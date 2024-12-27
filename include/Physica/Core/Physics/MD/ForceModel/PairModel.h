@@ -199,7 +199,7 @@ namespace Physica::Core {
         static_assert(TraitsType::IsPeriodBoundary, "[Error]: Fixed boundary is not implemented");
         const size_t atom1 = dof1 / 3U;
         const size_t atom2 = dof2 / 3U;
-        [[unlikely]] if (atom1 == atom2) {
+        if (atom1 == atom2) [[unlikely]] {
             const size_t dir2 = dof2 % 3U;
             if constexpr (ReverseDiff<T>) {
                 Tv result = 0;

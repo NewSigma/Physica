@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "HDF5.h"
+
 namespace Physica::Core {
     class PHYSICA_API H5File : public H5::H5File, public H5Location {
         using Base = H5::H5File;
@@ -55,5 +57,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] unsigned int getOpenflag() const noexcept { return openflag; }
         [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
+        /* Static members */
+        [[nodiscard]] static H5File create(const char* name) { return H5File(name, H5File::Creat | H5File::ReadWrite); }
     };
 }

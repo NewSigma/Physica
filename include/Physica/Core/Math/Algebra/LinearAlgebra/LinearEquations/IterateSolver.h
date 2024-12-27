@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include <iostream>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Exception/BadConvergenceException.h"
 
 namespace Physica::Core {
     template<Scalar T>
@@ -32,15 +33,14 @@ namespace Physica::Core {
         VectorType dot;
         RealType squaredRes0;
         RealType squaredRes;
-        RealType error;
-        size_t maxIteration;
+        RealType error = std::numeric_limits<T>::epsilon();
+        size_t maxIteration = 0;
         size_t iteration;
     public:
         bool mustConverge = true;
     public:
-        IterateSolver();
-        IterateSolver(size_t maxIteration_, RealType error_);
-        IterateSolver(size_t size, size_t maxIteration_, RealType error_);
+        IterateSolver() = default;
+        IterateSolver(size_t size);
         IterateSolver(const This&) = default;
         IterateSolver(This&&) noexcept = default;
         ~IterateSolver() = default;
@@ -60,6 +60,7 @@ namespace Physica::Core {
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
         /* Setters */
+        void setError(RealType error_) noexcept { error = std::move(error_); }
         void setMaxIteration(size_t iteration) noexcept { maxIteration = iteration; }
     private:
         [[nodiscard]] bool isConverged() const { return squaredRes < squaredRes0 * error; }
@@ -67,16 +68,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T>
-    IterateSolver<T>::IterateSolver() : IterateSolver(0, std::numeric_limits<T>::epsilon()) {}
-
-    template<Scalar T>
-    IterateSolver<T>::IterateSolver(size_t maxIteration_, RealType error_)
-            : error(std::move(error_))
-            , maxIteration(maxIteration_) {}
-
-    template<Scalar T>
-    IterateSolver<T>::IterateSolver(size_t size, size_t maxIteration_, RealType error_)
-            : IterateSolver(maxIteration_, error_) {
+    IterateSolver<T>::IterateSolver(size_t size) {
         resize(size);
     }
 
@@ -107,7 +99,8 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor, LVector V>
     void IterateSolver<T>::cg_functor(Functor dotFunc, V& b) {
-        assert(dot.getLength() == b.getLength());
+        if (dot.getLength() != b.getLength())
+            resize(b.getLength());
         residual = -b;
         searchP = b;
         V& x = b;
@@ -141,7 +134,8 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor1, class Functor2, LVector V>
     void IterateSolver<T>::cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, V& b) {
-        assert(dot.getLength() == b.getLength());
+        if (dot.getLength() != b.getLength())
+            resize(b.getLength());
         residual = -b;
         dotTransFunc(b, searchP);
         V& x = b;

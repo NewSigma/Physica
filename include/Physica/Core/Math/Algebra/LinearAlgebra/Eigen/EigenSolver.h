@@ -119,7 +119,7 @@ namespace Physica::Core {
         assert(source.getRow() == source.getCol());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
-        [[unlikely]] if (source.getRow() == 1) {
+        if (source.getRow() == 1) [[unlikely]] {
             eigenvalues[0] = source.calc(0, 0);
             rawEigenvectors(0, 0) = T(1);
             return;
@@ -141,11 +141,10 @@ namespace Physica::Core {
 
             const auto& matrixU = schur.getMatrixU();
             for (size_t i = 0; i < order; ++i) {
-                const auto col = matrixT.col(i);
-                auto toCol = rawEigenvectors.col(i);
-                toCol = (matrixU.leftCols(i + 1) * col.head(i + 1));
+                auto col = rawEigenvectors.col(i);
+                col = matrixU.leftCols(i + 1) * matrixT.col(i).head(i + 1);
                 if constexpr (isComplex)
-                    toCol.toUnit();
+                    col.toUnit();
             }
         }
     }
@@ -324,17 +323,18 @@ namespace Physica::Core {
                 auto col = block.col(i);
                 col[i] = T(1);
                 for (size_t j = i - 1; j < i; --j) {
+                    const T deltaEigen = eigenvalues[i].real() - eigenvalues[j].real();
                     if (eigenvalues[j].imag().isZero()) {
-                        auto row = block.row(j);
-                        col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i].real() - eigenvalues[j].real());
+                        const T factor = deltaEigen.isZero() ? T(std::numeric_limits<T>::epsilon()) : deltaEigen;
+                        col[j] = (col.tail(j + 1) * block.row(j).tail(j + 1)) / factor;
                     }
                     else {
-                        auto row1 = block.row(j - 1);
-                        auto row2 = block.row(j);
-                        auto tail = col.tail(j + 1);
-                        T dot1 = tail * row1.tail(j + 1);
-                        T dot2 = tail * row2.tail(j + 1);
-                        T inv_determinate = reciprocal(square(eigenvalues[j].real() - eigenvalues[i].real()) + square(eigenvalues[j].imag()));
+                        const auto row1 = block.row(j - 1);
+                        const auto row2 = block.row(j);
+                        const auto tail = col.tail(j + 1);
+                        const T dot1 = tail * row1.tail(j + 1);
+                        const T dot2 = tail * row2.tail(j + 1);
+                        const T inv_determinate = reciprocal(square(deltaEigen) + square(eigenvalues[j].imag()));
                         col[j - 1] = (dot1 * block(j, j) - dot2 * block(j - 1, j)) * inv_determinate;
                         col[j] = (dot2 * block(j - 1, j - 1) - dot1 * block(j, j - 1)) * inv_determinate;
                         --j;
@@ -383,18 +383,18 @@ namespace Physica::Core {
 
                         const T x = matrixT(j - 1, j);
                         const T y = matrixT(j, j - 1);
-                        const T vr = square(eigenvalues[j].real() - eigenvalues[i].real()) + square(eigenvalues[j].imag()) - square(eigenvalues[i].imag());
-                        const T vi = T(2) * (eigenvalues[j].real() - eigenvalues[i].real()) * eigenvalues[i].imag();
-
-                        const T temp1 = matrixT(j, j) - eigenvalues[i].real();
+                        const T deltaEigen = eigenvalues[j].real() - eigenvalues[i].real();
+                        const T vr = square(deltaEigen) + square(eigenvalues[j].imag()) - square(eigenvalues[i].imag());
+                        const T vi = T(2) * deltaEigen * eigenvalues[i].imag();
 
                         Complex<T> c{};
+                        const T temp1 = matrixT(j, j) - eigenvalues[i].real();
                         c.real() = x * dot21 - temp1 * dot11 + eigenvalues[i].imag() * dot12;
                         c.imag() = x * dot22 - temp1 * dot12 - eigenvalues[i].imag() * dot11;
                         c /= Complex<T>(vr, vi);
-
                         matrixT(j - 1, i - 1) = c.real();
                         matrixT(j - 1, i) = c.imag();
+
                         if (abs(x) > (abs(temp1) + abs(eigenvalues[i].imag()))) {
                             const T temp2 = matrixT(j - 1, j - 1) - eigenvalues[i].real();
                             matrixT(j, i - 1) = (-dot11 - temp2 * matrixT(j - 1, i - 1) + eigenvalues[i].imag() * matrixT(j - 1, i)) / x;

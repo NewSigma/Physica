@@ -125,7 +125,7 @@ namespace Physica::Core {
     template<class KineticModel, RandomGenerator R>
     void RingPolymer<T, Dim, NumReplica>::initMomentum(T temperatureT) {
         const size_t dof = getDOF();
-        [[unlikely]] if (temperatureT.isZero()) {
+        if (temperatureT.isZero()) [[unlikely]] {
             auto momentum = phase.topRows(dof);
             momentum = ValueType(0);
             return;

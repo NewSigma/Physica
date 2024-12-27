@@ -105,7 +105,7 @@ namespace Physica::Core {
             }
             auto outputTmp = TempFile("/tmp/tmpXXXXXX");
             const int err = run_qe(inputTmp, outputTmp).wait();
-            [[unlikely]] if (err != 0) {
+            if (err != 0) [[unlikely]] {
                 inputTmp.release();
                 outputTmp.release();
                 throw std::runtime_error("[Error]: QE finished with non zero exit code");

@@ -67,14 +67,11 @@ namespace Physica::Core {
         VectorType eigenvalues;
         DenseMatrix<T> eigenvectors;
 
-        RealType error;
-        RealType stableThreshold;
+        RealType error = std::numeric_limits<RealType>::epsilon();
+        RealType stableThreshold = DefaultStableThreshold;
     public:
         JacobiDavidson();
-        JacobiDavidson(size_t size,
-                       size_t numRequired,
-                       RealType error_ = RealType(std::numeric_limits<RealType>::epsilon()),
-                       RealType stableThrehold_ = DefaultStableThreshold);
+        JacobiDavidson(size_t size, size_t numRequired);
         JacobiDavidson(const This&) = default;
         JacobiDavidson(This&&) noexcept = default;
         ~JacobiDavidson() = default;
@@ -95,6 +92,7 @@ namespace Physica::Core {
         [[nodiscard]] const DenseMatrix<T>& getEigenvectors() const noexcept { return eigenvectors; }
         /* Setters */
         inline void setError(RealType error_) noexcept;
+        inline void setStableThreshold(RealType value) noexcept;
     private:
         template<Matrix M>
         void initSearchSpace(const M& source, VectorType& initial);
@@ -109,19 +107,15 @@ namespace Physica::Core {
     };
 
     template<Scalar T>
-    JacobiDavidson<T>::JacobiDavidson()
-            : linearSolver(MaxLinearSolverIteration, LinearSolverPrecision)
-            , error(std::numeric_limits<RealType>::epsilon())
-            , stableThreshold(DefaultStableThreshold) {
+    JacobiDavidson<T>::JacobiDavidson() {
         linearSolver.mustConverge = false;
+        linearSolver.setError(LinearSolverPrecision);
+        linearSolver.setMaxIteration(MaxLinearSolverIteration);
     }
 
     template<Scalar T>
-    JacobiDavidson<T>::JacobiDavidson(size_t size, size_t numRequired, RealType error_, RealType stableThreshold_)
-            : linearSolver(size, MaxLinearSolverIteration, LinearSolverPrecision)
-            , error(error_)
-            , stableThreshold(stableThreshold_) {
-        linearSolver.mustConverge = false;
+    JacobiDavidson<T>::JacobiDavidson(size_t size, size_t numRequired) : JacobiDavidson() {
+        linearSolver.resize(size);
         resize(size, numRequired);
     }
 
@@ -293,6 +287,12 @@ namespace Physica::Core {
     inline void JacobiDavidson<T>::setError(RealType error_) noexcept {
         assert(error_.isPositive() && "[Error]: Invalid argument");
         error = std::move(error_);
+    }
+
+    template<Scalar T>
+    inline void JacobiDavidson<T>::setStableThreshold(RealType value) noexcept {
+        assert(value.isPositive() && "[Error]: Invalid argument");
+        stableThreshold = std::move(value);
     }
     /**
      * Refer to [1]

@@ -40,7 +40,7 @@ namespace Physica::Core {
         const ScalarType v0 = source.calc(0);
         const RealType sourceNorm0 = v0.squaredNorm();
         const RealType squaredTailNorm = source.tail(1).squaredNorm();
-        [[likely]] if (squaredTailNorm > std::numeric_limits<ScalarType>::min()) {
+        if (squaredTailNorm > std::numeric_limits<ScalarType>::min()) [[likely]] {
             const RealType norm = sqrt(squaredTailNorm + sourceNorm0);
             const ScalarType factor = v0.unit() * norm;
             const ScalarType factor1 = v0 + factor;

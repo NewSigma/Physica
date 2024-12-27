@@ -92,7 +92,7 @@ namespace Physica::Core {
         assert(source.isSymm() && "[Error]: Bad symm matrix");
         assert(source.getRow() == eigenvalues.getLength() && "[Error]: Dimensions do not match");
         computeEigenvectors = computeEigenvectors_;
-        [[unlikely]] if (source.getRow() == 1) {
+        if (source.getRow() == 1) [[unlikely]] {
             eigenvalues[0] = source.calc(0, 0);
             eigenvectors(0, 0) = T(1);
             return;

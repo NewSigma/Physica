@@ -258,7 +258,7 @@ namespace Physica::Core {
             const size_t numReplica = getNumReplica();
             const size_t to = numReplica / PacketType::size() * PacketType::size();
             auto pos = ringPolymer.asMatrix().row(numParticle + id_dof);
-            [[unlikely]] if (id_dof == 0) {
+            if (id_dof == 0) [[unlikely]] {
                 if constexpr (IsFixedBoundary) {
                     const PacketType zeros(0);
                     size_t i = 0;
@@ -310,7 +310,7 @@ namespace Physica::Core {
                     }
                 }
                 if constexpr (IsFixedBoundary) {
-                    [[unlikely]] if (id_dof == numParticle - 1) {
+                    if (id_dof == numParticle - 1) [[unlikely]] {
                         const PacketType latticeSizes(latticeSize.value().toMachine());
                         size_t i = 0;
                         for (; i < to; i += PacketType::size()) {
