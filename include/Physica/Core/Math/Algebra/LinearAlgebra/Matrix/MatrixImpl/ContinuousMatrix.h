@@ -48,6 +48,8 @@ namespace Physica::Core {
         using RowBlock = ContinuousMatrixBlock<Derived, Row, ColAtCompile>;
         template<size_t Col>
         using ColBlock = ContinuousMatrixBlock<Derived, RowAtCompile, Col>;
+        template<size_t Row, size_t Col>
+        using BlockType = ContinuousMatrixBlock<Derived, Row, Col>;
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
@@ -56,62 +58,62 @@ namespace Physica::Core {
         This& operator=(This&& obj) noexcept = delete;
         Derived& operator=(const ScalarType& s);
         /* Operations */
-        [[nodiscard]] inline RowVector row(size_t r);
-        [[nodiscard]] inline const RowVector row(size_t r) const;
-        [[nodiscard]] inline ColVector col(size_t c);
-        [[nodiscard]] inline const ColVector col(size_t c) const;
+        [[nodiscard]] inline auto row(size_t r) noexcept;
+        [[nodiscard]] inline const auto row(size_t r) const noexcept;
+        [[nodiscard]] inline auto col(size_t c) noexcept;
+        [[nodiscard]] inline const auto col(size_t c) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline RowBlock<Row> rows(size_t fromRow, size_t rowCount);
+        [[nodiscard]] inline auto rows(size_t fromRow, size_t rowCount) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const RowBlock<Row> rows(size_t fromRow, size_t rowCount) const;
+        [[nodiscard]] inline const auto rows(size_t fromRow, size_t rowCount) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline RowBlock<Row> topRows(size_t to);
+        [[nodiscard]] inline auto topRows(size_t to) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const RowBlock<Row> topRows(size_t to) const;
+        [[nodiscard]] inline const auto topRows(size_t to) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline RowBlock<Row> bottomRows(size_t from);
+        [[nodiscard]] inline auto bottomRows(size_t from) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const RowBlock<Row> bottomRows(size_t from) const;
+        [[nodiscard]] inline const auto bottomRows(size_t from) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline ColBlock<Col> cols(size_t fromCol, size_t colCount);
+        [[nodiscard]] inline auto cols(size_t fromCol, size_t colCount) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline const ColBlock<Col> cols(size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline const auto cols(size_t fromCol, size_t colCount) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline ColBlock<Col> leftCols(size_t to);
+        [[nodiscard]] inline auto leftCols(size_t to) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline const ColBlock<Col> leftCols(size_t to) const;
+        [[nodiscard]] inline const auto leftCols(size_t to) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline ColBlock<Col> rightCols(size_t from);
+        [[nodiscard]] inline auto rightCols(size_t from) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline const ColBlock<Col> rightCols(size_t from) const;
+        [[nodiscard]] inline const auto rightCols(size_t from) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Col> topLeftCorner(size_t toRow, size_t toCol);
+        [[nodiscard]] inline auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> topLeftCorner(size_t toRow, size_t toCol) const;
+        [[nodiscard]] inline const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Col> topLeftCorner(size_t to);
+        [[nodiscard]] inline auto topLeftCorner(size_t to) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> topLeftCorner(size_t to) const;
+        [[nodiscard]] inline const auto topLeftCorner(size_t to) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Col> topRightCorner(size_t toRow, size_t fromCol);
+        [[nodiscard]] inline auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> topRightCorner(size_t toRow, size_t fromCol) const;
+        [[nodiscard]] inline const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Col> bottomLeftCorner(size_t fromRow, size_t toCol);
+        [[nodiscard]] inline auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> bottomLeftCorner(size_t fromRow, size_t toCol) const;
+        [[nodiscard]] inline const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Col> bottomRightCorner(size_t fromRow, size_t fromCol);
+        [[nodiscard]] inline auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> bottomRightCorner(size_t fromRow, size_t fromCol) const;
+        [[nodiscard]] inline const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Col> bottomRightCorner(size_t from);
+        [[nodiscard]] inline auto bottomRightCorner(size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> bottomRightCorner(size_t from) const;
+        [[nodiscard]] inline const auto bottomRightCorner(size_t from) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Col> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        [[nodiscard]] inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
 
         template<Matrix M>
         void resize(const M& m) { resize(m.getRow(), m.getCol()); }

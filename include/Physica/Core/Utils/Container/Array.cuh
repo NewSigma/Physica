@@ -28,21 +28,22 @@ namespace Physica::Core {
         static_assert(Length != Dynamic, "[Error]: Dynamic length is not implemented");
         static_assert(std::is_trivial<T>::value, "[Error]: Fixed size array with non-trivial element is not supported, it is seldom used on cuda");
         using host_obj = Array<T, Length, Allocator>;
+        using This = device_obj<host_obj>;
         using Base = host_obj;
     public:
         using host_obj::host_obj;
         device_obj() = default;
         __host__ __device__ device_obj(const host_obj& obj) : host_obj(obj) {}
-        device_obj(const device_obj& obj) = default;
-        device_obj(device_obj&& obj) noexcept = default;
+        device_obj(const This& obj) = default;
+        device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        __host__ __device__ device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        __host__ __device__ This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
         using Base::resize;
         [[nodiscard]] __host__ __device__ host_obj toHost() const { return *this; }
         __host__ __device__ void toHost(host_obj& obj) const { obj = *this; }
-        __host__ __device__ void swap(device_obj& __restrict obj) noexcept { host_obj::swap(obj); }
+        __host__ __device__ void swap(This& __restrict obj) noexcept { host_obj::swap(obj); }
     };
 
     template<class T, size_t Length, class Allocator>
@@ -100,11 +101,11 @@ namespace Physica::Core {
         template<class... Args>
         explicit device_obj(size_t length_, Args&&... args);
         explicit device_obj(const host_obj& array);
-        device_obj(const device_obj& obj);
-        device_obj(device_obj&& obj) noexcept;
+        device_obj(const This& obj);
+        device_obj(This&& obj) noexcept;
         ~device_obj();
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept;
+        This& operator=(device_obj obj) noexcept;
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
         [[nodiscard]] __device__ const_lvalue_reference operator[](size_t index) const { return Base::operator[](index); }
         /* Iterators */
@@ -126,7 +127,7 @@ namespace Physica::Core {
         inline void toHost(host_obj& obj) const;
         void reserve(size_t size);
         template<class... Args> void resize(size_t size, Args&&... args);
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         [[nodiscard]] pointer release() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return getLength(); }
@@ -286,7 +287,7 @@ namespace Physica::Core {
     }
 
     template<class T, class Allocator>
-    void device_obj<Array<T, Dynamic, Allocator>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<Array<T, Dynamic, Allocator>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(d_data, obj.d_data);
         std::swap(length, obj.length);

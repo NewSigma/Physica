@@ -96,7 +96,7 @@ namespace Physica::Core {
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos);
         [[nodiscard]] inline LatticeMatrix virial(const MDCellType& hostCell);
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
 
         __device__ void forceKernelImpl();
         __device__ void postForceKernelImpl();
@@ -112,10 +112,10 @@ namespace Physica::Core {
         device_obj() = default;
         device_obj(size_t numParticle);
         device_obj(size_t numParticle, T cutoff_);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void preParallel(
                 const LatticeMatrix& lattice,

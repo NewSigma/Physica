@@ -24,6 +24,7 @@
 namespace Physica::Core {
     template<class Derived>
     class device_obj<LValueVector<Derived>> : public device_obj<RValueVector<Derived>> {
+        using This = device_obj<LValueVector<Derived>>;
         using Base = device_obj<RValueVector<Derived>>;
         template<size_t Length>
         using BlockType = device_obj<LVectorBlock<Derived, Length>>;
@@ -37,8 +38,8 @@ namespace Physica::Core {
     public:
         ~device_obj() = default;
         /* Operators */
-        __host__ __device__ inline device_obj& operator=(const device_obj& obj);
-        __host__ __device__ inline device_obj& operator=(device_obj&& obj);
+        __host__ __device__ inline This& operator=(const This& obj);
+        __host__ __device__ inline This& operator=(This&& obj);
         template<Vector V>
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<V>& v);
 
@@ -56,24 +57,24 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return *data_ptr(index); }
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline BlockType<Length> head(size_t to);
+        [[nodiscard]] __host__ __device__ inline auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const BlockType<Length> head(size_t to) const;
+        [[nodiscard]] __host__ __device__ inline const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline BlockType<Length> tail(size_t from);
+        [[nodiscard]] __host__ __device__ inline auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const BlockType<Length> tail(size_t from) const;
+        [[nodiscard]] __host__ __device__ inline const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline BlockType<Length> segment(size_t from, size_t to);
+        [[nodiscard]] __host__ __device__ inline auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
+        [[nodiscard]] __host__ __device__ inline const auto segment(size_t from, size_t to) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     protected:
         device_obj() = default;
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
     };
 
     template<LVector T1, Vector T2>

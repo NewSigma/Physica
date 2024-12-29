@@ -44,7 +44,7 @@ namespace Physica::Core {
         using typename Base::ConstPtrTy;
     private:
         constexpr static int DiffOrder = ScalarType::Order;
-        constexpr static int DataDim = 1 + (DiffOrder > 1);
+        constexpr static int DataDim = 1 + (DiffOrder > 0);
         using DataSetType = H5DataSet<DataDim>;
         using DataSpaceType = H5DataSpace<DataDim>;
 
@@ -69,17 +69,17 @@ namespace Physica::Core {
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline BlockType<Length> head(size_t to);
+        [[nodiscard]] inline auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const BlockType<Length> head(size_t to) const;
+        [[nodiscard]] inline const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline BlockType<Length> tail(size_t from);
+        [[nodiscard]] inline auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const BlockType<Length> tail(size_t from) const;
+        [[nodiscard]] inline const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline BlockType<Length> segment(size_t from, size_t to);
+        [[nodiscard]] inline auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
+        [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
 
         template<Vector V>
         void resize(const V& x) { resize(x.getLength()); }

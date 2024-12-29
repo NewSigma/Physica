@@ -35,6 +35,7 @@ namespace Physica::Core {
         using This = LValueMatrix<Derived>;
         using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
         using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
+        using BlockType = LMatrixBlock<Derived>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
@@ -71,38 +72,38 @@ namespace Physica::Core {
         template<Matrix T>
         void reverse(const T& grad) const noexcept requires(isReverseDiff);
 
-        [[nodiscard]] inline RowVector row(size_t r);
-        [[nodiscard]] inline const RowVector row(size_t r) const;
-        [[nodiscard]] inline ColVector col(size_t c);
-        [[nodiscard]] inline const ColVector col(size_t c) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount);
-        [[nodiscard]] inline const LMatrixBlock<Derived> rows(size_t fromRow, size_t rowCount) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> topRows(size_t to);
-        [[nodiscard]] inline const LMatrixBlock<Derived> topRows(size_t to) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> bottomRows(size_t from);
-        [[nodiscard]] inline const LMatrixBlock<Derived> bottomRows(size_t from) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount);
-        [[nodiscard]] inline const LMatrixBlock<Derived> cols(size_t fromCol, size_t colCount) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> leftCols(size_t to);
-        [[nodiscard]] inline const LMatrixBlock<Derived> leftCols(size_t to) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> rightCols(size_t from);
-        [[nodiscard]] inline const LMatrixBlock<Derived> rightCols(size_t from) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol);
-        [[nodiscard]] inline const LMatrixBlock<Derived> topLeftCorner(size_t toRow, size_t toCol) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> topLeftCorner(size_t to);
-        [[nodiscard]] inline const LMatrixBlock<Derived> topLeftCorner(size_t to) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol);
-        [[nodiscard]] inline const LMatrixBlock<Derived> topRightCorner(size_t toRow, size_t fromCol) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol);
-        [[nodiscard]] inline const LMatrixBlock<Derived> bottomLeftCorner(size_t fromRow, size_t toCol) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol);
-        [[nodiscard]] inline const LMatrixBlock<Derived> bottomRightCorner(size_t fromRow, size_t fromCol) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> bottomRightCorner(size_t from);
-        [[nodiscard]] inline const LMatrixBlock<Derived> bottomRightCorner(size_t from) const;
-        [[nodiscard]] inline LMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
-        [[nodiscard]] inline const LMatrixBlock<Derived> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
-        [[nodiscard]] inline DiagVector<Derived, true> diag();
-        [[nodiscard]] inline const DiagVector<Derived, true> diag() const;
+        [[nodiscard]] inline auto row(size_t r) noexcept;
+        [[nodiscard]] inline const auto row(size_t r) const noexcept;
+        [[nodiscard]] inline auto col(size_t c) noexcept;
+        [[nodiscard]] inline const auto col(size_t c) const noexcept;
+        [[nodiscard]] inline auto rows(size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] inline const auto rows(size_t fromRow, size_t rowCount) const noexcept;
+        [[nodiscard]] inline auto topRows(size_t to) noexcept;
+        [[nodiscard]] inline const auto topRows(size_t to) const noexcept;
+        [[nodiscard]] inline auto bottomRows(size_t from) noexcept;
+        [[nodiscard]] inline const auto bottomRows(size_t from) const noexcept;
+        [[nodiscard]] inline auto cols(size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] inline const auto cols(size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] inline auto leftCols(size_t to) noexcept;
+        [[nodiscard]] inline const auto leftCols(size_t to) const noexcept;
+        [[nodiscard]] inline auto rightCols(size_t from) noexcept;
+        [[nodiscard]] inline const auto rightCols(size_t from) const noexcept;
+        [[nodiscard]] inline auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] inline const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
+        [[nodiscard]] inline auto topLeftCorner(size_t to) noexcept;
+        [[nodiscard]] inline const auto topLeftCorner(size_t to) const noexcept;
+        [[nodiscard]] inline auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] inline const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
+        [[nodiscard]] inline auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] inline const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
+        [[nodiscard]] inline auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] inline const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
+        [[nodiscard]] inline auto bottomRightCorner(size_t from) noexcept;
+        [[nodiscard]] inline const auto bottomRightCorner(size_t from) const noexcept;
+        [[nodiscard]] inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] inline auto diag() noexcept;
+        [[nodiscard]] inline const auto diag() const noexcept;
 
         [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
         [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }

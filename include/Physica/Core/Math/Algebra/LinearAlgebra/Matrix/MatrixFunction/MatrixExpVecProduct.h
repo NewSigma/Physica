@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
+#include "MatrixExp.h"
 #include "MatrixPow.h"
 
 namespace Physica::Core {

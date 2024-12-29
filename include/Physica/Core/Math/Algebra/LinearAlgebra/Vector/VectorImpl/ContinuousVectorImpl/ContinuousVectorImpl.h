@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/Exception/MKL/VSL.h"
+#include "../ContinuousVector.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -140,38 +140,38 @@ namespace Physica::Core {
 
     template<class Derived>
     template<size_t Length>
-    inline ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::head(size_t to) {
-        return ContinuousVectorBlock<Derived, Length>(Base::getDerived(), 0, to);
+    inline auto ContinuousVector<Derived>::head(size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::head(size_t to) const {
-        return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), 0, to);
+    inline const auto ContinuousVector<Derived>::head(size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::tail(size_t from) {
-        return ContinuousVectorBlock<Derived, Length>(Base::getDerived(), from);
+    inline auto ContinuousVector<Derived>::tail(size_t from) noexcept {
+        return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::tail(size_t from) const {
-        return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), from);
+    inline const auto ContinuousVector<Derived>::tail(size_t from) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::segment(size_t from, size_t to) {
-        return ContinuousVectorBlock<Derived, Length>(Base::getDerived(), from, to);
+    inline auto ContinuousVector<Derived>::segment(size_t from, size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::segment(size_t from, size_t to) const {
-        return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), from, to);
+    inline const auto ContinuousVector<Derived>::segment(size_t from, size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>

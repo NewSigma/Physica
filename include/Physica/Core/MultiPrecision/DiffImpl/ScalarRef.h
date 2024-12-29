@@ -29,8 +29,12 @@ namespace Physica::Core {
         using Base = ScalarBase<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using typename Base::PtrTy;
         using typename Base::GradType;
+    private:
+        template<int GradOrder>
+        using GradRtnTy = std::conditional<Order == GradOrder, ValueType&, ScalarRef<Diff<ValueType, Mode, Order - GradOrder>>>::type;
     public:
         ScalarRef() = default;
         explicit ScalarRef(PtrTy ptr_) : PtrTy(ptr_) {}
@@ -42,7 +46,7 @@ namespace Physica::Core {
         inline This& operator=(const ScalarType& other);
         inline This& operator=(int x) { return operator=(ScalarType(x)); }
         inline This& operator=(double x) { return operator=(ScalarType(x)); }
-        [[nodiscard]] operator ScalarType() const { return ScalarType(Base::value(), Base::grad()); }
+        [[nodiscard]] operator ScalarType() const { return ScalarType(value(), grad()); }
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
 
@@ -67,51 +71,68 @@ namespace Physica::Core {
         /* Getters */
         using PtrTy::value_ptr;
         using PtrTy::grad_ptr;
+        using Base::value;
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__ GradRtnTy<GradOrder> grad() noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__ const GradRtnTy<GradOrder> grad() const noexcept;
     };
 
     template<Scalar T, DiffMode Mode, int Order>
     inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarRef& other) {
-        Base::value() = other.value();
-        Base::grad() = other.grad();
+        value() = other.value();
+        grad() = other.grad();
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarType& other) {
-        Base::value() = other.value();
-        Base::grad() = other.grad();
+        value() = other.value();
+        grad() = other.grad();
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     bool ScalarRef<Diff<T, Mode, Order>>::operator==(const This& other) const {
-        return Base::value() == other.value() && Base::grad() == other.grad();
+        return value() == other.value() && grad() == other.grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     T ScalarRef<Diff<T, Mode, Order>>::reverse(GradType grad_) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
-        auto& g = const_cast<GradType&>(Base::grad());
+        auto& g = const_cast<GradType&>(grad());
         g.value() += grad_.value();
         if constexpr (Order != 1)
             g.reverse(grad_.grad());
-        return Base::value();
+        return value();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     inline void ScalarRef<Diff<T, Mode, Order>>::zero_grad() {
-        Base::grad() = 0;
+        grad() = 0;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     void ScalarRef<Diff<T, Mode, Order>>::swap(This&& obj) noexcept {
-        Base::value().swap(obj.value());
-        Base::grad().swap(obj.grad());
+        value().swap(obj.value());
+        grad().swap(obj.grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     void ScalarRef<Diff<T, Mode, Order>>::swap(ScalarType& obj) noexcept {
         obj.swap(*this);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    template<int GradOrder>
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::grad() noexcept -> GradRtnTy<GradOrder> {
+        return *grad_ptr();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    template<int GradOrder>
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::grad() const noexcept -> const GradRtnTy<GradOrder> {
+        return *grad_ptr();
     }
 
     template<Scalar T, DiffMode Mode, int Order>

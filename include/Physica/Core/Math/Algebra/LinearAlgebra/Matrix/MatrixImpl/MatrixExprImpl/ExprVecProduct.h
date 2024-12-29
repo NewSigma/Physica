@@ -56,31 +56,30 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return expr.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return expr; }
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
-    private:
-        template<LVector V1>
-        inline void generalImpl(V1& target_) const;
     };
 
     template<ExprType Type, Matrix T, class U, Vector V>
     template<LVector V1, class Executor>
     inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::assignTo(V1& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
-        if constexpr (!FastAssign)
-            generalImpl(target);
-        else if constexpr (Type == ExprType::Add) {
-            using ExprAdd = decltype(expr.getLHS() * vec + expr.getRHS() * vec);
-            target.template operator=<ExprAdd, Executor>(expr.getLHS() * vec + expr.getRHS() * vec);
-        }
-        else if constexpr (Type == ExprType::Sub) {
-            using ExprSub = decltype(expr.getLHS() * vec - expr.getRHS() * vec);
-            target.template operator=<ExprSub, Executor>(expr.getLHS() * vec - expr.getRHS() * vec);
-        }
-        else if constexpr (Type == ExprType::Mul) {
-            using ExprMul = decltype((expr.getLHS() * vec) * expr.getRHS());
-            target.template operator=<ExprMul, Executor>((expr.getLHS() * vec) * expr.getRHS());
+        if constexpr (FastAssign) {
+            if constexpr (Type == ExprType::Add) {
+                using ExprAdd = decltype(expr.getLHS() * vec + expr.getRHS() * vec);
+                target.template operator=<ExprAdd, Executor>(expr.getLHS() * vec + expr.getRHS() * vec);
+            }
+            else if constexpr (Type == ExprType::Sub) {
+                using ExprSub = decltype(expr.getLHS() * vec - expr.getRHS() * vec);
+                target.template operator=<ExprSub, Executor>(expr.getLHS() * vec - expr.getRHS() * vec);
+            }
+            else if constexpr (Type == ExprType::Mul) {
+                using ExprMul = decltype((expr.getLHS() * vec) * expr.getRHS());
+                target.template operator=<ExprMul, Executor>((expr.getLHS() * vec) * expr.getRHS());
+            }
+            else
+                static_assert(!FastAssign, "[Error]: assignTo is not implemented");
         }
         else
-            static_assert(!FastAssign, "[Error]: assignTo is not implemented");
+            Base::assignTo(target);
     }
 
     template<ExprType Type, Matrix T, class U, Vector V>
@@ -91,13 +90,6 @@ namespace Physica::Core {
     template<ExprType Type, Matrix T, class U, Vector V>
     inline auto MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc_value(size_t index) const -> ValueType {
         return expr.row(index).values() * vec.values();
-    }
-
-    template<ExprType Type, Matrix T, class U, Vector V>
-    template<LVector V1>
-    inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::generalImpl(V1& target) const {
-        for (size_t i = 0; i < getLength(); ++i)
-            target[i] = calc(i);
     }
 }
 

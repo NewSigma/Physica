@@ -90,8 +90,7 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int GradOrder>
-    Diff<T, Mode, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<T, Mode, Order>::grad() noexcept {
+    auto& Diff<T, Mode, Order>::grad() noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
         if constexpr (GradOrder == 1)
@@ -102,8 +101,7 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int GradOrder>
-    inline const Diff<T, Mode, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<T, Mode, Order>::grad() const noexcept {
+    inline const auto& Diff<T, Mode, Order>::grad() const noexcept {
         return const_cast<This&>(*this).template grad<GradOrder>();
     }
 

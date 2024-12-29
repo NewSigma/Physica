@@ -74,49 +74,47 @@ namespace Physica::Core {
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::head(size_t to) {
-        return {Base::getDerived(), 0, to};
+    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::head(size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::head(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to};
+    __host__ __device__ inline const auto device_obj<LValueVector<Derived>>::head(size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::tail(size_t from) {
-        return {Base::getDerived(), from};
+    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::tail(size_t from) noexcept {
+        return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::tail(size_t from) const {
-        return {Base::getConstCastDerived(), from};
+    __host__ __device__ inline const auto device_obj<LValueVector<Derived>>::tail(size_t from) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) {
-        return {Base::getDerived(), from, to};
+    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) const {
-        return {Base::getConstCastDerived(), from, to};
+    __host__ __device__ inline const auto device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<LValueVector<Derived>>::PtrTy
-    device_obj<LValueVector<Derived>>::data_ptr(size_t index) {
+    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) -> PtrTy {
         return Base::getDerived().data_ptr(index);
     }
-    
+
     template<class Derived>
-    __host__ __device__ inline device_obj<LValueVector<Derived>>::ConstPtrTy
-    device_obj<LValueVector<Derived>>::data_ptr(size_t index) const {
+    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) const -> ConstPtrTy {
         return Base::getDerived().data_ptr(index);
     }
 }

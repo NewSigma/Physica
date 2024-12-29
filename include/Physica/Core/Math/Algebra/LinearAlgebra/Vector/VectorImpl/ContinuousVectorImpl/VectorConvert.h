@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../ContinuousVector.h"
+
 namespace Physica::Core {
     template<class T>
     class ValueVector<ContinuousVector<T>> : public ContinuousVector<ValueVector<ContinuousVector<T>>> {
@@ -44,7 +46,6 @@ namespace Physica::Core {
 
     template<class T, int GradOrder>
     class GradVector<ContinuousVector<T>, GradOrder> : public ContinuousVector<GradVector<ContinuousVector<T>, GradOrder>> {
-        static_assert(GradOrder == 1, "[Error]: Not implemented");
         using This = GradVector<ContinuousVector<T>, GradOrder>;
         using Base = ContinuousVector<This>;
     public:
@@ -61,7 +62,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t i) { return (*v.data_ptr(i)).grad_ptr(); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t i) { return v.data_ptr(i).template grad_ptr<GradOrder>(); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };

@@ -45,12 +45,12 @@ namespace Physica::Core {
         device_obj() = default;
         device_obj(size_t row, size_t col, ExprType type);
         device_obj(const PlainMatrix& values);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = default;
-        device_obj& operator=(device_obj&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         [[nodiscard]] __device__ inline size_t calcOffset(size_t row, size_t col) const;
         template<Side Owner = GetSide()>
@@ -61,7 +61,7 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         inline void random_any(Distribution& dist);
 
-        void swap(device_obj& obj) noexcept { std::swap(*this, obj); }
+        void swap(This& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         using Dim::getRow;
         using Dim::getCol;

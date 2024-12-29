@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "../RValueMatrix.cuh"
 #include "Physica/PlainStruct.h"
 #include "RValueFlatten.cuh"
 
@@ -68,183 +69,153 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::RowVector
-    device_obj<RValueMatrix<Derived>>::row(size_t r) {
-        return {Base::getDerived(), r, 0, getCol()};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::row(size_t r) noexcept {
+        return RowVector(Base::getDerived(), r, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::RowVector
-    device_obj<RValueMatrix<Derived>>::row(size_t r) const {
-        return {Base::getConstCastDerived(), r, 0, getCol()};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::row(size_t r) const noexcept {
+        return RowVector(Base::getConstCastDerived(), r, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::ColVector
-    device_obj<RValueMatrix<Derived>>::col(size_t c) {
-        return {Base::getDerived(), 0, getRow(), c};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::col(size_t c) noexcept {
+        return ColVector(Base::getDerived(), 0, getRow(), c);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::ColVector
-    device_obj<RValueMatrix<Derived>>::col(size_t c) const {
-        return {Base::getConstCastDerived(), 0, getRow(), c};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::col(size_t c) const noexcept {
+        return ColVector(Base::getConstCastDerived(), 0, getRow(), c);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) {
-        return {Base::getDerived(), fromRow, rowCount, 0, getCol()};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) noexcept {
+        return BlockType(Base::getDerived(), fromRow, rowCount, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, 0, getCol()};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) const noexcept {
+        return BlockType(Base::getConstCastDerived(), fromRow, rowCount, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topRows(size_t to) {
-        return {Base::getDerived(), 0, to, 0, getCol()};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::topRows(size_t to) noexcept {
+        return BlockType(Base::getDerived(), 0, to, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topRows(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, getCol()};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::topRows(size_t to) const noexcept {
+        return BlockType(Base::getConstCastDerived(), 0, to, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomRows(size_t from) {
-        return {Base::getDerived(), from, getRow() - from, 0, getCol()};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::bottomRows(size_t from) noexcept {
+        return BlockType(Base::getDerived(), from, getRow() - from, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomRows(size_t from) const {
-        return {Base::getConstCastDerived(), from, getRow() - from, 0, getCol()};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::bottomRows(size_t from) const noexcept {
+        return BlockType(Base::getConstCastDerived(), from, getRow() - from, 0, getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::cols(size_t fromCol, size_t colCount) {
-        return {Base::getDerived(), 0, getRow(), fromCol, colCount};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::cols(size_t fromCol, size_t colCount) noexcept {
+        return BlockType(Base::getDerived(), 0, getRow(), fromCol, colCount);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::cols(size_t fromCol, size_t colCount) const {
-        return {Base::getConstCastDerived(), 0, getRow(), fromCol, colCount};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::cols(size_t fromCol, size_t colCount) const noexcept {
+        return BlockType(Base::getConstCastDerived(), 0, getRow(), fromCol, colCount);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::leftCols(size_t to) {
-        return {Base::getDerived(), 0, getRow(), 0, to};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::leftCols(size_t to) noexcept {
+        return BlockType(Base::getDerived(), 0, getRow(), 0, to);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::leftCols(size_t to) const {
-        return {Base::getConstCastDerived(), 0, getRow(), 0, to};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::leftCols(size_t to) const noexcept {
+        return BlockType(Base::getConstCastDerived(), 0, getRow(), 0, to);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::rightCols(size_t from) {
-        return {Base::getDerived(), 0, getRow(), from, getCol() - from};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::rightCols(size_t from) noexcept {
+        return BlockType(Base::getDerived(), 0, getRow(), from, getCol() - from);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::rightCols(size_t from) const {
-        return {Base::getConstCastDerived(), 0, getRow(), from, getCol() - from};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::rightCols(size_t from) const noexcept {
+        return BlockType(Base::getConstCastDerived(), 0, getRow(), from, getCol() - from);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) {
-        return {Base::getDerived(), 0, toRow, 0, toCol};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) noexcept {
+        return BlockType(Base::getDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) const {
-        return {Base::getConstCastDerived(), 0, toRow, 0, toCol};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) const noexcept {
+        return BlockType(Base::getConstCastDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t to) {
-        return {Base::getDerived(), 0, to, 0, to};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t to) noexcept {
+        return BlockType(Base::getDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, to};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::topLeftCorner(size_t to) const noexcept {
+        return BlockType(Base::getConstCastDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) {
-        return {Base::getDerived(), 0, toRow, fromCol, getRow() - fromCol};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) noexcept {
+        return BlockType(Base::getDerived(), 0, toRow, fromCol, getRow() - fromCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), 0, toRow, fromCol, getRow() - fromCol};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) const noexcept {
+        return BlockType(Base::getConstCastDerived(), 0, toRow, fromCol, getRow() - fromCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) {
-        return {Base::getDerived(), fromRow, getRow() - fromRow, 0, toCol};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) noexcept {
+        return BlockType(Base::getDerived(), fromRow, getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) const {
-        return {Base::getConstCastDerived(), fromRow, getRow() - fromRow, 0, toCol};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept {
+        return BlockType(Base::getConstCastDerived(), fromRow, getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) {
-        return {Base::getDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) noexcept {
+        return BlockType(Base::getDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept {
+        return BlockType(Base::getConstCastDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t from) {
-        return {Base::getDerived(), from, getRow() - from, from, getCol() - from};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t from) noexcept {
+        return BlockType(Base::getDerived(), from, getRow() - from, from, getCol() - from);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t from) const {
-        return {Base::getConstCastDerived(), from, getRow() - from, from, getCol() - from};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t from) const noexcept {
+        return BlockType(Base::getConstCastDerived(), from, getRow() - from, from, getCol() - from);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) {
-        return {Base::getDerived(), fromRow, rowCount, fromCol, colCount};
+    __host__ __device__ inline auto device_obj<RValueMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        return BlockType(Base::getDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
-    device_obj<RValueMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount};
+    __host__ __device__ inline const auto device_obj<RValueMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
+        return BlockType(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>

@@ -49,8 +49,8 @@ namespace Physica::Core {
             assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
@@ -91,8 +91,8 @@ namespace Physica::Core {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
@@ -126,8 +126,8 @@ namespace Physica::Core {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
@@ -161,8 +161,8 @@ namespace Physica::Core {
         size_t colCount;
     public:
         __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;

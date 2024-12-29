@@ -44,7 +44,7 @@ namespace Physica::Core {
         Diff(T v_);
         Diff(T v_, GradType g_);
         template<Scalar U>
-        explicit Diff(const U& x) requires(!ReverseDiff<U>);
+        explicit(T::Option < U::Option) Diff(const U& x) requires(!ReverseDiff<U>);
         Diff(const This&) requires(isForwardDiff) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
@@ -67,9 +67,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &v; }
         [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &g; }
         template<int GradOrder = 1>
-        [[nodiscard]] inline Base::template GradRtnTy<GradOrder>& grad() noexcept;
+        [[nodiscard]] inline auto& grad() noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] inline const Base::template GradRtnTy<GradOrder>& grad() const noexcept;
+        [[nodiscard]] inline const auto& grad() const noexcept;
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static members */
         template<RandomGenerator R>

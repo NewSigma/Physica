@@ -29,6 +29,7 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
             static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
             static_assert(T1::isComplex || !T2::isComplex, "[Error]: Cannot convert a complex to a real");
+            static_assert(Diffable<T1> || !Diffable<T2>, "[Error]: Assign a diffable vector to normal vector discards grads");
         public:
             using ScalarType = T1::ScalarType;
             using AnyPacket = BestPacket<ScalarType, SizeAtCompile>::Type;

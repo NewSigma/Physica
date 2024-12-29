@@ -47,11 +47,11 @@ namespace Physica::Core {
         device_obj() = default;
         template<Scalar U>
         device_obj(const device_obj<LinearLayer<U, WithBias>>& layer);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] OutputType forward(const InputType& x) const;
 
@@ -63,7 +63,7 @@ namespace Physica::Core {
         void random_xavier_normal(ValueType gain);
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
@@ -132,7 +132,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool WithBias>
-    void device_obj<LinearLayer<T, WithBias>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<LinearLayer<T, WithBias>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         weights.swap(obj.weights);
         if constexpr (WithBias)

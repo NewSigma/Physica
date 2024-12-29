@@ -52,6 +52,18 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    bool DenseVector<Diff<T, Mode, Order>, Length, Allocator>::operator==(const This& other) const {
+        const size_t length = getLength();
+        if (length != other.getLength())
+            return false;
+
+        for (size_t i = 0; i < length; ++i)
+            if (operator[](i) != other[i])
+                return false;
+        return true;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad() {
         g = T(0);
     }

@@ -42,8 +42,8 @@ namespace Physica::Core {
             assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Getters */
         template<Side Owner>
@@ -77,8 +77,8 @@ namespace Physica::Core {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Getters */
         template<Side Owner>
@@ -92,8 +92,10 @@ namespace Physica::Core {
 
     template<Matrix T>
     class device_obj<RMatrixBlock<T, Dynamic, Dynamic>> : public device_obj<RValueMatrix<RMatrixBlock<T, Dynamic, Dynamic>>> {
-    public:
+        using host_obj = RMatrixBlock<T, Dynamic, Dynamic>;
+        using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<RMatrixBlock<T, Dynamic, Dynamic>>>;
+    public:
         using typename Base::ScalarType;
     private:
         device_obj<T>& mat;
@@ -103,8 +105,8 @@ namespace Physica::Core {
         size_t colCount;
     public:
         __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const;

@@ -36,7 +36,7 @@ namespace Physica::Core {
         using Base::IsTrainMode;
         using LossType = device_obj<Loss<ScalarType>>::LossType;
     public:
-        device_obj(const device_obj&) = delete;
+        device_obj(const This&) = delete;
         ~device_obj() = default;
         /* Operations */
         template<class Dataset, class Optimizer, class RandomType>
@@ -49,11 +49,11 @@ namespace Physica::Core {
         [[nodiscard]] size_t classify(const InputType& input) const;
     protected:
         device_obj() = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(This&&) noexcept = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
     };
 
     template<class Derived>
@@ -100,7 +100,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void device_obj<SimpleNet<Derived>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<SimpleNet<Derived>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         net_guard.swap(obj.net_guard);
     }

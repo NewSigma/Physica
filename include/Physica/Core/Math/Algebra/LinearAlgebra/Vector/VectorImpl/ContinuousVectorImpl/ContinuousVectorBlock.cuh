@@ -22,6 +22,7 @@ namespace Physica::Core {
     template<Vector T, size_t Length>
     class device_obj<ContinuousVectorBlock<T, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<T, Length>>> {
         using host_obj = ContinuousVectorBlock<T, Length>;
+        using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
         using DeviceVector = device_obj<T>;
     public:
@@ -38,13 +39,13 @@ namespace Physica::Core {
     public:
         __host__ __device__ device_obj(device_obj<ContinuousVector<T>>& vec_, size_t from_, size_t to_);
         __host__ __device__ device_obj(device_obj<ContinuousVector<T>>& vec_, size_t from_);
-        device_obj(const device_obj& block) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This& block) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
-        inline device_obj& operator=(const device_obj& obj);
-        inline device_obj& operator=(device_obj&& obj) noexcept;
+        inline This& operator=(const This& obj);
+        inline This& operator=(This&& obj) noexcept;
         [[nodiscard]] __device__ inline RefTy operator[](size_t index);
         [[nodiscard]] __device__ inline ConstRefTy operator[](size_t index) const;
         /* Operations */

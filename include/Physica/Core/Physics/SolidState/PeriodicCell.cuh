@@ -41,13 +41,13 @@ namespace Physica::Core {
         device_obj();
         device_obj(size_t numParticle, Type type_);
         device_obj(const host_obj& obj);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static unsigned int getDim() { return Dim; }
         [[nodiscard]] __host__ __device__ const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -81,7 +81,7 @@ namespace Physica::Core {
             , type(obj.type) {}
 
     template<Scalar T, unsigned int Dim>
-    void device_obj<PeriodicCell<T, Dim>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<PeriodicCell<T, Dim>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         pos.swap(obj.pos);

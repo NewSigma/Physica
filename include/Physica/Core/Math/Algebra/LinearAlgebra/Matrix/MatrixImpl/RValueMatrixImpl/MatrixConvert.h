@@ -114,7 +114,7 @@ namespace Physica {
     class Traits<Core::GradMatrix<T, GradOrder>> {
         static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = T::ScalarType::template GradRtnTy<GradOrder>;
+        using ScalarType = Internal::GradTypeHelper<typename T::ScalarType, GradOrder>::Type;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = T::RowAtCompile;
         constexpr static size_t ColAtCompile = T::ColAtCompile;

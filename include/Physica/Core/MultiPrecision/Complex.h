@@ -61,10 +61,10 @@ namespace Physica::Core {
         inline void writePacket(const PacketType packet);
         void swap(Complex& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] T& real() noexcept { return re; }
-        [[nodiscard]] const T& real() const noexcept { return re; }
-        [[nodiscard]] T& imag() noexcept { return im; }
-        [[nodiscard]] const T& imag() const noexcept { return im; }
+        [[nodiscard]] __host__ __device__ T& real() noexcept { return re; }
+        [[nodiscard]] __host__ __device__ const T& real() const noexcept { return re; }
+        [[nodiscard]] __host__ __device__ T& imag() noexcept { return im; }
+        [[nodiscard]] __host__ __device__ const T& imag() const noexcept { return im; }
         [[nodiscard]] inline std::complex<MachineType> toMachine() const noexcept;
         [[nodiscard]] bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         /* Static Members */

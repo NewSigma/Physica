@@ -19,10 +19,38 @@
 #pragma once
 
 #include <cassert>
+#include <type_traits>
 #include "Physica/CRTPBase.h"
 #include "Physica/PlainStruct.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class T, int GradOrder>
+        class GradTypeHelper {
+            static_assert(Traits<T>::Order >= GradOrder, "[Error]: Required order is too high");
+            static_assert(GradOrder > 1, "[Error]: Bad GradOrder");
+        public:
+            using Type = GradTypeHelper<typename T::GradType, GradOrder - 1>::Type;
+        };
+
+        template<class T>
+        class GradTypeHelper<T, 1> {
+            constexpr static int Order = Traits<T>::Order;
+            constexpr static DiffMode Mode = Traits<T>::isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
+            static_assert(Order >= 1, "[Error]: Required order is too high");
+            using ValueType = Traits<T>::ValueType;
+        public:
+            using Type = std::conditional<Order == 1, ValueType, Diff<ValueType, Mode, Order - 1>>::type;
+        };
+
+        template<class T>
+        class GradTypeHelper<T, 0> {
+        public:
+            using Type = void;
+        };
+    }
+
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
         using This = ScalarBase<Derived>;
@@ -47,14 +75,13 @@ namespace Physica::Core {
         using ComplexType = TraitsType::ComplexType;
         using MachineType = TraitsType::MachineType;
         using device_obj_type = Derived;
+
+        using GradType = Internal::GradTypeHelper<ScalarType, isDiffable ? 1 : 0>::Type;
     private:
         constexpr static bool isScalarRef = IsScalarRef<Derived>::value;
         static_assert(isDiffable == (Order > 0), "[Error]: DiffMode is not self consistent");
         static_assert(std::is_same<Derived, ScalarType>::value || isScalarRef, "[Error]: Inconsistence type between traits and inherit class");
 
-        using GradType1 = std::conditional<Order == 1, ValueType, Diff<ValueType, Mode, Order - 1>>::type;
-    public:
-        using GradType = std::conditional<isDiffable, GradType1, PlainStruct<void>>::type;
         template<int GradOrder>
         using GradRtnTy = std::conditional<!isDiffable || Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
     public:
@@ -104,12 +131,12 @@ namespace Physica::Core {
         template<int GradOrder>
         [[nodiscard]] __host__ __device__ const auto grad_ptr() const noexcept;
 
-        [[nodiscard]] __host__ __device__  ValueType& value() noexcept;
-        [[nodiscard]] __host__ __device__  const ValueType& value() const noexcept;
+        [[nodiscard]] __host__ __device__ ValueType& value() noexcept;
+        [[nodiscard]] __host__ __device__ const ValueType& value() const noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__  GradRtnTy<GradOrder>& grad() noexcept;
+        [[nodiscard]] __host__ __device__ GradRtnTy<GradOrder>& grad() noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__  const GradRtnTy<GradOrder>& grad() const noexcept;
+        [[nodiscard]] __host__ __device__ const GradRtnTy<GradOrder>& grad() const noexcept;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept;
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept;
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept;
@@ -244,28 +271,31 @@ namespace Physica::Core {
 
     template<class Derived>
     __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
+        const auto& x = this->getDerived();
         if constexpr (isDiffable)
-            return RealType(value().real(), grad().real());
+            return RealType(x.value().real(), x.grad().real());
         else if constexpr (isComplex)
-            return this->getDerived().real();
+            return x.real();
         else
-            return this->getDerived();
+            return x;
     }
 
     template<class Derived>
     __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
+        const auto& x = this->getDerived();
         if constexpr (isDiffable)
-            return RealType(value().imag(), grad().imag());
+            return RealType(x.value().imag(), x.grad().imag());
         else if constexpr (isComplex)
-            return this->getDerived().imag();
+            return x.imag();
         else
             return RealType(0);
     }
 
     template<class Derived>
     __host__ __device__ inline ScalarBase<Derived>::ScalarType ScalarBase<Derived>::conjugate() const {
+        const auto& x = this->getDerived();
         if constexpr (isDiffable)
-            return ScalarType(value().conjugate(), grad().conjugate());
+            return ScalarType(x.value().conjugate(), x.grad().conjugate());
         else if constexpr (isComplex)
             return ScalarType(real(), -imag());
         else
@@ -321,24 +351,24 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline ScalarBase<Derived>::ValueType& ScalarBase<Derived>::value() noexcept {
+    __host__ __device__ inline auto ScalarBase<Derived>::value() noexcept -> ValueType& {
         return *value_ptr();
     }
 
     template<class Derived>
-    __host__ __device__ inline const ScalarBase<Derived>::ValueType& ScalarBase<Derived>::value() const noexcept {
+    __host__ __device__ inline auto ScalarBase<Derived>::value() const noexcept -> const ValueType& {
         return *value_ptr();
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__  ScalarBase<Derived>::GradRtnTy<GradOrder>& ScalarBase<Derived>::grad() noexcept {
+    __host__ __device__  auto ScalarBase<Derived>::grad() noexcept -> GradRtnTy<GradOrder>& {
         return *grad_ptr<GradOrder>();
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__  const ScalarBase<Derived>::GradRtnTy<GradOrder>& ScalarBase<Derived>::grad() const noexcept {
+    __host__ __device__  auto ScalarBase<Derived>::grad() const noexcept -> const GradRtnTy<GradOrder>& {
         return *grad_ptr<GradOrder>();
     }
 

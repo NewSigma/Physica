@@ -39,17 +39,17 @@ namespace Physica::Core {
     public:
         device_obj() = default;
         device_obj(const host_obj& obj);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Functor> __device__ void forCellInList(Functor func) const;
         template<class Functor> __device__ void forNeighInRange(Index3D centerCell, Functor func) const;
         template<class Functor> __device__ void forReducedNeighInRange(Index3D centerCell, Functor func) const;
         template<class Functor> __device__ inline void forAtomInCell(Index3D cellIndex, Functor func) const;
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __device__ const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] __host__ __device__ Index3D getCellGridDim() const noexcept { return cellGridDim; }
@@ -146,7 +146,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    void device_obj<CellList<T>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<CellList<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         cellGridDim.swap(obj.cellGridDim);

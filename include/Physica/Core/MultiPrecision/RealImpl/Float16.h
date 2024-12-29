@@ -40,7 +40,7 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = ScalarType;
         using ComplexType = Complex<ScalarType>;
-        using MachineType = __half;
+        using MachineType = half;
     };
 }
 
@@ -69,6 +69,8 @@ namespace Physica::Core {
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
+        template<ScalarOption Op>
+        __host__ __device__ This& operator=(Real<Op> x) noexcept;
         __host__ __device__ explicit operator float() const { return h; }
         __host__ __device__ explicit operator double() const { return h; }
         __host__ __device__ Real operator+(const Real& s) const { return Real(h + s.h); }
@@ -92,6 +94,11 @@ namespace Physica::Core {
 
     template<Scalar T>
     __host__ __device__ inline Real<Float16>::Real(const T& x) : h(x.toMachine()) {}
+
+    template<ScalarOption Op>
+    __host__ __device__ Real<Float16>& Real<Float16>::operator=(Real<Op> x) noexcept {
+        return operator=(This(x));
+    }
 
     inline std::ostream& operator<<(std::ostream& os, const Real<Float16>& s) {
         const auto lastPrec = os.precision();

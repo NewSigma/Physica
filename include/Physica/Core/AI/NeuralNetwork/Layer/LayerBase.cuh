@@ -43,11 +43,11 @@ namespace Physica::Core {
         [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
     protected:
         device_obj() = default;
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = default;
-        device_obj& operator=(device_obj&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
     };
 }
 

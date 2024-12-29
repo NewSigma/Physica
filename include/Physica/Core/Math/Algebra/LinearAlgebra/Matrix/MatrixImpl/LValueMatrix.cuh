@@ -23,6 +23,7 @@
 namespace Physica::Core {
     template<class Derived>
     class device_obj<LValueMatrix<Derived>> : public device_obj<RValueMatrix<Derived>> {
+        using This = device_obj<LValueMatrix<Derived>>;
         using Base = device_obj<RValueMatrix<Derived>>;
     public:
         using typename Base::ScalarType;
@@ -33,8 +34,8 @@ namespace Physica::Core {
         using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         /* Operators */
-        device_obj& operator=(const device_obj& m) = delete;
-        device_obj& operator=(device_obj&& m) = delete;
+        This& operator=(const This& m) = delete;
+        This& operator=(This&& m) = delete;
         template<Matrix M>
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<M>& m);
         __device__ device_obj<Derived>& operator=(const ScalarType& x);
@@ -57,8 +58,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const device_obj<LValueFlatten<Derived>> flatten() const { return {*this}; }
     protected:
         device_obj() = default;
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
     };
 }
 

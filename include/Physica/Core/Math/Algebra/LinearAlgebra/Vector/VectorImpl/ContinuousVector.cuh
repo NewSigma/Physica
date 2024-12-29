@@ -54,17 +54,17 @@ namespace Physica::Core {
         template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline BlockType<Length> head(size_t to);
+        [[nodiscard]] __host__ __device__ inline auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const BlockType<Length> head(size_t to) const;
+        [[nodiscard]] __host__ __device__ inline const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline BlockType<Length> tail(size_t from);
+        [[nodiscard]] __host__ __device__ inline auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const BlockType<Length> tail(size_t from) const;
+        [[nodiscard]] __host__ __device__ inline const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline BlockType<Length> segment(size_t from, size_t to);
+        [[nodiscard]] __host__ __device__ inline auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
+        [[nodiscard]] __host__ __device__ inline const auto segment(size_t from, size_t to) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }

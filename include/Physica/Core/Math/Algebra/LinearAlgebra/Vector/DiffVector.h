@@ -60,6 +60,7 @@ namespace Physica::Core {
         ~DenseVector() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] bool operator==(const This& other) const;
         using Base::operator=;
         using Base::operator[];
         /* Iterators */
@@ -114,5 +115,5 @@ namespace Physica {
     };
 }
 
-#include "DiffVectorImpl/DiffVectorImpl.h"
-#include "DiffVectorImpl/Iterator.h"
+#include "DiffVectorImpl/DiffVectorImpl.h" // IWYU pragma: export
+#include "DiffVectorImpl/Iterator.h" // IWYU pragma: export

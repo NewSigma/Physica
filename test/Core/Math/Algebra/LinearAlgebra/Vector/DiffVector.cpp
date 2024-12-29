@@ -19,16 +19,41 @@
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
-using VectorType = VectorND<Diff<float64, DiffMode::Reverse, 1>>;
+using namespace Physica;
 using RandomType = Random<MT19937>;
 
-int main() {
+static void test_rev() {
+    using VectorType = VectorND<Diff<float64, DiffMode::Reverse, 1>>;
     auto v = VectorType::random_uniform<RandomType>(16);
     v.sum().reverse();
     for (size_t i = 0; i < v.getLength(); ++i)
-        if (v[i].grad() != float64(1))
-            return 1;
+        if (v[i].grad() != float64(1)) [[unlikely]]
+            exit(EXIT_FAILURE);
+}
+
+static void test_hdf5() {
+#ifdef PHYSICA_HDF5
+    using dfloat = Diff<float64, DiffMode::Forward, 1>;
+    auto data = VectorND<dfloat>::random_uniform<RandomType>(36);
+    data.grads().random_uniform<RandomType>();
+
+    TempFile tmp("/tmp/tmpXXXXXX");
+    {
+        auto h5f = H5File::create(tmp.getName());
+        data.write(h5f, "x");
+    }
+    VectorND<dfloat> result;
+    auto h5f = H5File(tmp.getName());
+    result.read(h5f, "x");
+    if (data != result)
+        exit(EXIT_FAILURE);
+#endif
+}
+
+int main() {
+    test_rev();
+    test_hdf5();
     return 0;
 }

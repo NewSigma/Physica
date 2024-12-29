@@ -58,18 +58,18 @@ namespace Physica::Core {
     public:
         device_obj() = default;
         device_obj(const LatticeMatrix& lattice_, const VectorND<T>& charges_);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operator */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Executor>
         [[nodiscard]] inline VectorND<T> force_short(const PositionMatrix& pos);
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos);
         [[nodiscard]] BornChargeArray calcBornCharge() const { return host_obj::makeBornCharge(charges); }
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DeviceLattice& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const DeviceLattice& getRepLattice() const noexcept { return repLatt; }
@@ -124,7 +124,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSmallCell>
-    void device_obj<RSpaceEwald<T, IsSmallCell>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<RSpaceEwald<T, IsSmallCell>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         lattice.swap(obj.lattice);

@@ -118,6 +118,6 @@ namespace Physica::Core {
         if constexpr (GradOrder == 1)
             return pair.second;
         else
-            return grad_ptr<GradOrder - 1>();
+            return pair.second.template grad_ptr<GradOrder - 1>();
     }
 }

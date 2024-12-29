@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../ContinuousVector.cuh"
+
 namespace Physica::Core {
     template<class Derived>
     inline device_obj<ContinuousVector<Derived>>& device_obj<ContinuousVector<Derived>>::operator=(const This& obj) {
@@ -76,44 +78,38 @@ namespace Physica::Core {
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline device_obj<ContinuousVector<Derived>>::template BlockType<Length>
-    device_obj<ContinuousVector<Derived>>::head(size_t to) {
-        return {Base::getDerived(), 0, to};
+    __host__ __device__ inline auto device_obj<ContinuousVector<Derived>>::head(size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const device_obj<ContinuousVector<Derived>>::template BlockType<Length>
-    device_obj<ContinuousVector<Derived>>::head(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to};
+    __host__ __device__ inline const auto device_obj<ContinuousVector<Derived>>::head(size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline device_obj<ContinuousVector<Derived>>::template BlockType<Length>
-    device_obj<ContinuousVector<Derived>>::tail(size_t from) {
-        return {Base::getDerived(), from};
+    __host__ __device__ inline auto device_obj<ContinuousVector<Derived>>::tail(size_t from) noexcept {
+        return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const device_obj<ContinuousVector<Derived>>::template BlockType<Length>
-    device_obj<ContinuousVector<Derived>>::tail(size_t from) const {
-        return {Base::getConstCastDerived(), from};
+    __host__ __device__ inline const auto device_obj<ContinuousVector<Derived>>::tail(size_t from) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline device_obj<ContinuousVector<Derived>>::template BlockType<Length>
-    device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) {
-        return {Base::getDerived(), from, to};
+    __host__ __device__ inline auto device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const device_obj<ContinuousVector<Derived>>::template BlockType<Length>
-    device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) const {
-        return {Base::getConstCastDerived(), from, to};
+    __host__ __device__ inline const auto device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>

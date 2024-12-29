@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,9 +18,11 @@
  */
 #pragma once
 
+#include "../ContinuousMatrix.h"
+
 namespace Physica::Core {
     template<class Derived>
-    inline ContinuousMatrix<Derived>& ContinuousMatrix<Derived>::operator=(const This& obj) {
+    inline auto ContinuousMatrix<Derived>::operator=(const This& obj) -> This& {
         Base::operator=(obj);
         return *this;
     }
@@ -37,209 +39,190 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) {
+    inline auto ContinuousMatrix<Derived>::row(size_t r) noexcept {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)
-            return {Base::getDerived(), r, 1, 0};
+            return RowVector(Base::getDerived(), r, 1, 0);
         else
-            return {Base::getDerived(), r, 0, Base::getCol()};
+            return RowVector(Base::getDerived(), r, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline const ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) const {
+    inline const auto ContinuousMatrix<Derived>::row(size_t r) const noexcept {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)
-            return {Base::getConstCastDerived(), r, 1, 0};
+            return RowVector(Base::getConstCastDerived(), r, 1, 0);
         else
             return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) {
-        return {Base::getDerived(), 0, Base::getRow(), c};
+    inline auto ContinuousMatrix<Derived>::col(size_t c) noexcept {
+        return ColVector(Base::getDerived(), 0, Base::getRow(), c);
     }
 
     template<class Derived>
-    inline const ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) const {
+    inline const auto ContinuousMatrix<Derived>::col(size_t c) const noexcept {
         return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
     }
 
     template<class Derived>
     template<size_t Row>
-    inline ContinuousMatrix<Derived>::template RowBlock<Row>
-    ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) {
-        return {Base::getDerived(), fromRow, rowCount, 0, Base::getCol()};
+    inline auto ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) noexcept {
+        return RowBlock<Row>(Base::getDerived(), fromRow, rowCount, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    inline const ContinuousMatrix<Derived>::template RowBlock<Row>
-    ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol()};
+    inline const auto ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const noexcept {
+        return RowBlock<Row>(Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    inline ContinuousMatrix<Derived>::template RowBlock<Row>
-    ContinuousMatrix<Derived>::topRows(size_t to) {
-        return {Base::getDerived(), 0, to, 0, Base::getCol()};
+    inline auto ContinuousMatrix<Derived>::topRows(size_t to) noexcept {
+        return RowBlock<Row>(Base::getDerived(), 0, to, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    inline const ContinuousMatrix<Derived>::template RowBlock<Row>
-    ContinuousMatrix<Derived>::topRows(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, Base::getCol()};
+    inline const auto ContinuousMatrix<Derived>::topRows(size_t to) const noexcept {
+        return RowBlock<Row>(Base::getConstCastDerived(), 0, to, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    inline ContinuousMatrix<Derived>::template RowBlock<Row>
-    ContinuousMatrix<Derived>::bottomRows(size_t from) {
-        return {Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol()};
+    inline auto ContinuousMatrix<Derived>::bottomRows(size_t from) noexcept {
+        return RowBlock<Row>(Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    inline const ContinuousMatrix<Derived>::template RowBlock<Row>
-    ContinuousMatrix<Derived>::bottomRows(size_t from) const {
-        return {Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol()};
+    inline const auto ContinuousMatrix<Derived>::bottomRows(size_t from) const noexcept {
+        return RowBlock<Row>(Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Col>
-    inline ContinuousMatrix<Derived>::template ColBlock<Col>
-    ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) {
-        return {Base::getDerived(), 0, Base::getRow(), fromCol, colCount};
+    inline auto ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) noexcept {
+        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Col>
-    inline const ContinuousMatrix<Derived>::template ColBlock<Col>
-    ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount};
+    inline const auto ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) const noexcept {
+        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Col>
-    inline ContinuousMatrix<Derived>::template ColBlock<Col>
-    ContinuousMatrix<Derived>::leftCols(size_t to) {
-        return {Base::getDerived(), 0, Base::getRow(), 0, to};
+    inline auto ContinuousMatrix<Derived>::leftCols(size_t to) noexcept {
+        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), 0, to);
     }
 
     template<class Derived>
     template<size_t Col>
-    inline const ContinuousMatrix<Derived>::template ColBlock<Col>
-    ContinuousMatrix<Derived>::leftCols(size_t to) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), 0, to};
+    inline const auto ContinuousMatrix<Derived>::leftCols(size_t to) const noexcept {
+        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), 0, to);
     }
 
     template<class Derived>
     template<size_t Col>
-    inline ContinuousMatrix<Derived>::template ColBlock<Col>
-    ContinuousMatrix<Derived>::rightCols(size_t from) {
-        return {Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from};
+    inline auto ContinuousMatrix<Derived>::rightCols(size_t from) noexcept {
+        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Col>
-    inline const ContinuousMatrix<Derived>::template ColBlock<Col>
-    ContinuousMatrix<Derived>::rightCols(size_t from) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from};
+    inline const auto ContinuousMatrix<Derived>::rightCols(size_t from) const noexcept {
+        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) {
-        return {Base::getDerived(), 0, toRow, 0, toCol};
+    inline auto
+    ContinuousMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline const ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const {
-        return {Base::getConstCastDerived(), 0, toRow, 0, toCol};
+    inline const auto
+    ContinuousMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::topLeftCorner(size_t to) {
-        return {Base::getDerived(), 0, to, 0, to};
+    inline auto
+    ContinuousMatrix<Derived>::topLeftCorner(size_t to) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline const ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::topLeftCorner(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, to};
+    inline const auto ContinuousMatrix<Derived>::topLeftCorner(size_t to) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) {
-        return {Base::getDerived(), 0, toRow, fromCol, Base::getRow() - fromCol};
+    inline auto ContinuousMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline const ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), 0, toRow, fromCol, Base::getRow() - fromCol};
+    inline const auto ContinuousMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) {
-        return {Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol};
+    inline auto ContinuousMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline const ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const {
-        return {Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol};
+    inline const auto ContinuousMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) {
-        return {Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol};
+    inline auto ContinuousMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline const ContinuousMatrixBlock<Derived, Row, Col>
-    ContinuousMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol};
+    inline const auto ContinuousMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline ContinuousMatrixBlock<Derived, Row, Col> ContinuousMatrix<Derived>::bottomRightCorner(size_t from) {
-        return {Base::getDerived(), from, Base::getRow() - from, from, Base::getCol() - from};
+    inline auto ContinuousMatrix<Derived>::bottomRightCorner(size_t from) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline const ContinuousMatrixBlock<Derived, Row, Col> ContinuousMatrix<Derived>::bottomRightCorner(size_t from) const {
-        return {Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getCol() - from};
+    inline const auto ContinuousMatrix<Derived>::bottomRightCorner(size_t from) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline ContinuousMatrixBlock<Derived, Row, Col> ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) {
-        return {Base::getDerived(), fromRow, rowCount, fromCol, colCount};
+    inline auto ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    inline const ContinuousMatrixBlock<Derived, Row, Col> ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount};
+    inline const auto ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>

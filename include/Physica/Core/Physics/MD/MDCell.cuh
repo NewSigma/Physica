@@ -43,13 +43,13 @@ namespace Physica::Core {
         device_obj() = default;
         explicit device_obj(size_t numParticle);
         device_obj(const host_obj& obj);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(device_obj& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] __host__ __device__ const MassVector& getMassVec() const { return massVec; }
@@ -76,7 +76,7 @@ namespace Physica::Core {
             , invLattice(obj.getInvLattice()) {}
 
     template<Scalar T, unsigned int Dim>
-    void device_obj<MDCell<T, Dim>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<MDCell<T, Dim>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         massVec.swap(obj.massVec);

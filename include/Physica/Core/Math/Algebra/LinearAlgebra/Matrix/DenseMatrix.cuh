@@ -39,11 +39,11 @@ namespace Physica::Core {
         device_obj(const host_obj& mat);
         template<Matrix M>
         device_obj(const device_obj<M>& mat);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         using Storage::operator();
         /* Operations */

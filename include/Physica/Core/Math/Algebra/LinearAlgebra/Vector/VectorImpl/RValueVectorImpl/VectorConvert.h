@@ -281,7 +281,7 @@ namespace Physica {
     class Traits<GradVector<T, GradOrder>> {
         static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toGradVector() call");
     public:
-        using ScalarType = T::ScalarType::template GradRtnTy<GradOrder>;
+        using ScalarType = Internal::GradTypeHelper<typename T::ScalarType, GradOrder>::Type;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

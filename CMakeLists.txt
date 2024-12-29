@@ -76,6 +76,7 @@ endif()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION include)
 install(FILES include/Physica/Config.h DESTINATION include/Physica)
+install(FILES include/Physica/CRCoro.h DESTINATION include/Physica)
 install(FILES include/Physica/CRTPBase.h DESTINATION include/Physica)
 install(FILES include/Physica/Macro.h DESTINATION include/Physica)
 install(FILES include/Physica/PlainStruct.h DESTINATION include/Physica)

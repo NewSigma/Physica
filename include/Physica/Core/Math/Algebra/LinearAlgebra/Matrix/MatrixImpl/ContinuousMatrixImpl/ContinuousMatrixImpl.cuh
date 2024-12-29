@@ -18,230 +18,202 @@
  */
 #pragma once
 
+#include "../ContinuousMatrix.cuh"
+
 namespace Physica::Core {
     template<class Derived>
-    inline device_obj<ContinuousMatrix<Derived>>& device_obj<ContinuousMatrix<Derived>>::operator=(const This& obj) {
+    inline auto device_obj<ContinuousMatrix<Derived>>::operator=(const This& obj) -> This& {
         Base::operator=(obj);
         return *this;
     }
 
     template<class Derived>
-    inline device_obj<ContinuousMatrix<Derived>>& device_obj<ContinuousMatrix<Derived>>::operator=(This&& obj) noexcept {
+    inline auto device_obj<ContinuousMatrix<Derived>>::operator=(This&& obj) noexcept -> This& {
         Base::operator=(std::forward<Base>(obj));
         return *this;
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, 1, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::row(size_t r) {
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::row(size_t r) noexcept {
         const bool useSpecialization = device_obj<ContinuousMatrix<Derived>>::ColAtCompile == 1;
         if constexpr (useSpecialization)
-            return {Base::getDerived(), r, 1, 0};
+            return RowVector(Base::getDerived(), r, 1, 0);
         else
-            return {Base::getDerived(), r, 0, Base::getCol()};
+            return RowVector(Base::getDerived(), r, 0, Base::getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, 1, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::row(size_t r) const {
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::row(size_t r) const noexcept {
         const bool useSpecialization = device_obj<ContinuousMatrix<Derived>>::ColAtCompile == 1;
         if constexpr (useSpecialization)
-            return {Base::getConstCastDerived(), r, 1, 0};
+            return RowVector(Base::getConstCastDerived(), r, 1, 0);
         else
-            return {Base::getConstCastDerived(), r, 0, Base::getCol()};
+            return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, 1>>
-    device_obj<ContinuousMatrix<Derived>>::col(size_t c) {
-        return {Base::getDerived(), 0, Base::getRow(), c};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::col(size_t c) noexcept {
+        return ColVector(Base::getDerived(), 0, Base::getRow(), c);
     }
 
     template<class Derived>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, 1>>
-    device_obj<ContinuousMatrix<Derived>>::col(size_t c) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), c};
-    }
-
-    template<class Derived>
-    template<size_t Row>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) {
-        return {Base::getDerived(), fromRow, rowCount, 0, Base::getCol()};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::col(size_t c) const noexcept {
+        return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
     }
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol()};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) noexcept {
+        return RowBlock<Row>(Base::getDerived(), fromRow, rowCount, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::topRows(size_t to) {
-        return {Base::getDerived(), 0, to, 0, Base::getCol()};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) const noexcept {
+        return RowBlock<Row>(Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::topRows(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, Base::getCol()};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::topRows(size_t to) noexcept {
+        return RowBlock<Row>(Base::getDerived(), 0, to, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::bottomRows(size_t from) {
-        return {Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol()};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::topRows(size_t to) const noexcept {
+        return RowBlock<Row>(Base::getConstCastDerived(), 0, to, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, device_obj<ContinuousMatrix<Derived>>::ColAtCompile>>
-    device_obj<ContinuousMatrix<Derived>>::bottomRows(size_t from) const {
-        return {Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol()};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::bottomRows(size_t from) noexcept {
+        return RowBlock<Row>(Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol());
+    }
+
+    template<class Derived>
+    template<size_t Row>
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::bottomRows(size_t from) const noexcept {
+        return RowBlock<Row>(Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol());
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, Col>>
-    device_obj<ContinuousMatrix<Derived>>::cols(size_t fromCol, size_t colCount) {
-        return {Base::getDerived(), 0, Base::getRow(), fromCol, colCount};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::cols(size_t fromCol, size_t colCount) noexcept {
+        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, Col>>
-    device_obj<ContinuousMatrix<Derived>>::cols(size_t fromCol, size_t colCount) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::cols(size_t fromCol, size_t colCount) const noexcept {
+        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, Col>>
-    device_obj<ContinuousMatrix<Derived>>::leftCols(size_t to) {
-        return {Base::getDerived(), 0, Base::getRow(), 0, to};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::leftCols(size_t to) noexcept {
+        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), 0, to);
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, Col>>
-    device_obj<ContinuousMatrix<Derived>>::leftCols(size_t to) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), 0, to};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::leftCols(size_t to) const noexcept {
+        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), 0, to);
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, Col>>
-    device_obj<ContinuousMatrix<Derived>>::rightCols(size_t from) {
-        return {Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::rightCols(size_t from) noexcept {
+        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, device_obj<ContinuousMatrix<Derived>>::RowAtCompile, Col>>
-    device_obj<ContinuousMatrix<Derived>>::rightCols(size_t from) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::rightCols(size_t from) const noexcept {
+        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) {
-        return {Base::getDerived(), 0, toRow, 0, toCol};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) const {
-        return {Base::getConstCastDerived(), 0, toRow, 0, toCol};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t toRow, size_t toCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t to) {
-        return {Base::getDerived(), 0, to, 0, to};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t to) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, to};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::topLeftCorner(size_t to) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) {
-        return {Base::getDerived(), 0, toRow, fromCol, Base::getRow() - fromCol};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), 0, toRow, fromCol, Base::getRow() - fromCol};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::topRightCorner(size_t toRow, size_t fromCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) {
-        return {Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) const {
-        return {Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) {
-        return {Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t from) {
-        return {Base::getDerived(), from, Base::getRow() - from, from, Base::getCol() - from};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t from) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t from) const {
-        return {Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getCol() - from};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::bottomRightCorner(size_t from) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) {
-        return {Base::getDerived(), fromRow, rowCount, fromCol, colCount};
+    __host__ __device__ inline auto device_obj<ContinuousMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        return BlockType<Row, Col>(Base::getDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>>
-    device_obj<ContinuousMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount};
+    __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
+        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
     }
 }
