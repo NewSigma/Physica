@@ -263,7 +263,7 @@ namespace Physica::Core {
         if constexpr (ForwardDiff<T>) {
             using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
             const auto rep = reciprocal(y.value());
-            co_return ResultType(y.value() * rep, -y.value() * y.grad() * square(rep));
+            co_return ResultType(x * rep, -x * square(rep) * y.grad());
         }
         else {
             const auto rep = reciprocal(y);

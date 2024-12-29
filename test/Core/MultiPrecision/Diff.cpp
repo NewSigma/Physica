@@ -46,16 +46,24 @@ void testFunc() {
 }
 
 void testMath() {
-    using dfloat = Diff<T, DiffMode::Forward, 2>;
     bool good = true;
-    dfloat x(3, 1);
-    auto y = reciprocal(x);
-    good &= scalarNear(y.grad().value(), -square(reciprocal(x.value())), 1E-15);
-    good &= scalarNear(y.grad<2>(), pow(reciprocal(x.value()), T(3)) * T(2), 1E-15);
+    {
+        using dfloat = Diff<T, DiffMode::Forward, 1>;
+        auto result = T(3) / dfloat(T(2), T(4));
+        good &= scalarNear(result.value(), T(1.5), 1E-15);
+        good &= scalarNear(result.grad(), T(-3), 1E-15);
+    }
+    {
+        using dfloat = Diff<T, DiffMode::Forward, 2>;
+        dfloat x(3, 1);
+        auto y = reciprocal(x);
+        good &= scalarNear(y.grad().value(), -square(reciprocal(x.value())), 1E-15);
+        good &= scalarNear(y.grad<2>(), pow(reciprocal(x.value()), T(3)) * T(2), 1E-15);
 
-    y = sqrt(x);
-    good &= scalarNear(y.grad().value(), reciprocal(T(2) * sqrt(x.value())), 1E-15);
-    good &= scalarNear(y.grad<2>(), -reciprocal(T(4) * x.value() * sqrt(x.value())), 1E-15);
+        y = sqrt(x);
+        good &= scalarNear(y.grad().value(), reciprocal(T(2) * sqrt(x.value())), 1E-15);
+        good &= scalarNear(y.grad<2>(), -reciprocal(T(4) * x.value() * sqrt(x.value())), 1E-15);
+    }
     if (!good)
         exit(EXIT_FAILURE);
 }

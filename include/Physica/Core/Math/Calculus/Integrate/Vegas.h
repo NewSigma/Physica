@@ -55,7 +55,7 @@ namespace Physica::Core {
               int numSample_,
               int numPoint = 1000,
               RealValue compressRate_ = 1.5,
-              RealValue mixBeta_ = 0);
+              RealValue mixBeta_ = 1);
         Vegas(const This&) = default;
         Vegas(This&&) noexcept = default;
         ~Vegas() = default;
@@ -111,7 +111,7 @@ namespace Physica::Core {
         assert(numPoint > 2 && "[Error]: Invalid point number");
         assert(compressRate.isPositive() && "[Error]: Rate = 0 implies no grid refinement");
         assert(compressRate < RealValue(2) && "[Error]: Rate should be ~ 1");
-        assert(!mixBeta.isNegative() && (mixBeta < RealValue(1)) && "[Error]: Invalid beta");
+        assert(mixBeta.isPositive() && (mixBeta <= RealValue(1)) && "[Error]: Invalid beta");
         pointGrid.resize(numPoint, from.getLength());
         for (size_t i = 0; i < getDim(); ++i)
             pointGrid.col(i) = VectorND<RealValue>::linspace(from[i], to[i], numPoint);
@@ -127,7 +127,7 @@ namespace Physica::Core {
 
         LossMatrix lossMat(getNumPoint() - 1, getDim());
         for (int _ = 0; _ < numWarm; ++_) {
-            auto pair = trialIntegral<Functor, R, Executor>(lossMat, func);
+            trialIntegral<Functor, R, Executor>(lossMat, func);
             refineGrid<Executor>(lossMat);
         }
     }
@@ -302,7 +302,7 @@ namespace Physica::Core {
                 newPoints[i] = oldPoints[j] - temp * (oldPoints[j] - oldPoints[j - 1]) / lossMat(j - 1, dim);
             }
             newPoints[i] = oldPoints[i];
-            oldPoints = newPoints * (RealValue(1) - mixBeta) + oldPoints * mixBeta;
+            oldPoints = newPoints * mixBeta + oldPoints * (RealValue(1) - mixBeta);
         }, getDim(), Executor::getNumThread()).wait();
     }
 

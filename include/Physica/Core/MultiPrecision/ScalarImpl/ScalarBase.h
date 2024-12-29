@@ -339,14 +339,13 @@ namespace Physica::Core {
     template<class Derived>
     template<int GradOrder>
     __host__ __device__ auto ScalarBase<Derived>::grad_ptr() noexcept {
-        static_assert(isDiffable);
+        static_assert(isDiffable, "[Error]: Cannot take grad ptr of a undiffable scalar");
         return Base::getDerived().template grad_ptr<GradOrder>();
     }
 
     template<class Derived>
     template<int GradOrder>
     __host__ __device__ const auto ScalarBase<Derived>::grad_ptr() const noexcept {
-        static_assert(isDiffable);
         return Base::getConstCastDerived().grad_ptr();
     }
 
