@@ -19,7 +19,7 @@
 #pragma once
 
 #include "EigenSolver.h"
-#include "mkl_lapacke.h"
+#include "Physica/Core/Exception/MKL/Lapack.h"
 
 namespace Physica::Core {
     template<Scalar T, size_t Order>
@@ -40,9 +40,9 @@ namespace Physica::Core {
             if constexpr (isComplex) {
                 auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
                 if constexpr (T::Option == Float32)
-                    LAPACKE_cgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order);
+                    check_lapack(LAPACKE_cgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order));
                 else
-                    LAPACKE_zgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order);
+                    check_lapack(LAPACKE_zgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order));
             }
             else {
                 VectorND<T> ereal(order);
@@ -50,9 +50,9 @@ namespace Physica::Core {
                 auto* wr = reinterpret_cast<Tm*>(ereal.data());
                 auto* wi = reinterpret_cast<Tm*>(eimag.data());
                 if constexpr (T::Option == Float32)
-                    LAPACKE_sgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order);
+                    check_lapack(LAPACKE_sgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order));
                 else
-                    LAPACKE_dgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order);
+                    check_lapack(LAPACKE_dgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order));
                 for (size_t i = 0; i < order; ++i)
                     eigenvalues[i] = ComplexType(ereal[i], eimag[i]);
             }
@@ -62,9 +62,9 @@ namespace Physica::Core {
             if constexpr (isComplex) {
                 auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
                 if constexpr (T::Option == Float32)
-                    LAPACKE_cgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, w, nullptr, order);
+                    check_lapack(LAPACKE_cgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, w, nullptr, order));
                 else
-                    LAPACKE_zgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, w, nullptr, order);
+                    check_lapack(LAPACKE_zgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, w, nullptr, order));
             }
             else {
                 VectorND<T> ereal(order);
@@ -72,9 +72,9 @@ namespace Physica::Core {
                 auto* wr = reinterpret_cast<Tm*>(ereal.data());
                 auto* wi = reinterpret_cast<Tm*>(eimag.data());
                 if constexpr (T::Option == Float32)
-                    LAPACKE_sgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, wr, wi, nullptr, order);
+                    check_lapack(LAPACKE_sgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, wr, wi, nullptr, order));
                 else
-                    LAPACKE_dgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, wr, wi, nullptr, order);
+                    check_lapack(LAPACKE_dgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, wr, wi, nullptr, order));
                 for (size_t i = 0; i < order; ++i)
                     eigenvalues[i] = ComplexType(ereal[i], eimag[i]);
             }

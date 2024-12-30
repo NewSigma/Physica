@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../Complex.h"
+
 namespace Physica::Core {
     template<Scalar T>
     T abs(const Complex<T>& c);
@@ -33,6 +35,9 @@ namespace Physica::Core {
 
     template<Scalar T>
     inline Complex<T> ln(const Complex<T>& c);
+
+    template<Scalar T>
+    inline Complex<T> ln1p(const Complex<T>& c);
 
     template<Scalar T>
     inline Complex<T> ln1pexp(const Complex<T>& c);

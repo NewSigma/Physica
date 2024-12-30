@@ -193,6 +193,7 @@ namespace Physica::Core {
         group.readAttr("NumRefine", numRefine);
         group.readAttr("NumSample", numSample);
         group.readAttr("CompressRate", compressRate);
+        group.readAttr("MixBeta", mixBeta);
         return group;
     }
 
@@ -205,6 +206,7 @@ namespace Physica::Core {
         group.writeAttr("NumRefine", numRefine);
         group.writeAttr("NumSample", numSample);
         group.writeAttr("CompressRate", compressRate);
+        group.writeAttr("MixBeta", mixBeta);
 
         means.write(group, "Means");
         vars.write(group, "Vars");

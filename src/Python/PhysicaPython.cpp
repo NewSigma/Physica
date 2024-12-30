@@ -36,7 +36,7 @@ namespace Physica::Python {
     void PhysicaPython::compile(const char* moduleName) {
         auto& unit = clang.compile(moduleName);
         auto& jit = getJIT();
-        llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), LLVM::getInstance().getThreadSafeContext())));
+        check_llvm(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), LLVM::getInstance().getThreadSafeContext())));
     }
 
     PhysicaPython& PhysicaPython::getInstance() noexcept {

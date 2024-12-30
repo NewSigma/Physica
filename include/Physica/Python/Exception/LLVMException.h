@@ -31,20 +31,20 @@ namespace Physica::Python {
         const char* what() const noexcept override { return msg.c_str(); }
     };
 
-    inline void llvmCheck(llvm::Error err) {
+    inline void check_llvm(llvm::Error err) {
         if (err) [[unlikely]]
             throw LLVMException(std::move(err));
     }
 
     template<typename T>
-    inline T llvmCheck(llvm::Expected<T>&& E) {
-        llvmCheck(E.takeError());
+    inline T check_llvm(llvm::Expected<T>&& E) {
+        check_llvm(E.takeError());
         return T(std::move(*E));
     }
 
     template<typename T>
-    inline T& llvmCheck(llvm::Expected<T&>&& E) {
-        llvmCheck(E.takeError());
+    inline T& check_llvm(llvm::Expected<T&>&& E) {
+        check_llvm(E.takeError());
         return *E;
     }
 }

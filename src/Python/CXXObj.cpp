@@ -58,7 +58,7 @@ namespace Physica::Python {
         Clang& clang = pp.getClang();
         auto dtor = clang::GlobalDecl(pDecl->getDestructor(), clang::CXXDtorType::Dtor_Base);
         const std::string symbol = clang.getCodeGen().GetMangledName(std::move(dtor)).str();
-        const auto pDtor = llvmCheck(pp.getJIT().lookup(symbol));
+        const auto pDtor = check_llvm(pp.getJIT().lookup(symbol));
         pDtor.toPtr<DtorType>()(pObj);
         std::free(pObj);
         pObj = nullptr;
@@ -185,6 +185,6 @@ namespace Physica::Python {
         cgm.EmitGlobalDefinition(decl);
         pp.compile(symbol.str().c_str());
         execAddr = pp.getJIT().lookup(symbol);
-        return llvmCheck(std::move(execAddr)).toPtr<ForeignFunc>();
+        return check_llvm(std::move(execAddr)).toPtr<ForeignFunc>();
     }
 }

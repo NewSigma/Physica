@@ -104,12 +104,12 @@ namespace Physica::Core {
             return H5::PredType::NATIVE_UINT64;
         else if constexpr (std::is_same<T, float>::value)
             return H5::PredType::NATIVE_FLOAT;
-        else if constexpr (std::is_same<T, float32>::value)
+        else if constexpr (std::is_same<T, Real<Float32>>::value)
             return H5::PredType::NATIVE_FLOAT;
         else if constexpr (std::is_same<T, double>::value)
             return H5::PredType::NATIVE_DOUBLE;
         else {
-            static_assert(std::is_same<T, float64>::value, "[Error]: Not implemented");
+            static_assert(std::is_same<T, Real<Float64>>::value, "[Error]: Not implemented");
             return H5::PredType::NATIVE_DOUBLE;
         }
     }

@@ -31,8 +31,8 @@ namespace Physica::Core {
             throw MPIException("[Error]: Physica do not support the MPI");
 
         MPI_Errhandler handler;
-        mpiCheck(MPI_Comm_create_errhandler(world_handler, &handler));
-        mpiCheck(MPI_Comm_set_errhandler(getWorld(), handler));
+        check_mpi(MPI_Comm_create_errhandler(world_handler, &handler));
+        check_mpi(MPI_Comm_set_errhandler(getWorld(), handler));
     }
 
     MPIExecutor::~MPIExecutor() {

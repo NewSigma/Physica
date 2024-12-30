@@ -28,6 +28,6 @@ namespace Physica::Python {
         LLJITBuilder jitBuilder{};
         jitBuilder.setJITTargetMachineBuilder(std::move(tmBuilder));
         jitBuilder.setEnableDebuggerSupport(true);
-        jit = llvmCheck(jitBuilder.create());
+        jit = check_llvm(jitBuilder.create());
     }
 }

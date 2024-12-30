@@ -16,9 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
+#include "Physica/Core/Version.h"
 /**
  * This file is empty, you can include Physica headers to test your code.
  */
 int main() {
+    std::cout << Physica::Core::version();
     return 0;
 }

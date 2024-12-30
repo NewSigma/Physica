@@ -79,6 +79,10 @@ namespace Physica::Core {
     }
 
     inline double convertDoubleImpl(int length, int power, MPUnit* __restrict byte);
+
+    using float16 = Real<Float16>;
+    using float32 = Real<Float32>;
+    using float64 = Real<Float64>;
 }
 
 #include "Rational.h"

@@ -94,7 +94,7 @@ namespace Physica::Core {
 
     template<RandomOption Option, uint64_t FixedSeed>
     Random<Option, FixedSeed>::~Random() {
-        vslCheck(vslDeleteStream(&pStream));
+        check_vsl(vslDeleteStream(&pStream));
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
@@ -108,7 +108,7 @@ namespace Physica::Core {
         gen.seed(tseed);
         if constexpr (HasMKL()) {
             RandomSeed::toNextSeed(tseed);
-            vslCheck(vslNewStream(&pStream, getMKLRngID(), tseed));
+            check_vsl(vslNewStream(&pStream, getMKLRngID(), tseed));
         }
         return seed;
     }
@@ -123,7 +123,7 @@ namespace Physica::Core {
     Array<int> Random<Option, FixedSeed>::random_int(size_t length, int from, int to) {
         assert(from <= to && to < INT_MAX);
         Array<int> result(length);
-        vslCheck(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
+        check_vsl(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
         return result;
     }
 

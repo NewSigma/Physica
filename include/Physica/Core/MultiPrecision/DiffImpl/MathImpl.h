@@ -156,7 +156,14 @@ namespace Physica::Core {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
         const GradType x1 = GradType(x);
-        return ResultType(ln1pexp(x.value()), reciprocal(GradType(1) + exp(-x1)) * x.grad());
+        GradType g;
+        if (x.value().real().isPositive())
+            g = reciprocal(GradType(1) + exp(-x1));
+        else {
+            const GradType expx = exp(x1);
+            g = expx / (GradType(1) + expx);
+        }
+        return ResultType(ln1pexp(x.value()), g * x.grad());
     }
 
     template<Scalar T>

@@ -22,6 +22,10 @@
 #include "Physica/Core/MultiPrecision/Real.h" // IWYU pragma: export
 
 namespace Physica::Core {
+    using cfloat16 = Complex<float16>;
+    using cfloat32 = Complex<float32>;
+    using cfloat64 = Complex<float64>;
+
     template<Scalar T>
     class Complex<T> : public ScalarBase<Complex<T>>, public CRCoro<Complex<T>> {
         using This = Complex<T>;
@@ -67,6 +71,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const T& imag() const noexcept { return im; }
         [[nodiscard]] inline std::complex<MachineType> toMachine() const noexcept;
         [[nodiscard]] bool isZero() const noexcept { return re.isZero() && im.isZero(); }
+        [[nodiscard]] bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */
         [[nodiscard]] inline static Complex fromPhase(T phase);
         template<RandomGenerator R>

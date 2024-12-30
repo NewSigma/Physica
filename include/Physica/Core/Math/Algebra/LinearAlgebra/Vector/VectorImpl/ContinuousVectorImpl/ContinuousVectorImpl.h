@@ -188,9 +188,9 @@ namespace Physica::Core {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Option == Float32)
-                vslCheck(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
+                check_vsl(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Option == Float64)
-                vslCheck(vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (double*)data(), 0, 1));
+                check_vsl(vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (double*)data(), 0, 1));
             else
                 Base::template random_uniform<R>();
         }
@@ -212,9 +212,9 @@ namespace Physica::Core {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Option == Float32)
-                vslCheck(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
+                check_vsl(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Option == Float64)
-                vslCheck(vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (double*)data(), 0, 1));
+                check_vsl(vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (double*)data(), 0, 1));
             else
                 Base::template random_normal<R>();
         }

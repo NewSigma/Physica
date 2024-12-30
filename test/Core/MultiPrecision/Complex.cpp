@@ -16,30 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include <iostream>
+#include "Physica/Core/MultiPrecision/Complex.h"
 
-#ifdef PHYSICA_MPI
+using namespace Physica;
 
-#include <exception>
-#include <mpi/mpi.h>
-#include "Physica/Macro.h"
-
-namespace Physica::Core {
-    class PHYSICA_API MPIException : public std::exception {
-        char* msg;
-    public:
-        MPIException(const char* msg_) noexcept;
-        MPIException(int err) noexcept;
-        ~MPIException() override;
-        const char* what() const noexcept override { return msg; }
-    };
+int main() {
+    if (!ln1pexp(cfloat64(-1000, 0)).isZero()) // Test underflow
+        return 1;
+    return 0;
 }
-
-namespace Physica {
-    inline void check_mpi(int err) {
-        if (err != MPI_SUCCESS) [[unlikely]]
-            throw Physica::Core::MPIException(err);
-    }
-}
-
-#endif

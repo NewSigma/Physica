@@ -158,16 +158,16 @@ namespace Physica::Core {
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
-        Array<Array<int>> counts(lossMat.getRow(), getDim(), 0);
-        lossMat = std::numeric_limits<T>::min();
-
         ValueType maxSample;
         if constexpr (T::isComplex)
             maxSample = samples.reals().max().value();
         else
             maxSample = samples.max().value(); // Real LnVegas assumes f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);
+
+        Array<Array<int>> counts(lossMat.getRow(), getDim(), 0);
         T mean = 0, var = 0;
+        lossMat = std::numeric_limits<T>::min();
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);

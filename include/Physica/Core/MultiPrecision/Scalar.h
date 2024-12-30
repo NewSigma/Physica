@@ -74,14 +74,7 @@ namespace Physica::Core {
      * \class Real is a advanced float type that supports multiple precision
      */
     template<ScalarOption Option = Float64> class Real;
-    using float16 = Real<Float16>;
-    using float32 = Real<Float32>;
-    using float64 = Real<Float64>;
-
     template<class T> class Complex;
-    using cfloat16 = Complex<float16>;
-    using cfloat32 = Complex<float32>;
-    using cfloat64 = Complex<float64>;
 
     template<class T>
     concept ForwardDiff = std::remove_cvref_t<T>::ScalarType::isForwardDiff;

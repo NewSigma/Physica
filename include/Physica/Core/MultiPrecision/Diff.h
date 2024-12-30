@@ -151,6 +151,17 @@ namespace Physica {
 namespace std {
     template<Physica::Core::Scalar T, Physica::Core::DiffMode Mode, int Order>
     struct numeric_limits<Physica::Core::Diff<T, Mode, Order>> : public numeric_limits<T> {};
+
+    template<Physica::Core::Scalar T, Physica::Core::DiffMode Mode, int Order>
+    struct formatter<Physica::Core::Diff<T, Mode, Order>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Core::Diff<T, Mode, Order>& obj, std::format_context& ctx) const {
+            return std::format_to(ctx.out(), "{}", obj.value());
+        }
+    };
 }
 
 #include "DiffImpl/DiffImpl.h"

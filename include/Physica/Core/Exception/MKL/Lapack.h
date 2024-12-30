@@ -18,14 +18,15 @@
  */
 #pragma once
 
+#include <format>
 #include <system_error>
 #include "Physica/Macro.h"
 #ifdef PHYSICA_MKL
-    #include <mkl_vsl.h>
+    #include <mkl_lapacke.h>
 #endif
 
 namespace Physica::Core {
-    class PHYSICA_API VSLException : public std::system_error {
+    class PHYSICA_API LapackException : public std::system_error {
         using Base = std::system_error;
 
         class Impl final : public std::error_category {
@@ -38,25 +39,19 @@ namespace Physica::Core {
             Impl& operator=(const Impl&) = delete;
             Impl& operator=(Impl&&) noexcept = delete;
             /* Getters */
-            [[nodiscard]] const char* name() const noexcept override final { return "Intel MKL VSL"; }
-            [[nodiscard]] std::string message(int) const override final;
+            [[nodiscard]] const char* name() const noexcept override final { return "Intel MKL Lapack"; }
+            [[nodiscard]] std::string message(int code) const override final { return std::format("error code: {}", code); }
         };
     public:
-        VSLException(int code) noexcept : std::system_error(code, Impl()) {}
+        LapackException(int code) noexcept : std::system_error(code, Impl()) {}
         /* Getters */
         [[nodiscard]] int code() const noexcept { return Base::code().value(); }
     };
 }
 
 namespace Physica {
-    inline void check_vsl_impl(int err) {
+    inline void check_lapack(int err) {
         if (err != 0) [[unlikely]]
-            throw Physica::Core::VSLException(err);
+            throw Physica::Core::LapackException(err);
     }
 }
-
-#ifdef PHYSICA_MKL
-    #define check_vsl(err) check_vsl_impl(err)
-#else
-    #define check_vsl(err)
-#endif

@@ -124,10 +124,17 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Order>
     class HessenburgMatrixH : public RValueMatrix<HessenburgMatrixH<T, Order>> {
-        using Base = RValueMatrix<HessenburgMatrixH<T, Order>>;
+        using This = HessenburgMatrixH<T, Order>;
+        using Base = RValueMatrix<This>;
         const Hessenburg<T, Order>& hess;
     public:
         HessenburgMatrixH(const Hessenburg<T, Order>& hess_) : hess(hess_) {}
+        HessenburgMatrixH(const This&) = delete;
+        HessenburgMatrixH(This&&) noexcept = delete;
+        ~HessenburgMatrixH() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
         void assignTo(LValueMatrix<M>& target) const;

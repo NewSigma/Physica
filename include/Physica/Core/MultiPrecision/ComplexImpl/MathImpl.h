@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Math.h"
+
 namespace Physica::Core {
     template<Scalar T>
     T abs(const Complex<T>& c) {
@@ -33,6 +35,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     inline Complex<T> reciprocal(const Complex<T>& c) {
+        assert(!c.isZero() && "[Error]: Divide by zero");
         const auto& real = c.real();
         const auto& imag = c.imag();
         const auto divisor = reciprocal(square(real) + square(imag));
@@ -62,9 +65,18 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
+    inline Complex<T> ln1p(const Complex<T>& c) {
+        return ln(T(1) + c);
+    }
+
+    template<Scalar T>
     inline Complex<T> ln1pexp(const Complex<T>& c) {
-        T norm = c.norm();
-        return norm + ln(exp(-norm) + exp(c - norm));
+        if (c.real().isPositive()) {
+            T norm = c.norm();
+            return norm + ln(exp(-norm) + exp(c - norm));
+        }
+        else
+            return ln1p(exp(c));
     }
 
     template<Scalar T>

@@ -5,6 +5,7 @@ physica_add_test(Loss AI/Loss.cpp)
 add_subdirectory(IO)
 add_subdirectory(Math)
 ## MultiPrecision
+physica_add_test(Complex MultiPrecision/Complex.cpp)
 physica_add_test(Diff MultiPrecision/Diff.cpp)
 physica_add_test(Integer MultiPrecision/Integer.cpp)
 physica_add_test(Real MultiPrecision/Real.cpp)
