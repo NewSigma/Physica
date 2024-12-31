@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "DenseMatrixStorage.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/DenseMatrixStorage.h"
 
 namespace Physica::Core {
     /**

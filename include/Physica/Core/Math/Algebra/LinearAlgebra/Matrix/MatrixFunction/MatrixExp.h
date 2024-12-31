@@ -28,6 +28,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using RealType = ScalarType::RealType;
     private:
         const T& m;
     public:
@@ -42,6 +43,8 @@ namespace Physica::Core {
         template<Matrix M>
         void assignTo(LValueMatrix<M>& target) const;
         [[nodiscard]] ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
+
+        [[nodiscard]] RealType calcTraceMu() const;
         /* Getters */
         [[nodiscard]] const T& getMatrix() const noexcept { return m; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }
@@ -58,6 +61,13 @@ namespace Physica::Core {
     void MatrixExp<T>::assignTo(LValueMatrix<M>& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = (*this) * UnitVector<ScalarType>(i, getRow());
+    }
+
+    template<Matrix T>
+    auto MatrixExp<T>::calcTraceMu() const -> RealType {
+        const ScalarType trace = m.trace();
+        assert(trace.imag().isZero() && "[Error]: Not implemented");
+        return trace.real() / RealType(getRow());
     }
 
     template<Matrix T>

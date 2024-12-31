@@ -68,7 +68,7 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
-        [[nodiscard]] RealType calcTraceMu() const;
+        [[nodiscard]] auto calcTraceMu() const { return mexp.calcTraceMu(); }
         template<class Executor>
         [[nodiscard]] ParamPair calcParam(RealType traceMu) const;
         /* Getters */
@@ -121,15 +121,6 @@ namespace Physica::Core {
             }
             target *= factor;
         }
-    }
-
-    template<Matrix T, Vector U>
-    MatrixVectorProduct<MatrixExp<T>, U>::RealType
-    MatrixVectorProduct<MatrixExp<T>, U>::calcTraceMu() const {
-        const auto& mat = mexp.getMatrix();
-        const ScalarType trace = mat.trace();
-        assert(trace.imag().isZero() && "[Error]: Not implemented");
-        return trace.real() / RealType(getLength());
     }
 
     template<Matrix T, Vector U>
@@ -187,6 +178,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T, Vector U>
-    class Traits<Core::MatrixVectorProduct<MatrixExp<T>, U>>
-            : public Traits<Core::MatrixVectorProduct<T, U>> {};
+    class Traits<MatrixVectorProduct<MatrixExp<T>, U>> : public Traits<MatrixVectorProduct<T, U>> {};
 }

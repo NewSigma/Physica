@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../LValueVector.h"
+
 namespace Physica::Core {
     template<class Derived> class ContinuousVector;
 

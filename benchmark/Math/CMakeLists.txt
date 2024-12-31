@@ -1,6 +1,7 @@
 target_sources(Benchmark PRIVATE EigenSolver.cpp)
 target_sources(Benchmark PRIVATE InnerDot.cpp)
 target_sources(Benchmark PRIVATE LnCosh.cpp)
+target_sources(Benchmark PRIVATE Symv.cpp)
 if(${PHYSICA_MKL})
     target_sources(Benchmark PRIVATE EigenSolver_MKL.cpp)
     target_sources(Benchmark PRIVATE InnerDot_MKL.cpp)

@@ -30,8 +30,13 @@ namespace Physica::Core {
 
     class RandomBase {};
 
+    class QRandomBase : public RandomBase {};
+
     template<class T>
     concept RandomGenerator = std::derived_from<T, RandomBase>;
+
+    template<class T>
+    concept QuasiRandom = std::derived_from<T, QRandomBase>;
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.
      * 
@@ -72,15 +77,15 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static result_type min() { return GenType::min(); }
         [[nodiscard]] constexpr static result_type max() { return GenType::max(); }
 
-        [[nodiscard]] static Random& getInstance() noexcept;
+        [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
     private:
         Random();
-        Random(const Random&) = default;
-        Random(Random&&) noexcept = default;
+        Random(const This&) = default;
+        Random(This&&) noexcept = default;
         /* Operators */
-        Random& operator=(const Random&) = default;
-        Random& operator=(Random&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         /* Getters */
         [[nodiscard]] inline SeedType getThreadSeed() const noexcept;
         /* Static members */
@@ -98,7 +103,7 @@ namespace Physica::Core {
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    typename Random<Option, FixedSeed>::SeedType Random<Option, FixedSeed>::reseed() {
+    auto Random<Option, FixedSeed>::reseed() -> SeedType {
         if constexpr (IsSeedFixed)
             seed = FixedSeed;
         else

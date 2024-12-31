@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
+#include "DenseSymmImpl/HalfDenseMatrixStorage.h"
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {

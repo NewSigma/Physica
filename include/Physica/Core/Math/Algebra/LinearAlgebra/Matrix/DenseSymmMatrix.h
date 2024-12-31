@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "DenseMatrix.h"
-#include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
+#include "DenseSymmImpl/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
     template<Scalar T, size_t Order = Dynamic>
@@ -77,6 +77,7 @@ namespace Physica::Core {
         using Storage::getCol;
         using Storage::getOrder;
         using Storage::getRow;
+        using Storage::toIndex1D;
         [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
@@ -217,3 +218,5 @@ namespace std {
         m1.swap(m2);
     }
 }
+
+#include "DenseSymmImpl/MatrixVectorProduct.h"
