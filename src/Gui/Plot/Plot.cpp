@@ -19,7 +19,7 @@
 #include <QSvgGenerator>
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 namespace Physica::Gui {
     Plot::Plot(QWidget* parent) : ChartView(parent), axisX(new QValueAxis()), axisY(new QValueAxis()), axisTop(new QValueAxis()), axisRight(new QValueAxis()) {

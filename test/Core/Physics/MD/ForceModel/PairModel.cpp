@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using dfloat = Diff<float64, DiffMode::Reverse, 1>;
 /**
  * Params referenced from [1]

@@ -19,7 +19,7 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using MDCellType = MDCell<ScalarType>;
 using CrystalCellType = CrystalCell<ScalarType>;

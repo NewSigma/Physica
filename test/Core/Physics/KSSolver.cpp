@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/DFT/XCProvider/LDA.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using ComplexType = Complex<ScalarType>;
 using RandomType = Random<MT19937>;

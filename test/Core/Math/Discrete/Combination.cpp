@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Discrete/Combination.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int64_t combination1(int m, int n) {
     if (n == 0 || m == n)

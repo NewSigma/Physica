@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RandomType = Random<MT19937, 3438603950906262893>;
 using ScalarType = float64;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;

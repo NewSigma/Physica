@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Physics/Phonon/PhononSolverImpl/FCSwapVector.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = FCSwapVector<ScalarType>;
 using Index3D = Array<size_t, 3>;

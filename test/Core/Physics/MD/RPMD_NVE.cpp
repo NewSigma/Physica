@@ -24,7 +24,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;

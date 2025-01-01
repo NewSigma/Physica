@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/MultiPrecision/Real.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     Real<FloatMP> i(45);

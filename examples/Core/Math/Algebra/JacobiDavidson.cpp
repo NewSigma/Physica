@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = Real<Double>;
 using ComplexType = Complex<ScalarType>;
 using MatrixType = DenseHermiteMatrix<ComplexType>;

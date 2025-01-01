@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RealType = float64;
 using ComplexType = Complex<RealType>;
 

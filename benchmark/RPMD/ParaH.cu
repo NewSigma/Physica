@@ -24,7 +24,7 @@
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using Physica::Dynamic;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;

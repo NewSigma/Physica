@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     {

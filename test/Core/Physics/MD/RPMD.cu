@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
-using namespace Physica::Core;
+using namespace Physica;
 using Physica::Dynamic;
 using ScalarType = float32;
 using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;

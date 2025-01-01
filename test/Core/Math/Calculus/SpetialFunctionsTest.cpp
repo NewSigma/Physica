@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 void testLnGamma() {
     constexpr static int count = 2;

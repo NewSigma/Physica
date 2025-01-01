@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/SVD.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 

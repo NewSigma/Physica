@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Optimization/SteepestDescent.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using Optimizer = SteepestDescent<ScalarType, 2>;
 using VectorType = Optimizer::VectorType;

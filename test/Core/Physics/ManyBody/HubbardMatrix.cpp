@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 constexpr double HoppingT = 1.0;
 constexpr double RepelU = 2;
 

@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/MathConst.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 void printElements(const Real<FloatMP>& n) {
     int size = n.getSize();

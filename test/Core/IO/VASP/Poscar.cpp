@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 const static char* data1 = "Structure\n"
                            "1.0\n"

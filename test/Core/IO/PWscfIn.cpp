@@ -21,7 +21,7 @@
 #include "Physica/Core/IO/QE/PWscfIn.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 const char* data = "&CONTROL\n"
                    "  pseudo_dir = '/home/sigma/Program/pot-QE/pslibrary-master/pbe/PSEUDOPOTENTIALS'\n"
                    "  calculation = 'scf'\n"

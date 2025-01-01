@@ -20,7 +20,7 @@
 #include "Physica/Core/IO/Gnuplot.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 const static char* data1 = "# Test Gnuplot\n"
                            "1.0 1.1\n"

@@ -27,7 +27,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 using RandomType = Random<MT19937>;
 using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;

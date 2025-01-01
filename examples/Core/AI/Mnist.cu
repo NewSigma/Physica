@@ -26,7 +26,7 @@
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.cuh"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 
 template<Scalar> class MnistNet;

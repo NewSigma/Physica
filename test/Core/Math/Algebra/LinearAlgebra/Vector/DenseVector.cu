@@ -22,7 +22,7 @@
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 using namespace Physica;
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 using VectorType = VectorND<ScalarType>;
 using DeviceVector = Core::device_obj<VectorType>;

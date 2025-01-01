@@ -20,7 +20,7 @@
 #include <fstream>
 #include "Physica/Core/AI/DecisionTree/DecisionTree.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using TreeType = DecisionTree<ScalarType, DecisionTreeType::Classify>;
 /*

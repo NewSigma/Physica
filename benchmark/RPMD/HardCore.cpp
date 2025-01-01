@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;

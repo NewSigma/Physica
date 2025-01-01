@@ -28,7 +28,7 @@ namespace Physica::Core {
 }
 
 int main() {
-    using namespace Physica::Core;
+    using namespace Physica;
     DirStack stack("/home/user/Program");
     auto& dirs = Test::getDirs(stack);
     if (dirs.size() != 3)

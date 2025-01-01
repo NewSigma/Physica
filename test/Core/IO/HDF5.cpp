@@ -20,7 +20,7 @@
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     TempFile temp("/tmp/tmpXXXXXX");

@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/BasicAlgebra/Polynomial.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 template<Vector T>
 bool testPolyRoot(const T& coeffs, double precision) {

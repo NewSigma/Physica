@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/MultiPrecision/Complex.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using T = float64;
 
 void emptyVectorTest() {

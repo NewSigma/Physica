@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 extern const char* outcar_data;
 

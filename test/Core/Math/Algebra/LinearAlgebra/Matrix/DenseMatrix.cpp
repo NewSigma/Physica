@@ -20,7 +20,7 @@
 #include "Physica/Core/MultiPrecision/Complex.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RandomType = Random<MT19937>;
 
 int main() {

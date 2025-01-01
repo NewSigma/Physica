@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;

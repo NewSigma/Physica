@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/AI/Clustering/AP.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 
 bool testCluster(const std::forward_list<size_t>& cluster) {

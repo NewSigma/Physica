@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RandomType = Random<MT19937>;
 
 int main() {

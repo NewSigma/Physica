@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     using ScalarType = float64;

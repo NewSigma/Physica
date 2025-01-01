@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LUSolver.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     using ScalarType = float64;

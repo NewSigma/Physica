@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using ComplexType = Complex<ScalarType>;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;

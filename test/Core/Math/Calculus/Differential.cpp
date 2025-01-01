@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 
 int main() {
-    using namespace Physica::Core;
+    using namespace Physica;
     using ScalarType = float64;
     {
         auto func = [](const ScalarType& x) { return hermiteH(5, x); };

@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<Diff<ScalarType, DiffMode::Reverse, 1>>;
 using RandomType = Random<MT19937>;

@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinState.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     const SpinState<1, 6> psi(0b011010);

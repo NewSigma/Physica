@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     typedef DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 4, 4> Matrix4x4;

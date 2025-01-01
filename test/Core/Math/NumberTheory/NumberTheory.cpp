@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     {

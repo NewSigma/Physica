@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 using ScalarType = float64;
 using VectorType = Vector3D<ScalarType>;

@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Core::Physics;
 using namespace Physica::Gui;
 

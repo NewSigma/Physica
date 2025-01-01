@@ -19,7 +19,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Core::Physics;
 
 using ScalarType = float64;

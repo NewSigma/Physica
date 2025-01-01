@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/AI/NeuralNetwork/Loss.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 
 void testSelectProperty() {

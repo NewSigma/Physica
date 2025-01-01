@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 
 using namespace Physica;
-using namespace Physica::Core;
+using namespace Physica;
 
 namespace Physica {
     class Test {

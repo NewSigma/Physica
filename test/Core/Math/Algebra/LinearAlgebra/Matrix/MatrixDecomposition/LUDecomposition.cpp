@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/LUDecomposition.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     typedef DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3> Matrix3x3;

@@ -304,7 +304,7 @@ namespace Physica::Gui {
     QBoxPlotSeries& Plot::errorBar(
             const T& mean,
             const T& deviation) {
-        using namespace Physica::Core;
+        using namespace Physica;
         using ScalarType = float64;
         const auto x = VectorND<ScalarType>::linspace(0, mean.getLength() - 1, mean.getLength());
         return errorBar(x, mean, deviation);

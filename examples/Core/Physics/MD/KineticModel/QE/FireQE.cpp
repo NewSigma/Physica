@@ -11,7 +11,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/CFireModel.h"
 #include "Physica/Core/Physics/MD/Barostat/Berendsen.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using RandomType = Random<MT19937, 10002>;

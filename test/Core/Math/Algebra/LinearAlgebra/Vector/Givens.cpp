@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RealType = float64;
 using ComplexType = Complex<RealType>;
 

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h"
 #include "Physica/Core/MultiPrecision/Complex.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 template<LMatrix T>
 bool isUpperQuasiTriangle(const T& m) {

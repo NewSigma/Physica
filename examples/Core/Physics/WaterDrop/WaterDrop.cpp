@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Calculus/Function/FindRoot/Bisection.h"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 
 using T = float64;

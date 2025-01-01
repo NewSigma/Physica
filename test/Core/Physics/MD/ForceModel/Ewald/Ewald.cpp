@@ -21,7 +21,7 @@
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
-using namespace Physica::Core;
+using namespace Physica;
 
 template<Scalar T>
 void VASPTest() {

@@ -20,7 +20,7 @@
 #include <iostream>
 #include "Physica/Core/MultiPrecision/Real.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = Real<FloatMP>;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());

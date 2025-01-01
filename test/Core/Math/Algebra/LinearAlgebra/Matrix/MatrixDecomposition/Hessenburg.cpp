@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Hessenburg.h"
 #include "Physica/Core/MultiPrecision/Complex.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 template<Matrix T>
 bool isHessenburgMatrix(const T& m) {

@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     using T = float64;

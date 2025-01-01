@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;

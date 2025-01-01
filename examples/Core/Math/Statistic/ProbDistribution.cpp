@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 using RandomType = Random<MT19937>;
 

@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/Chebyshev.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using T = float64;
 
 template<class Function>

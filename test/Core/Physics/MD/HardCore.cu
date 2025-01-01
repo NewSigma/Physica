@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 
-using namespace Physica::Core;
+using namespace Physica;
 constexpr double timeStep = 0.1;
 constexpr double collideFactor = 0.001;
 const size_t numMolecular = 512;

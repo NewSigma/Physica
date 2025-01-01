@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
 
 int main() {
-    using namespace Physica::Core;
+    using namespace Physica;
     using ScalarType = float64;
     auto func = [](const ScalarType& x) { return exp(x) - ScalarType(5); };
     {

@@ -27,7 +27,7 @@
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 template<Scalar T, RandomGenerator R> class MnistNet;
 

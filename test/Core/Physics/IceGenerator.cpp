@@ -19,7 +19,7 @@
 #include "Physica/Core/Physics/SolidState/IceGenerator.h"
 
 using namespace Physica;
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 
 namespace Physica {

@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RealType = float64;
 using ScalarType = Complex<RealType>;
 using VectorType = VectorND<RealType>;

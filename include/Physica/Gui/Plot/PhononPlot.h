@@ -262,7 +262,7 @@ namespace Physica::Gui {
     template<Scalar T>
     PhononPlot<T>::VectorType
     PhononPlot<T>::makeFreq(const EigenSolverType& eigen) {
-        using namespace Physica::Core;
+        using namespace Physica;
         auto freq = PhononType::makeFreq(eigen);
         freq *= T(Core::PhyConst<AU>::freqToTHz(1));
         Plot::setMinY(std::min(Plot::getMinY(), double(freq.min())));

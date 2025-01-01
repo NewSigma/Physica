@@ -82,7 +82,7 @@ namespace Physica::Gui {
     template<Scalar T>
     PhononPlot3D<T>::BandArray PhononPlot3D<T>::calcBands(
             const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh) {
-        using namespace Physica::Core;
+        using namespace Physica;
         const MatrixType& meshX = mesh.first;
         const MatrixType& meshY = mesh.second;
         BandArray result(ph.getNumBand(), meshX.getRow(), meshX.getCol());

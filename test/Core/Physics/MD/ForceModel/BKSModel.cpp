@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 
 using namespace Physica;
-using namespace Physica::Core;
+using namespace Physica;
 
 namespace Physica {
     class Test {

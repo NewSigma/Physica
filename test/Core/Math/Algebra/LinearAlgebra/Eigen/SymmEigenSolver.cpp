@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/MultiPrecision/Diff.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 template<Matrix T>

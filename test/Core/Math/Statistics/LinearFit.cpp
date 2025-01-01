@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Statistics/LinearFit.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using Fit = LinearFit<ScalarType>;

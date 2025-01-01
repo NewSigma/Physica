@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 /**
  * Data sources:
  * [1] http://www.sfu.ca/~ssurjano/index.html

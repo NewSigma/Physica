@@ -22,7 +22,7 @@
 #include "Physica/Gui/Plot/DensityPlot.h"
 
 int main(int argc, char** argv) {
-    using namespace Physica::Core;
+    using namespace Physica;
     using namespace Physica::Gui;
 
     const int size = 1000;

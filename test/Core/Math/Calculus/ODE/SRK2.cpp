@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 #include "Physica/Core/Math/Statistics/LinearFit.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using RandomType = Random<MT19937, 4036979388296844000UL>;
 /**
  * We solve Eq. 5.1 of [1] and the slope of the result is expected to be lambda.

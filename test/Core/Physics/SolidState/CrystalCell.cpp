@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 using CrystalCellType = CrystalCell<ScalarType>;
 using LatticeMatrix = CrystalCellType::LatticeMatrix;

@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/SolidState/BrillouInterpolate.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using ComplexType = Complex<ScalarType>;
 using PhononType = FrozenPhonon<ScalarType>;

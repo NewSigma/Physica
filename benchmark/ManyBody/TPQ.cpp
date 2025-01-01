@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Core/Physics/ManyBody/TPQ.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using RandomType = Random<MT19937>;

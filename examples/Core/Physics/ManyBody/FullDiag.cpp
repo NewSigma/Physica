@@ -25,7 +25,7 @@
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 using Physica::Dynamic;
 using ScalarType = float64; // Will overflow if use float32

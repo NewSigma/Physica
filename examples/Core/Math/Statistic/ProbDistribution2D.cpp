@@ -27,7 +27,7 @@
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "Physica/Gui/Plot/Plot3D.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;

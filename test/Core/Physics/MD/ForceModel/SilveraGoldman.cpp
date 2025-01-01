@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 using ValueType = float64;
 using dfloat = Diff<ValueType, DiffMode::Reverse, 1>;

@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;

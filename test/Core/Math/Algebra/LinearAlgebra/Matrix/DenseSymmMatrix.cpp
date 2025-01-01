@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     HalfDenseMatrixStorage<float64> s(3, 3, 0);

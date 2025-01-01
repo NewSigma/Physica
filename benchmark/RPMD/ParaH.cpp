@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = SilveraGoldman<ScalarType, true>;

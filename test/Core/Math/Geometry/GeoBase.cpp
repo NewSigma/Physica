@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Geometry/GeoBase2D.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 
 int main() {

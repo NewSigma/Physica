@@ -19,7 +19,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 using MDCellType = MDCell<ScalarType>;
 using LatticeMatrix = MDCellType::LatticeMatrix;

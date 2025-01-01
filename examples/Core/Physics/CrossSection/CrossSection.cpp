@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 using T = float64;
 using ODE = ODESolver<T, 1>;

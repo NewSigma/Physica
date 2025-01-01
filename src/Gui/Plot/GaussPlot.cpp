@@ -21,7 +21,7 @@
 namespace Physica::Gui {
     GaussPlot::GaussPlot(double maxX, double maxY, double deltaX, double deltaY, unsigned int numSigma)
             : Base(-maxX, maxX, 0, maxY, deltaX, deltaY) {
-        using namespace Physica::Core;
+        using namespace Physica;
         using ScalarType = float64;
         using VectorType = VectorND<ScalarType>;
 

@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/MultiPrecision/Diff.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     {

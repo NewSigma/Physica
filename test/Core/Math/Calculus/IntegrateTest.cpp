@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 
 ScalarType func(ScalarType x) {

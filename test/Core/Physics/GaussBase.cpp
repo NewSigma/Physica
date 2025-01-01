@@ -20,7 +20,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 
 using namespace Physica;
-using namespace Physica::Core;
+using namespace Physica;
 
 using ScalarType = float64;
 

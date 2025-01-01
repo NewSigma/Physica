@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/MultiPrecision/Diff.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using T = float64;
 
 void testFunc() {

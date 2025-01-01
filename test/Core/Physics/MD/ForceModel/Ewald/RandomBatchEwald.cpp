@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using RandomType = Random<MT19937, 12989825518855205292UL>;
 using ForceModel = Q_TIP4P<ScalarType, RandomBatchEwald<ScalarType, RandomType>>;

@@ -28,7 +28,7 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Utils/BenchmarkHelper.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;

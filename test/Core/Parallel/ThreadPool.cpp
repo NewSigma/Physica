@@ -21,7 +21,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = VectorND<ScalarType>;

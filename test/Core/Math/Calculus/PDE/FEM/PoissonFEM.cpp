@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Rectangle1.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Triangle1.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
 using VectorType = Vector2D<ScalarType>;
 

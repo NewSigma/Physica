@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/CPUGPUModel.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using Physica::Dynamic;
 using ScalarType = float32;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;

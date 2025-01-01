@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 #include "Physica/Gui/Plot/Plot.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using namespace Physica::Gui;
 using ScalarType = Real<Double>;
 using VectorType = VectorND<ScalarType>;

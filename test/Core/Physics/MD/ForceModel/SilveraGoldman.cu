@@ -22,7 +22,7 @@
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float32;
 using HostForceModel = SilveraGoldman<ScalarType, true, true>;
 using DeviceForceModel = device_obj<HostForceModel>;

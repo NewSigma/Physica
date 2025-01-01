@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/EqualityQuadraticProgramming.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 int main() {
     using ScalarType = float64;

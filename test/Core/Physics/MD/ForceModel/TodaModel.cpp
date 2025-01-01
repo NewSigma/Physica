@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 using ScalarType = float64;
 using RandomType = Random<MT19937, 10000>;
