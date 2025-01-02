@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -196,7 +196,7 @@ namespace std {
         }
 
         auto format(const Physica::Core::Real<Physica::Core::Float64>& obj, std::format_context& ctx) const {
-            return std::format_to(ctx.out(), "{:.16G}", obj.toMachine());
+            return std::format_to(ctx.out(), "{}", obj.toMachine());
         }
     };
 }

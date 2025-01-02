@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
-#include <llvm/Support/ManagedStatic.h"
+#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
+#include "llvm/Support/ManagedStatic.h"
 
 namespace Physica::Python {
     class LLVM final {

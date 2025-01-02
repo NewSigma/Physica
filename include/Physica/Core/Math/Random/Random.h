@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -123,7 +123,9 @@ namespace Physica::Core {
         thread_local static This instance{};
         return instance;
     }
-
+    /**
+     * Range: [from, to]
+     */
     template<RandomOption Option, uint64_t FixedSeed>
     Array<int> Random<Option, FixedSeed>::random_int(size_t length, int from, int to) {
         assert(from <= to && to < INT_MAX);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -31,6 +31,10 @@ namespace Physica::Core {
         using typename Base::ValueType;
         using typename Base::RealValue;
         using typename Base::LossMatrix;
+        using typename Base::CountArray;
+    protected:
+        using Base::lossMat;
+        using Base::counts;
 
         using Base::means;
         using Base::vars;
@@ -68,7 +72,7 @@ namespace Physica::Core {
         using Base::calcVar;
 
         template<class Functor, RandomGenerator R, class Executor>
-        std::pair<T, T> trialIntegral(LossMatrix& lossMat, Functor lnFunc) const;
+        std::pair<T, T> trialIntegral(Functor lnFunc);
     };
 
     template<Scalar T>
@@ -78,10 +82,10 @@ namespace Physica::Core {
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
         assert(numWarm >= 0 && "[Error]: Invalid param");
 
-        LossMatrix lossMat(getNumPoint() - 1, getDim());
         for (int _ = 0; _ < numWarm; ++_) {
-            trialIntegral<Functor, R, Executor>(lossMat, lnFunc);
-            Base::template refineGrid<Executor>(lossMat);
+            Base::pre_trial();
+            trialIntegral<Functor, R, Executor>(lnFunc);
+            Base::template refineGrid<Executor>();
         }
     }
 
@@ -91,22 +95,22 @@ namespace Physica::Core {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
-        LossMatrix lossMat(getNumPoint() - 1, getDim());
         for (int refine = 0; refine < getNumRefine(); ++refine) {
-            auto pair = trialIntegral<Functor, R, Executor>(lossMat, lnFunc);
+            Base::pre_trial();
+            auto pair = trialIntegral<Functor, R, Executor>(lnFunc);
             means[refine] = std::move(pair.first);
             vars[refine] = std::move(pair.second);
-            loss[refine] = Base::calcGridLossImpl(lossMat);
-            Base::template refineGrid<Executor>(lossMat);
+            loss[refine] = Base::calcGridLossImpl();
+            Base::template refineGrid<Executor>();
         }
     }
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
     LnVegas<T>::RealValue LnVegas<T>::calcGridLoss(Functor func) const {
-        LossMatrix lossMat(getNumPoint() - 1, getDim());
-        trialIntegral<Functor, R, Executor>(lossMat, func);
-        return Base::calcGridLossImpl(lossMat);
+        Base::pre_trial();
+        trialIntegral<Functor, R, Executor>(func);
+        return Base::calcGridLossImpl();
     }
 
     template<Scalar T>
@@ -137,24 +141,16 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    std::pair<T, T> LnVegas<T>::trialIntegral(LossMatrix& lossMat, Functor lnFunc) const {
+    std::pair<T, T> LnVegas<T>::trialIntegral(Functor lnFunc) {
         const int numSample = getNumSample();
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, lossMat.getRow() - 1);
+        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
-            VectorND<RealValue> fromX(getDim());
-            VectorND<RealValue> deltaX(getDim());
-            for (size_t i = 0; i < getDim(); ++i) {
-                const auto& pointGrid = getPointGrid();
-                const auto index = indexes[n * getDim() + i];
-                fromX[i] = pointGrid(index, i);
-                deltaX[i] = pointGrid(index + 1, i);
-            }
-            deltaX -= fromX;
-
-            const VectorND<RealValue> x = fromX + hadamard(deltaX, VectorND<RealValue>::template random_uniform<R>(getDim()));
+            const auto pair = Base::template sample<R>(indexes.data_ptr(n * getDim()));
+            const auto& x = pair.first;
+            const auto& deltas = pair.second;
             const T lny = lnFunc(x);
-            const T lnxy = lny + ln(deltaX).sum() + RealValue(getDim()) * ln(RealValue(lossMat.getRow()));
+            const T lnxy = lny + ln(deltas).sum() + RealValue(getDim()) * ln(RealValue(getNumPoint()));
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
@@ -165,9 +161,7 @@ namespace Physica::Core {
             maxSample = samples.max().value(); // Real LnVegas assumes f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);
 
-        Array<Array<int>> counts(lossMat.getRow(), getDim(), 0);
         T mean = 0, var = 0;
-        lossMat = std::numeric_limits<T>::min();
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);

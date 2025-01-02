@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -35,6 +35,7 @@ namespace Physica::Core {
         using ValueType = T::ValueType;
         using RealValue = ValueType::RealType;
         using LossMatrix = DenseMatrix<RealValue>;
+        using CountArray = Array<Array<int>>;
     private:
         DenseMatrix<RealValue> pointGrid;
         VectorND<RealValue> from;
@@ -44,6 +45,9 @@ namespace Physica::Core {
         RealValue compressRate;
         RealValue mixBeta;
     protected:
+        LossMatrix lossMat;
+        CountArray counts;
+
         VectorND<T> means;
         VectorND<T> vars;
         VectorND<RealValue> loss;
@@ -90,12 +94,16 @@ namespace Physica::Core {
         /* Setters */
         void setNumRefine(int numRefine_);
     protected:
+        void pre_trial();
+        template<RandomGenerator R>
+        [[nodiscard]] std::pair<VectorND<RealValue>, VectorND<RealValue>> sample(const int* indexes) const;
         template<class Executor>
-        void refineGrid(LossMatrix& lossMat);
-        static RealValue calcGridLossImpl(const LossMatrix& lossMat);
+        void refineGrid();
+
+        RealValue calcGridLossImpl() const;
     private:
         template<class Functor, RandomGenerator R, class Executor>
-        std::pair<T, T> trialIntegral(LossMatrix& lossMat, Functor func) const;
+        std::pair<T, T> trialIntegral(Functor func);
         RealValue compress(VectorND<RealValue>& vars);
     };
 
@@ -115,6 +123,8 @@ namespace Physica::Core {
         pointGrid.resize(numPoint, from.getLength());
         for (size_t i = 0; i < getDim(); ++i)
             pointGrid.col(i) = VectorND<RealValue>::linspace(from[i], to[i], numPoint);
+        lossMat.resize(numPoint - 1, getDim());
+        counts.resize(numPoint - 1, getDim());
         setNumRefine(numRefine_);
     }
 
@@ -125,10 +135,10 @@ namespace Physica::Core {
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
         assert(numWarm >= 0 && "[Error]: Invalid param");
 
-        LossMatrix lossMat(getNumPoint() - 1, getDim());
         for (int _ = 0; _ < numWarm; ++_) {
-            trialIntegral<Functor, R, Executor>(lossMat, func);
-            refineGrid<Executor>(lossMat);
+            pre_trial();
+            trialIntegral<Functor, R, Executor>(func);
+            refineGrid<Executor>();
         }
     }
 
@@ -138,22 +148,22 @@ namespace Physica::Core {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
-        LossMatrix lossMat(getNumPoint() - 1, getDim());
         for (int refine = 0; refine < numRefine; ++refine) {
-            auto pair = trialIntegral<Functor, R, Executor>(lossMat, func);
+            pre_trial();
+            auto pair = trialIntegral<Functor, R, Executor>(func);
             means[refine] = std::move(pair.first);
             vars[refine] = std::move(pair.second);
-            loss[refine] = calcGridLossImpl(lossMat);
-            refineGrid<Executor>(lossMat);
+            loss[refine] = calcGridLossImpl();
+            refineGrid<Executor>();
         }
     }
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
     Vegas<T>::RealValue Vegas<T>::calcGridLoss(Functor func) const {
-        LossMatrix lossMat(getNumPoint() - 1, getDim());
-        trialIntegral<Functor, R, Executor>(lossMat, func);
-        return calcGridLossImpl(lossMat);
+        pre_trial();
+        trialIntegral<Functor, R, Executor>(func);
+        return calcGridLossImpl();
     }
 
     template<Scalar T>
@@ -225,48 +235,12 @@ namespace Physica::Core {
         compressRate.swap(obj.compressRate);
         mixBeta.swap(obj.mixBeta);
 
+        lossMat.swap(obj.lossMat);
+        counts.swap(obj.counts);
+
         means.swap(obj.means);
         vars.swap(obj.vars);
         loss.swap(obj.loss);
-    }
-
-    template<Scalar T>
-    template<class Functor, RandomGenerator R, class Executor>
-    std::pair<T, T> Vegas<T>::trialIntegral(LossMatrix& lossMat, Functor func) const {
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, lossMat.getRow() - 1);
-        VectorND<T> samples(numSample);
-        Executor::parallel_for([&, this](size_t n) {
-            VectorND<RealValue> fromX(getDim());
-            VectorND<RealValue> deltaX(getDim());
-            for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indexes[n * getDim() + i];
-                fromX[i] = pointGrid(index, i);
-                deltaX[i] = pointGrid(index + 1, i);
-            }
-            deltaX -= fromX;
-
-            const VectorND<RealValue> x = fromX + hadamard(deltaX, VectorND<RealValue>::template random_uniform<R>(getDim()));
-            const T y = func(x);
-            const T xy = y * (deltaX * RealValue(lossMat.getRow())).prod();
-            samples[n] = xy;
-        }, numSample, Executor::getNumThread()).wait();
-
-        Array<Array<int>> counts(lossMat.getRow(), getDim(), 0);
-        lossMat = std::numeric_limits<T>::min(); // Initial value avoids situation where number of samples is too small to sample effective data
-
-        T mean = 0, var = 0;
-        for (int n = 0; n < numSample; ++n) {
-            const T xy = samples[n];
-            toNextVariance(var, mean, n, xy);
-            // Loss has minimal value to avoid the grid size reducing to 0
-            const auto l = std::max(xy.value().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
-            for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indexes[n * getDim() + i];
-                toNextMean(lossMat(index, i), counts[index][i], l);
-                counts[index][i] += 1;
-            }
-        }
-        return std::make_pair(std::move(mean), std::move(var));
     }
 
     template<Scalar T>
@@ -281,9 +255,32 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
+    void Vegas<T>::pre_trial() {
+        for (auto& arr : counts)
+            for (int& elem : arr)
+                elem = 0;
+        lossMat = std::numeric_limits<T>::min(); // Initial value avoids situation where number of samples is too small to sample effective data
+    }
+
+    template<Scalar T>
+    template<RandomGenerator R>
+    auto Vegas<T>::sample(const int* indexes) const -> std::pair<VectorND<RealValue>, VectorND<RealValue>> {
+        VectorND<RealValue> x(getDim());
+        VectorND<RealValue> deltas(getDim());
+        for (size_t i = 0; i < getDim(); ++i) {
+            int index = indexes[i];
+            x[i] = pointGrid(index, i);
+            deltas[i] = pointGrid(index + 1, i);
+        }
+        deltas -= x;
+        x += hadamard(deltas, VectorND<RealValue>::template random_uniform<R>(getDim()));
+        return std::make_pair(std::move(x), std::move(deltas));
+    }
+
+    template<Scalar T>
     template<class Executor>
-    void Vegas<T>::refineGrid(LossMatrix& lossMat) {
-        Executor::parallel_for([this, &lossMat](size_t dim) {
+    void Vegas<T>::refineGrid() {
+        Executor::parallel_for([this](size_t dim) {
             const auto meanVar = compress(lossMat.asArray()[dim]);
             const bool noData = meanVar.isZero();
             if (noData) [[unlikely]] // No data in the dimension, usually we should have enough samples to avoid it
@@ -296,7 +293,7 @@ namespace Physica::Core {
             size_t i = 1;
             for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
                 while (temp < meanVar) {
-                    assert(j < lossMat.getRow() && "[Error]: Unexpected not enough vars, this is likely a bug");
+                    assert(j < getNumPoint() && "[Error]: Unexpected not enough vars, this is likely a bug");
                     temp += lossMat(j, dim);
                     j += 1;
                 }
@@ -309,7 +306,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    Vegas<T>::RealValue Vegas<T>::calcGridLossImpl(const LossMatrix& lossMat) {
+    auto Vegas<T>::calcGridLossImpl() const -> RealValue {
         RealValue maxVar = 0;
         for (size_t i = 0; i < lossMat.getCol(); ++i) {
             const auto col = lossMat.col(i);
@@ -317,6 +314,35 @@ namespace Physica::Core {
             maxVar = std::max(maxVar, variance(col, prior) / prior.squaredNorm());
         }
         return sqrt(maxVar);
+    }
+
+    template<Scalar T>
+    template<class Functor, RandomGenerator R, class Executor>
+    std::pair<T, T> Vegas<T>::trialIntegral(Functor func) {
+        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
+        VectorND<T> samples(numSample);
+        Executor::parallel_for([&, this](size_t n) {
+            const auto pair = sample<R>(indexes.data_ptr(n * getDim()));
+            const auto& x = pair.first;
+            const auto& deltas = pair.second;
+            const T y = func(x);
+            const T xy = y * (deltas * RealValue(getNumPoint())).prod();
+            samples[n] = xy;
+        }, numSample, Executor::getNumThread()).wait();
+
+        T mean = 0, var = 0;
+        for (int n = 0; n < numSample; ++n) {
+            const T xy = samples[n];
+            toNextVariance(var, mean, n, xy);
+            // Loss has minimal value to avoid the grid size reducing to 0
+            const auto l = std::max(xy.value().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
+            for (size_t i = 0; i < getDim(); ++i) {
+                const auto index = indexes[n * getDim() + i];
+                toNextMean(lossMat(index, i), counts[index][i], l);
+                counts[index][i] += 1;
+            }
+        }
+        return std::make_pair(std::move(mean), std::move(var));
     }
 
     template<Scalar T>

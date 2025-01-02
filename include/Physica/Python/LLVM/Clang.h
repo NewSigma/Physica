@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include <forward_list>
-#include <llvm/IR/Module.h"
+#include "llvm/IR/Module.h"
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/CodeGen/ModuleBuilder.h"
