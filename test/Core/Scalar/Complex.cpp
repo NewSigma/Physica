@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Complex.h"
+#include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
 

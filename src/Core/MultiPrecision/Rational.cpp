@@ -18,7 +18,7 @@
  */
 #include <cassert>
 #include "Physica/Core/Exception/DivideByZeroException.h"
-#include "Physica/Core/MultiPrecision/Rational.h"
+#include "Physica/Core/Scalar/Rational.h"
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {

@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/MultiPrecision/Complex.h"
+#include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
 using RandomType = Random<MT19937, 10000>;

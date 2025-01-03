@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Tridiagonalization.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/MultiPrecision/Complex.h"
+#include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;

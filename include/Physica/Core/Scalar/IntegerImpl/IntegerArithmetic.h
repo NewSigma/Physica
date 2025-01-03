@@ -20,8 +20,8 @@
 
 #include <cassert>
 #include <cstring>
-#include "Physica/Core/MultiPrecision/RealImpl/FloatMPImpl/AddBasic.h"
-#include "Physica/Core/MultiPrecision/RealImpl/FloatMPImpl/DivBasic.h"
+#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/AddBasic.h"
+#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/DivBasic.h"
 
 namespace Physica::Core {
     /**

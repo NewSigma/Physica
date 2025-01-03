@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Diff.h" // IWYU pragma: export
+#include "Physica/Core/Scalar/Diff.h" // IWYU pragma: export
 #include "DenseVector.h"
 
 namespace Physica::Core {

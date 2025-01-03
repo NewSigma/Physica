@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Schur.h"
-#include "Physica/Core/MultiPrecision/Complex.h"
+#include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
 

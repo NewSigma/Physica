@@ -19,7 +19,7 @@
 #pragma once
 
 #include <fstream>
-#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Scalar/Real.h"
 
 namespace Physica::Core {
     class PHYSICA_API Potcar {

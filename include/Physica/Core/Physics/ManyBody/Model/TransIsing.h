@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Scalar/Scalar.h"
 #include "LatticeModel.h"
 
 namespace Physica::Core {

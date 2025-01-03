@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/MultiPrecision/ExprType.h"
+#include "Physica/Core/Scalar/ExprType.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 

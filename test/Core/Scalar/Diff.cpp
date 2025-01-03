@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Diff.h"
+#include "Physica/Core/Scalar/Diff.h"
 
 using namespace Physica;
 using T = float64;

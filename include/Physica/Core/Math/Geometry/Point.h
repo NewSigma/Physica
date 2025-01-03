@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica::Core {

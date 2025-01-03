@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica::Core {
     class PHYSICA_API H5Group : public H5::Group, public H5Location {

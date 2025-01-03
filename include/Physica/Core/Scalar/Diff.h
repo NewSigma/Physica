@@ -19,8 +19,8 @@
 #pragma once
 
 #include <iosfwd>
-#include "Physica/Core/MultiPrecision/Real.h"  // IWYU pragma: export
-#include "Physica/Core/MultiPrecision/ExprType.h"
+#include "Physica/Core/Scalar/Real.h"  // IWYU pragma: export
+#include "Physica/Core/Scalar/ExprType.h"
 #include "DiffImpl/CoDiff.h"
 
 namespace Physica::Core {

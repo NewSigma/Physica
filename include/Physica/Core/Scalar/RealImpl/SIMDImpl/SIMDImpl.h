@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ExprType.h"
+#include "Physica/Core/Scalar/ExprType.h"
 #include "Physica/Core/Utils/Unreachable.h"
 
 namespace Physica::Core {

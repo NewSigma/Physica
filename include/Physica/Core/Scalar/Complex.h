@@ -19,7 +19,7 @@
 #pragma once
 
 #include <complex>
-#include "Physica/Core/MultiPrecision/Real.h" // IWYU pragma: export
+#include "Physica/Core/Scalar/Real.h" // IWYU pragma: export
 
 namespace Physica::Core {
     using cfloat16 = Complex<float16>;

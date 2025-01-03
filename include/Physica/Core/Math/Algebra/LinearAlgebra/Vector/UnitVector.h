@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cstddef>
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Scalar/Scalar.h"
 #include "Vector.h"
 
 namespace Physica::Core {

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {

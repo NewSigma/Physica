@@ -18,7 +18,7 @@
  */
 #include <random>
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Scalar/Real.h"
 
 using namespace Physica;
 using ScalarType = Real<FloatMP>;

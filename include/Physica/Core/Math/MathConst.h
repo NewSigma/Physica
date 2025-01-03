@@ -19,7 +19,7 @@
 #pragma once
 
 #include <numbers>
-#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Scalar/Real.h"
 
 namespace Physica::Core {
     template<ScalarOption Option>

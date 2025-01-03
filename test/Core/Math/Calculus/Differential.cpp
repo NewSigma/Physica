@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Calculus/Differential.h"
-#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 
 int main() {

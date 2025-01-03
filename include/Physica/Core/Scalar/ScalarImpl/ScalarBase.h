@@ -22,7 +22,7 @@
 #include <type_traits>
 #include "Physica/CRTPBase.h"
 #include "Physica/PlainStruct.h"
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica::Core {
     namespace Internal {

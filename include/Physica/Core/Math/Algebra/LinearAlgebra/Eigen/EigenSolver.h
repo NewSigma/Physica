@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Schur.h"
-#include "Physica/Core/MultiPrecision/Complex.h" // IWYU pragma: export
+#include "Physica/Core/Scalar/Complex.h" // IWYU pragma: export
 
 namespace Physica::Core {
     /**

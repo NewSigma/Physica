@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
-#include "Physica/Core/MultiPrecision/Diff.h"
+#include "Physica/Core/Scalar/Diff.h"
 
 using namespace Physica;
 

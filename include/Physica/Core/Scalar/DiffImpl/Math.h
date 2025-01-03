@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Diff.h"
+#include "Physica/Core/Scalar/Diff.h"
 
 namespace Physica::Core {
     template<Scalar T>

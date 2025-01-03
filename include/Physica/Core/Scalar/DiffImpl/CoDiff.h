@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica::Core {
     template<class T> requires(std::is_reference<T>::value)

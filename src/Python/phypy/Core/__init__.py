@@ -16,5 +16,5 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 """
-from . import MultiPrecision
-from .MultiPrecision import *
+from . import Scalar
+from .Scalar import *

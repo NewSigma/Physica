@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * al
  */
-#include "Physica/Core/MultiPrecision/Integer.h"
+#include "Physica/Core/Scalar/Integer.h"
 
 namespace Physica::Core {
     Integer factorial(const Integer& i) {

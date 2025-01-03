@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/CRTPBase.h"
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica::Core {
     template<class Derived>

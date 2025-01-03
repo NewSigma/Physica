@@ -21,7 +21,7 @@
 #include <vectorclass/vectorclass.h>
 #include <vectorclass/vectormath_exp.h>
 #include "Physica/PlainStruct.h"
-#include "Physica/Core/MultiPrecision/ScalarImpl/SIMDBase.h"
+#include "Physica/Core/Scalar/ScalarImpl/SIMDBase.h"
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {
