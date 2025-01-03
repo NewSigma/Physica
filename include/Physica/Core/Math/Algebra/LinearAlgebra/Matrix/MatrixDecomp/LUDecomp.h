@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,18 +22,18 @@
 
 namespace Physica::Core {
     template<Scalar T>
-    class LUDecomposition {
-        using This = LUDecomposition;
+    class LUDecomp {
+        using This = LUDecomp;
         using WorkingMatrix = DenseMatrix<T>;
     private:
         WorkingMatrix working;
     public:
-        LUDecomposition(size_t order);
+        LUDecomp(size_t order);
         template<Matrix M>
-        LUDecomposition(const M& source);
-        LUDecomposition(const This&) = default;
-        LUDecomposition(This&&) noexcept = default;
-        ~LUDecomposition() = default;
+        LUDecomp(const M& source);
+        LUDecomp(const This&) = default;
+        LUDecomp(This&&) noexcept = default;
+        ~LUDecomp() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -46,41 +46,41 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] const WorkingMatrix& getMatrixLU() const noexcept { return working; }
     private:
-        void decompositionColumn(size_t col);
+        void decomp_col(size_t col);
     };
 
     template<Scalar T>
-    LUDecomposition<T>::LUDecomposition(size_t order) : working(order, order) {}
+    LUDecomp<T>::LUDecomp(size_t order) : working(order, order) {}
 
     template<Scalar T>
     template<Matrix M>
-    LUDecomposition<T>::LUDecomposition(const M& source) {
+    LUDecomp<T>::LUDecomp(const M& source) {
         compute(source);
     }
 
     template<Scalar T>
     template<Matrix M>
-    void LUDecomposition<T>::compute(const M& source) {
+    void LUDecomp<T>::compute(const M& source) {
         assert(source.getRow() == source.getCol());
         working = source;
         const size_t order = getOrder();
         for (size_t i = 0; i < order; ++i)
-            decompositionColumn(i);
+            decomp_col(i);
     }
 
     template<Scalar T>
-    void LUDecomposition<T>::swap(This& __restrict obj) noexcept {
+    void LUDecomp<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj);
     }
     /**
-     * Apply LU Decomposition on a column of Matrix \from, save the result to Matrix \to.
+     * Apply LU Decomp on a column of Matrix \from, save the result to Matrix \to.
      *
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
     template<Scalar T>
-    void LUDecomposition<T>::decompositionColumn(size_t col) {
+    void LUDecomp<T>::decomp_col(size_t col) {
         const auto startAlphaIndex = col + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) {
             T temp(working(j, col));

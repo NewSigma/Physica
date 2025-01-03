@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,6 @@ namespace Physica::Core {
     template<class Derived> class ContinuousVector;
     template<class Derived> class RValueMatrix;
     template<class Derived> class ContinuousMatrix;
-    template<Scalar, int Option, size_t Row, size_t Col, class Allocator> class DenseMatrix;
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType> class HermiteVector;
@@ -86,8 +85,6 @@ namespace Physica::Core {
         using ValueType = ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
-        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, SizeAtCompile, 1, HostAllocator<ScalarType>>;
-        using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, HostAllocator<ScalarType>>;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;

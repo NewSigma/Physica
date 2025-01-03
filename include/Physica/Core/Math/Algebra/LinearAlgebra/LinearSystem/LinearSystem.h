@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,18 +30,18 @@ namespace Physica::Core {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005
      */
     template<Scalar T>
-    class LinearEquations {
-        using This = LinearEquations<T>;
+    class LinearSystem {
+        using This = LinearSystem<T>;
         using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector>;
 
         WorkingMatrix working;
     public:
-        explicit LinearEquations(WorkingMatrix&& working_);
+        explicit LinearSystem(WorkingMatrix&& working_);
         template<Matrix M>
-        explicit LinearEquations(const M& working_);
-        LinearEquations(const This& l) = default;
-        LinearEquations(This&& l) noexcept = default;
-        ~LinearEquations() = default;
+        explicit LinearSystem(const M& working_);
+        LinearSystem(const This& l) = default;
+        LinearSystem(This&& l) noexcept = default;
+        ~LinearSystem() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -61,10 +61,10 @@ namespace Physica::Core {
 
 namespace std {
     template<Physica::Core::Scalar T>
-    inline void swap(Physica::Core::LinearEquations<T>& __restrict equ1,
-                     Physica::Core::LinearEquations<T>& __restrict equ2) noexcept {
+    inline void swap(Physica::Core::LinearSystem<T>& __restrict equ1,
+                     Physica::Core::LinearSystem<T>& __restrict equ2) noexcept {
         equ1.swap(equ2);
     }
 }
 
-#include "LinearEquationsImpl.h"
+#include "LinearSystemImpl.h"

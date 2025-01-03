@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,14 +17,14 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/LUDecomposition.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
 
 using namespace Physica;
 
 int main() {
     typedef DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3> Matrix3x3;
     Matrix3x3 mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
-    LUDecomposition<float64> lu(mat1);
+    LUDecomp<float64> lu(mat1);
     Matrix3x3 decomp = lu.getMatrixLU();
     Matrix3x3 answer{{2, 3, 4}, {0.5, -0.5, 7}, {0.5, -1, -1}};
     decomp -= answer;

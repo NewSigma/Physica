@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,7 +45,8 @@ namespace Physica::Core {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
         using ValueType = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {
-            co_return ScalarType(relu(x.value()), x.value().isPositive() ? x.grad() : T(0));
+            using GradType = ScalarType::GradType;
+            co_return ScalarType(relu(x.value()), x.value().isPositive() ? x.grad() : GradType(0));
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);

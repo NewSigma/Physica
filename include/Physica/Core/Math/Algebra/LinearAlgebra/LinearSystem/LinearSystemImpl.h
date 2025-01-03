@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,19 +20,19 @@
 
 namespace Physica::Core {
     template<Scalar T>
-    LinearEquations<T>::LinearEquations(WorkingMatrix&& working_) : working(std::move(working_)) {
+    LinearSystem<T>::LinearSystem(WorkingMatrix&& working_) : working(std::move(working_)) {
         assert(working.getRow() + 1 == working.getCol() && "[Error]: Invalid working matrix");
     }
 
     template<Scalar T>
     template<Matrix M>
-    LinearEquations<T>::LinearEquations(const M& working_)
+    LinearSystem<T>::LinearSystem(const M& working_)
             : working(working_) {
         assert(working.getRow() + 1 == working.getCol() && "[Error]: Invalid working matrix");
     }
 
     template<Scalar T>
-    void LinearEquations<T>::gaussJordanPartial() {
+    void LinearSystem<T>::gaussJordanPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.partialPivoting(i);
@@ -44,7 +44,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    void LinearEquations<T>::gaussJordanComplete() {
+    void LinearSystem<T>::gaussJordanComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.completePivoting(i);
@@ -56,7 +56,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    void LinearEquations<T>::gaussEliminationPartial() {
+    void LinearSystem<T>::gaussEliminationPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.partialPivoting(i);
@@ -71,7 +71,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    void LinearEquations<T>::gaussEliminationComplete() {
+    void LinearSystem<T>::gaussEliminationComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.completePivoting(i);
@@ -86,20 +86,20 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    void LinearEquations<T>::swap(This& __restrict obj) noexcept {
+    void LinearSystem<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
     }
 
     template<Scalar T>
-    void LinearEquations<T>::upperEliminate(size_t index) {
+    void LinearSystem<T>::upperEliminate(size_t index) {
         assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
         for(size_t i = 0; i < index; ++i)
             working.rowReduce(index, i, index);
     }
 
     template<Scalar T>
-    void LinearEquations<T>::lowerEliminate(size_t index) {
+    void LinearSystem<T>::lowerEliminate(size_t index) {
         assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
         const auto r = working.getRow();
         for(size_t i = index + 1; i < r; ++i)

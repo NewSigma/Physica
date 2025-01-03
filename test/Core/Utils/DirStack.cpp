@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 #include <cstring>
 #include "Physica/Core/Utils/DirStack.h"
 
-namespace Physica::Core {
+namespace Physica {
     class Test {
     public:
         static std::vector<const char*>& getDirs(DirStack& stack) { return stack.dirs; }

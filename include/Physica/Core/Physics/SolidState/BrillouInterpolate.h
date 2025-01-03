@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LUSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LUSolver.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
@@ -142,7 +142,7 @@ namespace Physica::Core {
             initBaseCoeff();
             if (dataDim != data.getDim()) {
                 dataDim = data.getDim();
-                solver.decomposition(makeMatrixM());
+                solver.decomp(makeMatrixM());
                 const VectorND<ComplexType> ones(solver.getOrder(), ComplexType(1));
                 solverBuffer = solver.solve(ones);
             }

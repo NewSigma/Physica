@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -54,18 +54,17 @@ namespace Physica::Core {
      */
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     size_t DenseMatrix<T, Option, Row, Col, Allocator>::completePivoting(size_t col) {
-        const auto rank = getRow();
-        assert(col < rank);
+        const auto order = getRow();
+        assert(col < order);
         size_t main_row_index = 0, main_col_index = 0;
-        const T zero = T(0);
-        const T* main = &zero;
-        for (size_t i = col; i < rank; ++i) {
-            for (size_t j = col; j < rank; ++j) {
-                const auto* temp = Base::data_ptr(i, j);
-                bool larger = absCompare(*main, *temp);
-                main = larger ? main : temp;
-                main_row_index = larger ? main_row_index : j;
-                main_col_index = larger ? main_col_index : i;
+        T max_elem = 0;
+        for (size_t i = col; i < order; ++i) {
+            for (size_t j = col; j < order; ++j) {
+                ConstRefTy temp = (*this)(i, j);
+                bool flag = absCompare(max_elem, temp);
+                max_elem = flag ? max_elem : temp;
+                main_row_index = flag ? main_row_index : j;
+                main_col_index = flag ? main_col_index : i;
             }
         }
 
@@ -81,15 +80,15 @@ namespace Physica::Core {
      */
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     size_t DenseMatrix<T, Option, Row, Col, Allocator>::partialPivoting(size_t col) {
-        const auto rank = getRow();
-        assert(col < rank);
+        const auto order = getRow();
+        assert(col < order);
         size_t main_col_index = col;
-        const T* main = Base::data_ptr(col, col);
-        for (size_t j = col + 1; j < rank; ++j) {
-            const auto* temp = Base::data_ptr(j, col);
-            bool larger = absCompare(*main, *temp);
-            main = larger ? main : temp;
-            main_col_index = larger ? main_col_index : j;
+        T max_elem = (*this)(col, col);
+        for (size_t j = col + 1; j < order; ++j) {
+            ConstRefTy temp = (*this)(j, col);
+            bool flag = absCompare(max_elem, temp);
+            max_elem = flag ? max_elem : temp;
+            main_col_index = flag ? main_col_index : j;
         }
 
         if (col != main_col_index)

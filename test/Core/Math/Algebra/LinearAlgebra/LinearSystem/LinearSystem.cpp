@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearSystem.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/IterateSolver.h"
 
 using namespace Physica;
 
@@ -31,25 +31,25 @@ int main() {
             {-0.0701048797366553, -0.0884307621566726, -0.131016640264434, 0.788769710999288, 1.671684099146560E-1}};
     const VectorType answer{0.379822910240522, 0.0329724647167976, 1.55292884169613, 0.507335846409689};
     {
-        LinearEquations<ScalarType> equ(A);
+        LinearSystem<ScalarType> equ(A);
         equ.gaussJordanPartial();
         if (!vectorNear(equ.getSolution(), answer, 1E-14))
             return 1;
     }
     {
-        LinearEquations<ScalarType> equ(A);
+        LinearSystem<ScalarType> equ(A);
         equ.gaussJordanComplete();
         if (!vectorNear(equ.getSolution(), answer, 1E-13))
             return 1;
     }
     {
-        LinearEquations<ScalarType> equ(A);
+        LinearSystem<ScalarType> equ(A);
         equ.gaussEliminationPartial();
         if (!vectorNear(equ.getSolution(), answer, 1E-13))
             return 1;
     }
     {
-        LinearEquations<ScalarType> equ(A);
+        LinearSystem<ScalarType> equ(A);
         equ.gaussEliminationComplete();
         if (!vectorNear(equ.getSolution(), answer, 1E-13))
             return 1;

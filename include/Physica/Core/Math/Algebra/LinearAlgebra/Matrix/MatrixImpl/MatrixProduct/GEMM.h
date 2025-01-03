@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,16 @@
  */
 #pragma once
 
+#include "../RValueMatrix.h"
+
 namespace Physica::Core {
+    template<Scalar T,
+             int Option,
+             size_t Row,
+             size_t Col,
+             class Allocator>
+    class DenseMatrix;
+
     namespace Internal {
         template<Matrix T1, Matrix T2>
         struct ProductOption {

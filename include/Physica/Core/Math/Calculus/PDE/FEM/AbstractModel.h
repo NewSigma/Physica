@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include "Mesh.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/IterateSolver.h"
 
 namespace Physica::Core {
     template<class MeshType>

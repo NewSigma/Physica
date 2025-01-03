@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -160,13 +160,14 @@ namespace Physica {
 
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
 #include "RValueMatrixImpl/RValueFlatten.h"
+#include "RValueMatrixImpl/MatrixConvert.h"
+#include "RValueMatrixImpl/ReshapedVector.h"
+#include "MatrixProduct/GEMM.h"
+#include "MatrixProduct/GEMV.h"
+#include "MatrixProduct/GEVM.h"
 #include "Transpose.h"
 #include "Conjugate.h"
 #include "Hermite.h"
 #include "DiagVector.h"
 #include "MatrixNorm.h"
 #include "MatrixExpr.h"
-#include "RValueMatrixImpl/MatrixConvert.h"
-#include "MatrixProduct/GEMM.h"
-#include "MatrixProduct/GEMV.h"
-#include "MatrixProduct/GEVM.h"

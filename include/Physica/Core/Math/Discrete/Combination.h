@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,10 @@
 #pragma once
 
 #include <cassert>
-#include <climits>
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
     /**

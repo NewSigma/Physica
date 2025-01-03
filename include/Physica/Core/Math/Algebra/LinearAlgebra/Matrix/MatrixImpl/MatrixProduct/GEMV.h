@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -120,7 +120,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) requires(T::RowAtCompile == 1 && U::ColAtCompile == 1) {
+    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) requires(T::RowAtCompile == 1 && U::SizeAtCompile == 1) {
         return mat.row(0) * vec;
     }
 }

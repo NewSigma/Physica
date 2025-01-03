@@ -42,6 +42,8 @@ namespace Physica::Core {
         using Base = ContinuousMatrix<This>;
         using Storage = DenseMatrixStorage<T, Option, Row, Col, Allocator>;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::ConstRefTy;
     public:
         using typename Base::ValueType;
         using typename Base::ScalarType;

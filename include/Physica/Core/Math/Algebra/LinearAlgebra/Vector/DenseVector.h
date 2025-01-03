@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,8 +37,6 @@ namespace Physica::Core {
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
         using typename Base::ValueType;
-        using typename Base::ColMatrix;
-        using typename Base::RowMatrix;
         using Base::SizeAtCompile;
         using Base::isReverseDiff;
     protected:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearSystem.h"
 #include "NumCharacter.h"
 
 namespace Physica::Core {
@@ -100,7 +100,7 @@ namespace Physica::Core {
             x_r = hadamard(x, x_r);
         }
 
-        LinearEquations<T> equs(std::move(working));
+        LinearSystem<T> equs(std::move(working));
         equs.gaussJordanPartial();
         return equs.getSolution();
     }

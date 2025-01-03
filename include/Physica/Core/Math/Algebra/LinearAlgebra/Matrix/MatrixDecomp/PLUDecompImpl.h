@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,57 +18,51 @@
  */
 #pragma once
 
+#include "PLUDecomp.h"
+
 namespace Physica::Core {
     template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(MatrixType m) {
+    PLUDecomp<T, type, maxRow, maxColumn>::PLUDecomp(MatrixType m) {
         compute(std::move(m));
     }
 
     template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    PLUDecomposition<T, type, maxRow, maxColumn>&
-    PLUDecomposition<T, type, maxRow, maxColumn>::operator=(PLUDecomposition obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    void PLUDecomposition<T, type, maxRow, maxColumn>::compute(MatrixType m) {
+    void PLUDecomp<T, type, maxRow, maxColumn>::compute(MatrixType m) {
         matrix = std::move(m);
         biasOrder.resize(matrix.getRow());
-        const auto rank = matrix.getRow();
-        for(size_t i = 0; i < rank; ++i)
+        const auto order = matrix.getRow();
+        for(size_t i = 0; i < order; ++i)
             biasOrder[i] = i;
-        for(size_t i = 0; i < rank; ++i) {
-            std::swap(biasOrder[i], biasOrder[matrix.partialPivoting(i)]);
-            decompositionColumn(i);
+        for(size_t i = 0; i < order; ++i) {
+            size_t j = matrix.partialPivoting(i);
+            std::swap(biasOrder[i], biasOrder[j]);
+            decomp_col(i);
         }
     }
 
     template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    void PLUDecomposition<T, type, maxRow, maxColumn>::swap(PLUDecomposition& __restrict obj) noexcept {
+    void PLUDecomp<T, type, maxRow, maxColumn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         matrix.swap(obj.matrix);
         biasOrder.swap(biasOrder);
     }
-    /*!
-     * Apply LU Decomposition on a column of Matrix \from, save the result to Matrix \to.
-     *
+    /**
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
     template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    void PLUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t col) {
-        const auto startAlphaIndex = col + 1;
-        for (size_t j = 1; j < startAlphaIndex; ++j) { //Start from 1, unnecessary to handle j = 0
-            T temp(matrix(j, col));
+    void PLUDecomp<T, type, maxRow, maxColumn>::decomp_col(size_t col) {
+        const size_t alpha = col + 1;
+        for (size_t j = 1; j < alpha; ++j) {
+            T temp = 0;
             for (size_t k = 0; k < j; ++k)
-                temp -= matrix(j, k) * matrix(k, col);
-            matrix(j, col) = std::move(temp);
+                temp += matrix(j, k) * matrix(k, col);
+            matrix(j, col) -= temp;
         }
 
         const auto r = matrix.getRow();
-        for (size_t j = startAlphaIndex; j < r; ++j) {
-            T temp(matrix(j, col));
+        for (size_t j = alpha; j < r; ++j) {
+            T temp = matrix(j, col);
             for (size_t k = 0; k < col; ++k)
                 temp -= matrix(j, k) * matrix(k, col);
             matrix(j, col) = temp / matrix(col, col);

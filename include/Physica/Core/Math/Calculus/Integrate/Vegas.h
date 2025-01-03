@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica::Core {
@@ -32,8 +33,8 @@ namespace Physica::Core {
     class Vegas {
         using This = Vegas<T>;
     protected:
-        using ValueType = T::ValueType;
-        using RealValue = ValueType::RealType;
+        using Tv = T::ValueType;
+        using RealValue = Tv::RealType;
         using LossMatrix = DenseMatrix<RealValue>;
         using CountArray = Array<Array<int>>;
     private:

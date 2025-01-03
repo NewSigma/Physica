@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,28 +18,29 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/PLUDecomposition.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/PLUDecomp.h"
 
 namespace Physica::Core {
     template<Scalar T, int Option, size_t Order = Dynamic>
     class LUSolver {
-        using LUType = PLUDecomposition<T, Option, Order, Order>;
+        using This = LUSolver<T, Option, Order>;
+        using LUType = PLUDecomp<T, Option, Order, Order>;
         using MatrixType = LUType::MatrixType;
     private:
         LUType lu;
     public:
         LUSolver() = default;
         LUSolver(MatrixType A);
-        LUSolver(const LUSolver&) = default;
-        LUSolver(LUSolver&&) noexcept = default;
+        LUSolver(const This&) = default;
+        LUSolver(This&&) noexcept = default;
         ~LUSolver() = default;
         /* Operators */
-        LUSolver& operator=(LUSolver obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void decomposition(MatrixType A);
+        void decomp(MatrixType A);
         template<Vector V>
         DenseVector<T, Order> solve(const V& b) const;
-        void swap(LUSolver& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const { return lu.getMatrix().getRow(); }
     };
@@ -48,14 +49,7 @@ namespace Physica::Core {
     LUSolver<T, Option, Order>::LUSolver(MatrixType A) : lu(std::move(A)) {}
 
     template<Scalar T, int Option, size_t Order>
-    LUSolver<T, Option, Order>&
-    LUSolver<T, Option, Order>::operator=(LUSolver<T, Option, Order> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T, int Option, size_t Order>
-    void LUSolver<T, Option, Order>::decomposition(MatrixType A) {
+    void LUSolver<T, Option, Order>::decomp(MatrixType A) {
         lu.compute(std::move(A));
     }
 
@@ -84,7 +78,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, size_t Order>
-    void LUSolver<T, Option, Order>::swap(LUSolver& __restrict obj) noexcept {
+    void LUSolver<T, Option, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lu.swap(obj.lu);
     }

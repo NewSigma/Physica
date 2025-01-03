@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LUSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LUSolver.h"
 
 using namespace Physica;
 

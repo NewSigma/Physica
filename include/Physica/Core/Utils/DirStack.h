@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,6 +35,7 @@ namespace Physica::Core {
         std::string toPath() const;
     private:
         void cutPath(const char* path, size_t startPos, size_t endPos);
-        friend class Test;
+        /* Friends */
+        friend class Physica::Test;
     };
 }

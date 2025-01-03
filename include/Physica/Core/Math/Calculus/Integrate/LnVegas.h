@@ -28,7 +28,7 @@ namespace Physica::Core {
     class LnVegas : public Vegas<T> {
         using This = LnVegas<T>;
         using Base = Vegas<T>;
-        using typename Base::ValueType;
+        using typename Base::Tv;
         using typename Base::RealValue;
         using typename Base::LossMatrix;
         using typename Base::CountArray;
@@ -48,7 +48,7 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
-        void warmup(Functor func, int numWarm);
+        void warmup(Functor lnFunc, int numWarm);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void integral(Functor lnFunc);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
@@ -154,7 +154,7 @@ namespace Physica::Core {
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
-        ValueType maxSample;
+        Tv maxSample;
         if constexpr (T::isComplex)
             maxSample = samples.reals().max().value();
         else

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,6 +45,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index + from); }
+        [[nodiscard]] auto calc_value(size_t index) const { return vec.calc_value(index + from); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
     };

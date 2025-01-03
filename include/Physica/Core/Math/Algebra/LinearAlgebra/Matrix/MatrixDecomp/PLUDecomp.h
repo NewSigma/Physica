@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,29 +23,30 @@
 
 namespace Physica::Core {
     template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    class PLUDecomposition {
+    class PLUDecomp {
+        using This = PLUDecomp<T, type, maxRow, maxColumn>;
     public:
         using MatrixType = DenseMatrix<T, type, maxRow, maxColumn>;
     private:
         MatrixType matrix;
         Array<size_t> biasOrder; //TODO: use permutation matrix instead
     public:
-        PLUDecomposition() = default;
-        explicit PLUDecomposition(MatrixType m);
-        PLUDecomposition(const PLUDecomposition& l) = default;
-        PLUDecomposition(PLUDecomposition&& l) noexcept = default;
-        ~PLUDecomposition() = default;
+        PLUDecomp() = default;
+        explicit PLUDecomp(MatrixType m);
+        PLUDecomp(const This& l) = default;
+        PLUDecomp(This&& l) noexcept = default;
+        ~PLUDecomp() = default;
         /* Operators */
-        PLUDecomposition& operator=(PLUDecomposition obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void compute(MatrixType m);
-        void swap(PLUDecomposition& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] const Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
     private:
-        void decompositionColumn(size_t col);
+        void decomp_col(size_t col);
     };
 }
 
-#include "PLUDecompositionImpl.h"
+#include "PLUDecompImpl.h"

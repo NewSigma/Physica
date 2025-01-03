@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,11 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ReshapedVector.h"
 #include "Physica/Core/Physics/Molecular/WaterPolarTensor.h"
-#include "Ewald/RSpaceEwald.h"
-#include "LJModel.h"
 #include "ForceModelImpl/AABModel.h"
+#include "LJModel.h"
 
 namespace Physica::Core {
     /**

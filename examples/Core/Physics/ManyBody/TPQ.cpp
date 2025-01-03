@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <QApplication>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/HalfDenseMatrixStorage.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmImpl/HalfDenseMatrixStorage.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
