@@ -154,6 +154,7 @@ namespace Physica::Core {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
         if constexpr (isReverseDiff || ReverseDiff<U>)
             y.value() += x;
@@ -164,6 +165,7 @@ namespace Physica::Core {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
         if constexpr (isReverseDiff || ReverseDiff<U>)
             y.value() -= x;
@@ -174,6 +176,7 @@ namespace Physica::Core {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) requires(!isReverseDiff) {
+        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
         y = y * x;
     }
@@ -181,6 +184,7 @@ namespace Physica::Core {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) requires(!isReverseDiff) {
+        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
         y = y / x;
     }

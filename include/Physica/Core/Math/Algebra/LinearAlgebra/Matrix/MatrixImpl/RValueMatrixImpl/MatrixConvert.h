@@ -44,6 +44,72 @@ namespace Physica::Core {
     };
 
     template<class T>
+    class ImagMatrix : public RValueMatrix<ImagMatrix<T>> {
+        using This = ImagMatrix<T>;
+        using Base = RValueMatrix<This>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const T& mat;
+    public:
+        ImagMatrix(const T& mat_) : mat(mat_) {}
+        ImagMatrix(const This&) = delete;
+        ImagMatrix(This&&) noexcept = delete;
+        ~ImagMatrix() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).imag(); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+    };
+
+    template<class T>
+    class SquaredNormMatrix : public RValueMatrix<SquaredNormMatrix<T>> {
+        using This = SquaredNormMatrix<T>;
+        using Base = RValueMatrix<This>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const T& mat;
+    public:
+        SquaredNormMatrix(const T& mat_) : mat(mat_) {}
+        SquaredNormMatrix(const This&) = delete;
+        SquaredNormMatrix(This&&) noexcept = delete;
+        ~SquaredNormMatrix() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).squaredNorm(); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+    };
+
+    template<class T>
+    class NormMatrix : public RValueMatrix<NormMatrix<T>> {
+        using This = NormMatrix<T>;
+        using Base = RValueMatrix<This>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const T& mat;
+    public:
+        NormMatrix(const T& mat_) : mat(mat_) {}
+        NormMatrix(const This&) = delete;
+        NormMatrix(This&&) noexcept = delete;
+        ~NormMatrix() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).norm(); }
+        [[nodiscard]] size_t getRow() const { return mat.getRow(); }
+        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
+    };
+
+    template<class T>
     class ValueMatrix : public RValueMatrix<ValueMatrix<T>> {
         using This = ValueMatrix<T>;
         using Base = RValueMatrix<This>;
@@ -90,8 +156,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template <class T>
-    class Traits<Core::RealMatrix<T>> {
+    template<class T>
+    class Traits<RealMatrix<T>> {
     public:
         using ScalarType = T::ScalarType::RealType;
         constexpr static int Option = T::Option;
@@ -100,8 +166,17 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <class T>
-    class Traits<Core::ValueMatrix<T>> {
+    template<class T>
+    class Traits<ImagMatrix<T>> : public Traits<RealMatrix<T>> {};
+
+    template<class T>
+    class Traits<SquaredNormMatrix<T>> : public Traits<RealMatrix<T>> {};
+
+    template<class T>
+    class Traits<NormMatrix<T>> : public Traits<RealMatrix<T>> {};
+
+    template<class T>
+    class Traits<ValueMatrix<T>> {
     public:
         using ScalarType = T::ValueType;
         constexpr static int Option = T::Option;
@@ -110,8 +185,8 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <class T, int GradOrder>
-    class Traits<Core::GradMatrix<T, GradOrder>> {
+    template<class T, int GradOrder>
+    class Traits<GradMatrix<T, GradOrder>> {
         static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
         using ScalarType = Internal::GradTypeHelper<typename T::ScalarType, GradOrder>::Type;

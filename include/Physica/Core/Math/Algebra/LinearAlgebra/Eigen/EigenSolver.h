@@ -76,6 +76,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
+        [[nodiscard]] EigenvalueVector& getEigenvalues() noexcept { return eigenvalues; }
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
         /**
          * It is faster if all eigenvalues are real.
@@ -302,6 +303,7 @@ namespace Physica::Core {
     template<Matrix M>
     void EigenSolver<T, Order>::pre_compute(const M& source, bool computeEigenvectors_) {
         static_assert(std::is_same<T, typename M::ScalarType>::value, "[Error]: Inconsistent ScalarType");
+        assert(source.getRow() > 0);
         assert(source.getRow() == source.getCol());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;

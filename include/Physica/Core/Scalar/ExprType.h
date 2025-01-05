@@ -55,6 +55,8 @@ namespace Physica::Core {
         Cosh,
         Tanh,
         Sech,
+        ArcSinh,
+        ArcTanh,
         LnCosh
     };
 

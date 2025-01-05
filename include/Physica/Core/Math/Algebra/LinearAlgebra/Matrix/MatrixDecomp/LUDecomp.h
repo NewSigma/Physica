@@ -21,13 +21,16 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<Scalar T>
+    template<Scalar T, bool Pivote>
     class LUDecomp {
         using This = LUDecomp;
         using WorkingMatrix = DenseMatrix<T>;
+        using BiasArray = std::conditional<Pivote, Array<size_t>, PlainStruct<void>>::type; //TODO: use permutation matrix instead
     private:
         WorkingMatrix working;
+        [[no_unique_address]] BiasArray biasOrder;
     public:
+        LUDecomp() = default;
         LUDecomp(size_t order);
         template<Matrix M>
         LUDecomp(const M& source);
@@ -45,56 +48,67 @@ namespace Physica::Core {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] const WorkingMatrix& getMatrixLU() const noexcept { return working; }
+        [[nodiscard]] const Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
     private:
         void decomp_col(size_t col);
     };
 
-    template<Scalar T>
-    LUDecomp<T>::LUDecomp(size_t order) : working(order, order) {}
+    template<Scalar T, bool Pivote>
+    LUDecomp<T, Pivote>::LUDecomp(size_t order) : working(order, order) {
+        if constexpr (Pivote)
+            biasOrder.resize(order);
+    }
 
-    template<Scalar T>
+    template<Scalar T, bool Pivote>
     template<Matrix M>
-    LUDecomp<T>::LUDecomp(const M& source) {
+    LUDecomp<T, Pivote>::LUDecomp(const M& source) : LUDecomp(source.getRow()) {
         compute(source);
     }
 
-    template<Scalar T>
+    template<Scalar T, bool Pivote>
     template<Matrix M>
-    void LUDecomp<T>::compute(const M& source) {
+    void LUDecomp<T, Pivote>::compute(const M& source) {
         assert(source.getRow() == source.getCol());
-        working = source;
         const size_t order = getOrder();
-        for (size_t i = 0; i < order; ++i)
+        if constexpr (Pivote) {
+            for(size_t i = 0; i < order; ++i)
+                biasOrder[i] = i;
+        }
+
+        working = source;
+        for (size_t i = 0; i < order; ++i) {
+            if constexpr (Pivote) {
+                size_t j = working.partialPivoting(i);
+                std::swap(biasOrder[i], biasOrder[j]);
+            }
             decomp_col(i);
+        }
     }
 
-    template<Scalar T>
-    void LUDecomp<T>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, bool Pivote>
+    void LUDecomp<T, Pivote>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj);
+        if constexpr (Pivote)
+            biasOrder.swap(biasOrder);
     }
     /**
-     * Apply LU Decomp on a column of Matrix \from, save the result to Matrix \to.
-     *
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
-    template<Scalar T>
-    void LUDecomp<T>::decomp_col(size_t col) {
-        const auto startAlphaIndex = col + 1;
-        for (size_t j = 1; j < startAlphaIndex; ++j) {
-            T temp(working(j, col));
-            for (size_t k = 0; k < j; ++k)
-                temp -= working(j, k) * working(k, col);
-            working(j, col) = std::move(temp);
-        }
+    template<Scalar T, bool Pivote>
+    void LUDecomp<T, Pivote>::decomp_col(size_t col) {
+        const size_t alpha = col + 1;
+        for (size_t j = 1; j < alpha; ++j)
+            working(j, col) -= working.row(j).head(j) * working.col(col).head(j);
 
-        const auto r = working.getRow();
-        for (size_t j = startAlphaIndex; j < r; ++j) {
-            T temp(working(j, col));
-            for (size_t k = 0; k < col; ++k)
-                temp -= working(j, k) * working(k, col);
-            working(j, col) = temp / working(col, col);
+        const T factor = reciprocal(working(col, col));
+        if (col == 0)
+            working.col(0).tail(alpha) *= factor;
+        else {
+            const size_t r = working.getRow();
+            for (size_t j = alpha; j < r; ++j)
+                working(j, col) = (working(j, col) - working.row(j).head(col) * working.col(col).head(col)) * factor;
         }
     }
 }

@@ -67,6 +67,9 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        void mesh_uniform(size_t dim);
+        void mesh_tanh(size_t dim, RealValue range);
+
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void warmup(Functor func, int numWarm);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
@@ -94,6 +97,7 @@ namespace Physica::Core {
         [[nodiscard]] const VectorND<RealValue>& getLoss() const noexcept { return loss; }
         /* Setters */
         void setNumRefine(int numRefine_);
+        void setMixBeta(RealValue beta) { mixBeta = beta; }
     protected:
         void pre_trial();
         template<RandomGenerator R>
@@ -122,11 +126,28 @@ namespace Physica::Core {
         assert(compressRate < RealValue(2) && "[Error]: Rate should be ~ 1");
         assert(mixBeta.isPositive() && (mixBeta <= RealValue(1)) && "[Error]: Invalid beta");
         pointGrid.resize(numPoint, from.getLength());
-        for (size_t i = 0; i < getDim(); ++i)
-            pointGrid.col(i) = VectorND<RealValue>::linspace(from[i], to[i], numPoint);
         lossMat.resize(numPoint - 1, getDim());
         counts.resize(numPoint - 1, getDim());
         setNumRefine(numRefine_);
+        for (size_t i = 0; i < getDim(); ++i)
+            mesh_uniform(i);
+    }
+
+    template<Scalar T>
+    void Vegas<T>::mesh_uniform(size_t dim) {
+        pointGrid.col(dim) = VectorND<RealValue>::linspace(from[dim], to[dim], getNumPoint());
+    }
+
+    template<Scalar T>
+    void Vegas<T>::mesh_tanh(size_t dim, RealValue range) {
+        assert(range.isPositive());
+        const auto k = (to[dim] - from[dim]) * 0.5;
+        const auto b = (to[dim] + from[dim]) * 0.5;
+        auto p = VectorND<RealValue>::linspace(-range, range, getNumPoint());
+        p = tanh(p);
+        p[0] = -1;
+        p[getNumPoint() - 1] = 1;
+        pointGrid.col(dim) = k * p + b;
     }
 
     template<Scalar T>
@@ -197,14 +218,17 @@ namespace Physica::Core {
         from.read(group, "From");
         to.read(group, "To");
 
-        means.read(group, "Means");
-        vars.read(group, "Vars");
-        loss.read(group, "Loss");
-
         group.readAttr("NumRefine", numRefine);
         group.readAttr("NumSample", numSample);
         group.readAttr("CompressRate", compressRate);
         group.readAttr("MixBeta", mixBeta);
+
+        lossMat.resize(getNumPoint() - 1, getDim());
+        counts.resize(getNumPoint() - 1, getDim());
+
+        means.read(group, "Means");
+        vars.read(group, "Vars");
+        loss.read(group, "Loss");
         return group;
     }
 
@@ -214,6 +238,7 @@ namespace Physica::Core {
         pointGrid.write(group, "Grid");
         from.write(group, "From");
         to.write(group, "To");
+
         group.writeAttr("NumRefine", numRefine);
         group.writeAttr("NumSample", numSample);
         group.writeAttr("CompressRate", compressRate);

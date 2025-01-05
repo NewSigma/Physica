@@ -22,9 +22,9 @@
 using namespace Physica;
 
 int main() {
-    typedef DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3> Matrix3x3;
+    using Matrix3x3 = DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3>;
     Matrix3x3 mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
-    LUDecomp<float64> lu(mat1);
+    LUDecomp<float64, false> lu(mat1);
     Matrix3x3 decomp = lu.getMatrixLU();
     Matrix3x3 answer{{2, 3, 4}, {0.5, -0.5, 7}, {0.5, -1, -1}};
     decomp -= answer;

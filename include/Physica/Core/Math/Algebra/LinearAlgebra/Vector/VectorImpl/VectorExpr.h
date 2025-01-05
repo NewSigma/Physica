@@ -137,4 +137,6 @@ namespace Physica {
 #include "VectorExprImpl/Cosh.h"
 #include "VectorExprImpl/Tanh.h"
 #include "VectorExprImpl/Sech.h"
+#include "VectorExprImpl/ArcSinh.h"
+#include "VectorExprImpl/ArcTanh.h"
 #include "VectorExprImpl/LnCosh.h"

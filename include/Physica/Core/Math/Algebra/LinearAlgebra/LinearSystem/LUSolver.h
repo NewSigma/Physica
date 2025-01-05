@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/PLUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
 
 namespace Physica::Core {
     template<Scalar T, int Option, size_t Order = Dynamic>
     class LUSolver {
         using This = LUSolver<T, Option, Order>;
-        using LUType = PLUDecomp<T, Option, Order, Order>;
-        using MatrixType = LUType::MatrixType;
+        using MatrixType = DenseMatrix<T, Option, Order, Order>;
+        using MatrixB = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector>;
     private:
-        LUType lu;
+        LUDecomp<T, true> lu;
     public:
         LUSolver() = default;
         LUSolver(MatrixType A);
@@ -40,9 +40,11 @@ namespace Physica::Core {
         void decomp(MatrixType A);
         template<Vector V>
         DenseVector<T, Order> solve(const V& b) const;
+        template<Matrix M>
+        MatrixB solve(const M& b);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getOrder() const { return lu.getMatrix().getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return lu.getOrder(); }
     };
 
     template<Scalar T, int Option, size_t Order>
@@ -57,23 +59,33 @@ namespace Physica::Core {
     template<Vector V>
     DenseVector<T, Order> LUSolver<T, Option, Order>::solve(const V& b) const {
         const size_t order = getOrder();
+        assert(b.getLength() == order);
         DenseVector<T, Order> result(order);
         for (size_t i = 0; i < order; ++i)
             result[i] = b.calc(lu.getBiasOrder()[i]);
 
-        MatrixType working = lu.getMatrix();
+        MatrixType working = lu.getMatrixLU();
         for (size_t i = 0; i < order - 1; ++i) {
             auto bottom = working.bottomRows(i + 1);
-            auto tail = result.tail(i + 1);
-            tail -= bottom.col(i) * result[i];
+            result.tail(i + 1) -= bottom.col(i) * result[i];
         }
+
         for (size_t i = order - 1; i > 0; --i) {
             result[i] /= working(i, i);
             auto top = working.topRows(i);
-            auto head = result.head(i);
-            head -= top.col(i) * result[i];
+            result.head(i) -= top.col(i) * result[i];
         }
         result[0] /= working(0, 0);
+        return result;
+    }
+
+    template<Scalar T, int Option, size_t Order>
+    template<Matrix M>
+    auto LUSolver<T, Option, Order>::solve(const M& b) -> MatrixB {
+        assert(b.getRow() == getOrder());
+        MatrixB result(getOrder(), b.getCol());
+        for (size_t i = 0; i < b.getCol(); ++i)
+            result.asArray() = solve(result.col(i));
         return result;
     }
 
