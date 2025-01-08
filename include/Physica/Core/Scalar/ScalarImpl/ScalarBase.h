@@ -137,9 +137,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ GradRtnTy<GradOrder>& grad() noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ const GradRtnTy<GradOrder>& grad() const noexcept;
-        [[nodiscard]] __host__ __device__ bool isZero() const noexcept;
-        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept;
-        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept;
+        [[nodiscard]] __host__ __device__ auto isZero() const noexcept;
+        [[nodiscard]] __host__ __device__ auto isPositive() const noexcept;
+        [[nodiscard]] __host__ __device__ auto isNegative() const noexcept;
         /* Static Members */
         static inline bool matchSign(const ScalarType& s1, const ScalarType& s2);
     protected:
@@ -376,7 +376,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::isZero() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::isZero() const noexcept {
         if constexpr (isDiffable)
             return value().isZero();
         else
@@ -384,7 +384,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::isPositive() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::isPositive() const noexcept {
         if constexpr (isDiffable)
             return value().isPositive();
         else
@@ -392,7 +392,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ bool ScalarBase<Derived>::isNegative() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::isNegative() const noexcept {
         if constexpr (isDiffable)
             return value().isNegative();
         else

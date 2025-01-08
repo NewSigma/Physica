@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <fstream>
 #include <QApplication>
-#include "Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
@@ -27,7 +25,6 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/Analyser/RDF.h"
-#include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -35,7 +32,7 @@ using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using RandomType = Random<MT19937>;
-using EwaldType = RandomBatchEwald<ScalarType, RandomType>;
+using EwaldType = Ewald<ScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -116,7 +113,7 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
     RPMD<ScalarType, 3, NumReplica> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 
     rpmd.template initMomentum<KineticModel, RandomType>();
-    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType(1000, 100));
+    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType());
     KineticModel kineticModel(temperatureT, numReplica);
 
     RDF<ScalarType> rdf;
@@ -135,7 +132,7 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
     {
         rpmd.template nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
             PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
-        for (size_t i = 0; i < 1000; ++i) {
+        for (size_t i = 0; i < 1000 * (NumReplica == 0 ? 1 : 32); ++i) {
             rpmd.template nvt_step<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
                 thermo, kineticModel, forceModel);
             for (size_t j = 0; j < numReplica; ++j)
@@ -148,6 +145,9 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
     Plot* plot = new Plot(0, 7, 0, 3, 2, 1);
+    plot->getLegend().setAlignment(Qt::AlignTop);
+    plot->getLegend().show();
+
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     axisX->setTitleText("r/Å");

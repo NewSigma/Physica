@@ -31,7 +31,7 @@ namespace Physica::Core {
     template<ReverseDiff T>
     CoDiffNode<Base>::CoDiffNode(T&& x) noexcept requires(!IsCoDiff<T>::value) {
         auto fn = [](T&& x) noexcept -> This {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             Base y;
             if constexpr (Scalar<T>) {
                 auto result = co_yield Base(std::move(y));

@@ -27,7 +27,7 @@ namespace Physica::Core {
         if constexpr (ForwardDiff<T>)
             co_return ScalarType(abs(x.value()), x.value().isPositive() ? x.grad() : -x.grad());
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield abs(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
@@ -49,7 +49,7 @@ namespace Physica::Core {
             co_return ScalarType(relu(x.value()), x.value().isPositive() ? x.grad() : GradType(0));
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield relu(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
@@ -66,7 +66,7 @@ namespace Physica::Core {
             co_return ScalarType(square(x.value()), GradType(ValueType(2) * x * x.grad()));
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield square(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
@@ -83,7 +83,7 @@ namespace Physica::Core {
             co_return ScalarType(v.value(), -x.grad() * square(v));
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield reciprocal(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
@@ -101,7 +101,7 @@ namespace Physica::Core {
             co_return ScalarType(v.value(), ValueType(0.5) * x.grad() / v);
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield sqrt(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
@@ -119,7 +119,7 @@ namespace Physica::Core {
             co_return ScalarType(v.value(), ValueType(1.0 / 3) * v * x.grad() / GradType(x));
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield cbrt(x_.value());
             auto& g = result.grad();
             if (!g.isZero()) {
@@ -137,7 +137,7 @@ namespace Physica::Core {
             co_return ScalarType(ln(x.value()), x.grad() / GradType(x));
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield ln(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
@@ -176,7 +176,7 @@ namespace Physica::Core {
             co_return ScalarType(v.value(), v * x.grad());
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield exp(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
@@ -204,7 +204,7 @@ namespace Physica::Core {
         }
         else {
             using ValueType = ScalarType::ValueType;
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             ValueType c, s;
             sincos(x_.value(), s, c);
             auto result = co_yield c;
@@ -225,7 +225,7 @@ namespace Physica::Core {
         }
         else {
             using ValueType = ScalarType::ValueType;
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             ValueType c, s;
             sincos(x_.value(), s, c);
             auto result = co_yield s;
@@ -249,8 +249,8 @@ namespace Physica::Core {
             using ValueType = T::ValueType;
             ValueType s, c;
             sincos(x.value(), s, c);
-            LazyReverse<U&&> sin_ = std::forward<U>(sin_result);
-            LazyReverse<U&&> cos_ = std::forward<U>(cos_result);
+            LazyDestroy<U&&> sin_ = std::forward<U>(sin_result);
+            LazyDestroy<U&&> cos_ = std::forward<U>(cos_result);
             sin_ = s;
             cos_ = c;
             co_await std::suspend_always{};

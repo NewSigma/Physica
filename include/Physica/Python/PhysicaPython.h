@@ -42,7 +42,7 @@ namespace Physica::Python {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] const CXXType& toCXXType(const std::string& typeName) const { return strTypeMap.at(typeName); }
-        [[nodiscard]] const CXXType& toCXXType(py::handle handle) const { return toCXXType(py::str(handle)); }
+        [[nodiscard]] const CXXType& toCXXType(py::handle handle) const { return toCXXType(std::string(py::str(handle))); }
 
         void compile(const char* moduleName);
         /* Getters */

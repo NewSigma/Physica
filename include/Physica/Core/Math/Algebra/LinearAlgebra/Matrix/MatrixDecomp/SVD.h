@@ -164,9 +164,12 @@ namespace Physica::Core {
                 if (abs(singulars[j].real()) < abs(singulars[index_min].real()))
                     index_min = j;
             }
-            singulars[i].swap(singulars[index_min]);
-            larr[i].swap(larr[index_min]);
-            rarr[i].swap(rarr[index_min]);
+
+            if (index_min != i) {
+                singulars[i].swap(singulars[index_min]);
+                larr[i].swap(larr[index_min]);
+                rarr[i].swap(rarr[index_min]);
+            }
         }
     }
 

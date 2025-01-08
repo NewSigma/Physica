@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
+#include "NumCharacter.h"
 
 namespace Physica::Core {
     /**

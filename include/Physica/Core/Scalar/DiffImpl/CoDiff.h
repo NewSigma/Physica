@@ -22,7 +22,7 @@
 
 namespace Physica::Core {
     template<class T> requires(std::is_reference<T>::value)
-    using LazyReverse = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T&>::type;
+    using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T&>::type;
 
     template<class Base>
     class CoDiffNode : public Base {

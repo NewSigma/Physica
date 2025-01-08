@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 namespace Physica::Core {

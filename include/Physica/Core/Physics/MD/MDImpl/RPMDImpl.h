@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "../RPMD.h"
 
 namespace Physica::Core {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

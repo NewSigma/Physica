@@ -35,9 +35,17 @@ void test1() {
         exit(EXIT_FAILURE);
 }
 
+void emptyTest() {
+    Vector2D<float64> v{1, 0};
+    auto g = givens(v, 0, 1);
+    if ((g[0] != float64(1)) || (g[1] != float64(0)))
+        exit(EXIT_FAILURE);
+}
+
 int main() {
     test1<RealType>();
     test1<Diff<RealType, DiffMode::Forward, 1>>();
+    emptyTest();
     {
         Vector2D<ComplexType> v{{2, 1}, {1, -3}};
         auto givens_vector = givens(v, 0, 1);

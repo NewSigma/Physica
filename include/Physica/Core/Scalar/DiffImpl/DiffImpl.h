@@ -152,8 +152,8 @@ namespace Physica::Core {
                 co_return {x.value() + y.value(), x.grad()};
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
-            LazyReverse<U&&> y_ = std::forward<U>(y);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() + y_.value();
             auto& g = result.grad();
             if (!g.isZero()) {
@@ -174,8 +174,8 @@ namespace Physica::Core {
                 co_return {x.value() - y.value(), x.grad()};
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
-            LazyReverse<U&&> y_ = std::forward<U>(y);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() - y_.value();
             auto& g = result.grad();
             if (!g.isZero()) {
@@ -200,8 +200,8 @@ namespace Physica::Core {
                 co_return ResultType(x.value() * y.value(), x.grad() * y.value());
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
-            LazyReverse<U&&> y_ = std::forward<U>(y);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() * y_.value();
             auto& g = result.grad();
             if (!g.isZero()) {
@@ -229,8 +229,8 @@ namespace Physica::Core {
             }
         }
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
-            LazyReverse<U&&> y_ = std::forward<U>(y);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() / y_.value();
             auto& g = result.grad();
             if (!g.isZero()) {
@@ -276,7 +276,7 @@ namespace Physica::Core {
         if constexpr (ForwardDiff<T>)
             co_return {-x.value(), -x.grad()};
         else {
-            LazyReverse<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield x_.value();
             auto& g = result.grad();
             if (!g.isZero())

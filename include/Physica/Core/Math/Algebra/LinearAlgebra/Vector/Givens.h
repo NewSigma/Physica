@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,35 +23,40 @@
 namespace Physica::Core {
     /**
      * Construct a givens transformation that eleminate the element in \param vector at index \param j
+     *
+     * Reference:
+     * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:240-244
      */
     template<Vector T>
     CoDiff<Vector2D<typename T::ScalarType>> givens(const T& vector, size_t i, size_t j) {
         using ScalarType = T::ScalarType;
         using ResultType = Vector2D<ScalarType>;
-
+        using Vector2Dr = Vector2D<typename ScalarType::RealType>;
         ScalarType x_i = vector.calc(i);
         ScalarType x_j = vector.calc(j);
+        ResultType result;
         if constexpr (ScalarType::isComplex) {
-            using RealResultType = Vector2D<typename ScalarType::RealType>;
-            const auto alpha = givens(RealResultType{x_i.real(), x_i.imag()}, 0, 1);
-            const auto beta = givens(RealResultType{x_j.real(), x_j.imag()}, 0, 1);
-            const auto theta = givens(RealResultType{x_i.norm(), x_j.norm()}, 0, 1);
+            const auto alpha = givens(Vector2Dr{x_i.real(), x_i.imag()}, 0, 1);
+            const auto beta = givens(Vector2Dr{x_j.real(), x_j.imag()}, 0, 1);
+            const auto theta = givens(Vector2Dr{x_i.norm(), x_j.norm()}, 0, 1);
             const auto factor = ScalarType(alpha[0] * beta[0] + alpha[1] * beta[1], alpha[1] * beta[0] - alpha[0] * beta[1]);
             const auto theta1 = theta[1] * factor;
-            if constexpr (ReverseDiff<ScalarType>)
-                auto _ = co_yield ResultType{theta[0], theta1};
-            else
-                co_return ResultType{theta[0], theta1};
+            result = ResultType{theta[0], theta1};
         }
         else {
+            if (x_j.isZero())
+                co_return ResultType{x_i.isPositive() ? 1 : -1, 0};
+
             ScalarType rep_norm = reciprocal(sqrt(square(x_i) + square(x_j)));
             ScalarType cos = x_i * rep_norm;
             ScalarType sin = x_j * rep_norm;
-            if constexpr (ReverseDiff<ScalarType>)
-                auto _ = co_yield ResultType{cos, sin};
-            else
-                co_return ResultType{cos, sin};
+            result = ResultType{cos, sin};
         }
+
+        if constexpr (ReverseDiff<ScalarType>)
+            std::ignore = co_yield std::move(result);
+        else
+            co_return std::move(result);
     }
     /**
      * Apply givens on left
