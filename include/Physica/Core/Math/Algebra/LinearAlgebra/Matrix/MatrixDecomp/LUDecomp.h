@@ -31,7 +31,7 @@ namespace Physica::Core {
         [[no_unique_address]] BiasArray biasOrder;
     public:
         LUDecomp() = default;
-        LUDecomp(size_t order);
+        LUDecomp(size_t size);
         template<Matrix M>
         LUDecomp(const M& source);
         LUDecomp(const This&) = default;
@@ -42,6 +42,8 @@ namespace Physica::Core {
         /* Operations */
         template<Matrix M>
         void compute(const M& source);
+
+        void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return working.getRow(); }
@@ -54,9 +56,8 @@ namespace Physica::Core {
     };
 
     template<Scalar T, bool Pivote>
-    LUDecomp<T, Pivote>::LUDecomp(size_t order) : working(order, order) {
-        if constexpr (Pivote)
-            biasOrder.resize(order);
+    LUDecomp<T, Pivote>::LUDecomp(size_t size) {
+        resize(size);
     }
 
     template<Scalar T, bool Pivote>
@@ -69,7 +70,10 @@ namespace Physica::Core {
     template<Matrix M>
     void LUDecomp<T, Pivote>::compute(const M& source) {
         assert(source.getRow() == source.getCol());
-        const size_t order = getOrder();
+        const size_t order = source.getRow();
+        if (order != getOrder())
+            resize(order);
+
         if constexpr (Pivote) {
             for(size_t i = 0; i < order; ++i)
                 biasOrder[i] = i;
@@ -83,6 +87,13 @@ namespace Physica::Core {
             }
             decomp_col(i);
         }
+    }
+
+    template<Scalar T, bool Pivote>
+    void LUDecomp<T, Pivote>::resize(size_t size) {
+        working.resize(size, size);
+        if constexpr (Pivote)
+            biasOrder.resize(size);
     }
 
     template<Scalar T, bool Pivote>

@@ -333,13 +333,13 @@ namespace Physica::Core {
 
     template<Scalar T>
     auto Vegas<T>::calcGridLossImpl() const -> RealValue {
-        RealValue maxVar = 0;
+        RealValue sumvar = 0;
         for (size_t i = 0; i < lossMat.getCol(); ++i) {
             const auto col = lossMat.col(i);
             const RealValue prior = mean(col);
-            maxVar = std::max(maxVar, variance(col, prior) / prior.squaredNorm());
+            sumvar += sqrt(variance(col, prior) / prior.squaredNorm() / RealValue(getNumPoint()));
         }
-        return sqrt(maxVar);
+        return sumvar / RealValue(getDim());
     }
 
     template<Scalar T>

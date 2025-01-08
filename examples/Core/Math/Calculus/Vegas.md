@@ -17,11 +17,11 @@ Vegas算法自适应地调整积分网格以降低采样误差, 考虑8维积分
 
 $$I = \int_{-a}^a \text{d}\mathbf{x} \exp(-\frac{1}{2} \mathbf{x}^T \mathbf{x})$$
 
-定义网格损失函数为所有维度中$d_i$标准差的最大值
+定义网格损失函数为所有维度损失标准差的平均值
 
-$$L = \text{max}_i \; \sigma(d_i) = \text{max}_i \sqrt{\frac{\braket{d_i^2} - \braket{d_i}^2}{\braket{d_i}^2}}$$
+$$L = \frac{1}{N} \sum_i^N \; \sigma(d_i) = \frac{1}{N} \sum_i^N \sqrt{\frac{\braket{d_i^2} - \braket{d_i}^2}{N_P \braket{d_i}^2}}$$
 
-其中$d_i$由[1]中(17)式定义.
+其中$N$为维度, $N_P$为每个维度的格点数, $d_i$由[1]中(17)式定义.
 
 ![](./Vegas1.png)
 

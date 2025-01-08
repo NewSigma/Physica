@@ -37,7 +37,7 @@ void plotCompressRate() {
     const VectorND<T> from(8, T(-r));
     const VectorND<T> to(8, T(r));
 
-    Plot* plot = new Plot(0, 75, -3.5, 0.5, 25, 1);
+    Plot* plot = new Plot(0, 100, -5, -0.5, 25, 1);
     plot->getLegend().setAlignment(Qt::AlignRight);
     plot->getLegend().show();
     plot->getAxisX()->setLabelFormat("%d");
@@ -62,7 +62,7 @@ void plotNumPoint() {
     const VectorND<T> from(8, T(-r));
     const VectorND<T> to(8, T(r));
 
-    Plot* plot = new Plot(0, 1000, -6, -1, 250, 2);
+    Plot* plot = new Plot(0, 1000, -9, -1, 250, 2);
     plot->getLegend().setAlignment(Qt::AlignRight);
     plot->getLegend().show();
     plot->getAxisX()->setLabelFormat("%d");
@@ -87,7 +87,7 @@ void plotNumSample() {
     const VectorND<T> from(8, T(-r));
     const VectorND<T> to(8, T(r));
 
-    Plot* plot = new Plot(0, 1000, -5.5, -2.5, 250, 1);
+    Plot* plot = new Plot(0, 1000, -9, -5, 250, 1);
     plot->getLegend().setAlignment(Qt::AlignRight);
     plot->getLegend().show();
     plot->getAxisX()->setLabelFormat("%d");
