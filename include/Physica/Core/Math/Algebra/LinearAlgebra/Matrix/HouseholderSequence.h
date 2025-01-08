@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,16 +22,18 @@
 
 namespace Physica::Core {
     /**
-     * Construct using a lower triangular matrix, echo column represents a householder transformation
+     * Construct using a triangular matrix, echo column or row represents a householder transformation
      *
      * \tparam ColWiseRead
      * Read data from columns of source, otherwise read from rows
      *
      * Reference:
-     * [1] Eigen https://eigen.tuxfamily.org/
+     * [1] Eigen; https://eigen.tuxfamily.org/
      */
     template<Matrix T, bool ColWiseRead = true>
     class HouseholderSequence : public RValueMatrix<HouseholderSequence<T, ColWiseRead>> {
+        using This = HouseholderSequence<T, ColWiseRead>;
+
         const T& source;
         /**
          * Number of householder transformation in this sequence
@@ -43,6 +45,12 @@ namespace Physica::Core {
         size_t shift;
     public:
         HouseholderSequence(const T& source_);
+        HouseholderSequence(const This&) = default;
+        HouseholderSequence(This&&) noexcept = default;
+        ~HouseholderSequence() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix U>
         void assignTo(LValueMatrix<U>& target) const;
@@ -65,10 +73,10 @@ namespace Physica::Core {
     template<Matrix T, bool ColWiseRead>
     template<Matrix U>
     void HouseholderSequence<T, ColWiseRead>::assignTo(LValueMatrix<U>& target) const {
-        target.toUnitMatrix();
         const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getCol());
         assert(shift1 < target.getRow());
 
+        target.toUnitMatrix();
         for (size_t i = 0; i < size; ++i) {
             auto block = target.rightCols(i + shift1);
             if constexpr (ColWiseRead) {

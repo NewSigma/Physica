@@ -34,7 +34,12 @@ namespace Physica::Python {
         Executor exec;
         StrTypeMap strTypeMap;
     public:
+        PhysicaPython(const This&) = delete;
+        PhysicaPython(This&&) noexcept = delete;
         ~PhysicaPython() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] const CXXType& toCXXType(const std::string& typeName) const { return strTypeMap.at(typeName); }
         [[nodiscard]] const CXXType& toCXXType(py::handle handle) const { return toCXXType(py::str(handle)); }
@@ -52,10 +57,5 @@ namespace Physica::Python {
         [[nodiscard]] static This& getInstance() noexcept;
     private:
         PhysicaPython();
-        PhysicaPython(const This&) = default;
-        PhysicaPython(This&&) noexcept = default;
-        /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
     };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,6 +58,9 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
+        template<class... Args>
+        void resize(size_t order);
+
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
@@ -106,6 +109,9 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
+        template<class... Args>
+        void resize(size_t order);
+
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
@@ -161,6 +167,9 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
+        template<class... Args>
+        void resize(size_t order);
+
         [[nodiscard]] inline auto toDevice() const;
 
         void swap(This& __restrict obj) noexcept;
@@ -213,6 +222,9 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
+        template<class... Args>
+        void resize(size_t order);
+
         [[nodiscard]] inline auto toDevice() const;
 
         void swap(This& __restrict obj) noexcept;

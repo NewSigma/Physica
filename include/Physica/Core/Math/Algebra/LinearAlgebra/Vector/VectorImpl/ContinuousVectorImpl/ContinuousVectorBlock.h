@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -71,8 +71,8 @@ namespace Physica::Core {
     }
 
     template<Vector T, size_t Length>
-    ContinuousVectorBlock<T, Length>::ContinuousVectorBlock(
-        ContinuousVector<T>& vec_, size_t from_) : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
+    ContinuousVectorBlock<T, Length>::ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_)
+            : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
     inline ContinuousVectorBlock<T, Length>&

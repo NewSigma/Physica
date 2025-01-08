@@ -85,27 +85,30 @@ namespace Physica::Core {
 
         const size_t numCol = working.getCol();
         size_t i = 0;
-        ScalarType unit;
         for (; i < numCol - 2; ++i) {
             householderOnCol(i);
 
             auto row = working.row(i);
             auto sub_row = row.tail(i + 1);
-            unit = sub_row[0].unit();
+            auto unit = sub_row[0].unit();
             subDiag[i] = -householderInPlace(sub_row) * unit;
             auto corner2 = working.bottomRightCorner(i + 1);
             applyHouseholder(corner2, sub_row);
         }
-        /* Hangle last - 1 col */ {
-            householderOnCol(i);
-            subDiag[i] = working(i, i + 1);
-            ++i;
-        }
-        /* Hangle last col */ {
+        // Handle last - 1 col
+        householderOnCol(i);
+        subDiag[i] = working(i, i + 1);
+        ++i;
+        // Handle last col
+        if (working.getRow() != numCol) {
             auto col = working.col(i);
             auto sub_col = col.tail(i);
-            unit = sub_col[0].unit();
+            auto unit = sub_col[0].unit();
             mainDiag[i] = -householderInPlace(sub_col) * unit;
+        }
+        else {
+            mainDiag[i] = -working(i, i);
+            working(i, i) = 2;
         }
     }
 

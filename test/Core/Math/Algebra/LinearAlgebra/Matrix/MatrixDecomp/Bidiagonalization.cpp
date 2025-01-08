@@ -29,6 +29,7 @@ bool doTest(const T& source, double tolerance) {
     T U = obj.getMatrixU();
     T V = obj.getMatrixV();
     T B = obj.getMatrixB();
+
     T A = (U * B).compute() * V.transpose();
     if (!matrixNear(A, source, tolerance))
         return false;
@@ -36,6 +37,11 @@ bool doTest(const T& source, double tolerance) {
 }
 
 int main() {
+    {
+        const MatrixType mat{{1, 2, 3}, {2, 1, 1}, {-2, 0, 1}};
+        if (!doTest(mat, 1E-15))
+            return 1;
+    }
     {
         const MatrixType mat{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}, {9, 10, 11, 12, 13}, {7, 6, -8, -9, 5}};
         if (!doTest(mat, 1E-15))

@@ -33,26 +33,16 @@ namespace Physica::Core {
      */
     template<Scalar T, size_t RowAtCompile = Dynamic, size_t ColAtCompile = Dynamic>
     class SVD : public Decouplable {
+        static_assert(!T::isComplex, "[Error]: SVD class do not support complex data");
         using Base = Decouplable;
         using RealType = T::RealType;
-        static_assert(!T::isComplex, "[Error]: SVD class do not support complex data");
-        constexpr static size_t NumSingularValue = RowAtCompile > ColAtCompile
-                                                                ? ColAtCompile
-                                                                : RowAtCompile;
-        using WorkingMatrix = DenseMatrix<RealType,
-                                          MatrixOption::Col | MatrixOption::Vector,
-                                          RowAtCompile,
-                                          ColAtCompile>;
+        constexpr static size_t NumSingularValue = RowAtCompile > ColAtCompile ? ColAtCompile : RowAtCompile;
+        constexpr static int Option = MatrixOption::Col | MatrixOption::Vector;
     public:
         using SingularValueVector = DenseVector<RealType, NumSingularValue>;
-        using LSingularMatrix = DenseMatrix<RealType,
-                                            MatrixOption::Col | MatrixOption::Vector,
-                                            RowAtCompile,
-                                            RowAtCompile>;
-        using RSingularMatrix = DenseMatrix<RealType,
-                                            MatrixOption::Col | MatrixOption::Vector,
-                                            ColAtCompile,
-                                            ColAtCompile>;
+        using WorkingMatrix = DenseMatrix<RealType, Option, RowAtCompile, ColAtCompile>;
+        using LSingularMatrix = DenseMatrix<RealType, Option, RowAtCompile, RowAtCompile>;
+        using RSingularMatrix = DenseMatrix<RealType, Option, ColAtCompile, ColAtCompile>;
     private:
         WorkingMatrix working;
         SingularValueVector singulars;
@@ -73,6 +63,7 @@ namespace Physica::Core {
         void compute(const M& source);
         void sort();
         void resize(size_t row, size_t col);
+        void resize(size_t order);
         void swap(SVD& __restrict svd) noexcept;
         /* Getters */
         [[nodiscard]] const SingularValueVector& getSingulars() const noexcept { return singulars; }
@@ -128,7 +119,7 @@ namespace Physica::Core {
         while (1 <= upper && upper < order) {
             size_t lower = Base::activeWindowUpDiag(working, upper);
             for (size_t i = lower; i <= upper; ++i) {
-                if (abs(working(i, i)) <= T(std::numeric_limits<T>::epsilon() * 10)) { //TODO: absolute criteria is unrelirable, use relative criteria instead 
+                if (abs(working(i, i)) <= T(std::numeric_limits<T>::epsilon() * 10)) { //TODO: absolute criteria is unreliable, use relative criteria instead 
                     working(i, i) = T(0);
                     working(i, i + (i + 1 < order)) = T(0);
                     if (i < upper - 1) {
@@ -165,6 +156,8 @@ namespace Physica::Core {
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
     void SVD<T, RowAtCompile, ColAtCompile>::sort() {
         const size_t order = singulars.getLength();
+        auto& larr = lSingularMat.asArray();
+        auto& rarr = rSingularMat.asArray();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
             for (size_t j = i + 1; j < order; ++j) {
@@ -172,8 +165,8 @@ namespace Physica::Core {
                     index_min = j;
             }
             singulars[i].swap(singulars[index_min]);
-            lSingularMat[i].swap(lSingularMat[index_min]);
-            rSingularMat[i].swap(rSingularMat[index_min]);
+            larr[i].swap(larr[index_min]);
+            rarr[i].swap(rarr[index_min]);
         }
     }
 
@@ -186,7 +179,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    void SVD<T, RowAtCompile, ColAtCompile>::swap(SVD<T, RowAtCompile, ColAtCompile>& __restrict svd) noexcept {
+    void SVD<T, RowAtCompile, ColAtCompile>::resize(size_t order) {
+        resize(order, order);
+    }
+
+    template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
+    void SVD<T, RowAtCompile, ColAtCompile>::swap(SVD& __restrict svd) noexcept {
         assert(this != &svd && "[Error]: Self swap is likely a bug");
         working.swap(svd.working);
         singulars.swap(svd.singulars);

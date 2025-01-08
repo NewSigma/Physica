@@ -28,13 +28,13 @@ namespace Physica::Python {
         public:
             [[nodiscard]] const char* name() const noexcept override final { return "FFI"; }
             [[nodiscard]] std::string message(int code) const override final {
-                using enum ffi_status;
+                //using enum ffi_status; // TODO: clang 16 ~ 18 ICE, refactor once nvcc supports clang 19
                 switch (code) {
-                case FFI_OK:
+                case ffi_status::FFI_OK:
                     return "No error";
-                case FFI_BAD_ABI:
+                case ffi_status::FFI_BAD_ABI:
                     return "Bad ABI";
-                case FFI_BAD_TYPEDEF:
+                case ffi_status::FFI_BAD_TYPEDEF:
                     return "Bad typedef";
                 default:
                     return "Unknown";

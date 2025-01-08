@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/SVD.h"
 
@@ -25,20 +26,23 @@ using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vec
 
 template<Matrix T>
 bool doTest(const T& source, double tolerance) {
-    SVD<ScalarType, Physica::Dynamic, Physica::Dynamic> svd(source);
-    T U = svd.getMatrixU();
-    T V = svd.getMatrixV();
-    auto v = svd.getSingulars();
-    T A(source.getRow(), source.getCol());
-    A = ScalarType(0);
+    SVD<ScalarType> svd(source);
+    const auto& U = svd.getMatrixU();
+    const auto& V = svd.getMatrixV();
+    const auto& v = svd.getSingulars();
+
+    T A(source.getRow(), source.getCol(), 0);
     for (size_t i = 0; i < v.getLength(); ++i)
         A += U.col(i) * V.col(i).transpose() * v[i];
-    if (!matrixNear(A, source, tolerance))
-        return false;
-    return true;
+    return matrixNear(A, source, tolerance);
 }
 
 int main() {
+    {
+        const MatrixType mat{{1, 2, 3}, {2, 1, 1}, {-2, 0, 1}};
+        if (!doTest(mat, 1E-14))
+            return 1;
+    }
     {
         const MatrixType mat{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}, {9, 10, 11, 12, 13}, {7, 6, -8, -9, 5}};
         if (!doTest(mat, 1E-14))

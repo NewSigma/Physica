@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica::Core {
     /**
@@ -36,6 +36,7 @@ namespace Physica::Core {
         using ScalarType = T::ScalarType;
         using RealType = ScalarType::RealType;
         assert(source.getLength() == target.getLength());
+        assert(source.getLength() > 1 && "[Error]: Unnecessary householder call");
 
         const ScalarType v0 = source.calc(0);
         const RealType sourceNorm0 = v0.squaredNorm();
@@ -56,10 +57,10 @@ namespace Physica::Core {
                 target = RealType(0);
                 return RealType(0);
             }
+            target[0] = RealType(2);
+            target.tail(1) = RealType(0);
+            return sqrt(sourceNorm0);
         }
-        target[0] = RealType(2);
-        target.tail(1) = RealType(0);
-        return sqrt(sourceNorm0);
     }
 
     template<LVector T>

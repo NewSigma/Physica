@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -41,6 +41,13 @@ namespace Physica::Core {
     void ColumnElementStorage::resize(size_t row, size_t col, Args&&... args) {
         arr.resize(row * col, std::forward<Args>(args)...);
         Dim::resize(row, col);
+    }
+
+    template<tparams>
+    template<class... Args>
+    void ColumnElementStorage::resize(size_t order) {
+        arr.resize(order * order);
+        Dim::resize(order, order);
     }
 
     template<tparams>
@@ -90,6 +97,13 @@ namespace Physica::Core {
     void RowElementStorage::resize(size_t row, size_t col, Args&&... args) {
         arr.resize(row * col, std::forward<Args>(args)...);
         Dim::resize(row, col);
+    }
+
+    template<tparams>
+    template<class... Args>
+    void RowElementStorage::resize(size_t order) {
+        arr.resize(order * order);
+        Dim::resize(order, order);
     }
 
     template<tparams>
@@ -145,6 +159,15 @@ namespace Physica::Core {
     }
 
     template<tparams>
+    template<class... Args>
+    void ColumnVectorStorage::resize(size_t order) {
+        array.resize(order);
+        for (auto& vector : array)
+            vector.resize(order);
+        Dim::resize(order, order);
+    }
+
+    template<tparams>
     void ColumnVectorStorage::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         array.swap(obj.array);
@@ -186,6 +209,15 @@ namespace Physica::Core {
         for (auto& vector : array)
             vector.resize(col, std::forward<Args>(args)...);
         Dim::resize(row, col);
+    }
+
+    template<tparams>
+    template<class... Args>
+    void RowVectorStorage::resize(size_t order) {
+        array.resize(order);
+        for (auto& vector : array)
+            vector.resize(order);
+        Dim::resize(order, order);
     }
 
     template<tparams>
