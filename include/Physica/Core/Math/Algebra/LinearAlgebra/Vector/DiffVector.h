@@ -91,6 +91,9 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
+
+        [[nodiscard]] const ValueVector& values() const noexcept { return v; }
+        [[nodiscard]] ValueVector& values() noexcept { return v; }
         /* Static members */
         template<RandomGenerator R>
         [[nodiscard]] inline static This random_uniform(size_t len);

@@ -77,10 +77,10 @@ namespace Physica::Core {
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         [[nodiscard]] RealValue calcGridLoss(Functor func) const;
 
-        [[nodiscard]] T calcMean() const;
-        [[nodiscard]] T calcDevia() const;
-        [[nodiscard]] T calcVar() const;
-        [[nodiscard]] T calcSquaredChi() const;
+        [[nodiscard]] T calcMean(int from = 0) const;
+        [[nodiscard]] T calcDevia(int from = 0) const;
+        [[nodiscard]] T calcVar(int from = 0) const;
+        [[nodiscard]] T calcSquaredChi(int from = 0) const;
     #ifdef PHYSICA_HDF5
         const H5Group read(const H5Location& loc, const char* name);
         H5Group write(H5Location& loc, const char* name) const;
@@ -189,26 +189,31 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    T Vegas<T>::calcMean() const {
-        return reciprocal(vars) * means / reciprocal(vars).sum();
+    T Vegas<T>::calcMean(int from) const {
+        assert(0 <= from && from < getNumRefine());
+        return reciprocal(vars.tail(from)) * means.tail(from) / reciprocal(vars.tail(from)).sum();
     }
 
     template<Scalar T>
-    T Vegas<T>::calcVar() const {
-        return reciprocal(reciprocal(vars).sum());
+    T Vegas<T>::calcVar(int from) const {
+        assert(0 <= from && from < getNumRefine());
+        return reciprocal(reciprocal(vars.tail(from)).sum());
     }
 
     template<Scalar T>
-    T Vegas<T>::calcDevia() const {
-        return sqrt(calcVar());
+    T Vegas<T>::calcDevia(int from) const {
+        assert(0 <= from && from < getNumRefine());
+        return sqrt(calcVar(from));
     }
 
     template<Scalar T>
-    T Vegas<T>::calcSquaredChi() const {
+    T Vegas<T>::calcSquaredChi(int from) const {
+        assert(0 <= from && from < getNumRefine());
         if (numRefine == 1)
             return 1;
-        const T mean1 = calcMean();
-        return (RealValue(numSample) / RealValue(numRefine - 1)) * divide((means - mean1).squaredNorms(), vars).sum(); // Normalize, refer to [2]
+        const RealValue factor = RealValue(numSample) / RealValue(numRefine - from - 1);
+        const T mean1 = calcMean(from);
+        return factor * divide((means.tail(from) - mean1).squaredNorms(), vars.tail(from)).sum(); // Normalize, refer to [2]
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T>

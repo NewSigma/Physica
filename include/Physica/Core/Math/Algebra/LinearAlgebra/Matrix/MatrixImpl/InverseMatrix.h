@@ -18,18 +18,20 @@
  */
 #pragma once
 
+#include "LValueMatrix.h"
+
 namespace Physica::Core {
     namespace Internal {
         template<LMatrix SourceType, LMatrix TargetType, size_t Size>
         struct InverseImpl {
             static void run(const SourceType& source, TargetType& target) {
-                const size_t order = source.getRow();
+                const ssize_t order = source.getRow();
                 const ssize_t order1 = ssize_t(order) - 1;
                 SourceType copy = source;
                 if constexpr (MatrixOption::isSameMajor<SourceType, TargetType>()) {
                     target.toUnitMatrix();
                     for (ssize_t i = 0; i < order1; ++i) {
-                        size_t k = i;
+                        ssize_t k = i;
                         while (copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
                             [[maybe_unused]] const bool isNotSingular = k < order;
@@ -40,7 +42,7 @@ namespace Physica::Core {
                             target.majorSwap(k, i);
                         }
 
-                        for (size_t j = i + 1; j < order; ++j) {
+                        for (ssize_t j = i + 1; j < order; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             target.majorReduce(j, i, factor);
@@ -48,7 +50,7 @@ namespace Physica::Core {
                     }
 
                     for (ssize_t i = order1; i > 0; --i) {
-                        size_t k = i;
+                        ssize_t k = i;
                         while (copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
                             [[maybe_unused]] const bool isNotSingular = k < order;
@@ -59,13 +61,13 @@ namespace Physica::Core {
                             target.majorSwap(k, i);
                         }
 
-                        for (size_t j = 0; j < i; ++j) {
+                        for (ssize_t j = 0; j < i; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             target.majorReduce(j, i, factor);
                         }
                     }
-                    for (size_t i = 0; i < order; ++i)
+                    for (ssize_t i = 0; i < order; ++i)
                         target.majorMulScalar(i, reciprocal(copy(i, i)));
                 }
                 else {

@@ -54,10 +54,10 @@ namespace Physica::Core {
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         [[nodiscard]] RealValue calcGridLoss(Functor func) const;
 
-        [[nodiscard]] T calcLnMean() const;
-        [[nodiscard]] T calcLnDevia() const;
-        [[nodiscard]] T calcLnVar() const;
-        [[nodiscard]] T calcSquaredChi() const;
+        [[nodiscard]] T calcLnMean(int from = 0) const;
+        [[nodiscard]] T calcLnDevia(int from = 0) const;
+        [[nodiscard]] T calcLnVar(int from = 0) const;
+        [[nodiscard]] T calcSquaredChi(int from = 0) const;
 
         void swap(This& __restrict obj) noexcept { Base::swap(obj); }
         /* Getters */
@@ -114,29 +114,33 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    T LnVegas<T>::calcLnMean() const {
-        return (means - vars).lnSumExp() + calcLnVar();
+    T LnVegas<T>::calcLnMean(int from) const {
+        assert(0 <= from && from < getNumRefine());
+        return (means.tail(from) - vars.tail(from)).lnSumExp() + calcLnVar();
     }
 
     template<Scalar T>
-    T LnVegas<T>::calcLnDevia() const {
-        return RealValue(0.5) * calcLnVar();
+    T LnVegas<T>::calcLnDevia(int from) const {
+        assert(0 <= from && from < getNumRefine());
+        return RealValue(0.5) * calcLnVar(from);
     }
 
     template<Scalar T>
-    T LnVegas<T>::calcLnVar() const {
-        return -(-vars).lnSumExp();
+    T LnVegas<T>::calcLnVar(int from) const {
+        assert(0 <= from && from < getNumRefine());
+        return -(-vars.tail(from)).lnSumExp();
     }
 
     template<Scalar T>
-    T LnVegas<T>::calcSquaredChi() const {
+    T LnVegas<T>::calcSquaredChi(int from) const {
+        assert(0 <= from && from < getNumRefine());
         if (getNumRefine() == 1)
             return 1;
-        const T lnMean = calcLnMean();
-        VectorND<T> buffer = exp(means - lnMean);
+        const T lnMean = calcLnMean(from);
+        VectorND<T> buffer = exp(means.tail(from) - lnMean);
         buffer = ln(abs(buffer - RealValue(1))) + lnMean;
-        buffer = RealValue(2) * buffer - vars;
-        return exp(buffer).sum() / RealValue(getNumRefine() - 1);
+        buffer = RealValue(2) * buffer - vars.tail(from);
+        return exp(buffer).sum() / RealValue(getNumRefine() - from - 1);
     }
 
     template<Scalar T>

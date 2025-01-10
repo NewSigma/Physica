@@ -45,7 +45,7 @@ namespace Physica::Core {
         }
         else {
             if (x_j.isZero())
-                co_return ResultType{x_i.isPositive() ? 1 : -1, 0};
+                co_return ResultType{x_i.isPositive() ? 1.0 : -1.0, 0};
 
             ScalarType rep_norm = reciprocal(sqrt(square(x_i) + square(x_j)));
             ScalarType cos = x_i * rep_norm;

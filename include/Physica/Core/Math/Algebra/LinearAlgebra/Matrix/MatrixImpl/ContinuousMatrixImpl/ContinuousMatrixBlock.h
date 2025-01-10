@@ -109,7 +109,7 @@ namespace Physica::Core {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
-        [[nodiscard]] This& col(size_t c) {
+        [[nodiscard]] This& col([[maybe_unused]] size_t c) {
             assert(c == 0);
             return *this;
         }

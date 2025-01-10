@@ -18,10 +18,13 @@
  */
 #pragma once
 
+#include <cstdlib>
+
 namespace Physica::Core {
     class PlainPtr {
         using This = PlainPtr;
-        void* p;
+
+        void* p = nullptr;
     public:
         PlainPtr() = default;
         explicit PlainPtr(void* p_) : p(p_) {}

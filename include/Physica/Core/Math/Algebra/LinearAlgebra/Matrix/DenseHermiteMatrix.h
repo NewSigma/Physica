@@ -50,8 +50,6 @@ namespace Physica::Core {
         inline This& operator=(RealType value);
         [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
-        template<Vector V>
-        [[nodiscard]] inline auto operator*(const V& vec) const noexcept;
         /* Operations */
         using Base::format;
         using Base::transpose;
@@ -122,12 +120,6 @@ namespace Physica::Core {
     DenseHermiteMatrix<T, Order>::operator()(size_t row, size_t col) const {
         const size_t index = Storage::toIndex1D(row, col);
         return Storage::operator[](index);
-    }
-
-    template<Scalar T, size_t Order>
-    template<Vector V>
-    inline auto DenseHermiteMatrix<T, Order>::operator*(const V& vec) const noexcept {
-        return MatrixVectorProduct<This, V>(*this, vec);
     }
 
     template<Scalar T, size_t Order>

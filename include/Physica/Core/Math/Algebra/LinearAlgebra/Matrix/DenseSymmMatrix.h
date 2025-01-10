@@ -50,8 +50,6 @@ namespace Physica::Core {
         template<Scalar U> inline void operator-=(const U& x);
         template<Scalar U> inline void operator*=(const U& x);
         template<Scalar U> inline void operator/=(const U& x);
-        template<Vector V>
-        [[nodiscard]] inline auto operator*(const V& vec) const noexcept;
         /* Operations */
         using Base::assignTo;
         using Base::calc;
@@ -131,12 +129,6 @@ namespace Physica::Core {
     template<Scalar U>
     inline void DenseSymmMatrix<T, Order>::operator/=(const U& x) {
         asVector() /= x;
-    }
-
-    template<Scalar T, size_t Order>
-    template<Vector V>
-    inline auto DenseSymmMatrix<T, Order>::operator*(const V& vec) const noexcept {
-        return MatrixVectorProduct<This, V>(*this, vec);
     }
 
     template<Scalar T, size_t Order>

@@ -301,7 +301,7 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Order>
     template<Matrix M>
-    void EigenSolver<T, Order>::pre_compute(const M& source, bool computeEigenvectors_) {
+    void EigenSolver<T, Order>::pre_compute([[maybe_unused]] const M& source, bool computeEigenvectors_) {
         static_assert(std::is_same<T, typename M::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         assert(source.getRow() > 0);
         assert(source.getRow() == source.getCol());

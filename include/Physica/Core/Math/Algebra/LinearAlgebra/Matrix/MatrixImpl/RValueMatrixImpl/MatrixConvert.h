@@ -27,6 +27,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& mat;
     public:
@@ -39,6 +40,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).real(); }
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -49,6 +51,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& mat;
     public:
@@ -61,6 +64,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).imag(); }
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -71,6 +75,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& mat;
     public:
@@ -83,6 +88,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).squaredNorm(); }
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return mat.calc(row, col).value().squaredNorm(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -93,6 +99,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& mat;
     public:
@@ -105,6 +112,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).norm(); }
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return mat.calc(row, col).value().norm(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -138,6 +146,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& mat;
     public:
@@ -150,6 +159,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).template grad<GradOrder>(); }
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };

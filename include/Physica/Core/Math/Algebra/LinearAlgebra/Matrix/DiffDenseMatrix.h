@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h" // IWYU pragma: export
 #include "DenseMatrix.h"
 
 namespace Physica::Core {
@@ -78,6 +78,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
+
+        [[nodiscard]] const ValueMatrix& values() const noexcept { return v; }
+        [[nodiscard]] ValueMatrix& values() noexcept { return v; }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
         template<RandomGenerator R>

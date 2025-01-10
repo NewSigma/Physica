@@ -31,9 +31,9 @@ namespace Physica::Core {
 
         using StateType = U::StateType;
     public:
-        constexpr static unsigned int Dim = U::Dim;
-        constexpr static unsigned int NumSite = StateType::NumSite;
-        constexpr static unsigned int SiteDOF = StateType::SiteDOF;
+        constexpr static int Dim = U::Dim;
+        constexpr static int NumSite = StateType::NumSite;
+        constexpr static int SiteDOF = StateType::SiteDOF;
     private:
         U repr;
     public:
