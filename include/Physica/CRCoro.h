@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cstdlib>
 #include <exception>
 #include <coroutine>
 #include "CRTPBase.h"
@@ -37,20 +38,19 @@ namespace Physica::Core {
         struct RValueWrapper {
             T* p;
 
+            ~RValueWrapper() {
+                std::coroutine_handle<T>::from_promise(*p).destroy();
+            }
+
             operator T&&() const noexcept { return std::move(*p); }
         };
     public:
         using promise_type = T;
     public:
-        auto get_return_object() noexcept {
-            return RValueWrapper(&Base::getDerived());
-        }
+        auto get_return_object() noexcept { return RValueWrapper(&Base::getDerived()); }
         std::suspend_never initial_suspend() noexcept { return {}; }
-        std::suspend_never final_suspend() noexcept { return {}; }
-        void return_value(T&& x) noexcept {
-            Base::getDerived() = std::move(x);
-            asm volatile("" : : "r,m"(Base::getDerived()) : "memory"); // Forcing assignment has observable side effect
-        }
+        std::suspend_always final_suspend() noexcept { return {}; }
+        void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
         void unhandled_exception() { throw std::current_exception(); }
     protected:
         CRCoro() = default;

@@ -28,7 +28,8 @@ namespace Physica::Core {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:240-244
      */
     template<Vector T>
-    CoDiff<Vector2D<typename T::ScalarType>> givens(const T& vector, size_t i, size_t j) {
+    Vector2D<typename T::ScalarType> givens(const T& vector, size_t i, size_t j) {
+        static_assert(!ReverseDiff<T>, "[Error]: Not implemented, wait for P2014Rx");
         using ScalarType = T::ScalarType;
         using ResultType = Vector2D<ScalarType>;
         using Vector2Dr = Vector2D<typename ScalarType::RealType>;
@@ -45,18 +46,14 @@ namespace Physica::Core {
         }
         else {
             if (x_j.isZero())
-                co_return ResultType{x_i.isPositive() ? 1.0 : -1.0, 0};
+                return ResultType{x_i.isPositive() ? 1.0 : -1.0, 0};
 
             ScalarType rep_norm = reciprocal(sqrt(square(x_i) + square(x_j)));
             ScalarType cos = x_i * rep_norm;
             ScalarType sin = x_j * rep_norm;
             result = ResultType{cos, sin};
         }
-
-        if constexpr (ReverseDiff<ScalarType>)
-            std::ignore = co_yield std::move(result);
-        else
-            co_return std::move(result);
+        return result;
     }
     /**
      * Apply givens on left

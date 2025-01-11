@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -39,6 +39,7 @@ namespace Physica::Core {
         MassVector massVec;
         InvLatticeMatrix invLattice;
     public:
+        MDCell() = default;
         explicit MDCell(size_t numParticle);
         template<Scalar U>
         MDCell(CrystalCell<U> cell);
