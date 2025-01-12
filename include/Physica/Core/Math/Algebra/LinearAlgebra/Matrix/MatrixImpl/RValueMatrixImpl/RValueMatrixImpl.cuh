@@ -45,7 +45,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Matrix M>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<M>>& target) const {
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(device_obj<LValueMatrix<M>>& target) const {
         [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, M>;
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();

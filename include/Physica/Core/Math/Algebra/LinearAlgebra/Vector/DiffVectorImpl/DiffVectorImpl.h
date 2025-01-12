@@ -48,7 +48,7 @@ namespace Physica::Core {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<Vector V>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v) requires(!ReverseDiff<V>) : DenseVector(v.getLength()) {
-        v.assignTo(*this);
+        v.assign(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>

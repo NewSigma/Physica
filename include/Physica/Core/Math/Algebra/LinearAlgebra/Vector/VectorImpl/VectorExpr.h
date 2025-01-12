@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,8 @@ namespace Physica::Core {
      * 
      * Operations defined as \tparam LHS \tparam Type \tparam RHS. e.g. vector + scalar, expression * expression
      */
-    template<ExprType Type, Vector LHS, class RHS = LHS> class VectorExpr;
+    template<ExprType Type, class LHS, class RHS = LHS>
+    class VectorExpr;
 
     template<ExprType Type, Vector V>
     class UnitaryVectorExpr : public RValueVector<VectorExpr<Type, V>> {
@@ -52,8 +53,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const V& getExpr() const noexcept { return expr; }
     };
 
-    template<ExprType Type, Vector LHS, class RHS>
+    template<ExprType Type, class LHS, class RHS>
     class BinaryVectorExpr : public RValueVector<VectorExpr<Type, LHS, RHS>> {
+        static_assert(Vector<LHS> || Vector<RHS>, "[Error]: Either type should be Vector");
+
         using This = BinaryVectorExpr<Type, LHS, RHS>;
         using Base = RValueVector<VectorExpr<Type, LHS, RHS>>;
     public:
@@ -63,7 +66,7 @@ namespace Physica::Core {
         const RHS* rhs;
     public:
         BinaryVectorExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_), rhs(&rhs_) {
-            if constexpr (!Scalar<RHS>)
+            if constexpr (Vector<LHS> && Vector<RHS>)
                 assert(lhs->getLength() == rhs->getLength());
         }
         BinaryVectorExpr(const This&) = delete;
@@ -73,14 +76,19 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const {
+            if constexpr (Vector<LHS>)
+                return getLHS().getLength();
+            else
+                return getRHS().getLength();
+        }
         [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept { return *lhs; }
         [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept { return *rhs; }
     };
 }
 
 namespace Physica {
-    template<ExprType Type, Vector LHS, class RHS>
+    template<ExprType Type, Vector LHS, Vector RHS>
     class Traits<VectorExpr<Type, LHS, RHS>> {
         constexpr static size_t Size1 = Traits<LHS>::SizeAtCompile;
         constexpr static size_t Size2 = Traits<RHS>::SizeAtCompile;
@@ -109,6 +117,9 @@ namespace Physica {
         constexpr static bool FastAssign = Traits<LHS>::FastAssign;
         constexpr static bool FastPacket = Traits<LHS>::FastPacket;
     };
+
+    template<ExprType Type, Scalar LHS, Vector RHS>
+    class Traits<VectorExpr<Type, LHS, RHS>> : public Traits<VectorExpr<Type, RHS, LHS>> {};
 }
 
 #include "VectorExprImpl/Add.h"

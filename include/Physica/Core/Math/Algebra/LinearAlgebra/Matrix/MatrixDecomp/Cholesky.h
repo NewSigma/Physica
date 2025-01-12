@@ -32,7 +32,7 @@ namespace Physica::Core {
         ~Cholesky() = default;
         /* Operations */
         template<Matrix M>
-        void assignTo(LValueMatrix<M>& target) const;
+        void assign(LValueMatrix<M>& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return source.getRow(); }
@@ -47,7 +47,7 @@ namespace Physica::Core {
      */
     template<Matrix T>
     template<Matrix M>
-    void Cholesky<T>::assignTo(LValueMatrix<M>& target) const {
+    void Cholesky<T>::assign(LValueMatrix<M>& target) const {
         using ResultType = M;
         using ScalarType = ResultType::ScalarType;
         const size_t order = source.getRow();

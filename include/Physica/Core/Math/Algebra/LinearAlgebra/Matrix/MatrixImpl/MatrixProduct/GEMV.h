@@ -45,7 +45,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V, class Executor = SequentialExecutor>
-        inline void assignTo(V& target) const;
+        inline void assign(V& target) const;
 
         [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
         [[nodiscard]] inline ValueType calc_value(size_t index) const;
@@ -65,7 +65,7 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<Vector V, class Executor>
-    inline void MatrixVectorProduct<T, U>::assignTo(V& target) const {
+    inline void MatrixVectorProduct<T, U>::assign(V& target) const {
         if constexpr (isReverseDiff) {
             if constexpr (MatrixOption::isColMatrix<T>()) {
                 target = mat.values().col(0) * vec.values().calc(0);

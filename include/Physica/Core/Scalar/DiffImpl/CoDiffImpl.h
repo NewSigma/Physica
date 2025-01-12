@@ -40,7 +40,7 @@ namespace Physica::Core {
             else {
                 static_assert(Vector<T> || Matrix<T>, "[Error]: Unexpected type T");
                 y.resize(x_);
-                x_.assignTo(y);
+                x_.assign(y);
                 auto result = co_yield std::move(y);
                 x_.reverse(result.grads());
             }

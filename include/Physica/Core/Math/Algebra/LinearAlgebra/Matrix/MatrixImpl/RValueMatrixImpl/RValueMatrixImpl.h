@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,13 +20,13 @@
 
 #include <cassert>
 #include <forward_list>
-#include "../RValueMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/FormatedMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
+#include "FormatedMatrix.h"
 
 namespace Physica::Core {
     template<class Derived>
     template<Matrix T>
-    void RValueMatrix<Derived>::assignTo(LValueMatrix<T>& target) const {
+    void RValueMatrix<Derived>::assign(LValueMatrix<T>& target) const {
         using OtherScalar = T::ScalarType;
         constexpr size_t OtherRow = T::RowAtCompile;
         constexpr size_t OtherColumn = T::ColAtCompile;

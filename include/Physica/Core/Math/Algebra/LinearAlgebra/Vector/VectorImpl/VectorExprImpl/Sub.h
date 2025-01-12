@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,9 +21,11 @@
 #include "../VectorExpr.h"
 
 namespace Physica::Core {
-    template<Vector T, Scalar U>
+    template<class T, class U>
     class VectorExpr<ExprType::Sub, T, U>
             : public BinaryVectorExpr<ExprType::Sub, T, U> {
+        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either type should be Scalar");
+
         using Base = BinaryVectorExpr<ExprType::Sub, T, U>;
     public:
         using typename Base::ScalarType;
@@ -33,30 +35,50 @@ namespace Physica::Core {
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
-            return Base::getLHS().calc(s) - Base::getRHS();
+            if constexpr (Vector<T>)
+                return Base::getLHS().calc(s) - Base::getRHS();
+            else
+                return Base::getLHS() - Base::getRHS().calc(s);
         }
 
         [[nodiscard]] ValueType calc_value(size_t s) const {
-            return Base::getLHS().calc_value(s) - Base::getRHS().value();
+            if constexpr (Vector<T>)
+                return Base::getLHS().calc_value(s) - Base::getRHS().value();
+            else
+                return Base::getLHS().value() - Base::getRHS().calc_value(s);
         }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
-            return Base::getLHS().template packet<AnyPacket>(index) - AnyPacket(Base::getRHS());
+            if constexpr (Vector<T>)
+                return Base::getLHS().template packet<AnyPacket>(index) - AnyPacket(Base::getRHS());
+            else
+                return AnyPacket(Base::getLHS()) - Base::getRHS().template packet<AnyPacket>(index);
         }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<AnyPacket>(index, count) - AnyPacket(Base::getRHS(), count);
+            if constexpr (Vector<T>)
+                return Base::getLHS().template packetPartial<AnyPacket>(index, count) - AnyPacket(Base::getRHS(), count);
+            else
+                return AnyPacket(Base::getLHS(), count) - Base::getRHS().template packetPartial<AnyPacket>(index, count);
         }
 
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
             const auto& grad = grad_.values();
-            if constexpr (ReverseDiff<T>)
-                Base::getLHS().reverse(grad);
-            if constexpr (ReverseDiff<U>)
-                Base::getRHS().reverse(-grad.sum());
+            if constexpr (Vector<T>) {
+                if constexpr (ReverseDiff<T>)
+                    Base::getLHS().reverse(grad);
+                if constexpr (ReverseDiff<U>)
+                    Base::getRHS().reverse(-grad.sum());
+            }
+            else {
+                if constexpr (ReverseDiff<T>)
+                    Base::getLHS().reverse(grad.sum());
+                if constexpr (ReverseDiff<U>)
+                    Base::getRHS().reverse(-grad);
+            }
         }
     };
 
@@ -72,7 +94,7 @@ namespace Physica::Core {
         using Base::Base;
         /* Operations */
         template<Vector V, class Executor = SequentialExecutor>
-        inline void assignTo(V& v) const;
+        inline void assign(V& v) const;
 
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
             return getLHS().calc(s) - getRHS().calc(s);
@@ -107,28 +129,33 @@ namespace Physica::Core {
 
     template<Vector T1, Vector T2>
     template<Vector V, class Executor>
-    inline void VectorExpr<ExprType::Sub, T1, T2>::assignTo(V& v) const {
+    inline void VectorExpr<ExprType::Sub, T1, T2>::assign(V& v) const {
         constexpr bool FastAssign1 = Traits<T1>::FastAssign;
         constexpr bool FastAssign2 = Traits<T2>::FastAssign;
         if constexpr (FastAssign1) {
-            getLHS().template assignTo<V, Executor>(v);
+            getLHS().template assign<V, Executor>(v);
             v -= getRHS();
         }
         else if constexpr (FastAssign2) {
-            (-getRHS()).template assignTo<V, Executor>(v);
+            (-getRHS()).template assign<V, Executor>(v);
             v += getLHS();
         }
         else
-            Base::template assignTo<V, Executor>(v);
-    }
-
-    template<Vector T1, Vector T2>
-    [[nodiscard]] inline auto operator-(const T1& v1, const T2& v2) noexcept {
-        return VectorExpr<ExprType::Sub, T1, T2>(v1, v2);
+            Base::template assign<V, Executor>(v);
     }
 
     template<Vector T, Scalar U>
     [[nodiscard]] inline auto operator-(const T& v, const U& s) noexcept {
         return VectorExpr<ExprType::Sub, T, U>(v, s);
+    }
+
+    template<Scalar T, Vector U>
+    [[nodiscard]] inline auto operator-(const T& v, const U& s) noexcept {
+        return VectorExpr<ExprType::Sub, T, U>(v, s);
+    }
+
+    template<Vector T1, Vector T2>
+    [[nodiscard]] inline auto operator-(const T1& v1, const T2& v2) noexcept {
+        return VectorExpr<ExprType::Sub, T1, T2>(v1, v2);
     }
 }

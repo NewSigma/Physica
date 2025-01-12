@@ -51,7 +51,7 @@ namespace Physica::Core {
         template<Scalar U> inline void operator*=(const U& x);
         template<Scalar U> inline void operator/=(const U& x);
         /* Operations */
-        using Base::assignTo;
+        using Base::assign;
         using Base::calc;
         using Base::format;
         using Storage::resize;

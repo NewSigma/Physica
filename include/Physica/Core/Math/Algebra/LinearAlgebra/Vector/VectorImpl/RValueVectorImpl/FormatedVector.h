@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,11 +31,13 @@ namespace Physica::Core {
         std::string separator;
     public:
         FormatedVector(const T& data_);
-        /* Operators */
-        template<Vector U>
-        friend std::ostream& operator<<(std::ostream& os, const FormatedVector<U>& v);
         /* Operations */
         FormatedVector& toFormatMMA();
+        /* Getters */
+        [[nodiscard]] const T& getData() const noexcept { return data; }
+        [[nodiscard]] const std::string& getPrefix() const noexcept { return prefix; }
+        [[nodiscard]] const std::string& getSuffix() const noexcept { return suffix; }
+        [[nodiscard]] const std::string& getSeparator() const noexcept { return separator; }
         /* Setters */
         FormatedVector& setPrefix(std::string prefix_);
         FormatedVector& setSuffix(std::string suffix_);
@@ -48,21 +50,6 @@ namespace Physica::Core {
             , prefix("(")
             , suffix(")")
             , separator(", ") {}
-
-    template<Vector U>
-    std::ostream& operator<<(std::ostream& os, const FormatedVector<U>& v) {
-        const U& data = v.data;
-        os << v.prefix;
-        size_t length = data.getLength();
-        if (length > 0) {
-            --length;
-            for (size_t i = 0; i < length; ++i)
-                os << data.calc(i) << v.separator;
-            os << data.calc(length);
-        }
-        os << v.suffix;
-        return os;
-    }
 
     template<Vector T>
     FormatedVector<T>& FormatedVector<T>::toFormatMMA() {
@@ -89,4 +76,34 @@ namespace Physica::Core {
         separator = std::move(separator_);
         return *this;
     }
+
+    template<Vector U>
+    std::ostream& operator<<(std::ostream& os, const FormatedVector<U>& v) {
+        return os << std::format("{}", v);
+    }
+}
+
+namespace std {
+    template<Physica::Core::Vector T>
+    struct formatter<Physica::Core::FormatedVector<T>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Core::FormatedVector<T>& obj, std::format_context& ctx) const {
+            const auto& data = obj.getData();
+            const auto& sep = obj.getSeparator();
+            size_t length = data.getLength();
+            std::stringstream ss{};
+            ss << obj.getPrefix();
+            if (length > 0) {
+                --length;
+                for (size_t i = 0; i < length; ++i)
+                    ss << data.calc(i) << sep;
+                ss << data.calc(length);
+            }
+            ss << obj.getSuffix();
+            return std::format_to(ctx.out(), "{}", ss.str());
+        }
+    };
 }

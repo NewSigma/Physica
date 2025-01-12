@@ -125,9 +125,9 @@ namespace Physica::Core {
         const auto expr3 = expr2 * asVector();
         BufferType dot(Base::getLength());
         if (isPrepared())
-            expr3.template assignTo<BufferType, Executor>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
+            expr3.template assign<BufferType, Executor>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
         else
-            expr3.template assignTo<BufferType, Executor>(dot);
+            expr3.template assign<BufferType, Executor>(dot);
         Base::swap(dot);
         beta += deltaBeta;
     }

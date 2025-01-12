@@ -61,10 +61,10 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V, class Executor = SequentialExecutor>
-        inline void assignTo(V& target) const;
+        inline void assign(V& target) const;
 
         template<Vector V, class Executor = SequentialExecutor>
-        void assignTo(V& target, RealType traceMu, ParamPair params) const;
+        void assign(V& target, RealType traceMu, ParamPair params) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
@@ -87,14 +87,14 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<Vector V, class Executor>
-    inline void MatrixVectorProduct<MatrixExp<T>, U>::assignTo(V& target) const {
+    inline void MatrixVectorProduct<MatrixExp<T>, U>::assign(V& target) const {
         const RealType traceMu = calcTraceMu();
-        assignTo<V, Executor>(target, traceMu, calcParam<Executor>(traceMu));
+        assign<V, Executor>(target, traceMu, calcParam<Executor>(traceMu));
     }
 
     template<Matrix T, Vector U>
     template<Vector V, class Executor>
-    void MatrixVectorProduct<MatrixExp<T>, U>::assignTo(V& target, RealType traceMu, ParamPair params) const {
+    void MatrixVectorProduct<MatrixExp<T>, U>::assign(V& target, RealType traceMu, ParamPair params) const {
         using BufferType = DenseVector<ScalarType, U::SizeAtCompile>;
         assert(getLength() == target.getLength());
         const RealType epsilon = std::numeric_limits<RealType>::epsilon();

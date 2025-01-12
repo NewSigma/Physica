@@ -49,7 +49,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V1, class Executor = SequentialExecutor>
-        inline void assignTo(V1& target) const;
+        inline void assign(V1& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] inline ValueType calc_value(size_t index) const;
@@ -60,7 +60,7 @@ namespace Physica::Core {
 
     template<ExprType Type, Matrix T, class U, Vector V>
     template<Vector V1, class Executor>
-    inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::assignTo(V1& target) const {
+    inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::assign(V1& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
             if constexpr (Type == ExprType::Add) {
@@ -76,10 +76,10 @@ namespace Physica::Core {
                 target.template operator=<ExprMul, Executor>((expr.getLHS() * vec) * expr.getRHS());
             }
             else
-                static_assert(!FastAssign, "[Error]: assignTo is not implemented");
+                static_assert(!FastAssign, "[Error]: assign is not implemented");
         }
         else
-            Base::assignTo(target);
+            Base::assign(target);
     }
 
     template<ExprType Type, Matrix T, class U, Vector V>

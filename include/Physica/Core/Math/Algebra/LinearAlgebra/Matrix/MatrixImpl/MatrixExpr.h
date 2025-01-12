@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ namespace Physica::Core {
     /**
      * \class MatrixExpr represents \param T \param type \param U. e.g. matrix + scalar, expression * expression
      */
-    template<ExprType Type, Matrix T, class U = T> class MatrixExpr;
+    template<ExprType Type, class T, class U = T> class MatrixExpr;
 
     template<ExprType Type, Matrix M>
     class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
@@ -49,8 +49,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const M& getExpr() const noexcept { return expr; }
     };
 
-    template<ExprType Type, Matrix LHS, class RHS>
+    template<ExprType Type, class LHS, class RHS>
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
+        static_assert(Matrix<LHS> || Matrix<RHS>, "[Error]: Either types should be Matrix");
+
         using This = BinaryMatrixExpr<Type, LHS, RHS>;
         using Base = RValueMatrix<MatrixExpr<Type, LHS, RHS>>;
     public:
@@ -59,11 +61,8 @@ namespace Physica::Core {
         const LHS* lhs;
         const RHS* rhs;
     public:
-        BinaryMatrixExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_) {
-            if constexpr (Scalar<RHS>)
-                rhs = &rhs_;
-            else {
-                rhs = &rhs_;
+        BinaryMatrixExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_), rhs(&rhs_) {
+            if constexpr (Matrix<LHS> && Matrix<RHS>) {
                 assert(lhs->getRow() == rhs->getRow());
                 assert(lhs->getCol() == rhs->getCol());
             }
@@ -75,17 +74,27 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return getLHS().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const {
+            if constexpr (Matrix<LHS>)
+                return getLHS().getRow();
+            else
+                return getRHS().getRow();
+        }
+        [[nodiscard]] __host__ __device__ size_t getCol() const {
+            if constexpr (Matrix<LHS>)
+                return getLHS().getCol();
+            else
+                return getRHS().getCol();
+        }
         [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept { return *lhs; }
         [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept { return *rhs; }
     };
 }
 
 namespace Physica {
-    template<Core::ExprType Type, Matrix T, class U>
-    class Traits<Core::MatrixExpr<Type, T, U>> {
-        using MatrixOption = Core::MatrixOption;
+    template<ExprType Type, Matrix T, class U>
+    class Traits<MatrixExpr<Type, T, U>> {
+        using MatrixOption = MatrixOption;
         constexpr static bool SameMajor = MatrixOption::isSameMajor<T, U>();
         constexpr static int Major = SameMajor ? MatrixOption::getMajor<T>()
                                                : int(MatrixOption::AnyMajor);
@@ -103,15 +112,18 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template<Core::ExprType Type, Matrix T, Scalar U>
-    class Traits<Core::MatrixExpr<Type, T, U>> {
+    template<ExprType Type, Matrix T, Scalar U>
+    class Traits<MatrixExpr<Type, T, U>> {
     public:
-        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = T::RowAtCompile;
         constexpr static size_t ColAtCompile = T::ColAtCompile;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
+
+    template<ExprType Type, Scalar T, Matrix U>
+    class Traits<MatrixExpr<Type, T, U>> : public Traits<MatrixExpr<Type, U, T>> {};
 }
 
 #include "MatrixExprImpl/Minus.h"

@@ -51,7 +51,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V1, class Executor = SequentialExecutor>
-        inline void assignTo(V1& target) const;
+        inline void assign(V1& target) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const;
         /* Getters */
@@ -69,7 +69,7 @@ namespace Physica::Core {
 
     template<Scalar T, Representation U, Vector V>
     template<Vector V1, class Executor>
-    inline void MatrixVectorProduct<HubbardMatrix<T, U>, V>::assignTo(V1& target) const {
+    inline void MatrixVectorProduct<HubbardMatrix<T, U>, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = RealType(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {

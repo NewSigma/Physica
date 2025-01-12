@@ -152,7 +152,7 @@ namespace Physica::Core {
             assert(matrix.getRow() == matrix.getCol());
         }
         template<Matrix M>
-        void assignTo(M& target) const;
+        void assign(M& target) const;
         /* Getters */
         [[nodiscard]] const T& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
@@ -161,7 +161,7 @@ namespace Physica::Core {
 
     template<Matrix T>
     template<Matrix M>
-    void InverseMatrix<T>::assignTo(M& target) const {
+    void InverseMatrix<T>::assign(M& target) const {
         constexpr size_t Size = T::RowAtCompile == Dynamic ? M::RowAtCompile : T::RowAtCompile;
         Internal::InverseImpl<T, M, Size>::run(matrix, target);
     }

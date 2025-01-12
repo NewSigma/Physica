@@ -101,7 +101,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Vector V, class Executor>
-    inline void RValueVector<Derived>::assignTo(V& v) const {
+    inline void RValueVector<Derived>::assign(V& v) const {
         Internal::AssignImpl<V, Derived, Executor>::run(v, Base::getDerived());
     }
 

@@ -137,7 +137,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
-        void assignTo(LValueMatrix<M>& target) const;
+        void assign(LValueMatrix<M>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return hess.getSize(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return hess.getSize(); }
@@ -145,7 +145,7 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Order>
     template<Matrix M>
-    void HessenburgMatrixH<T, Order>::assignTo(LValueMatrix<M>& target) const {
+    void HessenburgMatrixH<T, Order>::assign(LValueMatrix<M>& target) const {
         using RealType = T::RealType;
         const size_t order = getRow();
         size_t i = 0;

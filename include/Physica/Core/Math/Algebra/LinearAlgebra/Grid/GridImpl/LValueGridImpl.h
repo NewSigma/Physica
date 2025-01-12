@@ -25,7 +25,7 @@ namespace Physica::Core {
         if constexpr (std::is_same<Derived, T>::value)
             assert(this != &other && "[Error]: Self assign is likely a bug");
         resize(other.getDim());
-        other.assignTo(*this);
+        other.assign(*this);
         return Base::getDerived();
     }
 

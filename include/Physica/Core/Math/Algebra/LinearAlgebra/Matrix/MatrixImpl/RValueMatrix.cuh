@@ -45,7 +45,7 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operations */
         template<Matrix M>
-        __host__ __device__ void assignTo(device_obj<LValueMatrix<M>>& target) const;
+        __host__ __device__ void assign(device_obj<LValueMatrix<M>>& target) const;
         [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;
         [[nodiscard]] __host__ __device__ inline auto col(size_t c) noexcept;

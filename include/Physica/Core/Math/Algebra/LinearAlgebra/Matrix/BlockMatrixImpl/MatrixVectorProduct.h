@@ -40,7 +40,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V, class Executor = SequentialExecutor>
-        void assignTo(V& target_) const;
+        void assign(V& target_) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
@@ -58,7 +58,7 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<Vector V, class Executor>
-    void MatrixVectorProduct<BlockMatrix<T>, U>::assignTo(V& target) const {
+    void MatrixVectorProduct<BlockMatrix<T>, U>::assign(V& target) const {
         assert(getLength() == target.getLength() && "[Error]: Dimensions do not match");
         size_t from = 0;
         for (size_t i = 0; i < m.getNumBlocks(); ++i) {

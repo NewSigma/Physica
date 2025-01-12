@@ -39,14 +39,14 @@ namespace Physica::Core {
     template<tparams>
     template<Matrix M>
     DiffDenseMatrix::DenseMatrix(const M& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
-        mat.assignTo(*this);
+        mat.assign(*this);
     }
 
     template<tparams>
     template<Vector V>
     DiffDenseMatrix::DenseMatrix(const V& vec) : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
-        vec.assignTo(col);
+        vec.assign(col);
     }
 
     template<tparams>

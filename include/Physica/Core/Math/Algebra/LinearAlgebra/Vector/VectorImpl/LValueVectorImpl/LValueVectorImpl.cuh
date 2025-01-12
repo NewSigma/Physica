@@ -39,7 +39,7 @@ namespace Physica::Core {
     __host__ __device__
     inline device_obj<LValueVector<Derived>>&
     device_obj<LValueVector<Derived>>::operator=(const device_obj<LValueVector<Derived>>& obj) {
-        obj.assignTo(*this);
+        obj.assign(*this);
         return *this;
     }
 
@@ -57,7 +57,7 @@ namespace Physica::Core {
         auto& x = Base::getDerived();
         if constexpr (IsHost())
             x.resize(v.getLength());
-        v.assignTo(x);
+        v.assign(x);
         return x;
     }
 

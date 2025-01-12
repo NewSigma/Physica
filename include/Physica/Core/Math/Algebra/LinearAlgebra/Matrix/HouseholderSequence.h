@@ -53,7 +53,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix U>
-        void assignTo(LValueMatrix<U>& target) const;
+        void assign(LValueMatrix<U>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getRow(); }
@@ -72,7 +72,7 @@ namespace Physica::Core {
 
     template<Matrix T, bool ColWiseRead>
     template<Matrix U>
-    void HouseholderSequence<T, ColWiseRead>::assignTo(LValueMatrix<U>& target) const {
+    void HouseholderSequence<T, ColWiseRead>::assign(LValueMatrix<U>& target) const {
         const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getCol());
         assert(shift1 < target.getRow());
 

@@ -46,7 +46,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
-        void assignTo(device_obj<ContinuousMatrix<M>>& target) const;
+        void assign(device_obj<ContinuousMatrix<M>>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
@@ -66,7 +66,7 @@ namespace Physica::Core {
 
     template<Matrix T1, Matrix T2>
     template<Matrix M>
-    void device_obj<MatrixProduct<T1, T2>>::assignTo(device_obj<ContinuousMatrix<M>>& target) const {
+    void device_obj<MatrixProduct<T1, T2>>::assign(device_obj<ContinuousMatrix<M>>& target) const {
         static_assert(MatrixOption::isColMatrix<T1>() && MatrixOption::isColMatrix<T2>(), "[Error]: cuBLAS uses column major");
         static_assert(MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>(), "[Error]: cuBLAS need element storage");
         constexpr bool IsDeviceMatrix = Traits<T1>::SizeAtCompile == Dynamic && Traits<T2>::SizeAtCompile == Dynamic;

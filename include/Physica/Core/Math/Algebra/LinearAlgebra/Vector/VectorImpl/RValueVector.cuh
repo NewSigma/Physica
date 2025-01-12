@@ -43,7 +43,7 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operations */
         template<Vector V>
-        __host__ __device__ void assignTo(device_obj<V>& target) const;
+        __host__ __device__ void assign(device_obj<V>& target) const;
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().template calc<Owner>(index); }

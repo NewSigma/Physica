@@ -39,7 +39,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Length, class Allocator>
     template<Vector V>
     DenseVector<T, Length, Allocator>::DenseVector(const V& v) : Storage(v.getLength()) {
-        v.assignTo(*this);
+        v.assign(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>

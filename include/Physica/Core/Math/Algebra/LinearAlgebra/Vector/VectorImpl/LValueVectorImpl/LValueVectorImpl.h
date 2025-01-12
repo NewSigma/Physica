@@ -38,7 +38,7 @@ namespace Physica::Core {
             assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& v1 = Base::getDerived();
         v1.resize(v.getLength());
-        v.template assignTo<Derived, Executor>(v1);
+        v.template assign<Derived, Executor>(v1);
         return v1;
     }
 

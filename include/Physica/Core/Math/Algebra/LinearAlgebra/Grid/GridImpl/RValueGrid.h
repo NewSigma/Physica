@@ -48,7 +48,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<Grid T>
-        void assignTo(LValueGrid<T>& other) const;
+        void assign(LValueGrid<T>& other) const;
         template<class Functor> void forIndexInGrid(Functor func) const { GridBase::forIndexInGrid(getDim(), func); }
 
         auto reals() const noexcept;
@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Grid T>
-    void RValueGrid<Derived>::assignTo(LValueGrid<T>& other) const {
+    void RValueGrid<Derived>::assign(LValueGrid<T>& other) const {
         forIndexInGrid(getDim(), [this, &other](Index3D index) {
             other(index) = calc(index);
         });

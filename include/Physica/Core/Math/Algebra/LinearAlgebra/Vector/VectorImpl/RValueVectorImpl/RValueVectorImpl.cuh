@@ -39,7 +39,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Vector V>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assignTo(device_obj<V>& target) const {
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(device_obj<V>& target) const {
         [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<Derived, V>;
 
         constexpr size_t OtherSize = Traits<V>::SizeAtCompile;

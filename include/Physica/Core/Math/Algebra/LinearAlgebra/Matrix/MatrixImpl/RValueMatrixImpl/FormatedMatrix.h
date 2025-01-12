@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../RValueMatrix.h"
+
 namespace Physica::Core {
     /**
      * \class FormatedMatrix convert a matrix to text, either readable to human, or other softwares.
@@ -35,15 +37,18 @@ namespace Physica::Core {
         std::string separator;
     public:
         FormatedMatrix(const T& data_);
-        /* Operators */
-        template<Matrix U>
-        friend std::ostream& operator<<(std::ostream& os, const FormatedMatrix<U>& m);
         /* Operations */
         FormatedMatrix& toFormatMMA();
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return data.calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return data.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return data.getCol(); }
+        [[nodiscard]] const std::string& getMatPrefix() const noexcept { return matPrefix; }
+        [[nodiscard]] const std::string& getMatSuffix() const noexcept { return matSuffix; }
+        [[nodiscard]] const std::string& getRowPrefix() const noexcept { return rowPrefix; }
+        [[nodiscard]] const std::string& getRowSuffix() const noexcept { return rowSuffix; }
+        [[nodiscard]] const std::string& getRowSeparator() const noexcept { return rowSeparator; }
+        [[nodiscard]] const std::string& getSeparator() const noexcept { return separator; }
         /* Setters */
         FormatedMatrix& setMatPrefix(std::string matPrefix_);
         FormatedMatrix& setMatSuffix(std::string matSuffix_);
@@ -62,43 +67,6 @@ namespace Physica::Core {
             , rowSuffix("")
             , rowSeparator("")
             , separator(" ") {}
-
-    template<Matrix U>
-    std::ostream& operator<<(std::ostream& os, const FormatedMatrix<U>& m) {
-        const size_t col = m.getCol();
-        const size_t row = m.getRow();
-        size_t width = 0;
-        /* Get max width */ {
-            for (size_t c = 0; c < col; ++c) {
-                for (size_t r = 0; r < row; ++ r) {
-                    std::stringstream stream{};
-                    stream.copyfmt(os);
-                    stream << m.calc(r, c).real();
-                    width = std::max(width, stream.str().length());
-                }
-            }
-        }
-        /* Output */ {
-            os << m.matPrefix;
-            for (size_t r = 0; r < row; ++r) {
-                os << m.rowPrefix;
-                for (size_t c = 0; c < col; ++c) {
-                    os.width(width);
-                    os << m.calc(r, c);
-                    const bool isLastElem = c + 1 == col;
-                    if (!isLastElem)
-                        os << m.separator;
-                }
-                os << m.rowSuffix << '\n';
-
-                const bool isLastRow = r + 1 == row;
-                if (!isLastRow)
-                    os << m.rowSeparator;
-            }
-            os << m.matSuffix;
-        }
-        return os;
-    }
 
     template<Matrix T>
     FormatedMatrix<T>& FormatedMatrix<T>::toFormatMMA() {
@@ -146,4 +114,48 @@ namespace Physica::Core {
         separator = std::move(separator_);
         return *this;
     }
+
+    template<Matrix U>
+    std::ostream& operator<<(std::ostream& os, const FormatedMatrix<U>& m) {
+        return os << std::format("{}", m);
+    }
+}
+
+namespace std {
+    template<Physica::Core::Matrix T>
+    struct formatter<Physica::Core::FormatedMatrix<T>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Core::FormatedMatrix<T>& obj, std::format_context& ctx) const {
+            const size_t col = obj.getCol();
+            const size_t row = obj.getRow();
+
+            size_t width = 0;
+            for (size_t c = 0; c < col; ++c)
+                for (size_t r = 0; r < row; ++ r)
+                    width = std::max(width, std::formatted_size("{}", obj.calc(r, c).real()));
+
+            std::stringstream ss{};
+            ss << obj.getMatPrefix();
+            for (size_t r = 0; r < row; ++r) {
+                ss << obj.getRowPrefix();
+                for (size_t c = 0; c < col; ++c) {
+                    ss.width(width);
+                    ss << obj.calc(r, c);
+                    const bool isLastElem = c + 1 == col;
+                    if (!isLastElem)
+                        ss << obj.getSeparator();
+                }
+                ss << obj.getRowSuffix() << '\n';
+
+                const bool isLastRow = r + 1 == row;
+                if (!isLastRow)
+                    ss << obj.getRowSeparator();
+            }
+            ss << obj.getMatSuffix();
+            return std::format_to(ctx.out(), "{}", ss.str());
+        }
+    };
 }

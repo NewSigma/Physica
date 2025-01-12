@@ -26,7 +26,7 @@ namespace Physica::Core {
         static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
         auto& target = Base::getDerived();
         target.resize(m.getRow(), m.getCol());
-        m.assignTo(target);
+        m.assign(target);
         return target;
     }
 

@@ -54,7 +54,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V>
-        __host__ __device__ void assignTo(device_obj<V>& target) const;
+        __host__ __device__ void assign(device_obj<V>& target) const;
         /* Getters */
         template<Side Owner>
         [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
@@ -102,9 +102,9 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<Vector V>
-    __host__ __device__ void device_obj<MatrixVectorProduct<T, U>>::assignTo(device_obj<V>& target) const {
+    __host__ __device__ void device_obj<MatrixVectorProduct<T, U>>::assign(device_obj<V>& target) const {
         if constexpr (IsHost())
-            Base::template assignTo<V>(target);
+            Base::template assign<V>(target);
         else {
             if constexpr (MatrixOption::isColMatrix<T>()) {
                 const auto& m = getLHS();
@@ -114,7 +114,7 @@ namespace Physica::Core {
                     target += m.col(i) * v.calc(i);
             }
             else
-                Base::template assignTo<V>(target);
+                Base::template assign<V>(target);
         }
     }
 

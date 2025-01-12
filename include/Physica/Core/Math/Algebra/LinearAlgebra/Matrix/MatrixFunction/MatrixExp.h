@@ -41,7 +41,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
-        void assignTo(LValueMatrix<M>& target) const;
+        void assign(LValueMatrix<M>& target) const;
         [[nodiscard]] ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
 
         [[nodiscard]] RealType calcTraceMu() const;
@@ -58,12 +58,12 @@ namespace Physica::Core {
 
     template<Matrix T>
     template<Matrix M>
-    void MatrixExp<T>::assignTo(LValueMatrix<M>& target) const {
+    void MatrixExp<T>::assign(LValueMatrix<M>& target) const {
         const RealType traceMu = calcTraceMu();
         const auto params = ((*this) * VectorND<ScalarType>(getRow())).template calcParam<SequentialExecutor>(traceMu);
         for (size_t i = 0; i < getCol(); ++i) {
             auto col = target.col(i);
-            ((*this) * UnitVector<ScalarType>(i, getRow())).assignTo(col, traceMu, params);
+            ((*this) * UnitVector<ScalarType>(i, getRow())).assign(col, traceMu, params);
         }
     }
 

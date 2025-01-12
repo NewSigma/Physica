@@ -164,7 +164,7 @@ namespace Physica::Core {
         BiDiagMatrixB(const Bidiagonalization<T>& bidiag_) : bidiag(bidiag_) {}
         /* Operations */
         template<Matrix M>
-        void assignTo(LValueMatrix<M>& target) const;
+        void assign(LValueMatrix<M>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return bidiag.working.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return bidiag.working.getCol(); }
@@ -172,7 +172,7 @@ namespace Physica::Core {
 
     template<Matrix T>
     template<Matrix M>
-    void BiDiagMatrixB<T>::assignTo(LValueMatrix<M>& target) const {
+    void BiDiagMatrixB<T>::assign(LValueMatrix<M>& target) const {
         target = ScalarType(0);
         const size_t col_1 = target.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {

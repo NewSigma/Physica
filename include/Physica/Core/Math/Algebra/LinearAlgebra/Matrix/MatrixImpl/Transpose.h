@@ -48,7 +48,7 @@ namespace Physica::Core {
         explicit TransposeVector(const T& vec_) : vec(vec_) {}
         /* Operations */
         template<Matrix M>
-        void assignTo(LValueMatrix<M>& target) const;
+        void assign(LValueMatrix<M>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
@@ -57,7 +57,7 @@ namespace Physica::Core {
 
     template<Vector T>
     template<Matrix M>
-    void TransposeVector<T>::assignTo(LValueMatrix<M>& target) const {
+    void TransposeVector<T>::assign(LValueMatrix<M>& target) const {
         using TargetType = LValueMatrix<M>;
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i), TargetType::colFromMajorMinor(0, i));

@@ -60,7 +60,7 @@ namespace Physica::Core {
     template<class Derived>
     FFTKSpace<Derived, 1>& FFTKSpace<Derived, 1>::operator=(const FFTKSpace<Derived, 1>& obj) {
         resize(obj.getLength());
-        obj.assignTo(*this);
+        obj.assign(*this);
         return *this;
     }
 
@@ -128,7 +128,7 @@ namespace Physica::Core {
     template<class Derived>
     FFTKSpace<Derived, 2>& FFTKSpace<Derived, 2>::operator=(const FFTKSpace<Derived, 2>& obj) {
         resize(obj.getRow(), obj.getCol());
-        obj.assignTo(*this);
+        obj.assign(*this);
         return *this;
     }
 
@@ -191,7 +191,7 @@ namespace Physica::Core {
     template<class Derived>
     FFTKSpace<Derived, 3>& FFTKSpace<Derived, 3>::operator=(const FFTKSpace<Derived, 3>& obj) {
         resize(obj.getDim());
-        obj.assignTo(*this);
+        obj.assign(*this);
         return *this;
     }
 

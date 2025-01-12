@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,36 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica::Core {
+    template<class T, class U>
+    class MatrixExpr<ExprType::Sub, T, U>
+            : public BinaryMatrixExpr<ExprType::Sub, T, U> {
+        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either types should be Scalar");
+
+        using Base = BinaryMatrixExpr<ExprType::Sub, T, U>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+    public:
+        using Base::Base;
+        /* Operations */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            if constexpr (Matrix<T>)
+                return Base::getLHS().calc(row, col) - Base::getRHS();
+            else
+                return Base::getLHS() - Base::getRHS().calc(row, col);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            if constexpr (Matrix<T>)
+                return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
+            else
+                return Base::getLHS().value() - Base::getRHS().calc_value(row, col);
+        }
+    };
+
     template<Matrix T1, Matrix T2>
     class MatrixExpr<ExprType::Sub, T1, T2>
             : public BinaryMatrixExpr<ExprType::Sub, T1, T2> {
@@ -47,25 +76,11 @@ namespace Physica::Core {
     };
 
     template<Matrix T, Scalar U>
-    class MatrixExpr<ExprType::Sub, T, U>
-            : public BinaryMatrixExpr<ExprType::Sub, T, U> {
-        using Base = BinaryMatrixExpr<ExprType::Sub, T, U>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
-    public:
-        using Base::Base;
-        /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) - Base::getRHS();
-        }
+    [[nodiscard]] inline auto operator-(const T& m, const U& x) noexcept {
+        return MatrixExpr<ExprType::Sub, T, U>(m, x);
+    }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
-        }
-    };
-
-    template<Matrix T, Scalar U>
+    template<Scalar T, Matrix U>
     [[nodiscard]] inline auto operator-(const T& m, const U& x) noexcept {
         return MatrixExpr<ExprType::Sub, T, U>(m, x);
     }

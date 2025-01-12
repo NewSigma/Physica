@@ -36,7 +36,7 @@ namespace Physica::Core {
     template<Matrix M>
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const M& mat)
             : DenseMatrix(mat.getRow(), mat.getCol()) {
-        mat.assignTo(*this);
+        mat.assign(*this);
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
@@ -44,7 +44,7 @@ namespace Physica::Core {
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const V& vec)
             : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
-        vec.assignTo(col);
+        vec.assign(col);
     }
     /**
      * \returns the origin column index of the main element

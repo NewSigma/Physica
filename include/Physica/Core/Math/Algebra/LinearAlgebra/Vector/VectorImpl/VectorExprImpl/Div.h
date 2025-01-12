@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,34 +21,49 @@
 #include "../VectorExpr.h"
 
 namespace Physica::Core {
-    template<Vector T, Scalar U>
+    template<class T, class U>
     class VectorExpr<ExprType::Div, T, U>
             : public BinaryVectorExpr<ExprType::Div, T, U> {
+        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either type should be Scalar");
+
         using Base = BinaryVectorExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
-        using Base::Base;
+        VectorExpr(const T& lhs, const U& rhs) : Base(lhs, rhs) {
+            if constexpr (Vector<T>)
+                assert(!rhs.isZero() && "[Error]: Divide by zero");
+        }
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
-            assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
-            return Base::getLHS().calc(s) / Base::getRHS();
+            if constexpr (Vector<T>)
+                return Base::getLHS().calc(s) / Base::getRHS();
+            else
+                return Base::getLHS() / Base::getRHS().calc(s);
         }
 
         [[nodiscard]] ValueType calc_value(size_t s) const {
-            assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
-            return Base::getLHS().calc_value(s) / Base::getRHS().value();
+            if constexpr (Vector<T>)
+                return Base::getLHS().calc_value(s) / Base::getRHS().value();
+            else
+                return Base::getLHS().value() / Base::getRHS().calc_value(s);
         }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
-            return Base::getLHS().template packet<AnyPacket>(index) * AnyPacket(reciprocal(Base::getRHS()));
+            if constexpr (Vector<T>)
+                return Base::getLHS().template packet<AnyPacket>(index) * AnyPacket(reciprocal(Base::getRHS()));
+            else
+                return AnyPacket(Base::getRHS()) / Base::getLHS().template packet<AnyPacket>(index);
         }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<AnyPacket>(index, count) * AnyPacket(reciprocal(Base::getRHS()));
+            if constexpr (Vector<T>)
+                return Base::getLHS().template packetPartial<AnyPacket>(index, count) * AnyPacket(reciprocal(Base::getRHS()));
+            else
+                return AnyPacket(Base::getRHS()) / Base::getLHS().template packetPartial<AnyPacket>(index, count);
         }
     };
 
@@ -86,6 +101,11 @@ namespace Physica::Core {
     };
 
     template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator/(const T& v, const U& x) noexcept {
+        return VectorExpr<ExprType::Div, T, U>(v, x);
+    }
+
+    template<Scalar T, Vector U>
     [[nodiscard]] inline auto operator/(const T& v, const U& x) noexcept {
         return VectorExpr<ExprType::Div, T, U>(v, x);
     }

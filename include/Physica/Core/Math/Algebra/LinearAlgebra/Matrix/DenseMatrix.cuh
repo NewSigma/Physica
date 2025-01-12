@@ -81,7 +81,7 @@ namespace Physica::Core {
     template<Matrix M>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(
             const device_obj<M>& mat) : device_obj(mat.getRow(), mat.getCol()) {
-        mat.getDerived().assignTo(*this);
+        mat.getDerived().assign(*this);
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>

@@ -70,7 +70,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
-        void assignTo(LValueMatrix<M>& target) const;
+        void assign(LValueMatrix<M>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
@@ -82,7 +82,7 @@ namespace Physica::Core {
 
     template<Matrix T1, Matrix T2>
     template<Matrix M>
-    void MatrixProduct<T1, T2>::assignTo(LValueMatrix<M>& target) const {
+    void MatrixProduct<T1, T2>::assign(LValueMatrix<M>& target) const {
         constexpr static int defaultMajor = Internal::ProductOption<T1, T2>::Major;
         constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
         using TargetType = LValueMatrix<M>;

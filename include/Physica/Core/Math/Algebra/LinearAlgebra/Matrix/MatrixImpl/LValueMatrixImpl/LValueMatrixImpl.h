@@ -81,7 +81,7 @@ namespace Physica::Core {
         static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
         static_assert(!(!isComplex && M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         Base::getDerived().resize(m.getRow(), m.getCol());
-        m.assignTo(Base::getDerived());
+        m.assign(Base::getDerived());
         return Base::getDerived();
     }
     

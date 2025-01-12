@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,27 +18,45 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica::Core {
-    template<Matrix T, Scalar U>
+    template<class T, class U>
     class MatrixExpr<ExprType::Div, T, U>
             : public BinaryMatrixExpr<ExprType::Div, T, U> {
+        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either types should be Scalar");
+
         using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
-        using Base::Base;
+        MatrixExpr(const T& lhs, const U& rhs) : Base(lhs, rhs) {
+            if constexpr (Matrix<T>)
+                assert(!rhs.isZero() && "[Error]: Divide by zero");
+        }
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) / Base::getRHS();
+            if constexpr (Matrix<T>)
+                return Base::getLHS().calc(row, col) / Base::getRHS();
+            else
+                return Base::getLHS() / Base::getRHS().calc(row, col);
         }
 
         [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) / Base::getRHS().value();
+            if constexpr (Matrix<T>)
+                return Base::getLHS().calc_value(row, col) / Base::getRHS().value();
+            else
+                return Base::getLHS().value() / Base::getRHS().calc_value(row, col);
         }
     };
 
     template<Matrix T, Scalar U>
+    [[nodiscard]] inline auto operator/(const T& m, const U& x) noexcept {
+        return MatrixExpr<ExprType::Div, T, U>(m, x);
+    }
+
+    template<Scalar T, Matrix U>
     [[nodiscard]] inline auto operator/(const T& m, const U& x) noexcept {
         return MatrixExpr<ExprType::Div, T, U>(m, x);
     }

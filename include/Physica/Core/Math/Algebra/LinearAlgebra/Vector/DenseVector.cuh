@@ -72,7 +72,7 @@ namespace Physica::Core {
     template<Vector V>
     __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const device_obj<V>& v)
             : Storage(v.getLength()) {
-        v.assignTo(*this);
+        v.assign(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>

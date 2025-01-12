@@ -96,7 +96,7 @@ namespace Physica::Core {
         ~RValueVector() = default;
         /* Operations */
         template<Vector V, class Executor = SequentialExecutor>
-        inline void assignTo(V& v) const;
+        inline void assign(V& v) const;
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] auto calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
