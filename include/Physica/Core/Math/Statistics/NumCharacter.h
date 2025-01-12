@@ -35,7 +35,7 @@ namespace Physica::Core {
         mean = (factor1 * mean + sample) * factor2;
     }
 
-    template<LVector T1, Vector T2>
+    template<Vector T1, Vector T2>
     inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
@@ -43,7 +43,7 @@ namespace Physica::Core {
         mean = (factor1 * mean + sample) * factor2;
     }
 
-    template<LMatrix T1, Matrix T2>
+    template<Matrix T1, Matrix T2>
     inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
@@ -83,7 +83,7 @@ namespace Physica::Core {
         toNextMean(mean, lastNumSample, sample);
     }
 
-    template<LVector T1, LVector T2>
+    template<Vector T1, Vector T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
@@ -92,7 +92,7 @@ namespace Physica::Core {
         toNextMean(mean, lastNumSample, sample);
     }
 
-    template<LMatrix T1, LMatrix T2>
+    template<Matrix T1, Matrix T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);

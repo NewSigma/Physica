@@ -73,7 +73,7 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:81-82
      */
-    template<LVector V>
+    template<Vector V>
     V::ScalarType lagrange(const V& x0, const V& y0, typename V::ScalarType x) {
         using T = V::ScalarType;
         assert(x0.getLength() == y0.getLength());
@@ -107,7 +107,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<LVector V>
+    template<Vector V>
     V interpolate_fft(const V& data, size_t newDim) {
         using T = V::ScalarType;
         using RealType = T::RealType;
@@ -146,7 +146,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<LVector V>
+    template<Vector V>
     V::ScalarType interpolate_fft(const V& data, typename V::ScalarType::RealType x, typename V::ScalarType::RealType period) {
         using T = V::ScalarType;
         using RealType = T::RealType;

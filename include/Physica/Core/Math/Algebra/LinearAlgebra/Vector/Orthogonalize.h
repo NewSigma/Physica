@@ -26,7 +26,7 @@ namespace Physica::Core {
      * Reference:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:254-255
      */
-    template<Matrix T, LVector U>
+    template<Matrix T, Vector U>
     void gramSchmidt(const T& base, U& v) {
         assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < base.getCol(); ++i) {
@@ -41,7 +41,7 @@ namespace Physica::Core {
      * 
      * This method is vulnerable to numerical roundness.
      */
-    template<Matrix T, LVector U>
+    template<Matrix T, Vector U>
     void normGramSchmidt(const T& base, U& v, typename U::ScalarType::RealType squaredNorm = 1) {
         using ScalarType = U::ScalarType;
         using RealType = ScalarType::RealType;
@@ -59,7 +59,7 @@ namespace Physica::Core {
         v *= reciprocal(sqrt(squaredNorm));
     }
 
-    template<LMatrix T>
+    template<Matrix T>
     void gramSchmidt(T& m) {
         assert(m.getRow() >= m.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < m.getCol(); ++i) {

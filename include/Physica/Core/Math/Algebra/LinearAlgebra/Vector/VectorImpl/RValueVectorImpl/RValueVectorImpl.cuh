@@ -38,7 +38,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<LVector V>
+    template<Vector V>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assignTo(device_obj<V>& target) const {
         [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<Derived, V>;
 
@@ -132,7 +132,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<LVector V>
+    template<Vector V>
     __device__ void device_obj<RValueVector<Derived>>::assignToImpl(device_obj<V>& target) const {
         constexpr bool enableSIMD = Internal::EnableSIMD<Derived, V>::value;
         if constexpr (enableSIMD) {

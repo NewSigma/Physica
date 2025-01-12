@@ -21,7 +21,7 @@
 #include "vectorclass/vectormath_trig.h"
 
 namespace Physica::Core {
-    template<Vector T1, LVector T2>
+    template<Vector T1, Vector T2>
     auto sincos(const T1& x, T2& s, T2& c) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
         constexpr static size_t Size1 = T1::SizeAtCompile;

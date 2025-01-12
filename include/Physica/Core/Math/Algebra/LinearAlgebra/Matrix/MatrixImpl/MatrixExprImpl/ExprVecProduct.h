@@ -48,7 +48,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<LVector V1, class Executor = SequentialExecutor>
+        template<Vector V1, class Executor = SequentialExecutor>
         inline void assignTo(V1& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
@@ -59,7 +59,7 @@ namespace Physica::Core {
     };
 
     template<ExprType Type, Matrix T, class U, Vector V>
-    template<LVector V1, class Executor>
+    template<Vector V1, class Executor>
     inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::assignTo(V1& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {

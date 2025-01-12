@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,7 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<LVector T1, Vector T2, class Executor>
+        template<Vector T1, Vector T2, class Executor>
         class AssignImpl {
             constexpr static size_t Size1 = T1::SizeAtCompile;
             constexpr static size_t Size2 = T2::SizeAtCompile;
@@ -100,7 +100,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<LVector V, class Executor>
+    template<Vector V, class Executor>
     inline void RValueVector<Derived>::assignTo(V& v) const {
         Internal::AssignImpl<V, Derived, Executor>::run(v, Base::getDerived());
     }
@@ -214,7 +214,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    RValueVector<Derived>::RealType RValueVector<Derived>::lnSquaredNorm() const {
+    auto RValueVector<Derived>::lnSquaredNorm() const -> RealType {
         const auto& derived = Base::getDerived();
         const RealType maxabs = abs(derived).max();
         assert(maxabs > RealType(std::numeric_limits<ScalarType>::min()) && "[Error]: ln(0) is not allowed");
@@ -223,7 +223,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline RValueVector<Derived>::RealType RValueVector<Derived>::normInf() const {
+    inline auto RValueVector<Derived>::normInf() const -> RealType {
         return abs(Base::getDerived()).max();
     }
 
@@ -379,18 +379,18 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    RValueVector<Derived>::ScalarType RValueVector<Derived>::lnSumExp() const {
+    auto RValueVector<Derived>::lnSumExp() const -> ScalarType {
         const Derived& v = Base::getDerived();
         ValueType m;
         if constexpr (isComplex)
-            m = abs(values()).max();
+            m = values().reals().max();
         else
-            m = max().value();
+            m = values().max();
         return ln(exp(v - m).sum()) + m;
     }
 
     template<class Derived>
-    RValueVector<Derived>::ScalarType RValueVector<Derived>::prod() const {
+    auto RValueVector<Derived>::prod() const -> ScalarType {
         assert(getLength() != 0);
         auto result = calc(0);
         for(size_t i = 1; i < getLength(); ++i)
@@ -414,7 +414,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Vector V>
-    RValueVector<Derived>::ScalarType RValueVector<Derived>::angleTo(const V& v) const noexcept {
+    auto RValueVector<Derived>::angleTo(const V& v) const noexcept -> ScalarType {
         return arccos(Base::getDerived() * v / (norm() * v.norm()));
     }
 

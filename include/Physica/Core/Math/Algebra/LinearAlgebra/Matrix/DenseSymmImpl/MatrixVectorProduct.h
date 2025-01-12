@@ -42,7 +42,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<LVector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SequentialExecutor>
         inline void assignTo(V& target) const;
 
         [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
@@ -59,7 +59,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order, Vector U>
-    template<LVector V, class Executor>
+    template<Vector V, class Executor>
     inline void MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>::assignTo(V& target) const {
         const size_t length = getLength();
         assert(length == target.getLength());

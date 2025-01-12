@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@
 using namespace Physica;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
-void crossProductTest() {
+static void crossProductTest() {
     using T = float32;
     VectorND<T> v1{3.845971, 0.000000, 0.000000};
     VectorND<T> v2{-0.007733, 3.835502, 0.000000};
@@ -34,7 +34,7 @@ void crossProductTest() {
         exit(EXIT_FAILURE);
 }
 
-void hdfTest() {
+static void hdfTest() {
 #ifdef PHYSICA_HDF5
     /* Real */ {
         using T = float64;
@@ -73,8 +73,15 @@ void hdfTest() {
 #endif
 }
 
+static void lnSumExpTest() {
+    VectorND<cfloat64> v{-1071, -739};
+    if (!v.lnSumExp().isFinite())
+        exit(EXIT_FAILURE);
+}
+
 int main() {
     crossProductTest();
     hdfTest();
+    lnSumExpTest();
     return 0;
 }

@@ -69,7 +69,7 @@ namespace Physica::Core {
     public:
         explicit HermiteVector(const T& vec_) : vec(vec_) {}
         /* Operations */
-        template<LMatrix M>
+        template<Matrix M>
         void assignTo(M& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
@@ -78,7 +78,7 @@ namespace Physica::Core {
     };
 
     template<Vector T>
-    template<LMatrix M>
+    template<Matrix M>
     void HermiteVector<T>::assignTo(M& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(M::rowFromMajorMinor(0, i), M::colFromMajorMinor(0, i));

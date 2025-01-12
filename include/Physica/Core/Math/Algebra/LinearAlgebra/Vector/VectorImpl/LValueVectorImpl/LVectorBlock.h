@@ -23,7 +23,7 @@ namespace Physica::Core {
     /**
      * Reference a part of the given vector
      */
-    template<LVector T, size_t Length>
+    template<Vector T, size_t Length>
     class LVectorBlock : public LValueVector<LVectorBlock<T, Length>> {
         using This = LVectorBlock<T, Length>;
         using Base = LValueVector<This>;
@@ -54,7 +54,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     };
 
-    template<LVector T, size_t Length>
+    template<Vector T, size_t Length>
     LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_, size_t to_)
             : vec(vec_), from(from_), to(to_) {
         assert(from_ < to);
@@ -62,10 +62,10 @@ namespace Physica::Core {
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<LVector T, size_t Length>
+    template<Vector T, size_t Length>
     LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
 
-    template<LVector T, size_t Length>
+    template<Vector T, size_t Length>
     __host__ __device__ size_t LVectorBlock<T, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
@@ -73,14 +73,14 @@ namespace Physica::Core {
             return Length;
     }
 
-    template<LVector T, size_t Length>
+    template<Vector T, size_t Length>
     __host__ __device__ inline LVectorBlock<T, Length>::PtrTy
     LVectorBlock<T, Length>::data_ptr(size_t index) {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 
-    template<LVector T, size_t Length>
+    template<Vector T, size_t Length>
     __host__ __device__ inline LVectorBlock<T, Length>::ConstPtrTy
     LVectorBlock<T, Length>::data_ptr(size_t index) const {
         assert((index + from) < to);
@@ -89,7 +89,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<LVector T, size_t Length>
+    template<Vector T, size_t Length>
     class Traits<LVectorBlock<T, Length>> {
     public:
         using ScalarType = T::ScalarType;

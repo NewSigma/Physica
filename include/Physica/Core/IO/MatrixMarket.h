@@ -27,7 +27,7 @@ namespace Physica::Core {
     public:
         ~MatrixMarket() = default;
         /* Static members */
-        template<LMatrix T>
+        template<Matrix T>
         static void read(const char* path, T& target);
     private:
         MatrixMarket();
@@ -38,7 +38,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = default;
     };
 
-    template<LMatrix T>
+    template<Matrix T>
     void MatrixMarket::read(const char* path, T& target) {
         using ScalarType = T::ScalarType;
         std::ifstream fin(path);

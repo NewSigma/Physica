@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,6 @@
 
 namespace Physica::Core {
     template<class Derived> class RValueVector;
-    template<class Derived> class LValueVector;
     template<class Derived> class RSparseVector;
 
     namespace Internal {
@@ -33,9 +32,6 @@ namespace Physica::Core {
 
     template<class T>
     concept Vector = Internal::VectorObj<T> || Internal::VectorObj<typename remove_codiff<T>::Type>;
-
-    template<class T>
-    concept LVector = std::derived_from<T, LValueVector<T>> || std::derived_from<T, device_obj<LValueVector<T>>>;
 
     template<class T>
     concept Sparse = std::derived_from<T, RSparseVector<T>>;

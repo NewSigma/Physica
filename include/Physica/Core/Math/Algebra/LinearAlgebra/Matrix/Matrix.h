@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,6 @@
 
 namespace Physica::Core {
     template<class Derived> class RValueMatrix;
-    template<class Derived> class LValueMatrix;
 
     namespace Internal {
         template<class T>
@@ -32,9 +31,6 @@ namespace Physica::Core {
 
     template<class T>
     concept Matrix = Internal::MatrixObj<T> || Internal::MatrixObj<typename remove_codiff<T>::Type>;
-
-    template<class T>
-    concept LMatrix = std::derived_from<T, LValueMatrix<T>> || std::derived_from<T, device_obj<LValueMatrix<T>>>;
     /**
      * This enum decides how the data is stored in a matrix.
      * A dense matrix can be stored as elements or vectors in rows or cols.

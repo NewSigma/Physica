@@ -35,7 +35,7 @@ namespace Physica::Core {
         VectorType vec;
     public:
         Point() = default;
-        template<LVector V>
+        template<Vector V>
         Point(const V& vec_) : vec(vec_) {}
         Point(std::initializer_list<T> list) : vec(std::move(list)) {}
         Point(const Point& p) = default;

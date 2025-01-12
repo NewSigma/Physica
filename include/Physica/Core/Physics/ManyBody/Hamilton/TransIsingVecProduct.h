@@ -48,7 +48,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<LVector V1, class Executor = SequentialExecutor>
+        template<Vector V1, class Executor = SequentialExecutor>
         inline void assignTo(V1& target) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const { noImpl(__func__); }
@@ -69,7 +69,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, Representation U, Vector V>
-    template<LVector V1, class Executor>
+    template<Vector V1, class Executor>
     inline void MatrixVectorProduct<TransIsingMatrix<T, U>, V>::assignTo(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = RealType(0);

@@ -23,7 +23,7 @@
 
 using namespace Physica;
 
-template<LMatrix T>
+template<Matrix T>
 bool isUpperQuasiTriangle(const T& m) {
     if (m.getRow() != m.getCol())
         return false;
@@ -56,7 +56,7 @@ bool isUpperTriangle(const T& m) {
     return true;
 }
 
-template<LMatrix T>
+template<Matrix T>
 bool realSchurTest(const T& mat, double precision) {
     Schur<typename T::ScalarType> schur(mat, true);
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
@@ -65,7 +65,7 @@ bool realSchurTest(const T& mat, double precision) {
     return (A - mat).norm1() <= mat.norm1() * precision;
 }
 
-template<LMatrix T>
+template<Matrix T>
 bool schurTest(const T& mat, double precision) {
     static_assert(T::isComplex, "[Error]: Use realSchurTest is prefered");
     Schur<typename T::ScalarType> schur(mat, true);

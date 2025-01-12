@@ -77,27 +77,27 @@ namespace Physica::Core {
         device_obj(This&&) noexcept = default;
     };
 
-    template<LVector T1, Vector T2>
+    template<Vector T1, Vector T2>
     __host__ __device__ inline void operator+=(device_obj<T1>& v1, const device_obj<T2>& v2) {
         v1 = v1 + v2;
     }
 
-    template<LVector T1, Vector T2>
+    template<Vector T1, Vector T2>
     __host__ __device__ inline void operator-=(device_obj<T1>& v1, const device_obj<T2>& v2) {
         v1 = v1 - v2;
     }
 
-    template<LVector T, Scalar U>
+    template<Vector T, Scalar U>
     __host__ __device__ inline void operator+=(device_obj<T>& v, const U& x) {
         v = v + x;
     }
 
-    template<LVector T, Scalar U>
+    template<Vector T, Scalar U>
     __host__ __device__ inline void operator*=(device_obj<T>& v, const U& x) {
         v = v * x;
     }
 
-    template<LVector T, Scalar U>
+    template<Vector T, Scalar U>
     __host__ __device__ inline void operator/=(device_obj<T>& v, const U& x) {
         v = v * reciprocal(x);
     }

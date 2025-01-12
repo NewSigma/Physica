@@ -41,7 +41,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<LVector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SequentialExecutor>
         inline void assignTo(V& target) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
@@ -59,7 +59,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T, Vector U>
-    template<LVector V, class Executor>
+    template<Vector V, class Executor>
     inline void MatrixVectorProduct<MatrixPow<T>, U>::assignTo(V& target) const {
         const int power = mpow.getPower();
         if (power == 0) {

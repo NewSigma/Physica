@@ -52,7 +52,7 @@ namespace Physica::Core {
         return v2 * v1;
     }
 
-    template<LVector T, Vector U>
+    template<Vector T, Vector U>
     void operator+=(T& v1, const U& v2) requires Sparse<U> {
         using ResultType = T::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
@@ -61,7 +61,7 @@ namespace Physica::Core {
         }
     }
 
-    template<LVector T, Vector U>
+    template<Vector T, Vector U>
     void operator-=(T& v1, const U& v2) requires Sparse<U> {
         using ResultType = T::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {

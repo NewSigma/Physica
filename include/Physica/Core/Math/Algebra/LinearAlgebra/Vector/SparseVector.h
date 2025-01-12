@@ -47,7 +47,7 @@ namespace Physica::Core {
         SparseVector& operator=(SparseVector obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] SparseRef operator[](size_t index) { return SparseRef(*this, index); }
         /* Operations */
-        template<LVector V>
+        template<Vector V>
         void assignTo_sparse(V& v) const;
         void resize(size_t newLength);
         void reserve(size_t numNonZero);
@@ -75,7 +75,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    template<LVector V>
+    template<Vector V>
     void SparseVector<T>::assignTo_sparse(V& v) const {
         for (size_t i = 0; i < getNumNonZero(); ++i)
             v[indexes[i]] = elems[i];

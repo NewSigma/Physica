@@ -31,7 +31,7 @@ namespace Physica::Core {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      * [2] Eigen; https://eigen.tuxfamily.org/
      */
-    template<Vector T, LVector U>
+    template<Vector T, Vector U>
     T::ScalarType::RealType householder(const T& source, U& target) {
         using ScalarType = T::ScalarType;
         using RealType = ScalarType::RealType;
@@ -63,12 +63,12 @@ namespace Physica::Core {
         }
     }
 
-    template<LVector T>
+    template<Vector T>
     T::ScalarType::RealType householderInPlace(T& v) {
         return householder(v, v);
     }
 
-    template<LMatrix M, Vector V>
+    template<Matrix M, Vector V>
     void applyHouseholder(const V& householder, M& mat) {
         using ScalarType = M::ScalarType;
         using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
@@ -79,7 +79,7 @@ namespace Physica::Core {
         mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
-    template<LMatrix M, Vector V>
+    template<Matrix M, Vector V>
     void applyHouseholder(M& mat, const V& householder) {
         using ScalarType = M::ScalarType;
         using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;

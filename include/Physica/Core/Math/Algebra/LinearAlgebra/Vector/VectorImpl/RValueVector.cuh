@@ -42,7 +42,7 @@ namespace Physica::Core {
     public:
         ~device_obj() = default;
         /* Operations */
-        template<LVector V>
+        template<Vector V>
         __host__ __device__ void assignTo(device_obj<V>& target) const;
         /* Getters */
         template<Side Owner = GetSide()>
@@ -70,7 +70,7 @@ namespace Physica::Core {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        template<LVector V>
+        template<Vector V>
         __device__ void assignToImpl(device_obj<V>& target) const;
     };
 }

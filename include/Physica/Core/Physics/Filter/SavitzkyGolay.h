@@ -42,9 +42,9 @@ namespace Physica::Core {
         /* Operators */
         SavitzkyGolay& operator=(SavitzkyGolay filter) noexcept { swap(filter); return *this; }
         /* Operations */
-        template<LVector V>
+        template<Vector V>
         void smooth(V& data) const;
-        template<LVector V>
+        template<Vector V>
         void smooth_zero(V& data) const;
         void swap(SavitzkyGolay& __restrict filter) noexcept;
         /* Getters */
@@ -79,7 +79,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    template<LVector V>
+    template<Vector V>
     void SavitzkyGolay<T>::smooth(V& data) const {
         const size_t windowSize = getWindowSize();
         VectorND<T> mask(windowSize);
@@ -97,7 +97,7 @@ namespace Physica::Core {
      * Append zeros if data is undefined
      */
     template<Scalar T>
-    template<LVector V>
+    template<Vector V>
     void SavitzkyGolay<T>::smooth_zero(V& data) const {
         const size_t windowSize = getWindowSize();
         VectorND<T> mask(windowSize);

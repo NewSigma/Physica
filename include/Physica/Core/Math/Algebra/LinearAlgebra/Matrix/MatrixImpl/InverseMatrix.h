@@ -22,7 +22,7 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<LMatrix SourceType, LMatrix TargetType, size_t Size>
+        template<Matrix SourceType, Matrix TargetType, size_t Size>
         struct InverseImpl {
             static void run(const SourceType& source, TargetType& target) {
                 const ssize_t order = source.getRow();
@@ -114,7 +114,7 @@ namespace Physica::Core {
             }
         };
 
-        template<LMatrix SourceType, LMatrix TargetType>
+        template<Matrix SourceType, Matrix TargetType>
         struct InverseImpl<SourceType, TargetType, 3> {
             static void run(const SourceType& source, TargetType& target) {
                 const auto repDet = reciprocal(source.determinate());
@@ -151,7 +151,7 @@ namespace Physica::Core {
         InverseMatrix(const LValueMatrix<T>& matrix_) : matrix(matrix_.getDerived()) {
             assert(matrix.getRow() == matrix.getCol());
         }
-        template<LMatrix M>
+        template<Matrix M>
         void assignTo(M& target) const;
         /* Getters */
         [[nodiscard]] const T& getMatrix() const noexcept { return matrix; }
@@ -160,7 +160,7 @@ namespace Physica::Core {
     };
 
     template<Matrix T>
-    template<LMatrix M>
+    template<Matrix M>
     void InverseMatrix<T>::assignTo(M& target) const {
         constexpr size_t Size = T::RowAtCompile == Dynamic ? M::RowAtCompile : T::RowAtCompile;
         Internal::InverseImpl<T, M, Size>::run(matrix, target);

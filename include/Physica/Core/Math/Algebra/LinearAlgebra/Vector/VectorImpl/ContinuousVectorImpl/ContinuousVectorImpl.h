@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<LVector T1, Vector T2, bool enableSIMD>
+        template<Vector T1, Vector T2, bool enableSIMD>
         struct AddAssignImpl {
             static void run(T1& v1, const T2& v2) {
                 for(size_t i = 0; i < v1.getLength(); ++i)
@@ -31,7 +31,7 @@ namespace Physica::Core {
             }
         };
 
-        template<LVector T1, Vector T2>
+        template<Vector T1, Vector T2>
         class AddAssignImpl<T1, T2, true> {
             constexpr static size_t Size1 = T1::SizeAtCompile;
             constexpr static size_t Size2 = T2::SizeAtCompile;

@@ -53,7 +53,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<LVector V>
+        template<Vector V>
         __host__ __device__ void assignTo(device_obj<V>& target) const;
         /* Getters */
         template<Side Owner>
@@ -101,7 +101,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T, Vector U>
-    template<LVector V>
+    template<Vector V>
     __host__ __device__ void device_obj<MatrixVectorProduct<T, U>>::assignTo(device_obj<V>& target) const {
         if constexpr (IsHost())
             Base::template assignTo<V>(target);

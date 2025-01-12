@@ -71,7 +71,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        template<LVector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SequentialExecutor>
         inline void assignTo(V& v) const;
 
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
@@ -106,7 +106,7 @@ namespace Physica::Core {
     };
 
     template<Vector T1, Vector T2>
-    template<LVector V, class Executor>
+    template<Vector V, class Executor>
     inline void VectorExpr<ExprType::Sub, T1, T2>::assignTo(V& v) const {
         constexpr bool FastAssign1 = Traits<T1>::FastAssign;
         constexpr bool FastAssign2 = Traits<T2>::FastAssign;

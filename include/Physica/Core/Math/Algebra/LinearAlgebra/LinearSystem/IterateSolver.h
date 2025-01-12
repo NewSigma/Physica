@@ -52,9 +52,9 @@ namespace Physica::Core {
         template<Matrix M>
         inline void cgnr(const M& A, VectorType& b);
 
-        template<class Functor, LVector V>
+        template<class Functor, Vector V>
         void cg_functor(Functor dotFunc, V& b);
-        template<class Functor1, class Functor2, LVector V>
+        template<class Functor1, class Functor2, Vector V>
         void cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, V& b);
 
         void resize(size_t size);
@@ -97,7 +97,7 @@ namespace Physica::Core {
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.112
      */
     template<Scalar T>
-    template<class Functor, LVector V>
+    template<class Functor, Vector V>
     void IterateSolver<T>::cg_functor(Functor dotFunc, V& b) {
         if (dot.getLength() != b.getLength())
             resize(b.getLength());
@@ -132,7 +132,7 @@ namespace Physica::Core {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:636-637
      */
     template<Scalar T>
-    template<class Functor1, class Functor2, LVector V>
+    template<class Functor1, class Functor2, Vector V>
     void IterateSolver<T>::cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, V& b) {
         if (dot.getLength() != b.getLength())
             resize(b.getLength());
