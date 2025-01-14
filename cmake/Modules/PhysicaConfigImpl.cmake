@@ -10,6 +10,11 @@ if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -fPIC -mrdrnd")
 elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-optimization-argument -Wno-unknown-warning-option")
+    # Workaround for P2014R0
+    #
+    # Reference:
+    # [1] https://github.com/llvm/llvm-project/issues/56671
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoro-aligned-allocation")
     add_link_options(-lstdc++) # Add this if you prefer libstdc++
 
     if (CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
@@ -39,7 +44,7 @@ endif()
 
 if(${PHYSICA_CUDA})
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-        message(FATAL_ERROR "To use CUDA, you should define CMAKE_CUDA_ARCHITECTURES.")
+        set(CMAKE_CUDA_ARCHITECTURES native)
     endif()
     enable_language(CUDA)
     find_package(CUDAToolkit REQUIRED)

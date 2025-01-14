@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.24)
 
 project(Physica
         VERSION 2025
@@ -9,6 +9,7 @@ project(Physica
 if (${CMAKE_SOURCE_DIR} MATCHES ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In source build is a bad practice")
 endif()
+message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 #############################################Settings#############################################
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" OFF)
@@ -25,10 +26,6 @@ option(PHYSICA_PYTHON "Enable python suppert" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(CMAKE_DISABLE_PRECOMPILE_HEADERS "Set OFF to acclerate compile using PCH" ON)
-
-message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
-# Policies
-cmake_policy(SET CMP0074 NEW)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include(PhysicaConfigImpl)

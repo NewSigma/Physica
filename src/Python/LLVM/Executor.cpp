@@ -27,7 +27,6 @@ namespace Physica::Python {
         tmBuilder.addFeatures(targetInfo.getTargetOpts().Features);
         LLJITBuilder jitBuilder{};
         jitBuilder.setJITTargetMachineBuilder(std::move(tmBuilder));
-        jitBuilder.setEnableDebuggerSupport(true);
         jit = check_llvm(jitBuilder.create());
     }
 }

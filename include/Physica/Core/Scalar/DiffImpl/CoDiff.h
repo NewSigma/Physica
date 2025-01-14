@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -57,7 +57,7 @@ namespace Physica::Core {
             std::suspend_never initial_suspend() noexcept { return {}; }
             std::suspend_always final_suspend() noexcept { return {}; }
             auto yield_value(Base obj_) noexcept {
-                obj = Base(std::move(obj_));
+                obj = std::move(obj_);
                 return suspend_yield{};
             }
             void return_void() noexcept {}
@@ -75,11 +75,13 @@ namespace Physica::Core {
         CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept;
         template<ReverseDiff T>
         CoDiffNode(T&& x) noexcept requires(!IsCoDiff<T>::value);
-        CoDiffNode(const This& other);
+        CoDiffNode(const This& other) = delete;
         CoDiffNode(This&& other) noexcept;
         ~CoDiffNode();
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        using Base::operator=;
         /* Operations */
         void swap(This& __restrict obj) noexcept;
     };

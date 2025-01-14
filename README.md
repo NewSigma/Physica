@@ -33,7 +33,7 @@ Physica is also an open source platform that maintains scientific code written i
 
 We adopt CMake as our building system:
 
-[CMake](https://cmake.org/) 3.19 and above  
+[CMake](https://cmake.org/) Refer CMakeLists.txt for minimum version  
 
 A C++ compiler that support C++ 20, the following compilers passed our test:
 

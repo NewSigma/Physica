@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,20 +45,7 @@ namespace Physica::Core {
                 x_.reverse(result.grads());
             }
         };
-        *this = fn(std::forward<T>(x));
-    }
-
-    template<class Base>
-    CoDiffNode<Base>::CoDiffNode(const This& other) {
-        *this = [=]() -> This {
-            auto result = co_yield other;
-            if constexpr (Scalar<Base>)
-                other.reverse(result.grad());
-            else {
-                static_assert(Vector<Base> || Matrix<Base>, "[Error]: Unexpected type T");
-                other.reverse(result.grads());
-            }
-        }();
+        fn(std::forward<T>(x)).swap(*this);
     }
 
     template<class Base>

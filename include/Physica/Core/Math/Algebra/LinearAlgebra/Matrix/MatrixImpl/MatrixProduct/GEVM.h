@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,9 +32,7 @@ namespace Physica::Core {
         const T& vec;
         const U& mat;
     public:
-        VectorMatrixProduct(const T& vec_, const U& mat_) : vec(vec_), mat(mat_) {
-            assert(mat.getRow() == 1);
-        }
+        VectorMatrixProduct(const T& vec_, const U& mat_);
         VectorMatrixProduct(const This&) = delete;
         VectorMatrixProduct(This&&) noexcept = delete;
         ~VectorMatrixProduct() = default;
@@ -50,7 +48,13 @@ namespace Physica::Core {
     };
 
     template<Vector T, Matrix U>
-    VectorMatrixProduct<T, U>::ScalarType VectorMatrixProduct<T, U>::calc(size_t row, size_t col) const {
+    VectorMatrixProduct<T, U>::VectorMatrixProduct(const T& vec_, const U& mat_) : vec(vec_), mat(mat_) {
+        assert(vec.getLength() > 0 && mat.getCol() > 0 && "[Error]: Empty vector or matrix");
+        assert(mat.getRow() == 1 && "[Error]: Dimensions do not match");
+    }
+
+    template<Vector T, Matrix U>
+    auto VectorMatrixProduct<T, U>::calc(size_t row, size_t col) const -> ScalarType {
         return vec.calc(row) * mat.calc(0, col);
     }
     /**
@@ -59,7 +63,6 @@ namespace Physica::Core {
      */
     template<Vector T, Matrix U>
     [[nodiscard]] inline auto operator*(const T& vec, const U& mat) noexcept requires(U::RowAtCompile == 1) {
-        assert(mat.getRow() == 1);
         return VectorMatrixProduct<T, U>(vec, mat);
     }
 }

@@ -30,7 +30,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    concept Matrix = Internal::MatrixObj<T> || Internal::MatrixObj<typename remove_codiff<T>::Type>;
+    concept Matrix = Internal::MatrixObj<std::remove_cvref_t<T>> || Internal::MatrixObj<typename remove_codiff<std::remove_cvref_t<T>>::Type>;
     /**
      * This enum decides how the data is stored in a matrix.
      * A dense matrix can be stored as elements or vectors in rows or cols.

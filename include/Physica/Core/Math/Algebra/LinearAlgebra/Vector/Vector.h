@@ -31,7 +31,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    concept Vector = Internal::VectorObj<T> || Internal::VectorObj<typename remove_codiff<T>::Type>;
+    concept Vector = Internal::VectorObj<std::remove_cvref_t<T>> || Internal::VectorObj<typename remove_codiff<std::remove_cvref_t<T>>::Type>;
 
     template<class T>
     concept Sparse = std::derived_from<T, RSparseVector<T>>;
