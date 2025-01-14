@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,28 +22,8 @@
 #include "Physica/Core/Utils/Container/RingBuffer.h"
 
 namespace Physica::Core {
-    RingBuffer::RingBuffer(size_t size)
-            : buffer(new char[size])
-            , size(size) {
-        bufferReader = bufferWriter = buffer;
-    }
-
-    RingBuffer::~RingBuffer() {
-        delete[] buffer;
-    }
-
-    RingBuffer::RingBuffer(const RingBuffer& ring)
-            : buffer(new char[ring.size])
-            , size(ring.size)
-            , bufferReader(ring.bufferReader)
-            , bufferWriter(ring.bufferWriter) {}
-
-    RingBuffer::RingBuffer(RingBuffer&& ring) noexcept
-            : buffer(ring.buffer)
-            , size(ring.size)
-            , bufferReader(ring.bufferReader)
-            , bufferWriter(ring.bufferWriter) {
-        ring.buffer = nullptr;
+    RingBuffer::RingBuffer(size_t size) : buffer(size) {
+        bufferReader = bufferWriter = buffer.data();
     }
     /*!
      * Read data from src and write bytes bytes to the buffer.
@@ -55,21 +35,21 @@ namespace Physica::Core {
      * Number of bytes to be read and write.
      */
     void RingBuffer::writeBytes(const char* src, size_t bytes) {
-        assert(bytes < size);
-        const size_t leftSpace = size - (bufferWriter - buffer);
+        assert(bytes < getSize());
+        const size_t leftSpace = getSize() - (bufferWriter - buffer.data());
         if(bytes < leftSpace) {
             while(bufferReader > bufferWriter && static_cast<size_t>(bufferReader - bufferWriter) < bytes)
                 std::this_thread::yield();
             memcpy(bufferWriter, src, bytes);
-            bufferWriter = bytes == leftSpace ? buffer : (bufferWriter + bytes);
+            bufferWriter = bytes == leftSpace ? buffer.data() : (bufferWriter + bytes);
         }
         else {
             size_t leftBytes = bytes - leftSpace;
-            while(bufferReader > bufferWriter || static_cast<size_t>(bufferReader - buffer) < leftBytes)
+            while(bufferReader > bufferWriter || static_cast<size_t>(bufferReader - buffer.data()) < leftBytes)
                 std::this_thread::yield();
             memcpy(bufferWriter, src, leftSpace);
-            memcpy(buffer, src + leftSpace, leftBytes);
-            bufferWriter = buffer + leftBytes;
+            memcpy(buffer.data(), src + leftSpace, leftBytes);
+            bufferWriter = buffer.data() + leftBytes;
         }
     }
     /*!
@@ -82,26 +62,26 @@ namespace Physica::Core {
      * Number of bytes to be read and write.
      */
     void RingBuffer::readBytes(char* dest, size_t bytes) {
-        const size_t leftSpace = size - (bufferReader - buffer);
+        const size_t leftSpace = getSize() - (bufferReader - buffer.data());
         if(bytes <= leftSpace) {
             while(bufferReader == bufferWriter)
                 std::this_thread::yield();
             memcpy(dest, bufferReader, bytes);
-            bufferReader = bytes == leftSpace ? buffer : (bufferReader + bytes);
+            bufferReader = bytes == leftSpace ? buffer.data() : (bufferReader + bytes);
         }
         else {
             size_t leftBytes = bytes - leftSpace;
             while(bufferReader == bufferWriter)
                 std::this_thread::yield();
             memcpy(dest, bufferReader, leftSpace);
-            memcpy(dest + leftSpace, buffer, leftBytes);
-            bufferReader = buffer + leftBytes;
+            memcpy(dest + leftSpace, buffer.data(), leftBytes);
+            bufferReader = buffer.data() + leftBytes;
         }
     }
 
     void RingBuffer::creadBytes(char* dest, size_t bytes, size_t bias) const {
-        char* const startPos = buffer + (bufferReader - buffer + bias) % size;
-        const size_t leftSpace = size - (startPos - buffer);
+        const char* startPos = buffer.data() + (bufferReader - buffer.data() + bias) % getSize();
+        const size_t leftSpace = getSize() - (startPos - buffer.data());
         if(bytes <= leftSpace) {
             while(startPos <= bufferWriter && startPos + bytes > bufferWriter)
                 std::this_thread::yield();
@@ -109,18 +89,17 @@ namespace Physica::Core {
         }
         else {
             size_t leftBytes = bytes - leftSpace;
-            while(buffer + leftBytes > bufferWriter)
+            while(buffer.data() + leftBytes > bufferWriter)
                 std::this_thread::yield();
             memcpy(dest, startPos, leftSpace);
-            memcpy(dest + leftSpace, buffer, leftBytes);
+            memcpy(dest + leftSpace, buffer.data(), leftBytes);
         }
     }
 
-    void RingBuffer::swap(RingBuffer& __restrict ring) noexcept {
-        assert(this != &ring && "[Error]: Self swap is likely a bug");
-        std::swap(buffer, ring.buffer);
-        std::swap(size, ring.size);
-        std::swap(bufferReader, ring.bufferReader);
-        std::swap(bufferWriter, ring.bufferWriter);
+    void RingBuffer::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        buffer.swap(obj.buffer);
+        std::swap(bufferReader, obj.bufferReader);
+        std::swap(bufferWriter, obj.bufferWriter);
     }
 }

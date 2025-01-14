@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,6 +24,7 @@ using namespace Physica;
 using RandomType = Random<MT19937>;
 
 int main() {
+#ifdef PHYSICA_HDF5
     /* Col float matrix */ {
         using T = float32;
         using MatrixType = DenseMatrix<T>;
@@ -66,5 +67,6 @@ int main() {
         if (data != buffer)
             exit(EXIT_FAILURE);
     }
+#endif
     return 0;
 }

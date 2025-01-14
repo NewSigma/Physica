@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,20 +18,13 @@
  */
 #pragma once
 
-#include <cstddef>
-#include "Physica/Macro.h"
+#include "Array.h"
 
 namespace Physica::Core {
-    //Idea: How about make use of overflow of integers in RingBuffer?
     class PHYSICA_API RingBuffer {
-        /*!
-         * Buffer of data bytes.
-         */
-        char* buffer;
-        /*!
-         * Size of buffer.
-         */
-        size_t size;
+        using This = RingBuffer;
+
+        Array<char> buffer;
         /*!
          * Directs to the next position of buffer to be read.
          * It is always behind of bufferReader.
@@ -44,11 +37,11 @@ namespace Physica::Core {
         char* bufferWriter;
     public:
         explicit RingBuffer(size_t size);
-        RingBuffer(const RingBuffer& ring);
-        RingBuffer(RingBuffer&& ring) noexcept;
-        ~RingBuffer();
+        RingBuffer(const This&) = default;
+        RingBuffer(This&&) noexcept = default;
+        ~RingBuffer() = default;
         /* Operators */
-        RingBuffer& operator=(RingBuffer obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<typename T> inline void write(T t);
         template<typename T> inline void read(T* t);
@@ -56,10 +49,10 @@ namespace Physica::Core {
         void writeBytes(const char* src, size_t bytes);
         void readBytes(char* dest, size_t bytes);
         void creadBytes(char* dest, size_t bytes, size_t bias) const;
-        void swap(RingBuffer& __restrict ring) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isEmpty() const noexcept { return bufferReader == bufferWriter; }
-        [[nodiscard]] size_t getSize() const noexcept { return size; }
+        [[nodiscard]] size_t getSize() const noexcept { return buffer.getLength(); }
     };
     /*!
      * Write T to the buffer.

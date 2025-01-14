@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,107 +18,116 @@
  */
 #pragma once
 
-#include <cstdlib>
+#include "DenseSymmImpl/HalfDenseMatrixStorage.h"
 #include "DenseMatrix.h"
 
 namespace Physica::Core {
-    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
+    /**
+     * \class MatrixChain calculates the product of matrices efficiently and stably.
+     *
+     * Reference:
+     * [1] Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein . 算法导论(第三版)[M]. 北京: 机械工业出版社, 2013:210-215
+     */
+    template<Scalar T>
     class MatrixChain {
-        DenseMatrix<T, type, maxRow, maxColumn>** chain;
-        size_t** price;
-        size_t** point;
-        size_t length;
+        using This = MatrixChain<T>;
+        using MatrixType = DenseMatrix<T>;
+
+        Array<MatrixType> chain;
+        HalfDenseMatrixStorage<size_t> price;
+        HalfDenseMatrixStorage<size_t> point;
     public:
         explicit MatrixChain(size_t length);
-        ~MatrixChain();
-
-        DenseMatrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { assert(i < length); return chain[i]; }
-        DenseMatrix<T, type, Dynamic, Dynamic> solve();
+        MatrixChain(const This&) = default;
+        MatrixChain(This&&) noexcept = default;
+        ~MatrixChain() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] MatrixType& operator[](size_t i) { return chain[i]; }
+        /* Operations */
+        void dynamicProgram();
+        MatrixType multiply() const;
+        MatrixType multiply(size_t from, size_t to) const;
+        void swap(This& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] size_t getLength() const noexcept { return chain.getLength(); }
     private:
-        DenseMatrix<T, type, Dynamic, Dynamic> multiply(size_t from, size_t to);
+        size_t deltaPrice(size_t n) const noexcept;
+        bool isCheaper(size_t new_p, size_t old_p, size_t n, size_t middle) const noexcept;
     };
 
-    /**
-     * \class MatrixChain provides a effective method to calculate the production of a chain of matrices.
-     *
-     * Note: matrices should be initialized and pass into the MatrixChain before calling solve(),
-     * matrices must not be deleted before the calculation finished.
-     *
-     * Warning:
-     * 1.If the chain is too long, size_t or stack may overflow and lead to wrong results.
-     * 2.length should be at least 2 or solve() will simply return the matrix passed in
-     * , which may result in double free.
-     *
-     * Reference: 算法导论 第三版 Page: 210-215
-     */
-    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    MatrixChain<T, type, maxRow, maxColumn>::MatrixChain(size_t length)
-            : chain(new DenseMatrix<T, type, maxRow, maxColumn>*[length])
-            , length(length), price(new size_t*[length]), point(new size_t*[length - 1]) {
-        const auto length_1 = length - 1;
-        for(size_t i = 0; i < length_1; ++i) {
-            price[i] = new size_t[length];
-            point[i] = new size_t[length_1];
-        }
-        //price is longer than point by 1.
-        price[length_1] = new size_t[length];
+    template<Scalar T>
+    MatrixChain<T>::MatrixChain(size_t length)
+            : chain(length), price(length), point(length) {
+        assert(length >= 2 && "[Error]: Invalid length");
+        for (size_t i = 0; i < length; ++i)
+            price(i, i) = 0;
     }
 
-    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    MatrixChain<T, type, maxRow, maxColumn>::~MatrixChain() {
-        delete[] chain;
-        const auto length_1 = length - 1;
-        for(size_t i = 0; i < length_1; ++i) {
-            delete[] price[i];
-            delete[] point[i];
-        }
-        //price is longer than point by 1.
-        delete[] price[length_1];
-        delete[] price;
-        delete[] point;
-    }
-    //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
-    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
-        for(size_t i = 0; i < length; ++i)
-            price[i][i] = 0;
-
-        for(size_t l = 1; l < length; ++l) { //(l + 1) is the length of sub-chain.
-            const auto m_max = length - l;
-            for(size_t m = 0; m < m_max; ++m) { //m is the start index of each sub-chain.
-                const auto m_end = m + l; //End index of each sub-chain.
-                auto n = m; //Cut (m ... ) into (m ... n) and (n + 1 ... m_end).
-                auto chain_n = chain[n];
+    template<Scalar T>
+    void MatrixChain<T>::dynamicProgram() {
+        const size_t length = getLength();
+        for (size_t l = 1; l < length; ++l) { //(l + 1) is the length of sub-chain.
+            const size_t m_max = length - l;
+            for (size_t m = 0; m < m_max; ++m) { // m is the start index of each sub-chain.
+                const size_t m_end = m + l; // End index of each sub-chain.
+                const size_t middle = (m + m_end) / 2;
+                size_t& price_m = price(m, m_end);
+                size_t& point_m = point(m, m_end);
+                // Cut (m ... m_end) into (m ... n) and (n + 1 ... m_end).
+                size_t n = m;
                 /* Handle n = m */ {
-                    price[m][m_end] = price[n + 1][m_end] + chain_n->getRow() * chain_n->getCol() * chain[n + 1]->getRow();
-                    point[m][m_end] = n;
+                    price_m = deltaPrice(n) + price(n + 1, m_end);
+                    point_m = n;
                     ++n;
                 }
-                for(; n < m_end; ++n) {
-                    chain_n = chain[n];
-                    size_t temp = price[m][n] + price[n + 1][m_end]
-                                                + chain_n->getRow() * chain_n->getCol() * chain[n + 1]->getRow();
-                    price[m][m_end] = temp < price[m][m_end] ? temp : price[m][m_end];
-                    point[m][m_end] = temp < price[m][m_end] ? n : point[m][m_end];
-                }
-                /* Handle n = m_end */ {
-                    chain_n = chain[n];
-                    size_t temp = price[m][n] + chain_n->getRow() * chain_n->getCol() * chain[n + 1]->getRow();
-                    price[m][m_end] = temp < price[m][m_end] ? temp : price[m][m_end];
-                    point[m][m_end] = temp < price[m][m_end] ? n : point[m][m_end];
+                for (; n < m_end; ++n) {
+                    size_t p = price(m, n) + deltaPrice(n) + price(n + 1, m_end);
+                    if (isCheaper(p, price_m, n, middle)) {
+                        price_m = p;
+                        point_m = n;
+                    }
                 }
             }
         }
-        return multiply(0, length - 1);
     }
-    //!Both \from and \to are included.
-    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
-    DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
-        if(from == to)
-            return DenseMatrix<T, type, Dynamic, Dynamic>(*chain[from]);
-        const auto cut_at = point[from][to];
+
+    template<Scalar T>
+    auto MatrixChain<T>::multiply() const -> MatrixType {
+        return multiply(0, getLength() - 1);
+    }
+    /**
+     * Closed interval: [from, to]
+     */
+    template<Scalar T>
+    auto MatrixChain<T>::multiply(size_t from, size_t to) const -> MatrixType {
+        assert(from <= to);
+        assert(to < getLength());
+        if (from == to)
+            return chain[from];
+        const size_t cut_at = point(from, to);
         auto first = multiply(from, cut_at);
         auto second = multiply(cut_at + 1, to);
         return first * second;
+    }
+
+    template<Scalar T>
+    void MatrixChain<T>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        chain.swap(obj.chain);
+        std::swap(price, obj.price);
+        std::swap(point, obj.point);
+    }
+
+    template<Scalar T>
+    size_t MatrixChain<T>::deltaPrice(size_t n) const noexcept {
+        return chain[n].getSize() * chain[n + 1].getRow();
+    }
+
+    template<Scalar T>
+    bool MatrixChain<T>::isCheaper(size_t new_p, size_t old_p, size_t n, size_t middle) const noexcept {
+        bool flag1 = new_p < old_p;
+        bool flag2 = (new_p == old_p) && (n <= middle); // if price is equal, use bisection method to keep stability
+        return flag1 == flag2;
     }
 }

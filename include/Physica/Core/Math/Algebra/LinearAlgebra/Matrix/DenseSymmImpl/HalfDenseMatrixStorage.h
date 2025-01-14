@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,8 +37,8 @@ namespace Physica::Core {
         size_t order;
     public:
         HalfDenseMatrixStorage() : arr(), order(Order) {}
-        HalfDenseMatrixStorage(size_t order_) : arr(order_ * (order_ + 1) / 2), order(order_) {}
-        HalfDenseMatrixStorage(size_t order_, const T& t) : arr(order_ * (order_ + 1) / 2, t), order(order_) {}
+        HalfDenseMatrixStorage(size_t order_);
+        HalfDenseMatrixStorage(size_t order_, const T& t);
         HalfDenseMatrixStorage(size_t row, size_t col);
         HalfDenseMatrixStorage(size_t row, size_t col, const T& t);
         HalfDenseMatrixStorage(std::initializer_list<T> list) : arr(list) {}
@@ -69,6 +69,17 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline auto data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
+
+    template<class T, size_t Order>
+    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t order_) : arr(order_ * (order_ + 1) / 2), order(order_) {}
+    /**
+     * If std::same_as<T, size_t> is true, the semantics is ambiguous.
+     *
+     * Use either HalfDenseMatrixStorage(size_t) or HalfDenseMatrixStorage(size_t, size_t, size_t) in this case.
+     */
+    template<class T, size_t Order>
+    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t order_, const T& t)
+            : arr(order_ * (order_ + 1) / 2, t), order(order_) {}
 
     template<class T, size_t Order>
     HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t col)
