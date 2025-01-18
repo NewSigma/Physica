@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/CRTPBase.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica::Core {
     template<class Derived>
@@ -29,14 +29,19 @@ namespace Physica::Core {
         using TraitsType = Traits<Derived>;
     public:
         using ScalarType = TraitsType::ScalarType;
-        using ValueType = ScalarType::ValueType;
-        using InputType = TraitsType::InputType;
         using OutputType = TraitsType::OutputType;
-        constexpr static bool IsTrainMode = ScalarType::isDiffable;
+        constexpr static bool IsTrain = ScalarType::isDiffable;
+        constexpr static bool IsInfer = !IsTrain;
     public:
         ~LayerBase() = default;
         /* Operations */
-        [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
+        template<class T>
+        [[nodiscard]] auto forward(const T& x) const { return Base::getDerived().template forward<T>(x); }
+        auto reverse(const Derived& __restrict other) const noexcept;
+
+        template<class Optimizer>
+        auto step(Optimizer& opt) { return Base::getDerived().step(opt); }
+        auto zero_grad() { return Base::getDerived().zero_grad(); }
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return Base::getDerived().getInputDim(); }
         [[nodiscard]] size_t getOutputDim() const noexcept { return Base::getDerived().getOutputDim(); }
@@ -48,6 +53,12 @@ namespace Physica::Core {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
     };
+
+    template<class Derived>
+    auto LayerBase<Derived>::reverse(const Derived& __restrict other) const noexcept {
+        assert(this != &other && "[Error]: Self reverse is invalid");
+        return Base::getDerived().reverse(other);
+    }
 }
 
 namespace Physica {

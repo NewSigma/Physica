@@ -132,6 +132,7 @@ namespace Physica::Core {
     template<Scalar T>
     CoDiff<T> ln(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
+        assert(x.isPositive() && "[Error]: Invalid param");
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             co_return ScalarType(ln(x.value()), x.grad() / GradType(x));
@@ -141,7 +142,7 @@ namespace Physica::Core {
             auto result = co_yield ln(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(result.value() * g / x_.value());
+                x_.reverse(g / x_.value());
         }
     }
 

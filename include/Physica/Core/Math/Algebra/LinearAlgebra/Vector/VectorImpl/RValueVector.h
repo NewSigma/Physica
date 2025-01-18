@@ -117,10 +117,10 @@ namespace Physica::Core {
         [[nodiscard]] inline RealType lnSquaredNorm() const;
         [[nodiscard]] inline RealType normInf() const;
 
-        [[nodiscard]] ScalarType max() const;
-        [[nodiscard]] ScalarType min() const;
+        [[nodiscard]] CoDiff<ScalarType> max() const;
+        [[nodiscard]] CoDiff<ScalarType> min() const;
         [[nodiscard]] CoDiff<ScalarType> sum() const;
-        [[nodiscard]] ScalarType lnSumExp() const;
+        [[nodiscard]] CoDiff<ScalarType> lnSumExp() const;
         [[nodiscard]] ScalarType prod() const;
         [[nodiscard]] bool isZeros() const;
         template<Vector V>

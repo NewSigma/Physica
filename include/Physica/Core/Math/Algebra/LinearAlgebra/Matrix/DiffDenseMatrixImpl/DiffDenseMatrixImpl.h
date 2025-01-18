@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,21 +32,28 @@ namespace Physica::Core {
             : v(row, col, init), g(row, col, 0) {}
 
     template<tparams>
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff)
+            : v(row, col, init.value()), g(row, col, init.grad()) {}
+
+    template<tparams>
     DiffDenseMatrix::DenseMatrix(initializer_list list) : v(std::move(list)) {
         g = GradMatrix(v.getRow(), v.getCol(), 0);
     }
 
     template<tparams>
-    template<Matrix M>
-    DiffDenseMatrix::DenseMatrix(const M& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
-        mat.assign(*this);
-    }
+    DiffDenseMatrix::DenseMatrix(ValueMatrix v_, GradMatrix g_) : v(std::move(v_)), g(std::move(g_)) {}
 
     template<tparams>
     template<Vector V>
-    DiffDenseMatrix::DenseMatrix(const V& vec) : DenseMatrix(vec.getLength(), 1) {
+    DiffDenseMatrix::DenseMatrix(const V& vec) requires(!ReverseDiff<V>) : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
         vec.assign(col);
+    }
+
+    template<tparams>
+    template<Matrix M>
+    DiffDenseMatrix::DenseMatrix(const M& mat) requires(!ReverseDiff<M>) : DenseMatrix(mat.getRow(), mat.getCol()) {
+        mat.assign(*this);
     }
 
     template<tparams>

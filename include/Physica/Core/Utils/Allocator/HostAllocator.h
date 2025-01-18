@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
@@ -33,6 +34,8 @@ namespace Physica::Core {
     template<class T, size_t Align = Dynamic>
     class HostAllocator {
         using This = HostAllocator<T, Align>;
+
+        constexpr static bool OverAlign = Align > alignof(std::max_align_t);
     public:
         using value_type = T;
         using size_type = std::size_t;
@@ -59,22 +62,32 @@ namespace Physica::Core {
 
     template<class T, size_t Align>
     [[nodiscard]] inline T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
-        constexpr size_t Alignment = Align == Dynamic ? alignof(T) : Align;
-        const size_t size = n * sizeof(T);
-    #ifdef _MSC_VER
-        return reinterpret_cast<T*>(_aligned_malloc(Alignment, size));
-    #else
-        return reinterpret_cast<T*>(std::aligned_alloc(Alignment, size));
-    #endif
+        size_t size = n * sizeof(T);
+        void* p;
+        if constexpr (OverAlign) {
+            size = (size + Align - 1) / Align * Align;
+        #ifdef _MSC_VER
+            p = _aligned_malloc(Align, size);
+        #else
+            p = std::aligned_alloc(Align, size);
+        #endif
+        }
+        else
+            p = std::malloc(size);
+        return reinterpret_cast<T*>(p);
     }
 
     template<class T, size_t Align>
     inline void HostAllocator<T, Align>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
-    #ifdef _MSC_VER
-        _aligned_free(p);
-    #else
-        std::free(p);
-    #endif
+        if constexpr (OverAlign) {
+        #ifdef _MSC_VER
+            _aligned_free(p);
+        #else
+            std::free(p);
+        #endif
+        }
+        else
+            std::free(p);
     }
 
     template<class T, size_t Align>

@@ -33,13 +33,12 @@ namespace Physica::Core {
         using MatrixType = host_obj::MatrixType;
         using MachineType = T::MachineType;
     public:
-        using Base::IsTrainMode;
+        using Base::IsTrain;
         using typename Base::ValueType;
-        using typename Base::InputType;
         using typename Base::OutputType;
         using DiffMatrix = Diff<DenseMatrix<ValueType, host_obj::Option>, DiffMode::Reverse, T::Order>;
-        using DeviceMatrix = device_obj<typename std::conditional<IsTrainMode, DiffMatrix, MatrixType>::type>;
-        using BiasType = std::conditional<WithBias, InputType, PlainStruct<void>>::type;
+        using DeviceMatrix = device_obj<typename std::conditional<IsTrain, DiffMatrix, MatrixType>::type>;
+        using BiasType = std::conditional<WithBias, OutputType, PlainStruct<void>>::type;
     private:
         DeviceMatrix weights;
         [[no_unique_address]] BiasType bias;
@@ -53,7 +52,8 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] OutputType forward(const InputType& x) const;
+        template<Vector V>
+        [[nodiscard]] OutputType forward(const V& x) const;
 
         template<RandomGenerator R>
         void random_normal();
@@ -85,8 +85,8 @@ namespace Physica::Core {
             , bias(layer.getBias()) {}
 
     template<Scalar T, bool WithBias>
-    device_obj<LinearLayer<T, WithBias>>::OutputType
-    device_obj<LinearLayer<T, WithBias>>::forward(const InputType& x) const {
+    template<Vector V>
+    auto device_obj<LinearLayer<T, WithBias>>::forward(const V& x) const -> OutputType {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (WithBias)
             return weights * x + bias;
@@ -184,9 +184,8 @@ namespace Physica {
         using VectorType = VectorND<typename Base::ScalarType>;
         using ValueType = Base::ScalarType::ValueType;
         using DiffVector = Diff<VectorND<ValueType>, DiffMode::Reverse, T::Order>;
-        constexpr static bool IsTrainMode = Base::ScalarType::isDiffable;
+        constexpr static bool IsTrain = Base::ScalarType::isDiffable;
     public:
-        using InputType = Core::device_obj<typename std::conditional<IsTrainMode, DiffVector, VectorType>::type>;
-        using OutputType = InputType;
+        using OutputType = Core::device_obj<typename std::conditional<IsTrain, DiffVector, VectorType>::type>;
     };
 }

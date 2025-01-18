@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -46,7 +46,7 @@ namespace Physica::Core {
         inline This& operator=(const ScalarType& other);
         inline This& operator=(int x) { return operator=(ScalarType(x)); }
         inline This& operator=(double x) { return operator=(ScalarType(x)); }
-        [[nodiscard]] operator ScalarType() const { return ScalarType(value(), grad()); }
+        [[nodiscard]] operator ScalarType() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
 
@@ -90,6 +90,11 @@ namespace Physica::Core {
         value() = other.value();
         grad() = other.grad();
         return *this;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    ScalarRef<Diff<T, Mode, Order>>::operator ScalarType() const requires(!ReverseDiff<T>) {
+        return ScalarType(value(), grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order>

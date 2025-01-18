@@ -25,7 +25,15 @@
 
 namespace Physica::Core {
     template<class Base>
-    CoDiffNode<Base>::CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {}
+    CoDiffNode<Base>::CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {
+        /**
+         * Workaround for [1]
+         *
+         * Reference:
+         * [1] https://github.com/llvm/llvm-project/issues/123347
+         */
+        asm volatile("" : : "r,m"(handle) : "memory");
+    }
 
     template<class Base>
     template<ReverseDiff T>
@@ -34,7 +42,7 @@ namespace Physica::Core {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             Base y;
             if constexpr (Scalar<T>) {
-                auto result = co_yield Base(std::move(y));
+                auto result = co_yield std::move(y);
                 x_.reverse(result.grad());
             }
             else {

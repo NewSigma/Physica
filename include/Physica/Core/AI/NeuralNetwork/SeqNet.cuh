@@ -18,22 +18,21 @@
  */
 #pragma once
 
-#include "SimpleNet.h"
+#include "SeqNet.h"
 #include "Loss.cuh"
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<SimpleNet<Derived>> : public device_obj<LayerBase<Derived>> {
+    class device_obj<SeqNet<Derived>> : public device_obj<LayerBase<Derived>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");
-        using host_obj = SimpleNet<Derived>;
+        using host_obj = SeqNet<Derived>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<Derived>>;
     public:
         using typename Base::ValueType;
         using typename Base::ScalarType;
-        using typename Base::InputType;
         using typename Base::OutputType;
-        using Base::IsTrainMode;
+        using Base::IsTrain;
         using LossType = device_obj<Loss<ScalarType>>::LossType;
     public:
         device_obj(const This&) = delete;
@@ -46,7 +45,6 @@ namespace Physica::Core {
         [[nodiscard]] LossType loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
         template<class Dataset>
         [[nodiscard]] LossType loss(const Dataset& dataset) const;
-        [[nodiscard]] size_t classify(const InputType& input) const;
     protected:
         device_obj() = default;
         device_obj(This&&) noexcept = default;
@@ -58,8 +56,8 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Dataset, class Optimizer, class RandomType>
-    void device_obj<SimpleNet<Derived>>::train_step(const Dataset& dataset, Optimizer& opt) {
-        static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
+    void device_obj<SeqNet<Derived>>::train_step(const Dataset& dataset, Optimizer& opt) {
+        static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         using TracerType = device_obj<ScalarType>::TracerType;
 
         auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
@@ -75,8 +73,8 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Dataset>
-    device_obj<SimpleNet<Derived>>::LossType device_obj<SimpleNet<Derived>>::loss(const Dataset& dataset) const {
-        static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
+    device_obj<SeqNet<Derived>>::LossType device_obj<SeqNet<Derived>>::loss(const Dataset& dataset) const {
+        static_assert(!IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
         LossType result = 0;
         for (size_t i = 0; i < size; ++i)
@@ -85,22 +83,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    size_t device_obj<SimpleNet<Derived>>::classify(const InputType& input) const {
-        static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
-        const auto output = Base::forward(input).toHost();
-        ValueType max = output[0];
-        size_t index = 0;
-        for (size_t i = 1; i < output.getLength(); ++i) {
-            if (output[i] > max) {
-                index = i;
-                max = output[i].value();
-            }
-        }
-        return index;
-    }
-
-    template<class Derived>
-    void device_obj<SimpleNet<Derived>>::swap(This& __restrict obj) noexcept {
+    void device_obj<SeqNet<Derived>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         net_guard.swap(obj.net_guard);
     }

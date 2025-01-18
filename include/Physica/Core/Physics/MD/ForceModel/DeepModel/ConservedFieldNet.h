@@ -29,13 +29,11 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
-        using typename Base::InputType;
-        using typename Base::OutputType;
 
         using device_obj_type = device_obj<LinearLayer<ScalarType, true>>;
         using DiffScalar1 = Diff<ValueType, DiffMode::Reverse, 1>;
         using LossType = Loss<ScalarType>::LossType;
-        constexpr static bool IsTrainMode = ScalarType::Order == 2;
+        constexpr static bool IsTrain = ScalarType::Order == 2;
         static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
     public:
         ConservedFieldNet(const ConservedFieldNet&) = delete;
@@ -60,7 +58,7 @@ namespace Physica::Core {
     template<class Derived>
     inline void ConservedFieldNet<Derived>::swap(ConservedFieldNet& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        if constexpr (IsTrainMode)
+        if constexpr (IsTrain)
             diffGuard.swap(obj.diffGuard);
     }
 }

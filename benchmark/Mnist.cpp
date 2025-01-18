@@ -21,7 +21,7 @@
 #include <gperftools/profiler.h>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h"
-#include "Physica/Core/AI/NeuralNetwork/SimpleNet.h"
+#include "Physica/Core/AI/NeuralNetwork/SeqNet.h"
 #include "Physica/Core/AI/NeuralNetwork/Loss.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
@@ -37,10 +37,9 @@ namespace Physica {
 }
 
 template<Scalar T, RandomGenerator R>
-class MnistNet : public SimpleNet<MnistNet<T, R>> {
-    using Base = SimpleNet<MnistNet<T, R>>;
+class MnistNet : public SeqNet<MnistNet<T, R>> {
+    using Base = SeqNet<MnistNet<T, R>>;
     using typename Base::ValueType;
-    using typename Base::InputType;
     using typename Base::OutputType;
 
     LinearLayer<T> layer1;
@@ -65,7 +64,8 @@ public:
     /* Operators */
     MnistNet& operator=(MnistNet& obj) noexcept { swap(obj); return *this; }
     /* Operations */
-    [[nodiscard]] OutputType forward(const InputType& x) const {
+    template<Vector V>
+    [[nodiscard]] OutputType forward(const V& x) const {
         OutputType result = relu(layer1.forward(x));
         result = relu(layer2.forward(result));
         result = layer3.forward(result);

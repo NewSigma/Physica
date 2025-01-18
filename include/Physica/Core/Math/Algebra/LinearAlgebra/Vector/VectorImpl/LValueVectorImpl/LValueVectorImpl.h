@@ -121,6 +121,7 @@ namespace Physica::Core {
     template<class Derived>
     template<Vector T>
     void LValueVector<Derived>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
+        assert(Base::getLength() == grad.getLength());
         using GradType = ScalarType::GradType;
         static_assert(std::is_same<GradType, typename T::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         for (size_t i = 0; i < Base::getLength(); ++i)

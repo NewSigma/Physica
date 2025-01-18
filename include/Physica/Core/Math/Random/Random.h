@@ -130,7 +130,13 @@ namespace Physica::Core {
     Array<int> Random<Option, FixedSeed>::random_int(size_t length, int from, int to) {
         assert(from <= to && to < INT_MAX);
         Array<int> result(length);
-        check_vsl(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
+        if constexpr (HasMKL())
+            check_vsl(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
+        else {
+            std::uniform_int_distribution<int> dist(from, to);
+            for (int& i : result)
+                i = dist(getInstance());
+        }
         return result;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,6 +38,8 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
+
+        using Base::operator=;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t i) { return (*v.data_ptr(i)).value_ptr(); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }
@@ -61,6 +63,8 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
+
+        using Base::operator=;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t i) { return v.data_ptr(i).template grad_ptr<GradOrder>(); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }

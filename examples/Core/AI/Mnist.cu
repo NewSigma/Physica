@@ -20,7 +20,7 @@
 #include <QApplication>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.cuh"
-#include "Physica/Core/AI/NeuralNetwork/SimpleNet.cuh"
+#include "Physica/Core/AI/NeuralNetwork/SeqNet.cuh"
 #include "Physica/Core/AI/NeuralNetwork/SimpleDataset.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.cuh"
@@ -38,15 +38,14 @@ namespace Physica {
 
 namespace Physica::Core {
     template<Scalar T>
-    class device_obj<MnistNet<T>> : public device_obj<SimpleNet<MnistNet<T>>> {
+    class device_obj<MnistNet<T>> : public device_obj<SeqNet<MnistNet<T>>> {
         using host_obj = MnistNet<T>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<SimpleNet<host_obj>>;
+        using Base = device_obj<SeqNet<host_obj>>;
         using typename Base::ValueType;
-        using typename Base::InputType;
         using typename Base::OutputType;
         using typename Base::LossType;
-        using Base::IsTrainMode;
+        using Base::IsTrain;
     public:
         using device_obj_type = This;
     private:
@@ -66,7 +65,8 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] OutputType forward(const InputType& x) const {
+        template<Vector V>
+        [[nodiscard]] OutputType forward(const V& x) const {
             OutputType result = relu(layer1.forward(x));
             result = layer2.forward(result);
             return result;
@@ -75,7 +75,7 @@ namespace Physica::Core {
         template<class Dataset>
         [[nodiscard]] LossType loss(const Dataset& dataset, size_t index) const {
             OutputType output;
-            if constexpr (IsTrainMode)
+            if constexpr (IsTrain)
                 output = forward(dataset.getSamples()[index]);
             else
                 output = forward(dataset.getSamples()[index].getValues());
@@ -118,8 +118,8 @@ constexpr size_t numEpoch = 10;
 constexpr size_t batchSize = 64;
 constexpr double learnRate = 0.05;
 
-std::pair<Dataset, Dataset> makeDataset() {
-    const Mnist mnist("/home/sigma/Documents/data");
+std::pair<Dataset, Dataset> makeDataset(const char* path) {
+    const Mnist mnist(path);
     auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
@@ -129,8 +129,12 @@ std::pair<Dataset, Dataset> makeDataset() {
 }
 
 int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cout << "[Error]: Expect path to data\n";
+        return 1;
+    }
     ThreadPool::numThreadRequired = 4;
-    const auto dataset = makeDataset();
+    const auto dataset = makeDataset(argv[1]);
     const size_t itePerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
 
     auto opt = Optimizer(learnRate, batchSize);

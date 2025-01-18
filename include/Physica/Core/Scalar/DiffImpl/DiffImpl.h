@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -277,7 +277,7 @@ namespace Physica::Core {
             co_return {-x.value(), -x.grad()};
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield x_.value();
+            auto result = co_yield -x_.value();
             auto& g = result.grad();
             if (!g.isZero())
                 x_.reverse(-g);

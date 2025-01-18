@@ -103,6 +103,7 @@ namespace Physica::Core {
     template<Matrix T, Vector U>
     template<Vector V>
     void MatrixVectorProduct<T, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        assert(grad_.getLength() == getLength());
         const auto& grad = grad_.values();
         if constexpr (ReverseDiff<T>)
             mat.reverse(grad * vec.values().transpose());

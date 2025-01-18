@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,10 +58,12 @@ namespace Physica::Core {
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
             const auto& grad = grad_.values();
+            const auto& lhs = Base::getLHS();
+            const auto& rhs = Base::getRHS();
             if constexpr (ReverseDiff<T>)
-                Base::getLHS().reverse(Base::getRHS().value() * grad);
+                lhs.reverse(rhs.value() * grad);
             if constexpr (ReverseDiff<U>)
-                Base::getRHS().reverse(Base::getLHS().values() * grad);
+                rhs.reverse(lhs.values() * grad);
         }
     };
 

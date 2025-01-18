@@ -19,87 +19,56 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
-#include "Physica/Core/Scalar/Diff.h"
+#include "Physica/Core/Scalar/Real.h"
 
 namespace Physica::Core {
     /**
-     * \class SGD Stochastic gradient descent using auto diff
+     * Stochastic gradient descent for auto diff
      */
-    template<Scalar T>
     class SGD {
-        static_assert(T::isDiffable, "[Error]: T must be differentiable");
-        static_assert(!is_device_obj<T>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
+        float64 learnRate;
+        int batchSize;
     public:
-        using ValueType = T::ValueType;
-    private:
-        constexpr static int AnyValue = 0;
-    protected:
-        ValueType learnRate;
-        ValueType meanLearnRate;
-        unsigned int batchSize;
-        T from;
-        T to;
-    public:
-        SGD(ValueType learnRate_, unsigned int batchSize_);
+        inline SGD(float64 learnRate_, int batchSize_);
         SGD(const SGD&) = default;
         SGD(SGD&&) noexcept = default;
         ~SGD() = default;
         /* Operators */
         SGD& operator=(SGD obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        inline void recordBegin();
-        inline void recordEnd();
-        void step() const;
-        inline void zero_grad() const;
-        void swap(SGD& __restrict obj) noexcept;
+        template<Diffable T>
+        void step(T& obj) const;
+        inline void swap(SGD& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] ValueType getLearnRate() const noexcept { return learnRate; }
-        [[nodiscard]] ValueType getMeanLearnRate() const noexcept { return meanLearnRate; }
+        [[nodiscard]] float64 getLearnRate() const noexcept { return learnRate; }
         [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
         /* Setters */
-        void setLearnRate(ValueType lr);
+        inline void setLearnRate(float64 lr);
     };
 
-    template<Scalar T>
-    SGD<T>::SGD(ValueType learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
+    inline SGD::SGD(float64 learnRate_, int batchSize_) : batchSize(batchSize_) {
         assert(batchSize > 0);
         setLearnRate(learnRate_);
     }
 
-    template<Scalar T>
-    inline void SGD<T>::recordBegin() {
-        to = T(AnyValue);
-    }
-    
-    template<Scalar T>
-    inline void SGD<T>::recordEnd() {
-        from = T(AnyValue);
-    }
-
-    template<Scalar T>
-    void SGD<T>::step() const {
-        noImpl("s.value() - meanLearnRate * s.grad()");
+    template<Diffable T>
+    void SGD::step(T& obj) const {
+        if constexpr (Scalar<T>)
+            obj.value() -= learnRate * obj.grad().value();
+        else if constexpr (Vector<T> || Matrix<T>)
+            obj.values() -= learnRate * obj.grads().values();
+        else
+            obj.step(*this);
     }
 
-    template<Scalar T>
-    inline void SGD<T>::zero_grad() const {
-        noImpl("SGD");
-    }
-
-    template<Scalar T>
-    void SGD<T>::swap(SGD& __restrict obj) noexcept {
+    inline void SGD::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         learnRate.swap(obj.learnRate);
-        meanLearnRate.swap(obj.meanLearnRate);
         std::swap(batchSize, obj.batchSize);
-        from.swap(obj.from);
-        to.swap(obj.to);
     }
 
-    template<Scalar T>
-    void SGD<T>::setLearnRate(ValueType lr) {
+    inline void SGD::setLearnRate(float64 lr) {
         assert(!lr.isZero() && "[Error]: 0 learn rate does nothing");
         learnRate = lr;
-        meanLearnRate = lr / ValueType(batchSize);
     }
 }

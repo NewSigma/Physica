@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,6 +31,7 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using Base::isForwardDiff;
+        using Base::isReverseDiff;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -54,7 +55,7 @@ namespace Physica::Core {
         DenseVector(initializer_list list);
         DenseVector(ValueVector v_, GradVector g_) noexcept;
         template<Vector V>
-        DenseVector(const V& v) requires(!ReverseDiff<V>);
+        explicit(isReverseDiff) DenseVector(const V& v) requires(!ReverseDiff<V>);
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;
@@ -94,6 +95,8 @@ namespace Physica::Core {
 
         [[nodiscard]] const ValueVector& values() const noexcept { return v; }
         [[nodiscard]] ValueVector& values() noexcept { return v; }
+        [[nodiscard]] const GradVector& grads() const noexcept { return g; }
+        [[nodiscard]] GradVector& grads() noexcept { return g; }
         /* Static members */
         template<RandomGenerator R>
         [[nodiscard]] inline static This random_uniform(size_t len);

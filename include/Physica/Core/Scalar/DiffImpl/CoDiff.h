@@ -56,8 +56,9 @@ namespace Physica::Core {
             auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
             std::suspend_never initial_suspend() noexcept { return {}; }
             std::suspend_always final_suspend() noexcept { return {}; }
-            auto yield_value(Base obj_) noexcept {
-                obj = std::move(obj_);
+            template<class T>
+            auto yield_value(T&& arg) noexcept {
+                obj = Base(std::forward<T>(arg));
                 return suspend_yield{};
             }
             void return_void() noexcept {}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,38 +22,34 @@
 
 namespace Physica::Core {
     template<Scalar T>
-    class Loss {
-        static_assert(!is_device_obj<T>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
-    public:
-        constexpr static bool IsTrainMode = T::isDiffable;
-        using ValueType = T::ValueType;
-        using LossType = T;
-    private:
-        using VectorType = VectorND<T>;
-    public:
-        [[nodiscard]] static T softmax(const VectorType& v, size_t label);
-        [[nodiscard]] static T crossEntropy(const VectorType& v, size_t label);
-        [[nodiscard]] static T polar_rate(T train_loss, T valid_loss);
-        [[nodiscard]] static T mixed_loss(T train_loss, T valid_loss);
-    };
-
-    template<Scalar T>
-    T Loss<T>::softmax(const VectorType& v, size_t label) {
-        const T maximum = v.max();
-        const T factor = reciprocal(exp(v - maximum).sum());
-        return exp(v.calc(label) - maximum) * factor;
+    CoDiff<T> softmax(const VectorND<T>& v, size_t label) {
+        auto y = exp(-crossEntropy(v, label));
+        if constexpr (ReverseDiff<T>) {
+            auto tmp = co_yield y.value();
+            y.reverse(tmp.grad());
+        }
+        else
+            co_return std::move(y);
     }
 
     template<Scalar T>
-    T Loss<T>::crossEntropy(const VectorType& v, size_t label) {
+    CoDiff<T> crossEntropy(const VectorND<T>& v, size_t label) {
         assert(label < v.getLength() && "[Error]: The label is not exist");
-        return -ln(softmax(v, label) + T(std::numeric_limits<ValueType>::min())); //Add minimum to avoid ln(0)
+        const auto vl = v[label];
+        const auto v1 = v - vl;
+        auto y = v1.lnSumExp();
+        if constexpr (ReverseDiff<T>) {
+            auto tmp = co_yield y.value();
+            y.reverse(tmp.grad());
+        }
+        else
+            co_return std::move(y);
     }
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting
      */
     template<Scalar T>
-    T Loss<T>::polar_rate(T train_loss, T valid_loss) {
+    T polar_rate(T train_loss, T valid_loss) {
         const T total = train_loss + valid_loss;
         const T delta = train_loss - valid_loss;
         if (abs(delta) * T(std::numeric_limits<T>::epsilon()) >= total)
@@ -62,7 +58,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    T Loss<T>::mixed_loss(T train_loss, T valid_loss) {
+    T mixed_loss(T train_loss, T valid_loss) {
         return std::max(train_loss, valid_loss) + abs(train_loss - valid_loss);
     }
 }

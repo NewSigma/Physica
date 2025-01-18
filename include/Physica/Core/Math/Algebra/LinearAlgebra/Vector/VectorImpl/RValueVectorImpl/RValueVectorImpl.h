@@ -228,19 +228,32 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    RValueVector<Derived>::ScalarType RValueVector<Derived>::max() const {
+    auto RValueVector<Derived>::max() const -> CoDiff<ScalarType> {
         static_assert(!ScalarType::isComplex, "[Error]: Compare between complex number is ill defined");
-
         assert(getLength() != 0);
+
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
-        if constexpr (!EnableSIMD || isReverseDiff) {  // Optimize: Not implemented for reverse diff
+        if constexpr (isReverseDiff) {
+            size_t index = 0;
+            ValueType elem = calc_value(0), temp;
+            for(size_t i = 1; i < getLength(); ++i) {
+                temp = calc_value(i);
+                if (elem < temp) {
+                    elem = temp;
+                    index = i;
+                }
+            }
+            const auto result = co_yield calc_value(index);
+            calc(index).reverse(result.grad());
+        }
+        else if constexpr (!EnableSIMD) {
             ScalarType result = calc(0);
             for(size_t i = 1; i < getLength(); ++i) {
                 ScalarType temp = calc(i);
                 if (result < temp)
                     result = temp;
             }
-            return result;
+            co_return result;
         }
         else {
             const auto& v = Base::getDerived();
@@ -273,26 +286,30 @@ namespace Physica::Core {
                         result = std::max<ScalarType>(result, v.calc(i + j));
                 }
             }
-            return result;
+            co_return std::move(result);
         }
     }
 
     template<class Derived>
-    RValueVector<Derived>::ScalarType RValueVector<Derived>::min() const {
+    auto RValueVector<Derived>::min() const -> CoDiff<ScalarType> {
         static_assert(!ScalarType::isComplex, "[Error]: Compare between complex number is ill defined");
-
         assert(getLength() != 0);
+
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
-        if constexpr (!EnableSIMD || isReverseDiff) { // Optimize: Not implemented for reverse diff
-            ScalarType result = calc(0);
+        if constexpr (isReverseDiff) {
+            size_t index = 0;
+            ValueType elem = calc_value(0), temp;
             for(size_t i = 1; i < getLength(); ++i) {
-                ScalarType temp = calc(i);
-                if (result > temp)
-                    result = temp;
+                temp = calc_value(i);
+                if (elem > temp) {
+                    elem = temp;
+                    index = i;
+                }
             }
-            return result;
+            const auto result = co_yield calc_value(index);
+            calc(index).reverse(result.grad());
         }
-        else {
+        else if constexpr (EnableSIMD) {
             const auto& v = Base::getDerived();
             PacketType buffer(std::numeric_limits<ScalarType>::max());
             ScalarType result;
@@ -323,14 +340,35 @@ namespace Physica::Core {
                         result = std::min<ScalarType>(result, v.calc(i + j));
                 }
             }
-            return result;
+            co_return std::move(result);
+        }
+        else {
+            ScalarType result = calc(0);
+            for(size_t i = 1; i < getLength(); ++i) {
+                ScalarType temp = calc(i);
+                if (result > temp)
+                    result = temp;
+            }
+            co_return result;
         }
     }
 
     template<class Derived>
     auto RValueVector<Derived>::sum() const -> CoDiff<ScalarType> {
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
-        if constexpr (Internal::EnableSIMD<Derived>::value && !isReverseDiff) {
+        if constexpr (isReverseDiff) {
+            size_t i = 0;
+            ValueType v = 0;
+            auto elems = co_for([&]() { return i < getLength(); }, [&]() { ++i; }, [&]() {
+                auto elem = calc(i);
+                v += elem.value();
+                return elem;
+            });
+            auto result = co_yield std::move(v);
+            for (auto& elem : elems)
+                elem.reverse(result.grad());
+        }
+        else if constexpr (Internal::EnableSIMD<Derived>::value) {
             const auto& v = Base::getDerived();
             PacketType buffer(0);
             if constexpr (SizeAtCompile != Dynamic) {
@@ -358,18 +396,6 @@ namespace Physica::Core {
             }
             co_return buffer.sum();
         }
-        else if constexpr (isReverseDiff) {
-            size_t i = 0;
-            ValueType v = 0;
-            auto elems = co_for([&]() { return i < getLength(); }, [&]() { ++i; }, [&]() {
-                auto elem = calc(i);
-                v += elem.value();
-                return elem;
-            });
-            auto result = co_yield std::move(v);
-            for (auto& elem : elems)
-                elem.reverse(result.grad());
-        }
         else {
             auto result = ScalarType(0);
             for(size_t i = 0; i < getLength(); ++i)
@@ -379,14 +405,21 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::lnSumExp() const -> ScalarType {
+    auto RValueVector<Derived>::lnSumExp() const -> CoDiff<ScalarType> {
         const Derived& v = Base::getDerived();
         ValueType m;
         if constexpr (isComplex)
             m = values().reals().max();
         else
             m = values().max();
-        return ln(exp(v - m).sum()) + m;
+
+        auto y = ln(exp(v - m).sum() + ValueType(std::numeric_limits<ValueType>::min())) + m; // Add min() to avoid ln(0)
+        if constexpr (isReverseDiff) {
+            auto tmp = co_yield y.value();
+            y.reverse(tmp.grad());
+        }
+        else
+            co_return std::move(y);
     }
 
     template<class Derived>

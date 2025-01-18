@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,129 +18,131 @@
  */
 #pragma once
 
+#include "Float64.h"
+
 namespace Physica::Core {
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> abs(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> abs(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> relu(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> relu(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> square(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> square(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> reciprocal(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> reciprocal(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> sqrt(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> sqrt(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> cbrt(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> cbrt(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> ln(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> ln(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> ln1p(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> ln1p(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> log(const Real<Option>& s, const Real<Option>& a) noexcept;
+    __host__ __device__ inline Real<Option> log(const Real<Option>& x, const Real<Option>& a) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> exp(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> exp(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> pow(const Real<Option>& s, const Real<Option>& n) noexcept;
+    Real<Option> pow(const Real<Option>& x, const Real<Option>& n) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> factorial(const Real<Option>& s) noexcept;
+    Real<Option> factorial(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> cos(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> cos(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> sin(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> sin(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline void sincos(Real<Option> s, Real<Option>& sin_result, Real<Option>& cos_result) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> tan(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> tan(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> sec(const Real<Option>& s) noexcept;
+    Real<Option> sec(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> csc(const Real<Option>& s) noexcept;
+    Real<Option> csc(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> cot(const Real<Option>& s) noexcept;
+    Real<Option> cot(const Real<Option>& x) noexcept;
     //!Domain of definition: [0, Pi]
     template<ScalarOption Option>
-    Real<Option> arccos(const Real<Option>& s) noexcept;
+    Real<Option> arccos(const Real<Option>& x) noexcept;
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<ScalarOption Option>
-    Real<Option> arcsin(const Real<Option>& s) noexcept;
+    Real<Option> arcsin(const Real<Option>& x) noexcept;
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<ScalarOption Option>
-    Real<Option> arctan(const Real<Option>& s) noexcept;
+    Real<Option> arctan(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arcsec(const Real<Option>& s) noexcept;
+    Real<Option> arcsec(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arccsc(const Real<Option>& s) noexcept;
+    Real<Option> arccsc(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arccot(const Real<Option>& s) noexcept;
+    Real<Option> arccot(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> cosh(const Real<Option>& s) noexcept;
+    Real<Option> cosh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> sinh(const Real<Option>& s) noexcept;
+    Real<Option> sinh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> tanh(const Real<Option>& s) noexcept;
+    Real<Option> tanh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> sech(const Real<Option>& s) noexcept;
+    Real<Option> sech(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> csch(const Real<Option>& s) noexcept;
+    Real<Option> csch(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> coth(const Real<Option>& s) noexcept;
+    Real<Option> coth(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arccosh(const Real<Option>& s) noexcept;
+    Real<Option> arccosh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arcsinh(const Real<Option>& s) noexcept;
+    Real<Option> arcsinh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arctanh(const Real<Option>& s) noexcept;
+    Real<Option> arctanh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arcsech(const Real<Option>& s) noexcept;
+    Real<Option> arcsech(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arccsch(const Real<Option>& s) noexcept;
+    Real<Option> arccsch(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> arccoth(const Real<Option>& s) noexcept;
+    Real<Option> arccoth(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
     Real<Option> ln1pexp(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> lncosh(const Real<Option>& s) noexcept;
+    Real<Option> lncosh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> floor(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> floor(const Real<Option>& x) noexcept;
     
     template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> ceil(const Real<Option>& s) noexcept;
+    __host__ __device__ inline Real<Option> ceil(const Real<Option>& x) noexcept;
 }
 
 #include "MathImpl.h"

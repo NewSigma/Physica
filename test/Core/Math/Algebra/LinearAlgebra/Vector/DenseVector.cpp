@@ -17,10 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Utils/Unix/TempFile.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/AI/NeuralNetwork/Loss.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Scalar/Complex.h"
+#include "Physica/Core/Utils/Unix/TempFile.h"
 
 using namespace Physica;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;
@@ -74,9 +75,21 @@ static void hdfTest() {
 }
 
 static void lnSumExpTest() {
-    VectorND<cfloat64> v{-1071, -739};
-    if (!v.lnSumExp().isFinite())
-        exit(EXIT_FAILURE);
+    /* Complex overflow test */ {
+        VectorND<cfloat64> v{-1071, -739};
+        if (!v.lnSumExp().isFinite())
+            exit(EXIT_FAILURE);
+    }
+    /* Diff test */ {
+        using dfloat = Diff<float32, DiffMode::Reverse, 1>;
+        const auto x = VectorND<dfloat>::random_uniform<RandomType>(8);
+        x.lnSumExp().reverse();
+
+        for (size_t i = 0; i < x.getLength(); ++i) {
+            if (!scalarNear(x.grads()[i], softmax(x.values(), i), 1E-6))
+                exit(EXIT_FAILURE);
+        }
+    }
 }
 
 int main() {

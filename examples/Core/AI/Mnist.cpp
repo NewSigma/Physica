@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,140 +20,172 @@
 #include <QApplication>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h"
-#include "Physica/Core/AI/NeuralNetwork/SimpleNet.h"
+#include "Physica/Core/AI/NeuralNetwork/SeqNet.h"
+#include "Physica/Core/AI/NeuralNetwork/Loss.h"
+#include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Math/Optimization/Stochastic/MomentumSGD.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Scalar/Diff.h"
 #include "Physica/Gui/Plot/Plot.h"
+
+namespace Physica {
+    template<Scalar> class MnistNet;
+
+    template<Scalar T>
+    class Traits<MnistNet<T>> : public Traits<LinearLayer<T>> {};
+
+    template<Scalar T>
+    class MnistNet : public SeqNet<MnistNet<T>> {
+        using This = MnistNet<T>;
+        using Base = SeqNet<This>;
+        using typename Base::Tv;
+        using typename Base::OutputType;
+    private:
+        LinearLayer<T> layer1;
+        LinearLayer<T> layer2;
+    public:
+        MnistNet() = default;
+        MnistNet(size_t width1) : layer1(Mnist::NumPixelInImage, width1), layer2(width1, 10) {}
+        template<Scalar U>
+        MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2) {}
+        MnistNet(const This& other) = default;
+        MnistNet(This&&) noexcept = default;
+        ~MnistNet() = default;
+        /* Operators */
+        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        template<RandomGenerator R>
+        void init() {
+            layer1.template random_xavier_normal<R>(1);
+            layer2.template random_xavier_normal<R>(1);
+        }
+
+        template<Vector V>
+        [[nodiscard]] CoDiff<OutputType> forward(const V& x) const {
+            auto y1 = layer1.forward(x);
+            CoDiff<OutputType> y2 = relu(y1);
+            auto y3 = layer2.forward(y2);
+            if constexpr (Base::IsTrain)
+                y3 = co_yield std::move(y3);
+            else
+                co_return std::move(y3);
+        }
+
+        void reverse(const This& __restrict other) const noexcept {
+            assert(this != &other && "[Error]: Self reverse is invalid");
+            layer1.reverse(other.layer1);
+            layer2.reverse(other.layer2);
+        }
+
+        template<class Optimizer>
+        void step(Optimizer& opt) {
+            layer1.step(opt);
+            layer2.step(opt);
+        }
+
+        void zero_grad() {
+            layer1.zero_grad();
+            layer2.zero_grad();
+        }
+
+        template<class Dataset>
+        [[nodiscard]] CoDiff<T> loss(const Dataset& dataset, size_t index) const {
+            auto weights = forward(dataset.getSamples()[index]);
+            auto loss = crossEntropy(weights, dataset.getLabels()[index]);
+            if constexpr (ReverseDiff<T>) {
+                auto tmp = co_yield loss.value();
+                loss.reverse(tmp.grad());
+            }
+            else
+                co_return std::move(loss);
+        }
+
+        template<class Dataset>
+        [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
+
+        size_t classify(const VectorND<Tv>& input) const {
+            static_assert(!Base::IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
+            const auto output = Base::forward(input);
+            Tv max = output[0];
+            size_t index = 0;
+            for (size_t i = 1; i < output.getLength(); ++i) {
+                if (output[i] > max) {
+                    index = i;
+                    max = output[i].value();
+                }
+            }
+            return index;
+        }
+
+        template<class Dataset>
+        Tv calcAccuracy(const Dataset& dataset) const {
+            const auto& testSamples = dataset.getSamples();
+            const auto& testLabels = dataset.getLabels();
+            const size_t numTestData = dataset.getSize();
+            size_t count = 0;
+            for (size_t i = 0; i < numTestData; ++i)
+                count += testLabels[i] == classify(VectorND<Tv>(testSamples[i]));
+            return Tv(count) / Tv(numTestData);
+        }
+
+        void swap(This& __restrict obj) noexcept {
+            assert(this != &obj && "[Error]: Self swap is likely a bug");
+            Base::swap(obj);
+            layer1.swap(obj.layer1);
+            layer2.swap(obj.layer2);
+        }
+    private:
+        template<Scalar> friend class MnistNet;
+    };
+}
 
 using namespace Physica;
 using namespace Physica::Gui;
 
-template<Scalar> class MnistNet;
-
-namespace Physica {
-    template<class T>
-    class Traits<MnistNet<T>> : public Traits<LinearLayer<T>> {};
-}
-
-template<Scalar T>
-class MnistNet : public SimpleNet<MnistNet<T>> {
-    using Base = SimpleNet<MnistNet<T>>;
-    using typename Base::ValueType;
-    using typename Base::InputType;
-    using typename Base::OutputType;
-private:
-    LinearLayer<T> layer1;
-    LinearLayer<T, false> layer2;
-public:
-    MnistNet() = default;
-    template<RandomGenerator R>
-    MnistNet(size_t width1, R&)
-            : layer1(Mnist::NumPixelInImage, width1)
-            , layer2(width1, 10) {
-        //auto dist = std::normal_distribution<float>(0, 0.01);
-        //layer1.template random_any<Distribution, R>(dist);
-        //layer2.template random_any<Distribution, R>(dist);
-
-        //layer1.template random_xavier_uniform<R>(1);
-        //layer2.template random_xavier_uniform<R>(1);
-
-        layer1.template random_xavier_normal<R>(1);
-        layer2.template random_xavier_normal<R>(1);
-    }
-    template<Scalar U>
-    MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2) {}
-    MnistNet(const MnistNet& other) = default;
-    MnistNet(MnistNet&&) noexcept = default;
-    ~MnistNet() = default;
-    /* Operators */
-    MnistNet& operator=(MnistNet& obj) noexcept { swap(obj); return *this; }
-    /* Operations */
-    [[nodiscard]] OutputType forward(const InputType& x) const {
-        CoDiff<OutputType> result = relu(layer1.forward(x));
-        result = layer2.forward(result);
-        return result;
-    }
-
-    template<class Dataset>
-    [[nodiscard]] T loss(const Dataset& dataset, size_t index) const {
-        return Loss<T>::crossEntropy(forward(dataset.getSamples()[index]), dataset.getLabels()[index]);
-    }
-
-    template<class Dataset>
-    [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
-
-    template<class Dataset>
-    ValueType calcAccuracy(const Dataset& dataset) const {
-        const auto& testSamples = dataset.getSamples();
-        const auto& testLabels = dataset.getLabels();
-        const size_t numTestData = dataset.getSize();
-        size_t count = 0;
-        for (size_t i = 0; i < numTestData; ++i)
-            count += testLabels[i] == Base::classify(InputType(testSamples[i]));
-        return ValueType(count) / ValueType(numTestData);
-    }
-
-    void swap(MnistNet& obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
-        layer1.swap(obj.layer1);
-        layer2.swap(obj.layer2);
-    }
-private:
-    template<Scalar> friend class MnistNet;
-};
-
-using ValueType = float32;
-using ScalarType = Diff<ValueType, DiffMode::Reverse>;
-using Dataset = Mnist::DatasetType<VectorND<ValueType>>;
-using Optimizer = MomentumSGD<ScalarType>;
+using T = float32;
+using dfloat = Diff<T, DiffMode::Reverse>;
+using Dataset = Mnist::DatasetType<VectorND<T>>;
 using RandomType = Random<MT19937>;
 constexpr size_t numEpoch = 10;
 constexpr size_t batchSize = 64;
-constexpr double momentum = 0.5;
 constexpr double learnRate = 0.05;
 
-std::pair<Dataset, Dataset> makeDataset() {
-    const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
+static std::pair<Dataset, Dataset> makeDataset() {
+    const Mnist mnist("./data");
+    auto dataset = mnist.makeTrainDataset<VectorND<T>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
-        sample = sample * ValueType(1.0 / 128) - ValueType(1);
+        sample = sample * T(1.0 / 128) - T(1);
     }
     return dataset.randomSplit<RandomType>(54000);
 }
 
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
+
     const auto dataset = makeDataset();
-    const size_t itePerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
+    const int64_t stepPerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
+    auto opt = SGD(learnRate, batchSize);
+    auto nn = MnistNet<dfloat>(32);
+    nn.init<RandomType>();
 
-    auto opt = Optimizer(momentum, learnRate, batchSize);
-    opt.recordBegin();
-    using NetType = MnistNet<ScalarType>;
-    auto nn = NetType(32, RandomType::getInstance());
-    opt.recordEnd();
-
-    VectorND<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
+    VectorND<T> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
     for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
-        if (epoch != 0) {
-            for (size_t i = 0; i < itePerEpoch; ++i)
-                nn.train_step<Dataset, Optimizer, RandomType, ThreadExecutor>(dataset.first, opt);
-        }
-
-        const auto nn_infer = MnistNet<ValueType>(nn);
+        const auto nn_infer = MnistNet<T>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
         acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
+
+        nn.train_step_for<Dataset, SGD, RandomType, SequentialExecutor>(stepPerEpoch, dataset.first, opt);
     }
 
     QApplication app(argc, argv);
     Plot* plot = new Plot(-0.5, numEpoch - 0.5, 0, 3, 2, 1);
-    auto* legend = plot->getChart()->legend();
-    legend->setAlignment(Qt::AlignRight);
-    legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
+    auto& legend = plot->getLegend();
+    legend.setAlignment(Qt::AlignRight);
+    legend.setMarkerShape(QLegend::MarkerShapeFromSeries);
+    legend.show();
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     auto* axisRight = plot->getAxisRight();
@@ -166,6 +198,7 @@ int main(int argc, char** argv) {
     axisRight->setLabelFormat("%.1f");
     axisRight->setRange(0, 1);
     axisRight->setTickInterval(0.2);
+    axisRight->setMinorTickCount(4);
     {
         auto& line = plot->line(loss_train);
         auto pen = line.pen();

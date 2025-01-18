@@ -26,13 +26,13 @@ namespace Physica::Core {
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
         using host_obj = Loss<T>;
     public:
-        constexpr static bool IsTrainMode = T::isDiffable;
+        constexpr static bool IsTrain = T::isDiffable;
         using ValueType = T::ValueType;
-        using LossType = std::conditional<IsTrainMode, device_obj<T>, T>::type;
+        using LossType = std::conditional<IsTrain, device_obj<T>, T>::type;
     private:
         using ValueVector = VectorND<ValueType>;
         using DiffVector = Diff<ValueVector, DiffMode::Reverse, T::Order>;
-        using VectorType = device_obj<typename std::conditional<IsTrainMode, DiffVector, ValueVector>::type>;
+        using VectorType = device_obj<typename std::conditional<IsTrain, DiffVector, ValueVector>::type>;
     public:
         [[nodiscard]] static LossType softmax(const VectorType& v, size_t label);
         [[nodiscard]] static LossType crossEntropy(const VectorType& v, size_t label);
@@ -41,7 +41,7 @@ namespace Physica::Core {
     template<Scalar T>
     device_obj<Loss<T>>::LossType
     device_obj<Loss<T>>::softmax(const VectorType& v, size_t label) {
-        if constexpr (IsTrainMode) {
+        if constexpr (IsTrain) {
             const auto maximum = v.max();
             const auto temp = exp(v - maximum);
             return temp.calc(label) / temp.sum();

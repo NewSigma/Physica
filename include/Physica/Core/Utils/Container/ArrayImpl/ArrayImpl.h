@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,6 +23,7 @@
 #ifdef PHYSICA_CUDA
     #include <thrust/swap.h>
 #endif
+#include "../Array.h"
 
 namespace Physica::Core {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////

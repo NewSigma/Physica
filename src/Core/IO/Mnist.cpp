@@ -16,34 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <filesystem>
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Mnist.h"
-#include "Physica/Core/Utils/DirStack.h"
 
 namespace Physica::Core {
     Mnist::Mnist(const char* folder) {
-        DirStack dir(folder);
-        dir.push("train-images.idx3-ubyte");
-        trainSamples = readDatas(dir.toPath());
+        std::filesystem::path p(folder) ;
+        p.append("train-images.idx3-ubyte");
+        trainSamples = readDatas(p.string());
         if (trainSamples.getLength() != 60000)
             throw BadFileFormatException("[Error]: Bad data file");
-        dir.pop();
+        p.remove_filename();
 
-        dir.push("t10k-images.idx3-ubyte");
-        testSamples = readDatas(dir.toPath());
+        p.append("t10k-images.idx3-ubyte");
+        testSamples = readDatas(p.string());
         if (testSamples.getLength() != 10000)
             throw BadFileFormatException("[Error]: Bad data file");
-        dir.pop();
+        p.remove_filename();
 
-        dir.push("train-labels.idx1-ubyte");
-        trainLabels = readLabels(dir.toPath());
+        p.append("train-labels.idx1-ubyte");
+        trainLabels = readLabels(p.string());
         if (trainLabels.getLength() != 60000)
             throw BadFileFormatException("[Error]: Bad label file");
-        dir.pop();
+        p.remove_filename();
 
-        dir.push("t10k-labels.idx1-ubyte");
-        testLabels = readLabels(dir.toPath());
+        p.append("t10k-labels.idx1-ubyte");
+        testLabels = readLabels(p.string());
         if (testLabels.getLength() != 10000)
             throw BadFileFormatException("[Error]: Bad label file");
     }

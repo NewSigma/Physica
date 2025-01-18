@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include <vectorclass/vectormath_trig.h>
+#include <vectorclass/vectormath_hyp.h>
 
 namespace Physica::Core {
     template<Scalar T, size_t Size>
@@ -112,6 +113,11 @@ namespace Physica::Core {
     template<Scalar T, size_t Size>
     inline auto arctan2(const SIMD<T, Size>& y, const SIMD<T, Size>& x) {
         return Physica::atan2(y.toMachine(), x.toMachine());
+    }
+
+    template<Scalar T, size_t Size>
+    inline auto tanh(const SIMD<T, Size>& x) {
+        return SIMD<T, Size>(Physica::tanh(x.toMachine()));
     }
 
     template<Scalar T, size_t Size>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h" // IWYU pragma: export
 #include "Physica/PlainStruct.h"
 #include "LayerBase.h"
 
@@ -27,12 +27,11 @@ namespace Physica::Core {
     class LinearLayer : public LayerBase<LinearLayer<T, WithBias>> {
         using This = LinearLayer<T, WithBias>;
         using Base = LayerBase<This>;
-        using typename Base::InputType;
         using typename Base::OutputType;
-        using typename Base::ValueType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
+        using Tv = T::ValueType;
         using MatrixType = DenseMatrix<T, Option>;
-        using BiasType = std::conditional<WithBias, InputType, PlainStruct<void>>::type;
+        using BiasType = std::conditional<WithBias, VectorND<T>, PlainStruct<void>>::type;
     public:
         using device_obj_type = device_obj<This>;
     private:
@@ -49,14 +48,20 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] inline OutputType forward(const InputType& x) const;
+        template<Vector V>
+        [[nodiscard]] inline CoDiff<OutputType> forward(const V& x) const;
+        void reverse(const This& __restrict other) const noexcept;
+
+        template<class Optimizer>
+        void step(Optimizer& opt);
+        void zero_grad();
 
         template<RandomGenerator R>
         void random_normal();
         template<RandomGenerator R>
-        void random_xavier_uniform(ValueType gain);
+        void random_xavier_uniform(Tv gain);
         template<RandomGenerator R>
-        void random_xavier_normal(ValueType gain);
+        void random_xavier_normal(Tv gain);
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
         void swap(LinearLayer& __restrict obj) noexcept;
@@ -78,16 +83,64 @@ namespace Physica::Core {
 
     template<Scalar T, bool WithBias>
     template<Scalar U>
-    LinearLayer<T, WithBias>::LinearLayer(const LinearLayer<U, WithBias>& layer)
-            : weights(layer.getWeights()), bias(layer.getBias()) {}
+    LinearLayer<T, WithBias>::LinearLayer(const LinearLayer<U, WithBias>& layer) {
+        if constexpr (Diffable<T>) {
+            weights = layer.getWeights();
+            if constexpr (WithBias)
+                bias = layer.getBias();
+        }
+        else {
+            weights = layer.getWeights().values();
+            if constexpr (WithBias)
+                bias = layer.getBias().values();
+        }
+    }
 
     template<Scalar T, bool WithBias>
-    inline LinearLayer<T, WithBias>::OutputType LinearLayer<T, WithBias>::forward(const InputType& x) const {
+    template<Vector V>
+    inline auto LinearLayer<T, WithBias>::forward(const V& x) const -> CoDiff<OutputType> {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
+        if constexpr (ReverseDiff<T>) {
+            auto expr1 = weights * x;
+            if constexpr (WithBias) {
+                auto expr2 = expr1 + bias;
+                const auto result = co_yield expr2.values();
+                expr2.reverse(result.grads());
+            }
+            else {
+                const auto result = co_yield expr1.values();
+                expr1.reverse(result.grads());
+            }
+        }
+        else {
+            if constexpr (WithBias)
+                co_return weights * x + bias;
+            else
+                co_return weights * x;
+        }
+    }
+
+    template<Scalar T, bool WithBias>
+    void LinearLayer<T, WithBias>::reverse(const This& __restrict other) const noexcept {
+        assert(this != &other && "[Error]: Self reverse is invalid");
+        weights.reverse(other.weights.grads());
         if constexpr (WithBias)
-            return weights * x + bias;
-        else
-            return weights * x;
+            bias.reverse(other.bias.grads());
+    }
+
+    template<Scalar T, bool WithBias>
+    template<class Optimizer>
+    void LinearLayer<T, WithBias>::step(Optimizer& opt) {
+        opt.step(weights);
+        if constexpr (WithBias)
+            opt.step(bias);
+    }
+
+    template<Scalar T, bool WithBias>
+    void LinearLayer<T, WithBias>::zero_grad() {
+        weights.grads() = Tv(0);
+        if constexpr (WithBias)
+            bias.grads() = Tv(0);
     }
 
     template<Scalar T, bool WithBias>
@@ -100,9 +153,9 @@ namespace Physica::Core {
 
     template<Scalar T, bool WithBias>
     template<RandomGenerator R>
-    void LinearLayer<T, WithBias>::random_xavier_uniform(ValueType gain) {
+    void LinearLayer<T, WithBias>::random_xavier_uniform(Tv gain) {
         using MachineType = T::MachineType;
-        const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
+        const auto factor = (gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.template random_any<decltype(dist), R>(dist);
         if constexpr (WithBias)
@@ -111,9 +164,9 @@ namespace Physica::Core {
 
     template<Scalar T, bool WithBias>
     template<RandomGenerator R>
-    void LinearLayer<T, WithBias>::random_xavier_normal(ValueType gain) {
+    void LinearLayer<T, WithBias>::random_xavier_normal(Tv gain) {
         using MachineType = T::MachineType;
-        const auto deviation = (gain * sqrt(ValueType(2) / ValueType(getInputDim() + getOutputDim()))).toMachine();
+        const auto deviation = (gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
         weights.template random_any<decltype(dist), R>(dist);
         if constexpr (WithBias)
@@ -144,7 +197,6 @@ namespace Physica {
         using ScalarType = T;
         constexpr static bool WithBias = B;
 
-        using InputType = VectorND<T>;
-        using OutputType = CoDiff<InputType>;
+        using OutputType = VectorND<T>;
     };
 }

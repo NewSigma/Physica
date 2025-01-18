@@ -33,14 +33,14 @@ namespace Physica::Core {
     public:
         using ScalarType = TraitsType::ScalarType;
         using ValueType = ScalarType::ValueType;
-        using InputType = TraitsType::InputType;
         using OutputType = TraitsType::OutputType;
-        constexpr static bool IsTrainMode = ScalarType::isDiffable;
+        constexpr static bool IsTrain = ScalarType::isDiffable;
         static_assert(!is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
     public:
         ~device_obj() = default;
         /* Operations */
-        [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
+        template<class T>
+        [[nodiscard]] OutputType forward(const T& x) const { return Base::getDerived().template forward<T>(x); }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

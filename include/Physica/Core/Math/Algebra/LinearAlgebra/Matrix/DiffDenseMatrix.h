@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,6 +33,8 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
+        using Base::isForwardDiff;
+        using Base::isReverseDiff;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -48,11 +50,13 @@ namespace Physica::Core {
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T init);
+        DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff);
         DenseMatrix(initializer_list list);
-        template<Matrix M>
-        DenseMatrix(const M& mat);
+        DenseMatrix(ValueMatrix v_, GradMatrix g_);
         template<Vector V>
-        DenseMatrix(const V& vec);
+        explicit(isReverseDiff) DenseMatrix(const V& vec) requires(!ReverseDiff<V>);
+        template<Matrix M>
+        explicit(isReverseDiff) DenseMatrix(const M& mat) requires(!ReverseDiff<M>);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         ~DenseMatrix() = default;
@@ -81,6 +85,8 @@ namespace Physica::Core {
 
         [[nodiscard]] const ValueMatrix& values() const noexcept { return v; }
         [[nodiscard]] ValueMatrix& values() noexcept { return v; }
+        [[nodiscard]] const GradMatrix& grads() const noexcept { return g; }
+        [[nodiscard]] GradMatrix& grads() noexcept { return g; }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
         template<RandomGenerator R>

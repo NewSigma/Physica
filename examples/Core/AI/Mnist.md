@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -17,9 +17,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ![](./Mnist.png)
 
-**图1** Mnist训练曲线，使用Xavier-Normal初始化
-
-输出层一般不需要添加偏置。实验发现若输出层有偏置则验证集精度只能达到80%，训练误差不下降，去除偏置后验证集精度为96%，和已有结果接近$^{[1]}$。
+**图1** Mnist训练曲线，使用Xavier-Normal初始化。验证集精度为96%，和已有结果接近$^{[1]}$。
 
 ## Reference
 
