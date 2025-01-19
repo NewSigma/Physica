@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <fstream>
-#include "Physica/Core/AI/DecisionTree/DecisionTree.h"
+#include "Physica/Core/ML/DecisionTree/DecisionTree.h"
 
 using namespace Physica;
 using ScalarType = float64;

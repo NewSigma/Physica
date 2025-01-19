@@ -1,6 +1,6 @@
-## AI
-physica_add_test(AP AI/AP.cpp)
-physica_add_test(Loss AI/Loss.cpp)
+## ML
+physica_add_test(AP ML/AP.cpp)
+physica_add_test(Loss ML/Loss.cpp)
 
 add_subdirectory(IO)
 add_subdirectory(Math)

@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/AI/Clustering/AP.h"
+#include "Physica/Core/ML/Clustering/AP.h"
 
 using namespace Physica;
 using ScalarType = float64;

@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/AI/NeuralNetwork/Loss.h"
+#include "Physica/Core/ML/NeuralNetwork/Loss.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 
 using namespace Physica;

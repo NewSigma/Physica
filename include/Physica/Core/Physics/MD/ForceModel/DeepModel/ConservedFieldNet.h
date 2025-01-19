@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/AI/NeuralNetwork/Layer/LayerBase.h"
+#include "Physica/Core/ML/NeuralNetwork/Layer/LayerBase.h"
 
 namespace Physica::Core {
     template<class Derived>

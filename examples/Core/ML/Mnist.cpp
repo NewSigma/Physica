@@ -19,9 +19,9 @@
 #include <iostream>
 #include <QApplication>
 #include "Physica/Core/IO/Mnist.h"
-#include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h"
-#include "Physica/Core/AI/NeuralNetwork/SeqNet.h"
-#include "Physica/Core/AI/NeuralNetwork/Loss.h"
+#include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
+#include "Physica/Core/ML/NeuralNetwork/SeqNet.h"
+#include "Physica/Core/ML/NeuralNetwork/Loss.h"
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"

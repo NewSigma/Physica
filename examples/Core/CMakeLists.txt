@@ -1,8 +1,8 @@
-# AI
-physica_add_example(DecisionTree AI/DecisionTree.cpp)
-physica_add_example(Mnist AI/Mnist.cpp)
+# ML
+physica_add_example(DecisionTree ML/DecisionTree.cpp)
+physica_add_example(Mnist ML/Mnist.cpp)
 if(${PHYSICA_CUDA})
-    #physica_add_example(Mnist_cuda AI/Mnist.cu) # NVCC 12.6 ICE
+    #physica_add_example(Mnist_cuda ML/Mnist.cu) # NVCC 12.6 ICE
 endif()
 
 add_subdirectory(Math)
