@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -39,8 +39,8 @@ namespace Physica::Core {
      * a particular isotope, modifications are necessary.
      * 
      * Reference:
-     * [1] Physical constants, SI (NIST 2022) http://physics.nist.gov/constants
-     * [2] Standard Atomic Weights 2021 https://www.ciaaw.org/atomic-weights.htm
+     * [1] Physical constants, SI (NIST 2022); http://physics.nist.gov/constants
+     * [2] Standard Atomic Weights 2021; https://www.ciaaw.org/atomic-weights.htm
      */
     template<>
     class PhyConst<SI> {
@@ -85,7 +85,7 @@ namespace Physica::Core {
      * Hartree atomic units. \param hartreeInEv referenced from [1]
      * 
      * Reference:
-     * [1] Physical constants, SI (NIST 2022) http://physics.nist.gov/constants
+     * [1] Physical constants, SI (NIST 2022); http://physics.nist.gov/constants
      */
     template<>
     class PhyConst<AU> {

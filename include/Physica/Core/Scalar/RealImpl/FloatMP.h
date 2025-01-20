@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,24 +18,26 @@
  */
 #pragma once
 
+#include "../Real.h"
+
 namespace Physica {
     template<>
-    class Traits<Core::Real<Core::FloatMP>> {
+    class Traits<Real<FloatMP>> {
     public:
-        constexpr static Core::ScalarOption Option = Core::FloatMP;
+        constexpr static ScalarOption Option = FloatMP;
         constexpr static int Order = 0;
         constexpr static bool isComplex = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
 
-        using ValueType = Core::Real<Core::FloatMP>;
+        using ValueType = Real<FloatMP>;
         using ScalarType = ValueType;
         using PtrTy = ScalarType*;
         using ConstPtrTy = const ScalarType*;
         using RefTy = ScalarType&;
         using ConstRefTy = const ScalarType&;
         using RealType = ScalarType;
-        using ComplexType = Core::Complex<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using MachineType = ScalarType;
     };
 }
@@ -95,7 +97,6 @@ namespace Physica::Core {
         Real& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Real& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr static ScalarOption getOption() { return FloatMP; }
         [[nodiscard]] int getLength() const noexcept { return length; }
         [[nodiscard]] int getPower() const noexcept { return power; }
         [[nodiscard]] int getSize() const noexcept { return std::abs(length); }

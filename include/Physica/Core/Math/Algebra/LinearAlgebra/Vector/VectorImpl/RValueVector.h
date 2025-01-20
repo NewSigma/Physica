@@ -121,6 +121,9 @@ namespace Physica::Core {
         [[nodiscard]] CoDiff<ScalarType> min() const;
         [[nodiscard]] CoDiff<ScalarType> sum() const;
         [[nodiscard]] CoDiff<ScalarType> lnSumExp() const;
+        [[nodiscard]] CoDiff<ScalarType> crossEntropy(size_t index) const;
+        [[nodiscard]] CoDiff<ScalarType> lnSoftmax(size_t index) const;
+        [[nodiscard]] CoDiff<ScalarType> softmax(size_t index) const;
         [[nodiscard]] ScalarType prod() const;
         [[nodiscard]] bool isZeros() const;
         template<Vector V>

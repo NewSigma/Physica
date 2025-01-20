@@ -364,6 +364,7 @@ namespace Physica::Core {
                 v += elem.value();
                 return elem;
             });
+
             auto result = co_yield std::move(v);
             for (auto& elem : elems)
                 elem.reverse(result.grad());
@@ -414,6 +415,45 @@ namespace Physica::Core {
             m = values().max();
 
         auto y = ln(exp(v - m).sum() + ValueType(std::numeric_limits<ValueType>::min())) + m; // Add min() to avoid ln(0)
+        if constexpr (isReverseDiff) {
+            auto tmp = co_yield y.value();
+            y.reverse(tmp.grad());
+        }
+        else
+            co_return std::move(y);
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::crossEntropy(size_t index) const -> CoDiff<ScalarType> {
+        assert(index < getLength() && "[Error]: Index overflow");
+        const auto& v = Base::getDerived();
+        const auto vi = calc(index);
+        const auto delta = v - vi;
+        auto y = delta.lnSumExp();
+        if constexpr (isReverseDiff) {
+            auto tmp = co_yield y.value();
+            y.reverse(tmp.grad());
+        }
+        else
+            co_return std::move(y);
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::lnSoftmax(size_t index) const -> CoDiff<ScalarType> {
+        assert(index < getLength() && "[Error]: Index overflow");
+        auto y = -crossEntropy(index);
+        if constexpr (isReverseDiff) {
+            auto tmp = co_yield y.value();
+            y.reverse(tmp.grad());
+        }
+        else
+            co_return std::move(y);
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::softmax(size_t index) const -> CoDiff<ScalarType> {
+        assert(index < getLength() && "[Error]: Index overflow");
+        auto y = exp(lnSoftmax(index));
         if constexpr (isReverseDiff) {
             auto tmp = co_yield y.value();
             y.reverse(tmp.grad());

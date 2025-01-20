@@ -88,7 +88,6 @@ namespace Physica::Core {
         [[nodiscard]] inline Real mod() const noexcept;
         void swap(Real& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
-        [[nodiscard]] constexpr static ScalarOption getOption() { return Float32; }
         [[nodiscard]] __host__ __device__ float toMachine() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == 0; }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > 0; }
@@ -152,31 +151,8 @@ namespace Physica::Core {
         return Real(dist(R::getInstance()));
     }
 
-    inline std::ostream& operator<<(std::ostream& os, const Real<Float32>& s) {
-        const auto lastPrec = os.precision();
-        return os << std::setprecision(7) << float(s) << std::setprecision(lastPrec);
-    }
-
-    inline Real<Float32>& operator++(Real<Float32>& s) {
-        s += float32(1.0F);
-        return s;
-    }
-
-    inline Real<Float32>& operator--(Real<Float32>& s) {
-        s -= float32(1.0F);
-        return s;
-    }
-
-    inline Real<Float32> operator++(Real<Float32>& s, int) {
-        float32 temp(s);
-        s += float32(1.0F);
-        return temp;
-    }
-
-    inline Real<Float32> operator--(Real<Float32>& s, int) {
-        float32 temp(s);
-        s -= float32(1.0F);
-        return temp;
+    inline std::ostream& operator<<(std::ostream& os, const Real<Float32>& x) {
+        return os << std::format("{}", x.toMachine());
     }
 }
 

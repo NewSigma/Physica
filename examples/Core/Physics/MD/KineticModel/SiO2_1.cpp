@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He. All rights reserved.
+ * Copyright 2023-2025 Weibo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
@@ -12,7 +12,6 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/KineticModel/FireModel.h"
-#include "Physica/Core/Physics/MD/Barostat/Berendsen.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;

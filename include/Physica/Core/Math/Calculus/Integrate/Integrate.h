@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "IntegrateRange.h"
+#include "IntegrateImpl/IntegrateRange.h"
 
 namespace Physica::Core {
     enum class IntegrateMethod {
@@ -139,4 +139,4 @@ namespace Physica::Core {
     };
 }
 
-#include "IntegrateImpl.h"
+#include "IntegrateImpl/IntegrateImpl.h"

@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/ML/NeuralNetwork/Loss.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Scalar/Complex.h"
@@ -86,7 +85,45 @@ static void lnSumExpTest() {
         x.lnSumExp().reverse();
 
         for (size_t i = 0; i < x.getLength(); ++i) {
-            if (!scalarNear(x.grads()[i], softmax(x.values(), i), 1E-6))
+            if (!scalarNear(x.grads()[i], x.values().softmax(i), 1E-6))
+                exit(EXIT_FAILURE);
+        }
+    }
+}
+
+static void crossEntropyTest() {
+    /* Select test */ {
+        const VectorND<float32> result{-3.34036088, -109.5531235, 13.51656151, 11.29175949};
+        const float32 l1 = result.crossEntropy(3);
+        if (!l1.isFinite())
+            exit(EXIT_FAILURE);
+
+        const float32 l2 = result.crossEntropy(1);
+        if (!l2.isFinite())
+            exit(EXIT_FAILURE);
+    }
+    /* Overflow test */ {
+        const VectorND<float32> result{555.321167, 364.9577942, 355.3863831, -594.8062134};
+        for (size_t i = 0; i < result.getLength(); ++i) {
+            const float32 s = result.softmax(i);
+            if (!s.isFinite())
+                exit(EXIT_FAILURE);
+        }
+    }
+    /* Diff test */ {
+        using dfloat = Diff<float32, DiffMode::Reverse, 1>;
+        constexpr int Label = 0;
+        const auto x = VectorND<dfloat>::random_uniform<RandomType>(8);
+        auto loss = [&x](size_t k) -> float32 {
+            float32 result = 0;
+            for (size_t i = 0; i < x.getLength(); ++i)
+                result += x.values().softmax(i) * (float32(i == k) - float32(Label == k));
+            return result;
+        };
+
+        x.crossEntropy(Label).reverse();
+        for (size_t i = 0; i < x.getLength(); ++i) {
+            if (!scalarNear(x.grads()[i], loss(i), 1E-6))
                 exit(EXIT_FAILURE);
         }
     }
@@ -96,5 +133,6 @@ int main() {
     crossProductTest();
     hdfTest();
     lnSumExpTest();
+    crossEntropyTest();
     return 0;
 }

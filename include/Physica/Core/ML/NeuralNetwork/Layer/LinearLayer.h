@@ -27,7 +27,7 @@ namespace Physica::Core {
     class LinearLayer : public LayerBase<LinearLayer<T, WithBias>> {
         using This = LinearLayer<T, WithBias>;
         using Base = LayerBase<This>;
-        using typename Base::OutputType;
+
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         using Tv = T::ValueType;
         using MatrixType = DenseMatrix<T, Option>;
@@ -49,12 +49,14 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<Vector V>
-        [[nodiscard]] inline CoDiff<OutputType> forward(const V& x) const;
+        [[nodiscard]] inline CoDiff<VectorND<T>> forward(const V& x) const;
         void reverse(const This& __restrict other) const noexcept;
 
         template<class Optimizer>
         void step(Optimizer& opt);
         void zero_grad();
+
+        void resize(size_t inputDim, size_t outputDim);
 
         template<RandomGenerator R>
         void random_normal();
@@ -75,10 +77,8 @@ namespace Physica::Core {
     };
 
     template<Scalar T, bool WithBias>
-    LinearLayer<T, WithBias>::LinearLayer(size_t inputDim, size_t outputDim)
-            : weights(outputDim, inputDim) {
-        if constexpr (WithBias)
-            bias.resize(outputDim);
+    LinearLayer<T, WithBias>::LinearLayer(size_t inputDim, size_t outputDim) {
+        resize(inputDim, outputDim);
     }
 
     template<Scalar T, bool WithBias>
@@ -98,7 +98,7 @@ namespace Physica::Core {
 
     template<Scalar T, bool WithBias>
     template<Vector V>
-    inline auto LinearLayer<T, WithBias>::forward(const V& x) const -> CoDiff<OutputType> {
+    inline auto LinearLayer<T, WithBias>::forward(const V& x) const -> CoDiff<VectorND<T>> {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (ReverseDiff<T>) {
             auto expr1 = weights * x;
@@ -131,16 +131,27 @@ namespace Physica::Core {
     template<Scalar T, bool WithBias>
     template<class Optimizer>
     void LinearLayer<T, WithBias>::step(Optimizer& opt) {
-        opt.step(weights);
-        if constexpr (WithBias)
-            opt.step(bias);
+        if constexpr (ReverseDiff<T>) {
+            opt.step(weights);
+            if constexpr (WithBias)
+                opt.step(bias);
+        }
     }
 
     template<Scalar T, bool WithBias>
     void LinearLayer<T, WithBias>::zero_grad() {
-        weights.grads() = Tv(0);
+        if constexpr (ReverseDiff<T>) {
+            weights.grads() = Tv(0);
+            if constexpr (WithBias)
+                bias.grads() = Tv(0);
+        }
+    }
+
+    template<Scalar T, bool WithBias>
+    void LinearLayer<T, WithBias>::resize(size_t inputDim, size_t outputDim) {
+        weights.resize(inputDim, outputDim);
         if constexpr (WithBias)
-            bias.grads() = Tv(0);
+            bias.resize(outputDim);
     }
 
     template<Scalar T, bool WithBias>
@@ -196,7 +207,5 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static bool WithBias = B;
-
-        using OutputType = VectorND<T>;
     };
 }

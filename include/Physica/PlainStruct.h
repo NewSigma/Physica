@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,6 +21,9 @@
 #include "Macro.h"
 
 namespace Physica {
+    /**
+     * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
+     */
     template<class T> class PlainStruct;
 
     template<>
@@ -28,9 +31,7 @@ namespace Physica {
     public:
         void swap(PlainStruct<void>&) {}
     };
-    /**
-     * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
-     */
+
     template<class T>
     class alignas(T) PlainStruct<const T> {
     public:
@@ -51,12 +52,12 @@ namespace Physica {
     };
 
     template<class T>
-    __host__ __device__ inline PlainStruct<const T> asStruct(const T& obj) noexcept {
+    [[nodiscard]] __host__ __device__ inline PlainStruct<const T> asStruct(const T& obj) noexcept {
         return PlainStruct<const T>(reinterpret_cast<const PlainStruct<const T>&>(obj));
     }
 
     template<class T>
-    __host__ __device__ inline PlainStruct<T> asStruct(T& obj) noexcept {
+    [[nodiscard]] __host__ __device__ inline PlainStruct<T> asStruct(T& obj) noexcept {
         return PlainStruct<T>(reinterpret_cast<PlainStruct<T>&>(obj));
     }
 }

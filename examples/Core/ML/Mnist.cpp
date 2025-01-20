@@ -39,7 +39,6 @@ namespace Physica {
         using This = MnistNet<T>;
         using Base = SeqNet<This>;
         using typename Base::Tv;
-        using typename Base::OutputType;
     private:
         LinearLayer<T> layer1;
         LinearLayer<T> layer2;
@@ -61,9 +60,9 @@ namespace Physica {
         }
 
         template<Vector V>
-        [[nodiscard]] CoDiff<OutputType> forward(const V& x) const {
+        [[nodiscard]] CoDiff<VectorND<T>> forward(const V& x) const {
             auto y1 = layer1.forward(x);
-            CoDiff<OutputType> y2 = relu(y1);
+            CoDiff<VectorND<T>> y2 = relu(y1);
             auto y3 = layer2.forward(y2);
             if constexpr (Base::IsTrain)
                 y3 = co_yield std::move(y3);
@@ -91,7 +90,7 @@ namespace Physica {
         template<class Dataset>
         [[nodiscard]] CoDiff<T> loss(const Dataset& dataset, size_t index) const {
             auto weights = forward(dataset.getSamples()[index]);
-            auto loss = crossEntropy(weights, dataset.getLabels()[index]);
+            auto loss = weights.crossEntropy(dataset.getLabels()[index]);
             if constexpr (ReverseDiff<T>) {
                 auto tmp = co_yield loss.value();
                 loss.reverse(tmp.grad());
@@ -165,7 +164,7 @@ int main(int argc, char** argv) {
 
     const auto dataset = makeDataset();
     const int64_t stepPerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
-    auto opt = SGD(learnRate, batchSize);
+    auto opt = SGD(learnRate);
     auto nn = MnistNet<dfloat>(32);
     nn.init<RandomType>();
 
@@ -177,7 +176,7 @@ int main(int argc, char** argv) {
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
         acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
 
-        nn.train_step_for<Dataset, SGD, RandomType, SequentialExecutor>(stepPerEpoch, dataset.first, opt);
+        nn.train_step_for<Dataset, SGD, RandomType, SequentialExecutor>(stepPerEpoch, batchSize, dataset.first, opt);
     }
 
     QApplication app(argc, argv);

@@ -21,30 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica::Core {
-    template<Scalar T>
-    CoDiff<T> softmax(const VectorND<T>& v, size_t label) {
-        auto y = exp(-crossEntropy(v, label));
-        if constexpr (ReverseDiff<T>) {
-            auto tmp = co_yield y.value();
-            y.reverse(tmp.grad());
-        }
-        else
-            co_return std::move(y);
-    }
-
-    template<Scalar T>
-    CoDiff<T> crossEntropy(const VectorND<T>& v, size_t label) {
-        assert(label < v.getLength() && "[Error]: The label is not exist");
-        const auto vl = v[label];
-        const auto v1 = v - vl;
-        auto y = v1.lnSumExp();
-        if constexpr (ReverseDiff<T>) {
-            auto tmp = co_yield y.value();
-            y.reverse(tmp.grad());
-        }
-        else
-            co_return std::move(y);
-    }
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting
      */

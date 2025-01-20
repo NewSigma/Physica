@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Scalar/Real.h"
 
 namespace Physica::Core {
@@ -27,9 +28,8 @@ namespace Physica::Core {
      */
     class SGD {
         float64 learnRate;
-        int batchSize;
     public:
-        inline SGD(float64 learnRate_, int batchSize_);
+        inline SGD(float64 lr);
         SGD(const SGD&) = default;
         SGD(SGD&&) noexcept = default;
         ~SGD() = default;
@@ -41,14 +41,12 @@ namespace Physica::Core {
         inline void swap(SGD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] float64 getLearnRate() const noexcept { return learnRate; }
-        [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
         /* Setters */
         inline void setLearnRate(float64 lr);
     };
 
-    inline SGD::SGD(float64 learnRate_, int batchSize_) : batchSize(batchSize_) {
-        assert(batchSize > 0);
-        setLearnRate(learnRate_);
+    inline SGD::SGD(float64 lr) {
+        setLearnRate(std::move(lr));
     }
 
     template<Diffable T>
@@ -64,11 +62,10 @@ namespace Physica::Core {
     inline void SGD::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         learnRate.swap(obj.learnRate);
-        std::swap(batchSize, obj.batchSize);
     }
 
     inline void SGD::setLearnRate(float64 lr) {
-        assert(!lr.isZero() && "[Error]: 0 learn rate does nothing");
+        assert(!lr.isPositive() && "[Error]: 0 learn rate does nothing");
         learnRate = lr;
     }
 }

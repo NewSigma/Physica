@@ -84,7 +84,6 @@ namespace Physica::Core {
         /* Operations */
         void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
-        [[nodiscard]] constexpr static ScalarOption getOption() { return Float16; }
         [[nodiscard]] __host__ __device__ __half toMachine() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return h == __half(0); }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > __half(0); }

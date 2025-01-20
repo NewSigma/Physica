@@ -35,9 +35,9 @@ namespace Physica::Core {
         ~SeqNet() = default;
         /* Operations */
         template<class Dataset, class Optimizer, class RandomType, class Executor>
-        void train_step(const Dataset& dataset, Optimizer& opt);
+        void train_step(int batchSize, const Dataset& dataset, Optimizer& opt);
         template<class Dataset, class Optimizer, class RandomType, class Executor>
-        void train_step_for(int64_t numStep, const Dataset& dataset, Optimizer& opt);
+        void train_step_for(int64_t numStep, int batchSize, const Dataset& dataset, Optimizer& opt);
 
         template<class Dataset>
         [[nodiscard]] auto loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
@@ -54,17 +54,17 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Dataset, class Optimizer, class RandomType, class Executor>
-    void SeqNet<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
+    void SeqNet<Derived>::train_step(int batchSize, const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
-        const Tv mean_grad = reciprocal(Tv(opt.getBatchSize()));
+        const Tv mean_grad = reciprocal(Tv(batchSize));
         if constexpr (std::same_as<Executor, SequentialExecutor>) {
-            const auto indexes = RandomType::random_int(opt.getBatchSize(), 0, dataset.getSize() - 1);
+            const auto indexes = RandomType::random_int(batchSize, 0, dataset.getSize() - 1);
             for (auto index : indexes)
                 loss<Dataset>(dataset, index).reverse(mean_grad);
         }
         else {
-            const size_t numThread = Executor::getNumThread();
-            const size_t batchSizePerThread = (opt.getBatchSize() + numThread - 1) / numThread;
+            const int numThread = Executor::getNumThread();
+            const int batchSizePerThread = (batchSize + numThread - 1) / numThread;
             std::mutex mutex{};
             Executor::parallel_for([this, mean_grad, batchSizePerThread, &dataset, &mutex](size_t) {
                 auto& nn = Base::getDerived();
@@ -82,9 +82,9 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Dataset, class Optimizer, class RandomType, class Executor>
-    void SeqNet<Derived>::train_step_for(int64_t numStep, const Dataset& dataset, Optimizer& opt) {
+    void SeqNet<Derived>::train_step_for(int64_t numStep, int batchSize, const Dataset& dataset, Optimizer& opt) {
         for (int64_t _ = 0; _ < numStep; ++_)
-            train_step<Dataset, Optimizer, RandomType, Executor>(dataset, opt);
+            train_step<Dataset, Optimizer, RandomType, Executor>(batchSize, dataset, opt);
     }
 
     template<class Derived>

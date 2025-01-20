@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,103 +25,136 @@
 #include "Physica/Core/ML/NeuralNetwork/Loss.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-
-using namespace Physica;
-
-template<Scalar T, RandomGenerator R> class MnistNet;
 
 namespace Physica {
-    template<class T, RandomGenerator R>
-    class Traits<MnistNet<T, R>> : public Traits<LinearLayer<T>> {};
+    template<Scalar> class MnistNet;
+
+    template<Scalar T>
+    class Traits<MnistNet<T>> : public Traits<LinearLayer<T>> {};
+
+    template<Scalar T>
+    class MnistNet : public SeqNet<MnistNet<T>> {
+        using This = MnistNet<T>;
+        using Base = SeqNet<This>;
+        using typename Base::Tv;
+    private:
+        LinearLayer<T> layer1;
+        LinearLayer<T> layer2;
+    public:
+        MnistNet() = default;
+        MnistNet(size_t width1) : layer1(Mnist::NumPixelInImage, width1), layer2(width1, 10) {}
+        template<Scalar U>
+        MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2) {}
+        MnistNet(const This& other) = default;
+        MnistNet(This&&) noexcept = default;
+        ~MnistNet() = default;
+        /* Operators */
+        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        template<RandomGenerator R>
+        void init() {
+            layer1.template random_xavier_normal<R>(1);
+            layer2.template random_xavier_normal<R>(1);
+        }
+
+        template<Vector V>
+        [[nodiscard]] CoDiff<VectorND<T>> forward(const V& x) const {
+            auto y1 = layer1.forward(x);
+            CoDiff<VectorND<T>> y2 = relu(y1);
+            auto y3 = layer2.forward(y2);
+            if constexpr (Base::IsTrain)
+                y3 = co_yield std::move(y3);
+            else
+                co_return std::move(y3);
+        }
+
+        void reverse(const This& __restrict other) const noexcept {
+            assert(this != &other && "[Error]: Self reverse is invalid");
+            layer1.reverse(other.layer1);
+            layer2.reverse(other.layer2);
+        }
+
+        template<class Optimizer>
+        void step(Optimizer& opt) {
+            layer1.step(opt);
+            layer2.step(opt);
+        }
+
+        void zero_grad() {
+            layer1.zero_grad();
+            layer2.zero_grad();
+        }
+
+        template<class Dataset>
+        [[nodiscard]] CoDiff<T> loss(const Dataset& dataset, size_t index) const {
+            auto weights = forward(dataset.getSamples()[index]);
+            auto loss = weights.crossEntropy(dataset.getLabels()[index]);
+            if constexpr (ReverseDiff<T>) {
+                auto tmp = co_yield loss.value();
+                loss.reverse(tmp.grad());
+            }
+            else
+                co_return std::move(loss);
+        }
+
+        template<class Dataset>
+        [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
+
+        size_t classify(const VectorND<Tv>& input) const {
+            static_assert(!Base::IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
+            const auto output = Base::forward(input);
+            Tv max = output[0];
+            size_t index = 0;
+            for (size_t i = 1; i < output.getLength(); ++i) {
+                if (output[i] > max) {
+                    index = i;
+                    max = output[i].value();
+                }
+            }
+            return index;
+        }
+
+        template<class Dataset>
+        Tv calcAccuracy(const Dataset& dataset) const {
+            const auto& testSamples = dataset.getSamples();
+            const auto& testLabels = dataset.getLabels();
+            const size_t numTestData = dataset.getSize();
+            size_t count = 0;
+            for (size_t i = 0; i < numTestData; ++i)
+                count += testLabels[i] == classify(VectorND<Tv>(testSamples[i]));
+            return Tv(count) / Tv(numTestData);
+        }
+
+        void swap(This& __restrict obj) noexcept {
+            assert(this != &obj && "[Error]: Self swap is likely a bug");
+            Base::swap(obj);
+            layer1.swap(obj.layer1);
+            layer2.swap(obj.layer2);
+        }
+    private:
+        template<Scalar> friend class MnistNet;
+    };
 }
 
-template<Scalar T, RandomGenerator R>
-class MnistNet : public SeqNet<MnistNet<T, R>> {
-    using Base = SeqNet<MnistNet<T, R>>;
-    using typename Base::ValueType;
-    using typename Base::OutputType;
-
-    LinearLayer<T> layer1;
-    LinearLayer<T> layer2;
-    LinearLayer<T> layer3;
-public:
-    MnistNet() = default;
-    MnistNet(size_t width1, size_t width2)
-            : layer1(Mnist::NumPixelInImage, width1)
-            , layer2(width1, width2)
-            , layer3(width2, 10) {
-        auto dist = std::normal_distribution<float>(0, 0.01);
-        layer1.template random_any<decltype(dist), R>(dist);
-        layer2.template random_any<decltype(dist), R>(dist);
-        layer3.template random_any<decltype(dist), R>(dist);
-    }
-    template<Scalar U>
-    MnistNet(const MnistNet<U, R>& net) : layer1(net.layer1), layer2(net.layer2), layer3(net.layer3) {}
-    MnistNet(const MnistNet& other) = default;
-    MnistNet(MnistNet&&) noexcept = default;
-    ~MnistNet() = default;
-    /* Operators */
-    MnistNet& operator=(MnistNet& obj) noexcept { swap(obj); return *this; }
-    /* Operations */
-    template<Vector V>
-    [[nodiscard]] OutputType forward(const V& x) const {
-        OutputType result = relu(layer1.forward(x));
-        result = relu(layer2.forward(result));
-        result = layer3.forward(result);
-        return result;
-    }
-
-    template<class Dataset>
-    [[nodiscard]] T loss(const Dataset& dataset, size_t index) const {
-        return Loss<T>::crossEntropy(forward(dataset.getSamples()[index]), dataset.getLabels()[index]);
-    }
-
-    template<class Dataset>
-    [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
-
-    template<class Dataset>
-    ValueType calcAccuracy(const Dataset& dataset) const {
-        const auto& testSamples = dataset.getSamples();
-        const auto& testLabels = dataset.getLabels();
-        const size_t numTestData = dataset.getSize();
-        size_t count = 0;
-        for (const auto& sample : testSamples)
-            count += testLabels[Base::classify(VectorType(sample))] == 1;
-        return ValueType(count) / ValueType(numTestData);
-    }
-
-    void swap(MnistNet& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
-        layer1.swap(obj.layer1);
-        layer2.swap(obj.layer2);
-        layer3.swap(obj.layer3);
-    }
-private:
-    template<Scalar, RandomGenerator> friend class MnistNet;
-};
-
-using ValueType = float32;
-using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
-using Dataset = Mnist::DatasetType<VectorND<ValueType>>;
-using Optimizer = SGD<ScalarType>;
+using namespace Physica;
+using T = float32;
+using dfloat = Diff<T, DiffMode::Reverse, 1>;
+using Dataset = Mnist::DatasetType<VectorND<T>>;
 using RandomType = Random<MT19937>;
-constexpr size_t batchSize = 9000;
+constexpr size_t BatchSize = 64;
 
 namespace {
     Dataset makeDataset() {
         const Mnist mnist("/home/sigma/Documents/data");
-        auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
+        auto dataset = mnist.makeTrainDataset<VectorND<T>>();
         for (size_t i = 0; i < dataset.getSize(); ++i) {
             auto& sample = dataset.getSamples()[i];
-            sample = sample * ValueType(1.0 / 128) - ValueType(1);
+            sample = sample * T(1.0 / 128) - T(1);
         }
         return dataset;
     }
 
     static void main(benchmark::State& state) {
-        ThreadPool::numThreadRequired = 4;
         Dataset dataset;
         try {
             dataset = makeDataset();
@@ -129,13 +162,10 @@ namespace {
         catch (std::exception& e) {
             state.SkipWithError(e.what());
         }
-        auto opt = Optimizer(0.01, batchSize);
-        opt.recordBegin();
-        auto nn = MnistNet<ScalarType, RandomType>(512, 512);
-        opt.recordEnd();
-
+        auto opt = SGD(0.01);
+        auto nn = MnistNet<dfloat>(512);
         for (auto _ : state)
-            nn.train_step<Dataset, Optimizer, RandomType, SequentialExecutor>(dataset, opt);
+            nn.train_step<Dataset, SGD, RandomType, SequentialExecutor>(BatchSize, dataset, opt);
     }
 }
 

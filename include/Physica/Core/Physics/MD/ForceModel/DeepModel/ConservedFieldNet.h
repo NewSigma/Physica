@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,7 +34,6 @@ namespace Physica::Core {
         using DiffScalar1 = Diff<ValueType, DiffMode::Reverse, 1>;
         using LossType = Loss<ScalarType>::LossType;
         constexpr static bool IsTrain = ScalarType::Order == 2;
-        static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
     public:
         ConservedFieldNet(const ConservedFieldNet&) = delete;
         ~ConservedFieldNet() = default;

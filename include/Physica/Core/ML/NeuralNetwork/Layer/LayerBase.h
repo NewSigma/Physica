@@ -29,7 +29,6 @@ namespace Physica::Core {
         using TraitsType = Traits<Derived>;
     public:
         using ScalarType = TraitsType::ScalarType;
-        using OutputType = TraitsType::OutputType;
         constexpr static bool IsTrain = ScalarType::isDiffable;
         constexpr static bool IsInfer = !IsTrain;
     public:

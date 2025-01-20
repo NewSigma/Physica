@@ -29,7 +29,7 @@ namespace Physica::Core {
         using This = LnVegas<T>;
         using Base = Vegas<T>;
         using typename Base::Tv;
-        using typename Base::RealValue;
+        using typename Base::Trv;
         using typename Base::LossMatrix;
         using typename Base::CountArray;
     protected:
@@ -52,7 +52,7 @@ namespace Physica::Core {
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void integral(Functor lnFunc);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
-        [[nodiscard]] RealValue calcGridLoss(Functor func) const;
+        [[nodiscard]] Trv calcGridLoss(Functor func) const;
 
         [[nodiscard]] T calcLnMean(int from = 0) const;
         [[nodiscard]] T calcLnDevia(int from = 0) const;
@@ -107,7 +107,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    LnVegas<T>::RealValue LnVegas<T>::calcGridLoss(Functor func) const {
+    LnVegas<T>::Trv LnVegas<T>::calcGridLoss(Functor func) const {
         Base::pre_trial();
         trialIntegral<Functor, R, Executor>(func);
         return Base::calcGridLossImpl();
@@ -122,7 +122,7 @@ namespace Physica::Core {
     template<Scalar T>
     T LnVegas<T>::calcLnDevia(int from) const {
         assert(0 <= from && from < getNumRefine());
-        return RealValue(0.5) * calcLnVar(from);
+        return Trv(0.5) * calcLnVar(from);
     }
 
     template<Scalar T>
@@ -138,9 +138,9 @@ namespace Physica::Core {
             return 1;
         const T lnMean = calcLnMean(from);
         VectorND<T> buffer = exp(means.tail(from) - lnMean);
-        buffer = ln(abs(buffer - RealValue(1))) + lnMean;
-        buffer = RealValue(2) * buffer - vars.tail(from);
-        return exp(buffer).sum() / RealValue(getNumRefine() - from - 1);
+        buffer = ln(abs(buffer - Trv(1))) + lnMean;
+        buffer = Trv(2) * buffer - vars.tail(from);
+        return exp(buffer).sum() / Trv(getNumRefine() - from - 1);
     }
 
     template<Scalar T>
@@ -154,7 +154,7 @@ namespace Physica::Core {
             const auto& x = pair.first;
             const auto& deltas = pair.second;
             const T lny = lnFunc(x);
-            const T lnxy = lny + ln(deltas).sum() + RealValue(getDim()) * ln(RealValue(getNumPoint()));
+            const T lnxy = lny + ln(deltas).sum() + Trv(getDim()) * ln(Trv(getNumPoint()));
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
@@ -170,7 +170,7 @@ namespace Physica::Core {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
 
-            const auto l = std::max(xy.value().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
+            const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
                 toNextMean(lossMat(index, i), counts[index][i], l);
@@ -178,7 +178,7 @@ namespace Physica::Core {
             }
         }
         mean = ln(mean) + maxSample;
-        var = ln(var) + RealValue(2) * maxSample;
+        var = ln(var) + Trv(2) * maxSample;
         return std::make_pair(std::move(mean), std::move(var));
     }
 }
