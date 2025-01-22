@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,8 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-
-#include "vectorclass/vectormath_trig.h"
 
 namespace Physica::Core {
     template<Vector T1, Vector T2>

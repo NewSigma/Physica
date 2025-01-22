@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,7 +36,6 @@ namespace Physica::Core {
         using RealType = ScalarType::RealType;
         using ColMatrix = This;
         using RowMatrix = This;
-        using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order>;
         constexpr static bool isComplex = true;
     public:
         using Storage::Storage;

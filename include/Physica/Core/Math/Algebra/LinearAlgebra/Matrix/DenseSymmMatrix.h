@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,7 +33,6 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using ColMatrix = This;
         using RowMatrix = This;
-        using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order>;
     public:
         template<Matrix M>
         DenseSymmMatrix(const M& mat);

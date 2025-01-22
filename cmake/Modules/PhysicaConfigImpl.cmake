@@ -5,77 +5,80 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -fPIC -mrdrnd")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-optimization-argument -Wno-unknown-warning-option")
-    # Workaround for P2014R0
-    #
-    # Reference:
-    # [1] https://github.com/llvm/llvm-project/issues/56671
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcoro-aligned-allocation")
-    add_link_options(-lstdc++) # Add this if you prefer libstdc++
-
-    if (CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
-        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --compiler-bindir ${CMAKE_CXX_COMPILER}")
-
-        find_package(IntelSYCL REQUIRED)
-        get_target_property(IntelSYCL_LIBRARY_PATH IntelSYCL::SYCL_CXX INTERFACE_LINK_DIRECTORIES)
-        set(CMAKE_BUILD_RPATH ${IntelSYCL_LIBRARY_PATH})
-        set(CMAKE_INSTALL_RPATH ${IntelSYCL_LIBRARY_PATH})
-    endif()
-elseif(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4068 /wd4201 /wd4242 /wd4244 /wd4251 /wd4267 /wd4275 /wd4305 /wd4365 /wd4458 /wd4514 /wd4623 /wd4625 /wd4626 /wd4710 /wd4711 /wd4800 /wd4819 /wd4820 /wd4996 /wd5026 /wd5027 /wd5045 /wd5051 /wd5219")
+if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+    add_compile_options(/Wall)
+    add_compile_options(/wd4068 /wd4201 /wd4242 /wd4244 /wd4251 /wd4267 /wd4275 /wd4305 /wd4365 /wd4458 /wd4514 /wd4623 /wd4625 /wd4626 /wd4710 /wd4711 /wd4800 /wd4819 /wd4820 /wd4996 /wd5026 /wd5027 /wd5045 /wd5051 /wd5219)
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DNOMINMAX)
 else()
-    message(FATAL_ERROR "Unknown compiler")
+    add_compile_options(-Wall -fPIC -mrdrnd -fno-math-errno -fno-trapping-math -fno-signed-zeros)
+
+    if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
+        add_compile_options(-Wextra)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
+        add_compile_options(-Wno-deprecated-declarations)
+        # Workaround for P2014R0
+        #
+        # Reference:
+        # [1] https://github.com/llvm/llvm-project/issues/56671
+        add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fcoro-aligned-allocation>)
+        add_link_options(-lstdc++) # Add this if you prefer libstdc++
+
+        if (CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
+            find_package(IntelSYCL REQUIRED)
+            get_target_property(IntelSYCL_LIBRARY_PATH IntelSYCL::SYCL_CXX INTERFACE_LINK_DIRECTORIES)
+            set(CMAKE_BUILD_RPATH ${IntelSYCL_LIBRARY_PATH})
+            set(CMAKE_INSTALL_RPATH ${IntelSYCL_LIBRARY_PATH})
+        endif()
+    else()
+        message(FATAL_ERROR "Unknown compiler")
+    endif()
 endif()
 
 if(${PHYSICA_OPTIMIZE})
     add_definitions(-DPHYSICA_ASM)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-endif()
-
-if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -fno-signaling-nans -fno-trapping-math")
+    add_compile_options(-march=native)
 endif()
 
 if(${PHYSICA_CUDA})
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
         set(CMAKE_CUDA_ARCHITECTURES native)
     endif()
-    enable_language(CUDA)
-    find_package(CUDAToolkit REQUIRED)
-    add_definitions(-DPHYSICA_CUDA)
-
+    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
     set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
     set(CMAKE_CUDA_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED})
     set(CMAKE_CUDA_VISIBILITY_PRESET ${CMAKE_CXX_VISIBILITY_PRESET})
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
-    set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
-    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
-    # clangd does not work with response file
-    # Reference: https://github.com/clangd/clangd/discussions/1676
-    set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
+    enable_language(CUDA)
+    find_package(CUDAToolkit REQUIRED)
+    add_definitions(-DPHYSICA_CUDA)
 
-    # Warning 20011: Call host function from host-device function
-    # Warning 20208: Use long double in device code
-    set(CMAKE_CUDA_FLAGS 
-        ${CMAKE_CUDA_FLAGS}
-        --Wreorder
-        --Wdefault-stream-launch
-        --Wext-lambda-captures-this
-        --Wno-deprecated-declarations
-        --Wno-deprecated-gpu-targets
-        --diag-suppress 20011
-        --diag-suppress 20208
-        --default-stream per-thread
-        --expt-relaxed-constexpr
-        ${CMAKE_CXX_FLAGS})
-    string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
+    if(CMAKE_CUDA_COMPILER_ID MATCHES Clang)
+        add_compile_options(-Wno-unknown-cuda-version)
+    else()
+        # clangd does not work with response file
+        # Reference: https://github.com/clangd/clangd/discussions/1676
+        set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
+
+        set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
+        set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
+        # Warning 20011: Call host function from host-device function
+        # Warning 20208: Use long double in device code
+        set(CMAKE_CUDA_FLAGS 
+            ${CMAKE_CUDA_FLAGS}
+            --Wreorder
+            --Wdefault-stream-launch
+            --Wext-lambda-captures-this
+            --Wno-deprecated-declarations
+            --Wno-deprecated-gpu-targets
+            --diag-suppress 20011
+            --diag-suppress 20208
+            --default-stream per-thread
+            --expt-relaxed-constexpr
+            ${CMAKE_CXX_FLAGS})
+        string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
+    endif()
 endif()
 ##############################################Libs################################################
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_RPATH}")

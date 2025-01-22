@@ -124,7 +124,7 @@ namespace Physica::Core {
         friend class Integer;
         template<ScalarOption Option> __host__ __device__ friend Real<Option> square(const Real<Option>& s) noexcept;
         template<ScalarOption Option> __host__ __device__ friend Real<Option> sqrt(const Real<Option>& s) noexcept;
-        template<ScalarOption Option> friend Real<Option> ln(const Real<Option>& s) noexcept;
+        template<ScalarOption Option> __host__ __device__ friend Real<Option> ln(const Real<Option>& s) noexcept;
         /* Static members */
         inline static Real<FloatMP> add(const Real& s1, const Real& s2);
         inline static Real<FloatMP> sub(const Real& s1, const Real& s2);

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/PlainStruct.h"
-#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "../RValueVector.cuh"
 
 namespace Physica::Core {
     namespace Internal {

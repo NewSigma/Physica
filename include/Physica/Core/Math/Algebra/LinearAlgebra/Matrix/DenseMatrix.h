@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "DenseMatrixImpl/DenseMatrixStorage.h"
+#include "Physica/Core/Utils/Container/Array2D.h"
 #include "MatrixImpl/ContinuousMatrix.h"
 
 namespace Physica::Core {
@@ -37,10 +37,10 @@ namespace Physica::Core {
              class Allocator = HostAllocator<T>>
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>
                       , public CRCoro<DenseMatrix<T, Option, Row, Col, Allocator>>
-                      , public DenseMatrixStorage<T, Option, Row, Col, Allocator> {
+                      , public Array2D<T, Option, Row, Col, Allocator> {
         using This = DenseMatrix<T, Option, Row, Col, Allocator>;
         using Base = ContinuousMatrix<This>;
-        using Storage = DenseMatrixStorage<T, Option, Row, Col, Allocator>;
+        using Storage = Array2D<T, Option, Row, Col, Allocator>;
         using Base::isReverseDiff;
     protected:
         using typename Base::ConstRefTy;
@@ -51,7 +51,6 @@ namespace Physica::Core {
         using initializer_list = std::initializer_list<typename Storage::InitializerType>;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Col, Row, Col>;
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Col>;
-        using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Col>;
     public:
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t col);
@@ -129,4 +128,4 @@ namespace std {
     }
 }
 
-#include "DenseMatrixImpl/DenseMatrixImpl.h"
+#include "MatrixImpl/DenseMatrixImpl.h"

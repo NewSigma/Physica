@@ -278,7 +278,7 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    Real<Option> floor(const Real<Option>& x) noexcept {
+    __host__ __device__ Real<Option> floor(const Real<Option>& x) noexcept {
         if constexpr (Option == Float32)
             return Real<Option>(::floorf(x.toMachine()));
         else

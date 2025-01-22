@@ -44,10 +44,6 @@ void T::swap(T& __restrict obj) noexcept {
 
 ## 其他C++特性
 
-### Run-Time Type Information (RTTI)
-
-不得使用
-
 ### 静态断言
 
 类模板的静态断言应尽可能放置在Traits中

@@ -53,7 +53,7 @@ namespace Physica::Core {
             const unsigned int numThread = std::min(maxMinor, MaxThreadPerBlock);
             const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
             const unsigned int numBlockY = maxMajor;
-            kernel<<<{numBlockX, numBlockY}, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+            kernel<<<dim3{numBlockX, numBlockY}, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
             check(cudaGetLastError());
         }
         else {

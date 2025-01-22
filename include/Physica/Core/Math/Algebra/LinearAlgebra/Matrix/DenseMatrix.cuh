@@ -18,20 +18,20 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
+#include "Physica/Core/Utils/Container/Array2D.cuh"
 #include "MatrixImpl/ContinuousMatrix.cuh"
-#include "DenseMatrixImpl/DenseMatrixStorage.cuh"
+#include "DenseMatrix.h"
 
 namespace Physica::Core {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     class device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
             : public device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>
-            , public device_obj<DenseMatrixStorage<T, Option, Row, Col, Allocator>> {
+            , public device_obj<Array2D<T, Option, Row, Col, Allocator>> {
         using host_obj = DenseMatrix<T, Option, Row, Col, Allocator>;
         using host_storage = host_obj::Storage;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>;
-        using Storage = device_obj<DenseMatrixStorage<T, Option, Row, Col, Allocator>>;
+        using Storage = device_obj<Array2D<T, Option, Row, Col, Allocator>>;
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t col);

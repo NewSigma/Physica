@@ -1,0 +1,93 @@
+/*
+ * Copyright 2021-2025 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <cassert>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+
+namespace Physica::Core {
+    template<class T,
+             int Option = MatrixOption::Col | MatrixOption::Vector,
+             size_t Row = Dynamic,
+             size_t Col = Dynamic,
+             class Allocator = HostAllocator<T>>
+    class Array2D {
+        using This = Array2D<T, Option, Row, Col, Allocator>;
+        constexpr static bool isVectorStorage = !(Option & MatrixOption::Element);
+        constexpr static bool isDynamicArray = Row == Dynamic && Col == Dynamic;
+        constexpr static bool isColMajor = !(Option & MatrixOption::Row);
+        constexpr static size_t MaxMajor = isColMajor ? Col : Row;
+        constexpr static size_t MaxMinor = isColMajor ? Row : Col;
+    public:
+        using VectorType = std::conditional<Scalar<T>, DenseVector<T, MaxMinor>, Array<T, MaxMinor>>::type;
+        using InitializerType = std::conditional<isVectorStorage, VectorType, T>::type;
+    private:
+        using AllocatorV = Allocator::template rebind_alloc<VectorType>;
+        using VArrayType = Array<VectorType, MaxMajor, AllocatorV>;
+        using EArrayType = std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
+        using ArrayType = std::conditional<isVectorStorage, VArrayType, EArrayType>::type;
+        using IndexType = std::conditional<isDynamicArray, size_t, PlainStruct<void>>::type;
+
+        ArrayType arr;
+        [[no_unique_address]] IndexType r;
+    public:
+        Array2D() = default;
+        Array2D(size_t row, size_t col);
+        Array2D(size_t row, size_t col, T value);
+        Array2D(std::initializer_list<InitializerType> list);
+        Array2D(const This&) = default;
+        Array2D(This&&) noexcept = default;
+        ~Array2D() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] T& operator()(size_t r, size_t c);
+        [[nodiscard]] const T& operator()(size_t r, size_t c) const;
+        /* Operations */
+        template<class... Args>
+        void resize(size_t row, size_t col, Args&&... args);
+        template<class... Args>
+        void resize(size_t order);
+
+        [[nodiscard]] inline auto toDevice() const;
+        [[nodiscard]] inline auto toDeviceAsync() const;
+        inline void toDevice(device_obj<This>& obj) const;
+        inline void toDeviceAsync(device_obj<This>& obj) const;
+
+        void swap(This& __restrict obj) noexcept;
+        void swap_row(size_t r1, size_t r2) noexcept;
+        void swap_col(size_t c1, size_t c2) noexcept;
+        /* Getters */
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const;
+    private:
+        Array2D(ArrayType arr_, IndexType r_);
+
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const;
+        /* Friends */
+        friend class device_obj<This>;
+    };
+}
+
+#include "ArrayImpl/Array2DImpl.h"

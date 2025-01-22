@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include <vectorclass/vectormath_trig.h>
-#include <vectorclass/vectormath_hyp.h>
-
 namespace Physica::Core {
     template<Scalar T, size_t Size>
     [[nodiscard]] __host__ __device__ inline SIMD<T, Size> abs(const SIMD<T, Size>& x) {

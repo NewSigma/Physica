@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,6 @@
 #include "Physica/Core/ML/Clustering/AP.h"
 
 using namespace Physica;
-using ScalarType = float64;
 
 bool testCluster(const std::forward_list<size_t>& cluster) {
     const size_t first = cluster.front();
@@ -34,16 +33,16 @@ bool testCluster(const std::forward_list<size_t>& cluster) {
 }
 
 int main() {
-    DenseMatrix<ScalarType> points{{5, 0}, {5, 1}, {5, -1}, {-5, 0}, {-5, 1}, {-5, -1}};
-    DenseSymmMatrix<ScalarType> similar(points.getCol());
+    DenseMatrix<float64> points{{5, 0}, {5, 1}, {5, -1}, {-5, 0}, {-5, 1}, {-5, -1}};
+    DenseSymmMatrix<float64> similar(points.getCol());
     for (size_t i = 0; i < similar.getOrder(); ++i) {
-        similar(i, i) = ScalarType(-1);
+        similar(i, i) = float64(-1);
         for (size_t j = i + 1; j < similar.getOrder(); ++j) {
             similar(i, j) = -(points.col(i) - points.col(j)).norm();
         }
     }
 
-    AP<ScalarType> ap(std::move(similar), 0.5, 10, 100);
+    AP<float64> ap(std::move(similar), 0.5, 10, 100);
     auto exemplars = ap.getExemplars();
     if (exemplars.size() != 2)
         return 1;

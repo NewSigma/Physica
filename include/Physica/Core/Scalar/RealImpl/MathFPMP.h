@@ -18,18 +18,20 @@
  */
 #pragma once
 
+#include "FloatMP.h"
+
 namespace Physica::Core {
     template<>
-    Real<FloatMP> abs(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ Real<FloatMP> abs(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> sqrt(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ Real<FloatMP> sqrt(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> ln(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ Real<FloatMP> ln(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> exp(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ Real<FloatMP> exp(const Real<FloatMP>& s) noexcept;
 
     //!Compute a ^ unit.
     inline Real<FloatMP> powWord(const Real<FloatMP>& a, MPUnit unit) {
@@ -80,10 +82,10 @@ namespace Physica::Core {
     Real<FloatMP> factorial(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> cos(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ Real<FloatMP> cos(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> sin(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ Real<FloatMP> sin(const Real<FloatMP>& s) noexcept;
 
     template<>
     Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept;
@@ -125,5 +127,5 @@ namespace Physica::Core {
     Real<FloatMP> arccoth(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> floor(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ Real<FloatMP> floor(const Real<FloatMP>& s) noexcept;
 }

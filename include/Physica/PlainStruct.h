@@ -28,7 +28,18 @@ namespace Physica {
 
     template<>
     class PlainStruct<void> {
+        using This = PlainStruct<void>;
     public:
+        constexpr PlainStruct() = default;
+        template<class T>
+        constexpr PlainStruct(T&&) {}
+        constexpr PlainStruct(const This&) = default;
+        constexpr PlainStruct(This&&) noexcept = default;
+        constexpr ~PlainStruct() = default;
+        /* Operators */
+        template<class T>
+        constexpr void operator=(T&&) {}
+        /* Operations */
         void swap(PlainStruct<void>&) {}
     };
 

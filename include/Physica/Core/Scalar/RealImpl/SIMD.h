@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,8 @@
 
 #include <vectorclass/vectorclass.h>
 #include <vectorclass/vectormath_exp.h>
+#include <vectorclass/vectormath_trig.h>
+#include <vectorclass/vectormath_hyp.h>
 #include "Physica/PlainStruct.h"
 #include "Physica/Core/Scalar/ScalarImpl/SIMDBase.h"
 #include "SIMDImpl/Instruset.h"

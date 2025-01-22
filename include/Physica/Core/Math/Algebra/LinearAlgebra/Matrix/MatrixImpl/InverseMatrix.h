@@ -83,7 +83,7 @@ namespace Physica::Core {
                             temp.majorSwap(k, i);
                         }
 
-                        for (size_t j = i + 1; j < order; ++j) {
+                        for (ssize_t j = i + 1; j < order; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             temp.majorReduce(j, i, factor);
@@ -107,7 +107,7 @@ namespace Physica::Core {
                             temp.majorReduce(j, i, factor);
                         }
                     }
-                    for (size_t i = 0; i < order; ++i)
+                    for (ssize_t i = 0; i < order; ++i)
                         temp.majorMulScalar(i, reciprocal(copy(i, i)));
                     target = temp;
                 }

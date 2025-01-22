@@ -253,7 +253,7 @@ namespace Physica::Core {
                 if (result < temp)
                     result = temp;
             }
-            co_return result;
+            co_return std::move(result);
         }
         else {
             const auto& v = Base::getDerived();
@@ -349,7 +349,7 @@ namespace Physica::Core {
                 if (result > temp)
                     result = temp;
             }
-            co_return result;
+            co_return std::move(result);
         }
     }
 

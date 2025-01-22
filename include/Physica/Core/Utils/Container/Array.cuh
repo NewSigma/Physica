@@ -21,6 +21,7 @@
 #include "Physica/PlainStruct.h"
 #include "Physica/Core/Utils/Allocator/DeviceAllocator.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Array.h"
 
 namespace Physica::Core {
     template<class T, size_t Length, class Allocator>
@@ -137,7 +138,6 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return d_data; }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return d_data; }
     private:
-        using Base::operator[];
         /* Iterators */
         using Base::begin;
         using Base::cbegin;

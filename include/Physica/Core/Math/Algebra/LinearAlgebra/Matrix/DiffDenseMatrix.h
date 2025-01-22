@@ -108,4 +108,4 @@ namespace Physica {
     };
 }
 
-#include "DiffDenseMatrixImpl/DiffDenseMatrixImpl.h"
+#include "MatrixImpl/DiffDenseMatrixImpl.h"

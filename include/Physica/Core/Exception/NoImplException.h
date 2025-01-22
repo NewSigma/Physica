@@ -27,7 +27,7 @@ namespace Physica::Core {
         NoImplException(const char* msg) : std::runtime_error(msg) {}
     };
 
-    __host__ __device__ [[noreturn]] inline void noImpl(const char* msg) {
+    [[noreturn]] __host__ __device__ inline void noImpl(const char* msg) {
     #ifdef __CUDA_ARCH__
         printf("%s\n", msg);
         __trap();
