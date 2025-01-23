@@ -24,7 +24,8 @@ namespace Physica::Core {
     template<Scalar T>
     class AdaptiveBase {
         using This = AdaptiveBase<T>;
-        using Trv = T::RealType::ValueType;
+        using Tr = T::RealType;
+        using Trv = Tr::ValueType;
     protected:
         VectorND<Trv> from;
         VectorND<Trv> to;
@@ -57,9 +58,9 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDim() const noexcept { return from.getLength(); }
         [[nodiscard]] int getNumRefine() const noexcept { return numRefine; }
         [[nodiscard]] int getNumSample() const noexcept { return numSample; }
-        [[nodiscard]] const VectorND<T>& getMeans() const noexcept { return means; }
-        [[nodiscard]] const VectorND<T>& getVars() const noexcept { return vars; }
-        [[nodiscard]] const VectorND<Trv>& getLoss() const noexcept { return loss; }
+        [[nodiscard]] const auto& getMeans() const noexcept { return means; }
+        [[nodiscard]] const auto& getVars() const noexcept { return vars; }
+        [[nodiscard]] const auto& getLoss() const noexcept { return loss; }
         /* Setters */
         void setNumRefine(int numRefine_);
     };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -44,6 +44,7 @@ namespace Physica::Core {
     public:
         Complex() = default;
         Complex(MachineType x) : This(T(x)) {}
+        Complex(double _Complex x);
         Complex(T re_);
         Complex(T re_, T im_);
         Complex(std::initializer_list<T> list);
@@ -80,9 +81,6 @@ namespace Physica::Core {
         [[nodiscard]] static Complex random_normal();
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
-
-    template<Scalar T>
-    std::ostream& operator<<(std::ostream& os, const Complex<T>& c);
 
     template<Scalar T>
     inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2);
@@ -130,6 +128,11 @@ namespace Physica::Core {
 
     template<Scalar T>
     auto operator-(const Complex<T>& c) { return Complex<T>(-c.real(), -c.imag()); }
+
+    template<Scalar T>
+    std::ostream& operator<<(std::ostream& os, const Complex<T>& x) {
+        return os << std::format("{}", x);
+    }
 }
 
 namespace Physica {
@@ -162,6 +165,18 @@ namespace std {
 
     template<Physica::Core::Scalar T>
     void swap(Physica::Core::Complex<T>& __restrict c1, Physica::Core::Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
+
+    template<Physica::Core::Scalar T>
+    struct formatter<Physica::Core::Complex<T>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Core::Complex<T>& obj, std::format_context& ctx) const {
+            const auto& im = obj.imag();
+            return std::format_to(ctx.out(), "{} {} {}i", obj.real(), im.isNegative() ? '-' : '+', im);
+        }
+    };
 }
 
 #include "ComplexImpl/ComplexImpl.h"

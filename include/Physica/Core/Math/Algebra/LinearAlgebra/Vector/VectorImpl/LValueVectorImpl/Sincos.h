@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../LValueVector.h"
+
 namespace Physica::Core {
     template<Vector T1, Vector T2>
     auto sincos(const T1& x, T2& s, T2& c) {

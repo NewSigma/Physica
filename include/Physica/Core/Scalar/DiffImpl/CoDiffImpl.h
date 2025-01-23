@@ -57,7 +57,7 @@ namespace Physica::Core {
     }
 
     template<class Base>
-    CoDiffNode<Base>::CoDiffNode(This&& other) noexcept : Base(std::move(other)), handle(other.handle) {
+    CoDiffNode<Base>::CoDiffNode(This&& other) noexcept : Base(static_cast<Base&&>(other)), handle(other.handle) {
         other.handle = nullptr;
     }
 
@@ -65,7 +65,7 @@ namespace Physica::Core {
     CoDiffNode<Base>::~CoDiffNode() {
         if (handle) {
             assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
-            handle.promise().obj = Base(std::move(*this));
+            handle.promise().obj = Base(static_cast<Base&&>(*this));
             handle.resume();
             assert(handle.done() && "[Error]: Invalid reverse diff");
             handle.destroy();

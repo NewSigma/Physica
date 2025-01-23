@@ -151,3 +151,4 @@ namespace Physica {
 #include "VectorExprImpl/ArcSinh.h"
 #include "VectorExprImpl/ArcTanh.h"
 #include "VectorExprImpl/LnCosh.h"
+#include "VectorExprImpl/Softmax.h"

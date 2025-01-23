@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -57,46 +57,7 @@ namespace Physica::Core {
         Sech,
         ArcSinh,
         ArcTanh,
-        LnCosh
+        LnCosh,
+        Softmax
     };
-
-    constexpr const char* exprTypeToStr(ExprType type) {
-        using enum ExprType;
-        switch (type) {
-            case Set: return "Set";
-            case Assign: return "Assign";
-            case Diff: return "Diff";
-            case Minus: return "Minus";
-            case Add: return "Add";
-            case Sub: return "Sub";
-            case Mul: return "Mul";
-            case Div: return "Div";
-            case Sum: return "Sum";
-            case More: return "More";
-            case MoreEq: return "MoreEq";
-            case Reciprocal: return "Reciprocal";
-            case Sqrt: return "Sqrt";
-            case Cbrt: return "Cbrt";
-            case Abs: return "Abs";
-            case Relu: return "Relu";
-            case Unit: return "Unit";
-            case Square: return "Square";
-            case Ln: return "Ln";
-            case Ln1p: return "Ln1p";
-            case Ln1pExp: return "Ln1pExp";
-            case Exp: return "Exp";
-            case Pow: return "Pow";
-            case Sin: return "Sin";
-            case Cos: return "Cos";
-            case Tan: return "Tan";
-            case Sec: return "Sec";
-            case ArcCos: return "ArcCos";
-            case Cosh: return "Cosh";
-            case Tanh: return "Tanh";
-            case Sech: return "Sech";
-            case LnCosh: return "LnCosh";
-            default: [[unlikely]]
-                return "Unknown";
-        }
-    }
 }

@@ -120,10 +120,10 @@ namespace Physica::Core {
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
-                using ValueType = T::ValueType;
-                ValueType values[AnyPacket::size()];
+                using Tv = T::ValueType;
+                Tv values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
-                    values[i] = ValueType(calc(index));
+                    values[i] = Tv(calc(index));
                 ValuePacket packet{};
                 packet.load(values);
                 return AnyPacket(std::move(packet));
@@ -154,10 +154,10 @@ namespace Physica::Core {
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
-                using ValueType = T::ValueType;
-                ValueType values[AnyPacket::size()];
+                using Tv = T::ValueType;
+                Tv values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
-                    values[i] = i < count ? ValueType(calc(index)) : ValueType(0);
+                    values[i] = i < count ? Tv(calc(index)) : Tv(0);
                 ValuePacket packet{};
                 packet.load(values);
                 return AnyPacket(std::move(packet));
@@ -463,12 +463,23 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::prod() const -> ScalarType {
+    auto RValueVector<Derived>::prod() const -> CoDiff<ScalarType> {
         assert(getLength() != 0);
-        auto result = calc(0);
-        for(size_t i = 1; i < getLength(); ++i)
-            result *= calc(i);
-        return result;
+        if constexpr (isReverseDiff) {
+            ValueType result = calc_value(0);
+            for(size_t i = 1; i < getLength(); ++i)
+                result *= calc_value(i);
+
+            auto tmp = co_yield std::move(result);
+            const auto& v = Base::getDerived();
+            v.reverse(reciprocal(v.values()) * (tmp * tmp.grad()));
+        }
+        else {
+            auto result = calc(0);
+            for(size_t i = 1; i < getLength(); ++i)
+                result *= calc(i);
+            co_return std::move(result);
+        }
     }
 
     template<class Derived>

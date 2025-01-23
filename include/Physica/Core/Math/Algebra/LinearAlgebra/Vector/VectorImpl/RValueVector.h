@@ -124,7 +124,7 @@ namespace Physica::Core {
         [[nodiscard]] CoDiff<ScalarType> crossEntropy(size_t index) const;
         [[nodiscard]] CoDiff<ScalarType> lnSoftmax(size_t index) const;
         [[nodiscard]] CoDiff<ScalarType> softmax(size_t index) const;
-        [[nodiscard]] ScalarType prod() const;
+        [[nodiscard]] CoDiff<ScalarType> prod() const;
         [[nodiscard]] bool isZeros() const;
         template<Vector V>
         [[nodiscard]] inline auto crossProduct(const V& v) const noexcept;

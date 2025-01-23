@@ -96,7 +96,7 @@ namespace Physica::Core {
         Trv calcGridLossImpl() const;
     private:
         template<class Functor, RandomGenerator R, class Executor>
-        std::pair<T, T> trialIntegral(Functor func);
+        void trialIntegral(Functor func, T& mean, T& var);
         Trv compress(VectorND<Trv>& vars);
     };
 
@@ -141,9 +141,10 @@ namespace Physica::Core {
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
         assert(numWarm >= 0 && "[Error]: Invalid param");
 
+        T mean, var;
         for (int _ = 0; _ < numWarm; ++_) {
             pre_trial();
-            trialIntegral<Functor, R, Executor>(func);
+            trialIntegral<Functor, R, Executor>(func, mean, var);
             refineGrid<Executor>();
         }
     }
@@ -157,9 +158,7 @@ namespace Physica::Core {
         const int numRefine = Base::getNumRefine();
         for (int refine = 0; refine < numRefine; ++refine) {
             pre_trial();
-            auto pair = trialIntegral<Functor, R, Executor>(func);
-            means[refine] = std::move(pair.first);
-            vars[refine] = std::move(pair.second);
+            trialIntegral<Functor, R, Executor>(func, means[refine], vars[refine]);
             loss[refine] = calcGridLossImpl();
             refineGrid<Executor>();
         }
@@ -168,8 +167,9 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
     Vegas<T>::Trv Vegas<T>::calcGridLoss(Functor func) const {
+        T mean, var;
         pre_trial();
-        trialIntegral<Functor, R, Executor>(func);
+        trialIntegral<Functor, R, Executor>(func, mean, var);
         return calcGridLossImpl();
     }
 #ifdef PHYSICA_HDF5
@@ -270,7 +270,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    std::pair<T, T> Vegas<T>::trialIntegral(Functor func) {
+    void Vegas<T>::trialIntegral(Functor func, T& mean, T& var) {
         const int numSample = Base::getNumSample();
         const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
@@ -283,7 +283,6 @@ namespace Physica::Core {
             samples[n] = xy;
         }, numSample, Executor::getNumThread()).wait();
 
-        T mean = 0, var = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
@@ -295,7 +294,6 @@ namespace Physica::Core {
                 counts[index][i] += 1;
             }
         }
-        return std::make_pair(std::move(mean), std::move(var));
     }
 
     template<Scalar T>

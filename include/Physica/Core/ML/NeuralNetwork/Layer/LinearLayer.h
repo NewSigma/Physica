@@ -149,7 +149,7 @@ namespace Physica::Core {
 
     template<Scalar T, bool WithBias>
     void LinearLayer<T, WithBias>::resize(size_t inputDim, size_t outputDim) {
-        weights.resize(inputDim, outputDim);
+        weights.resize(outputDim, inputDim);
         if constexpr (WithBias)
             bias.resize(outputDim);
     }

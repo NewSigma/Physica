@@ -63,12 +63,12 @@ namespace Physica {
     };
 
     template<class T>
-    [[nodiscard]] __host__ __device__ inline PlainStruct<const T> asStruct(const T& obj) noexcept {
+    [[nodiscard]] __host__ __device__ inline auto asStruct(const T& obj) noexcept {
         return PlainStruct<const T>(reinterpret_cast<const PlainStruct<const T>&>(obj));
     }
 
     template<class T>
-    [[nodiscard]] __host__ __device__ inline PlainStruct<T> asStruct(T& obj) noexcept {
+    [[nodiscard]] __host__ __device__ inline auto asStruct(T& obj) noexcept {
         return PlainStruct<T>(reinterpret_cast<PlainStruct<T>&>(obj));
     }
 }

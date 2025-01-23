@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,12 @@
  */
 #pragma once
 
+#include "../Complex.h"
+
 namespace Physica::Core {
+    template<Scalar T>
+    Complex<T>::Complex(double _Complex x) : This(std::complex<MachineType>(x)) {}
+
     template<Scalar T>
     Complex<T>::Complex(T re_) : re(re_), im(0) {}
 
@@ -128,14 +133,6 @@ namespace Physica::Core {
         return *instance;
     }
 #endif
-    template<Scalar T>
-    std::ostream& operator<<(std::ostream& os, const Complex<T>& c) {
-        const auto& im = c.imag();
-        return os << c.real()
-                  << (im.isNegative() ? " - " : " + " )
-                  << abs(im) << 'i';
-    }
-
     template<Scalar T>
     inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2) {
         return Complex<T>(c1.real() + c2.real(), c1.imag() + c2.imag());

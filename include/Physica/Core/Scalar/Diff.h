@@ -43,6 +43,7 @@ namespace Physica::Core {
         Diff(MachineType x) : This(T(x)) {}
         Diff(T v_);
         Diff(T v_, GradType g_);
+        Diff(CoDiffNode<This>) requires(isReverseDiff) = delete;
         template<Scalar U>
         explicit(T::Option < U::Option) Diff(const U& x) requires(!ReverseDiff<U>);
         Diff(const This&) requires(isForwardDiff) = default;

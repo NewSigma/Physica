@@ -65,7 +65,7 @@ namespace Physica::Core {
     }
 
     inline void SGD::setLearnRate(float64 lr) {
-        assert(!lr.isPositive() && "[Error]: 0 learn rate does nothing");
+        assert(lr.isPositive() && "[Error]: Invalid learn rate");
         learnRate = lr;
     }
 }

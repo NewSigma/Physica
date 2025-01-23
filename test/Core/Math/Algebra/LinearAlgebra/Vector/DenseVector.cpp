@@ -129,10 +129,28 @@ static void crossEntropyTest() {
     }
 }
 
+static void softmaxTest() {
+    using dfloat = Diff<float32, DiffMode::Reverse>;
+    const auto factors = VectorND<float32>::random_uniform<RandomType>(8);
+    const auto x = VectorND<dfloat>::random_uniform<RandomType>(8);
+    const auto x1 = x;
+    VectorND<float32> y = softmax(x1.values());
+    softmax(x1).reverse(y, factors);
+
+    for (size_t i = 0; i < x.getLength(); ++i)
+        x.softmax(i).reverse(factors[i]);
+
+    std::cout << x.grads().format() << std::endl;
+    std::cout << x1.grads().format() << std::endl;
+    if (!vectorNear(x.grads(), x1.grads(), 1E-6))
+        exit(EXIT_FAILURE);
+}
+
 int main() {
     crossProductTest();
     hdfTest();
     lnSumExpTest();
     crossEntropyTest();
+    softmaxTest();
     return 0;
 }

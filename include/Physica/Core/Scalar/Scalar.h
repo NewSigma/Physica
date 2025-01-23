@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -138,7 +138,7 @@ namespace Physica::Core {
 
     template<class T>
     struct IsCoDiff<CoDiffNode<T>> {
-        constexpr static bool value = false;
+        constexpr static bool value = true;
     };
 
     template<class T>

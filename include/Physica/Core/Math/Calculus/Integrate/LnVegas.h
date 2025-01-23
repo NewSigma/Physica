@@ -72,7 +72,7 @@ namespace Physica::Core {
         using Base::calcVar;
 
         template<class Functor, RandomGenerator R, class Executor>
-        std::pair<T, T> trialIntegral(Functor lnFunc);
+        void trialIntegral(Functor lnFunc, T& mean, T& var);
     };
 
     template<Scalar T>
@@ -82,9 +82,10 @@ namespace Physica::Core {
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
         assert(numWarm >= 0 && "[Error]: Invalid param");
 
+        T mean, var;
         for (int _ = 0; _ < numWarm; ++_) {
             Base::pre_trial();
-            trialIntegral<Functor, R, Executor>(lnFunc);
+            trialIntegral<Functor, R, Executor>(lnFunc, mean, var);
             Base::template refineGrid<Executor>();
         }
     }
@@ -97,9 +98,7 @@ namespace Physica::Core {
 
         for (int refine = 0; refine < getNumRefine(); ++refine) {
             Base::pre_trial();
-            auto pair = trialIntegral<Functor, R, Executor>(lnFunc);
-            means[refine] = std::move(pair.first);
-            vars[refine] = std::move(pair.second);
+            trialIntegral<Functor, R, Executor>(lnFunc, means[refine], vars[refine]);
             loss[refine] = Base::calcGridLossImpl();
             Base::template refineGrid<Executor>();
         }
@@ -108,8 +107,9 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
     LnVegas<T>::Trv LnVegas<T>::calcGridLoss(Functor func) const {
+        T mean, var;
         Base::pre_trial();
-        trialIntegral<Functor, R, Executor>(func);
+        trialIntegral<Functor, R, Executor>(func, mean, var);
         return Base::calcGridLossImpl();
     }
 
@@ -145,7 +145,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    std::pair<T, T> LnVegas<T>::trialIntegral(Functor lnFunc) {
+    void LnVegas<T>::trialIntegral(Functor lnFunc, T& mean, T& var) {
         const int numSample = getNumSample();
         const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
@@ -165,7 +165,6 @@ namespace Physica::Core {
             maxSample = samples.max().value(); // Real LnVegas assumes f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);
 
-        T mean = 0, var = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
@@ -179,6 +178,5 @@ namespace Physica::Core {
         }
         mean = ln(mean) + maxSample;
         var = ln(var) + Trv(2) * maxSample;
-        return std::make_pair(std::move(mean), std::move(var));
     }
 }
