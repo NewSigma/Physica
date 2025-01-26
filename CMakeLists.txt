@@ -6,8 +6,14 @@ project(Physica
         HOMEPAGE_URL https://gitee.com/newsigma/Physica
         LANGUAGES C CXX)
 
-if (${CMAKE_SOURCE_DIR} MATCHES ${CMAKE_BINARY_DIR})
+if(${CMAKE_SOURCE_DIR} MATCHES ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In source build is a bad practice")
+endif()
+
+if(DEFINED SKBUILD_PROJECT_VERSION)
+    if(NOT ${SKBUILD_PROJECT_VERSION} MATCHES ${CMAKE_PROJECT_VERSION})
+        message(FATAL_ERROR "In consistent versions")
+    endif()
 endif()
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 #############################################Settings#############################################

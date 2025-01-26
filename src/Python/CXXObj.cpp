@@ -16,16 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "clang/AST/GlobalDecl.h"
-#include "Physica/Python/LLVM/LLVM.h"
+#include "Physica/Core/Exception/LLVMException.h"
+#include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/Utils/Unreachable.h"
 #include "Physica/Python/CXXPtr.h"
 #include "Physica/Python/CXXObj.h"
 #include "Physica/Python/PhysicaPython.h"
-#include "Physica/Python/Exception/LLVMException.h"
 #include "Physica/Python/FFI/FuncInfo.h"
-#include "Physica/Core/Utils/Container/Array.h"
-#include "Physica/Core/Utils/Unreachable.h"
 
 namespace Physica::Python {
     CXXObj::CXXObj(CXXPtr p, py::args tparams) : pObj(nullptr) {
@@ -58,7 +56,7 @@ namespace Physica::Python {
         Clang& clang = pp.getClang();
         auto dtor = clang::GlobalDecl(pDecl->getDestructor(), clang::CXXDtorType::Dtor_Base);
         const std::string symbol = clang.getCodeGen().GetMangledName(std::move(dtor)).str();
-        const auto pDtor = check_llvm(pp.getJIT().lookup(symbol));
+        const auto pDtor = check(pp.getJIT().lookup(symbol));
         pDtor.toPtr<DtorType>()(pObj);
         std::free(pObj);
         pObj = nullptr;
@@ -121,7 +119,7 @@ namespace Physica::Python {
 
     void* CXXObj::allocateObj(const CXXRecordDecl* pDecl) {
         assert(pDecl != nullptr && "[Error]: Invalid param");
-        const auto& pp = PhysicaPython::getInstance();
+        auto& pp = PhysicaPython::getInstance();
         const auto& ctx = pp.getClang().getASTContext();
         const auto type = ctx.getRecordType(pDecl);
         return std::aligned_alloc(ctx.getTypeAlign(type), ctx.getTypeSize(type));
@@ -185,6 +183,6 @@ namespace Physica::Python {
         cgm.EmitGlobalDefinition(decl);
         pp.compile(symbol.str().c_str());
         execAddr = pp.getJIT().lookup(symbol);
-        return check_llvm(std::move(execAddr)).toPtr<ForeignFunc>();
+        return check(std::move(execAddr)).toPtr<ForeignFunc>();
     }
 }

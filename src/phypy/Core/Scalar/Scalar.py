@@ -24,11 +24,11 @@ class ScalarOption(Enum):
     Float64 = 1
     FloatMP = 2
 
-class Scalar(CXXObj):
+class Real(CXXObj):
     __pDecl = None
 
-    def __init__(self, Option: ScalarOption = ScalarOption.Double) -> None:
-        super().__init__(Scalar.__pDecl, Option.value)
+    def __init__(self, Option: ScalarOption = ScalarOption.Float64) -> None:
+        super().__init__(Real.__pDecl, Option.value)
         super().construct()
         self.__Option = Option
 
@@ -45,10 +45,10 @@ class Scalar(CXXObj):
 
     @staticmethod
     def include() -> None:
-        if (Scalar.__pDecl is None):
+        if (Real.__pDecl is None):
             from phypy import physica
-            Scalar.__pDecl = physica.include('Core/MultiPrecision/Scalar.h')
+            Real.__pDecl = physica.include('Core/Scalar/Real.h')
 
-Scalar.include()
+Real.include()
 
-__all__ = [ScalarOption.__name__, Scalar.__name__]
+__all__ = [ScalarOption.__name__, Real.__name__]

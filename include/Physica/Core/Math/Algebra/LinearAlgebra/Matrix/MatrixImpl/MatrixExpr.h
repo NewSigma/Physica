@@ -94,7 +94,6 @@ namespace Physica::Core {
 namespace Physica {
     template<ExprType Type, Matrix T, class U>
     class Traits<MatrixExpr<Type, T, U>> {
-        using MatrixOption = MatrixOption;
         constexpr static bool SameMajor = MatrixOption::isSameMajor<T, U>();
         constexpr static int Major = SameMajor ? MatrixOption::getMajor<T>()
                                                : int(MatrixOption::AnyMajor);

@@ -19,8 +19,8 @@
 #pragma once
 
 #include <forward_list>
+#include <filesystem>
 #include "llvm/IR/Module.h"
-#include "llvm/Support/CrashRecoveryContext.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/CodeGen/ModuleBuilder.h"
 #include "clang/Parse/Parser.h"
@@ -38,20 +38,21 @@ namespace Physica::Python {
         using CodeGenerator = clang::CodeGenerator;
         using Parser = clang::Parser;
         using TranslationUnitDecl = clang::TranslationUnitDecl;
-        constexpr static const char* DummyFile = "Unknown";
+        constexpr static const char* DummyFile = "Dummy";
     public:
         struct PartialTranslationUnit {
             TranslationUnitDecl* unitDecl;
             std::unique_ptr<llvm::Module> unitModule;
         };
     private:
+        std::filesystem::path root;
         CompilerInstance ci;
         std::unique_ptr<IncrementalAction> action;
         std::unique_ptr<Parser> parser;
         std::forward_list<PartialTranslationUnit> partialUnitList;
         HeaderManager* pHeaderManager;
     public:
-        Clang();
+        Clang(std::filesystem::path root_);
         Clang(const Clang&) = delete;
         Clang(Clang&&) noexcept = delete;
         ~Clang() = default;

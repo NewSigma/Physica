@@ -2,5 +2,8 @@
 .clangd
 .vscode
 build
+dist
 temp
 include/Physica/Config.h
+
+*.pyc

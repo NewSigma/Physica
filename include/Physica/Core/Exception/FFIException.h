@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,7 @@
 #include <system_error>
 #include "Physica/Macro.h"
 
-namespace Physica::Python {
+namespace Physica {
     class PHYSICA_API FFIException : public std::system_error {
         class Impl final : public std::error_category {
         public:
@@ -44,11 +44,9 @@ namespace Physica::Python {
     public:
         FFIException(ffi_status code) : std::system_error(code, Impl()) {}
     };
-}
 
-namespace Physica {
     inline void check(ffi_status err) {
         if (err != FFI_OK) [[unlikely]]
-            throw Physica::Python::FFIException(err);
+            throw FFIException(err);
     }
 }

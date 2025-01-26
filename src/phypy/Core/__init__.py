@@ -1,5 +1,5 @@
 """
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -16,5 +16,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 """
+from phypy import physica
+
+def version() -> str:
+    return physica.version()
+
 from . import Scalar
 from .Scalar import *

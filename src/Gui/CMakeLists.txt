@@ -5,5 +5,7 @@ target_sources(PhysicaGui PRIVATE ${SOURCES_GUI})
 target_precompile_headers(PhysicaGui REUSE_FROM PhysicaCore)
 target_link_libraries(PhysicaGui PUBLIC Physica::Gui)
 
+set_target_properties(PhysicaPython PROPERTIES INSTALL_RPATH \${ORIGIN})
+
 install(TARGETS PhysicaGui DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Gui DESTINATION include/Physica)

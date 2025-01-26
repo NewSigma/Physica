@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
+#include "Physica/Core/Exception/FFIException.h"
 #include "Physica/Python/FFI/FuncInfo.h"
-#include "Physica/Python/Exception/FFIException.h"
 
 namespace Physica::Python {
     FuncInfo::FuncInfo(unsigned int nargs, const ffi_type* rtype, const ffi_type** atypes) {

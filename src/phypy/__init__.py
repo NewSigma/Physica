@@ -1,5 +1,5 @@
 """
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -16,30 +16,35 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 """
-import sys
-import os
 
-sys.path.append(os.path.abspath('../../build/src/Python'))
 """
 LLVM-17 uses dlsym() to locate symbols, and it is necessary import the symbols to python using os.RTLD_GLOBAL
 
 Reference:
 [1] https://github.com/apache/arrow/issues/39695
 """
-def importPhysica():
+def import_physica():
+    import os
+    import sys
+    import site
+
+    path = sys.path.copy()
+    root = os.path.join(site.getsitepackages()[0], 'phypy')
     dlflags = sys.getdlopenflags()
     sys.setdlopenflags(dlflags + os.RTLD_GLOBAL)
+    sys.path.append(os.path.join(root, 'lib'))
     try:
-        import PhysicaPython as physica
+        import PhysicaPython as physica # type: ignore
     finally:
         sys.setdlopenflags(dlflags)
+        sys.path = path
+    physica.init(root)
     return physica
 
-physica = importPhysica()
+physica = import_physica()
 CXXObj = physica.CXXObj
-
-del sys
-del os
+del import_physica
 
 from . import Core
 from .Core import *
+del Core

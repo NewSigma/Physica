@@ -20,8 +20,8 @@
 #include "clang/FrontendTool/Utils.h"
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Sema/CodeCompleteConsumer.h"
+#include "Physica/Core/Exception/LLVMException.h"
 #include "Physica/Python/LLVM/ClangImpl/IncrementalAction.h"
-#include "Physica/Python/Exception/LLVMException.h"
 
 namespace Physica::Python {
     IncrementalAction::IncrementalAction(CompilerInstance& ci, llvm::LLVMContext& context)

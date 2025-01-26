@@ -80,9 +80,9 @@ if(${PHYSICA_CUDA})
         string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
     endif()
 endif()
-##############################################Libs################################################
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${CMAKE_INSTALL_RPATH}")
+
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+##############################################Libs################################################
 # FFTW3
 find_package(FFTW3 REQUIRED)
 include_directories(SYSTEM ${FFTW3_INCLUDE_DIRS})

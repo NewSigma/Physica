@@ -1,0 +1,37 @@
+[build-system]
+requires = [
+    "scikit-build-core >= 0.10",
+    "pybind11 >= 2.11"
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "phypy"
+version = '2025'
+authors = [
+    {name = "Weibo He", email = "NewSigma@163.com"},
+]
+description = "Physica python interface"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+license = {text = "GPLv3+"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent"
+]
+
+[tool.scikit-build]
+cmake.version = ">=3.24"
+cmake.args = [
+    '-DPHYSICA_MKL=ON',
+    '-DPHYSICA_HDF5=ON',
+    '-DPHYSICA_PYTHON=ON',
+    '-DPHYSICA_OPTIMIZE=ON'
+]
+cmake.build-type = "Release"
+wheel.packages = ["src/phypy"]
+wheel.install-dir = "phypy"
+build-dir = "build/phypy"

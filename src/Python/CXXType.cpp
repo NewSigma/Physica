@@ -22,7 +22,7 @@
 namespace Physica::Python {
     CXXType::CXXType(clang::CXXRecordDecl* pDecl_) : pDecl(pDecl_) {
         assert(pDecl != nullptr && "[Error]: Invalid param");
-        const auto& pp = PhysicaPython::getInstance();
+        auto& pp = PhysicaPython::getInstance();
         const auto& ctx = pp.getClang().getASTContext();
         const auto type = ctx.getRecordType(pDecl);
         ffiType.size = ctx.getTypeSize(type);

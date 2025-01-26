@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,8 +19,9 @@
 #pragma once
 
 #include <unordered_map>
+#include <filesystem>
+#include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "Physica/Python/LLVM/Clang.h"
-#include "Physica/Python/LLVM/Executor.h"
 #include "CXXType.h"
 
 namespace Physica::Python {
@@ -28,12 +29,13 @@ namespace Physica::Python {
         using This = PhysicaPython;
         using ExecutorAddr = llvm::orc::ExecutorAddr;
         using StrTypeMap = std::unordered_map<std::string, CXXType>;
-        using LLJIT = Executor::LLJIT;
+        using LLJIT = llvm::orc::LLJIT;
 
         Clang clang;
-        Executor exec;
+        std::unique_ptr<LLJIT> jit;
         StrTypeMap strTypeMap;
     public:
+        PhysicaPython(std::filesystem::path root_);
         PhysicaPython(const This&) = delete;
         PhysicaPython(This&&) noexcept = delete;
         ~PhysicaPython() = default;
@@ -46,16 +48,10 @@ namespace Physica::Python {
 
         void compile(const char* moduleName);
         /* Getters */
-        [[nodiscard]] const Clang& getClang() const noexcept { return clang; }
         [[nodiscard]] Clang& getClang() noexcept { return clang; }
-        [[nodiscard]] const Executor& getExec() const noexcept { return exec; }
-        [[nodiscard]] Executor& getExec() noexcept { return exec; }
-        [[nodiscard]] const LLJIT& getJIT() const noexcept { return exec.getJIT(); }
-        [[nodiscard]] LLJIT& getJIT() noexcept { return exec.getJIT(); }
+        [[nodiscard]] LLJIT& getJIT() noexcept { return *jit; }
         [[nodiscard]] const StrTypeMap& getStrTypeMap() const noexcept { return strTypeMap; }
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
-    private:
-        PhysicaPython();
     };
 }

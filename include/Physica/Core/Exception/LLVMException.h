@@ -18,33 +18,30 @@
  */
 #pragma once
 
-#include <exception>
 #include <llvm/Support/Error.h>
 
-namespace Physica::Python {
-    class LLVMException : public std::exception {
-        std::string msg;
+namespace Physica {
+    class LLVMException : public std::runtime_error {
+        using Base = std::runtime_error;
     public:
-        explicit LLVMException(const char* err) : msg(err) {}
-        explicit LLVMException(llvm::Error err) : msg(llvm::toString(std::move(err))) {}
-        ~LLVMException() noexcept override = default;
-        const char* what() const noexcept override { return msg.c_str(); }
+        explicit LLVMException(const char* err) : Base(err) {}
+        explicit LLVMException(llvm::Error err) : Base(llvm::toString(std::move(err))) {}
     };
 
-    inline void check_llvm(llvm::Error err) {
+    inline void check(llvm::Error err) {
         if (err) [[unlikely]]
             throw LLVMException(std::move(err));
     }
 
     template<typename T>
-    inline T check_llvm(llvm::Expected<T>&& E) {
-        check_llvm(E.takeError());
+    inline T check(llvm::Expected<T>&& E) {
+        check(E.takeError());
         return T(std::move(*E));
     }
 
     template<typename T>
-    inline T& check_llvm(llvm::Expected<T&>&& E) {
-        check_llvm(E.takeError());
+    inline T& check(llvm::Expected<T&>&& E) {
+        check(E.takeError());
         return *E;
     }
 }

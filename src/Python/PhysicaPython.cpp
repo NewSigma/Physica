@@ -16,17 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include "clang/AST/GlobalDecl.h"
+#include "Physica/Core/Version.h"
+#include "Physica/Core/Exception/LLVMException.h"
 #include "Physica/Python/PhysicaPython.h"
 #include "Physica/Python/CXXPtr.h"
 #include "Physica/Python/CXXObj.h"
 #include "Physica/Python/LLVM/LLVM.h"
-#include "Physica/Python/Exception/LLVMException.h"
 
 namespace Physica::Python {
-    PhysicaPython::PhysicaPython() {
-        exec = Executor(clang.getCI().getTarget());
+    constinit static PhysicaPython* instance = nullptr;
+
+    PhysicaPython::PhysicaPython(std::filesystem::path root_) : clang(std::move(root_)) {
+        using namespace llvm::orc;
+
+        const auto& target = clang.getCI().getTarget();
+        JITTargetMachineBuilder tmBuilder(target.getTriple());
+        tmBuilder.addFeatures(target.getTargetOpts().Features);
+        LLJITBuilder jitBuilder{};
+        jitBuilder.setJITTargetMachineBuilder(std::move(tmBuilder));
+        jit = check(jitBuilder.create());
 
         strTypeMap["NoneType"] = CXXType(ffi_type_void);
         strTypeMap["float"] = CXXType(ffi_type_float);
@@ -36,20 +44,19 @@ namespace Physica::Python {
     void PhysicaPython::compile(const char* moduleName) {
         auto& unit = clang.compile(moduleName);
         auto& jit = getJIT();
-        check_llvm(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), LLVM::getInstance().getThreadSafeContext())));
+        check(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), LLVM::getInstance().getThreadSafeContext())));
     }
 
     PhysicaPython& PhysicaPython::getInstance() noexcept {
-        static PhysicaPython instance{};
-        return instance;
+        return *instance;
     }
 }
 
 PYBIND11_MODULE(PhysicaPython, m) {
     using namespace Physica::Python;
 
-    m.doc() = "PhysicaPython is a python interface to Physica";
-    py::register_exception<LLVMException>(m, "LLVMException");
+    m.doc() = "Backend of Physica Python interface";
+    py::register_exception<Physica::LLVMException>(m, "LLVMException");
 
     py::class_<CXXPtr>(m, "CXXPtr")
         .def("__repr__", &CXXPtr::toString);
@@ -60,6 +67,11 @@ PYBIND11_MODULE(PhysicaPython, m) {
         .def("construct", &CXXObj::construct)
         .def("call", &CXXObj::call, py::return_value_policy::move);
 
+    m.def("init", [](std::string root) noexcept {
+        if (instance == nullptr)
+            instance = new PhysicaPython(root);
+    });
+
     m.def("include", [](const char* includeName) -> CXXPtr {
         return (void*)PhysicaPython::getInstance().getClang().include(includeName);
     }, py::return_value_policy::move);
@@ -67,4 +79,6 @@ PYBIND11_MODULE(PhysicaPython, m) {
     m.def("compile", [](const char* moduleName) {
         PhysicaPython::getInstance().compile(moduleName);
     });
+
+    m.def("version", Physica::Core::version);
 }

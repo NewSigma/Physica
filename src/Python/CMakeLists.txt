@@ -1,6 +1,6 @@
 ##############################################Libs################################################
 set(PYBIND11_FINDPYTHON ON)
-find_package(pybind11 CONFIG REQUIRED)
+find_package(pybind11 REQUIRED CONFIG)
 
 find_package(LLVM REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)
@@ -24,10 +24,11 @@ target_include_directories(PhysicaPython SYSTEM PRIVATE ${FFI_INCLUDE_DIRS})
 
 target_compile_definitions(PhysicaPython PRIVATE ${LLVM_DEFINITIONS})
 target_compile_definitions(PhysicaPython PRIVATE -DLLVM_RESOURCE_DIR="${LLVM_LIBRARY_DIR}/clang/${LLVM_VERSION_MAJOR}")
-target_compile_definitions(PhysicaPython PRIVATE -DPHYSICA_INCLUDE_DIR="${CMAKE_INSTALL_PREFIX}/include")
 target_compile_definitions(PhysicaPython PRIVATE -DHDF5_INCLUDE_DIR="${HDF5_INCLUDE_DIR_CPP}")
 target_compile_definitions(PhysicaPython PRIVATE -DPHYSICA_CUDA_ARCHITECTURES="--offload-arch=sm_${PHYSICA_CUDA_ARCHITECTURES}")
 
 target_link_libraries(PhysicaPython PRIVATE PhysicaCore PRIVATE clang-cpp PRIVATE ${FFI_LIBRARY})
+
+set_target_properties(PhysicaPython PROPERTIES INSTALL_RPATH $ORIGIN)
 
 install(TARGETS PhysicaPython DESTINATION lib)
