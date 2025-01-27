@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -55,22 +55,22 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline LValueVector<Derived>::RefTy LValueVector<Derived>::operator[](size_t index) {
+    inline auto LValueVector<Derived>::operator[](size_t index) -> RefTy {
         return *data_ptr(index);
     }
 
     template<class Derived>
-    inline LValueVector<Derived>::ConstRefTy LValueVector<Derived>::operator[](size_t index) const {
+    inline auto LValueVector<Derived>::operator[](size_t index) const -> ConstRefTy {
         return *data_ptr(index);
     }
 
     template<class Derived>
-    LValueVector<Derived>::ConstRefTy LValueVector<Derived>::calc(size_t index) const {
+    auto LValueVector<Derived>::calc(size_t index) const -> ConstRefTy {
         return operator[](index);
     }
 
     template<class Derived>
-    LValueVector<Derived>::ValueType LValueVector<Derived>::calc_value(size_t index) const {
+    auto LValueVector<Derived>::calc_value(size_t index) const -> ValueType {
         return operator[](index).value();
     }
 
@@ -107,7 +107,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    CoDiff<typename LValueVector<Derived>::ScalarType> LValueVector<Derived>::sum() const {
+    auto LValueVector<Derived>::sum() const -> CoDiff<ScalarType> {
         if constexpr (isReverseDiff) {
             auto result = co_yield Base::values().sum();
             const auto& grad = result.grad();
@@ -193,13 +193,13 @@ namespace Physica::Core {
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */
     template<class Derived>
-    __host__ __device__ inline LValueVector<Derived>::PtrTy LValueVector<Derived>::data_ptr(size_t index) noexcept {
+    inline auto LValueVector<Derived>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < Base::getLength() && "[Error]: Index out of range");
         return Base::getDerived().data_ptr(index);
     }
 
     template<class Derived>
-    __host__ __device__ inline LValueVector<Derived>::ConstPtrTy LValueVector<Derived>::data_ptr(size_t index) const noexcept {
+    inline auto LValueVector<Derived>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

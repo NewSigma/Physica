@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh" // IWYU pragma: export
 #include "Array2D.h"
 
 namespace Physica::Core {
@@ -36,8 +36,8 @@ namespace Physica::Core {
         using SizeType = std::conditional<isVectorStorage, size_t, PlainStruct<void>>::type;
     private:
         ArrayType arr;
-        [[no_unique_address]] IndexType r;
-        [[no_unique_address]] SizeType size;
+        [[no_unique_address]] IndexType r = 0;
+        SizeType size = 0; // TODO: Looks like double [[no_unique_address]] makes NVCC 12.8 miscompilation
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t col);

@@ -46,7 +46,7 @@ namespace Physica::Core {
         using IndexType = std::conditional<isDynamicArray, size_t, PlainStruct<void>>::type;
 
         ArrayType arr;
-        [[no_unique_address]] IndexType r;
+        [[no_unique_address]] IndexType r = 0;
     public:
         Array2D() = default;
         Array2D(size_t row, size_t col);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -52,11 +52,11 @@ namespace Physica::Core {
     public:
         using device_obj_type = This;
     private:
-        __half h;
+        half h;
     public:
         constexpr Real() = default;
         __host__ __device__ Real(int i) : h(i) {}
-        __host__ __device__ Real(__half f_) : h(f_) {}
+        __host__ __device__ Real(half f_) : h(f_) {}
         __host__ __device__ Real(float f_) : h(f_) {}
         __host__ __device__ Real(double d_) : h(d_) {}
         template<Scalar T>
@@ -84,10 +84,10 @@ namespace Physica::Core {
         /* Operations */
         void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ __half toMachine() const noexcept { return h; }
-        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return h == __half(0); }
-        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > __half(0); }
-        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < __half(0); }
+        [[nodiscard]] __host__ __device__ half toMachine() const noexcept { return h; }
+        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return h == half(0); }
+        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > half(0); }
+        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < half(0); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }
     };
 

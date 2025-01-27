@@ -92,8 +92,8 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         inline void random_any(Distribution& dist);
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] inline PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const noexcept;
     protected:
         LValueVector() = default;
         LValueVector(const This&) = default;

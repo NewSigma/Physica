@@ -41,7 +41,8 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> reciprocal(const Real<Option>& x) noexcept {
-        assert(!x.isZero() && "[Error]: Divide by zero");
+        if constexpr (Option != FloatMP)
+            assert(!x.isZero() && "[Error]: Divide by zero");
         return Real<Option>(1) / x;
     }
 

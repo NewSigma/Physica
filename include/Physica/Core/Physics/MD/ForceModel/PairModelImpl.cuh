@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <cub/cub.cuh>
 #include "Physica/PlainStruct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
@@ -60,24 +59,23 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<PairModel<Derived>>::ScalarType
-    device_obj<PairModel<Derived>>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    __host__ __device__ inline auto
+    device_obj<PairModel<Derived>>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const -> ScalarType {
         return Base::getDerived().pot_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<PairModel<Derived>>::ScalarType
-    device_obj<PairModel<Derived>>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    __host__ __device__ inline auto
+    device_obj<PairModel<Derived>>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const -> ScalarType {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
 
     template<class Derived>
     template<class Executor>
-    VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
-    device_obj<PairModel<Derived>>::force(
+    auto device_obj<PairModel<Derived>>::force(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
-            const PositionMatrix& cartesianPos) {
+            const PositionMatrix& cartesianPos) -> VectorND<ScalarType> {
         forceAsync<PageLockedVector, Executor>(lattice, invLattice, cartesianPos, swapBuffer);
         CUDAContext::getInstance().wait();
         return swapBuffer;
@@ -85,8 +83,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Executor>
-    inline VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
-    device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
+    inline auto device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) -> VectorND<ScalarType> {
         return force<Executor>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
 
@@ -127,23 +124,21 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Executor>
-    inline VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
-    device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) {
+    inline auto device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) -> VectorND<ScalarType> {
         return force<Executor>(cell);
     }
 
     template<class Derived>
     template<class Executor>
-    inline VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
-    device_obj<PairModel<Derived>>::force_long(const MDCellType& cell) const {
+    inline auto device_obj<PairModel<Derived>>::force_long(const MDCellType& cell) const -> VectorND<ScalarType> {
         return VectorND<ScalarType>(cell.getNumParticle() * 3, 0);
     }
 
     template<class Derived>
-    device_obj<PairModel<Derived>>::LatticeMatrix device_obj<PairModel<Derived>>::virial(
+    auto device_obj<PairModel<Derived>>::virial(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
-            const PositionMatrix& cartesianPos) {
+            const PositionMatrix& cartesianPos) -> LatticeMatrix {
         static_assert(!IsSmallCell, "[Error]: Not implemented for small cell");
         dim3 gridDims;
         size_t numThread;
@@ -169,7 +164,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline device_obj<PairModel<Derived>>::LatticeMatrix device_obj<PairModel<Derived>>::virial(const MDCellType& hostCell) {
+    inline auto device_obj<PairModel<Derived>>::virial(const MDCellType& hostCell) -> LatticeMatrix {
         return virial(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
 

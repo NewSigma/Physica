@@ -57,9 +57,9 @@ namespace Physica::Core {
         template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) { return vec.data() + from + index; }
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const { return vec.data() + from + index; }
+        [[nodiscard]] inline size_t getLength() const noexcept;
+        [[nodiscard]] inline PtrTy data_ptr(size_t index) { return vec.data() + from + index; }
+        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const { return vec.data() + from + index; }
     };
 
     template<Vector T, size_t Length>
@@ -75,29 +75,25 @@ namespace Physica::Core {
             : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    inline ContinuousVectorBlock<T, Length>&
-    ContinuousVectorBlock<T, Length>::operator=(const ContinuousVectorBlock<T, Length>& v) {
+    inline auto ContinuousVectorBlock<T, Length>::operator=(const ContinuousVectorBlock<T, Length>& v) -> This& {
         v.assign(*this);
         return *this;
     }
     
     template<Vector T, size_t Length>
-    inline ContinuousVectorBlock<T, Length>&
-    ContinuousVectorBlock<T, Length>::operator=(ContinuousVectorBlock<T, Length>&& v) noexcept {
+    inline auto ContinuousVectorBlock<T, Length>::operator=(ContinuousVectorBlock<T, Length>&& v) noexcept -> This& {
         v.assign(*this);
         return *this;
     }
 
     template<Vector T, size_t Length>
-    inline ContinuousVectorBlock<T, Length>::RefTy
-    ContinuousVectorBlock<T, Length>::operator[](size_t index) {
+    inline auto ContinuousVectorBlock<T, Length>::operator[](size_t index) -> RefTy {
         assert((index + from) < to);
         return vec[index + from];
     }
 
     template<Vector T, size_t Length>
-    inline ContinuousVectorBlock<T, Length>::ConstRefTy
-    ContinuousVectorBlock<T, Length>::operator[](size_t index) const {
+    inline auto ContinuousVectorBlock<T, Length>::operator[](size_t index) const -> ConstRefTy {
         assert((index + from) < to);
         return vec[index + from];
     }
@@ -127,7 +123,7 @@ namespace Physica::Core {
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline size_t ContinuousVectorBlock<T, Length>::getLength() const noexcept {
+    inline size_t ContinuousVectorBlock<T, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else

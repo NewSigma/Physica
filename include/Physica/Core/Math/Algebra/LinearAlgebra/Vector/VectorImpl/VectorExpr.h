@@ -49,8 +49,8 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getExpr().getLength(); }
-        [[nodiscard]] __host__ __device__ const V& getExpr() const noexcept { return expr; }
+        [[nodiscard]] size_t getLength() const { return getExpr().getLength(); }
+        [[nodiscard]] const V& getExpr() const noexcept { return expr; }
     };
 
     template<ExprType Type, class LHS, class RHS>
@@ -76,14 +76,14 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t getLength() const {
+        [[nodiscard]] size_t getLength() const {
             if constexpr (Vector<LHS>)
                 return getLHS().getLength();
             else
                 return getRHS().getLength();
         }
-        [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept { return *lhs; }
-        [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept { return *rhs; }
+        [[nodiscard]] const LHS& getLHS() const noexcept { return *lhs; }
+        [[nodiscard]] const RHS& getRHS() const noexcept { return *rhs; }
     };
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,18 +19,17 @@
 #pragma once
 
 #include <cstring>
+#include "ArrayBase.h"
 
 namespace Physica::Core {
     template<class Derived, class Allocator>
-    __host__ __device__ inline ArrayBase<Derived, Allocator>::lvalue_reference
-    ArrayBase<Derived, Allocator>::operator[](size_t index) {
+    __host__ __device__ inline auto ArrayBase<Derived, Allocator>::operator[](size_t index) -> lvalue_reference {
         assert(index < getLength() && "[Error]: Index overflow");
         return data()[index];
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ inline ArrayBase<Derived, Allocator>::const_lvalue_reference
-    ArrayBase<Derived, Allocator>::operator[](size_t index) const {
+    __host__ __device__ inline auto ArrayBase<Derived, Allocator>::operator[](size_t index) const -> const_lvalue_reference {
         assert(index < getLength() && "[Error]: Index overflow");
         return data()[index];
     }

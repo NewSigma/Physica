@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,6 +22,7 @@
 #include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
+#include "GEMM.h"
 
 namespace Physica::Core {
     template<Matrix T1, Matrix T2>
@@ -99,13 +100,12 @@ namespace Physica::Core {
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline device_obj<MatrixProduct<T1, T2>>
-    operator*(const device_obj<T1>& mat1, const device_obj<T2>& mat2) noexcept {
-        return {mat1, mat2};
+    [[nodiscard]] inline auto operator*(const device_obj<T1>& mat1, const device_obj<T2>& mat2) noexcept {
+        return device_obj<MatrixProduct<T1, T2>>(mat1, mat2);
     }
 }
 
 namespace Physica {
-    template<Core::Matrix T1, Core::Matrix T2>
-    class Traits<Core::device_obj<Core::MatrixProduct<T1, T2>>> : public Traits<Core::MatrixProduct<T1, T2>> {};
+    template<Matrix T1, Matrix T2>
+    class Traits<device_obj<MatrixProduct<T1, T2>>> : public Traits<MatrixProduct<T1, T2>> {};
 }

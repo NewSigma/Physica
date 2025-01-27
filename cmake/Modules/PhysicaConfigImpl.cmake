@@ -44,7 +44,6 @@ if(${PHYSICA_CUDA})
     if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
         set(CMAKE_CUDA_ARCHITECTURES native)
     endif()
-    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
     set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
     set(CMAKE_CUDA_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED})
     set(CMAKE_CUDA_VISIBILITY_PRESET ${CMAKE_CXX_VISIBILITY_PRESET})
@@ -76,6 +75,7 @@ if(${PHYSICA_CUDA})
             --diag-suppress 20208
             --default-stream per-thread
             --expt-relaxed-constexpr
+            --device-entity-has-hidden-visibility true
             ${CMAKE_CXX_FLAGS})
         string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
     endif()

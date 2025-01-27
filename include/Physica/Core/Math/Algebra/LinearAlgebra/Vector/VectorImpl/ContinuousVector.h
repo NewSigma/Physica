@@ -98,8 +98,8 @@ namespace Physica::Core {
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }
+        [[nodiscard]] PtrTy data() { return Base::data_ptr(0); }
+        [[nodiscard]] ConstPtrTy data() const { return Base::data_ptr(0); }
     protected:
         ContinuousVector() = default;
         ContinuousVector(const This&) = default;

@@ -35,10 +35,8 @@ namespace Physica::Core {
     }
 
     template<tparams>
-    device_obj<Array2D>::device_obj(const host_obj& storage) : arr(storage.arr), r(storage.r) {
-        if constexpr (isVectorStorage)
-            size = storage.getSize();
-    }
+    device_obj<Array2D>::device_obj(const host_obj& storage)
+            : arr(storage.arr), r(storage.r), size(storage.getSize()) {}
 
     template<tparams>
     __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) -> ElemType& {
@@ -63,6 +61,7 @@ namespace Physica::Core {
     __host__ __device__ void device_obj<Array2D>::resize(size_t row, size_t col, Args&&... args) {
         assert((Row == row || Row == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert((Col == col || Col == Dynamic) && "[Error]: Cannot resize a fixed array");
+        assert(row > 0 && col > 0);
         if constexpr (isVectorStorage) {
             if constexpr (IsDevice())
                 noImpl("[Error]: resize() is not supported on device");

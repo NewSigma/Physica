@@ -37,7 +37,7 @@ We adopt CMake as our building system:
 
 A C++ compiler that support C++ 20, the following compilers passed our test:
 
-[GCC](https://gcc.gnu.org/) N/A (Bug 116768, Bug 117625)  
+[GCC](https://gcc.gnu.org/) N/A (Bug 104177)  
 [clang](https://clang.llvm.org/) 17.0.6  
 [IntelLLVM](https://www.intel.cn/content/www/cn/zh/developer/tools/oneapi/dpc-compiler.html) 2025.0  
 
@@ -46,7 +46,7 @@ Addtional libraries:
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional, Recommended data format)  
 [oneMKL](https://www.intel.com/) 2024.2 (Optional)  
-[CUDA](https://developer.nvidia.com/cuda-downloads)  12.6  (Optional)  
+[CUDA](https://developer.nvidia.com/cuda-downloads)  12.8  (Optional)  
 [Qt](https://www.qt.io/)  6.5.3  (Optional, Plotting support)  
 [pybind11](https://github.com/pybind/pybind11) 2.11 (Optional, Python binding, Experimental)  
 [LLVM](https://llvm.org/) 17.0.6 (Optional, Python binding, Experimental)  
