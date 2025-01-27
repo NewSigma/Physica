@@ -29,18 +29,15 @@ namespace Physica::Python {
         llvm::llvm_shutdown_obj shutDownGuard;
         ThreadSafeContext threadSafeContext;
     public:
+        LLVM();
+        LLVM(const LLVM&) = delete;
+        LLVM(LLVM&&) noexcept = delete;
         ~LLVM() = default;
+        /* Operators */
+        LLVM& operator=(const LLVM&) = delete;
+        LLVM& operator=(LLVM&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ThreadSafeContext& getThreadSafeContext() noexcept { return threadSafeContext; }
         [[nodiscard]] LLVMContext& getContext() noexcept { return *threadSafeContext.getContext(); }
-        /* Static members */
-        static LLVM& getInstance() noexcept;
-    private:
-        LLVM();
-        LLVM(const LLVM&) = default;
-        LLVM(LLVM&&) noexcept = default;
-        /* Operators */
-        LLVM& operator=(const LLVM&) = default;
-        LLVM& operator=(LLVM&&) noexcept = default;
     };
 }

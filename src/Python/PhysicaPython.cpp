@@ -26,10 +26,10 @@
 namespace Physica::Python {
     constinit static PhysicaPython* instance = nullptr;
 
-    PhysicaPython::PhysicaPython(std::filesystem::path root_) : clang(std::move(root_)) {
+    PhysicaPython::PhysicaPython(std::filesystem::path root_) : llvm(), clang(std::move(root_), llvm) {
         using namespace llvm::orc;
 
-        const auto& target = clang.getCI().getTarget();
+        const auto& target = clang.getTarget();
         JITTargetMachineBuilder tmBuilder(target.getTriple());
         tmBuilder.addFeatures(target.getTargetOpts().Features);
         LLJITBuilder jitBuilder{};
@@ -44,7 +44,7 @@ namespace Physica::Python {
     void PhysicaPython::compile(const char* moduleName) {
         auto& unit = clang.compile(moduleName);
         auto& jit = getJIT();
-        check(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), LLVM::getInstance().getThreadSafeContext())));
+        check(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), llvm.getThreadSafeContext())));
     }
 
     PhysicaPython& PhysicaPython::getInstance() noexcept {
@@ -67,7 +67,7 @@ PYBIND11_MODULE(PhysicaPython, m) {
         .def("construct", &CXXObj::construct)
         .def("call", &CXXObj::call, py::return_value_policy::move);
 
-    m.def("init", [](std::string root) noexcept {
+    m.def("init", [](std::string root) {
         if (instance == nullptr)
             instance = new PhysicaPython(root);
     });

@@ -25,6 +25,7 @@
 #include "clang/CodeGen/ModuleBuilder.h"
 #include "clang/Parse/Parser.h"
 #include "ClangImpl/IncrementalAction.h"
+#include "LLVM.h"
 
 namespace Physica::Python {
     class HeaderManager;
@@ -32,8 +33,9 @@ namespace Physica::Python {
      * Reference:
      * [1] clang-repl; https://clang.llvm.org/docs/ClangRepl.html
      */
-    class Clang {
+    class Clang : public clang::CompilerInstance {
         using This = Clang;
+        using Base = CompilerInstance;
         using CompilerInstance = clang::CompilerInstance;
         using CodeGenerator = clang::CodeGenerator;
         using Parser = clang::Parser;
@@ -46,34 +48,29 @@ namespace Physica::Python {
         };
     private:
         std::filesystem::path root;
-        CompilerInstance ci;
         std::unique_ptr<IncrementalAction> action;
         std::unique_ptr<Parser> parser;
         std::forward_list<PartialTranslationUnit> partialUnitList;
         HeaderManager* pHeaderManager;
     public:
-        Clang(std::filesystem::path root_);
-        Clang(const Clang&) = delete;
-        Clang(Clang&&) noexcept = delete;
+        Clang(std::filesystem::path root_, LLVM& llvm);
+        Clang(const This&) = delete;
+        Clang(This&&) noexcept = delete;
         ~Clang() = default;
         /* Operators */
-        Clang& operator=(const Clang&) = delete;
-        Clang& operator=(Clang&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         const clang::NamedDecl* include(const char* includeName);
         PartialTranslationUnit& compile(const char* moduleName);
         /* Getters */
-        [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
-        [[nodiscard]] const clang::ASTContext& getASTContext() const noexcept { return ci.getASTContext(); }
-        [[nodiscard]] clang::ASTContext& getASTContext() noexcept { return ci.getASTContext(); }
-        [[nodiscard]] const CodeGenerator& getCodeGen() const noexcept;
         [[nodiscard]] CodeGenerator& getCodeGen() noexcept;
         [[nodiscard]] Parser& getParser() noexcept { return *parser; }
         [[nodiscard]] const HeaderManager& getHeaderManager() const noexcept { return *pHeaderManager; }
     private:
         /* Operations */
         void makeInvocation();
-        void makeOptions();
+        void initOptions();
         void parse();
         void cleanLastUnit() noexcept;
     };

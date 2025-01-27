@@ -19,7 +19,6 @@
 #include <iostream>
 #include "clang/AST/DeclContextInternals.h"
 #include "clang/Basic/Diagnostic.h"
-#include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Driver/Compilation.h"
@@ -32,31 +31,26 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "Physica/Core/Exception/LLVMException.h"
-#include "Physica/Python/LLVM/LLVM.h"
 #include "Physica/Python/LLVM/Clang.h"
 #include "Physica/Python/LLVM/ClangImpl/HeaderManager.h"
 #include "Physica/Macro.h"
 
 namespace Physica::Python {
-    Clang::Clang(std::filesystem::path root_) : root(std::move(root_)), ci() {
-        using namespace clang;
-        {
-            auto& PCHOps = *ci.getPCHContainerOperations();
-            PCHOps.registerWriter(std::make_unique<ObjectFilePCHContainerWriter>());
-            PCHOps.registerReader(std::make_unique<ObjectFilePCHContainerReader>());
-        }
+    Clang::Clang(std::filesystem::path root_, LLVM& llvm) : root(std::move(root_)) {
         makeInvocation();
-        makeOptions();
-        ci.createDiagnostics();
-        ci.LoadRequestedPlugins();
+        initOptions();
+        Base::createTarget();
+        Base::createDiagnostics();
+        Base::LoadRequestedPlugins();
 
-        action = std::make_unique<IncrementalAction>(ci, LLVM::getInstance().getContext());
-        ci.ExecuteAction(*action);
+        action = std::make_unique<IncrementalAction>(*this, llvm.getContext());
+        Base::ExecuteAction(*action);
 
-        auto& pp = ci.getPreprocessor();
+        auto& pp = Base::getPreprocessor();
         pHeaderManager = new HeaderManager(*this);
-        pp.addPPCallbacks(std::unique_ptr<PPCallbacks>(pHeaderManager));
-        parser = std::make_unique<Parser>(pp, ci.getSema(), false);
+        pp.addPPCallbacks(std::unique_ptr<clang::PPCallbacks>(pHeaderManager));
+
+        parser = std::make_unique<Parser>(pp, Base::getSema(), false);
         parser->Initialize();
     }
 
@@ -72,11 +66,11 @@ namespace Physica::Python {
                 memBuf = llvm::WritableMemoryBuffer::getNewUninitMemBuffer(source.length(), includeName);
                 memcpy(memBuf->getBufferStart(), source.data(), source.length());
             }
-            SourceManager& manager = getCI().getSourceManager();
+            SourceManager& manager = Base::getSourceManager();
             SourceLocation loc = manager.getLocForStartOfFile(manager.getMainFileID());
             FileID fid = manager.createFileID(std::move(memBuf), SrcMgr::C_User, 0, 0, loc);
 
-            Preprocessor& pp = getCI().getPreprocessor();
+            Preprocessor& pp = Base::getPreprocessor();
             assert(pp.isIncrementalProcessingEnabled() && "[Error]: Unexpected clang state");
             const bool failed = pp.EnterSourceFile(std::move(fid), nullptr, std::move(loc));
             if (failed)
@@ -84,12 +78,13 @@ namespace Physica::Python {
             parse();
             ite = headers.find(std::string(includeName));
         }
+        assert(ite != headers.cend());
         return (*ite).second;
     }
 
     Clang::PartialTranslationUnit& Clang::compile(const char* moduleName) {
         using namespace clang;
-        Sema& sema = ci.getSema();
+        Sema& sema = Base::getSema();
         llvm::CrashRecoveryContextCleanupRegistrar<Sema> recoverGuard(&sema);
 
         auto& ctx = getASTContext();
@@ -107,10 +102,6 @@ namespace Physica::Python {
         }
         partialUnitList.push_front(std::move(unit));
         return partialUnitList.front();
-    }
-
-    const clang::CodeGenerator& Clang::getCodeGen() const noexcept {
-        return const_cast<This&>(*this).getCodeGen();
     }
 
     clang::CodeGenerator& Clang::getCodeGen() noexcept {
@@ -132,6 +123,7 @@ namespace Physica::Python {
             }
             else
                 args.push_back("-xc++");
+            args.push_back("-std=c++20");
             args.push_back("-Xclang");
             args.push_back("-fincremental-extensions");
             args.push_back("--compile");
@@ -155,9 +147,9 @@ namespace Physica::Python {
             auto pDiagOpts = CreateAndPopulateDiagOpts(args);
             auto* pDiagBuffer = new TextDiagnosticPrinter(llvm::outs(), pDiagOpts.get());
             auto* pDiag = new DiagnosticsEngine(new DiagnosticIDs(), pDiagOpts.release(), pDiagBuffer);
-            ci.setDiagnostics(pDiag);
+            Base::setDiagnostics(pDiag);
         }
-        auto llvmDirver = driver::Driver("", llvm::sys::getProcessTriple(), ci.getDiagnostics());
+        auto llvmDirver = driver::Driver("", llvm::sys::getProcessTriple(), Base::getDiagnostics());
         std::unique_ptr<driver::Compilation> pCompile;
         /* Make compilation */ {
             llvmDirver.setCheckInputsExist(false);
@@ -174,36 +166,28 @@ namespace Physica::Python {
         if (strcmp("clang", cmd->getCreator().getName()) != 0)
             throw LLVMException("[Error]: Driver initialization failed");
 
-        auto* pDiagOpts = new DiagnosticOptions();
-        auto* pDiagBuffer = new TextDiagnosticPrinter(llvm::outs(), pDiagOpts);
-        auto* pDiag = new DiagnosticsEngine(new DiagnosticIDs(), pDiagOpts, pDiagBuffer, true);
-        const bool success = CompilerInvocation::CreateFromArgs(ci.getInvocation(), cmd->getArguments(), *pDiag);
+        const bool success = CompilerInvocation::CreateFromArgs(Base::getInvocation(), cmd->getArguments(), Base::getDiagnostics());
         if (!success)
             throw LLVMException("[Error]: Failed to create compiler invocation");
     }
 
-    void Clang::makeOptions() {
+    void Clang::initOptions() {
         using namespace clang;
-        auto* memBuffer = llvm::MemoryBuffer::getMemBuffer("").release();
-        ci.getPreprocessorOpts().addRemappedFile(DummyFile, memBuffer);
-        /* Make target */ {
-            auto* target = TargetInfo::CreateTargetInfo(ci.getDiagnostics(), ci.getInvocation().TargetOpts);
-            if (target == nullptr)
-                throw LLVMException("[Error]: Target is missing");
-            target->adjust(ci.getDiagnostics(), ci.getLangOpts());
-            ci.setTarget(target);
+        /* Preprocessor */ {
+            auto* memBuffer = llvm::MemoryBuffer::getMemBuffer("").release();
+            Base::getPreprocessorOpts().addRemappedFile(DummyFile, memBuffer);
         }
         /* CodeGen */ {
-            auto& options = ci.getCodeGenOpts();
+            auto& options = Base::getCodeGenOpts();
             options.ClearASTBeforeBackend = false;
             options.DisableFree = false;
         }
-        ci.getFrontendOpts().DisableFree = false;
+        Base::getFrontendOpts().DisableFree = false;
     }
 
     void Clang::parse() {
         using namespace clang;
-        Sema& sema = ci.getSema();
+        Sema& sema = Base::getSema();
         // Skip previous eof due to last incremental input.
         const bool skipEOF = parser->getCurToken().is(tok::annot_repl_input_end);
         if (skipEOF) {
@@ -215,7 +199,7 @@ namespace Physica::Python {
         }
 
         {
-            auto& consumer = ci.getASTConsumer();
+            auto& consumer = Base::getASTConsumer();
             Parser::DeclGroupPtrTy pDeclGroup;
             Sema::ModuleImportState state;
             bool isDone = parser->ParseFirstTopLevelDecl(pDeclGroup, state);
@@ -228,7 +212,8 @@ namespace Physica::Python {
                 isDone = parser->ParseTopLevelDecl(pDeclGroup, state);
             }
         }
-        DiagnosticsEngine& diag = getCI().getDiagnostics();
+
+        auto& diag = Base::getDiagnostics();
         if (diag.hasErrorOccurred()) {
             cleanLastUnit();
             diag.Reset(true);
@@ -236,13 +221,13 @@ namespace Physica::Python {
             throw LLVMException("[Error]: Parsing failed");
         }
         Token check;
-        getCI().getPreprocessor().Lex(check);
+        Base::getPreprocessor().Lex(check);
         assert(check.is(tok::annot_repl_input_end) && "[Error]: Lexer must be EOF when starting incremental parse");
     }
 
     void Clang::cleanLastUnit() noexcept {
         using namespace clang;
-        auto* unitDecl = ci.getSema().getASTContext().getTranslationUnitDecl();
+        auto* unitDecl = Base::getSema().getASTContext().getTranslationUnitDecl();
         TranslationUnitDecl* FirstTU = unitDecl->getFirstDecl();
         if (StoredDeclsMap* map = FirstTU->getPrimaryContext()->getLookupPtr()) {
             for (auto ite = map->begin(); ite != map->end(); ++ite) {

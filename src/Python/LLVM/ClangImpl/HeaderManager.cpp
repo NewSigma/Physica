@@ -37,7 +37,7 @@ namespace Physica::Python {
             return;
 
         constexpr const char IncludeDir[] = "include/Physica/";
-        const StringRef fileName = pFile->getName();
+        const StringRef fileName = pFile->tryGetRealPathName();
         const size_t pos = fileName.find(IncludeDir);
         const bool isNotPhysicaHeader = pos == StringRef::npos;
         if (isNotPhysicaHeader)
@@ -54,14 +54,14 @@ namespace Physica::Python {
             assert(end != StringRef::npos && "[Error]: Unexpected includeName");
             className = includeName.slice(includeName.rfind('/') + 1, end);
         }
-        auto& ctx = compiler.getCI().getASTContext();
-        compiler.getCI().getASTConsumer().HandleTranslationUnit(ctx);
+        auto& ctx = compiler.getASTContext();
+        compiler.getASTConsumer().HandleTranslationUnit(ctx);
         auto* pClass = findClassDecl(*ctx.getTranslationUnitDecl(), className);
         loadedHeaders[includeName.str()] = pClass;
     }
 
     const clang::Preprocessor& HeaderManager::getPreprocessor() const noexcept {
-        return compiler.getCI().getPreprocessor();
+        return compiler.getPreprocessor();
     }
 
     HeaderManager::ClassDecl* HeaderManager::findClassDecl(DeclContext& tree, StringRef className) {

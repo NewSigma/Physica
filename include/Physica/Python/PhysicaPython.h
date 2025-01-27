@@ -31,6 +31,7 @@ namespace Physica::Python {
         using StrTypeMap = std::unordered_map<std::string, CXXType>;
         using LLJIT = llvm::orc::LLJIT;
 
+        LLVM llvm;
         Clang clang;
         std::unique_ptr<LLJIT> jit;
         StrTypeMap strTypeMap;
@@ -48,6 +49,7 @@ namespace Physica::Python {
 
         void compile(const char* moduleName);
         /* Getters */
+        [[nodiscard]] LLVM& getLLVM() noexcept { return llvm; }
         [[nodiscard]] Clang& getClang() noexcept { return clang; }
         [[nodiscard]] LLJIT& getJIT() noexcept { return *jit; }
         [[nodiscard]] const StrTypeMap& getStrTypeMap() const noexcept { return strTypeMap; }
