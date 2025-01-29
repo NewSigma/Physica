@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,7 +36,7 @@ namespace Physica::Core {
         static void rdrand(uint16_t& __restrict integer) {
             for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand16_step(&integer);
-                if (code == 1)
+                if (code == 1) [[likely]]
                     return;
             }
             throw RdrandException();
@@ -45,7 +45,7 @@ namespace Physica::Core {
         static void rdrand(uint32_t& __restrict integer) {
             for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand32_step(&integer);
-                if (code == 1)
+                if (code == 1) [[likely]]
                     return;
             }
             throw RdrandException();
@@ -54,7 +54,7 @@ namespace Physica::Core {
         static void rdrand(uint64_t& __restrict integer) {
             for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand64_step(reinterpret_cast<unsigned long long*>(&integer));
-                if (code == 1)
+                if (code == 1) [[likely]]
                     return;
             }
             throw RdrandException();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -154,12 +154,12 @@ namespace Physica::Core {
         while (true) {
             oldCycles = result;
             if (gettimeofday(&startTime, nullptr) != 0) [[unlikely]]
-                throw Core::SystemException();
+                throw SystemException();
 
             const uint64_t startCycles = now();
             while (true) {
                 if (gettimeofday(&stopTime, nullptr) != 0) [[unlikely]]
-                    throw Core::SystemException();
+                    throw SystemException();
 
                 const uint64_t stopCycles = now();
                 const uint64_t micros = (stopTime.tv_usec - startTime.tv_usec) +

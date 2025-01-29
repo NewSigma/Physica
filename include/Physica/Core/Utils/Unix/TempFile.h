@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -48,7 +48,7 @@ namespace Physica::Core {
             name[i] = name_template[i];
         fd = mkstemp(name);
         if (fd == -1) [[unlikely]]
-            throw Core::SystemException();
+            throw SystemException();
     }
 
     template<size_t N>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,6 @@
 
 #include <cstdlib>
 #include <unistd.h>
-#include "UnixHelper.h"
 #include "Physica/Core/Exception/SystemException.h"
 
 namespace Physica::Core {
@@ -47,7 +46,7 @@ namespace Physica::Core {
             name[i] = name_template[i];
         pName = mkdtemp(name);
         if (pName == nullptr) [[unlikely]]
-            throw Core::SystemException();
+            throw SystemException();
     }
 
     template<size_t N>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "Physica/PlainStruct.h"
+#include "VectorExpr.h"
 
 namespace Physica::Core {
     template<ExprType Type, Vector V>
@@ -119,7 +122,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<ExprType Type, Vector Expr1, class Expr2>
-    class Traits<Core::device_obj<Core::VectorExpr<Type, Expr1, Expr2>>> : public Traits<Core::VectorExpr<Type, Expr1, Expr2>> {};
+    class Traits<device_obj<VectorExpr<Type, Expr1, Expr2>>> : public Traits<VectorExpr<Type, Expr1, Expr2>> {};
 }
 
 #include "VectorExprImpl/Add.cuh"

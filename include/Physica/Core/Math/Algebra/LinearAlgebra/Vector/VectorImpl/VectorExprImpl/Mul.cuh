@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../VectorExpr.cuh"
 
 namespace Physica::Core {
     template<Vector T, Scalar U>
@@ -70,8 +72,8 @@ namespace Physica::Core {
 
         template<class AnyPacket, Side Owner = GetSide()>
         [[nodiscard]] __device__ AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::template getLHS().template packetPartial<AnyPacket, Owner>(index, count)
-                 * Base::template getRHS().template packetPartial<AnyPacket, Owner>(index, count);
+            return Base::template getLHS<Owner>().template packetPartial<AnyPacket, Owner>(index, count)
+                 * Base::template getRHS<Owner>().template packetPartial<AnyPacket, Owner>(index, count);
         }
     };
 

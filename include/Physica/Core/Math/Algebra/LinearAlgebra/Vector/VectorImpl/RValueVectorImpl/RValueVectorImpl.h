@@ -472,7 +472,7 @@ namespace Physica::Core {
 
             auto tmp = co_yield std::move(result);
             const auto& v = Base::getDerived();
-            v.reverse(reciprocal(v.values()) * (tmp * tmp.grad()));
+            v.reverse(reciprocal(v.values()) * (tmp.value() * tmp.grad()));
         }
         else {
             auto result = calc(0);

@@ -29,6 +29,6 @@ target_compile_definitions(PhysicaPython PRIVATE -DPHYSICA_CUDA_ARCHITECTURES="-
 
 target_link_libraries(PhysicaPython PRIVATE PhysicaCore PRIVATE clang-cpp PRIVATE ${FFI_LIBRARY})
 
-set_target_properties(PhysicaPython PROPERTIES INSTALL_RPATH $ORIGIN)
+set_target_properties(PhysicaPython PROPERTIES INSTALL_RPATH \${ORIGIN})
 
 install(TARGETS PhysicaPython DESTINATION lib)

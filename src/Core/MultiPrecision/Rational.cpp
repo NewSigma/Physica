@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
-#include "Physica/Core/Exception/DivideByZeroException.h"
 #include "Physica/Core/Scalar/Rational.h"
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
@@ -73,8 +72,7 @@ namespace Physica::Core {
      * Optimize: refer to the Optimize above.
      */
     Rational Rational::operator/(const Rational& r) const {
-        if (r.isZero())
-            throw DivideByZeroException();
+        assert(!r.isZero());
         Integer numerator_ = numerator * r.denominator;
         Integer denominator_ = denominator * r.numerator;
         numerator_.setSign(Integer::matchSign(numerator_, denominator_));

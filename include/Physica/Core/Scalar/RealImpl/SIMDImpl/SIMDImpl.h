@@ -18,8 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/ExprType.h"
+#include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Utils/Unreachable.h"
+#include "../SIMD.h"
 
 namespace Physica::Core {
     template<Scalar T, size_t Size>

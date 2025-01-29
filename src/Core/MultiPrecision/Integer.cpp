@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,6 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include "Physica/Core/Exception/DivideByZeroException.h"
 #include "Physica/Core/Scalar/Integer.h"
 #include "Physica/Core/Scalar/Real.h"
 
@@ -135,8 +134,7 @@ namespace Physica::Core {
     }
 
     Integer Integer::operator/(const Integer& i) const {
-        if (i.isZero())
-            throw DivideByZeroException();
+        assert(!i.isZero());
         if (isZero())
             return 0;
         if (i == 1)

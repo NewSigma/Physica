@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include <cstring>
 #include <memory>
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica::Core {
     // operator<<

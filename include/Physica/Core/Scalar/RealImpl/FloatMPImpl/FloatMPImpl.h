@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/DivideByZeroException.h"
 #include "AddBasic.h"
 #include "DivBasic.h"
 #include "ArraySupport.h"
@@ -241,9 +240,7 @@ namespace Physica::Core {
     }
 
     inline Real<FloatMP> Real<FloatMP>::div(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
-        if(s2.isZero())
-            throw DivideByZeroException();
-
+        assert(!s2.isZero() && "[Error]: Divide by zero");
         if(!s1.isZero()) {
             if(s2 != BasicConst::getInstance()._1) {
                 const auto s1_size = s1.getSize(), s2_size = s2.getSize();
