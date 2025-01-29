@@ -21,6 +21,7 @@
 #include "Physica/Python/PhysicaPython.h"
 #include "Physica/Python/CXXPtr.h"
 #include "Physica/Python/CXXObj.h"
+#include "Physica/Python/LLVM/ASTCursor.h"
 #include "Physica/Python/LLVM/LLVM.h"
 
 namespace Physica::Python {
@@ -66,6 +67,18 @@ PYBIND11_MODULE(PhysicaPython, m) {
         .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
         .def("construct", &CXXObj::construct)
         .def("call", &CXXObj::call, py::return_value_policy::move);
+    
+    py::class_<ASTCursor>(m, "ASTCursor")
+        .def(py::init([]() {
+            return ASTCursor(PhysicaPython::getInstance().getClang().getASTContext());
+        }))
+        .def("__repr__", &ASTCursor::toString)
+        .def("pop", &ASTCursor::pop)
+        .def("ls", &ASTCursor::ls)
+        .def("cd", &ASTCursor::cd)
+        .def("dump", &ASTCursor::dump)
+        .def("reset", &ASTCursor::reset)
+        .def("size", &ASTCursor::size);
 
     m.def("init", [](std::string root) {
         if (instance == nullptr)

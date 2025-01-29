@@ -42,9 +42,12 @@ def import_physica():
     return physica
 
 physica = import_physica()
-CXXObj = physica.CXXObj
 del import_physica
+
+CXXObj = physica.CXXObj
 
 from . import Core
 from .Core import *
 del Core
+
+ast = physica.ASTCursor()
