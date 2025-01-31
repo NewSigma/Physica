@@ -189,6 +189,12 @@ namespace Physica::Core {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::template random_any<Distribution, R>(dist);
     }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto LValueVector<Derived>::grads() const noexcept {
+        return Base::template grads_impl<GradOrder>();
+    }
     /**
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */

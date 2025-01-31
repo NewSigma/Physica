@@ -416,18 +416,24 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline LValueMatrix<Derived>::PtrTy LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept {
+    template<int GradOrder>
+    auto LValueMatrix<Derived>::grads() const noexcept {
+        return Base::template grads_impl<GradOrder>();
+    }
+
+    template<class Derived>
+    __host__ __device__ inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < Base::getRow() && col < Base::getCol());
         return Base::getDerived().data_ptr(row, col);
     }
 
     template<class Derived>
-    __host__ __device__ inline LValueMatrix<Derived>::ConstPtrTy LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept {
+    __host__ __device__ inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 
     template<class Derived>
-    inline LValueMatrix<Derived>::RefTy LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) {
+    inline auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) -> RefTy {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
@@ -435,7 +441,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline LValueMatrix<Derived>::ConstRefTy LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const {
+    inline auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const -> ConstRefTy {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());

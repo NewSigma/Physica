@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
+#include "RValueMatrix.h"
 
 namespace Physica::Core {
     template<Matrix T, bool isLValueMatrix>

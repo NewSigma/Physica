@@ -91,11 +91,11 @@ namespace Physica::Core {
     class Diff;
 
     template<class T>
-    class CoDiffNode;
+    class DiffCoro;
 
     template<>
-    class CoDiffNode<void> {
-        using This = CoDiffNode<void>;
+    class DiffCoro<void> {
+        using This = DiffCoro<void>;
         class Promise {
         public:
             auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
@@ -109,11 +109,11 @@ namespace Physica::Core {
     private:
         std::coroutine_handle<Promise> handle = nullptr;
     public:
-        CoDiffNode() = default;
-        CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept : handle(handle_) {}
-        CoDiffNode(const This&) = delete;
-        CoDiffNode(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
-        ~CoDiffNode() {
+        DiffCoro() = default;
+        DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : handle(handle_) {}
+        DiffCoro(const This&) = delete;
+        DiffCoro(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+        ~DiffCoro() {
             if (handle) {
                 assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
                 handle.resume();
@@ -132,13 +132,18 @@ namespace Physica::Core {
     };
 
     template<class T>
-    struct IsCoDiff {
-        constexpr static bool value = false;
-    };
+    class IsCoDiff {
+        template<class U>
+        struct Impl {
+            constexpr static bool value = false;
+        };
 
-    template<class T>
-    struct IsCoDiff<CoDiffNode<T>> {
-        constexpr static bool value = true;
+        template<class U>
+        struct Impl<DiffCoro<U>> {
+            constexpr static bool value = true;
+        };
+    public:
+        constexpr static bool value = Impl<std::remove_cvref_t<T>>::value;
     };
 
     template<class T>
@@ -147,13 +152,13 @@ namespace Physica::Core {
     };
 
     template<class T>
-    struct remove_codiff<CoDiffNode<T>> {
+    struct remove_codiff<DiffCoro<T>> {
         using Type = T;
     };
 
     template<class T>
     using CoDiff = std::conditional<std::is_void<T>::value || ReverseDiff<T>
-                 , CoDiffNode<typename remove_codiff<typename remove_cvref<T>::Type>::Type>
+                 , DiffCoro<typename remove_codiff<typename remove_cvref<T>::Type>::Type>
                  , typename remove_cvref<T>::Type>::type;
 
     namespace Internal {

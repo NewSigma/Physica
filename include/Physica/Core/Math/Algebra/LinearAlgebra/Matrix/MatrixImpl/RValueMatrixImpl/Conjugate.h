@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RValueMatrix.h"
+#include "../RValueMatrix.h"
 
 namespace Physica::Core {
     template<Matrix T>

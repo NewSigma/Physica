@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RValueMatrix.h"
+#include "../RValueMatrix.h"
 
 namespace Physica::Core {
     template<class MatrixType> class Hermite;

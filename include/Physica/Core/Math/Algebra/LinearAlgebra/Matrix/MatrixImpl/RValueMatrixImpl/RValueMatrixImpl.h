@@ -340,6 +340,15 @@ namespace Physica::Core {
     template<class Derived>
     template<int GradOrder>
     auto RValueMatrix<Derived>::grads() const noexcept {
+        if constexpr (isReverseDiff)
+            return Base::getDerived().template grads<GradOrder>();
+        else
+            return grads_impl<GradOrder>();
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto RValueMatrix<Derived>::grads_impl() const noexcept {
         return GradMatrix<Derived, GradOrder>(Base::getDerived());
     }
 

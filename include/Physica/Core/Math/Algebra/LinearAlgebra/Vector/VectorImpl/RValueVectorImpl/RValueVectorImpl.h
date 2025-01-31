@@ -414,10 +414,12 @@ namespace Physica::Core {
         else
             m = values().max();
 
-        auto y = ln(exp(v - m).sum() + ValueType(std::numeric_limits<ValueType>::min())) + m; // Add min() to avoid ln(0)
+        auto expr1 = v - m;
+        auto expr2 = exp(expr1);
+        auto y = ln(expr2.sum() + ValueType(std::numeric_limits<ValueType>::min())) + m; // Add min() to avoid ln(0)
         if constexpr (isReverseDiff) {
             auto tmp = co_yield y.value();
-            y.reverse(tmp.grad());
+            y.reverse_final(tmp.grad());
         }
         else
             co_return std::move(y);
@@ -432,7 +434,7 @@ namespace Physica::Core {
         auto y = delta.lnSumExp();
         if constexpr (isReverseDiff) {
             auto tmp = co_yield y.value();
-            y.reverse(tmp.grad());
+            y.reverse_final(tmp.grad());
         }
         else
             co_return std::move(y);
@@ -456,7 +458,7 @@ namespace Physica::Core {
         auto y = exp(lnSoftmax(index));
         if constexpr (isReverseDiff) {
             auto tmp = co_yield y.value();
-            y.reverse(tmp.grad());
+            y.reverse_final(tmp.grad());
         }
         else
             co_return std::move(y);
@@ -539,16 +541,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::reverse() noexcept {
-        return ReverseVector<Derived>(Base::getDerived());
-    }
-
-    template<class Derived>
-    inline const auto RValueVector<Derived>::reverse() const noexcept {
-        return ReverseVector<Derived>(Base::getDerived());
-    }
-
-    template<class Derived>
     auto RValueVector<Derived>::reals() const noexcept {
         return RealVector<Derived>(Base::getDerived());
     }
@@ -576,6 +568,15 @@ namespace Physica::Core {
     template<class Derived>
     template<int GradOrder>
     auto RValueVector<Derived>::grads() const noexcept {
+        if constexpr (isReverseDiff)
+            return Base::getDerived().template grads<GradOrder>();
+        else
+            return grads_impl<GradOrder>();
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto RValueVector<Derived>::grads_impl() const noexcept {
         return GradVector<Derived, GradOrder>(Base::getDerived());
     }
 

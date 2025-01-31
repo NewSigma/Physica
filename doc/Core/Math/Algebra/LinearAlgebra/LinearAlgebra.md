@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -31,14 +31,26 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## 右值对象
 
-右值对象的核心操作为
+**右值对象**的核心操作为
 
 1. calc() 计算元素的值, 按值返回
-2. getLength(), getRow(), getCol()等 返回线性代数对象的尺寸
+2. getLength(), getRow(), getCol()等 返回线性代数对象的**尺寸**
 
 另外
 
 calc_value() 返回元素的value, 用于反向传播等不需要梯度的情况
+
+
+## 转换函数
+
+一些常用的逐元素操作被实现为所谓的转换函数，它是返回一个右值对象的成员函数。其尺寸与原对象相同，但在每个元素上进行相同的操作，以右值向量为例:
+
+reals: 返回实部组成的向量
+imags: 虚部
+squaredNorms: 模方
+norms: 模
+values: 值
+grads: 梯度, 对反向传播的纯右值向量调用grads()是不合理的，因为此时计算图尚未生成。调用将导致编译期错误
 
 ## 模板参数
 

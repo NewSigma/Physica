@@ -243,30 +243,30 @@ namespace Physica::Core {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator+(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>) {
-        return y + x;
+    [[nodiscard]] inline auto operator+(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
+        return std::forward<T>(y) + std::forward<U>(x);
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator-(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>) {
-        return -(y - x);
+    [[nodiscard]] inline auto operator-(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
+        return -(std::forward<T>(y) - std::forward<U>(x));
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator*(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>) {
-        return y * x;
+    [[nodiscard]] inline auto operator*(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
+        return std::forward<T>(y) * std::forward<U>(x);
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<T, U>::Type>
-    operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>) {
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    operator/(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
         if constexpr (ForwardDiff<T>) {
             using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
             const auto rep = reciprocal(y.value());
             co_return ResultType(x * rep, -x * square(rep) * y.grad());
         }
         else {
-            const auto rep = reciprocal(y);
+            const auto rep = reciprocal(std::forward<T>(y));
             std::ignore = co_yield rep * x;
         }
     }

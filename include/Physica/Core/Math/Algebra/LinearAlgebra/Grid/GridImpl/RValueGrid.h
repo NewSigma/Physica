@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -44,6 +44,8 @@ namespace Physica::Core {
         using Base = CRTPBase<This>;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
+        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
+        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
     public:
         /* Operations */
@@ -76,6 +78,9 @@ namespace Physica::Core {
         template<Scalar T, bool IsUnitLattice, class Functor>
         inline static void forPointIndexInGrid(
                 const RValueGrid& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+    protected:
+        template<int GradOrder>
+        auto grads_impl() const noexcept;
     };
 
     template<class Derived>
@@ -114,7 +119,10 @@ namespace Physica::Core {
     template<class Derived>
     template<int GradOrder>
     auto RValueGrid<Derived>::grads() const noexcept {
-        return GradGrid<Derived, GradOrder>(Base::getDerived());
+        if constexpr (isReverseDiff)
+            return Base::getDerived().template grads<GradOrder>();
+        else
+            return grads_impl<GradOrder>();
     }
 
     template<class Derived>
@@ -129,6 +137,12 @@ namespace Physica::Core {
     inline void RValueGrid<Derived>::forPointIndexInGrid(
             const RValueGrid& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
         forPointIndexInGrid<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto RValueGrid<Derived>::grads_impl() const noexcept {
+        return GradGrid<Derived, GradOrder>(Base::getDerived());
     }
 }
 

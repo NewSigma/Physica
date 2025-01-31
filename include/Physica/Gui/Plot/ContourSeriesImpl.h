@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include <iostream>
+#include <QtCharts/QChart>
+#include "ContourSeries.h"
 
 namespace Physica::Gui {
     template<Matrix T>

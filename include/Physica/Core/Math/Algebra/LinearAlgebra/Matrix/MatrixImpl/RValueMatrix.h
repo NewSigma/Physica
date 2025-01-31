@@ -138,6 +138,9 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
+        /* Operations */
+        template<int GradOrder>
+        auto grads_impl() const noexcept;
     };
 
     template<Matrix T1, Matrix T2>
@@ -161,13 +164,13 @@ namespace Physica {
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
 #include "RValueMatrixImpl/RValueFlatten.h"
 #include "RValueMatrixImpl/MatrixConvert.h"
+#include "RValueMatrixImpl/Transpose.h"
+#include "RValueMatrixImpl/Conjugate.h"
+#include "RValueMatrixImpl/Hermite.h"
 #include "RValueMatrixImpl/ReshapedVector.h"
 #include "MatrixProduct/GEMM.h"
 #include "MatrixProduct/GEMV.h"
 #include "MatrixProduct/GEVM.h"
-#include "Transpose.h"
-#include "Conjugate.h"
-#include "Hermite.h"
-#include "DiagVector.h"
-#include "MatrixNorm.h"
+#include "RValueMatrixImpl/MatrixNorm.h"
 #include "MatrixExpr.h"
+#include "DiagVector.h"

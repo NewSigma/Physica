@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,8 +19,6 @@
 #pragma once
 
 #include <cstdarg>
-#include <iostream>
-#include <array>
 #include "Physica/Logger/LoggerRuntime.h"
 
 namespace Physica::Logger {

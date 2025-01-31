@@ -125,6 +125,9 @@ namespace Physica::Core {
         void random_normal();
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
+
+        template<int GradOrder = 1>
+        auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
@@ -147,4 +150,5 @@ namespace Physica {
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.h"
-#include "InverseMatrix.h"
+#include "LValueMatrixImpl/ReshapedVector.h"
+#include "LValueMatrixImpl/InverseMatrix.h"

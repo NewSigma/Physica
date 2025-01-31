@@ -84,6 +84,13 @@ namespace Physica::Core {
         template<size_t Length = Dynamic>
         [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
 
+        template<Matrix M>
+        auto reshape(const M& mat) const noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        auto reshape_col(size_t row, size_t col) const noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        auto reshape_row(size_t row, size_t col) const noexcept;
+
         inline void toUnit();
         template<RandomGenerator R>
         inline void random_uniform();
@@ -91,6 +98,9 @@ namespace Physica::Core {
         inline void random_normal();
         template<class Distribution, RandomGenerator R>
         inline void random_any(Distribution& dist);
+
+        template<int GradOrder = 1>
+        auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] inline PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const noexcept;

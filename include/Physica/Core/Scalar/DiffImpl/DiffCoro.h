@@ -25,11 +25,11 @@ namespace Physica::Core {
     using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T&>::type;
 
     template<class Base>
-    class CoDiffNode : public Base {
-        static_assert(ReverseDiff<Base>, "[Error]: CoDiffNode save compute graph for reverse diffable objects");
-        static_assert(!IsCoDiff<Base>::value, "[Error]: Nested CoDiffNode is not allowed");
+    class DiffCoro : public Base {
+        static_assert(ReverseDiff<Base>, "[Error]: DiffCoro save compute graph for reverse diffable objects");
+        static_assert(!IsCoDiff<Base>::value, "[Error]: Nested DiffCoro is not allowed");
         static_assert(std::is_object<Base>::value, "[Error]: Must save the return by value");
-        using This = CoDiffNode<Base>;
+        using This = DiffCoro<Base>;
 
         class Promise {
             struct suspend_yield : public std::suspend_always {
@@ -72,18 +72,20 @@ namespace Physica::Core {
     private:
         std::coroutine_handle<Promise> handle = nullptr;
     public:
-        CoDiffNode() = default;
-        CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept;
+        DiffCoro() = default;
+        DiffCoro(std::coroutine_handle<Promise> handle_) noexcept;
         template<ReverseDiff T>
-        CoDiffNode(T&& x) noexcept requires(!IsCoDiff<T>::value);
-        CoDiffNode(const This& other) = delete;
-        CoDiffNode(This&& other) noexcept;
-        ~CoDiffNode();
+        DiffCoro(T&& x) noexcept requires(!IsCoDiff<T>::value);
+        DiffCoro(const This& other) = delete;
+        DiffCoro(This&& other) noexcept;
+        ~DiffCoro();
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         using Base::operator=;
         /* Operations */
+        template<class T>
+        void reverse_final(T&& x) noexcept;
         void swap(This& __restrict obj) noexcept;
     };
 
@@ -99,7 +101,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T>
-    class Traits<CoDiffNode<T>> : public Traits<T> {};
+    class Traits<DiffCoro<T>> : public Traits<T> {};
 }
 
-#include "CoDiffImpl.h"
+#include "DiffCoroImpl.h"

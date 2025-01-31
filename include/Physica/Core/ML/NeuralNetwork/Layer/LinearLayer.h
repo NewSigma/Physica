@@ -70,8 +70,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return weights.getCol(); }
         [[nodiscard]] size_t getOutputDim() const noexcept { return weights.getRow(); }
-        [[nodiscard]] const MatrixType& getWeights() const noexcept { return weights; }
-        [[nodiscard]] const BiasType& getBias() const noexcept { return bias; }
+        [[nodiscard]] const auto& getWeights() const noexcept { return weights; }
+        [[nodiscard]] const auto& getBias() const noexcept requires(WithBias) { return bias; }
     private:
         friend class device_obj<This>;
     };

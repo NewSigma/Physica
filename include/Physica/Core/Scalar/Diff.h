@@ -21,7 +21,7 @@
 #include <iosfwd>
 #include "Physica/Core/Scalar/Real.h"  // IWYU pragma: export
 #include "Physica/Core/Scalar/ExprType.h"
-#include "DiffImpl/CoDiff.h"
+#include "DiffImpl/DiffCoro.h"
 
 namespace Physica::Core {
     template<Scalar T, DiffMode Mode, int Order>
@@ -43,7 +43,7 @@ namespace Physica::Core {
         Diff(MachineType x) : This(T(x)) {}
         Diff(T v_);
         Diff(T v_, GradType g_);
-        Diff(CoDiffNode<This>) requires(isReverseDiff) = delete;
+        Diff(DiffCoro<This>) requires(isReverseDiff) = delete;
         template<Scalar U>
         explicit(T::Option < U::Option) Diff(const U& x) requires(!ReverseDiff<U>);
         Diff(const This&) requires(isForwardDiff) = default;

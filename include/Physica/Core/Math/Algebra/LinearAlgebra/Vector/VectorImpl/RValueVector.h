@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/CRTPBase.h"
-#include "Physica/Core/Scalar/Real.h"
+#include "Physica/Core/Scalar/Real.h" // IWYU pragma: export
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "RValueVectorImpl/RVectorBlock.h"
@@ -32,8 +32,6 @@ namespace Physica::Core {
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType> class HermiteVector;
-    template<class VectorType> class ReverseVector;
-    template<class VectorType, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<Vector V1, Vector V2> class CrossProduct;
     template<class T> class RealVector;
     template<class T> class ImagVector;
@@ -143,15 +141,15 @@ namespace Physica::Core {
         [[nodiscard]] inline auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
-        [[nodiscard]] inline auto reverse() noexcept;
-        [[nodiscard]] inline const auto reverse() const noexcept;
+        [[nodiscard]] inline auto reversal() noexcept;
+        [[nodiscard]] inline const auto reversal() const noexcept;
 
         template<Matrix M>
-        auto reshape(const M& mat) const;
+        auto reshape(const M& mat) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_col(size_t row, size_t col) const;
+        auto reshape_col(size_t row, size_t col) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_row(size_t row, size_t col) const;
+        auto reshape_row(size_t row, size_t col) const noexcept;
 
         auto reals() const noexcept;
         auto imags() const noexcept;
@@ -169,6 +167,9 @@ namespace Physica::Core {
         /* Operators */
         RValueVector& operator=(const RValueVector&) = default;
         RValueVector& operator=(RValueVector&&) noexcept = default;
+        /* Operations */
+        template<int GradOrder>
+        auto grads_impl() const noexcept;
     };
 
     template<Vector T1, Vector T2>
@@ -177,15 +178,15 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T>
-    class Traits<Core::RValueVector<T>> {
+    class Traits<RValueVector<T>> {
     public:
         using Derived = T;
     };
 }
 
 #include "RValueVectorImpl/RValueVectorImpl.h"
-#include "RValueVectorImpl/ReverseVector.h"
+#include "RValueVectorImpl/ReversalVector.h"
 #include "RValueVectorImpl/CrossProduct.h"
+#include "RValueVectorImpl/VectorConvert.h"
 #include "InnerDot.h"
 #include "VectorExpr.h"
-#include "RValueVectorImpl/VectorConvert.h"

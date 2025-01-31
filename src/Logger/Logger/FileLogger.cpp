@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+#include <iostream>
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Logger/Logger/FileLogger.h"
 

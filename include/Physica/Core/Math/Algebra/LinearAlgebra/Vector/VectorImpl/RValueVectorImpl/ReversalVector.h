@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,30 +18,42 @@
  */
 #pragma once
 
+#include "../RValueVector.h"
+
 namespace Physica::Core {
     template<Vector T>
-    class ReverseVector<T> final : public RValueVector<ReverseVector<T>> {
-        using This = ReverseVector<T>;
+    class ReversalVector final : public RValueVector<ReversalVector<T>> {
+        using This = ReversalVector<T>;
         using Base = RValueVector<This>;
 
         T& v;
     public:
         using typename Base::ScalarType;
     public:
-        explicit ReverseVector(T& v_) : v(v_) {}
-        ReverseVector(const ReverseVector&) = delete;
-        ReverseVector(ReverseVector&&) noexcept = delete;
-        ~ReverseVector() = default;
+        explicit ReversalVector(T& v_) : v(v_) {}
+        ReversalVector(const This&) = delete;
+        ReversalVector(This&&) noexcept = delete;
+        ~ReversalVector() = default;
         /* Operators */
-        ReverseVector& operator=(const ReverseVector&) = delete;
-        ReverseVector& operator=(ReverseVector&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return v.calc(getLength() - index - 1); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
+
+    template<class Derived>
+    inline auto RValueVector<Derived>::reversal() noexcept {
+        return ReversalVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    inline const auto RValueVector<Derived>::reversal() const noexcept {
+        return ReversalVector<Derived>(Base::getDerived());
+    }
 }
 
 namespace Physica {
     template<Vector T>
-    class Traits<Core::ReverseVector<T>> : public Traits<T> {};
+    class Traits<ReversalVector<T>> : public Traits<T> {};
 }

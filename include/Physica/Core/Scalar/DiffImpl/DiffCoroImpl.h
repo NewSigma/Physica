@@ -19,13 +19,13 @@
 #pragma once
 
 #include <forward_list>
-#include "CoDiff.h"
+#include "DiffCoro.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     template<class Base>
-    CoDiffNode<Base>::CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {
+    DiffCoro<Base>::DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {
         /**
          * Workaround for [1]
          *
@@ -37,7 +37,7 @@ namespace Physica::Core {
 
     template<class Base>
     template<ReverseDiff T>
-    CoDiffNode<Base>::CoDiffNode(T&& x) noexcept requires(!IsCoDiff<T>::value) {
+    DiffCoro<Base>::DiffCoro(T&& x) noexcept requires(!IsCoDiff<T>::value) {
         auto fn = [](T&& x) noexcept -> This {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             Base y;
@@ -57,12 +57,12 @@ namespace Physica::Core {
     }
 
     template<class Base>
-    CoDiffNode<Base>::CoDiffNode(This&& other) noexcept : Base(static_cast<Base&&>(other)), handle(other.handle) {
+    DiffCoro<Base>::DiffCoro(This&& other) noexcept : Base(static_cast<Base&&>(other)), handle(other.handle) {
         other.handle = nullptr;
     }
 
     template<class Base>
-    CoDiffNode<Base>::~CoDiffNode() {
+    DiffCoro<Base>::~DiffCoro() {
         if (handle) {
             assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
             handle.promise().obj = Base(static_cast<Base&&>(*this));
@@ -74,7 +74,15 @@ namespace Physica::Core {
     }
 
     template<class Base>
-    void CoDiffNode<Base>::swap(This& __restrict obj) noexcept {
+    template<class T>
+    void DiffCoro<Base>::reverse_final(T&& x) noexcept {
+        assert(handle != nullptr && "[Error]: Reverse has been finalized");
+        Base::reverse(std::forward<T>(x));
+        this->~DiffCoro();
+    }
+
+    template<class Base>
+    void DiffCoro<Base>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(handle, obj.handle);
