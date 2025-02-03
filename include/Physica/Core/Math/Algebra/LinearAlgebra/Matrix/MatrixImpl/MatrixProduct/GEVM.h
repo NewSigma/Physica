@@ -41,8 +41,8 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getCol(); }
+        [[nodiscard]] size_t getRow() const { return vec.getLength(); }
+        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
         [[nodiscard]] const T& getLHS() const noexcept { return vec; }
         [[nodiscard]] const U& getRHS() const noexcept { return mat; }
     };

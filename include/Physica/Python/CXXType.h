@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <memory>
 #include <ffi.h>
 #include <clang/AST/DeclCXX.h>
 #include <pybind11/pybind11.h>

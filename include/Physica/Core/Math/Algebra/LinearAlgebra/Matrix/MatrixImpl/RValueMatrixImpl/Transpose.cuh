@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,7 @@
  */
 #pragma once
 
-#include "Transpose.h"
-#include "RValueMatrix.cuh"
+#include "../RValueMatrix.cuh"
 
 namespace Physica::Core {
     template<Matrix T>
@@ -62,9 +61,9 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Matrix T>
-    class Traits<Core::device_obj<Core::Transpose<T>>> : public Traits<Core::Transpose<T>> {};
+    template<Matrix T>
+    class Traits<device_obj<Transpose<T>>> : public Traits<Transpose<T>> {};
 
-    template<Core::Vector T>
-    class Traits<Core::device_obj<Core::TransposeVector<T>>> : public Traits<Core::TransposeVector<T>> {};
+    template<Vector T>
+    class Traits<device_obj<TransposeVector<T>>> : public Traits<TransposeVector<T>> {};
 }

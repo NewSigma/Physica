@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica::Core {
     template<Matrix T1, Matrix T2>
     class MatrixExpr<ExprType::Add, T1, T2>

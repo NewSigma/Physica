@@ -86,23 +86,24 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived& LValueMatrix<Derived>::operator=(const ScalarType& s) {
+    template<Scalar T>
+    Derived& LValueMatrix<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
         static_assert(!isReverseDiff, "[Error]: Not implemented");
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         for (size_t i = 0; i < maxMajor; ++i)
             for (size_t j = 0; j < maxMinor; ++j)
-                refFromMajorMinor(i, j) = s;
+                refFromMajorMinor(i, j) = x;
         return Base::getDerived();
     }
 
     template<class Derived>
-    inline LValueMatrix<Derived>::RefTy LValueMatrix<Derived>::operator()(size_t row, size_t col) {
+    inline auto LValueMatrix<Derived>::operator()(size_t row, size_t col) -> RefTy {
         return *data_ptr(row, col);
     }
 
     template<class Derived>
-    inline LValueMatrix<Derived>::ConstRefTy LValueMatrix<Derived>::operator()(size_t row, size_t col) const {
+    inline auto LValueMatrix<Derived>::operator()(size_t row, size_t col) const -> ConstRefTy {
         return *data_ptr(row, col);
     }
 
@@ -458,12 +459,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    LValueFlatten<Derived> LValueMatrix<Derived>::flatten() {
+    auto LValueMatrix<Derived>::flatten() {
         return LValueFlatten<Derived>(*this);
     }
 
     template<class Derived>
-    const LValueFlatten<Derived> LValueMatrix<Derived>::flatten() const {
+    const auto LValueMatrix<Derived>::flatten() const {
         return LValueFlatten<Derived>(*this);
     }
 }

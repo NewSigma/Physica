@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Version.h"
 #include "Physica/Core/Exception/LLVMException.h"
 #include "Physica/Python/PhysicaPython.h"
 #include "Physica/Python/CXXPtr.h"
@@ -52,6 +51,8 @@ namespace Physica::Python {
         return *instance;
     }
 }
+
+void pymain(py::module_& m);
 
 PYBIND11_MODULE(PhysicaPython, m) {
     using namespace Physica::Python;
@@ -93,5 +94,5 @@ PYBIND11_MODULE(PhysicaPython, m) {
         PhysicaPython::getInstance().compile(moduleName);
     });
 
-    m.def("version", Physica::Core::version);
+    pymain(m);
 }

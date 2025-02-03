@@ -56,11 +56,11 @@ namespace Physica::Core {
         inline This& operator=(const This& m);
         inline This& operator=(This&& m);
 
-        Derived& operator=(const ScalarType& s);
-        void operator+=(const ScalarType& s) { Base::getDerived() = Base::getDerived() + s; }
-        void operator-=(const ScalarType& s) { Base::getDerived() = Base::getDerived() - s; }
-        void operator*=(const ScalarType& s) { Base::getDerived() = Base::getDerived() * s; }
-        void operator/=(const ScalarType& s) { Base::getDerived() = Base::getDerived() / s; }
+        template<Scalar T> Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
+        template<Scalar T> void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
+        template<Scalar T> void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
+        template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
+        template<Scalar T> void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
 
         template<Matrix M> Derived& operator=(const M& m);
         template<Matrix M> void operator+=(const M& m) { Base::getDerived() = Base::getDerived() + m; }
@@ -133,8 +133,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] inline RefTy refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] inline ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
-        [[nodiscard]] LValueFlatten<Derived> flatten();
-        [[nodiscard]] const LValueFlatten<Derived> flatten() const;
+        [[nodiscard]] auto flatten();
+        [[nodiscard]] const auto flatten() const;
         /* Setters */
         void toUnitMatrix();
     protected:

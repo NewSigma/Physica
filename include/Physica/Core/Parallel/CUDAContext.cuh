@@ -57,4 +57,12 @@ namespace Physica::Core {
     inline void CUDAContext::setPointerMode(bool isDeviceSide) noexcept {
         cublasSetPointerMode(*this, isDeviceSide ? CUBLAS_POINTER_MODE_DEVICE : CUBLAS_POINTER_MODE_HOST);
     }
+
+    __host__ __device__ inline bool isZeroThread() {
+    #ifdef __CUDA_ARCH__
+        return !threadIdx.x && !threadIdx.y && !threadIdx.z && !blockIdx.x && !blockIdx.x && !blockIdx.x;
+    #else
+        return false;
+    #endif
+    }
 }

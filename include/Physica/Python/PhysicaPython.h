@@ -20,6 +20,7 @@
 
 #include <unordered_map>
 #include <filesystem>
+#include <pybind11/iostream.h>
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "Physica/Python/LLVM/Clang.h"
 #include "CXXType.h"
@@ -31,6 +32,8 @@ namespace Physica::Python {
         using StrTypeMap = std::unordered_map<std::string, CXXType>;
         using LLJIT = llvm::orc::LLJIT;
 
+        py::scoped_ostream_redirect pyout;
+        py::scoped_estream_redirect pyerr;
         LLVM llvm;
         Clang clang;
         std::unique_ptr<LLJIT> jit;

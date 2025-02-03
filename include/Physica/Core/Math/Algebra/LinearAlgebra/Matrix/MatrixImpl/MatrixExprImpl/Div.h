@@ -51,6 +51,27 @@ namespace Physica::Core {
         }
     };
 
+    template<Matrix T, Matrix U>
+    class MatrixExpr<ExprType::Div, T, U>
+            : public BinaryMatrixExpr<ExprType::Div, T, U> {
+        using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+    public:
+        using Base::Base;
+        /* Operations */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            assert(!Base::getRHS().calc(row, col).isZero() && "[Error]: Divide by zero");
+            return Base::getLHS().calc(row, col) / Base::getRHS().calc(row, col);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            assert(!Base::getRHS().calc_value(row, col).isZero() && "[Error]: Divide by zero");
+            return Base::getLHS().calc_value(row, col) / Base::getRHS().calc_value(row, col);
+        }
+    };
+
     template<Matrix T, Scalar U>
     [[nodiscard]] inline auto operator/(const T& m, const U& x) noexcept {
         return MatrixExpr<ExprType::Div, T, U>(m, x);
@@ -58,6 +79,11 @@ namespace Physica::Core {
 
     template<Scalar T, Matrix U>
     [[nodiscard]] inline auto operator/(const T& m, const U& x) noexcept {
+        return MatrixExpr<ExprType::Div, T, U>(m, x);
+    }
+
+    template<Matrix T, Matrix U>
+    [[nodiscard]] inline auto divide(const T& m, const U& x) noexcept {
         return MatrixExpr<ExprType::Div, T, U>(m, x);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,26 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include <pybind11/pybind11.h>
+#include "Physica/Core/Version.h"
 
-#include "Physica/Core/Exception/CUDA/CUDA.cuh"
-#include "SequentialExecutor.h"
+using namespace Physica;
+namespace py = pybind11;
 
-namespace Physica::Core {
-    /**
-     * Single thread with cuda support
-     */
-    class CUDAExecutor : public SequentialExecutor {
-    public:
-        static void wait() { check(cudaDeviceSynchronize()); }
-    };
-}
+void pymain(py::module_& m) {
+    m.def("pymain", Core::version, "This func is empty, you can include Physica headers to test your code.");
 
-namespace Physica {
-    template<>
-    class Traits<Core::CUDAExecutor> {
-    public:
-        constexpr static bool UseCPU = false;
-        constexpr static bool UseCUDA = true;
-    };
+    m.def("version", Core::version);
 }
