@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,92 +18,70 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include <unordered_map>
+#include "AdamImpl/AdamImpl.h"
 
 namespace Physica::Core {
     /**
      * Reference:
-     * [1] Adam: A Method for Stochastic Optimization (arXiv:1412.6980 [cs.LG])
+     * [1] arXiv:1412.6980; https://doi.org/10.48550/arXiv.1412.6980
      */
-    template<Scalar T, Vector U>
+    template<Scalar T>
     class Adam {
-        const Array<T, 6> args;
-        U params;
+        static_assert(!Diffable<T>);
+        using Args = AdamBase<T>::Args;
+
+        Args args;
+        std::unordered_map<void*, AdamBase<T>*> targetBufferMap;
     public:
-        Adam(const Array<T, 6>& args_);
+        Adam(T lr = 1E-3, T beta1 = 0.9, T beta2 = 0.999, T epsilon = 1E-8, T decay = 0);
+        Adam(const Adam&) = default;
+        Adam(Adam&&) noexcept = default;
         ~Adam() = default;
+        /* Operators */
+        Adam& operator=(Adam obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Function>
-        void compute(Function func, const U& params_, size_t maxIteration);
-        /* Getters */
-        [[nodiscard]] const U& getParams() const noexcept { return params; }
-    private:
-        template<class Function>
-        [[nodiscard]] U gradient(Function func);
+        template<class U>
+        void step(U& target);
+
+        void swap(Adam& __restrict obj) noexcept;
     };
-    /**
-     * Five args:
-     * args[0]: stepSize, real number in (0, inf)
-     * args[1]: real number in [0, 1)
-     * args[2]: real number in [0, 1)
-     * args[3]: Exponential decay rates for the moment estimates, real number in [0, 1)
-     * args[4]: Very small real number in (0, inf)
-     * args[5]: Expected relative error, small real number in (0, inf)
-     */
-    template<Scalar T, Vector U>
-    Adam<T, U>::Adam(const Array<T, 6>& args_) : args(args_), params() {
-        assert(args[0].isPositive());
-        assert(args[1].isPositive() && args[1] < T(1));
-        assert(args[2].isPositive() && args[2] < T(1));
-        assert(args[3].isPositive() && args[3] < T(1));
-        assert(args[4].isPositive());
-        assert(args[5].isPositive());
-    }
-    /**
-     * \class Function is declared like:
-     * T func(const U& params)
-     * 
-     * \param maxIteration
-     * Set to 0 to disable this criteria
-     */
-    template<Scalar T, Vector U>
-    template<class Function>
-    void Adam<T, U>::compute(Function func, const U& params_, size_t maxIteration) {
-        params = params_;
-        auto m = U::zeros(params.getLength());
-        auto v = U::zeros(params.getLength());
-        T beta1 = args[1];
-        size_t count = 0;
-        U temp(params.getLength());
-        bool stop = false;
-        do {
-            U g = gradient(func);
-            const T beta1_1 = T(1) - beta1;
-            m = m * beta1 + g * beta1_1;
-            v = v * args[2] + hadamard(g, g) * T(T(1) -  args[2]);
-            const T alpha = args[0] / beta1_1 * sqrt(T(T(1) - args[2]));
-            temp = params - alpha * hadamard(m, reciprocal(sqrt(v) + args[4]));
-            beta1 *= args[3];
-            ++count;
-            const bool meetRelativeCriteria = vectorNear(params, temp, double(args[5]));
-            stop = (maxIteration != 0 && count > maxIteration) || meetRelativeCriteria;
-            params = temp;
-        } while(!stop);
+
+    template<Scalar T>
+    Adam<T>::Adam(T lr, T beta1, T beta2, T epsilon, T decay) {
+        assert(lr.isPositive());
+        assert(beta1.isPositive() && beta1 < T(1));
+        assert(beta2.isPositive() && beta2 < T(1));
+        assert(epsilon.isPositive());
+        assert(!decay.isNegative() && decay < T(1));
+        args.lr = lr;
+        args.beta1 = beta1;
+        args.beta2 = beta2;
+        args.epsilon = epsilon;
+        args.decay = decay;
     }
 
-    template<Scalar T, Vector U>
-    template<class Function>
-    U Adam<T, U>::gradient(Function func) {
-        const size_t length = params.getLength();
-        U result(length);
-        const T y0 = func(std::cref(params));
-        for (size_t i = 0; i < length; ++i) {
-            T new_param = params[i] + args[0];
-            params[i].swap(new_param);
-            const T y1 = func(std::cref(params));
-            result[i] = (y1 - y0) / args[0];
-            params[i].swap(new_param);
+    template<Scalar T>
+    template<class U>
+    void Adam<T>::step(U& target) {
+        void* pTarget = (void*)(&target);
+        const bool exist = targetBufferMap.count(pTarget) != 0;
+        auto& opt = targetBufferMap[pTarget];
+        if (!exist) {
+            if constexpr (Vector<U>)
+                opt = new AdamImpl<U>(args, target.getLength());
+            else {
+                static_assert(Matrix<U>, "[Error]: Unexpected type");
+                opt = new AdamImpl<U>(args, target.getRow(), target.getCol());
+            }
         }
-        return result;
+        opt->step(args, pTarget);
+    }
+
+    template<Scalar T>
+    void Adam<T>::swap(Adam& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        std::swap(args, obj.args);
+        targetBufferMap.swap(obj.targetBufferMap);
     }
 }
