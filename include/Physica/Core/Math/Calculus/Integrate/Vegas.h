@@ -70,7 +70,7 @@ namespace Physica::Core {
         void mesh_tanh(size_t dim, Trv range);
 
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
-        void warmup(Functor func, int numWarm);
+        Trv warmup(Functor func, int numWarm);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void integral(Functor func);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
@@ -136,7 +136,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    void Vegas<T>::warmup(Functor func, int numWarm) {
+    auto Vegas<T>::warmup(Functor func, int numWarm) -> Trv {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
         assert(numWarm >= 0 && "[Error]: Invalid param");
@@ -147,6 +147,7 @@ namespace Physica::Core {
             trialIntegral<Functor, R, Executor>(func, mean, var);
             refineGrid<Executor>();
         }
+        return calcGridLossImpl();
     }
 
     template<Scalar T>

@@ -45,6 +45,8 @@ namespace Physica::Core {
         void step(U& target);
 
         void swap(Adam& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] Args& getArgs() const noexcept { return args; }
     };
 
     template<Scalar T>

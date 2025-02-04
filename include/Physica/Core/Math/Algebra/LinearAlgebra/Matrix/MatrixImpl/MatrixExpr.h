@@ -44,8 +44,8 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
+        [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
+        [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] __host__ __device__ const M& getExpr() const noexcept { return expr; }
     };
 
@@ -74,13 +74,13 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t getRow() const {
+        [[nodiscard]] size_t getRow() const {
             if constexpr (Matrix<LHS>)
                 return getLHS().getRow();
             else
                 return getRHS().getRow();
         }
-        [[nodiscard]] __host__ __device__ size_t getCol() const {
+        [[nodiscard]] size_t getCol() const {
             if constexpr (Matrix<LHS>)
                 return getLHS().getCol();
             else

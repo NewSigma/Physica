@@ -16,15 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/ML/NeuralNetwork/SeqNet.h"
-#include "Physica/Core/ML/NeuralNetwork/Loss.h"
+#include "Physica/Core/ML/Optimizer/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
 
 namespace Physica {
     template<Scalar> class MnistNet;

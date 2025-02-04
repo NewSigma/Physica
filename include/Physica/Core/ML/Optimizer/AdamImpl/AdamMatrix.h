@@ -18,25 +18,25 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "AdamImpl.h"
 
 namespace Physica::Core {
-    template<Vector V>
-    class AdamImpl<V> : public AdamBase<typename V::ScalarType::ValueType> {
-        using T = V::ScalarType;
+    template<Matrix M>
+    class AdamImpl<M> : public AdamBase<typename M::ScalarType::ValueType> {
+        using T = M::ScalarType;
         using Tv = T::ValueType;
-        using This = AdamImpl<V>;
+        using This = AdamImpl<M>;
         using Base = AdamBase<Tv>;
-        using VectorType = DenseVector<Tv, V::SizeAtCompile>;
+        using MatrixType = DenseMatrix<Tv, M::Option, M::RowAtCompile, M::ColAtCompile>;
         using typename Base::Args;
 
         Tv beta1t;
         Tv beta2t;
-        VectorType m;
-        VectorType v;
+        MatrixType m;
+        MatrixType v;
     public:
-        AdamImpl(const Args& args, size_t length);
+        AdamImpl(const Args& args, size_t row, size_t col);
         AdamImpl(const This&) = default;
         AdamImpl(This&&) noexcept = default;
         ~AdamImpl() = default;
@@ -48,39 +48,43 @@ namespace Physica::Core {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return m.getLength(); }
+        [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
     };
 
-    template<Vector V>
-    AdamImpl<V>::AdamImpl(const Args& args, size_t length) : m(length), v(length) {
+    template<Matrix M>
+    AdamImpl<M>::AdamImpl(const Args& args, size_t row, size_t col) : m(row, col), v(row, col) {
         reset(args);
     }
 
-    template<Vector V>
-    void AdamImpl<V>::step(const Args& args, void* pTarget) {
+    template<Matrix M>
+    void AdamImpl<M>::step(const Args& args, void* pTarget) {
+        M& target = *reinterpret_cast<M*>(pTarget);
+        if (!args.decay.isZero())
+            target.grads() += args.decay * target.values();
+
         const Tv beta1 = args.beta1;
         const Tv beta2 = args.beta2;
         const Tv beta1_ = Tv(1) - beta1;
         const Tv beta2_ = Tv(1) - beta2;
-        V& target = *reinterpret_cast<V*>(pTarget);
         m = beta1 * m + beta1_ * target.grads();
         v = beta2 * v + beta2_ * target.grads().squaredNorms();
         const Tv alpha = args.lr / (Tv(1) - beta1t) * sqrt(Tv(1) - beta2t);
-        target.values() -= alpha * divide(m, sqrt(v) + args.epsilon);
+        target.values() -= alpha * divide(m, sqrt_elem(v) + args.epsilon);
         beta1t *= beta1;
         beta2t *= beta2;
     }
 
-    template<Vector V>
-    void AdamImpl<V>::reset(const Args& args) {
+    template<Matrix M>
+    void AdamImpl<M>::reset(const Args& args) {
         beta1t = args.beta1;
         beta2t = args.beta2;
         m = Tv(0);
         v = Tv(0);
     }
 
-    template<Vector V>
-    void AdamImpl<V>::swap(This& __restrict obj) noexcept {
+    template<Matrix M>
+    void AdamImpl<M>::swap(This& __restrict obj) noexcept {
         beta1t.swap(obj.beta1t);
         beta2t.swap(obj.beta2t);
         m.swap(obj.m);

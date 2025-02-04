@@ -21,7 +21,7 @@
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/ML/NeuralNetwork/SeqNet.h"
-#include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
+#include "Physica/Core/ML/Optimizer/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Scalar/Diff.h"

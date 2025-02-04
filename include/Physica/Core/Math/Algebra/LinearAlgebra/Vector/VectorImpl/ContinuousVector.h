@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -66,6 +66,8 @@ namespace Physica::Core {
 
         template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
+
+        [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] inline auto head(size_t to) noexcept;

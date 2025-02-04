@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,6 +58,8 @@ namespace Physica::Core {
         This& operator=(This&& obj) noexcept = delete;
         Derived& operator=(const ScalarType& s);
         /* Operations */
+        [[nodiscard]] auto toNumpy() const;
+
         [[nodiscard]] inline auto row(size_t r) noexcept;
         [[nodiscard]] inline const auto row(size_t r) const noexcept;
         [[nodiscard]] inline auto col(size_t c) noexcept;
@@ -145,4 +147,4 @@ namespace Physica {
     class Traits<ContinuousMatrix<Derived>> : public Traits<Derived> {};
 }
 
-#include "ContinuousMatrixImpl/ContinuousMatrixImpl.h"
+#include "ContinuousMatrixImpl/ContinuousMatrixImpl.h" // IWYU pragma: export
