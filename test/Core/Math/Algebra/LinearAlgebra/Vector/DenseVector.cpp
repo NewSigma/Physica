@@ -140,8 +140,6 @@ static void softmaxTest() {
     for (size_t i = 0; i < x.getLength(); ++i)
         x.softmax(i).reverse(factors[i]);
 
-    std::cout << x.grads().format() << std::endl;
-    std::cout << x1.grads().format() << std::endl;
     if (!vectorNear(x.grads(), x1.grads(), 1E-6))
         exit(EXIT_FAILURE);
 }

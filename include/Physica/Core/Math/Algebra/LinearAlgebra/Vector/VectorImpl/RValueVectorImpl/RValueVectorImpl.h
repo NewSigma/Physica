@@ -357,17 +357,8 @@ namespace Physica::Core {
     auto RValueVector<Derived>::sum() const -> CoDiff<ScalarType> {
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         if constexpr (isReverseDiff) {
-            size_t i = 0;
-            ValueType v = 0;
-            auto elems = co_for([&]() { return i < getLength(); }, [&]() { ++i; }, [&]() {
-                auto elem = calc(i);
-                v += elem.value();
-                return elem;
-            });
-
-            auto result = co_yield std::move(v);
-            for (auto& elem : elems)
-                elem.reverse(result.grad());
+            auto result = co_yield values().sum();
+            Base::getDerived().reverse(result.grad());
         }
         else if constexpr (Internal::EnableSIMD<Derived>::value) {
             const auto& v = Base::getDerived();

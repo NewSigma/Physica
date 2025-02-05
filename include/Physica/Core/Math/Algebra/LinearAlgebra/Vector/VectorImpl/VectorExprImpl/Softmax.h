@@ -32,13 +32,23 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t i) const { return Base::getExpr().softmax(i); }
+        template<Vector V, class Executor = SequentialExecutor>
+        inline void assign(V& v) const;
 
+        [[nodiscard]] ScalarType calc(size_t i) const { return Base::getExpr().softmax(i); }
         [[nodiscard]] ValueType calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
 
         template<Vector U, Vector V>
         void reverse(const U& y, const V& grad_) const noexcept requires(isReverseDiff) ;
     };
+
+    template<Vector T>
+    template<Vector V, class Executor>
+    inline void VectorExpr<ExprType::Softmax, T>::assign(V& v) const {
+        const auto& expr = Base::getExpr();
+        const ScalarType factor = expr.lnSumExp();
+        v = exp(expr - factor);
+    }
 
     template<Vector T>
     template<Vector U, Vector V>

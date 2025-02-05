@@ -64,23 +64,47 @@ namespace Physica::Core {
                 return AnyPacket(Base::getLHS(), count) - Base::getRHS().template packetPartial<AnyPacket>(index, count);
         }
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
-            const auto& grad = grad_.values();
+        template<class V>
+        void reverse(const V& grad_) const noexcept requires(isReverseDiff);
+    };
+
+    template<class T, class U>
+    template<class V>
+    void VectorExpr<ExprType::Sub, T, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        const auto& lhs = Base::getLHS();
+        const auto& rhs = Base::getRHS();
+        if constexpr (Scalar<V>) {
+            const auto& grad = grad_.value();
             if constexpr (Vector<T>) {
                 if constexpr (ReverseDiff<T>)
-                    Base::getLHS().reverse(grad);
+                    lhs.reverse(grad);
                 if constexpr (ReverseDiff<U>)
-                    Base::getRHS().reverse(-grad.sum());
+                    rhs.reverse(-grad * ValueType(Base::getLength()));
             }
             else {
                 if constexpr (ReverseDiff<T>)
-                    Base::getLHS().reverse(grad.sum());
+                    lhs.reverse(grad * ValueType(Base::getLength()));
                 if constexpr (ReverseDiff<U>)
-                    Base::getRHS().reverse(-grad);
+                    rhs.reverse(-grad);
             }
         }
-    };
+        else {
+            static_assert(Vector<V>, "[Error]: Unexpected type");
+            const auto& grad = grad_.values();
+            if constexpr (Vector<T>) {
+                if constexpr (ReverseDiff<T>)
+                    lhs.reverse(grad);
+                if constexpr (ReverseDiff<U>)
+                    rhs.reverse(-grad.sum());
+            }
+            else {
+                if constexpr (ReverseDiff<T>)
+                    lhs.reverse(grad.sum());
+                if constexpr (ReverseDiff<U>)
+                    rhs.reverse(-grad);
+            }
+        }
+    }
 
     template<Vector T1, Vector T2>
     class VectorExpr<ExprType::Sub, T1, T2>
