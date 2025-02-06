@@ -81,7 +81,7 @@ namespace Physica::Core {
         ~DiffCoro();
         /* Operators */
         This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        This& operator=(This&& obj) noexcept;
         using Base::operator=;
         /* Operations */
         template<class T>

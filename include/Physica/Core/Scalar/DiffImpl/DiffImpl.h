@@ -267,7 +267,8 @@ namespace Physica::Core {
         }
         else {
             const auto rep = reciprocal(std::forward<T>(y));
-            std::ignore = co_yield rep * x;
+            auto result = co_yield x * rep.value();
+            rep.reverse(x * result.grad());
         }
     }
 

@@ -423,13 +423,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
+    inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < Base::getRow() && col < Base::getCol());
         return Base::getDerived().data_ptr(row, col);
     }
 
     template<class Derived>
-    __host__ __device__ inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
+    inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 

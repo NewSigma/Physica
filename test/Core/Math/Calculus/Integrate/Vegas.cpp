@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
-#include "Physica/Core/Math/Calculus/Integrate/LnVegas.h"
+#include "Physica/Core/Math/Calculus/Integrate/Vegas.h"
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
@@ -35,7 +35,7 @@ int main() {
         auto func = [&](const VectorND<T>& x) {
             return exp(T(-100) * (x - r1).squaredNorm()) + exp(T(-100) * (x - r2).squaredNorm());
         };
-        auto vegas = Vegas<T>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
+        auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
         vegas.integral<decltype(func), RandomType>(func);
 
         const T temp = erf(T(5));
@@ -51,7 +51,7 @@ int main() {
             const bool flag2 = (x - r2).squaredNorm() < T(R * R);
             return T((flag1 || flag2) ? 1 : 0);
         };
-        auto vegas = Vegas<T>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 100000, 1000, 0.2);
+        auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 100000, 1000, 0.2);
         vegas.integral<decltype(func), RandomType>(func);
 
         const T answer = square(T(std::numbers::pi * R * R));
@@ -63,7 +63,7 @@ int main() {
         auto func = [&](const VectorND<T>& x) {
             return T(-100) * (x - r1).squaredNorm();
         };
-        auto vegas = LnVegas<T>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
+        auto vegas = Vegas<T, true>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
         vegas.integral<decltype(func), RandomType>(func);
 
         const T temp = erf(T(5));

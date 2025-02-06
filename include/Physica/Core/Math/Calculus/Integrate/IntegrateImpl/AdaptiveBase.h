@@ -21,9 +21,9 @@
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica::Core {
-    template<Scalar T>
+    template<Scalar T, bool TakeLn>
     class AdaptiveBase {
-        using This = AdaptiveBase<T>;
+        using This = AdaptiveBase<T, TakeLn>;
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
     protected:
@@ -43,16 +43,18 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] T calcMean(int from = 0) const;
-        [[nodiscard]] T calcDevia(int from = 0) const;
-        [[nodiscard]] T calcVar(int from = 0) const;
+        [[nodiscard]] T calcMean(int from = 0) const requires(!TakeLn);
+        [[nodiscard]] T calcDevia(int from = 0) const requires(!TakeLn);
+        [[nodiscard]] T calcVar(int from = 0) const requires(!TakeLn);
+
+        [[nodiscard]] T calcLnMean(int from = 0) const requires(TakeLn);
+        [[nodiscard]] T calcLnDevia(int from = 0) const requires(TakeLn);
+        [[nodiscard]] T calcLnVar(int from = 0) const requires(TakeLn);
+
         [[nodiscard]] T calcSquaredChi(int from = 0) const;
 
-    #ifdef PHYSICA_HDF5
         const H5Group read(const H5Location& loc, const char* name);
         H5Group write(H5Location& loc, const char* name) const;
-    #endif
-
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDim() const noexcept { return from.getLength(); }
@@ -65,8 +67,8 @@ namespace Physica::Core {
         void setNumRefine(int numRefine_);
     };
 
-    template<Scalar T>
-    AdaptiveBase<T>::AdaptiveBase(VectorND<Trv> from_, VectorND<Trv> to_, int numRefine_, int numSample_)
+    template<Scalar T, bool TakeLn>
+    AdaptiveBase<T, TakeLn>::AdaptiveBase(VectorND<Trv> from_, VectorND<Trv> to_, int numRefine_, int numSample_)
             : from(std::move(from_))
             , to(std::move(to_))
             , numSample(numSample_) {
@@ -76,40 +78,67 @@ namespace Physica::Core {
         setNumRefine(numRefine_);
     }
 
-    template<Scalar T>
-    T AdaptiveBase<T>::calcMean(int from) const {
+    template<Scalar T, bool TakeLn>
+    T AdaptiveBase<T, TakeLn>::calcMean(int from) const requires(!TakeLn) {
         assert(0 <= from && from < getNumRefine());
         return reciprocal(vars.tail(from)) * means.tail(from) / reciprocal(vars.tail(from)).sum();
     }
 
-    template<Scalar T>
-    T AdaptiveBase<T>::calcVar(int from) const {
+    template<Scalar T, bool TakeLn>
+    T AdaptiveBase<T, TakeLn>::calcVar(int from) const requires(!TakeLn) {
         assert(0 <= from && from < getNumRefine());
         return reciprocal(reciprocal(vars.tail(from)).sum());
     }
 
-    template<Scalar T>
-    T AdaptiveBase<T>::calcDevia(int from) const {
+    template<Scalar T, bool TakeLn>
+    T AdaptiveBase<T, TakeLn>::calcDevia(int from) const requires(!TakeLn) {
         assert(0 <= from && from < getNumRefine());
         return sqrt(calcVar(from));
+    }
+
+    template<Scalar T, bool TakeLn>
+    T AdaptiveBase<T, TakeLn>::calcLnMean(int from) const requires(TakeLn) {
+        assert(0 <= from && from < getNumRefine());
+        return (means.tail(from) - vars.tail(from)).lnSumExp() + calcLnVar();
+    }
+
+    template<Scalar T, bool TakeLn>
+    T AdaptiveBase<T, TakeLn>::calcLnDevia(int from) const requires(TakeLn) {
+        assert(0 <= from && from < getNumRefine());
+        return Trv(0.5) * calcLnVar(from);
+    }
+
+    template<Scalar T, bool TakeLn>
+    T AdaptiveBase<T, TakeLn>::calcLnVar(int from) const requires(TakeLn) {
+        assert(0 <= from && from < getNumRefine());
+        return -(-vars.tail(from)).lnSumExp();
     }
     /**
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. Numerical Recipes(3rd edition)[M]. London: Cambridge University Press, 2007:414-416
      */
-    template<Scalar T>
-    T AdaptiveBase<T>::calcSquaredChi(int from) const {
+    template<Scalar T, bool TakeLn>
+    T AdaptiveBase<T, TakeLn>::calcSquaredChi(int from) const {
         assert(0 <= from && from < getNumRefine());
         if (numRefine == 1)
             return 1;
-        const Trv factor = Trv(numSample) / Trv(numRefine - from - 1);
-        const T mean1 = calcMean(from);
-        return factor * divide((means.tail(from) - mean1).squaredNorms(), vars.tail(from)).sum(); // Normalize, refer to [1]
+        if constexpr (TakeLn) {
+            const T lnMean = calcLnMean(from);
+            VectorND<T> buffer = exp(means.tail(from) - lnMean);
+            buffer = ln(abs(buffer - Trv(1))) + lnMean;
+            buffer = Trv(2) * buffer - vars.tail(from);
+            return exp(buffer).sum() / Trv(numRefine - from - 1);
+        }
+        else {
+            const Trv factor = Trv(numSample) / Trv(numRefine - from - 1);
+            const T mean1 = calcMean(from);
+            return factor * divide((means.tail(from) - mean1).squaredNorms(), vars.tail(from)).sum(); // Normalize, refer to [1]
+        }
     }
 
 #ifdef PHYSICA_HDF5
-    template<Scalar T>
-    const H5Group AdaptiveBase<T>::read(const H5Location& loc, const char* name) {
+    template<Scalar T, bool TakeLn>
+    const H5Group AdaptiveBase<T, TakeLn>::read(const H5Location& loc, const char* name) {
         const auto group = loc.openGroup(name);
         group.readAttr("NumRefine", numRefine);
         group.readAttr("NumSample", numSample);
@@ -122,8 +151,8 @@ namespace Physica::Core {
         return group;
     }
 
-    template<Scalar T>
-    H5Group AdaptiveBase<T>::write(H5Location& loc, const char* name) const {
+    template<Scalar T, bool TakeLn>
+    H5Group AdaptiveBase<T, TakeLn>::write(H5Location& loc, const char* name) const {
         auto group = loc.openGroup(name);
         group.writeAttr("NumRefine", numRefine);
         group.writeAttr("NumSample", numSample);
@@ -137,8 +166,8 @@ namespace Physica::Core {
     }
 #endif
 
-    template<Scalar T>
-    void AdaptiveBase<T>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, bool TakeLn>
+    void AdaptiveBase<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         from.swap(obj.from);
         to.swap(obj.to);
@@ -150,8 +179,8 @@ namespace Physica::Core {
         loss.swap(obj.loss);
     }
 
-    template<Scalar T>
-    void AdaptiveBase<T>::setNumRefine(int numRefine_) {
+    template<Scalar T, bool TakeLn>
+    void AdaptiveBase<T, TakeLn>::setNumRefine(int numRefine_) {
         assert(numRefine_ > 0);
         numRefine = numRefine_;
         means.resize(numRefine);

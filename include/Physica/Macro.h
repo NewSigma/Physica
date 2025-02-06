@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,13 +24,15 @@
 
 #ifdef PHYSICA_MKL
     #include <mkl_types.h>
+#else
+    using VSLStreamStatePtr = void*;
 #endif
 
-#ifndef PHYSICA_CUDA
+#ifdef PHYSICA_CUDA
+    #include <cuda_runtime_api.h>
+#else
     #define __host__
     #define __device__
-#else
-    #include <cuda_runtime_api.h>
 #endif
 
 #ifdef __GNUC__

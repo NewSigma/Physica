@@ -74,6 +74,12 @@ namespace Physica::Core {
     }
 
     template<class Base>
+    auto DiffCoro<Base>::operator=(This&& obj) noexcept -> This& {
+        swap(obj);
+        return *this;
+    }
+
+    template<class Base>
     template<class T>
     void DiffCoro<Base>::reverse_final(T&& x) noexcept {
         assert(handle != nullptr && "[Error]: Reverse has been finalized");

@@ -122,8 +122,8 @@ namespace Physica::Core {
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
 

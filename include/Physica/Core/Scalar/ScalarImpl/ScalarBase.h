@@ -321,7 +321,7 @@ namespace Physica::Core {
 
     template<class Derived>
     __host__ __device__ inline auto ScalarBase<Derived>::squaredNorm() const {
-        if constexpr (isComplex)
+        if constexpr (isComplex || isReverseDiff)
             return this->getDerived().squaredNorm();
         else
             return square(this->getDerived());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica::Core {
     template<Vector T>
     class VectorExpr<ExprType::Ln, T> : public UnitaryVectorExpr<ExprType::Ln, T> {
@@ -26,6 +28,7 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
@@ -42,7 +45,22 @@ namespace Physica::Core {
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
             return ln(Base::getExpr().template packetPartial<AnyPacket>(index, count)).cutoff(count);
         }
+
+        template<class U>
+        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector T>
+    template<class U>
+    void VectorExpr<ExprType::Ln, T>::reverse(const U& grad_) const noexcept requires(isReverseDiff){
+        const auto& expr = Base::getExpr();
+        if constexpr (Scalar<U>)
+            expr.reverse(grad_.value() / expr.values());
+        else {
+            static_assert(Vector<U>, "[Error]: Unexpected type");
+            expr.reverse(divide(grad_.values(), expr.values()));
+        }
+    }
 
     template<Vector T>
     [[nodiscard]] inline auto ln(const T& v) noexcept {

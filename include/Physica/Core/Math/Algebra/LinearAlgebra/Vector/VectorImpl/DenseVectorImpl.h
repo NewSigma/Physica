@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,7 @@
  */
 #pragma once
 
-#include <cassert>
-#include <random>
+#include "../DenseVector.h"
 
 namespace Physica::Core {
     template<Scalar T, size_t Length, class Allocator>

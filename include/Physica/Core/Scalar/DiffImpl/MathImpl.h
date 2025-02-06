@@ -185,13 +185,22 @@ namespace Physica::Core {
         }
     }
 
-    template<Scalar T, int Order>
-    auto pow(const Diff<T, DiffMode::Forward, Order>& x, const T& a) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        constexpr int GradOrder = GradType::Order;
-        const auto y = pow(GradType(x), a);
-        return ResultType(y.value(), x.grad() * y / x.template mask<GradOrder>() * a);
+    template<Scalar T, Scalar U>
+    CoDiff<T> pow(T&& x, U&& a) requires(Diffable<T> && !Diffable<U>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        if constexpr (ForwardDiff<T>) {
+            using GradType = ScalarType::GradType;
+            constexpr int GradOrder = GradType::Order;
+            const auto y = pow(GradType(x), a);
+            co_return ResultType(y.value(), x.grad() * y / x.template mask<GradOrder>() * a);
+        }
+        else {
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            LazyDestroy<U&&> a_ = std::forward<U>(a);
+            auto result = co_yield pow(x_.value(), a_);
+            auto& g = result.grad();
+            x_.reverse(result.value() * g * a_ / x_.value());
+        }
     }
 
     template<Scalar T>

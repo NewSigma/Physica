@@ -54,9 +54,6 @@ namespace Physica::Core {
         constexpr static bool IsSeedFixed = Traits<This>::IsSeedFixed;
     private:
         using GenType = std::mt19937;
-    #ifndef PHYSICA_MKL
-        using VSLStreamStatePtr = void*;
-    #endif
 
         GenType gen;
         VSLStreamStatePtr pStream;

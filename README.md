@@ -75,7 +75,7 @@ To use Physica, examples that under /path/to/install/Physica/examples are ready 
 
 ## Maintainers
 
-[@NewSigma](NewSigma@163.com)
+Weibo He (NewSigma@163.com)  
 
 ## Contributing
 

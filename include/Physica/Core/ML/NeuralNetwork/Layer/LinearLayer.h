@@ -66,6 +66,9 @@ namespace Physica::Core {
         void random_xavier_normal(Tv gain);
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
+
+        const H5Group read(const H5Location& loc, const char* name);
+        H5Group write(H5Location& loc, const char* name) const;
         void swap(LinearLayer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return weights.getCol(); }
@@ -191,6 +194,26 @@ namespace Physica::Core {
         if constexpr (WithBias)
             bias.template random_any<Distribution, R>(dist);
     }
+
+#ifdef PHYSICA_HDF5
+    template<Scalar T, bool WithBias>
+    const H5Group LinearLayer<T, WithBias>::read(const H5Location& loc, const char* name) {
+        const auto group = loc.openGroup(name);
+        weights.values().read(group, "Weight");
+        if constexpr (WithBias)
+            bias.values().read(group, "Bias");
+        return group;
+    }
+
+    template<Scalar T, bool WithBias>
+    H5Group LinearLayer<T, WithBias>::write(H5Location& loc, const char* name) const {
+        auto group = loc.openGroup(name);
+        weights.values().write(group, "Weight");
+        if constexpr (WithBias)
+            bias.values().write(group, "Bias");
+        return group;
+    }
+#endif
 
     template<Scalar T, bool WithBias>
     void LinearLayer<T, WithBias>::swap(LinearLayer& __restrict obj) noexcept {

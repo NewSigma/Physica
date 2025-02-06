@@ -54,8 +54,8 @@ namespace Physica::Core {
     template<Scalar T>
     CoDiff<T> exp(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, int Order>
-    auto pow(const Diff<T, DiffMode::Forward, Order>& x, const T& a);
+    template<Scalar T, Scalar U>
+    CoDiff<T> pow(T&& x, U&& a) requires(Diffable<T> && !Diffable<U>);
 /*
     template<Scalar T, int Order>
     auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n);

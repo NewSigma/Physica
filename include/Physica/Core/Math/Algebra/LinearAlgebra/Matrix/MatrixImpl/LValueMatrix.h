@@ -129,8 +129,8 @@ namespace Physica::Core {
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] inline PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] inline RefTy refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] inline ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] auto flatten();
