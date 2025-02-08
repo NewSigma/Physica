@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <filesystem>
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Exception/IOException.h"
 
@@ -27,12 +28,6 @@ namespace Physica::Core {
             const H5::FileAccPropList& access_plist) : Base(name, openflag_, create_plist, access_plist), openflag(openflag_) {}
     
     H5File::H5File(const H5File& obj) : Base(obj), openflag(obj.openflag) {}
-
-    H5File& H5File::operator=(H5File& obj) {
-        Base::operator=(obj);
-        openflag = obj.openflag;
-        return *this;
-    }
 
     H5DataSet<1> H5File::createDataSet(const char* filepath, const char* name) {
         std::ifstream fin(filepath);
@@ -56,5 +51,11 @@ namespace Physica::Core {
         if (isReadOnly())
             throw IOException("[Error]: Group not found");
         return Base::createGroup(name, 0);
+    }
+
+    H5File H5File::open(const char* name) {
+        if (std::filesystem::exists(name))
+            return H5File(name, ReadWrite);
+        return create(name);
     }
 }

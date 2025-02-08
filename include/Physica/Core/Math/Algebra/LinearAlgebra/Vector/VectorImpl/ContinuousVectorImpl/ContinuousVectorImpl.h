@@ -283,8 +283,13 @@ namespace Physica::Core {
     }
 #endif
     template<class Derived>
-    auto ContinuousVector<Derived>::values() const noexcept -> ValuesRtnTy {
+    auto ContinuousVector<Derived>::values() noexcept -> ValuesRtnTy {
         return Base::getDerived();
+    }
+
+    template<class Derived>
+    auto ContinuousVector<Derived>::values() const noexcept -> const ValuesRtnTy {
+        return const_cast<This&>(*this).values();
     }
 
     template<class Derived>

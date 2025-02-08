@@ -95,14 +95,6 @@ namespace Physica {
     #endif
     }
 
-    consteval inline static bool UseASM() {
-    #ifdef PHYSICA_ASM
-        return true;
-    #else
-        return false;
-    #endif
-    }
-
     consteval inline static bool HasHDF5() {
     #ifdef PHYSICA_HDF5
         return true;

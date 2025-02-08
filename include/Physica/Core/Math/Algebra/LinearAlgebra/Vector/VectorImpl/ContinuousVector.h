@@ -47,7 +47,7 @@ namespace Physica::Core {
         using DataSetType = H5DataSet<DataDim>;
         using DataSpaceType = H5DataSpace<DataDim>;
 
-        using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueVector<This>, const Derived&>::type;
+        using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueVector<This>, Derived&>::type;
     public:
         ~ContinuousVector() = default;
         /* Operators */
@@ -96,7 +96,8 @@ namespace Physica::Core {
         const DataSetType read(const H5Location& loc, const char* name);
         DataSetType write(H5Location& loc, const char* name) const;
 
-        ValuesRtnTy values() const noexcept;
+        [[nodiscard]] ValuesRtnTy values() noexcept;
+        [[nodiscard]] const ValuesRtnTy values() const noexcept;
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */

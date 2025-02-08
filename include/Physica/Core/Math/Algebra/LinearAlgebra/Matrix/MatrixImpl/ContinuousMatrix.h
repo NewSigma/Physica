@@ -50,6 +50,8 @@ namespace Physica::Core {
         using ColBlock = ContinuousMatrixBlock<Derived, RowAtCompile, Col>;
         template<size_t Row, size_t Col>
         using BlockType = ContinuousMatrixBlock<Derived, Row, Col>;
+
+        using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueMatrix<Derived>, Derived&>::type;
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
@@ -130,6 +132,9 @@ namespace Physica::Core {
 
         const H5DataSet<2> read(const H5Location& loc, const char* name);
         H5DataSet<2> write(H5Location& loc, const char* name) const;
+
+        [[nodiscard]] ValuesRtnTy values() noexcept;
+        [[nodiscard]] const ValuesRtnTy values() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }

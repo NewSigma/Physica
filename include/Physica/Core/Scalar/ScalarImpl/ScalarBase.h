@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,7 +21,6 @@
 #include <cassert>
 #include <type_traits>
 #include "Physica/CRTPBase.h"
-#include "Physica/PlainStruct.h"
 #include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica::Core {
@@ -350,7 +349,7 @@ namespace Physica::Core {
     template<class Derived>
     template<int GradOrder>
     __host__ __device__ const auto ScalarBase<Derived>::grad_ptr() const noexcept {
-        return Base::getConstCastDerived().grad_ptr();
+        return Base::getConstCastDerived().template grad_ptr<GradOrder>();
     }
 
     template<class Derived>

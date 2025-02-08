@@ -85,11 +85,17 @@ namespace Physica::Core {
         [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
 
         template<Matrix M>
-        auto reshape(const M& mat) const noexcept;
+        auto reshape(const M& mat) noexcept;
+        template<Matrix M>
+        const auto reshape(const M& mat) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_col(size_t row, size_t col) const noexcept;
+        auto reshape_col(size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_row(size_t row, size_t col) const noexcept;
+        const auto reshape_col(size_t row, size_t col) const noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        auto reshape_row(size_t row, size_t col) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        const auto reshape_row(size_t row, size_t col) const noexcept;
 
         inline void toUnit();
         template<RandomGenerator R>

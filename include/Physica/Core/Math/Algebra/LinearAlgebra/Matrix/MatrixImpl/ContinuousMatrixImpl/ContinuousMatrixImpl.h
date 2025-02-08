@@ -315,4 +315,17 @@ namespace Physica::Core {
         return std::cref(dataset);
     }
 #endif
+
+    template<class Derived>
+    auto ContinuousMatrix<Derived>::values() noexcept -> ValuesRtnTy {
+        if constexpr (Diffable<ScalarType>)
+            return Base::values();
+        else
+            return Base::getDerived();
+    }
+
+    template<class Derived>
+    auto ContinuousMatrix<Derived>::values() const noexcept -> const ValuesRtnTy {
+        return const_cast<This&>(*this).values();
+    }
 }

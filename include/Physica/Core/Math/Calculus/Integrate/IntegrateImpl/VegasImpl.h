@@ -148,18 +148,22 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool TakeLn>
-    template<RandomGenerator R>
-    auto Vegas<T, TakeLn>::sample(const int* indexes) const -> std::pair<VectorND<Trv>, VectorND<Trv>> {
-        VectorND<Trv> x(getDim());
-        VectorND<Trv> deltas(getDim());
-        for (size_t i = 0; i < getDim(); ++i) {
-            int index = indexes[i];
-            x[i] = pointGrid(index, i);
-            deltas[i] = pointGrid(index + 1, i);
-        }
-        deltas -= x;
-        x += hadamard(deltas, VectorND<Trv>::template random_uniform<R>(getDim()));
-        return std::make_pair(std::move(x), std::move(deltas));
+    Vegas<T, TakeLn>::Trv Vegas<T, TakeLn>::compress(VectorND<Trv>& vars) {
+        const auto sum = vars.sum();
+        const bool noData = sum.isZero();
+        if (noData)
+            return 0;
+
+        const VectorND<Trv> buffer = vars * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
+        const Vector3D<Trv> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
+        size_t i = 0;
+        vars[0] = Trv(7.0 / 8) * buffer[0] + Trv(1.0 / 8) * buffer[1];
+        for (; i < vars.getLength() - 2; ++i)
+            vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
+        vars[i + 1] = Trv(1.0 / 8) * buffer[i] + Trv(7.0 / 8) * buffer[i + 1];
+
+        vars = pow(divide(vars - Trv(1), ln(vars)), compressRate);
+        return mean(vars);
     }
 
     template<Scalar T, bool TakeLn>
@@ -199,6 +203,21 @@ namespace Physica::Core {
             sumvar += sqrt(variance(col, prior) / prior.squaredNorm() / Trv(getNumPoint()));
         }
         return sumvar / Trv(getDim());
+    }
+
+    template<Scalar T, bool TakeLn>
+    template<RandomGenerator R>
+    auto Vegas<T, TakeLn>::sample(const int* indexes) const -> std::pair<VectorND<Trv>, VectorND<Trv>> {
+        VectorND<Trv> x(getDim());
+        VectorND<Trv> deltas(getDim());
+        for (size_t i = 0; i < getDim(); ++i) {
+            int index = indexes[i];
+            x[i] = pointGrid(index, i);
+            deltas[i] = pointGrid(index + 1, i);
+        }
+        deltas -= x;
+        x += hadamard(deltas, VectorND<Trv>::template random_uniform<R>(getDim()));
+        return std::make_pair(std::move(x), std::move(deltas));
     }
 
     template<Scalar T, bool TakeLn>
@@ -264,24 +283,5 @@ namespace Physica::Core {
         }
         mean = ln(mean) + maxSample;
         var = ln(var) + Trv(2) * maxSample;
-    }
-
-    template<Scalar T, bool TakeLn>
-    Vegas<T, TakeLn>::Trv Vegas<T, TakeLn>::compress(VectorND<Trv>& vars) {
-        const auto sum = vars.sum();
-        const bool noData = sum.isZero();
-        if (noData)
-            return 0;
-
-        const VectorND<Trv> buffer = vars * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
-        const Vector3D<Trv> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
-        size_t i = 0;
-        vars[0] = Trv(7.0 / 8) * buffer[0] + Trv(1.0 / 8) * buffer[1];
-        for (; i < vars.getLength() - 2; ++i)
-            vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
-        vars[i + 1] = Trv(1.0 / 8) * buffer[i] + Trv(7.0 / 8) * buffer[i + 1];
-
-        vars = pow(divide(vars - Trv(1), ln(vars)), compressRate);
-        return mean(vars);
     }
 }

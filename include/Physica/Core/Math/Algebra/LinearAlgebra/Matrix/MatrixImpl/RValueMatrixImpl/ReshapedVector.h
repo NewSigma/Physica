@@ -54,6 +54,7 @@ namespace Physica::Core {
             : v(v_), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
+        assert(r * c == v.getLength());
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>

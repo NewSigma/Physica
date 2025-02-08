@@ -30,8 +30,7 @@ cmake.version = ">=3.24"
 cmake.args = [
     '-DPHYSICA_MKL=ON',
     '-DPHYSICA_HDF5=ON',
-    '-DPHYSICA_PYTHON=ON',
-    '-DPHYSICA_OPTIMIZE=ON'
+    '-DPHYSICA_PYTHON=ON'
 ]
 cmake.build-type = "Release"
 wheel.packages = ["src/phypy"]

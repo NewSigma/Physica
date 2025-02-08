@@ -191,7 +191,7 @@ namespace Physica::Core {
         auto func = [&](const ScalarType& x) -> ScalarType { return cos(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
                                                            BasicConst::getInstance()._0,
-                                                           MathConst<FloatMP>::getInstance().PI,
+                                                           MathConst<ScalarType>::getInstance().PI,
                                                            BasicConst::getInstance()._1,
                                                            BasicConst::getInstance().Minus_1);
     }
@@ -201,8 +201,8 @@ namespace Physica::Core {
         using ScalarType = Real<FloatMP>;
         auto func = [&](const ScalarType& x) -> ScalarType { return sin(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
-                                                           MathConst<FloatMP>::getInstance().Minus_PI_2,
-                                                           MathConst<FloatMP>::getInstance().PI_2,
+                                                           MathConst<ScalarType>::getInstance().Minus_PI_2,
+                                                           MathConst<ScalarType>::getInstance().PI_2,
                                                            BasicConst::getInstance().Minus_1,
                                                            BasicConst::getInstance()._1);
     }

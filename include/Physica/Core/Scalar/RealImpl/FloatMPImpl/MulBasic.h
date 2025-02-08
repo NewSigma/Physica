@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,7 +27,7 @@ namespace Physica::Core {
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
     inline MPUnit mulWordByWordHigh(MPUnit n1, MPUnit n2) {
-        if constexpr (UseASM() && !IsMSVC()) {
+        if constexpr (!IsMSVC()) {
         #ifdef __GNUC__
             MPUnit result;
             if constexpr (PhysicaWordSize == 64) {
@@ -73,7 +73,7 @@ namespace Physica::Core {
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
     inline void mulWordByWord(MPUnit& high, MPUnit& low, MPUnit n1, MPUnit n2) {
-        if constexpr (UseASM() && !IsMSVC()) {
+        if constexpr (!IsMSVC()) {
         #ifdef __GNUC__
             if constexpr (PhysicaWordSize == 64) {
                 asm (

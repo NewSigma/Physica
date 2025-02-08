@@ -22,8 +22,10 @@
 #include "Physica/Core/Scalar/Real.h"
 
 namespace Physica::Core {
+    template<class> class MathConst;
+
     template<ScalarOption Option>
-    class MathConst {
+    class MathConst<Real<Option>> {
         using T = Real<Option>;
         using MachineType = T::MachineType;
     public:
@@ -43,8 +45,9 @@ namespace Physica::Core {
     };
 
     template<>
-    class PHYSICA_API MathConst<FloatMP> {
+    class PHYSICA_API MathConst<Real<FloatMP>> {
         using T = Real<FloatMP>;
+        using This = MathConst<T>;
     public:
         T PI;
         T E;

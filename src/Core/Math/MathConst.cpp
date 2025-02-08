@@ -23,7 +23,7 @@ namespace Physica::Core {
      * Consts that need some calculates.
      * Should call new to Const_1 so as to make calculates available.
      */
-    MathConst<FloatMP>::MathConst() {
+    MathConst<Real<FloatMP>>::MathConst() {
         //0.31 is the big approximation of ln(2) / ln(10)
         PI = T(calcPI(
                 static_cast<int>(static_cast<double>(MPUnitWidth) * GlobalPrecision * 0.31) + 1));
@@ -38,7 +38,7 @@ namespace Physica::Core {
      * [1] http://www.pi314.net/eng/salamin.php
      * [2] https://blog.csdn.net/liangbch/article/details/78724041
      */
-    MathConst<FloatMP>::T MathConst<FloatMP>::calcPI(int precision) {
+    auto MathConst<Real<FloatMP>>::calcPI(int precision) -> T {
         const auto& basicConst = BasicConst::getInstance();
 
         T a(static_cast<SignedMPUnit>(1));
@@ -60,7 +60,7 @@ namespace Physica::Core {
         return a * a / c;
     }
 
-    const MathConst<FloatMP>& MathConst<FloatMP>::getInstance() noexcept {
+    auto MathConst<Real<FloatMP>>::getInstance() noexcept -> const This& {
         static MathConst mathConst{};
         return mathConst;
     }

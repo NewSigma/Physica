@@ -87,20 +87,19 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumPoint() const noexcept { return pointGrid.getRow(); }
         /* Setters */
         void setMixBeta(Trv beta) { mixBeta = beta; }
-    protected:
+    private:
         void pre_trial();
-        template<RandomGenerator R>
-        [[nodiscard]] std::pair<VectorND<Trv>, VectorND<Trv>> sample(const int* indexes) const;
         template<class Executor>
         void refineGrid();
-
         Trv calcGridLossImpl() const;
-    private:
+        Trv compress(VectorND<Trv>& vars);
+
+        template<RandomGenerator R>
+        [[nodiscard]] std::pair<VectorND<Trv>, VectorND<Trv>> sample(const int* indexes) const;
         template<class Functor, RandomGenerator R, class Executor>
         void trial_normal(Functor func, T& mean, T& var);
         template<class Functor, RandomGenerator R, class Executor>
         void trial_ln(Functor func, T& mean, T& var);
-        Trv compress(VectorND<Trv>& vars);
     };
 }
 

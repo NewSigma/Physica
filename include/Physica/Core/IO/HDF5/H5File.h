@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,6 +37,7 @@ namespace Physica::Core {
     private:
         unsigned int openflag;
     public:
+        H5File() = default;
         H5File(const char* name,
                unsigned int openflag_ = OpenFlag::ReadOnly,
                const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
@@ -45,8 +46,8 @@ namespace Physica::Core {
         H5File(H5File&&) noexcept = delete;
         virtual ~H5File() = default;
         /* Operators */
-        H5File& operator=(H5File& obj);
-        H5File& operator=(H5File&&) noexcept = delete;
+        H5File& operator=(H5File& obj) = default;
+        H5File& operator=(H5File&&) noexcept = default;
         /* Operations */
         using Location::exists;
         using Location::createDataSet;
@@ -59,5 +60,6 @@ namespace Physica::Core {
         [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
         /* Static members */
         [[nodiscard]] static H5File create(const char* name) { return H5File(name, H5File::Creat | H5File::ReadWrite); }
+        [[nodiscard]] static H5File open(const char* name);
     };
 }
