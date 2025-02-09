@@ -110,6 +110,8 @@ if(${PHYSICA_MKL})
 endif()
 
 if(${PHYSICA_MPI})
+    set(MPI_CXX_COMPILER_FLAGS -cc=${CMAKE_CXX_COMPILER})
+    set(MPI_CXX_COMPILE_OPTIONS "")
     find_package(MPI REQUIRED)
     add_definitions(-DPHYSICA_MPI)
     include_directories(SYSTEM ${MPI_CXX_INCLUDE_DIRS})

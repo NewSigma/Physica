@@ -27,7 +27,11 @@ namespace Physica::Core {
      */
     class CUDAExecutor : public SequentialExecutor {
     public:
-        static void wait() { check(cudaDeviceSynchronize()); }
+        static void wait() {
+        #ifdef PHYSICA_CUDA
+            check(cudaDeviceSynchronize());
+        #endif
+        }
     };
 }
 

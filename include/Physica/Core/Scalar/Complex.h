@@ -34,10 +34,9 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using typename Base::MachineType;
-        constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
-    #ifdef PHYSICA_MKL
         using MKL_Complex = std::conditional<T::Option == Float32, MKL_Complex8, MKL_Complex16>::type;
-    #endif
+
+        constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
     private:
         T re;
         T im;

@@ -122,11 +122,8 @@ namespace Physica::Core {
     }
 
     __host__ __device__ inline bool Real<Float64>::isFinite() const noexcept {
-    #ifdef __CUDA_ARCH__
+        using namespace std;
         return isfinite(d);
-    #else
-        return std::isfinite(d);
-    #endif
     }
 
     inline Real<Float64> Real<Float64>::nan() noexcept {

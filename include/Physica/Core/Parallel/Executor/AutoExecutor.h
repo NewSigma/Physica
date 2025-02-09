@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,9 +19,7 @@
 #pragma once
 
 #include "ThreadExecutor.h"
-#ifdef PHYSICA_CUDA
-    #include "CUDAExecutor.cuh"
-#endif
+#include "CUDAExecutor.cuh"
 
 namespace Physica::Core {
     /**
@@ -30,11 +28,7 @@ namespace Physica::Core {
     class AutoExecutor : public ThreadExecutor {
         using Base = ThreadExecutor;
     public:
-        static void wait() {
-        #ifdef PHYSICA_CUDA
-            CUDAExecutor::wait();
-        #endif
-        }
+        static void wait() { CUDAExecutor::wait(); }
     };
 }
 

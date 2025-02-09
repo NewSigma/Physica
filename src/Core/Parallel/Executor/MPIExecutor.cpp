@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,11 +24,9 @@
 namespace Physica::Core {
     MPIExecutor::MPIExecutor() {
         int mode;
-        int err = MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode);
-        if (err != MPI_SUCCESS)
-            throw MPIException("[Error]: MPI initialization failed");
+        check_mpi(MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode));
         if (mode != MPI_THREAD_SERIALIZED)
-            throw MPIException("[Error]: Physica do not support the MPI");
+            throw std::runtime_error("[Error]: Physica do not support the MPI");
 
         MPI_Errhandler handler;
         check_mpi(MPI_Comm_create_errhandler(world_handler, &handler));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/PlainStruct.h"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "../RValueVector.cuh"
 
 namespace Physica::Core {
@@ -79,12 +80,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __device__ inline device_obj<RValueVector<Derived>>::RealType device_obj<RValueVector<Derived>>::norm() const {
+    __device__ inline auto device_obj<RValueVector<Derived>>::norm() const -> RealType {
         return sqrt(Base::getDerived().squaredNorm());
     }
 
     template<class Derived>
-    __device__ inline device_obj<RValueVector<Derived>>::RealType device_obj<RValueVector<Derived>>::squaredNorm() const {
+    __device__ inline auto device_obj<RValueVector<Derived>>::squaredNorm() const -> RealType {
         auto result = RealType(0);
         for(size_t i = 0; i < getLength(); ++i)
             result += calc(i).squaredNorm();
@@ -92,7 +93,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __device__ device_obj<RValueVector<Derived>>::ScalarType device_obj<RValueVector<Derived>>::max() const {
+    __device__ auto device_obj<RValueVector<Derived>>::max() const -> ScalarType {
         assert(getLength() != 0);
         ScalarType result = calc(0);
         for(size_t i = 1; i < getLength(); ++i) {
@@ -104,7 +105,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __device__ device_obj<RValueVector<Derived>>::ScalarType device_obj<RValueVector<Derived>>::min() const {
+    __device__ auto device_obj<RValueVector<Derived>>::min() const -> ScalarType {
         assert(getLength() != 0);
         ScalarType result = calc(0);
         for(size_t i = 1; i < getLength(); ++i) {
@@ -116,7 +117,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __device__ device_obj<RValueVector<Derived>>::ScalarType device_obj<RValueVector<Derived>>::sum() const {
+    __device__ auto device_obj<RValueVector<Derived>>::sum() const -> ScalarType {
         assert(getLength() != 0);
         auto result = ScalarType(0);
         for(size_t i = 0; i < getLength(); ++i)

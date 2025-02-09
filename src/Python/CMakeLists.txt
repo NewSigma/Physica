@@ -1,3 +1,4 @@
+enable_language(C)
 ##############################################Libs################################################
 set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED CONFIG)

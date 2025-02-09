@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,28 +18,36 @@
  */
 #pragma once
 
-#ifdef PHYSICA_MPI
-
-#include <exception>
-#include <mpi/mpi.h>
+#include <system_error>
 #include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class PHYSICA_API MPIException : public std::exception {
-        char* msg;
+    class PHYSICA_API MPIException : public std::system_error {
+        using Base = std::system_error;
+
+        class Impl final : public std::error_category {
+        public:
+            Impl() = default;
+            Impl(const Impl&) = delete;
+            Impl(Impl&&) noexcept = delete;
+            ~Impl() = default;
+            /* Operators */
+            Impl& operator=(const Impl&) = delete;
+            Impl& operator=(Impl&&) noexcept = delete;
+            /* Getters */
+            [[nodiscard]] const char* name() const noexcept override final { return "MPI"; }
+            [[nodiscard]] std::string message(int) const override final;
+        };
     public:
-        MPIException(const char* msg_) noexcept;
-        MPIException(int err) noexcept;
-        ~MPIException() override;
-        const char* what() const noexcept override { return msg; }
+        MPIException(int code) noexcept : std::system_error(code, Impl()) {}
+        /* Getters */
+        [[nodiscard]] int code() const noexcept { return Base::code().value(); }
     };
 }
 
 namespace Physica {
     inline void check_mpi(int err) {
-        if (err != MPI_SUCCESS) [[unlikely]]
-            throw Physica::Core::MPIException(err);
+        if (err != 0) [[unlikely]]
+            throw Core::MPIException(err);
     }
 }
-
-#endif

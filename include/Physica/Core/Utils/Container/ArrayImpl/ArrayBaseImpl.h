@@ -46,7 +46,6 @@ namespace Physica::Core {
         return true;
     }
 
-#ifdef PHYSICA_HDF5
     template<class Derived, class Allocator>
     template<class T>
     void ArrayBase<Derived, Allocator>::read(const T& loc, const char* name) {
@@ -68,7 +67,6 @@ namespace Physica::Core {
             (*this)[i].write(group, buffer);
         }
     }
-#endif
 
     template<class Derived, class Allocator>
     template<class... Args>

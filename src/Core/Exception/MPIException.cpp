@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,24 +18,15 @@
  */
 #ifdef PHYSICA_MPI
 
-#include <cstring>
 #include "Physica/Core/Exception/MPIException.h"
+#include <mpi/mpi.h>
 
 namespace Physica::Core {
-    MPIException::MPIException(const char* msg_) noexcept {
-        const size_t length = strlen(msg_);
-        msg = new char[length];
-        strcpy(msg, msg_);
-    }
-
-    MPIException::MPIException(int err) noexcept {
-        msg = new char[MPI_MAX_ERROR_STRING];
+    std::string MPIException::Impl::message(int err) const {
+        char buffer[MPI_MAX_ERROR_STRING];
         int resultlen;
-        MPI_Error_string(err, msg, &resultlen);
-    }
-
-    MPIException::~MPIException() {
-        delete[] msg;
+        MPI_Error_string(err, buffer, &resultlen);
+        return buffer;
     }
 }
 
