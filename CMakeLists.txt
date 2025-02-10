@@ -30,7 +30,6 @@ option(PHYSICA_HDF5 "HDF5 is the standard IO format in Physica" ON)
 option(PHYSICA_CUDA "CUDA enables GPU accleration" OFF)
 option(PHYSICA_PYTHON "Enable python suppert" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(CMAKE_DISABLE_PRECOMPILE_HEADERS "Set OFF to acclerate compile using PCH" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include(PhysicaConfigImpl)

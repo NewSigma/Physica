@@ -1,7 +1,6 @@
 function(physica_add_example NAME SOURCES)
     add_executable(Example-${NAME})
     target_sources(Example-${NAME} PRIVATE ${SOURCES} ${ARGN})
-    target_precompile_headers(Example-${NAME} REUSE_FROM PhysicaCore)
     target_link_libraries(Example-${NAME} PhysicaCore ${GPerfTools_LIBRARY})
     set_target_properties(PhysicaPython PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
     if(${PHYSICA_GUI})

@@ -306,11 +306,20 @@ namespace Physica::Core {
         return ResultType(arccos(x.value()), -x.grad() / sqrt(T(1) - square(GradType(x))));
     }
 
-    template<Scalar T, int Order>
-    auto cosh(const Diff<T, DiffMode::Forward, Order>& x) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(cosh(x.value()), x.grad() * sinh(GradType(x)));
+    template<Scalar T>
+    CoDiff<T> cosh(T&& x) requires(Diffable<T>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        if constexpr (ForwardDiff<T>) {
+            using GradType = ScalarType::GradType;
+            co_return ResultType(cosh(x.value()), x.grad() * sinh(GradType(x)));
+        }
+        else {
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            auto result = co_yield cosh(x_.value());
+            auto& g = result.grad();
+            if (!g.isZero())
+                x_.reverse(sinh(x_.value()) * g);
+        }
     }
 
     template<Scalar T, int Order>
@@ -328,10 +337,19 @@ namespace Physica::Core {
         return ResultType(v.value(), (T(1) - square(v)) * x.grad());
     }
 
-    template<Scalar T, int Order>
-    auto lncosh(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(lncosh(x.value()), x.grad() * tanh(GradType(x)));
+    template<Scalar T>
+    CoDiff<T> lncosh(T&& x) requires(Diffable<T>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        if constexpr (ForwardDiff<T>) {
+            using GradType = ScalarType::GradType;
+            co_return ResultType(lncosh(x.value()), x.grad() * tanh(GradType(x)));
+        }
+        else {
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            auto result = co_yield lncosh(x_.value());
+            auto& g = result.grad();
+            if (!g.isZero())
+                x_.reverse(tanh(x_.value()) * g);
+        }
     }
 }

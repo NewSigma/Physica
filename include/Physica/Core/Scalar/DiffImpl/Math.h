@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -100,8 +100,8 @@ namespace Physica::Core {
     template<Scalar T, int Order>
     auto arccot(const Diff<T, DiffMode::Forward, Order>& x);
 */
-    template<Scalar T, int Order>
-    auto cosh(const Diff<T, DiffMode::Forward, Order>& x);
+    template<Scalar T>
+    CoDiff<T> cosh(T&& x) requires(Diffable<T>);
 
     template<Scalar T, int Order>
     auto sinh(const Diff<T, DiffMode::Forward, Order>& x);
@@ -136,8 +136,8 @@ namespace Physica::Core {
     template<Scalar T, int Order>
     auto arccoth(const Diff<T, DiffMode::Forward, Order>& x);
 */
-    template<Scalar T, int Order>
-    auto lncosh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    CoDiff<T> lncosh(T&& x) requires(Diffable<T>);
 
     template<Scalar T, int Order>
     inline T floor(const Diff<T, DiffMode::Forward, Order>& x) {
