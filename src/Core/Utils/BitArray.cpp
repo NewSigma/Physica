@@ -23,7 +23,7 @@
 #include <limits>
 #include "Physica/Core/Utils/Container/BitArray.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * bitCount is the number of bool types you need.
      * bitCount is different from BitArray::length.

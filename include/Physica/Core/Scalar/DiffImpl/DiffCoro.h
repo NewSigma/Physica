@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Scalar/Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T> requires(std::is_reference<T>::value)
     using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T&>::type;
 

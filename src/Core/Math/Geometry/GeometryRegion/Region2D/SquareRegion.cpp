@@ -19,7 +19,7 @@
 #include <utility>
 #include "Physica/Core/Math/Geometry/GeometryRegion/Region2D/SquareRegion.h"
 
-namespace Physica::Core {
+namespace Physica {
     SquareRegion::SquareRegion(Point2D p, float length) : GeometryRegion<2>(Square), p(std::move(p)), length(length) {}
 
     SquareRegion::SquareRegion(const SquareRegion& region)

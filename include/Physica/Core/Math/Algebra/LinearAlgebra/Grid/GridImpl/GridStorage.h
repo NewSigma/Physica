@@ -20,7 +20,7 @@
 
 #include "GridBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T>
     class GridStorage : public GridBase {
         using This = GridStorage<T>;

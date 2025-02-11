@@ -24,7 +24,7 @@
 #include "Physica/Core/Utils/Allocator/PageLockedAllocator.cuh"
 #include "HardCore.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
     class HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor> {
         constexpr static unsigned int WarpSize = Physica::CUDADevAttr::WarpSize;

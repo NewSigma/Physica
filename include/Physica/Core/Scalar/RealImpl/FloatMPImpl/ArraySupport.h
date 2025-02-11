@@ -22,7 +22,7 @@
 #include <memory>
 #include "Physica/Core/Scalar/Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     // operator<<
     [[nodiscard]] inline std::unique_ptr<MPUnit[]> byteLeftShift(
                         const MPUnit* __restrict byte, unsigned int length, unsigned int shift) {

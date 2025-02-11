@@ -19,7 +19,7 @@
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     CUDAContext::CUDAContext() : CUDAStream(), cublas(nullptr) {}
 
     CUDAContext::~CUDAContext() {

@@ -21,7 +21,7 @@
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class DataSpaceBase : public CRTPBase<DataSpaceBase<Derived>> {
         using This = DataSpaceBase<Derived>;
@@ -45,7 +45,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T>
-    class Traits<Core::DataSpaceBase<T>> {
+    class Traits<DataSpaceBase<T>> {
     public:
         using Derived = T;
     };

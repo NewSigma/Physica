@@ -20,7 +20,7 @@
 
 #include "PairModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Potential that suits para-hydrogen
      * 
@@ -174,7 +174,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, bool B1, bool B2>
-    class Traits<Core::SilveraGoldman<T, B1, B2>> {
+    class Traits<SilveraGoldman<T, B1, B2>> {
     public:
         using ScalarType = T;
         constexpr static bool IsPeriodBoundary = B1;

@@ -26,7 +26,7 @@
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "ArrayImpl/ArrayBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T>> class Array;
     template<class T> class PageLockedAllocator;
 
@@ -153,7 +153,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T, size_t Length, class Allocator>
-    class Traits<Core::Array<T, Length, Allocator>> {
+    class Traits<Array<T, Length, Allocator>> {
     public:
         using ElemType = T;
         constexpr static size_t SizeAtCompile = Length;
@@ -163,8 +163,8 @@ namespace Physica {
 
 namespace std {
     template<class T, size_t Length, class Allocator>
-    inline void swap(Physica::Core::Array<T, Length, Allocator>& __restrict array1,
-                     Physica::Core::Array<T, Length, Allocator>& __restrict array2) noexcept {
+    inline void swap(Physica::Array<T, Length, Allocator>& __restrict array1,
+                     Physica::Array<T, Length, Allocator>& __restrict array2) noexcept {
         array1.swap(array2);
     }
 }

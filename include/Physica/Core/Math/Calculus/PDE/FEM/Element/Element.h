@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class ElementType, class Functor, int DeltaOrder>
         struct GaussIntegral;
@@ -78,7 +78,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T>
-    class Traits<Core::Element<T>> {
+    class Traits<Element<T>> {
     public:
         using Derived = T;
     };

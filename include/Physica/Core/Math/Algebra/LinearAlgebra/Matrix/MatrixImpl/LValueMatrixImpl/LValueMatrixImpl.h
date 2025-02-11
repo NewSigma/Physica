@@ -21,7 +21,7 @@
 #include "../LValueMatrix.h"
 #include "LValueFlatten.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         /**
          * \tparam rank

@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
@@ -335,7 +335,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T, bool B>
-    class Traits<Core::RSpaceEwald<T, B>> {
+    class Traits<RSpaceEwald<T, B>> {
     public:
         using ScalarType = T;
         constexpr static bool IsPotDependOnAtomIndex = true;

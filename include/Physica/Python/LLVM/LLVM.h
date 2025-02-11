@@ -21,7 +21,7 @@
 #include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
 #include "llvm/Support/ManagedStatic.h"
 
-namespace Physica::Python {
+namespace Physica {
     class LLVM final {
         using LLVMContext = llvm::LLVMContext;
         using ThreadSafeContext = llvm::orc::ThreadSafeContext;

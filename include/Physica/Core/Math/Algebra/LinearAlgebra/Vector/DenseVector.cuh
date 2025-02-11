@@ -22,7 +22,7 @@
 #include "VectorImpl/ContinuousVector.cuh"
 #include "Physica/Core/Utils/Container/Array.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
     class device_obj<DenseVector<T, Length, Allocator>>
             : public device_obj<ContinuousVector<DenseVector<T, Length, Allocator>>>
@@ -110,5 +110,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
-    class Traits<Core::device_obj<DenseVector<T, Length, Allocator>>> : public Traits<DenseVector<T, Length, Allocator>> {};
+    class Traits<device_obj<DenseVector<T, Length, Allocator>>> : public Traits<DenseVector<T, Length, Allocator>> {};
 }

@@ -20,7 +20,7 @@
 
 #include "GeoBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class GeoBase2D : public GeoBase<2, T> {
     public:

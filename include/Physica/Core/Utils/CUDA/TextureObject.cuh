@@ -20,7 +20,7 @@
 
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T>
     class TextureObject {
         using This = TextureObject;

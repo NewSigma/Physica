@@ -20,7 +20,7 @@
 
 #include "IntegrateImpl/IntegrateRange.h"
 
-namespace Physica::Core {
+namespace Physica {
     enum class IntegrateMethod {
         Rectangular,
         Ladder,

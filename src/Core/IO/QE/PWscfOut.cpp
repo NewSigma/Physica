@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     PWscfOut::PWscfOut(const char* path, size_t numAtom) : fin(path), force(3 * numAtom), buffer(DefaultBufferSize) {
         if (!fin)
             throw IOException("[Error]: File not found");

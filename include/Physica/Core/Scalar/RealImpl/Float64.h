@@ -44,7 +44,7 @@ namespace Physica {
     };
 }
 
-namespace Physica::Core {
+namespace Physica {
     template<>
     class Real<Float64> : public ScalarBase<Real<Float64>>, public CRCoro<Real<Float64>> {
         using This = Real<Float64>;
@@ -154,7 +154,7 @@ namespace Physica::Core {
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Core::Real<Physica::Core::Float64>> : 
+    struct numeric_limits<Physica::Real<Physica::Float64>> : 
     #ifdef PHYSICA_CUDA
         public ::cuda::std::numeric_limits<double>
     #else
@@ -163,12 +163,12 @@ namespace std {
     {};
 
     template<>
-    struct formatter<Physica::Core::Real<Physica::Core::Float64>, char> {
+    struct formatter<Physica::Real<Physica::Float64>, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
             return ctx.begin();
         }
 
-        auto format(const Physica::Core::Real<Physica::Core::Float64>& obj, std::format_context& ctx) const {
+        auto format(const Physica::Real<Physica::Float64>& obj, std::format_context& ctx) const {
             return std::format_to(ctx.out(), "{}", obj.toMachine());
         }
     };

@@ -20,7 +20,7 @@
 #include "Physica/Python/LLVM/ClangImpl/HeaderManager.h"
 #include "Physica/Python/LLVM/Clang.h"
 
-namespace Physica::Python {
+namespace Physica {
     void HeaderManager::LexedFileChanged(
             FileID,
             LexedFileChangeReason Reason,

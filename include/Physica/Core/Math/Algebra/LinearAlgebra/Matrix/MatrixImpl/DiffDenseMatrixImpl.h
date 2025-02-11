@@ -20,7 +20,7 @@
 
 #include "../DiffDenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
 #define tparams Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col
 #define DiffDenseMatrix DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>
 

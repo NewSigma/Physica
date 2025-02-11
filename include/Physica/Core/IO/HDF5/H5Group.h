@@ -20,10 +20,10 @@
 
 #include "Physica/Core/Scalar/Scalar.h"
 
-namespace Physica::Core {
-    class PHYSICA_API H5Group : public H5::Group, public H5Location {
+namespace Physica {
+    class PHYSICA_API H5Group : public H5::Group, public H5Loc {
         using Base = H5::Group;
-        using Location = Core::H5Location;
+        using Location = H5Loc;
     public:
         H5Group(H5::Group group) : Base(group) {}
         H5Group(const H5Group&) = default;

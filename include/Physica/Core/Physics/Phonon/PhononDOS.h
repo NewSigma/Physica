@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Geometry/CubeCross.h"
 #include "PhononSolver.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class PhononDOS {
     public:

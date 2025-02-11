@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     BoolMatrix::BoolMatrix(size_t col, size_t row) : arr(row, BitArray(col)) {
         assert(col > 0 && row > 0);
     }

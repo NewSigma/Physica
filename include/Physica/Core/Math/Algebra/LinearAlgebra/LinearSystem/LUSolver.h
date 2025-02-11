@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Option, size_t Order = Dynamic>
     class LUSolver {
         using This = LUSolver<T, Option, Order>;

@@ -20,7 +20,7 @@
 
 #include "../DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator>::DenseVector(size_t length) : Storage(length) {}
 

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size>::SIMD(int x) : SIMD(ScalarType(x)) {}
 

@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Unreachable.h"
 #include "MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class BlockMatrix : public RValueMatrix<BlockMatrix<T>> {
         using This = BlockMatrix<T>;
@@ -101,7 +101,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T>
-    class Traits<Core::BlockMatrix<T>> {
+    class Traits<BlockMatrix<T>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;

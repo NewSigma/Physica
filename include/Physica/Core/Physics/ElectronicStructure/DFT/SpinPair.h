@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     enum class SpinState {
         Up = 0,
         Down = 1
@@ -55,7 +55,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T, bool IsSpinPolarized>
-    class Traits<Core::SpinPair<T, IsSpinPolarized>> {
+    class Traits<SpinPair<T, IsSpinPolarized>> {
     public:
         constexpr static unsigned char NumSpin = IsSpinPolarized ? 2 : 1;
         using Base = Array<T, NumSpin>;

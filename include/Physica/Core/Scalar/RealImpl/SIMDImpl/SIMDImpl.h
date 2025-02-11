@@ -22,7 +22,7 @@
 #include "Physica/Core/Utils/Unreachable.h"
 #include "../SIMD.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Size>
     template<Scalar U>
     SIMD<T, Size>::SIMD(const U& x) : pack(x.value().toMachine()) {}

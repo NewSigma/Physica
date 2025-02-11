@@ -26,7 +26,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/QuadraticProgramming.h"
 
-namespace Physica::Core::Physics {
+namespace Physica {
     /**
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:43-88

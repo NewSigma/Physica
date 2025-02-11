@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class MatrixType> class ContinuousFlatten;
 
     template<Matrix T>

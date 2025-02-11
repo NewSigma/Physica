@@ -20,7 +20,7 @@
 
 #include "RSparseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<ExprType type, Vector T1, class T2 = T1> class SparseVectorExpr;
 
     template<Vector T, Scalar U>
@@ -67,7 +67,7 @@ namespace Physica {
     template<ExprType type, Vector T, Scalar U>
     class Traits<SparseVectorExpr<type, T, U>> {
     public:
-        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }

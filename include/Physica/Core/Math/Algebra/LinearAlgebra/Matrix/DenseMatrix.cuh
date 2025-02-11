@@ -22,7 +22,7 @@
 #include "MatrixImpl/ContinuousMatrix.cuh"
 #include "DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     class device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
             : public device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>
@@ -141,6 +141,6 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    class Traits<Core::device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>>
+    class Traits<device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>>
             : public Traits<DenseMatrix<T, Option, Row, Col, Allocator>> {};
 }

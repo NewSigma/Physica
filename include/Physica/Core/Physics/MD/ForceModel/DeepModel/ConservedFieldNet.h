@@ -20,7 +20,7 @@
 
 #include "Physica/Core/ML/NeuralNetwork/Layer/LayerBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class ConservedFieldNet : public LayerBase<Derived> {
         using This = ConservedFieldNet<Derived>;

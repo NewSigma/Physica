@@ -22,7 +22,7 @@
 #include "Physica/Core/Parallel/Executor/AutoExecutor.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Given \tparam HostModel, \class CPUGPUModel enables collaborative computing on both CPU and GPU.
      */
@@ -83,5 +83,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class HostModel, class DeviceModel>
-    class Traits<Core::CPUGPUModel<HostModel, DeviceModel>> : public Traits<HostModel> {};
+    class Traits<CPUGPUModel<HostModel, DeviceModel>> : public Traits<HostModel> {};
 }

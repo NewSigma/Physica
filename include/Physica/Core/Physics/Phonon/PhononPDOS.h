@@ -20,7 +20,7 @@
 
 #include "PhononDOS.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class PhononPDOS : public PhononDOS<T> {
         using Base = PhononDOS<T>;

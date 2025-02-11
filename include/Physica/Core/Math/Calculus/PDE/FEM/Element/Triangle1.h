@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Calculus/PDE/FEM/Mesh.h"
 #include "Element.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class Triangle1 : public Element<Triangle1<T>> {
     public:
@@ -61,14 +61,14 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T>
-    class Traits<Core::Triangle1<T>> {
+    class Traits<Triangle1<T>> {
     public:
         constexpr static unsigned int Dim = 2;
         constexpr static unsigned int Order = 1;
         constexpr static unsigned int NumPoint = 3;
         constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
         using ScalarType = T;
-        using MatrixType = Core::DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
     };
 }
 

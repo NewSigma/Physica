@@ -21,7 +21,7 @@
 #include <cstddef>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * BitArray is similar to bool[] but it has a better use of space.
      */

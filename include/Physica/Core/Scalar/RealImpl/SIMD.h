@@ -26,7 +26,7 @@
 #include "Physica/Core/Scalar/ScalarImpl/SIMDBase.h"
 #include "SIMDImpl/Instruset.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Size> class BoolSIMD;
 
     template<Scalar T, size_t Size>
@@ -196,9 +196,9 @@ namespace Physica {
 }
 
 namespace std {
-#define PacketType Physica::Core::SIMD<T, Size>
+#define PacketType Physica::SIMD<T, Size>
 
-    template<Physica::Core::Scalar T, size_t Size>
+    template<Physica::Scalar T, size_t Size>
     inline PacketType max(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
@@ -210,7 +210,7 @@ namespace std {
             return Physica::max(a.toMachine(), b.toMachine());
     }
 
-    template<Physica::Core::Scalar T, size_t Size>
+    template<Physica::Scalar T, size_t Size>
     inline PacketType min(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {

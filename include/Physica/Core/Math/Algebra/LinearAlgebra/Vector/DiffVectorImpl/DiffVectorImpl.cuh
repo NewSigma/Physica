@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class This, class SegmentType, bool ComputeMax>
         __global__ void DiffVector_minmaxKernel(

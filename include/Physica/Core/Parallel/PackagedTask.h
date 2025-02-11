@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     class Task {
     public:
         virtual ~Task() = default;

@@ -21,7 +21,7 @@
 #include <complex>
 #include "Physica/Core/Scalar/Real.h" // IWYU pragma: export
 
-namespace Physica::Core {
+namespace Physica {
     using cfloat16 = Complex<float16>;
     using cfloat32 = Complex<float32>;
     using cfloat64 = Complex<float64>;
@@ -159,19 +159,19 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T>
-    struct numeric_limits<Physica::Core::Complex<T>> : public numeric_limits<T> {};
+    template<Physica::Scalar T>
+    struct numeric_limits<Physica::Complex<T>> : public numeric_limits<T> {};
 
-    template<Physica::Core::Scalar T>
-    void swap(Physica::Core::Complex<T>& __restrict c1, Physica::Core::Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
+    template<Physica::Scalar T>
+    void swap(Physica::Complex<T>& __restrict c1, Physica::Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
 
-    template<Physica::Core::Scalar T>
-    struct formatter<Physica::Core::Complex<T>, char> {
+    template<Physica::Scalar T>
+    struct formatter<Physica::Complex<T>, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
             return ctx.begin();
         }
 
-        auto format(const Physica::Core::Complex<T>& obj, std::format_context& ctx) const {
+        auto format(const Physica::Complex<T>& obj, std::format_context& ctx) const {
             const auto& im = obj.imag();
             return std::format_to(ctx.out(), "{} {} {}i", obj.real(), im.isNegative() ? '-' : '+', im);
         }

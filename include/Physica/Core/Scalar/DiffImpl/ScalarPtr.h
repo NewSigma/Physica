@@ -20,7 +20,7 @@
 
 #include "../Diff.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     class ScalarPtr<Diff<T, Mode, Order>> {
         using ScalarType = Diff<T, Mode, Order>;

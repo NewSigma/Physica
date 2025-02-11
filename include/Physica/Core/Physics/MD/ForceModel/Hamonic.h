@@ -20,7 +20,7 @@
 
 #include "EmptyForceModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim>
     class Hamonic : private EmptyForceModel<T, Dim> {
         using Base = EmptyForceModel<T, Dim>;
@@ -140,7 +140,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, unsigned int Dim>
-    class Traits<Core::Hamonic<T, Dim>> {
+    class Traits<Hamonic<T, Dim>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;

@@ -20,7 +20,7 @@
 
 #include "PairModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool IsSmallCell = false>
     class LJModel : public PairModel<LJModel<T, IsSmallCell>> {
         using This = LJModel<T, IsSmallCell>;

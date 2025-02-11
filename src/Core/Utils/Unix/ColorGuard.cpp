@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Utils/Unix/ColorGuard.h"
 
-namespace Physica::Core {
+namespace Physica {
     #define COLOR(FGBG, CODE, BOLD) "\033[0;" BOLD FGBG CODE "m"
     #define ALLCOLORS(FGBG, BOLD) {\
         COLOR(FGBG, "0", BOLD),\

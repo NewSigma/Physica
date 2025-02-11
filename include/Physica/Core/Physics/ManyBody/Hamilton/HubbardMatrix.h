@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/ManyBody/Model/Hubbard.h"
 #include "HamiltonMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     class ThreadExecutor;
     /**
      * Refer to [1] for applied symmetries

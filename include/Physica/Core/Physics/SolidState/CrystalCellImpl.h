@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/IO/VASP/Poscar.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     CrystalCell<T>::CrystalCell(Base base, AtomicArray atomicNumbers_)
             : Base(std::move(base))
@@ -76,7 +76,7 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T>
-    H5Group CrystalCell<T>::read(const H5Location& loc, const char* name) {
+    H5Group CrystalCell<T>::read(const H5Loc& loc, const char* name) {
         const auto group = Base::read(loc, name);
         const auto dataset = group.template openDataSet<1>("AtomicNumber");
         const size_t numParticle = dataset.getSize(0);
@@ -88,7 +88,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    H5Group CrystalCell<T>::write(H5Location& loc, const char* name) const {
+    H5Group CrystalCell<T>::write(H5Loc& loc, const char* name) const {
         auto group = Base::write(loc, name);
         const auto space = H5DataSpace<1>({Base::getNumParticle()});
         auto dataset = group.template createDataSet<1>("AtomicNumber", H5::PredType::NATIVE_UINT16, space);

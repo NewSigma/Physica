@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API CUDAEvent {
         using This = CUDAEvent;
 

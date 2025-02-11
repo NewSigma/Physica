@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DecisionTreeType Type>
     DecisionTree<T, Type>::DecisionTree(const Dataset& dataset) : DecisionTree(train(dataset)) {}
 

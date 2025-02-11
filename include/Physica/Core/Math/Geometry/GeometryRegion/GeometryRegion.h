@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Geometry/Point.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * Describe a region in 2D or 3D. Used tree to implement it.
      */

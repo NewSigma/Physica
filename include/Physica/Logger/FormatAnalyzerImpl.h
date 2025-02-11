@@ -21,7 +21,7 @@
 #include <utility>
 #include <cstring>
 
-namespace Physica::Logger {
+namespace Physica {
     /*!
      * \param format
      *      C style format string.

@@ -24,7 +24,7 @@
 #include <cstdint>
 #include "Physica/Core/Exception/RdrandException.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * rdrand returns a high quality random number, in rare conditions it may fail and we should retry
      * several times but in extremely rare conditions it can not return anything.

@@ -20,7 +20,7 @@
 
 #include <vector>
 
-namespace Physica::Core {
+namespace Physica {
     template<class FutureType>
     class FutureGroup {
         std::vector<FutureType> futures;

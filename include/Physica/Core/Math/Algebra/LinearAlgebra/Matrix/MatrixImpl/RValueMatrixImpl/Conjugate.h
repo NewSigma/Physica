@@ -20,7 +20,7 @@
 
 #include "../RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class Conjugate<T> : public RValueMatrix<Conjugate<T>> {
         using Base = RValueMatrix<Conjugate<T>>;

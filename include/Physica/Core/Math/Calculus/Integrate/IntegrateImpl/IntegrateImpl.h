@@ -23,7 +23,7 @@
  * Bug: if the start of integrate domain is much larger than step size, the result will be 0. May be use taylor series
  * and expend the function to the first order.
  */
-namespace Physica::Core {
+namespace Physica {
     //////////////////////////////////Rectangular//////////////////////////////////
     template<Scalar T>
     Integrate<IntegrateMethod::Rectangular, T, 1>::Integrate(Base range, T stepSize_)

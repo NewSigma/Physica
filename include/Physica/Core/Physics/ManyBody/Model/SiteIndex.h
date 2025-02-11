@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<unsigned int Dim>
     class SiteIndex : public Array<size_t, Dim + 1> {
         using This = SiteIndex<Dim>;

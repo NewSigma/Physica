@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         /**
          * Critical to performance of \class Ewald, refactor with care

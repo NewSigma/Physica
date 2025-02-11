@@ -22,11 +22,11 @@
 #include <string>
 #include "Physica/Core/Utils/Container/RingBuffer.h"
 
-namespace Physica::Logger {
+namespace Physica {
     /**
      * LogThread will scan and delete buffers that should be deleted.
      */
-    class LogBuffer : public Core::RingBuffer {
+    class LogBuffer : public RingBuffer {
         bool shouldDelete;
     public:
         LogBuffer(size_t size) : RingBuffer(size), shouldDelete(false) {}

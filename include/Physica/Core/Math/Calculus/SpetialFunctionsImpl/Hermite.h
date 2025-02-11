@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<ScalarOption Option, bool errorTrack>
     Real<Option> lnGamma(const Real<Option>& s);
 

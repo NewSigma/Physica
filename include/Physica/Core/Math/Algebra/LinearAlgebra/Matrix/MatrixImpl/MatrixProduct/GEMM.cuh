@@ -24,7 +24,7 @@
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 #include "GEMM.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T1, Matrix T2>
     class device_obj<MatrixProduct<T1, T2>> : public device_obj<RValueMatrix<MatrixProduct<T1, T2>>> {
         using host_obj = MatrixProduct<T1, T2>;

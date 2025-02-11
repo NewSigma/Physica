@@ -21,7 +21,7 @@
 #include "DiffVectorExpr.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<ExprType type, int Order, Vector> class DiffVectorExprUnitary;
     template<ExprType type, int Order, Vector T1, class T2 = T1> class DiffVectorExprBinary;
 

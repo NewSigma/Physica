@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/IO/VASP/Xdatcar.h"
 
-namespace Physica::Core {
+namespace Physica {
     Xdatcar::Xdatcar(std::ifstream fin_) : data()
                                         , fin(std::move(fin_))
                                         , stepNum(0)

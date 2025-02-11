@@ -20,7 +20,7 @@
 
 #include "ContinuousMatrixBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, size_t Col>
     class device_obj<ContinuousMatrixBlock<T, 1, Col>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<T, 1, Col>>> {
         using host_obj = ContinuousMatrixBlock<T, 1, Col>;
@@ -185,6 +185,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Matrix T, size_t Row, size_t Col>
-    class Traits<Core::device_obj<Core::ContinuousMatrixBlock<T, Row, Col>>> : public Traits<Core::ContinuousMatrixBlock<T, Row, Col>> {};
+    template<Matrix T, size_t Row, size_t Col>
+    class Traits<device_obj<ContinuousMatrixBlock<T, Row, Col>>> : public Traits<ContinuousMatrixBlock<T, Row, Col>> {};
 }

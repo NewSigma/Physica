@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Class Polynomial provides operations around polynomials.
      *

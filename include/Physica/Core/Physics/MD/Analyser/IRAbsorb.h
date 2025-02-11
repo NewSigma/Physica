@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/Filter/SavitzkyGolay.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] S. Habershon, G. S. Fanourgakis, and D. E. Manolopoulos, J. Chem. Phys. 129, 074501 (2008).

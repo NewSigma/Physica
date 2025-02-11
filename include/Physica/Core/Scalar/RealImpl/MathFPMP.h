@@ -20,7 +20,7 @@
 
 #include "FloatMP.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<>
     __host__ __device__ Real<FloatMP> abs(const Real<FloatMP>& s) noexcept;
 

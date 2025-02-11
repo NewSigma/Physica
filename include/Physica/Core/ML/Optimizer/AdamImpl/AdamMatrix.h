@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "AdamImpl.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix M>
     class AdamImpl<M> : public AdamBase<typename M::ScalarType::ValueType> {
         using T = M::ScalarType;

@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] Clementi E, Davis D R. Electronic structure of large molecular systems[J]. Journal of Computational Physics, 1966, 1(2):223-244.
@@ -257,7 +257,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     T GaussBase<T>::squaredNorm() const {
-        using Physica::Core::Internal::doubleFactorial;
+        using Internal::doubleFactorial;
         const T temp = T(M_PI_2) / alpha;
         const T factor = temp * sqrt(temp);
         const T numerator = doubleFactorial<T>(l != 0 ? (2 * l - 1) : size_t(0))
@@ -273,7 +273,7 @@ namespace Physica::Core {
                                                   const T& alpha_sum,
                                                   size_t index1,
                                                   size_t index2) {
-        using Physica::Core::Internal::doubleFactorial;
+        using Internal::doubleFactorial;
         T result = T(0);
         T i_float = T(0);
         for (size_t i = 0; i <= (index1 + index2) / 2; ++i) {
@@ -311,7 +311,7 @@ namespace Physica::Core {
                                                                const T& element_pa,
                                                                const T& element_pb,
                                                                const T& epsilon) {
-        using Physica::Core::Internal::factorial;
+        using Internal::factorial;
         T result = T(0);
         for (size_t l = 0; l <= (index1 + index2); ++l) {
             const T temp = factorial<T>(l) * helper_f(l, index1, index2, element_pa, element_pb);
@@ -332,7 +332,7 @@ namespace Physica::Core {
                                                                const T& element_pa,
                                                                const T& element_pb,
                                                                const T& epsilon) {
-        using Physica::Core::Internal::factorial;
+        using Internal::factorial;
         T result = T(0);
         for (size_t L = 0; L <= (index1 + index2); ++L) {
             const T temp = attractionHelperG(L, index1, index2, element_pa, element_pb, epsilon);
@@ -357,7 +357,7 @@ namespace Physica::Core {
                                                       const T& epsilon1,
                                                       const T& epsilon2,
                                                       const T& delta) {
-        using Physica::Core::Internal::factorial;
+        using Internal::factorial;
         T result = T(0);
         for (size_t L1 = 0; L1 <= index1 + index2; ++L1) {
             const T factor1 = repulsionHelperH(L1, index1, index2, element_pa, element_pb, epsilon1, false);
@@ -386,7 +386,7 @@ namespace Physica::Core {
                                                               const T& element2,
                                                               const T& epsilon,
                                                               bool type) {
-        using Physica::Core::Internal::factorial;
+        using Internal::factorial;
         T result = T(0);
         const T factor = reciprocal(factorial<T>(L));
         for (size_t l = 0; l <= index1 + index2; ++l) {
@@ -402,7 +402,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     T GaussBase<T>::helper_f(size_t j, size_t l, size_t m, const T& a, const T& b) {
-        using Physica::Core::Internal::factorial;
+        using Internal::factorial;
         assert(l + m >= j);
         const size_t lower = j > m ? (j - m) : 0;
         const size_t upper = std::min(j, l);
@@ -439,7 +439,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T>
-    class Traits<Core::GaussBase<T>> {
+    class Traits<GaussBase<T>> {
     public:
         using ScalarType = T;
     };

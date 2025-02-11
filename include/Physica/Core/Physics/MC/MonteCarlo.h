@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim = 3>
     class MonteCarlo {
         using MDCellType = MDCell<T, Dim>;

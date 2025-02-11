@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Physics/MD/MDCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] Daan Frenkel and Berend Smit. Understanding Molecular Simulation[M]. Academic Press. 2002:85-86

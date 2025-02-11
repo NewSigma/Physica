@@ -20,7 +20,7 @@
 
 #include <cassert>
 
-namespace Physica::Core {
+namespace Physica {
     template<ScalarOption Option>
     Real<Option> legendreP(unsigned int l, const Real<Option>& x) {
         using T = Real<Option>;

@@ -21,7 +21,7 @@
 #include <fstream>
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<size_t Dim> class H5DataSpace;
 
     template<size_t Dim>

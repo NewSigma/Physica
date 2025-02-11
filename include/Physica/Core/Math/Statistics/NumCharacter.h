@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T>
     T::ScalarType mean(const T& x) {
         using ScalarType = T::ScalarType;

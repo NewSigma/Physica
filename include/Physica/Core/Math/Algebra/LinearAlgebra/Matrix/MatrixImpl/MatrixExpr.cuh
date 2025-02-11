@@ -20,7 +20,7 @@
 
 #include "MatrixExpr.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<ExprType Type, Matrix M>
     class device_obj<UnitaryMatrixExpr<Type, M>> : public device_obj<RValueMatrix<MatrixExpr<Type, M>>> {
         using host_obj = UnitaryMatrixExpr<Type, M>;
@@ -135,7 +135,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template <ExprType type, Matrix T1, class T2>
-    class Traits<Core::device_obj<Core::MatrixExpr<type, T1, T2>>> : public Traits<Core::MatrixExpr<type, T1, T2>> {};
+    class Traits<device_obj<MatrixExpr<type, T1, T2>>> : public Traits<MatrixExpr<type, T1, T2>> {};
 }
 
 #include "MatrixExprImpl/Add.cuh"

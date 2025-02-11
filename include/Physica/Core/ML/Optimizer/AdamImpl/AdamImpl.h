@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Scalar/Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class> class AdamImpl;
 
     template<Scalar T>

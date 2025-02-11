@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     //////////////////////////////////FloatMP///////////////////////////////////
     Real<FloatMP>::Real() : byte(nullptr), length(0), power(0) {}
 

@@ -20,7 +20,7 @@
 
 #include "../RValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T>
     class RealVector : public RValueVector<RealVector<T>> {
         using This = RealVector<T>;

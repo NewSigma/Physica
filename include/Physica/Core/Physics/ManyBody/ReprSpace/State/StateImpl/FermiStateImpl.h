@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 #include "../FermiState.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<int Dim, int NumSite>
     inline FermiState<Dim, NumSite>::FermiState(Spin spinUp_, Spin spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}

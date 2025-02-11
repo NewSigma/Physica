@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class HalfDenseMatrixStorage stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
      */
@@ -142,7 +142,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T, size_t Order>
-    class Traits<Core::HalfDenseMatrixStorage<T, Order>> {
+    class Traits<HalfDenseMatrixStorage<T, Order>> {
         template<bool, size_t Size>
         struct Helper {
             using Type = DenseVector<T, Size>;
@@ -153,7 +153,7 @@ namespace Physica {
             using Type = Array<T, Size>;
         };
 
-        constexpr static bool IsScalar = Core::Scalar<T>;
+        constexpr static bool IsScalar = Scalar<T>;
         constexpr static size_t SizeAtCompile = Order * (Order + 1) / 2;
     public:
         using ElemType = T;
@@ -163,8 +163,8 @@ namespace Physica {
 
 namespace std {
     template<class T, size_t Order>
-    inline void swap(Physica::Core::HalfDenseMatrixStorage<T, Order>& __restrict mat1,
-                     Physica::Core::HalfDenseMatrixStorage<T, Order>& __restrict mat2) noexcept {
+    inline void swap(Physica::HalfDenseMatrixStorage<T, Order>& __restrict mat1,
+                     Physica::HalfDenseMatrixStorage<T, Order>& __restrict mat2) noexcept {
         mat1.swap(mat2);
     }
 }

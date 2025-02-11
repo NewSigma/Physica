@@ -22,7 +22,7 @@
 #include <string>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] https://www.quantum-espresso.org/Doc/INPUT_PW.html

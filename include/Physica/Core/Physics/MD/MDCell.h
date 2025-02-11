@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim = 3>
     class MDCell : public PeriodicCell<T, Dim> {
     public:
@@ -123,7 +123,7 @@ namespace Physica::Core {
     template<Scalar T, unsigned int Dim>
     void MDCell<T, Dim>::scale(const T& factor) {
         Base::scale_cartesian(factor);
-        invLattice *= Core::reciprocal(factor);
+        invLattice *= reciprocal(factor);
     }
 
     template<Scalar T, unsigned int Dim>
@@ -222,7 +222,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, unsigned int D>
-    class Traits<Core::MDCell<T, D>> {
+    class Traits<MDCell<T, D>> {
     public:
         using ScalarType = T;
         constexpr static unsigned int Dim = D;

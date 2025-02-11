@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 #include "Physica/Logger/LoggerRuntime.h"
 #include <unistd.h>
 
-using namespace Physica::Logger;
+using namespace Physica;
 
 int main() {
     Info(STDOUT_FILENO, "Test begin.");

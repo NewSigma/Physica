@@ -24,7 +24,7 @@
  * 
  * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
  */
-namespace Physica::Core {
+namespace Physica {
     template<class T> class device_obj;
 
     template<class T>

@@ -21,7 +21,7 @@
 #include <stdexcept>
 #include "Physica/Core/Utils/DirStack.h"
 
-namespace Physica::Core {
+namespace Physica {
     DirStack::DirStack(const char* path) {
         char ch = path[0];
         if (ch != '/')

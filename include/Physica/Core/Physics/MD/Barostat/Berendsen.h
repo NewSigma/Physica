@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "BaroType.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Berendsen barostat as introduced in [1]
      * 
@@ -204,7 +204,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, size_t NumReplica, BaroType Type>
-    class Traits<Core::Berendsen<T, NumReplica, Type>> {
+    class Traits<Berendsen<T, NumReplica, Type>> {
     public:
         constexpr static unsigned int Order = 1;
     };

@@ -20,7 +20,7 @@
 
 #include "../ContinuousVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T>
     class ValueVector<ContinuousVector<T>> : public ContinuousVector<ValueVector<ContinuousVector<T>>> {
         using This = ValueVector<ContinuousVector<T>>;

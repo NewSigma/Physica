@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Force constant(FC) swap vector is the constraint vector $w$ as introduced in [1].
      * 

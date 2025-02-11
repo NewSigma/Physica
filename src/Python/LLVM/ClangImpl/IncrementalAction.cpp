@@ -23,7 +23,7 @@
 #include "Physica/Core/Exception/LLVMException.h"
 #include "Physica/Python/LLVM/ClangImpl/IncrementalAction.h"
 
-namespace Physica::Python {
+namespace Physica {
     IncrementalAction::IncrementalAction(CompilerInstance& ci, llvm::LLVMContext& context)
             : Base(makeAction(ci, context)) {}
 

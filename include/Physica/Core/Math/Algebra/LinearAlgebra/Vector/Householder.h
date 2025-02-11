@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * The first element of \param target will be the factor to construct houseHolder matrix.
      * The other parts of \param target will be essential HouseHolder vector.

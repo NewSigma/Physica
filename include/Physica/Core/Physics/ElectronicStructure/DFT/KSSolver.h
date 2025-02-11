@@ -26,7 +26,7 @@
 #include "ChargeMixer.h"
 #include "KSHamilton.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, class XCProvider>
     class KSSolver {
     public:

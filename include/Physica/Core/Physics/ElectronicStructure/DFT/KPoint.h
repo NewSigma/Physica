@@ -20,7 +20,7 @@
 
 #include "SpinPair.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t NumBand, bool isSpinPolarized>
     class KPoint {
     public:

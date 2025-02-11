@@ -21,7 +21,7 @@
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "ContinuousVectorImpl/ContinuousVectorBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class ContinuousVector has its element on memory continuously
      */
@@ -93,8 +93,8 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         inline void random_any(Distribution& dist);
 
-        const DataSetType read(const H5Location& loc, const char* name);
-        DataSetType write(H5Location& loc, const char* name) const;
+        const DataSetType read(const H5Loc& loc, const char* name);
+        DataSetType write(H5Loc& loc, const char* name) const;
 
         [[nodiscard]] ValuesRtnTy values() noexcept;
         [[nodiscard]] const ValuesRtnTy values() const noexcept;

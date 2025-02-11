@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Size>
     class BoolSIMD : private Traits<BoolSIMD<T, Size>>::BaseType {
         using This = BoolSIMD<T, Size>;

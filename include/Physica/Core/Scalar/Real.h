@@ -25,7 +25,7 @@
 #endif
 #include "Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar, class RandomType> class GaussRandomPool;
 
     union float_extract {

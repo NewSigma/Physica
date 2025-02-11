@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PIPhonon final {
         using ScalarType = float64;
         using ComplexType = Complex<ScalarType>;

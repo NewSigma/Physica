@@ -21,7 +21,7 @@
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Scalar/Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class LayerBase : public CRTPBase<LayerBase<Derived>> {
         using This = LayerBase<Derived>;

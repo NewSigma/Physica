@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class RValueVector;
     template<class Derived> class RSparseVector;
 

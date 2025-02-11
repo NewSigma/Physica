@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class VectorExpr implements template expression for vectors, which will reduce temporary objects.
      * 

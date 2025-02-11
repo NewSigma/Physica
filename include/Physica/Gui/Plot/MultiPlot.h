@@ -21,7 +21,7 @@
 #include <QGridLayout>
 #include "Plot.h"
 
-namespace Physica::Gui {
+namespace Physica {
     class PHYSICA_API MultiPlot : public QWidget {
         using This = MultiPlot;
         using Base = QWidget;

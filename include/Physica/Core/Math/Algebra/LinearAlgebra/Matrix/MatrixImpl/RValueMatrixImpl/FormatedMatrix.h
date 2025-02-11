@@ -20,7 +20,7 @@
 
 #include "../RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class FormatedMatrix convert a matrix to text, either readable to human, or other softwares.
      */
@@ -122,13 +122,13 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<Physica::Core::Matrix T>
-    struct formatter<Physica::Core::FormatedMatrix<T>, char> {
+    template<Physica::Matrix T>
+    struct formatter<Physica::FormatedMatrix<T>, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
             return ctx.begin();
         }
 
-        auto format(const Physica::Core::FormatedMatrix<T>& obj, std::format_context& ctx) const {
+        auto format(const Physica::FormatedMatrix<T>& obj, std::format_context& ctx) const {
             const size_t col = obj.getCol();
             const size_t row = obj.getRow();
 

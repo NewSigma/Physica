@@ -20,7 +20,7 @@
 
 #include "RValueMatrixImpl/RMatrixBlock.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<RValueMatrix<Derived>> : public CRTPBase<device_obj<RValueMatrix<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Order> class HessenburgMatrixH;
     /**
      * Decomposite matrix A like A = QHQ^H
@@ -164,11 +164,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Scalar T, size_t Order>
-    class Traits<Core::HessenburgMatrixH<T, Order>> {
+    template<Scalar T, size_t Order>
+    class Traits<HessenburgMatrixH<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = Core::MatrixOption::Col | (Order == Dynamic ? Core::MatrixOption::Vector : Core::MatrixOption::Element);
+        constexpr static int Option = MatrixOption::Col | (Order == Dynamic ? MatrixOption::Vector : MatrixOption::Element);
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

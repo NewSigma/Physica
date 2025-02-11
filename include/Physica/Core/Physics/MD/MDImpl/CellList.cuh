@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "CellList.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class device_obj<CellList<T>> {
         using host_obj = CellList<T>;

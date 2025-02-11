@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/NoImplException.h"
 #include "../SpinState.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<int Dim, int NumSite>
     inline SpinState<Dim, NumSite>::SpinState(IntType occupyBits_) : occupyBits(occupyBits_) {}
 

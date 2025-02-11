@@ -23,7 +23,7 @@
 
 struct cublasContext;
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class CUDAContext provides per-thread device resource management
      */

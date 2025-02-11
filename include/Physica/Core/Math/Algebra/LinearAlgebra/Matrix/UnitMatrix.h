@@ -20,7 +20,7 @@
 
 #include "MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class UnitMatrix : public RValueMatrix<UnitMatrix<T, Order>> {
         using This = UnitMatrix<T, Order>;

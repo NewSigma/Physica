@@ -24,7 +24,7 @@
 #include "Physica/Logger/LogBuffer.h"
 #include "Physica/Logger/LoggerRuntime.h"
 
-namespace Physica::Logger {
+namespace Physica {
     std::string LogBuffer::makeMsgString() {
         std::stringstream logString{};
         size_t logID;

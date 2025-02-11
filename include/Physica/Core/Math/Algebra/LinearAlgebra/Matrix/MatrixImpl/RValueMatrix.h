@@ -20,7 +20,7 @@
 
 #include "RValueMatrixImpl/RMatrixBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class LValueMatrix;
     template<class Derived> class ContinuousMatrix;
     template<class MatrixType> class Transpose;

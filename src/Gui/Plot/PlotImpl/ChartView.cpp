@@ -18,7 +18,7 @@
  */
 #include "Physica/Gui/Plot/PlotImpl/ChartView.h"
 
-namespace Physica::Gui {
+namespace Physica {
     ChartView::ChartView(QChart* chart_, QWidget* parent)
             : QGraphicsView(parent)
             , chart(chart_)

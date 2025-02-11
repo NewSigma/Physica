@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class device_obj<ContinuousFlatten<T>> : public device_obj<ContinuousVector<ContinuousFlatten<T>>> {
         using host_obj = ContinuousFlatten<T>;
@@ -69,5 +69,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T>
-    class Traits<Core::device_obj<Core::ContinuousFlatten<T>>> : public Traits<Core::ContinuousFlatten<T>> {};
+    class Traits<device_obj<ContinuousFlatten<T>>> : public Traits<ContinuousFlatten<T>> {};
 }

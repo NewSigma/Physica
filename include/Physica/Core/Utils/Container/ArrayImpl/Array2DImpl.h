@@ -20,7 +20,7 @@
 
 #include "../Array2D.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col) : r(row) {
         if constexpr (isVectorStorage) {

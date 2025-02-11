@@ -20,7 +20,7 @@
 #include "Physica/Core/IO/QE/PWscfIn.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
-namespace Physica::Core {
+namespace Physica {
     PWscfIn& PWscfIn::operator=(PWscfIn obj) noexcept {
         swap(obj);
         return *this;

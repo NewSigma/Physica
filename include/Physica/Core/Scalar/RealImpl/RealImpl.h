@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * This function is shared by \class Real and \class Integer.
      */

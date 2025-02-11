@@ -20,12 +20,12 @@
 
 #include "Physica/Core/Exception/IOException.h"
 
-namespace Physica::Core {
+namespace Physica {
     class H5Group;
 
-    class PHYSICA_API H5Location {
+    class PHYSICA_API H5Loc {
     public:
-        ~H5Location() = default;
+        ~H5Loc() = default;
         /* Operations */
         inline bool exists(const char *name, const H5::LinkAccPropList& lapl = H5::LinkAccPropList::DEFAULT) const;
 
@@ -46,23 +46,23 @@ namespace Physica::Core {
         [[nodiscard]] const H5Group openGroup(const char* name) const;
         [[nodiscard]] H5Group openGroup(const char* name);
     protected:
-        H5Location() = default;
-        H5Location(const H5Location&) = default;
-        H5Location(H5Location&&) noexcept = default;
+        H5Loc() = default;
+        H5Loc(const H5Loc&) = default;
+        H5Loc(H5Loc&&) noexcept = default;
         /* Operators */
-        H5Location& operator=(const H5Location&) = default;
-        H5Location& operator=(H5Location&&) noexcept = default;
+        H5Loc& operator=(const H5Loc&) = default;
+        H5Loc& operator=(H5Loc&&) noexcept = default;
     private:
-        H5::H5Location& getDerived() { return *reinterpret_cast<H5::H5Location*>(this); }
-        const H5::H5Location& getDerived() const { return *reinterpret_cast<const H5::H5Location*>(this); }
+        auto& getDerived() { return *reinterpret_cast<H5::H5Location*>(this); }
+        const auto& getDerived() const { return *reinterpret_cast<const H5::H5Location*>(this); }
     };
 
-    inline bool H5Location::exists(const char *name, const H5::LinkAccPropList& lapl) const {
+    inline bool H5Loc::exists(const char *name, const H5::LinkAccPropList& lapl) const {
         return getDerived().exists(name, lapl);
     }
 
     template<size_t Dim>
-    inline H5DataSet<Dim> H5Location::createDataSet(
+    inline H5DataSet<Dim> H5Loc::createDataSet(
             const char *name,
             const H5::DataType& data_type,
             const H5::DataSpace& data_space,
@@ -73,14 +73,14 @@ namespace Physica::Core {
     }
 
     template<size_t Dim>
-    H5DataSet<Dim> H5Location::openDataSet(const char* name) {
+    H5DataSet<Dim> H5Loc::openDataSet(const char* name) {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
         return getDerived().openDataSet(name);
     }
 
     template<size_t Dim>
-    const H5DataSet<Dim> H5Location::openDataSet(const char* name) const {
+    const H5DataSet<Dim> H5Loc::openDataSet(const char* name) const {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
         return getDerived().openDataSet(name);

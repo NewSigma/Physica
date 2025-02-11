@@ -23,7 +23,7 @@
 #include <coroutine>
 #include "CRTPBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class CRCoro is Curiously Recurring Coroutine
      *

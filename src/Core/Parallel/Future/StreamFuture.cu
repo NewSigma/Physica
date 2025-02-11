@@ -20,7 +20,7 @@
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     StreamFuture::StreamFuture() : isDone(false) {
         check(cudaLaunchHostFunc(CUDAContext::getInstance(), &StreamFuture::taskDoneCallback, this));
     }

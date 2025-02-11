@@ -23,28 +23,28 @@
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "PairModel.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class T>
-        __global__ void PairModel_forceKernel(Physica::PlainStruct<Core::device_obj<T>> pair) {
+        __global__ void PairModel_forceKernel(Physica::PlainStruct<device_obj<T>> pair) {
             static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
             pair.getDerived().forceKernelImpl();
         }
 
         template<class T>
-        __global__ void PairModel_postForceKernel(Physica::PlainStruct<Core::device_obj<T>> pair) {
+        __global__ void PairModel_postForceKernel(Physica::PlainStruct<device_obj<T>> pair) {
             static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
             pair.getDerived().postForceKernelImpl();
         }
 
         template<class T>
-        __global__ void PairModel_virialKernel(Physica::PlainStruct<Core::device_obj<T>> pair) {
+        __global__ void PairModel_virialKernel(Physica::PlainStruct<device_obj<T>> pair) {
             static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
             pair.getDerived().virialKernelImpl();
         }
 
         template<class T>
-        __global__ void PairModel_postVirialKernel(Physica::PlainStruct<Core::device_obj<T>> pair) {
+        __global__ void PairModel_postVirialKernel(Physica::PlainStruct<device_obj<T>> pair) {
             static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
             pair.getDerived().postVirialKernelImpl();
         }

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.cuh"
 #include "DiffDenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Option, int Order>
     class device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
             : public device_obj<RValueMatrix<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
@@ -188,10 +188,10 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, int Option, int Order>
-    class Traits<Core::device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
+    class Traits<device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
             : public Traits<DenseMatrix<T, Option>> {
     public:
-        using ScalarType = Core::device_obj<Diff<T, DiffMode::Reverse, Order>>;
+        using ScalarType = device_obj<Diff<T, DiffMode::Reverse, Order>>;
     };
 }
 

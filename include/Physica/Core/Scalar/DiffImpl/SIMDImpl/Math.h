@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Scalar/Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline auto abs(const SIMD<Diff<T, Mode, Order>, Size>& x);
 

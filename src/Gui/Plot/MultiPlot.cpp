@@ -19,7 +19,7 @@
 #include <QSvgGenerator>
 #include "Physica/Gui/Plot/MultiPlot.h"
 
-namespace Physica::Gui {
+namespace Physica {
     MultiPlot::MultiPlot(int row, int col, QWidget* parent) : QWidget(parent), layout(new QGridLayout(this)) {
         QPalette p{};
         p.setColor(QPalette::Window, Qt::white);

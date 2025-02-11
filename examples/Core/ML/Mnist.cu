@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,16 +27,13 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using namespace Physica::Gui;
 
 template<Scalar> class MnistNet;
 
 namespace Physica {
     template<class T>
-    class Traits<Core::device_obj<MnistNet<T>>> : public Traits<Core::device_obj<LinearLayer<T>>> {};
-}
+    class Traits<device_obj<MnistNet<T>>> : public Traits<device_obj<LinearLayer<T>>> {};
 
-namespace Physica::Core {
     template<Scalar T>
     class device_obj<MnistNet<T>> : public device_obj<SeqNet<MnistNet<T>>> {
         using host_obj = MnistNet<T>;

@@ -34,7 +34,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 #include "PackagedTask.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] Eigen; https://eigen.tuxfamily.org/

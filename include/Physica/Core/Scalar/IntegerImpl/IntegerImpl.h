@@ -20,7 +20,7 @@
 
 #include "IntegerArithmetic.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<ScalarOption Option>
     Integer::Integer(const Real<Option>& s) {
         if constexpr (Option == FloatMP) {

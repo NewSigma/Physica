@@ -21,7 +21,7 @@
 #include <system_error>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API CUDAException : public std::system_error {
         using Base = std::system_error;
 
@@ -48,6 +48,6 @@ namespace Physica::Core {
 namespace Physica {
     inline void check(cudaError_t err) {
         if (err != cudaSuccess) [[unlikely]]
-            throw Physica::Core::CUDAException(err);
+            throw CUDAException(err);
     }
 }

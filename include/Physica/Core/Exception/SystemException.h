@@ -21,7 +21,7 @@
 #include <system_error>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API SystemException : public std::system_error {
     public:
         SystemException() noexcept : std::system_error(errno, std::system_category()) {}

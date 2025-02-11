@@ -21,7 +21,7 @@
 #include <stdexcept>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API BadConvergenceException : public std::runtime_error {
     public:
         BadConvergenceException(const char* msg_) : std::runtime_error(msg_) {}

@@ -24,7 +24,7 @@
 #include "Bidiagonalization.h"
 #include "Decouplable.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Decomposite matrix A like A = UDV^T
      * 
@@ -265,9 +265,9 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    inline void swap(Physica::Core::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd1,
-                     Physica::Core::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd2) noexcept {
+    template<Physica::Scalar T, size_t RowAtCompile, size_t ColAtCompile>
+    inline void swap(Physica::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd1,
+                     Physica::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd2) noexcept {
         svd1.swap(svd2);
     }
 }

@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Tridiagonalization.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * A = XTX^{-1}
      * where X is matrix of eigenvectors
@@ -229,9 +229,9 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T, size_t Order>
-    inline void swap(Physica::Core::SymmEigenSolver<T, Order>& __restrict solver1,
-                     Physica::Core::SymmEigenSolver<T, Order>& __restrict solver2) noexcept {
+    template<Physica::Scalar T, size_t Order>
+    inline void swap(Physica::SymmEigenSolver<T, Order>& __restrict solver1,
+                     Physica::SymmEigenSolver<T, Order>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

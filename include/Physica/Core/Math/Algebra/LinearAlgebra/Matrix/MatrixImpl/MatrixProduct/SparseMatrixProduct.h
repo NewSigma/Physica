@@ -20,7 +20,7 @@
 
 #include "GEMV.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Option> class SparseMatrix;
 
     template<Scalar T, int Option, Vector U>

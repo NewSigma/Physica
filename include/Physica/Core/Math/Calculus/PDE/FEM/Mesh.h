@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Geometry/Point.h"
 
-namespace Physica::Core {
+namespace Physica {
     enum class NodeType : char {
         Free,
         Dirichlet

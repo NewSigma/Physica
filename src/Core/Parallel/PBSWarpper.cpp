@@ -21,7 +21,7 @@
 #include "Physica/Core/Parallel/PBSWarpper.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
-namespace Physica::Core {
+namespace Physica {
     const PBSWarpper& PBSWarpper::getInstance() noexcept {
         static PBSWarpper pbs{};
         return pbs;

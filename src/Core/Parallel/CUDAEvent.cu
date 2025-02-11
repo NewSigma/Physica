@@ -19,7 +19,7 @@
 #include <cassert>
 #include "Physica/Core/Parallel/CUDAEvent.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     CUDAEvent::CUDAEvent() {
         check(cudaEventCreate(&event));
     }

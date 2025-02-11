@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/MDImpl/CellList.h"
 #include "EmptyForceModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Member variable pot_shift is referenced from [1]
      * 
@@ -418,7 +418,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T>
-    class Traits<Core::PairModel<T>> {
+    class Traits<PairModel<T>> {
     public:
         using Derived = T;
 

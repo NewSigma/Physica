@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     template<Grid T>
     Derived& LValueGrid<Derived>::operator=(const T& other) {

@@ -20,7 +20,7 @@
 
 #include "RSpaceEwald.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * TODO: Anisotropic condition
      * 

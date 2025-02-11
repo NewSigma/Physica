@@ -20,7 +20,7 @@
 
 #include "CrossProduct.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector V1, Vector V2>
     class device_obj<CrossProduct<V1, V2>> : public device_obj<RValueVector<CrossProduct<V1, V2>>> {
         using host_obj = CrossProduct<V1, V2>;
@@ -46,5 +46,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    class Traits<Core::device_obj<Core::CrossProduct<V1, V2>>> : public Traits<Core::CrossProduct<V1, V2>> {};
+    class Traits<device_obj<CrossProduct<V1, V2>>> : public Traits<CrossProduct<V1, V2>> {};
 }

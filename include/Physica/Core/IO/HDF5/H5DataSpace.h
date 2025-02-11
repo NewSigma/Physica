@@ -21,7 +21,7 @@
 #include "DataSpaceImpl/DataSpaceBase.h"
 #include "DataSpaceImpl/SubDataSpace.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<size_t Dim>
     class H5DataSpace : public DataSpaceBase<H5DataSpace<Dim>>, public H5::DataSpace {
         using Base = DataSpaceBase<H5DataSpace<Dim>>;
@@ -148,7 +148,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<size_t S>
-    class Traits<Core::H5DataSpace<S>> {
+    class Traits<H5DataSpace<S>> {
     public:
         constexpr static size_t Dim = S;
     };

@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     class GridBase {
     public:
         using Index3D = Array<size_t, 3>;

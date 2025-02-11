@@ -20,7 +20,7 @@
 
 #include "../ContinuousVector.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     inline device_obj<ContinuousVector<Derived>>& device_obj<ContinuousVector<Derived>>::operator=(const This& obj) {
         Base::operator=(obj);

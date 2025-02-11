@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Exception/NoImplException.h"
 
-namespace Physica::Core {
+namespace Physica {
     SSHWarpper::SSHWarpper(std::string hostname_, std::string command_)
             : hostname(std::move(hostname_)), command(std::move(command_)) {
         execute();

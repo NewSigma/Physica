@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Stochastic gradient descent for auto diff
      */

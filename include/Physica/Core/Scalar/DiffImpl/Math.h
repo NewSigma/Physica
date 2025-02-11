@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Scalar/Diff.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     __host__ __device__ inline CoDiff<T> abs(T&& x) requires(Diffable<T>);
 

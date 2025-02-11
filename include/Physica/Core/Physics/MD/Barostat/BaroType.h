@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     enum class BaroType {
         Anisotropic,
         XY,

@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class HamiltonMatrix : public RValueMatrix<Derived> {
         using This = HamiltonMatrix<Derived>;
@@ -49,7 +49,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class Derived>
-    class Traits<Core::HamiltonMatrix<Derived>> {
+    class Traits<HamiltonMatrix<Derived>> {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
         constexpr static size_t RowAtCompile = Dynamic;

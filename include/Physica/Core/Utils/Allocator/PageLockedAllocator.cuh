@@ -20,7 +20,7 @@
 
 #include "HostAllocator.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T>
     class PageLockedAllocator {
     public:
@@ -89,9 +89,9 @@ namespace Physica::Core {
 
 namespace std {
     template<class T>
-    struct allocator_traits<Physica::Core::PageLockedAllocator<T>> {
+    struct allocator_traits<Physica::PageLockedAllocator<T>> {
     public:
-        using allocator_type = Physica::Core::PageLockedAllocator<T>;
+        using allocator_type = Physica::PageLockedAllocator<T>;
         using value_type = T;
         using pointer = T*;
         using const_pointer = const T*;
@@ -107,7 +107,7 @@ namespace std {
         using propagate_on_container_swap = std::false_type;
         using is_always_equal = std::is_empty<allocator_type>::type;
         template<class U>
-        using rebind_alloc = Physica::Core::PageLockedAllocator<U>;
+        using rebind_alloc = Physica::PageLockedAllocator<U>;
         template<class U>
         using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
 

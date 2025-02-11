@@ -20,7 +20,7 @@
 #include "Physica/Core/Utils/CUDA/DeviceProp.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     std::ostream& DeviceProp::printDeviceProp(unsigned int device, std::ostream& os) const {
         const auto& prop = getProperty(device);
         os << "Device " << device << ": \"" << prop.name << "\"\n";

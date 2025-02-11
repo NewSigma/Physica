@@ -20,7 +20,7 @@
 
 #include "Physica/PlainStruct.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T, Matrix U>
     class device_obj<VectorMatrixProduct<T, U>>
             : public device_obj<RValueMatrix<VectorMatrixProduct<T, U>>> {
@@ -67,6 +67,6 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Vector T, Matrix U>
-    class Traits<Core::device_obj<VectorMatrixProduct<T, U>>>
+    class Traits<device_obj<VectorMatrixProduct<T, U>>>
             : public Traits<VectorMatrixProduct<T, U>> {};
 }

@@ -22,7 +22,7 @@
 #include <cublas_v2.h>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API cuBLASException : public std::system_error {
         class Impl final : public std::error_category {
         public:
@@ -45,6 +45,6 @@ namespace Physica::Core {
 namespace Physica {
     inline void check(cublasStatus_t err) {
         if (err != CUBLAS_STATUS_SUCCESS) [[unlikely]]
-            throw Physica::Core::cuBLASException(err);
+            throw cuBLASException(err);
     }
 }

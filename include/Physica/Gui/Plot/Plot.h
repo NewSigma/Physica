@@ -29,7 +29,7 @@
 #include "PlotImpl/ChartView.h"
 #include "ContourSeries.h"
 
-namespace Physica::Gui {
+namespace Physica {
     class PHYSICA_API Plot : public ChartView {
         using Base = ChartView;
 
@@ -47,38 +47,38 @@ namespace Physica::Gui {
         Plot& operator=(const Plot&) = delete;
         Plot& operator=(Plot&&) noexcept = delete;
         /* Operations */
-        template<Core::Vector T>
+        template<Vector T>
         QLineSeries& line(const T& y);
-        template<Core::Vector T1, Core::Vector T2>
+        template<Vector T1, Vector T2>
         QLineSeries& line(const T1& x, const T2& y);
-        template<Core::Vector T>
+        template<Vector T>
         QSplineSeries& spline(const T& y);
-        template<Core::Vector T1, Core::Vector T2>
+        template<Vector T1, Vector T2>
         QSplineSeries& spline(const T1& x, const T2& y);
-        template<Core::Vector T>
+        template<Vector T>
         QScatterSeries& scatter(const T& y);
-        template<Core::Vector T1, Core::Vector T2>
+        template<Vector T1, Vector T2>
         QScatterSeries& scatter(const T1& x, const T2& y);
-        template<Core::Vector T>
+        template<Vector T>
         QAreaSeries& hist(const T& data, size_t binCount, bool density = false);
-        template<Core::Vector T>
+        template<Vector T>
         QAreaSeries& area_boundary(const T& x,
                                    const T& lower,
                                    const T& upper);
-        template<Core::Vector T>
+        template<Vector T>
         QAreaSeries& area_center(const T& x,
                                  const T& center,
                                  const T& deviation);
-        template<Core::Matrix T>
-        ContourSeries<T>& contour(const Core::LValueMatrix<T>& x,
-                                  const Core::LValueMatrix<T>& y,
-                                  const Core::LValueMatrix<T>& z,
-                                  Core::Array<double> levels);
-        template<Core::Vector T>
-        QBoxPlotSeries& boxWhisker(const T& x, const Core::Array<T>& data);
-        template<Core::Vector T>
+        template<Matrix T>
+        ContourSeries<T>& contour(const LValueMatrix<T>& x,
+                                  const LValueMatrix<T>& y,
+                                  const LValueMatrix<T>& z,
+                                  Array<double> levels);
+        template<Vector T>
+        QBoxPlotSeries& boxWhisker(const T& x, const Array<T>& data);
+        template<Vector T>
         QBoxPlotSeries& errorBar(const T& mean, const T& deviation);
-        template<Core::Vector T1, Core::Vector T2>
+        template<Vector T1, Vector T2>
         QBoxPlotSeries& errorBar(const T1& x, const T2& mean, const T2& deviation);
         QScatterSeries& label(double x, double y, QString text);
 
@@ -113,19 +113,19 @@ namespace Physica::Gui {
         void setFont(QFont font);
         void setFontSize(int size);
     private:
-        template<Core::Vector T>
-        QBoxSet* setFromVector(const Core::LValueVector<T>& v);
-        template<Core::Vector T>
-        double findMedian(const Core::LValueVector<T>& sorted_v, size_t from, size_t to);
+        template<Vector T>
+        QBoxSet* setFromVector(const LValueVector<T>& v);
+        template<Vector T>
+        double findMedian(const LValueVector<T>& sorted_v, size_t from, size_t to);
     };
 
-    template<Core::Vector T>
+    template<Vector T>
     QLineSeries& Plot::line(const T& y) {
-        using Vector = Core::DenseVector<typename T::ScalarType, T::SizeAtCompile>;
+        using Vector = DenseVector<typename T::ScalarType, T::SizeAtCompile>;
         return line(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
-    template<Core::Vector T1, Core::Vector T2>
+    template<Vector T1, Vector T2>
     QLineSeries& Plot::line(const T1& x, const T2& y) {
         assert(x.getLength() == y.getLength());
         QLineSeries* series = new QLineSeries();
@@ -139,13 +139,13 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
+    template<Vector T>
     QSplineSeries& Plot::spline(const T& y) {
-        using Vector = Core::DenseVector<typename T::ScalarType, T::SizeAtCompile>;
+        using Vector = DenseVector<typename T::ScalarType, T::SizeAtCompile>;
         return spline(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
-    template<Core::Vector T1, Core::Vector T2>
+    template<Vector T1, Vector T2>
     QSplineSeries& Plot::spline(const T1& x, const T2& y) {
         assert(x.getLength() == y.getLength());
         QSplineSeries* series = new QSplineSeries();
@@ -159,13 +159,13 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
+    template<Vector T>
     QScatterSeries& Plot::scatter(const T& y) {
-        using Vector = Core::DenseVector<typename T::ScalarType, T::SizeAtCompile>;
+        using Vector = DenseVector<typename T::ScalarType, T::SizeAtCompile>;
         return scatter(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
-    template<Core::Vector T1, Core::Vector T2>
+    template<Vector T1, Vector T2>
     QScatterSeries& Plot::scatter(const T1& x, const T2& y) {
         assert(x.getLength() == y.getLength());
         QScatterSeries* series = new QScatterSeries();
@@ -179,7 +179,7 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
+    template<Vector T>
     QAreaSeries& Plot::hist(const T& data, size_t binCount, bool density) {
         using ScalarType = T::ScalarType;
         
@@ -201,7 +201,7 @@ namespace Physica::Gui {
                 binWidth = 1;
         }
 
-        Core::Array<unsigned int> arr(binCount + 1, 0);
+        Array<unsigned int> arr(binCount + 1, 0);
         const double binCountPerUnit = 1 / binWidth;
         for (size_t i = 0; i < length; ++i) {
             const size_t binIndex = size_t((double(data.calc(i)) - min) * binCountPerUnit);
@@ -241,7 +241,7 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
+    template<Vector T>
     QAreaSeries& Plot::area_boundary(const T& x,
                                      const T& lower,
                                      const T& upper) {
@@ -262,7 +262,7 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
+    template<Vector T>
     QAreaSeries& Plot::area_center(const T& x,
                                    const T& center,
                                    const T& deviation) {
@@ -271,11 +271,11 @@ namespace Physica::Gui {
         return area_boundary(x, lower, upper);
     }
 
-    template<Core::Matrix T>
-    ContourSeries<T>& Plot::contour(const Core::LValueMatrix<T>& x,
-                                    const Core::LValueMatrix<T>& y,
-                                    const Core::LValueMatrix<T>& z,
-                                    Core::Array<double> levels) {
+    template<Matrix T>
+    ContourSeries<T>& Plot::contour(const LValueMatrix<T>& x,
+                                    const LValueMatrix<T>& y,
+                                    const LValueMatrix<T>& z,
+                                    Array<double> levels) {
         auto* series = new ContourSeries<T>(x, y, z, std::move(levels));
         series->attachTo(*getChart());
         series->attachAxis(axisX);
@@ -284,8 +284,8 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
-    QBoxPlotSeries& Plot::boxWhisker(const T& x, const Core::Array<T>& data) {
+    template<Vector T>
+    QBoxPlotSeries& Plot::boxWhisker(const T& x, const Array<T>& data) {
         assert(x.getLength() == data.getLength());
         QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {
@@ -300,7 +300,7 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
+    template<Vector T>
     QBoxPlotSeries& Plot::errorBar(
             const T& mean,
             const T& deviation) {
@@ -310,7 +310,7 @@ namespace Physica::Gui {
         return errorBar(x, mean, deviation);
     }
 
-    template<Core::Vector T1, Core::Vector T2>
+    template<Vector T1, Vector T2>
     QBoxPlotSeries& Plot::errorBar(
             const T1& x,
             const T2& mean,
@@ -338,9 +338,9 @@ namespace Physica::Gui {
         return *series;
     }
 
-    template<Core::Vector T>
-    QBoxSet* Plot::setFromVector(const Core::LValueVector<T>& v) {
-        using BufferType = Core::DenseVector<typename T::ScalarType, T::SizeAtCompile>;
+    template<Vector T>
+    QBoxSet* Plot::setFromVector(const LValueVector<T>& v) {
+        using BufferType = DenseVector<typename T::ScalarType, T::SizeAtCompile>;
         BufferType buffer = v;
         std::sort(buffer.begin(), buffer.end());
         auto* result = new QBoxSet();
@@ -353,8 +353,8 @@ namespace Physica::Gui {
         return result;
     }
 
-    template<Core::Vector T>
-    double Plot::findMedian(const Core::LValueVector<T>& sorted_v, size_t from, size_t to) {
+    template<Vector T>
+    double Plot::findMedian(const LValueVector<T>& sorted_v, size_t from, size_t to) {
         size_t count = to - from;
         if (count % 2) {
             return double(sorted_v[count / 2 + from]);

@@ -20,7 +20,7 @@
 
 #include "SparseVectorImpl/RSparseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T> class SparseReference;
 
     template<Scalar T>

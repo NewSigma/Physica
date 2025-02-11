@@ -23,7 +23,7 @@
 #include <mpi/mpi.h>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API MPIExecutor {
         using This = MPIExecutor;
     public:

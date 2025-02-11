@@ -22,20 +22,20 @@
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 #include "Plot.h"
 
-namespace Physica::Gui {
+namespace Physica {
     template<Scalar T>
     class PhononPlot : public Plot {
     public:
-        using ComplexType = Core::Complex<T>;
-        using Vector3D = Core::Vector3D<T>;
-        using VectorType = Core::VectorND<T>;
-        using MatrixType = Core::DenseMatrix<T>;
-        using ComplexMatrix = Core::DenseMatrix<ComplexType>;
-        using PhononType = Core::FrozenPhonon<T>;
+        using ComplexType = Complex<T>;
+        using Vector3D = Vector3D<T>;
+        using VectorType = VectorND<T>;
+        using MatrixType = DenseMatrix<T>;
+        using ComplexMatrix = DenseMatrix<ComplexType>;
+        using PhononType = FrozenPhonon<T>;
         using KSpaceFCGrid = PhononType::KSpaceFCGrid;
         using EigenSolverType = PhononType::EigenSolverType;
-        using Index3D = Core::GridBase::Index3D;
-        using ColorArray = Core::Array<QColor>;
+        using Index3D = GridBase::Index3D;
+        using ColorArray = Array<QColor>;
 
         enum BandConnectMethod {
             Direct,
@@ -72,8 +72,8 @@ namespace Physica::Gui {
             BandConnectMethod method = BandConnectMethod::Predict);
         /* Getters */
         [[nodiscard]] QCategoryAxis* getAxisX() const noexcept { return reinterpret_cast<QCategoryAxis*>(Plot::getAxisX()); }
-        [[nodiscard]] T getMaxFreqInAU() const noexcept { return getMaxY() / T(Core::PhyConst<Core::AU>::freqToTHz(1)); }
-        [[nodiscard]] T getMinFreqInAU() const noexcept { return getMinY() / T(Core::PhyConst<Core::AU>::freqToTHz(1)); }
+        [[nodiscard]] T getMaxFreqInAU() const noexcept { return getMaxY() / T(PhyConst<AU>::freqToTHz(1)); }
+        [[nodiscard]] T getMinFreqInAU() const noexcept { return getMinY() / T(PhyConst<AU>::freqToTHz(1)); }
         /* Setters */
         void resetCurrentX() { currentX = T(0); }
     private:
@@ -264,7 +264,7 @@ namespace Physica::Gui {
     PhononPlot<T>::makeFreq(const EigenSolverType& eigen) {
         using namespace Physica;
         auto freq = PhononType::makeFreq(eigen);
-        freq *= T(Core::PhyConst<AU>::freqToTHz(1));
+        freq *= T(PhyConst<AU>::freqToTHz(1));
         Plot::setMinY(std::min(Plot::getMinY(), double(freq.min())));
         Plot::setMaxY(std::max(Plot::getMaxY(), double(freq.max())));
         return freq;

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class IterateSolver {
         using This = IterateSolver<T>;
@@ -184,9 +184,9 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T>
-    inline void swap(Physica::Core::IterateSolver<T>& __restrict solver1,
-                     Physica::Core::IterateSolver<T>& __restrict solver2) noexcept {
+    template<Physica::Scalar T>
+    inline void swap(Physica::IterateSolver<T>& __restrict solver1,
+                     Physica::IterateSolver<T>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

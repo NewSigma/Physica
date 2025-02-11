@@ -21,7 +21,7 @@
 #include <random>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, class RandomPoolType>
     class GaussRandomPool {
     public:
@@ -72,5 +72,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, class RandomPoolType>
-    class Traits<Core::GaussRandomPool<T, RandomPoolType>> : public Traits<RandomPoolType> {};
+    class Traits<GaussRandomPool<T, RandomPoolType>> : public Traits<RandomPoolType> {};
 }

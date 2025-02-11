@@ -18,7 +18,7 @@
  */
 #include "Physica/Logger/Logger/StdLogger.h"
 
-namespace Physica::Logger {
+namespace Physica {
     StdLogger::StdLogger(std::ostream& stream) : os(stream) {}
 
     void StdLogger::log(LogBuffer& buffer) {

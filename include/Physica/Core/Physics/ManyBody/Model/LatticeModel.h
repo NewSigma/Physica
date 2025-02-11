@@ -20,7 +20,7 @@
 
 #include "SiteIndex.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<int Dim>
     class LatticeModel {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");

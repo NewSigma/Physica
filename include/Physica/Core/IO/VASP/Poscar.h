@@ -21,7 +21,7 @@
 #include <iosfwd>
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     class Xdatcar;
 
     template<Scalar T>

@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T> class Poscar;
 
     template<Scalar T>
@@ -47,8 +47,8 @@ namespace Physica::Core {
         /* Operations */
         void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] CrystalCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
-        H5Group read(const H5Location& loc, const char* name);
-        H5Group write(H5Location& loc, const char* name) const;
+        H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(CrystalCell& __restrict cell) noexcept;
         /* Getters */
         using Base::getType;

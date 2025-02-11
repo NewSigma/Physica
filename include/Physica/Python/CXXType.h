@@ -21,14 +21,19 @@
 #include <ffi.h>
 #include <clang/AST/DeclCXX.h>
 #include <pybind11/pybind11.h>
-#include "Physica/Core/Utils/Allocator/PlainPtr.h"
 
 namespace py = pybind11;
 
-namespace Physica::Python {
+namespace Physica {
     class CXXType {
         clang::CXXRecordDecl* pDecl;
         ffi_type ffiType;
+
+        struct deleter {
+            void operator()(void* ptr) { std::free(ptr); }
+        };
+
+        using Ptr = std::unique_ptr<void, deleter>;
     public:
         CXXType() = default;
         CXXType(clang::CXXRecordDecl* pDecl_);
@@ -40,8 +45,8 @@ namespace Physica::Python {
         CXXType& operator=(CXXType obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] const ffi_type* toFFI() const noexcept { return &ffiType; }
-        [[nodiscard]] py::object toPython(Core::PlainPtr&& data) const;
-        [[nodiscard]] Core::PlainPtr allocate() const noexcept;
+        [[nodiscard]] py::object toPython(void* data) const;
+        [[nodiscard]] Ptr allocate() const noexcept;
         void swap(CXXType& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isTrivial() const noexcept { return pDecl == nullptr; }

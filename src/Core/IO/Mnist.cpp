@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Mnist.h"
 
-namespace Physica::Core {
+namespace Physica {
     Mnist::Mnist(const char* folder) {
         std::filesystem::path p(folder) ;
         p.append("train-images.idx3-ubyte");

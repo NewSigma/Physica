@@ -23,7 +23,7 @@
 #include "Physica/Python/LLVM/ASTCursor.h"
 #include "Physica/Python/LLVM/LLVM.h"
 
-namespace Physica::Python {
+namespace Physica {
     constinit static PhysicaPython* instance = nullptr;
 
     PhysicaPython::PhysicaPython(std::filesystem::path root_) : llvm(), clang(std::move(root_), llvm) {
@@ -55,7 +55,7 @@ namespace Physica::Python {
 void pymain(py::module_& m);
 
 PYBIND11_MODULE(PhysicaPython, m) {
-    using namespace Physica::Python;
+    using namespace Physica;
 
     m.doc() = "Backend of Physica Python interface";
     py::register_exception<Physica::LLVMException>(m, "LLVMException");

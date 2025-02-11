@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Scalar/ExprType.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<ExprType type, Grid T1, class T2 = T1> class GridExpression;
     //////////////////////////////////////Add//////////////////////////////////////
     template<Grid T1, Grid T2>
@@ -111,18 +111,18 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<ExprType type, Core::Grid Exp1, Core::Grid Exp2>
+    template<ExprType type, Grid Exp1, Grid Exp2>
     class Traits<GridExpression<type, Exp1, Exp2>> {
         using ScalarType1 = Exp1::ScalarType;
         using RealType = ScalarType1::RealType;
-        using BinaryScalarType = Core::Internal::BinaryScalarOpRtnTy<ScalarType1, typename Exp2::ScalarType>::Type;
+        using BinaryScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, typename Exp2::ScalarType>::Type;
     public:
         using ScalarType = std::conditional<type == ExprType::Abs, RealType, BinaryScalarType>::type;
     };
 
-    template<ExprType type, Core::Grid Exp, Core::Scalar U>
+    template<ExprType type, Grid Exp, Scalar U>
     class Traits<GridExpression<type, Exp, U>> {
     public:
-        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename Exp::ScalarType, U>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename Exp::ScalarType, U>::Type;
     };
 }

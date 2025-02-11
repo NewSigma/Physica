@@ -21,7 +21,7 @@
 #include "DecisionTree.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*
      * Reference:
      * [1] Leo Breiman, Random forests[J]. Machine Learning, 45, 5–32, 2001
@@ -185,7 +185,7 @@ namespace Physica::Core {
             }
             const T newError = makeTestError(predictions, dataset.labels, numTestSample);
             const T deltaError = newError - train<R>(numTree, dataset).second;
-            Core::toNextMean(mean, i, deltaError);
+            toNextMean(mean, i, deltaError);
         }
         return mean;
     }

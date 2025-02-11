@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, Vector V>
     class MatrixVectorProduct;
 

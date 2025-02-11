@@ -22,7 +22,7 @@
 #include "Physica/PlainStruct.h"
 #include "LatticeModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Dim>
     class Hubbard : public LatticeModel<Dim> {
         static_assert(!T::isComplex, "[Error]: Model param must be real");

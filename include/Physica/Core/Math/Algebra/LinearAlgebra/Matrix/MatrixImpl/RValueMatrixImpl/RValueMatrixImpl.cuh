@@ -24,7 +24,7 @@
 #include "Physica/PlainStruct.h"
 #include "RValueFlatten.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class Derived, Matrix M>
         __global__ void RValueMatrix_assignToKernel(

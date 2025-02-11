@@ -20,7 +20,7 @@
 
 #include "HubbardMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, Representation U>
     HubbardMatrix<T, U>::HubbardMatrix(ModelBase hubbard, U repr_)
             : ModelBase(std::move(hubbard))

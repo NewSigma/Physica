@@ -21,7 +21,7 @@
 #include <type_traits>
 #include "Physica/CRTPBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class ReprBasis : public CRTPBase<ReprBasis<Derived>> {
         using This = ReprBasis<Derived>;

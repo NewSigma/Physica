@@ -21,7 +21,7 @@
 #include <cmath>
 #include <numbers>
 
-namespace Physica::Core {
+namespace Physica {
     enum UnitSystem {
         SI,
         AU,

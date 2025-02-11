@@ -35,7 +35,7 @@
 #include "Physica/Python/LLVM/ClangImpl/HeaderManager.h"
 #include "Physica/Macro.h"
 
-namespace Physica::Python {
+namespace Physica {
     Clang::Clang(std::filesystem::path root_, LLVM& llvm) : root(std::move(root_)) {
         makeInvocation();
         initOptions();

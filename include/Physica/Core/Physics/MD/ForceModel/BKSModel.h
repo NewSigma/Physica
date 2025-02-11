@@ -23,7 +23,7 @@
 #include "ForceModelImpl/AABModel.h"
 #include "PairModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * BKS potential for SiO2 or Al-P-O, as introduced in [1]
      * 
@@ -234,7 +234,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    class Traits<Core::BKSModel<T, EwaldType, AvoidTooNear>> {
+    class Traits<BKSModel<T, EwaldType, AvoidTooNear>> {
     public:
         using ScalarType = T;
         constexpr static bool IsPeriodBoundary = true;

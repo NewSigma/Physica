@@ -19,7 +19,7 @@
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "Physica/Core/Math/Random/RandomSeed.h"
 
-namespace Physica::Core {
+namespace Physica {
     int ThreadPool::numThreadRequired = 0;
 
     ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {

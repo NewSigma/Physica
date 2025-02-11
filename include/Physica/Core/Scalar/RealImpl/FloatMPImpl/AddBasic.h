@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * \len is the length of \from. Length of \to should not less than \len. length of \result should be \len at least.
      */

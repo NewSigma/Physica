@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, Vector U>
     class device_obj<MatrixVectorProduct<T, U>>
             : public device_obj<RValueVector<MatrixVectorProduct<T, U>>> {
@@ -127,5 +127,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T, Vector U>
-    class Traits<Core::device_obj<MatrixVectorProduct<T, U>>> : public Traits<MatrixVectorProduct<T, U>> {};
+    class Traits<device_obj<MatrixVectorProduct<T, U>>> : public Traits<MatrixVectorProduct<T, U>> {};
 }

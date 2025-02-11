@@ -25,7 +25,7 @@
     #include <mkl_lapacke.h>
 #endif
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API LapackException : public std::system_error {
         using Base = std::system_error;
 
@@ -52,6 +52,6 @@ namespace Physica::Core {
 namespace Physica {
     inline void check_lapack(int err) {
         if (err != 0) [[unlikely]]
-            throw Physica::Core::LapackException(err);
+            throw LapackException(err);
     }
 }

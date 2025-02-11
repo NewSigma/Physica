@@ -25,7 +25,7 @@
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * References:
      * [1] Neural Process. Lett. 14, 27–34 (2001). https://doi.org/10.1023/A:1011326007550

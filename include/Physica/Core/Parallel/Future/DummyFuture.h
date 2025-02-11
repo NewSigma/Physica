@@ -20,7 +20,7 @@
 
 #include "FutureGroup.h"
 
-namespace Physica::Core {
+namespace Physica {
     class DummyFuture {
     public:
         void wait() {}

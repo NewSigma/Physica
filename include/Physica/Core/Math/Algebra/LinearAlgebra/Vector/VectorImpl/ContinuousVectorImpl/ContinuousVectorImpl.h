@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/MKL/VSL.h"
 #include "../ContinuousVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Vector T1, Vector T2, bool enableSIMD>
         struct AddAssignImpl {
@@ -237,7 +237,7 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    const ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::read(const H5Location& loc, const char* name) {
+    const ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::read(const H5Loc& loc, const char* name) {
         const auto dataset = loc.openDataSet<DataDim>(name);
         const size_t length = dataset.getSize(0);
         resize(length);
@@ -256,7 +256,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::write(H5Location& loc, const char* name) const {
+    ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::write(H5Loc& loc, const char* name) const {
         const size_t length = Base::getLength();
         const auto memSpace = H5DataSpace<1>(length);
         DataSpaceType fileSpace;

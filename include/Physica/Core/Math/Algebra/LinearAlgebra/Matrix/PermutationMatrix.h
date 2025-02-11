@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include "MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class PermutationMatrix : public RValueMatrix<PermutationMatrix<T>> {
         Array<size_t> indexes;
@@ -94,11 +94,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Scalar T>
-    class Traits<Core::PermutationMatrix<T>> {
+    template<Scalar T>
+    class Traits<PermutationMatrix<T>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = Core::MatrixOption::AnyMajor | Core::MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

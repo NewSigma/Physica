@@ -25,7 +25,7 @@
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "SeqExecutor.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API ThreadExecutor {
     public:
         using FutureType = std::future<void>;
@@ -103,7 +103,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<>
-    class Traits<Core::ThreadExecutor> {
+    class Traits<ThreadExecutor> {
     public:
         constexpr static bool UseCPU = true;
         constexpr static bool UseCUDA = false;

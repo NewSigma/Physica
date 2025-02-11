@@ -21,7 +21,7 @@
 #include <pybind11/numpy.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/ContinuousVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     auto ContinuousVector<Derived>::toNumpy() const {
         using T = ScalarType::MachineType;

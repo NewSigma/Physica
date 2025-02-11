@@ -21,7 +21,7 @@
 #include <thread>
 #include "Physica/Core/Utils/Container/RingBuffer.h"
 
-namespace Physica::Core {
+namespace Physica {
     RingBuffer::RingBuffer(size_t size) : buffer(size) {
         bufferReader = bufferWriter = buffer.data();
     }

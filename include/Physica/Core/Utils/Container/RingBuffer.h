@@ -20,7 +20,7 @@
 
 #include "Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API RingBuffer {
         using This = RingBuffer;
 

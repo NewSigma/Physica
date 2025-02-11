@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "SeqExecutor.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Single thread with cuda support
      */
@@ -37,7 +37,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<>
-    class Traits<Core::CUDAExecutor> {
+    class Traits<CUDAExecutor> {
     public:
         constexpr static bool UseCPU = false;
         constexpr static bool UseCUDA = true;

@@ -22,7 +22,7 @@
 #include "DiffVector.h"
 #include "DenseVector.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Order>
     class device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
             : public device_obj<RValueVector<Diff<VectorND<T>, DiffMode::Reverse, Order>>> {
@@ -97,9 +97,9 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, int Order>
-    class Traits<Core::device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>> : public Traits<VectorND<T>> {
+    class Traits<device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>> : public Traits<VectorND<T>> {
     public:
-        using ScalarType = Core::device_obj<Diff<T, DiffMode::Reverse, Order>>;
+        using ScalarType = device_obj<Diff<T, DiffMode::Reverse, Order>>;
     };
 }
 

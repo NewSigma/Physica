@@ -20,7 +20,7 @@
 
 #include "Langevin.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] J. Chem. Phys. 140, 234116 (2014); https://doi.org/10.1063/1.4883861
@@ -102,7 +102,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    class Traits<Core::TRPMDThermo<T, Dim, NumReplica>> {
+    class Traits<TRPMDThermo<T, Dim, NumReplica>> {
     public:
         constexpr static bool IsCentroidCoupled = false;
     };

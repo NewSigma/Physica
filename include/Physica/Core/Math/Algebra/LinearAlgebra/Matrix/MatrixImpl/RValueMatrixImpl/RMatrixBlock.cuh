@@ -20,7 +20,7 @@
 
 #include "RMatrixBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class device_obj<RMatrixBlock<T, 1, Dynamic>> : public device_obj<RValueVector<RMatrixBlock<T, 1, Dynamic>>> {
         using host_obj = RMatrixBlock<T, 1, Dynamic>;
@@ -137,5 +137,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T, size_t Row, size_t Col>
-    class Traits<Core::device_obj<Core::RMatrixBlock<T, Row, Col>>> : public Traits<Core::RMatrixBlock<T, Row, Col>> {};
+    class Traits<device_obj<RMatrixBlock<T, Row, Col>>> : public Traits<RMatrixBlock<T, Row, Col>> {};
 }

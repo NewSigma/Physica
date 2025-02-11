@@ -24,7 +24,7 @@
     #include <mkl_vsl.h>
 #endif
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API VSLException : public std::system_error {
         using Base = std::system_error;
 
@@ -51,7 +51,7 @@ namespace Physica::Core {
 namespace Physica {
     inline void check_vsl_impl(int err) {
         if (err != 0) [[unlikely]]
-            throw Physica::Core::VSLException(err);
+            throw VSLException(err);
     }
 }
 

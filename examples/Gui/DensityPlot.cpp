@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,6 @@
 
 int main(int argc, char** argv) {
     using namespace Physica;
-    using namespace Physica::Gui;
 
     const int size = 1000;
     const int step_size = 10;

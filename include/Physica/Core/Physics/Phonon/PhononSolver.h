@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "PhononSolverImpl/BHProjector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class PhononSolver {
         using This = PhononSolver<T>;

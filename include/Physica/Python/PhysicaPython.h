@@ -25,7 +25,7 @@
 #include "Physica/Python/LLVM/Clang.h"
 #include "CXXType.h"
 
-namespace Physica::Python {
+namespace Physica {
     class PhysicaPython final {
         using This = PhysicaPython;
         using ExecutorAddr = llvm::orc::ExecutorAddr;

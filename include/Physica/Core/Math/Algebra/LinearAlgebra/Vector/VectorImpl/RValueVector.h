@@ -24,7 +24,7 @@
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "RValueVectorImpl/RVectorBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class LValueVector;
     template<class Derived> class ContinuousVector;
     template<class Derived> class RValueMatrix;

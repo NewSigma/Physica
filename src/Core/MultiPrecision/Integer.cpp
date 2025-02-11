@@ -22,7 +22,7 @@
 #include "Physica/Core/Scalar/Integer.h"
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     Integer::Integer(int i)
             : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
             , length(i >= 0 ? 1 : -1) {

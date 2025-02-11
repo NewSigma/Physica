@@ -26,7 +26,7 @@
 #include "Physica/Core/Parallel/SubProcess.h"
 #include "Physica/Core/Exception/SystemException.h"
 
-namespace Physica::Core {
+namespace Physica {
     SubProcess::SubProcess() : task(), pid(-1), nice_incr(0) {}
 
     SubProcess::SubProcess(std::function<void()> task_, int nice_incr_) : task(std::move(task_)), pid(-1), nice_incr(nice_incr_) {}

@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     class RingPolymer {
         using ValueType = T::ValueType;
@@ -145,7 +145,7 @@ namespace Physica::Core {
                 driftMomentum[direction] += temp;
             }
         }
-        driftMomentum *= Core::reciprocal(T(getNumParticle() * getNumReplica()));
+        driftMomentum *= reciprocal(T(getNumParticle() * getNumReplica()));
 
         for (size_t i = 0; i < dof; ++i) {
             auto row = phase.row(i);

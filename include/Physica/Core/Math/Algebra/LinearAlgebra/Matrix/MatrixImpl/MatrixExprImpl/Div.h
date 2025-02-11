@@ -20,7 +20,7 @@
 
 #include "../MatrixExpr.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T, class U>
     class MatrixExpr<ExprType::Div, T, U>
             : public BinaryMatrixExpr<ExprType::Div, T, U> {

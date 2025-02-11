@@ -25,15 +25,15 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] Frey B. J., Dueck D. Clustering by Passing Messages Between Data Points[J]. Science. 2007 Feb 16;315(5814):972-6
      */
     template<Scalar T>
     class AP {
-        using MatrixType = Core::DenseMatrix<T, Core::MatrixOption::Row | Core::MatrixOption::Vector>;
-        using SimilarMatrix = Core::DenseSymmMatrix<T>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
+        using SimilarMatrix = DenseSymmMatrix<T>;
     private:
         MatrixType responsibility;
         MatrixType availabilities;
@@ -73,7 +73,7 @@ namespace Physica::Core {
         const size_t order = similarity.getOrder();
         const T mixing2 = T(1) - mixing;
 
-        Core::VectorND<T> buffer(order);
+        VectorND<T> buffer(order);
         exemplars.clear();
         availabilities = T(0);
 
@@ -131,7 +131,7 @@ namespace Physica::Core {
                 break;
             ++iteration;
             if (iteration >= maxIteration)
-                throw Core::BadConvergenceException("Exceed max iteration of AP");
+                throw BadConvergenceException("Exceed max iteration of AP");
         };
     }
 

@@ -20,7 +20,7 @@
 
 #include "../VectorExpr.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T>
     class VectorExpr<ExprType::Tanh, T> : public UnitaryVectorExpr<ExprType::Tanh, T> {
         using This = VectorExpr<ExprType::Tanh, T>;

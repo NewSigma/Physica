@@ -23,7 +23,7 @@
 #include "LValueVector.cuh"
 #include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<ContinuousVector<Derived>> : public device_obj<LValueVector<Derived>> {
         using Base = device_obj<LValueVector<Derived>>;

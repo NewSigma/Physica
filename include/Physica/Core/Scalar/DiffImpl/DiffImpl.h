@@ -20,7 +20,7 @@
 
 #include "../Diff.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     Diff<T, Mode, Order>::Diff(T v_) : v(std::move(v_)), g(0) {}
 

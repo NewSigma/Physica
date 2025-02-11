@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,7 +24,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using namespace Physica::Gui;
 using RandomType = Random<MT19937>;
 using T = float64;
 

@@ -23,11 +23,11 @@
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Logger/Logger/FileLogger.h"
 
-namespace Physica::Logger {
+namespace Physica {
     FileLogger::FileLogger(const char* filename, bool trunc)
             : fd(open(filename, trunc ? (O_WRONLY | O_TRUNC | O_CREAT) : (O_WRONLY | O_APPEND | O_CREAT), S_IRUSR | S_IWUSR)) {
         if (fd == -1)
-            throw Core::IOException("[Error]: Failed to open file");
+            throw IOException("[Error]: Failed to open file");
     }
 
     FileLogger::~FileLogger() {

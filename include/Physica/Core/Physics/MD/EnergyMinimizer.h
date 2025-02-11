@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ReshapedVector.h"
 #include "MDCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim = 3>
     class EnergyMinimizer {
     public:

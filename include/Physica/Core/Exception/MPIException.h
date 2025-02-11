@@ -21,7 +21,7 @@
 #include <system_error>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API MPIException : public std::system_error {
         using Base = std::system_error;
 
@@ -48,6 +48,6 @@ namespace Physica::Core {
 namespace Physica {
     inline void check_mpi(int err) {
         if (err != 0) [[unlikely]]
-            throw Core::MPIException(err);
+            throw MPIException(err);
     }
 }

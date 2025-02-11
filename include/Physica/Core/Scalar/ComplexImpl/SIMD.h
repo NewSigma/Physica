@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Length>
     class BestPacket<Complex<T>, Length> {
         using RealPacket = BestPacket<T, Length * 2>;

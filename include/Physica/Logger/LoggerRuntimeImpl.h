@@ -21,7 +21,7 @@
 #include <cstring>
 #include "Physica/Core/Utils/Cycler.h"
 
-namespace Physica::Logger {
+namespace Physica {
     template<typename T1, typename... Ts>
     inline
     std::enable_if<!std::is_same<T1, char*>::value
@@ -36,7 +36,7 @@ namespace Physica::Logger {
     std::enable_if<std::is_same<T1, char*>::value
                             || std::is_same<T1, const char*>::value>::type
     writeArgs(const ArgType* p_args, T1 head, Ts... args) {
-        Core::RingBuffer& buffer = LoggerRuntime::getInstance().getBuffer();
+        RingBuffer& buffer = LoggerRuntime::getInstance().getBuffer();
         if(*p_args == ArgType::s) {
             size_t strLength = std::strlen(head);
             buffer.write(strLength);
@@ -62,7 +62,7 @@ namespace Physica::Logger {
     template<typename... Ts>
     void log(const ArgType* p_args, size_t logID, Ts... args) {
         assert(logID <= LoggerRuntime::getInstance().getNextLogID() && "[Error]: The log ID is not registered");
-        size_t time = Core::Cycler::now();
+        size_t time = Cycler::now();
         writeArgs(p_args, logID);
         writeArgs(p_args, time);
         writeArgs(p_args, args...);

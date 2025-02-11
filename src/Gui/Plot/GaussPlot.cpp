@@ -18,7 +18,7 @@
  */
 #include "Physica/Gui/Plot/GaussPlot.h"
 
-namespace Physica::Gui {
+namespace Physica {
     GaussPlot::GaussPlot(double maxX, double maxY, double deltaX, double deltaY, unsigned int numSigma)
             : Base(-maxX, maxX, 0, maxY, deltaX, deltaY) {
         using namespace Physica;

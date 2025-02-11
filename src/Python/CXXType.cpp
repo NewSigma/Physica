@@ -19,7 +19,7 @@
 #include "Physica/Python/CXXType.h"
 #include "Physica/Python/PhysicaPython.h"
 
-namespace Physica::Python {
+namespace Physica {
     CXXType::CXXType(clang::CXXRecordDecl* pDecl_) : pDecl(pDecl_) {
         assert(pDecl != nullptr && "[Error]: Invalid param");
         auto& pp = PhysicaPython::getInstance();
@@ -31,22 +31,21 @@ namespace Physica::Python {
 
     CXXType::CXXType(ffi_type ffiType_) : pDecl(nullptr), ffiType(ffiType_) {}
 
-    py::object CXXType::toPython(Core::PlainPtr&& data) const {
-        void* pData = data.get();
+    py::object CXXType::toPython(void* data) const {
         switch (ffiType.type) {
         case FFI_TYPE_VOID:
             return py::none();
         case FFI_TYPE_FLOAT:
-            return py::float_(*reinterpret_cast<float*>(pData));
+            return py::float_(*reinterpret_cast<float*>(data));
         case FFI_TYPE_DOUBLE:
-            return py::float_(*reinterpret_cast<double*>(pData));
+            return py::float_(*reinterpret_cast<double*>(data));
         default:
             throw std::runtime_error("[Error]: Unknown type");
         }
     }
 
-    Core::PlainPtr CXXType::allocate() const noexcept {
-        return Core::PlainPtr(std::aligned_alloc(getAlign(), getSize()));
+    auto CXXType::allocate() const noexcept -> Ptr {
+        return Ptr(std::aligned_alloc(getAlign(), getSize()));
     }
 
     void CXXType::swap(CXXType& __restrict obj) noexcept {

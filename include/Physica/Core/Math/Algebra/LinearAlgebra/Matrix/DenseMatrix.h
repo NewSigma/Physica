@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Container/Array2D.h"
 #include "MatrixImpl/ContinuousMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class DenseMatrix
      * A matrix can be either fixed matrix, which have its max size defined,
@@ -120,10 +120,10 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Physica::Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     inline void swap(
-            Physica::Core::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
-            Physica::Core::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {
+            Physica::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
+            Physica::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

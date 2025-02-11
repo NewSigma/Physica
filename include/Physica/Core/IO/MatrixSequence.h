@@ -22,7 +22,7 @@
 #include <utility>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class MatrixSequence {
         using This = MatrixSequence<T>;

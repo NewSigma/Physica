@@ -21,7 +21,7 @@
 #include "Physica/CRTPBase.h"
 #include "GridBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class RValueGrid;
     template<class Derived> class LValueGrid;
     template<class GridType> class FlattenGrid;

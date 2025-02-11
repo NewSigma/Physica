@@ -19,7 +19,7 @@
 #include <format>
 #include "Physica/Python/LLVM/ASTCursor.h"
 
-namespace Physica::Python {
+namespace Physica {
     ASTCursor::ASTCursor(clang::ASTContext& ctx) {
         push(ctx.getTranslationUnitDecl());
     }

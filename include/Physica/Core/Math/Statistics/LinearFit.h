@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearSystem.h"
 #include "NumCharacter.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] 贾俊平、何晓群、金勇进. 统计学(第六版)[M]. 北京:中国人民大学出版社, 2015:280-282.

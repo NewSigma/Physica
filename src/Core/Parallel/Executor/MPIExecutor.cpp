@@ -21,7 +21,7 @@
 #include "Physica/Core/Parallel/Executor/MPIExecutor.h"
 #include "Physica/Core/Exception/MPIException.h"
 
-namespace Physica::Core {
+namespace Physica {
     MPIExecutor::MPIExecutor() {
         int mode;
         check_mpi(MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode));

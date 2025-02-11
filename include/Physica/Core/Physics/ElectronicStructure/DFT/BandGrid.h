@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
 #include "KPoint.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool isSpinPolarized> class BandGrid;
 
     template<Scalar T, bool isSpinPolarized>
@@ -152,8 +152,8 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool isSpinPolarized>
-    inline void swap(Physica::Core::BandGrid<T, isSpinPolarized>& __restrict band1,
-                     Physica::Core::BandGrid<T, isSpinPolarized>& __restrict band2) noexcept {
+    inline void swap(Physica::BandGrid<T, isSpinPolarized>& __restrict band1,
+                     Physica::BandGrid<T, isSpinPolarized>& __restrict band2) noexcept {
         band1.swap(band2);
     }
     /**

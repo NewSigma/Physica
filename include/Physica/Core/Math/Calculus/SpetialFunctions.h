@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Scalar T>
         T factorial(unsigned int x) {

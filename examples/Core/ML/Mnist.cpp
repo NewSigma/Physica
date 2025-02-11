@@ -138,8 +138,6 @@ namespace Physica {
 }
 
 using namespace Physica;
-using namespace Physica::Gui;
-
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse>;
 using Dataset = Mnist::DatasetType<VectorND<T>>;

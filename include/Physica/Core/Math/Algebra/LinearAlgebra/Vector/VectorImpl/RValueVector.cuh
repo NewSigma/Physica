@@ -22,7 +22,7 @@
 #include "Physica/Core/Utils/CUDA/DeviceProp.cuh"
 #include "RValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public CRTPBase<device_obj<RValueVector<Derived>>> {
         using This = device_obj<RValueVector<Derived>>;

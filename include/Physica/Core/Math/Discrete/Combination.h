@@ -24,7 +24,7 @@
 #include <algorithm>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Calculate the number of arrangement $A_m^n$.
      * Using the definition, may be possible to optimize.

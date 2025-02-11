@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Diff.h" // IWYU pragma: export
 #include "DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     class DenseVector<Diff<T, Mode, Order>, Length, Allocator>
             : public ContinuousVector<DenseVector<Diff<T, Mode, Order>, Length, Allocator>>

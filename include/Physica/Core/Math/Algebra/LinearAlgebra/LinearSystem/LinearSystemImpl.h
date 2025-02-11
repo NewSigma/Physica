@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     LinearSystem<T>::LinearSystem(WorkingMatrix&& working_) : working(std::move(working_)) {
         assert(working.getRow() + 1 == working.getCol() && "[Error]: Invalid working matrix");

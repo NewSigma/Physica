@@ -20,7 +20,7 @@
 #include "Physica/Core/Exception/FFIException.h"
 #include "Physica/Python/FFI/FuncInfo.h"
 
-namespace Physica::Python {
+namespace Physica {
     FuncInfo::FuncInfo(unsigned int nargs, const ffi_type* rtype, const ffi_type** atypes) {
         check(ffi_prep_cif(&raw_cif, FFI_DEFAULT_ABI, nargs, const_cast<ffi_type*>(rtype), const_cast<ffi_type**>(atypes)));
     }

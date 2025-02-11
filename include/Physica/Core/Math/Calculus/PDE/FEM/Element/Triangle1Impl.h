@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Geometry/GeoBase2D.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Scalar T, class Functor, int DeltaOrder>
         struct GaussIntegral<Triangle1<T>, Functor, DeltaOrder> {

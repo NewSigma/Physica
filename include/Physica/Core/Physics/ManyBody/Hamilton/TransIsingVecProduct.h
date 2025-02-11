@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/ManyBody/ReprSpace/PauliMatrix.h"
 #include "TransIsingMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, Representation U, Vector V>
     class MatrixVectorProduct<TransIsingMatrix<T, U>, V>
             : public RValueVector<MatrixVectorProduct<TransIsingMatrix<T, U>, V>> {

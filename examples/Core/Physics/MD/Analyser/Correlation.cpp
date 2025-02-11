@@ -27,7 +27,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
@@ -58,7 +57,7 @@ namespace Physica {
     }
 
     template<>
-    class Traits<Core::ForceModel> : public Traits<Core::LJModel1<ScalarType>> {};
+    class Traits<ForceModel> : public Traits<LJModel1<ScalarType>> {};
 }
 
 MDCell<ScalarType> makeSystem() {

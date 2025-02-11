@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
 #include "HubbardMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, Representation U, Vector V>
     class MatrixVectorProduct<HubbardMatrix<T, U>, V> : public RValueVector<MatrixVectorProduct<HubbardMatrix<T, U>, V>> {
         using MatrixType = HubbardMatrix<T, U>;

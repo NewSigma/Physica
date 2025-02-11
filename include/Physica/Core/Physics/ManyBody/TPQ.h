@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Hamilton/HamiltonMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * NVE ensemble referenced from [1]
      * NVT ensemble referenced from [2]

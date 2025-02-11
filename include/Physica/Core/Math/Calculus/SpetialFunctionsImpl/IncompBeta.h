@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Exception/BadConvergenceException.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<ScalarOption Option>
         Real<Option> incompBetaImpl(const Real<Option>& a, const Real<Option>& b, const Real<Option>& x) {

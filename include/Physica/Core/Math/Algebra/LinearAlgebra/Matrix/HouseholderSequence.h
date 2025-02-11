@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Construct using a triangular matrix, echo column or row represents a householder transformation
      *
@@ -104,7 +104,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T, bool ColWiseRead>
-    class Traits<Core::HouseholderSequence<T, ColWiseRead>> {
+    class Traits<HouseholderSequence<T, ColWiseRead>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;

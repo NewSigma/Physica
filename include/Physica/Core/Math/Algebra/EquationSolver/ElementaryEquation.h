@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Equations are defined like this:
      * T func(const T&)

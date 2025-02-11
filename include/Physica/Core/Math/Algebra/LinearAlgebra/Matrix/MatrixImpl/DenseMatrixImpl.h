@@ -20,7 +20,7 @@
 
 #include "../DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col)
             : Storage(row, col) {}

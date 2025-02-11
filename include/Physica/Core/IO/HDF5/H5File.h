@@ -20,10 +20,10 @@
 
 #include "HDF5.h"
 
-namespace Physica::Core {
-    class PHYSICA_API H5File : public H5::H5File, public H5Location {
+namespace Physica {
+    class PHYSICA_API H5File : public H5::H5File, public H5Loc {
         using Base = H5::H5File;
-        using Location = Core::H5Location;
+        using Loc = H5Loc;
     public:
         enum OpenFlag : unsigned int {
             ReadOnly = 0x0000U,
@@ -49,10 +49,10 @@ namespace Physica::Core {
         H5File& operator=(H5File& obj) = default;
         H5File& operator=(H5File&&) noexcept = default;
         /* Operations */
-        using Location::exists;
-        using Location::createDataSet;
-        using Location::openDataSet;
-        using Location::openGroup;
+        using Loc::exists;
+        using Loc::createDataSet;
+        using Loc::openDataSet;
+        using Loc::openGroup;
         [[nodiscard]] H5DataSet<1> createDataSet(const char* filepath, const char* name);
         [[nodiscard]] H5Group openGroup(const char* name);
         /* Getters */

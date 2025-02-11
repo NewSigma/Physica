@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * By default, point do not need high precision, so @param type is set to float32.
      */

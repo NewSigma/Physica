@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class SparseReference {
         using This = SparseReference<T>;

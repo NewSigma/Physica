@@ -20,7 +20,7 @@
 
 #include "../Complex.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     Complex<T>::Complex(double _Complex x) : This(std::complex<MachineType>(x)) {}
 

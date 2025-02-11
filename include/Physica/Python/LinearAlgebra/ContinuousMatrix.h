@@ -21,7 +21,7 @@
 #include <pybind11/numpy.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/ContinuousMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     auto ContinuousMatrix<Derived>::toNumpy() const {
         static_assert(MatrixOption::isElementMatrix<Derived>(), "[Error]: Vector storage cannot cast to numpy");

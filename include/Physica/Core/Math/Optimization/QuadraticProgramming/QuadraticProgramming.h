@@ -21,7 +21,7 @@
 #include <algorithm>
 #include "EqualityQuadraticProgramming.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Solve quadratic programming, that is
      * 

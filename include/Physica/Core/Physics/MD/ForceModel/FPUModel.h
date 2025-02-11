@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
     class FPUModel {
         static_assert(Dim == 1, "[Error]: FPUModel must be 1-dimensional");

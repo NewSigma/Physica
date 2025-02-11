@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "State.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<int Dim, int NumSite>
     class SpinState : public State<SpinState<Dim, NumSite>> {
         using This = SpinState<Dim, NumSite>;
@@ -110,8 +110,8 @@ namespace Physica {
 
 namespace std {
     template<int Dim, int NumSite>
-    struct hash<Physica::Core::SpinState<Dim, NumSite>> {
-        using T = Physica::Core::SpinState<Dim, NumSite>;
+    struct hash<Physica::SpinState<Dim, NumSite>> {
+        using T = Physica::SpinState<Dim, NumSite>;
 
         std::size_t operator()(const T& psi) const noexcept {
             return std::hash<typename T::IntType>{}(psi.getOccupyBits());
@@ -130,7 +130,7 @@ namespace std {
                 if (isOccupy) {
                     i += 1;
                     if (site >= i)
-                        result += Physica::Core::combination(site, i);
+                        result += Physica::combination(site, i);
                 }
                 bits >>= 1;
             }

@@ -23,7 +23,7 @@
 #include <QRubberBand>
 #include "Physica/Macro.h"
 
-namespace Physica::Gui {
+namespace Physica {
     class PHYSICA_API ChartView : public QGraphicsView {
         using Base = QGraphicsView;
 

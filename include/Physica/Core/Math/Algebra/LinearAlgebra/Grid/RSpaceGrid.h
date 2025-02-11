@@ -21,7 +21,7 @@
 #include "GridImpl/GridStorage.h"
 #include "GridImpl/LValueGrid.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class RSpaceGrid : public LValueGrid<RSpaceGrid<T>>, private GridStorage<T> {
         using This = RSpaceGrid<T>;

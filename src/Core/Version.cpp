@@ -26,7 +26,7 @@
 #endif
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     PHYSICA_API std::string version() {
         std::ostringstream os{};
         std::format_to(std::ostreambuf_iterator<char>(os), "Physica {}    Hash: {}\n", Version, GitHash);

@@ -21,7 +21,7 @@
 #include "Physica/PlainStruct.h"
 #include "VectorExpr.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<ExprType Type, Vector V>
     class device_obj<UnitaryVectorExpr<Type, V>> : public device_obj<RValueVector<VectorExpr<Type, V>>> {
         using host_obj = UnitaryVectorExpr<Type, V>;

@@ -23,7 +23,7 @@
 #include <string>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API DirStack {
         std::vector<const char*> dirs;
     public:

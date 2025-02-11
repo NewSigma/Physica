@@ -21,7 +21,7 @@
 #include <stdexcept>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API IOException : public std::runtime_error {
     public:
         IOException(const char* msg) : std::runtime_error(msg) {}

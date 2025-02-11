@@ -20,7 +20,7 @@
 
 #include "FCProjector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Bohn-Huang(BH) projector impose Bohn-Huang and Huang invariance to force constant matrix as introduced in [1].
      * 

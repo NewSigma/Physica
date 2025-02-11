@@ -21,7 +21,7 @@
 #include <array>
 #include "LoggerType.h"
 
-namespace Physica::Logger {
+namespace Physica {
     template<size_t N>
     constexpr size_t getArgCount(const char (&format)[N]);
 

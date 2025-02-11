@@ -22,7 +22,7 @@
 #include <cstddef>
 #include <array>
 
-namespace Physica::Logger {
+namespace Physica {
     /*!
      * ArgType indicates the conversion specifier, e.g. c in %c, s in %s.
      */

@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Unfinished:
      * If the equations do not have the unique solution, the program will throw a divide zero exception and stop.
@@ -60,9 +60,9 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T>
-    inline void swap(Physica::Core::LinearSystem<T>& __restrict equ1,
-                     Physica::Core::LinearSystem<T>& __restrict equ2) noexcept {
+    template<Physica::Scalar T>
+    inline void swap(Physica::LinearSystem<T>& __restrict equ1,
+                     Physica::LinearSystem<T>& __restrict equ2) noexcept {
         equ1.swap(equ2);
     }
 }

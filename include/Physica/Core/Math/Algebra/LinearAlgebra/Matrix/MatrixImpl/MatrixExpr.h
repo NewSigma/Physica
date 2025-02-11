@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/ExprType.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class MatrixExpr represents \param T \param type \param U. e.g. matrix + scalar, expression * expression
      */

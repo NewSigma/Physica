@@ -21,7 +21,7 @@
 #include "ThreadExecutor.h"
 #include "CUDAExecutor.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class AutoExecutor is devoted to provide a load balancing heterogeneous computing.
      */

@@ -21,7 +21,7 @@
 #include "DenseSymmImpl/HalfDenseMatrixStorage.h"
 #include "DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class MatrixChain calculates the product of matrices efficiently and stably.
      *

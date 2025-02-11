@@ -21,7 +21,7 @@
 #include "EigenSolver.h"
 #include "Physica/Core/Exception/MKL/Lapack.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Order>
     template<Matrix M>
     void EigenSolver<T, Order>::compute_mkl(const M& source, bool computeEigenvectors_) {

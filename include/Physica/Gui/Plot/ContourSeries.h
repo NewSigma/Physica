@@ -21,11 +21,11 @@
 #include <QtCharts/QLineSeries>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
-namespace Physica::Gui {
+namespace Physica {
     template<Matrix T>
     class ContourSeries : public QObject {
         using ScalarType = T::ScalarType;
-        using ContourLine = std::pair<Core::Array<double>, Core::Array<double>>;
+        using ContourLine = std::pair<Array<double>, Array<double>>;
 
         struct Quad {
             using Vertex = std::pair<size_t, size_t>;
@@ -69,16 +69,16 @@ namespace Physica::Gui {
         };
 
         class Grid {
-            using FlagMatrix = Core::Array<Core::Array<bool>>;
+            using FlagMatrix = Array<Array<bool>>;
 
-            const Core::LValueMatrix<T>& x;
-            const Core::LValueMatrix<T>& y;
-            const Core::LValueMatrix<T>& z;
+            const LValueMatrix<T>& x;
+            const LValueMatrix<T>& y;
+            const LValueMatrix<T>& z;
             FlagMatrix flags;
         public:            
-            Grid(const Core::LValueMatrix<T>& x_,
-                 const Core::LValueMatrix<T>& y_,
-                 const Core::LValueMatrix<T>& z_);
+            Grid(const LValueMatrix<T>& x_,
+                 const LValueMatrix<T>& y_,
+                 const LValueMatrix<T>& z_);
             Grid(const Grid&) = delete;
             Grid(Grid&&) noexcept = delete;
             ~Grid() = default;
@@ -98,13 +98,13 @@ namespace Physica::Gui {
             void interpolateEdge(Edge edge, double level, ContourLine& line) const;
         };
         
-        Core::Array<ContourLine> contourLines;
-        Core::Array<QLineSeries*> splines;
+        Array<ContourLine> contourLines;
+        Array<QLineSeries*> splines;
     public:
-        ContourSeries(const Core::LValueMatrix<T>& x,
-                      const Core::LValueMatrix<T>& y,
-                      const Core::LValueMatrix<T>& z,
-                      Core::Array<double> level,
+        ContourSeries(const LValueMatrix<T>& x,
+                      const LValueMatrix<T>& y,
+                      const LValueMatrix<T>& z,
+                      Array<double> level,
                       QObject* parent = nullptr);
         ContourSeries(const ContourSeries&) = delete;
         ContourSeries(ContourSeries&&) noexcept = delete;

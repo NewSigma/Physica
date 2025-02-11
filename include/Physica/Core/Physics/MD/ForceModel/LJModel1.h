@@ -20,7 +20,7 @@
 
 #include "PairModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class LJModel1 is a variation of \class LJModel
      * 

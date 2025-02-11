@@ -31,7 +31,7 @@
 #include "LoggerTimer.h"
 #include "FormatAnalyzer.h"
 
-namespace Physica::Logger {
+namespace Physica {
     class AbstractLogger;
     /**
      * Three loggers will be created after initialized: std::clog, std::cout, std::cerr,
@@ -84,7 +84,7 @@ namespace Physica::Logger {
         [[nodiscard]] AbstractLogger& getLogger(size_t index) const { assert(index < loggerList.size()); return *loggerList[index]; }
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] LogInfo getLogInfo(size_t index) const { return logInfos[index]; }
-        [[nodiscard]] Core::RingBuffer& getBuffer();
+        [[nodiscard]] RingBuffer& getBuffer();
         /* Setters */
         void releaseBuffer() noexcept { threadLogBuffer->schedualDelete(); threadLogBuffer = nullptr; }
         /* Static Members */
@@ -111,7 +111,7 @@ namespace Physica::Logger {
 
 #define Log(loggerID, severity, format, ...)                                                        \
     do {                                                                                            \
-        using namespace Physica::Logger;                                                            \
+        using namespace Physica;                                                                    \
         AbstractLogger& logger = LoggerRuntime::getInstance().getLogger(loggerID);                  \
         LogLevel level = logger.getCurrentLevel();                                                  \
         if(level >= LogLevel::severity) {                                                           \
@@ -132,7 +132,7 @@ namespace Physica::Logger {
                 logID = LoggerRuntime::getInstance().getNextLogID();                                \
             }                                                                                       \
             writeArgs(argArray.begin(), static_cast<size_t>(loggerID));                             \
-            Physica::Logger::log(argArray.begin(), logID, ##__VA_ARGS__);                           \
+            Physica::log(argArray.begin(), logID, ##__VA_ARGS__);                           \
         }                                                                                           \
     } while(false)
 
@@ -148,7 +148,7 @@ namespace Physica::Logger {
 
 #define Fatal(loggerID, format, ...)                    \
     do {                                                \
-        using namespace Physica::Logger;                \
+        using namespace Physica;                        \
         Log(loggerID, Fatal, format, ##__VA_ARGS__);    \
         std::abort();                                   \
     } while(false)

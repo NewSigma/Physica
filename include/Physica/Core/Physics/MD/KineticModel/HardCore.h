@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/BadConvergenceException.h"
 #include "FreeModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SeqExecutor>
@@ -387,7 +387,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
-    class Traits<Core::HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>> {
+    class Traits<HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>> {
         static_assert(!T::isComplex);
     public:
         constexpr static bool IsPeriodBoundary = !IsFixedBoundary;

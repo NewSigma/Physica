@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,7 +26,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using namespace Physica::Gui;
 constexpr double timeStep = 0.1;
 constexpr double collideFactor = 0.005;
 const size_t numMolecular = 512;
@@ -98,8 +97,8 @@ int main(int argc, char** argv) {
         }, record.getCol(), ThreadPool::numThreadRequired).wait();
 
         for (size_t i = 0; i < mean.getLength(); ++i) {
-            mean[i] = Physica::Core::mean(record.row(i));
-            devia[i] = Physica::Core::deviation(record.row(i));
+            mean[i] = Physica::mean(record.row(i));
+            devia[i] = deviation(record.row(i));
         }
         const ScalarType factor = reciprocal(mean[0]);
         mean *= factor;

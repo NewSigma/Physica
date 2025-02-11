@@ -21,7 +21,7 @@
 #include <algorithm>
 #include "Physica/Core/Physics/MD/MDCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * References:
      * [1] M. Matsumoto, T. Yagasaki, H. Tanaka. GenIce: Hydrogen-Disordered Ice Generator.[J]. J. Comput. Chem. 2017, DOI: 10.1002/jcc.25077

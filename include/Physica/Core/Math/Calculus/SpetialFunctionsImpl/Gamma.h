@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Calculus/Differential.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         /**
          * Reference:

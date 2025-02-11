@@ -20,7 +20,7 @@
 
 #include "RValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T1, Vector T2>
     class InnerDot {
         using This = InnerDot<T1, T2>;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived, class Allocator> class ArrayBase;
     /**
      * FIterator(Forward)

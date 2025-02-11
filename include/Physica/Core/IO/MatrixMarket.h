@@ -21,7 +21,7 @@
 #include <fstream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     class MatrixMarket {
         using This = MatrixMarket;
     public:

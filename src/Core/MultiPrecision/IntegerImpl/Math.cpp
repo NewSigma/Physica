@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Scalar/Integer.h"
 
-namespace Physica::Core {
+namespace Physica {
     Integer factorial(const Integer& i) {
         Integer result = 1;
         Integer temp = 1;

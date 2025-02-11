@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Exception/NoImplException.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Chebyshev descriptor introduced in [1]
      * 
@@ -137,7 +137,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T, bool IsSmallCell>
-    class Traits<Core::ChebyshevRadial<T, IsSmallCell>> {
+    class Traits<ChebyshevRadial<T, IsSmallCell>> {
     public:
         using ScalarType = T;
     };

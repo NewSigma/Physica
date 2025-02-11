@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] vectorclass2 https://github.com/vectorclass/version2/blob/master/instrset.h

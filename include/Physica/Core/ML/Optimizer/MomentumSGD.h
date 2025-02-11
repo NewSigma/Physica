@@ -21,7 +21,7 @@
 #include <memory>
 #include "SGD.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class MomentumSGD : public SGD<T> {
         static_assert(T::isDiffable, "[Error]: T must be differentiable");

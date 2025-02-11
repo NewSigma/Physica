@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Physics/MD/RPMD.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Exact as introduced in [1]: Exact free ring-polymer update
      * Cayley as introduced in [2]: More accurate and efficient Cayley transform-based approximated version of BAOAB
@@ -227,7 +227,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T1, unsigned int T2, size_t T3, RPMDIntegrator Integrator>
-    class Traits<Core::FreeModel<T1, T2, T3, Integrator>> {
+    class Traits<FreeModel<T1, T2, T3, Integrator>> {
     public:
         using ScalarType = T1;
         constexpr static unsigned int Dim = T2;

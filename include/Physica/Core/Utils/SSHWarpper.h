@@ -21,7 +21,7 @@
 #include <string>
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API SSHWarpper {
         std::string hostname;
         std::string command;

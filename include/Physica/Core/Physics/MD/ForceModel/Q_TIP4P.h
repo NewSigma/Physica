@@ -22,7 +22,7 @@
 #include "ForceModelImpl/AABModel.h"
 #include "LJModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] J. Chem. Phys. 131, 024501 (2009); https://doi.org/10.1063/1.3167790
@@ -627,7 +627,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, class EwaldType>
-    class Traits<Core::Q_TIP4P<T, EwaldType>> {
+    class Traits<Q_TIP4P<T, EwaldType>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsLatticeDependent = true;

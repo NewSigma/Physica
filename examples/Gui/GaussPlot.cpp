@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,6 @@
 #include "Physica/Gui/Plot/GaussPlot.h"
 
 using namespace Physica;
-using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;

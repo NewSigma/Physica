@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Dim>
     class IntegrateRange {
         //We consider dimension which is larger than 3 is unsuitable to allocate domain data on stack.

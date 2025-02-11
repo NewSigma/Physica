@@ -20,7 +20,7 @@
 
 #include "Element.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class CuboidLinear : public Element<CuboidLinear<T>> {
         using Base = Element<CuboidLinear<T>>;
@@ -207,13 +207,13 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T>
-    class Traits<Core::CuboidLinear<T>> {
+    class Traits<CuboidLinear<T>> {
     public:
         constexpr static unsigned int Dim = 3;
         constexpr static unsigned int Order = 1;
         constexpr static unsigned int NumPoint = 8;
         constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
         using ScalarType = T;
-        using MatrixType = Core::DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
     };
 }

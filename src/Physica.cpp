@@ -22,6 +22,6 @@
  * This file is empty, you can include Physica headers to test your code.
  */
 int main() {
-    std::cout << Physica::Core::version();
+    std::cout << Physica::version();
     return 0;
 }

@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * Basic consts that initialize directly.
      */

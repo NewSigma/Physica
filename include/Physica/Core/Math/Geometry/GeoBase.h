@@ -20,7 +20,7 @@
 
 #include "Point.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] Lo S. H. Finite Element Mesh Generation[M]. Taylor and Francis, 2015.19-20

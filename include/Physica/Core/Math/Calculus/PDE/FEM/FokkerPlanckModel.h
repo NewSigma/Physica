@@ -20,7 +20,7 @@
 
 #include "AbstractModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class MeshType, class Functor>
     class FokkerPlanckModel : public AbstractModel<MeshType> {
     public:

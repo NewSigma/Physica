@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class PlainWaveBasis {
         using ComplexType = Complex<T>;

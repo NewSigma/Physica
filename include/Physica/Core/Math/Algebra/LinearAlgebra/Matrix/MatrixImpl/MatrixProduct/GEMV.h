@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, Vector U>
     class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<T, U>> {
         using This = MatrixVectorProduct<T, U>;

@@ -23,19 +23,19 @@
 #include <QtCharts/QSplineSeries>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/RValueVector.h"
 
-namespace Physica::Gui {
+namespace Physica {
     class PHYSICA_API PolarPlot : public QChartView {
         using Base = QChartView;
     public:
         PolarPlot(QWidget* parent = nullptr);
 
-        template<Core::Vector T1, Core::Vector T2>
+        template<Vector T1, Vector T2>
         QSplineSeries& spline(const T1& theta, const T2& rho);
         /* Getters */
         [[nodiscard]] QPolarChart* chart() { return static_cast<QPolarChart*>(Base::chart()); }
     };
 
-    template<Core::Vector T1, Core::Vector T2>
+    template<Vector T1, Vector T2>
     QSplineSeries& PolarPlot::spline(const T1& theta, const T2& rho) {
         assert(rho.getLength() == theta.getLength());
         QSplineSeries* series = new QSplineSeries();

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class LValueGrid;
     template<class GridType> class LGridBlock;
 
@@ -76,7 +76,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Grid T>
-    class Traits<Core::LGridBlock<T>> {
+    class Traits<LGridBlock<T>> {
     public:
         using ScalarType = T::ScalarType;
     };

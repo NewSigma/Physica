@@ -21,7 +21,7 @@
 #include "Physica/Macro.h"
 #include "Physica/Core/Exception/NoImplException.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * This is simplified version of mulWordByWord(), which get the high Unit only.
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.

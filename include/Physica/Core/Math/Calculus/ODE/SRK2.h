@@ -20,7 +20,7 @@
 
 #include "ODESolver.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Apply to wight noise only
      * Defination of RandomFunc:

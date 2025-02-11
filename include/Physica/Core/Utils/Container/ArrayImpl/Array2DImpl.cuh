@@ -20,7 +20,7 @@
 
 #include "../Array2D.cuh"
 
-namespace Physica::Core {
+namespace Physica {
 #define tparams class T, int Option, size_t Row, size_t Col, class Allocator
 #define Array2D Array2D<T, Option, Row, Col, Allocator>
 

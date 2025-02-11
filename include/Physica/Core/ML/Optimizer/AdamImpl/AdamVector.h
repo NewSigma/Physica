@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "AdamImpl.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector V>
     class AdamImpl<V> : public AdamBase<typename V::ScalarType::ValueType> {
         using T = V::ScalarType;

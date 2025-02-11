@@ -29,7 +29,7 @@
 #include "Physica/Macro.h"
 #include "FutureGroup.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API ProcessFuture {
         pid_t pid;
         int error;

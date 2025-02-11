@@ -21,7 +21,7 @@
 #include <string>
 #include <utility>
 
-namespace Physica::Python {
+namespace Physica {
     class CXXPtr {
         using This = CXXPtr;
         void* p;

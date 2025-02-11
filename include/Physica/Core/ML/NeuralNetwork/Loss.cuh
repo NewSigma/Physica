@@ -20,7 +20,7 @@
 
 #include "Loss.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class device_obj<Loss<T>> {
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");

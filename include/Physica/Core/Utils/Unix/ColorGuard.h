@@ -21,7 +21,7 @@
 #include <ostream>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] LLVM; https://github.com/llvm/llvm-project/blob/main/clang/include/clang/AST/ASTDumperUtils.h

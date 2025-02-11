@@ -20,7 +20,7 @@
 
 #include "../RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T>
     class RealMatrix : public RValueMatrix<RealMatrix<T>> {
         using This = RealMatrix<T>;

@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference a part of the given vector
      */
@@ -72,7 +72,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Vector T, size_t Length>
-    class Traits<Core::RVectorBlock<T, Length>> {
+    class Traits<RVectorBlock<T, Length>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Length;

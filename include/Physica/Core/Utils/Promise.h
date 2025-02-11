@@ -21,7 +21,7 @@
 #include <coroutine>
 #include <utility>
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * co_await \class suspend_promise fetches pointer to promise when executing coroutine
      */

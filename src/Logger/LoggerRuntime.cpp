@@ -23,7 +23,7 @@
 #include "Physica/Logger/LoggerRuntime.h"
 #include "Physica/Logger/Logger/StdLogger.h"
 
-namespace Physica::Logger {
+namespace Physica {
     LogLevel LoggerRuntime::globalLevel = LogLevel::Info;
     thread_local LogBuffer* LoggerRuntime::threadLogBuffer = nullptr;
 
@@ -72,7 +72,7 @@ namespace Physica::Logger {
             logThread.join();
     }
 
-    Core::RingBuffer& LoggerRuntime::getBuffer() {
+    RingBuffer& LoggerRuntime::getBuffer() {
         if (shouldExit) [[unlikely]]
             throw std::runtime_error("[Error]: Try to append log to closed LoggerRuntime");
         if (threadLogBuffer == nullptr) {

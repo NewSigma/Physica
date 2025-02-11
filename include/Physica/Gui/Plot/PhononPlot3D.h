@@ -21,16 +21,16 @@
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 #include "Plot3D.h"
 
-namespace Physica::Gui {
+namespace Physica {
     template<Scalar T>
     class PhononPlot3D : public Plot3D {
         using Base = Plot3D;
-        using Vector3D = Core::Vector3D<T>;
-        using VectorType = Core::VectorND<T>;
-        using MatrixType = Core::DenseMatrix<T>;
+        using Vector3D = Vector3D<T>;
+        using VectorType = VectorND<T>;
+        using MatrixType = DenseMatrix<T>;
         using MeshType = std::pair<MatrixType, MatrixType>;
-        using BandArray = Core::Array<MatrixType>;
-        using PhononType = Core::FrozenPhonon<T>;
+        using BandArray = Array<MatrixType>;
+        using PhononType = FrozenPhonon<T>;
         using KSpaceFCGrid = PhononType::KSpaceFCGrid;
     public:
         PhononPlot3D() = default;

@@ -20,7 +20,7 @@
 
 #include <cassert>
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, class Function>
     T bisection(Function func, const T& n, const T& x1, const T& x2, const T& y1, const T& y2) {
         const T epsilon = std::numeric_limits<T>::epsilon();

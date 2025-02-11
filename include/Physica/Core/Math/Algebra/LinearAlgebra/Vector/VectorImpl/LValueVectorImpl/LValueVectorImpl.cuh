@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class Derived, Scalar T>
         __global__ void assignConst_kernel(

@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Geometry/GeometryRegion/GeometryRegion.h"
 
-namespace Physica::Core {
+namespace Physica {
     /////////////////////////////////////Dimension 2/////////////////////////////////////
     GeometryRegion<2>::GeometryRegion(RegionType type) : type(type) {}
     /////////////////////////////////////Dimension 3/////////////////////////////////////

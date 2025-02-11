@@ -22,7 +22,7 @@
 #include <cassert>
 #include "Physica/Core/Parallel/Future/DummyFuture.h"
 
-namespace Physica::Core {
+namespace Physica {
     class SeqExecutor {
     public:
         using FutureType = DummyFuture;
@@ -82,7 +82,7 @@ namespace Physica {
     template<class T> class Traits;
 
     template<>
-    class Traits<Core::SeqExecutor> {
+    class Traits<SeqExecutor> {
     public:
         constexpr static bool UseCPU = true;
         constexpr static bool UseCUDA = false;

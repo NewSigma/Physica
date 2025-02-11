@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class LMatrixBlock;
 
     template<Matrix T, size_t Col>
@@ -205,8 +205,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Matrix T, size_t Row, size_t Col>
-    class Traits<Core::LMatrixBlock<T, Row, Col>> {
+    template<Matrix T, size_t Row, size_t Col>
+    class Traits<LMatrixBlock<T, Row, Col>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;

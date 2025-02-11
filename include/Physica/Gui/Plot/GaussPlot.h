@@ -20,7 +20,7 @@
 
 #include "Plot.h"
 
-namespace Physica::Gui {
+namespace Physica {
     class PHYSICA_API GaussPlot : public Plot {
         using Base = Plot;
     public:

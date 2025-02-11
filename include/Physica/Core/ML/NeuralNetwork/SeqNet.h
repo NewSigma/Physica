@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Layer/LayerBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class SeqNet : public LayerBase<Derived> {
         using This = SeqNet<Derived>;

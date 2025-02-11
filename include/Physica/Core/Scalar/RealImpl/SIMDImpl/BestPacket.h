@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class BestPacket finds the best packet for a linear storage
      */

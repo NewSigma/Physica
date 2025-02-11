@@ -27,7 +27,7 @@
 #include "ClangImpl/IncrementalAction.h"
 #include "LLVM.h"
 
-namespace Physica::Python {
+namespace Physica {
     class HeaderManager;
     /**
      * Reference:

@@ -22,7 +22,7 @@
 #include "Physica/PlainStruct.h"
 #include "LayerBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool WithBias = true>
     class LinearLayer : public LayerBase<LinearLayer<T, WithBias>> {
         using This = LinearLayer<T, WithBias>;
@@ -67,8 +67,8 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
 
-        const H5Group read(const H5Location& loc, const char* name);
-        H5Group write(H5Location& loc, const char* name) const;
+        const H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(LinearLayer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return weights.getCol(); }
@@ -199,7 +199,7 @@ namespace Physica::Core {
 
 #ifdef PHYSICA_HDF5
     template<Scalar T, bool WithBias>
-    const H5Group LinearLayer<T, WithBias>::read(const H5Location& loc, const char* name) {
+    const H5Group LinearLayer<T, WithBias>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         weights.values().read(group, "Weight");
         if constexpr (WithBias)
@@ -208,7 +208,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool WithBias>
-    H5Group LinearLayer<T, WithBias>::write(H5Location& loc, const char* name) const {
+    H5Group LinearLayer<T, WithBias>::write(H5Loc& loc, const char* name) const {
         auto group = loc.openGroup(name);
         weights.values().write(group, "Weight");
         if constexpr (WithBias)

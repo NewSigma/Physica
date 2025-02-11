@@ -25,7 +25,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     Poscar<T>::Poscar()
             : Base(), elementTypes(), numOfEachType() {}
@@ -297,7 +297,7 @@ namespace Physica::Core {
         assert(lattice(1, 2).isZero());
         lattice(2, 2) *= factor;
 
-        const T inv_factor = Core::reciprocal(factor);
+        const T inv_factor = reciprocal(factor);
 
         auto col = pos.col(2);
         for (size_t i = 0; i < col.getLength(); ++i) {

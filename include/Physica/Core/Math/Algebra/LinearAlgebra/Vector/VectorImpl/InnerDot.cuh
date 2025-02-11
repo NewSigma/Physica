@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T1, Vector T2>
     __device__ InnerDot<T1, T2>::ResultType operator*(const device_obj<T1>& v1, const device_obj<T2>& v2) {
         using ResultType = InnerDot<T1, T2>::ResultType;

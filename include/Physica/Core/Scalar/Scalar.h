@@ -28,7 +28,7 @@
 #include "Physica/Macro.h"
 #include "Physica/Core/Utils/Type.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class ScalarType> class ScalarPtr;
     template<class Derived> class ScalarBase;
 

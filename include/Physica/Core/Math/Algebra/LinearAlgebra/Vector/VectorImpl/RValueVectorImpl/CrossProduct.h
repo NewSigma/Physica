@@ -20,7 +20,7 @@
 
 #include "../RValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector V1, Vector V2>
     class CrossProduct : public RValueVector<CrossProduct<V1, V2>> {
         using This = CrossProduct<V1, V2>;
@@ -66,12 +66,12 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    class Traits<Core::CrossProduct<V1, V2>> {
+    class Traits<CrossProduct<V1, V2>> {
         static_assert((Traits<V1>::SizeAtCompile == 3 || Traits<V1>::SizeAtCompile == Dynamic) &&
                       (Traits<V2>::SizeAtCompile == 3 || Traits<V2>::SizeAtCompile == Dynamic),
                       "CrossProduct can apply on 3-dim vectors only");
     public:
-        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = 3;
     };
 }

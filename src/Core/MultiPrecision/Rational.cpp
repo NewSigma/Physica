@@ -20,7 +20,7 @@
 #include "Physica/Core/Scalar/Rational.h"
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
-namespace Physica::Core {
+namespace Physica {
     Rational::Rational(const Integer& i) : numerator(i), denominator(1) {}
     
     Rational::Rational(const Integer& numerator_, const Integer& denominator_)

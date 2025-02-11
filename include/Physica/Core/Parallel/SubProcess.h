@@ -21,7 +21,7 @@
 #include <functional>
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API SubProcess {
     private:
         std::function<void()> task;

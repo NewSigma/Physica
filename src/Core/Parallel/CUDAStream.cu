@@ -21,7 +21,7 @@
 #include "Physica/Core/Parallel/CUDAStream.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     CUDAStream::CUDAStream() {
         cudaStreamCreate(&stream);
     }

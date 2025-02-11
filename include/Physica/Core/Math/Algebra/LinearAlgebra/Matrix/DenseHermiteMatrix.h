@@ -21,7 +21,7 @@
 #include "DenseSymmImpl/HalfDenseMatrixStorage.h"
 #include "MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Order> class DenseSymmMatrix;
 
     template<Scalar T, size_t Order = Dynamic>
@@ -64,8 +64,8 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
 
-        inline const H5DataSet<1> read(const H5Location& loc, const char* name);
-        inline H5DataSet<1> write(H5Location& loc, const char* name) const;
+        inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
+        inline H5DataSet<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         using Base::getDerived;
         using Storage::getCol;
@@ -194,13 +194,13 @@ namespace Physica::Core {
 #ifdef PHYSICA_HDF5
     template<Scalar T, size_t Order>
     inline const H5DataSet<1> DenseHermiteMatrix<T, Order>::read(
-            const H5Location& loc, const char* name) {
+            const H5Loc& loc, const char* name) {
         return asVector().read(loc, name);
     }
 
     template<Scalar T, size_t Order>
     inline H5DataSet<1> DenseHermiteMatrix<T, Order>::write(
-            H5Location& loc, const char* name) const {
+            H5Loc& loc, const char* name) const {
         return asVector().write(loc, name);
     }
 #endif
@@ -232,10 +232,10 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T, size_t Order>
+    template<Physica::Scalar T, size_t Order>
     inline void swap(
-            Physica::Core::DenseHermiteMatrix<T, Order>& __restrict m1,
-            Physica::Core::DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
+            Physica::DenseHermiteMatrix<T, Order>& __restrict m1,
+            Physica::DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

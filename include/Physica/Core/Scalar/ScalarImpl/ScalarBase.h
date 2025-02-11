@@ -23,7 +23,7 @@
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Scalar/Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class T, int GradOrder>
         class GradTypeHelper {
@@ -486,7 +486,7 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T>
+    template<Physica::Scalar T>
     inline void swap(T& __restrict x, T& __restrict y) noexcept {
         x.swap(y);
     }

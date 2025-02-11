@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,6 @@
 #include <QApplication>
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution2D.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
@@ -28,7 +27,6 @@
 #include "Physica/Gui/Plot/Plot3D.h"
 
 using namespace Physica;
-using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;

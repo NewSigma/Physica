@@ -20,7 +20,7 @@
 
 #include "Integer.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API Rational {
         Integer numerator;
         //Always positive integer.
@@ -68,9 +68,9 @@ namespace Physica::Core {
 
 namespace std {
     template<>
-    inline void swap<Physica::Core::Rational>(
-            Physica::Core::Rational& __restrict r1,
-            Physica::Core::Rational& __restrict r2) noexcept {
+    inline void swap<Physica::Rational>(
+            Physica::Rational& __restrict r1,
+            Physica::Rational& __restrict r2) noexcept {
         r1.swap(r2);
     }
 }

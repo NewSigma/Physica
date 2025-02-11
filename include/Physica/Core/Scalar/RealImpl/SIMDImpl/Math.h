@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/ExprType.h"
 #include "../SIMD.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Size>
     [[nodiscard]] __host__ __device__ inline SIMD<T, Size> abs(const SIMD<T, Size>& x) {
         if constexpr (T::Option == Float16)

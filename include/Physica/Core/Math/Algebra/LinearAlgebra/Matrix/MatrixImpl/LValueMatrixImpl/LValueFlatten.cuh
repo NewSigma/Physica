@@ -20,7 +20,7 @@
 
 #include "LValueFlatten.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class device_obj<LValueFlatten<T>> : public device_obj<LValueVector<LValueFlatten<T>>> {
         using host_obj = LValueFlatten<T>;
@@ -68,6 +68,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Matrix T>
-    class Traits<Core::device_obj<Core::LValueFlatten<T>>> : public Traits<Core::LValueFlatten<T>> {};
+    template<Matrix T>
+    class Traits<device_obj<LValueFlatten<T>>> : public Traits<LValueFlatten<T>> {};
 }

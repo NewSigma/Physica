@@ -20,7 +20,7 @@
 
 #include "AbstractLogger.h"
 
-namespace Physica::Logger {
+namespace Physica {
     class PHYSICA_API FileLogger final : public AbstractLogger {
         int fd;
     public:

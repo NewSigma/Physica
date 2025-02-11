@@ -23,7 +23,7 @@
 #include "Physica/Core/Utils/Cycler.h"
 #include "Physica/Core/Exception/SystemException.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * Given an elapsed time measured in cycles, return an integer
      * giving the corresponding time in nanoseconds. Note: toSeconds()

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "IntegrateImpl/AdaptiveBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Adaptive monte-carlo for high dimensional integration
      *
@@ -78,8 +78,8 @@ namespace Physica::Core {
         template<class Functor, RandomGenerator R, class Executor = SeqExecutor>
         [[nodiscard]] Trv calcGridLoss(Functor func) const;
 
-        const H5Group read(const H5Location& loc, const char* name);
-        H5Group write(H5Location& loc, const char* name) const;
+        const H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::getDim;

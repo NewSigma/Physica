@@ -20,7 +20,7 @@
 
 #include "../DenseSymmMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Order, Vector U>
     class MatrixVectorProduct<DenseSymmMatrix<T, Order>, U> : public RValueVector<MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>> {
         using MatrixType = DenseSymmMatrix<T, Order>;

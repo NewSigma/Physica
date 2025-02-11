@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Dim>
     SteepestDescent<T, Dim>::SteepestDescent(T maxStepSize, T decreaseCondNum, T curvatureCondNum)
             : nowY(std::numeric_limits<T>::max())

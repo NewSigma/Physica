@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     if (ReportUnrecognizedArguments(argc, argv))
         return 1;
 
-    std::cout << Physica::Core::version() << '\n';
+    std::cout << Physica::version() << '\n';
     RunSpecifiedBenchmarks();
     Shutdown();
     return 0;

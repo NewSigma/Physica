@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica> class RingPolymer;
     /**
      * PILE thermostat as introduced in [1]
@@ -80,7 +80,7 @@ namespace Physica::Core {
     void Langevin<T, Dim, NumReplica>::step(RingPolymerType& ringPolymer, T deltaT) const {
         const size_t dof = ringPolymer.getDOF();
         const T repBeta = ringPolymer.calcRepBeta(temperatureT);
-        const T momentumViscosityY = Core::reciprocal(thermostatTime);
+        const T momentumViscosityY = reciprocal(thermostatTime);
         const auto& massVec = ringPolymer.getMassVec();
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
@@ -143,7 +143,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    class Traits<Core::Langevin<T, Dim, NumReplica>> {
+    class Traits<Langevin<T, Dim, NumReplica>> {
     public:
         constexpr static bool IsCentroidCoupled = true;
     };

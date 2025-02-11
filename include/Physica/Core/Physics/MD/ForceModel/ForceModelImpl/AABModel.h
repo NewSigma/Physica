@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * AAB(2 : 1) molecular, for example H2O(\class Q_TIP4P)
      */

@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Hold public part of decouplable algorithms. E.g. \class Schur and \class SymmEigenSolver
      */

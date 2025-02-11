@@ -20,7 +20,7 @@
 
 #ifdef PHYSICA_MKL
 
-namespace Physica::Core {
+namespace Physica {
     std::string VSLException::Impl::message(int code) const {
         switch(code) {
         case VSL_STATUS_OK:

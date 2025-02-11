@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim>
     class MSD {
         using MDCellType = MDCell<T, Dim>;

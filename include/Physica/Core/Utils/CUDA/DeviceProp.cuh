@@ -21,7 +21,7 @@
 #include "Physica/Macro.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API DeviceProp {
     private:
         int driverVersion;

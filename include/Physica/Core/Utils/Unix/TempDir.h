@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include "Physica/Core/Exception/SystemException.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<size_t N>
     class TempDir {
         char name[N];

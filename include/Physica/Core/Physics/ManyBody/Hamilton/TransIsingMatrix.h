@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/ManyBody/Model/TransIsing.h"
 #include "HamiltonMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, Representation U>
     class TransIsingMatrix : public HamiltonMatrix<TransIsingMatrix<T, U>>, public TransIsing<T, U::Dim> {
         using This = TransIsingMatrix<T, U>;

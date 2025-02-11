@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class This, class SegmentType>
         __global__ void SGD_stepKernel(Physica::PlainStruct<const This> sgd, Physica::PlainStruct<SegmentType> segment) {

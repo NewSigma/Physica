@@ -20,7 +20,7 @@
 
 #include "ThreadGuardFFTW.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     FFT<T, 1>::FFT()
             : forward_plan(nullptr)

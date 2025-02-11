@@ -23,7 +23,7 @@
 #include "Basis/PlainWaveBasis.h"
 #include "SpinPair.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool IsSpinPolarized>
     class DensityGrid {
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;

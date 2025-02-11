@@ -20,16 +20,16 @@
 #include <sys/time.h>
 #include "Physica/Logger/LoggerTimer.h"
 
-namespace Physica::Logger {
+namespace Physica {
     LoggerTimer::LoggerTimer() {
         gettimeofday(&startTime, nullptr);
-        startCycle = Core::Cycler::now();
+        startCycle = Cycler::now();
     }
 
     timeval LoggerTimer::toTime(uint64_t cycle) const {
         assert(cycle > startCycle);
         const uint64_t delta = cycle - startCycle;
-        const uint64_t us = Core::Cycler::toMicroseconds(delta) + startTime.tv_usec;
+        const uint64_t us = Cycler::toMicroseconds(delta) + startTime.tv_usec;
         const uint64_t s = us / 1000000;
         timeval result = startTime;
         result.tv_sec += s;

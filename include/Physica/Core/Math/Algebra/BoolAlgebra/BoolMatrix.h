@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Container/BitArray.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * Optimize:
      * 1. Fixed size matrix

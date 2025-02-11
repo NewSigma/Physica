@@ -20,7 +20,7 @@
 
 #include "../RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class MatrixType> class Hermite;
     template<class VectorType> class HermiteVector;
 

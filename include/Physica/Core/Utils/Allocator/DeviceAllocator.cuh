@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<class T, bool IsClass>
         struct DeviceAllocatorValueType {
@@ -118,9 +118,9 @@ namespace Physica::Core {
 
 namespace std {
     template<class T>
-    struct allocator_traits<Physica::Core::DeviceAllocator<T>> {
+    struct allocator_traits<Physica::DeviceAllocator<T>> {
     public:
-        using allocator_type = Physica::Core::DeviceAllocator<T>;
+        using allocator_type = Physica::DeviceAllocator<T>;
         using value_type = allocator_type::value_type;
         using pointer = value_type*;
         using const_pointer = const value_type*;
@@ -136,7 +136,7 @@ namespace std {
         using propagate_on_container_swap = std::false_type;
         using is_always_equal = std::is_empty<allocator_type>::type;
         template<class U>
-        using rebind_alloc = Physica::Core::DeviceAllocator<U>;
+        using rebind_alloc = Physica::DeviceAllocator<U>;
         template<class U>
         using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
 

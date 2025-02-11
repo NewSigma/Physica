@@ -35,7 +35,7 @@ namespace clang::CodeGen {
     };
 }
 
-namespace Physica::Python {
+namespace Physica {
     class IncrementalAction : public clang::WrapperFrontendAction {
         using This = IncrementalAction;
         using Base = clang::WrapperFrontendAction;

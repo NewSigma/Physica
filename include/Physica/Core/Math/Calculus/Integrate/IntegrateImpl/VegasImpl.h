@@ -20,7 +20,7 @@
 
 #include "../Vegas.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool TakeLn>
     Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate_, Trv mixBeta_)
             : Base(std::move(from), std::move(to), numRefine, numSample)
@@ -106,7 +106,7 @@ namespace Physica::Core {
 
 #ifdef PHYSICA_HDF5
     template<Scalar T, bool TakeLn>
-    const H5Group Vegas<T, TakeLn>::read(const H5Location& loc, const char* name) {
+    const H5Group Vegas<T, TakeLn>::read(const H5Loc& loc, const char* name) {
         const auto group = Base::read(loc, name);
         group.readAttr("CompressRate", compressRate);
         group.readAttr("MixBeta", mixBeta);
@@ -118,7 +118,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool TakeLn>
-    H5Group Vegas<T, TakeLn>::write(H5Location& loc, const char* name) const {
+    H5Group Vegas<T, TakeLn>::write(H5Loc& loc, const char* name) const {
         auto group = Base::write(loc, name);
         group.writeAttr("CompressRate", compressRate);
         group.writeAttr("MixBeta", mixBeta);

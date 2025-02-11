@@ -20,7 +20,7 @@
 
 #include "../LValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     inline LValueVector<Derived>& LValueVector<Derived>::operator=(const This& v) {
         return operator=<Derived>(v);

@@ -23,7 +23,7 @@
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T, size_t Length, class Allocator>
     class device_obj<Array<T, Length, Allocator>> : public Array<T, Length, Allocator> {
         static_assert(Length != Dynamic, "[Error]: Dynamic length is not implemented");
@@ -170,7 +170,7 @@ namespace Physica::Core {
     device_obj<Array<T, Dynamic, Allocator>>::device_obj(const device_obj<Array<T, Dynamic, Allocator>>& obj)
             : length(obj.getLength()), capacity(obj.getCapacity()), alloc(obj.alloc) {
         d_data = alloc.allocate(capacity);
-        auto& ctx = Core::CUDAContext::getInstance();
+        auto& ctx = CUDAContext::getInstance();
         if constexpr (isTrivial)
             cudaMemcpyAsync(d_data, obj.d_data, length * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice, ctx);
         else {
@@ -196,7 +196,7 @@ namespace Physica::Core {
     device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
         if constexpr (!isTrivial) {
             Array<ElemType, Dynamic> buffer(length);
-            auto& ctx = Core::CUDAContext::getInstance();
+            auto& ctx = CUDAContext::getInstance();
             cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
             ctx.wait();
         }
@@ -323,7 +323,7 @@ namespace Physica::Core {
         const size_t length = getLength();
         obj.resize(length);
 
-        auto& ctx = Core::CUDAContext::getInstance();
+        auto& ctx = CUDAContext::getInstance();
         if constexpr (isTrivial) {
             cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             ctx.wait();
@@ -345,16 +345,16 @@ namespace Physica::Core {
         const size_t length = getLength();
         obj.resize(length);
 
-        auto& ctx = Core::CUDAContext::getInstance();
+        auto& ctx = CUDAContext::getInstance();
         cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
     }
 }
 
 namespace Physica {
     template<class T, size_t Length, class Allocator>
-    class Traits<Core::device_obj<Core::Array<T, Length, Allocator>>> {
+    class Traits<device_obj<Array<T, Length, Allocator>>> {
     public:
-        using AllocatorType = Core::DeviceAllocator<T>;
+        using AllocatorType = DeviceAllocator<T>;
         using ElemType = AllocatorType::value_type;
         constexpr static size_t SizeAtCompile = Length;
     };

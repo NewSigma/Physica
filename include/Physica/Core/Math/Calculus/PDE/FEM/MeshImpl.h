@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class T>
     Mesh<T>::Mesh(size_t numElement, size_t numNode)
             : elements(numElement)

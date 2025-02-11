@@ -22,7 +22,7 @@
 #include "DivBasic.h"
 #include "ArraySupport.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
      * This function provide a quick sign check compare to using isPositive() and isNegative().

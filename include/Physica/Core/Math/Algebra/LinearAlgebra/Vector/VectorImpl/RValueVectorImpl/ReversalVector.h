@@ -20,7 +20,7 @@
 
 #include "../RValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T>
     class ReversalVector final : public RValueVector<ReversalVector<T>> {
         using This = ReversalVector<T>;

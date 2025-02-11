@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "NumCharacter.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Compute correlation using FFT method as introduced in [1]
      * 

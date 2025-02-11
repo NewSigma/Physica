@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Langevin.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Note: Velocity rescaling algorithm[1] may give a negative probability at small number of particles condition.
      * 
@@ -144,7 +144,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class KineticModel>
-    class Traits<Core::DoubleThermo<KineticModel>> {
+    class Traits<DoubleThermo<KineticModel>> {
     public:
         constexpr static bool IsCentroidCoupled = false;
     };

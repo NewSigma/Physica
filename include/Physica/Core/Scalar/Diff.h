@@ -23,7 +23,7 @@
 #include "Physica/Core/Scalar/ExprType.h"
 #include "DiffImpl/DiffCoro.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     class Diff<T, Mode, Order> : public ScalarBase<Diff<T, Mode, Order>>
                                , public std::conditional<Mode == DiffMode::Forward, CRCoro<Diff<T, Mode, Order>>, PlainStruct<void>>::type {
@@ -150,16 +150,16 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T, Physica::Core::DiffMode Mode, int Order>
-    struct numeric_limits<Physica::Core::Diff<T, Mode, Order>> : public numeric_limits<T> {};
+    template<Physica::Scalar T, Physica::DiffMode Mode, int Order>
+    struct numeric_limits<Physica::Diff<T, Mode, Order>> : public numeric_limits<T> {};
 
-    template<Physica::Core::Scalar T, Physica::Core::DiffMode Mode, int Order>
-    struct formatter<Physica::Core::Diff<T, Mode, Order>, char> {
+    template<Physica::Scalar T, Physica::DiffMode Mode, int Order>
+    struct formatter<Physica::Diff<T, Mode, Order>, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
             return ctx.begin();
         }
 
-        auto format(const Physica::Core::Diff<T, Mode, Order>& obj, std::format_context& ctx) const {
+        auto format(const Physica::Diff<T, Mode, Order>& obj, std::format_context& ctx) const {
             return std::format_to(ctx.out(), "{}", obj.value());
         }
     };

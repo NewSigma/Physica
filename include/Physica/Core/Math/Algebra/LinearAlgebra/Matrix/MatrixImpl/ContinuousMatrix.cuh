@@ -22,7 +22,7 @@
 #include "LValueMatrix.cuh"
 #include "ContinuousMatrixImpl/ContinuousMatrixBlock.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<ContinuousMatrix<Derived>> : public device_obj<LValueMatrix<Derived>> {
         using host_obj = ContinuousMatrix<Derived>;

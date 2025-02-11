@@ -21,7 +21,7 @@
 #include <fstream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API Outcar {
         using ScalarType = float64;
 

@@ -20,7 +20,7 @@
 
 #include "../VectorExpr.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T>
     class device_obj<VectorExpr<ExprType::Reciprocal, T>>
             : public device_obj<UnitaryVectorExpr<ExprType::Reciprocal, T>> {

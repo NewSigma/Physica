@@ -21,7 +21,7 @@
 #include <stdexcept>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API NoImplException : public std::runtime_error {
     public:
         NoImplException(const char* msg) : std::runtime_error(msg) {}

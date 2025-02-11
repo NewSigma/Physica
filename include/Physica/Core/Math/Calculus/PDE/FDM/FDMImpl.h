@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     FDM<T>::FDM(size_t col, size_t row) : data(col) {
         for(size_t i = 0; i < col; ++i)

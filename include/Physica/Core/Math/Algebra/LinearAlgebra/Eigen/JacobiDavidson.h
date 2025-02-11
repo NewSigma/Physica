@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/IterateSolver.h"
 #include "EigenSolver.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class JacobiDavidson provides an iterative solution for computing the lowest eigenvalues and their corresponding eigenvectors.
      * If you are interested in obtaining the highest eigenvalues, simply invert the sign of the matrix.
@@ -428,10 +428,10 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T>
+    template<Physica::Scalar T>
     inline void swap(
-            Physica::Core::JacobiDavidson<T>& __restrict obj1,
-            Physica::Core::JacobiDavidson<T>& __restrict obj2) noexcept {
+            Physica::JacobiDavidson<T>& __restrict obj1,
+            Physica::JacobiDavidson<T>& __restrict obj2) noexcept {
         obj1.swap(obj2);
     }
 }

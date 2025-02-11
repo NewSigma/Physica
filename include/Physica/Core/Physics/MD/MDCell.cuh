@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/SolidState/PeriodicCell.cuh"
 #include "MDCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim>
     class device_obj<MDCell<T, Dim>> : public device_obj<PeriodicCell<T, Dim>> {
         using host_obj = MDCell<T, Dim>;

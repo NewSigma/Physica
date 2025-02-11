@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/MDImpl/CellList.cuh"
 #include "Physica/Core/Utils/Allocator/PageLockedAllocator.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<PairModel<Derived>> : public CRTPBase<device_obj<PairModel<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
@@ -130,9 +130,9 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T>
-    class Traits<Core::device_obj<Core::PairModel<T>>> : public Traits<Core::PairModel<T>> {
+    class Traits<device_obj<PairModel<T>>> : public Traits<PairModel<T>> {
     public:
-        using Derived = Core::device_obj<T>;
+        using Derived = device_obj<T>;
     };
 }
 

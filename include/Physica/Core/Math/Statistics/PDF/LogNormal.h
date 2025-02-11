@@ -20,7 +20,7 @@
 
 #include "Normal.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class LogNormal {
         Normal<T> normal;

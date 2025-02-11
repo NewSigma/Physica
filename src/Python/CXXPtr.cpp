@@ -19,7 +19,7 @@
 #include <sstream>
 #include "Physica/Python/CXXPtr.h"
 
-namespace Physica::Python {
+namespace Physica {
     std::string CXXPtr::toString() const {
         std::stringstream ss{};
         ss << p;

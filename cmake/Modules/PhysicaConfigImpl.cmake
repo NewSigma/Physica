@@ -20,7 +20,7 @@ else()
     if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
         add_compile_options(-Wextra)
     elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
-        add_compile_options(-Wno-deprecated-declarations)
+        add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fassume-sane-operator-new>) # -fassume-nothrow-exception-dtor
         # Workaround for P2014R0
         #
         # Reference:

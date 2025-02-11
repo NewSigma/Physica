@@ -20,7 +20,7 @@
 
 #include <ffi.h>
 
-namespace Physica::Python {
+namespace Physica {
     class FuncInfo {
         using This = FuncInfo;
 

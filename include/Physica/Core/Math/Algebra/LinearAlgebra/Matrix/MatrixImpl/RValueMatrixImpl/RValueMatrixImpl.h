@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 #include "FormatedMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     template<Matrix T>
     void RValueMatrix<Derived>::assign(LValueMatrix<T>& target) const {

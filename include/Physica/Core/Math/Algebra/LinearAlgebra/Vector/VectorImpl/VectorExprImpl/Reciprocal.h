@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T>
     class VectorExpr<ExprType::Reciprocal, T> : public UnitaryVectorExpr<ExprType::Reciprocal, T> {
         using This = VectorExpr<ExprType::Reciprocal, T>;

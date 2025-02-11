@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Calculus/PDE/FEM/Mesh.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class ElementType>
     class VTKFile {
         using MeshType = Mesh<ElementType>;

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "FermiRepr.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     class KFermiRepr : public ReprBasis<KFermiRepr<Dim, NumSite, UseInversionSymm>> {
         using This = KFermiRepr<Dim, NumSite, UseInversionSymm>;

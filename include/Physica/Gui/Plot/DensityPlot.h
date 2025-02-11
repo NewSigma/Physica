@@ -21,7 +21,7 @@
 #include <QtWidgets/QWidget>
 #include "Physica/Core/Math/Geometry/Point.h"
 
-namespace Physica::Gui {
+namespace Physica {
     /*!
      * DensityPlot provide a approach to show 2D data.
      */

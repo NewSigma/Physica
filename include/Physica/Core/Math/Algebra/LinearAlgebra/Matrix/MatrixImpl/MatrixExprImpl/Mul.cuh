@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, Scalar U>
     class device_obj<MatrixExpr<ExprType::Mul, T, U>>
             : public device_obj<BinaryMatrixExpr<ExprType::Mul, T, U>> {

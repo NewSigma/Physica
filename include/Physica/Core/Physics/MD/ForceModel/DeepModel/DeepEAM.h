@@ -21,7 +21,7 @@
 #include "Descriptor/ChebyshevRadial.h"
 #include "ConservedFieldNet.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class NetType, bool IsSmallCell>
     class DeepEAM {
         static_assert(std::is_base_of<ConservedFieldNet<NetType>, NetType>::value, "[Error]: DeepEAM must be a conserved field");

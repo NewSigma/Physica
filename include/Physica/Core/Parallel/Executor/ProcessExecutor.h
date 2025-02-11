@@ -22,7 +22,7 @@
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Parallel/SubProcess.h"
 
-namespace Physica::Core {
+namespace Physica {
     class ProcessExecutor {
     public:
         using FutureType = ProcessFuture;
@@ -73,7 +73,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<>
-    class Traits<Core::ProcessExecutor> {
+    class Traits<ProcessExecutor> {
     public:
         constexpr static bool UseCPU = true;
         constexpr static bool UseCUDA = false;

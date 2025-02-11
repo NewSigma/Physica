@@ -22,7 +22,7 @@
 #include "clang/AST/Decl.h"
 #include "clang/Lex/PPCallbacks.h"
 
-namespace Physica::Python {
+namespace Physica {
     class Clang;
 
     class HeaderManager : public clang::PPCallbacks {

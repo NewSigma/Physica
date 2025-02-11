@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Decomposite a symmetrical, positive matrix A into LL^T.
      * If target matrix is a column matrix, return lower triangular matrix L, if row matrix, return upper triangular matrix L^T

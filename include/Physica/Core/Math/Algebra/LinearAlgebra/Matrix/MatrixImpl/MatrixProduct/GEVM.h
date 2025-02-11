@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T, Matrix U>
     class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<T, U>> {
         using This = VectorMatrixProduct<T, U>;
@@ -73,7 +73,7 @@ namespace Physica {
         static_assert(U::RowAtCompile == 1 || U::RowAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
-        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = T::SizeAtCompile;
         constexpr static size_t ColAtCompile = U::ColAtCompile;

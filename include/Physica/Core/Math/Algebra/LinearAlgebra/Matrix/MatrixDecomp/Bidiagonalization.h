@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T> class BiDiagMatrixB;
     /**
      * Decomposite matrix A like A = UBV^T
@@ -184,8 +184,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Matrix T>
-    class Traits<Core::BiDiagMatrixB<T>> : public Traits<T> {
+    template<Matrix T>
+    class Traits<BiDiagMatrixB<T>> : public Traits<T> {
     private:
         using Base = Traits<T>;
         using Base::Option;
@@ -193,8 +193,8 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Matrix T>
-    inline void swap(Physica::Core::Bidiagonalization<T>& __restrict obj1, Physica::Core::Bidiagonalization<T>& __restrict obj2) noexcept {
+    template<Physica::Matrix T>
+    inline void swap(Physica::Bidiagonalization<T>& __restrict obj1, Physica::Bidiagonalization<T>& __restrict obj2) noexcept {
         obj1.swap(obj2);
     }
 }

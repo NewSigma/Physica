@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/MathConst.h"
 #include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<>
     Real<FloatMP> abs(const Real<FloatMP>& s) noexcept {
         Real<FloatMP> temp(s);

@@ -21,7 +21,7 @@
 #include <cstdarg>
 #include "Physica/Logger/LoggerRuntime.h"
 
-namespace Physica::Logger {
+namespace Physica {
     /*!
      * Abstract father class for all loggers.
      */

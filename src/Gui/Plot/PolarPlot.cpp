@@ -18,7 +18,7 @@
  */
 #include "Physica/Gui/Plot/PolarPlot.h"
 
-namespace Physica::Gui {
+namespace Physica {
     PolarPlot::PolarPlot(QWidget* parent) : QChartView(parent) {
         setAttribute(Qt::WA_DeleteOnClose);
 

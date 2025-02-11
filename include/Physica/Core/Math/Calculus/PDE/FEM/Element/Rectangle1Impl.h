@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Scalar T, class Functor, int DeltaOrder>
         struct GaussIntegral<Rectangle1<T>, Functor, DeltaOrder> {

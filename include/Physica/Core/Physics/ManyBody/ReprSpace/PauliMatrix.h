@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 #include "State/SpinState.h"
 
-namespace Physica::Core {
+namespace Physica {
     enum class PauliIndex {
         I,
         X,

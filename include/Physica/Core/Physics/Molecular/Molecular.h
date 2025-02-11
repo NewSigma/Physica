@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Geometry/Point.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core::Physics {
+namespace Physica {
     template<Scalar T>
     class Molecular {
         using PointType = Point<3, T>;

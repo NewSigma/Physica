@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool TakeLn>
     class AdaptiveBase {
         using This = AdaptiveBase<T, TakeLn>;
@@ -53,8 +53,8 @@ namespace Physica::Core {
 
         [[nodiscard]] T calcSquaredChi(int from = 0) const;
 
-        const H5Group read(const H5Location& loc, const char* name);
-        H5Group write(H5Location& loc, const char* name) const;
+        const H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDim() const noexcept { return from.getLength(); }
@@ -138,7 +138,7 @@ namespace Physica::Core {
 
 #ifdef PHYSICA_HDF5
     template<Scalar T, bool TakeLn>
-    const H5Group AdaptiveBase<T, TakeLn>::read(const H5Location& loc, const char* name) {
+    const H5Group AdaptiveBase<T, TakeLn>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         group.readAttr("NumRefine", numRefine);
         group.readAttr("NumSample", numSample);
@@ -152,7 +152,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool TakeLn>
-    H5Group AdaptiveBase<T, TakeLn>::write(H5Location& loc, const char* name) const {
+    H5Group AdaptiveBase<T, TakeLn>::write(H5Loc& loc, const char* name) const {
         auto group = loc.openGroup(name);
         group.writeAttr("NumRefine", numRefine);
         group.writeAttr("NumSample", numSample);

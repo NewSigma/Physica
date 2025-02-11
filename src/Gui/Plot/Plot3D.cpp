@@ -19,7 +19,7 @@
 #include <QtGui/QGuiApplication>
 #include "Physica/Gui/Plot/Plot3D.h"
 
-namespace Physica::Gui {
+namespace Physica {
     Plot3D::Plot3D(QWidget* parent)
             : QWidget(parent)
             , vLayout(new QVBoxLayout())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,8 +20,6 @@
 #include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
 
 using namespace Physica;
-using namespace Physica::Core::Physics;
-
 using ScalarType = float64;
 
 constexpr double precitionGoal = 1E-8;

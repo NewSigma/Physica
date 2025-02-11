@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Diff.h"
 #include "FFT.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode>
     class FFT<Diff<T, Mode, 1>, 1>
             : public FFTRSpace<FFT<Diff<T, Mode, 1>, 1>, 1>

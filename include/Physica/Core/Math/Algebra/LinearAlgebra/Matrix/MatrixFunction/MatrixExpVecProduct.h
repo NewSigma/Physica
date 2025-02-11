@@ -22,7 +22,7 @@
 #include "MatrixExp.h"
 #include "MatrixPow.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, Vector U> class MatrixVectorProduct;
     /**
      * Reference:

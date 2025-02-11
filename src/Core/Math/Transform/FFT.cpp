@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Transform/FFTImpl/ThreadGuardFFTW.h"
 
-namespace Physica::Core::Internal {
+namespace Physica::Internal {
     ThreadGuardFFTW& ThreadGuardFFTW::getInstance() noexcept {
         constinit static ThreadGuardFFTW instance{};
         return instance;

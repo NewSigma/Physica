@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T, size_t Length>
     class device_obj<RVectorBlock<T, Length>> : public device_obj<RValueVector<RVectorBlock<T, Length>>> {
         using host_obj = RVectorBlock<T, Length>;
@@ -67,5 +67,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Vector T, size_t Length>
-    class Traits<Core::device_obj<Core::RVectorBlock<T, Length>>> : public Traits<Core::RVectorBlock<T, Length>> {};
+    class Traits<device_obj<RVectorBlock<T, Length>>> : public Traits<RVectorBlock<T, Length>> {};
 }

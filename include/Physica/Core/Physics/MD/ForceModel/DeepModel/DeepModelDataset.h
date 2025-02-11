@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class DeepModelDataset {
         using CellType = CrystalCell<T>;
@@ -40,8 +40,8 @@ namespace Physica::Core {
         DeepModelDataset& operator=(DeepModelDataset obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void append(CellType cell, T energy, VectorType force);
-        H5Group read(const H5Location& loc, const char* name);
-        H5Group write(H5Location& loc, const char* name) const;
+        H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(DeepModelDataset& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumSample() const noexcept { return cells.getLength(); }
@@ -59,7 +59,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    H5Group DeepModelDataset<T>::read(const H5Location& loc, const char* name) {
+    H5Group DeepModelDataset<T>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         energys.read(group, "Energys");
         
@@ -79,7 +79,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    H5Group DeepModelDataset<T>::write(H5Location& loc, const char* name) const {
+    H5Group DeepModelDataset<T>::write(H5Loc& loc, const char* name) const {
         auto group = loc.openGroup(name);
         energys.write(group, "Energys");
 

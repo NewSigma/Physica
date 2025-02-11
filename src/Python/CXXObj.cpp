@@ -25,7 +25,7 @@
 #include "Physica/Python/PhysicaPython.h"
 #include "Physica/Python/FFI/FuncInfo.h"
 
-namespace Physica::Python {
+namespace Physica {
     CXXObj::CXXObj(CXXPtr p, py::args tparams) : pObj(nullptr) {
         using namespace clang;
         const bool isPlainClass = tparams.size() == 0;
@@ -52,12 +52,9 @@ namespace Physica::Python {
             return;
 
         using DtorType = void (*)(void*);
-        auto& pp = PhysicaPython::getInstance();
-        Clang& clang = pp.getClang();
-        auto dtor = clang::GlobalDecl(pDecl->getDestructor(), clang::CXXDtorType::Dtor_Base);
-        const std::string symbol = clang.getCodeGen().GetMangledName(std::move(dtor)).str();
-        const auto pDtor = check(pp.getJIT().lookup(symbol));
-        pDtor.toPtr<DtorType>()(pObj);
+        const auto pFunc = lookupFunc(clang::GlobalDecl(pDecl->getDestructor(), clang::CXXDtorType::Dtor_Base));
+        auto* pDtor = reinterpret_cast<DtorType>(pFunc);
+        pDtor(pObj);
         std::free(pObj);
         pObj = nullptr;
     }
@@ -84,7 +81,6 @@ namespace Physica::Python {
     py::object CXXObj::call(const char* rtnTyName, const char* name, py::args args) {
         clang::GlobalDecl funcDecl;
         for (auto pFunc : pDecl->methods()) {
-            using namespace llvm;
             using namespace clang;
             if (pFunc->getDeclName().getNameKind() != DeclarationName::NameKind::Identifier)
                 continue;
@@ -102,19 +98,22 @@ namespace Physica::Python {
         auto pRtn = rtnType.allocate();
 
         const size_t numArgs = args.size();
-        Core::Array<const ffi_type*> argTypes(numArgs + 1);
-        Core::Array<Core::PlainPtr> pArgs(numArgs + 1);
+        Array<const ffi_type*> argTypes(numArgs + 1);
+        Array<void*> pArgs(numArgs + 1);
         argTypes[0] = &ffi_type_pointer;
-        pArgs[0] = Core::PlainPtr(&pObj);
+        pArgs[0] = &pObj;
         for (size_t i = 1; i <= numArgs; ++i){
             const auto argType = pp.toCXXType(args[i]);
             argTypes[i] = argType.toFFI();
-            pArgs[i] = argType.allocate();
+            pArgs[i] = argType.allocate().release();
         }
         FuncInfo info(numArgs + 1, rtnType.toFFI(), argTypes.data());
         ffi_call(const_cast<ffi_cif*>(info.cif()), fn, pRtn.get(), reinterpret_cast<void**>(pArgs.data()));
-        pArgs[0] = nullptr;
-        return rtnType.toPython(std::move(pRtn));
+        
+        auto result = rtnType.toPython(pRtn.get());
+        for (size_t i = 1; i <= numArgs; ++i)
+            std::free(pArgs[i]);
+        return result;
     }
 
     void* CXXObj::allocateObj(const CXXRecordDecl* pDecl) {
@@ -166,7 +165,7 @@ namespace Physica::Python {
             return false;
         default:
             assert(false && "[Error]: Invalid tparam type");
-            Core::unreachable();
+            unreachable();
         }
     }
 

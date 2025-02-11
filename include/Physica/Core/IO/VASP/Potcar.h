@@ -21,7 +21,7 @@
 #include <fstream>
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API Potcar {
         using ScalarType = float32;
         ScalarType mass;

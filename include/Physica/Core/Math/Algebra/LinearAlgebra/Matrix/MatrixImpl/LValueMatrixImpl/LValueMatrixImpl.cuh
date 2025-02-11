@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     template<Matrix M>
     __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const device_obj<M>& m) {

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T, size_t Length>
     class device_obj<ContinuousVectorBlock<T, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<T, Length>>> {
         using host_obj = ContinuousVectorBlock<T, Length>;
@@ -110,5 +110,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Vector T, size_t Length>
-    class Traits<Core::device_obj<Core::ContinuousVectorBlock<T, Length>>> : public Traits<Core::ContinuousVectorBlock<T, Length>> {};
+    class Traits<device_obj<ContinuousVectorBlock<T, Length>>> : public Traits<ContinuousVectorBlock<T, Length>> {};
 }

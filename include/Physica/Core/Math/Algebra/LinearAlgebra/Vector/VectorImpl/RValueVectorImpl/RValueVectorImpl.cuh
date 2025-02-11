@@ -22,7 +22,7 @@
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "../RValueVector.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Vector T1, Vector T2>
         __global__ void RValueVector_assignToKernel(

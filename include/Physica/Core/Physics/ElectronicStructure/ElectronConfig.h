@@ -21,7 +21,7 @@
 #include "Physica/Macro.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core::Physics {
+namespace Physica {
     class PHYSICA_API ElectronConfig {
     public:
         enum OrbitState {

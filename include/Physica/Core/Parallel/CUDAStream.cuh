@@ -21,7 +21,7 @@
 #include <cuda_runtime.h>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API CUDAStream {
         cudaStream_t stream;
     public:

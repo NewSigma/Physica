@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/Future/StreamFuture.cuh"
 #include "Physica/Core/Physics/MD/RPMD.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
         __global__ void __launch_bounds__(512, 1)

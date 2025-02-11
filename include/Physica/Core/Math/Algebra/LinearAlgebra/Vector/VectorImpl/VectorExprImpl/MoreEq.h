@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T1, Vector T2>
     class VectorExpr<ExprType::MoreEq, T1, T2>
             : public BinaryVectorExpr<ExprType::MoreEq, T1, T2> {

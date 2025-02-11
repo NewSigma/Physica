@@ -34,7 +34,7 @@ namespace Physica {
     };
 }
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Length>
     class BestPacket;
 
@@ -168,7 +168,7 @@ namespace Physica::Core {
 }
 
 namespace std {
-#define T Physica::Core::SIMD<Physica::Core::Real<Physica::Core::Float16>, 2>
+#define T Physica::SIMD<Physica::Real<Physica::Float16>, 2>
 
     __host__ __device__ inline T max(T a, T b) noexcept {
         return T(__hmax2_nan(a.toMachine(), b.toMachine()));

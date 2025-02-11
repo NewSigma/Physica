@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Scalar.h"
 #include "LatticeModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Dim>
     class TransIsing : public LatticeModel<Dim> {
         static_assert(Dim == 1, "Not implemented");

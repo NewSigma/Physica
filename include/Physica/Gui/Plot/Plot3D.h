@@ -24,7 +24,7 @@
 #include <QtDataVisualization/QSurfaceDataProxy>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
-namespace Physica::Gui {
+namespace Physica {
     class PHYSICA_API Plot3D : public QWidget {
         QVBoxLayout* vLayout;
     protected:
@@ -32,7 +32,7 @@ namespace Physica::Gui {
     public:
         Plot3D(QWidget* parent = nullptr);
         /* Operations */
-        template<Core::Matrix T>
+        template<Matrix T>
         QSurface3DSeries& surf(const T& x,
                                const T& y,
                                const T& z);
@@ -49,7 +49,7 @@ namespace Physica::Gui {
         [[nodiscard]] static QLinearGradient makeDefaultGrad();
     };
 
-    template<Core::Matrix T>
+    template<Matrix T>
     QSurface3DSeries& Plot3D::surf(const T& x,
                                    const T& y,
                                    const T& z) {

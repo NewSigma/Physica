@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class LValueVector;
     /**
      * Reference a part of the given vector

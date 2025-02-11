@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "OptimizationImpl/LineSearch.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Dim>
     class SteepestDescent {
     public:

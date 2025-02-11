@@ -18,12 +18,12 @@
  */
 #include "Physica/Core/IO/HDF5/HDF5.h"
 
-namespace Physica::Core {
-    const H5Group H5Location::openGroup(const char* name) const {
+namespace Physica {
+    const H5Group H5Loc::openGroup(const char* name) const {
         return getDerived().openGroup(name);
     }
 
-    H5Group H5Location::openGroup(const char* name) {
+    H5Group H5Loc::openGroup(const char* name) {
         auto& loc = getDerived();
         if (loc.exists(name))
             return loc.openGroup(name);

@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "DensityGrid.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool IsSpinPolarized>
     class KSHamilton {
         static_assert(!IsSpinPolarized, "[Error]: Not implemented");

@@ -21,7 +21,7 @@
 #include "RValueGrid.h"
 #include "LGridBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Notes:
      * Right is positive direction of x.

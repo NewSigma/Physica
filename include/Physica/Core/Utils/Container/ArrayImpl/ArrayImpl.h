@@ -25,7 +25,7 @@
 #endif
 #include "../Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, class Allocator>
     template<class... Args>

@@ -22,7 +22,7 @@
 #include "clang/AST/ASTContext.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Python {
+namespace Physica {
     class ASTCursor {
         using This = ASTCursor;
         using DeclContext = clang::DeclContext;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class SpaceType, size_t Dim>
     class SubDataSpace : public DataSpaceBase<SubDataSpace<SpaceType, Dim>> {
         using This = SubDataSpace<SpaceType, Dim>;
@@ -75,7 +75,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T, size_t S>
-    class Traits<Core::SubDataSpace<T, S>> {
+    class Traits<SubDataSpace<T, S>> {
     public:
         constexpr static size_t Dim = S;
         static_assert(Dim != Dynamic, "[Error]: Not implemented");

@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool Pivote>
     class LUDecomp {
         using This = LUDecomp;

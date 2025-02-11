@@ -27,7 +27,7 @@
 #include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Exception/NoImplException.h"
 
-namespace Physica::Core {
+namespace Physica {
     ProcessFuture::ProcessFuture() : error(-1), isValid(false) {}
 
     ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), error(-1), finished(false), isValid(true) {}

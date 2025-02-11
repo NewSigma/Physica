@@ -18,6 +18,6 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     Integer factorial(const Integer& i);
 }

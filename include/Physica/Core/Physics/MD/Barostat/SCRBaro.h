@@ -21,7 +21,7 @@
 #include "Berendsen.h"
 #include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Stochastic cell rescaling(SCR) barostat as introduced in [1], its anisotropic version as introduced in [2]
      * 
@@ -114,7 +114,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, size_t NumReplica, RandomGenerator R, BaroType Type>
-    class Traits<Core::SCRBaro<T, NumReplica, R, Type>> {
+    class Traits<SCRBaro<T, NumReplica, R, Type>> {
     public:
         constexpr static unsigned int Order = 1;
     };

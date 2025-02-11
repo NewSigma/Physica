@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh" // IWYU pragma: export
 #include "Array2D.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     class device_obj<Array2D<T, Option, Row, Col, Allocator>> {
         using host_obj = Array2D<T, Option, Row, Col, Allocator>;

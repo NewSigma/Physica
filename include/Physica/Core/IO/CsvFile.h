@@ -22,7 +22,7 @@
 #include <variant>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API CsvFile {
     public:
         enum DataType {

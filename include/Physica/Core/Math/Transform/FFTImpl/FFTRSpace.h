@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived, size_t Dim> class FFTRSpace;
 
     template<class Derived>

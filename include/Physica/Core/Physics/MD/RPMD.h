@@ -22,7 +22,7 @@
 #include "MDImpl/RingPolymer.h"
 #include "Barostat/BaroType.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim> class FireModel;
     template<Scalar T, unsigned int Dim, BaroType Type> class CFireModel;
 
@@ -160,8 +160,8 @@ namespace Physica::Core {
         template<class KineticModel, class ForceModel, class Executor>
         VectorND<T> testNVE(T duration, KineticModel& kineticModel, ForceModel& forceModel) const;
 
-        void read(const H5Location& loc, const char* name);
-        void write(H5Location& loc, const char* name) const;
+        void read(const H5Loc& loc, const char* name);
+        void write(H5Loc& loc, const char* name) const;
         void swap(RPMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }

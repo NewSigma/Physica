@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, bool WithBias>
     class device_obj<LinearLayer<T, WithBias>> : public device_obj<LayerBase<LinearLayer<T, WithBias>>> {
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
@@ -179,13 +179,13 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, bool WithBias>
-    class Traits<Core::device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
+    class Traits<device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
         using Base = Traits<LinearLayer<T, WithBias>>;
         using VectorType = VectorND<typename Base::ScalarType>;
         using ValueType = Base::ScalarType::ValueType;
         using DiffVector = Diff<VectorND<ValueType>, DiffMode::Reverse, T::Order>;
         constexpr static bool IsTrain = Base::ScalarType::isDiffable;
     public:
-        using OutputType = Core::device_obj<typename std::conditional<IsTrain, DiffVector, VectorType>::type>;
+        using OutputType = device_obj<typename std::conditional<IsTrain, DiffVector, VectorType>::type>;
     };
 }

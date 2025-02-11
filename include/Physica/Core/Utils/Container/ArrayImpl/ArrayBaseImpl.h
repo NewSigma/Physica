@@ -21,7 +21,7 @@
 #include <cstring>
 #include "ArrayBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived, class Allocator>
     __host__ __device__ inline auto ArrayBase<Derived, Allocator>::operator[](size_t index) -> lvalue_reference {
         assert(index < getLength() && "[Error]: Index overflow");

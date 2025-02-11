@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/ML/NeuralNetwork/SimpleDataset.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] http://yann.lecun.com/exdb/mnist/

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "GridImpl/GridBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Provide a algebra for Index1D and Index3D in periodic boundary condition
      */

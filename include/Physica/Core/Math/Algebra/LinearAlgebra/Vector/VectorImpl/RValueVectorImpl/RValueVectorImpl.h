@@ -20,7 +20,7 @@
 
 #include "FormatedVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Vector T1, Vector T2, class Executor>
         class AssignImpl {

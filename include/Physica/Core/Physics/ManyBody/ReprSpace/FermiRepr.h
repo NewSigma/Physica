@@ -24,7 +24,7 @@
 #include "State/FermiState.h"
 #include "ReprBasis.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<int Dim, int NumSite, bool UseInversionSymm>
     class FermiRepr : public ReprBasis<FermiRepr<Dim, NumSite, UseInversionSymm>> {
         using This = FermiRepr<Dim, NumSite, UseInversionSymm>;

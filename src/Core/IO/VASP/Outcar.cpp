@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     Outcar::Outcar(const char* path, unsigned int numAtom) : force(numAtom * 3) {
         std::ifstream fin(path);
         if (!fin)

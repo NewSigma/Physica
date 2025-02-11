@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Cycler.h"
 
-namespace Physica::Core {
+namespace Physica {
     class Benchmark {
         using ScalarType = float64;
     public:
@@ -48,7 +48,7 @@ namespace Physica::Core {
         static ScalarType probabilityLarger1(ScalarType mean1, ScalarType devia1, ScalarType mean2, ScalarType devia2) {
             ScalarType mean = mean2 - mean1;
             ScalarType devia = sqrt(square(devia1) + square(devia2));
-            return Core::erfc(mean / (devia * sqrt(ScalarType(2.0)))) * 0.5;
+            return erfc(mean / (devia * sqrt(ScalarType(2.0)))) * 0.5;
         }
     };
 }

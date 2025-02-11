@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Fast inertial relaxation engine(FIRE) as introduced in [1, 2]
      * 

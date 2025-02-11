@@ -21,7 +21,7 @@
 #include "Physica/Macro.h"
 #include "Physica/Core/Utils/Container/Array.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Target on OpenPBS(https://github.com/openpbs/openpbs)
      */

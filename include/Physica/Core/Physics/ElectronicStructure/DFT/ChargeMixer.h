@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "DensityGrid.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * References:
      * [1] G. Kresse and J. Furthmüller, Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set(https://doi.org/10.1103/physrevb.54.11169)

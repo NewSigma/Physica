@@ -20,7 +20,7 @@
 
 #include "Math.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     T abs(const Complex<T>& c) {
         return c.norm();

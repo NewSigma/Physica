@@ -22,7 +22,7 @@
 #include "IceGenerator.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     IceGenerator<T>::IceGenerator(T maxDistOO_, T maxDistOH_)
             : maxDistOO(maxDistOO_)

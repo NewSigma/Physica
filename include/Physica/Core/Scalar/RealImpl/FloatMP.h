@@ -42,7 +42,7 @@ namespace Physica {
     };
 }
 
-namespace Physica::Core {
+namespace Physica {
     constexpr int GlobalPrecision = 4;
 
     template<>
@@ -146,12 +146,12 @@ namespace Physica::Core {
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Core::Real<Physica::Core::FloatMP>> {
-        using T = Physica::Core::Real<Physica::Core::FloatMP>;
+    struct numeric_limits<Physica::Real<Physica::FloatMP>> {
+        using T = Physica::Real<Physica::FloatMP>;
     public:
         static T epsilon() noexcept {
-            auto result = T(static_cast<Physica::Core::SignedMPUnit>(1));
-            result.setPower(1 - Physica::Core::GlobalPrecision);
+            auto result = T(static_cast<Physica::SignedMPUnit>(1));
+            result.setPower(1 - Physica::GlobalPrecision);
             return result;
         }
     };

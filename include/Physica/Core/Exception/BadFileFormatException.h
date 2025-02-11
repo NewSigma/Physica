@@ -21,7 +21,7 @@
 #include "IOException.h"
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API BadFileFormatException : public IOException {
         using This = BadFileFormatException;
     public:

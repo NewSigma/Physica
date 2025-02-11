@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h" // IWYU pragma: export
 #include "DenseMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] Giles, M. An extended collection of matrix derivative results for forward and reverse mode algorithmic differentiation (2008); https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf.

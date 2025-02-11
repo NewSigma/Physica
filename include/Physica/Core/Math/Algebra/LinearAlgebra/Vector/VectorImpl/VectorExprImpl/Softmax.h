@@ -20,7 +20,7 @@
 
 #include "../VectorExpr.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T>
     class VectorExpr<ExprType::Softmax, T>
             : public UnitaryVectorExpr<ExprType::Softmax, T> {

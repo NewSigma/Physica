@@ -23,7 +23,7 @@
 #include "Physica/PlainStruct.h"
 #include "RSpaceEwald.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \tparam REwaldType: R(Space)EwaldType.
      * May be device side or host side, small cell version or large cell version, so it cannot be simplified to a single bool.
@@ -356,7 +356,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T1, class T2>
-    class Traits<Core::Ewald<T1, T2>> : public Traits<T2> {
+    class Traits<Ewald<T1, T2>> : public Traits<T2> {
     public:
         using ScalarType = T1;
         using REwaldType = T2;

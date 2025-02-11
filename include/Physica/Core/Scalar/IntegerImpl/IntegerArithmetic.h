@@ -23,7 +23,7 @@
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/AddBasic.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/DivBasic.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Both i1 and i2 must be positive integers.
      */

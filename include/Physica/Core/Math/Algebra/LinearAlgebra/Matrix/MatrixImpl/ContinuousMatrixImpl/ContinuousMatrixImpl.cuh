@@ -20,7 +20,7 @@
 
 #include "../ContinuousMatrix.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     inline auto device_obj<ContinuousMatrix<Derived>>::operator=(const This& obj) -> This& {
         Base::operator=(obj);

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/UnitVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class MatrixExp : public RValueMatrix<MatrixExp<T>> {
         using This = MatrixExp<T>;
@@ -81,7 +81,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Physica::Core::Matrix T>
+    template<Matrix T>
     class Traits<MatrixExp<T>> : public Traits<T> {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;

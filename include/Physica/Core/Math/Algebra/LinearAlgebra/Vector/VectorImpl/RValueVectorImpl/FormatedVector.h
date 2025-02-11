@@ -20,7 +20,7 @@
 
 #include "../RValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class VectorType> class FormatedVector;
 
     template<Vector T>
@@ -84,13 +84,13 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<Physica::Core::Vector T>
-    struct formatter<Physica::Core::FormatedVector<T>, char> {
+    template<Physica::Vector T>
+    struct formatter<Physica::FormatedVector<T>, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
             return ctx.begin();
         }
 
-        auto format(const Physica::Core::FormatedVector<T>& obj, std::format_context& ctx) const {
+        auto format(const Physica::FormatedVector<T>& obj, std::format_context& ctx) const {
             const auto& data = obj.getData();
             const auto& sep = obj.getSeparator();
             size_t length = data.getLength();

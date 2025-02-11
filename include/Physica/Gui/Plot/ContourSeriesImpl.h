@@ -21,7 +21,7 @@
 #include <QtCharts/QChart>
 #include "ContourSeries.h"
 
-namespace Physica::Gui {
+namespace Physica {
     template<Matrix T>
     bool ContourSeries<T>::Quad::operator==(Quad quad) const noexcept {
         return row == quad.row && col == quad.col;
@@ -156,9 +156,9 @@ namespace Physica::Gui {
     }
 
     template<Matrix T>
-    ContourSeries<T>::Grid::Grid(const Core::LValueMatrix<T>& x_,
-                                          const Core::LValueMatrix<T>& y_,
-                                          const Core::LValueMatrix<T>& z_) : x(x_), y(y_), z(z_), flags() {
+    ContourSeries<T>::Grid::Grid(const LValueMatrix<T>& x_,
+                                          const LValueMatrix<T>& y_,
+                                          const LValueMatrix<T>& z_) : x(x_), y(y_), z(z_), flags() {
         flags.resize(x.getRow() - 1);
         for (size_t i = 0; i < x.getRow() - 1; ++i)
             flags[i].resize(x.getCol() - 1, false);
@@ -241,10 +241,10 @@ namespace Physica::Gui {
     }
 
     template<Matrix T>
-    ContourSeries<T>::ContourSeries(const Core::LValueMatrix<T>& x,
-                                             const Core::LValueMatrix<T>& y,
-                                             const Core::LValueMatrix<T>& z,
-                                             Core::Array<double> levels,
+    ContourSeries<T>::ContourSeries(const LValueMatrix<T>& x,
+                                             const LValueMatrix<T>& y,
+                                             const LValueMatrix<T>& z,
+                                             Array<double> levels,
                                              QObject* parent) : QObject(parent) {
         for (double level : levels) {
             Grid grid = Grid(x, y, z);

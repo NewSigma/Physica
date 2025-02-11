@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, Vector U>
     class MatrixVectorProduct<BlockMatrix<T>, U>
             : public RValueVector<MatrixVectorProduct<BlockMatrix<T>, U>> {

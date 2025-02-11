@@ -25,7 +25,7 @@ using namespace Physica;
 using namespace Physica;
 using ScalarType = float32;
 using VectorType = VectorND<ScalarType>;
-using DeviceVector = Core::device_obj<VectorType>;
+using DeviceVector = device_obj<VectorType>;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 __global__ void test_kernel(

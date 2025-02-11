@@ -26,7 +26,7 @@
 #include "FFTImpl/FFTRSpace.h"
 #include "FFTImpl/FFTKSpace.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar, size_t Dim = 1> class FFT;
 
     enum class PlanFlag {
@@ -196,7 +196,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, size_t dim>
-    class Traits<Core::FFT<T, dim>> {
+    class Traits<FFT<T, dim>> {
     public :
         using ScalarType = T;
         using MachineType = ScalarType::MachineType;

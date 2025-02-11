@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include "AdamImpl/AdamImpl.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Reference:
      * [1] arXiv:1412.6980; https://doi.org/10.48550/arXiv.1412.6980

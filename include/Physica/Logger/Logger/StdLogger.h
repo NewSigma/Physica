@@ -20,7 +20,7 @@
 
 #include "AbstractLogger.h"
 
-namespace Physica::Logger {
+namespace Physica {
     /**
      * The standard logger that links to stdout and stderr,
      * will be created when LoggerRuntime is initialized.

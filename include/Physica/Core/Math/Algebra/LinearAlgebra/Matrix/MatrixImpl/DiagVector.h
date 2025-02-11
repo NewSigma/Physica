@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
 #include "RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T, bool isLValueMatrix>
     class DiagVector<T, isLValueMatrix> : public RValueVector<DiagVector<T, isLValueMatrix>> {
         using This = DiagVector<T, isLValueMatrix>;

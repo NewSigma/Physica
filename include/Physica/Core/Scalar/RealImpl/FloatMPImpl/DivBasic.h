@@ -21,7 +21,7 @@
 #include "SubBasic.h"
 #include "MulBasic.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*
      * Return the precomputed reciprocal.
      * Reference: T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class MatrixPow : public RValueMatrix<MatrixPow<T>> {
         using This = MatrixPow<T>;
@@ -63,8 +63,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Matrix T>
-    class Traits<Core::MatrixPow<T>> : public Traits<T> {
+    template<Matrix T>
+    class Traits<MatrixPow<T>> : public Traits<T> {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
     };

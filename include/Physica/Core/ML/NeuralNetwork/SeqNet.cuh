@@ -21,7 +21,7 @@
 #include "SeqNet.h"
 #include "Loss.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<SeqNet<Derived>> : public device_obj<LayerBase<Derived>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");

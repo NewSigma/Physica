@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim> class EmptyForceModel;
 
     namespace Internal {
@@ -78,7 +78,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, unsigned int Dim>
-    class Traits<Core::EmptyForceModel<T, Dim>> {
+    class Traits<EmptyForceModel<T, Dim>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;

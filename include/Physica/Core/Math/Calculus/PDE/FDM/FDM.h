@@ -23,7 +23,7 @@
 /*!
  * Solve the laplace equation using FDM. This is created for study and is very shabby.
  */
-namespace Physica::Core {
+namespace Physica {
     class FDMBase {
     public:
         enum BoundaryType {

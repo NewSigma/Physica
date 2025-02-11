@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         class PeriodicCellImpl {
         public:
@@ -87,8 +87,8 @@ namespace Physica::Core {
         [[nodiscard]] PeriodicCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         [[nodiscard]] PeriodicCell makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const;
 
-        H5Group read(const H5Location& loc, const char* name);
-        H5Group write(H5Location& loc, const char* name) const;
+        H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(PeriodicCell& __restrict cell) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getDim() { return Dim; }
@@ -379,7 +379,7 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T, unsigned int Dim>
-    H5Group PeriodicCell<T, Dim>::read(const H5Location& loc, const char* name) {
+    H5Group PeriodicCell<T, Dim>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         lattice.read(group, "lattice");
         const auto posDataset = pos.read(group, "pos");
@@ -389,7 +389,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    H5Group PeriodicCell<T, Dim>::write(H5Location& loc, const char* name) const {
+    H5Group PeriodicCell<T, Dim>::write(H5Loc& loc, const char* name) const {
         auto group = loc.openGroup(name);
         lattice.write(group, "lattice");
         auto posDataset = pos.write(group, "pos");
@@ -796,9 +796,9 @@ namespace Physica::Core {
     void PeriodicCell<T, Dim>::toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z) {
         assert(type == Type::Direct);
         toUnitPosDirect(pos, x, y, z);
-        const T inv_x = Core::reciprocal(T(x));
-        const T inv_y = Core::reciprocal(T(y));
-        const T inv_z = Core::reciprocal(T(z));
+        const T inv_x = reciprocal(T(x));
+        const T inv_y = reciprocal(T(y));
+        const T inv_z = reciprocal(T(z));
 
         auto rowX = lattice.row(0);
         rowX *= inv_x;

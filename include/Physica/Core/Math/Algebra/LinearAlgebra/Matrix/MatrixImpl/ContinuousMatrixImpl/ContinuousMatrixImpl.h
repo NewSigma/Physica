@@ -20,7 +20,7 @@
 
 #include "../ContinuousMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     inline auto ContinuousMatrix<Derived>::operator=(const This& obj) -> This& {
         Base::operator=(obj);
@@ -274,7 +274,7 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Location& loc, const char* name) {
+    const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Loc& loc, const char* name) {
         const auto dataset = loc.openDataSet<2>(name);
         const size_t maxMajor = dataset.getSize(0);
         const size_t maxMinor = dataset.getSize(1);
@@ -293,7 +293,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    H5DataSet<2> ContinuousMatrix<Derived>::write(H5Location& loc, const char* name) const {
+    H5DataSet<2> ContinuousMatrix<Derived>::write(H5Loc& loc, const char* name) const {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         const auto space = H5DataSpace<2>({maxMajor, maxMinor});

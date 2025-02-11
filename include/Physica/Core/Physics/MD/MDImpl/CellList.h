@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class CellList {
         static_assert(!Diffable<T>, "[Error]: CellList is not diffable");

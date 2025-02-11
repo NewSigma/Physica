@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class MatrixExpr<ExprType::Ln, T>
             : public UnitaryMatrixExpr<ExprType::Ln, T> {

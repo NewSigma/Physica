@@ -21,7 +21,7 @@
 #include <numbers>
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class> class MathConst;
 
     template<ScalarOption Option>

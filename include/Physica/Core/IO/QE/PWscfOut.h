@@ -21,7 +21,7 @@
 #include <fstream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API PWscfOut {
         using ScalarType = float64;
         constexpr static size_t DefaultBufferSize = 1024; //1024 shall be enough

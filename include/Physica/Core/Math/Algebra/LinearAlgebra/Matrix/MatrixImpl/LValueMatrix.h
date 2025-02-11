@@ -21,7 +21,7 @@
 #include "RValueMatrix.h"
 #include "LValueMatrixImpl/LMatrixBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class MatrixType> class InverseMatrix;
     template<class MatrixType> class LValueFlatten;
     /**
@@ -146,7 +146,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class Derived>
-    class Traits<Core::LValueMatrix<Derived>> : public Traits<Derived> {};
+    class Traits<LValueMatrix<Derived>> : public Traits<Derived> {};
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.h"

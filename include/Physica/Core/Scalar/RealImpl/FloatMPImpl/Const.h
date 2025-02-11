@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API BasicConst {
         using T = Real<FloatMP>;
     public:

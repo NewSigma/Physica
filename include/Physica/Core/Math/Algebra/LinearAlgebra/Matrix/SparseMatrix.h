@@ -20,7 +20,7 @@
 
 #include "MatrixImpl/RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, int Option = MatrixOption::Row | MatrixOption::Element>
     class SparseMatrix : public RValueMatrix<SparseMatrix<T, Option>> {
         using This = SparseMatrix<T, Option>;
@@ -152,8 +152,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Scalar T, int Op>
-    class Traits<Core::SparseMatrix<T, Op>> {
+    template<Scalar T, int Op>
+    class Traits<SparseMatrix<T, Op>> {
     public:
         using ScalarType = T;
         constexpr static int Option = Op;

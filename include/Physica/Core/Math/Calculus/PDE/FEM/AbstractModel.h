@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/IterateSolver.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class MeshType>
     class AbstractModel {
     public:

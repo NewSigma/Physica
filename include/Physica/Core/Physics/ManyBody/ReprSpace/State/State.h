@@ -21,7 +21,7 @@
 #include <cstddef>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class State {
     public:

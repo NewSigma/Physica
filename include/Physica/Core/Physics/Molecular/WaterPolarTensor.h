@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class WaterPolarTensor provides polarization tensor of water molecular at CCSD/W6 precision as introduced in [1].
      * 

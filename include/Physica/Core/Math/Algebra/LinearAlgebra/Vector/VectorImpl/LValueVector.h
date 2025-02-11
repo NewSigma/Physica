@@ -21,7 +21,7 @@
 #include "RValueVector.h"
 #include "LValueVectorImpl/LVectorBlock.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class LValueVector is a base class for vectors. You can take the address of elements in an LValueVector.
      * An LValueVector can be assigned to an LValueVector, and other vector classes can be assigned to an LValueVector.

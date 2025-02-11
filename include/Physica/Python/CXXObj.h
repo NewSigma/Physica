@@ -26,7 +26,7 @@ namespace clang {
     class CXXRecordDecl;
 }
 
-namespace Physica::Python {
+namespace Physica {
     class CXXPtr;
 
     class CXXObj {

@@ -20,7 +20,7 @@
 #include "Physica/Core/IO/Gnuplot.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
-namespace Physica::Core {
+namespace Physica {
     std::ostream& operator<<(std::ostream& os, const Gnuplot& gnuplot) {
         assert(gnuplot.xDatas.getLength() == gnuplot.yDatas.getLength());
         for (size_t i = 0; i < gnuplot.xDatas.getLength(); ++i) {

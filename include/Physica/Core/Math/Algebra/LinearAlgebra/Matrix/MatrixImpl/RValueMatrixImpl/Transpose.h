@@ -20,7 +20,7 @@
 
 #include "../RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class Transpose<T> : public RValueMatrix<Transpose<T>> {
         using Base = RValueMatrix<Transpose<T>>;

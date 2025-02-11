@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,7 +30,7 @@
 using namespace Physica;
 using ScalarType = float32;
 using RandomType = Random<MT19937>;
-using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;
+using EwaldType = Ewald<ScalarType, device_obj<RSpaceEwald<ScalarType>>>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 using MDType = RPMD<ScalarType, 3, 1, PageLockedAllocator<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;

@@ -20,7 +20,7 @@
 #include <QMouseEvent>
 #include "Physica/Gui/Plot/DensityPlot.h"
 
-namespace Physica::Gui {
+namespace Physica {
     DensityPlot::DensityPlot(int width, int height, QWidget* parent)
             : QWidget(parent)
             , dataImage(QImage(width, height, QImage::Format_Alpha8))

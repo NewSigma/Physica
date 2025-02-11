@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     PIPhonon::PIPhonon(size_t numAtomUnitCell_,
                        size_t superSizeX_,
                        size_t superSizeY_,

@@ -22,7 +22,7 @@
 #include "Physica/Macro.h"
 #include "Physica/Core/Exception/NoImplException.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * This class provides static methods that read the fine-grain CPU
      * cycle counter and translate between cycle-level times and absolute

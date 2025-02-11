@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class RValueFlatten<T> : public RValueVector<RValueFlatten<T>> {
         using This = RValueFlatten<T>;
@@ -50,7 +50,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T>
-    class Traits<Core::RValueFlatten<T>> {
+    class Traits<RValueFlatten<T>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;

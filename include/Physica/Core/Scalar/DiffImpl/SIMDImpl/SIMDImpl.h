@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     SIMD<Diff<T, Mode, Order>, Size>::SIMD(int x) : values(x), grads(0) {}
 

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class ProbDistribution2D {
         using This = ProbDistribution2D;

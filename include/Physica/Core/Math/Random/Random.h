@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "RandomSeed.h"
 
-namespace Physica::Core {
+namespace Physica {
     enum RandomOption {
         MT19937
     };

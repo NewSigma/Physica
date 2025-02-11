@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Random/Sobol.h"
 
-namespace Physica::Core {
+namespace Physica {
     Sobol::Sobol() : numStep(0), mask(MaxDim * MaxBit), buffer(MaxDim, 0) {
         constexpr static int MaskInit[]{1, 1, 1, 1, 1, 1, 3, 1, 3, 3, 1, 1, 5, 7, 7, 3, 3, 5, 15, 11, 5, 15, 13, 9};
         for (unsigned int i = 0; i < sizeof(MaskInit) / sizeof(int); ++i)

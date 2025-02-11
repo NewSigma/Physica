@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/RValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class RSparseVector : public RValueVector<Derived> {
         using Base = RValueVector<Derived>;

@@ -33,7 +33,13 @@ class Real(CXXObj):
         self.__Option = Option
 
     def __float__(self):
-        rtnTyName = str(self.Option).lower()
+        match self.Option:
+            case ScalarOption.Float32:
+                rtnTyName = 'float'
+            case ScalarOption.Float64:
+                rtnTyName = 'double'
+            case _:
+                raise NotImplementedError
         return float(self.call(rtnTyName, 'toMachine'))
 
     def __repr__(self):

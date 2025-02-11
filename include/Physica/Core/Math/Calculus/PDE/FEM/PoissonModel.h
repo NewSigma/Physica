@@ -20,7 +20,7 @@
 
 #include "AbstractModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class MeshType, class Functor>
     class PoissonModel : public AbstractModel<MeshType> {
     public:

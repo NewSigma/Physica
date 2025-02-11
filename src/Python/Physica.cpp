@@ -23,7 +23,7 @@ using namespace Physica;
 namespace py = pybind11;
 
 void pymain(py::module_& m) {
-    m.def("pymain", Core::version, "This func is empty, you can include Physica headers to test your code.");
+    m.def("pymain", version, "This func is empty, you can include Physica headers to test your code.");
 
-    m.def("version", Core::version);
+    m.def("version", version);
 }

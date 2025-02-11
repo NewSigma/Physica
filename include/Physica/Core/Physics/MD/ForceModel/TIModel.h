@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Hamonic.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class TIModel provides support to thermodynamic integration(TI).
      * 
@@ -153,5 +153,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class ForceModel>
-    class Traits<Core::TIModel<ForceModel>> : public Traits<ForceModel> {};
+    class Traits<TIModel<ForceModel>> : public Traits<ForceModel> {};
 }

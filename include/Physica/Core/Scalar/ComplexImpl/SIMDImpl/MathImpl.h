@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Size>
     SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size>& x) {
         return sqrt(x.squaredNorm());

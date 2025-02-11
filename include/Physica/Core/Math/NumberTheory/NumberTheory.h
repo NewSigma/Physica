@@ -21,7 +21,7 @@
 #include <utility>
 #include "Physica/Core/Math/Discrete/Combination.h"
 
-namespace Physica::Core {
+namespace Physica {
     class Integer;
     /**
      * Optimize: Make use of DP and the fact that $C_n^m = C_n^(n - m)$

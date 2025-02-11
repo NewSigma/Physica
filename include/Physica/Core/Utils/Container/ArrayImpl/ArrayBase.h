@@ -24,7 +24,7 @@
 #include "Physica/CRTPBase.h"
 #include "Iterator.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Public parts among specializations of \class Array.
      */
@@ -100,7 +100,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T, class Allocator>
-    class Traits<Core::ArrayBase<T, Allocator>> {
+    class Traits<ArrayBase<T, Allocator>> {
     public:
         using Derived = T;
     };

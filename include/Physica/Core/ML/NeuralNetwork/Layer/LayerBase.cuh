@@ -21,7 +21,7 @@
 #include "LayerBase.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<LayerBase<Derived>> : public CRTPBase<device_obj<LayerBase<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");

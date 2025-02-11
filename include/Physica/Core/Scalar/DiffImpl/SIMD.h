@@ -20,7 +20,7 @@
 
 #include "../Diff.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length>
     class BestPacket<Diff<T, Mode, Order>, Length> {
         using ScalarType = Diff<T, Mode, Order>;

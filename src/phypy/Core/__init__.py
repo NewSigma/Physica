@@ -23,3 +23,4 @@ def version() -> str:
 
 from . import Scalar
 from .Scalar import *
+del Scalar

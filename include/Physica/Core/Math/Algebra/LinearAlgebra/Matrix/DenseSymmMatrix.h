@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 #include "DenseSymmImpl/HalfDenseMatrixStorage.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order>>
                           , private HalfDenseMatrixStorage<T, Order> {
@@ -67,8 +67,8 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist) { asVector().template random_any<Distribution, R>(dist); }
 
-        inline const H5DataSet<1> read(const H5Location& loc, const char* name);
-        inline H5DataSet<1> write(H5Location& loc, const char* name) const;
+        inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
+        inline H5DataSet<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         using Storage::data_ptr;
         using Storage::getCol;
@@ -179,12 +179,12 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T, size_t Order>
-    inline const H5DataSet<1> DenseSymmMatrix<T, Order>::read(const H5Location& loc, const char* name) {
+    inline const H5DataSet<1> DenseSymmMatrix<T, Order>::read(const H5Loc& loc, const char* name) {
         return asVector().read(loc, name);
     }
 
     template<Scalar T, size_t Order>
-    inline H5DataSet<1> DenseSymmMatrix<T, Order>::write(H5Location& loc, const char* name) const {
+    inline H5DataSet<1> DenseSymmMatrix<T, Order>::write(H5Loc& loc, const char* name) const {
         return asVector().write(loc, name);
     }
 #endif
@@ -203,9 +203,9 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T, size_t Order>
-    inline void swap(Physica::Core::DenseSymmMatrix<T, Order>& __restrict m1,
-                     Physica::Core::DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
+    template<Physica::Scalar T, size_t Order>
+    inline void swap(Physica::DenseSymmMatrix<T, Order>& __restrict m1,
+                     Physica::DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

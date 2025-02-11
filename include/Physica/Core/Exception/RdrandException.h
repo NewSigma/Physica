@@ -21,7 +21,7 @@
 #include <stdexcept>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API RdrandException : public std::runtime_error {
     public:
         RdrandException() : std::runtime_error("Unable to generate a rand in the given iteration") {}

@@ -22,6 +22,6 @@
 /**
  * Operation between differentiable vectors shall save procedural info, so template expression does not apply to it.
  */
-namespace Physica::Core {
+namespace Physica {
     
 }

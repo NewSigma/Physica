@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Matrix T, Vector V>
         __global__ void DiffMatrixProduct_gemvKernel(

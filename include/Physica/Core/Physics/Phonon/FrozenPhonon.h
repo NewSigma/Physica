@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "PhononSolver.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * References:
      * [1] Dario Alfè PHON: A program to calculate phonons using the small displacement method [J]. Computer Physics Communications, 2009, 180(12), 2622-2633 (DOI: 10.1016/j.cpc.2009.03.010)
@@ -66,8 +66,8 @@ namespace Physica::Core {
         using Base::getSuperSize;
         using Base::getNumCell;
         /* Static members */
-        static void read(RSpaceFCGrid& rSpaceFC, const H5Location& loc, const char* name);
-        static void write(const RSpaceFCGrid& rSpaceFC, H5Location& loc, const char* name);
+        static void read(RSpaceFCGrid& rSpaceFC, const H5Loc& loc, const char* name);
+        static void write(const RSpaceFCGrid& rSpaceFC, H5Loc& loc, const char* name);
     private:
         PositionMatrix makeWignerSeitzRadius() const;
         GridStorage<DenseMatrix<T>> makeWignerSeitzWeights() const;
@@ -177,7 +177,7 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T>
-    void FrozenPhonon<T>::read(RSpaceFCGrid& rSpaceFC, const H5Location& loc, const char* name) {
+    void FrozenPhonon<T>::read(RSpaceFCGrid& rSpaceFC, const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         unsigned char superSize[Dim];
         auto attr = group.openAttribute("SuperSize");
@@ -193,7 +193,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    void FrozenPhonon<T>::write(const RSpaceFCGrid& rSpaceFC, H5Location& loc, const char* name) {
+    void FrozenPhonon<T>::write(const RSpaceFCGrid& rSpaceFC, H5Loc& loc, const char* name) {
         auto group = loc.openGroup(name);
         const auto gridDim = rSpaceFC.getDim();
         /* Write superSize */ {

@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Math/Random/Random.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class SampleType, class LabelType>
     class SimpleDataset {
         using This = SimpleDataset<SampleType, LabelType>;

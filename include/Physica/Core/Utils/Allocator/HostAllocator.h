@@ -25,7 +25,7 @@
 #include <limits>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Default allocator for \class Array, which provides custom interface reallocate()
      * 
@@ -121,9 +121,9 @@ namespace Physica::Core {
 
 namespace std {
     template<class T, size_t Align_>
-    struct allocator_traits<Physica::Core::HostAllocator<T, Align_>> {
+    struct allocator_traits<Physica::HostAllocator<T, Align_>> {
     public:
-        using allocator_type = Physica::Core::HostAllocator<T, Align_>;
+        using allocator_type = Physica::HostAllocator<T, Align_>;
         using value_type = T;
         using pointer = T*;
         using const_pointer = const T*;
@@ -139,7 +139,7 @@ namespace std {
         using propagate_on_container_swap = std::false_type;
         using is_always_equal = std::is_empty<allocator_type>::type;
         template<class U>
-        using rebind_alloc = Physica::Core::HostAllocator<U>;
+        using rebind_alloc = Physica::HostAllocator<U>;
         template<class U>
         using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
 

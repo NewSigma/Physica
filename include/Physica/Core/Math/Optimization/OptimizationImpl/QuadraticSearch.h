@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class QuadraticSearch {
         Vector3D<T> x;

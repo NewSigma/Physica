@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 #include "VectorImpl/ContinuousVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Length = Dynamic, class Allocator = HostAllocator<T, alignof(typename BestPacket<T, Length>::Type)>>
     class DenseVector : public ContinuousVector<DenseVector<T, Length, Allocator>>
                       , public CRCoro<DenseVector<T, Length, Allocator>>
@@ -115,8 +115,8 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Core::Scalar T, size_t Length>
-    inline void swap(Physica::Core::DenseVector<T, Length>& __restrict v1, Physica::Core::DenseVector<T, Length>& __restrict v2) noexcept {
+    template<Physica::Scalar T, size_t Length>
+    inline void swap(Physica::DenseVector<T, Length>& __restrict v1, Physica::DenseVector<T, Length>& __restrict v2) noexcept {
         v1.swap(v2);
     }
 }

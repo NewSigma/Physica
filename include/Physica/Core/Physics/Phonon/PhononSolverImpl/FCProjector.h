@@ -20,7 +20,7 @@
 
 #include "FCSwapVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Force constant(FC) projector utilizes the projection method to incorporate symmetry invariance as introduced in [1].
      * 

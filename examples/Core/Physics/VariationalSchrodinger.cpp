@@ -24,7 +24,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using namespace Physica::Gui;
 using ScalarType = float64;
 
 class InfiniteDeepWell {

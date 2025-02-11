@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,9 +23,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using namespace Physica::Core::Physics;
-using namespace Physica::Gui;
-
 using ScalarType = float64;
 
 void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEnergy) {

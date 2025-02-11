@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Calculus/PDE/FDM/FDM.h"
 
-namespace Physica::Core {
+namespace Physica {
     const int FDMBase::iterateMax = 100;
     const double FDMBase::precision = 0.01;
 }

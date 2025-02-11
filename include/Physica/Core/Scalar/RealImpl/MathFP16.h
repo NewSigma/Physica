@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<>
     __host__ __device__ inline Real<Float16> abs(const Real<Float16>& s) noexcept {
         return Real<Float16>(::__habs(s.toMachine()));

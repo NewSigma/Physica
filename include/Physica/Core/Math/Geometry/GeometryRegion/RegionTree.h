@@ -20,7 +20,7 @@
 
 #include "GeometryRegion.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * A tree describes operations between two regions. e.g. and, or ...
      */

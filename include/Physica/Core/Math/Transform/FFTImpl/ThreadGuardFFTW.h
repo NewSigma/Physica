@@ -21,7 +21,7 @@
 #include <mutex>
 #include "Physica/Macro.h"
 
-namespace Physica::Core::Internal {
+namespace Physica::Internal {
     /**
      * Protect thread safe
      */

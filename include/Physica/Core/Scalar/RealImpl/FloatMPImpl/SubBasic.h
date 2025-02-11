@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /*
      * Calculate n1 - n2, the result must be one word.
      */

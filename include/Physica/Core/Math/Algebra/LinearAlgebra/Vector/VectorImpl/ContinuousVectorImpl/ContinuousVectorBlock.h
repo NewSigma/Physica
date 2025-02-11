@@ -20,7 +20,7 @@
 
 #include "../LValueVector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class ContinuousVector;
 
     template<Vector T, size_t Length>

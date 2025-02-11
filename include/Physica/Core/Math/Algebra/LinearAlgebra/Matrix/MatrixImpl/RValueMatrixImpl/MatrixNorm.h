@@ -22,7 +22,7 @@
 #include "Physica/Core/Exception/BadConvergenceException.h"
 #include "../RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1() const {
         RealType maxNorm1 = 0;

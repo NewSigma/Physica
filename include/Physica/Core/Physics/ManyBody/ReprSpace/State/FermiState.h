@@ -20,7 +20,7 @@
 
 #include "SpinState.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<int Dim, int NumSite>
     class FermiState : public State<FermiState<Dim, NumSite>> {
         using This = FermiState<Dim, NumSite>;

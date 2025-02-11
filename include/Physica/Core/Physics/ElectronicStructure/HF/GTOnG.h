@@ -20,7 +20,7 @@
 
 #include "GaussBase.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Size>
     class GTOnG {
         using BaseType = GaussBase<T>;
@@ -120,7 +120,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, size_t Size>
-    class Traits<Core::GTOnG<T, Size>> {
+    class Traits<GTOnG<T, Size>> {
     public:
         using ScalarType = T;
         constexpr static size_t size = Size;

@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Construct a givens transformation that eleminate the element in \param vector at index \param j
      *

@@ -23,7 +23,7 @@
 #include <utility>
 #include "Scalar.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<ScalarOption Option> class Real;
 
     class PHYSICA_API Integer {
@@ -113,12 +113,12 @@ namespace Physica::Core {
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Core::Integer> {
+    struct numeric_limits<Physica::Integer> {
         constexpr static bool is_integer = true;
     };
 
     template<>
-    inline void swap(Physica::Core::Integer& __restrict i1, Physica::Core::Integer& __restrict i2) noexcept {
+    inline void swap(Physica::Integer& __restrict i1, Physica::Integer& __restrict i2) noexcept {
         i1.swap(i2);
     }
 }

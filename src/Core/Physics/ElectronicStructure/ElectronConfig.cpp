@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Physics/ElectronicStructure/ElectronConfig.h"
 
-namespace Physica::Core::Physics {
+namespace Physica {
     size_t ElectronConfig::getNumOccupiedOrbit() const noexcept {
         size_t result = 0;
         for (size_t i = 0; i < states.getLength(); ++i)

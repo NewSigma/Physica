@@ -20,7 +20,7 @@
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Exception/IOException.h"
 
-namespace Physica::Core {
+namespace Physica {
     H5File::H5File(
             const char* name,
             unsigned int openflag_,

@@ -22,7 +22,7 @@
 #include "ContinuousMatrixImpl/ContinuousMatrixBlock.h"
 #include "ContinuousMatrixImpl/ContinuousFlatten.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * A ContinuousMatrix has its elements on major direction distributed continuously.
      */
@@ -130,8 +130,8 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
 
-        const H5DataSet<2> read(const H5Location& loc, const char* name);
-        H5DataSet<2> write(H5Location& loc, const char* name) const;
+        const H5DataSet<2> read(const H5Loc& loc, const char* name);
+        H5DataSet<2> write(H5Loc& loc, const char* name) const;
 
         [[nodiscard]] ValuesRtnTy values() noexcept;
         [[nodiscard]] const ValuesRtnTy values() const noexcept;

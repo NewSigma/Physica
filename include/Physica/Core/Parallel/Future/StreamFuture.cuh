@@ -22,7 +22,7 @@
 #include <condition_variable>
 #include "Physica/Macro.h"
 
-namespace Physica::Core {
+namespace Physica {
     class PHYSICA_API StreamFuture {
         bool isDone;
         std::mutex mutex;

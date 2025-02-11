@@ -25,7 +25,7 @@
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * References:
      * [1] R.N. Euwema, D.J. Stukel, T.C. Collins, J.S. DeWitt, D.G. Shankland, Phys. Rev. 178 (1969) 1419–1423. http://dx.doi.org/10.1103/PhysRev.178.1419.

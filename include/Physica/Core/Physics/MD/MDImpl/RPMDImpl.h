@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "../RPMD.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::RPMD(
             MDCellType cell_,
@@ -705,7 +705,7 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::read(const H5Location& loc, const char* name) {
+    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         LatticeMatrix temp{};
         temp.read(group, "lattice");
@@ -715,7 +715,7 @@ namespace Physica::Core {
     }
     
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::write(H5Location& loc, const char* name) const {
+    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::write(H5Loc& loc, const char* name) const {
         auto group = loc.openGroup(name);
         getLattice().write(group, "lattice");
         getPhaseMatrix().write(group, "phase");

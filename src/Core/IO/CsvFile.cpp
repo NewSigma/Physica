@@ -22,7 +22,7 @@
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
-namespace Physica::Core {
+namespace Physica {
     CsvFile::CsvFile(DataTypeArray datatypes_, const char* path)
             : datatypes(std::move(datatypes_)) {
         allocate();

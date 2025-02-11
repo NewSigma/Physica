@@ -20,6 +20,6 @@
 
 #include <string>
 
-namespace Physica::Core {
+namespace Physica {
     std::string version();
 }

@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/MD/Barostat/Berendsen.h"
 #include "FireModel.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class CFireModel is Cell-FIRE that incorporates cell degree of freedom into \class FireModel
      */

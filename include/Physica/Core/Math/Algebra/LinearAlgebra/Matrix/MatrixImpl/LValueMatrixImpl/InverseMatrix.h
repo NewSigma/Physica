@@ -20,7 +20,7 @@
 
 #include "../LValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     namespace Internal {
         template<Matrix SourceType, Matrix TargetType, size_t Size>
         struct InverseImpl {
@@ -169,5 +169,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T>
-    class Traits<Core::InverseMatrix<T>> : public Traits<T> {};
+    class Traits<InverseMatrix<T>> : public Traits<T> {};
 }

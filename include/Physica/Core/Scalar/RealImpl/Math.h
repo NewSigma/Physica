@@ -20,7 +20,7 @@
 
 #include "Float64.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> abs(const Real<Option>& x) noexcept;
 

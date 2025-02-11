@@ -20,7 +20,7 @@
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
-namespace Physica::Core {
+namespace Physica {
     Potcar::Potcar(const char* path) {
         std::ifstream fin(path);
         if (!fin)

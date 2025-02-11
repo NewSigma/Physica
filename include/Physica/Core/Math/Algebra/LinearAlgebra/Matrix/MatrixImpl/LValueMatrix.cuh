@@ -20,7 +20,7 @@
 
 #include "RValueMatrix.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<LValueMatrix<Derived>> : public device_obj<RValueMatrix<Derived>> {
         using This = device_obj<LValueMatrix<Derived>>;

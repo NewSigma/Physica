@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/RValueVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived> class RValueMatrix;
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class RMatrixBlock;
 
@@ -146,7 +146,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T, size_t Row, size_t Col>
-    class Traits<Core::RMatrixBlock<T, Row, Col>> {
+    class Traits<RMatrixBlock<T, Row, Col>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;

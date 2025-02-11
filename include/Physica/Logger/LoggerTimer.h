@@ -22,7 +22,7 @@
 #include <cstdint>
 #include "Physica/Core/Utils/Cycler.h"
 
-namespace Physica::Logger {
+namespace Physica {
     /**
      * This class handle conversion between cycle at initialize and Unix time.
      */
@@ -33,7 +33,7 @@ namespace Physica::Logger {
         LoggerTimer();
         ~LoggerTimer() = default;
         /* Operations */
-        [[nodiscard]] timeval now() const { return toTime(Core::Cycler::now()); }
+        [[nodiscard]] timeval now() const { return toTime(Cycler::now()); }
         [[nodiscard]] timeval toTime(uint64_t cycle) const;
         /* Getters */
         [[nodiscard]] timeval getStartTime() const noexcept { return startTime; }

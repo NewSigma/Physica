@@ -21,7 +21,7 @@
 #include <mkl_cblas.h>
 #include "../InnerDot.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T1, Vector T2>
     InnerDot<T1, T2>::ScalarType InnerDot<T1, T2>::calc_mkl() const {
         using MachineType = ScalarType::MachineType;

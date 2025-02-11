@@ -25,7 +25,7 @@
 
     #include "H5DataSet.h"
     #include "H5DataSpace.h"
-    #include "H5Location.h"
+    #include "H5Loc.h"
     #include "H5File.h"
     #include "H5Group.h"
 #else
@@ -34,12 +34,12 @@
         class DSetMemXferPropList;
     }
 
-    namespace Physica::Core {
+    namespace Physica {
         template<class Derived> class DataSpaceBase {};
         template<size_t Dim> class H5DataSpace {};
         template<size_t Dim> class H5DataSet {};
         class H5File;
         class H5Group {};
-        class H5Location {};
+        class H5Loc {};
     }
 #endif

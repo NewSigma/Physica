@@ -21,7 +21,7 @@
 #include "State/SpinState.h"
 #include "ReprBasis.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<int Dim, int NumSite>
     class SpinRepr : public ReprBasis<SpinRepr<Dim, NumSite>> {
         using This = SpinRepr<Dim, NumSite>;

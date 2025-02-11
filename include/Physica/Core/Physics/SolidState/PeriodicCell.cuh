@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh" // IWYU pragma: export
 #include "PeriodicCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, unsigned int Dim>
     class device_obj<PeriodicCell<T, Dim>> : public Internal::PeriodicCellImpl {
         using host_obj = PeriodicCell<T, Dim>;

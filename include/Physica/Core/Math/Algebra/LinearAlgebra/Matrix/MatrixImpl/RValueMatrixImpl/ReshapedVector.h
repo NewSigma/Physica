@@ -20,7 +20,7 @@
 
 #include "../RValueMatrix.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
     class RValueReshapedVector : public RValueMatrix<RValueReshapedVector<T, MatrixMajor, Row, Col>> {
         using This = RValueReshapedVector<T, MatrixMajor, Row, Col>;

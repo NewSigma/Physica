@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     template<class Function, Vector T>
     GeneAlgorithm<Function, T>::GeneAlgorithm(Function func_, const AlgorithmConfig& config_)
             : config(config_)

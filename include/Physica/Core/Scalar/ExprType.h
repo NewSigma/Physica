@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * \class ExprType is used in implementation of expression template and auto differential.
      */

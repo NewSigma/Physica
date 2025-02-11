@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/MathConst.h"
 
-namespace Physica::Core {
+namespace Physica {
     /*!
      * Consts that need some calculates.
      * Should call new to Const_1 so as to make calculates available.

@@ -21,7 +21,7 @@
 #include "LValueVector.h"
 #include "RValueVector.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<class Derived>
     class device_obj<LValueVector<Derived>> : public device_obj<RValueVector<Derived>> {
         using This = device_obj<LValueVector<Derived>>;

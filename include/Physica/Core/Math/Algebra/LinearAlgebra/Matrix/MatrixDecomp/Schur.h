@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * A = UTU^H
      * 

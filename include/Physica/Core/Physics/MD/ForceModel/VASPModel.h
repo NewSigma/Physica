@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Utils/Unix/TempDir.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class VASPModel {
         using MDCellType = MDCell<T>;
@@ -168,7 +168,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T>
-    class Traits<Core::VASPModel<T>> {
+    class Traits<VASPModel<T>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;

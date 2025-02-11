@@ -20,7 +20,7 @@
 
 #include "../RValueMatrix.cuh"
 
-namespace Physica::Core {
+namespace Physica {
     template<Matrix T>
     class device_obj<Transpose<T>> : public device_obj<RValueMatrix<Transpose<T>>> {
         using host_obj = Transpose<T>;

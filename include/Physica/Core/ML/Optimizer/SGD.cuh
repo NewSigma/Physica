@@ -20,7 +20,7 @@
 
 #include "SGD.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T>
     class SGD<device_obj<T>> {
         static_assert(T::isDiffable, "[Error]: T must be differentiable");

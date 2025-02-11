@@ -22,7 +22,7 @@
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Vector.h"
 
-namespace Physica::Core {
+namespace Physica {
     template<Scalar T, size_t Length = Dynamic>
     class UnitVector : public RValueVector<UnitVector<T, Length>> {
         using This = UnitVector<T, Length>;

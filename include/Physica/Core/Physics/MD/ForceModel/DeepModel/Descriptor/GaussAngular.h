@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
-namespace Physica::Core {
+namespace Physica {
     /**
      * Angular function introduced in [1]
      * 
