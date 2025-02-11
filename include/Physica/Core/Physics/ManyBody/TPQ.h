@@ -51,9 +51,9 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ModelType, class Executor = SequentialExecutor>
+        template<class ModelType, class Executor = SeqExecutor>
         void pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta);
-        template<class ModelType, class Executor = SequentialExecutor>
+        template<class ModelType, class Executor = SeqExecutor>
         void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta);
 
         [[nodiscard]] inline RealType calcPartitionXi() const;

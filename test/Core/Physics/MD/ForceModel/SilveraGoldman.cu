@@ -55,7 +55,7 @@ int main() {
     for (size_t numMolecular : {108, 160}) {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
         RPMD<ScalarType> rpmd = makeSystem(numMolecular);
-        const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
+        const auto f0 = hostModel.template force<SeqExecutor>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CUDAExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-3))
             return 1;
@@ -64,7 +64,7 @@ int main() {
         constexpr unsigned int numMolecular = 108;
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
         RPMD<ScalarType> rpmd = makeSystem(numMolecular);
-        const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
+        const auto f0 = hostModel.template force<SeqExecutor>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CUDAExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))
             return 1;

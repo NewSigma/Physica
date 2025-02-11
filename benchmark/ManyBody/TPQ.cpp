@@ -45,7 +45,7 @@ namespace {
         psi.pre_nvt_step(hamilton, Beta);
         psi.random_normal<RandomType>();
         for (auto _ : state)
-            psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
+            psi.template nvt_step<Hamilton, SeqExecutor>(hamilton, Beta);
     }
 }
 

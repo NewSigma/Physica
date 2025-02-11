@@ -60,7 +60,7 @@ namespace Physica::Core {
     template<Matrix M>
     void MatrixExp<T>::assign(LValueMatrix<M>& target) const {
         const RealType traceMu = calcTraceMu();
-        const auto params = ((*this) * VectorND<ScalarType>(getRow())).template calcParam<SequentialExecutor>(traceMu);
+        const auto params = ((*this) * VectorND<ScalarType>(getRow())).template calcParam<SeqExecutor>(traceMu);
         for (size_t i = 0; i < getCol(); ++i) {
             auto col = target.col(i);
             ((*this) * UnitVector<ScalarType>(i, getRow())).assign(col, traceMu, params);

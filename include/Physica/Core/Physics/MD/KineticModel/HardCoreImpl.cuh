@@ -47,7 +47,7 @@ namespace Physica::Core {
             , buffer(numParticle)
             , lockedBuffer(numParticle * 2)
             , maxHandleNum(maxHandleNum_) {
-        HardCore<T, IsFixedBoundary, NumReplica, Integrator, SequentialExecutor>::checkParam(collideFactor, 1);
+        HardCore<T, IsFixedBoundary, NumReplica, Integrator, SeqExecutor>::checkParam(collideFactor, 1);
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>

@@ -71,7 +71,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& v) const;
 
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {

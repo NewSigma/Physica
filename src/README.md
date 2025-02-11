@@ -1,6 +1,6 @@
 # 关于工程结构
 
-工程结构是用户接触开源软件最开始接触到的。一个干净、目标导向的工程结构应当被视为和设计与注释良好的代码同等甚至更加重要。Physica的一级工程结构和通常的开源C++项目一致, 包括: 3rdparty, benchmark, doc, examples, include, src 和 test文件夹。在Physica中, 二级工程结构按照模块进行组织。Physica包含以下模块:
+工程结构是用户接触开源软件最开始接触到的。一个干净、目标导向的工程结构应当被视为和设计与注释良好的代码同等重要。Physica的一级工程结构和通常的开源C++项目一致, 包括: 3rdparty, benchmark, doc, examples, include, src 和 test文件夹。在Physica中, 二级工程结构按照模块进行组织。Physica包含以下模块:
 
 **Core**: 包含Physica核心功能的实现  
 **Gui**: 包含2D和3D绘图支持, 以Qt为绘图后端  

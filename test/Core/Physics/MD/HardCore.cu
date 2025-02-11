@@ -110,12 +110,12 @@ void testCpuGpuCompare() {
         rpmd.initMomentum<KineticModel, RandomType>();
 
         ForceModel forceModel{};
-        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
         cpu_data[0] = calcThermoFlux(rpmd);
-        rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, forceModel);
+        rpmd.nve_step_for<KineticModel, ForceModel, SeqExecutor>(1.0, kineticModel, forceModel);
         for (size_t j = 1; j < NumData; ++j) {
             cpu_data[j] = calcThermoFlux(rpmd);
-            rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(1.0, kineticModel, forceModel);
+            rpmd.nve_step_for<KineticModel, ForceModel, SeqExecutor>(1.0, kineticModel, forceModel);
             scaleVelocity(rpmd);
         }
     }

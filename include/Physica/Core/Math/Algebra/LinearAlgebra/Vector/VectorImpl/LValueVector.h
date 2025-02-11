@@ -54,7 +54,7 @@ namespace Physica::Core {
         template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
         template<Scalar T> void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Vector T, class Executor = SequentialExecutor>
+        template<Vector T, class Executor = SeqExecutor>
         inline Derived& operator=(const T& v_);
         template<Vector T> void operator+=(const T& v) { Base::getDerived() = Base::getDerived() + v; }
         template<Vector T> void operator-=(const T& v) { Base::getDerived() += -v; } // To avoid alias

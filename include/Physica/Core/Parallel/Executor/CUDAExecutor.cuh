@@ -19,13 +19,13 @@
 #pragma once
 
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
-#include "SequentialExecutor.h"
+#include "SeqExecutor.h"
 
 namespace Physica::Core {
     /**
      * Single thread with cuda support
      */
-    class CUDAExecutor : public SequentialExecutor {
+    class CUDAExecutor : public SeqExecutor {
     public:
         static void wait() {
         #ifdef PHYSICA_CUDA

@@ -48,7 +48,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V1, class Executor = SequentialExecutor>
+        template<Vector V1, class Executor = SeqExecutor>
         inline void assign(V1& target) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const { noImpl(__func__); }

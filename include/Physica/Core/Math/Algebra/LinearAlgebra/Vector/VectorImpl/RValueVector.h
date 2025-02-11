@@ -21,7 +21,7 @@
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Scalar/Real.h" // IWYU pragma: export
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "RValueVectorImpl/RVectorBlock.h"
 
 namespace Physica::Core {
@@ -93,7 +93,7 @@ namespace Physica::Core {
     public:
         ~RValueVector() = default;
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& v) const;
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -72,7 +72,7 @@ namespace Physica::Core {
     template<Vector V, class Executor>
     void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         static_assert(Traits<Executor>::UseCUDA, "[Error]: Invalid executor");
-        const auto threadId = ThreadPool::getThreadInfo().id;
+        const auto threadId = ThreadPool::getThreadID();
         const bool useCPU = ThreadPool::isMainThread() || static_cast<size_t>(threadId) >= getNumCUDAThread();
         if (useCPU)
             result = hostModel.template force<ThreadExecutor>(cell);

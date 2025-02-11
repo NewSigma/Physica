@@ -71,11 +71,11 @@ namespace Physica::Core {
         void mesh_uniform(size_t dim);
         void mesh_tanh(size_t dim, Trv range);
 
-        template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
+        template<class Functor, RandomGenerator R, class Executor = SeqExecutor>
         Trv warmup(Functor func, int numWarm);
-        template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
+        template<class Functor, RandomGenerator R, class Executor = SeqExecutor>
         void integral(Functor func);
-        template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
+        template<class Functor, RandomGenerator R, class Executor = SeqExecutor>
         [[nodiscard]] Trv calcGridLoss(Functor func) const;
 
         const H5Group read(const H5Location& loc, const char* name);

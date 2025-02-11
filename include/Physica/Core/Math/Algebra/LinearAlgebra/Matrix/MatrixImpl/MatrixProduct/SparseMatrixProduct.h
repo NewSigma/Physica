@@ -41,7 +41,7 @@ namespace Physica::Core {
             assert(mat.getCol() == vec.getLength());
         }
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         void assign(V& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;

@@ -69,7 +69,7 @@ int main(int argc, char** argv) {
         VectorType buffer(numMolecular, 0);
         for (size_t i = 0; i < numStep; ++i) {
             ForceModel forceModel{};
-            rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
+            rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
             auto col = rpmd.getRingPolymer().asMatrix().col(0);
             auto momentum = col.head(numMolecular);
             temp = hadamard(square(momentum), repMass) * ScalarType(0.5);

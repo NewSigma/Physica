@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
 namespace Physica::Core {
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
@@ -60,7 +60,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
     template<Vector V, class Executor>
     void FPUModel<T, IsPeriodBoundary, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
-        static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization not implemented");
+        static_assert(std::is_same<Executor, SeqExecutor>::value, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         result = T(0);

@@ -112,7 +112,7 @@ static void bench(benchmark::State& state) {
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum<KineticModel, RandomType>();
     for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
 }
 
 BENCHMARK(bench)->Name("Q_TIP4P")->Unit(benchmark::kMillisecond);

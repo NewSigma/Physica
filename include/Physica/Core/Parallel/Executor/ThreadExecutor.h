@@ -23,13 +23,13 @@
 #include <cassert>
 #include "Physica/Core/Parallel/Future/FutureGroup.h"
 #include "Physica/Core/Parallel/ThreadPool.h"
-#include "SequentialExecutor.h"
+#include "SeqExecutor.h"
 
 namespace Physica::Core {
-    class ThreadExecutor {
+    class PHYSICA_API ThreadExecutor {
     public:
         using FutureType = std::future<void>;
-        using Range = SequentialExecutor::Range;
+        using Range = SeqExecutor::Range;
     public:
         /* Operations */
         template<class Functor, class... Args>
@@ -39,10 +39,12 @@ namespace Physica::Core {
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, size_t loopCount);
         template<class Functor>
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, size_t loopCount, int core);
-        PHYSICA_API static void auto_wait(FutureType& future);
+
+        static void auto_wait(FutureType& future);
         inline static void auto_wait(FutureGroup<FutureType>& group);
         static void wait() {}
         /* Getters */
+        [[nodiscard]] static int getThreadID() { return ThreadPool::getInstance().getThreadID(); }
         [[nodiscard]] static int getNumThread() { return ThreadPool::getInstance().getNumThreads(); }
         /* Static members */
         [[nodiscard]] inline static Range splitJob(size_t loopCount, int core, int part);

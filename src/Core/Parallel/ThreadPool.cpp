@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -75,18 +75,7 @@ namespace Physica::Core {
         cond.notify_all();
     }
 
-    ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() noexcept {
-        thread_local static std::unique_ptr<ThreadInfo> info = nullptr;
-        if (info == nullptr) {
-            info.reset(new ThreadInfo());
-            info->id = MainThreadID;
-            info->numScheduled = 0;
-            info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
-        }
-        return *info;
-    }
-
-    ThreadPool& ThreadPool::getInstance() noexcept {
+    auto ThreadPool::getInstance() noexcept -> This& {
         static ThreadPool pool(makeNumThread());
         return pool;
     }
@@ -121,5 +110,33 @@ namespace Physica::Core {
                 cond.wait(poolLocker);
             }
         }
+    }
+
+    auto ThreadPool::getThreadInfo() noexcept -> ThreadInfo& {
+        thread_local static std::unique_ptr<ThreadInfo> info = nullptr;
+        if (info == nullptr) {
+            info.reset(new ThreadInfo());
+            info->id = MainThreadID;
+            info->numScheduled = 0;
+            info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
+        }
+        return *info;
+    }
+
+    int ThreadPool::getNumProcesser() noexcept {
+        #ifdef __linux__
+            return get_nprocs();
+        #else
+            SYSTEM_INFO sinfo;
+            GetSystemInfo(&sinfo);
+            return sinfo.dwNumberOfProcessors;
+        #endif
+    }
+
+    int ThreadPool::makeNumThread() noexcept {
+        const auto numProcesser = getNumProcesser();
+        if (numThreadRequired == 0 || numThreadRequired > numProcesser)
+            numThreadRequired = numProcesser * 3 / 4;
+        return numThreadRequired;
     }
 }

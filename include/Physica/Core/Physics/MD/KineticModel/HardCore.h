@@ -24,7 +24,7 @@
 namespace Physica::Core {
     template<Scalar T, unsigned int Dim, size_t NumReplica> class RingPolymer;
 
-    template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor>
+    template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SeqExecutor>
     class HardCore : private FreeModel<T, 1, NumReplica, Integrator> {
         using Base = FreeModel<T, 1, NumReplica, Integrator>;
         using ValueType = T::ValueType;

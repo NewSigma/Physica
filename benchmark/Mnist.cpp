@@ -163,7 +163,7 @@ namespace {
         auto opt = SGD(0.01);
         auto nn = MnistNet<dfloat>(512);
         for (auto _ : state)
-            nn.train_step<Dataset, SGD, RandomType, SequentialExecutor>(BatchSize, dataset, opt);
+            nn.train_step<Dataset, SGD, RandomType, SeqExecutor>(BatchSize, dataset, opt);
     }
 }
 

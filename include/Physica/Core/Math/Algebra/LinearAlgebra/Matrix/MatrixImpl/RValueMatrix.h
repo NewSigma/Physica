@@ -101,7 +101,7 @@ namespace Physica::Core {
         [[nodiscard]] inline auto format() const noexcept;
 
         [[nodiscard]] RealType norm1() const;
-        template<class Executor = SequentialExecutor>
+        template<class Executor = SeqExecutor>
         [[nodiscard]] RealType norm1_power(unsigned int maxIteration) const;
         [[nodiscard]] RealType normInf() const;
 

@@ -48,7 +48,7 @@ int main() {
     HostForceModel hostModel(cell.getLattice(), charges);
     DeviceForceModel deviceModel(cell.getLattice(), charges);
     {
-        const auto f0 = hostModel.template force_short<SequentialExecutor>(pos);
+        const auto f0 = hostModel.template force_short<SeqExecutor>(pos);
         const auto f1 = deviceModel.template force_short<CUDAExecutor>(pos);
         if (!vectorNear(f0, f1, 1E-4))
             return 1;

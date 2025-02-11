@@ -66,7 +66,7 @@ static void func(benchmark::State& state) {
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
 }
 
 BENCHMARK(func)->Name("HardCore")->Unit(benchmark::kMicrosecond);

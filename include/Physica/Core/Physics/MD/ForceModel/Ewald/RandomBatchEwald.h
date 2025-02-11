@@ -106,9 +106,9 @@ namespace Physica::Core {
     VectorND<T> RandomBatchEwald<T, R>::force(const PositionMatrix& pos) const {
         VectorND<T> result;
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
-            result = force_long<SequentialExecutor>(pos);
+            result = force_long<SeqExecutor>(pos);
         });
-        const VectorND<T> rSpaceSum = Base::template force_short<SequentialExecutor>(pos);
+        const VectorND<T> rSpaceSum = Base::template force_short<SeqExecutor>(pos);
         Executor::auto_wait(kSpaceFuture);
         result += rSpaceSum;
         return result;

@@ -36,7 +36,7 @@ namespace Physica::Core {
             assert(v2.getLength() == 3);
         }
         /* Operations */
-        template<Vector U, class Executor = SequentialExecutor>
+        template<Vector U, class Executor = SeqExecutor>
         void assign(LValueVector<U>& v) const {
             v[0] = v1[1] * v2[2] - v1[2] * v2[1];
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];

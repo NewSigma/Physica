@@ -174,7 +174,7 @@ namespace Physica::Core {
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
         constexpr bool isSeedFixed = Traits<R>::IsSeedFixed;
-        using NoRandExecutor = std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+        using NoRandExecutor = std::conditional<isSeedFixed, SeqExecutor, Executor>::type;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
@@ -232,7 +232,7 @@ namespace Physica::Core {
         static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
 
         constexpr bool isSeedFixed = Traits<R>::IsSeedFixed;
-        using NoRandExecutor = std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+        using NoRandExecutor = std::conditional<isSeedFixed, SeqExecutor, Executor>::type;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)

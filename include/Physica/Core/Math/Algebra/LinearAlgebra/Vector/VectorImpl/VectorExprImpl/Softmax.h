@@ -32,7 +32,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& v) const;
 
         [[nodiscard]] ScalarType calc(size_t i) const { return Base::getExpr().softmax(i); }

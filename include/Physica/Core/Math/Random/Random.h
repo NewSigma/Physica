@@ -140,7 +140,7 @@ namespace Physica::Core {
     template<RandomOption Option, uint64_t FixedSeed>
     inline auto Random<Option, FixedSeed>::getThreadSeed() const noexcept -> SeedType {
         if constexpr (IsSeedFixed)
-            return ThreadPool::isMainThread() ? seed : (seed + ThreadPool::getThreadInfo().id + 1);
+            return ThreadPool::isMainThread() ? seed : (seed + ThreadPool::getThreadID() + 1);
         else
             return seed;
     }

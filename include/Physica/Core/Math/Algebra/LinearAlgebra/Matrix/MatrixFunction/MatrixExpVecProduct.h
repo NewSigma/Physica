@@ -60,10 +60,10 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& target) const;
 
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         void assign(V& target, RealType traceMu, ParamPair params) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }

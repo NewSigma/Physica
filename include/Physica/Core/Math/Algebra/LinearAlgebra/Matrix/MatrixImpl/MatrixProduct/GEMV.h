@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
 namespace Physica::Core {
     template<Matrix T, Vector U>
@@ -44,7 +44,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& target) const;
 
         [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;

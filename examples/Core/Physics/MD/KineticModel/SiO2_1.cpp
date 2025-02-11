@@ -45,7 +45,7 @@ int main(int argc, char** argv) {
     VectorType f2norm(2000);
     for (size_t i = 0; i < f2norm.getLength(); ++i) {
         //rpmd.setTimeStep(fire.getTimeStep()); // Adaptive time step
-        rpmd.fire_vstep<KineticModel, ForceModel, SequentialExecutor>(fire, kineticModel, forceModel);
+        rpmd.fire_vstep<KineticModel, ForceModel, SeqExecutor>(fire, kineticModel, forceModel);
         f2norm[i] = fire.getForceNorm();
     }
 

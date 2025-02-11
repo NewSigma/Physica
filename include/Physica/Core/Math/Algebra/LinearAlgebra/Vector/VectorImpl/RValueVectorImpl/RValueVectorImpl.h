@@ -71,7 +71,7 @@ namespace Physica::Core {
                         return;
 
                     const size_t to = length / PacketSize * PacketSize;
-                    if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
+                    if constexpr (std::is_same<Executor, SeqExecutor>::value) {
                         size_t i = 0;
                         for (; i < to; i += PacketSize)
                             v1.writePacket(i, v2.template packet<AnyPacket>(i));

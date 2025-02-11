@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Math/Optimization/OptimizationImpl/QuadraticSearch.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "PhononSolver.h"
 
 namespace Physica::Core {
@@ -100,7 +100,7 @@ namespace Physica::Core {
             const T copy = toDisplace;
             toDisplace += displace;
             VectorND<T> forceConst =
-                    model.template force<SequentialExecutor>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
+                    model.template force<SeqExecutor>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
             toDisplace = copy;
 
             for (size_t cell = 0; cell < getNumCell(); ++cell) {

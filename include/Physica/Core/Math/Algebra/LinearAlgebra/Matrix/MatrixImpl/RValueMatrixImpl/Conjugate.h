@@ -47,7 +47,7 @@ namespace Physica::Core {
     public:
         explicit ConjugateVector(const T& vec_) : vec(vec_) {}
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
+        template<Vector V, class Executor = SeqExecutor>
         void assign(V& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }

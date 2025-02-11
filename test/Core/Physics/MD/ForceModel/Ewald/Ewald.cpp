@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
 using namespace Physica;
 using namespace Physica;
@@ -140,7 +140,7 @@ namespace Physica {
         void forceTest() {
             ewald.potentialV(pos).reverse();
 
-            const VectorND<ScalarType> force = ewald.force<SequentialExecutor>(pos);
+            const VectorND<ScalarType> force = ewald.force<SeqExecutor>(pos);
             PositionMatrix force_diff(pos.getRow(), pos.getCol());
             for (size_t i = 0; i < pos.getRow(); ++i)
                 for (size_t j = 0; j < pos.getCol(); ++j)

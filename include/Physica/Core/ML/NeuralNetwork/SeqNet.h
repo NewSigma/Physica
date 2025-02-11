@@ -57,7 +57,7 @@ namespace Physica::Core {
     void SeqNet<Derived>::train_step(int batchSize, const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         const Tv mean_grad = reciprocal(Tv(batchSize));
-        if constexpr (std::same_as<Executor, SequentialExecutor>) {
+        if constexpr (std::same_as<Executor, SeqExecutor>) {
             const auto indexes = RandomType::random_int(batchSize, 0, dataset.getSize() - 1);
             for (auto index : indexes)
                 loss<Dataset>(dataset, index).reverse(mean_grad);

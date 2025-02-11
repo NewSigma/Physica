@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
@@ -27,8 +27,8 @@ using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = VectorND<ScalarType>;
 using RandomType = Random<MT19937>;
 
-void func([[maybe_unused]] size_t i) {
-    printf("Thread ID: %d\n", ThreadPool::getThreadInfo().id);
+void func(size_t) {
+    printf("Thread ID: %d\n", ThreadPool::getThreadID());
 }
 
 int main() {
@@ -39,7 +39,7 @@ int main() {
     VectorType result_seq(4);
     VectorType result_par(4);
     auto sum_col = [&](VectorType& result, unsigned int i) { result[i] = A.col(i).sum(); };
-    SequentialExecutor::parallel_for([=, &result_seq](unsigned int i) { sum_col(result_seq, i); }, 4, 4);
+    SeqExecutor::parallel_for([=, &result_seq](unsigned int i) { sum_col(result_seq, i); }, 4, 4);
     ThreadExecutor::parallel_for([=, &result_par](unsigned int i) { sum_col(result_par, i); }, 4, 4).wait();
 
     pool.shouldExit();

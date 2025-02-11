@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/Future/DummyFuture.h"
 
 namespace Physica::Core {
-    class SequentialExecutor {
+    class SeqExecutor {
     public:
         using FutureType = DummyFuture;
         using Range = std::pair<unsigned int, unsigned int>;
@@ -45,13 +45,13 @@ namespace Physica::Core {
     };
 
     template<class Functor, class... Args>
-    inline SequentialExecutor::FutureType SequentialExecutor::schedule(Functor func, Args&&... args) {
+    inline SeqExecutor::FutureType SeqExecutor::schedule(Functor func, Args&&... args) {
         func(std::forward<Args>(args)...);
         return FutureType{};
     }
 
     template<class Functor>
-    inline FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
+    inline FutureGroup<typename SeqExecutor::FutureType> SeqExecutor::parallel_for(
             Functor func, unsigned int loopCount) {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
@@ -62,7 +62,7 @@ namespace Physica::Core {
     }
 
     template<class Functor>
-    inline FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
+    inline FutureGroup<typename SeqExecutor::FutureType> SeqExecutor::parallel_for(
             Functor func, unsigned int loopCount, unsigned int) {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
@@ -71,9 +71,9 @@ namespace Physica::Core {
         return FutureGroup<FutureType>{};
     }
 
-    inline SequentialExecutor::Range SequentialExecutor::splitJob(
+    inline SeqExecutor::Range SeqExecutor::splitJob(
             unsigned int loopCount, [[maybe_unused]] unsigned int core, [[maybe_unused]] unsigned int part) {
-        assert(part == 0 && core == 1 && "[Error]: SequentialExecutor do not support other param");
+        assert(part == 0 && core == 1 && "[Error]: SeqExecutor do not support other param");
         return std::make_pair(0, loopCount);
     }
 }
@@ -82,7 +82,7 @@ namespace Physica {
     template<class T> class Traits;
 
     template<>
-    class Traits<Core::SequentialExecutor> {
+    class Traits<Core::SeqExecutor> {
     public:
         constexpr static bool UseCPU = true;
         constexpr static bool UseCUDA = false;
