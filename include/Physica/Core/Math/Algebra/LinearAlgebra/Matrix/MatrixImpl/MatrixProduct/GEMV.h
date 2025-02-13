@@ -107,8 +107,14 @@ namespace Physica {
         const auto& grad = grad_.values();
         if constexpr (ReverseDiff<T>)
             mat.reverse(grad * vec.values().transpose());
-        if constexpr (ReverseDiff<U>)
-            vec.reverse(mat.values().transpose() * grad);
+        if constexpr (ReverseDiff<U>) {
+            if constexpr (MatrixOption::isRowMatrix<T>()) {
+                for (size_t i = 0; i < getLength(); ++i)
+                    vec.reverse(mat.values().row(i) * grad.calc(i));
+            }
+            else
+                vec.reverse(mat.values().transpose() * grad);
+        }
     }
 
     template<Matrix T, Vector U>

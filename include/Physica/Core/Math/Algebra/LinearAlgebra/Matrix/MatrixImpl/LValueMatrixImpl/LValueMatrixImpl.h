@@ -110,8 +110,7 @@ namespace Physica {
     template<class Derived>
     template<Matrix T>
     void LValueMatrix<Derived>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
-        using GradType = ScalarType::GradType;
-        static_assert(std::is_same<GradType, typename T::ScalarType>::value, "[Error]: Inconsistent ScalarType");
+        static_assert(std::same_as<typename ScalarType::GradType, typename T::ScalarType>, "[Error]: Inconsistent ScalarType");
         assert(Base::getRow() == grad.getRow());
         assert(Base::getCol() == grad.getCol());
         const size_t maxMajor = Base::getMaxMajor();

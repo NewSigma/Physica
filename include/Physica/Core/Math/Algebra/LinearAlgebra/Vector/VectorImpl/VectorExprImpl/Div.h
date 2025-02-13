@@ -55,7 +55,7 @@ namespace Physica {
             if constexpr (Vector<T>)
                 return Base::getLHS().template packet<AnyPacket>(index) * AnyPacket(reciprocal(Base::getRHS()));
             else
-                return AnyPacket(Base::getRHS()) / Base::getLHS().template packet<AnyPacket>(index);
+                return AnyPacket(Base::getLHS()) / Base::getRHS().template packet<AnyPacket>(index);
         }
 
         template<class AnyPacket>
@@ -63,7 +63,7 @@ namespace Physica {
             if constexpr (Vector<T>)
                 return Base::getLHS().template packetPartial<AnyPacket>(index, count) * AnyPacket(reciprocal(Base::getRHS()));
             else
-                return AnyPacket(Base::getRHS()) / Base::getLHS().template packetPartial<AnyPacket>(index, count);
+                return AnyPacket(Base::getLHS()) / Base::getRHS().template packetPartial<AnyPacket>(index, count);
         }
     };
 

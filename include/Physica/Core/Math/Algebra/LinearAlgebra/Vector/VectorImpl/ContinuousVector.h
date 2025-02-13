@@ -64,9 +64,11 @@ namespace Physica {
         template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
+        template<Vector T>
+        void reverse(const T& grad) const noexcept requires(isReverseDiff);
+
         template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
-
         [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>

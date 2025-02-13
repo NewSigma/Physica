@@ -1,6 +1,9 @@
 # Physica
 
-Physica is a high-performance and scalable template library for computational physics, dedicated to providing a rapid iteration platform for new algorithms. It is not a textbook or a ready-to-use solution. Physica provides several basic components and does not restrict creativity. It helps users implement ideas in less than 200 lines of code.
+Physica is a high-performance and scalable C++ template library, dedicated to providing a rapid iteration platform for new algorithms. It provides the following two main features:
+
+- Differentiable linear algebra library that leverages SIMD and GPU acceleration
+- Domain specific composable module for computational physics
 
 Physica is also an open source platform that maintains scientific code written in Physica and related data. We expect Physica, as a platform and not just a software, to promote the reproducibility of scientific results. The open source community continuously ensures that the results remain readable, reproducible and accurate.
 
@@ -13,15 +16,13 @@ Physica is also an open source platform that maintains scientific code written i
 - [Contributing](#contributing)
 - [License](#license)
 
-## Design philosophy <a id="philosophy"></a>
+## Design philosophy
 
-1. Be complex, strict and precise
+Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
-2. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
+## Features
 
-## Features <a id="feature"></a>
-
-- A linear algebra library that leverages SIMD and GPU acceleration, offers automatic differentiation support and multiprecision capabilities
+- Differentiable linear algebra library that leverages SIMD and GPU acceleration
 - Basic math library: Provides commonly used functions such as ODE, PDE, special functions, optimization, statistics, etc.
 - Classical molecular dynamics(MD), path integral molecular dynamics(PIMD) simulations using NVE, NVT and NPT ensembles
 - Multithreads and CUDA parallel support
@@ -55,7 +56,7 @@ Addtional libraries:
 
 Compile Physica using the following command:  
 
-```
+``` Bash
 mkdir -p /path/to/Physica/build
 cd /path/to/Physica/build
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release ../ # Note: Set CMake options as you need, refer to CMakeLists.txt for a full list of options
@@ -64,7 +65,7 @@ make install -j<N>
 
 Test Physica using the following command:  
 
-```
+``` Bash
 cd /path/to/Physica/build/test
 ctest -j<N>
 ```

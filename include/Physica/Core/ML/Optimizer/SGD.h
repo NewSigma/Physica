@@ -20,51 +20,57 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
-#include "Physica/Core/Scalar/Real.h"
 
 namespace Physica {
     /**
      * Stochastic gradient descent for auto diff
      */
+    template<Scalar T>
     class SGD {
-        float64 learnRate;
+        static_assert(!Diffable<T>);
+
+        T learnRate;
     public:
-        inline SGD(float64 lr);
+        inline SGD(T lr);
         SGD(const SGD&) = default;
         SGD(SGD&&) noexcept = default;
         ~SGD() = default;
         /* Operators */
         SGD& operator=(SGD obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Diffable T>
-        void step(T& obj) const;
+        template<Diffable U>
+        void step(U& target) const;
         inline void swap(SGD& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] float64 getLearnRate() const noexcept { return learnRate; }
+        [[nodiscard]] T getLearnRate() const noexcept { return learnRate; }
         /* Setters */
-        inline void setLearnRate(float64 lr);
+        inline void setLearnRate(T lr);
     };
 
-    inline SGD::SGD(float64 lr) {
+    template<Scalar T>
+    inline SGD<T>::SGD(T lr) {
         setLearnRate(std::move(lr));
     }
 
-    template<Diffable T>
-    void SGD::step(T& obj) const {
+    template<Scalar T>
+    template<Diffable U>
+    void SGD<T>::step(U& target) const {
         if constexpr (Scalar<T>)
-            obj.value() -= learnRate * obj.grad().value();
+            target.value() -= learnRate * target.grad().value();
         else if constexpr (Vector<T> || Matrix<T>)
-            obj.values() -= learnRate * obj.grads().values();
+            target.values() -= learnRate * target.grads().values();
         else
-            obj.step(*this);
+            target.step(*this);
     }
 
-    inline void SGD::swap(SGD& __restrict obj) noexcept {
+    template<Scalar T>
+    inline void SGD<T>::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         learnRate.swap(obj.learnRate);
     }
 
-    inline void SGD::setLearnRate(float64 lr) {
+    template<Scalar T>
+    inline void SGD<T>::setLearnRate(T lr) {
         assert(lr.isPositive() && "[Error]: Invalid learn rate");
         learnRate = lr;
     }
