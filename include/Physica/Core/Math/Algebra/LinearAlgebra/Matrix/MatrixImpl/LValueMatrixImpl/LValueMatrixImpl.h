@@ -88,12 +88,16 @@ namespace Physica {
     template<class Derived>
     template<Scalar T>
     Derived& LValueMatrix<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
-        static_assert(!isReverseDiff, "[Error]: Not implemented");
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
-        for (size_t i = 0; i < maxMajor; ++i)
-            for (size_t j = 0; j < maxMinor; ++j)
-                refFromMajorMinor(i, j) = x;
+        for (size_t i = 0; i < maxMajor; ++i) {
+            for (size_t j = 0; j < maxMinor; ++j) {
+                if constexpr (ReverseDiff<T>)
+                    refFromMajorMinor(i, j) = x.value();
+                else
+                    refFromMajorMinor(i, j) = x;
+            }
+        }
         return Base::getDerived();
     }
 

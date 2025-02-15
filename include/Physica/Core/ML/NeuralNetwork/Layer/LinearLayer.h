@@ -58,6 +58,7 @@ namespace Physica {
 
         void resize(size_t inputDim, size_t outputDim);
 
+        void fill(Tv x);
         template<RandomGenerator R>
         void random_normal();
         template<RandomGenerator R>
@@ -157,6 +158,13 @@ namespace Physica {
         weights.resize(outputDim, inputDim);
         if constexpr (WithBias)
             bias.resize(outputDim);
+    }
+
+    template<Scalar T, bool WithBias>
+    void LinearLayer<T, WithBias>::fill(Tv x) {
+        weights = x;
+        if constexpr (WithBias)
+            bias = x;
     }
 
     template<Scalar T, bool WithBias>

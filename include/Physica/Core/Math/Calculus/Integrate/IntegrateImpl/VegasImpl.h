@@ -2,7 +2,7 @@
  * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
- * 
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -81,12 +81,15 @@ namespace Physica {
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
         const int numRefine = Base::getNumRefine();
+        T mean = 0, var = 0;
         for (int refine = 0; refine < numRefine; ++refine) {
             pre_trial();
             if constexpr (TakeLn)
-                trial_ln<Functor, R, Executor>(func, means[refine], vars[refine]);
+                trial_ln<Functor, R, Executor>(func, mean, var);
             else
-                trial_normal<Functor, R, Executor>(func, means[refine], vars[refine]);
+                trial_normal<Functor, R, Executor>(func, mean, var);
+            means[refine] = mean;
+            vars[refine] = var;
             loss[refine] = calcGridLossImpl();
             refineGrid<Executor>();
         }

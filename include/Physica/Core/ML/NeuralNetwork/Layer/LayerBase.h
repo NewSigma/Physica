@@ -18,8 +18,8 @@
  */
 #pragma once
 
+#include <concepts>
 #include "Physica/CRTPBase.h"
-#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
     template<class Derived>
@@ -42,9 +42,6 @@ namespace Physica {
         auto step(Optimizer& opt) { return Base::getDerived().step(opt); }
         auto step() { return Base::getDerived().step(); }
         auto zero_grad() { return Base::getDerived().zero_grad(); }
-        /* Getters */
-        [[nodiscard]] size_t getInputDim() const noexcept { return Base::getDerived().getInputDim(); }
-        [[nodiscard]] size_t getOutputDim() const noexcept { return Base::getDerived().getOutputDim(); }
     protected:
         LayerBase() = default;
         LayerBase(const This&) = default;

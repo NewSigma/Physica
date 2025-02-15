@@ -36,6 +36,7 @@ namespace Physica {
         int numRefine;
         int numSample;
     public:
+        AdaptiveBase() = default;
         AdaptiveBase(VectorND<Trv> from_, VectorND<Trv> to_, int numRefine_, int numSample_);
         AdaptiveBase(const This&) = default;
         AdaptiveBase(This&&) noexcept = default;

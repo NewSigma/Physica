@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "PhononSolverImpl/BHProjector.h"
