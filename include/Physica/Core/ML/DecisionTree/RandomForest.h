@@ -48,26 +48,26 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getNumTree() const noexcept { return trees.getLength(); }
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static std::pair<RandomForest, T> train(unsigned int numTree, const Dataset& dataset);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static T makeFeatureImportance(
                 size_t featureId,
                 unsigned int numForest,
                 unsigned int numTree,
                 Dataset dataset);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] std::forward_list<size_t> selectImportantFeature(
                 unsigned int numForest,
                 unsigned int numTree,
                 Dataset dataset);
     private:
         RandomForest(Array<TreeType> trees_);
-        template<RandomGenerator R>
+        template<RNG R>
         static TreeType trainTree(const Dataset& dataset,
                                   std::forward_list<size_t> availableSample,
                                   std::forward_list<size_t> availableFeature);
-        template<RandomGenerator R>
+        template<RNG R>
         static std::pair<std::forward_list<size_t>, std::forward_list<size_t>> randTrainTestSet(size_t numSample);
         static void testTree(T prediction, T label, size_t sampleId, VectorType& predictions, Array<size_t>& numTestSample);
         static T makeTestError(const VectorType& predictions, const VectorType& labels, const Array<size_t>& numTestSample);
@@ -115,7 +115,7 @@ namespace Physica {
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<RandomGenerator R>
+    template<RNG R>
     std::pair<RandomForest<T, Type>, T> RandomForest<T, Type>::train(
             unsigned int numTree,
             const Dataset& dataset) {
@@ -143,7 +143,7 @@ namespace Physica {
      * [2] Manual On Setting Up, Using, And Understanding Random Forests V3.1 (https://www.stat.berkeley.edu/~breiman/Using_random_forests_V3.1.pdf)
      */
     template<Scalar T, DecisionTreeType Type>
-    template<RandomGenerator R>
+    template<RNG R>
     T RandomForest<T, Type>::makeFeatureImportance(
             size_t featureId,
             unsigned int numForest,
@@ -191,7 +191,7 @@ namespace Physica {
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<RandomGenerator R>
+    template<RNG R>
     std::forward_list<size_t> RandomForest<T, Type>::selectImportantFeature(
             unsigned int numForest,
             unsigned int numTree,
@@ -228,7 +228,7 @@ namespace Physica {
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<RandomGenerator R>
+    template<RNG R>
     RandomForest<T, Type>::TreeType RandomForest<T, Type>::trainTree(
             const Dataset& dataset,
             std::forward_list<size_t> availableSample,
@@ -271,7 +271,7 @@ namespace Physica {
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<RandomGenerator R>
+    template<RNG R>
     std::pair<std::forward_list<size_t>, std::forward_list<size_t>>
     RandomForest<T, Type>::randTrainTestSet(size_t numSample) {
         std::uniform_int_distribution<size_t> dist(0, numSample - 1);

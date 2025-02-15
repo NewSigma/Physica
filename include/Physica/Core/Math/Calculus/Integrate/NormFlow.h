@@ -51,9 +51,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<DNN Net, RandomGenerator R, class Executor = SeqExecutor>
+        template<DNN Net, RNG R, class Executor = SeqExecutor>
         Trv warmup(Net& nn, int numWarm);
-        template<DNN Net, RandomGenerator R, class Executor = SeqExecutor>
+        template<DNN Net, RNG R, class Executor = SeqExecutor>
         void integral(Net& nn);
         [[nodiscard]] T calcSquaredChi(int from = 0) const { return Base::calcSquaredChiImpl<false>(from); }
 
@@ -62,16 +62,16 @@ namespace Physica {
         using Base::getDim;
     private:
         VectorND<Trv> makeMask() const;
-        template<DNN Net, RandomGenerator R, class Executor>
+        template<DNN Net, RNG R, class Executor>
         Trv trial_normal(Net& nn, Tv& mean, Tv& var);
-        template<DNN Net, RandomGenerator R, class Executor>
+        template<DNN Net, RNG R, class Executor>
         Trv trial_ln(Net& nn, Tv& mean, Tv& var);
 
         Trv calcLoss(Trv y, const CoDiff<T>& lnJ);
     };
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RandomGenerator R, class Executor>
+    template<DNN Net, RNG R, class Executor>
     auto NormFlow<T, TakeLn>::warmup(Net& nn, int numWarm) -> Trv {
         using CallResult = std::invoke_result<Net, VectorND<Tv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
@@ -92,7 +92,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RandomGenerator R, class Executor>
+    template<DNN Net, RNG R, class Executor>
     void NormFlow<T, TakeLn>::integral(Net& nn) {
         using CallResult = std::invoke_result<Net, VectorND<Tv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RandomGenerator R, class Executor>
+    template<DNN Net, RNG R, class Executor>
     auto NormFlow<T, TakeLn>::trial_normal(Net& nn, Tv& mean, Tv& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
@@ -168,7 +168,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RandomGenerator R, class Executor>
+    template<DNN Net, RNG R, class Executor>
     auto NormFlow<T, TakeLn>::trial_ln(Net& nn, Tv& mean, Tv& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;

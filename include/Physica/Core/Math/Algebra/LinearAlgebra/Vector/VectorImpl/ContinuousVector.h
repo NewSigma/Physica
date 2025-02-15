@@ -88,11 +88,11 @@ namespace Physica {
         void resize(const V& x) { resize(x.getLength()); }
         void resize(size_t length) { Base::getDerived().resize(length); }
 
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_uniform();
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         inline void random_any(Distribution& dist);
 
         const DataSetType read(const H5Loc& loc, const char* name);

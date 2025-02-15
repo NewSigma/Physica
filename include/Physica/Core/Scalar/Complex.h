@@ -74,9 +74,9 @@ namespace Physica {
         [[nodiscard]] bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */
         [[nodiscard]] inline static Complex fromPhase(T phase);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static Complex random_uniform();
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static Complex random_normal();
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };

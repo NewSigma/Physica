@@ -29,7 +29,7 @@ namespace Physica {
      * [1] J. Chem. Phys. 153, 114107 (2020); https://doi.org/10.1063/5.0020514
      * [2] https://doi.org/10.48550/arXiv.2111.06402
      */
-    template<Scalar T, size_t NumReplica, RandomGenerator R, BaroType Type>
+    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
     class SCRBaro : private Berendsen<T, NumReplica, Type> {
         using Base = Berendsen<T, NumReplica, Type>;
         using typename Base::MDCellType;
@@ -56,11 +56,11 @@ namespace Physica {
         [[nodiscard]] LatticeMatrix makeDiffuseMatrix(T pressPerDOF) const;
     };
 
-    template<Scalar T, size_t NumReplica, RandomGenerator R, BaroType Type>
+    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
     SCRBaro<T, NumReplica, R, Type>::SCRBaro(
             T compressRate, T tempT, T targetP) : Base(compressRate, tempT, targetP) {}
 
-    template<Scalar T, size_t NumReplica, RandomGenerator R, BaroType Type>
+    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
     template<class MDType, class ForceModel>
     inline void SCRBaro<T, NumReplica, R, Type>::npt_step(
             MDType& rpmd, const LatticeMatrix& stress, T deltaT) {
@@ -85,7 +85,7 @@ namespace Physica {
             }));
     }
 
-    template<Scalar T, size_t NumReplica, RandomGenerator R, BaroType Type>
+    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
     SCRBaro<T, NumReplica, R, Type>::LatticeMatrix
     SCRBaro<T, NumReplica, R, Type>::makeDiffuseMatrix(T pressPerDOF) const {
         const T diffuseFactor = sqrt(T(2.0 / Dim) * Base::compressRate * pressPerDOF);
@@ -113,7 +113,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, size_t NumReplica, RandomGenerator R, BaroType Type>
+    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
     class Traits<SCRBaro<T, NumReplica, R, Type>> {
     public:
         constexpr static unsigned int Order = 1;

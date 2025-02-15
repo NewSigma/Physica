@@ -24,19 +24,25 @@
 #include "RandomSeed.h"
 
 namespace Physica {
+    namespace Internal {
+        class RandomBase {};
+
+        class QRandomBase : public RandomBase {};
+    }
+
     enum RandomOption {
         MT19937
     };
-
-    class RandomBase {};
-
-    class QRandomBase : public RandomBase {};
-
+    /**
+     * Random Number Generator
+     */
     template<class T>
-    concept RandomGenerator = std::derived_from<T, RandomBase>;
-
+    concept RNG = std::derived_from<T, Internal::RandomBase>;
+    /**
+     * Quasi Random Number Generator
+     */
     template<class T>
-    concept QuasiRandom = std::derived_from<T, QRandomBase>;
+    concept QRNG = std::derived_from<T, Internal::QRandomBase>;
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.
      * 
@@ -46,7 +52,7 @@ namespace Physica {
      * making it possible for other parts of the program to check whether the seed is fixed at compiling time.
      */
     template<RandomOption Option, uint64_t FixedSeed = Physica::Dynamic>
-    class PHYSICA_API Random : public RandomBase {
+    class PHYSICA_API Random : public Internal::RandomBase {
         using This = Random<Option, FixedSeed>;
     public:
         using result_type = uint64_t;

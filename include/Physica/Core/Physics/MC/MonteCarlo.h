@@ -39,7 +39,7 @@ namespace Physica {
         /* Operators */
         MonteCarlo& operator=(MonteCarlo mc) noexcept;
         /* Operations */
-        template<RandomGenerator R,
+        template<RNG R,
                  class ForceModel,
                  class Executor>
         void nvt_step(const ForceModel& forceModel);
@@ -62,7 +62,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<RandomGenerator R, class ForceModel, class Executor>
+    template<RNG R, class ForceModel, class Executor>
     void MonteCarlo<T, Dim>::nvt_step(const ForceModel& forceModel) {
         std::uniform_real_distribution<> uniform_dist{};
 

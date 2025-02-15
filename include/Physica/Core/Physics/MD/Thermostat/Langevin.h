@@ -44,7 +44,7 @@ namespace Physica {
         /* Operators */
         Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
-        template<RandomGenerator R, class Executor>
+        template<RNG R, class Executor>
         void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(Langevin& __restrict obj) noexcept;
         /* Getters */
@@ -76,7 +76,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<RandomGenerator R, class Executor>
+    template<RNG R, class Executor>
     void Langevin<T, Dim, NumReplica>::step(RingPolymerType& ringPolymer, T deltaT) const {
         const size_t dof = ringPolymer.getDOF();
         const T repBeta = ringPolymer.calcRepBeta(temperatureT);

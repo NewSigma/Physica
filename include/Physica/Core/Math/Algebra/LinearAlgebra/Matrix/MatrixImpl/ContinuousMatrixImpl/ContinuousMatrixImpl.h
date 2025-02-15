@@ -226,7 +226,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     void ContinuousMatrix<Derived>::random_uniform() {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
@@ -242,7 +242,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     void ContinuousMatrix<Derived>::random_normal() {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
@@ -258,7 +258,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     void ContinuousMatrix<Derived>::random_any(Distribution& dist) {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;

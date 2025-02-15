@@ -47,7 +47,7 @@ namespace Physica {
         GeneAlgorithm(Function func_, const AlgorithmConfig& config_);
         ~GeneAlgorithm() = default;
 
-        template<RandomGenerator R>
+        template<RNG R>
         void solve();
         /* Getters */
         [[nodiscard]] const AlgorithmConfig& getConfig() const noexcept { return config; }
@@ -57,9 +57,9 @@ namespace Physica {
         /* Setters */
         void setConfig(const AlgorithmConfig& c) { config = c; }
     private:
-        template<RandomGenerator R>
+        template<RNG R>
         void crossover();
-        template<RandomGenerator R>
+        template<RNG R>
         void mutation();
     };
 }

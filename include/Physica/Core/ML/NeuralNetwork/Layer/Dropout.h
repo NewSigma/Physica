@@ -37,7 +37,7 @@ namespace Physica {
         /* Operator */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] CoDiff<VectorND<T>> forward(const VectorND<T>& x) const;
         void reverse(const This& __restrict obj) const noexcept {}
 
@@ -56,7 +56,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     CoDiff<VectorND<T>> Dropout<T>::forward(const VectorND<T>& x) const {
         auto mask = VectorND<Tv>::template random_uniform<R>(x.getLength());
         for (auto& elem : mask)

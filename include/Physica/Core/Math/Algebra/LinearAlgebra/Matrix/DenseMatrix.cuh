@@ -57,11 +57,11 @@ namespace Physica {
         using Storage::getCol;
         /* Static members */
         [[nodiscard]] static inline device_obj unitMatrix(size_t order);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t row, size_t col);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
     };
 
@@ -91,7 +91,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform(
             size_t row, size_t col) {
@@ -99,7 +99,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal(
             size_t row, size_t col) {
@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(
             size_t row, size_t col, Distribution& dist) {

@@ -65,11 +65,11 @@ namespace Physica {
         using Base::operator=;
         using Base::operator();
         /* Operations */
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_uniform();
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         inline void random_any(Distribution& dist);
 
         void resize(size_t row, size_t col);
@@ -89,11 +89,11 @@ namespace Physica {
         [[nodiscard]] GradMatrix& grads() noexcept { return g; }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static auto random_uniform(size_t row, size_t col);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static auto random_normal(size_t row, size_t col);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static auto random_any(size_t row, size_t col, Distribution& dist);
     private:
         friend class device_obj<This>;

@@ -160,7 +160,7 @@ namespace Physica {
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
-             RandomGenerator R,
+             RNG R,
              class KineticModel,
              class ForceModel,
              class Executor>
@@ -197,7 +197,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
-             RandomGenerator R,
+             RNG R,
              class KineticModel,
              class ForceModel,
              class Executor>
@@ -213,7 +213,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
-             RandomGenerator R,
+             RNG R,
              class Barostat,
              class KineticModel,
              class ForceModel,
@@ -262,7 +262,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class Thermostat, RandomGenerator R, class Barostat, class KineticModel, class ForceModel, class Executor>
+    template<class Thermostat, RNG R, class Barostat, class KineticModel, class ForceModel, class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::npt_step_for(
             T duration,
             const Thermostat& thermostat,
@@ -325,7 +325,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class KineticModel, RandomGenerator R>
+    template<class KineticModel, RNG R>
     inline void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::initMomentum() {
         return ringPolymer.template initMomentum<KineticModel, R>(temperatureT);
     }

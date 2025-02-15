@@ -126,7 +126,7 @@ namespace Physica {
             : Base(std::move(range)), sampleCount(sampleCount_) {}
 
     template<Scalar T, size_t dim>
-    template<class Function, RandomGenerator R>
+    template<class Function, RNG R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(Function func) const {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
@@ -142,7 +142,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t dim>
-    template<class Function, RandomGenerator R>
+    template<class Function, RNG R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(unsigned int numSequence, Function func, T& deviation) const {
         assert(numSequence > 0);
         T mean = 0;
@@ -154,7 +154,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
+    template<class Functor1, class Functor2, class Distribution, RNG R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(
             Functor1 func,
             Functor2 importance,
@@ -168,7 +168,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
+    template<class Functor1, class Functor2, class Distribution, RNG R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(
             unsigned int numSequence,
             Functor1 func,

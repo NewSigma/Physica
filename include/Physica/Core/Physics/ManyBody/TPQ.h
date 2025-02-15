@@ -61,7 +61,7 @@ namespace Physica {
         [[nodiscard]] RealType lnSquaredDot(const VectorND<RealType>& other) const;
         void swap(This& __restrict obj) noexcept;
 
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_normal(RealType norm = 0);
         /* Getters */
         [[nodiscard]] RealType getBeta() const noexcept { return beta; }
@@ -71,7 +71,7 @@ namespace Physica {
         [[nodiscard]] const Base& asVector() const noexcept { return *this; }
         [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static This random_normal(size_t len, RealType norm);
     private:
         using Base::random_uniform;
@@ -172,7 +172,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void TPQ<T>::random_normal(RealType norm) {
         const bool useDefault = norm.isZero();
         if (useDefault) // Default norm is as small as possible while keep all effective digits
@@ -182,7 +182,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     TPQ<T> TPQ<T>::random_normal(size_t len, RealType norm) {
         This result(len);
         result.random_normal<R>(norm);

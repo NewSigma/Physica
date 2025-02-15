@@ -127,7 +127,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     void LValueGrid<Derived>::random_uniform() {
         forIndexInGrid(getDim(), [this](Index3D index) {
             this->operator()(index) = ScalarType::template random_uniform<R>();
@@ -135,7 +135,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     void LValueGrid<Derived>::random_normal() {
         forIndexInGrid(getDim(), [this](Index3D index) {
             this->operator()(index) = ScalarType::template random_normal<R>();

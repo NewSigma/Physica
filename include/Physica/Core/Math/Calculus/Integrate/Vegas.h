@@ -71,11 +71,11 @@ namespace Physica {
         void mesh_uniform(size_t dim);
         void mesh_tanh(size_t dim, Trv range);
 
-        template<class Functor, RandomGenerator R, class Executor = SeqExecutor>
+        template<class Functor, RNG R, class Executor = SeqExecutor>
         Trv warmup(Functor func, int numWarm);
-        template<class Functor, RandomGenerator R, class Executor = SeqExecutor>
+        template<class Functor, RNG R, class Executor = SeqExecutor>
         void integral(Functor func);
-        template<class Functor, RandomGenerator R, class Executor = SeqExecutor>
+        template<class Functor, RNG R, class Executor = SeqExecutor>
         [[nodiscard]] Trv calcGridLoss(Functor func) const;
 
         const H5Group read(const H5Loc& loc, const char* name);
@@ -94,11 +94,11 @@ namespace Physica {
         Trv calcGridLossImpl() const;
         Trv compress(VectorND<Trv>& vars);
 
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] std::pair<VectorND<Trv>, VectorND<Trv>> sample(const int* indexes) const;
-        template<class Functor, RandomGenerator R, class Executor>
+        template<class Functor, RNG R, class Executor>
         void trial_normal(Functor func, T& mean, T& var);
-        template<class Functor, RandomGenerator R, class Executor>
+        template<class Functor, RNG R, class Executor>
         void trial_ln(Functor func, T& mean, T& var);
     };
 }

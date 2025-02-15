@@ -95,27 +95,27 @@ namespace Physica {
         void nve_step_for(T duration, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
-                 RandomGenerator R,
+                 RNG R,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
         void nvt_step(const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
-                 RandomGenerator R,
+                 RNG R,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
         void nvt_step_for(T duration, const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
-                 RandomGenerator R,
+                 RNG R,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
         void npt_step(const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
-                 RandomGenerator R,
+                 RNG R,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
@@ -127,7 +127,7 @@ namespace Physica {
         template<BaroType Type, class KineticModel, class ForceModel, class Executor>
         void fire_pstep(CFireModel<T, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
 
-        template<class KineticModel, RandomGenerator R> inline void initMomentum();
+        template<class KineticModel, RNG R> inline void initMomentum();
         template<class KineticModel> inline void scaleVelocity();
         void normalizeCentroid();
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;

@@ -44,19 +44,19 @@ namespace Physica {
             : traceSeg(asStruct(TracerType::getInstance().pushSegment(values))) {}
 
     template<Scalar T, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_uniform() {
         *this = random_uniform<R>(getLength());
     }
 
     template<Scalar T, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_normal() {
         *this = random_normal<R>(getLength());
     }
 
     template<Scalar T, int Order>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_any(Distribution& dist) {
         *this = random_any<Distribution, R>(getLength(), dist);
     }
@@ -223,21 +223,21 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_uniform(size_t len) {
         return This(PlainVector::random_uniform<R>(len));
     }
 
     template<Scalar T, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_normal(size_t len) {
         return This(PlainVector::random_normal<R>(len));
     }
 
     template<Scalar T, int Order>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_any(size_t len, Distribution& dist) {
         return This(PlainVector::random_any<Distribution, R>(len, dist));

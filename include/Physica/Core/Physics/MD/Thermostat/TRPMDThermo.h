@@ -41,7 +41,7 @@ namespace Physica {
         /* Operators */
         TRPMDThermo& operator=(TRPMDThermo obj) noexcept;
         /* Operations */
-        template<RandomGenerator R, class Executor>
+        template<RNG R, class Executor>
         void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(TRPMDThermo& __restrict obj) noexcept;
         /* Setters */
@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<RandomGenerator R, class Executor>
+    template<RNG R, class Executor>
     void TRPMDThermo<T, Dim, NumReplica>::step(RingPolymerType& ringPolymer, T deltaT) const {
         if constexpr (NumReplica == 1)
             return;

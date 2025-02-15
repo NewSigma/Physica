@@ -49,9 +49,9 @@ namespace Physica {
         [[nodiscard]] T* getCoeffs() noexcept { return coeffs; }
         [[nodiscard]] const T* getCoeffs() const noexcept { return coeffs; }
         /* Static Members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static GTOnG randomBase(const VectorND<T>& center) { return randomBase(center, 0, 0, 0); }
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static GTOnG randomBase(const VectorND<T>& center, size_t l, size_t m, size_t n);
     };
 
@@ -104,7 +104,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Size>
-    template<RandomGenerator R>
+    template<RNG R>
     GTOnG<T, Size> GTOnG<T, Size>::randomBase(const VectorND<T>& center, size_t l, size_t m, size_t n) {
         GTOnG result{};
         for (size_t i = 0; i < Size; ++i) {

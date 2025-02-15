@@ -57,7 +57,7 @@ namespace Physica {
     template<DNN Net>
     auto LinearCoupler<T>::forward(const Net& nn, VectorND<Tv>& x, const VectorND<Tv>& mask) const -> CoDiff<T> {
         assert(dim == x.getLength() && "[Error]: Dimensions do not match");
-        assert(x.getLength() == mask.getLength*);
+        assert(x.getLength() == mask.getLength());
         VectorND<Tv> xA = hadamard(x, mask);
         VectorND<Tv> xB = x - xA;
         auto w1 = nn.forward(xA);

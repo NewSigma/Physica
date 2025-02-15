@@ -60,11 +60,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t len);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
     };
 
@@ -82,21 +82,21 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_uniform(
             size_t len) {
         return host_obj::template random_uniform<R>(len).toDevice();
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_normal(
             size_t len) {
         return host_obj::template random_normal<R>(len).toDevice();
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_any(
             size_t len, Distribution& dist) {
         return host_obj::template random_any<Distribution, R>(len, dist).toDevice();

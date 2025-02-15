@@ -390,7 +390,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     void LValueMatrix<Derived>::random_uniform() {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
@@ -400,7 +400,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     void LValueMatrix<Derived>::random_normal() {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
@@ -410,7 +410,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     void LValueMatrix<Derived>::random_any(Distribution& dist) {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();

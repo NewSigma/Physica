@@ -67,7 +67,7 @@ namespace Physica {
         /* Operations */
         bool solve(T criteria, size_t maxIte);
 
-        template<RandomGenerator R> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial);
+        template<RNG R> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial);
         void swap(KSSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return hamiltonH.getRepLattice(); }
@@ -170,7 +170,7 @@ namespace Physica {
     }
 
     template<Scalar T, class XCProvider>
-    template<RandomGenerator R>
+    template<RNG R>
     void KSSolver<T, XCProvider>::initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial) {
         const ssize_t dimX = std::min(initial[SpinState::Up].getDimX(), orbits[0][SpinState::Up].getDimX());
         const ssize_t dimY = std::min(initial[SpinState::Up].getDimY(), orbits[0][SpinState::Up].getDimY());

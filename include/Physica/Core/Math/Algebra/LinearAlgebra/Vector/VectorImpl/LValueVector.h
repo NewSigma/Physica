@@ -98,11 +98,11 @@ namespace Physica {
         const auto reshape_row(size_t row, size_t col) const noexcept;
 
         inline void toUnit();
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_uniform();
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         inline void random_any(Distribution& dist);
 
         template<int GradOrder = 1>

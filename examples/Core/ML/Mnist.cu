@@ -50,7 +50,7 @@ namespace Physica {
         device_obj<LinearLayer<T, false>> layer2;
     public:
         device_obj() = default;
-        template<RandomGenerator R>
+        template<RNG R>
         device_obj(size_t width1)
                 : layer1(decltype(layer1)::random_xavier_normal<R>(Mnist::NumPixelInImage, width1, 1))
                 , layer2(decltype(layer2)::random_xavier_normal<R>(width1, 10, 1)) {}

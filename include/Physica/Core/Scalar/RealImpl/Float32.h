@@ -96,13 +96,13 @@ namespace Physica {
         [[nodiscard]] bool isInteger() const;
         /* Static Members */
         [[nodiscard]] inline static Real nan() noexcept;
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static Real random_uniform();
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static Real random_normal();
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static Real random_normal(GaussRandomPool<This, R>& pool) { return pool(); }
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static Real random_any(Distribution& dist);
     #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_FLOAT; }
@@ -131,19 +131,19 @@ namespace Physica {
         return std::nanf("");
     }
 
-    template<RandomGenerator R>
+    template<RNG R>
     inline Real<Float32> Real<Float32>::random_uniform() {
         std::uniform_real_distribution<float> dist{};
         return Real(dist(R::getInstance()));
     }
 
-    template<RandomGenerator R>
+    template<RNG R>
     inline Real<Float32> Real<Float32>::random_normal() {
         std::normal_distribution<float> dist{};
         return Real(dist(R::getInstance()));
     }
 
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline Real<Float32> Real<Float32>::random_any(Distribution& dist) {
         return Real(dist(R::getInstance()));
     }

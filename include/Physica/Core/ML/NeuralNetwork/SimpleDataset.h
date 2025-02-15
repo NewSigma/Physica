@@ -48,7 +48,7 @@ namespace Physica {
         /* Operations */
         inline void reserve(size_t size);
         inline void append(DataType data);
-        template<RandomGenerator R>
+        template<RNG R>
         SplitResultType randomSplit(size_t firstSize) const;
         void swap(SimpleDataset& __restrict obj) noexcept;
         /* Getters */
@@ -98,7 +98,7 @@ namespace Physica {
     }
 
     template<class SampleType, class LabelType>
-    template<RandomGenerator R>
+    template<RNG R>
     SimpleDataset<SampleType, LabelType>::SplitResultType
     SimpleDataset<SampleType, LabelType>::randomSplit(size_t firstSize) const {
         assert(firstSize > 0 && "[Error]: Spliting a zero size dataset does nothing");

@@ -113,13 +113,13 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    template<RandomGenerator R>
+    template<RNG R>
     FermiState<Dim, NumSite> FermiState<Dim, NumSite>::random_state() {
         return This(Spin::template random_state<R>(), Spin::template random_state<R>());
     }
 
     template<int Dim, int NumSite>
-    template<RandomGenerator R>
+    template<RNG R>
     FermiState<Dim, NumSite> FermiState<Dim, NumSite>::random_state(size_t numSpinUp, size_t numSpinDown) {
         return This(Spin::template random_state<R>(numSpinUp), Spin::template random_state<R>(numSpinDown));
     }

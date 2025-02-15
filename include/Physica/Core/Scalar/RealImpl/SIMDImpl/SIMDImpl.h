@@ -304,7 +304,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Size>
-    template<RandomGenerator R>
+    template<RNG R>
     SIMD<T, Size> SIMD<T, Size>::random_uniform() {
         SIMD result{};
         T buffer[Size];

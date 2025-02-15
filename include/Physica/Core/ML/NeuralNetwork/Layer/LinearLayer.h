@@ -59,13 +59,13 @@ namespace Physica {
         void resize(size_t inputDim, size_t outputDim);
 
         void fill(Tv x);
-        template<RandomGenerator R>
+        template<RNG R>
         void random_normal();
-        template<RandomGenerator R>
+        template<RNG R>
         void random_xavier_uniform(Tv gain);
-        template<RandomGenerator R>
+        template<RNG R>
         void random_xavier_normal(Tv gain);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         void random_any(Distribution& dist);
 
         const H5Group read(const H5Loc& loc, const char* name);
@@ -168,7 +168,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<RandomGenerator R>
+    template<RNG R>
     void LinearLayer<T, WithBias>::random_normal() {
         weights.template random_normal<R>();
         if constexpr (WithBias)
@@ -176,7 +176,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<RandomGenerator R>
+    template<RNG R>
     void LinearLayer<T, WithBias>::random_xavier_uniform(Tv gain) {
         using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()))).toMachine();
@@ -187,7 +187,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<RandomGenerator R>
+    template<RNG R>
     void LinearLayer<T, WithBias>::random_xavier_normal(Tv gain) {
         using MachineType = T::MachineType;
         const auto deviation = (gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()))).toMachine();
@@ -198,7 +198,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     void LinearLayer<T, WithBias>::random_any(Distribution& dist) {
         weights.template random_any<Distribution, R>(dist);
         if constexpr (WithBias)

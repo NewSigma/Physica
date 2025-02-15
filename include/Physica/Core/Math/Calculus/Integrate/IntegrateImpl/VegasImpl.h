@@ -56,7 +56,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RandomGenerator R, class Executor>
+    template<class Functor, RNG R, class Executor>
     auto Vegas<T, TakeLn>::warmup(Functor func, int numWarm) -> Trv {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RandomGenerator R, class Executor>
+    template<class Functor, RNG R, class Executor>
     void Vegas<T, TakeLn>::integral(Functor func) {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
@@ -96,7 +96,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RandomGenerator R, class Executor>
+    template<class Functor, RNG R, class Executor>
     Vegas<T, TakeLn>::Trv Vegas<T, TakeLn>::calcGridLoss(Functor func) const {
         T mean, var;
         pre_trial();
@@ -209,7 +209,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<RandomGenerator R>
+    template<RNG R>
     auto Vegas<T, TakeLn>::sample(const int* indexes) const -> std::pair<VectorND<Trv>, VectorND<Trv>> {
         VectorND<Trv> x(getDim());
         VectorND<Trv> deltas(getDim());
@@ -224,7 +224,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RandomGenerator R, class Executor>
+    template<class Functor, RNG R, class Executor>
     void Vegas<T, TakeLn>::trial_normal(Functor func, T& mean, T& var) {
         const int numSample = Base::getNumSample();
         const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
@@ -252,7 +252,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RandomGenerator R, class Executor>
+    template<class Functor, RNG R, class Executor>
     void Vegas<T, TakeLn>::trial_ln(Functor func, T& mean, T& var) {
         const int numSample = Base::getNumSample();
         const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);

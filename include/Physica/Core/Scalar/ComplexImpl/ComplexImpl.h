@@ -106,7 +106,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     Complex<T> Complex<T>::random_uniform() {
         T re = T::template random_uniform<R>();
         T im = T::template random_uniform<R>();
@@ -114,7 +114,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     Complex<T> Complex<T>::random_normal() {
         T re = T::template random_normal<R>();
         T im = T::template random_normal<R>();

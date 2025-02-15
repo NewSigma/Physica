@@ -60,11 +60,11 @@ namespace Physica {
         [[nodiscard]] inline auto hermite() const noexcept;
         void swap(This& __restrict m) noexcept;
 
-        template<RandomGenerator R>
+        template<RNG R>
         void random_uniform() { asVector().template random_uniform<R>(); }
-        template<RandomGenerator R>
+        template<RNG R>
         void random_normal() { asVector().template random_normal<R>(); }
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         void random_any(Distribution& dist) { asVector().template random_any<Distribution, R>(dist); }
 
         inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
@@ -79,11 +79,11 @@ namespace Physica {
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t order);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t order);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static This random_any(size_t order, Distribution& dist);
     };
     /**
@@ -152,7 +152,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<RandomGenerator R>
+    template<RNG R>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
     DenseSymmMatrix<T, Order>::random_uniform(size_t order) {
         This result(order);
@@ -161,7 +161,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<RandomGenerator R>
+    template<RNG R>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
     DenseSymmMatrix<T, Order>::random_normal(size_t order) {
         This result(order);
@@ -170,7 +170,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
     DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
         This result(order);

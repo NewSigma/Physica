@@ -75,8 +75,8 @@ namespace Physica {
 
         [[nodiscard]] auto flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
         void resize(Index3D size) { Base::getDerived().resize(size); }
-        template<RandomGenerator R> void random_uniform();
-        template<RandomGenerator R> void random_normal();
+        template<RNG R> void random_uniform();
+        template<RNG R> void random_normal();
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }

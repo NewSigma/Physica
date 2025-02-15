@@ -169,21 +169,21 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void LValueVector<Derived>::random_uniform() {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::template random_uniform<R>();
     }
 
     template<class Derived>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void LValueVector<Derived>::random_normal() {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::template random_normal<R>();
     }
 
     template<class Derived>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline void LValueVector<Derived>::random_any(Distribution& dist) {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::template random_any<Distribution, R>(dist);

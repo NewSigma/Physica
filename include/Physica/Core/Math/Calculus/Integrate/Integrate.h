@@ -123,14 +123,14 @@ namespace Physica {
     public:
         Integrate(Base range, uint64_t sampleCount_);
         /* Operations */
-        template<class Function, RandomGenerator R>
+        template<class Function, RNG R>
         T solve(Function func) const;
-        template<class Function, RandomGenerator R>
+        template<class Function, RNG R>
         T solve_e(unsigned int numSequence, Function func, T& deviation) const;
 
-        template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
+        template<class Functor1, class Functor2, class Distribution, RNG R>
         T solve(Functor1 func, Functor2 importance, Distribution& disterator) const;
-        template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
+        template<class Functor1, class Functor2, class Distribution, RNG R>
         T solve_e(unsigned int numSequence,
                            Functor1 func,
                            Functor2 importance,

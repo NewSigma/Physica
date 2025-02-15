@@ -22,7 +22,7 @@ Optimal performance and scalability: Balancing between performance, scalability 
 
 ## Features
 
-- Differentiable linear algebra library that leverages SIMD and GPU acceleration
+- Compiling time optimization using template expressions  
 - Basic math library: Provides commonly used functions such as ODE, PDE, special functions, optimization, statistics, etc.
 - Classical molecular dynamics(MD), path integral molecular dynamics(PIMD) simulations using NVE, NVT and NPT ensembles
 - Multithreads and CUDA parallel support

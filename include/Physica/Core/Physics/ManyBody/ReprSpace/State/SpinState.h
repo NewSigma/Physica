@@ -76,9 +76,9 @@ namespace Physica {
         [[nodiscard]] inline bool isSpinUp(int8_t site) const noexcept;
         [[nodiscard]] inline bool isSpinDown(int8_t site) const noexcept;
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static This random_state();
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static This random_state(size_t numParticle);
         [[nodiscard]] constexpr static IntType makeFullMask() noexcept { return (static_cast<IntType>(1) << NumSite) - 1; }
         [[nodiscard]] constexpr static IntType makeHighMask() noexcept { return (static_cast<IntType>(1) << (NumSite - 1)); }

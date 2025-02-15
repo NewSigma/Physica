@@ -77,21 +77,21 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform() {
         v.template random_uniform<R>();
         zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_normal() {
         v.template random_normal<R>();
         zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(Distribution& dist) {
         v.template random_any<Distribution, R>(dist);
         zero_grad();
@@ -118,7 +118,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform(size_t len) {
         This result(len);
@@ -127,7 +127,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_normal(size_t len) {
         This result(len);
@@ -136,7 +136,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(size_t len, Distribution& dist) {
         This result(len);

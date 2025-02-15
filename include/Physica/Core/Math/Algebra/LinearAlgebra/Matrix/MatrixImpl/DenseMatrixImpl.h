@@ -104,7 +104,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(
             size_t row, size_t col) {
         This result(row, col);
@@ -113,7 +113,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RandomGenerator R>
+    template<RNG R>
     inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(
             size_t row, size_t col) {
         This result(row, col);
@@ -122,7 +122,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
             size_t row, size_t col, Distribution& dist) {
         This result(row, col);

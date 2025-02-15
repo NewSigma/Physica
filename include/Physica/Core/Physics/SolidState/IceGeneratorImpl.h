@@ -51,7 +51,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRand() {
         PositionMatrix pos = prepareRun();;
         searchDanglingH(pos);
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     IceGenerator<T>::CrystalCellType IceGenerator<T>::makeDefects(unsigned int numDefect) const {
         assert(numDefect < getNumMolecule());
         PositionMatrix pos = initialCell.getPos();
@@ -106,7 +106,7 @@ namespace Physica {
      * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
      */
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     Array<size_t> IceGenerator<T>::randRing() const {
         auto& gen = R::getInstance();
         Array<size_t> ring{};
@@ -352,7 +352,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     size_t IceGenerator<T>::makeRandEmptyO() const {
         std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
         auto& gen = R::getInstance();
@@ -370,7 +370,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     size_t IceGenerator<T>::makeRandFreeH(size_t indexO) const {
         assert(indexO < getNumMolecule());
         const auto hInRange = findBondedH(indexO);
@@ -445,7 +445,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     void IceGenerator<T>::randUninitializedH(PositionMatrix& pos) {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
             while (numHydrogenRequired[i] != 0) {
@@ -520,7 +520,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     Vector3D<T> IceGenerator<T>::randUnitVector() {
         const T theta(T::template random_uniform<R>() * M_PI);
         const T phi(T::template random_uniform<R>() * M_PI * 2);

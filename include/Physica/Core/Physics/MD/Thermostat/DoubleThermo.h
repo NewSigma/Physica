@@ -50,14 +50,14 @@ namespace Physica {
         /* Operators */
         DoubleThermo& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RandomGenerator R, class Executor>
+        template<RNG R, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(DoubleThermo& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
-        template<RandomGenerator R>
+        template<RNG R>
         ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT) const;
     };
 
@@ -67,7 +67,7 @@ namespace Physica {
             , thermostatTime(thermostatTime_) {}
 
     template<class KineticModel>
-    template<RandomGenerator R, class Executor>
+    template<RNG R, class Executor>
     void DoubleThermo<KineticModel>::step(
             RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
@@ -116,7 +116,7 @@ namespace Physica {
     }
 
     template<class KineticModel>
-    template<RandomGenerator R>
+    template<RNG R>
     DoubleThermo<KineticModel>::ScalarType DoubleThermo<KineticModel>::makeTranslationalFactor(
             const RingPolymerType& ringPolymer, ScalarType deltaT) const {
         using Integrator = SRK2<ScalarType, 1>;

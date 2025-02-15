@@ -26,7 +26,7 @@ namespace Physica {
     * Reference:
     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. Numerical Recipes(3rd edition)[M]. London: Cambridge University Press, 2007:406-408
     */
-    class PHYSICA_API Sobol : public QRandomBase {
+    class PHYSICA_API Sobol : public Internal::QRandomBase {
         using This = Sobol;
         constexpr static int8_t Degree[]{1, 2, 3, 3, 4, 4, 5, 5, 5, 5, 5, 5};
         constexpr static int16_t PolyCoeff[]{0, 1, 1, 2, 1, 4, 2, 4, 7, 11, 13, 14};

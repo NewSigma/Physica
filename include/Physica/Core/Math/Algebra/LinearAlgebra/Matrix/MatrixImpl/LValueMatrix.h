@@ -119,11 +119,11 @@ namespace Physica {
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
 
-        template<RandomGenerator R>
+        template<RNG R>
         void random_uniform();
-        template<RandomGenerator R>
+        template<RNG R>
         void random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         void random_any(Distribution& dist);
 
         template<int GradOrder = 1>

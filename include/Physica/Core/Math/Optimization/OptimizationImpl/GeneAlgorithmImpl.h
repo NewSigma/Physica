@@ -35,7 +35,7 @@ namespace Physica {
     }
 
     template<class Function, Vector T>
-    template<RandomGenerator R>
+    template<RNG R>
     void GeneAlgorithm<Function, T>::solve() {
         for (size_t iteration = 0; iteration < config.maxGeneration; ++iteration) {
             crossover<R>();
@@ -49,7 +49,7 @@ namespace Physica {
     }
 
     template<class Function, Vector T>
-    template<RandomGenerator R>
+    template<RNG R>
     void GeneAlgorithm<Function, T>::crossover() {
         const auto populationSize = config.populationSize;
         const auto crossoverRate = config.crossoverRate;
@@ -74,7 +74,7 @@ namespace Physica {
     }
 
     template<class Function, Vector T>
-    template<RandomGenerator R>
+    template<RNG R>
     void GeneAlgorithm<Function, T>::mutation() {
         const ScalarType random = ScalarType::template random_uniform<R>();
         if(random < ScalarType(config.mutationRate)) {

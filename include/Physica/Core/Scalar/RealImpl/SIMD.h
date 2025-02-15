@@ -115,7 +115,7 @@ namespace Physica {
         inline static SIMD blend(const SIMD& x, const SIMD& y);
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits();
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static SIMD random_uniform();
         [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
     private:

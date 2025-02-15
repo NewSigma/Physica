@@ -37,7 +37,7 @@ namespace Physica {
         VectorND<ScalarType> intrinsicDim;
         VectorND<ScalarType> correlateDim;
     public:
-        template<Vector T, RandomGenerator R>
+        template<Vector T, RNG R>
         DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const T& radius);
         /* Operations */
         template<Vector T, Matrix U>
@@ -51,7 +51,7 @@ namespace Physica {
         static inline T corrIntegral(const U& data, const T& radius);
     };
 
-    template<Vector T, RandomGenerator R>
+    template<Vector T, RNG R>
     DimEstimator::DimEstimator(size_t sampleNum,
                                const Array<size_t>& intrinsicDim_,
                                const T& radius)

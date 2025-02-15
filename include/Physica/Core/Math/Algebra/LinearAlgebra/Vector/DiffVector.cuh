@@ -54,9 +54,9 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        template<RandomGenerator R> inline void random_uniform();
-        template<RandomGenerator R> inline void random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<RNG R> inline void random_uniform();
+        template<RNG R> inline void random_normal();
+        template<class Distribution, RNG R>
         inline void random_any(Distribution& dist);
 
         void swap(This& obj) noexcept { std::swap(*this, obj); }
@@ -83,11 +83,11 @@ namespace Physica {
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t len);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
     private:
         [[nodiscard]] __host__ __device__ SegmentType& getTraceSegment() noexcept { return traceSeg.getDerived(); }

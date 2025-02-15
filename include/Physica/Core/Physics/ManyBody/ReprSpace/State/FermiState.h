@@ -70,9 +70,9 @@ namespace Physica {
         [[nodiscard]] int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
         [[nodiscard]] inline int getNumDoubleOccupy() const noexcept;
         /* Static member */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static This random_state();
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] static This random_state(size_t numSpinUp, size_t numSpinDown);
     };
 

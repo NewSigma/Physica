@@ -73,11 +73,11 @@ namespace Physica {
         [[nodiscard]] inline const auto& grad() const noexcept;
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static auto random_uniform();
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static auto random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static auto random_any(Distribution& dist);
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };

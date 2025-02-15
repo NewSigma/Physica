@@ -49,7 +49,7 @@ namespace Physica {
         /* Operators */
         RingPolymer& operator=(RingPolymer obj) noexcept;
         /* Operations */
-        template<class KineticModel, RandomGenerator R> void initMomentum(T temperatureT);
+        template<class KineticModel, RNG R> void initMomentum(T temperatureT);
         template<class KineticModel> void scaleVelocity(T temperatureT);
         [[nodiscard]] DenseVector<T, Dim> makeDriftMomentum() const;
         void removeDrift();
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<class KineticModel, RandomGenerator R>
+    template<class KineticModel, RNG R>
     void RingPolymer<T, Dim, NumReplica>::initMomentum(T temperatureT) {
         const size_t dof = getDOF();
         if (temperatureT.isZero()) [[unlikely]] {

@@ -82,9 +82,9 @@ namespace Physica {
         void zero_grad();
         inline void resize(size_t size);
 
-        template<RandomGenerator R> inline void random_uniform();
-        template<RandomGenerator R> inline void random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<RNG R> inline void random_uniform();
+        template<RNG R> inline void random_normal();
+        template<class Distribution, RNG R>
         inline void random_any(Distribution& dist);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -98,11 +98,11 @@ namespace Physica {
         [[nodiscard]] const GradVector& grads() const noexcept { return g; }
         [[nodiscard]] GradVector& grads() noexcept { return g; }
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t len);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static auto linspace(T from, T to, size_t count);
     };

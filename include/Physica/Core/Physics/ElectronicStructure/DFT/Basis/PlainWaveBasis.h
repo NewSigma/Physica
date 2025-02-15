@@ -48,7 +48,7 @@ namespace Physica {
         inline void normalize();
         T calcNumElectron() const;
 
-        template<RandomGenerator R>
+        template<RNG R>
         inline void random_normal();
         void swap(PlainWaveBasis& __restrict obj) noexcept;
         /* Getters */
@@ -110,7 +110,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void PlainWaveBasis<T>::random_normal() {
         coeffGrid.template random_normal<R>();
     }

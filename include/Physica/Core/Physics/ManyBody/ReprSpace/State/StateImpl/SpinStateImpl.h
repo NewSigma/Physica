@@ -162,7 +162,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    template<RandomGenerator R>
+    template<RNG R>
     SpinState<Dim, NumSite> SpinState<Dim, NumSite>::random_state() {
         constexpr bool flag = NumSite < sizeof(typename R::result_type) * CHAR_BIT;
         static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
@@ -170,7 +170,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    template<RandomGenerator R>
+    template<RNG R>
     SpinState<Dim, NumSite> SpinState<Dim, NumSite>::random_state(size_t numParticle) {
         constexpr bool flag = NumSite < sizeof(typename R::result_type) * CHAR_BIT;
         static_assert(flag, "[Error]: The random generator cannot provide enough random bits");

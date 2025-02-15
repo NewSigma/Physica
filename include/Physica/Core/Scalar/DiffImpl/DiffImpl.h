@@ -111,19 +111,19 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline auto Diff<T, Mode, Order>::random_uniform() {
         return Diff(T::template random_uniform<R>());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline auto Diff<T, Mode, Order>::random_normal() {
         return Diff(T::template random_normal<R>());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline auto Diff<T, Mode, Order>::random_any(Distribution& dist) {
         return Diff(T::template random_any<Distribution, R>(dist));
     }

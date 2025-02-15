@@ -56,9 +56,9 @@ namespace Physica {
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ inline ScalarType calc(size_t row, size_t col) const;
 
-        template<RandomGenerator R> inline void random_uniform();
-        template<RandomGenerator R> inline void random_normal();
-        template<class Distribution, RandomGenerator R>
+        template<RNG R> inline void random_uniform();
+        template<RNG R> inline void random_normal();
+        template<class Distribution, RNG R>
         inline void random_any(Distribution& dist);
 
         void swap(This& obj) noexcept { std::swap(*this, obj); }
@@ -73,11 +73,11 @@ namespace Physica {
         [[nodiscard]] __device__ inline T& grad(size_t row, size_t col);
         [[nodiscard]] __device__ inline const T& grad(size_t row, size_t col) const;
         /* Static members */
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
-        template<RandomGenerator R>
+        template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t row, size_t col);
-        template<class Distribution, RandomGenerator R>
+        template<class Distribution, RNG R>
         [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
     private:
         /* Operations */
@@ -114,19 +114,19 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform() {
         *this = random_uniform<R>(getRow(), getCol());
     }
 
     template<Scalar T, int Option, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal() {
         *this = random_normal<R>(getRow(), getCol());
     }
 
     template<Scalar T, int Option, int Order>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist) {
         *this = random_any<Distribution, R>(getRow(), getCol(), dist);
     }
@@ -162,7 +162,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform(
             size_t row, size_t col) {
@@ -170,7 +170,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, int Order>
-    template<RandomGenerator R>
+    template<RNG R>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal(
             size_t row, size_t col) {
@@ -178,7 +178,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, int Order>
-    template<class Distribution, RandomGenerator R>
+    template<class Distribution, RNG R>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(
             size_t row, size_t col, Distribution& dist) {
