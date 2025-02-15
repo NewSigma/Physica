@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RValueVector.h"
+#include "../RValueVector.h"
 
 namespace Physica {
     template<Vector T1, Vector T2>
@@ -115,5 +115,5 @@ namespace Physica {
 }
 
 #ifdef PHYSICA_MKL
-    #include "InnerDotImpl/InnerDot_MKL.h"
+    #include "InnerDot_MKL.h"
 #endif

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <mkl_cblas.h>
-#include "../InnerDot.h"
+#include "InnerDot.h"
 
 namespace Physica {
     template<Vector T1, Vector T2>

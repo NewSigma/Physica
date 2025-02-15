@@ -34,6 +34,16 @@ static void crossProductTest() {
         exit(EXIT_FAILURE);
 }
 
+static void innerDotTest() {
+    using T = float32;
+    const auto v1 = VectorND<Complex<T>>::random_uniform<RandomType>(16);
+    const auto v2 = VectorND<T>::random_uniform<RandomType>(16);
+    const auto dot1 = v1 * v2;
+    const auto dot2 = hadamard(v1, v2).sum();
+    if (!scalarNear(dot1, dot2, 1E-6))
+        exit(EXIT_FAILURE);
+}
+
 static void hdfTest() {
 #ifdef PHYSICA_HDF5
     /* Real */ {
@@ -130,11 +140,12 @@ static void crossEntropyTest() {
 }
 
 static void softmaxTest() {
-    using dfloat = Diff<float32, DiffMode::Reverse>;
-    const auto factors = VectorND<float32>::random_uniform<RandomType>(8);
+    using T = float64;
+    using dfloat = Diff<T, DiffMode::Reverse>;
+    const auto factors = VectorND<T>::random_uniform<RandomType>(8);
     const auto x = VectorND<dfloat>::random_uniform<RandomType>(8);
     const auto x1 = x;
-    VectorND<float32> y = softmax(x1.values());
+    VectorND<T> y = softmax(x1.values());
     softmax(x1).reverse(y, factors);
 
     for (size_t i = 0; i < x.getLength(); ++i)
@@ -146,6 +157,7 @@ static void softmaxTest() {
 
 int main() {
     crossProductTest();
+    innerDotTest();
     hdfTest();
     lnSumExpTest();
     crossEntropyTest();

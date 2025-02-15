@@ -55,7 +55,7 @@ namespace Physica {
             using ResultType = BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
             using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
         private:
-            constexpr static bool isSameScalar = std::is_same<typename T1::ValueType, typename T2::ValueType>::value;
+            constexpr static bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
             constexpr static bool isBadPacket = PacketType::size() == 1;
         public:
             constexpr static bool value = isSameScalar && !isBadPacket;
@@ -64,6 +64,7 @@ namespace Physica {
         template<Vector T1, Vector T2 = T1>
         struct EnableMKL {
             constexpr static bool value = HasMKL()
+                                       && std::same_as<typename T1::ScalarType, typename T2::ScalarType>
                                        && is_continuous<T1>::value
                                        && is_continuous<T2>::value
                                        && !Diffable<T1>
@@ -188,5 +189,5 @@ namespace Physica {
 #include "RValueVectorImpl/ReversalVector.h"
 #include "RValueVectorImpl/CrossProduct.h"
 #include "RValueVectorImpl/VectorConvert.h"
-#include "InnerDot.h"
+#include "RValueVectorImpl/InnerDot.h"
 #include "VectorExpr.h"
