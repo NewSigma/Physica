@@ -55,9 +55,9 @@ namespace Physica {
     template<Scalar T>
     template<Diffable U>
     void SGD<T>::step(U& target) const {
-        if constexpr (Scalar<T>)
+        if constexpr (Scalar<U>)
             target.value() -= learnRate * target.grad().value();
-        else if constexpr (Vector<T> || Matrix<T>)
+        else if constexpr (Vector<U> || Matrix<U>)
             target.values() -= learnRate * target.grads().values();
         else
             target.step(*this);

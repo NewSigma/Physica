@@ -40,6 +40,7 @@ namespace Physica {
 
         template<class Optimizer>
         auto step(Optimizer& opt) { return Base::getDerived().step(opt); }
+        auto step() { return Base::getDerived().step(); }
         auto zero_grad() { return Base::getDerived().zero_grad(); }
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return Base::getDerived().getInputDim(); }
@@ -58,6 +59,11 @@ namespace Physica {
         assert(this != &other && "[Error]: Self reverse is invalid");
         return Base::getDerived().reverse(other);
     }
+    /**
+     * Deep Neutral Network
+     */
+    template<class T>
+    concept DNN = std::derived_from<T, LayerBase<T>>;
 }
 
 namespace Physica {

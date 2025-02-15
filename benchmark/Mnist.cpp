@@ -24,6 +24,11 @@
 #include "Physica/Core/ML/Optimizer/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
 
+using namespace Physica;
+constexpr size_t BatchSize = 64;
+constexpr int HiddenW = 512;
+constexpr double LearnRate = 0.01;
+
 namespace Physica {
     template<Scalar> class MnistNet;
 
@@ -36,11 +41,15 @@ namespace Physica {
         using Base = SeqNet<This>;
         using typename Base::Tv;
     private:
-        LinearLayer<T> layer1;
-        LinearLayer<T> layer2;
+        LinearLayer<T> layer1 = LinearLayer<T>(Mnist::NumPixelInImage, HiddenW);
+        LinearLayer<T> layer2 = LinearLayer<T>(HiddenW, 10);
+        SGD<Tv> opt = SGD<Tv>(LearnRate);
     public:
-        MnistNet() = default;
-        MnistNet(size_t width1) : layer1(Mnist::NumPixelInImage, width1), layer2(width1, 10) {}
+        template<RandomGenerator R>
+        MnistNet(R&) {
+            layer1.template random_xavier_normal<R>(1);
+            layer2.template random_xavier_normal<R>(1);
+        }
         template<Scalar U>
         MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2) {}
         MnistNet(const This& other) = default;
@@ -49,12 +58,6 @@ namespace Physica {
         /* Operators */
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RandomGenerator R>
-        void init() {
-            layer1.template random_xavier_normal<R>(1);
-            layer2.template random_xavier_normal<R>(1);
-        }
-
         template<Vector V>
         [[nodiscard]] CoDiff<VectorND<T>> forward(const V& x) const {
             auto y1 = layer1.forward(x);
@@ -73,10 +76,12 @@ namespace Physica {
         }
 
         template<class Optimizer>
-        void step(Optimizer& opt) {
-            layer1.step(opt);
-            layer2.step(opt);
+        void step(Optimizer& opt_) {
+            layer1.step(opt_);
+            layer2.step(opt_);
         }
+
+        void step() { step(opt); }
 
         void zero_grad() {
             layer1.zero_grad();
@@ -134,12 +139,10 @@ namespace Physica {
     };
 }
 
-using namespace Physica;
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse, 1>;
 using Dataset = Mnist::DatasetType<VectorND<T>>;
 using RandomType = Random<MT19937>;
-constexpr size_t BatchSize = 64;
 
 namespace {
     Dataset makeDataset() {
@@ -159,11 +162,12 @@ namespace {
         }
         catch (std::exception& e) {
             state.SkipWithError(e.what());
+            return;
         }
-        auto opt = SGD(0.01);
-        auto nn = MnistNet<dfloat>(512);
+
+        auto nn = MnistNet<dfloat>(RandomType::getInstance());
         for (auto _ : state)
-            nn.train_step<Dataset, SGD, RandomType, SeqExecutor>(BatchSize, dataset, opt);
+            nn.train_step<Dataset, RandomType, SeqExecutor>(BatchSize, dataset);
     }
 }
 

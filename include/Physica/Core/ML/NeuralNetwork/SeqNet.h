@@ -34,10 +34,10 @@ namespace Physica {
     public:
         ~SeqNet() = default;
         /* Operations */
-        template<class Dataset, class Optimizer, class RandomType, class Executor>
-        void train_step(int batchSize, const Dataset& dataset, Optimizer& opt);
-        template<class Dataset, class Optimizer, class RandomType, class Executor>
-        void train_step_for(int64_t numStep, int batchSize, const Dataset& dataset, Optimizer& opt);
+        template<class Dataset, class RandomType, class Executor>
+        void train_step(int batchSize, const Dataset& dataset);
+        template<class Dataset, class RandomType, class Executor>
+        void train_step_for(int64_t numStep, int batchSize, const Dataset& dataset);
 
         template<class Dataset>
         [[nodiscard]] auto loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
@@ -53,8 +53,8 @@ namespace Physica {
     };
 
     template<class Derived>
-    template<class Dataset, class Optimizer, class RandomType, class Executor>
-    void SeqNet<Derived>::train_step(int batchSize, const Dataset& dataset, Optimizer& opt) {
+    template<class Dataset, class RandomType, class Executor>
+    void SeqNet<Derived>::train_step(int batchSize, const Dataset& dataset) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         const Tv mean_grad = reciprocal(Tv(batchSize));
         if constexpr (std::same_as<Executor, SeqExecutor>) {
@@ -76,15 +76,15 @@ namespace Physica {
                 buffer.reverse(nn);
             }, numThread, numThread).wait();
         }
-        Base::step(opt);
+        Base::step();
         Base::zero_grad();
     }
 
     template<class Derived>
-    template<class Dataset, class Optimizer, class RandomType, class Executor>
-    void SeqNet<Derived>::train_step_for(int64_t numStep, int batchSize, const Dataset& dataset, Optimizer& opt) {
+    template<class Dataset, class RandomType, class Executor>
+    void SeqNet<Derived>::train_step_for(int64_t numStep, int batchSize, const Dataset& dataset) {
         for (int64_t _ = 0; _ < numStep; ++_)
-            train_step<Dataset, Optimizer, RandomType, Executor>(batchSize, dataset, opt);
+            train_step<Dataset, RandomType, Executor>(batchSize, dataset);
     }
 
     template<class Derived>

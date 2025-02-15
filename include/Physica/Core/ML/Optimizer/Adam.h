@@ -77,10 +77,8 @@ namespace Physica {
         void swap(Adam& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const Args& getArgs() const noexcept { return args; }
+        [[nodiscard]] Args& getArgs() noexcept { return args; }
         [[nodiscard]] T getLearnRate() const noexcept { return args.lr; }
-        /* Setters */
-        void setArgs(Args args_);
-        void setLearnRate(T lr) noexcept { args.lr = lr; }
     };
 
     template<Scalar T>
@@ -88,8 +86,12 @@ namespace Physica {
             : Adam(Args{.lr = lr, .beta1 = beta1, .beta2 = beta2, .epsilon = epsilon, .decay = decay}) {}
 
     template<Scalar T>
-    Adam<T>::Adam(Args args_) {
-        setArgs(args_);
+    Adam<T>::Adam(Args args_) : args(args_) {
+        assert(args.lr.isPositive());
+        assert(args.beta1.isPositive() && args.beta1 < T(1));
+        assert(args.beta2.isPositive() && args.beta2 < T(1));
+        assert(args.epsilon.isPositive());
+        assert(!args.decay.isNegative() && args.decay < T(1));
     }
 
     template<Scalar T>
@@ -134,15 +136,5 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         targetBufferMap.swap(obj.targetBufferMap);
         std::swap(args, obj.args);
-    }
-
-    template<Scalar T>
-    void Adam<T>::setArgs(Args args_) {
-        args = args_;
-        assert(args.lr.isPositive());
-        assert(args.beta1.isPositive() && beta1 < T(1));
-        assert(args.beta2.isPositive() && beta2 < T(1));
-        assert(args.epsilon.isPositive());
-        assert(!args.decay.isNegative() && decay < T(1));
     }
 }

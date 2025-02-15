@@ -27,6 +27,12 @@
 #include "Physica/Core/Scalar/Diff.h"
 #include "Physica/Gui/Plot/Plot.h"
 
+using namespace Physica;
+constexpr size_t NumEpoch = 10;
+constexpr size_t BatchSize = 64;
+constexpr int HiddenW = 32;
+constexpr double LearnRate = 0.05;
+
 namespace Physica {
     template<Scalar> class MnistNet;
 
@@ -39,11 +45,15 @@ namespace Physica {
         using Base = SeqNet<This>;
         using typename Base::Tv;
     private:
-        LinearLayer<T> layer1;
-        LinearLayer<T> layer2;
+        LinearLayer<T> layer1 = LinearLayer<T>(Mnist::NumPixelInImage, HiddenW);
+        LinearLayer<T> layer2 = LinearLayer<T>(HiddenW, 10);
+        SGD<Tv> opt = SGD<Tv>(LearnRate);
     public:
-        MnistNet() = default;
-        MnistNet(size_t width1) : layer1(Mnist::NumPixelInImage, width1), layer2(width1, 10) {}
+        template<RandomGenerator R>
+        MnistNet(R&) {
+            layer1.template random_xavier_normal<R>(1);
+            layer2.template random_xavier_normal<R>(1);
+        }
         template<Scalar U>
         MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2) {}
         MnistNet(const This& other) = default;
@@ -52,12 +62,6 @@ namespace Physica {
         /* Operators */
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RandomGenerator R>
-        void init() {
-            layer1.template random_xavier_normal<R>(1);
-            layer2.template random_xavier_normal<R>(1);
-        }
-
         template<Vector V>
         [[nodiscard]] CoDiff<VectorND<T>> forward(const V& x) const {
             auto y1 = layer1.forward(x);
@@ -76,10 +80,12 @@ namespace Physica {
         }
 
         template<class Optimizer>
-        void step(Optimizer& opt) {
-            layer1.step(opt);
-            layer2.step(opt);
+        void step(Optimizer& opt_) {
+            layer1.step(opt_);
+            layer2.step(opt_);
         }
+
+        void step() { step(opt); }
 
         void zero_grad() {
             layer1.zero_grad();
@@ -137,14 +143,10 @@ namespace Physica {
     };
 }
 
-using namespace Physica;
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse>;
 using Dataset = Mnist::DatasetType<VectorND<T>>;
 using RandomType = Random<MT19937>;
-constexpr size_t numEpoch = 10;
-constexpr size_t batchSize = 64;
-constexpr double learnRate = 0.05;
 
 static std::pair<Dataset, Dataset> makeDataset() {
     const Mnist mnist("./data");
@@ -160,24 +162,21 @@ int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
 
     const auto dataset = makeDataset();
-    const int64_t stepPerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
-    auto opt = SGD(learnRate);
-    auto nn = MnistNet<dfloat>(32);
-    nn.init<RandomType>();
-
-    VectorND<T> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
-    for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
+    const int64_t stepPerEpoch = (dataset.first.getSize() + BatchSize - 1) / BatchSize;
+    auto nn = MnistNet<dfloat>(RandomType::getInstance());
+    VectorND<T> loss_train(NumEpoch), loss_valid(NumEpoch), acc_train(NumEpoch), acc_valid(NumEpoch);
+    for (size_t epoch = 0; epoch < NumEpoch; ++epoch) {
         const auto nn_infer = MnistNet<T>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
         acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
 
-        nn.train_step_for<Dataset, SGD, RandomType, SeqExecutor>(stepPerEpoch, batchSize, dataset.first, opt);
+        nn.train_step_for<Dataset, RandomType, SeqExecutor>(stepPerEpoch, BatchSize, dataset.first);
     }
 
     QApplication app(argc, argv);
-    Plot* plot = new Plot(-0.5, numEpoch - 0.5, 0, 3, 2, 1);
+    Plot* plot = new Plot(-0.5, NumEpoch - 0.5, 0, 3, 2, 1);
     auto& legend = plot->getLegend();
     legend.setAlignment(Qt::AlignRight);
     legend.setMarkerShape(QLegend::MarkerShapeFromSeries);
