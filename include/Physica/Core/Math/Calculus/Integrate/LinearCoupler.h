@@ -32,6 +32,8 @@ namespace Physica {
     public:
         LinearCoupler() = default;
         LinearCoupler(int dim_, int numBin_);
+        template<Scalar U>
+        LinearCoupler(const LinearCoupler<U>& other);
         LinearCoupler(const This&) = default;
         LinearCoupler(This&&) noexcept = default;
         ~LinearCoupler() = default;
@@ -42,6 +44,9 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> forward(const Net& nn, VectorND<Tv>& x, const VectorND<Tv>& mask) const;
 
         void swap(This& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] int getDim() const noexcept { return dim; }
+        [[nodiscard]] int getNumBin() const noexcept { return numBin; }
     private:
         CoDiff<T> transform(const VectorND<T>& weights, VectorND<Tv>& x2) const;
     };
@@ -52,6 +57,10 @@ namespace Physica {
         assert(dim > 0);
         assert(numBin > 0);
     }
+
+    template<Scalar T>
+    template<Scalar U>
+    LinearCoupler<T>::LinearCoupler(const LinearCoupler<U>& other) : LinearCoupler(other.getDim(), other.getNumBin()) {}
 
     template<Scalar T>
     template<DNN Net>
@@ -97,9 +106,10 @@ namespace Physica {
             const size_t index = tmp.toMachine();
             indexes[i] = index;
             deltas[i] = std::max(prob[index], Tv(std::numeric_limits<Tv>::min()));
-            z[i] = tmp.mod() * prob[index];
+            Tv zi = tmp.mod() * prob[index];
             if (index > 0)
-                z[i] += prob.head(index).sum();
+                zi = std::min(Tv(1), zi + prob.head(index).sum());
+            z[i] = zi;
             subdim += 1;
         }
 
