@@ -85,8 +85,8 @@ namespace Physica {
         VectorND<ScalarType> average_force(superDof);
         VectorND<ScalarType> average_momentum(superDof);
         for (size_t i = 0; i < superDof; ++i) {
-            average_force[i] = mean(force.row(i));
-            average_momentum[i] = mean(momentum.row(i));
+            average_force[i] = force.row(i).mean();
+            average_momentum[i] = momentum.row(i).mean();
         }
 
         VectorND<ScalarType> buffer1(numCell);

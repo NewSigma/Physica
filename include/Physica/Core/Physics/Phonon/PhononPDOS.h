@@ -109,7 +109,7 @@ namespace Physica {
             cornerProj[5] = projections(index1[0], index[1], index1[2])[band];
             cornerProj[6] = projections(index1[0], index1[1], index[2])[band];
             cornerProj[7] = projections(index1)[band];
-            result += Base::calcElemDOS(freq, band, index) * mean(cornerProj);
+            result += Base::calcElemDOS(freq, band, index) * cornerProj.mean();
         });
         result /= T(eigenvalues.getSize() * ElementVolume);
         return result;

@@ -33,12 +33,12 @@ namespace Physica {
         using BlockType = ContinuousVectorBlock<Derived, Length>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using typename Base::PacketType;
         using Base::SizeAtCompile;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
+        using typename Base::Tv;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:

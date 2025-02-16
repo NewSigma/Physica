@@ -87,10 +87,14 @@ namespace Physica {
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
+    protected:
+        using T = ScalarType;
+        using Tr = T::RealType;
+        using Tv = T::ValueType;
+        using Trv = Tr::ValueType;
     private:
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
-        using RealType = ScalarType::RealType;
     public:
         ~RValueVector() = default;
         /* Operations */
@@ -109,26 +113,30 @@ namespace Physica {
         [[nodiscard]] auto conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
 
-        [[nodiscard]] inline CoDiff<RealType> norm1() const;
-        [[nodiscard]] inline CoDiff<RealType> norm2() const;
-        [[nodiscard]] inline CoDiff<RealType> norm() const;
-        [[nodiscard]] inline CoDiff<RealType> squaredNorm() const;
-        [[nodiscard]] inline RealType lnSquaredNorm() const;
-        [[nodiscard]] inline RealType normInf() const;
+        [[nodiscard]] inline CoDiff<Tr> norm1() const;
+        [[nodiscard]] inline CoDiff<Tr> norm2() const;
+        [[nodiscard]] inline CoDiff<Tr> norm() const;
+        [[nodiscard]] inline CoDiff<Tr> squaredNorm() const;
+        [[nodiscard]] inline Tr lnSquaredNorm() const;
+        [[nodiscard]] inline Tr normInf() const;
 
-        [[nodiscard]] CoDiff<ScalarType> max() const;
-        [[nodiscard]] CoDiff<ScalarType> min() const;
-        [[nodiscard]] CoDiff<ScalarType> sum() const;
-        [[nodiscard]] CoDiff<ScalarType> lnSumExp() const;
-        [[nodiscard]] CoDiff<ScalarType> crossEntropy(size_t index) const;
-        [[nodiscard]] CoDiff<ScalarType> lnSoftmax(size_t index) const;
-        [[nodiscard]] CoDiff<ScalarType> softmax(size_t index) const;
-        [[nodiscard]] CoDiff<ScalarType> prod() const;
+        [[nodiscard]] CoDiff<T> max() const;
+        [[nodiscard]] CoDiff<T> min() const;
+        [[nodiscard]] CoDiff<T> sum() const;
+        [[nodiscard]] T mean() const;
+        [[nodiscard]] T variance() const;
+        [[nodiscard]] T variance(const T& prior_mean) const;
+        [[nodiscard]] T deviation() const;
+        [[nodiscard]] CoDiff<T> lnSumExp() const;
+        [[nodiscard]] CoDiff<T> crossEntropy(size_t index) const;
+        [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const;
+        [[nodiscard]] CoDiff<T> softmax(size_t index) const;
+        [[nodiscard]] CoDiff<T> prod() const;
         [[nodiscard]] bool isZeros() const;
         template<Vector V>
         [[nodiscard]] inline auto crossProduct(const V& v) const noexcept;
         template<Vector V>
-        [[nodiscard]] ScalarType angleTo(const V& v) const noexcept;
+        [[nodiscard]] T angleTo(const V& v) const noexcept;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] inline auto head(size_t to) noexcept;

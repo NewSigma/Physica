@@ -166,7 +166,7 @@ namespace Physica {
         vars[i + 1] = Trv(1.0 / 8) * buffer[i] + Trv(7.0 / 8) * buffer[i + 1];
 
         vars = pow(divide(vars - Trv(1), ln(vars)), compressRate);
-        return mean(vars);
+        return vars.mean();
     }
 
     template<Scalar T, bool TakeLn>
@@ -202,8 +202,8 @@ namespace Physica {
         Trv sumvar = 0;
         for (size_t i = 0; i < lossMat.getCol(); ++i) {
             const auto col = lossMat.col(i);
-            const Trv prior = mean(col);
-            sumvar += sqrt(variance(col, prior) / prior.squaredNorm() / Trv(getNumPoint()));
+            const Trv prior = col.mean();
+            sumvar += sqrt(col.variance(prior) / prior.squaredNorm() / Trv(getNumPoint()));
         }
         return sumvar / Trv(getDim());
     }

@@ -217,7 +217,7 @@ namespace Physica {
                 importance[i] = makeFeatureImportance<R>(i, numForest, numTree, {features, dataset.labels, isFeatureContinuous});
             
             const auto shadow_importance = importance.tail(numFeature);
-            const T upper_bound = mean(shadow_importance) + deviation(shadow_importance);
+            const T upper_bound = shadow_importance.mean() + deviation(shadow_importance);
             auto ite = result.before_begin();
             for (size_t i = numFeature - 1; i < numFeature; --i, ++ite) {
                 if (importance[i] < upper_bound)

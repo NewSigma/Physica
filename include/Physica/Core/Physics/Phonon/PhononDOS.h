@@ -160,7 +160,7 @@ namespace Physica {
         cornerFreq[6] = eigenvalues(index1[0], index1[1], index[2])[band];
         cornerFreq[7] = eigenvalues(index1)[band];
 
-        const Vector4D<T> plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - mean(cornerFreq)};
+        const Vector4D<T> plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - cornerFreq.mean()};
         const auto head = plane.head(3);
         const auto cross = CubeCross<T>(plane);
         const T norm = head.norm();

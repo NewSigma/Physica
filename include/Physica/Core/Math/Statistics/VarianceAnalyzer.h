@@ -70,10 +70,8 @@ namespace Physica {
     template<Scalar T>
     T VarianceAnalyzer<T>::getSSE() const {
         T result = 0;
-        for (const auto& vec : data) {
-            const T mean_i = mean(vec);
-            result += square(vec - mean_i).sum();
-        }
+        for (const auto& vec : data)
+            result += square(vec - vec.mean()).sum();
         return result;
     }
 
@@ -87,7 +85,7 @@ namespace Physica {
         const T mean_total = getTotalMean();
         T result = 0;
         for (const auto& vec : data)
-            result += vec.getLength() * square(mean(vec) - mean_total);
+            result += vec.getLength() * square(vec.mean() - mean_total);
         return result;
     }
 
@@ -100,7 +98,7 @@ namespace Physica {
     T VarianceAnalyzer<T>::getTotalMean() const {
         T result = 0;
         for (const auto& vec : data)
-            result += mean(vec) * T(vec.getLength());
+            result += vec.mean() * T(vec.getLength());
         result /= getTotalNumSample();
         return result;
     }

@@ -22,12 +22,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica {
-    template<Vector T>
-    T::ScalarType mean(const T& x) {
-        using ScalarType = T::ScalarType;
-        return x.sum() / ScalarType(x.getLength());
-    }
-
     template<Scalar T>
     __host__ __device__ inline void toNextMean(T& mean, size_t lastNumSample, T sample) {
         const T factor1 = T(lastNumSample);
@@ -58,21 +52,6 @@ namespace Physica {
         for (size_t i = 0; i < x.getLength(); ++i)
             toNextMean(result, i, x.calc(i));
         return result;
-    }
-
-    template<Vector T>
-    T::ScalarType variance(const T& x) {
-        using ScalarType = T::ScalarType;
-        const size_t length = x.getLength();
-        const ScalarType x_mean = mean(x);
-        return square(x - x_mean).sum() / ScalarType(length - 1);
-    }
-
-    template<Vector T>
-    T::ScalarType variance(const T& x, typename T::ScalarType prior_mean) {
-        using ScalarType = T::ScalarType;
-        const size_t length = x.getLength();
-        return square(x - prior_mean).sum() / ScalarType(length);
     }
 
     template<Scalar T>
@@ -114,11 +93,6 @@ namespace Physica {
     }
 
     template<Vector T>
-    inline T::ScalarType deviation(const T& x) {
-        return sqrt(variance(x));
-    }
-
-    template<Vector T>
     inline T::ScalarType deviation_stable(const T& x) {
         return sqrt(variance_stable(x));
     }
@@ -127,7 +101,7 @@ namespace Physica {
     DenseVector<typename T::ScalarType, T::SizeAtCompile>
     normalize(const T& x) {
         using ScalarType = T::ScalarType;
-        const ScalarType x_mean = mean(x);
+        const ScalarType x_mean = x.mean();
         const ScalarType factor = reciprocal(deviation(x));
         return (x - x_mean) * factor;
     }
@@ -136,8 +110,8 @@ namespace Physica {
     T::ScalarType covariance(const T& x, const T& y) {
         assert(x.getLength() == y.getLength());
         using ScalarType = T::ScalarType;
-        const ScalarType x_mean = mean(x);
-        const ScalarType y_mean = mean(y);
+        const ScalarType x_mean = x.mean();
+        const ScalarType y_mean = y.mean();
         DenseVector<typename T::ScalarType, T::SizeAtCompile> temp = hadamard((x - x_mean), (y - y_mean));
         return temp.sum() / ScalarType(temp.getLength() - 1);
     }
@@ -149,7 +123,7 @@ namespace Physica {
         temp = hadamard(square(temp), temp);
         const size_t length = x.getLength();
         const ScalarType factor = ScalarType(length * length) / ScalarType((length - 1) * (length - 2));
-        return mean(temp) * factor;
+        return temp.mean() * factor;
     }
 
     template<Vector T>
@@ -157,9 +131,9 @@ namespace Physica {
         using ScalarType = T::ScalarType;
         T temp = normalize(x);
         temp = square(temp);
-        const ScalarType mean2 = mean(temp);
+        const ScalarType mean2 = temp.mean();
         temp = square(temp);
-        const ScalarType mean1 = mean(temp);
+        const ScalarType mean1 = temp.mean();
 
         const size_t length = x.getLength();
         const ScalarType factor2 = ScalarType(length * length * 3) / ScalarType((length - 2) * (length - 3));

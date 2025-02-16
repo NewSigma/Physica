@@ -38,14 +38,14 @@ namespace Physica {
         using BlockType = LMatrixBlock<Derived>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
-        using typename Base::RealType;
         using Base::RowAtCompile;
         using Base::ColAtCompile;
         using Base::isComplex;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
+        using typename Base::Tr;
+        using typename Base::Tv;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
@@ -106,7 +106,7 @@ namespace Physica {
         [[nodiscard]] inline const auto diag() const noexcept;
 
         [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 

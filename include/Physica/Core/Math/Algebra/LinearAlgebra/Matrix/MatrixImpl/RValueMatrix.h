@@ -57,6 +57,11 @@ namespace Physica {
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
+    protected:
+        using T = ScalarType;
+        using Tr = T::RealType;
+        using Tv = T::ValueType;
+        using Trv = Tr::ValueType;
     public:
         ~RValueMatrix() = default;
         /* Operations */
@@ -100,15 +105,16 @@ namespace Physica {
         [[nodiscard]] inline auto calcFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] inline auto format() const noexcept;
 
-        [[nodiscard]] RealType norm1() const;
+        [[nodiscard]] Tr norm1() const;
         template<class Executor = SeqExecutor>
-        [[nodiscard]] RealType norm1_power(unsigned int maxIteration) const;
-        [[nodiscard]] RealType normInf() const;
+        [[nodiscard]] Tr norm1_power(unsigned int maxIteration) const;
+        [[nodiscard]] Tr normInf() const;
 
-        [[nodiscard]] ScalarType max() const;
-        [[nodiscard]] ScalarType min() const;
-        [[nodiscard]] CoDiff<ScalarType> sum() const;
-        [[nodiscard]] ScalarType trace() const;
+        [[nodiscard]] T max() const;
+        [[nodiscard]] T min() const;
+        [[nodiscard]] CoDiff<T> sum() const;
+        [[nodiscard]] T mean() const;
+        [[nodiscard]] T trace() const;
         [[nodiscard]] inline auto transpose() const noexcept;
         [[nodiscard]] inline auto conjugate() const noexcept;
         [[nodiscard]] inline auto hermite() const noexcept;

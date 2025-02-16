@@ -97,8 +97,8 @@ int main(int argc, char** argv) {
         }, record.getCol(), ThreadPool::numThreadRequired).wait();
 
         for (size_t i = 0; i < mean.getLength(); ++i) {
-            mean[i] = Physica::mean(record.row(i));
-            devia[i] = deviation(record.row(i));
+            mean[i] = record.row(i).mean();
+            devia[i] = record.row(i).deviation();
         }
         const ScalarType factor = reciprocal(mean[0]);
         mean *= factor;

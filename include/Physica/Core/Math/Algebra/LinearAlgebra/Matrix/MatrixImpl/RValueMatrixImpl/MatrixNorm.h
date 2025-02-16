@@ -24,11 +24,11 @@
 
 namespace Physica {
     template<class Derived>
-    RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1() const {
-        RealType maxNorm1 = 0;
+    auto RValueMatrix<Derived>::norm1() const -> Tr {
+        Tr maxNorm1 = 0;
         for (size_t c = 0; c < getCol(); ++c) {
             const auto v = col(c);
-            RealType temp = abs(v).sum();
+            Tr temp = abs(v).sum();
             if (temp > maxNorm1)
                 maxNorm1 = temp;
         }
@@ -42,15 +42,15 @@ namespace Physica {
      */
     template<class Derived>
     template<class Executor>
-    RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const {
+    auto RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const -> Tr {
         assert(getRow() == getCol() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
         using VectorType = VectorND<ScalarType>;
         const Derived& m = Base::getDerived();
         const size_t length = getRow();
-        const RealType factor = reciprocal(RealType(length));
+        const Trv factor = reciprocal(Trv(length));
 
-        VectorND<RealType> x(length, factor);
+        VectorND<Tr> x(length, factor);
         VectorType y(length);
         VectorType z(length);
         unsigned int iteration = 0;
@@ -61,8 +61,8 @@ namespace Physica {
 
             using MatVecDot = decltype(m.hermite() * unit(y));
             z.template operator=<MatVecDot, Executor>(m.hermite() * unit(y));
-            const RealType criteria = iteration == 0 ? (z.reals().sum() * factor) : z[index].real();
-            const bool isConverged = z.normInf() <= criteria * RealType(1 + std::numeric_limits<RealType>::epsilon());
+            const Trv criteria = iteration == 0 ? (z.reals().sum() * factor) : z[index].real();
+            const bool isConverged = z.normInf() <= criteria * Trv(1 + std::numeric_limits<T>::epsilon());
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1
             if (isConverged || isCycling) {
                 if constexpr (isComplex)
@@ -72,20 +72,20 @@ namespace Physica {
                     for (size_t i = 0; i < length; i += 2)
                         v[i] = -v[i];
                     x = m * v;
-                    const RealType pick = x.norm1() / v.norm1();
+                    const Tr pick = x.norm1() / v.norm1();
                     return std::max(y.norm1(), pick);
                 }
             }
 
             if (iteration == 0)
-                x = RealType(0);
+                x = Tr(0);
             else
-                x[index] = RealType(0);
+                x[index] = Tr(0);
 
             size_t nextIndex = 0;
-            RealType maxAbs = 0;
+            Tr maxAbs = 0;
             for (size_t i = 0; i < length; ++i) {
-                const RealType temp = abs(z.calc(i).real());
+                const Tr temp = abs(z.calc(i).real());
                 if (temp > maxAbs) {
                     nextIndex = i;
                     maxAbs = temp;
@@ -94,15 +94,15 @@ namespace Physica {
             if (lastIndex != nextIndex)
                 lastIndex = index;
             index = nextIndex;
-            x[index] = RealType(1);
+            x[index] = Trv(1);
             iteration += 1;
         }
         throw BadConvergenceException("[Error]: norm1_power failed to converge");
     }
 
     template<class Derived>
-    RValueMatrix<Derived>::RealType RValueMatrix<Derived>::normInf() const {
-        RealType result = std::numeric_limits<RealType>::lowest();
+    auto RValueMatrix<Derived>::normInf() const -> Tr {
+        Trv result = std::numeric_limits<T>::lowest();
         for (size_t i = 0; i < getRow(); ++i)
             result = std::max(abs(row(i)).sum(), result);
         return result;

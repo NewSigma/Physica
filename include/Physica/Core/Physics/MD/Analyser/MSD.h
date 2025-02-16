@@ -44,8 +44,8 @@ namespace Physica {
         template<size_t NumReplica, class ForceMatrixAllocator>
         inline void sample(const RPMD<T, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
 
-        [[nodiscard]] T calcMSD() const { return mean(calcAtomMSD()); }
-        [[nodiscard]] T calcMSD2D() const { return mean(calcAtomMSD2D()); }
+        [[nodiscard]] T calcMSD() const { return calcAtomMSD().mean(); }
+        [[nodiscard]] T calcMSD2D() const { return calcAtomMSD2D().mean(); }
         [[nodiscard]] VectorND<T> calcAtomMSD() const;
         [[nodiscard]] VectorND<T> calcAtomMSD2D() const;
         [[nodiscard]] inline T calcFiniteSizeLimit(size_t atomId) const noexcept;

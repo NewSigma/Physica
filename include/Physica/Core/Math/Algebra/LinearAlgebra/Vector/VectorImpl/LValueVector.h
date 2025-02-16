@@ -34,10 +34,10 @@ namespace Physica {
         using BlockType = LVectorBlock<Derived, Length>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
+        using typename Base::Tv;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
@@ -62,7 +62,7 @@ namespace Physica {
         [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */
         [[nodiscard]] ConstRefTy calc(size_t index) const;
-        [[nodiscard]] ValueType calc_value(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
         template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 

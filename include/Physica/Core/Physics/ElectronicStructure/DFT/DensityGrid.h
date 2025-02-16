@@ -146,13 +146,13 @@ namespace Physica {
         {
             auto rho_up_new = getTotalDensity().flatten();
             const auto& rho_up_old = rho.getTotalDensity().flatten();
-            const T factor = mean(rho_up_old) / mean(rho_up_new);
+            const T factor = rho_up_old.mean() / rho_up_new.mean();
             rho_up_new *= factor;
         }
         if constexpr (IsSpinPolarized) {
             auto rho_down_new = getPolarDensity().flatten();
             const auto& rho_down_old = rho.getPolarDensity().flatten();
-            const T factor = mean(rho_down_old) / mean(rho_down_new);
+            const T factor = rho_down_old.mean() / rho_down_new.mean();
             rho_down_new *= factor;
         }
     }

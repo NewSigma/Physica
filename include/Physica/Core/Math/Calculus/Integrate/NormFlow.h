@@ -169,8 +169,8 @@ namespace Physica {
 
             for (auto& net : nets)
                 nn.reverse(net);
-            mean = Physica::mean(samples);
-            var = Physica::variance(samples, mean);
+            mean = samples.mean();
+            var = samples.variance(mean);
         }
         return loss / Trv(numSample);
     }
@@ -222,8 +222,8 @@ namespace Physica {
             maxSample = samples.max().value(); // Assuming f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);
 
-        mean = Physica::mean(samples);
-        var = Physica::variance(samples, mean);
+        mean = samples.mean();
+        var = samples.variance(mean);
         mean = ln(mean) + maxSample;
         var = ln(var) + Trv(2) * maxSample;
         return loss / Trv(numSample);

@@ -36,7 +36,6 @@ namespace Physica {
         using Storage = Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::SizeAtCompile;
         using Base::isReverseDiff;
     protected:

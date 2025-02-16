@@ -25,14 +25,14 @@
 
 namespace Physica {
     template<class Derived>
-    template<Matrix T>
-    void RValueMatrix<Derived>::assign(LValueMatrix<T>& target) const {
-        using OtherScalar = T::ScalarType;
-        constexpr size_t OtherRow = T::RowAtCompile;
-        constexpr size_t OtherColumn = T::ColAtCompile;
+    template<Matrix M>
+    void RValueMatrix<Derived>::assign(LValueMatrix<M>& target) const {
+        using OtherScalar = M::ScalarType;
+        constexpr size_t OtherRow = M::RowAtCompile;
+        constexpr size_t OtherColumn = M::ColAtCompile;
         static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == OtherColumn || ColAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
-        static_assert(!(isComplex && !T::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
+        static_assert(!(isComplex && !M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         assert(getRow() == target.getRow());
         assert(getCol() == target.getCol());
         const size_t maxMajor = target.getMaxMajor();
@@ -213,12 +213,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::max() const {
-        ScalarType result;
+    auto RValueMatrix<Derived>::max() const -> T {
+        T result;
         if constexpr (MatrixOption::isColMatrix<This>()) {
             result = col(0).max();
             for (size_t i = 1; i < getCol(); ++i) {
-                ScalarType temp = col(i).max();
+                T temp = col(i).max();
                 if (temp > result)
                     result = temp;
             }
@@ -226,7 +226,7 @@ namespace Physica {
         else {
             result = row(0).max();
             for (size_t i = 1; i < getRow(); ++i) {
-                ScalarType temp = row(i).max();
+                T temp = row(i).max();
                 if (temp > result)
                     result = temp;
             }
@@ -235,12 +235,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::min() const {
-        ScalarType result;
+    auto RValueMatrix<Derived>::min() const -> T {
+        T result;
         if constexpr (MatrixOption::isColMatrix<This>()) {
             result = col(0).min();
             for (size_t i = 1; i < getCol(); ++i) {
-                ScalarType temp = col(i).min();
+                T temp = col(i).min();
                 if (temp < result)
                     result = temp;
             }
@@ -248,7 +248,7 @@ namespace Physica {
         else {
             result = row(0).min();
             for (size_t i = 1; i < getRow(); ++i) {
-                ScalarType temp = row(i).min();
+                T temp = row(i).min();
                 if (temp < result)
                     result = temp;
             }
@@ -257,10 +257,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto RValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
+    inline auto RValueMatrix<Derived>::sum() const -> CoDiff<T> {
         if constexpr (isReverseDiff) {
-            ValueType v = 0;
-            std::forward_list<CoDiff<ScalarType>> elems{};
+            Tv v = 0;
+            std::forward_list<CoDiff<T>> elems{};
             for (size_t major = 0; major < getMaxMajor(); ++major) {
                 size_t minor = 0;
                 auto list = co_for([&]{ return minor < getMaxMinor(); }, [&]{ ++minor; }, [&]{
@@ -275,7 +275,7 @@ namespace Physica {
                 elem.reverse(result.grad());
         }
         else {
-            ScalarType result = 0;
+            T result = 0;
             for (size_t major = 0; major < getMaxMajor(); ++major)
                 for (size_t minor = 0; minor < getMaxMinor(); ++minor)
                     result += calcFromMajorMinor(major, minor);
@@ -284,9 +284,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
+    auto RValueMatrix<Derived>::mean() const -> T {
+        return sum() / Trv(getRow() * getCol());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::trace() const -> T {
         assert(getRow() == getCol());
-        ScalarType result = ScalarType(0);
+        T result = T(0);
         for (size_t i = 0; i < getRow(); ++i)
             result += calc(i, i);
         return result;

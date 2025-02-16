@@ -293,7 +293,7 @@ namespace Physica {
         if constexpr (isReverseDiff) {
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
-            ValueType v = 0;
+            Tr v = 0;
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
                     v += refFromMajorMinor(major, minor).value();
@@ -458,7 +458,7 @@ namespace Physica {
         const size_t order = Base::getRow();
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
-                refFromMajorMinor(i, j) = RealType(i == j ? 1 : 0);
+                refFromMajorMinor(i, j) = Tr(i == j ? 1 : 0);
     }
 
     template<class Derived>

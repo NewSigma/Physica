@@ -410,7 +410,7 @@ namespace Physica {
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic(size_t dofIndex) const {
         const T repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
         const auto pos = getPhaseMatrix().row(getDOF() + dofIndex);
-        const T centroidPos = mean(pos);
+        const T centroidPos = pos.mean();
 
         T kinetic = repBeta - (pos - centroidPos) * forceBuffer.row(dofIndex);
         kinetic /= T(getNumReplica() * 2);
@@ -460,7 +460,7 @@ namespace Physica {
             temp[replica] = model.potentialV(phaseToCell(replica));
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
-        return mean(temp);
+        return temp.mean();
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

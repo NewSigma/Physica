@@ -32,7 +32,6 @@ namespace Physica {
         using This = ContinuousMatrix<Derived>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::RowAtCompile;
         using Base::ColAtCompile;
         using Base::isReverseDiff;

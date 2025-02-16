@@ -274,7 +274,7 @@ namespace Physica {
         const size_t dof = getDOF();
         size_t index = dof;
         for (auto& elem : result.asArray()) {
-            elem = T(mean(phase.row(index)));
+            elem = T(phase.row(index).mean());
             ++index;
         }
         return result;
@@ -298,7 +298,7 @@ namespace Physica {
         PositionMatrix result(getNumParticle(), Dim, 0);
         size_t index = 0;
         for (auto& elem : result.asArray()) {
-            elem = T(mean(phase.row(index)));
+            elem = T(phase.row(index).mean());
             ++index;
         }
         return result;

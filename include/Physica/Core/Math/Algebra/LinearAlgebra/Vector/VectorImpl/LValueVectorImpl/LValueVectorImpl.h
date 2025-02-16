@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueVector<Derived>::calc_value(size_t index) const -> ValueType {
+    auto LValueVector<Derived>::calc_value(size_t index) const -> Tv {
         return operator[](index).value();
     }
 

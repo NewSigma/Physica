@@ -64,14 +64,14 @@ namespace Physica {
 
     template<Scalar T>
     T LinearFit<T>::relatedCoeff(const VectorType& x, const VectorType& y) {
-        return covariance(x, y) / sqrt(variance(x) * variance(y));
+        return covariance(x, y) / sqrt(x.variance() * y.variance());
     }
 
     template<Scalar T>
     LinearFit<T>::ScalarPair LinearFit<T>::deviation(
             const VectorType& x, const VectorType& y, ScalarPair pair) {
         const T mean_sse = square(y - pair.first * x - pair.second).sum() / T(x.getLength() - 2);
-        const T mean_x = mean(x);
+        const T mean_x = x.mean();
         const T ssx = square(x - mean_x).sum();
         const T deviation_k = sqrt(mean_sse / ssx);
         const T deviation_b = sqrt(mean_sse);
