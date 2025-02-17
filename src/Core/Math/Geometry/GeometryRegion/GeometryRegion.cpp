@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -18,9 +18,7 @@
  */
 #include "Physica/Core/Math/Geometry/GeometryRegion/GeometryRegion.h"
 
-namespace Physica {
-    /////////////////////////////////////Dimension 2/////////////////////////////////////
-    GeometryRegion<2>::GeometryRegion(RegionType type) : type(type) {}
-    /////////////////////////////////////Dimension 3/////////////////////////////////////
-    GeometryRegion<3>::GeometryRegion(RegionType type) : type(type) {}
-}
+using namespace Physica;
+
+GeometryRegion<2>::GeometryRegion(RegionType type) : type(type) {}
+GeometryRegion<3>::GeometryRegion(RegionType type) : type(type) {}

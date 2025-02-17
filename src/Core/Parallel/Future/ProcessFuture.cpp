@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,44 +22,46 @@
 #include <signal.h>
 #ifdef __linux__
     #include <sys/wait.h>
-#endif
+ #endif
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Exception/NoImplException.h"
 
-namespace Physica {
-    ProcessFuture::ProcessFuture() : error(-1), isValid(false) {}
+using namespace Physica;
 
-    ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), error(-1), finished(false), isValid(true) {}
+ProcessFuture::ProcessFuture()
+        : error(-1), isValid(false) {}
 
-    int ProcessFuture::wait() {
-        if (!isValid)
-            throw std::future_error(std::future_errc::no_state);
+ProcessFuture::ProcessFuture(pid_t pid_)
+        : pid(pid_), error(-1), finished(false), isValid(true) {}
 
-        if (finished)
-            return error;
-    #ifdef __linux__
-        int status;
-        pid_t endPid = waitpid(pid, &status, 0);
-        if (endPid <= 0) {
-            fprintf(stderr, "[Error]: Failed to wait for chile processes.\n");
-            throw SystemException();
-        }
-        finished = true;
+int ProcessFuture::wait() {
+    if (!isValid)
+        throw std::future_error(std::future_errc::no_state);
 
-        if (WIFEXITED(status))
-            error = WEXITSTATUS(status);
-    #else
-        noImpl(__func__);
-    #endif
+    if (finished)
         return error;
+#ifdef __linux__
+    int status;
+    pid_t endPid = waitpid(pid, &status, 0);
+    if (endPid <= 0) {
+        fprintf(stderr, "[Error]: Failed to wait for chile processes.\n");
+        throw SystemException();
     }
+    finished = true;
 
-    void ProcessFuture::swap(ProcessFuture& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(pid, obj.pid);
-        std::swap(error, obj.error);
-        std::swap(finished, obj.finished);
-        std::swap(isValid, obj.isValid);
-    }
+    if (WIFEXITED(status))
+        error = WEXITSTATUS(status);
+#else
+    noImpl(__func__);
+#endif
+    return error;
+}
+
+void ProcessFuture::swap(ProcessFuture& __restrict obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    std::swap(pid, obj.pid);
+    std::swap(error, obj.error);
+    std::swap(finished, obj.finished);
+    std::swap(isValid, obj.isValid);
 }

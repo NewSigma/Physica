@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,16 +18,16 @@
  */
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
-namespace Physica {
-    void ThreadExecutor::auto_wait(FutureType& future) {
-        const auto nano = std::chrono::nanoseconds(1);
-        while (future.wait_for(nano) != std::future_status::ready) {
-            std::unique_ptr<Task> task = ThreadPool::getInstance().steal();
-            if (task != nullptr)
-                task->execute();
-            else
-                std::this_thread::yield();
-        }
-        future.get();
+using namespace Physica;
+
+void ThreadExecutor::auto_wait(FutureType& future) {
+    const auto nano = std::chrono::nanoseconds(1);
+    while (future.wait_for(nano) != std::future_status::ready) {
+        std::unique_ptr<Task> task = ThreadPool::getInstance().steal();
+        if (task != nullptr)
+            task->execute();
+        else
+            std::this_thread::yield();
     }
+    future.get();
 }

@@ -20,13 +20,13 @@
 #include "Physica/Core/Exception/FFIException.h"
 #include "Physica/Python/FFI/FuncInfo.h"
 
-namespace Physica {
-    FuncInfo::FuncInfo(unsigned int nargs, const ffi_type* rtype, const ffi_type** atypes) {
-        check(ffi_prep_cif(&raw_cif, FFI_DEFAULT_ABI, nargs, const_cast<ffi_type*>(rtype), const_cast<ffi_type**>(atypes)));
-    }
+using namespace Physica;
 
-    void FuncInfo::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(raw_cif, obj.raw_cif);
-    }
+FuncInfo::FuncInfo(unsigned int nargs, const ffi_type* rtype, const ffi_type** atypes) {
+    check(ffi_prep_cif(&raw_cif, FFI_DEFAULT_ABI, nargs, const_cast<ffi_type*>(rtype), const_cast<ffi_type**>(atypes)));
+}
+
+void FuncInfo::swap(This& __restrict obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    std::swap(raw_cif, obj.raw_cif);
 }

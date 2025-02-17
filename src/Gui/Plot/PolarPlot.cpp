@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,11 +18,11 @@
  */
 #include "Physica/Gui/Plot/PolarPlot.h"
 
-namespace Physica {
-    PolarPlot::PolarPlot(QWidget* parent) : QChartView(parent) {
-        setAttribute(Qt::WA_DeleteOnClose);
+using namespace Physica;
 
-        setChart(new QPolarChart());
-        setRenderHint(QPainter::Antialiasing);
-    }
+PolarPlot::PolarPlot(QWidget* parent) : QChartView(parent) {
+    setAttribute(Qt::WA_DeleteOnClose);
+
+    setChart(new QPolarChart());
+    setRenderHint(QPainter::Antialiasing);
 }

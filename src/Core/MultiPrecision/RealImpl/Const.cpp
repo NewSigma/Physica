@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,36 +18,33 @@
  */
 #include "Physica/Core/Scalar/Real.h"
 
-namespace Physica {
-    /*!
-     * Basic consts that initialize directly.
-     */
-    BasicConst::BasicConst()
-            : ln_2(std::log(2))
-            , ln_10(std::log(10))
-            , ln_2_10(std::log(2) / std::log(10))
-            , plotPoints(static_cast<SignedMPUnit>(20)) {
-        expectedRelativeError = T(1, 1 - GlobalPrecision);
-        expectedRelativeError.setByte(0, 1);
+using namespace Physica;
 
-        stepSize = T(1, - GlobalPrecision / 2); //(- GlobalPrecision / 2) is selected by experience.
-        stepSize.setByte(0, 1);
+BasicConst::BasicConst()
+        : ln_2(std::log(2))
+        , ln_10(std::log(10))
+        , ln_2_10(std::log(2) / std::log(10))
+        , plotPoints(static_cast<SignedMPUnit>(20)) {
+    expectedRelativeError = T(1, 1 - GlobalPrecision);
+    expectedRelativeError.setByte(0, 1);
 
-        R_MAX = 2147483647;
-        _0 = 0;
-        _1 = 1;
-        Minus_1 = -1;
-        _2 = 2;
-        Minus_2 = -2;
-        _3 = 3;
-        Minus_3 = -3;
-        _4 = 4;
-        Minus_4 = -4;
-        _10 = 10;
-    }
+    stepSize = T(1, -GlobalPrecision / 2); //(- GlobalPrecision / 2) is selected by experience.
+    stepSize.setByte(0, 1);
 
-    const BasicConst& BasicConst::getInstance() noexcept {
-        static BasicConst basicConst{};
-        return basicConst;
-    }
+    R_MAX = 2147483647;
+    _0 = 0;
+    _1 = 1;
+    Minus_1 = -1;
+    _2 = 2;
+    Minus_2 = -2;
+    _3 = 3;
+    Minus_3 = -3;
+    _4 = 4;
+    Minus_4 = -4;
+    _10 = 10;
+}
+
+const BasicConst& BasicConst::getInstance() noexcept {
+    static BasicConst basicConst{};
+    return basicConst;
 }

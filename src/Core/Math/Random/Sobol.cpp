@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,36 +18,37 @@
  */
 #include "Physica/Core/Math/Random/Sobol.h"
 
-namespace Physica {
-    Sobol::Sobol() : numStep(0), mask(MaxDim * MaxBit), buffer(MaxDim, 0) {
-        constexpr static int MaskInit[]{1, 1, 1, 1, 1, 1, 3, 1, 3, 3, 1, 1, 5, 7, 7, 3, 3, 5, 15, 11, 5, 15, 13, 9};
-        for (unsigned int i = 0; i < sizeof(MaskInit) / sizeof(int); ++i)
-            mask[i] = MaskInit[i];
+using namespace Physica;
 
-        Array<unsigned int*> iu(MaxBit);
-        for (int j = 0, k = 0; j < MaxBit; ++j, k += MaxDim)
-            iu[j] = &mask[k];
+Sobol::Sobol()
+        : numStep(0), mask(MaxDim * MaxBit), buffer(MaxDim, 0) {
+    constexpr static int MaskInit[]{1, 1, 1, 1, 1, 1, 3, 1, 3, 3, 1, 1, 5, 7, 7, 3, 3, 5, 15, 11, 5, 15, 13, 9};
+    for (unsigned int i = 0; i < sizeof(MaskInit) / sizeof(int); ++i)
+        mask[i] = MaskInit[i];
 
-        for (int k = 0; k < MaxDim; k++) {
-            for (int j = 0; j < Degree[k]; ++j)
-                iu[j][k] <<= (MaxBit - 1 - j);
+    Array<unsigned int*> iu(MaxBit);
+    for (int j = 0, k = 0; j < MaxBit; ++j, k += MaxDim)
+        iu[j] = &mask[k];
 
-            int p = PolyCoeff[k];
-            for (int j = Degree[k]; j < MaxBit; ++j) {
-                unsigned int i = iu[j - Degree[k]][k];
-                i ^= (i >> Degree[k]);
-                for (int l = Degree[k] - 1; l >= 1; --l) {
-                    if (p % 2 == 1)
-                        i ^= iu[j - l][k];
-                    p >>= 1;
-                }
-                iu[j][k] = i;
+    for (int k = 0; k < MaxDim; k++) {
+        for (int j = 0; j < Degree[k]; ++j)
+            iu[j][k] <<= (MaxBit - 1 - j);
+
+        int p = PolyCoeff[k];
+        for (int j = Degree[k]; j < MaxBit; ++j) {
+            unsigned int i = iu[j - Degree[k]][k];
+            i ^= (i >> Degree[k]);
+            for (int l = Degree[k] - 1; l >= 1; --l) {
+                if (p % 2 == 1)
+                    i ^= iu[j - l][k];
+                p >>= 1;
             }
+            iu[j][k] = i;
         }
     }
+}
 
-    auto Sobol::getInstance() noexcept -> This& {
-        thread_local static This instance{};
-        return instance;
-    }
+auto Sobol::getInstance() noexcept -> This& {
+    thread_local static This instance{};
+    return instance;
 }

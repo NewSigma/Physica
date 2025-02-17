@@ -44,17 +44,15 @@ constexpr size_t numStep = 800;
 constexpr size_t numSystem = 8;
 
 namespace Physica {
-    namespace Core {
-        class ForceModel : public LJModel1<ScalarType> {
-            constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(4.13);
-            constexpr static double lj_epsilon = PhyConst<AU>::kToTemperature(165.9);
-            constexpr static double pair_cutoff = 15;
+    class ForceModel : public LJModel1<ScalarType> {
+        constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(4.13);
+        constexpr static double lj_epsilon = PhyConst<AU>::kToTemperature(165.9);
+        constexpr static double pair_cutoff = 15;
 
-            using Base = LJModel1<ScalarType>;
-        public:
-            ForceModel() : Base(lj_sigma, lj_epsilon, pair_cutoff) {}
-        };
-    }
+        using Base = LJModel1<ScalarType>;
+    public:
+        ForceModel() : Base(lj_sigma, lj_epsilon, pair_cutoff) {}
+    };
 
     template<>
     class Traits<ForceModel> : public Traits<LJModel1<ScalarType>> {};

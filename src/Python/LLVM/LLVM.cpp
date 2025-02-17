@@ -19,9 +19,9 @@
 #include "llvm/Support/TargetSelect.h"
 #include "Physica/Python/LLVM/LLVM.h"
 
-namespace Physica {
-    LLVM::LLVM() : threadSafeContext(std::make_unique<LLVMContext>()) {
-        llvm::InitializeNativeTarget();
-        llvm::InitializeNativeTargetAsmPrinter();
-    }
+using namespace Physica;
+
+LLVM::LLVM() : threadSafeContext(std::make_unique<LLVMContext>()) {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
 }

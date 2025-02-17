@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,6 @@
  */
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 
-namespace Physica {
-    int ProcessExecutor::nice_incr = 0;
-}
+using namespace Physica;
+
+int ProcessExecutor::nice_incr = 0;

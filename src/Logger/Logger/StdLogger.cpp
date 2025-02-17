@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,10 +18,10 @@
  */
 #include "Physica/Logger/Logger/StdLogger.h"
 
-namespace Physica {
-    StdLogger::StdLogger(std::ostream& stream) : os(stream) {}
+using namespace Physica;
 
-    void StdLogger::log(LogBuffer& buffer) {
-        os << buffer.makeMsgString() << '\n';
-    }
+StdLogger::StdLogger(std::ostream& stream) : os(stream) {}
+
+void StdLogger::log(LogBuffer& buffer) {
+    os << buffer.makeMsgString() << '\n';
 }

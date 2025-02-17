@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,10 @@
 #include <sstream>
 #include "Physica/Python/CXXPtr.h"
 
-namespace Physica {
-    std::string CXXPtr::toString() const {
-        std::stringstream ss{};
-        ss << p;
-        return ss.str();
-    }
+using namespace Physica;
+
+std::string CXXPtr::toString() const {
+    std::stringstream ss{};
+    ss << p;
+    return ss.str();
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,122 +16,123 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <cstdlib>
-#include <cstring>
+#include "Physica/Core/Utils/Container/BitArray.h"
 #include <cassert>
 #include <climits>
+#include <cstdlib>
+#include <cstring>
 #include <limits>
-#include "Physica/Core/Utils/Container/BitArray.h"
 
-namespace Physica {
-    /*!
-     * bitCount is the number of bool types you need.
-     * bitCount is different from BitArray::length.
-     */
-    BitArray::BitArray(size_t bitCount_) : bitCount(bitCount_) {
-        arr = new unsigned char[getLength()];
-    }
+using namespace Physica;
+/*!
+ * bitCount is the number of bool types you need.
+ * bitCount is different from BitArray::length.
+ */
+BitArray::BitArray(size_t bitCount_) : bitCount(bitCount_) {
+    arr = new unsigned char[getLength()];
+}
 
-    BitArray::BitArray(size_t bitCount_, bool initial) : BitArray(bitCount_) {
-        unsigned char init = initial ? std::numeric_limits<unsigned char>::max() : std::numeric_limits<unsigned char>::min();
-        memset(arr, init, getLength());
-    }
+BitArray::BitArray(size_t bitCount_, bool initial) : BitArray(bitCount_) {
+    unsigned char init = initial ? std::numeric_limits<unsigned char>::max() : std::numeric_limits<unsigned char>::min();
+    memset(arr, init, getLength());
+}
 
-    BitArray::BitArray(const BitArray& array)
-            : bitCount(array.bitCount) {
+BitArray::BitArray(const BitArray& array)
+        : bitCount(array.bitCount) {
+    const size_t length = getLength();
+    arr = new unsigned char[length];
+    for (unsigned int i = 0; i < length; ++i)
+        arr[i] = array.arr[i];
+}
+
+BitArray::BitArray(BitArray&& array) noexcept
+        : arr(array.arr), bitCount(array.bitCount) {
+    array.arr = nullptr;
+}
+
+BitArray::~BitArray() {
+    delete[] arr;
+}
+
+BitArray& BitArray::operator=(const BitArray& array) {
+    if (this != &array) {
+        this->~BitArray();
+        bitCount = array.bitCount;
         const size_t length = getLength();
-        arr = new unsigned char[length];
-        for(unsigned int i = 0; i < length; ++i)
+        arr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+        for (unsigned int i = 0; i < length; ++i)
             arr[i] = array.arr[i];
     }
-
-    BitArray::BitArray(BitArray&& array) noexcept : arr(array.arr), bitCount(array.bitCount) {
-        array.arr = nullptr;
-    }
-
-    BitArray::~BitArray() {
-        delete[] arr;
-    }
-
-    BitArray& BitArray::operator=(const BitArray& array) {
-        if(this != &array) {
-            this->~BitArray();
-            bitCount = array.bitCount;
-            const size_t length = getLength();
-            arr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
-            for(unsigned int i = 0; i < length; ++i)
-                arr[i] = array.arr[i];
-        }
-        return *this;
-    }
-
-    BitArray& BitArray::operator=(BitArray&& array) noexcept {
-        if(this != &array)
-            this->~BitArray();
-        bitCount = array.bitCount;
-        arr = array.arr;
-        return *this;
-    }
-    /*!
-     * Access the s.th bool, s starts from 0.
-     */
-    bool BitArray::operator[](size_t s) const {
-        assert(bitCount > s);
-        s += 1;
-        const auto quotient = s / CHAR_BIT;
-        const auto reminder = s - quotient * CHAR_BIT;
-        if(reminder)
-            return arr[quotient] & (1U << (reminder - 1U));
-        return arr[quotient - 1] & (1U << (CHAR_BIT - 1U));
-    }
-
-    BitArray BitArray::operator&(const BitArray& array) const {
-        assert(bitCount == array.bitCount);
-        const size_t length = getLength();
-        auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
-        for(size_t s = 0; s < length; ++s)
-            newArr[s] = arr[s] & array.arr[s];
-        return BitArray(newArr, length);
-    }
-
-    BitArray BitArray::operator|(const BitArray& array) const {
-        assert(bitCount == array.bitCount);
-        const size_t length = getLength();
-        auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
-        for(size_t s = 0; s < length; ++s)
-            newArr[s] = arr[s] | array.arr[s];
-        return BitArray(newArr, length);
-    }
-
-    BitArray BitArray::operator~() const {
-        const size_t length = getLength();
-        auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
-        for(size_t s = 0; s < length; ++s)
-            newArr[s] = ~arr[s];
-        return BitArray(newArr, length);
-    }
-
-    void BitArray::setBit(size_t s, bool b) {
-        assert(bitCount > s);
-        s += 1;
-        const auto quotient = s / CHAR_BIT;
-        const auto reminder = s - quotient * CHAR_BIT;
-        if(b) {
-            if(reminder)
-                arr[quotient] |= (1U << (reminder - 1U));
-            else
-                arr[quotient - 1] |= (1U << (CHAR_BIT - 1U));
-        }
-        else {
-            if(reminder)
-                arr[quotient] &= ~(1U << (reminder - 1U));
-            else
-                arr[quotient - 1] &= ~(1U << (CHAR_BIT - 1U));
-        }
-    }
-    /*!
-     * Construct a BitArray directly from its members. Declared private to avoid incorrect uses.
-     * Length of arr must be @param length.
-     */
-    BitArray::BitArray(unsigned char* arr, size_t bitCount) : arr(arr), bitCount(bitCount) {}
+    return *this;
 }
+
+BitArray& BitArray::operator=(BitArray&& array) noexcept {
+    if (this != &array)
+        this->~BitArray();
+    bitCount = array.bitCount;
+    arr = array.arr;
+    return *this;
+}
+/*!
+ * Access the s.th bool, s starts from 0.
+ */
+bool BitArray::operator[](size_t s) const {
+    assert(bitCount > s);
+    s += 1;
+    const auto quotient = s / CHAR_BIT;
+    const auto reminder = s - quotient * CHAR_BIT;
+    if (reminder)
+        return arr[quotient] & (1U << (reminder - 1U));
+    return arr[quotient - 1] & (1U << (CHAR_BIT - 1U));
+}
+
+BitArray BitArray::operator&(const BitArray& array) const {
+    assert(bitCount == array.bitCount);
+    const size_t length = getLength();
+    auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+    for (size_t s = 0; s < length; ++s)
+        newArr[s] = arr[s] & array.arr[s];
+    return BitArray(newArr, length);
+}
+
+BitArray BitArray::operator|(const BitArray& array) const {
+    assert(bitCount == array.bitCount);
+    const size_t length = getLength();
+    auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+    for (size_t s = 0; s < length; ++s)
+        newArr[s] = arr[s] | array.arr[s];
+    return BitArray(newArr, length);
+}
+
+BitArray BitArray::operator~() const {
+    const size_t length = getLength();
+    auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+    for (size_t s = 0; s < length; ++s)
+        newArr[s] = ~arr[s];
+    return BitArray(newArr, length);
+}
+
+void BitArray::setBit(size_t s, bool b) {
+    assert(bitCount > s);
+    s += 1;
+    const auto quotient = s / CHAR_BIT;
+    const auto reminder = s - quotient * CHAR_BIT;
+    if (b) {
+        if (reminder)
+            arr[quotient] |= (1U << (reminder - 1U));
+        else
+            arr[quotient - 1] |= (1U << (CHAR_BIT - 1U));
+    }
+    else {
+        if (reminder)
+            arr[quotient] &= ~(1U << (reminder - 1U));
+        else
+            arr[quotient - 1] &= ~(1U << (CHAR_BIT - 1U));
+    }
+}
+/*!
+ * Construct a BitArray directly from its members. Declared private to avoid incorrect uses.
+ * Length of arr must be @param length.
+ */
+BitArray::BitArray(unsigned char* arr, size_t bitCount)
+        : arr(arr), bitCount(bitCount) {}

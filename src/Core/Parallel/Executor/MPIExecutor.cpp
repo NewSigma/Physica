@@ -18,33 +18,33 @@
  */
 #ifdef PHYSICA_MPI
 
-#include "Physica/Core/Parallel/Executor/MPIExecutor.h"
-#include "Physica/Core/Exception/MPIException.h"
+    #include "Physica/Core/Parallel/Executor/MPIExecutor.h"
+    #include "Physica/Core/Exception/MPIException.h"
 
-namespace Physica {
-    MPIExecutor::MPIExecutor() {
-        int mode;
-        check_mpi(MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode));
-        if (mode != MPI_THREAD_SERIALIZED)
-            throw std::runtime_error("[Error]: Physica do not support the MPI");
+using namespace Physica;
 
-        MPI_Errhandler handler;
-        check_mpi(MPI_Comm_create_errhandler(world_handler, &handler));
-        check_mpi(MPI_Comm_set_errhandler(getWorld(), handler));
-    }
+MPIExecutor::MPIExecutor() {
+    int mode;
+    check_mpi(MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode));
+    if (mode != MPI_THREAD_SERIALIZED)
+        throw std::runtime_error("[Error]: Physica do not support the MPI");
 
-    MPIExecutor::~MPIExecutor() {
-        MPI_Finalize();
-    }
+    MPI_Errhandler handler;
+    check_mpi(MPI_Comm_create_errhandler(world_handler, &handler));
+    check_mpi(MPI_Comm_set_errhandler(getWorld(), handler));
+}
 
-    MPIExecutor& MPIExecutor::getInstance() noexcept {
-        static MPIExecutor mpi{};
-        return mpi;
-    }
+MPIExecutor::~MPIExecutor() {
+    MPI_Finalize();
+}
 
-    void MPIExecutor::world_handler(MPI_Comm*, int* pErr, ...) {
-        throw MPIException(*pErr);
-    }
+MPIExecutor& MPIExecutor::getInstance() noexcept {
+    static MPIExecutor mpi{};
+    return mpi;
+}
+
+void MPIExecutor::world_handler(MPI_Comm*, int* pErr, ...) {
+    throw MPIException(*pErr);
 }
 
 #endif

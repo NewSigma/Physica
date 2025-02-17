@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,40 +26,42 @@
 #include "Physica/Core/Parallel/SubProcess.h"
 #include "Physica/Core/Exception/SystemException.h"
 
-namespace Physica {
-    SubProcess::SubProcess() : task(), pid(-1), nice_incr(0) {}
+using namespace Physica;
 
-    SubProcess::SubProcess(std::function<void()> task_, int nice_incr_) : task(std::move(task_)), pid(-1), nice_incr(nice_incr_) {}
+SubProcess::SubProcess()
+        : task(), pid(-1), nice_incr(0) {}
 
-    SubProcess& SubProcess::operator=(SubProcess process) noexcept {
-        swap(process);
-        return *this;
-    }
+SubProcess::SubProcess(std::function<void()> task_, int nice_incr_)
+        : task(std::move(task_)), pid(-1), nice_incr(nice_incr_) {}
 
-    ProcessFuture SubProcess::execute() {
-        pid = fork();
-        if (pid == -1)
-            throw SystemException();
-        else if (pid == 0) {
-            prctl(PR_SET_PDEATHSIG, SIGTERM);
-            /* Set nice */ {
-                errno = 0;
-                const int code = nice(nice_incr);
-                if (code == -1 && errno != 0)
-                    perror("[Warn]: Failed to process priority");
-            }
-            task();
-            _exit(EXIT_SUCCESS);
+SubProcess& SubProcess::operator=(SubProcess process) noexcept {
+    swap(process);
+    return *this;
+}
+
+ProcessFuture SubProcess::execute() {
+    pid = fork();
+    if (pid == -1)
+        throw SystemException();
+    else if (pid == 0) {
+        prctl(PR_SET_PDEATHSIG, SIGTERM);
+        /* Set nice */ {
+            errno = 0;
+            const int code = nice(nice_incr);
+            if (code == -1 && errno != 0)
+                perror("[Warn]: Failed to process priority");
         }
-        return ProcessFuture(pid);
+        task();
+        _exit(EXIT_SUCCESS);
     }
+    return ProcessFuture(pid);
+}
 
-    void SubProcess::swap(SubProcess& __restrict process) noexcept {
-        assert(this != &process && "[Error]: Self swap is likely a bug");
-        task.swap(process.task);
-        std::swap(pid, process.pid);
-        std::swap(nice_incr, process.nice_incr);
-    }
+void SubProcess::swap(SubProcess& __restrict process) noexcept {
+    assert(this != &process && "[Error]: Self swap is likely a bug");
+    task.swap(process.task);
+    std::swap(pid, process.pid);
+    std::swap(nice_incr, process.nice_incr);
 }
 
 #endif

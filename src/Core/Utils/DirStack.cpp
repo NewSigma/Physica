@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,74 +16,74 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <cstring>
-#include <cassert>
-#include <stdexcept>
 #include "Physica/Core/Utils/DirStack.h"
+#include <cassert>
+#include <cstring>
+#include <stdexcept>
 
-namespace Physica {
-    DirStack::DirStack(const char* path) {
-        char ch = path[0];
-        if (ch != '/')
-            throw std::invalid_argument("Path must start with '/'\n");
-        size_t count = 1;
-        size_t dirStart = 1;
-        size_t dirEnd = 1;
-        do {
-            if (ch == '/') {
-                if (dirStart == dirEnd)
-                    goto ignore;
-                cutPath(path, dirStart, dirEnd);
-                dirStart = ++dirEnd;
-            }
-            else {
-                ++dirEnd;
-            }
-        ignore:
-            ch = path[count++];
-        } while(ch != '\0');
+using namespace Physica;
 
-        if (dirStart != dirEnd)
+DirStack::DirStack(const char* path) {
+    char ch = path[0];
+    if (ch != '/')
+        throw std::invalid_argument("Path must start with '/'\n");
+    size_t count = 1;
+    size_t dirStart = 1;
+    size_t dirEnd = 1;
+    do {
+        if (ch == '/') {
+            if (dirStart == dirEnd)
+                goto ignore;
             cutPath(path, dirStart, dirEnd);
-    }
-
-    DirStack::~DirStack() {
-        for (auto dir : dirs)
-            delete[] dir;
-    }
-
-    void DirStack::push(const char* dir) {
-        const size_t length = strlen(dir);
-        char* copy = new char[length + 1];
-        memcpy(copy, dir, length + 1);
-        dirs.push_back(copy);
-    }
-
-    std::unique_ptr<const char[]> DirStack::pop() {
-        auto ite = dirs.crbegin();
-        const char* value = *ite;
-        dirs.pop_back();
-        return std::unique_ptr<const char[]>(value);
-    }
-    
-    std::string DirStack::toPath() const {
-        std::string result{};
-        for (const auto& dir : dirs) {
-            result.push_back('/');
-            result += dir;
+            dirStart = ++dirEnd;
         }
-        if (result.empty())
-            result.push_back('/');
-        return result;
-    }
+        else {
+            ++dirEnd;
+        }
+    ignore:
+        ch = path[count++];
+    } while (ch != '\0');
 
-    void DirStack::cutPath(const char* path, size_t startPos, size_t endPos) {
-        assert(startPos < endPos);
-        const size_t dirLength = endPos - startPos + 1;
-        auto* dir = new char[dirLength];
-        const size_t dirLength_1 = dirLength - 1;
-        memcpy(dir, path + startPos, dirLength_1);
-        dir[dirLength_1] = '\0';
-        dirs.push_back(dir);
+    if (dirStart != dirEnd)
+        cutPath(path, dirStart, dirEnd);
+}
+
+DirStack::~DirStack() {
+    for (auto dir : dirs)
+        delete[] dir;
+}
+
+void DirStack::push(const char* dir) {
+    const size_t length = strlen(dir);
+    char* copy = new char[length + 1];
+    memcpy(copy, dir, length + 1);
+    dirs.push_back(copy);
+}
+
+std::unique_ptr<const char[]> DirStack::pop() {
+    auto ite = dirs.crbegin();
+    const char* value = *ite;
+    dirs.pop_back();
+    return std::unique_ptr<const char[]>(value);
+}
+
+std::string DirStack::toPath() const {
+    std::string result{};
+    for (const auto& dir : dirs) {
+        result.push_back('/');
+        result += dir;
     }
+    if (result.empty())
+        result.push_back('/');
+    return result;
+}
+
+void DirStack::cutPath(const char* path, size_t startPos, size_t endPos) {
+    assert(startPos < endPos);
+    const size_t dirLength = endPos - startPos + 1;
+    auto* dir = new char[dirLength];
+    const size_t dirLength_1 = dirLength - 1;
+    memcpy(dir, path + startPos, dirLength_1);
+    dir[dirLength_1] = '\0';
+    dirs.push_back(dir);
 }

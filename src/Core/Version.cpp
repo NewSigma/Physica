@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,24 +25,23 @@
     #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #endif
 #include "Physica/Macro.h"
+#include "Physica/Core/Version.h"
 
-namespace Physica {
-    PHYSICA_API std::string version() {
-        std::ostringstream os{};
-        std::format_to(std::ostreambuf_iterator<char>(os), "Physica {}    Hash: {}\n", Version, GitHash);
-    #ifdef PHYSICA_MKL
-        constexpr int len = 198;
-        char buf[198];
-        mkl_get_version_string(buf, len);
-        std::format_to(std::ostreambuf_iterator<char>(os), "MKL: {}\n", buf);
-    #endif
-    #ifdef PHYSICA_CUDA
-        int driverVer, runtimeVer;
-        check(cudaDriverGetVersion(&driverVer));
-        check(cudaRuntimeGetVersion(&runtimeVer));
-        std::format_to(std::ostreambuf_iterator<char>(os), "CUDA driver : {}\n", driverVer);
-        std::format_to(std::ostreambuf_iterator<char>(os), "CUDA runtime: {}\n", runtimeVer);
-    #endif
-        return os.str();
-    }
+PHYSICA_API std::string Physica::version() {
+    std::ostringstream os{};
+    std::format_to(std::ostreambuf_iterator<char>(os), "Physica {}    Hash: {}\n", Version, GitHash);
+#ifdef PHYSICA_MKL
+    constexpr int len = 198;
+    char buf[198];
+    mkl_get_version_string(buf, len);
+    std::format_to(std::ostreambuf_iterator<char>(os), "MKL: {}\n", buf);
+#endif
+#ifdef PHYSICA_CUDA
+    int driverVer, runtimeVer;
+    check(cudaDriverGetVersion(&driverVer));
+    check(cudaRuntimeGetVersion(&runtimeVer));
+    std::format_to(std::ostreambuf_iterator<char>(os), "CUDA driver : {}\n", driverVer);
+    std::format_to(std::ostreambuf_iterator<char>(os), "CUDA runtime: {}\n", runtimeVer);
+#endif
+    return os.str();
 }

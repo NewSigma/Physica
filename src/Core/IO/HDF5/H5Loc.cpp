@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,15 +18,15 @@
  */
 #include "Physica/Core/IO/HDF5/HDF5.h"
 
-namespace Physica {
-    const H5Group H5Loc::openGroup(const char* name) const {
-        return getDerived().openGroup(name);
-    }
+using namespace Physica;
 
-    H5Group H5Loc::openGroup(const char* name) {
-        auto& loc = getDerived();
-        if (loc.exists(name))
-            return loc.openGroup(name);
-        return loc.createGroup(name, 0);
-    }
+const H5Group H5Loc::openGroup(const char* name) const {
+    return getDerived().openGroup(name);
+}
+
+H5Group H5Loc::openGroup(const char* name) {
+    auto& loc = getDerived();
+    if (loc.exists(name))
+        return loc.openGroup(name);
+    return loc.createGroup(name, 0);
 }

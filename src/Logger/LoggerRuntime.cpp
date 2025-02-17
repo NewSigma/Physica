@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,126 +16,126 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <cstring>
-#include <csignal>
-#include <unistd.h>
 #include "Physica/Logger/LoggerRuntime.h"
+#include <csignal>
+#include <cstring>
+#include <iostream>
+#include <unistd.h>
 #include "Physica/Logger/Logger/StdLogger.h"
 
-namespace Physica {
-    LogLevel LoggerRuntime::globalLevel = LogLevel::Info;
-    thread_local LogBuffer* LoggerRuntime::threadLogBuffer = nullptr;
+using namespace Physica;
 
-    LoggerRuntime::LoggerRuntime()
-            : timer()
-            , bufferList()
-            , bufferListMutex()
-            , processingBufferID(0)
-            , shouldExit(false) {
-        registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::clog)));
-        registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cout)));
-        registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cerr)));
-        //Init buffer for current thread or logThread will try to access a empty bufferList
-        std::ignore = getBuffer();
+LogLevel LoggerRuntime::globalLevel = LogLevel::Info;
+thread_local LogBuffer* LoggerRuntime::threadLogBuffer = nullptr;
 
-        logThread = std::thread(&LoggerRuntime::logThreadMain, this);
+LoggerRuntime::LoggerRuntime()
+        : timer()
+        , bufferList()
+        , bufferListMutex()
+        , processingBufferID(0)
+        , shouldExit(false) {
+    registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::clog)));
+    registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cout)));
+    registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cerr)));
+    // Init buffer for current thread or logThread will try to access a empty bufferList
+    std::ignore = getBuffer();
 
-        if (std::signal(SIGABRT, abort_handler) == SIG_ERR) {
-            Debug(STDERR_FILENO, "Implementation forbid us from handling SIGABRT");
-        }
+    logThread = std::thread(&LoggerRuntime::logThreadMain, this);
+
+    if (std::signal(SIGABRT, abort_handler) == SIG_ERR) {
+        Debug(STDERR_FILENO, "Implementation forbid us from handling SIGABRT");
     }
+}
 
-    LoggerRuntime::~LoggerRuntime() {
-        waitExit();
-        for (auto& logger : loggerList)
-            delete logger;
-        for (LogBuffer* buffer : bufferList)
-            delete buffer;
+LoggerRuntime::~LoggerRuntime() {
+    waitExit();
+    for (auto& logger : loggerList)
+        delete logger;
+    for (LogBuffer* buffer : bufferList)
+        delete buffer;
+}
+/**
+ * \param logger
+ * Pointer to a logger thar is allocated on heap.
+ *
+ * \return
+ * The id of the registered logger.
+ */
+size_t LoggerRuntime::registerLogger(std::unique_ptr<AbstractLogger>&& logger) {
+    auto nextID = loggerList.size();
+    loggerList.push_back(logger.release());
+    return nextID;
+}
+
+void LoggerRuntime::waitExit() noexcept {
+    loggerShouldExit();
+    if (logThread.joinable())
+        logThread.join();
+}
+
+RingBuffer& LoggerRuntime::getBuffer() {
+    if (shouldExit) [[unlikely]]
+        throw std::runtime_error("[Error]: Try to append log to closed LoggerRuntime");
+    if (threadLogBuffer == nullptr) {
+        threadLogBuffer = new LogBuffer(DefaultBufferSize);
+        std::unique_lock<std::mutex> lock(bufferListMutex);
+        bufferList.push_back(threadLogBuffer);
     }
-    /**
-     * \param logger
-     * Pointer to a logger thar is allocated on heap.
-     *
-     * \return
-     * The id of the registered logger.
-     */
-    size_t LoggerRuntime::registerLogger(std::unique_ptr<AbstractLogger>&& logger) {
-        auto nextID = loggerList.size();
-        loggerList.push_back(logger.release());
-        return nextID;
-    }
+    return *threadLogBuffer;
+}
 
-    void LoggerRuntime::waitExit() noexcept {
-        loggerShouldExit();
-        if (logThread.joinable())
-            logThread.join();
-    }
+LoggerRuntime& LoggerRuntime::getInstance() noexcept {
+    static LoggerRuntime runtime{};
+    return runtime;
+}
 
-    RingBuffer& LoggerRuntime::getBuffer() {
-        if (shouldExit) [[unlikely]]
-            throw std::runtime_error("[Error]: Try to append log to closed LoggerRuntime");
-        if (threadLogBuffer == nullptr) {
-            threadLogBuffer = new LogBuffer(DefaultBufferSize);
-            std::unique_lock<std::mutex> lock(bufferListMutex);
-            bufferList.push_back(threadLogBuffer);
-        }
-        return *threadLogBuffer;
-    }
+void LoggerRuntime::logThreadMain() {
+    // Format [11:49:23] [Physica:12|Info]: This is a log.
+    using namespace std::chrono_literals;
 
-    LoggerRuntime& LoggerRuntime::getInstance() noexcept {
-        static LoggerRuntime runtime{};
-        return runtime;
-    }
-
-    void LoggerRuntime::logThreadMain() {
-        //Format [11:49:23] [Physica:12|Info]: This is a log.
-        using namespace std::chrono_literals;
-        
-        while (!shouldExit || (processingBufferID >= 0)) {
-            while (processingBufferID < 0) {
-                if(shouldExit)
-                    return;
-                std::this_thread::sleep_for(1s);
-                findNextBufferToLog();
-            }
-
-            bufferListMutex.lock();
-            LogBuffer& buffer = *bufferList[processingBufferID];
-            bufferListMutex.unlock();
-
-            while (!buffer.isEmpty()) {
-                size_t loggerID;
-                buffer.read(&loggerID);
-                loggerList[loggerID]->log(buffer);
-            }
+    while (!shouldExit || (processingBufferID >= 0)) {
+        while (processingBufferID < 0) {
+            if (shouldExit)
+                return;
+            std::this_thread::sleep_for(1s);
             findNextBufferToLog();
         }
-    }
 
-    void LoggerRuntime::findNextBufferToLog() noexcept {
-        std::unique_lock<std::mutex> lock(bufferListMutex);
-        std::vector<LogBuffer*> newBufferList{};
-        newBufferList.reserve(bufferList.size());
-        for (auto ite = bufferList.begin(); ite != bufferList.end(); ++ite) {
-            auto buffer = *ite;
-            if (!(buffer->isEmpty() && buffer->getShouldDelete()))
-                newBufferList.push_back(buffer);
+        bufferListMutex.lock();
+        LogBuffer& buffer = *bufferList[processingBufferID];
+        bufferListMutex.unlock();
+
+        while (!buffer.isEmpty()) {
+            size_t loggerID;
+            buffer.read(&loggerID);
+            loggerList[loggerID]->log(buffer);
         }
-        bufferList.swap(newBufferList);
-
-        const size_t size = bufferList.size();
-        for (size_t i = 0; i < size; ++i) {
-            processingBufferID = static_cast<int>((processingBufferID + 1) % size);
-            auto* buffer = bufferList[processingBufferID];
-            if (!buffer->isEmpty())
-                return;
-        }
-        processingBufferID = -1;
+        findNextBufferToLog();
     }
+}
 
-    void LoggerRuntime::abort_handler(int) noexcept {
-        getInstance().~LoggerRuntime();
-        std::_Exit(EXIT_FAILURE);
+void LoggerRuntime::findNextBufferToLog() noexcept {
+    std::unique_lock<std::mutex> lock(bufferListMutex);
+    std::vector<LogBuffer*> newBufferList{};
+    newBufferList.reserve(bufferList.size());
+    for (auto ite = bufferList.begin(); ite != bufferList.end(); ++ite) {
+        auto buffer = *ite;
+        if (!(buffer->isEmpty() && buffer->getShouldDelete()))
+            newBufferList.push_back(buffer);
     }
+    bufferList.swap(newBufferList);
+
+    const size_t size = bufferList.size();
+    for (size_t i = 0; i < size; ++i) {
+        processingBufferID = static_cast<int>((processingBufferID + 1) % size);
+        auto* buffer = bufferList[processingBufferID];
+        if (!buffer->isEmpty())
+            return;
+    }
+    processingBufferID = -1;
+}
+
+void LoggerRuntime::abort_handler(int) noexcept {
+    getInstance().~LoggerRuntime();
+    std::_Exit(EXIT_FAILURE);
 }

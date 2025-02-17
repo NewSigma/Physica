@@ -23,72 +23,68 @@
 #include "Physica/Python/LLVM/ASTCursor.h"
 #include "Physica/Python/LLVM/LLVM.h"
 
-namespace Physica {
-    constinit static PhysicaPython* instance = nullptr;
+using namespace Physica;
+constinit static PhysicaPython* instance = nullptr;
 
-    PhysicaPython::PhysicaPython(std::filesystem::path root_) : llvm(), clang(std::move(root_), llvm) {
-        using namespace llvm::orc;
+PhysicaPython::PhysicaPython(std::filesystem::path root_)
+        : llvm(), clang(std::move(root_), llvm) {
+    using namespace llvm::orc;
 
-        const auto& target = clang.getTarget();
-        JITTargetMachineBuilder tmBuilder(target.getTriple());
-        tmBuilder.addFeatures(target.getTargetOpts().Features);
-        LLJITBuilder jitBuilder{};
-        jitBuilder.setJITTargetMachineBuilder(std::move(tmBuilder));
-        jit = check(jitBuilder.create());
+    const auto& target = clang.getTarget();
+    JITTargetMachineBuilder tmBuilder(target.getTriple());
+    tmBuilder.addFeatures(target.getTargetOpts().Features);
+    LLJITBuilder jitBuilder{};
+    jitBuilder.setJITTargetMachineBuilder(std::move(tmBuilder));
+    jit = check(jitBuilder.create());
 
-        strTypeMap["NoneType"] = CXXType(ffi_type_void);
-        strTypeMap["float"] = CXXType(ffi_type_float);
-        strTypeMap["double"] = CXXType(ffi_type_double);
-    }
+    strTypeMap["NoneType"] = CXXType(ffi_type_void);
+    strTypeMap["float"] = CXXType(ffi_type_float);
+    strTypeMap["double"] = CXXType(ffi_type_double);
+}
 
-    void PhysicaPython::compile(const char* moduleName) {
-        auto& unit = clang.compile(moduleName);
-        auto& jit = getJIT();
-        check(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), llvm.getThreadSafeContext())));
-    }
+void PhysicaPython::compile(const char* moduleName) {
+    auto& unit = clang.compile(moduleName);
+    auto& jit = getJIT();
+    check(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), llvm.getThreadSafeContext())));
+}
 
-    PhysicaPython& PhysicaPython::getInstance() noexcept {
-        return *instance;
-    }
+PhysicaPython& PhysicaPython::getInstance() noexcept {
+    return *instance;
 }
 
 void pymain(py::module_& m);
 
 PYBIND11_MODULE(PhysicaPython, m) {
-    using namespace Physica;
-
     m.doc() = "Backend of Physica Python interface";
     py::register_exception<Physica::LLVMException>(m, "LLVMException");
 
     py::class_<CXXPtr>(m, "CXXPtr")
-        .def("__repr__", &CXXPtr::toString);
+            .def("__repr__", &CXXPtr::toString);
 
     py::class_<CXXObj>(m, "CXXObj")
-        .def(py::init<CXXPtr, py::args>())
-        .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
-        .def("construct", &CXXObj::construct)
-        .def("call", &CXXObj::call, py::return_value_policy::move);
-    
+            .def(py::init<CXXPtr, py::args>())
+            .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
+            .def("construct", &CXXObj::construct)
+            .def("call", &CXXObj::call, py::return_value_policy::move);
+
     py::class_<ASTCursor>(m, "ASTCursor")
-        .def(py::init([]() {
-            return ASTCursor(PhysicaPython::getInstance().getClang().getASTContext());
-        }))
-        .def("__repr__", &ASTCursor::toString)
-        .def("pop", &ASTCursor::pop)
-        .def("ls", &ASTCursor::ls)
-        .def("cd", &ASTCursor::cd)
-        .def("dump", &ASTCursor::dump)
-        .def("reset", &ASTCursor::reset)
-        .def("size", &ASTCursor::size);
+            .def(py::init([]() {
+                return ASTCursor(PhysicaPython::getInstance().getClang().getASTContext());
+            }))
+            .def("__repr__", &ASTCursor::toString)
+            .def("pop", &ASTCursor::pop)
+            .def("ls", &ASTCursor::ls)
+            .def("cd", &ASTCursor::cd)
+            .def("dump", &ASTCursor::dump)
+            .def("reset", &ASTCursor::reset)
+            .def("size", &ASTCursor::size);
 
     m.def("init", [](std::string root) {
         if (instance == nullptr)
             instance = new PhysicaPython(root);
     });
 
-    m.def("include", [](const char* includeName) -> CXXPtr {
-        return (void*)PhysicaPython::getInstance().getClang().include(includeName);
-    }, py::return_value_policy::move);
+    m.def("include", [](const char* includeName) -> CXXPtr { return (void*)PhysicaPython::getInstance().getClang().include(includeName); }, py::return_value_policy::move);
 
     m.def("compile", [](const char* moduleName) {
         PhysicaPython::getInstance().compile(moduleName);

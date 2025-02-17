@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,38 +19,39 @@
 #include "Physica/Python/CXXType.h"
 #include "Physica/Python/PhysicaPython.h"
 
-namespace Physica {
-    CXXType::CXXType(clang::CXXRecordDecl* pDecl_) : pDecl(pDecl_) {
-        assert(pDecl != nullptr && "[Error]: Invalid param");
-        auto& pp = PhysicaPython::getInstance();
-        const auto& ctx = pp.getClang().getASTContext();
-        const auto type = ctx.getRecordType(pDecl);
-        ffiType.size = ctx.getTypeSize(type);
-        ffiType.alignment = ctx.getTypeAlign(type);
-    }
+using namespace Physica;
 
-    CXXType::CXXType(ffi_type ffiType_) : pDecl(nullptr), ffiType(ffiType_) {}
+CXXType::CXXType(clang::CXXRecordDecl* pDecl_) : pDecl(pDecl_) {
+    assert(pDecl != nullptr && "[Error]: Invalid param");
+    auto& pp = PhysicaPython::getInstance();
+    const auto& ctx = pp.getClang().getASTContext();
+    const auto type = ctx.getRecordType(pDecl);
+    ffiType.size = ctx.getTypeSize(type);
+    ffiType.alignment = ctx.getTypeAlign(type);
+}
 
-    py::object CXXType::toPython(void* data) const {
-        switch (ffiType.type) {
-        case FFI_TYPE_VOID:
-            return py::none();
-        case FFI_TYPE_FLOAT:
-            return py::float_(*reinterpret_cast<float*>(data));
-        case FFI_TYPE_DOUBLE:
-            return py::float_(*reinterpret_cast<double*>(data));
-        default:
-            throw std::runtime_error("[Error]: Unknown type");
-        }
-    }
+CXXType::CXXType(ffi_type ffiType_)
+        : pDecl(nullptr), ffiType(ffiType_) {}
 
-    auto CXXType::allocate() const noexcept -> Ptr {
-        return Ptr(std::aligned_alloc(getAlign(), getSize()));
+py::object CXXType::toPython(void* data) const {
+    switch (ffiType.type) {
+    case FFI_TYPE_VOID:
+        return py::none();
+    case FFI_TYPE_FLOAT:
+        return py::float_(*reinterpret_cast<float*>(data));
+    case FFI_TYPE_DOUBLE:
+        return py::float_(*reinterpret_cast<double*>(data));
+    default:
+        throw std::runtime_error("[Error]: Unknown type");
     }
+}
 
-    void CXXType::swap(CXXType& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(pDecl, obj.pDecl);
-        std::swap(ffiType, obj.ffiType);
-    }
+auto CXXType::allocate() const noexcept -> Ptr {
+    return Ptr(std::aligned_alloc(getAlign(), getSize()));
+}
+
+void CXXType::swap(CXXType& __restrict obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    std::swap(pDecl, obj.pDecl);
+    std::swap(ffiType, obj.ffiType);
 }

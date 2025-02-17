@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,35 +19,35 @@
 #include <QtGui/QGuiApplication>
 #include "Physica/Gui/Plot/Plot3D.h"
 
-namespace Physica {
-    Plot3D::Plot3D(QWidget* parent)
-            : QWidget(parent)
-            , vLayout(new QVBoxLayout())
-            , surface(new Q3DSurface()) {
-        if (parent == nullptr) {
-            QRect primaryScreenRec = QGuiApplication::primaryScreen()->geometry();
-            resize(primaryScreenRec.width() / 2, primaryScreenRec.height() / 1.6);
-        }
-        setAttribute(Qt::WA_DeleteOnClose);
-        setLayout(vLayout);
+using namespace Physica;
 
-        surface->activeTheme()->setType(Q3DTheme::ThemePrimaryColors);
-        surface->axisX()->setLabelAutoRotation(30);
-        surface->axisY()->setLabelAutoRotation(90);
-        surface->axisZ()->setLabelAutoRotation(30);
-
-        auto* widget = QWidget::createWindowContainer(surface, this);
-        widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        layout()->addWidget(widget);
+Plot3D::Plot3D(QWidget* parent)
+        : QWidget(parent)
+        , vLayout(new QVBoxLayout())
+        , surface(new Q3DSurface()) {
+    if (parent == nullptr) {
+        QRect primaryScreenRec = QGuiApplication::primaryScreen()->geometry();
+        resize(primaryScreenRec.width() / 2, primaryScreenRec.height() / 1.6);
     }
+    setAttribute(Qt::WA_DeleteOnClose);
+    setLayout(vLayout);
 
-    QLinearGradient Plot3D::makeDefaultGrad() {
-        QLinearGradient gr;
-        gr.setColorAt(0.0, Qt::blue);
-        gr.setColorAt(0.35, Qt::cyan);
-        gr.setColorAt(0.5, Qt::green);
-        gr.setColorAt(0.65, Qt::yellow);
-        gr.setColorAt(1.0, Qt::red);
-        return gr;
-    }
+    surface->activeTheme()->setType(Q3DTheme::ThemePrimaryColors);
+    surface->axisX()->setLabelAutoRotation(30);
+    surface->axisY()->setLabelAutoRotation(90);
+    surface->axisZ()->setLabelAutoRotation(30);
+
+    auto* widget = QWidget::createWindowContainer(surface, this);
+    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    layout()->addWidget(widget);
+}
+
+QLinearGradient Plot3D::makeDefaultGrad() {
+    QLinearGradient gr;
+    gr.setColorAt(0.0, Qt::blue);
+    gr.setColorAt(0.35, Qt::cyan);
+    gr.setColorAt(0.5, Qt::green);
+    gr.setColorAt(0.65, Qt::yellow);
+    gr.setColorAt(1.0, Qt::red);
+    return gr;
 }

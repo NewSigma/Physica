@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Calculus/PDE/FDM/FDM.h"
 
-namespace Physica {
-    const int FDMBase::iterateMax = 100;
-    const double FDMBase::precision = 0.01;
-}
+using namespace Physica;
+
+const int FDMBase::iterateMax = 100;
+const double FDMBase::precision = 0.01;

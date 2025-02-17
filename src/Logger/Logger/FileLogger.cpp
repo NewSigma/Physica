@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,34 +16,34 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <fcntl.h>
-#include <unistd.h>
 #include <cstring>
 #include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Logger/Logger/FileLogger.h"
 
-namespace Physica {
-    FileLogger::FileLogger(const char* filename, bool trunc)
-            : fd(open(filename, trunc ? (O_WRONLY | O_TRUNC | O_CREAT) : (O_WRONLY | O_APPEND | O_CREAT), S_IRUSR | S_IWUSR)) {
-        if (fd == -1)
-            throw IOException("[Error]: Failed to open file");
-    }
+using namespace Physica;
 
-    FileLogger::~FileLogger() {
-        close(fd);
-    }
+FileLogger::FileLogger(const char* filename, bool trunc)
+        : fd(open(filename, trunc ? (O_WRONLY | O_TRUNC | O_CREAT) : (O_WRONLY | O_APPEND | O_CREAT), S_IRUSR | S_IWUSR)) {
+    if (fd == -1)
+        throw IOException("[Error]: Failed to open file");
+}
 
-    void FileLogger::log(LogBuffer& buffer) {
-        const std::string msg = buffer.makeMsgString();
-        const char* c_str = msg.c_str();
-        if (write(fd, c_str, strlen(c_str)) == -1) {
-            std::cerr << "[Error]: Failed to write to log file\n";
-            exit(EXIT_FAILURE);
-        }
-        if (write(fd, "\n", 1) == -1) {
-            std::cerr << "[Error]: Failed to write to log file\n";
-            exit(EXIT_FAILURE);
-        }
+FileLogger::~FileLogger() {
+    close(fd);
+}
+
+void FileLogger::log(LogBuffer& buffer) {
+    const std::string msg = buffer.makeMsgString();
+    const char* c_str = msg.c_str();
+    if (write(fd, c_str, strlen(c_str)) == -1) {
+        std::cerr << "[Error]: Failed to write to log file\n";
+        exit(EXIT_FAILURE);
+    }
+    if (write(fd, "\n", 1) == -1) {
+        std::cerr << "[Error]: Failed to write to log file\n";
+        exit(EXIT_FAILURE);
     }
 }

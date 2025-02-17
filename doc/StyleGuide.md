@@ -29,6 +29,12 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 所有头文件应使用#pragma once以避免多重include，禁止使用#define
 
+## Scoping
+
+### namespace
+
+源文件中使用using namespace以避免缩进
+
 ## Class
 
 ### swap函数原型

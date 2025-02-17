@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,158 +21,158 @@
 
 using namespace Physica;
 
-namespace Physica {
-    Plot::Plot(QWidget* parent) : ChartView(parent), axisX(new QValueAxis()), axisY(new QValueAxis()), axisTop(new QValueAxis()), axisRight(new QValueAxis()) {
-        setAttribute(Qt::WA_DeleteOnClose);
+Plot::Plot(QWidget* parent)
+        : ChartView(parent), axisX(new QValueAxis()), axisY(new QValueAxis()), axisTop(new QValueAxis()), axisRight(new QValueAxis()) {
+    setAttribute(Qt::WA_DeleteOnClose);
 
-        setChart(new QChart());
-        setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
-        setBackgroundRole(QPalette::Light);
+    setChart(new QChart());
+    setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
+    setBackgroundRole(QPalette::Light);
 
-        auto& legend = getLegend();
-        legend.setAlignment(Qt::AlignTop);
-        legend.setMarkerShape(QLegend::MarkerShapeFromSeries);
-        legend.hide();
+    auto& legend = getLegend();
+    legend.setAlignment(Qt::AlignTop);
+    legend.setMarkerShape(QLegend::MarkerShapeFromSeries);
+    legend.hide();
 
-        auto& chart = *Base::getChart();
-        chart.setBackgroundVisible(false);
-        chart.setMargins(QMargins{});
-        {
-            axisX->setTickAnchor(0);
-            axisX->setTickType(QValueAxis::TicksDynamic);
-            axisX->setGridLineVisible(false);
-            axisX->setMinorGridLineVisible(false);
-            axisX->setLinePenColor(Qt::black);
+    auto& chart = *Base::getChart();
+    chart.setBackgroundVisible(false);
+    chart.setMargins(QMargins{});
+    {
+        axisX->setTickAnchor(0);
+        axisX->setTickType(QValueAxis::TicksDynamic);
+        axisX->setGridLineVisible(false);
+        axisX->setMinorGridLineVisible(false);
+        axisX->setLinePenColor(Qt::black);
 
-            axisY->setTickAnchor(0);
-            axisY->setTickType(QValueAxis::TicksDynamic);
-            axisY->setGridLineVisible(false);
-            axisY->setMinorGridLineVisible(false);
-            axisY->setLinePenColor(Qt::black);
+        axisY->setTickAnchor(0);
+        axisY->setTickType(QValueAxis::TicksDynamic);
+        axisY->setGridLineVisible(false);
+        axisY->setMinorGridLineVisible(false);
+        axisY->setLinePenColor(Qt::black);
 
-            axisTop->setTickAnchor(0);
-            axisTop->setTickType(QValueAxis::TicksDynamic);
-            axisTop->setLabelsVisible(false);
-            axisTop->setGridLineVisible(false);
-            axisTop->setMinorGridLineVisible(false);
-            axisTop->setLinePenColor(Qt::black);
+        axisTop->setTickAnchor(0);
+        axisTop->setTickType(QValueAxis::TicksDynamic);
+        axisTop->setLabelsVisible(false);
+        axisTop->setGridLineVisible(false);
+        axisTop->setMinorGridLineVisible(false);
+        axisTop->setLinePenColor(Qt::black);
 
-            axisRight->setTickAnchor(0);
-            axisRight->setTickType(QValueAxis::TicksDynamic);
-            axisRight->setLabelsVisible(false);
-            axisRight->setGridLineVisible(false);
-            axisRight->setMinorGridLineVisible(false);
-            axisRight->setLinePenColor(Qt::black);
+        axisRight->setTickAnchor(0);
+        axisRight->setTickType(QValueAxis::TicksDynamic);
+        axisRight->setLabelsVisible(false);
+        axisRight->setGridLineVisible(false);
+        axisRight->setMinorGridLineVisible(false);
+        axisRight->setLinePenColor(Qt::black);
 
-            setTickDirection(QAbstractAxis::Inner);
-            chart.addAxis(axisX, Qt::AlignBottom);
-            chart.addAxis(axisY, Qt::AlignLeft);
-            chart.addAxis(axisTop, Qt::AlignTop);
-            chart.addAxis(axisRight, Qt::AlignRight);
-        }
-
-        QFont font{};
-        font.setPointSize(15);
-        setFont(font);
+        setTickDirection(QAbstractAxis::Inner);
+        chart.addAxis(axisX, Qt::AlignBottom);
+        chart.addAxis(axisY, Qt::AlignLeft);
+        chart.addAxis(axisTop, Qt::AlignTop);
+        chart.addAxis(axisRight, Qt::AlignRight);
     }
 
-    Plot::Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent) : Plot(parent) {
-        setBox(minX, maxX, minY, maxY, deltaX, deltaY);
-    }
+    QFont font{};
+    font.setPointSize(15);
+    setFont(font);
+}
 
-    QScatterSeries& Plot::label(double x, double y, QString text) {
-        using Vec = Vector1D<float64>;
-        auto& result = scatter(Vec{x}, Vec{y});
-        result.setPointLabelsVisible(true);
-        result.setPointLabelsFormat(QPointLabelFormat(std::move(text)));
-        result.setMarkerSize(0);
-        return result;
-    }
+Plot::Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent)
+        : Plot(parent) {
+    setBox(minX, maxX, minY, maxY, deltaX, deltaY);
+}
 
-    QImage Plot::toImage(int width, int height) {
-        auto image = QImage(QSize(width, height), QImage::Format_ARGB32);
+QScatterSeries& Plot::label(double x, double y, QString text) {
+    using Vec = Vector1D<float64>;
+    auto& result = scatter(Vec{x}, Vec{y});
+    result.setPointLabelsVisible(true);
+    result.setPointLabelsFormat(QPointLabelFormat(std::move(text)));
+    result.setMarkerSize(0);
+    return result;
+}
 
-        QPainter painter{};
-        painter.begin(&image);
-        painter.setRenderHints(renderHints());
-        painter.fillRect(image.rect(), Qt::white);
+QImage Plot::toImage(int width, int height) {
+    auto image = QImage(QSize(width, height), QImage::Format_ARGB32);
 
-        auto& chart = *getChart();
-        const auto size1 = image.size() * 0.99;
-        chart.setMinimumSize(size1);
-        chart.setMaximumSize(size1);
+    QPainter painter{};
+    painter.begin(&image);
+    painter.setRenderHints(renderHints());
+    painter.fillRect(image.rect(), Qt::white);
 
-        render(&painter, image.rect(), chart.rect().toRect());
-        painter.end();
+    auto& chart = *getChart();
+    const auto size1 = image.size() * 0.99;
+    chart.setMinimumSize(size1);
+    chart.setMaximumSize(size1);
 
-        chart.setMaximumSize(0, 0);
-        chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-        return image;
-    }
+    render(&painter, image.rect(), chart.rect().toRect());
+    painter.end();
 
-    void Plot::toSvg(const char* path, int width, int height, int resolution) {
-        QSvgGenerator gen{};
-        gen.setFileName(path);
-        gen.setTitle("SVG Plot");
-        gen.setDescription("Created by Physica(https://gitee.com/newsigma/Physica)");
-        gen.setSize(QSize(width, height));
-        gen.setViewBox(QRectF(QPointF{}, gen.size()));
-        if (resolution > 0)
-            gen.setResolution(resolution);
+    chart.setMaximumSize(0, 0);
+    chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+    return image;
+}
 
-        QPainter painter{};
-        painter.begin(&gen);
-        painter.setRenderHints(renderHints());
-        painter.fillRect(gen.viewBox(), Qt::white);
+void Plot::toSvg(const char* path, int width, int height, int resolution) {
+    QSvgGenerator gen{};
+    gen.setFileName(path);
+    gen.setTitle("SVG Plot");
+    gen.setDescription("Created by Physica(https://gitee.com/newsigma/Physica)");
+    gen.setSize(QSize(width, height));
+    gen.setViewBox(QRectF(QPointF{}, gen.size()));
+    if (resolution > 0)
+        gen.setResolution(resolution);
 
-        auto& chart = *getChart();
-        const auto size1 = gen.size() * 0.99;
-        chart.setMinimumSize(size1);
-        chart.setMaximumSize(size1);
+    QPainter painter{};
+    painter.begin(&gen);
+    painter.setRenderHints(renderHints());
+    painter.fillRect(gen.viewBox(), Qt::white);
 
-        render(&painter);
-        painter.end();
+    auto& chart = *getChart();
+    const auto size1 = gen.size() * 0.99;
+    chart.setMinimumSize(size1);
+    chart.setMaximumSize(size1);
 
-        chart.setMaximumSize(0, 0);
-        chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-    }
+    render(&painter);
+    painter.end();
 
-    void Plot::setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY) {
-        axisX->setTickInterval(deltaX);
-        axisX->setRange(minX, maxX);
-        axisY->setTickInterval(deltaY);
-        axisY->setRange(minY, maxY);
-        axisTop->setTickInterval(deltaX);
-        axisTop->setRange(minX, maxX);
-        axisRight->setTickInterval(deltaY);
-        axisRight->setRange(minY, maxY);
-    }
+    chart.setMaximumSize(0, 0);
+    chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+}
 
-    void Plot::setTickDirection(QAbstractAxis::TickDirection d) {
-        axisX->setTickDirection(d);
-        axisY->setTickDirection(d);
-        axisTop->setTickDirection(d);
-        axisRight->setTickDirection(d);
-    }
+void Plot::setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY) {
+    axisX->setTickInterval(deltaX);
+    axisX->setRange(minX, maxX);
+    axisY->setTickInterval(deltaY);
+    axisY->setRange(minY, maxY);
+    axisTop->setTickInterval(deltaX);
+    axisTop->setRange(minX, maxX);
+    axisRight->setTickInterval(deltaY);
+    axisRight->setRange(minY, maxY);
+}
 
-    void Plot::setFont(QFont font) {
-        Base::setFont(font);
-        getLegend().setFont(font);
-        getChart()->setTitleFont(font);
+void Plot::setTickDirection(QAbstractAxis::TickDirection d) {
+    axisX->setTickDirection(d);
+    axisY->setTickDirection(d);
+    axisTop->setTickDirection(d);
+    axisRight->setTickDirection(d);
+}
 
-        axisX->setLabelsFont(font);
-        axisX->setTitleFont(font);
-        axisY->setLabelsFont(font);
-        axisY->setTitleFont(font);
-        axisTop->setLabelsFont(font);
-        axisTop->setTitleFont(font);
-        axisRight->setLabelsFont(font);
-        axisRight->setTitleFont(font);
-    }
+void Plot::setFont(QFont font) {
+    Base::setFont(font);
+    getLegend().setFont(font);
+    getChart()->setTitleFont(font);
 
-    void Plot::setFontSize(int size) {
-        auto f = Base::font();
-        f.setPointSize(size);
-        setFont(f);
-    }
+    axisX->setLabelsFont(font);
+    axisX->setTitleFont(font);
+    axisY->setLabelsFont(font);
+    axisY->setTitleFont(font);
+    axisTop->setLabelsFont(font);
+    axisTop->setTitleFont(font);
+    axisRight->setLabelsFont(font);
+    axisRight->setTitleFont(font);
+}
+
+void Plot::setFontSize(int size) {
+    auto f = Base::font();
+    f.setPointSize(size);
+    setFont(f);
 }

@@ -19,80 +19,80 @@
 #include <format>
 #include "Physica/Python/LLVM/ASTCursor.h"
 
-namespace Physica {
-    ASTCursor::ASTCursor(clang::ASTContext& ctx) {
-        push(ctx.getTranslationUnitDecl());
-    }
+using namespace Physica;
 
-    std::string ASTCursor::toString() const {
-        return formatDecl(astStack.top());
-    }
+ASTCursor::ASTCursor(clang::ASTContext& ctx) {
+    push(ctx.getTranslationUnitDecl());
+}
 
-    void ASTCursor::push(const DeclContext* decl) {
-        astStack.push(decl);
-        traverse();
-    }
+std::string ASTCursor::toString() const {
+    return formatDecl(astStack.top());
+}
 
-    void ASTCursor::pop() {
-        if (astStack.size() == 1)
-            return;
-        astStack.pop();
-        traverse();
-    }
+void ASTCursor::push(const DeclContext* decl) {
+    astStack.push(decl);
+    traverse();
+}
 
-    void ASTCursor::ls() const {
-        for (size_t i = 0; i < childs.getLength(); ++i) {
-            llvm::outs() << i << '\t';
+void ASTCursor::pop() {
+    if (astStack.size() == 1)
+        return;
+    astStack.pop();
+    traverse();
+}
 
-            const auto* decl = childs[i];
-            if (llvm::isa<DeclContext>(decl)) {
-                const auto* p = llvm::cast<DeclContext>(decl);
-                llvm::outs() << std::format("+ {}\n", formatDecl(p));
-            }
-            else
-                decl->dump();
-        }
-    }
+void ASTCursor::ls() const {
+    for (size_t i = 0; i < childs.getLength(); ++i) {
+        llvm::outs() << i << '\t';
 
-    std::string ASTCursor::cd(size_t index) {
-        if (!(index < size()))
-            throw std::out_of_range("[Error]: Invalid child");
-
-        const auto* decl = childs[index];
-        if (!llvm::isa<DeclContext>(decl))
-            throw std::invalid_argument("[Error]: This is not a DeclContext");
-        push(llvm::cast<DeclContext>(decl));
-        return toString();
-    }
-
-    void ASTCursor::dump() const {
-        astStack.top()->dumpAsDecl();
-    }
-
-    void ASTCursor::reset() {
-        while (astStack.size() > 1)
-            astStack.pop();
-        traverse();
-    }
-
-    void ASTCursor::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        astStack.swap(obj.astStack);
-        childs.swap(obj.childs);
-    }
-
-    void ASTCursor::traverse() {
-        childs.clear();
-        for (const auto* decl : astStack.top()->decls())
-            childs.append(decl);
-    }
-
-    std::string ASTCursor::formatDecl(const DeclContext* decls) {
-        if (llvm::isa<clang::NamedDecl>(decls)) {
-            const auto* p = llvm::cast<clang::NamedDecl>(decls);
-            return std::format("{}({})", p->getNameAsString(), p->getDeclKindName());
+        const auto* decl = childs[i];
+        if (llvm::isa<DeclContext>(decl)) {
+            const auto* p = llvm::cast<DeclContext>(decl);
+            llvm::outs() << std::format("+ {}\n", formatDecl(p));
         }
         else
-            return std::format("{}", decls->getDeclKindName());
+            decl->dump();
     }
+}
+
+std::string ASTCursor::cd(size_t index) {
+    if (!(index < size()))
+        throw std::out_of_range("[Error]: Invalid child");
+
+    const auto* decl = childs[index];
+    if (!llvm::isa<DeclContext>(decl))
+        throw std::invalid_argument("[Error]: This is not a DeclContext");
+    push(llvm::cast<DeclContext>(decl));
+    return toString();
+}
+
+void ASTCursor::dump() const {
+    astStack.top()->dumpAsDecl();
+}
+
+void ASTCursor::reset() {
+    while (astStack.size() > 1)
+        astStack.pop();
+    traverse();
+}
+
+void ASTCursor::swap(This& __restrict obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    astStack.swap(obj.astStack);
+    childs.swap(obj.childs);
+}
+
+void ASTCursor::traverse() {
+    childs.clear();
+    for (const auto* decl : astStack.top()->decls())
+        childs.append(decl);
+}
+
+std::string ASTCursor::formatDecl(const DeclContext* decls) {
+    if (llvm::isa<clang::NamedDecl>(decls)) {
+        const auto* p = llvm::cast<clang::NamedDecl>(decls);
+        return std::format("{}({})", p->getNameAsString(), p->getDeclKindName());
+    }
+    else
+        return std::format("{}", decls->getDeclKindName());
 }

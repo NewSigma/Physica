@@ -21,13 +21,13 @@
 #include "Physica/Core/Exception/MPIException.h"
 #include <mpi/mpi.h>
 
-namespace Physica {
-    std::string MPIException::Impl::message(int err) const {
-        char buffer[MPI_MAX_ERROR_STRING];
-        int resultlen;
-        MPI_Error_string(err, buffer, &resultlen);
-        return buffer;
-    }
+using namespace Physica;
+
+std::string MPIException::Impl::message(int err) const {
+    char buffer[MPI_MAX_ERROR_STRING];
+    int resultlen;
+    MPI_Error_string(err, buffer, &resultlen);
+    return buffer;
 }
 
 #endif

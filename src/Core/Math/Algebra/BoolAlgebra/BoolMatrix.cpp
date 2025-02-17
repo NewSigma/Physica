@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,80 +18,82 @@
  */
 #include "Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h"
 
-namespace Physica {
-    BoolMatrix::BoolMatrix(size_t col, size_t row) : arr(row, BitArray(col)) {
-        assert(col > 0 && row > 0);
-    }
+using namespace Physica;
 
-    BoolMatrix::BoolMatrix(size_t col, size_t row, bool initial) : arr(row, BitArray(col, initial)) {
-        assert(col > 0 && row > 0);
-    }
-    /*!
-     * Return the multiple of two @class BoolMatrix: A(m * k) and B(k * n).
-     *
-     * Complexity: O(m * k * n)  possible to optimize.
-     */
-    BoolMatrix BoolMatrix::operator*(const BoolMatrix& m) const {
-        const size_t c1 = getCol();
-        const size_t r1 = getRow();
-        const size_t c2 = m.getCol();
-        assert(c1 == m.getRow());
+BoolMatrix::BoolMatrix(size_t col, size_t row)
+        : arr(row, BitArray(col)) {
+    assert(col > 0 && row > 0);
+}
 
-        Array<BitArray> array{};
-        array.reserve(r1);
-        for(size_t i = 0; i < r1; ++i) {
-            BitArray row_i(c2);
-            for(size_t j = 0; j < c2; ++j) {
-                bool bit = false;
-                for(size_t k = 0; k < c1; ++k) {
-                    if((*this)[i][k] && m[k][j]) {
-                        bit = true;
-                        break;
-                    }
+BoolMatrix::BoolMatrix(size_t col, size_t row, bool initial)
+        : arr(row, BitArray(col, initial)) {
+    assert(col > 0 && row > 0);
+}
+/*!
+ * Return the multiple of two @class BoolMatrix: A(m * k) and B(k * n).
+ *
+ * Complexity: O(m * k * n)  possible to optimize.
+ */
+BoolMatrix BoolMatrix::operator*(const BoolMatrix& m) const {
+    const size_t c1 = getCol();
+    const size_t r1 = getRow();
+    const size_t c2 = m.getCol();
+    assert(c1 == m.getRow());
+
+    Array<BitArray> array{};
+    array.reserve(r1);
+    for (size_t i = 0; i < r1; ++i) {
+        BitArray row_i(c2);
+        for (size_t j = 0; j < c2; ++j) {
+            bool bit = false;
+            for (size_t k = 0; k < c1; ++k) {
+                if ((*this)[i][k] && m[k][j]) {
+                    bit = true;
+                    break;
                 }
-                row_i.setBit(j, bit);
             }
-            array.get_allocator().construct(array.data() + i, std::move(row_i));
+            row_i.setBit(j, bit);
         }
-        array.setLength(r1);
-        return BoolMatrix(std::move(array));
+        array.get_allocator().construct(array.data() + i, std::move(row_i));
     }
-    /*!
-     * Complexity: O(row)
-     */
-    BoolMatrix BoolMatrix::operator&(const BoolMatrix& m) const {
-        assert(hasSameSize(m));
-        const size_t row = getRow();
-        Array<BitArray> array{};
-        array.reserve(row);
-        for(size_t s = 0; s < row; ++s)
-            array.get_allocator().construct(array.data() + s, arr[s] & m.arr[s]);
-        array.setLength(row);
-        return BoolMatrix(std::move(array));
-    }
-    /*!
-     * Complexity: O(row)
-     */
-    BoolMatrix BoolMatrix::operator|(const BoolMatrix& m) const {
-        assert(hasSameSize(m));
-        const size_t row = getRow();
-        Array<BitArray> array{};
-        array.reserve(row);
-        for(size_t s = 0; s < row; ++s)
-            array.get_allocator().construct(array.data() + s, arr[s] | m.arr[s]);
-        array.setLength(row);
-        return BoolMatrix(std::move(array));
-    }
-    /*!
-     * Complexity: O(row)
-     */
-    BoolMatrix BoolMatrix::operator~() const {
-        const size_t row = getRow();
-        Array<BitArray> array{};
-        array.reserve(row);
-        for(size_t s = 0; s < row; ++s)
-            array.get_allocator().construct(array.data() + s, ~(arr[s]));
-        array.setLength(row);
-        return BoolMatrix(std::move(array));
-    }
+    array.setLength(r1);
+    return BoolMatrix(std::move(array));
+}
+/*!
+ * Complexity: O(row)
+ */
+BoolMatrix BoolMatrix::operator&(const BoolMatrix& m) const {
+    assert(hasSameSize(m));
+    const size_t row = getRow();
+    Array<BitArray> array{};
+    array.reserve(row);
+    for (size_t s = 0; s < row; ++s)
+        array.get_allocator().construct(array.data() + s, arr[s] & m.arr[s]);
+    array.setLength(row);
+    return BoolMatrix(std::move(array));
+}
+/*!
+ * Complexity: O(row)
+ */
+BoolMatrix BoolMatrix::operator|(const BoolMatrix& m) const {
+    assert(hasSameSize(m));
+    const size_t row = getRow();
+    Array<BitArray> array{};
+    array.reserve(row);
+    for (size_t s = 0; s < row; ++s)
+        array.get_allocator().construct(array.data() + s, arr[s] | m.arr[s]);
+    array.setLength(row);
+    return BoolMatrix(std::move(array));
+}
+/*!
+ * Complexity: O(row)
+ */
+BoolMatrix BoolMatrix::operator~() const {
+    const size_t row = getRow();
+    Array<BitArray> array{};
+    array.reserve(row);
+    for (size_t s = 0; s < row; ++s)
+        array.get_allocator().construct(array.data() + s, ~(arr[s]));
+    array.setLength(row);
+    return BoolMatrix(std::move(array));
 }
