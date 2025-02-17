@@ -31,6 +31,7 @@
 namespace Physica {
     template<class ScalarType> class ScalarPtr;
     template<class Derived> class ScalarBase;
+    template<class Derived> class SIMDBase;
 
     template<class T>
     struct IsScalarRef {
@@ -46,6 +47,9 @@ namespace Physica {
     concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
                   || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>
                   || IsScalarRef<std::remove_cvref_t<T>>::value;
+
+    template<class T>
+    concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
 
     enum ScalarOption {
         Float16 = 0,

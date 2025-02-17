@@ -36,20 +36,20 @@ namespace Physica {
 
         [[nodiscard]] ValueType calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
             if constexpr (isComplexV)
-                return sqrt(Base::getExpr().squaredNorms().template packet<AnyPacket>(index));
+                return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index));
             else
-                return abs(Base::getExpr().template packet<AnyPacket>(index));
+                return abs(Base::getExpr().template packet<Pack>(index));
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
             if constexpr (isComplexV)
-                return sqrt(Base::getExpr().squaredNorms().template packetPartial<AnyPacket>(index, count));
+                return sqrt(Base::getExpr().squaredNorms().template packetPartial<Pack>(index, count));
             else
-                return abs(Base::getExpr().template packetPartial<AnyPacket>(index, count));
+                return abs(Base::getExpr().template packetPartial<Pack>(index, count));
         }
 
         ScalarType max() const {

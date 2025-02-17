@@ -103,10 +103,10 @@ namespace Physica {
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] auto calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
-        template<class AnyPacket>
-        [[nodiscard]] inline AnyPacket packet(size_t index) const;
-        template<class AnyPacket>
-        [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
+        template<Packet Pack>
+        [[nodiscard]] inline Pack packet(size_t index) const;
+        template<Packet Pack>
+        [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
 
         [[nodiscard]] inline auto format() const;
         [[nodiscard]] auto transpose() const noexcept;

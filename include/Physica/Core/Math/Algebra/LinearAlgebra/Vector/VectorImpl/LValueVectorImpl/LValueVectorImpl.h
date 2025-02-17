@@ -75,31 +75,31 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    void LValueVector<Derived>::writePacket(size_t index, const AnyPacket packet) {
-        using T = Traits<AnyPacket>::ScalarType;
+    template<Packet Pack>
+    void LValueVector<Derived>::writePacket(size_t index, const Pack packet) {
+        using T = Traits<Pack>::ScalarType;
         if constexpr (T::isForwardDiff) {
-            for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+            for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 (*this)[index] = packet[i];
         }
         else {
-            ScalarType buffer[AnyPacket::size()];
+            ScalarType buffer[Pack::size()];
             packet.store(buffer);
-            for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+            for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 (*this)[index] = buffer[i];
         }
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
-        using T = Traits<AnyPacket>::ScalarType;
+    template<Packet Pack>
+    void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+        using T = Traits<Pack>::ScalarType;
         if constexpr (T::isForwardDiff) {
             for (size_t i = 0; i < count; ++i, ++index)
                 (*this)[index] = packet[i];
         }
         else {
-            ScalarType buffer[AnyPacket::size()];
+            ScalarType buffer[Pack::size()];
             packet.store(buffer);
             for (size_t i = 0; i < count; ++i, ++index)
                 (*this)[index] = buffer[i];

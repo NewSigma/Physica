@@ -63,8 +63,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] ConstRefTy calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
-        template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
-        template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
+        template<Packet Pack> void writePacket(size_t index, const Pack packet);
+        template<Packet Pack> void writePacketPartial(size_t index, size_t count, const Pack packet);
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 

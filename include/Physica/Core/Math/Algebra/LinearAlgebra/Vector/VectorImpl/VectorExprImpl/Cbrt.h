@@ -33,17 +33,17 @@ namespace Physica {
 
         [[nodiscard]] ValueType calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
-            AnyPacket result = Base::getExpr().template packet<AnyPacket>(index);
-            for (size_t i = 0; i < static_cast<size_t>(AnyPacket::size()); ++i)
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
+            Pack result = Base::getExpr().template packet<Pack>(index);
+            for (size_t i = 0; i < static_cast<size_t>(Pack::size()); ++i)
                 result.insert(i, cbrt(result[i]));
             return result;
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            AnyPacket result = Base::getExpr().template packetPartial<AnyPacket>(index, count);
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            Pack result = Base::getExpr().template packetPartial<Pack>(index, count);
             for (size_t i = 0; i < count; ++i)
                 result.insert(i, cbrt(result[i]));
             return result;

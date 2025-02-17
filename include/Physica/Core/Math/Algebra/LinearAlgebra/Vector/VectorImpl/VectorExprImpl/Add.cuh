@@ -36,16 +36,16 @@ namespace Physica {
                  + ScalarType(Base::template getRHS<Owner>());
         }
 
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ AnyPacket packet(size_t index) const {
-            return Base::template getLHS<Owner>().template packet<AnyPacket, Owner>(index)
-                 + AnyPacket(Base::template getRHS<Owner>());
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ Pack packet(size_t index) const {
+            return Base::template getLHS<Owner>().template packet<Pack, Owner>(index)
+                 + Pack(Base::template getRHS<Owner>());
         }
 
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::template getLHS<Owner>().template packetPartial<AnyPacket, Owner>(index, count)
-                 + AnyPacket(Base::template getRHS<Owner>());
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
+            return Base::template getLHS<Owner>().template packetPartial<Pack, Owner>(index, count)
+                 + Pack(Base::template getRHS<Owner>());
         }
     };
 
@@ -64,16 +64,16 @@ namespace Physica {
                  + ScalarType(Base::template getRHS<Owner>().template calc<Owner>(index));
         }
 
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ AnyPacket packet(size_t index) const {
-            return Base::template getLHS<Owner>().template packet<AnyPacket, Owner>(index)
-                 + Base::template getRHS<Owner>().template packet<AnyPacket, Owner>(index);
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ Pack packet(size_t index) const {
+            return Base::template getLHS<Owner>().template packet<Pack, Owner>(index)
+                 + Base::template getRHS<Owner>().template packet<Pack, Owner>(index);
         }
 
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::template getLHS<Owner>().template packetPartial<AnyPacket, Owner>(index, count)
-                 + Base::template getRHS<Owner>().template packetPartial<AnyPacket, Owner>(index, count);
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
+            return Base::template getLHS<Owner>().template packetPartial<Pack, Owner>(index, count)
+                 + Base::template getRHS<Owner>().template packetPartial<Pack, Owner>(index, count);
         }
     };
 

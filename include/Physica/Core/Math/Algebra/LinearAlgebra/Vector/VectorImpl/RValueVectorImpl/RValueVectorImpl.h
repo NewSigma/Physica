@@ -32,8 +32,8 @@ namespace Physica {
             static_assert(Diffable<T1> || !Diffable<T2>, "[Error]: Assign a diffable vector to normal vector discards grads");
         public:
             using ScalarType = T1::ScalarType;
-            using AnyPacket = BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static size_t PacketSize = AnyPacket::size();
+            using Pack = BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static size_t PacketSize = Pack::size();
             constexpr static bool isReverseDiff = ReverseDiff<ScalarType>;
 
             inline static void run(T1& v1, const T2& v2) {
@@ -57,12 +57,12 @@ namespace Physica {
                 if constexpr (SizeAtCompile != Dynamic) {
                     constexpr size_t to = SizeAtCompile / PacketSize * PacketSize;
                     for (size_t i = 0; i < to; i += PacketSize)
-                        v1.writePacket(i, v2.template packet<AnyPacket>(i));
+                        v1.writePacket(i, v2.template packet<Pack>(i));
                     
                     constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketSize;
                     if constexpr (i != SizeAtCompile) {
                         constexpr size_t count = SizeAtCompile - i;
-                        v1.writePacketPartial(i, count, v2.template packetPartial<AnyPacket>(i, count));
+                        v1.writePacketPartial(i, count, v2.template packetPartial<Pack>(i, count));
                     }
                 }
                 else {
@@ -74,23 +74,23 @@ namespace Physica {
                     if constexpr (std::is_same<Executor, SeqExecutor>::value) {
                         size_t i = 0;
                         for (; i < to; i += PacketSize)
-                            v1.writePacket(i, v2.template packet<AnyPacket>(i));
+                            v1.writePacket(i, v2.template packet<Pack>(i));
 
                         if (to != length) {
                             const size_t count = length - i;
-                            v1.writePacketPartial(i, count, v2.template packetPartial<AnyPacket>(i, count));
+                            v1.writePacketPartial(i, count, v2.template packetPartial<Pack>(i, count));
                         }
                     }
                     else {
                         const size_t numLoop = to / PacketSize;
                         auto future = Executor::parallel_for([&v2, &v1](size_t i) {
                             const size_t i1 = i * PacketSize;
-                            v1.writePacket(i1, v2.template packet<AnyPacket>(i1));
+                            v1.writePacket(i1, v2.template packet<Pack>(i1));
                         }, numLoop, Executor::getNumThread());
 
                         if (to != length) {
                             const size_t count = length % PacketSize;
-                            v1.writePacketPartial(to, count, v2.template packetPartial<AnyPacket>(to, count));
+                            v1.writePacketPartial(to, count, v2.template packetPartial<Pack>(to, count));
                         }
                         future.wait();
                     }
@@ -106,68 +106,68 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    inline AnyPacket RValueVector<Derived>::packet(size_t index) const {
-        using U = Traits<AnyPacket>::ScalarType;
-        assert(index + AnyPacket::size() <= getLength() && "[Error]: Index out of range");
+    template<Packet Pack>
+    inline Pack RValueVector<Derived>::packet(size_t index) const {
+        using U = Traits<Pack>::ScalarType;
+        assert(index + Pack::size() <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
-            using ValuePacket = AnyPacket::ValueType;
+            using ValuePacket = Pack::ValueType;
             if constexpr (isForwardDiff) {
-                using GradPacket = AnyPacket::GradType;
+                using GradPacket = Pack::GradType;
                 const auto& x = Base::getDerived();
                 auto values = x.values().template packet<ValuePacket>(index);
                 auto grads = x.grads().template packet<GradPacket>(index);
-                return AnyPacket(std::move(values), std::move(grads));
+                return Pack(std::move(values), std::move(grads));
             }
             else {
                 using Uv = U::ValueType;
-                Uv values[AnyPacket::size()];
-                for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+                Uv values[Pack::size()];
+                for (size_t i = 0; i < Pack::size(); ++i, ++index)
                     values[i] = Uv(calc(index));
                 ValuePacket packet{};
                 packet.load(values);
-                return AnyPacket(std::move(packet));
+                return Pack(std::move(packet));
             }
         }
         else {
-            U buffer[AnyPacket::size()];
-            for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+            U buffer[Pack::size()];
+            for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 buffer[i] = U(calc(index));
-            AnyPacket packet{};
+            Pack packet{};
             packet.load(buffer);
             return packet;
         }
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    inline AnyPacket RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
-        using U = Traits<AnyPacket>::ScalarType;
+    template<Packet Pack>
+    inline Pack RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
+        using U = Traits<Pack>::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
-            using ValuePacket = AnyPacket::ValueType;
+            using ValuePacket = Pack::ValueType;
             if constexpr (isForwardDiff) {
-                using GradPacket = AnyPacket::GradType;
+                using GradPacket = Pack::GradType;
                 const auto& x = Base::getDerived();
                 auto values = x.values().template packetPartial<ValuePacket>(index, count);
                 auto grads = x.grads().template packetPartial<GradPacket>(index, count);
-                return AnyPacket(std::move(values), std::move(grads));
+                return Pack(std::move(values), std::move(grads));
             }
             else {
                 using Uv = U::ValueType;
-                Uv values[AnyPacket::size()];
-                for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+                Uv values[Pack::size()];
+                for (size_t i = 0; i < Pack::size(); ++i, ++index)
                     values[i] = i < count ? Uv(calc(index)) : Uv(0);
                 ValuePacket packet{};
                 packet.load(values);
-                return AnyPacket(std::move(packet));
+                return Pack(std::move(packet));
             }
         }
         else {
-            U buffer[AnyPacket::size()];
-            for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+            U buffer[Pack::size()];
+            for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 buffer[i] = i < count ? U(calc(index)) : U(0);
-            AnyPacket packet{};
+            Pack packet{};
             packet.load_partial(buffer, count);
             return packet;
         }

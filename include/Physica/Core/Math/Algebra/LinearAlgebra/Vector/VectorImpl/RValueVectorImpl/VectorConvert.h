@@ -93,39 +93,39 @@ namespace Physica {
 
         [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
             if constexpr (isComplexV) {
                 static_assert(!isReverseDiff, "[Error]: Not implemented");
                 constexpr size_t MaxSize = BestPacket<ComplexType, Dynamic>::Size;
-                constexpr size_t Size = AnyPacket::size();
+                constexpr size_t Size = Pack::size();
                 if constexpr (Size <= MaxSize) {
                     using PacketType = SIMD<ComplexType, Size>;
                     const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
-                    return AnyPacket(x2.real());
+                    return Pack(x2.real());
                 }
                 else {
                     constexpr size_t Size1 = Size / 2;
                     using PacketType = SIMD<ComplexType, Size1>;
                     const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
                     const auto y2 = PacketType::asComplex(v.template packet<PacketType>(index + Size1).squaredNorm());
-                    return AnyPacket(x2.real(), y2.real());
+                    return Pack(x2.real(), y2.real());
                 }
             }
             else
-                return square(v.template packet<AnyPacket>(index));
+                return square(v.template packet<Pack>(index));
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
             if constexpr (isComplexV) {
                 static_assert(!isReverseDiff, "[Error]: Not implemented");
                 constexpr size_t MaxSize = BestPacket<ComplexType, Dynamic>::Size;
-                constexpr size_t Size = AnyPacket::size();
+                constexpr size_t Size = Pack::size();
                 if constexpr (Size <= MaxSize) {
                     using PacketType = SIMD<ComplexType, Size>;
                     const auto x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count).squaredNorm());
-                    return AnyPacket(x2.real());
+                    return Pack(x2.real());
                 }
                 else {
                     constexpr size_t Size1 = Size / 2;
@@ -135,14 +135,14 @@ namespace Physica {
                     const auto x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count1).squaredNorm());
 
                     if (flag)
-                        return AnyPacket(x2.real(), SIMD<ScalarType, Size1>(0));
+                        return Pack(x2.real(), SIMD<ScalarType, Size1>(0));
                     const size_t count2 = count - count1;
                     const auto y2 = PacketType::asComplex(v.template packetPartial<PacketType>(index + Size / 2, count2).squaredNorm());
-                    return AnyPacket(x2.real(), y2.real());
+                    return Pack(x2.real(), y2.real());
                 }
             }
             else
-                return square(v.template packetPartial<AnyPacket>(index, count));
+                return square(v.template packetPartial<Pack>(index, count));
         }
 
         [[nodiscard]] size_t getLength() const { return v.getLength(); }

@@ -60,16 +60,16 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class AnyPacket, Side Owner>
-    __device__ inline AnyPacket device_obj<RValueVector<Derived>>::packet(size_t index) const {
-        static_assert(Scalar<AnyPacket>, "[Error]: Not implemented");
+    template<Packet Pack, Side Owner>
+    __device__ inline Pack device_obj<RValueVector<Derived>>::packet(size_t index) const {
+        static_assert(Scalar<Pack>, "[Error]: Not implemented");
         return calc(index);
     }
 
     template<class Derived>
-    template<class AnyPacket, Side Owner>
-    __device__ inline AnyPacket device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
-        static_assert(Scalar<AnyPacket>, "[Error]: Not implemented");
+    template<Packet Pack, Side Owner>
+    __device__ inline Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
+        static_assert(Scalar<Pack>, "[Error]: Not implemented");
         assert(count == 1 && "[Error]: No need to call partial version");
         return calc(index);
     }

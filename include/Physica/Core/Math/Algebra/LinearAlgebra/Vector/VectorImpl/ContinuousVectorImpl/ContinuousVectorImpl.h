@@ -93,49 +93,49 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    inline AnyPacket ContinuousVector<Derived>::packet(size_t index) const {
-        assert(index + AnyPacket::size() <= Base::getLength());
-        if constexpr (std::is_same_v<ScalarType, typename Traits<AnyPacket>::ScalarType>) {
-            AnyPacket packet{};
+    template<Packet Pack>
+    inline Pack ContinuousVector<Derived>::packet(size_t index) const {
+        assert(index + Pack::size() <= Base::getLength());
+        if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
+            Pack packet{};
             packet.load(Base::data_ptr(index));
             return packet;
         }
         else
-            return Base::template packet<AnyPacket>(index);
+            return Base::template packet<Pack>(index);
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    inline AnyPacket ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
+    template<Packet Pack>
+    inline Pack ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
         assert(index + count <= Base::getLength());
-        if constexpr (std::is_same_v<ScalarType, typename Traits<AnyPacket>::ScalarType>) {
-            AnyPacket packet{};
+        if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
+            Pack packet{};
             packet.load_partial(Base::data_ptr(index), count);
             return packet;
         }
         else
-            return Base::template packetPartial<AnyPacket>(index, count);
+            return Base::template packetPartial<Pack>(index, count);
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    inline void ContinuousVector<Derived>::writePacket(size_t index, const AnyPacket packet) {
-        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<AnyPacket>::ScalarType>;
+    template<Packet Pack>
+    inline void ContinuousVector<Derived>::writePacket(size_t index, const Pack packet) {
+        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
         else
-            Base::template writePacket<AnyPacket>(index, packet);
+            Base::template writePacket<Pack>(index, packet);
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
-        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<AnyPacket>::ScalarType>;
+    template<Packet Pack>
+    inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store_partial(Base::data_ptr(index), count);
         else
-            Base::template writePacketPartial<AnyPacket>(index, count, packet);
+            Base::template writePacketPartial<Pack>(index, count, packet);
     }
 
     template<class Derived>

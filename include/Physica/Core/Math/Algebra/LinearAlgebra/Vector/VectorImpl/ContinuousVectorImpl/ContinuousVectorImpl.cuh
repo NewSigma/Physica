@@ -47,32 +47,32 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class AnyPacket, Side Owner>
-    __device__ inline AnyPacket device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
-        AnyPacket packet{};
+    template<Packet Pack, Side Owner>
+    __device__ inline Pack device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
+        Pack packet{};
         packet.load(Base::data_ptr(index));
         return packet;
     }
 
     template<class Derived>
-    template<class AnyPacket, Side Owner>
-    __device__ inline AnyPacket device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
-        AnyPacket packet{};
+    template<Packet Pack, Side Owner>
+    __device__ inline Pack device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
+        Pack packet{};
         packet.load_partial(Base::data_ptr(index), count);
         return packet;
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const AnyPacket packet) {
-        using LocalPacket = std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
+    template<Packet Pack>
+    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const Pack packet) {
+        using LocalPacket = std::conditional<Pack::size() == 1, ScalarType, SIMD<ScalarType, Pack::size()>>::type;
         LocalPacket(packet).store(Base::data_ptr(index));
     }
 
     template<class Derived>
-    template<class AnyPacket>
-    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
-        using LocalPacket = std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
+    template<Packet Pack>
+    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+        using LocalPacket = std::conditional<Pack::size() == 1, ScalarType, SIMD<ScalarType, Pack::size()>>::type;
         LocalPacket(packet).store_partial(Base::data_ptr(index), count);
     }
 

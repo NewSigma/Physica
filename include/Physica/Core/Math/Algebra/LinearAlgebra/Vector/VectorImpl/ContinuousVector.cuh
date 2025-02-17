@@ -42,12 +42,12 @@ namespace Physica {
         inline This& operator=(This&& obj);
         using Base::operator=;
         /* Operations */
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ inline AnyPacket packet(size_t index) const;
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ inline AnyPacket packetPartial(size_t index, size_t count) const;
-        template<class AnyPacket> __device__ inline void writePacket(size_t index, const AnyPacket packet);
-        template<class AnyPacket> __device__ inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ inline Pack packet(size_t index) const;
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
+        template<Packet Pack> __device__ inline void writePacket(size_t index, const Pack packet);
+        template<Packet Pack> __device__ inline void writePacketPartial(size_t index, size_t count, const Pack packet);
 
         void resize(size_t length) { Base::getDerived().resize(length); }
         template<Vector V> void toHost(ContinuousVector<V>& obj) const;

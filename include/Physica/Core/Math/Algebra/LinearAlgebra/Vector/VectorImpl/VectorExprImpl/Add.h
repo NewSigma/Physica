@@ -40,14 +40,14 @@ namespace Physica {
             return Base::getLHS().calc_value(s) + Base::getRHS().value();
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
-            return Base::getLHS().template packet<AnyPacket>(index) + AnyPacket(Base::getRHS());
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
+            return Base::getLHS().template packet<Pack>(index) + Pack(Base::getRHS());
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<AnyPacket>(index, count) + AnyPacket(Base::getRHS(), count);
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS(), count);
         }
 
         template<Vector V>
@@ -82,14 +82,14 @@ namespace Physica {
             return Base::getLHS().calc_value(s) + Base::getRHS().calc_value(s);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
-            return getLHS().template packet<AnyPacket>(index) + getRHS().template packet<AnyPacket>(index);
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
+            return getLHS().template packet<Pack>(index) + getRHS().template packet<Pack>(index);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return getLHS().template packetPartial<AnyPacket>(index, count) + getRHS().template packetPartial<AnyPacket>(index, count);
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            return getLHS().template packetPartial<Pack>(index, count) + getRHS().template packetPartial<Pack>(index, count);
         }
 
         template<Vector V>

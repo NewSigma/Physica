@@ -51,10 +51,10 @@ namespace Physica {
         [[nodiscard]] RefTy operator[](size_t index);
         [[nodiscard]] ConstRefTy operator[](size_t index) const;
         /* Operations */
-        template<class AnyPacket> [[nodiscard]] inline AnyPacket packet(size_t index) const;
-        template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
-        template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
-        template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
+        template<Packet Pack> [[nodiscard]] inline Pack packet(size_t index) const;
+        template<Packet Pack> [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
+        template<Packet Pack> inline void writePacket(size_t index, const Pack packet);
+        template<Packet Pack> inline void writePacketPartial(size_t index, size_t count, const Pack packet);
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] inline size_t getLength() const noexcept;
@@ -99,27 +99,27 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    template<class AnyPacket>
-    inline AnyPacket ContinuousVectorBlock<T, Length>::packet(size_t index) const {
-        return vec.template packet<AnyPacket>(from + index);
+    template<Packet Pack>
+    inline Pack ContinuousVectorBlock<T, Length>::packet(size_t index) const {
+        return vec.template packet<Pack>(from + index);
     }
 
     template<Vector T, size_t Length>
-    template<class AnyPacket>
-    inline AnyPacket ContinuousVectorBlock<T, Length>::packetPartial(size_t index, size_t count) const {
-        return vec.template packetPartial<AnyPacket>(from + index, count);
+    template<Packet Pack>
+    inline Pack ContinuousVectorBlock<T, Length>::packetPartial(size_t index, size_t count) const {
+        return vec.template packetPartial<Pack>(from + index, count);
     }
 
     template<Vector T, size_t Length>
-    template<class AnyPacket>
-    inline void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const AnyPacket packet) {
-        return vec.template writePacket<AnyPacket>(from + index, packet);
+    template<Packet Pack>
+    inline void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const Pack packet) {
+        return vec.template writePacket<Pack>(from + index, packet);
     }
 
     template<Vector T, size_t Length>
-    template<class AnyPacket>
-    inline void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
-        return vec.template writePacketPartial<AnyPacket>(from + index, count, packet);
+    template<Packet Pack>
+    inline void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+        return vec.template writePacketPartial<Pack>(from + index, count, packet);
     }
 
     template<Vector T, size_t Length>

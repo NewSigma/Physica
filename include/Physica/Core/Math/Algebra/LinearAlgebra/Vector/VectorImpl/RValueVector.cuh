@@ -47,10 +47,10 @@ namespace Physica {
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().template calc<Owner>(index); }
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ inline AnyPacket packet(size_t index) const;
-        template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ inline AnyPacket packetPartial(size_t index, size_t count) const;
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ inline Pack packet(size_t index) const;
+        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
 
         [[nodiscard]] __host__ __device__ inline auto transpose() const noexcept;
         template<Side Owner = GetSide()>

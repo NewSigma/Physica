@@ -37,12 +37,12 @@ namespace Physica {
             return sec(Base::getExpr().calc_value(index));
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const { return sec(Base::getExpr().template packet<AnyPacket>(index)); }
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const { return sec(Base::getExpr().template packet<Pack>(index)); }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return sec(Base::getExpr().template packetPartial<AnyPacket>(index, count)).cutoff(count);
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            return sec(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
         }
     };
 

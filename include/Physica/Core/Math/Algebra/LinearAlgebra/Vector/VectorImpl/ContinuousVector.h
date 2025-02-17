@@ -59,10 +59,10 @@ namespace Physica {
         template<Vector V>
         inline void operator+=(const V& v);
         /* Operations */
-        template<class AnyPacket> [[nodiscard]] inline AnyPacket packet(size_t index) const;
-        template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
-        template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
-        template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
+        template<Packet Pack> [[nodiscard]] inline Pack packet(size_t index) const;
+        template<Packet Pack> [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
+        template<Packet Pack> inline void writePacket(size_t index, const Pack packet);
+        template<Packet Pack> inline void writePacketPartial(size_t index, size_t count, const Pack packet);
 
         template<Vector T>
         void reverse(const T& grad) const noexcept requires(isReverseDiff);

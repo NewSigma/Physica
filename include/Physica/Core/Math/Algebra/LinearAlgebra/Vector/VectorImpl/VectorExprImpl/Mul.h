@@ -43,14 +43,14 @@ namespace Physica {
             return Base::getLHS().calc_value(index) * Base::getRHS().value();
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
-            return Base::getLHS().template packet<AnyPacket>(index) * AnyPacket(Base::getRHS());
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
+            return Base::getLHS().template packet<Pack>(index) * Pack(Base::getRHS());
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<AnyPacket>(index, count) * AnyPacket(Base::getRHS());
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            return Base::getLHS().template packetPartial<Pack>(index, count) * Pack(Base::getRHS());
         }
 
         [[nodiscard]] ScalarType sum() const { return Base::getLHS().sum() * Base::getRHS(); }
@@ -98,14 +98,14 @@ namespace Physica {
             return Base::getLHS().calc_value(index) * Base::getRHS().calc_value(index);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
-            return Base::getLHS().template packet<AnyPacket>(index) * Base::getRHS().template packet<AnyPacket>(index);
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
+            return Base::getLHS().template packet<Pack>(index) * Base::getRHS().template packet<Pack>(index);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<AnyPacket>(index, count) * Base::getRHS().template packetPartial<AnyPacket>(index, count);
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            return Base::getLHS().template packetPartial<Pack>(index, count) * Base::getRHS().template packetPartial<Pack>(index, count);
         }
 
         template<Vector V>

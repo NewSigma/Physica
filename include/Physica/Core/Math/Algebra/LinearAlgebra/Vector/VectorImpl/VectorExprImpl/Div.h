@@ -50,20 +50,20 @@ namespace Physica {
                 return Base::getLHS().value() / Base::getRHS().calc_value(s);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
             if constexpr (Vector<T>)
-                return Base::getLHS().template packet<AnyPacket>(index) * AnyPacket(reciprocal(Base::getRHS()));
+                return Base::getLHS().template packet<Pack>(index) * Pack(reciprocal(Base::getRHS()));
             else
-                return AnyPacket(Base::getLHS()) / Base::getRHS().template packet<AnyPacket>(index);
+                return Pack(Base::getLHS()) / Base::getRHS().template packet<Pack>(index);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
             if constexpr (Vector<T>)
-                return Base::getLHS().template packetPartial<AnyPacket>(index, count) * AnyPacket(reciprocal(Base::getRHS()));
+                return Base::getLHS().template packetPartial<Pack>(index, count) * Pack(reciprocal(Base::getRHS()));
             else
-                return AnyPacket(Base::getLHS()) / Base::getRHS().template packetPartial<AnyPacket>(index, count);
+                return Pack(Base::getLHS()) / Base::getRHS().template packetPartial<Pack>(index, count);
         }
     };
 
@@ -87,15 +87,15 @@ namespace Physica {
             return Base::getLHS().calc_value(s) / Base::getRHS().calc_value(s);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
-            return Base::getLHS().template packet<AnyPacket>(index) / Base::getRHS().template packet<AnyPacket>(index);
+        template<Packet Pack>
+        [[nodiscard]] Pack packet(size_t index) const {
+            return Base::getLHS().template packet<Pack>(index) / Base::getRHS().template packet<Pack>(index);
         }
 
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            const auto pack1 = Base::getLHS().template packetPartial<AnyPacket>(index, count);
-            const auto pack2 = Base::getRHS().template packetPartial<AnyPacket>(index, count);
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            const auto pack1 = Base::getLHS().template packetPartial<Pack>(index, count);
+            const auto pack2 = Base::getRHS().template packetPartial<Pack>(index, count);
             return (pack1 / pack2).cutoff(count);
         }
     };
