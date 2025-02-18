@@ -100,6 +100,8 @@ namespace Physica {
         /* Operations */
         template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& v) const;
+        template<Vector V, class Executor = SeqExecutor>
+        inline void assign_add(V& v) const;
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] auto calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
@@ -179,6 +181,16 @@ namespace Physica {
         /* Operations */
         template<int GradOrder>
         auto grads_impl() const noexcept;
+    private:
+        template<Vector V, class Executor>
+        inline void assign_for(V& v) const;
+        template<Vector V, class Executor, size_t Size>
+        inline void assign_simd(V& v) const;
+
+        template<Vector V, class Executor>
+        inline void assign_add_for(V& v) const;
+        template<Vector V, size_t Size>
+        inline void assign_add_simd(V& v) const;
     };
 
     template<Vector T1, Vector T2>

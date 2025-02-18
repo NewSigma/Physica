@@ -26,20 +26,38 @@
 namespace Physica {
     template<class Derived>
     template<Matrix M>
-    void RValueMatrix<Derived>::assign(LValueMatrix<M>& target) const {
-        using OtherScalar = M::ScalarType;
+    void RValueMatrix<Derived>::assign(M& target) const {
         constexpr size_t OtherRow = M::RowAtCompile;
         constexpr size_t OtherColumn = M::ColAtCompile;
         static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == OtherColumn || ColAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
         static_assert(!(isComplex && !M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
+
         assert(getRow() == target.getRow());
         assert(getCol() == target.getCol());
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
         for (size_t i = 0; i < maxMajor; ++i)
             for (size_t j = 0; j < maxMinor; ++j)
-                target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j)));
+                target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
+    }
+
+    template<class Derived>
+    template<Matrix M>
+    void RValueMatrix<Derived>::assign_add(M& target) const {
+        constexpr size_t OtherRow = M::RowAtCompile;
+        constexpr size_t OtherColumn = M::ColAtCompile;
+        static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
+        static_assert(ColAtCompile == OtherColumn || ColAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
+        static_assert(!(isComplex && !M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
+
+        assert(getRow() == target.getRow());
+        assert(getCol() == target.getCol());
+        const size_t maxMajor = target.getMaxMajor();
+        const size_t maxMinor = target.getMaxMinor();
+        for (size_t i = 0; i < maxMajor; ++i)
+            for (size_t j = 0; j < maxMinor; ++j)
+                target.refFromMajorMinor(i, j) += calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j));
     }
 
     template<class Derived>

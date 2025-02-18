@@ -171,4 +171,4 @@ namespace {
     }
 }
 
-BENCHMARK(main)->Name("Mnist")->Unit(benchmark::kSecond);
+BENCHMARK(main)->Name("Mnist")->Unit(benchmark::kMillisecond);

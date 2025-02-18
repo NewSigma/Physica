@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -92,14 +92,8 @@ namespace Physica {
             return getLHS().template packetPartial<Pack>(index, count) + getRHS().template packetPartial<Pack>(index, count);
         }
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
-            const auto& grad = grad_.values();
-            if constexpr (ReverseDiff<T1>)
-                Base::getLHS().reverse(grad);
-            if constexpr (ReverseDiff<T2>)
-                Base::getRHS().reverse(grad);
-        }
+        template<class U>
+        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -120,7 +114,25 @@ namespace Physica {
         }
         else
             Base::template assign<V, Executor>(v);
+    }
 
+    template<Vector T1, Vector T2>
+    template<class U>
+    void VectorExpr<ExprType::Add, T1, T2>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+        if constexpr (Scalar<U>) {
+            if constexpr (ReverseDiff<T1>)
+                Base::getLHS().reverse(grad_);
+            if constexpr (ReverseDiff<T2>)
+                Base::getRHS().reverse(grad_);
+        }
+        else {
+            static_assert(Vector<U>);
+            const auto& grad = grad_.values();
+            if constexpr (ReverseDiff<T1>)
+                Base::getLHS().reverse(grad);
+            if constexpr (ReverseDiff<T2>)
+                Base::getRHS().reverse(grad);
+        }
     }
 
     template<Vector T, Scalar U>

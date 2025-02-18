@@ -28,6 +28,7 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
@@ -44,7 +45,17 @@ namespace Physica {
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
             return square(Base::getExpr().template packetPartial<Pack>(index, count));
         }
+
+        template<Scalar U>
+        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector T>
+    template<Scalar U>
+    void VectorExpr<ExprType::Square, T>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+        const auto& expr = Base::getExpr();
+        expr.reverse(expr.values() * (ValueType(2) * grad_));
+    }
 
     template<Vector T>
     [[nodiscard]] inline auto square(const T& v) noexcept {

@@ -127,6 +127,8 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     void LinearLayer<T, WithBias>::reverse(const This& __restrict other) const noexcept {
         assert(this != &other && "[Error]: Self reverse is invalid");
+        assert(getInputDim() == other.getInputDim());
+        assert(getOutputDim() == other.getOutputDim());
         if constexpr (ReverseDiff<T>) {
             weights.reverse(other.weights.grads());
             if constexpr (WithBias)

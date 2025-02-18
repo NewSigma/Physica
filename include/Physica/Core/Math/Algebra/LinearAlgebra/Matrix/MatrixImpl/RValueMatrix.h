@@ -66,7 +66,10 @@ namespace Physica {
         ~RValueMatrix() = default;
         /* Operations */
         template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
+        void assign(M& target) const;
+        template<Matrix M>
+        void assign_add(M& target) const;
+
         [[nodiscard]] inline auto row(size_t r) noexcept;
         [[nodiscard]] inline const auto row(size_t r) const noexcept;
         [[nodiscard]] inline auto col(size_t c) noexcept;

@@ -105,8 +105,17 @@ namespace Physica {
     void MatrixVectorProduct<T, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
         assert(grad_.getLength() == getLength());
         const auto& grad = grad_.values();
-        if constexpr (ReverseDiff<T>)
-            mat.reverse(grad * vec.values().transpose());
+        if constexpr (ReverseDiff<T>) {
+            if constexpr (MatrixOption::isRowMatrix<T>()) {
+                for (size_t i = 0; i < mat.getRow(); ++i)
+                    mat.row(i).reverse(grad[i] * vec.values());
+            }
+            else {
+                for (size_t i = 0; i < mat.getCol(); ++i)
+                    mat.col(i).reverse(grad * vec.calc_value(i));
+            }
+        }
+
         if constexpr (ReverseDiff<U>) {
             if constexpr (MatrixOption::isRowMatrix<T>()) {
                 for (size_t i = 0; i < getLength(); ++i)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,55 +22,6 @@
 #include "../ContinuousVector.h"
 
 namespace Physica {
-    namespace Internal {
-        template<Vector T1, Vector T2, bool enableSIMD>
-        struct AddAssignImpl {
-            static void run(T1& v1, const T2& v2) {
-                for(size_t i = 0; i < v1.getLength(); ++i)
-                    v1[i] += v2.calc(i);
-            }
-        };
-
-        template<Vector T1, Vector T2>
-        class AddAssignImpl<T1, T2, true> {
-            constexpr static size_t Size1 = T1::SizeAtCompile;
-            constexpr static size_t Size2 = T2::SizeAtCompile;
-            constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-            using PacketType = BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
-        public:
-            static void run(T1& v1, const T2& v2) {
-                if constexpr (SizeAtCompile != Dynamic) {
-                    constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
-                    for (size_t i = 0; i < to; i += PacketType::size()) {
-                        const PacketType sum = v1.template packet<PacketType>(i) + v2.template packet<PacketType>(i);
-                        v1.writePacket(i, sum);
-                    }
-
-                    constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
-                    if constexpr (i != SizeAtCompile) {
-                        constexpr size_t count = SizeAtCompile - i;
-                        const PacketType sum = v1.template packetPartial<PacketType>(i, count) + v2.template packetPartial<PacketType>(i, count);
-                        v1.writePacketPartial(i, count, sum);
-                    }
-                }
-                else {
-                    const size_t length = v1.getLength();
-                    size_t i = 0;
-                    const size_t to = length / PacketType::size() * PacketType::size();
-                    for (; i < to; i += PacketType::size()) {
-                        const PacketType sum = v1.template packet<PacketType>(i) + v2.template packet<PacketType>(i);
-                        v1.writePacket(i, sum);
-                    }
-                    if (to != length) {
-                        const size_t count = length - i;
-                        const PacketType sum = v1.template packetPartial<PacketType>(i, count) + v2.template packetPartial<PacketType>(i, count);
-                        v1.writePacketPartial(i, count, sum);
-                    }
-                }
-            }
-        };
-    }
-
     template<class Derived>
     inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const This& v) {
         Base::operator=(v);
@@ -80,16 +31,6 @@ namespace Physica {
     template<class Derived>
     inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(This&& v) {
         return *this = v;
-    }
-
-    template<class Derived>
-    template<Vector V>
-    inline void ContinuousVector<Derived>::operator+=(const V& v) {
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = Traits<V>::SizeAtCompile;
-        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        assert(Base::getLength() == v.getLength());
-        Internal::AddAssignImpl<Derived, V, Internal::EnableSIMD<Derived, V>::value>::run(Base::getDerived(), v);
     }
 
     template<class Derived>
@@ -139,10 +80,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector T>
-    void ContinuousVector<Derived>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
-        static_assert(std::same_as<typename ScalarType::GradType, typename T::ScalarType>, "[Error]: Inconsistent ScalarType");
-        assert(Base::getLength() == grad.getLength());
+    template<class U>
+    void ContinuousVector<Derived>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        static_assert(Scalar<U> || Vector<U>, "[Error]: Unexpected type");
+        if constexpr (Vector<U>)
+            assert(Base::getLength() == grad.getLength());
         Base::getConstCastDerived().grads() += grad;
     }
 

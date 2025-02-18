@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,11 +18,14 @@
  */
 #pragma once
 
+#include <cassert>
+
 namespace Physica {
     /**
      * Use std::unreachable once we dump to C++23
      */
     [[noreturn]] inline void unreachable() {
+        assert(false && "[Error]: Trigger unreachable");
     #if defined(_MSC_VER) && !defined(__clang__)
         __assume(false);
     #else

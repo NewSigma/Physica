@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -69,8 +69,8 @@ namespace Physica {
         [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
         [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
         /* Operations */
-        template<Matrix T>
-        void reverse(const T& grad) const noexcept requires(isReverseDiff);
+        template<Matrix M>
+        void reverse(const M& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] inline auto row(size_t r) noexcept;
         [[nodiscard]] inline const auto row(size_t r) const noexcept;

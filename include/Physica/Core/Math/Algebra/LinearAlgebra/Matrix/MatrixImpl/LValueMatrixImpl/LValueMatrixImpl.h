@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -112,20 +112,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix T>
-    void LValueMatrix<Derived>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
-        static_assert(std::same_as<typename ScalarType::GradType, typename T::ScalarType>, "[Error]: Inconsistent ScalarType");
+    template<Matrix M>
+    void LValueMatrix<Derived>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+        static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
         assert(Base::getRow() == grad.getRow());
         assert(Base::getCol() == grad.getCol());
-        const size_t maxMajor = Base::getMaxMajor();
-        const size_t maxMinor = Base::getMaxMinor();
-        for (size_t major = 0; major < maxMajor; ++major) {
-            for (size_t minor = 0; minor < maxMinor; ++minor) {
-                const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
-                const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
-                refFromMajorMinor(major, minor).reverse(grad.calc(r, c));
-            }
-        }
+        Base::getConstCastDerived().grads() += grad;
     }
 
     template<class Derived>

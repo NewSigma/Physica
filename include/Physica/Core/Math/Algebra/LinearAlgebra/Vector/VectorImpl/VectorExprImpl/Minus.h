@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica {
     template<Vector T>
     class VectorExpr<ExprType::Minus, T>
@@ -26,6 +28,7 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
@@ -38,6 +41,11 @@ namespace Physica {
 
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const { return -Base::getExpr().template packetPartial<Pack>(index, count); }
+
+        template<class U>
+        void reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+            Base::getExpr().reverse(-grad_);
+        }
     };
 
     template<Vector T>

@@ -21,88 +21,40 @@
 #include "FormatedVector.h"
 
 namespace Physica {
-    namespace Internal {
-        template<Vector T1, Vector T2, class Executor>
-        class AssignImpl {
-            constexpr static size_t Size1 = T1::SizeAtCompile;
-            constexpr static size_t Size2 = T2::SizeAtCompile;
-            constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-            static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-            static_assert(T1::isComplex || !T2::isComplex, "[Error]: Cannot convert a complex to a real");
-            static_assert(Diffable<T1> || !Diffable<T2>, "[Error]: Assign a diffable vector to normal vector discards grads");
-        public:
-            using ScalarType = T1::ScalarType;
-            using Pack = BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static size_t PacketSize = Pack::size();
-            constexpr static bool isReverseDiff = ReverseDiff<ScalarType>;
+    template<class Derived>
+    template<Vector V, class Executor>
+    inline void RValueVector<Derived>::assign(V& v) const {
+        constexpr static size_t Size1 = SizeAtCompile;
+        constexpr static size_t Size2 = V::SizeAtCompile;
+        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
+        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
+        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
 
-            inline static void run(T1& v1, const T2& v2) {
-                assert(v1.getLength() == v2.getLength() && "[Error]: Size mismatch between two vector");
-                if constexpr (Internal::EnableSIMD<T1, T2>::value && !isReverseDiff)
-                    run_simd(v1, v2);
-                else
-                    run_for(v1, v2);
-            }
-        private:
-            inline static void run_for(T1& v1, const T2& v2) {
-                Executor::parallel_for([&](size_t i) {
-                    if constexpr (isReverseDiff)
-                        v1[i] = v2.calc_value(i);
-                    else
-                        v1[i] = v2.calc(i);
-                }, v2.getLength(), Executor::getNumThread()).wait();
-            }
-
-            inline static void run_simd(T1& v1, const T2& v2) {
-                if constexpr (SizeAtCompile != Dynamic) {
-                    constexpr size_t to = SizeAtCompile / PacketSize * PacketSize;
-                    for (size_t i = 0; i < to; i += PacketSize)
-                        v1.writePacket(i, v2.template packet<Pack>(i));
-                    
-                    constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketSize;
-                    if constexpr (i != SizeAtCompile) {
-                        constexpr size_t count = SizeAtCompile - i;
-                        v1.writePacketPartial(i, count, v2.template packetPartial<Pack>(i, count));
-                    }
-                }
-                else {
-                    const size_t length = v2.getLength();
-                    if (length == 0)
-                        return;
-
-                    const size_t to = length / PacketSize * PacketSize;
-                    if constexpr (std::is_same<Executor, SeqExecutor>::value) {
-                        size_t i = 0;
-                        for (; i < to; i += PacketSize)
-                            v1.writePacket(i, v2.template packet<Pack>(i));
-
-                        if (to != length) {
-                            const size_t count = length - i;
-                            v1.writePacketPartial(i, count, v2.template packetPartial<Pack>(i, count));
-                        }
-                    }
-                    else {
-                        const size_t numLoop = to / PacketSize;
-                        auto future = Executor::parallel_for([&v2, &v1](size_t i) {
-                            const size_t i1 = i * PacketSize;
-                            v1.writePacket(i1, v2.template packet<Pack>(i1));
-                        }, numLoop, Executor::getNumThread());
-
-                        if (to != length) {
-                            const size_t count = length % PacketSize;
-                            v1.writePacketPartial(to, count, v2.template packetPartial<Pack>(to, count));
-                        }
-                        future.wait();
-                    }
-                }
-            }
-        };
+        assert(getLength() == v.getLength() && "[Error]: Size mismatch between two vector");
+        if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
+            constexpr static size_t Size = Size1 > Size2 ? Size1 : Size2;
+            assign_simd<V, Executor, Size>(v);
+        }
+        else
+            assign_for<V, Executor>(v);
     }
 
     template<class Derived>
     template<Vector V, class Executor>
-    inline void RValueVector<Derived>::assign(V& v) const {
-        Internal::AssignImpl<V, Derived, Executor>::run(v, Base::getDerived());
+    inline void RValueVector<Derived>::assign_add(V& v) const {
+        constexpr static size_t Size1 = SizeAtCompile;
+        constexpr static size_t Size2 = V::SizeAtCompile;
+        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
+        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
+        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
+
+        assert(getLength() == v.getLength() && "[Error]: Size mismatch between two vector");
+        if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
+            constexpr static size_t Size = Size1 > Size2 ? Size1 : Size2;
+            assign_add_simd<V, Size>(v);
+        }
+        else
+            assign_add_for<V, Executor>(v);
     }
 
     template<class Derived>
@@ -594,6 +546,113 @@ namespace Physica {
     template<int GradOrder>
     auto RValueVector<Derived>::grads_impl() const noexcept {
         return GradVector<Derived, GradOrder>(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<Vector V, class Executor>
+    inline void RValueVector<Derived>::assign_for(V& v) const {
+        Executor::parallel_for([&, this](size_t i) {
+            if constexpr (isReverseDiff)
+                v[i] = calc_value(i);
+            else
+                v[i] = calc(i);
+        }, getLength(), Executor::getNumThread()).wait();
+    }
+
+    template<class Derived>
+    template<Vector V, class Executor, size_t Size>
+    inline void RValueVector<Derived>::assign_simd(V& v) const {
+        using Pack = BestPacket<typename V::ScalarType, Size>::Type;
+        constexpr static size_t PacketSize = Pack::size();
+        const auto& v0 = Base::getDerived();
+        if constexpr (Size != Dynamic) {
+            constexpr size_t to = Size / PacketSize * PacketSize;
+            for (size_t i = 0; i < to; i += PacketSize)
+                v.writePacket(i, v0.template packet<Pack>(i));
+            
+            constexpr size_t i = Size - Size % PacketSize;
+            if constexpr (i != Size) {
+                constexpr size_t count = Size - i;
+                v.writePacketPartial(i, count, v0.template packetPartial<Pack>(i, count));
+            }
+        }
+        else {
+            const size_t length = getLength();
+            if (length == 0)
+                return;
+
+            const size_t to = length / PacketSize * PacketSize;
+            if constexpr (std::is_same<Executor, SeqExecutor>::value) {
+                size_t i = 0;
+                for (; i < to; i += PacketSize)
+                    v.writePacket(i, v0.template packet<Pack>(i));
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    v.writePacketPartial(i, count, v0.template packetPartial<Pack>(i, count));
+                }
+            }
+            else {
+                const size_t numLoop = to / PacketSize;
+                auto future = Executor::parallel_for([&, this](size_t i) {
+                    const size_t i1 = i * PacketSize;
+                    v.writePacket(i1, v0.template packet<Pack>(i1));
+                }, numLoop, Executor::getNumThread());
+
+                if (to != length) {
+                    const size_t count = length % PacketSize;
+                    v.writePacketPartial(to, count, v0.template packetPartial<Pack>(to, count));
+                }
+                future.wait();
+            }
+        }
+    }
+
+    template<class Derived>
+    template<Vector V, class Executor>
+    inline void RValueVector<Derived>::assign_add_for(V& v) const {
+        Executor::parallel_for([&, this](size_t i) {
+            if constexpr (isReverseDiff)
+                v[i] += calc_value(i);
+            else
+                v[i] += calc(i);
+        }, getLength(), Executor::getNumThread()).wait();
+    }
+
+    template<class Derived>
+    template<Vector V, size_t Size>
+    inline void RValueVector<Derived>::assign_add_simd(V& v) const {
+        using Pack = BestPacket<typename V::ScalarType, Size>::Type;
+        constexpr static size_t PacketSize = Pack::size();
+        const auto& v0 = Base::getDerived();
+        if constexpr (Size != Dynamic) {
+            constexpr size_t to = Size / PacketSize * PacketSize;
+            for (size_t i = 0; i < to; i += PacketSize) {
+                const Pack sum = v.template packet<Pack>(i) + v0.template packet<Pack>(i);
+                v.writePacket(i, sum);
+            }
+
+            constexpr size_t i = Size - Size % PacketSize;
+            if constexpr (i != Size) {
+                constexpr size_t count = Size - i;
+                const Pack sum = v.template packetPartial<Pack>(i, count) + v0.template packetPartial<Pack>(i, count);
+                v.writePacketPartial(i, count, sum);
+            }
+        }
+        else {
+            const size_t length = v.getLength();
+            size_t i = 0;
+            const size_t to = length / PacketSize * PacketSize;
+            for (; i < to; i += PacketSize) {
+                const Pack sum = v.template packet<Pack>(i) + v0.template packet<Pack>(i);
+                v.writePacket(i, sum);
+            }
+            if (to != length) {
+                const size_t count = length - i;
+                const Pack sum = v.template packetPartial<Pack>(i, count) + v0.template packetPartial<Pack>(i, count);
+                v.writePacketPartial(i, count, sum);
+            }
+        }
     }
 
     template<Vector T1, Vector T2>

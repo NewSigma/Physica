@@ -55,6 +55,18 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<Vector V>
+    inline void LValueVector<Derived>::operator+=(const V& v) {
+        v.assign_add(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<Vector V>
+    inline void LValueVector<Derived>::operator-=(const V& v) {
+        Base::getDerived() += -v; // To avoid alias
+    }
+
+    template<class Derived>
     inline auto LValueVector<Derived>::operator[](size_t index) -> RefTy {
         return *data_ptr(index);
     }

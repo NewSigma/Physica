@@ -108,15 +108,28 @@ namespace Physica {
             return Base::getLHS().template packetPartial<Pack>(index, count) * Base::getRHS().template packetPartial<Pack>(index, count);
         }
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        template<class U>
+        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
+    };
+
+    template<Vector T1, Vector T2>
+    template<class U>
+    void VectorExpr<ExprType::Mul, T1, T2>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+        if constexpr (Scalar<U>) {
+            if constexpr (ReverseDiff<T1>)
+                Base::getLHS().reverse(Base::getRHS().values() * grad_);
+            if constexpr (ReverseDiff<T2>)
+                Base::getRHS().reverse(Base::getLHS().values() * grad_);
+        }
+        else {
+            static_assert(Vector<U>);
             const auto& grad = grad_.values();
             if constexpr (ReverseDiff<T1>)
                 Base::getLHS().reverse(hadamard(Base::getRHS().values(), grad));
             if constexpr (ReverseDiff<T2>)
                 Base::getRHS().reverse(hadamard(Base::getLHS().values(), grad));
         }
-    };
+    }
 
     template<Vector T, Scalar U>
     [[nodiscard]] inline auto operator*(const T& v, const U& x) noexcept {

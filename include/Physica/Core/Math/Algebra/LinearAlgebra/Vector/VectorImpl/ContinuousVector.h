@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/IO/HDF5/HDF5.h"
 #include "ContinuousVectorImpl/ContinuousVectorBlock.h"
 
 namespace Physica {
@@ -55,17 +54,14 @@ namespace Physica {
         using Base::operator+=;
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
-
-        template<Vector V>
-        inline void operator+=(const V& v);
         /* Operations */
         template<Packet Pack> [[nodiscard]] inline Pack packet(size_t index) const;
         template<Packet Pack> [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
         template<Packet Pack> inline void writePacket(size_t index, const Pack packet);
         template<Packet Pack> inline void writePacketPartial(size_t index, size_t count, const Pack packet);
 
-        template<Vector T>
-        void reverse(const T& grad) const noexcept requires(isReverseDiff);
+        template<class U>
+        void reverse(const U& grad) const noexcept requires(isReverseDiff);
 
         template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;

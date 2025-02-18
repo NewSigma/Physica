@@ -56,8 +56,8 @@ namespace Physica {
 
         template<Vector T, class Executor = SeqExecutor>
         inline Derived& operator=(const T& v_);
-        template<Vector T> void operator+=(const T& v) { Base::getDerived() = Base::getDerived() + v; }
-        template<Vector T> void operator-=(const T& v) { Base::getDerived() += -v; } // To avoid alias
+        template<Vector V> inline void operator+=(const V& v);
+        template<Vector V> inline void operator-=(const V& v);
         [[nodiscard]] inline RefTy operator[](size_t index);
         [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */

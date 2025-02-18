@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../VectorExpr.h"
 
 namespace Physica {
     template<Vector T>
@@ -52,6 +54,9 @@ namespace Physica {
                 return abs(Base::getExpr().template packetPartial<Pack>(index, count));
         }
 
+        template<Vector V>
+        void reverse(const V& grad) const noexcept requires(isReverseDiff);
+
         ScalarType max() const {
             if constexpr (isComplexV)
                 return sqrt(Base::getExpr().squaredNorms().max());
@@ -59,6 +64,13 @@ namespace Physica {
                 return Base::max();
         }
     };
+
+    template<Vector T>
+    template<Vector V>
+    void VectorExpr<ExprType::Abs, T>::reverse(const V& grad) const noexcept requires(isReverseDiff) {
+        const auto& expr = Base::getExpr();
+        expr.reverse(hadamard(unit(expr.values()), grad));
+    }
 
     template<Vector T>
     [[nodiscard]] inline auto abs(const T& v) noexcept {

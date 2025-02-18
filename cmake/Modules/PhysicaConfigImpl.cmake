@@ -11,14 +11,14 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DNOMINMAX)
 else()
-    add_compile_options(-Wall -fPIC -fno-plt -mrdrnd -fno-math-errno -fno-trapping-math -fno-signed-zeros -march=native)
+    add_compile_options(-Wall -fno-plt -mrdrnd -fno-math-errno -fno-trapping-math -fno-signed-zeros -march=native)
     add_link_options(-Wl,-Bsymbolic,--as-needed,--gc-sections)
     if(CMAKE_BUILD_TYPE MATCHES Release)
         add_link_options(-Wl,--strip-all)
     endif()
 
     if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-        add_compile_options(-Wextra)
+        add_compile_options(-Wextra -fassume-sane-operators-new-delete)
     elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
         add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fassume-sane-operator-new>) # -fassume-nothrow-exception-dtor
         # Workaround for P2014R0
