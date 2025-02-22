@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -258,7 +258,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     void ContinuousMatrix<Derived>::random_any(Distribution& dist) {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
@@ -267,10 +267,10 @@ namespace Physica {
             TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_any<Distribution, R>(dist);
+                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_any<R, Distribution>(dist);
         }
         else
-            Base::template random_any<Distribution, R>(dist);
+            Base::template random_any<R, Distribution>(dist);
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>

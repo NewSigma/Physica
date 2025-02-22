@@ -43,13 +43,14 @@ namespace Physica {
         template<Vector V>
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<V>& v);
 
-        template<Scalar T>
-        inline device_obj<Derived>& operator=(const T& s);
-        void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
-        void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
-        void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
-        void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
+        template<Scalar T> inline device_obj<Derived>& operator=(const T& x);
+        template<Scalar T> __device__ void operator+=(const T& x);
+        template<Scalar T> __device__ void operator-=(const T& x);
+        template<Scalar T> __device__ void operator*=(const T& x);
+        template<Scalar T> __device__ void operator/=(const T& x);
 
+        template<Vector V> __device__ inline void operator+=(const device_obj<V>& v);
+        template<Vector V> __device__ inline void operator-=(const device_obj<V>& v);
         [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
@@ -76,31 +77,6 @@ namespace Physica {
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
     };
-
-    template<Vector T1, Vector T2>
-    __host__ __device__ inline void operator+=(device_obj<T1>& v1, const device_obj<T2>& v2) {
-        v1 = v1 + v2;
-    }
-
-    template<Vector T1, Vector T2>
-    __host__ __device__ inline void operator-=(device_obj<T1>& v1, const device_obj<T2>& v2) {
-        v1 = v1 - v2;
-    }
-
-    template<Vector T, Scalar U>
-    __host__ __device__ inline void operator+=(device_obj<T>& v, const U& x) {
-        v = v + x;
-    }
-
-    template<Vector T, Scalar U>
-    __host__ __device__ inline void operator*=(device_obj<T>& v, const U& x) {
-        v = v * x;
-    }
-
-    template<Vector T, Scalar U>
-    __host__ __device__ inline void operator/=(device_obj<T>& v, const U& x) {
-        v = v * reciprocal(x);
-    }
 }
 
 #include "LValueVectorImpl/LValueVectorImpl.cuh"

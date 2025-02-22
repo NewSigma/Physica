@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,14 +27,6 @@ using ScalarType = float32;
 using VectorType = VectorND<ScalarType>;
 using DeviceVector = device_obj<VectorType>;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;
-
-__global__ void test_kernel(
-        PlainStruct<DeviceVector> a,
-        PlainStruct<DeviceVector> b,
-        PlainStruct<DeviceVector> result,
-        ScalarType factor) {
-    result.getDerived() = a.getDerived() + b.getDerived() * factor;
-}
 
 int main() {
     const VectorType a{1, 2, 3, 4};
@@ -70,10 +62,11 @@ int main() {
         auto d_b = b.toDevice();
         VectorType result(len);
         DeviceVector d_result(len);
-        test_kernel<<<1, len, 0, CUDAContext::getInstance()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
-        check(cudaGetLastError());
-        d_result.toHostAsync(result);
-        CUDAExecutor::wait();
+        CUDAExecutor::launch([a = asStruct(d_a), b = asStruct(d_b), result = asStruct(d_result), factor] __device__() mutable {
+            result.getDerived() = a.getDerived() + b.getDerived() * factor;
+        }, 1, len).wait();
+
+        d_result.toHost(result);
         if (!vectorNear(result, answer, 1E-7)) {
             std::cout << "[Error]: Kernel failed\n";
             return 1;

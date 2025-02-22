@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
-#include "Physica/Core/Utils/CUDA/DeviceProp.cuh"
 #include "RValueVector.h"
 
 namespace Physica {
@@ -37,14 +36,15 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxThreadPerBlock = 256;
-    private:
-        using RealType = ScalarType::RealType;
+    protected:
+        using T = ScalarType;
+        using Tr = ScalarType::RealType;
     public:
         ~device_obj() = default;
         /* Operations */
         template<Vector V>
         __host__ __device__ void assign(device_obj<V>& target) const;
-        /* Getters */
+
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().template calc<Owner>(index); }
         template<Packet Pack, Side Owner = GetSide()>
@@ -53,15 +53,17 @@ namespace Physica {
         [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
 
         [[nodiscard]] __host__ __device__ inline auto transpose() const noexcept;
+
+        [[nodiscard]] __device__ inline Tr norm() const;
+        [[nodiscard]] __device__ inline Tr squaredNorm() const;
+        [[nodiscard]] __device__ T max() const;
+        [[nodiscard]] __device__ T min() const;
+        [[nodiscard]] __device__ T sum() const;
+        template<Vector V>
+        [[nodiscard]] __device__ inline auto crossProduct(const device_obj<V>& v) const noexcept;
+        /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().template getLength<Owner>(); }
-        [[nodiscard]] __device__ inline RealType norm() const;
-        [[nodiscard]] __device__ inline RealType squaredNorm() const;
-        [[nodiscard]] __device__ ScalarType max() const;
-        [[nodiscard]] __device__ ScalarType min() const;
-        [[nodiscard]] __device__ ScalarType sum() const;
-        template<Vector V>
-        [[nodiscard]] __device__ inline device_obj<CrossProduct<Derived, V>> crossProduct(const device_obj<V>& v) const noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

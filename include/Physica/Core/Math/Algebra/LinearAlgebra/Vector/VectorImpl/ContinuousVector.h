@@ -63,6 +63,9 @@ namespace Physica {
         template<class U>
         void reverse(const U& grad) const noexcept requires(isReverseDiff);
 
+        template<Vector V>
+        void resize(const V& x) { resize(x.getLength()); }
+        void resize(size_t length) { Base::getDerived().resize(length); }
         template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
         [[nodiscard]] auto toNumpy() const;
@@ -80,15 +83,11 @@ namespace Physica {
         template<size_t Length = Dynamic>
         [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
 
-        template<Vector V>
-        void resize(const V& x) { resize(x.getLength()); }
-        void resize(size_t length) { Base::getDerived().resize(length); }
-
         template<RNG R>
         inline void random_uniform();
         template<RNG R>
         inline void random_normal();
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         inline void random_any(Distribution& dist);
 
         const DataSetType read(const H5Loc& loc, const char* name);

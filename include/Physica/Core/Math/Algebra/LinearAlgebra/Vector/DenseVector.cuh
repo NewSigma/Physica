@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,7 +37,7 @@ namespace Physica {
         using This = device_obj<host_obj>;
     public:
         device_obj() = default;
-        using Storage::Storage;
+        using Storage::Storage; // Handle __host__ and __device__ in base class
         template<Vector V>
         __host__ __device__ device_obj(const device_obj<V>& v);
         device_obj(const This&) = default;
@@ -50,7 +50,11 @@ namespace Physica {
         using Storage::operator[];
         /* Operations */
         [[nodiscard]] inline host_obj toHost() const;
+        [[nodiscard]] inline host_obj toHostAsync() const;
+        inline void toHost(host_obj& obj) const;
+        inline void toHostAsync(host_obj& obj) const;
         using Base::toHost;
+        using Base::toHostAsync;
         using Storage::resize;
         using Storage::swap;
         /* Getters */
@@ -64,7 +68,7 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t len);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
     };
 
@@ -76,34 +80,45 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    inline device_obj<DenseVector<T, Length, Allocator>>::host_obj
-    device_obj<DenseVector<T, Length, Allocator>>::toHost() const {
+    inline auto device_obj<DenseVector<T, Length, Allocator>>::toHost() const -> host_obj {
         return host_obj(Storage::toHost());
     }
 
     template<Scalar T, size_t Length, class Allocator>
+    inline auto device_obj<DenseVector<T, Length, Allocator>>::toHostAsync() const -> host_obj {
+        return host_obj(Storage::toHostAsync());
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    inline void device_obj<DenseVector<T, Length, Allocator>>::toHost(host_obj& obj) const {
+        Storage::toHost(obj);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    inline void device_obj<DenseVector<T, Length, Allocator>>::toHostAsync(host_obj& obj) const {
+        Storage::toHostAsync(obj);
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_uniform(
-            size_t len) {
+    inline auto device_obj<DenseVector<T, Length, Allocator>>::random_uniform(size_t len) -> This {
         return host_obj::template random_uniform<R>(len).toDevice();
     }
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_normal(
-            size_t len) {
+    inline auto device_obj<DenseVector<T, Length, Allocator>>::random_normal(size_t len) -> This {
         return host_obj::template random_normal<R>(len).toDevice();
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class Distribution, RNG R>
-    inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_any(
-            size_t len, Distribution& dist) {
-        return host_obj::template random_any<Distribution, R>(len, dist).toDevice();
+    template<RNG R, class Distribution>
+    inline auto device_obj<DenseVector<T, Length, Allocator>>::random_any(size_t len, Distribution& dist) -> This {
+        return host_obj::template random_any<R, Distribution>(len, dist).toDevice();
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    inline device_obj<DenseVector<T, Length, Allocator>> DenseVector<T, Length, Allocator>::toDevice() const {
+    inline auto DenseVector<T, Length, Allocator>::toDevice() const {
         return device_obj<DenseVector<T, Length, Allocator>>(*this);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include <iostream>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
+#include "Physica/Core/Math/Random/Random.h"
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.h"
-/**
- * Operation between differentiable vectors shall save procedural info, so template expression does not apply to it.
- */
-namespace Physica {
-    
+using namespace Physica;
+using RandomType = Random<MT19937>;
+using T = float32;
+
+int main() {
+    using VectorType = device_obj<VectorND<Diff<T, DiffMode::Reverse>>>;
+    auto v = VectorType(8, 0);
+    v.reverse(T(1));
+    CUDAExecutor::wait();
+    const auto grads = v.grads().toHost();
+
+    std::cout << grads.format() << std::endl;
+    for (auto elem : grads)
+        if (elem != T(1))
+            return 1;
+    return 0;
 }

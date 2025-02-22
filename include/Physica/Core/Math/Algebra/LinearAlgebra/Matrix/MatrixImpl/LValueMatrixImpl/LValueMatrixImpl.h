@@ -402,13 +402,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     void LValueMatrix<Derived>::random_any(Distribution& dist) {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         for (size_t major = 0; major < maxMajor; ++major)
             for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::template random_any<Distribution, R>(dist);
+                refFromMajorMinor(major, minor) = ScalarType::template random_any<R, Distribution>(dist);
     }
 
     template<class Derived>

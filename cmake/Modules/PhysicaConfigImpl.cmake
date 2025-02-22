@@ -74,6 +74,7 @@ if(${PHYSICA_CUDA})
             --diag-suppress 20208
             --default-stream per-thread
             --expt-relaxed-constexpr
+            --expt-extended-lambda
             --device-entity-has-hidden-visibility true
             ${CMAKE_CXX_FLAGS})
         string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")

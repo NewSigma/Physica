@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,19 +28,23 @@ namespace Physica {
     class device_obj<ContinuousVector<Derived>> : public device_obj<LValueVector<Derived>> {
         using Base = device_obj<LValueVector<Derived>>;
         using This = device_obj<ContinuousVector<Derived>>;
-        template<size_t Length> using BlockType = device_obj<ContinuousVectorBlock<Derived, Length>>;
+        template<size_t Length>
+        using BlockType = device_obj<ContinuousVectorBlock<Derived, Length>>;
     public:
         using host_obj = ContinuousVector<Derived>;
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
+        using Base::MaxThreadPerBlock;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     public:
         ~device_obj() = default;
         /* Operators */
+        using Base::operator=;
+        using Base::operator+=;
         inline This& operator=(const This& obj);
         inline This& operator=(This&& obj);
-        using Base::operator=;
         /* Operations */
         template<Packet Pack, Side Owner = GetSide()>
         [[nodiscard]] __device__ inline Pack packet(size_t index) const;
@@ -49,6 +53,11 @@ namespace Physica {
         template<Packet Pack> __device__ inline void writePacket(size_t index, const Pack packet);
         template<Packet Pack> __device__ inline void writePacketPartial(size_t index, size_t count, const Pack packet);
 
+        template<class U>
+        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+
+        template<Vector V>
+        void resize(const V& x) { resize(x.getLength()); }
         void resize(size_t length) { Base::getDerived().resize(length); }
         template<Vector V> void toHost(ContinuousVector<V>& obj) const;
         template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;

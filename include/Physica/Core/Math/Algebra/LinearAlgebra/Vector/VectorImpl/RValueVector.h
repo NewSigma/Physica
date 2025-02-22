@@ -125,8 +125,8 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> max() const;
         [[nodiscard]] CoDiff<T> min() const;
         [[nodiscard]] CoDiff<T> sum() const;
-        [[nodiscard]] T mean() const;
-        [[nodiscard]] T variance() const;
+        [[nodiscard]] CoDiff<T> mean() const;
+        [[nodiscard]] CoDiff<T> variance() const;
         [[nodiscard]] T variance(const T& prior_mean) const;
         [[nodiscard]] T deviation() const;
         [[nodiscard]] CoDiff<T> lnSumExp() const;

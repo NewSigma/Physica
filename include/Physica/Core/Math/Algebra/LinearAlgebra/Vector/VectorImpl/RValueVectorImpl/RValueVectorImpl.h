@@ -349,23 +349,31 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::mean() const -> T {
+    auto RValueVector<Derived>::mean() const -> CoDiff<T> {
         return sum() / Trv(getLength());
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::variance() const -> T {
+    auto RValueVector<Derived>::variance() const -> CoDiff<T> {
         const auto& x = Base::getDerived();
         const size_t length = getLength();
         const auto x_mean = mean();
-        return square(x - x_mean).sum() / Trv(length - 1);
+        const auto expr = x - x_mean;
+        const auto expr2 = square(expr);
+        auto result = expr2.sum() / Trv(length - 1);
+        if constexpr (isReverseDiff) {
+            auto tmp = co_yield result.value();
+            result.reverse(tmp.grad());
+        }
+        else
+            co_return std::move(result);
     }
 
     template<class Derived>
     auto RValueVector<Derived>::variance(const T& prior_mean) const -> T {
         const auto& x = Base::getDerived();
         const size_t length = getLength();
-        return square(x - prior_mean).sum() / Trv(length - 1);
+        return (x - prior_mean).squaredNorm() / Trv(length - 1);
     }
 
     template<class Derived>

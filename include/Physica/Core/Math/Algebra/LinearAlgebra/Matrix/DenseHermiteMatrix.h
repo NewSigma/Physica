@@ -61,7 +61,7 @@ namespace Physica {
         void random_uniform();
         template<RNG R>
         void random_normal();
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         void random_any(Distribution& dist);
 
         inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
@@ -78,7 +78,7 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t order);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t order);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t order, Distribution& dist);
         template<Matrix M>
         [[nodiscard]] bool isHermiteMatrix(const M& mat, double precision);
@@ -151,9 +151,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     void DenseHermiteMatrix<T, Order>::random_any(Distribution& dist) {
-        asVector().template random_any<Distribution, R>(dist);
+        asVector().template random_any<R, Distribution>(dist);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).imag() = RealType(0);
     }
@@ -184,11 +184,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     [[nodiscard]] inline DenseHermiteMatrix<T, Order>
     DenseHermiteMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
         This result(order);
-        result.template random_any<Distribution, R>(dist);
+        result.template random_any<R, Distribution>(dist);
         return result;
     }
 #ifdef PHYSICA_HDF5

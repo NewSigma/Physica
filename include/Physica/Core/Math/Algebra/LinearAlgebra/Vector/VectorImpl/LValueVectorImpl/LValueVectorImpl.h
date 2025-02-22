@@ -195,10 +195,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline void LValueVector<Derived>::random_any(Distribution& dist) {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::template random_any<Distribution, R>(dist);
+            this->operator[](i) = ScalarType::template random_any<R, Distribution>(dist);
     }
 
     template<class Derived>

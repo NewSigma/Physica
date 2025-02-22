@@ -85,7 +85,7 @@ namespace Physica {
     void HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::do_nve_step(T deltaT, size_t numStep) {
         assert(deltaT.isPositive());
         const size_t numParticle = getNumParticle();
-        const size_t maxThread = DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
+        const size_t maxThread = CUDADevAttr::MaxThreadsPerBlock;
         const unsigned int numThread = numParticle > maxThread ? maxThread : numParticle;
         Internal::HardCore_stepKernel<T, IsFixedBoundary, NumReplica>
             <<<1, numThread, numThread * sizeof(T), CUDAContext::getInstance()>>>(asStruct(*this), deltaT, numStep);

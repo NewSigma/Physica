@@ -29,9 +29,9 @@ namespace Physica {
     class SGD {
         static_assert(!Diffable<T>);
 
-        T learnRate;
+        T lr;
     public:
-        inline SGD(T lr);
+        inline SGD(T lr_);
         SGD(const SGD&) = default;
         SGD(SGD&&) noexcept = default;
         ~SGD() = default;
@@ -42,23 +42,20 @@ namespace Physica {
         void step(U& target) const;
         inline void swap(SGD& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] T getLearnRate() const noexcept { return learnRate; }
-        /* Setters */
-        inline void setLearnRate(T lr);
+        [[nodiscard]] T& getLearnRate() noexcept { return lr; }
+        [[nodiscard]] const T& getLearnRate() const noexcept { return lr; }
     };
 
     template<Scalar T>
-    inline SGD<T>::SGD(T lr) {
-        setLearnRate(std::move(lr));
-    }
+    inline SGD<T>::SGD(T lr_) : lr(lr_) {}
 
     template<Scalar T>
     template<Diffable U>
     void SGD<T>::step(U& target) const {
         if constexpr (Scalar<U>)
-            target.value() -= learnRate * target.grad().value();
+            target.value() -= lr * target.grad().value();
         else if constexpr (Vector<U> || Matrix<U>)
-            target.values() -= learnRate * target.grads().values();
+            target.values() -= lr * target.grads().values();
         else
             target.step(*this);
     }
@@ -66,12 +63,6 @@ namespace Physica {
     template<Scalar T>
     inline void SGD<T>::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        learnRate.swap(obj.learnRate);
-    }
-
-    template<Scalar T>
-    inline void SGD<T>::setLearnRate(T lr) {
-        assert(lr.isPositive() && "[Error]: Invalid learn rate");
-        learnRate = lr;
+        lr.swap(obj.lr);
     }
 }

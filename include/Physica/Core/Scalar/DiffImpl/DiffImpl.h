@@ -49,9 +49,9 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     template<int MaskOrder>
     auto Diff<T, Mode, Order>::mask() const noexcept {
-        using MaskedType = std::conditional<MaskOrder == 0, const T&, const Diff<typename Base::ValueType, Mode, MaskOrder>&>::type;
-        using ResultType = std::conditional<std::less<int>{}(MaskOrder, Order), MaskedType, const This&>::type;
-        return reinterpret_cast<ResultType>(*this);
+        using MaskedType = std::conditional<MaskOrder == 0, T, Diff<typename Base::ValueType, Mode, MaskOrder>>::type;
+        using ResultType = std::conditional<std::less<int>{}(MaskOrder, Order), MaskedType, This>::type;
+        return reinterpret_cast<const ResultType&>(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -123,9 +123,9 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline auto Diff<T, Mode, Order>::random_any(Distribution& dist) {
-        return Diff(T::template random_any<Distribution, R>(dist));
+        return Diff(T::template random_any<R, Distribution>(dist));
     }
 
 #ifdef PHYSICA_HDF5

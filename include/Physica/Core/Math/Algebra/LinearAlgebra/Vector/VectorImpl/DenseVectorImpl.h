@@ -77,11 +77,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_any(
             size_t len, Distribution& dist) {
         This result(len);
-        result.random_any<decltype(dist), R>(dist);
+        result.random_any<R, decltype(dist)>(dist);
         return result;
     }
     /**

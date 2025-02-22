@@ -128,9 +128,9 @@ namespace Physica {
         template<class Function, RNG R>
         T solve_e(unsigned int numSequence, Function func, T& deviation) const;
 
-        template<class Functor1, class Functor2, class Distribution, RNG R>
+        template<class Functor1, class Functor2, RNG R, class Distribution>
         T solve(Functor1 func, Functor2 importance, Distribution& disterator) const;
-        template<class Functor1, class Functor2, class Distribution, RNG R>
+        template<class Functor1, class Functor2, RNG R, class Distribution>
         T solve_e(unsigned int numSequence,
                            Functor1 func,
                            Functor2 importance,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,7 +58,7 @@ namespace Physica {
 
         template<RNG R> inline void random_uniform();
         template<RNG R> inline void random_normal();
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         inline void random_any(Distribution& dist);
 
         void swap(This& obj) noexcept { std::swap(*this, obj); }
@@ -77,7 +77,7 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t row, size_t col);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
     private:
         /* Operations */
@@ -126,9 +126,9 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, int Order>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist) {
-        *this = random_any<Distribution, R>(getRow(), getCol(), dist);
+        *this = random_any<R, Distribution>(getRow(), getCol(), dist);
     }
 
     template<Scalar T, int Option, int Order>
@@ -178,11 +178,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, int Order>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(
             size_t row, size_t col, Distribution& dist) {
-        return This(PlainMatrix::template random_any<Distribution, R>(row, col, dist));
+        return This(PlainMatrix::template random_any<R, Distribution>(row, col, dist));
     }
 }
 

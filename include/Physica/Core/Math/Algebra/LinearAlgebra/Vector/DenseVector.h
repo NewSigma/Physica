@@ -62,7 +62,7 @@ namespace Physica {
         using Base::random_normal;
         using Base::random_any;
 
-        [[nodiscard]] inline device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
         using Base::toDevice;
         using Base::toDeviceAsync;
 
@@ -88,7 +88,7 @@ namespace Physica {
         [[nodiscard]] static This random_uniform(const This& v1, const This& v2);
         template<RNG R>
         [[nodiscard]] static This random_normal(size_t len);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static This linspace(T from, T to, size_t count);
     };

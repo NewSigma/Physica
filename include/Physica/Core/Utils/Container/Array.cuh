@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -106,7 +106,7 @@ namespace Physica {
         device_obj(This&& obj) noexcept;
         ~device_obj();
         /* Operators */
-        This& operator=(device_obj obj) noexcept;
+        This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
         [[nodiscard]] __device__ const_lvalue_reference operator[](size_t index) const { return Base::operator[](index); }
         /* Iterators */
@@ -125,7 +125,10 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] PlainHostObj toPlainHost() const;
         [[nodiscard]] host_obj toHost() const;
+        [[nodiscard]] host_obj toHostAsync() const;
         inline void toHost(host_obj& obj) const;
+        void toHostAsync(host_obj& obj) const;
+
         void reserve(size_t size);
         template<class... Args> void resize(size_t size, Args&&... args);
         void swap(This& __restrict obj) noexcept;
@@ -204,19 +207,11 @@ namespace Physica {
         d_data = nullptr;
         length = capacity = 0;
     }
-
-    template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Allocator>>&
-    device_obj<Array<T, Dynamic, Allocator>>::operator=(device_obj<Array<T, Dynamic, Allocator>> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
     /**
      * Synchronization is expected before this, copy is async to task stream
      */
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Allocator>>::PlainHostObj
-    device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const {
+    auto device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const -> PlainHostObj {
         PlainHostObj result(getLength());
         check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         return result;
@@ -227,19 +222,34 @@ namespace Physica {
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator> device_obj<Array<T, Dynamic, Allocator>>::toHost() const {
         host_obj result(length);
-        if constexpr (isTrivial)
-            check(cudaMemcpy(result.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
-        else {
-            const auto buffer = toPlainHost();
-            for (size_t i = 0; i < length; ++i)
-                result[i] = buffer[i].getDerived().toHost();
-        }
+        toHost(result);
         return result;
     }
 
     template<class T, class Allocator>
     inline void device_obj<Array<T, Dynamic, Allocator>>::toHost(host_obj& obj) const {
-        obj = toHost();
+        toHostAsync(obj);
+        CUDAContext::getInstance().wait();
+    }
+
+    template<class T, class Allocator>
+    auto device_obj<Array<T, Dynamic, Allocator>>::toHostAsync() const -> host_obj {
+        host_obj result(length);
+        toHostAsync(result);
+        return result;
+    }
+
+    template<class T, class Allocator>
+    void device_obj<Array<T, Dynamic, Allocator>>::toHostAsync(host_obj& obj) const {
+        obj.reserve(length);
+        if constexpr (isTrivial)
+            check(cudaMemcpyAsync(obj.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+        else {
+            const auto buffer = toPlainHost();
+            for (size_t i = 0; i < length; ++i)
+                buffer[i].getDerived().toHostAsync(obj[i]);
+        }
+        obj.setLength(length);
     }
     /**
      * Synchronization is expected before this, copy is async to task stream
@@ -295,8 +305,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Allocator>>::pointer
-    device_obj<Array<T, Dynamic, Allocator>>::release() noexcept {
+    auto device_obj<Array<T, Dynamic, Allocator>>::release() noexcept -> pointer {
         auto* copy = d_data;
         d_data = nullptr;
         length = capacity = 0;

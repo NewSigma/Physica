@@ -287,7 +287,7 @@ namespace Physica {
             gridDims.y = static_cast<unsigned int>(cellList.getCellGridDimY());
             gridDims.z = static_cast<unsigned int>(cellList.getCellGridDimZ());
             const size_t maxNumAtomInCell = hostCellList.calcMaxNumAtomInCell();
-            const size_t maxThread = DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
+            const size_t maxThread = CUDADevAttr::MaxThreadsPerBlock;
             numThread = maxNumAtomInCell > maxThread ? maxThread : maxNumAtomInCell;
             assert(maxThread >= maxNumAtomInCell && "[Error]: Too many particle in the cell, performance may be pool");
         }

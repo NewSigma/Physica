@@ -154,21 +154,21 @@ namespace Physica {
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, class Distribution, RNG R>
+    template<class Functor1, class Functor2, RNG R, class Distribution>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(
             Functor1 func,
             Functor2 importance,
             Distribution& dist) const {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
-            const VectorType x = VectorType::template random_any<Distribution, R>(dim);
+            const VectorType x = VectorType::template random_any<R, Distribution>(dim);
             toNextMean(result, i, func(x) / importance(x));
         }
         return result;
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, class Distribution, RNG R>
+    template<class Functor1, class Functor2, RNG R, class Distribution>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(
             unsigned int numSequence,
             Functor1 func,

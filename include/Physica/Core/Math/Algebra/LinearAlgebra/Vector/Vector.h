@@ -27,7 +27,8 @@ namespace Physica {
 
     namespace Internal {
         template<class T>
-        concept VectorObj = std::derived_from<T, RValueVector<T>> || std::derived_from<T, device_obj<RValueVector<T>>>;
+        concept VectorObj = std::derived_from<T, RValueVector<T>>
+                         || std::derived_from<T, device_obj<RValueVector<typename remove_device_obj<T>::Type>>>;
     }
 
     template<class T>

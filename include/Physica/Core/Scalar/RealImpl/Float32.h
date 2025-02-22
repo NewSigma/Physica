@@ -102,7 +102,7 @@ namespace Physica {
         [[nodiscard]] inline static Real random_normal();
         template<RNG R>
         [[nodiscard]] static Real random_normal(GaussRandomPool<This, R>& pool) { return pool(); }
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static Real random_any(Distribution& dist);
     #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_FLOAT; }
@@ -143,7 +143,7 @@ namespace Physica {
         return Real(dist(R::getInstance()));
     }
 
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline Real<Float32> Real<Float32>::random_any(Distribution& dist) {
         return Real(dist(R::getInstance()));
     }

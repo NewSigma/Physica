@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -77,7 +77,7 @@ namespace Physica {
         [[nodiscard]] inline static auto random_uniform();
         template<RNG R>
         [[nodiscard]] inline static auto random_normal();
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static auto random_any(Distribution& dist);
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };

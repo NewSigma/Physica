@@ -95,7 +95,7 @@ namespace Physica {
         [[nodiscard]] inline static auto random_uniform(size_t row, size_t col);
         template<RNG R>
         [[nodiscard]] inline static auto random_normal(size_t row, size_t col);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static auto random_any(size_t row, size_t col, Distribution& dist);
         template<Vector V>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const V& vecInCols, const V& vecInRows);

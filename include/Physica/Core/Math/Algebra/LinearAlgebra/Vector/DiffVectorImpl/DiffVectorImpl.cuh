@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,228 +18,94 @@
  */
 #pragma once
 
+#include "../DiffVector.cuh"
+
 namespace Physica {
-    namespace Internal {
-        template<class This, class SegmentType, bool ComputeMax>
-        __global__ void DiffVector_minmaxKernel(
-                const Physica::PlainStruct<const This> v,
-                Physica::PlainStruct<SegmentType> result) {
-            v.getDerived().template minmaxKernelImpl<ComputeMax>(result.getDerived());
-        }
+    template<Scalar T, int Order>
+    device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length) : v(length), g(length) {}
 
-        template<class This, class SegmentType>
-        __global__ void DiffVector_sumKernel(
-                const Physica::PlainStruct<const This> v,
-                Physica::PlainStruct<SegmentType> result) {
-            v.getDerived().sumKernelImpl(result.getDerived());
-        }
+    template<Scalar T, int Order>
+    device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length, T init) : v(length, init), g(length, 0) {}
+
+    template<Scalar T, int Order>
+    template<Vector V>
+    device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(const V& v_) requires(!ReverseDiff<V>) : device_obj(v_.getLength()) {
+        v = v_;
     }
 
     template<Scalar T, int Order>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::device_obj(size_t length, ExprType type)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(length, type))) {}
+    void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::zero_grad() {
+        g = T(0);
+    }
 
     template<Scalar T, int Order>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::device_obj(const PlainVector& values)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(values))) {}
-
-    template<Scalar T, int Order>
-    template<RNG R>
-    inline void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_uniform() {
-        *this = random_uniform<R>(getLength());
+    inline void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::resize(size_t size) {
+        if (size != getLength()) {
+            v.resize(size);
+            g.resize(size);
+        }
     }
 
     template<Scalar T, int Order>
     template<RNG R>
-    inline void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_normal() {
-        *this = random_normal<R>(getLength());
+    inline void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::random_uniform() {
+        v.template random_uniform<R>();
+        zero_grad();
     }
 
     template<Scalar T, int Order>
-    template<class Distribution, RNG R>
-    inline void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_any(Distribution& dist) {
-        *this = random_any<Distribution, R>(getLength(), dist);
+    template<RNG R>
+    inline void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::random_normal() {
+        v.template random_normal<R>();
+        zero_grad();
     }
 
     template<Scalar T, int Order>
-    template<Side Owner>
-    __host__ __device__ inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::calc(size_t index) const {
+    template<RNG R, class Distribution>
+    inline void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::random_any(Distribution& dist) {
+        v.template random_any<R, Distribution>(dist);
+        zero_grad();
+    }
+
+    template<Scalar T, int Order>
+    void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::swap(This& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        v.swap(obj.v);
+        g.swap(obj.g);
+    }
+
+    template<Scalar T, int Order>
+    __host__ __device__ inline auto device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < getLength() && "[Error]: Index out of range");
-        return getTraceSegment()[index];
+        return PtrTy(v.data_ptr(index), g.data_ptr(index));
     }
 
     template<Scalar T, int Order>
-    template<bool ComputeMax>
-    __device__ void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::minmaxKernelImpl(SegmentType& result) const {
-        extern __shared__ T buffer[];
-        const size_t length = getLength();
-        const size_t index = threadIdx.x;
-
-        T value = calc(index).value();
-        int valueIndex = index;
-        for (int i = index + blockDim.x; i < length; i += blockDim.x) {
-            const T temp = calc(i).value();
-            const bool flag = ComputeMax ? (temp > value) : (temp < value);
-            if (flag) {
-                value = temp;
-                valueIndex = i;
-            }
-        }
-        buffer[index] = value;
-
-        int i0 = blockDim.x;
-        int i = (i0 + 1) / 2;
-        while (index + i < i0) {
-            __syncthreads();
-            const int index1 = index + i;
-            const T temp = buffer[index1];
-            const bool flag = ComputeMax ? (temp > value) : (temp < value);
-            if (flag) {
-                value = temp;
-                valueIndex = index1;
-                buffer[index] = value;
-            }
-            i0 = i;
-            i = (i0 + 1) / 2;
-        }
-
-        if (index != 0)
-            return;
-        const auto& trace = getTraceSegment();
-        result.getRecords()[0] = {0, ExprType::Assign};
-        result.getOperands()[0] = trace[valueIndex];
-        result.getValues()[0] = value;
-        result.getGrads()[0] = 0;
-    }
-
-    template<Scalar T, int Order>
-    __device__ void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::sumKernelImpl(SegmentType& result) const {
-        extern __shared__ T buffer[];
-        const size_t length = getLength();
-        const size_t index = threadIdx.x;
-
-        T threadSum = 0;
-        for (int i = index; i < length; i += blockDim.x)
-            threadSum += calc(i).value();
-        buffer[index] = threadSum;
-
-        int i0 = blockDim.x;
-        int i = (i0 + 1) / 2;
-        while (index + i < i0) {
-            __syncthreads();
-            threadSum += buffer[index + i];
-            buffer[index] = threadSum;
-            i0 = i;
-            i = (i0 + 1) / 2;
-        }
-
-        if (index != 0)
-            return;
-        const auto& trace = getTraceSegment();
-        result.getRecords()[0] = {0, ExprType::Sum};
-        result.getOperands()[0] = trace[0];
-        result.getOperands()[1] = trace[length - 1];
-        result.getValues()[0] = threadSum;
-        result.getGrads()[0] = 0;
-    }
-
-    template<Scalar T, int Order>
-    __host__ __device__ inline T*
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::value_ptr(size_t index) const noexcept {
-        return calc(index).value_ptr();
-    }
-
-    template<Scalar T, int Order>
-    __host__ __device__ inline T*
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::grad_ptr(size_t index) const noexcept {
-        return calc(index).grad_ptr();
-    }
-
-    template<Scalar T, int Order>
-    __device__ inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::DiffRecord&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::getRecord(size_t index) {
-        return getTraceSegment().getRecords()[index];
-    }
-
-    template<Scalar T, int Order>
-    __device__ inline T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::value(size_t index) {
-        return getTraceSegment().getValues()[index];
-    }
-
-    template<Scalar T, int Order>
-    __device__ inline const T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::value(size_t index) const {
-        return getTraceSegment().getValues()[index];
-    }
-
-    template<Scalar T, int Order>
-    __device__ inline T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::grad(size_t index) {
-        return getTraceSegment().getGrads()[index];
-    }
-
-    template<Scalar T, int Order>
-    __device__ inline const T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::grad(size_t index) const {
-        return getTraceSegment().getGrads()[index];
-    }
-
-    template<Scalar T, int Order>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::max() const {
-        auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Assign);
-        const size_t length = getLength();
-        const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
-        Internal::DiffVector_minmaxKernel<This, SegmentType, true>
-                <<<1, numThread, numThread * sizeof(T), CUDAContext::getInstance()>>>(asStruct(*this), asStruct(trace));
-        check(cudaGetLastError());
-        return ScalarType(trace.getValues().data(), trace.getGrads().data());
-    }
-
-    template<Scalar T, int Order>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::min() const {
-        auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Assign);
-        const size_t length = getLength();
-        const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
-        Internal::DiffVector_minmaxKernel<This, SegmentType, false>
-                <<<1, numThread, numThread * sizeof(T), CUDAContext::getInstance()>>>(asStruct(*this), asStruct(trace));
-        check(cudaGetLastError());
-        return ScalarType(trace.getValues().data(), trace.getGrads().data());
-    }
-
-    template<Scalar T, int Order>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::sum() const {
-        auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Sum);
-        const size_t length = getLength();
-        const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
-        Internal::DiffVector_sumKernel<This, SegmentType>
-                <<<1, numThread, numThread * sizeof(T), CUDAContext::getInstance()>>>(asStruct(*this), asStruct(trace));
-        check(cudaGetLastError());
-        return ScalarType(trace.getValues().data(), trace.getGrads().data());
+    __host__ __device__ inline auto device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 
     template<Scalar T, int Order>
     template<RNG R>
-    inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_uniform(size_t len) {
-        return This(PlainVector::random_uniform<R>(len));
+    inline auto device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::random_uniform(size_t len) -> This {
+        This result(len);
+        result.template random_uniform<R>();
+        return result;
     }
 
     template<Scalar T, int Order>
     template<RNG R>
-    inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_normal(size_t len) {
-        return This(PlainVector::random_normal<R>(len));
+    inline auto device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::random_normal(size_t len) -> This {
+        This result(len);
+        result.template random_normal<R>();
+        return result;
     }
 
     template<Scalar T, int Order>
-    template<class Distribution, RNG R>
-    inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_any(size_t len, Distribution& dist) {
-        return This(PlainVector::random_any<Distribution, R>(len, dist));
+    template<RNG R, class Distribution>
+    inline auto device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::random_any(size_t len, Distribution& dist) -> This {
+        This result(len);
+        result.template random_any<R, Distribution>(dist);
+        return result;
     }
 }

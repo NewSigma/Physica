@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,90 +18,77 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/Diff.cuh"
-#include "DiffVector.h"
 #include "DenseVector.cuh"
+#include "DiffVector.h"
 
 namespace Physica {
     template<Scalar T, int Order>
-    class device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
-            : public device_obj<RValueVector<Diff<VectorND<T>, DiffMode::Reverse, Order>>> {
-        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
-        using PlainVector = VectorND<T>;
-        using host_obj = Diff<PlainVector, DiffMode::Reverse, Order>;
+    class device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>
+            : public device_obj<ContinuousVector<DenseVector<Diff<T, DiffMode::Reverse, Order>>>> {
+        using host_obj = DenseVector<Diff<T, DiffMode::Reverse, Order>>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using TracerType = device_obj<typename host_obj::TracerType>;
-        using SegmentType = device_obj<typename host_obj::SegmentType>;
-        using RecordArray = SegmentType::RecordArray;
-        using ValueVector = SegmentType::ValueVector;
-        using GradVector = SegmentType::GradVector;
+        using Base = device_obj<ContinuousVector<host_obj>>;
     public:
         using ScalarType = Base::ScalarType;
-        using DiffRecord = SegmentType::DiffRecord;
-        using OperandArray = SegmentType::OperandArray;
         using Base::MaxThreadPerBlock;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
-        PlainStruct<SegmentType> traceSeg;
+        using ValueVector = device_obj<VectorND<T>>;
+        using GradType = ScalarType::GradType;
+        using GradVector = std::conditional<Order == 1, ValueVector, device_obj<VectorND<GradType>>>::type;
+        using initializer_list = std::initializer_list<T>;
+
+        ValueVector v;
+        device_obj<VectorND<T>> g;
     public:
         device_obj() = default;
-        device_obj(size_t length, ExprType type);
-        device_obj(const PlainVector& values);
+        explicit device_obj(size_t length);
+        device_obj(size_t length, T init);
+        template<Vector V>
+        explicit device_obj(const V& v_) requires(!ReverseDiff<V>);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RNG R> inline void random_uniform();
-        template<RNG R> inline void random_normal();
-        template<class Distribution, RNG R>
+        void zero_grad();
+        inline void resize(size_t size);
+
+        template<RNG R>
+        inline void random_uniform();
+        template<RNG R>
+        inline void random_normal();
+        template<RNG R, class Distribution>
         inline void random_any(Distribution& dist);
-
-        void swap(This& obj) noexcept { std::swap(*this, obj); }
-
-        template<bool ComputeMax>
-        __device__ void minmaxKernelImpl(SegmentType& result) const;
-        __device__ void sumKernelImpl(SegmentType& result) const;
+        void swap(This& obj) noexcept;
         /* Getters */
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ inline ScalarType calc(size_t index) const;
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getTraceSegment().getLength(); }
-        [[nodiscard]] __host__ __device__ inline T* value_ptr(size_t index) const noexcept;
-        [[nodiscard]] __host__ __device__ inline T* grad_ptr(size_t index) const noexcept;
-        [[nodiscard]] __device__ inline DiffRecord& getRecord(size_t index);
-        [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return getTraceSegment().getOperands(); }
-        [[nodiscard]] __device__ inline T& value(size_t index);
-        [[nodiscard]] __device__ inline const T& value(size_t index) const;
-        [[nodiscard]] __device__ inline T& grad(size_t index);
-        [[nodiscard]] __device__ inline const T& grad(size_t index) const;
-        [[nodiscard]] const ValueVector& getValues() const noexcept { return getTraceSegment().getValues(); }
-        [[nodiscard]] const GradVector& getGrads() const noexcept { return getTraceSegment().getGrads(); }
-        [[nodiscard]] ScalarType max() const;
-        [[nodiscard]] ScalarType min() const;
-        [[nodiscard]] ScalarType sum() const;
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
+
+        [[nodiscard]] __host__ __device__ const ValueVector& values() const noexcept { return v; }
+        [[nodiscard]] __host__ __device__ ValueVector& values() noexcept { return v; }
+        [[nodiscard]] __host__ __device__ const GradVector& grads() const noexcept { return g; }
+        [[nodiscard]] __host__ __device__ GradVector& grads() noexcept { return g; }
         /* Static members */
         template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t len);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
-    private:
-        [[nodiscard]] __host__ __device__ SegmentType& getTraceSegment() noexcept { return traceSeg.getDerived(); }
-        [[nodiscard]] __host__ __device__ const SegmentType& getTraceSegment() const noexcept { return traceSeg.getDerived(); }
     };
 }
 
 namespace Physica {
     template<Scalar T, int Order>
-    class Traits<device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>> : public Traits<VectorND<T>> {
-    public:
-        using ScalarType = device_obj<Diff<T, DiffMode::Reverse, Order>>;
+    class Traits<device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>> : public Traits<DenseVector<Diff<T, DiffMode::Reverse, Order>>> {
+        static_assert(!Diffable<T>, "[Error]: Nested Diff<> is not allowed");
     };
 }
 
 #include "DiffVectorImpl/DiffVectorImpl.cuh"
-#include "DiffVectorImpl/DiffVectorExpr.cuh"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,14 +22,35 @@
 
 namespace Physica {
     template<class Derived>
-    inline device_obj<ContinuousVector<Derived>>& device_obj<ContinuousVector<Derived>>::operator=(const This& obj) {
+    inline auto device_obj<ContinuousVector<Derived>>::operator=(const This& obj) -> This& {
         Base::operator=(obj);
         return *this;
     }
     
     template<class Derived>
-    inline device_obj<ContinuousVector<Derived>>& device_obj<ContinuousVector<Derived>>::operator=(This&& obj) {
+    inline auto device_obj<ContinuousVector<Derived>>::operator=(This&& obj) -> This& {
         return *this = obj;
+    }
+
+    template<class Derived>
+    template<class U>
+    void device_obj<ContinuousVector<Derived>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        const size_t length = Base::getLength();
+        const unsigned int numThread = std::min(length, MaxThreadPerBlock);
+        const unsigned int numBlock = (length + numThread - 1) / numThread;
+        if constexpr (Scalar<U>) {
+            CUDAExecutor::launch([x = asStruct(Base::getConstCastDerived()), g_ = grad] __device__() mutable {
+                x.getDerived().grads() += g_;
+            }, numBlock, numThread);
+        }
+        else {
+            static_assert(Vector<U>, "[Error]: Unexpected type");
+            assert(Base::getLength() == grad.getLength());
+            CUDAExecutor::launch([x = asStruct(Base::getConstCastDerived()), g_ = asStruct(grad)] __device__() mutable {
+                x.getDerived().grads() += g_;
+            }, numBlock, numThread);
+        }
     }
 
     template<class Derived>

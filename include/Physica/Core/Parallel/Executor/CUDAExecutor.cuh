@@ -19,20 +19,37 @@
 #pragma once
 
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "SeqExecutor.h"
 
 namespace Physica {
+    namespace Internal {
+        template<class Functor>
+        __global__ void kernel(Functor func) {
+            return func();
+        }
+    }
     /**
      * Single thread with cuda support
      */
     class CUDAExecutor : public SeqExecutor {
     public:
+        template<class Functor>
+        static CUDAExecutor launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem = 0);
+
         static void wait() {
         #ifdef PHYSICA_CUDA
             check(cudaDeviceSynchronize());
         #endif
         }
     };
+
+    template<class Functor>
+    CUDAExecutor CUDAExecutor::launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem) {
+        Internal::kernel<<<numBlocks, numThreads, sharedMem, CUDAContext::getInstance()>>>(func);
+        check(cudaGetLastError());
+        return {};
+    }
 }
 
 namespace Physica {

@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include "Physica/PlainStruct.h"
-#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "../RValueVector.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/PlainStruct.h"
 
 namespace Physica {
     namespace Internal {
@@ -80,24 +80,24 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ inline auto device_obj<RValueVector<Derived>>::norm() const -> RealType {
+    __device__ inline auto device_obj<RValueVector<Derived>>::norm() const -> Tr {
         return sqrt(Base::getDerived().squaredNorm());
     }
 
     template<class Derived>
-    __device__ inline auto device_obj<RValueVector<Derived>>::squaredNorm() const -> RealType {
-        auto result = RealType(0);
-        for(size_t i = 0; i < getLength(); ++i)
+    __device__ inline auto device_obj<RValueVector<Derived>>::squaredNorm() const -> Tr {
+        auto result = Tr(0);
+        for (size_t i = 0; i < getLength(); ++i)
             result += calc(i).squaredNorm();
         return result;
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::max() const -> ScalarType {
+    __device__ auto device_obj<RValueVector<Derived>>::max() const -> T {
         assert(getLength() != 0);
-        ScalarType result = calc(0);
-        for(size_t i = 1; i < getLength(); ++i) {
-            ScalarType temp = calc(i);
+        T result = calc(0);
+        for (size_t i = 1; i < getLength(); ++i) {
+            T temp = calc(i);
             if (result < temp)
                 result = temp;
         }
@@ -105,11 +105,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::min() const -> ScalarType {
+    __device__ auto device_obj<RValueVector<Derived>>::min() const -> T {
         assert(getLength() != 0);
-        ScalarType result = calc(0);
-        for(size_t i = 1; i < getLength(); ++i) {
-            ScalarType temp = calc(i);
+        T result = calc(0);
+        for (size_t i = 1; i < getLength(); ++i) {
+            T temp = calc(i);
             if (result > temp)
                 result = temp;
         }
@@ -117,18 +117,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::sum() const -> ScalarType {
+    __device__ auto device_obj<RValueVector<Derived>>::sum() const -> T {
         assert(getLength() != 0);
-        auto result = ScalarType(0);
-        for(size_t i = 0; i < getLength(); ++i)
+        auto result = T(0);
+        for (size_t i = 0; i < getLength(); ++i)
             result += calc(i);
         return result;
     }
 
     template<class Derived>
     template<Vector V>
-    __device__ inline device_obj<CrossProduct<Derived, V>>
-    device_obj<RValueVector<Derived>>::crossProduct(const device_obj<V>& v) const noexcept {
+    __device__ inline auto device_obj<RValueVector<Derived>>::crossProduct(const device_obj<V>& v) const noexcept {
         return device_obj<CrossProduct<Derived, V>>(*this, v);
     }
 
@@ -140,7 +139,7 @@ namespace Physica {
             constexpr static size_t Size1 = Derived::SizeAtCompile;
             constexpr static size_t Size2 = V::SizeAtCompile;
             constexpr static size_t VectorSize = Size1 > Size2 ? Size1 : Size2;
-            using PacketType = device_obj<BestPacket<ScalarType, VectorSize>>::Type;
+            using PacketType = device_obj<BestPacket<T, VectorSize>>::Type;
             constexpr static size_t PacketSize = PacketType::size();
 
             if constexpr (VectorSize != Dynamic) {

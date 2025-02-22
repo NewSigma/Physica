@@ -126,7 +126,7 @@ namespace Physica {
         void random_uniform();
         template<RNG R>
         void random_normal();
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         void random_any(Distribution& dist);
 
         const H5DataSet<2> read(const H5Loc& loc, const char* name);

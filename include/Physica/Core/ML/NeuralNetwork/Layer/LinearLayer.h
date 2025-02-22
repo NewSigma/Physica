@@ -65,7 +65,7 @@ namespace Physica {
         void random_xavier_uniform(Tv gain);
         template<RNG R>
         void random_xavier_normal(Tv gain);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         void random_any(Distribution& dist);
 
         const H5Group read(const H5Loc& loc, const char* name);
@@ -183,9 +183,9 @@ namespace Physica {
         using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
-        weights.template random_any<decltype(dist), R>(dist);
+        weights.template random_any<R, decltype(dist)>(dist);
         if constexpr (WithBias)
-            bias.template random_any<decltype(dist), R>(dist);
+            bias.template random_any<R, decltype(dist)>(dist);
     }
 
     template<Scalar T, bool WithBias>
@@ -194,17 +194,17 @@ namespace Physica {
         using MachineType = T::MachineType;
         const auto deviation = (gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
-        weights.template random_any<decltype(dist), R>(dist);
+        weights.template random_any<R, decltype(dist)>(dist);
         if constexpr (WithBias)
-            bias.template random_any<decltype(dist), R>(dist);
+            bias.template random_any<R, decltype(dist)>(dist);
     }
 
     template<Scalar T, bool WithBias>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     void LinearLayer<T, WithBias>::random_any(Distribution& dist) {
-        weights.template random_any<Distribution, R>(dist);
+        weights.template random_any<R, Distribution>(dist);
         if constexpr (WithBias)
-            bias.template random_any<Distribution, R>(dist);
+            bias.template random_any<R, Distribution>(dist);
     }
 
 #ifdef PHYSICA_HDF5

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -76,7 +76,7 @@ namespace Physica {
             CrystalCellType::PositionMatrix pos(numAtom, 3);
             std::uniform_real_distribution dist(-0.1, 0.1);
             for (size_t i = 0; i < MoleculePerCell; ++i) {
-                auto temp = Vector3D<float64>::template random_any<decltype(dist), RandomType>(3, dist);
+                auto temp = Vector3D<float64>::template random_any<R, decltype(dist)>(3, dist);
                 if (i == 0) {
                     temp[0] += float64(0.25);
                     temp[1] += float64(0.25);

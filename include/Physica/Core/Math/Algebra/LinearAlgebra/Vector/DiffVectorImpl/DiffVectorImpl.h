@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -47,8 +47,8 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<Vector V>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v) requires(!ReverseDiff<V>) : DenseVector(v.getLength()) {
-        v.assign(*this);
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v_) requires(!ReverseDiff<V>) : DenseVector(v_.getLength()) {
+        v_.assign(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -91,9 +91,9 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(Distribution& dist) {
-        v.template random_any<Distribution, R>(dist);
+        v.template random_any<R, Distribution>(dist);
         zero_grad();
     }
 
@@ -105,22 +105,19 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    __host__ __device__ inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>::PtrTy
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) noexcept {
+    __host__ __device__ inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < getLength() && "[Error]: Index out of range");
         return PtrTy(v.data_ptr(index), g.data_ptr(index));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    __host__ __device__ inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>::ConstPtrTy
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) const noexcept {
+    __host__ __device__ inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<RNG R>
-    inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform(size_t len) {
+    inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_uniform(size_t len) -> This {
         This result(len);
         result.template random_uniform<R>();
         return result;
@@ -128,19 +125,17 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<RNG R>
-    inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_normal(size_t len) {
+    inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_normal(size_t len) -> This {
         This result(len);
         result.template random_normal<R>();
         return result;
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<class Distribution, RNG R>
-    inline DenseVector<Diff<T, Mode, Order>, Length, Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(size_t len, Distribution& dist) {
+    template<RNG R, class Distribution>
+    inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(size_t len, Distribution& dist) -> This {
         This result(len);
-        result.template random_any<Distribution, R>(dist);
+        result.template random_any<R, Distribution>(dist);
         return result;
     }
 

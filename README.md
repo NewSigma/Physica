@@ -49,9 +49,9 @@ Addtional libraries:
 [oneMKL](https://www.intel.com/) 2024.2 (Optional)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.8  (Optional)  
 [Qt](https://www.qt.io/)  6.5.3  (Optional, Plotting support)  
-[pybind11](https://github.com/pybind/pybind11) 2.11 (Optional, Python binding, Experimental)  
-[LLVM](https://llvm.org/) 17.0.6 (Optional, Python binding, Experimental)  
-[libffi](https://github.com/libffi/libffi/) 3.4.6 (Optional, Python binding, Experimental)  
+[pybind11](https://github.com/pybind/pybind11) 2.11 (Optional, Python binding, Concept Validation)  
+[LLVM](https://llvm.org/) 17.0.6 (Optional, Python binding, Concept Validation)  
+[libffi](https://github.com/libffi/libffi/) 3.4.6 (Optional, Python binding, Concept Validation)  
 [vectorclass](https://github.com/vectorclass/version2) 2.01.03 (Bundled)  
 
 Compile Physica using the following command:  

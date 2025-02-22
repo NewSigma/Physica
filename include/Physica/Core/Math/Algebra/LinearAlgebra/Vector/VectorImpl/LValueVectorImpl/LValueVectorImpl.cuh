@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../LValueVector.cuh"
+
 namespace Physica {
     namespace Internal {
         template<class Derived, Scalar T>
@@ -70,6 +72,42 @@ namespace Physica {
         Internal::assignConst_kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), x);
         check(cudaGetLastError());
         return Base::getDerived();
+    }
+
+    template<class Derived>
+    template<Scalar T>
+    __device__ void device_obj<LValueVector<Derived>>::operator+=(const T& x) {
+        Base::getDerived() = Base::getDerived() + x;
+    }
+
+    template<class Derived>
+    template<Scalar T>
+    __device__ void device_obj<LValueVector<Derived>>::operator-=(const T& x) {
+        Base::getDerived() = Base::getDerived() - x;
+    }
+
+    template<class Derived>
+    template<Scalar T>
+    __device__ void device_obj<LValueVector<Derived>>::operator*=(const T& x) {
+        Base::getDerived() = Base::getDerived() * x;
+    }
+
+    template<class Derived>
+    template<Scalar T>
+    __device__ void device_obj<LValueVector<Derived>>::operator/=(const T& x) {
+        Base::getDerived() = Base::getDerived() / x;
+    }
+
+    template<class Derived>
+    template<Vector V>
+    __device__ inline void device_obj<LValueVector<Derived>>::operator+=(const device_obj<V>& v) {
+        Base::getDerived() = Base::getDerived() + v;
+    }
+
+    template<class Derived>
+    template<Vector V>
+    __device__ inline void device_obj<LValueVector<Derived>>::operator-=(const device_obj<V>& v) {
+        Base::getDerived() += -v;
     }
 
     template<class Derived>

@@ -1,15 +1,14 @@
 /*
- * Copyright 2023-2024 Weibo He. All rights reserved.
+ * Copyright 2023-2025 Weibo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
 #include <fstream>
 #include "Physica/Core/IO/VASP/Poscar.h"
-#include "Physica/Core/Physics/MD/ForceModel/QEModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/ForceModel/QEModel.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Physics/MD/KineticModel/CFireModel.h"
-#include "Physica/Core/Physics/MD/Barostat/Berendsen.h"
+#include "Physica/Core/Physics/MD/KineticModel/FireModel.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -83,7 +82,7 @@ MDCell<ScalarType> makeSystem() {
     pos = cell1.getPos();
     std::normal_distribution<double> dist(0, 0.5);
     for (auto& elem : pos.asArray())
-        elem += ScalarType::random_any<decltype(dist), RandomType>(dist); //Perturbation
+        elem += ScalarType::random_any<RandomType, decltype(dist)>(dist); //Perturbation
     cell1.setPos(pos);
     return cell1;
 }

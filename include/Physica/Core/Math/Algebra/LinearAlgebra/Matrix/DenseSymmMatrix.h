@@ -64,8 +64,8 @@ namespace Physica {
         void random_uniform() { asVector().template random_uniform<R>(); }
         template<RNG R>
         void random_normal() { asVector().template random_normal<R>(); }
-        template<class Distribution, RNG R>
-        void random_any(Distribution& dist) { asVector().template random_any<Distribution, R>(dist); }
+        template<RNG R, class Distribution>
+        void random_any(Distribution& dist) { asVector().template random_any<R, Distribution>(dist); }
 
         inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
         inline H5DataSet<1> write(H5Loc& loc, const char* name) const;
@@ -83,7 +83,7 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t order);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t order);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t order, Distribution& dist);
     };
     /**
@@ -170,11 +170,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
     DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
         This result(order);
-        result.template random_any<Distribution, R>(dist);
+        result.template random_any<R, Distribution>(dist);
         return result;
     }
 #ifdef PHYSICA_HDF5

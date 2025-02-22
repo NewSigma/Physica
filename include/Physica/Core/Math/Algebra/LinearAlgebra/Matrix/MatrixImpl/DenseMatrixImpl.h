@@ -122,11 +122,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
             size_t row, size_t col, Distribution& dist) {
         This result(row, col);
-        result.template random_any<Distribution, R>(dist);
+        result.template random_any<R, Distribution>(dist);
         return result;
     }
 

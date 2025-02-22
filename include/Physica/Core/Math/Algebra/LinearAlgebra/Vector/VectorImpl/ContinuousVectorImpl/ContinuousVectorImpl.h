@@ -174,17 +174,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Distribution, RNG R>
+    template<RNG R, class Distribution>
     inline void ContinuousVector<Derived>::random_any(Distribution& dist) {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
-                this->operator[](i) = ScalarType::template random_any<decltype(dist), R>(dist);
+                this->operator[](i) = ScalarType::template random_any<R, decltype(dist)>(dist);
         }
         else
-            Base::template random_any<decltype(dist), R>(dist);
+            Base::template random_any<R, decltype(dist)>(dist);
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>

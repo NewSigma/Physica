@@ -55,7 +55,7 @@ namespace Physica {
         DenseVector(initializer_list list);
         DenseVector(ValueVector v_, GradVector g_) noexcept;
         template<Vector V>
-        explicit(isReverseDiff) DenseVector(const V& v) requires(!ReverseDiff<V>);
+        explicit(isReverseDiff) DenseVector(const V& v_) requires(!ReverseDiff<V>);
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;
@@ -84,7 +84,7 @@ namespace Physica {
 
         template<RNG R> inline void random_uniform();
         template<RNG R> inline void random_normal();
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         inline void random_any(Distribution& dist);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -102,7 +102,7 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t len);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<class Distribution, RNG R>
+        template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static auto linspace(T from, T to, size_t count);
     };

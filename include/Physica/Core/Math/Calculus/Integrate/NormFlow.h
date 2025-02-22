@@ -56,7 +56,6 @@ namespace Physica {
         Trv warmup(Net& nn, int numWarm);
         template<DNN Net, RNG R, class Executor = SeqExecutor>
         void integral(Net& nn);
-        [[nodiscard]] T calcSquaredChi(int from = 0) const { return Base::calcSquaredChiImpl<false>(from); }
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -134,7 +133,6 @@ namespace Physica {
     auto NormFlow<T, TakeLn>::trial_normal(Net& nn, FuncValue& mean, FuncValue& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
-        const auto volumn = (to - from).prod();
         const auto mask = makeMask();
 
         VectorND<Trv> x(getDim());
@@ -145,10 +143,11 @@ namespace Physica {
                 const auto lnJ = nn.forward(x, mask);
                 x = from + hadamard(coeff, x);
                 FuncValue y = nn(x);
-                FuncValue sample = y * exp(lnJ.value()) * volumn;
+                FuncValue sample = y * exp(lnJ.value());
                 toNextVariance(var, mean, i, sample);
-                loss += calcLoss(nn(x), lnJ);
+                loss += calcLoss_normal(nn(x), lnJ);
             }
+            loss /= Trv(numSample);
         }
         else {
             const int numThread = Executor::getNumThread();
@@ -162,17 +161,20 @@ namespace Physica {
                 const auto lnJ = nets[tid].forward(x, mask);
                 x = from + hadamard(coeff, x);
                 FuncValue y = nn(x);
-                samples[i] = y * exp(lnJ.value()) * volumn;
-                losses[tid] += calcLoss(y, lnJ);
+                samples[i] = y * exp(lnJ.value());
+                losses[tid] += calcLoss_normal(y, lnJ);
             }, numSample, numThread).wait();
-            loss = losses.sum();
+            loss = losses.mean();
 
             for (auto& net : nets)
                 nn.reverse(net);
             mean = samples.mean();
             var = samples.variance(mean);
         }
-        return loss / Trv(numSample);
+        const auto volume = (to - from).prod();
+        mean *= volume;
+        var *= square(volume);
+        return loss - Trv(1);
     }
 
     template<Scalar T, bool TakeLn>
@@ -226,7 +228,7 @@ namespace Physica {
         var = samples.variance(mean);
         mean = ln(mean) + maxSample;
         var = ln(var) + Trv(2) * maxSample;
-        return loss / Trv(numSample);
+        return loss - ln(Trv(numSample));
     }
 
     template<Scalar T, bool TakeLn>
@@ -240,16 +242,17 @@ namespace Physica {
     template<Scalar T, bool TakeLn>
     template<class Executor>
     auto NormFlow<T, TakeLn>::calcLoss_ln(Trv lnVolume, VectorND<FuncValue>& samples, Array<CoDiff<T>>& lnJs, const VectorND<T>& lnJv) -> Trv {
+        const size_t numSample = samples.getLength();
         Trv result;
         {
-            auto l = (Trv(2) * (samples + lnJv)).lnSumExp();
+            const Tv mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
+            auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp();
             if constexpr (ReverseDiff<T>)
                 l.reverse();
             result = l.value();
         }
 
         const int numThread = Executor::getNumThread();
-        const size_t numSample = Base::getNumSample();
         auto futures = Executor::parallel_for([&, lnVolume](size_t i) {
             auto& lnJ = lnJs[i];
             samples[i] += lnJ.value() + lnVolume;
