@@ -18,15 +18,14 @@
  */
 #pragma once
 
-#include "GridBase.h"
+#include "TensorBase.h"
 
 namespace Physica {
     template<class T>
-    class GridStorage : public GridBase {
-        using This = GridStorage<T>;
-        using Base = GridBase;
+    class TensorStorage : public TensorBase {
+        using This = TensorStorage<T>;
+        using Base = TensorBase;
     public:
-        using Index3D = Array<size_t, 3>;
         using ArrayType = Array<T>;
     private:
         ArrayType values;
@@ -34,22 +33,22 @@ namespace Physica {
         size_t dimY;
         size_t dimZ;
     public:
-        GridStorage() = default;
+        TensorStorage() = default;
         template<class... Args>
-        GridStorage(Index3D index, Args&&... args);
-        GridStorage(const GridStorage&) = default;
-        GridStorage(GridStorage&&) noexcept = default;
-        ~GridStorage() = default;
+        TensorStorage(Index3D index, Args&&... args);
+        TensorStorage(const TensorStorage&) = default;
+        TensorStorage(TensorStorage&&) noexcept = default;
+        ~TensorStorage() = default;
         /* Operators */
-        GridStorage& operator=(GridStorage obj) noexcept;
+        TensorStorage& operator=(TensorStorage obj) noexcept;
         [[nodiscard]] inline T& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
         [[nodiscard]] inline const T& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
         [[nodiscard]] T& operator()(Index3D index) { return *data_ptr(index); }
         [[nodiscard]] const T& operator()(Index3D index) const { return *data_ptr(index); }
         /* Operations */
-        template<class Functor> void forIndexInGrid(Functor func) const { Base::forIndexInGrid(getDim(), func); }
+        template<class Functor> void forIndexInTensor(Functor func) const { Base::forIndexInTensor(getDim(), func); }
         template<class... Args> void resize(Index3D index, Args&&... args);
-        void swap(GridStorage& __restrict obj) noexcept;
+        void swap(TensorStorage& __restrict obj) noexcept;
         /* Iterator */
         auto begin() noexcept { return values.begin(); }
         auto begin() const noexcept { return cbegin(); }
@@ -74,14 +73,14 @@ namespace Physica {
     };
 
     template<class T>
-    GridStorage<T>& GridStorage<T>::operator=(GridStorage<T> obj) noexcept {
+    TensorStorage<T>& TensorStorage<T>::operator=(TensorStorage<T> obj) noexcept {
         swap(obj);
         return *this;
     }
 
     template<class T>
     template<class... Args>
-    GridStorage<T>::GridStorage(Index3D index, Args&&... args)
+    TensorStorage<T>::TensorStorage(Index3D index, Args&&... args)
             : dimX(index[0])
             , dimY(index[1])
             , dimZ(index[2]) {
@@ -90,7 +89,7 @@ namespace Physica {
 
     template<class T>
     template<class... Args>
-    void GridStorage<T>::resize(Index3D index, Args&&... args) {
+    void TensorStorage<T>::resize(Index3D index, Args&&... args) {
         dimX = index[0];
         dimY = index[1];
         dimZ = index[2];
@@ -98,7 +97,7 @@ namespace Physica {
     }
 
     template<class T>
-    void GridStorage<T>::swap(GridStorage& __restrict obj) noexcept {
+    void TensorStorage<T>::swap(TensorStorage& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         values.swap(obj.values);
         std::swap(dimX, obj.dimX);
@@ -107,7 +106,7 @@ namespace Physica {
     }
 
     template<class T>
-    __host__ __device__ inline T* GridStorage<T>::data_ptr(Index3D index) {
+    __host__ __device__ inline T* TensorStorage<T>::data_ptr(Index3D index) {
         assert(index[0] < dimX);
         assert(index[1] < dimY);
         assert(index[2] < dimZ);
@@ -115,7 +114,7 @@ namespace Physica {
     }
 
     template<class T>
-    __host__ __device__ inline const T* GridStorage<T>::data_ptr(Index3D index) const {
+    __host__ __device__ inline const T* TensorStorage<T>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

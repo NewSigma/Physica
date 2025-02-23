@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Basis/PlainWaveBasis.h"
 #include "SpinPair.h"
@@ -27,9 +27,8 @@ namespace Physica {
     template<Scalar T, bool IsSpinPolarized>
     class DensityGrid {
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
-        using GridType = RSpaceGrid<T>;
+        using GridType = DenseTensor<T>;
     public:
-        using Index3D = RSpaceGrid<T>::Index3D;
         using BasisType = PlainWaveBasis<T>;
         using KSOrbitArray = Array<SpinPair<BasisType, IsSpinPolarized>>;
     private:
@@ -142,7 +141,7 @@ namespace Physica {
                 rho_down(index) = rho(SpinState::Down, pos);
             }
         };
-        RSpaceGrid<T>::template forPointIndexInGrid<T, true, decltype(kernel)>(getTotalDensity(), latt, kernel);
+        DenseTensor<T>::template forPointIndexInGrid<T, true, decltype(kernel)>(getTotalDensity(), latt, kernel);
         {
             auto rho_up_new = getTotalDensity().flatten();
             const auto& rho_up_old = rho.getTotalDensity().flatten();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,15 +19,13 @@
 #pragma once
 
 #include "Physica/Core/Scalar/Complex.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 
 namespace Physica {
     template<Scalar T>
     class PlainWaveBasis {
         using ComplexType = Complex<T>;
-        using GridType = RSpaceGrid<ComplexType>;
+        using GridType = DenseTensor<ComplexType>;
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
-        using Index3D = GridBase::Index3D;
 
         GridType coeffGrid;
         LatticeMatrix repLatt;
@@ -124,7 +122,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    GridBase::Index3D PlainWaveBasis<T>::makeGridDim(T cutEnergy, const LatticeMatrix& repLatt) {
+    Index3D PlainWaveBasis<T>::makeGridDim(T cutEnergy, const LatticeMatrix& repLatt) {
         constexpr double factor = 2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck;
         const T maxWaveVec = sqrt(T(factor) * cutEnergy);
         const auto range = PeriodicCell<T, 3>::estimateRange(repLatt, maxWaveVec);
@@ -146,7 +144,7 @@ namespace Physica {
     template<Scalar T>
     template<class Functor>
     inline void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func) {
-        GridBase::forIndexInGrid(dim, [&repLatt, dim, func](Index3D index) {
+        TensorBase::forIndexInTensor(dim, [&repLatt, dim, func](Index3D index) {
             func(makeWaveVector(repLatt, index, dim));
         });
     }
@@ -154,7 +152,7 @@ namespace Physica {
     template<Scalar T>
     template<class Functor>
     inline void PlainWaveBasis<T>::forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func) {
-        GridBase::forIndexInGrid(dim, [&repLatt, dim, func](Index3D index) {
+        TensorBase::forIndexInTensor(dim, [&repLatt, dim, func](Index3D index) {
             func(makeWaveVector(repLatt, index, dim), index);
         });
     }

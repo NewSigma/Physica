@@ -19,13 +19,13 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/TensorStorage.h"
 
 namespace Physica {
     template<Scalar T>
     class ProbDistribution2D {
         using This = ProbDistribution2D;
-        using BucketType = GridStorage<size_t>;
+        using BucketType = TensorStorage<size_t>;
         using VectorType = VectorND<T>;
         using MatrixType = DenseMatrix<T>;
         using MeshType = std::pair<MatrixType, MatrixType>;

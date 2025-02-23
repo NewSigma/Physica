@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,8 +19,8 @@
 #pragma once
 
 #include <forward_list>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/TensorStorage.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 namespace Physica {
@@ -32,8 +32,7 @@ namespace Physica {
         using MDCellType = MDCell<T>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
-        using CellGrid = GridStorage<std::forward_list<size_t>>;
-        using Index3D = GridBase::Index3D;
+        using CellGrid = TensorStorage<std::forward_list<size_t>>;
     private:
         LatticeMatrix lattice;
         PositionMatrix directPos;
@@ -110,7 +109,7 @@ namespace Physica {
         }
         {
             size_t cellAtomMapIndex = 0;
-            cellGrid.forIndexInGrid([this, &cellGrid, &cellAtomMapIndex](Index3D index) {
+            cellGrid.forIndexInTensor([this, &cellGrid, &cellAtomMapIndex](Index3D index) {
                 const auto index1D = PeriodIndex3D(index, cellGridDim).toIndex1D();
                 cellStartOffset[index1D] = cellAtomMapIndex;
                 const auto& list = cellGrid(index);
@@ -145,7 +144,7 @@ namespace Physica {
         }
         {
             size_t cellAtomMapIndex = 0;
-            cellGrid.forIndexInGrid([this, &cellGrid, &cellAtomMapIndex](Index3D index) {
+            cellGrid.forIndexInTensor([this, &cellGrid, &cellAtomMapIndex](Index3D index) {
                 const auto index1D = PeriodIndex3D(index, cellGridDim).toIndex1D();
                 cellStartOffset[index1D] = cellAtomMapIndex;
                 const auto& list = cellGrid(index);
@@ -261,8 +260,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CellList<T>::Index3D
-    CellList<T>::posToIndex(size_t atomId) const {
+    Index3D CellList<T>::posToIndex(size_t atomId) const {
         const T x0 = abs(directPos(atomId, 0) - T(std::numeric_limits<T>::epsilon()));
         const T y0 = abs(directPos(atomId, 1) - T(std::numeric_limits<T>::epsilon()));
         const T z0 = abs(directPos(atomId, 2) - T(std::numeric_limits<T>::epsilon()));
@@ -310,8 +308,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CellList<T>::Index3D
-    CellList<T>::makeGridDim(const LatticeMatrix& lattice, T cutoff) {
+    Index3D CellList<T>::makeGridDim(const LatticeMatrix& lattice, T cutoff) {
         const auto repLatt = MDCellType::makeRepLattice(lattice);
         const T factor = reciprocal(cutoff) * T(2 * M_PI);
         size_t dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));

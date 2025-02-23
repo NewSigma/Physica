@@ -1,0 +1,92 @@
+/*
+ * Copyright 2023-2025 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "Physica/CRTPBase.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
+#include "TensorBase.h"
+
+namespace Physica {
+    template<class Derived> class LValueTensor;
+    template<class TensorType> class FlattenTensor;
+    template<class T> class RealTensor;
+    template<class T> class ImagTensor;
+    template<class T> class SquaredNormTensor;
+    template<class T> class NormTensor;
+    template<class T> class ValueTensor;
+    template<class T, int GradOrder> class GradTensor;
+
+    template<class Derived>
+    class RValueTensor : public CRTPBase<RValueTensor<Derived>>, public TensorBase {
+        using This = RValueTensor<Derived>;
+        using Base = CRTPBase<This>;
+    public:
+        using ScalarType = Traits<Derived>::ScalarType;
+        constexpr static int Dim = Traits<Derived>::Dim;
+        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
+        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
+        constexpr static bool isComplex = ScalarType::isComplex;
+    public:
+        /* Operations */
+        template<Tensor X>
+        void assign(X& x) const;
+        template<class Functor> void forIndexInTensor(Functor func) const { TensorBase::forIndexInTensor(getDim(), func); }
+
+        auto reals() const noexcept;
+        auto imags() const noexcept;
+        auto squaredNorms() const noexcept;
+        auto norms() const noexcept;
+        auto values() const noexcept;
+        template<int GradOrder = 1>
+        auto grads() const noexcept;
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getDimX(); }
+        [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getDimY(); }
+        [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getDimZ(); }
+        [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
+        [[nodiscard]] size_t getSize() const noexcept { return getDimX() * getDimY() * getDimZ(); }
+        /* Static members */
+        using TensorBase::forPointInTensor;
+        using TensorBase::forPointIndexInTensor;
+        using TensorBase::forIndexInTensor;
+        template<Scalar T, bool IsUnitLattice, class Functor>
+        inline static void forPointInTensor(
+                const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        template<Scalar T, bool IsUnitLattice, class Functor>
+        inline static void forPointIndexInTensor(
+                const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+    protected:
+        template<int GradOrder>
+        auto grads_impl() const noexcept;
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<RValueTensor<T>> {
+    public:
+        using Derived = T;
+    };
+}
+
+#include "RValueTensorImpl/RValueTensorImpl.h"
+#include "RValueTensorImpl/TensorConvert.h"
+#include "TensorExpr.h"

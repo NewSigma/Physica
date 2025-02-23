@@ -48,7 +48,6 @@ namespace Physica {
         using PositionMatrix = MDCellType::PositionMatrix;
         using CellListType = CellList<T>;
         using DeviceCellList = device_obj<CellListType>;
-        using Index3D = GridBase::Index3D;
         using DeviceVector3D = device_obj<Vector3D<T>>;
         using ForceBufferType = device_obj<DenseMatrix<T>>;
         using VirialBufferType = device_obj<DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;

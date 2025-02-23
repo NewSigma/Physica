@@ -42,7 +42,6 @@ namespace Physica {
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using ComplexType = Complex<T>;
-        using Index3D = GridBase::Index3D;
         using LatticeReturnType = std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
         using HostChargeVector = std::conditional<IsDeviceREwald, VectorND<T>, PlainStruct<void>>::type;
     public:

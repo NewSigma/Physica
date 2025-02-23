@@ -27,7 +27,6 @@ namespace Physica {
         using typename Base::SolverType;
         using typename Base::MDCellType;
         using typename Base::CoeffVector;
-        using typename Base::Index3D;
         using typename Base::KSpaceFCGrid;
         using typename Base::EigenValueGrid;
         using Base::Dim;
@@ -64,7 +63,7 @@ namespace Physica {
             , direction(std::move(direction_))
             , projections(gridDim) {
         assert(direction.getLength() == getUnitCellDOF() && "[Error]: DOF of direction and unit cell do not match");
-        eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
+        eigenvalues.forIndexInTensor([this, &forceConstants](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
             Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
@@ -94,7 +93,7 @@ namespace Physica {
     template<Scalar T>
     T PhononPDOS<T>::calcPDOS(T freq, size_t band) const {
         T result = 0;
-        eigenvalues.forIndexInGrid([this, freq, band, &result](Index3D index) {
+        eigenvalues.forIndexInTensor([this, freq, band, &result](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
             Index3D index1{};
             for (unsigned int i = 0; i < Dim; ++i)

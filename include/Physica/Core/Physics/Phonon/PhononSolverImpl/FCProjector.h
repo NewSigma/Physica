@@ -33,8 +33,7 @@ namespace Physica {
         constexpr static unsigned int Dim = 3;
         using VectorType = VectorND<T>;
         using RSpaceFCMat = DenseMatrix<T>;
-        using RSpaceFCGrid = GridStorage<RSpaceFCMat>;
-        using Index3D = RSpaceFCGrid::Index3D;
+        using RSpaceFCGrid = TensorStorage<RSpaceFCMat>;
     protected:
         Index3D superSize;
         size_t numDOF;
@@ -79,7 +78,7 @@ namespace Physica {
     template<Scalar T>
     T FCProjector<T>::projectSwap(VectorType& v) const {
         T maxAbsDot = 0;
-        GridBase::forIndexInGrid(superSize, [this, &v, &maxAbsDot](Index3D index) {
+        TensorBase::forIndexInTensor(superSize, [this, &v, &maxAbsDot](Index3D index) {
             T maxAbsDotInner = 0;
             for (size_t i = 0; i < numDOF; ++i) {
                 for (size_t j = i; j < numDOF; ++j) {

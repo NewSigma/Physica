@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 
 namespace Physica {
     enum class LDAType {
@@ -226,7 +226,7 @@ namespace Physica {
 namespace Physica {
     template<Scalar T, LDAType type, bool polarized>
     class Traits<LDA<T, type, polarized>> {
-        using GridType = RSpaceGrid<T>;
+        using GridType = DenseTensor<T>;
     public:
         constexpr static bool IsSpinPolarized = polarized;
         constexpr static size_t NumSpin = IsSpinPolarized ? 2 : 1;

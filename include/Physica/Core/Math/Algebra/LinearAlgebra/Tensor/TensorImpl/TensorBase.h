@@ -20,21 +20,21 @@
 
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
-    class GridBase {
+    class TensorBase {
     public:
-        using Index3D = Array<size_t, 3>;
         /* Static members */
         template<Scalar T, bool IsUnitLattice, class Functor>
-        static void forPointInGrid(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        static void forPointInTensor(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
         template<Scalar T, bool IsUnitLattice, class Functor>
-        static void forPointIndexInGrid(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
-        template<class Functor> static void forIndexInGrid(Index3D dim, Functor func);
+        static void forPointIndexInTensor(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        template<class Functor> static void forIndexInTensor(Index3D dim, Functor func);
     };
 
     template<Scalar T, bool IsUnitLattice, class Functor>
-    void GridBase::forPointInGrid(
+    void TensorBase::forPointInTensor(
             Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using VectorType = Vector3D<T>;
@@ -65,7 +65,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsUnitLattice, class Functor>
-    void GridBase::forPointIndexInGrid(
+    void TensorBase::forPointIndexInTensor(
             Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
         static_assert(!T::isComplex, "[Error]: Position in 3D space can not be complex number");
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
@@ -97,7 +97,7 @@ namespace Physica {
     }
 
     template<class Functor>
-    void GridBase::forIndexInGrid(Index3D dim, Functor func) {
+    void TensorBase::forIndexInTensor(Index3D dim, Functor func) {
         for (size_t x = 0; x < dim[0]; ++x)
             for (size_t y = 0; y < dim[1]; ++y)
                 for (size_t z = 0; z < dim[2]; ++z)

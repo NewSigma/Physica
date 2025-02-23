@@ -32,7 +32,6 @@ namespace Physica {
         using Base = FCProjector<T>;
     public:
         using typename Base::VectorType;
-        using typename Base::Index3D;
         using Base::Dim;
         using MDCellType = MDCell<T>;
         constexpr static unsigned int NumIndependentHuangCond = 15;

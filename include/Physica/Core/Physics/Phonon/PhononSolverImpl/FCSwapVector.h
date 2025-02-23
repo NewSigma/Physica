@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
     /**
@@ -30,8 +31,6 @@ namespace Physica {
     template<Scalar T>
     class FCSwapVector : public SparseVector<T> {
         using Base = SparseVector<T>;
-        using Index3D = Array<size_t, 3>;
-        using Index5D = Array<size_t, 5>;
 
         Index3D superSize;
         Index3D cellIndex;
@@ -94,8 +93,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    FCSwapVector<T>::Index5D FCSwapVector<T>::index1DTo5D(
-            size_t numDOF, const Index3D& superSize, size_t index1D) {
+    Index5D FCSwapVector<T>::index1DTo5D(size_t numDOF, const Index3D& superSize, size_t index1D) {
         assert(index1D < calcLength(numDOF, superSize) && "[Error]: Index out of range");
         Index5D result{};
         result[4] = index1D % numDOF;

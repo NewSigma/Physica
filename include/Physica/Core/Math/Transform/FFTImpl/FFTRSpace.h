@@ -155,27 +155,26 @@ namespace Physica {
     template<class Derived>
     class FFTRSpace<Derived, 3>
             : public CRTPBase<FFTRSpace<Derived, 3>>
-            , public LValueGrid<FFTRSpace<Derived, 3>> {
+            , public LValueTensor<FFTRSpace<Derived, 3>> {
         using This = FFTRSpace<Derived, 3>;
         using Base = CRTPBase<This>;
-        using GridBase = LValueGrid<This>;
+        using TensorBase = LValueTensor<This>;
     public:
-        using typename GridBase::ScalarType;
-        using Index3D = GridBase::Index3D;
-        using GridBase::isComplex;
+        using typename TensorBase::ScalarType;
+        using TensorBase::isComplex;
     protected:
-        using typename GridBase::PtrTy;
-        using typename GridBase::ConstPtrTy;
+        using typename TensorBase::PtrTy;
+        using typename TensorBase::ConstPtrTy;
     public:
         ~FFTRSpace() = default;
         /* Operators */
         FFTRSpace& operator=(const FFTRSpace& obj);
-        using GridBase::operator=;
-        using GridBase::operator();
+        using TensorBase::operator=;
+        using TensorBase::operator();
         /* Operations */
-        template<Grid T> inline void transform(const LValueGrid<T>& data);
+        template<Tensor T> inline void transform(const LValueTensor<T>& data);
         inline void resize([[maybe_unused]] Index3D size);
-        using GridBase::forIndexInGrid;
+        using TensorBase::forIndexInTensor;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
@@ -196,8 +195,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Grid T>
-    inline void FFTRSpace<Derived, 3>::transform(const LValueGrid<T>& data) {
+    template<Tensor T>
+    inline void FFTRSpace<Derived, 3>::transform(const LValueTensor<T>& data) {
         assert(data.getDimX() == getDimX());
         assert(data.getDimY() == getDimY());
         assert(data.getDimZ() == getDimZ());

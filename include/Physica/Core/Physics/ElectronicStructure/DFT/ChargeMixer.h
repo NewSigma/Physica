@@ -37,7 +37,6 @@ namespace Physica {
         using DensityType = DensityGrid<T, isSpinPolarized>;
         using DensityArray = Array<DensityType, DIISBufferSize>;
         using FFT3D = FFT<T, 3>;
-        using Index3D = DensityType::Index3D;
     private:
         LatticeMatrix repLatt;
         DensityArray oldDensities;
@@ -100,7 +99,6 @@ namespace Physica {
     void ChargeMixer<T, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
             using GridType = FFT3D::KSpaceType;
-            using Index3D = GridType::Index3D;
             const auto& deltaRho = residules[0].getTotalDensity();
             fft.getRSpace().flatten() = deltaRho.flatten();
             fft.transform();
@@ -111,7 +109,7 @@ namespace Physica {
                 const T factor = T(amix) * std::min(kNorm / (kNorm + square(T(bmix))), T(amin));
                 kSpace(index) *= factor;
             };
-            GridType::template forPointIndexInGrid<T, true, decltype(kernel)>(kSpace.getDim(), repLatt, kernel);
+            GridType::template forPointIndexInTensor<T, true, decltype(kernel)>(kSpace.getDim(), repLatt, kernel);
             fft.invTransform();
 
             const auto& rho_old = oldDensities[0].getTotalDensity().flatten();

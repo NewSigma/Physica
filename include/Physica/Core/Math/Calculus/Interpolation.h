@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica {
@@ -184,13 +184,13 @@ namespace Physica {
         return result;
     }
 
-    template<LGrid G>
-    RSpaceGrid<typename G::ScalarType> interpolate_fft(const G& data, typename GridBase::Index3D newDim) {
-        using T = G::ScalarType;
-        using ResultType = RSpaceGrid<T>;
+    template<Tensor X>
+    DenseTensor<typename X::ScalarType> interpolate_fft(const X& data, Index3D newDim) {
+        static_assert(X::Dim == 3);
+        using T = X::ScalarType;
+        using ResultType = DenseTensor<T>;
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
-        using Index3D = GridBase::Index3D;
         constexpr size_t Dim = 3;
         constexpr bool isComplex = T::isComplex;
 
@@ -199,11 +199,11 @@ namespace Physica {
         fft.transform();
 
         auto result = ResultType(newDim);
-        GridBase::forIndexInGrid(newDim, [newDim, &fft, &result](Index3D rIndex) {
+        TensorBase::forIndexInTensor(newDim, [newDim, &fft, &result](Index3D rIndex) {
             const auto& kSpace = fft.getKSpace();
             const Index3D rSpaceSize = fft.getRSpaceSize();
             auto elem = ComplexType(0);
-            GridBase::forIndexInGrid(rSpaceSize, [newDim, rSpaceSize, rIndex, &kSpace, &elem](Index3D kIndex) {
+            TensorBase::forIndexInTensor(rSpaceSize, [newDim, rSpaceSize, rIndex, &kSpace, &elem](Index3D kIndex) {
                 RealType phase(0);
                 for (size_t dim = 0; dim < Dim; ++dim)
                     phase += RealType(kIndex[dim] * rIndex[dim]) / newDim[dim];
@@ -233,15 +233,14 @@ namespace Physica {
         return result;
     }
 
-    template<LGrid G>
-    G::ScalarType interpolate_fft(
-            const G& data,
-            Vector3D<typename G::ScalarType::RealType> r,
-            Vector3D<typename G::ScalarType::RealType> period) {
-        using T = G::ScalarType;
+    template<Tensor X>
+    X::ScalarType interpolate_fft(
+            const X& data,
+            Vector3D<typename X::ScalarType::RealType> r,
+            Vector3D<typename X::ScalarType::RealType> period) {
+        using T = X::ScalarType;
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
-        using Index3D = Array<size_t, 3>;
         constexpr size_t Dim = 3;
         constexpr bool isComplex = T::isComplex;
         
@@ -253,7 +252,7 @@ namespace Physica {
         const Vector3D<RealType> relative_r = divide(r, period);
         const Index3D rSpaceSize = fft.getRSpaceSize();
         auto elem = ComplexType(0);
-        GridBase::forIndexInGrid(rSpaceSize, [relative_r, rSpaceSize, &kSpace, &elem](Index3D kIndex) {
+        TensorBase::forIndexInTensor(rSpaceSize, [relative_r, rSpaceSize, &kSpace, &elem](Index3D kIndex) {
             RealType phase(0);
             for (size_t dim = 0; dim < Dim; ++dim)
                 phase += RealType(kIndex[dim]) * relative_r[dim];

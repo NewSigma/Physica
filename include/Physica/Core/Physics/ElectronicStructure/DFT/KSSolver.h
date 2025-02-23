@@ -38,8 +38,7 @@ namespace Physica {
         using DensityType = DensityGrid<T, IsSpinPolarized>;
         using BasisType = DensityType::BasisType;
         using KSOrbitArray = DensityType::KSOrbitArray;
-        using PotType = SpinPair<RSpaceGrid<T>, IsSpinPolarized>;
-        using Index3D = GridBase::Index3D;
+        using PotType = SpinPair<DenseTensor<T>, IsSpinPolarized>;
 
         using LatticeMatrix = HamiltonType::LatticeMatrix;
         using FFT3D = FFT<ComplexType, 3>;
@@ -213,53 +212,7 @@ namespace Physica {
 
     template<Scalar T, class XCProvider>
     void KSSolver<T, XCProvider>::calcDensity(const BasisType& orbit) {
-        const auto& kSpacePsi = orbit.getCoeffGrid();
-        const size_t psiDimX = kSpacePsi.getDimX() / 2;
-        const size_t psiDimY = kSpacePsi.getDimY() / 2;
-        const size_t psiDimZ = kSpacePsi.getDimZ() / 2;
-
-        auto& kSpaceRho = fft.getKSpace();
-        kSpaceRho = T(0);
-        const size_t rhoDimX = kSpaceRho.getDimX();
-        const size_t rhoDimY = kSpaceRho.getDimY();
-        const size_t rhoDimZ = kSpaceRho.getDimZ();
-        {
-            auto corner = kSpaceRho.leftFrontBottomCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-            corner = kSpacePsi.leftFrontBottomCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        {
-            auto corner = kSpaceRho.rightFrontBottomCorner({rhoDimX - psiDimX, psiDimY + 1, psiDimZ + 1});
-            corner = kSpacePsi.rightFrontBottomCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        {
-            auto corner = kSpaceRho.leftBackBottomCorner({psiDimX + 1, rhoDimY - psiDimY, psiDimZ + 1});
-            corner = kSpacePsi.leftBackBottomCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        {
-            auto corner = kSpaceRho.rightBackBottomCorner({rhoDimX - psiDimX, rhoDimY - psiDimY, psiDimZ + 1});
-            corner = kSpacePsi.rightBackBottomCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        {
-            auto corner = kSpaceRho.leftFrontTopCorner({psiDimX + 1, psiDimY + 1, rhoDimZ - psiDimZ});
-            corner = kSpacePsi.leftFrontTopCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        {
-            auto corner = kSpaceRho.rightFrontTopCorner({rhoDimX - psiDimX, psiDimY + 1, rhoDimZ - psiDimZ});
-            corner = kSpacePsi.rightFrontTopCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        {
-            auto corner = kSpaceRho.leftBackTopCorner({psiDimX + 1, rhoDimY - psiDimY, rhoDimZ - psiDimZ});
-            corner = kSpacePsi.leftBackTopCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        {
-            auto corner = kSpaceRho.rightBackTopCorner({rhoDimX - psiDimX, rhoDimY - psiDimY, rhoDimZ - psiDimZ});
-            corner = kSpacePsi.rightBackTopCorner({psiDimX + 1, psiDimY + 1, psiDimZ + 1});
-        }
-        fft.invTransform();
-        const size_t numCellOld = kSpacePsi.getSize();
-        const size_t numCellNew = kSpaceRho.getSize();
-        const T numElectronScale = sqrt(T(numCellNew) / T(numCellOld));
-        fft.getRSpace() *= numElectronScale;
+        noImpl("Wait for tensor module");
     }
 
     template<Scalar T, class XCProvider>

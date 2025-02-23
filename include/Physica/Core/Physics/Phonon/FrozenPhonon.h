@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Math/Optimization/OptimizationImpl/QuadraticSearch.h"
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "PhononSolver.h"
@@ -34,7 +34,6 @@ namespace Physica {
         using Base = PhononSolver<T>;
     public:
         using typename Base::ComplexType;
-        using typename Base::Index3D;
         using typename Base::FFT3D;
         using typename Base::MDCellType;
         using typename Base::PositionMatrix;
@@ -70,7 +69,7 @@ namespace Physica {
         static void write(const RSpaceFCGrid& rSpaceFC, H5Loc& loc, const char* name);
     private:
         PositionMatrix makeWignerSeitzRadius() const;
-        GridStorage<DenseMatrix<T>> makeWignerSeitzWeights() const;
+        TensorStorage<DenseMatrix<T>> makeWignerSeitzWeights() const;
         T calcWignerSeitzWeight(const Vector3D<T> r, const PositionMatrix& wignerSeitzRadius) const;
     };
 
@@ -86,8 +85,7 @@ namespace Physica {
 
     template<Scalar T>
     template<class ForceModel>
-    FrozenPhonon<T>::RSpaceFCGrid
-    FrozenPhonon<T>::makeForceConstants(ForceModel& model) const {
+    auto FrozenPhonon<T>::makeForceConstants(ForceModel& model) const -> RSpaceFCGrid {
         const size_t unitCellDOF = getUnitCellDOF();
         const T factor = -reciprocal(displace);
         const Index3D superSize = Base::getSuperSize();
@@ -185,7 +183,7 @@ namespace Physica {
         const auto gridDim = Index3D{superSize[0], superSize[1], superSize[2]};
         rSpaceFC.resize(gridDim);
 
-        rSpaceFC.forIndexInGrid([&group, &rSpaceFC](Index3D index) {
+        rSpaceFC.forIndexInTensor([&group, &rSpaceFC](Index3D index) {
             char name[64]; // 64 shall be enough
             sprintf(name, "%zu_%zu_%zu", index[0], index[1], index[2]);
             rSpaceFC(index).read(group, name);
@@ -205,7 +203,7 @@ namespace Physica {
             group.writeAttr("SuperSize", superSize);
         }
 
-        rSpaceFC.forIndexInGrid([&group, &rSpaceFC](Index3D index) {
+        rSpaceFC.forIndexInTensor([&group, &rSpaceFC](Index3D index) {
             char name[64]; // 64 shall be enough
             sprintf(name, "%zu_%zu_%zu", index[0], index[1], index[2]);
             rSpaceFC(index).write(group, name);
@@ -213,14 +211,14 @@ namespace Physica {
     }
 #endif
     template<Scalar T>
-    GridStorage<DenseMatrix<T>>
+    TensorStorage<DenseMatrix<T>>
     FrozenPhonon<T>::makeWignerSeitzWeights() const {
         const auto wignerSeitzRadius = makeWignerSeitzRadius();
         const Index3D superSize = Base::getSuperSize();
         const Index3D gridDim{4 * superSize[0] + 1, 4 * superSize[1] + 1, 4 * superSize[2] + 1};
         const size_t numAtom = getNumUnitCellAtom();
-        GridStorage<DenseMatrix<T>> result(gridDim, numAtom, numAtom);
-        GridBase::forIndexInGrid(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
+        TensorStorage<DenseMatrix<T>> result(gridDim, numAtom, numAtom);
+        TensorBase::forIndexInTensor(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
             const auto& unitCell = Base::getUnitCell();
             const Vector3D<T> factor{T(index[0]) - T(2 * superSize[0]),
                                   T(index[1]) - T(2 * superSize[1]),

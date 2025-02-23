@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,12 +27,11 @@ namespace Physica {
         static_assert(!IsSpinPolarized, "[Error]: Not implemented");
     public:
         using ComplexType = Complex<T>;
-        using GridType = RSpaceGrid<ComplexType>;
+        using GridType = DenseTensor<ComplexType>;
         using StrucFactorArray = Array<GridType>;
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using BasisType = PlainWaveBasis<T>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
-        using Index3D = GridBase::Index3D;
         using FFT3D = FFT<T, 3>;
     private:
         HermiteMatrix hamiltonH;
@@ -58,7 +57,7 @@ namespace Physica {
         void makeNearFreeHamilton(Vector3D<T> kPoint);
         void makeHamiltonWithoutXC(const DensityGrid<T, IsSpinPolarized>& densityRho, Vector3D<T> kPoint);
         void makeHamiltonWithXC(
-            const RSpaceGrid<T>& xcPot,
+            const DenseTensor<T>& xcPot,
             const DensityGrid<T, IsSpinPolarized>& densityRho,
             Vector3D<T> kPoint);
 
@@ -120,9 +119,9 @@ namespace Physica {
     void KSHamilton<T, IsSpinPolarized>::makeNearFreeHamilton(Vector3D<T> kPoint) {
         makeFreeHamilton(kPoint);
 
-        GridBase::forIndexInGrid(basisDim, [this](Index3D index1) {
+        TensorBase::forIndexInTensor(basisDim, [this](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
-            GridBase::forIndexInGrid(basisDim, [this, r, index1](Index3D index2) {
+            TensorBase::forIndexInTensor(basisDim, [this, r, index1](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceIonCoulomb.getDim());
                 hamiltonH(r, c) += kSpaceIonCoulomb(delta);
@@ -140,9 +139,9 @@ namespace Physica {
         fft_rho.transform();
         auto& kSpaceDensity = fft_rho.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());
-        GridBase::forIndexInGrid(basisDim, [this, repVolume, &kSpaceDensity](Index3D index1) {
+        TensorBase::forIndexInTensor(basisDim, [this, repVolume, &kSpaceDensity](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
-            GridBase::forIndexInGrid(basisDim, [this, repVolume, r, index1, &kSpaceDensity](Index3D index2) {
+            TensorBase::forIndexInTensor(basisDim, [this, repVolume, r, index1, &kSpaceDensity](Index3D index2) {
                 constexpr double factor = 1 / PhyConst<AU>::vacuumDielectric;
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getDim());
@@ -154,7 +153,7 @@ namespace Physica {
 
     template<Scalar T, bool IsSpinPolarized>
     void KSHamilton<T, IsSpinPolarized>::makeHamiltonWithXC(
-            const RSpaceGrid<T>& xcPot,
+            const DenseTensor<T>& xcPot,
             const DensityGrid<T, IsSpinPolarized>& densityRho,
             Vector3D<T> kPoint) {
         makeHamiltonWithoutXC(densityRho, kPoint);
@@ -163,9 +162,9 @@ namespace Physica {
         fft_xc.transform();
         auto& kSpaceXC = fft_xc.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());
-        GridBase::forIndexInGrid(basisDim, [this, repVolume, &kSpaceXC](Index3D index1) {
+        TensorBase::forIndexInTensor(basisDim, [this, repVolume, &kSpaceXC](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
-            GridBase::forIndexInGrid(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
+            TensorBase::forIndexInTensor(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceXC.getDim());
                 hamiltonH(r, c) += kSpaceXC(delta) * repVolume;
@@ -174,8 +173,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    KSHamilton<T, IsSpinPolarized>::Index3D
-    KSHamilton<T, IsSpinPolarized>::calcDeltaIndex(Index3D index1, Index3D index2, Index3D deltaDim) const {
+    Index3D KSHamilton<T, IsSpinPolarized>::calcDeltaIndex(Index3D index1, Index3D index2, Index3D deltaDim) const {
         for (int i = 0; i < 3; ++i) {
             assert(index1[i] < basisDim[i]);
             assert(index2[i] < basisDim[i]);

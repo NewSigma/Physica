@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
@@ -28,7 +28,6 @@ namespace Physica {
         using ScalarType = float64;
         using ComplexType = Complex<ScalarType>;
         using CorrMatrix = HalfDenseMatrixStorage<VectorND<ScalarType>, Dynamic>;
-        using Index3D = RSpaceGrid<ScalarType>::Index3D;
         using FFT3D = FFT<ScalarType, 3>;
         constexpr static unsigned int Dim = 3;
         constexpr static double ConsiderAsZeroThrehold = 100 * std::numeric_limits<double>::epsilon();
@@ -97,9 +96,9 @@ namespace Physica {
                 const size_t offset_c = c * numCell;
                 buffer1 = ScalarType(0);
                 buffer2 = ScalarType(0);
-                RSpaceGrid<ScalarType>::forIndexInGrid(getSuperSize(),
+                DenseTensor<ScalarType>::forIndexInTensor(getSuperSize(),
                     [&, this, offset_r, offset_c](Index3D cell1) {
-                        RSpaceGrid<ScalarType>::forIndexInGrid(getSuperSize(),
+                        DenseTensor<ScalarType>::forIndexInTensor(getSuperSize(),
                             [&, this, cell1, offset_r, offset_c](Index3D cell2) {
                                 const auto range = getSuperSize();
                                 Index3D delta;

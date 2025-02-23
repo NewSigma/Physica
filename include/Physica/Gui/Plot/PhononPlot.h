@@ -34,7 +34,6 @@ namespace Physica {
         using PhononType = FrozenPhonon<T>;
         using KSpaceFCGrid = PhononType::KSpaceFCGrid;
         using EigenSolverType = PhononType::EigenSolverType;
-        using Index3D = GridBase::Index3D;
         using ColorArray = Array<QColor>;
 
         enum BandConnectMethod {

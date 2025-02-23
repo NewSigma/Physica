@@ -28,7 +28,6 @@ namespace Physica {
     public:
         using SolverType = PhononSolver<T>;
         using ElementType = CuboidLinear<T>;
-        using Index3D = SolverType::Index3D;
         using CoeffVector = DenseVector<T, ElementType::DegreeOfFreedom>;
         using MDCellType = SolverType::MDCellType;
         using KSpaceFCGrid = SolverType::KSpaceFCGrid;
@@ -67,7 +66,7 @@ namespace Physica {
     PhononDOS<T>::PhononDOS(
             MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim)
             : PhononDOS(std::move(unitCell), std::move(superSize), std::move(gridDim)) {
-        eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
+        eigenvalues.forIndexInTensor([this, &forceConstants](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
             Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
@@ -100,7 +99,7 @@ namespace Physica {
     template<Scalar T>
     T PhononDOS<T>::calcDOS(T freq, size_t band) const {
         T result = 0;
-        eigenvalues.forIndexInGrid([this, freq, band, &result](Index3D index) {
+        eigenvalues.forIndexInTensor([this, freq, band, &result](Index3D index) {
             result += calcElemDOS(freq, band, index);
         });
         result /= T(eigenvalues.getSize() * ElementVolume);

@@ -21,7 +21,6 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = FCSwapVector<ScalarType>;
-using Index3D = Array<size_t, 3>;
 
 bool testIndex1D5D(size_t numDOF, const Index3D& superSize, size_t index1D) {
     const auto index5D = VectorType::index1DTo5D(numDOF, superSize, index1D);

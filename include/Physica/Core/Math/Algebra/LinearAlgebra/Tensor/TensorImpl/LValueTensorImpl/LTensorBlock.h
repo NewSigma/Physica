@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,14 +19,13 @@
 #pragma once
 
 namespace Physica {
-    template<class Derived> class LValueGrid;
-    template<class GridType> class LGridBlock;
+    template<class Derived> class LValueTensor;
+    template<class TensorType> class LTensorBlock;
 
-    template<Grid T>
-    class LGridBlock<T> : public LValueGrid<LGridBlock<T>> {
-        using This = LGridBlock<T>;
-        using Base = LValueGrid<This>;
-        using Index3D = GridBase::Index3D;
+    template<Tensor T>
+    class LTensorBlock<T> : public LValueTensor<LTensorBlock<T>> {
+        using This = LTensorBlock<T>;
+        using Base = LValueTensor<This>;
     public:
         using typename Base::ScalarType;
     private:
@@ -34,14 +33,14 @@ namespace Physica {
         Index3D from;
         Index3D count;
     public:
-        LGridBlock(T& grid_, Index3D from_, Index3D count_);
-        LGridBlock(const LGridBlock&) = delete;
-        LGridBlock(LGridBlock&&) noexcept = delete;
-        ~LGridBlock() = default;
+        LTensorBlock(T& grid_, Index3D from_, Index3D count_);
+        LTensorBlock(const LTensorBlock&) = delete;
+        LTensorBlock(LTensorBlock&&) noexcept = delete;
+        ~LTensorBlock() = default;
         /* Operators */
         using Base::operator=;
-        LGridBlock& operator=(const LGridBlock& b) { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
-        LGridBlock& operator=(LGridBlock&& b) noexcept { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
+        LTensorBlock& operator=(const LTensorBlock& b) { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
+        LTensorBlock& operator=(LTensorBlock&& b) noexcept { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
         /* Operations */
         void resize([[maybe_unused]] Index3D size) { assert(size == count && "[Error]: Resize part of a grid is not allowed"); }
         /* Getters */
@@ -52,8 +51,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(Index3D index) const;
     };
 
-    template<Grid T>
-    LGridBlock<T>::LGridBlock(T& grid_, Index3D from_, Index3D count_)
+    template<Tensor T>
+    LTensorBlock<T>::LTensorBlock(T& grid_, Index3D from_, Index3D count_)
             : grid(grid_)
             , from(from_)
             , count(count_) {
@@ -63,20 +62,20 @@ namespace Physica {
         }
     }
 
-    template<Grid T>
-    __host__ __device__ inline LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) {
+    template<Tensor T>
+    __host__ __device__ inline LTensorBlock<T>::ScalarType* LTensorBlock<T>::data_ptr(Index3D index) {
         return grid.data_ptr({from[0] + index[0], from[1] + index[1], from[2] + index[2]});
     }
 
-    template<Grid T>
-    __host__ __device__ inline const LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) const {
+    template<Tensor T>
+    __host__ __device__ inline const LTensorBlock<T>::ScalarType* LTensorBlock<T>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }
 
 namespace Physica {
-    template<Grid T>
-    class Traits<LGridBlock<T>> {
+    template<Tensor T>
+    class Traits<LTensorBlock<T>> {
     public:
         using ScalarType = T::ScalarType;
     };

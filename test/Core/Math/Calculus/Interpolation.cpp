@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Random/Random.h"
 
@@ -59,13 +59,11 @@ void testFFT1D() {
 }
 
 void testFFT3D() {
-    using GridType = RSpaceGrid<ScalarType>;
-    using Index3D = GridType::Index3D;
-
-    const auto data = GridType::random_uniform<RandomType>({5, 5, 5});
+    using TensorType = DenseTensor<ScalarType>;
+    const auto data = TensorType::random_uniform<RandomType>({5, 5, 5});
     {
         const auto result = interpolate_fft(data, {10, 10, 10});
-        GridType::forIndexInGrid(data.getDim(), [&data, &result](Index3D index) {
+        TensorType::forIndexInTensor(data.getDim(), [&data, &result](Index3D index) {
             Index3D index1{index[0] * 2, index[1] * 2, index[2] * 2};
             if (!scalarNear(data(index), result(index1), 1E-8))
                 exit(EXIT_FAILURE);

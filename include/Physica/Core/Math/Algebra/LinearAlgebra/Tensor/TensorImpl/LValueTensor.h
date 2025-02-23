@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "RValueGrid.h"
-#include "LGridBlock.h"
+#include "RValueTensor.h"
+#include "LValueTensorImpl/LTensorBlock.h"
 
 namespace Physica {
     /**
@@ -29,18 +29,17 @@ namespace Physica {
      * Top is positive direction of z.
      */
     template<class Derived>
-    class LValueGrid : public RValueGrid<Derived> {
-        using Base = RValueGrid<Derived>;
+    class LValueTensor : public RValueTensor<Derived> {
+        using Base = RValueTensor<Derived>;
     public:
         using typename Base::ScalarType;
-        using typename Base::Index3D;
     protected:
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
         using ConstRefTy = ScalarType::ConstRefTy;
     public:
-        template<Grid T>
+        template<Tensor T>
         Derived& operator=(const T& other);
         Derived& operator=(const ScalarType& s);
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
@@ -52,28 +51,10 @@ namespace Physica {
         template<Scalar T> void operator*=(const T& s) { Base::getDerived() = Base::getDerived() * s; }
         template<Scalar T> void operator/=(const T& s) { Base::getDerived() = Base::getDerived() / s; }
         /* Operations */
-        [[nodiscard]] inline LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex) const;
-        [[nodiscard]] inline LGridBlock<Derived> rightFrontBottomCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> rightFrontBottomCorner(Index3D cornerIndex) const;
-        [[nodiscard]] inline LGridBlock<Derived> leftBackBottomCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> leftBackBottomCorner(Index3D cornerIndex) const;
-        [[nodiscard]] inline LGridBlock<Derived> rightBackBottomCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> rightBackBottomCorner(Index3D cornerIndex) const;
+        [[nodiscard]] inline LTensorBlock<Derived> block(Index3D from, Index3D count);
+        [[nodiscard]] inline const LTensorBlock<Derived> block(Index3D from, Index3D count) const;
 
-        [[nodiscard]] inline LGridBlock<Derived> leftFrontTopCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> leftFrontTopCorner(Index3D cornerIndex) const;
-        [[nodiscard]] inline LGridBlock<Derived> rightFrontTopCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> rightFrontTopCorner(Index3D cornerIndex) const;
-        [[nodiscard]] inline LGridBlock<Derived> leftBackTopCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> leftBackTopCorner(Index3D cornerIndex) const;
-        [[nodiscard]] inline LGridBlock<Derived> rightBackTopCorner(Index3D cornerIndex);
-        [[nodiscard]] inline const LGridBlock<Derived> rightBackTopCorner(Index3D cornerIndex) const;
-
-        [[nodiscard]] inline LGridBlock<Derived> block(Index3D from, Index3D count);
-        [[nodiscard]] inline const LGridBlock<Derived> block(Index3D from, Index3D count) const;
-
-        [[nodiscard]] auto flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
+        [[nodiscard]] auto flatten() const { return FlattenTensor<Derived>(Base::getDerived()); }
         void resize(Index3D size) { Base::getDerived().resize(size); }
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();
@@ -86,21 +67,21 @@ namespace Physica {
         using Base::getDimZ;
         using Base::getDim;
         /* Static members */
-        using Base::forPointInGrid;
-        using Base::forPointIndexInGrid;
-        using Base::forIndexInGrid;
+        using Base::forPointInTensor;
+        using Base::forPointIndexInTensor;
+        using Base::forIndexInTensor;
     };
 
-    template<Grid T, Grid U>
-    inline void operator+=(LValueGrid<T>& g1, const U& g2) {
+    template<Tensor T, Tensor U>
+    inline void operator+=(LValueTensor<T>& g1, const U& g2) {
         g1.getDerived() = g1.getDerived() + g2.getDerived();
     }
 
-    template<Grid T, Grid U>
-    inline void operator-=(LValueGrid<T>& g1, const U& g2) {
+    template<Tensor T, Tensor U>
+    inline void operator-=(LValueTensor<T>& g1, const U& g2) {
         g1.getDerived() = g1.getDerived() - g2.getDerived();
     }
 }
 
-#include "LValueGridImpl.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/FlattenGrid.h"
+#include "LValueTensorImpl/LValueTensorImpl.h"
+#include "LValueTensorImpl/FlattenTensor.h"

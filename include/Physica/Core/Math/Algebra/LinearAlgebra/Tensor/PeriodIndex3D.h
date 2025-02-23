@@ -19,14 +19,12 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "GridImpl/GridBase.h"
 
 namespace Physica {
     /**
      * Provide a algebra for Index1D and Index3D in periodic boundary condition
      */
     class PHYSICA_API PeriodIndex3D {
-        using Index3D = GridBase::Index3D;
         using Index1D = Index3D::ElemType;
 
         Index3D index;
@@ -83,7 +81,7 @@ namespace Physica {
         return index[2] < kSpaceDimZ;
     }
 
-    __host__ __device__ inline PeriodIndex3D::Index3D PeriodIndex3D::toReducedK() const {
+    __host__ __device__ inline Index3D PeriodIndex3D::toReducedK() const {
         Index3D result = index;
         if (!isInReducedK()) {
             result[0] = (dim[0] - result[0]) % dim[0];
@@ -104,7 +102,7 @@ namespace Physica {
         dim.swap(obj.dim);
     }
 
-    __host__ __device__ inline PeriodIndex3D::Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
+    __host__ __device__ inline Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
         Index3D result{};
         result[0] = index / (dim[1] * dim[2]);
         const Index1D temp = index % (dim[1] * dim[2]);

@@ -47,7 +47,6 @@ namespace Physica {
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
         using CellListType = CellList<Tv>;
-        using Index3D = GridBase::Index3D;
         using Vec3D = Vector3D<T>;
         using ForceConstMatrix = EmptyForceModel<T, Dim>::ForceConstMatrix;
     private:

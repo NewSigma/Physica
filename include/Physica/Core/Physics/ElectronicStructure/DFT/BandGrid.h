@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/TensorStorage.h"
 #include "KPoint.h"
 
 namespace Physica {
@@ -27,7 +27,7 @@ namespace Physica {
 
     template<Scalar T, bool isSpinPolarized>
     class BandGrid {
-        using KPointGrid = GridStorage<KPoint<T, 0, isSpinPolarized>>;
+        using KPointGrid = TensorStorage<KPoint<T, 0, isSpinPolarized>>;
         using LatticeMatrix = CrystalCell<T>::LatticeMatrix;
 
         KPointGrid kPointGrid;

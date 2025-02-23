@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LUSolver.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
@@ -34,14 +34,13 @@ namespace Physica {
     class BrillouInterpolate {
         constexpr static unsigned int Dim = 3;
         constexpr static bool isComplex = T::isComplex;
-        using Index3D = GridBase::Index3D;
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
         using LatticeMatrix = PeriodicCell<RealType, Dim>::LatticeMatrix;
         using CoeffMatrixM = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
         using Vec3D = Vector3D<RealType>;
 
-        RSpaceGrid<ComplexType> baseCoeff;
+        DenseTensor<ComplexType> baseCoeff;
         LatticeMatrix lattice;
         LUSolver<ComplexType, CoeffMatrixM::Option> solver;
         VectorND<ComplexType> solverBuffer;
@@ -58,10 +57,10 @@ namespace Physica {
         [[nodiscard]] T operator()(Vec3D kPoint);
         /* Operations */
         RealType calcRoughness() const;
-        void interpolate(const RSpaceGrid<T>& data);
-        T interpolateFEM(Vec3D kPoint, const RSpaceGrid<T>& data) const;
+        void interpolate(const DenseTensor<T>& data);
+        T interpolateFEM(Vec3D kPoint, const DenseTensor<T>& data) const;
         template<Matrix M>
-        M interpolateHermiteMatrix(Vec3D qPoint, const GridStorage<M>& matrixGrid);
+        M interpolateHermiteMatrix(Vec3D qPoint, const TensorStorage<M>& matrixGrid);
         void swap(BrillouInterpolate& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Index3D getBaseDim() const noexcept { return baseCoeff.getDim(); }
@@ -88,7 +87,7 @@ namespace Physica {
     T BrillouInterpolate<T>::operator()(Vec3D kPoint) {
         const Index3D baseDim = getBaseDim();
         T result(0);
-        GridBase::forIndexInGrid(baseDim, [this, kPoint, baseDim, &result](Index3D index) {
+        TensorBase::forIndexInTensor(baseDim, [this, kPoint, baseDim, &result](Index3D index) {
             RealType phase(0);
             for (size_t dim = 0; dim < Dim; ++dim)
                 phase += RealType(index[dim]) * kPoint[dim];
@@ -121,12 +120,12 @@ namespace Physica {
             const RealType r4 = square(r2);
             result += baseCoeff(index).squaredNorm() * (RealType(1) + smoothFactor1 * r2 + smoothFactor2 * r4);
         };
-        GridBase::forPointIndexInGrid<true, decltype(kernel)>(getBaseDim(), lattice, kernel);
+        TensorBase::forPointIndexInTensor<true, decltype(kernel)>(getBaseDim(), lattice, kernel);
         return result;
     }
 
     template<Scalar T>
-    void BrillouInterpolate<T>::interpolate(const RSpaceGrid<T>& data) {
+    void BrillouInterpolate<T>::interpolate(const DenseTensor<T>& data) {
         assert(dataDim[0] <= getBaseDim()[0] && "[Error]: Not enough base function, interpolation is overdetermined");
         assert(dataDim[1] <= getBaseDim()[1] && "[Error]: Not enough base function, interpolation is overdetermined");
         assert(dataDim[2] <= getBaseDim()[2] && "[Error]: Not enough base function, interpolation is overdetermined");
@@ -155,7 +154,7 @@ namespace Physica {
             fft.rawInvTransform();
 
             const Index3D baseDim = getBaseDim();
-            GridBase::forIndexInGrid(baseDim, [this, &fft](Index3D rIndex) {
+            TensorBase::forIndexInTensor(baseDim, [this, &fft](Index3D rIndex) {
                 PeriodIndex3D pIndex(rIndex, dataDim);
                 pIndex.normalize();
                 baseCoeff(rIndex) *= fft.getRSpace()(pIndex);
@@ -165,7 +164,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T BrillouInterpolate<T>::interpolateFEM(Vec3D kPoint, const RSpaceGrid<T>& data) const {
+    T BrillouInterpolate<T>::interpolateFEM(Vec3D kPoint, const DenseTensor<T>& data) const {
         using ElementType = CuboidLinear<RealType>;
         using IndexArray = ElementType::IndexArray;
         for (size_t i = 0; i < Dim; ++i) {
@@ -210,14 +209,14 @@ namespace Physica {
 
     template<Scalar T>
     template<Matrix M>
-    M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const GridStorage<M>& matrixGrid) {
+    M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const TensorStorage<M>& matrixGrid) {
         const Index3D gridDim = matrixGrid.getDim();
         const size_t order = matrixGrid(0, 0, 0).getRow();
         M result(order, order, T(0));
-        RSpaceGrid<ComplexType> buffer(gridDim);
+        DenseTensor<ComplexType> buffer(gridDim);
         for (size_t c = 0; c < order; ++c) {
             for (size_t r = 0; r < order; ++r) {
-                GridBase::forIndexInGrid(gridDim, [r, c, &buffer, &matrixGrid](Index3D index) {
+                TensorBase::forIndexInTensor(gridDim, [r, c, &buffer, &matrixGrid](Index3D index) {
                     buffer(index) = matrixGrid(index)(r, c);
                 });
                 interpolate(buffer);
@@ -250,7 +249,7 @@ namespace Physica {
             else
                 baseCoeff(index) = reciprocal(RealType(1) + (smoothFactor1 + smoothFactor2 * r2) * r2);
         };
-        GridBase::forPointIndexInGrid<RealType, true, decltype(kernel)>(getBaseDim(), lattice, kernel);
+        TensorBase::forPointIndexInTensor<RealType, true, decltype(kernel)>(getBaseDim(), lattice, kernel);
     }
     /**
      * Matrix M as defined in [1]
@@ -266,7 +265,7 @@ namespace Physica {
                 const PeriodIndex3D period_c(c, dataDim);
                 const auto kIndex = Index3D(period_r + period_c);
                 ComplexType elem(0);
-                GridBase::forIndexInGrid(baseDim, [this, kIndex, &elem](Index3D rIndex) {
+                TensorBase::forIndexInTensor(baseDim, [this, kIndex, &elem](Index3D rIndex) {
                     RealType phase(0);
                     for (size_t i = 0; i < Dim; ++i)
                         phase += RealType(rIndex[i] * kIndex[i]) / RealType(dataDim[i]);
