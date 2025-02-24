@@ -121,7 +121,10 @@ namespace Physica {
             for (size_t i = 0; i < length; ++i) {
                 if (z[i].isZero())
                     continue;
-                grid.col(i).softmax(indexes[i]).reverse(deltas[i].grad());
+                Tv s = grid.col(i).values().softmax(indexes[i]);
+                Tv g = (s - square(s)) * deltas[i].grad();
+                grid.col(i).reverse(-g / Tv(numBin));
+                grid(indexes[i], i).reverse(g);
             }
         }
         else

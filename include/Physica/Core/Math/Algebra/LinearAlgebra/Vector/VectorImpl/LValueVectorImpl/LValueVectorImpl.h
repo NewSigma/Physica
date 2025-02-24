@@ -131,12 +131,19 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector T>
+    template<class T>
     void LValueVector<Derived>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
         static_assert(std::same_as<typename ScalarType::GradType, typename T::ScalarType>, "[Error]: Inconsistent ScalarType");
-        assert(Base::getLength() == grad.getLength());
-        for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i].reverse(grad.calc(i));
+        if constexpr (Scalar<T>) {
+            for (size_t i = 0; i < Base::getLength(); ++i)
+                (*this)[i].reverse(grad);
+        }
+        else {
+            static_assert(Vector<T>, "[Error]: Unexpected type");
+            assert(Base::getLength() == grad.getLength());
+            for (size_t i = 0; i < Base::getLength(); ++i)
+                (*this)[i].reverse(grad.calc(i));
+        }
     }
 
     template<class Derived>

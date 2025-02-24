@@ -25,6 +25,7 @@ namespace Physica {
     /**
      * Reference:
      * [1] arXiv:1412.6980; https://doi.org/10.48550/arXiv.1412.6980
+     * [2] pytorch; https://pytorch.org/docs/stable/generated/torch.optim.Adam.html
      */
     template<Scalar T>
     class Adam {

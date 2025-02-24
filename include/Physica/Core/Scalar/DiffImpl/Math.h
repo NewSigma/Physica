@@ -103,11 +103,11 @@ namespace Physica {
     template<Scalar T>
     CoDiff<T> cosh(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, int Order>
-    auto sinh(const Diff<T, DiffMode::Forward, Order>& x);
+    template<Scalar T>
+    CoDiff<T> sinh(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, int Order>
-    auto tanh(const Diff<T, DiffMode::Forward, Order>& x);
+    template<Scalar T>
+    CoDiff<T> tanh(T&& x) requires(Diffable<T>);
 /*
     template<Scalar T, int Order>
     auto sech(const Diff<T, DiffMode::Forward, Order>& x);

@@ -68,7 +68,7 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 
-        template<Vector T>
+        template<class T>
         void reverse(const T& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>

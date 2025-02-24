@@ -322,19 +322,37 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Order>
-    auto sinh(const Diff<T, DiffMode::Forward, Order>& x) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(sinh(x.value()), x.grad() * cosh(GradType(x)));
+    template<Scalar T>
+    CoDiff<T> sinh(T&& x) requires(Diffable<T>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        if constexpr (ForwardDiff<T>) {
+            using GradType = ScalarType::GradType;
+            co_return ResultType(sinh(x.value()), x.grad() * cosh(GradType(x)));
+        }
+        else {
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            auto result = co_yield sinh(x_.value());
+            auto& g = result.grad();
+            if (!g.isZero())
+                x_.reverse(cosh(x_.value()) * g);
+        }
     }
 
-    template<Scalar T, int Order>
-    auto tanh(const Diff<T, DiffMode::Forward, Order>& x) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        const GradType v = tanh(GradType(x));
-        return ResultType(v.value(), (T(1) - square(v)) * x.grad());
+    template<Scalar T>
+    CoDiff<T> tanh(T&& x) requires(Diffable<T>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        if constexpr (ForwardDiff<T>) {
+            using GradType = ScalarType::GradType;
+            const GradType v = tanh(GradType(x));
+            co_return ResultType(v.value(), (T(1) - square(v)) * x.grad());
+        }
+        else {
+            LazyDestroy<T&&> x_ = std::forward<T>(x);
+            auto result = co_yield tanh(x_.value());
+            auto& g = result.grad();
+            if (!g.isZero())
+                x_.reverse(square(sech(x_.value())) * g);
+        }
     }
 
     template<Scalar T>
