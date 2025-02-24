@@ -55,8 +55,8 @@ namespace Physica {
         template<class... Args>
         __host__ __device__ explicit Array(size_t length, Args&&... args);
         __host__ __device__ Array(std::initializer_list<T> list);
-        template<class OtherAlloc>
-        Array(const Array<T, Length, OtherAlloc>& other);
+        template<size_t OtherLength, class OtherAlloc>
+        Array(const Array<T, OtherLength, OtherAlloc>& other);
         Array(const This&) = default;
         Array(This&&) noexcept = default;
         ~Array() = default;
@@ -110,8 +110,8 @@ namespace Physica {
         template<class... Args>
         explicit Array(size_t length_, Args&&... args);
         Array(std::initializer_list<T> list);
-        template<class OtherAlloc>
-        Array(const Array<T, Dynamic, OtherAlloc>& other);
+        template<size_t Length, class OtherAlloc>
+        Array(const Array<T, Length, OtherAlloc>& other);
         Array(const This& array);
         Array(This&& array) noexcept;
         ~Array();

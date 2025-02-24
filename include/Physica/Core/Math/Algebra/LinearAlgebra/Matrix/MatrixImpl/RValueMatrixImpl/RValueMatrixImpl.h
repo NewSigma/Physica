@@ -332,7 +332,7 @@ namespace Physica {
 
     template<class Derived>
     inline auto RValueMatrix<Derived>::flatten() const noexcept {
-        return RValueFlatten<Derived>(Base::getDerived());
+        return FlattenR<Derived>(Base::getDerived());
     }
 
     template<class Derived>

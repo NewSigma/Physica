@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
     template<class Derived> class RValueTensor;

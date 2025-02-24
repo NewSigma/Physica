@@ -18,24 +18,37 @@
  */
 #pragma once
 
+#include "../LValueTensor.h"
+
 namespace Physica {
     template<class Derived>
     template<Tensor T>
     Derived& LValueTensor<Derived>::operator=(const T& other) {
         if constexpr (std::is_same<Derived, T>::value)
             assert(this != &other && "[Error]: Self assign is likely a bug");
-        resize(other.getDim());
-        other.assign(Base::getDerived());
+        Derived& x = Base::getDerived();
+        x.resize(other.getShape());
+        other.assign(x);
+        return x;
+    }
+
+    template<class Derived>
+    template<Scalar U>
+    Derived& LValueTensor<Derived>::operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+        flatten() = x;
         return Base::getDerived();
     }
 
     template<class Derived>
-    Derived& LValueTensor<Derived>::operator=(const ScalarType& s) {
-        for (size_t i = 0; i < getDimX(); ++i)
-            for (size_t j = 0; j < getDimY(); ++j)
-                for (size_t k = 0; k < getDimZ(); ++k)
-                    Base::getDerived()(i, j, k) = s;
-        return Base::getDerived();
+    template<Tensor X>
+    inline void LValueTensor<Derived>::operator+=(const X& x) {
+        Base::getDerived() = Base::getDerived() + x;
+    }
+
+    template<class Derived>
+    template<Tensor X>
+    inline void LValueTensor<Derived>::operator-=(const X& x) {
+        Base::getDerived() = Base::getDerived() - x;
     }
 
     template<class Derived>
@@ -49,19 +62,25 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto LValueTensor<Derived>::flatten() {
+        return FlattenL<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    const auto LValueTensor<Derived>::flatten() const {
+        return FlattenL<Derived>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
     template<RNG R>
     void LValueTensor<Derived>::random_uniform() {
-        forIndexInTensor(getDim(), [this](Index3D index) {
-            this->operator()(index) = ScalarType::template random_uniform<R>();
-        });
+        flatten().template random_uniform<R>();
     }
 
     template<class Derived>
     template<RNG R>
     void LValueTensor<Derived>::random_normal() {
-        forIndexInTensor(getDim(), [this](Index3D index) {
-            this->operator()(index) = ScalarType::template random_normal<R>();
-        });
+        flatten().template random_normal<R>();
     }
 
     template<class Derived>

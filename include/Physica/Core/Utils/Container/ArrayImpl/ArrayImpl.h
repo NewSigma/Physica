@@ -47,8 +47,10 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
-    template<class OtherAlloc>
-    Array<T, Length, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) {
+    template<size_t OtherLength, class OtherAlloc>
+    Array<T, Length, Allocator>::Array(const Array<T, OtherLength, OtherAlloc>& other) {
+        static_assert(OtherLength == Length || OtherLength == Dynamic, "[Error]: Length do not match");
+        assert(other.getLength() == Length && "[Error]: Length do not match");
         for (size_t i = 0; i < Length; ++i)
             arr[i] = other[i];
     }
@@ -96,8 +98,8 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    template<class OtherAlloc>
-    Array<T, Dynamic, Allocator>::Array(const Array<T, Dynamic, OtherAlloc>& other) : Array(other.getLength()) {
+    template<size_t Length, class OtherAlloc>
+    Array<T, Dynamic, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) : Array(other.getLength()) {
         for (size_t i = 0; i < getLength(); ++i)
             arr[i] = other[i];
     }

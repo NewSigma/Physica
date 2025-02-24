@@ -123,7 +123,7 @@ namespace Physica {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
             TensorBase::forIndexInTensor(basisDim, [this, r, index1](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
-                const Index3D delta = calcDeltaIndex(index1, index2, kSpaceIonCoulomb.getDim());
+                const Index3D delta = calcDeltaIndex(index1, index2, kSpaceIonCoulomb.getShape());
                 hamiltonH(r, c) += kSpaceIonCoulomb(delta);
             });
         });
@@ -144,7 +144,7 @@ namespace Physica {
             TensorBase::forIndexInTensor(basisDim, [this, repVolume, r, index1, &kSpaceDensity](Index3D index2) {
                 constexpr double factor = 1 / PhyConst<AU>::vacuumDielectric;
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
-                const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getDim());
+                const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getShape());
                 const Vector3D<T> waveG = BasisType::makeWaveVector(repLatt, delta, basisDim);
                 hamiltonH(r, c) += T(factor) * repVolume * kSpaceDensity(delta) / waveG.squaredNorm();
             });
@@ -166,7 +166,7 @@ namespace Physica {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
             TensorBase::forIndexInTensor(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
-                const Index3D delta = calcDeltaIndex(index1, index2, kSpaceXC.getDim());
+                const Index3D delta = calcDeltaIndex(index1, index2, kSpaceXC.getShape());
                 hamiltonH(r, c) += kSpaceXC(delta) * repVolume;
             });
         });
@@ -195,13 +195,13 @@ namespace Physica {
     KSHamilton<T, IsSpinPolarized>::StrucFactorArray
     KSHamilton<T, IsSpinPolarized>::makeStructureFactor() const {
         const auto species = cell.getSpecies();
-        auto result = Array<GridType>(species.size(), kSpaceIonCoulomb.getDim());
+        auto result = Array<GridType>(species.size(), kSpaceIonCoulomb.getShape());
         size_t i = 0;
         for (uint16_t element : species) {
             GridType& grid = result[i];
             i += 1;
             size_t j = 0;
-            BasisType::forKInBasis(repLatt, grid.getDim(), [this, element, &j, &grid](Vector3D<T> waveK) {
+            BasisType::forKInBasis(repLatt, grid.getShape(), [this, element, &j, &grid](Vector3D<T> waveK) {
                 auto factor = ComplexType(0);
                 for (size_t ion = 0; ion < cell.getNumParticle(); ++ion) {
                     if (cell.getAtomicNumber(ion) == element) { //Optimize: We can use searching table method
@@ -232,7 +232,7 @@ namespace Physica {
             const T chargeZ = T(element);
             const T factor2 = factor1 * chargeZ;
             const auto& grid = strucFactorGrids[i];
-            BasisType::forKIndexInBasis(repLatt, kSpaceIonCoulomb.getDim(), [this, factor2, &grid](Vector3D<T> waveK, Index3D index) {
+            BasisType::forKIndexInBasis(repLatt, kSpaceIonCoulomb.getShape(), [this, factor2, &grid](Vector3D<T> waveK, Index3D index) {
                 const T squaredNorm = waveK.squaredNorm();
                 const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
                 if (isNotGammaPoint) [[likely]]

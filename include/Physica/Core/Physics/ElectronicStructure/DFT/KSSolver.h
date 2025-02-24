@@ -129,7 +129,7 @@ namespace Physica {
 
     template<Scalar T, class XCProvider>
     bool KSSolver<T, XCProvider>::solve(T criteria, size_t maxIte) {
-        for (auto& kPoint : band.getKPointGrid()) {
+        for (auto& kPoint : band.getKPointGrid().asArray()) {
             iteration = 0;
             while (true) {
                 hamiltonH.makeHamiltonWithXC(xcPot[SpinState::Up], density, kPoint.getPos());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,20 +18,22 @@
  */
 #pragma once
 
+#include "../RValueMatrix.h"
+
 namespace Physica {
     template<Matrix T>
-    class RValueFlatten<T> : public RValueVector<RValueFlatten<T>> {
-        using This = RValueFlatten<T>;
+    class FlattenR<T> : public RValueVector<FlattenR<T>> {
+        using This = FlattenR<T>;
 
         const T& mat;
     public:
-        using Base = RValueVector<RValueFlatten<T>>;
+        using Base = RValueVector<FlattenR<T>>;
         using typename Base::ScalarType;
     public:
-        RValueFlatten(const T& mat_) : mat(mat_) {}
-        RValueFlatten(const This&) = delete;
-        RValueFlatten(This&&) noexcept = delete;
-        ~RValueFlatten() = default;
+        FlattenR(const T& mat_) : mat(mat_) {}
+        FlattenR(const This&) = delete;
+        FlattenR(This&&) noexcept = delete;
+        ~FlattenR() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -41,7 +43,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    RValueFlatten<T>::ScalarType RValueFlatten<T>::calc(size_t index) const {
+    auto FlattenR<T>::calc(size_t index) const -> ScalarType {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
@@ -50,7 +52,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix T>
-    class Traits<RValueFlatten<T>> {
+    class Traits<FlattenR<T>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;

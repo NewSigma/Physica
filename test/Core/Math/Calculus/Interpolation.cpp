@@ -59,15 +59,18 @@ void testFFT1D() {
 }
 
 void testFFT3D() {
-    using TensorType = DenseTensor<ScalarType>;
+    using TensorType = DenseTensor<ScalarType, 3>;
     const auto data = TensorType::random_uniform<RandomType>({5, 5, 5});
     {
         const auto result = interpolate_fft(data, {10, 10, 10});
-        TensorType::forIndexInTensor(data.getDim(), [&data, &result](Index3D index) {
-            Index3D index1{index[0] * 2, index[1] * 2, index[2] * 2};
-            if (!scalarNear(data(index), result(index1), 1E-8))
+        for (size_t i = 0; i < data.getSize(); ++i) {
+            auto indices = data.toIndexND(i);
+            auto indices1 = indices;
+            for (auto& id : indices1)
+                id *= 2;
+            if (!scalarNear(data.asArray()[i], result(indices1), 1E-8))
                 exit(EXIT_FAILURE);
-        });
+        }
     }
     /* Test periodicity */ {
         const ScalarType value = interpolate_fft(data, {0.2, 0.1, 0.3}, {1, 1, 1});

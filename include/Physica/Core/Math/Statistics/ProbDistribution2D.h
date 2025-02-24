@@ -19,13 +19,13 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/TensorStorage.h"
+#include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
     template<Scalar T>
     class ProbDistribution2D {
         using This = ProbDistribution2D;
-        using BucketType = TensorStorage<size_t>;
+        using BucketType = ArrayND<size_t, 3>;
         using VectorType = VectorND<T>;
         using MatrixType = DenseMatrix<T>;
         using MeshType = std::pair<MatrixType, MatrixType>;
@@ -52,8 +52,8 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
-        [[nodiscard]] size_t getNumBinX() const noexcept { return bucket.getDimX(); }
-        [[nodiscard]] size_t getNumBinY() const noexcept { return bucket.getDimY(); }
+        [[nodiscard]] size_t getNumBinX() const noexcept { return bucket.getShape(0); }
+        [[nodiscard]] size_t getNumBinY() const noexcept { return bucket.getShape(1); }
         [[nodiscard]] T getFromPointX() const noexcept { return seperatesX[0]; }
         [[nodiscard]] T getFromPointY() const noexcept { return seperatesY[0]; }
         [[nodiscard]] T getToPointX() const noexcept { return *seperatesX.crbegin(); }
@@ -78,16 +78,16 @@ namespace Physica {
     ProbDistribution2D<T> ProbDistribution2D<T>::operator+(
             const This& pdf) {
         This result(*this);
-        for (size_t i = 0; i < result.bucket.getDimX(); ++i)
-            for (size_t j = 0; j < result.bucket.getDimY(); ++j)
+        for (size_t i = 0; i < result.getNumBinX(); ++i)
+            for (size_t j = 0; j < result.getNumBinY(); ++j)
                 result.bucket(i, j, 0) += pdf.bucket(i, j, 0);
         return result;
     }
 
     template<Scalar T>
     void ProbDistribution2D<T>::operator+=(const This& pdf) {
-        for (size_t i = 0; i < bucket.getDimX(); ++i)
-            for (size_t j = 0; j < bucket.getDimY(); ++j)
+        for (size_t i = 0; i < getNumBinX(); ++i)
+            for (size_t j = 0; j < getNumBinY(); ++j)
                 bucket(i, j, 0) += pdf.bucket(i, j, 0);
     }
 
@@ -102,7 +102,7 @@ namespace Physica {
 
     template<Scalar T>
     void ProbDistribution2D<T>::clear() {
-        for (auto& elem : bucket)
+        for (auto& elem : bucket.asArray())
             elem = 0;
     }
 
@@ -142,7 +142,7 @@ namespace Physica {
     template<Scalar T>
     size_t ProbDistribution2D<T>::calcNumSample() const {
         size_t num = 0;
-        for (size_t elem : bucket)
+        for (size_t elem : bucket.asArray())
             num += elem;
         return num;
     }

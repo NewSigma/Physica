@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "RValueFlatten.h"
+#include "Flatten.h"
 
 namespace Physica {
     template<Matrix T>
-    class device_obj<RValueFlatten<T>> : public device_obj<RValueVector<RValueFlatten<T>>> {
-        using This = device_obj<RValueFlatten<T>>;
+    class device_obj<FlattenR<T>> : public device_obj<RValueVector<FlattenR<T>>> {
+        using This = device_obj<FlattenR<T>>;
 
         const device_obj<T>& mat;
     public:
-        using host_obj = RValueFlatten<T>;
+        using host_obj = FlattenR<T>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     public:
@@ -44,7 +44,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    __device__ device_obj<RValueFlatten<T>>::ScalarType device_obj<RValueFlatten<T>>::calc(size_t index) const {
+    __device__ auto device_obj<FlattenR<T>>::calc(size_t index) const -> ScalarType {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
@@ -53,5 +53,5 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix T>
-    class Traits<device_obj<RValueFlatten<T>>> : public Traits<RValueFlatten<T>> {};
+    class Traits<device_obj<FlattenR<T>>> : public Traits<FlattenR<T>> {};
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../LValueMatrix.h"
 
 namespace Physica {
     template<class Derived>
@@ -36,6 +38,16 @@ namespace Physica {
             for (size_t j = 0; j < Base::getMaxMinor(); ++j)
                 refFromMajorMinor(i, j) = ScalarType(x);
         return Base::getDerived();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::flatten() {
+        return device_obj<FlattenL<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ const auto device_obj<LValueMatrix<Derived>>::flatten() const {
+        return device_obj<FlattenL<Derived>>(Base::getDerived());
     }
 
     template<class Derived>

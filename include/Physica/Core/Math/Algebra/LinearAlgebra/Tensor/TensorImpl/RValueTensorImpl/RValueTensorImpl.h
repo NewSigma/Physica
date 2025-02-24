@@ -16,15 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
- #pragma once
+#pragma once
+
+#include "../RValueTensor.h"
+#include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
     template<class Derived>
     template<Tensor X>
     void RValueTensor<Derived>::assign(X& x) const {
-        forIndexInTensor(getDim(), [this, &x](Index3D index) {
-            x(index) = calc(index);
-        });
+        const auto& derived = Base::getDerived();
+        for (size_t i = 0; i < derived.getSize(); ++i) {
+            const auto indices = toIndexND(i);
+            x(indices) = calc(indices);
+        }
+    }
+
+    template<class Derived>
+    size_t RValueTensor<Derived>::toIndex1D(const IndexArray& indices) const noexcept {
+        return ArrayND<ScalarType, Dim>::toIndex1D(getShape(), indices);
+    }
+
+    template<class Derived>
+    auto RValueTensor<Derived>::toIndexND(size_t index) const noexcept -> IndexArray {
+        return ArrayND<ScalarType, Dim>::toIndexND(getShape(), index);
     }
 
     template<class Derived>
@@ -62,6 +77,31 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueTensor<Derived>::getShape() const noexcept -> IndexArray {
+        const auto& x = Base::getDerived();
+        IndexArray shape(x.getDim());
+        for (int i = 0; i < shape.getLength(); ++i)
+            shape[i] = x.getShape(i);
+        return shape;
+    }
+
+    template<class Derived>
+    auto RValueTensor<Derived>::getDim() const noexcept {
+        if constexpr (Dim == Dynamic)
+            return Base::getDerived().getDim();
+        else
+            return Dim;
+    }
+
+    template<class Derived>
+    size_t RValueTensor<Derived>::getSize() const noexcept {
+        size_t size = getShape(0);
+        for (int i = 1; i < getDim(); ++i)
+            size *= getShape(i);
+        return size;
+    }
+
+    template<class Derived>
     template<Scalar T, bool IsUnitLattice, class Functor>
     inline void RValueTensor<Derived>::forPointInTensor(
             const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
@@ -73,6 +113,11 @@ namespace Physica {
     inline void RValueTensor<Derived>::forPointIndexInTensor(
             const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
         forPointIndexInTensor<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
+    }
+
+    template<class Derived>
+    size_t RValueTensor<Derived>::toSize(const IndexArray& shape) {
+        return ArrayND<ScalarType, Dim>::toSize(shape);;
     }
 
     template<class Derived>

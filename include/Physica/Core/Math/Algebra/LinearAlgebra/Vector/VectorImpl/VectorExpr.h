@@ -98,12 +98,12 @@ namespace Physica {
         constexpr static bool FastPacket2 = Traits<RHS>::FastPacket;
         constexpr static bool IsAddOrSub = Type == ExprType::Add || Type == ExprType::Sub;
 
-        using ScalarType1 = LHS::ScalarType;
-        using RealType = ScalarType1::RealType;
-        using BinaryScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, typename RHS::ScalarType>::Type;
+        using T = LHS::ScalarType;
+        using Tr = T::RealType;
+        using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS::ScalarType>::Type;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
     public:
-        using ScalarType = std::conditional<Type == ExprType::Abs, RealType, BinaryScalarType>::type;
+        using ScalarType = std::conditional<Type == ExprType::Abs, Tr, T12>::type;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
         constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;

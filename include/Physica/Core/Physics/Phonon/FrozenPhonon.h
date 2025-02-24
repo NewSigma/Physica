@@ -69,7 +69,7 @@ namespace Physica {
         static void write(const RSpaceFCGrid& rSpaceFC, H5Loc& loc, const char* name);
     private:
         PositionMatrix makeWignerSeitzRadius() const;
-        TensorStorage<DenseMatrix<T>> makeWignerSeitzWeights() const;
+        ArrayND<DenseMatrix<T>, 3> makeWignerSeitzWeights() const;
         T calcWignerSeitzWeight(const Vector3D<T> r, const PositionMatrix& wignerSeitzRadius) const;
     };
 
@@ -211,13 +211,12 @@ namespace Physica {
     }
 #endif
     template<Scalar T>
-    TensorStorage<DenseMatrix<T>>
-    FrozenPhonon<T>::makeWignerSeitzWeights() const {
+    ArrayND<DenseMatrix<T>, 3> FrozenPhonon<T>::makeWignerSeitzWeights() const {
         const auto wignerSeitzRadius = makeWignerSeitzRadius();
         const Index3D superSize = Base::getSuperSize();
         const Index3D gridDim{4 * superSize[0] + 1, 4 * superSize[1] + 1, 4 * superSize[2] + 1};
         const size_t numAtom = getNumUnitCellAtom();
-        TensorStorage<DenseMatrix<T>> result(gridDim, numAtom, numAtom);
+        ArrayND<DenseMatrix<T>, 3> result(gridDim, numAtom, numAtom);
         TensorBase::forIndexInTensor(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
             const auto& unitCell = Base::getUnitCell();
             const Vector3D<T> factor{T(index[0]) - T(2 * superSize[0]),

@@ -33,7 +33,7 @@ namespace Physica {
         constexpr static unsigned int Dim = 3;
         using VectorType = VectorND<T>;
         using RSpaceFCMat = DenseMatrix<T>;
-        using RSpaceFCGrid = TensorStorage<RSpaceFCMat>;
+        using RSpaceFCGrid = ArrayND<RSpaceFCMat, 3>;
     protected:
         Index3D superSize;
         size_t numDOF;

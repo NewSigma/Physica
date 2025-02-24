@@ -48,7 +48,7 @@ namespace Physica {
                 return arr[r][c];
         }
         else
-            return arr[toIndex(r, c)];
+            return arr[toIndex1D(r, c)];
     }
 
     template<tparams>
@@ -152,7 +152,7 @@ namespace Physica {
             }
         }
         else
-            return arr.data() + toIndex(row, col);
+            return arr.data() + toIndex1D(row, col);
     }
 
     template<tparams>
@@ -161,7 +161,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ size_t device_obj<Array2D>::toIndex(size_t r, size_t c) const {
+    __host__ __device__ size_t device_obj<Array2D>::toIndex1D(size_t r, size_t c) const {
         if constexpr (isColMajor)
             return getRow() * c + r;
         else

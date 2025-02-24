@@ -40,7 +40,7 @@ namespace Physica {
         using CoeffMatrixM = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
         using Vec3D = Vector3D<RealType>;
 
-        DenseTensor<ComplexType> baseCoeff;
+        DenseTensor<ComplexType, 3> baseCoeff;
         LatticeMatrix lattice;
         LUSolver<ComplexType, CoeffMatrixM::Option> solver;
         VectorND<ComplexType> solverBuffer;
@@ -57,13 +57,13 @@ namespace Physica {
         [[nodiscard]] T operator()(Vec3D kPoint);
         /* Operations */
         RealType calcRoughness() const;
-        void interpolate(const DenseTensor<T>& data);
-        T interpolateFEM(Vec3D kPoint, const DenseTensor<T>& data) const;
+        void interpolate(const DenseTensor<T, 3>& data);
+        T interpolateFEM(Vec3D kPoint, const DenseTensor<T, 3>& data) const;
         template<Matrix M>
-        M interpolateHermiteMatrix(Vec3D qPoint, const TensorStorage<M>& matrixGrid);
+        M interpolateHermiteMatrix(Vec3D qPoint, const ArrayND<M, 3>& matrixGrid);
         void swap(BrillouInterpolate& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] Index3D getBaseDim() const noexcept { return baseCoeff.getDim(); }
+        [[nodiscard]] Index3D getBaseDim() const noexcept { return baseCoeff.getShape(); }
     private:
         void initBaseCoeff();
         CoeffMatrixM makeMatrixM() const;
@@ -125,13 +125,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void BrillouInterpolate<T>::interpolate(const DenseTensor<T>& data) {
+    void BrillouInterpolate<T>::interpolate(const DenseTensor<T, 3>& data) {
         assert(dataDim[0] <= getBaseDim()[0] && "[Error]: Not enough base function, interpolation is overdetermined");
         assert(dataDim[1] <= getBaseDim()[1] && "[Error]: Not enough base function, interpolation is overdetermined");
         assert(dataDim[2] <= getBaseDim()[2] && "[Error]: Not enough base function, interpolation is overdetermined");
         const bool useNormalFFT = dataDim[0] == getBaseDim()[0] && dataDim[1] == getBaseDim()[1] && dataDim[2] == getBaseDim()[2];
         if (useNormalFFT) {
-            dataDim = data.getDim();
+            dataDim = data.getShape();
             FFT<ComplexType, 3> fft(dataDim, PlanFlag::Estimate);
             fft.getKSpace() = data;
             fft.invTransform();
@@ -139,8 +139,8 @@ namespace Physica {
         }
         else {
             initBaseCoeff();
-            if (dataDim != data.getDim()) {
-                dataDim = data.getDim();
+            if (dataDim != data.getShape()) {
+                dataDim = data.getShape();
                 solver.decomp(makeMatrixM());
                 const VectorND<ComplexType> ones(solver.getOrder(), ComplexType(1));
                 solverBuffer = solver.solve(ones);
@@ -164,7 +164,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T BrillouInterpolate<T>::interpolateFEM(Vec3D kPoint, const DenseTensor<T>& data) const {
+    T BrillouInterpolate<T>::interpolateFEM(Vec3D kPoint, const DenseTensor<T, 3>& data) const {
         using ElementType = CuboidLinear<RealType>;
         using IndexArray = ElementType::IndexArray;
         for (size_t i = 0; i < Dim; ++i) {
@@ -209,11 +209,11 @@ namespace Physica {
 
     template<Scalar T>
     template<Matrix M>
-    M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const TensorStorage<M>& matrixGrid) {
+    M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const ArrayND<M, 3>& matrixGrid) {
         const Index3D gridDim = matrixGrid.getDim();
         const size_t order = matrixGrid(0, 0, 0).getRow();
         M result(order, order, T(0));
-        DenseTensor<ComplexType> buffer(gridDim);
+        DenseTensor<ComplexType, 3> buffer(gridDim);
         for (size_t c = 0; c < order; ++c) {
             for (size_t r = 0; r < order; ++r) {
                 TensorBase::forIndexInTensor(gridDim, [r, c, &buffer, &matrixGrid](Index3D index) {

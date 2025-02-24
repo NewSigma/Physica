@@ -68,7 +68,7 @@ namespace Physica {
                 return arr[r][c];
         }
         else
-            return arr[toIndex(r, c)];
+            return arr[toIndex1D(r, c)];
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -160,6 +160,22 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    __host__ __device__ T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) {
+        if constexpr (isVectorStorage) {
+            const size_t major = isColMajor ? col : row;
+            const size_t minor = isColMajor ? row : col;
+            return arr[major].data() + minor;
+        }
+        else
+            return arr.data() + toIndex1D(row, col);
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    __host__ __device__ const T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) const {
+        return const_cast<This&>(*this).data_ptr(row, col);
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
     __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::getRow() const noexcept {
         if constexpr (Row == Dynamic) {
             if constexpr (Col == Dynamic)
@@ -200,23 +216,7 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) {
-        if constexpr (isVectorStorage) {
-            const size_t major = isColMajor ? col : row;
-            const size_t minor = isColMajor ? row : col;
-            return arr[major].data() + minor;
-        }
-        else
-            return arr.data() + toIndex(row, col);
-    }
-
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ const T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) const {
-        return const_cast<This&>(*this).data_ptr(row, col);
-    }
-
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::toIndex(size_t r, size_t c) const {
+    __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::toIndex1D(size_t r, size_t c) const {
         if constexpr (isColMajor)
             return getRow() * c + r;
         else

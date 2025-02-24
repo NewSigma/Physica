@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -279,22 +279,6 @@ namespace Physica {
         rSpaceSize.swap(fft.rSpaceSize);
         kSpaceSize.swap(fft.kSpaceSize);
         std::swap(planFlag, fft.planFlag);
-    }
-
-    template<Scalar T, size_t Dim>
-    FFT<T, Dim>::IndexArray FFT<T, Dim>::getRSpaceSize() const noexcept{
-        IndexArray result{};
-        for (size_t i = 0; i < Dim; ++i)
-            result[i] = rSpaceSize[i];
-        return result;
-    }
-
-    template<Scalar T, size_t Dim>
-    FFT<T, Dim>::IndexArray FFT<T, Dim>::getKSpaceSize() const noexcept {
-        IndexArray result{};
-        for (size_t i = 0; i < Dim; ++i)
-            result[i] = kSpaceSize[i];
-        return result;
     }
 
     template<Scalar T, size_t Dim>

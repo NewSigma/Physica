@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -176,9 +176,12 @@ namespace Physica {
         inline void resize([[maybe_unused]] Index3D size);
         using TensorBase::forIndexInTensor;
         /* Getters */
+        [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getKSpaceSize(); }
+        [[nodiscard]] size_t getShape(int dim) const noexcept { return getShape()[dim]; }
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
+        [[nodiscard]] size_t getSize() const noexcept { return TensorBase::toSize(Base::getDerived().getKSpaceSize()); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(Index3D index);
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(Index3D index) const;
     protected:
@@ -257,5 +260,6 @@ namespace Physica {
     public:
         using Derived = T;
         using ScalarType = Traits<T>::ScalarType::ComplexType;
+        constexpr static int Dim = 3;
     };
 }

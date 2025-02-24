@@ -102,6 +102,7 @@ namespace Physica {
     class Traits<RealTensor<T>> {
     public:
         using ScalarType = T::ScalarType::RealType;
+        constexpr static int Dim = T::Dim;
     };
 
     template<class T>
@@ -115,6 +116,7 @@ namespace Physica {
         static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueTensor() call or toGradTensor() call");
     public:
         using ScalarType = T::PlainType;
+        constexpr static int Dim = T::Dim;
     };
 
     template<class T, int GradOrder>

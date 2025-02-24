@@ -19,59 +19,51 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/RValueTensor.h"
+#include "../RValueTensor.h"
 
 namespace Physica {
-    template<class TensorType> class LValueTensor;
-
     template<Tensor T>
-    class FlattenTensor<T> : public LValueVector<FlattenTensor<T>> {
-        using This = FlattenTensor<T>;
+    class FlattenL<T> : public LValueVector<FlattenL<T>> {
+        using This = FlattenL<T>;
 
-        const T& grid;
+        T& tensor;
     public:
-        using Base = LValueVector<FlattenTensor<T>>;
+        using Base = LValueVector<FlattenL<T>>;
         using typename Base::ScalarType;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     public:
-        FlattenTensor(const T& grid_) : grid(grid_) {}
+        FlattenL(T& tensor_) : tensor(tensor_) {}
+        FlattenL(const This&) = delete;
+        FlattenL(This&&) noexcept = delete;
+        ~FlattenL() = default;
         /* Operators */
-        FlattenTensor& operator=(const FlattenTensor& obj);
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         using Base::operator=;
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return grid.getSize(); }
+        [[nodiscard]] size_t getLength() const noexcept { return tensor.getSize(); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<Tensor T>
-    FlattenTensor<T>& FlattenTensor<T>::operator=(const FlattenTensor<T>& obj) {
-        Base::getDerived() = obj.getDerived();
-        return *this;
+    __host__ __device__ auto FlattenL<T>::data_ptr(size_t index) -> PtrTy {
+        return tensor.data_ptr(tensor.toIndexND(index));
     }
 
     template<Tensor T>
-    __host__ __device__ FlattenTensor<T>::PtrTy FlattenTensor<T>::data_ptr(size_t index) {
-        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
-    }
-
-    template<Tensor T>
-    __host__ __device__ FlattenTensor<T>::ConstPtrTy FlattenTensor<T>::data_ptr(size_t index) const {
-        const size_t temp = index / grid.getDimZ();
-        const size_t x = temp / grid.getDimY();
-        const size_t y = temp % grid.getDimY();
-        const size_t z = index % grid.getDimZ();
-        return grid.data_ptr({x, y, z});
+    __host__ __device__ auto FlattenL<T>::data_ptr(size_t index) const -> ConstPtrTy {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }
 
 namespace Physica {
     template<Tensor T>
-    class Traits<FlattenTensor<T>> {
+    class Traits<FlattenL<T>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;

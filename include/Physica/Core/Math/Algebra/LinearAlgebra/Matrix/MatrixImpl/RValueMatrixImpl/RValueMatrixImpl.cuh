@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/CUDA/CUDA.cuh"
-#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "../RValueMatrix.cuh"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Parallel/CUDAContext.cuh" // IWYU pragma: export
 #include "Physica/PlainStruct.h"
-#include "RValueFlatten.cuh"
+#include "Flatten.cuh" // IWYU pragma: export
 
 namespace Physica {
     namespace Internal {
@@ -231,6 +231,6 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::flatten() const noexcept {
-        return device_obj<RValueFlatten<Derived>>(Base::getDerived());
+        return device_obj<FlattenR<Derived>>(Base::getDerived());
     }
 }

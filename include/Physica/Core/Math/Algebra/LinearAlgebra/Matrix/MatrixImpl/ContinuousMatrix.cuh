@@ -107,11 +107,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+
+        [[nodiscard]] auto flatten();
+        [[nodiscard]] const auto flatten() const;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
-        [[nodiscard]] device_obj<ContinuousFlatten<Derived>> flatten() { return {*this}; }
-        [[nodiscard]] const device_obj<ContinuousFlatten<Derived>> flatten() const { return {const_cast<This&>(*this)}; }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -120,4 +121,4 @@ namespace Physica {
 }
 
 #include "ContinuousMatrixImpl/ContinuousMatrixImpl.cuh"
-#include "ContinuousMatrixImpl/ContinuousFlatten.cuh"
+#include "ContinuousMatrixImpl/Flatten.cuh"

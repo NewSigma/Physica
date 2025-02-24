@@ -20,9 +20,9 @@
 
 #include "LValueMatrix.h"
 #include "ContinuousMatrixImpl/ContinuousMatrixBlock.h"
-#include "ContinuousMatrixImpl/ContinuousFlatten.h"
 
 namespace Physica {
+    template<class> class FlattenC;
     /**
      * A ContinuousMatrix has its elements on major direction distributed continuously.
      */
@@ -122,6 +122,9 @@ namespace Physica {
         void resize(const M& m) { resize(m.getRow(), m.getCol()); }
         void resize(size_t r, size_t c) { Base::getDerived().resize(r, c); }
 
+        [[nodiscard]] auto flatten();
+        [[nodiscard]] const auto flatten() const;
+
         template<RNG R>
         void random_uniform();
         template<RNG R>
@@ -137,8 +140,6 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
-        [[nodiscard]] ContinuousFlatten<Derived> flatten() { return {*this}; }
-        [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {const_cast<This&>(*this)}; }
     protected:
         ContinuousMatrix() = default;
         ContinuousMatrix(const This&) = default;
@@ -152,3 +153,5 @@ namespace Physica {
 }
 
 #include "ContinuousMatrixImpl/ContinuousMatrixImpl.h" // IWYU pragma: export
+#include "ContinuousMatrixImpl/Flatten.h"
+

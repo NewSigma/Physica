@@ -74,17 +74,17 @@ namespace Physica {
         void swap_row(size_t r1, size_t r2) noexcept;
         void swap_col(size_t c1, size_t c2) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
-        [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ auto& asArray() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const auto& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col);
         [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
     private:
         Array2D(ArrayType arr_, IndexType r_);
 
-        __host__ __device__ size_t toIndex(size_t r, size_t c) const;
+        __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
         /* Friends */
         friend class device_obj<This>;
     };

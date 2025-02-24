@@ -194,7 +194,7 @@ namespace Physica {
         constexpr size_t Dim = 3;
         constexpr bool isComplex = T::isComplex;
 
-        auto fft = FFT<T, 3>(data.getDim(), PlanFlag::Estimate);
+        auto fft = FFT<T, 3>(data.getShape(), PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
 
@@ -210,7 +210,7 @@ namespace Physica {
                 phase *= RealType(2 * M_PI);
                 const auto factor = ComplexType::fromPhase(phase);
                 if constexpr (!isComplex) {
-                    if (kIndex[2] >= kSpace.getDim()[2]) {
+                    if (kIndex[2] >= kSpace.getShape(2)) {
                         Index3D kIndex1;
                         kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
                         kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);
@@ -244,7 +244,7 @@ namespace Physica {
         constexpr size_t Dim = 3;
         constexpr bool isComplex = T::isComplex;
         
-        auto fft = FFT<T, 3>(data.getDim(), PlanFlag::Estimate);
+        auto fft = FFT<T, 3>(data.getShape(), PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const auto& kSpace = fft.getKSpace();
@@ -259,7 +259,7 @@ namespace Physica {
             phase *= RealType(2 * M_PI);
             const auto factor = ComplexType::fromPhase(phase);
             if constexpr (!isComplex) {
-                if (kIndex[2] >= kSpace.getDim()[2]) {
+                if (kIndex[2] >= kSpace.getShape(2)) {
                     Index3D kIndex1;
                     kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
                     kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);

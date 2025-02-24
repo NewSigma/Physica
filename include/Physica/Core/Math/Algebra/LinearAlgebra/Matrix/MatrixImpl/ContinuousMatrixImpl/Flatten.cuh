@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,10 +18,13 @@
  */
 #pragma once
 
+#include "../ContinuousMatrix.cuh"
+#include "Flatten.h"
+
 namespace Physica {
     template<Matrix T>
-    class device_obj<ContinuousFlatten<T>> : public device_obj<ContinuousVector<ContinuousFlatten<T>>> {
-        using host_obj = ContinuousFlatten<T>;
+    class device_obj<FlattenC<T>> : public device_obj<ContinuousVector<FlattenC<T>>> {
+        using host_obj = FlattenC<T>;
         using This = device_obj<host_obj>;
 
         device_obj<T>& mat;
@@ -51,8 +54,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    __host__ __device__ inline device_obj<ContinuousFlatten<T>>::PtrTy
-    device_obj<ContinuousFlatten<T>>::data_ptr(size_t index) {
+    __host__ __device__ inline auto device_obj<FlattenC<T>>::data_ptr(size_t index) -> PtrTy {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
@@ -61,13 +63,12 @@ namespace Physica {
     }
 
     template<Matrix T>
-    __host__ __device__ inline device_obj<ContinuousFlatten<T>>::ConstPtrTy
-    device_obj<ContinuousFlatten<T>>::data_ptr(size_t index) const {
+    __host__ __device__ inline auto device_obj<FlattenC<T>>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }
 
 namespace Physica {
     template<Matrix T>
-    class Traits<device_obj<ContinuousFlatten<T>>> : public Traits<ContinuousFlatten<T>> {};
+    class Traits<device_obj<FlattenC<T>>> : public Traits<FlattenC<T>> {};
 }

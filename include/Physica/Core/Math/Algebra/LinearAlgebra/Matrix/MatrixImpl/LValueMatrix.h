@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<class MatrixType> class InverseMatrix;
-    template<class MatrixType> class LValueFlatten;
+    template<class> class FlattenL;
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes can be assigned to this class.
@@ -66,9 +66,15 @@ namespace Physica {
         template<Matrix M> void operator+=(const M& m) { Base::getDerived() = Base::getDerived() + m; }
         template<Matrix M> void operator-=(const M& m) { Base::getDerived() = Base::getDerived() - m; }
         template<Matrix M> void operator*=(const M& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
+
         [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
         [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
         /* Operations */
+        [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+
+        [[nodiscard]] CoDiff<ScalarType> sum() const;
+
         template<Matrix M>
         void reverse(const M& grad) const noexcept requires(isReverseDiff);
 
@@ -105,11 +111,6 @@ namespace Physica {
         [[nodiscard]] inline auto diag() noexcept;
         [[nodiscard]] inline const auto diag() const noexcept;
 
-        [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
-
-        [[nodiscard]] CoDiff<ScalarType> sum() const;
-
         [[nodiscard]] auto inverse() const noexcept;
         [[nodiscard]] CoDiff<ScalarType> determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
@@ -119,6 +120,10 @@ namespace Physica {
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
 
+        [[nodiscard]] auto flatten();
+        [[nodiscard]] const auto flatten() const;
+
+        void toUnitMatrix();
         template<RNG R>
         void random_uniform();
         template<RNG R>
@@ -133,10 +138,6 @@ namespace Physica {
         [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] inline RefTy refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] inline ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
-        [[nodiscard]] auto flatten();
-        [[nodiscard]] const auto flatten() const;
-        /* Setters */
-        void toUnitMatrix();
     protected:
         LValueMatrix() = default;
         LValueMatrix(const This&) = default;

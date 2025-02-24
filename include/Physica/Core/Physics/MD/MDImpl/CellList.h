@@ -19,9 +19,9 @@
 #pragma once
 
 #include <forward_list>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/TensorImpl/TensorStorage.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
     template<Scalar T>
@@ -32,7 +32,7 @@ namespace Physica {
         using MDCellType = MDCell<T>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
-        using CellGrid = TensorStorage<std::forward_list<size_t>>;
+        using CellGrid = ArrayND<std::forward_list<size_t>, 3>;
     private:
         LatticeMatrix lattice;
         PositionMatrix directPos;
@@ -101,7 +101,7 @@ namespace Physica {
         atomCellMap.resize(getNumParticle());
 
         PeriodicCell<T, 3>::toDirect(directPos, lattice);
-        CellGrid cellGrid(cellGridDim);
+        auto cellGrid = CellGrid(cellGridDim);
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const Index3D index = posToIndex(i);
             atomCellMap[i] = index;
@@ -109,15 +109,15 @@ namespace Physica {
         }
         {
             size_t cellAtomMapIndex = 0;
-            cellGrid.forIndexInTensor([this, &cellGrid, &cellAtomMapIndex](Index3D index) {
-                const auto index1D = PeriodIndex3D(index, cellGridDim).toIndex1D();
-                cellStartOffset[index1D] = cellAtomMapIndex;
-                const auto& list = cellGrid(index);
+            auto& cells = cellGrid.asArray();
+            for (size_t i = 0; i < cells.getLength(); ++i) {
+                cellStartOffset[i] = cellAtomMapIndex;
+                const auto& list = cells[i];
                 for (auto atom : list) {
                     cellAtomMap[cellAtomMapIndex] = atom;
                     cellAtomMapIndex += 1;
                 }
-            });
+            }
         }
         neighShifts = makeNeighShifts(lattice);
     }
@@ -144,15 +144,15 @@ namespace Physica {
         }
         {
             size_t cellAtomMapIndex = 0;
-            cellGrid.forIndexInTensor([this, &cellGrid, &cellAtomMapIndex](Index3D index) {
-                const auto index1D = PeriodIndex3D(index, cellGridDim).toIndex1D();
-                cellStartOffset[index1D] = cellAtomMapIndex;
-                const auto& list = cellGrid(index);
+            auto& cells = cellGrid.asArray();
+            for (size_t i = 0; i < cells.getLength(); ++i) {
+                cellStartOffset[i] = cellAtomMapIndex;
+                const auto& list = cells[i];
                 for (auto atom : list) {
                     cellAtomMap[cellAtomMapIndex] = atom;
                     cellAtomMapIndex += 1;
                 }
-            });
+            }
         }
     }
 

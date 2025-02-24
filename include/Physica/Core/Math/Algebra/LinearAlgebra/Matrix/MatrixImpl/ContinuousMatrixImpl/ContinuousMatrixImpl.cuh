@@ -216,4 +216,14 @@ namespace Physica {
     __host__ __device__ inline const auto device_obj<ContinuousMatrix<Derived>>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
         return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
     }
+
+    template<class Derived>
+    auto device_obj<ContinuousMatrix<Derived>>::flatten() {
+        return device_obj<FlattenC<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    const auto device_obj<ContinuousMatrix<Derived>>::flatten() const {
+        return device_obj<FlattenC<Derived>>(const_cast<This&>(*this));
+    }
 }

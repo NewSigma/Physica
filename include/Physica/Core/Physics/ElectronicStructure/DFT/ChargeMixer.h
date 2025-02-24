@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "DensityGrid.h"
 
@@ -109,7 +110,7 @@ namespace Physica {
                 const T factor = T(amix) * std::min(kNorm / (kNorm + square(T(bmix))), T(amin));
                 kSpace(index) *= factor;
             };
-            GridType::template forPointIndexInTensor<T, true, decltype(kernel)>(kSpace.getDim(), repLatt, kernel);
+            GridType::template forPointIndexInTensor<T, true, decltype(kernel)>(kSpace.getShape(), repLatt, kernel);
             fft.invTransform();
 
             const auto& rho_old = oldDensities[0].getTotalDensity().flatten();

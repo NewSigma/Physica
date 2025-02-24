@@ -58,6 +58,7 @@ namespace Physica {
         inline Derived& operator=(const T& v_);
         template<Vector V> inline void operator+=(const V& v);
         template<Vector V> inline void operator-=(const V& v);
+
         [[nodiscard]] inline RefTy operator[](size_t index);
         [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */

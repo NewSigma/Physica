@@ -22,66 +22,62 @@
 #include "LValueTensorImpl/LTensorBlock.h"
 
 namespace Physica {
-    /**
-     * Notes:
-     * Right is positive direction of x.
-     * Back is positive direction of y.
-     * Top is positive direction of z.
-     */
     template<class Derived>
     class LValueTensor : public RValueTensor<Derived> {
+        using This = LValueTensor<Derived>;
         using Base = RValueTensor<Derived>;
     public:
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
     protected:
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
         using ConstRefTy = ScalarType::ConstRefTy;
     public:
+        ~LValueTensor() = default;
+        /* Operators */
         template<Tensor T>
         Derived& operator=(const T& other);
-        Derived& operator=(const ScalarType& s);
+
+        template<Scalar U>
+        Derived& operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
+        template<Scalar U> void operator+=(const U& x) { Base::getDerived() = Base::getDerived() + x; }
+        template<Scalar U> void operator-=(const U& x) { Base::getDerived() = Base::getDerived() - x; }
+        template<Scalar U> void operator*=(const U& x) { Base::getDerived() = Base::getDerived() * x; }
+        template<Scalar U> void operator/=(const U& x) { Base::getDerived() = Base::getDerived() / x; }
+
+        template<Tensor X> inline void operator+=(const X& x);
+        template<Tensor X> inline void operator-=(const X& x);
+
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
         [[nodiscard]] ScalarType& operator()(Index3D index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator()(Index3D index) const { return *data_ptr(index); }
-        template<Scalar T> void operator+=(const T& s) { Base::getDerived() = Base::getDerived() + s; }
-        template<Scalar T> void operator-=(const T& s) { Base::getDerived() = Base::getDerived() - s; }
-        template<Scalar T> void operator*=(const T& s) { Base::getDerived() = Base::getDerived() * s; }
-        template<Scalar T> void operator/=(const T& s) { Base::getDerived() = Base::getDerived() / s; }
         /* Operations */
+        [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
+
         [[nodiscard]] inline LTensorBlock<Derived> block(Index3D from, Index3D count);
         [[nodiscard]] inline const LTensorBlock<Derived> block(Index3D from, Index3D count) const;
 
-        [[nodiscard]] auto flatten() const { return FlattenTensor<Derived>(Base::getDerived()); }
-        void resize(Index3D size) { Base::getDerived().resize(size); }
+        [[nodiscard]] auto flatten();
+        [[nodiscard]] const auto flatten() const;
+
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(Index3D index) const { return Base::getDerived().data_ptr(index); }
-        using Base::getDimX;
-        using Base::getDimY;
-        using Base::getDimZ;
-        using Base::getDim;
         /* Static members */
         using Base::forPointInTensor;
         using Base::forPointIndexInTensor;
         using Base::forIndexInTensor;
+    protected:
+        LValueTensor() = default;
+        LValueTensor(const This&) = default;
+        LValueTensor(This&&) noexcept = default;
     };
-
-    template<Tensor T, Tensor U>
-    inline void operator+=(LValueTensor<T>& g1, const U& g2) {
-        g1.getDerived() = g1.getDerived() + g2.getDerived();
-    }
-
-    template<Tensor T, Tensor U>
-    inline void operator-=(LValueTensor<T>& g1, const U& g2) {
-        g1.getDerived() = g1.getDerived() - g2.getDerived();
-    }
 }
 
 #include "LValueTensorImpl/LValueTensorImpl.h"
-#include "LValueTensorImpl/FlattenTensor.h"
+#include "LValueTensorImpl/Flatten.h"

@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 

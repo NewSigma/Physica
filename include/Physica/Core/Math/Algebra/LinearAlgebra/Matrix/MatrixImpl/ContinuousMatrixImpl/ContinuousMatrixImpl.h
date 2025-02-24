@@ -226,6 +226,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto ContinuousMatrix<Derived>::flatten() {
+        return FlattenC<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    const auto ContinuousMatrix<Derived>::flatten() const {
+        return FlattenC<Derived>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
     template<RNG R>
     void ContinuousMatrix<Derived>::random_uniform() {
         if constexpr (isReverseDiff) {

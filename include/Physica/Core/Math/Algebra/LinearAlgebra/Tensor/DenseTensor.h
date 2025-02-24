@@ -18,116 +18,68 @@
  */
 #pragma once
 
-#include "TensorImpl/TensorStorage.h"
 #include "TensorImpl/LValueTensor.h"
 
 namespace Physica {
-    template<Scalar T>
-    class DenseTensor : public LValueTensor<DenseTensor<T>>, private TensorStorage<T> {
-        using This = DenseTensor<T>;
+    template<Scalar T, int Dim = Dynamic>
+    class DenseTensor : public LValueTensor<DenseTensor<T, Dim>>, private ArrayND<T, Dim> {
+        using This = DenseTensor<T, Dim>;
         using Base = LValueTensor<This>;
-        using Storage = TensorStorage<T>;
+        using Storage = ArrayND<T, Dim>;
+    protected:
+        using typename Base::IndexArray;
     public:
         DenseTensor() = default;
         template<class... Args>
-        DenseTensor(Index3D index, Args&&... args);
+        DenseTensor(IndexArray shape, Args&&... args);
         DenseTensor(const This&) = default;
         DenseTensor(This&&) noexcept = default;
         ~DenseTensor() = default;
         /* Operators */
         using Base::operator=;
-        This& operator=(This grid) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Storage::operator();
-        template<class U> friend std::ostream& operator<<(std::ostream& os, const DenseTensor<U>& grid);
-        template<class U> friend std::istream& operator>>(std::istream& is, DenseTensor<U>& grid);
         /* Operations */
         using Base::random_normal;
         template<class... Args>
-        inline void resize(Index3D index, Args&&... args);
-        inline void swap(This& __restrict grid) noexcept;
+        inline void resize(IndexArray shape, Args&&... args);
+
+        using Base::toIndex1D;
+        using Base::toIndexND;
+
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
+        using Storage::asArray;
         using Storage::data_ptr;
+        using Storage::getShape;
         using Storage::getDim;
-        using Storage::getDimX;
-        using Storage::getDimY;
-        using Storage::getDimZ;
         using Storage::getSize;
         /* Static members */
-        using Base::forIndexInTensor;
-        using Base::forPointIndexInTensor;
-        using Base::forPointInTensor;
         template<RNG R>
-        static DenseTensor random_uniform(Index3D size);
+        static DenseTensor random_uniform(IndexArray shape);
         template<RNG R>
-        static DenseTensor random_normal(Index3D size);
+        static DenseTensor random_normal(IndexArray shape);
     };
 
-    template<Scalar T>
-    template<class... Args>
-    DenseTensor<T>::DenseTensor(Index3D index, Args&&... args) : Storage(index, std::forward<Args>(args)...) {}
-
-    template<Scalar T>
-    DenseTensor<T>& DenseTensor<T>::operator=(DenseTensor grid) noexcept {
-        swap(grid);
-        return *this;
-    }
-
-    template<Scalar T>
-    std::ostream& operator<<(std::ostream& os, const DenseTensor<T>& grid) {
-        const Index3D dim = grid.getDim();
-        os.write(reinterpret_cast<const char*>(&dim), sizeof(Index3D));
-        os.write(reinterpret_cast<const char*>(grid.asArray().data()), grid.getSize() * sizeof(T));
-        return os;
-    }
-
-    template<Scalar T>
-    std::istream& operator>>(std::istream& is, DenseTensor<T>& grid) {
-        Index3D dim;
-        is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
-        grid.resize(dim);
-        is.read(reinterpret_cast<char*>(grid.asArray().data()), grid.getSize() * sizeof(T));
-        return is;
-    }
-
-    template<Scalar T>
-    template<class... Args>
-    inline void DenseTensor<T>::resize(Index3D index, Args&&... args) {
-        Storage::resize(index, std::forward<Args>(args)...);
-    }
-
-    template<Scalar T>
-    inline void DenseTensor<T>::swap(This& __restrict grid) noexcept {
-        assert(this != &grid && "[Error]: Self swap is likely a bug");
-        Storage::swap(grid);
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    inline DenseTensor<T> DenseTensor<T>::random_uniform(Index3D size) {
-        auto result = DenseTensor<T>(size);
-        result.flatten().template random_uniform<R>();
-        return result;
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    inline DenseTensor<T> DenseTensor<T>::random_normal(Index3D size) {
-        auto result = DenseTensor<T>(size);
-        result.flatten().template random_normal<R>();
-        return result;
-    }
-
-    template<Scalar T>
-    inline void swap(DenseTensor<T>& __restrict grid1, DenseTensor<T>& __restrict grid2) noexcept {
-        grid1.swap(grid2);
-    }
+    template<Scalar T> using Tensor3D = DenseTensor<T, 3>;
+    template<Scalar T> using Tensor4D = DenseTensor<T, 4>;
+    template<Scalar T> using TensorND = DenseTensor<T>;
 }
 
 namespace Physica {
-    template<Scalar T>
-    class Traits<DenseTensor<T>> {
+    template<Scalar T, int Dim_>
+    class Traits<DenseTensor<T, Dim_>> {
     public:
         using ScalarType = T;
-        constexpr static int Dim = 3;
+        constexpr static int Dim = Dim_;
     };
 }
+
+namespace std {
+    template<Physica::Scalar T, size_t Dim>
+    inline void swap(Physica::DenseTensor<T, Dim>& __restrict x, Physica::DenseTensor<T, Dim>& __restrict y) noexcept {
+        x.swap(y);
+    }
+}
+
+#include "TensorImpl/DenseTensorImpl.h"

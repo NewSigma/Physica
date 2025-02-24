@@ -24,7 +24,7 @@
 
 namespace Physica {
     template<class Derived> class LValueTensor;
-    template<class TensorType> class FlattenTensor;
+    template<class> class FlattenL;
     template<class T> class RealTensor;
     template<class T> class ImagTensor;
     template<class T> class SquaredNormTensor;
@@ -42,10 +42,18 @@ namespace Physica {
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
+    protected:
+        using IndexArray = Array<size_t, Dim>;
     public:
         /* Operations */
         template<Tensor X>
         void assign(X& x) const;
+
+        [[nodiscard]] ScalarType calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] size_t toIndex1D(const IndexArray& indices) const noexcept;
+        [[nodiscard]] IndexArray toIndexND(size_t index) const noexcept;
+
         template<class Functor> void forIndexInTensor(Functor func) const { TensorBase::forIndexInTensor(getDim(), func); }
 
         auto reals() const noexcept;
@@ -56,13 +64,10 @@ namespace Physica {
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
-        [[nodiscard]] ScalarType calc(Index3D index) const { return Base::getDerived().calc(index); }
-        [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getDimX(); }
-        [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getDimY(); }
-        [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getDimZ(); }
-        [[nodiscard]] Index3D getDim() const noexcept { return {getDimX(), getDimY(), getDimZ()}; }
-        [[nodiscard]] size_t getSize() const noexcept { return getDimX() * getDimY() * getDimZ(); }
+        [[nodiscard]] auto getShape(int dim) const noexcept { return Base::getDerived().getShape(dim); }
+        [[nodiscard]] IndexArray getShape() const noexcept;
+        [[nodiscard]] auto getDim() const noexcept;
+        [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
         using TensorBase::forPointInTensor;
         using TensorBase::forPointIndexInTensor;
@@ -73,6 +78,8 @@ namespace Physica {
         template<Scalar T, bool IsUnitLattice, class Functor>
         inline static void forPointIndexInTensor(
                 const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        
+        [[nodiscard]] static size_t toSize(const IndexArray& shape);
     protected:
         template<int GradOrder>
         auto grads_impl() const noexcept;

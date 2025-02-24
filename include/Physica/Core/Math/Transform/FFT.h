@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -133,8 +133,8 @@ namespace Physica {
         PlanType forward_plan;
         PlanType backward_plan;
         ComplexTypeFFTW* buffer;
-        Array<int, Dim> rSpaceSize;
-        Array<int, Dim> kSpaceSize;
+        IndexArray rSpaceSize;
+        IndexArray kSpaceSize;
         PlanFlag planFlag;
     public:
         FFT();
@@ -155,8 +155,8 @@ namespace Physica {
         [[nodiscard]] size_t getDim() const noexcept { return Dim == Dynamic ? rSpaceSize.getLength() : Dim; }
         [[nodiscard]] __host__ __device__ ComplexTypeFFTW* getBuffer() { return buffer; }
         [[nodiscard]] __host__ __device__ const ComplexTypeFFTW* getBuffer() const { return buffer; }
-        [[nodiscard]] IndexArray getRSpaceSize() const noexcept;
-        [[nodiscard]] IndexArray getKSpaceSize() const noexcept;
+        [[nodiscard]] const auto& getRSpaceSize() const noexcept { return rSpaceSize; }
+        [[nodiscard]] const auto& getKSpaceSize() const noexcept { return kSpaceSize; }
         [[nodiscard]] inline RealType getRSpaceDelta(RealType kSpaceDelta, unsigned int dim) const noexcept;
         [[nodiscard]] inline RealType getKSpaceDelta(RealType rSpaceDelta, unsigned int dim) const noexcept;
         [[nodiscard]] __host__ __device__ RSpaceType& getRSpace() { return *this; }

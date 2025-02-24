@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,60 +18,62 @@
  */
 #pragma once
 
+#include "../ContinuousMatrix.h"
+
 namespace Physica {
     template<Matrix T>
-    class LValueFlatten<T> : public LValueVector<LValueFlatten<T>> {
-        using This = LValueFlatten<T>;
+    class FlattenC<T> : public ContinuousVector<FlattenC<T>> {
+        using This = FlattenC<T>;
 
-        const T& mat;
+        T& mat;
     public:
-        using Base = LValueVector<This>;
+        using Base = ContinuousVector<This>;
         using typename Base::ScalarType;
     protected:
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
-        LValueFlatten(const LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
-        LValueFlatten(const This&) = delete;
-        LValueFlatten(This&&) noexcept = delete;
-        ~LValueFlatten() = default;
+        FlattenC(ContinuousMatrix<T>& mat_) : mat(mat_.getDerived()) {}
+        FlattenC(const This&) = delete;
+        FlattenC(This&&) noexcept = delete;
+        ~FlattenC() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operators */
         [[nodiscard]] ScalarType& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
+        /* Operations */
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<Matrix T>
-    __host__ __device__ inline LValueFlatten<T>::PtrTy
-    LValueFlatten<T>::data_ptr(size_t index) {
-        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
-    }
-
-    template<Matrix T>
-    __host__ __device__ inline LValueFlatten<T>::ConstPtrTy
-    LValueFlatten<T>::data_ptr(size_t index) const {
+    __host__ __device__ inline auto FlattenC<T>::data_ptr(size_t index) -> PtrTy {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
         const size_t col = MatrixOption::colFromMajorMinor<T>(major, minor);
         return mat.data_ptr(row, col);
     }
+
+    template<Matrix T>
+    __host__ __device__ inline auto FlattenC<T>::data_ptr(size_t index) const -> ConstPtrTy {
+        return const_cast<This&>(*this).data_ptr(index);
+    }
 }
 
 namespace Physica {
     template<Matrix T>
-    class Traits<LValueFlatten<T>> {
+    class Traits<FlattenC<T>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
 
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
+        constexpr static bool FastPacket = true;
     };
 }

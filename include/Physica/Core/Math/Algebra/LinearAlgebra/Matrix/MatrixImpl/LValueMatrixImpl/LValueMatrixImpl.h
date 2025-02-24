@@ -19,7 +19,7 @@
 #pragma once
 
 #include "../LValueMatrix.h"
-#include "LValueFlatten.h"
+#include "Flatten.h"
 
 namespace Physica {
     namespace Internal {
@@ -109,6 +109,25 @@ namespace Physica {
     template<class Derived>
     inline auto LValueMatrix<Derived>::operator()(size_t row, size_t col) const -> ConstRefTy {
         return *data_ptr(row, col);
+    }
+
+    template<class Derived>
+    auto LValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
+        if constexpr (isReverseDiff) {
+            const size_t maxMajor = Base::getMaxMajor();
+            const size_t maxMinor = Base::getMaxMinor();
+            Tr v = 0;
+            for (size_t major = 0; major < maxMajor; ++major)
+                for (size_t minor = 0; minor < maxMinor; ++minor)
+                    v += refFromMajorMinor(major, minor).value();
+
+            const auto result = co_yield std::move(v);
+            for (size_t major = 0; major < maxMajor; ++major)
+                for (size_t minor = 0; minor < maxMinor; ++minor)
+                    refFromMajorMinor(major, minor).reverse(result.grad());
+        }
+        else
+            co_return Base::sum();
     }
 
     template<class Derived>
@@ -281,25 +300,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
-        if constexpr (isReverseDiff) {
-            const size_t maxMajor = Base::getMaxMajor();
-            const size_t maxMinor = Base::getMaxMinor();
-            Tr v = 0;
-            for (size_t major = 0; major < maxMajor; ++major)
-                for (size_t minor = 0; minor < maxMinor; ++minor)
-                    v += refFromMajorMinor(major, minor).value();
-
-            const auto result = co_yield std::move(v);
-            for (size_t major = 0; major < maxMajor; ++major)
-                for (size_t minor = 0; minor < maxMinor; ++minor)
-                    refFromMajorMinor(major, minor).reverse(result.grad());
-        }
-        else
-            co_return Base::sum();
-    }
-
-    template<class Derived>
     auto LValueMatrix<Derived>::inverse() const noexcept {
         return InverseMatrix<Derived>(this->getDerived());
     }
@@ -382,6 +382,25 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto LValueMatrix<Derived>::flatten() {
+        return FlattenL<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    const auto LValueMatrix<Derived>::flatten() const {
+        return FlattenL<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::toUnitMatrix() {
+        assert(Base::getRow() == Base::getCol());
+        const size_t order = Base::getRow();
+        for (size_t i = 0; i < order; ++i)
+            for (size_t j = 0; j < order; ++j)
+                refFromMajorMinor(i, j) = Tr(i == j ? 1 : 0);
+    }
+
+    template<class Derived>
     template<RNG R>
     void LValueMatrix<Derived>::random_uniform() {
         const size_t maxMajor = Base::getMaxMajor();
@@ -442,24 +461,5 @@ namespace Physica {
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
         return Base::getDerived()(r, c);
-    }
-
-    template<class Derived>
-    void LValueMatrix<Derived>::toUnitMatrix() {
-        assert(Base::getRow() == Base::getCol());
-        const size_t order = Base::getRow();
-        for (size_t i = 0; i < order; ++i)
-            for (size_t j = 0; j < order; ++j)
-                refFromMajorMinor(i, j) = Tr(i == j ? 1 : 0);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::flatten() {
-        return LValueFlatten<Derived>(*this);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::flatten() const {
-        return LValueFlatten<Derived>(*this);
     }
 }

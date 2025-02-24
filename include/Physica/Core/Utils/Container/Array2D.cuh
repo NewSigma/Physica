@@ -68,7 +68,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ ElemType* data_ptr(size_t row, size_t col);
         [[nodiscard]] __host__ __device__ const ElemType* data_ptr(size_t row, size_t col) const;
     private:
-        __host__ __device__ size_t toIndex(size_t r, size_t c) const;
+        __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
     };
 }
 

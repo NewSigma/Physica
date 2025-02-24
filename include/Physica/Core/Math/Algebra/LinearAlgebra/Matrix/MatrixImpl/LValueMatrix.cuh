@@ -39,23 +39,28 @@ namespace Physica {
         template<Matrix M>
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<M>& m);
         __device__ device_obj<Derived>& operator=(const ScalarType& x);
-        [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
-        [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
+
         __device__ void operator+=(const ScalarType& s) { Base::getDerived() = Base::getDerived() + s; }
         __device__ void operator-=(const ScalarType& s) { Base::getDerived() = Base::getDerived() - s; }
         __device__ void operator*=(const ScalarType& s) { Base::getDerived() = Base::getDerived() * s; }
         __device__ void operator/=(const ScalarType& s) { Base::getDerived() = Base::getDerived() / s; }
+
         template<Matrix M> __device__ void operator+=(const device_obj<M>& m) { Base::getDerived() = Base::getDerived() + m; }
         template<Matrix M> __device__ void operator-=(const device_obj<M>& m) { Base::getDerived() = Base::getDerived() - m; }
-        /* Getters */
+
+        [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
+        [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
+        /* Operations */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
+
+        [[nodiscard]] __host__ __device__ auto flatten();
+        [[nodiscard]] __host__ __device__ const auto flatten() const;
+        /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) { return Base::getDerived().data_ptr(row, col); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const { return Base::getDerived().data_ptr(row, col); }
         [[nodiscard]] __device__ inline ScalarType& refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] __device__ inline const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
-        [[nodiscard]] __host__ __device__ device_obj<LValueFlatten<Derived>> flatten() { return {*this}; }
-        [[nodiscard]] __host__ __device__ const device_obj<LValueFlatten<Derived>> flatten() const { return {*this}; }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -64,4 +69,4 @@ namespace Physica {
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.cuh"
-#include "LValueMatrixImpl/LValueFlatten.cuh"
+#include "LValueMatrixImpl/Flatten.cuh"

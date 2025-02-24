@@ -26,8 +26,8 @@ namespace Physica {
     template<class MatrixType> class Transpose;
     template<class MatrixType> class Conjugate;
     template<class MatrixType> class Hermite;
-    template<class MatrixType> class RValueFlatten;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
+    template<class> class FlattenR;
     template<class T> class RealMatrix;
     template<class T> class ImagMatrix;
     template<class T> class SquaredNormMatrix;
@@ -171,7 +171,7 @@ namespace Physica {
 }
 
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
-#include "RValueMatrixImpl/RValueFlatten.h"
+#include "RValueMatrixImpl/Flatten.h"
 #include "RValueMatrixImpl/MatrixConvert.h"
 #include "RValueMatrixImpl/Transpose.h"
 #include "RValueMatrixImpl/Conjugate.h"
