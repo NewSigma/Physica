@@ -94,6 +94,8 @@ namespace Physica {
 
         template<class U>
         void reverse(const U& grad_) const noexcept requires(isReverseDiff);
+
+        auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -128,6 +130,7 @@ namespace Physica {
         else {
             static_assert(Vector<U>);
             const auto& grad = grad_.values();
+            assert(grad.getLength() == Base::getLength());
             if constexpr (ReverseDiff<T1>)
                 Base::getLHS().reverse(grad);
             if constexpr (ReverseDiff<T2>)

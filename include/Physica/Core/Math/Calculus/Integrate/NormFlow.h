@@ -245,7 +245,7 @@ namespace Physica {
         const size_t numSample = samples.getLength();
         Trv result;
         {
-            const Tv mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
+            const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
             auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp();
             if constexpr (ReverseDiff<T>)
                 l.reverse();

@@ -62,14 +62,17 @@ namespace Physica {
         };
 
         template<Vector T1, Vector T2 = T1>
-        struct EnableMKL {
+        class EnableMKL {
+            using U1 = std::remove_cvref<T1>::type;
+            using U2 = std::remove_cvref<T2>::type;
+        public:
             constexpr static bool value = HasMKL()
-                                       && std::same_as<typename T1::ScalarType, typename T2::ScalarType>
-                                       && is_continuous<T1>::value
-                                       && is_continuous<T2>::value
-                                       && !Diffable<T1>
-                                       && !Diffable<T2>
-                                       && (EnableSIMD<T1, T2>::SizeAtCompile == Dynamic);
+                                       && std::same_as<typename U1::ScalarType, typename U2::ScalarType>
+                                       && is_continuous<U1>::value
+                                       && is_continuous<U2>::value
+                                       && !Diffable<U1>
+                                       && !Diffable<U2>
+                                       && (EnableSIMD<U1, U2>::SizeAtCompile == Dynamic);
         };
     }
     /**

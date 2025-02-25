@@ -29,11 +29,15 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
         using Base::isReverseDiff;
+        using Base::isComplex;
     public:
         using Base::Base;
         /* Operations */
         template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& v) const;
+
+        template<Vector V, class Executor = SeqExecutor>
+        inline void assign_add(V& v) const;
 
         [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const {
             return Base::getLHS().calc(index) * Base::getRHS();
@@ -65,6 +69,8 @@ namespace Physica {
             if constexpr (ReverseDiff<U>)
                 rhs.reverse(lhs.values() * grad);
         }
+    private:
+        void assign_add_mkl(void* y) const noexcept;
     };
 
     template<Vector T, Scalar U>
@@ -77,6 +83,15 @@ namespace Physica {
         }
         else
             Base::assign(v);
+    }
+
+    template<Vector T, Scalar U>
+    template<Vector V, class Executor>
+    inline void VectorExpr<ExprType::Mul, T, U>::assign_add(V& v) const {
+        if constexpr (Internal::EnableMKL<T, V>::value)
+            assign_add_mkl(v.data());
+        else
+            Base::assign_add(v);
     }
 
     template<Vector T1, Vector T2>
@@ -146,3 +161,5 @@ namespace Physica {
         return VectorExpr<ExprType::Mul, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }
+
+#include "MKL/Mul.h"

@@ -22,6 +22,10 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
+    /**
+     * Reference:
+     * [1] ACM Transactions on Graphics, 38(5) 1-19 (2019); https://doi.org/10.1145/3341156
+     */
     template<Scalar T>
     class LinearCoupler {
         using This = LinearCoupler<T>;

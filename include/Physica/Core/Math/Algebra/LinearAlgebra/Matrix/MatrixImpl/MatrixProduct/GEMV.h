@@ -52,6 +52,8 @@ namespace Physica {
 
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff);
+
+        auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const T& getLHS() const noexcept { return mat; }
