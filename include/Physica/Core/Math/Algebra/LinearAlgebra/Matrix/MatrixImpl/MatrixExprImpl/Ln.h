@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica {
     template<Matrix T>
     class MatrixExpr<ExprType::Ln, T>
@@ -37,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    [[nodiscard]] inline auto ln_elem(const T& m) noexcept {
-        return MatrixExpr<ExprType::Ln, T>(m);
+    [[nodiscard]] inline auto ln_elem(T&& m) noexcept {
+        return MatrixExpr<ExprType::Ln, T&&>(std::forward<T>(m));
     }
 }

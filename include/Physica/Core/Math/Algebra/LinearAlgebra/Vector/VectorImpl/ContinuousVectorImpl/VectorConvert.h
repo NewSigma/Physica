@@ -32,8 +32,8 @@ namespace Physica {
         const T& v;
     public:
         ValueVector(const T& v_) : v(v_) {}
-        ValueVector(const This&) = delete;
-        ValueVector(This&&) noexcept = delete;
+        ValueVector(const This&) = default;
+        ValueVector(This&&) noexcept = default;
         ~ValueVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -57,8 +57,8 @@ namespace Physica {
         const T& v;
     public:
         GradVector(const T& v_) : v(v_) {}
-        GradVector(const This&) = delete;
-        GradVector(This&&) noexcept = delete;
+        GradVector(const This&) = default;
+        GradVector(This&&) noexcept = default;
         ~GradVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;

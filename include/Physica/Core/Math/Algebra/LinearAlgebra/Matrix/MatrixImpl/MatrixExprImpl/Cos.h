@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica {
     template<Matrix T>
     class MatrixExpr<ExprType::Cos, T>
@@ -37,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    [[nodiscard]] inline auto cos_elem(const T& m) noexcept {
-        return MatrixExpr<ExprType::Cos, T>(m);
+    [[nodiscard]] inline auto cos_elem(T&& m) noexcept {
+        return MatrixExpr<ExprType::Cos, T&&>(std::forward<T>(m));
     }
 }

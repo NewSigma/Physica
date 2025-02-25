@@ -41,8 +41,8 @@ namespace Physica {
                 : expr(expr_), vec(vec_) {
             assert(expr.getCol() == vec.getLength());
         }
-        MatrixVectorProduct(const This&) = delete;
-        MatrixVectorProduct(This&&) noexcept = delete;
+        MatrixVectorProduct(const This&) = default;
+        MatrixVectorProduct(This&&) noexcept = default;
         ~MatrixVectorProduct() = default;
         /* Operators */
         This& operator=(const This&) = delete;

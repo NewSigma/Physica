@@ -36,10 +36,10 @@ namespace Physica {
     inline Derived& LValueVector<Derived>::operator=(const V& v) {
         if constexpr (std::is_same<Derived, V>::value)
             assert(this != &v && "[Error]: Self assign is likely a bug");
-        Derived& v1 = Base::getDerived();
-        v1.resize(v.getLength());
-        v.template assign<Derived, Executor>(v1);
-        return v1;
+        Derived& x = Base::getDerived();
+        x.resize(v.getLength());
+        v.template assign<Derived, Executor>(x);
+        return x;
     }
 
     template<class Derived>

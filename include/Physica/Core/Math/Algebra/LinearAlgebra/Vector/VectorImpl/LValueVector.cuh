@@ -54,7 +54,6 @@ namespace Physica {
         [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return *data_ptr(index); }
 
         template<size_t Length = Dynamic>

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica {
     template<Matrix T>
     class MatrixExpr<ExprType::Reciprocal, T>
@@ -37,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    [[nodiscard]] inline auto reciprocal_elem(const T& m) noexcept {
-        return MatrixExpr<ExprType::Reciprocal, T>(m);
+    [[nodiscard]] inline auto reciprocal_elem(T&& m) noexcept {
+        return MatrixExpr<ExprType::Reciprocal, T&&>(std::forward<T>(m));
     }
 }

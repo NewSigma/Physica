@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica {
     template<Matrix T>
     class MatrixExpr<ExprType::Sin, T>
@@ -37,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    [[nodiscard]] inline auto sin_elem(const T& m) noexcept {
-        return MatrixExpr<ExprType::Sin, T>(m);
+    [[nodiscard]] inline auto sin_elem(T&& m) noexcept {
+        return MatrixExpr<ExprType::Sin, T&&>(std::forward<T>(m));
     }
 }

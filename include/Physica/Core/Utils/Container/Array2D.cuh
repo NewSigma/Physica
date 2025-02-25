@@ -37,7 +37,7 @@ namespace Physica {
     private:
         ArrayType arr;
         [[no_unique_address]] IndexType r = 0;
-        SizeType size = 0; // TODO: Looks like double [[no_unique_address]] makes NVCC 12.8 miscompilation
+        SizeType size = 0; // Double [[no_unique_address]] makes NVCC 12.8, arch 75 miscompilation
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t col);
@@ -58,9 +58,7 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }

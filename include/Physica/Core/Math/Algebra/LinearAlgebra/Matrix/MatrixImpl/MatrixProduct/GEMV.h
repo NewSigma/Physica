@@ -127,16 +127,12 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) noexcept requires(T::RowAtCompile != 1) {
-        static_assert(T::ColAtCompile == U::SizeAtCompile ||
-                      T::ColAtCompile == Dynamic ||
-                      U::SizeAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
+    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) noexcept requires(T::RowAtCompile != 1 && !CUDA<T> && !CUDA<U>) {
         return MatrixVectorProduct<T, U>(mat, vec);
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) requires(T::RowAtCompile == 1 && U::SizeAtCompile == 1) {
+    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) requires(T::RowAtCompile == 1 && U::SizeAtCompile == 1 && !CUDA<T> && !CUDA<U>) {
         return mat.row(0) * vec;
     }
 }
@@ -144,9 +140,13 @@ namespace Physica {
 namespace Physica {
     template<Matrix T, Vector U>
     class Traits<MatrixVectorProduct<T, U>> {
+        using T1 = std::remove_cvref_t<T>;
+        using U1 = std::remove_cvref_t<U>;
+        static_assert(T1::ColAtCompile == U1::SizeAtCompile || T1::ColAtCompile == Dynamic || U1::SizeAtCompile == Dynamic,
+                "Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
-        constexpr static size_t SizeAtCompile = T::RowAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename U1::ScalarType>::Type;
+        constexpr static size_t SizeAtCompile = T1::RowAtCompile;
         constexpr static bool FastAssign = MatrixOption::isColMatrix<T>();
         constexpr static bool FastPacket = false;
     };

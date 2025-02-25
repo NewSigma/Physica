@@ -34,8 +34,8 @@ namespace Physica {
         using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         FlattenL(const LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
-        FlattenL(const This&) = delete;
-        FlattenL(This&&) noexcept = delete;
+        FlattenL(const This&) = default;
+        FlattenL(This&&) noexcept = default;
         ~FlattenL() = default;
         /* Operators */
         This& operator=(const This&) = delete;

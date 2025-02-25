@@ -54,8 +54,9 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V>
-    __host__ __device__
-    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<V>& v) {
+    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<V>& v) {
+        if constexpr (std::is_same<Derived, V>::value)
+            assert(this != &v && "[Error]: Self assign is likely a bug");
         auto& x = Base::getDerived();
         if constexpr (IsHost())
             x.resize(v.getLength());

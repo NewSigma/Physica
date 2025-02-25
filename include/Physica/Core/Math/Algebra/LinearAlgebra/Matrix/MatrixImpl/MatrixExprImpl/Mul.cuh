@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.cuh"
+
 namespace Physica {
     template<Matrix T, Scalar U>
     class device_obj<MatrixExpr<ExprType::Mul, T, U>>
@@ -28,19 +30,18 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(Base::template getLHS<Owner>().calc(row, col)) * ScalarType(Base::template getRHS<Owner>());
+            return Base::getLHS().calc(row, col) * Base::getRHS();
         }
     };
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] __device__ inline auto operator*(const U& x, const device_obj<T>& m) noexcept {
-        return device_obj<MatrixExpr<ExprType::Mul, T, U>>(m, x);
+    [[nodiscard]] __device__ inline auto operator*(T&& m, U&& x) noexcept requires(CUDA<T>) {
+        return device_obj<MatrixExpr<ExprType::Mul, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
     }
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] __device__ inline auto operator*(const device_obj<T>& m, const U& x) noexcept {
-        return device_obj<MatrixExpr<ExprType::Mul, T, U>>(m, x);
+    [[nodiscard]] __device__ inline auto operator*(U&& x, T&& m) noexcept requires(CUDA<T>) {
+        return m * x;
     }
 }

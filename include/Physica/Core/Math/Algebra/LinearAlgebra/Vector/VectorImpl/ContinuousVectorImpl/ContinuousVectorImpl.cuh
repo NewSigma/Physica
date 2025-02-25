@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack, Side Owner>
+    template<Packet Pack>
     __device__ inline Pack device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
         Pack packet{};
         packet.load(Base::data_ptr(index));
@@ -76,7 +76,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack, Side Owner>
+    template<Packet Pack>
     __device__ inline Pack device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
         Pack packet{};
         packet.load_partial(Base::data_ptr(index), count);
@@ -149,7 +149,7 @@ namespace Physica {
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(ScalarType);
         obj.resize(length);
-        if constexpr (std::is_trivially_copy_constructible<T>::value)
+        if constexpr (T::SizeAtCompile != Dynamic)
             memcpy(obj.data(), data(), size);
         else
             check(cudaMemcpyAsync(obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));

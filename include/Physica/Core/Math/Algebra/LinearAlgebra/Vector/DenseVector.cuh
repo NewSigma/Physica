@@ -49,17 +49,18 @@ namespace Physica {
         using Storage::operator=;
         using Storage::operator[];
         /* Operations */
+        using Storage::resize;
+
         [[nodiscard]] inline host_obj toHost() const;
         [[nodiscard]] inline host_obj toHostAsync() const;
         inline void toHost(host_obj& obj) const;
         inline void toHostAsync(host_obj& obj) const;
         using Base::toHost;
         using Base::toHostAsync;
-        using Storage::resize;
+
         using Storage::swap;
         /* Getters */
         using Storage::data;
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Storage::getLength(); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }

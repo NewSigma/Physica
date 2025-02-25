@@ -30,9 +30,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index)) / ScalarType(Base::template getRHS<Owner>());
+            return Base::getLHS().calc(index) / Base::getRHS();
         }
     };
 

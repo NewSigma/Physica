@@ -94,7 +94,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
     private:
         template<size_t Length>
-        using BlockType = RVectorBlock<Derived&, Length>;
+        using BlockType = RVectorBlock<Derived, Length>;
     public:
         ~RValueVector() = default;
         /* Operations */

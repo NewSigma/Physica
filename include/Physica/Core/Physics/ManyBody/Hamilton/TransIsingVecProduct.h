@@ -41,8 +41,8 @@ namespace Physica {
         const V& vec;
     public:
         MatrixVectorProduct(const MatrixType& mat_, const V& vec_);
-        MatrixVectorProduct(const This&) = delete;
-        MatrixVectorProduct(This&&) noexcept = delete;
+        MatrixVectorProduct(const This&) = default;
+        MatrixVectorProduct(This&&) noexcept = default;
         ~MatrixVectorProduct() = default;
         /* Operators */
         This& operator=(const This&) = delete;

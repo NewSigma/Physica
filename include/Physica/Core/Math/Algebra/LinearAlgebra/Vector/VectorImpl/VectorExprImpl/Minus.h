@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto operator-(T&& v) noexcept {
+    [[nodiscard]] inline auto operator-(T&& v) noexcept requires(!CUDA<T>) {
         return VectorExpr<ExprType::Minus, T&&>(std::forward<T>(v));
     }
 }

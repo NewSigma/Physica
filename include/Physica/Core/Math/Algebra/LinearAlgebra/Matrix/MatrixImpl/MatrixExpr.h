@@ -34,10 +34,10 @@ namespace Physica {
     public:
         using Base::isReverseDiff;
     private:
-        const M& expr;
+        const LazyDestroy<M> expr;
     public:
-        UnitaryMatrixExpr(const M& expr_) : expr(expr_) {}
-        UnitaryMatrixExpr(const This&) = delete;
+        UnitaryMatrixExpr(M expr_) : expr(std::forward<M>(expr_)) {}
+        UnitaryMatrixExpr(const This&) = default;
         UnitaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~UnitaryMatrixExpr() = default;
         /* Operators */
@@ -46,7 +46,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] __host__ __device__ const M& getExpr() const noexcept { return expr; }
+        [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
     };
 
     template<ExprType Type, class LHS, class RHS>
@@ -58,16 +58,16 @@ namespace Physica {
     public:
         using Base::isReverseDiff;
     private:
-        const LHS* lhs;
-        const RHS* rhs;
+        const LazyDestroy<LHS> lhs;
+        const LazyDestroy<RHS> rhs;
     public:
-        BinaryMatrixExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_), rhs(&rhs_) {
+        BinaryMatrixExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
             if constexpr (Matrix<LHS> && Matrix<RHS>) {
-                assert(lhs->getRow() == rhs->getRow());
-                assert(lhs->getCol() == rhs->getCol());
+                assert(lhs.getRow() == rhs.getRow());
+                assert(lhs.getCol() == rhs.getCol());
             }
         }
-        BinaryMatrixExpr(const This&) = delete;
+        BinaryMatrixExpr(const This&) = default;
         BinaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~BinaryMatrixExpr() = default;
         /* Operators */
@@ -86,43 +86,47 @@ namespace Physica {
             else
                 return getRHS().getCol();
         }
-        [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept { return *lhs; }
-        [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept { return *rhs; }
+        [[nodiscard]] const auto& getLHS() const noexcept { return lhs; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
     };
 }
 
 namespace Physica {
-    template<ExprType Type, Matrix T, class U>
-    class Traits<MatrixExpr<Type, T, U>> {
-        constexpr static bool SameMajor = MatrixOption::isSameMajor<T, U>();
-        constexpr static int Major = SameMajor ? MatrixOption::getMajor<T>()
+    template<ExprType Type, Matrix LHS, Matrix RHS>
+    class Traits<MatrixExpr<Type, LHS, RHS>> {
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
+        using ResultType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
+
+        constexpr static bool SameMajor = MatrixOption::isSameMajor<LHS1, RHS1>();
+        constexpr static int Major = SameMajor ? MatrixOption::getMajor<LHS1>()
                                                : int(MatrixOption::AnyMajor);
-        constexpr static bool SameStorage = MatrixOption::isSameStorage<T, U>();
-        constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T>()
+        constexpr static bool SameStorage = MatrixOption::isSameStorage<LHS1, RHS1>();
+        constexpr static int Storage = SameStorage ? MatrixOption::getStorage<LHS1>()
                                                    : int(MatrixOption::AnyStorage);
         constexpr static bool IsReal = Type == ExprType::Abs || Type == ExprType::Square;
-        using ResultType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
     public:
         using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
         constexpr static int Option = Major | Storage;
-        // Optimize: T and U may not have same compiling size, for example, T may be fixed size and U may be dynamic
-        constexpr static size_t RowAtCompile = T::RowAtCompile;
-        constexpr static size_t ColAtCompile = T::ColAtCompile;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        constexpr static size_t RowAtCompile = LHS1::RowAtCompile > RHS1::RowAtCompile ? LHS1::RowAtCompile : RHS1::RowAtCompile;
+        constexpr static size_t ColAtCompile = LHS1::ColAtCompile > RHS1::ColAtCompile ? LHS1::ColAtCompile : RHS1::ColAtCompile;
+        constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile > RHS1::SizeAtCompile ? LHS1::SizeAtCompile : RHS1::SizeAtCompile;
     };
 
-    template<ExprType Type, Matrix T, Scalar U>
-    class Traits<MatrixExpr<Type, T, U>> {
+    template<ExprType Type, Matrix LHS, Scalar RHS>
+    class Traits<MatrixExpr<Type, LHS, RHS>> {
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
-        constexpr static int Option = T::Option;
-        constexpr static size_t RowAtCompile = T::RowAtCompile;
-        constexpr static size_t ColAtCompile = T::ColAtCompile;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, RHS1>::Type;
+        constexpr static int Option = LHS1::Option;
+        constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
+        constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
+        constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
     };
 
-    template<ExprType Type, Scalar T, Matrix U>
-    class Traits<MatrixExpr<Type, T, U>> : public Traits<MatrixExpr<Type, U, T>> {};
+    template<ExprType Type, Scalar LHS, Matrix RHS>
+    class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
 }
 
 #include "MatrixExprImpl/Minus.h"

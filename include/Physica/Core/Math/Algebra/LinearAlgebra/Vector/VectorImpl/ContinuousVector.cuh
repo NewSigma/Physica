@@ -46,12 +46,14 @@ namespace Physica {
         inline This& operator=(const This& obj);
         inline This& operator=(This&& obj);
         /* Operations */
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packet(size_t index) const;
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
-        template<Packet Pack> __device__ inline void writePacket(size_t index, const Pack packet);
-        template<Packet Pack> __device__ inline void writePacketPartial(size_t index, size_t count, const Pack packet);
+        template<Packet Pack>
+        __device__ inline void writePacket(size_t index, const Pack packet);
+        template<Packet Pack>
+        __device__ inline void writePacketPartial(size_t index, size_t count, const Pack packet);
 
         template<class U>
         void reverse(const U& grad) const noexcept requires(isReverseDiff);

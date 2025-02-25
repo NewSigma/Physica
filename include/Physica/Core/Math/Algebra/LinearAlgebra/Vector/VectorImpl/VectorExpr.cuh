@@ -29,92 +29,44 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<VectorExpr<Type, V>>>;
     private:
-        union {
-            PlainStruct<const V> value;
-            const V* ptr;
-        } expr;
+        PlainStruct<const std::remove_cvref_t<V>> expr;
     public:
-        __host__ __device__ inline device_obj(V expr_) {
-            if constexpr (IsHost())
-                expr.value = asStruct(expr_);
-            else
-                expr.ptr = &expr_;
-        }
-        device_obj(const This&) = delete;
+        __host__ __device__ inline device_obj(V expr_) : expr(asStruct(expr_)) {}
+        device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getLength() const {
-            return getExpr<Owner>().template getLength<Owner>();
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const V& getExpr() const {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return expr.value.getDerived();
-            else
-                return *expr.ptr;
-        }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return getExpr().getLength(); }
+        [[nodiscard]] __host__ __device__ const auto& getExpr() const { return expr.getDerived(); }
     };
 
     template<ExprType Type, Vector LHS, class RHS>
     class device_obj<BinaryVectorExpr<Type, LHS, RHS>> : public device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>> {
-        static_assert(CUDA<LHS>, "[Error]: Invalid type");
+        static_assert(CUDA<LHS> && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
         using host_obj = BinaryVectorExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>>;
     private:
-        union {
-            PlainStruct<const LHS> value;
-            const LHS* ptr;
-        } lhs;
-
-        union {
-            PlainStruct<const RHS> value;
-            const RHS* ptr;
-        } rhs;
+        PlainStruct<const std::remove_cvref_t<LHS>> lhs;
+        PlainStruct<const std::remove_cvref_t<RHS>> rhs;
     public:
-        __host__ __device__ inline device_obj(LHS lhs_, RHS rhs_) {
+        __host__ __device__ inline device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
             if constexpr (Vector<RHS>)
-                assert(lhs_.getLength() == rhs_.getLength());
-            if constexpr (IsHost()) {
-                lhs.value = asStruct(lhs_);
-                rhs.value = asStruct(rhs_);
-            }
-            else {
-                lhs.ptr = &lhs_;
-                rhs.ptr = &rhs_;
-            }
+                assert(getLHS().getLength() == getRHS().getLength());
         }
-        device_obj(const This&) = delete;
+        device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS<Owner>().template getLength<Owner>(); }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return lhs.value.getDerived();
-            else
-                return *lhs.ptr;
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return rhs.value.getDerived();
-            else
-                return *rhs.ptr;
-        }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getLength(); }
+        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
     };
 }
 

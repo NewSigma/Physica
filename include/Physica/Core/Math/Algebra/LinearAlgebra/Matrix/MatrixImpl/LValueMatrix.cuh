@@ -51,7 +51,6 @@ namespace Physica {
         [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
         [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
         /* Operations */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
 
         [[nodiscard]] __host__ __device__ auto flatten();

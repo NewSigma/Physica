@@ -98,7 +98,6 @@ namespace Physica {
     }
 
     template<tparams>
-    template<Side Owner>
     __host__ __device__ size_t device_obj<Array2D>::getRow() const noexcept {
         if constexpr (Row == Dynamic) {
             if constexpr (Col == Dynamic)
@@ -114,7 +113,6 @@ namespace Physica {
     }
 
     template<tparams>
-    template<Side Owner>
     __host__ __device__ size_t device_obj<Array2D>::getCol() const noexcept {
         if constexpr (Col == Dynamic) {
             const size_t size = getSize();

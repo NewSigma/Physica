@@ -31,8 +31,8 @@ namespace Physica {
         using typename Base::ScalarType;
     public:
         FlattenR(const T& mat_) : mat(mat_) {}
-        FlattenR(const This&) = delete;
-        FlattenR(This&&) noexcept = delete;
+        FlattenR(const This&) = default;
+        FlattenR(This&&) noexcept = default;
         ~FlattenR() = default;
         /* Operators */
         This& operator=(const This&) = delete;

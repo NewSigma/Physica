@@ -77,16 +77,15 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
         /* Operations */
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().template calc<Owner>(row, col); }
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
+
         [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
         /* Getters */
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().template getRow<Owner>(); }
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().template getCol<Owner>(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
         /* Static members */
@@ -112,6 +111,7 @@ namespace Physica {
 
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
+#include "RValueMatrixImpl/Hermite.cuh"
 #include "MatrixProduct/GEMM.cuh"
 #include "MatrixProduct/GEMV.cuh"
 #include "MatrixProduct/GEVM.cuh"

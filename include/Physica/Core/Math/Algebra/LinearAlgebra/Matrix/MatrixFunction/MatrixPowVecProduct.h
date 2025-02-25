@@ -34,8 +34,8 @@ namespace Physica {
         const U& v;
     public:
         MatrixVectorProduct(const MatrixPow<T>& mpow_, const U& v_);
-        MatrixVectorProduct(const This&) = delete;
-        MatrixVectorProduct(This&&) noexcept = delete;
+        MatrixVectorProduct(const This&) = default;
+        MatrixVectorProduct(This&&) noexcept = default;
         ~MatrixVectorProduct() = default;
         /* Operators */
         This& operator=(const This&) = delete;

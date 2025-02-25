@@ -36,8 +36,8 @@ namespace Physica {
         using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         device_obj(device_obj<ContinuousMatrix<T>>& mat_) : mat(mat_.getDerived()) {}
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;

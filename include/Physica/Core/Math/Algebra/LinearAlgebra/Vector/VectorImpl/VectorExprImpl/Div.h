@@ -31,9 +31,9 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
-        VectorExpr(const T& lhs, const U& rhs) : Base(lhs, rhs) {
+        VectorExpr(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
             if constexpr (Vector<T>)
-                assert(!rhs.isZero() && "[Error]: Divide by zero");
+                assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
         }
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {

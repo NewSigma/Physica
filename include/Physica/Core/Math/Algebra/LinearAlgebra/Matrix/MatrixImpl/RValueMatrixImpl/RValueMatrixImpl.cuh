@@ -230,6 +230,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::hermite() const noexcept {
+        return device_obj<Hermite<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::flatten() const noexcept {
         return device_obj<FlattenR<Derived>>(Base::getDerived());
     }

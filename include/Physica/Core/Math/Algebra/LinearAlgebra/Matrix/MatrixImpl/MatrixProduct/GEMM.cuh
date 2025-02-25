@@ -51,9 +51,7 @@ namespace Physica {
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getRHS().getCol(); }
         [[nodiscard]] __host__ __device__ const device_obj<T1>& getLHS() const noexcept { return mat1.getDerived(); }
         [[nodiscard]] __host__ __device__ const device_obj<T2>& getRHS() const noexcept { return mat2.getDerived(); }

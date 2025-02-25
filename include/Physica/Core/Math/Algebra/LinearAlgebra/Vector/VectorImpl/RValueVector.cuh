@@ -45,11 +45,10 @@ namespace Physica {
         template<Vector V>
         __host__ __device__ void assign(device_obj<V>& target) const;
 
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().template calc<Owner>(index); }
-        template<Packet Pack, Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packet(size_t index) const;
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
 
         [[nodiscard]] __host__ __device__ inline auto transpose() const noexcept;
@@ -62,8 +61,7 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] __device__ inline auto crossProduct(const device_obj<V>& v) const noexcept;
         /* Getters */
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().template getLength<Owner>(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

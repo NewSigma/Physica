@@ -18,7 +18,3 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 **Length**
 
 Length > 0在栈上构造, Length = 0在堆上构造
-
-**Owner**
-
-仅在设备右值向量中出现，用于标识模板表达式在主机端或设备端构造。设备右值向量使用union实现，使用Owner区分使用的成员

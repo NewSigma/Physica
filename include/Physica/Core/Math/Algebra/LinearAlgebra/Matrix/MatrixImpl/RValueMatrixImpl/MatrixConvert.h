@@ -32,8 +32,8 @@ namespace Physica {
         const T& mat;
     public:
         RealMatrix(const T& mat_) : mat(mat_) {}
-        RealMatrix(const This&) = delete;
-        RealMatrix(This&&) noexcept = delete;
+        RealMatrix(const This&) = default;
+        RealMatrix(This&&) noexcept = default;
         ~RealMatrix() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -56,8 +56,8 @@ namespace Physica {
         const T& mat;
     public:
         ImagMatrix(const T& mat_) : mat(mat_) {}
-        ImagMatrix(const This&) = delete;
-        ImagMatrix(This&&) noexcept = delete;
+        ImagMatrix(const This&) = default;
+        ImagMatrix(This&&) noexcept = default;
         ~ImagMatrix() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -80,8 +80,8 @@ namespace Physica {
         const T& mat;
     public:
         SquaredNormMatrix(const T& mat_) : mat(mat_) {}
-        SquaredNormMatrix(const This&) = delete;
-        SquaredNormMatrix(This&&) noexcept = delete;
+        SquaredNormMatrix(const This&) = default;
+        SquaredNormMatrix(This&&) noexcept = default;
         ~SquaredNormMatrix() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -104,8 +104,8 @@ namespace Physica {
         const T& mat;
     public:
         NormMatrix(const T& mat_) : mat(mat_) {}
-        NormMatrix(const This&) = delete;
-        NormMatrix(This&&) noexcept = delete;
+        NormMatrix(const This&) = default;
+        NormMatrix(This&&) noexcept = default;
         ~NormMatrix() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -127,8 +127,8 @@ namespace Physica {
         const T& mat;
     public:
         ValueMatrix(const T& mat_) : mat(mat_) {}
-        ValueMatrix(const This&) = delete;
-        ValueMatrix(This&&) noexcept = delete;
+        ValueMatrix(const This&) = default;
+        ValueMatrix(This&&) noexcept = default;
         ~ValueMatrix() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -151,8 +151,8 @@ namespace Physica {
         const T& mat;
     public:
         GradMatrix(const T& mat_) : mat(mat_) {}
-        GradMatrix(const This&) = delete;
-        GradMatrix(This&&) noexcept = delete;
+        GradMatrix(const This&) = default;
+        GradMatrix(This&&) noexcept = default;
         ~GradMatrix() = default;
         /* Operators */
         This& operator=(const This&) = delete;

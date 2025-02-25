@@ -30,14 +30,13 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t s) const {
-            return square(Base::template getExpr<Owner>().template calc<Owner>(s));
+            return square(Base::getExpr().calc(s));
         }
     };
 
     template<Vector T>
-    [[nodiscard]] __host__ __device__ inline auto square(const device_obj<T>& v) noexcept {
-        return device_obj<VectorExpr<ExprType::Square, T>>(v);
+    [[nodiscard]] __host__ __device__ inline auto square(T&& v) noexcept requires(CUDA<T>) {
+        return device_obj<VectorExpr<ExprType::Square, T&&>>(std::forward<T>(v));
     }
 }

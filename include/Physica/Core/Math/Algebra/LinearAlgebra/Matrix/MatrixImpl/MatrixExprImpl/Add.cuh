@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.cuh"
+
 namespace Physica {
     template<Matrix T, Scalar U>
     class device_obj<MatrixExpr<ExprType::Add, T, U>>
@@ -28,9 +30,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(Base::template getLHS<Owner>().calc(row, col)) + ScalarType(Base::template getRHS<Owner>());
+            return Base::getLHS().calc(row, col) + Base::getRHS();
         }
     };
 
@@ -43,21 +44,18 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(Base::template getLHS<Owner>().calc(row, col)) + ScalarType(Base::template getRHS<Owner>().calc(row, col));
+            return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
         }
     };
 
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] __host__ __device__ inline auto operator+(
-            const device_obj<T1>& mat1, const device_obj<T2>& mat2) noexcept {
-        return device_obj<MatrixExpr<ExprType::Add, T1, T2>>(mat1.getDerived(), mat2.getDerived());
+    template<Matrix T, Scalar U>
+    [[nodiscard]] __host__ __device__ inline auto operator+(T&& m, U&& x) noexcept requires(CUDA<T>) {
+        return device_obj<MatrixExpr<ExprType::Add, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator+(
-            const device_obj<T>& mat, const U& x) noexcept {
-        return device_obj<MatrixExpr<ExprType::Add, T, U>>(mat.getDerived(), x);
+    template<Matrix T1, Matrix T2>
+    [[nodiscard]] __host__ __device__ inline auto operator+(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
+        return device_obj<MatrixExpr<ExprType::Add, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

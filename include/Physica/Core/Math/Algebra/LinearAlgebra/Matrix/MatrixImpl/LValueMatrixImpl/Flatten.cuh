@@ -35,8 +35,8 @@ namespace Physica {
         using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         __host__ __device__ device_obj(const device_obj<LValueMatrix<T>>& mat_) : mat(mat_) {}
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;

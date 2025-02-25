@@ -46,13 +46,11 @@ namespace Physica {
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Getters */
-        template<Side Owner>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             assert(index < colCount);
-            return mat.template calc(fromRow, fromCol + index);
+            return mat.calc(fromRow, fromCol + index);
         }
 
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
     };
 
@@ -77,16 +75,15 @@ namespace Physica {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Getters */
-        template<Side Owner>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             assert(index < rowCount);
             return mat.calc(fromRow + index, fromCol);
         }
-        template<Side Owner = GetSide()>
+
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
     };
 

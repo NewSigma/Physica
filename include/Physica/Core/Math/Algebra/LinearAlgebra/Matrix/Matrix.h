@@ -51,7 +51,7 @@ namespace Physica {
     public:
         template<class MatrixType>
         __host__ __device__ consteval static bool isColMatrix() {
-            return isAnyMajor<MatrixType>() || !(Traits<MatrixType>::Option & Row);
+            return isAnyMajor<MatrixType>() || !(Traits<std::remove_cvref_t<MatrixType>>::Option & Row);
         }
 
         template<class MatrixType>
@@ -61,7 +61,7 @@ namespace Physica {
 
         template<class MatrixType>
         __host__ __device__ consteval static bool isAnyMajor() {
-            return Traits<MatrixType>::Option & AnyMajor;
+            return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyMajor;
         }
 
         template<class MatrixType>
@@ -71,7 +71,7 @@ namespace Physica {
 
         template<class MatrixType>
         __host__ __device__ consteval static bool isElementMatrix() {
-            return isAnyStorage<MatrixType>() || Traits<MatrixType>::Option & Element;
+            return isAnyStorage<MatrixType>() || Traits<std::remove_cvref_t<MatrixType>>::Option & Element;
         }
 
         template<class MatrixType>
@@ -81,7 +81,7 @@ namespace Physica {
 
         template<class MatrixType>
         __host__ __device__ consteval static bool isAnyStorage() {
-            return Traits<MatrixType>::Option & AnyStorage;
+            return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyStorage;
         }
 
         template<class MatrixType>

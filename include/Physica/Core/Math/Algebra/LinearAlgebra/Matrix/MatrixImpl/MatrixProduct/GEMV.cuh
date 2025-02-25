@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,14 +18,12 @@
  */
 #pragma once
 
+#include "Physica/PlainStruct.h"
+#include "GEMV.h"
+
 namespace Physica {
     template<Matrix T, Vector U>
-    class device_obj<MatrixVectorProduct<T, U>>
-            : public device_obj<RValueVector<MatrixVectorProduct<T, U>>> {
-        static_assert(T::ColAtCompile == U::SizeAtCompile ||
-                      T::ColAtCompile == Dynamic ||
-                      U::SizeAtCompile == Dynamic,
-                      "[Error]: Row and column do not match in matrix-vector product");
+    class device_obj<MatrixVectorProduct<T, U>> : public device_obj<RValueVector<MatrixVectorProduct<T, U>>> {
         using host_obj = MatrixVectorProduct<T, U>;
         using Base = device_obj<RValueVector<host_obj>>;
         using This = device_obj<host_obj>;
@@ -34,18 +32,10 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
     private:
-        union {
-            Physica::PlainStruct<const DeviceMatrix> value;
-            const DeviceMatrix* ptr;
-        } mat;
-
-        union {
-            Physica::PlainStruct<const DeviceVector> value;
-            const DeviceVector* ptr;
-        } vec;
+        PlainStruct<const std::remove_cvref_t<T>> mat;
+        PlainStruct<const std::remove_cvref_t<U>> vec;
     public:
-        __host__ __device__ device_obj(
-                const device_obj<T>& mat_, const device_obj<U>& vec_);
+        __host__ __device__ device_obj(T mat_, U vec_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -56,48 +46,20 @@ namespace Physica {
         template<Vector V>
         __host__ __device__ void assign(device_obj<V>& target) const;
         /* Getters */
-        template<Side Owner>
         [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS<Owner>().getRow(); }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceMatrix& getLHS() const noexcept {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return mat.value.getDerived();
-            else
-                return *mat.ptr;
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceVector& getRHS() const noexcept {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return vec.value.getDerived();
-            else
-                return *vec.ptr;
-        }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getRow(); }
+        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return mat.getDerived(); }
+        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return vec.getDerived(); }
     };
 
     template<Matrix T, Vector U>
-    __host__ __device__ device_obj<MatrixVectorProduct<T, U>>::device_obj(
-            const device_obj<T>& mat_, const device_obj<U>& vec_) {
-        assert(mat_.getCol() == vec_.getLength());
-        if constexpr (IsHost()) {
-            mat.value = asStruct(mat_);
-            vec.value = asStruct(vec_);
-        }
-        else {
-            mat.ptr = &mat_;
-            vec.ptr = &vec_;
-        }
+    __host__ __device__ device_obj<MatrixVectorProduct<T, U>>::device_obj(T mat_, U vec_) : mat(asStruct(mat_)), vec(asStruct(vec_)) {
+        assert(getLHS().getCol() == getRHS().getLength());
     }
 
     template<Matrix T, Vector U>
-    template<Side Owner>
-    __device__ inline device_obj<MatrixVectorProduct<T, U>>::ScalarType
-    device_obj<MatrixVectorProduct<T, U>>::calc(size_t index) const {
-        return getLHS<Owner>().row(index) * getRHS<Owner>();
+    __device__ inline auto device_obj<MatrixVectorProduct<T, U>>::calc(size_t index) const -> ScalarType {
+        return getLHS().row(index) * getRHS();
     }
 
     template<Matrix T, Vector U>
@@ -119,9 +81,8 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ inline std::enable_if<T::RowAtCompile != 1, device_obj<MatrixVectorProduct<T, U>>>::type
-    operator*(const device_obj<T>& mat, const device_obj<U>& vec) noexcept {
-        return {mat, vec};
+    [[nodiscard]] __host__ __device__ inline auto operator*(T&& m, U&& v) noexcept requires(T::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
+        return device_obj<MatrixVectorProduct<T&&, U&&>>(std::forward<T>(m), std::forward<U>(v));
     }
 }
 

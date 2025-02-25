@@ -26,19 +26,17 @@ namespace Physica {
      */
     template<Vector T, size_t Length>
     class RVectorBlock : public RValueVector<RVectorBlock<T, Length>> {
-        static_assert(std::is_reference<T>::value, "[Error]: Expect a reference");
-
         using This = RVectorBlock<T, Length>;
         using Base = RValueVector<This>;
     public:
         using ScalarType = Base::ScalarType;
     private:
-        LazyDestroy<T> vec;
+        T& vec;
         size_t from;
         size_t to;
     public:
-        RVectorBlock(T vec_, size_t from_, size_t to_);
-        RVectorBlock(T vec_, size_t from_);
+        RVectorBlock(T& vec_, size_t from_, size_t to_);
+        RVectorBlock(T& vec_, size_t from_);
         RVectorBlock(const This& block) = default;
         RVectorBlock(This&&) noexcept = default;
         ~RVectorBlock() = default;
@@ -53,16 +51,14 @@ namespace Physica {
     };
 
     template<Vector T, size_t Length>
-    RVectorBlock<T, Length>::RVectorBlock(T vec_, size_t from_, size_t to_)
-            : vec(std::forward<T>(vec_)), from(from_), to(to_) {
+    RVectorBlock<T, Length>::RVectorBlock(T& vec_, size_t from_, size_t to_) : vec(vec_), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector T, size_t Length>
-    RVectorBlock<T, Length>::RVectorBlock(T vec_, size_t from_)
-            : RVectorBlock(std::forward<T>(vec_), from_, vec_.getLength()) {}
+    RVectorBlock<T, Length>::RVectorBlock(T& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
     __host__ __device__ inline size_t RVectorBlock<T, Length>::getLength() const noexcept {
@@ -76,6 +72,7 @@ namespace Physica {
 namespace Physica {
     template<Vector T, size_t Length>
     class Traits<RVectorBlock<T, Length>> {
+        static_assert(std::is_object<T>::value, "[Errpr]: Invalid type");
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Length;

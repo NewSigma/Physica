@@ -34,10 +34,8 @@ namespace Physica {
         __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(mat_) {}
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.calc(col, row); }
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.template getCol<Owner>(); }
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.template getRow<Owner>(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.getRow(); }
     };
 
     template<Vector T>
@@ -53,9 +51,7 @@ namespace Physica {
         __host__ __device__ explicit device_obj(const device_obj<T>& vec_) : vec(vec_) {}
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
     };
 }

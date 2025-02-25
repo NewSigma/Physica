@@ -30,24 +30,23 @@ namespace Physica {
     public:
         using Base::Base;
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return reciprocal(Base::template getExpr<Owner>().template calc<Owner>(index));
+            return reciprocal(Base::getExpr().calc(index));
         }
 
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ Pack packet(size_t index) const {
-            return Pack(1) / Base::template getExpr<Owner>().template packet<Pack, Owner>(index);
+            return Pack(1) / Base::getExpr().template packet<Pack>(index);
         }
 
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
-            return Pack(1) / Base::template getExpr<Owner>().template packetPartial<Pack, Owner>(index, count);
+            return Pack(1) / Base::getExpr().template packetPartial<Pack>(index, count);
         }
     };
 
     template<Vector T>
     [[nodiscard]] __host__ __device__ inline auto reciprocal(T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Reciprocal, T>>(std::forward<T>(v));
+        return device_obj<VectorExpr<ExprType::Reciprocal, T&&>>(std::forward<T>(v));
     }
 }

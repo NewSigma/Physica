@@ -65,7 +65,6 @@ namespace Physica {
         inline void random_any(Distribution& dist);
         void swap(This& obj) noexcept;
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;

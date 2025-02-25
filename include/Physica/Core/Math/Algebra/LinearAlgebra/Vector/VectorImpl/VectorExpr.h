@@ -42,15 +42,15 @@ namespace Physica {
         const LazyDestroy<V> expr;
     public:
         UnitaryVectorExpr(V expr_) : expr(std::forward<V>(expr_)) {}
-        UnitaryVectorExpr(const This&) = delete;
+        UnitaryVectorExpr(const This&) = default;
         UnitaryVectorExpr(This&&) noexcept = default;
         ~UnitaryVectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getExpr().getLength(); }
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return expr; }
+        [[nodiscard]] size_t getLength() const { return getExpr().getLength(); }
+        [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
     };
 
     template<ExprType Type, class LHS, class RHS>
@@ -71,7 +71,7 @@ namespace Physica {
             if constexpr (Vector<LHS> && Vector<RHS>)
                 assert(lhs.getLength() == rhs.getLength());
         }
-        BinaryVectorExpr(const This&) = delete;
+        BinaryVectorExpr(const This&) = default;
         BinaryVectorExpr(This&&) noexcept = default;
         ~BinaryVectorExpr() = default;
         /* Operators */
@@ -84,8 +84,8 @@ namespace Physica {
             else
                 return getRHS().getLength();
         }
-        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs; }
-        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs; }
+        [[nodiscard]] const auto& getLHS() const noexcept { return lhs; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
     };
 }
 

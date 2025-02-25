@@ -31,22 +31,23 @@ namespace Physica {
 
             const auto& source = source_.getDerived();
             auto& target = target_.getDerived();
-            const size_t length = source.template getLength<Side::Host>();
+            const size_t length = source.getLength();
             const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
             if (index < length)
-                target[index] = ScalarType(source.template calc<Side::Host>(index));
+                target[index] = ScalarType(source.calc(index));
         }
     }
 
     template<class Derived>
     template<Vector V>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assign(device_obj<V>& target) const {
+        constexpr static size_t Size1 = SizeAtCompile;
+        constexpr static size_t Size2 = V::SizeAtCompile;
+        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
+        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
+        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
+
         [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<Derived, V>;
-
-        constexpr size_t OtherSize = Traits<V>::SizeAtCompile;
-        constexpr bool SizeMatch = SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize;
-        static_assert(SizeMatch, "[Error]: Size mismatch between two vector");
-
         const size_t length = getLength();
         assert(length == target.getLength() && "[Error]: Size mismatch between two vector");
         if constexpr (IsHost()) {
@@ -60,14 +61,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack, Side Owner>
+    template<Packet Pack>
     __device__ inline Pack device_obj<RValueVector<Derived>>::packet(size_t index) const {
         static_assert(Scalar<Pack>, "[Error]: Not implemented");
         return calc(index);
     }
 
     template<class Derived>
-    template<Packet Pack, Side Owner>
+    template<Packet Pack>
     __device__ inline Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
         static_assert(Scalar<Pack>, "[Error]: Not implemented");
         assert(count == 1 && "[Error]: No need to call partial version");

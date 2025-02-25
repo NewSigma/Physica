@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,113 +23,53 @@
 namespace Physica {
     template<ExprType Type, Matrix M>
     class device_obj<UnitaryMatrixExpr<Type, M>> : public device_obj<RValueMatrix<MatrixExpr<Type, M>>> {
+        static_assert(CUDA<M>, "[Error]: Invalid type");
         using host_obj = UnitaryMatrixExpr<Type, M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<Type, M>>>;
-        using DeviceMatrix = device_obj<M>;
     private:
-        union {
-            PlainStruct<const DeviceMatrix> value;
-            const DeviceMatrix* ptr;
-        } expr;
+        PlainStruct<const std::remove_cvref_t<M>> expr;
     public:
-        __host__ __device__ inline device_obj(const device_obj<M>& expr_) {
-            if constexpr (IsHost())
-                expr.value = asStruct(expr_);
-            else
-                expr.ptr = &expr_;
-        }
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        __host__ __device__ inline device_obj(M expr_) : expr(std::forward<M>(expr_)) {}
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getRow() const {
-            return getExpr<Owner>().template getRow<Owner>();
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getCol() const {
-            return getExpr<Owner>().template getCol<Owner>();
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceMatrix& getExpr() const {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return expr.value.getDerived();
-            else
-                return *expr.ptr;
-        }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
+        [[nodiscard]] __host__ __device__ const auto& getExpr() const { return expr.getDerived(); }
     };
 
     template<ExprType Type, Matrix LHS, class RHS>
     class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
+        static_assert(CUDA<LHS> && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
         using host_obj = BinaryMatrixExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>>;
-        using DeviceLHS = device_obj<LHS>;
-        using DeviceRHS = std::conditional<Scalar<RHS>, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
-        union {
-            PlainStruct<const DeviceLHS> value;
-            const DeviceLHS* ptr;
-        } lhs;
-
-        union {
-            PlainStruct<const DeviceRHS> value;
-            const DeviceRHS* ptr;
-        } rhs;
+        PlainStruct<const std::remove_cvref_t<LHS>> lhs;
+        PlainStruct<const std::remove_cvref_t<RHS>> rhs;
     public:
-        __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
+        __host__ __device__ inline device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
             if constexpr (Matrix<RHS>) {
                 assert(lhs_.getRow() == rhs_.getRow());
                 assert(lhs_.getCol() == rhs_.getCol());
             }
-
-            if constexpr (IsHost()) {
-                lhs.value = asStruct(lhs_);
-                rhs.value = asStruct(rhs_);
-            }
-            else {
-                lhs.ptr = &lhs_;
-                rhs.ptr = &rhs_;
-            }
         }
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getRow() const {
-            return getLHS<Owner>().template getRow<Owner>();
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getCol() const {
-            return getLHS<Owner>().template getCol<Owner>();
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceLHS& getLHS() const noexcept {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return lhs.value.getDerived();
-            else
-                return *lhs.ptr;
-        }
-
-        template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceRHS& getRHS() const noexcept {
-            if constexpr (IsHost() || Owner == Side::Host)
-                return rhs.value.getDerived();
-            else
-                return *rhs.ptr;
-        }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return getLHS().getCol(); }
+        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
     };
 }
 

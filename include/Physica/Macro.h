@@ -68,25 +68,16 @@ namespace Physica {
         MKL
     };
 
-    enum class Side {
-        Host,
-        Device
-    };
-
-    __host__ __device__ consteval inline static Side GetSide() {
+    __host__ __device__ consteval inline static bool IsHost() {
     #ifdef __CUDA_ARCH__
-        return Side::Device;
+        return false;
     #else
-        return Side::Host;
+        return true;
     #endif
     }
 
-    __host__ __device__ consteval inline static bool IsHost() {
-        return GetSide() == Side::Host;
-    }
-
     __host__ __device__ consteval inline static bool IsDevice() {
-        return GetSide() == Side::Device;
+        return !IsHost();
     }
 
     consteval inline static bool IsMSVC() {

@@ -51,7 +51,6 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
@@ -100,7 +99,6 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    template<Side Owner>
     __host__ __device__ inline size_t device_obj<ContinuousVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;

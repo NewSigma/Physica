@@ -30,22 +30,18 @@ namespace Physica {
     public:
         using Base::Base;
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index))
-                 + ScalarType(Base::template getRHS<Owner>());
+            return Base::getLHS().calc(index) + Base::getRHS();
         }
 
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ Pack packet(size_t index) const {
-            return Base::template getLHS<Owner>().template packet<Pack, Owner>(index)
-                 + Pack(Base::template getRHS<Owner>());
+            return Base::getLHS().template packet<Pack>(index) + Pack(Base::getRHS());
         }
 
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
-            return Base::template getLHS<Owner>().template packetPartial<Pack, Owner>(index, count)
-                 + Pack(Base::template getRHS<Owner>());
+            return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS());
         }
     };
 
@@ -58,32 +54,30 @@ namespace Physica {
     public:
         using Base::Base;
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index))
-                 + ScalarType(Base::template getRHS<Owner>().template calc<Owner>(index));
+            return Base::getLHS().calc(index) + Base::getRHS().calc(index);
         }
 
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ Pack packet(size_t index) const {
-            return Base::template getLHS<Owner>().template packet<Pack, Owner>(index)
-                 + Base::template getRHS<Owner>().template packet<Pack, Owner>(index);
+            return Base::getLHS().template packet<Pack>(index)
+                 + Base::getRHS().template packet<Pack>(index);
         }
 
-        template<Packet Pack, Side Owner = GetSide()>
+        template<Packet Pack>
         [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
-            return Base::template getLHS<Owner>().template packetPartial<Pack, Owner>(index, count)
-                 + Base::template getRHS<Owner>().template packetPartial<Pack, Owner>(index, count);
+            return Base::getLHS().template packetPartial<Pack>(index, count)
+                 + Base::getRHS().template packetPartial<Pack>(index, count);
         }
     };
 
     template<Vector T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator+(T&& v, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Add, T, U>>(std::forward<T>(v), std::forward<U>(x));
+        return device_obj<VectorExpr<ExprType::Add, T&&, U&&>>(std::forward<T>(v), std::forward<U>(x));
     }
 
     template<Vector T1, Vector T2>
     [[nodiscard]] __host__ __device__ inline auto operator+(T1&& v1, T2&& v2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<VectorExpr<ExprType::Add, T1, T2>>(std::forward<T1>(v1), std::forward<T2>(v2));
+        return device_obj<VectorExpr<ExprType::Add, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }

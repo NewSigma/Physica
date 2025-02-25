@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica {
     template<Matrix T>
     class MatrixExpr<ExprType::Sqrt, T>
@@ -37,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    [[nodiscard]] inline auto sqrt_elem(const T& m) noexcept {
-        return MatrixExpr<ExprType::Sqrt, T>(m);
+    [[nodiscard]] inline auto sqrt_elem(T&& m) noexcept {
+        return MatrixExpr<ExprType::Sqrt, T&&>(std::forward<T>(m));
     }
 }

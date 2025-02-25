@@ -57,7 +57,6 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(fromRow, fromCol + index); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(fromRow, fromCol + index); }
@@ -99,7 +98,6 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(fromRow + index, fromCol); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(fromRow + index, fromCol); }
@@ -134,7 +132,6 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t index) {
             assert(index == 0 && "[Error]: Index overflow");

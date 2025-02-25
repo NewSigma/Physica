@@ -67,13 +67,18 @@ namespace Physica {
         }
     };
 
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto operator+(const T1& mat1, const T2& mat2) noexcept {
-        return MatrixExpr<ExprType::Add, T1, T2>(mat1, mat2);
+    template<Matrix T, Scalar U>
+    [[nodiscard]] inline auto operator+(T&& m, U&& x) noexcept {
+        return MatrixExpr<ExprType::Add, T&&, U&&>(std::forward<T>(m), std::forward<U>(x));
     }
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] inline auto operator+(const T& mat, const U& x) noexcept {
-        return MatrixExpr<ExprType::Add, T, U>(mat, x);
+    [[nodiscard]] inline auto operator+(U&& x, T&& m) noexcept {
+        return m + x;
+    }
+
+    template<Matrix T1, Matrix T2>
+    [[nodiscard]] inline auto operator+(T1&& m1, T2&& m2) noexcept {
+        return MatrixExpr<ExprType::Add, T1&&, T2&&>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

@@ -53,7 +53,6 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         [[nodiscard]] __device__ inline size_t calcOffset(size_t row, size_t col) const;
-        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ inline ScalarType calc(size_t row, size_t col) const;
 
         template<RNG R> inline void random_uniform();
@@ -107,7 +106,6 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, int Order>
-    template<Side Owner>
     __device__ inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::calc(size_t row, size_t col) const {
         return getTraceSegment()[calcOffset(row, col)];

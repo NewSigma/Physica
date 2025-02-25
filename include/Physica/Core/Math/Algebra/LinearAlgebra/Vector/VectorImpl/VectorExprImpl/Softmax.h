@@ -58,7 +58,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    [[nodiscard]] inline auto softmax(const T& v) noexcept {
-        return VectorExpr<ExprType::Softmax, T>(v);
+    [[nodiscard]] inline auto softmax(T&& v) noexcept requires(!CUDA<T>) {
+        return VectorExpr<ExprType::Softmax, T&&>(std::forward<T>(v));
     }
 }

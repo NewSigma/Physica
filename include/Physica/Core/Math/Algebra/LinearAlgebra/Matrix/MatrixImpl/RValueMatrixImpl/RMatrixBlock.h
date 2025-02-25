@@ -78,8 +78,8 @@ namespace Physica {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        RMatrixBlock(const This&) = delete;
-        RMatrixBlock(This&&) noexcept = delete;
+        RMatrixBlock(const This&) = default;
+        RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const {

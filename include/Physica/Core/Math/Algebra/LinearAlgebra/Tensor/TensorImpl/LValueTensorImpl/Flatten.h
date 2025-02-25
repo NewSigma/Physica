@@ -35,8 +35,8 @@ namespace Physica {
         using typename Base::ConstPtrTy;
     public:
         FlattenL(T& tensor_) : tensor(tensor_) {}
-        FlattenL(const This&) = delete;
-        FlattenL(This&&) noexcept = delete;
+        FlattenL(const This&) = default;
+        FlattenL(This&&) noexcept = default;
         ~FlattenL() = default;
         /* Operators */
         This& operator=(const This&) = delete;

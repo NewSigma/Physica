@@ -32,8 +32,8 @@ namespace Physica {
         const T& v;
     public:
         explicit RealVector(const T& v_) : v(v_) {}
-        RealVector(const This&) = delete;
-        RealVector(This&&) noexcept = delete;
+        RealVector(const This&) = default;
+        RealVector(This&&) noexcept = default;
         ~RealVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -55,8 +55,8 @@ namespace Physica {
         const T& v;
     public:
         explicit ImagVector(const T& v_) : v(v_) {}
-        ImagVector(const This&) = delete;
-        ImagVector(This&&) noexcept = delete;
+        ImagVector(const This&) = default;
+        ImagVector(This&&) noexcept = default;
         ~ImagVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -82,8 +82,8 @@ namespace Physica {
         const T& v;
     public:
         explicit SquaredNormVector(const T& v_) : v(v_) {}
-        SquaredNormVector(const This&) = delete;
-        SquaredNormVector(This&&) noexcept = delete;
+        SquaredNormVector(const This&) = default;
+        SquaredNormVector(This&&) noexcept = default;
         ~SquaredNormVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -159,8 +159,8 @@ namespace Physica {
         const T& v;
     public:
         explicit NormVector(const T& v_) : v(v_) {}
-        NormVector(const This&) = delete;
-        NormVector(This&&) noexcept = delete;
+        NormVector(const This&) = default;
+        NormVector(This&&) noexcept = default;
         ~NormVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -182,8 +182,8 @@ namespace Physica {
         const T& v;
     public:
         explicit ValueVector(const T& v_) : v(v_) {}
-        ValueVector(const This&) = delete;
-        ValueVector(This&&) noexcept = delete;
+        ValueVector(const This&) = default;
+        ValueVector(This&&) noexcept = default;
         ~ValueVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -205,8 +205,8 @@ namespace Physica {
         const T& v;
     public:
         explicit GradVector(const T& v_) : v(v_) {}
-        GradVector(const This&) = delete;
-        GradVector(This&&) noexcept = delete;
+        GradVector(const This&) = default;
+        GradVector(This&&) noexcept = default;
         ~GradVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -230,8 +230,8 @@ namespace Physica {
         const T& v;
     public:
         DiffMaskVector(const T& v_) : v(v_) {}
-        DiffMaskVector(const This&) = delete;
-        DiffMaskVector(This&&) noexcept = delete;
+        DiffMaskVector(const This&) = default;
+        DiffMaskVector(This&&) noexcept = default;
         ~DiffMaskVector() = default;
         /* Operators */
         This& operator=(const This&) = delete;

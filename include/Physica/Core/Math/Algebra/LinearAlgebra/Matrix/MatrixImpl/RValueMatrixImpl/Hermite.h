@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -46,8 +46,8 @@ namespace Physica {
 
     template<Matrix T>
     class Hermite<T> : public RValueMatrix<Hermite<T>> {
-    public:
         using Base = RValueMatrix<Hermite<T>>;
+    public:
         using typename Base::ScalarType;
     private:
         const T& matrix;
@@ -61,8 +61,8 @@ namespace Physica {
 
     template<Vector T>
     class HermiteVector<T> : public RValueMatrix<HermiteVector<T>> {
-    public:
         using Base = RValueMatrix<HermiteVector<T>>;
+    public:
         using typename Base::ScalarType;
     private:
         const T& vec;
