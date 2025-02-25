@@ -60,8 +60,8 @@ namespace Physica {
      */
     class Test;
 
-    constexpr static unsigned int PhysicaWordSize = sizeof(void*) * CHAR_BIT;
-    constexpr size_t Dynamic = 0;
+    [[maybe_unused]] constexpr static unsigned int PhysicaWordSize = sizeof(void*) * CHAR_BIT;
+    [[maybe_unused]] constexpr size_t Dynamic = 0;
 
     enum class Backend {
         Base,
@@ -76,11 +76,11 @@ namespace Physica {
     #endif
     }
 
-    __host__ __device__ consteval inline static bool IsDevice() {
+    [[maybe_unused]] __host__ __device__ consteval inline static bool IsDevice() {
         return !IsHost();
     }
 
-    consteval inline static bool IsMSVC() {
+    [[maybe_unused]] consteval inline static bool IsMSVC() {
     #ifdef _MSC_VER
         return true;
     #else
@@ -88,7 +88,7 @@ namespace Physica {
     #endif
     }
 
-    consteval inline static bool HasHDF5() {
+    [[maybe_unused]] consteval inline static bool HasHDF5() {
     #ifdef PHYSICA_HDF5
         return true;
     #else
@@ -96,7 +96,7 @@ namespace Physica {
     #endif
     }
 
-    consteval inline static bool HasMKL() {
+    [[maybe_unused]] consteval inline static bool HasMKL() {
     #ifdef PHYSICA_MKL
         return true;
     #else
@@ -104,7 +104,7 @@ namespace Physica {
     #endif
     }
 
-    consteval inline static bool HasMPI() {
+    [[maybe_unused]] consteval inline static bool HasMPI() {
     #ifdef PHYSICA_MPI
         return true;
     #else
@@ -112,7 +112,7 @@ namespace Physica {
     #endif
     }
 
-    consteval inline static bool HasCUDA() {
+    [[maybe_unused]] consteval inline static bool HasCUDA() {
     #ifdef PHYSICA_CUDA
         return true;
     #else

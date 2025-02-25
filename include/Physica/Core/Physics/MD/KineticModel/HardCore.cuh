@@ -69,7 +69,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return repMass.getLength(); }
     private:
-        __device__ inline void handleCollision(__restrict__ T* sharedBuffer);
+        __device__ inline void handleCollision(T* __restrict sharedBuffer);
     };
 }
 

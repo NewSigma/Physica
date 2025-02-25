@@ -219,8 +219,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    __device__ inline void HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::handleCollision(
-            __restrict__ T* sharedBuffer) {
+    __device__ inline void HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::handleCollision(T* __restrict sharedBuffer) {
         const unsigned int threadId = threadIdx.x;
         const size_t numParticle = mass.getLength();
         auto momentum = d_phase.head(numParticle);

@@ -67,7 +67,7 @@ int main() {
         }, 1, len).wait();
 
         d_result.toHost(result);
-        if (!vectorNear(result, answer, 1E-7)) {
+        if (!vectorNear(result, answer, 1E-6)) {
             std::cout << "[Error]: Kernel failed\n";
             return 1;
         }

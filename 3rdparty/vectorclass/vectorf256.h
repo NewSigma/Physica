@@ -2330,40 +2330,34 @@ inline Vec4d change_sign(Vec4d const a) {
 // ABI version 4 or later needed on Gcc for correct mangling of 256-bit intrinsic vectors.
 // If necessary, compile with -fabi-version=0 to get the latest abi version
 //#if !defined (GCC_VERSION) || (defined (__GXX_ABI_VERSION) && __GXX_ABI_VERSION >= 1004)
-static inline __m256i reinterpret_i (__m256i const x) {
-    return x;
+template<class Pack>
+static inline __m256i reinterpret_i(Pack const x) requires(sizeof(Pack) == 32) {
+    if constexpr (std::same_as<Pack, __m128i>)
+        return x;
+    else if constexpr (std::same_as<Pack, __m128>)
+        return _mm256_castps_si256(x);
+    else
+        return _mm256_castpd_si256(x);
 }
 
-static inline __m256i reinterpret_i (__m256  const x) {
-    return _mm256_castps_si256(x);
+template<class Pack>
+static inline __m256i reinterpret_f(Pack const x) requires(sizeof(Pack) == 32) {
+    if constexpr (std::same_as<Pack, __m128i>)
+        return _mm256_castsi256_ps(x);
+    else if constexpr (std::same_as<Pack, __m128>)
+        return x;
+    else
+        return _mm256_castpd_ps(x);
 }
 
-static inline __m256i reinterpret_i (__m256d const x) {
-    return _mm256_castpd_si256(x);
-}
-
-static inline __m256  reinterpret_f (__m256i const x) {
-    return _mm256_castsi256_ps(x);
-}
-
-static inline __m256  reinterpret_f (__m256  const x) {
-    return x;
-}
-
-static inline __m256  reinterpret_f (__m256d const x) {
-    return _mm256_castpd_ps(x);
-}
-
-static inline __m256d reinterpret_d (__m256i const x) {
-    return _mm256_castsi256_pd(x);
-}
-
-static inline __m256d reinterpret_d (__m256  const x) {
-    return _mm256_castps_pd(x);
-}
-
-static inline __m256d reinterpret_d (__m256d const x) {
-    return x;
+template<class Pack>
+static inline __m256i reinterpret_d(Pack const x) requires(sizeof(Pack) == 32) {
+    if constexpr (std::same_as<Pack, __m128i>)
+        return _mm256_castsi256_pd(x);
+    else if constexpr (std::same_as<Pack, __m128>)
+        return _mm256_castps_pd(x);
+    else
+        return x;
 }
 
 #else  // AVX2 emulated in vectori256e.h, AVX supported
