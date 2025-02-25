@@ -34,43 +34,45 @@ namespace Physica {
 
     template<ExprType Type, Vector V>
     class UnitaryVectorExpr : public RValueVector<VectorExpr<Type, V>> {
+        static_assert(std::is_reference<V>::value, "[Error]: Expect a reference");
+        static_assert(!std::is_const<V>::value, "[Error]: Const is implied");
         using This = UnitaryVectorExpr<Type, V>;
         using Base = RValueVector<VectorExpr<Type, V>>;
-    public:
-        using Base::isReverseDiff;
     private:
-        const V& expr;
+        const LazyDestroy<V> expr;
     public:
-        UnitaryVectorExpr(const V& expr_) : expr(expr_) {}
+        UnitaryVectorExpr(V expr_) : expr(std::forward<V>(expr_)) {}
         UnitaryVectorExpr(const This&) = delete;
-        UnitaryVectorExpr(This&&) noexcept requires(isReverseDiff) = default;
+        UnitaryVectorExpr(This&&) noexcept = default;
         ~UnitaryVectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] size_t getLength() const { return getExpr().getLength(); }
-        [[nodiscard]] const V& getExpr() const noexcept { return expr; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return getExpr().getLength(); }
+        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return expr; }
     };
 
     template<ExprType Type, class LHS, class RHS>
     class BinaryVectorExpr : public RValueVector<VectorExpr<Type, LHS, RHS>> {
         static_assert(Vector<LHS> || Vector<RHS>, "[Error]: Either type should be Vector");
+        static_assert(std::is_reference<LHS>::value, "[Error]: Expect a reference");
+        static_assert(std::is_reference<RHS>::value, "[Error]: Expect a reference");
+        static_assert(!std::is_const<LHS>::value, "[Error]: Const is implied");
+        static_assert(!std::is_const<RHS>::value, "[Error]: Const is implied");
 
         using This = BinaryVectorExpr<Type, LHS, RHS>;
         using Base = RValueVector<VectorExpr<Type, LHS, RHS>>;
-    public:
-        using Base::isReverseDiff;
     private:
-        const LHS* lhs;
-        const RHS* rhs;
+        const LazyDestroy<LHS> lhs;
+        const LazyDestroy<RHS> rhs;
     public:
-        BinaryVectorExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_), rhs(&rhs_) {
+        BinaryVectorExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
             if constexpr (Vector<LHS> && Vector<RHS>)
-                assert(lhs->getLength() == rhs->getLength());
+                assert(lhs.getLength() == rhs.getLength());
         }
         BinaryVectorExpr(const This&) = delete;
-        BinaryVectorExpr(This&&) noexcept requires(isReverseDiff) = default;
+        BinaryVectorExpr(This&&) noexcept = default;
         ~BinaryVectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -82,25 +84,27 @@ namespace Physica {
             else
                 return getRHS().getLength();
         }
-        [[nodiscard]] const LHS& getLHS() const noexcept { return *lhs; }
-        [[nodiscard]] const RHS& getRHS() const noexcept { return *rhs; }
+        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs; }
+        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs; }
     };
 }
 
 namespace Physica {
     template<ExprType Type, Vector LHS, Vector RHS>
     class Traits<VectorExpr<Type, LHS, RHS>> {
-        constexpr static size_t Size1 = Traits<LHS>::SizeAtCompile;
-        constexpr static size_t Size2 = Traits<RHS>::SizeAtCompile;
-        constexpr static bool FastAssign1 = Traits<LHS>::FastAssign;
-        constexpr static bool FastAssign2 = Traits<RHS>::FastAssign;
-        constexpr static bool FastPacket1 = Traits<LHS>::FastPacket;
-        constexpr static bool FastPacket2 = Traits<RHS>::FastPacket;
-        constexpr static bool IsAddOrSub = Type == ExprType::Add || Type == ExprType::Sub;
-
-        using T = LHS::ScalarType;
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
+        using T = LHS1::ScalarType;
         using Tr = T::RealType;
-        using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS::ScalarType>::Type;
+        using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS1::ScalarType>::Type;
+
+        constexpr static size_t Size1 = Traits<LHS1>::SizeAtCompile;
+        constexpr static size_t Size2 = Traits<RHS1>::SizeAtCompile;
+        constexpr static bool FastAssign1 = Traits<LHS1>::FastAssign;
+        constexpr static bool FastAssign2 = Traits<RHS1>::FastAssign;
+        constexpr static bool FastPacket1 = Traits<LHS1>::FastPacket;
+        constexpr static bool FastPacket2 = Traits<RHS1>::FastPacket;
+        constexpr static bool IsAddOrSub = Type == ExprType::Add || Type == ExprType::Sub;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
     public:
         using ScalarType = std::conditional<Type == ExprType::Abs, Tr, T12>::type;
@@ -111,11 +115,13 @@ namespace Physica {
 
     template<ExprType Type, Vector LHS, Scalar RHS>
     class Traits<VectorExpr<Type, LHS, RHS>> {
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
-        constexpr static size_t SizeAtCompile = Traits<LHS>::SizeAtCompile;
-        constexpr static bool FastAssign = Traits<LHS>::FastAssign;
-        constexpr static bool FastPacket = Traits<LHS>::FastPacket;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, RHS1>::Type;
+        constexpr static size_t SizeAtCompile = Traits<LHS1>::SizeAtCompile;
+        constexpr static bool FastAssign = Traits<LHS1>::FastAssign;
+        constexpr static bool FastPacket = Traits<LHS1>::FastPacket;
     };
 
     template<ExprType Type, Scalar LHS, Vector RHS>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica {
     template<Vector T>
     class VectorExpr<ExprType::Sech, T> : public UnitaryVectorExpr<ExprType::Sech, T> {
@@ -35,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto sech(const T& v) noexcept {
-        return VectorExpr<ExprType::Sech, T>(v);
+    [[nodiscard]] inline auto sech(T&& v) noexcept {
+        return VectorExpr<ExprType::Sech, T&&>(std::forward<T>(v));
     }
 }

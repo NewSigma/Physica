@@ -94,7 +94,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
     private:
         template<size_t Length>
-        using BlockType = RVectorBlock<Derived, Length>;
+        using BlockType = RVectorBlock<Derived&, Length>;
     public:
         ~RValueVector() = default;
         /* Operations */
@@ -141,17 +141,17 @@ namespace Physica {
         [[nodiscard]] T angleTo(const V& v) const noexcept;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto head(size_t to) noexcept;
+        [[nodiscard]] inline auto head(size_t to) & noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto head(size_t to) const noexcept;
+        [[nodiscard]] inline const auto head(size_t to) const& noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto tail(size_t from) noexcept;
+        [[nodiscard]] inline auto tail(size_t from) & noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto tail(size_t from) const noexcept;
+        [[nodiscard]] inline const auto tail(size_t from) const& noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto segment(size_t from, size_t to) noexcept;
+        [[nodiscard]] inline auto segment(size_t from, size_t to) & noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] inline const auto segment(size_t from, size_t to) const& noexcept;
         [[nodiscard]] inline auto reversal() noexcept;
         [[nodiscard]] inline const auto reversal() const noexcept;
 

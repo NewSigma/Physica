@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,8 +37,8 @@ namespace Physica {
     public:
         __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_, size_t to_);
         __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_);
-        LVectorBlock(const LVectorBlock& block) = delete;
-        LVectorBlock(LVectorBlock&&) noexcept = delete;
+        LVectorBlock(const This& block) = default;
+        LVectorBlock(This&&) noexcept = default;
         ~LVectorBlock() = default;
         /* Operators */
         using Base::operator=;

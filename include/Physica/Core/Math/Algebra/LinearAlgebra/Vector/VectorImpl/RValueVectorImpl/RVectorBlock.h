@@ -26,19 +26,21 @@ namespace Physica {
      */
     template<Vector T, size_t Length>
     class RVectorBlock : public RValueVector<RVectorBlock<T, Length>> {
+        static_assert(std::is_reference<T>::value, "[Error]: Expect a reference");
+
         using This = RVectorBlock<T, Length>;
         using Base = RValueVector<This>;
     public:
         using ScalarType = Base::ScalarType;
     private:
-        const T& vec;
+        LazyDestroy<T> vec;
         size_t from;
         size_t to;
     public:
-        RVectorBlock(const T& vec_, size_t from_, size_t to_);
-        RVectorBlock(const T& vec_, size_t from_);
-        RVectorBlock(const This& block) = delete;
-        RVectorBlock(This&&) noexcept = delete;
+        RVectorBlock(T vec_, size_t from_, size_t to_);
+        RVectorBlock(T vec_, size_t from_);
+        RVectorBlock(const This& block) = default;
+        RVectorBlock(This&&) noexcept = default;
         ~RVectorBlock() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -51,15 +53,16 @@ namespace Physica {
     };
 
     template<Vector T, size_t Length>
-    RVectorBlock<T, Length>::RVectorBlock(const T& vec_, size_t from_, size_t to_)
-            : vec(vec_), from(from_), to(to_) {
+    RVectorBlock<T, Length>::RVectorBlock(T vec_, size_t from_, size_t to_)
+            : vec(std::forward<T>(vec_)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector T, size_t Length>
-    RVectorBlock<T, Length>::RVectorBlock(const T& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
+    RVectorBlock<T, Length>::RVectorBlock(T vec_, size_t from_)
+            : RVectorBlock(std::forward<T>(vec_), from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
     __host__ __device__ inline size_t RVectorBlock<T, Length>::getLength() const noexcept {

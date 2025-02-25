@@ -37,8 +37,8 @@ namespace Physica {
         const U& vec;
     public:
         MatrixVectorProduct(const T& mat_, const U& vec_);
-        MatrixVectorProduct(const This&) = delete;
-        MatrixVectorProduct(This&&) noexcept requires(ReverseDiff<ScalarType>) = default;
+        MatrixVectorProduct(const This&) = default;
+        MatrixVectorProduct(This&&) noexcept = default;
         ~MatrixVectorProduct() = default;
         /* Operators */
         This& operator=(const This&) = delete;

@@ -102,8 +102,8 @@ namespace Physica {
     template<Vector T1, Vector T2>
     template<Vector V, class Executor>
     inline void VectorExpr<ExprType::Add, T1, T2>::assign(V& v) const {
-        constexpr bool FastAssign1 = Traits<T1>::FastAssign;
-        constexpr bool FastAssign2 = Traits<T2>::FastAssign;
+        constexpr bool FastAssign1 = Traits<std::remove_cvref_t<T1>>::FastAssign;
+        constexpr bool FastAssign2 = Traits<std::remove_cvref_t<T2>>::FastAssign;
         if constexpr (FastAssign1) {
             getLHS().template assign<V, Executor>(v);
             v += getRHS();
@@ -136,17 +136,17 @@ namespace Physica {
     }
 
     template<Vector T, Scalar U>
-    [[nodiscard]] inline auto operator+(const T& v, const U& x) noexcept {
-        return VectorExpr<ExprType::Add, T, U>(v, x);
+    [[nodiscard]] inline auto operator+(T&& v, U&& x) noexcept requires(!CUDA<T>) {
+        return VectorExpr<ExprType::Add, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector T>
-    [[nodiscard]] inline auto operator+(const U& x, const T& v) noexcept {
-        return v + x;
+    [[nodiscard]] inline auto operator+(U&& x, T&& v) noexcept requires(!CUDA<T>) {
+        return std::forward<T>(v) + std::forward<U>(x);
     }
 
     template<Vector T1, Vector T2>
-    [[nodiscard]] inline auto operator+(const T1& v1, const T2& v2) noexcept {
-        return VectorExpr<ExprType::Add, T1, T2>(v1, v2);
+    [[nodiscard]] inline auto operator+(T1&& v1, T2&& v2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
+        return VectorExpr<ExprType::Add, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }

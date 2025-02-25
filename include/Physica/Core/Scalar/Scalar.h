@@ -165,6 +165,9 @@ namespace Physica {
                  , DiffCoro<typename remove_codiff<typename remove_cvref<T>::Type>::Type>
                  , typename remove_cvref<T>::Type>::type;
 
+    template<class T> requires(std::is_reference<T>::value)
+    using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T&>::type;
+
     namespace Internal {
         /**
          * \class BinaryScalarOpRtnTy returns a type that can exactly represent the two input scalars.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../VectorExpr.h"
 
 namespace Physica {
     template<Vector T1, Vector T2>
@@ -69,13 +71,13 @@ namespace Physica {
         using Base::getRHS;
     };
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] inline auto operator>=(const T1& v1, const T2& v2) noexcept {
-        return VectorExpr<ExprType::MoreEq, T1, T2>(v1, v2);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator>=(T&& v, U&& x) noexcept {
+        return VectorExpr<ExprType::MoreEq, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
     }
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] inline auto operator>=(const T& v, const U& x) noexcept {
-        return VectorExpr<ExprType::MoreEq, T, U>(v, x);
+    template<Vector T1, Vector T2>
+    [[nodiscard]] inline auto operator>=(T1&& v1, T2&& v2) noexcept {
+        return VectorExpr<ExprType::MoreEq, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }

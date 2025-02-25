@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -63,7 +63,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    [[nodiscard]] inline auto exp(const T& v) noexcept {
-        return VectorExpr<ExprType::Exp, T>(v);
+    [[nodiscard]] inline auto exp(T&& v) noexcept {
+        return VectorExpr<ExprType::Exp, T&&>(std::forward<T>(v));
     }
 }

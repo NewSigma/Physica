@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto unit(const T& v) noexcept {
-        return VectorExpr<ExprType::Unit, T>(v);
+    [[nodiscard]] inline auto unit(T&& v) noexcept {
+        return VectorExpr<ExprType::Unit, T&&>(std::forward<T>(v));
     }
 }

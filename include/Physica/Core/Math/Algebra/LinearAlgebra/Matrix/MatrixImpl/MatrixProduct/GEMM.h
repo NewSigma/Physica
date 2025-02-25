@@ -62,8 +62,8 @@ namespace Physica {
         MatrixProduct(const T1& mat1_, const T2& mat2_) : mat1(mat1_), mat2(mat2_) {
             assert(mat1.getCol() == mat2.getRow());
         }
-        MatrixProduct(const This&) = delete;
-        MatrixProduct(This&&) noexcept = delete;
+        MatrixProduct(const This&) = default;
+        MatrixProduct(This&&) noexcept = default;
         ~MatrixProduct() = default;
         /* Operators */
         This& operator=(const This&) = delete;

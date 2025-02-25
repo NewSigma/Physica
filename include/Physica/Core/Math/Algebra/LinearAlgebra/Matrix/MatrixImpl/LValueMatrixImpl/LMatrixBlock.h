@@ -45,8 +45,8 @@ namespace Physica {
             assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
-        LMatrixBlock(const This&) = delete;
-        LMatrixBlock(This&&) noexcept = delete;
+        LMatrixBlock(const This&) = default;
+        LMatrixBlock(This&&) noexcept = default;
         ~LMatrixBlock() = default;
         /* Operators */
         using Base::operator=;
@@ -86,8 +86,8 @@ namespace Physica {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        LMatrixBlock(const This&) = delete;
-        LMatrixBlock(This&&) noexcept = delete;
+        LMatrixBlock(const This&) = default;
+        LMatrixBlock(This&&) noexcept = default;
         ~LMatrixBlock() = default;
         /* Operators */
         using Base::operator=;

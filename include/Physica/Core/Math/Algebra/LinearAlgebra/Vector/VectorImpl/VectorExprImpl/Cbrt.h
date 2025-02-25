@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -51,7 +51,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto cbrt(const T& v) noexcept {
-        return VectorExpr<ExprType::Cbrt, T>(v);
+    [[nodiscard]] inline auto cbrt(T&& v) noexcept {
+        return VectorExpr<ExprType::Cbrt, T&&>(std::forward<T>(v));
     }
 }

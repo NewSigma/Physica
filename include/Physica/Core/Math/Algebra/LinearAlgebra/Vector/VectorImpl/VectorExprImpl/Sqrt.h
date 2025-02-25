@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../VectorExpr.h"
 
 namespace Physica {
     template<Vector T>
@@ -41,7 +43,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto sqrt(const T& v) noexcept {
-        return VectorExpr<ExprType::Sqrt, T>(v);
+    [[nodiscard]] inline auto sqrt(T&& v) noexcept {
+        return VectorExpr<ExprType::Sqrt, T&&>(std::forward<T>(v));
     }
 }

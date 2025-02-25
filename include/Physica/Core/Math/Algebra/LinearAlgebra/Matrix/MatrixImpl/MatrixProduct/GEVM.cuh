@@ -39,8 +39,8 @@ namespace Physica {
                 : vec(asStruct(vec_)), mat(asStruct(mat_)) {
             assert(mat.getDerived().getRow() == 1);
         }
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;

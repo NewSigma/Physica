@@ -41,13 +41,13 @@ namespace Physica {
     public:
         ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_, size_t to_);
         ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_);
-        ContinuousVectorBlock(const ContinuousVectorBlock& block) = delete;
-        ContinuousVectorBlock(ContinuousVectorBlock&&) noexcept = delete;
+        ContinuousVectorBlock(const This& block) = default;
+        ContinuousVectorBlock(This&&) noexcept = default;
         ~ContinuousVectorBlock() = default;
         /* Operators */
         using Base::operator=;
-        inline ContinuousVectorBlock& operator=(const ContinuousVectorBlock& v);
-        inline ContinuousVectorBlock& operator=(ContinuousVectorBlock&& v) noexcept;
+        inline This& operator=(const This& v);
+        inline This& operator=(This&& v) noexcept;
         [[nodiscard]] RefTy operator[](size_t index);
         [[nodiscard]] ConstRefTy operator[](size_t index) const;
         /* Operations */
@@ -75,13 +75,13 @@ namespace Physica {
             : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    inline auto ContinuousVectorBlock<T, Length>::operator=(const ContinuousVectorBlock<T, Length>& v) -> This& {
+    inline auto ContinuousVectorBlock<T, Length>::operator=(const This& v) -> This& {
         v.assign(*this);
         return *this;
     }
     
     template<Vector T, size_t Length>
-    inline auto ContinuousVectorBlock<T, Length>::operator=(ContinuousVectorBlock<T, Length>&& v) noexcept -> This& {
+    inline auto ContinuousVectorBlock<T, Length>::operator=(This&& v) noexcept -> This& {
         v.assign(*this);
         return *this;
     }

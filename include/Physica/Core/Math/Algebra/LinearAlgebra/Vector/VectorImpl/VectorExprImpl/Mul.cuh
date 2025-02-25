@@ -78,19 +78,17 @@ namespace Physica {
     };
 
     template<Vector T, Scalar U>
-    [[nodiscard]] __device__ inline auto
-    operator*(const device_obj<T>& v, const U& x) noexcept {
-        return device_obj<VectorExpr<ExprType::Mul, T, U>>(v, x);
+    [[nodiscard]] __device__ inline auto operator*(T&& v, U&& x) noexcept requires(CUDA<T>) {
+        return device_obj<VectorExpr<ExprType::Mul, T, U>>(std::forward<T>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector T>
-    [[nodiscard]] __device__ inline auto operator*(const U& x, const device_obj<T>& v) noexcept {
-        return v * x;
+    [[nodiscard]] __device__ inline auto operator*(U&& x, T&& v) noexcept requires(CUDA<T>) {
+        return std::forward<T>(v) * std::forward<U>(x);
     }
-    
+
     template<Vector T1, Vector T2>
-    [[nodiscard]] __host__ __device__ inline auto
-    hadamard(const device_obj<T1>& v1, const device_obj<T2>& v2) noexcept {
-        return device_obj<VectorExpr<ExprType::Mul, T1, T2>>(v1, v2);
+    [[nodiscard]] __host__ __device__ inline auto hadamard(T1&& v1, T2&& v2) noexcept requires(CUDA<T1> && CUDA<T2>) {
+        return device_obj<VectorExpr<ExprType::Mul, T1, T2>>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }

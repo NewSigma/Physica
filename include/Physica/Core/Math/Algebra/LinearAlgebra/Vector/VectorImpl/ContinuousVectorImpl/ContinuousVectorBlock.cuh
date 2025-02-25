@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -39,8 +39,8 @@ namespace Physica {
     public:
         __host__ __device__ device_obj(device_obj<ContinuousVector<T>>& vec_, size_t from_, size_t to_);
         __host__ __device__ device_obj(device_obj<ContinuousVector<T>>& vec_, size_t from_);
-        device_obj(const This& block) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This& block) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;

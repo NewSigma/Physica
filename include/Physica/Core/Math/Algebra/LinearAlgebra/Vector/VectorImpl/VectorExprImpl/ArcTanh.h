@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto arctanh(const T& v) noexcept {
-        return VectorExpr<ExprType::ArcTanh, T>(v);
+    [[nodiscard]] inline auto arctanh(T&& v) noexcept {
+        return VectorExpr<ExprType::ArcTanh, T&&>(std::forward<T>(v));
     }
 }

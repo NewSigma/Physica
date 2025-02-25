@@ -29,7 +29,7 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        constexpr static bool isComplexV = T::isComplex;
+        constexpr static bool isComplexV = std::remove_cvref_t<T>::isComplex;
         constexpr static bool isReverseDiff = Base::isReverseDiff;
     public:
         using Base::Base;
@@ -73,7 +73,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    [[nodiscard]] inline auto abs(const T& v) noexcept {
-        return VectorExpr<ExprType::Abs, T>(v);
+    [[nodiscard]] inline auto abs(T&& v) noexcept {
+        return VectorExpr<ExprType::Abs, T&&>(std::forward<T>(v));
     }
 }

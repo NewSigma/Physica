@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../VectorExpr.h"
 
 namespace Physica {
     template<Vector T>
@@ -47,7 +49,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto sec(const T& v) noexcept {
-        return VectorExpr<ExprType::Sec, T>(v);
+    [[nodiscard]] inline auto sec(T&& v) noexcept {
+        return VectorExpr<ExprType::Sec, T&&>(std::forward<T>(v));
     }
 }

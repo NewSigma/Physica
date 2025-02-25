@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,6 +24,8 @@
  * 
  * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
  */
+#include <type_traits>
+
 namespace Physica {
     template<class T> class device_obj;
 
@@ -45,5 +47,13 @@ namespace Physica {
     template<class T>
     struct remove_device_obj<device_obj<T>> {
         using Type = T;
+    };
+
+    template<class T>
+    concept CUDA = is_device_obj<std::remove_cvref_t<T>>::value;
+
+    template<CUDA T>
+    class device_obj<T> {
+        static_assert(!CUDA<T>, "[Error]: Nested device_obj is not allowed");
     };
 }

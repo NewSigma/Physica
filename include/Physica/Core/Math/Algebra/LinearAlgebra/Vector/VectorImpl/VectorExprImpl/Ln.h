@@ -63,7 +63,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    [[nodiscard]] inline auto ln(const T& v) noexcept {
-        return VectorExpr<ExprType::Ln, T>(v);
+    [[nodiscard]] inline auto ln(T&& v) noexcept {
+        return VectorExpr<ExprType::Ln, T&&>(std::forward<T>(v));
     }
 }

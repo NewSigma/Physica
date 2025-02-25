@@ -5,7 +5,7 @@ Physica is a high-performance and scalable C++ template library, dedicated to pr
 - Differentiable linear algebra library that leverages SIMD and GPU acceleration
 - Domain specific composable module for computational physics
 
-Physica is also an open source platform that maintains scientific code written in Physica and related data. We expect Physica, as a platform and not just a software, to promote the reproducibility of scientific results. The open source community continuously ensures that the results remain readable, reproducible and reliable.
+Physica is also an open source platform that maintains scientific code written in Physica and related data. We expect Physica, as a platform and not just a software, to promote the development of open science. The open source community continuously ensures that the results remain readable, reproducible and reliable.
 
 ## Table of Contents
 

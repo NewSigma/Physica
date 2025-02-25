@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../VectorExpr.h"
 
 namespace Physica {
     template<Vector T>
@@ -45,7 +47,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto reciprocal(const T& v) noexcept {
-        return VectorExpr<ExprType::Reciprocal, T>(v);
+    [[nodiscard]] inline auto reciprocal(T&& v) noexcept requires(!CUDA<T>) {
+        return VectorExpr<ExprType::Reciprocal, T&&>(std::forward<T>(v));
     }
 }

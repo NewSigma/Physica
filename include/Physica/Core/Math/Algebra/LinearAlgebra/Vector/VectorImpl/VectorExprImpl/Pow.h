@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector T, Scalar U>
-    [[nodiscard]] inline auto pow(const T& v, const U& x) noexcept {
-        return VectorExpr<ExprType::Pow, T, U>(v, x);
+    [[nodiscard]] inline auto pow(T&& v, U&& x) noexcept {
+        return VectorExpr<ExprType::Pow, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
     }
 }

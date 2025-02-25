@@ -39,8 +39,8 @@ namespace Physica {
         Physica::PlainStruct<const device_obj<T2>> mat2;
     public:
         __host__ __device__ device_obj(const device_obj<T1>& mat1_, const device_obj<T2>& mat2_);
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;

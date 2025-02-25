@@ -102,7 +102,7 @@ namespace Physica {
             const bool isIncreased = (y >= last_y) && (i > 0);
             if (violatesWolfe || isIncreased)
                 return zoom(func, grad, x, gradient, direction, step_lower, step);
-            
+
             const T diff_phi = grad(x1) * direction;
             if (abs(diff_phi) <= -curvatureCondNum * diff_phi_0)
                 return step;

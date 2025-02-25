@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica {
     template<Vector T>
     class VectorExpr<ExprType::Ln1pExp, T> : public UnitaryVectorExpr<ExprType::Ln1pExp, T> {
@@ -35,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto ln1pexp(const T& v) noexcept {
-        return VectorExpr<ExprType::Ln1pExp, T>(v);
+    [[nodiscard]] inline auto ln1pexp(T&& v) noexcept {
+        return VectorExpr<ExprType::Ln1pExp, T&&>(std::forward(v));
     }
 }

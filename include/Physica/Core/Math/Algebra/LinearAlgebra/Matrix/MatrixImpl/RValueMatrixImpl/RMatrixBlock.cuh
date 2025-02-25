@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,8 +42,8 @@ namespace Physica {
             assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Getters */
         template<Side Owner>

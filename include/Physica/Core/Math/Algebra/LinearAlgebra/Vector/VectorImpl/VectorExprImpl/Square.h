@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,7 +58,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    [[nodiscard]] inline auto square(const T& v) noexcept {
-        return VectorExpr<ExprType::Square, T>(v);
+    [[nodiscard]] inline auto square(T&& v) noexcept {
+        return VectorExpr<ExprType::Square, T&&>(std::forward<T>(v));
     }
 }

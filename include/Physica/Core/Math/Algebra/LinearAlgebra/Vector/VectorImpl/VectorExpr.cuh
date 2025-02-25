@@ -24,24 +24,24 @@
 namespace Physica {
     template<ExprType Type, Vector V>
     class device_obj<UnitaryVectorExpr<Type, V>> : public device_obj<RValueVector<VectorExpr<Type, V>>> {
+        static_assert(CUDA<V>, "[Error]: Invalid type");
         using host_obj = UnitaryVectorExpr<Type, V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<VectorExpr<Type, V>>>;
-        using DeviceVector = device_obj<V>;
     private:
         union {
-            PlainStruct<const DeviceVector> value;
-            const DeviceVector* ptr;
+            PlainStruct<const V> value;
+            const V* ptr;
         } expr;
     public:
-        __host__ __device__ inline device_obj(const device_obj<V>& expr_) {
+        __host__ __device__ inline device_obj(V expr_) {
             if constexpr (IsHost())
                 expr.value = asStruct(expr_);
             else
                 expr.ptr = &expr_;
         }
         device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -53,7 +53,7 @@ namespace Physica {
         }
 
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceVector& getExpr() const {
+        [[nodiscard]] __host__ __device__ const V& getExpr() const {
             if constexpr (IsHost() || Owner == Side::Host)
                 return expr.value.getDerived();
             else
@@ -62,25 +62,23 @@ namespace Physica {
     };
 
     template<ExprType Type, Vector LHS, class RHS>
-    class device_obj<BinaryVectorExpr<Type, LHS, RHS>>
-            : public device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>> {
+    class device_obj<BinaryVectorExpr<Type, LHS, RHS>> : public device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>> {
+        static_assert(CUDA<LHS>, "[Error]: Invalid type");
         using host_obj = BinaryVectorExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>>;
-        using DeviceLHS = device_obj<LHS>;
-        using DeviceRHS = std::conditional<Scalar<RHS>, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
         union {
-            PlainStruct<const DeviceLHS> value;
-            const DeviceLHS* ptr;
+            PlainStruct<const LHS> value;
+            const LHS* ptr;
         } lhs;
 
         union {
-            PlainStruct<const DeviceRHS> value;
-            const DeviceRHS* ptr;
+            PlainStruct<const RHS> value;
+            const RHS* ptr;
         } rhs;
     public:
-        __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
+        __host__ __device__ inline device_obj(LHS lhs_, RHS rhs_) {
             if constexpr (Vector<RHS>)
                 assert(lhs_.getLength() == rhs_.getLength());
             if constexpr (IsHost()) {
@@ -93,7 +91,7 @@ namespace Physica {
             }
         }
         device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -103,7 +101,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS<Owner>().template getLength<Owner>(); }
 
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceLHS& getLHS() const noexcept {
+        [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept {
             if constexpr (IsHost() || Owner == Side::Host)
                 return lhs.value.getDerived();
             else
@@ -111,7 +109,7 @@ namespace Physica {
         }
 
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceRHS& getRHS() const noexcept {
+        [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept {
             if constexpr (IsHost() || Owner == Side::Host)
                 return rhs.value.getDerived();
             else

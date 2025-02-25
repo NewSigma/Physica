@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "RVectorBlock.h"
+
 namespace Physica {
     template<Vector T, size_t Length>
     class device_obj<RVectorBlock<T, Length>> : public device_obj<RValueVector<RVectorBlock<T, Length>>> {
@@ -33,8 +35,8 @@ namespace Physica {
     public:
         __host__ __device__ device_obj(const device_obj<T>& vec_, size_t from_, size_t to_);
         __host__ __device__ device_obj(const device_obj<T>& vec_, size_t from_);
-        device_obj(const This& block) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This& block) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;

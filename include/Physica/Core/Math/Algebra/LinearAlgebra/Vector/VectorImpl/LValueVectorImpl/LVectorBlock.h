@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../LValueVector.h"
 
 namespace Physica {
     template<class Derived> class LValueVector;
@@ -39,8 +41,8 @@ namespace Physica {
     public:
         LVectorBlock(T& vec_, size_t from_, size_t to_);
         LVectorBlock(T& vec_, size_t from_);
-        LVectorBlock(const This& block) = delete;
-        LVectorBlock(This&&) noexcept = delete;
+        LVectorBlock(const This& block) = default;
+        LVectorBlock(This&&) noexcept = default;
         ~LVectorBlock() = default;
         /* Operators */
         using Base::operator=;

@@ -33,8 +33,8 @@ namespace Physica {
         const U& mat;
     public:
         VectorMatrixProduct(const T& vec_, const U& mat_);
-        VectorMatrixProduct(const This&) = delete;
-        VectorMatrixProduct(This&&) noexcept = delete;
+        VectorMatrixProduct(const This&) = default;
+        VectorMatrixProduct(This&&) noexcept = default;
         ~VectorMatrixProduct() = default;
         /* Operators */
         This& operator=(const This&) = delete;
