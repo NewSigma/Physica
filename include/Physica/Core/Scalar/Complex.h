@@ -173,7 +173,7 @@ namespace std {
 
         auto format(const Physica::Complex<T>& obj, std::format_context& ctx) const {
             const auto& im = obj.imag();
-            return std::format_to(ctx.out(), "{} {} {}i", obj.real(), im.isNegative() ? '-' : '+', im);
+            return std::format_to(ctx.out(), "{} {} {}i", obj.real(), im.isNegative() ? '-' : '+', abs(im));
         }
     };
 }

@@ -213,7 +213,7 @@ namespace Physica {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
-        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc(s).value(); }
+        [[nodiscard]] ValueType calc_value(size_t s) const { return calc(s).value(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -238,7 +238,7 @@ namespace Physica {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template mask<MaskOrder>(); }
-        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc(s).value(); }
+        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
