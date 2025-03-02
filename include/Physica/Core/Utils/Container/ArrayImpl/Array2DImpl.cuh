@@ -41,14 +41,7 @@ namespace Physica {
     template<tparams>
     __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) -> ElemType& {
         assert(r < getRow() && c < getCol());
-        if constexpr (isVectorStorage) {
-            if constexpr (isColMajor)
-                return arr[c][r];
-            else
-                return arr[r][c];
-        }
-        else
-            return arr[toIndex1D(r, c)];
+        return *data_ptr(r, c);
     }
 
     template<tparams>
@@ -79,7 +72,8 @@ namespace Physica {
         else {
             if constexpr (IsDevice())
                 assert(Row * Col != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-            arr.resize(row * col, std::forward<Args>(args)...);
+            else
+                arr.resize(row * col, std::forward<Args>(args)...);
         }
         r = row;
     }
@@ -139,6 +133,8 @@ namespace Physica {
 
     template<tparams>
     __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) -> ElemType* {
+        assert(row < getRow());
+        assert(col < getCol());
         if constexpr (isVectorStorage) {
             const size_t major = isColMajor ? col : row;
             const size_t minor = isColMajor ? row : col;

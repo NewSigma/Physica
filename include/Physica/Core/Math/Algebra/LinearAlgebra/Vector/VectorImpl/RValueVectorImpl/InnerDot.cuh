@@ -18,13 +18,15 @@
  */
 #pragma once
 
+#include "../RValueVector.cuh"
+
 namespace Physica {
     template<Vector T1, Vector T2>
-    __device__ InnerDot<T1, T2>::ResultType operator*(const device_obj<T1>& v1, const device_obj<T2>& v2) {
-        using ResultType = InnerDot<T1, T2>::ResultType;
+    __device__ auto operator*(const T1& v1, const T2& v2) requires(CUDA<T1> && CUDA<T2>) {
+        using ScalarType = InnerDot<T1, T2>::ScalarType;
 
         assert(v1.getLength() == v2.getLength() && "[Error]: Dimensions do not match");
-        ResultType result = 0;
+        ScalarType result = 0;
         for (size_t i = 0; i < v1.getLength(); ++i)
             result += v1.calc(i) * v2.calc(i);
         return result;

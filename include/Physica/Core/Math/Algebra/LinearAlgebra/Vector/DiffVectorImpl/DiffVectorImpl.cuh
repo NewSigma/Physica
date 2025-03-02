@@ -25,17 +25,20 @@ namespace Physica {
     device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length) : v(length), g(length) {}
 
     template<Scalar T, int Order>
-    device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length, T init) : v(length, init), g(length, 0) {}
+    device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length, T init) : v(length, init), g(length) {
+        g.zeros();
+    }
 
     template<Scalar T, int Order>
     template<Vector V>
     device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(const V& v_) requires(!ReverseDiff<V>) : device_obj(v_.getLength()) {
-        v = v_;
+        v_.assign(v);
+        g.zeros();
     }
 
     template<Scalar T, int Order>
     void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::zero_grad() {
-        g = T(0);
+        g.zeros();
     }
 
     template<Scalar T, int Order>
@@ -44,6 +47,32 @@ namespace Physica {
             v.resize(size);
             g.resize(size);
         }
+    }
+
+    template<Scalar T, int Order>
+    inline auto device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::toHost() const -> host_obj {
+        host_obj result = toHostAsync();
+        CUDAContext::getInstance().wait();
+        return result;
+    }
+
+    template<Scalar T, int Order>
+    inline auto device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::toHostAsync() const -> host_obj {
+        host_obj result(getLength());
+        toHostAsync(result);
+        return result;
+    }
+
+    template<Scalar T, int Order>
+    inline void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::toHost(host_obj& obj) const {
+        toHostAsync(obj);
+        CUDAContext::getInstance().wait();
+    }
+
+    template<Scalar T, int Order>
+    inline void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::toHostAsync(host_obj& obj) const {
+        v.toHostAsync(obj.v);
+        g.toHostAsync(obj.g);
     }
 
     template<Scalar T, int Order>
@@ -68,7 +97,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::swap(This& obj) noexcept {
+    void device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         v.swap(obj.v);
         g.swap(obj.g);

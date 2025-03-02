@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "../LValueMatrix.h"
+#include "../LValueMatrix.cuh"
 
 namespace Physica {
     template<class Derived>
     template<Matrix M>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const device_obj<M>& m) {
+    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const M& m) requires(CUDA<M>) {
         static_assert(RowAtCompile == Dynamic || M::RowAtCompile == Dynamic || RowAtCompile == M::RowAtCompile, "[Error]: Incompatible row number");
         static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
         auto& target = Base::getDerived();
@@ -33,11 +33,44 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const ScalarType& x) {
-        for (size_t i = 0; i < Base::getMaxMajor(); ++i)
-            for (size_t j = 0; j < Base::getMaxMinor(); ++j)
-                refFromMajorMinor(i, j) = ScalarType(x);
-        return Base::getDerived();
+    template<Scalar T>
+    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const T& x) {
+        if (IsHost()) {
+            const auto config = Base::makeKernelConfig();
+            CUDAExecutor::launch([m_ = asStruct(Base::getDerived()), x] __device__() mutable {
+                const auto& m = m_.getDerived();
+                const size_t maxMinor = m.getMaxMinor();
+                const size_t major = blockIdx.y;
+                const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
+                if (minor < maxMinor)
+                    m.refFromMajorMinor(major, minor) = x;
+            }, config.first, config.second);
+        }
+        else {
+            for (size_t i = 0; i < Base::getMaxMajor(); ++i)
+                for (size_t j = 0; j < Base::getMaxMinor(); ++j)
+                    refFromMajorMinor(i, j) = x;
+            return Base::getDerived();
+        }
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<LValueMatrix<Derived>>::operator()(size_t row, size_t col) -> RefTy {
+        return *data_ptr(row, col);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<LValueMatrix<Derived>>::operator()(size_t row, size_t col) const -> ConstRefTy {
+        return *data_ptr(row, col);
+    }
+
+    template<class Derived>
+    template<Matrix M>
+    void device_obj<LValueMatrix<Derived>>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+        static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
+        assert(Base::getRow() == grad.getRow());
+        assert(Base::getCol() == grad.getCol());
+        Base::getConstCastDerived().grads() += grad;
     }
 
     template<class Derived>
@@ -51,20 +84,28 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ inline device_obj<LValueMatrix<Derived>>::ScalarType&
-    device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) {
+    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::data_ptr(size_t row, size_t col) -> PtrTy {
+        assert(row < Base::getRow());
+        assert(col < Base::getCol());
+        return Base::getDerived().data_ptr(row, col);
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
+        return const_cast<This&>(*this).data_ptr(row, col);
+    }
+
+    template<class Derived>
+    __device__ inline auto device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) -> RefTy {
+        assert(major < Base::getDerived().getMaxMajor());
+        assert(minor < Base::getDerived().getMaxMinor());
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
         return Base::getDerived()(r, c);
     }
 
     template<class Derived>
-    __device__ inline const device_obj<LValueMatrix<Derived>>::ScalarType&
-    device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) const {
-        const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
-        const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
-        return Base::getDerived()(r, c);
+    __device__ inline auto device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) const -> ConstRefTy {
+        return const_cast<This&>(*this).refFromMajorMinor(major, minor);
     }
 }

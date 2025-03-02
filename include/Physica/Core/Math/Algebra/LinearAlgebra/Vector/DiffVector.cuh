@@ -55,7 +55,16 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void zero_grad();
+
+        using Base::resize;
         inline void resize(size_t size);
+
+        [[nodiscard]] inline host_obj toHost() const;
+        [[nodiscard]] inline host_obj toHostAsync() const;
+        inline void toHost(host_obj& obj) const;
+        inline void toHostAsync(host_obj& obj) const;
+        using Base::toHost;
+        using Base::toHostAsync;
 
         template<RNG R>
         inline void random_uniform();
@@ -63,16 +72,16 @@ namespace Physica {
         inline void random_normal();
         template<RNG R, class Distribution>
         inline void random_any(Distribution& dist);
-        void swap(This& obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
 
-        [[nodiscard]] __host__ __device__ const ValueVector& values() const noexcept { return v; }
-        [[nodiscard]] __host__ __device__ ValueVector& values() noexcept { return v; }
-        [[nodiscard]] __host__ __device__ const GradVector& grads() const noexcept { return g; }
-        [[nodiscard]] __host__ __device__ GradVector& grads() noexcept { return g; }
+        [[nodiscard]] __host__ __device__ const auto& values() const noexcept { return v; }
+        [[nodiscard]] __host__ __device__ auto& values() noexcept { return v; }
+        [[nodiscard]] __host__ __device__ const auto& grads() const noexcept { return g; }
+        [[nodiscard]] __host__ __device__ auto& grads() noexcept { return g; }
         /* Static members */
         template<RNG R>
         [[nodiscard]] inline static This random_uniform(size_t len);

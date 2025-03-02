@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "SeqExecutor.h"
@@ -33,22 +34,27 @@ namespace Physica {
      * Single thread with cuda support
      */
     class CUDAExecutor : public SeqExecutor {
+        struct KernelFuture {
+            cudaStream_t stream;
+
+            void wait() { check(cudaStreamSynchronize(stream)); }
+        };
     public:
         template<class Functor>
-        static CUDAExecutor launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem = 0);
-
-        static void wait() {
-        #ifdef PHYSICA_CUDA
-            check(cudaDeviceSynchronize());
-        #endif
-        }
+        __host__ __device__ static KernelFuture launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem = 0);
+        static void wait() { CUDAContext::getInstance().wait(); }
     };
 
     template<class Functor>
-    CUDAExecutor CUDAExecutor::launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem) {
-        Internal::kernel<<<numBlocks, numThreads, sharedMem, CUDAContext::getInstance()>>>(func);
+    __host__ __device__ auto CUDAExecutor::launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem) -> KernelFuture {
+        cudaStream_t stream = nullptr;
+        if constexpr (IsHost())
+            stream = cudaStream_t(CUDAContext::getInstance().getStream());
+        else
+            noImpl("No dynamic parallel support");
+        Internal::kernel<<<numBlocks, numThreads, sharedMem, stream>>>(func);
         check(cudaGetLastError());
-        return {};
+        return KernelFuture(stream);
     }
 }
 

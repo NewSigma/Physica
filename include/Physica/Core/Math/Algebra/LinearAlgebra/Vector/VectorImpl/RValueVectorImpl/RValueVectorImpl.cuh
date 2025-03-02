@@ -23,41 +23,28 @@
 #include "Physica/PlainStruct.h"
 
 namespace Physica {
-    namespace Internal {
-        template<Vector T1, Vector T2>
-        __global__ void RValueVector_assignToKernel(
-                Physica::PlainStruct<const device_obj<T1>> source_, Physica::PlainStruct<device_obj<T2>> target_) {
-            using ScalarType = T2::ScalarType;
-
-            const auto& source = source_.getDerived();
-            auto& target = target_.getDerived();
-            const size_t length = source.getLength();
-            const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-            if (index < length)
-                target[index] = ScalarType(source.calc(index));
-        }
-    }
-
     template<class Derived>
     template<Vector V>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(device_obj<V>& target) const {
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const requires(CUDA<V>) {
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
         static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
         static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
-
-        [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<Derived, V>;
-        const size_t length = getLength();
-        assert(length == target.getLength() && "[Error]: Size mismatch between two vector");
-        if constexpr (IsHost()) {
-            const unsigned int numThread = std::min(length, MaxThreadPerBlock);
-            const unsigned int numBlock = (length + numThread - 1) / numThread;
-            kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target));
-            check(cudaGetLastError());
+        assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+        if (IsHost()) {
+            auto config = makeKernelConfig();
+            CUDAExecutor::launch([source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
+                const auto& source = source_.getDerived();
+                auto& target = target_.getDerived();
+                const size_t length = source.getLength();
+                const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+                if (index < length)
+                    target[index] = source.calc(index);
+            }, config.first, config.second);
         }
         else
-            assignToImpl<V>(target);
+            assign_impl<V>(target);
     }
 
     template<class Derived>
@@ -133,10 +120,49 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::reals() const noexcept {
+        return device_obj<RealVector<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::imags() const noexcept {
+        return device_obj<ImagVector<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::squaredNorms() const noexcept {
+        return device_obj<SquaredNormVector<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::norms() const noexcept {
+        return device_obj<NormVector<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::values() const noexcept -> ValuesRtnTy {
+        return ValuesRtnTy(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::grads() const noexcept {
+        return device_obj<GradVector<Derived, GradOrder>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
+        constexpr unsigned int MaxThread = MaxThreadPerBlock;
+        const unsigned int length = getLength();
+        const unsigned int numThread = std::min(length, MaxThread);
+        const unsigned int numBlock = (length + numThread - 1) / numThread;
+        return std::make_pair(dim3(numBlock), dim3(numThread));
+    }
+
+    template<class Derived>
     template<Vector V>
-    __device__ void device_obj<RValueVector<Derived>>::assignToImpl(device_obj<V>& target) const {
-        constexpr bool enableSIMD = Internal::EnableSIMD<Derived, V>::value;
-        if constexpr (enableSIMD) {
+    __device__ void device_obj<RValueVector<Derived>>::assign_impl(V& target) const requires(CUDA<V>) {
+        if constexpr (Internal::EnableSIMD<device_obj<Derived>, V>::value) {
             constexpr static size_t Size1 = Derived::SizeAtCompile;
             constexpr static size_t Size2 = V::SizeAtCompile;
             constexpr static size_t VectorSize = Size1 > Size2 ? Size1 : Size2;

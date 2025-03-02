@@ -57,8 +57,10 @@ namespace Physica {
         private:
             constexpr static bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
             constexpr static bool isBadPacket = PacketType::size() == 1;
+            constexpr static bool isCUDA = CUDA<T1> || CUDA<T2>;
+            constexpr static bool isFloat16 = ResultType::Option == Float16;
         public:
-            constexpr static bool value = isSameScalar && !isBadPacket;
+            constexpr static bool value = (isCUDA == isFloat16) && isSameScalar && !isBadPacket;
         };
 
         template<Vector T1, Vector T2 = T1>
@@ -89,6 +91,7 @@ namespace Physica {
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
+        constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
     protected:
         using T = ScalarType;
@@ -98,6 +101,7 @@ namespace Physica {
     private:
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
+        using ValuesRtnTy = std::conditional<isDiffable, ValueVector<Derived>, Derived&>::type;
     public:
         ~RValueVector() = default;
         /* Operations */
@@ -165,13 +169,13 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         auto reshape_row(size_t row, size_t col) const noexcept;
 
-        auto reals() const noexcept;
-        auto imags() const noexcept;
-        auto squaredNorms() const noexcept;
-        auto norms() const noexcept;
-        auto values() const noexcept;
+        [[nodiscard]] auto reals() const noexcept;
+        [[nodiscard]] auto imags() const noexcept;
+        [[nodiscard]] auto squaredNorms() const noexcept;
+        [[nodiscard]] auto norms() const noexcept;
+        [[nodiscard]] ValuesRtnTy values() const noexcept;
         template<int GradOrder = 1>
-        auto grads() const noexcept;
+        [[nodiscard]] auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     protected:

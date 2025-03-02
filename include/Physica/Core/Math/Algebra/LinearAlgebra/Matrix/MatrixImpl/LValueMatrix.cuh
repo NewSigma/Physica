@@ -29,37 +29,45 @@ namespace Physica {
         using typename Base::ScalarType;
         using Base::RowAtCompile;
         using Base::ColAtCompile;
+        using Base::isReverseDiff;
     protected:
+        using typename Base::Tr;
+        using typename Base::Tv;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
+        using RefTy = ScalarType::RefTy;
+        using ConstRefTy = ScalarType::ConstRefTy;
     public:
         /* Operators */
         This& operator=(const This& m) = delete;
         This& operator=(This&& m) = delete;
-        template<Matrix M>
-        __host__ __device__ device_obj<Derived>& operator=(const device_obj<M>& m);
-        __device__ device_obj<Derived>& operator=(const ScalarType& x);
 
-        __device__ void operator+=(const ScalarType& s) { Base::getDerived() = Base::getDerived() + s; }
-        __device__ void operator-=(const ScalarType& s) { Base::getDerived() = Base::getDerived() - s; }
-        __device__ void operator*=(const ScalarType& s) { Base::getDerived() = Base::getDerived() * s; }
-        __device__ void operator/=(const ScalarType& s) { Base::getDerived() = Base::getDerived() / s; }
+        template<Scalar T> __host__ __device__ device_obj<Derived>& operator=(const T& x);
+        template<Scalar T> __host__ __device__ void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
+        template<Scalar T> __host__ __device__ void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
+        template<Scalar T> __host__ __device__ void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
+        template<Scalar T> __host__ __device__ void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Matrix M> __device__ void operator+=(const device_obj<M>& m) { Base::getDerived() = Base::getDerived() + m; }
-        template<Matrix M> __device__ void operator-=(const device_obj<M>& m) { Base::getDerived() = Base::getDerived() - m; }
+        template<Matrix M> __host__ __device__ device_obj<Derived>& operator=(const M& m) requires(CUDA<M>);
+        template<Matrix M> __host__ __device__ void operator+=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() + m; }
+        template<Matrix M> __host__ __device__ void operator-=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() - m; }
 
-        [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
-        [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
+        [[nodiscard]] __device__ RefTy operator()(size_t row, size_t col);
+        [[nodiscard]] __device__ ConstRefTy operator()(size_t row, size_t col) const;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
+        [[nodiscard]] __device__ ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+
+        template<Matrix M>
+        void reverse(const M& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] __host__ __device__ auto flatten();
         [[nodiscard]] __host__ __device__ const auto flatten() const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) { return Base::getDerived().data_ptr(row, col); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const { return Base::getDerived().data_ptr(row, col); }
-        [[nodiscard]] __device__ inline ScalarType& refFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] __device__ inline const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __device__ inline RefTy refFromMajorMinor(size_t major, size_t minor);
+        [[nodiscard]] __device__ inline ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

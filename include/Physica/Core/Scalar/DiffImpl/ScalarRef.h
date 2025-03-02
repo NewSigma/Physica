@@ -37,21 +37,21 @@ namespace Physica {
         using GradRtnTy = std::conditional<Order == GradOrder, ValueType&, ScalarRef<Diff<ValueType, Mode, Order - GradOrder>>>::type;
     public:
         ScalarRef() = default;
-        explicit ScalarRef(PtrTy ptr_) : PtrTy(ptr_) {}
+        __host__ __device__ explicit ScalarRef(PtrTy ptr_) : PtrTy(ptr_) {}
         ScalarRef(const ScalarRef&) = default;
         ScalarRef(ScalarRef&&) noexcept = default;
         ~ScalarRef() = default;
         /* Operators */
-        inline This& operator=(const This& other);
-        inline This& operator=(const ScalarType& other);
-        inline This& operator=(int x) { return operator=(ScalarType(x)); }
-        inline This& operator=(double x) { return operator=(ScalarType(x)); }
-        [[nodiscard]] operator ScalarType() const requires(!ReverseDiff<T>);
+        __host__ __device__ inline This& operator=(const This& other);
+        __host__ __device__ inline This& operator=(const ScalarType& other);
+        __host__ __device__ inline This& operator=(int x) { return operator=(ScalarType(x)); }
+        __host__ __device__ inline This& operator=(double x) { return operator=(ScalarType(x)); }
+        [[nodiscard]] __host__ __device__ operator ScalarType() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
 
-        [[nodiscard]] ScalarType operator-() const { return -ScalarType(*this); }
-        [[nodiscard]] bool operator==(const This& other) const;
+        [[nodiscard]] __host__ __device__ ScalarType operator-() const { return -ScalarType(*this); }
+        [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
         __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
         template<Scalar U>
@@ -63,11 +63,11 @@ namespace Physica {
         template<Scalar U>
         __host__ __device__ bool operator<(const ScalarRef<U>& s) const noexcept { return operator<(U(s)); }
         /* Operations */
-        T reverse(GradType grad_ = 1) const noexcept;
-        inline void zero_grad();
+        __host__ __device__ T reverse(GradType grad_ = 1) const noexcept;
+        __host__ __device__ inline void zero_grad();
 
-        void swap(This&& obj) noexcept;
-        void swap(ScalarType& obj) noexcept;
+        __host__ __device__ void swap(This&& obj) noexcept;
+        __host__ __device__ void swap(ScalarType& obj) noexcept;
         /* Getters */
         using PtrTy::value_ptr;
         using PtrTy::grad_ptr;
@@ -79,31 +79,31 @@ namespace Physica {
     };
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarRef& other) {
+    __host__ __device__ inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarRef& other) {
         value() = other.value();
         grad() = other.grad();
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarType& other) {
+    __host__ __device__ inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarType& other) {
         value() = other.value();
         grad() = other.grad();
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    ScalarRef<Diff<T, Mode, Order>>::operator ScalarType() const requires(!ReverseDiff<T>) {
+    __host__ __device__ ScalarRef<Diff<T, Mode, Order>>::operator ScalarType() const requires(!ReverseDiff<T>) {
         return ScalarType(value(), grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    bool ScalarRef<Diff<T, Mode, Order>>::operator==(const This& other) const {
+    __host__ __device__ bool ScalarRef<Diff<T, Mode, Order>>::operator==(const This& other) const {
         return value() == other.value() && grad() == other.grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    T ScalarRef<Diff<T, Mode, Order>>::reverse(GradType grad_) const noexcept {
+    __host__ __device__ T ScalarRef<Diff<T, Mode, Order>>::reverse(GradType grad_) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
         auto& g = const_cast<GradType&>(grad());
         g.value() += grad_.value();
@@ -113,18 +113,18 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline void ScalarRef<Diff<T, Mode, Order>>::zero_grad() {
+    __host__ __device__ inline void ScalarRef<Diff<T, Mode, Order>>::zero_grad() {
         grad() = 0;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void ScalarRef<Diff<T, Mode, Order>>::swap(This&& obj) noexcept {
+    __host__ __device__ void ScalarRef<Diff<T, Mode, Order>>::swap(This&& obj) noexcept {
         value().swap(obj.value());
         grad().swap(obj.grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void ScalarRef<Diff<T, Mode, Order>>::swap(ScalarType& obj) noexcept {
+    __host__ __device__ void ScalarRef<Diff<T, Mode, Order>>::swap(ScalarType& obj) noexcept {
         obj.swap(*this);
     }
 
@@ -144,4 +144,17 @@ namespace Physica {
     inline std::ostream& operator<<(std::ostream& os, const ScalarRef<Diff<T, Mode, Order>>& obj) {
         return os << obj.value();
     }
+}
+
+namespace std {
+    template<class T>
+    struct formatter<Physica::ScalarRef<T>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return formatter<T, char>::parse(ctx);
+        }
+
+        auto format(const Physica::ScalarRef<T>& obj, std::format_context& ctx) const {
+            return formatter<T, char>::format(T(obj), ctx);
+        }
+    };
 }

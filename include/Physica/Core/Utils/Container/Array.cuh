@@ -19,8 +19,9 @@
 #pragma once
 
 #include "Physica/PlainStruct.h"
-#include "Physica/Core/Utils/Allocator/DeviceAllocator.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Utils/Allocator/DeviceAllocator.cuh"
 #include "Array.h"
 
 namespace Physica {
@@ -93,14 +94,14 @@ namespace Physica {
         using typename Base::CFIteType;
         using typename Base::CRIteType;
     private:
-        pointer d_data;
-        size_t length;
-        size_t capacity;
+        pointer d_data = nullptr;
+        size_t length = 0;
+        size_t capacity = 0;
         [[no_unique_address]] allocator_type alloc;
     public:
-        device_obj();
+        device_obj() = default;
         template<class... Args>
-        explicit device_obj(size_t length_, Args&&... args);
+        __host__ __device__ explicit device_obj(size_t length_, Args&&... args);
         explicit device_obj(const host_obj& array);
         device_obj(const This& obj);
         device_obj(This&& obj) noexcept;
@@ -153,12 +154,13 @@ namespace Physica {
     };
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Allocator>>::device_obj() : d_data(nullptr), length(0), capacity(0) {}
-
-    template<class T, class Allocator>
     template<class... Args>
-    device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args)
-            : device_obj(host_obj(length_, std::forward<Args>(args)...).toDevice()) {}
+    __host__ __device__ device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args) {
+        if constexpr (IsHost())
+            host_obj(length_, std::forward<Args>(args)...).toDevice(*this);
+        else
+            unreachable(); // Marked __device__ to silence warnings
+    }
 
     template<class T, class Allocator>
     device_obj<Array<T, Dynamic, Allocator>>::device_obj(const host_obj& array)
@@ -207,18 +209,14 @@ namespace Physica {
         d_data = nullptr;
         length = capacity = 0;
     }
-    /**
-     * Synchronization is expected before this, copy is async to task stream
-     */
+
     template<class T, class Allocator>
     auto device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const -> PlainHostObj {
         PlainHostObj result(getLength());
         check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         return result;
     }
-    /**
-     * Synchronization is expected before this, copy is async to task stream
-     */
+
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator> device_obj<Array<T, Dynamic, Allocator>>::toHost() const {
         host_obj result(length);
@@ -243,7 +241,7 @@ namespace Physica {
     void device_obj<Array<T, Dynamic, Allocator>>::toHostAsync(host_obj& obj) const {
         obj.reserve(length);
         if constexpr (isTrivial)
-            check(cudaMemcpyAsync(obj.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+            check(cudaMemcpyAsync(obj.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
         else {
             const auto buffer = toPlainHost();
             for (size_t i = 0; i < length; ++i)
@@ -251,22 +249,18 @@ namespace Physica {
         }
         obj.setLength(length);
     }
-    /**
-     * Synchronization is expected before this, copy is async to task stream
-     */
+
     template<class T, class Allocator>
     void device_obj<Array<T, Dynamic, Allocator>>::reserve(size_t size) {
         assert(size > getCapacity());
         const auto buffer = toPlainHost();
         alloc.deallocate(d_data, capacity);
         d_data = alloc.allocate(size);
-        check(cudaMemcpy(d_data, buffer.data(), getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+        cudaMemcpyAsync(d_data, buffer.data(), getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice);
         capacity = size;
         check(cudaStreamSynchronize(nullptr));
     }
-    /**
-     * Synchronization is expected before this, copy is async to task stream
-     */
+
     template<class T, class Allocator>
     template<class... Args>
     void device_obj<Array<T, Dynamic, Allocator>>::resize(size_t size, Args&&... args) {

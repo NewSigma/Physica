@@ -24,6 +24,7 @@
     #include <thrust/swap.h>
 #endif
 #include "../Array.h"
+#include "Physica/Core/Utils/Unreachable.h"
 
 namespace Physica {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
@@ -76,9 +77,6 @@ namespace Physica {
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array() : arr(nullptr), length(0), capacity(0), alloc() {}
-
-    template<class T, class Allocator>
     template<class... Args>
     Array<T, Dynamic, Allocator>::Array(size_t length_, Args&&... args) : length(length_), capacity(length_), alloc() {
         arr = alloc.allocate(capacity);
@@ -105,13 +103,17 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(const This& array) : length(array.length), capacity(array.capacity), alloc() {
-        arr = alloc.allocate(capacity);
-        if constexpr (!std::is_trivial<ElemType>::value)
-            for(size_t i = 0; i < length; ++i)
-                alloc.construct(arr + i, array[i]);
+    __host__ __device__ Array<T, Dynamic, Allocator>::Array(const This& array) : length(array.length), capacity(array.capacity), alloc() {
+        if constexpr (IsHost()) {
+            arr = alloc.allocate(capacity);
+            if constexpr (!std::is_trivial<ElemType>::value)
+                for(size_t i = 0; i < length; ++i)
+                    alloc.construct(arr + i, array[i]);
+            else
+                memcpy(arr, array.arr, length * sizeof(ElemType));
+        }
         else
-            memcpy(arr, array.arr, length * sizeof(ElemType));
+            unreachable();  // Marked __device__ to silence warnings
     }
 
     template<class T, class Allocator>
@@ -123,12 +125,16 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::~Array() {
-        if constexpr (!std::is_trivial<ElemType>::value)
-            if (arr != nullptr)
-                for(size_t i = 0; i < length; ++i)
-                    alloc.destroy(arr + i);
-        alloc.deallocate(arr, length);
+    __host__ __device__ Array<T, Dynamic, Allocator>::~Array() {
+        if constexpr (IsHost()) {
+            if constexpr (!std::is_trivial<ElemType>::value)
+                if (arr != nullptr)
+                    for(size_t i = 0; i < length; ++i)
+                        alloc.destroy(arr + i);
+            alloc.deallocate(arr, length);
+        }
+        else
+            unreachable();  // Marked __device__ to silence warnings
     }
 
     template<class T, class Allocator>

@@ -64,12 +64,11 @@ namespace Physica {
         constexpr Real(Real&&) noexcept = default;
         constexpr ~Real() = default;
         /* Operators */
+        using Base::operator=;
         using Base::operator>;
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        template<ScalarOption Op>
-        __host__ __device__ This& operator=(Real<Op> x) noexcept;
         __host__ __device__ explicit operator float() const noexcept { return d; }
         __host__ __device__ explicit operator double() const noexcept { return d; }
         __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(d + s.d); }
@@ -85,7 +84,7 @@ namespace Physica {
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] inline Real mod() const noexcept;
-        void swap(Real& __restrict s) noexcept { std::swap(d, s.d); }
+        __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] __host__ __device__ double toMachine() const noexcept { return d; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
@@ -110,11 +109,6 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ inline Real<Float64>::Real(const T& x) : d(double(x)) {}
-
-    template<ScalarOption Op>
-    __host__ __device__ Real<Float64>& Real<Float64>::operator=(Real<Op> x) noexcept {
-        return operator=(This(x));
-    }
 
     inline Real<Float64> Real<Float64>::mod() const noexcept {
         double buffer;

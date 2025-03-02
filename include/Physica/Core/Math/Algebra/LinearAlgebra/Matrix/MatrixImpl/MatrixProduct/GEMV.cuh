@@ -31,6 +31,7 @@ namespace Physica {
         using DeviceMatrix = device_obj<T>;
     public:
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
     private:
         PlainStruct<const std::remove_cvref_t<T>> mat;
         PlainStruct<const std::remove_cvref_t<U>> vec;
@@ -45,6 +46,11 @@ namespace Physica {
         /* Operations */
         template<Vector V>
         __host__ __device__ void assign(device_obj<V>& target) const;
+
+        template<Vector V>
+        void reverse(const V& grad_) const noexcept requires(isReverseDiff);
+
+        auto values() const noexcept { return mat.getDerived().values() * vec.getDerived().values(); }
         /* Getters */
         [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getRow(); }
@@ -81,7 +87,20 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(T&& m, U&& v) noexcept requires(T::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
+    template<Vector V>
+    void device_obj<MatrixVectorProduct<T, U>>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        assert(grad_.getLength() == getLength());
+        const auto& grad = grad_.values();
+        const auto& m = mat.getDerived();
+        const auto& v = vec.getDerived();
+        if constexpr (ReverseDiff<T>)
+            m.reverse(grad * v.values().transpose());
+        if constexpr (ReverseDiff<U>)
+            v.reverse(m.values().transpose() * grad);
+    }
+
+    template<Matrix T, Vector U>
+    [[nodiscard]] __host__ __device__ inline auto operator*(T&& m, U&& v) noexcept requires(std::remove_cvref_t<T>::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
         return device_obj<MatrixVectorProduct<T&&, U&&>>(std::forward<T>(m), std::forward<U>(v));
     }
 }

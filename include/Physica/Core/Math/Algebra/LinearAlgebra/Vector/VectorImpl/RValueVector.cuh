@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "RValueVector.h"
 
@@ -34,16 +35,21 @@ namespace Physica {
         using PacketType = device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
+        constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static size_t MaxThreadPerBlock = 256;
+        constexpr static int MaxThreadPerBlock = 256;
     protected:
         using T = ScalarType;
-        using Tr = ScalarType::RealType;
+        using Tr = T::RealType;
+        using Tv = T::ValueType;
+        using Trv = Tr::ValueType;
+    private:
+        using ValuesRtnTy = std::conditional<isDiffable, device_obj<ValueVector<Derived>>, device_obj<Derived>&>::type;
     public:
         ~device_obj() = default;
         /* Operations */
         template<Vector V>
-        __host__ __device__ void assign(device_obj<V>& target) const;
+        __host__ __device__ void assign(V& target) const requires(CUDA<V>);
 
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         template<Packet Pack>
@@ -60,6 +66,14 @@ namespace Physica {
         [[nodiscard]] __device__ T sum() const;
         template<Vector V>
         [[nodiscard]] __device__ inline auto crossProduct(const device_obj<V>& v) const noexcept;
+
+        [[nodiscard]] __host__ __device__ auto reals() const noexcept;
+        [[nodiscard]] __host__ __device__ auto imags() const noexcept;
+        [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;
+        [[nodiscard]] __host__ __device__ auto norms() const noexcept;
+        [[nodiscard]] __host__ __device__ ValuesRtnTy values() const noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__ auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     protected:
@@ -70,8 +84,10 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
+        [[nodiscard]] __host__ __device__ std::pair<dim3, dim3> makeKernelConfig() const noexcept;
+    private:
         template<Vector V>
-        __device__ void assignToImpl(device_obj<V>& target) const;
+        __device__ void assign_impl(V& target) const requires(CUDA<V>);
     };
 }
 
@@ -85,6 +101,7 @@ namespace Physica {
 
 #include "RValueVectorImpl/RValueVectorImpl.cuh"
 #include "RValueVectorImpl/CrossProduct.cuh"
+#include "RValueVectorImpl/VectorConvert.cuh"
 #include "RValueVectorImpl/InnerDot.cuh"
 #include "VectorExpr.cuh"
 

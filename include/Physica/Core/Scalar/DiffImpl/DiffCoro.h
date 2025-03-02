@@ -36,7 +36,7 @@ namespace Physica {
                     handle = std::move(handle_);
                 }
 
-                [[nodiscard]] const Base await_resume() const noexcept {
+                [[nodiscard]] Base await_resume() const noexcept { // NVCC 12.8 rejects valid if we return const Base
                     return Base(std::move(handle.promise().obj));
                 }
             };
@@ -59,7 +59,7 @@ namespace Physica {
                 return suspend_yield{};
             }
             void return_void() noexcept {}
-            void unhandled_exception() { throw std::current_exception(); }
+            void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
 
             void swap(This& __restrict obj_) noexcept { obj.swap(obj_); }
         };

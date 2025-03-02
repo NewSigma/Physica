@@ -78,8 +78,8 @@ namespace Physica {
         void swap_col(size_t c1, size_t c2) noexcept;
         /* Getters */
         using Base::data;
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] inline PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
 

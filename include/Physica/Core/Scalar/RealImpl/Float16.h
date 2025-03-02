@@ -65,12 +65,11 @@ namespace Physica {
         constexpr Real(This&&) noexcept = default;
         constexpr ~Real() = default;
         /* Operators */
+        using Base::operator=;
         using Base::operator>;
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        template<ScalarOption Op>
-        __host__ __device__ This& operator=(Real<Op> x) noexcept;
         __host__ __device__ explicit operator float() const { return h; }
         __host__ __device__ explicit operator double() const { return h; }
         __host__ __device__ Real operator+(const Real& s) const { return Real(h + s.h); }
@@ -82,7 +81,7 @@ namespace Physica {
         __host__ __device__ bool operator<(const Real& s) const { return h < s.h; }
         __host__ __device__ bool operator==(const Real& s) const { return h == s.h; }
         /* Operations */
-        void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
+        __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
         [[nodiscard]] __host__ __device__ half toMachine() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return h == half(0); }
@@ -93,11 +92,6 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ inline Real<Float16>::Real(const T& x) : h(x.toMachine()) {}
-
-    template<ScalarOption Op>
-    __host__ __device__ Real<Float16>& Real<Float16>::operator=(Real<Op> x) noexcept {
-        return operator=(This(x));
-    }
 
     inline std::ostream& operator<<(std::ostream& os, const Real<Float16>& s) {
         const auto lastPrec = os.precision();

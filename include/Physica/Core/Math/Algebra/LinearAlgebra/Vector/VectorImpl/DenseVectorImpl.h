@@ -37,12 +37,18 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     template<Vector V>
-    DenseVector<T, Length, Allocator>::DenseVector(const V& v) : Storage(v.getLength()) {
+    DenseVector<T, Length, Allocator>::DenseVector(const V& v) requires(!CUDA<V>) : Storage(v.getLength()) {
         v.assign(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::zeros(size_t len) {
+    template<Vector V>
+    void DenseVector<T, Length, Allocator>::resize(const V& x) {
+        resize(x.getLength());
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
         This result{};
         result.reserve(len);
         for(size_t i = 0; i < len; ++i)
@@ -53,7 +59,7 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(size_t len) {
+    auto DenseVector<T, Length, Allocator>::random_uniform(size_t len) -> This {
         This result(len);
         result.random_uniform<R>();
         return result;
@@ -61,7 +67,7 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(const This& v1, const This& v2) {
+    auto DenseVector<T, Length, Allocator>::random_uniform(const This& v1, const This& v2) -> This {
         assert(v1.getLength() == v2.getLength());
         This result = random_uniform<R>(v1.getLength());
         result = v1 + hadamard((v2 - v1), result);
@@ -70,7 +76,7 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_normal(size_t len) {
+    auto DenseVector<T, Length, Allocator>::random_normal(size_t len) -> This {
         This result(len);
         result.random_normal<R>();
         return result;
@@ -78,8 +84,7 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     template<RNG R, class Distribution>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_any(
-            size_t len, Distribution& dist) {
+    auto DenseVector<T, Length, Allocator>::random_any(size_t len, Distribution& dist) -> This {
         This result(len);
         result.random_any<R, decltype(dist)>(dist);
         return result;
@@ -88,7 +93,7 @@ namespace Physica {
      * Both \param from and \param to are included
      */
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::linspace(T from, T to, size_t count) {
+    auto DenseVector<T, Length, Allocator>::linspace(T from, T to, size_t count) -> This {
         assert(from < to);
         const T step = (to - from) / T(count - 1);
         This result = This(count);

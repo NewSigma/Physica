@@ -72,15 +72,13 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline device_obj<LVectorBlock<T, Length>>::PtrTy
-    device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) {
+    __host__ __device__ inline auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) -> PtrTy {
         assert((index + from) < to);
         return vec.getDerived().data_ptr(index);
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline const device_obj<LVectorBlock<T, Length>>::ConstPtrTy
-    device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const {
+    __host__ __device__ inline auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

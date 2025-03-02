@@ -29,6 +29,7 @@ namespace Physica {
         using This = DenseVector<Diff<T, Mode, Order>, Length, Allocator>;
         using Base = ContinuousVector<This>;
     public:
+        using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
@@ -78,8 +79,9 @@ namespace Physica {
         __host__ __device__ CRIteType rend() const noexcept { return crend(); }
         __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
         /* Operations */
-        using Base::resize;
         void zero_grad();
+
+        using Base::resize;
         inline void resize(size_t size);
 
         template<RNG R> inline void random_uniform();
@@ -90,8 +92,8 @@ namespace Physica {
         /* Getters */
         using Base::data;
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] inline PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const noexcept;
 
         [[nodiscard]] const ValueVector& values() const noexcept { return v; }
         [[nodiscard]] ValueVector& values() noexcept { return v; }
@@ -105,6 +107,8 @@ namespace Physica {
         template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static auto linspace(T from, T to, size_t count);
+        /* Friends */
+        friend class device_obj<This>;
     };
 }
 

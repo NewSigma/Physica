@@ -46,8 +46,13 @@ namespace Physica {
 }
 
 namespace Physica {
-    inline void check(cudaError_t err) {
-        if (err != cudaSuccess) [[unlikely]]
+    __host__ __device__ inline void check(cudaError_t err) {
+        if (err != cudaSuccess) [[unlikely]] {
+        #ifdef __CUDA_ARCH__
+            printf("CUDAException with code %d\n", int(err));
+        #else
             throw CUDAException(err);
+        #endif
+        }
     }
 }

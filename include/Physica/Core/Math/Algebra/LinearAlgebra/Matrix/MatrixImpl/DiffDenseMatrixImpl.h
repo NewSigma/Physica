@@ -28,8 +28,9 @@ namespace Physica {
     DiffDenseMatrix::DenseMatrix(size_t row, size_t col) : v(row, col), g(row, col) {}
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, T init)
-            : v(row, col, init), g(row, col, 0) {}
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, T init) : v(row, col, init), g(row, col) {
+        g.zeros();
+    }
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff)
@@ -37,7 +38,8 @@ namespace Physica {
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(initializer_list list) : v(std::move(list)) {
-        g = GradMatrix(v.getRow(), v.getCol(), 0);
+        g = GradMatrix(v.getRow(), v.getCol());
+        g.zeros();
     }
 
     template<tparams>
@@ -53,25 +55,29 @@ namespace Physica {
     template<tparams>
     template<Matrix M>
     DiffDenseMatrix::DenseMatrix(const M& mat) requires(!ReverseDiff<M>) : DenseMatrix(mat.getRow(), mat.getCol()) {
-        mat.assign(*this);
+        mat.assign(v);
+        g.zeros();
     }
 
     template<tparams>
     template<RNG R>
     inline void DiffDenseMatrix::random_uniform() {
-        *this = random_uniform<R>(getRow(), getCol());
+        v.template random_uniform<R>();
+        g.zeros();
     }
 
     template<tparams>
     template<RNG R>
     inline void DiffDenseMatrix::random_normal() {
-        *this = random_normal<R>(getRow(), getCol());
+        v.template random_uniform<R>();
+        g.zeros();
     }
 
     template<tparams>
     template<RNG R, class Distribution>
     inline void DiffDenseMatrix::random_any(Distribution& dist) {
-        *this = random_any<R, Distribution>(getRow(), getCol(), dist);
+        v.template random_any<R, Distribution>(dist);
+        g.zeros();
     }
 
     template<tparams>
@@ -100,14 +106,14 @@ namespace Physica {
     }
 
     template<tparams>
-    inline DiffDenseMatrix::PtrTy DiffDenseMatrix::data_ptr(size_t row, size_t col) noexcept {
+    inline auto DiffDenseMatrix::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < getRow() && "[Error]: Index out of range");
         assert(col < getCol() && "[Error]: Index out of range");
         return PtrTy(v.data_ptr(row, col), g.data_ptr(row, col));
     }
 
     template<tparams>
-    inline DiffDenseMatrix::ConstPtrTy DiffDenseMatrix::data_ptr(size_t row, size_t col) const noexcept {
+    inline auto DiffDenseMatrix::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 

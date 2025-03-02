@@ -40,37 +40,37 @@ namespace Physica {
         GradType g;
     public:
         Diff() = default;
-        Diff(MachineType x) : This(T(x)) {}
-        Diff(T v_);
-        Diff(T v_, GradType g_);
+        __host__ __device__ Diff(MachineType x) : This(T(x)) {}
+        __host__ __device__ Diff(T v_);
+        __host__ __device__ Diff(T v_, GradType g_);
         Diff(DiffCoro<This>) requires(isReverseDiff) = delete;
         template<Scalar U>
-        explicit(T::Option < U::Option) Diff(const U& x) requires(!ReverseDiff<U>);
+        __host__ __device__ explicit(T::Option < U::Option) Diff(const U& x) requires(!ReverseDiff<U>);
         Diff(const This&) requires(isForwardDiff) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] explicit operator float() const { return float(v); }
-        [[nodiscard]] explicit operator double() const { return double(v); }
-        [[nodiscard]] inline bool operator==(const This& other) const;
+        __host__ __device__ This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] __host__ __device__ explicit operator float() const { return float(v); }
+        [[nodiscard]] __host__ __device__ explicit operator double() const { return double(v); }
+        [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const;
         /* Operations */
         template<int MaskOrder>
-        auto mask() const noexcept;
+        __host__ __device__ auto mask() const noexcept;
 
-        T reverse(GradType grad_ = 1) const noexcept;
-        inline void zero_grad();
+        __host__ __device__ T reverse(GradType grad_ = 1) const noexcept;
+        __host__ __device__ inline void zero_grad();
 
         [[nodiscard]] auto conjugate() const;
-        void swap(This& __restrict obj) noexcept;
-        void swap(ScalarRef<This>&& ref) noexcept;
+        __host__ __device__ void swap(This& __restrict obj) noexcept;
+        __host__ __device__ void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &v; }
         [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &g; }
         template<int GradOrder = 1>
-        [[nodiscard]] inline auto& grad() noexcept;
+        [[nodiscard]] __host__ __device__ inline auto& grad() noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] inline const auto& grad() const noexcept;
+        [[nodiscard]] __host__ __device__ inline const auto& grad() const noexcept;
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static members */
         template<RNG R>

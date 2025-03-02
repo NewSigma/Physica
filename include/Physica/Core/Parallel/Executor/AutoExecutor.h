@@ -18,8 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "ThreadExecutor.h"
-#include "CUDAExecutor.cuh"
 
 namespace Physica {
     /**
@@ -28,7 +28,7 @@ namespace Physica {
     class AutoExecutor : public ThreadExecutor {
         using Base = ThreadExecutor;
     public:
-        static void wait() { CUDAExecutor::wait(); }
+        static void wait() { CUDAContext::getInstance().wait(); }
     };
 }
 

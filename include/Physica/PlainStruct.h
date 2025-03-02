@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Macro.h"
+#include <array>
 
 namespace Physica {
     /**
@@ -45,10 +45,11 @@ namespace Physica {
 
     template<class T>
     class alignas(T) PlainStruct<const T> {
+        using This = PlainStruct<const T>;
     public:
         using Derived = T;
     private:
-        char anonymous[sizeof(T)];
+        std::array<std::byte, sizeof(T)> bytes;
     public:
         [[nodiscard]] __host__ __device__ const T& getDerived() const noexcept { return *reinterpret_cast<const T*>(this); }
         [[nodiscard]] __host__ __device__ T& getConstCastDerived() const noexcept { return *reinterpret_cast<T*>(const_cast<PlainStruct*>(this)); }

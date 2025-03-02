@@ -126,6 +126,17 @@ namespace Physica {
     }
 
     template<class Derived>
+    void ContinuousVector<Derived>::zeros() {
+        if constexpr (Diffable<T>) {
+            auto p = data();
+            std::memset(p.value_ptr(), 0, Base::getLength() * sizeof(T));
+            std::memset(p.grad_ptr(), 0, Base::getLength() * sizeof(T));
+        }
+        else
+            std::memset(data(), 0, Base::getLength() * sizeof(T));
+    }
+
+    template<class Derived>
     template<RNG R>
     inline void ContinuousVector<Derived>::random_uniform() {
         if constexpr (isReverseDiff) {

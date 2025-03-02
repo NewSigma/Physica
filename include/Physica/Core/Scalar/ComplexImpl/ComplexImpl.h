@@ -25,13 +25,13 @@ namespace Physica {
     Complex<T>::Complex(double _Complex x) : This(std::complex<MachineType>(x)) {}
 
     template<Scalar T>
-    Complex<T>::Complex(T re_) : re(re_), im(0) {}
+    __host__ __device__ Complex<T>::Complex(T re_) : re(re_), im(0) {}
 
     template<Scalar T>
-    Complex<T>::Complex(T re_, T im_) : re(re_), im(im_) {}
+    __host__ __device__ Complex<T>::Complex(T re_, T im_) : re(re_), im(im_) {}
 
     template<Scalar T>
-    Complex<T>::Complex(std::initializer_list<T> list) {
+    __host__ __device__ Complex<T>::Complex(std::initializer_list<T> list) {
         assert(list.size() == 2);
         auto ite = list.begin();
         re = *ite;
@@ -44,30 +44,30 @@ namespace Physica {
 
     template<Scalar T>
     template<Scalar U, DiffMode Mode, int Order>
-    Complex<T>::Complex(const Diff<U, Mode, Order>& d) : Complex(d.value()) {}
+    __host__ __device__ Complex<T>::Complex(const Diff<U, Mode, Order>& d) : Complex(d.value()) {}
 
     template<Scalar T>
-    inline bool Complex<T>::operator==(const This& other) const {
+    __host__ __device__ inline bool Complex<T>::operator==(const This& other) const {
         return re == other.re && im == other.im;
     }
 
     template<Scalar T>
-    inline T Complex<T>::squaredNorm() const {
+    __host__ __device__ inline T Complex<T>::squaredNorm() const {
         return square(re) + square(im);
     }
 
     template<Scalar T>
-    inline T Complex<T>::norm() const {
+    __host__ __device__ inline T Complex<T>::norm() const {
         return sqrt(squaredNorm());
     }
 
     template<Scalar T>
-    inline T Complex<T>::phase() const {
+    __host__ __device__ inline T Complex<T>::phase() const {
         return std::arg(toMachine());
     }
 
     template<Scalar T>
-    Complex<T> Complex<T>::unit() const {
+    __host__ __device__ Complex<T> Complex<T>::unit() const {
         const T temp = norm();
         if (temp.isZero())
             return T(1);
@@ -87,7 +87,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void Complex<T>::swap(Complex& __restrict obj) noexcept {
+    __host__ __device__ void Complex<T>::swap(Complex& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         re.swap(obj.re);
         im.swap(obj.im);
@@ -179,55 +179,47 @@ namespace Physica {
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator+(
-            const Complex<T>& c,const Real<Option>& s) {
-        return {c.real() + s, c.imag()};
+    __host__ __device__ auto operator+(const Complex<T>& c,const Real<Option>& s) {
+        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() + s, c.imag());
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator-(
-            const Complex<T>& c, const Real<Option>& s) {
-        return {c.real() - s, c.imag()};
+    __host__ __device__ auto operator-(const Complex<T>& c, const Real<Option>& s) {
+        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() - s, c.imag());
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator*(
-            const Complex<T>& c, const Real<Option>& s) {
-        return {c.real() * s, c.imag() * s};
+    __host__ __device__ auto operator*(const Complex<T>& c, const Real<Option>& s) {
+        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() * s, c.imag() * s);
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator/(
-            const Complex<T>& c, const Real<Option>& s) {
+    __host__ __device__ auto operator/(const Complex<T>& c, const Real<Option>& s) {
         const auto rep = reciprocal(s);
-        return {c.real() * rep, c.imag() * rep};
+        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() * rep, c.imag() * rep);
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator+(
-            const Real<Option>& s, const Complex<T>& c) {
+    __host__ __device__ auto operator+(const Real<Option>& s, const Complex<T>& c) {
         return c + s;
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator-(
-            const Real<Option>& s, const Complex<T>& c) {
-        return {s - c.real(), -c.imag()};
+    __host__ __device__ auto operator-(const Real<Option>& s, const Complex<T>& c) {
+        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(s - c.real(), -c.imag());
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator*(
-            const Real<Option>& s, const Complex<T>& c) {
+    __host__ __device__ auto operator*(const Real<Option>& s, const Complex<T>& c) {
         return c * s;
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator/(
-            const Real<Option>& s, const Complex<T>& c) {
+    __host__ __device__ auto operator/(const Real<Option>& s, const Complex<T>& c) {
         const auto& re = c.real();
         const auto& im = c.imag();
         const auto divisor = s * reciprocal(square(re) + square(im));
-        return {re * divisor, -im * divisor};
+        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(re * divisor, -im * divisor);
     }
 }
 

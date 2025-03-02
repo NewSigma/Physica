@@ -26,14 +26,34 @@ namespace Physica {
             : public device_obj<UnitaryVectorExpr<ExprType::Square, T>> {
         using Base = device_obj<UnitaryVectorExpr<ExprType::Square, T>>;
     public:
-        using typename Base::ScalarType;
+        using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t s) const {
-            return square(Base::getExpr().calc(s));
+        [[nodiscard]] __device__ T calc(size_t index) const {
+            if constexpr (isReverseDiff)
+                return calc_value(index);
+            else
+                return square(Base::getExpr().calc(index));
         }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
+            return square(Base::getExpr().calc_value(index));
+        }
+
+        template<Vector V>
+        void reverse(const V& grad) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector T>
+    template<Vector V>
+    void device_obj<VectorExpr<ExprType::Square, T>>::reverse(const V& grad) const noexcept requires(isReverseDiff) {
+        const auto& expr = Base::getExpr();
+        expr.reverse(expr.values() * (Tv(2) * grad));
+    }
 
     template<Vector T>
     [[nodiscard]] __host__ __device__ inline auto square(T&& v) noexcept requires(CUDA<T>) {

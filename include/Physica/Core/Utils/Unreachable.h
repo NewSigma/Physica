@@ -19,17 +19,24 @@
 #pragma once
 
 #include <cassert>
+#include "Physica/Macro.h"
 
 namespace Physica {
     /**
      * Use std::unreachable once we dump to C++23
      */
-    [[noreturn]] inline void unreachable() {
+    [[noreturn]] __host__ __device__ inline void unreachable() noexcept {
         assert(false && "[Error]: Trigger unreachable");
-    #if defined(_MSC_VER) && !defined(__clang__)
-        __assume(false);
-    #else
+    #ifdef __CUDA_ARCH__
         __builtin_unreachable();
+    #else
+        if constexpr (IsHost()) {
+        #if defined(_MSC_VER) && !defined(__clang__)
+            __assume(false);
+        #else
+            __builtin_unreachable();
+        #endif
+        }
     #endif
     }
 }

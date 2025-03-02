@@ -27,14 +27,7 @@ namespace Physica {
     template<class Derived>
     template<Matrix M>
     void RValueMatrix<Derived>::assign(M& target) const {
-        constexpr size_t OtherRow = M::RowAtCompile;
-        constexpr size_t OtherColumn = M::ColAtCompile;
-        static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
-        static_assert(ColAtCompile == OtherColumn || ColAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
-        static_assert(!(isComplex && !M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
-
-        assert(getRow() == target.getRow());
-        assert(getCol() == target.getCol());
+        assign_check(Base::getDerived(), target);
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
         for (size_t i = 0; i < maxMajor; ++i)
@@ -45,14 +38,7 @@ namespace Physica {
     template<class Derived>
     template<Matrix M>
     void RValueMatrix<Derived>::assign_add(M& target) const {
-        constexpr size_t OtherRow = M::RowAtCompile;
-        constexpr size_t OtherColumn = M::ColAtCompile;
-        static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
-        static_assert(ColAtCompile == OtherColumn || ColAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
-        static_assert(!(isComplex && !M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
-
-        assert(getRow() == target.getRow());
-        assert(getCol() == target.getCol());
+        assign_check(Base::getDerived(), target);
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
         for (size_t i = 0; i < maxMajor; ++i)
@@ -356,8 +342,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::values() const noexcept {
-        return ValueMatrix<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::values() const noexcept -> ValuesRtnTy {
+        return ValuesRtnTy(Base::getDerived());
     }
 
     template<class Derived>
@@ -385,6 +371,16 @@ namespace Physica {
                 if (calc(r, c) != calc(c, r))
                     return false;
         return true;
+    }
+
+    template<class Derived>
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ void RValueMatrix<Derived>::assign_check(const M1& source, const M2& target) noexcept {
+        static_assert(M1::RowAtCompile == M2::RowAtCompile || M1::RowAtCompile == Dynamic || M2::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
+        static_assert(M1::ColAtCompile == M2::ColAtCompile || M1::ColAtCompile == Dynamic || M2::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
+        static_assert(!M1::isComplex || M2::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");
+        assert(source.getRow() == target.getRow() && "[Error]: Dimensions do not match");
+        assert(source.getCol() == target.getCol() && "[Error]: Dimensions do not match");
     }
 
     template<Matrix T1, Matrix T2>

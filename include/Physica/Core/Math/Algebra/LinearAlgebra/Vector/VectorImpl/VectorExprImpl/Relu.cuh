@@ -21,22 +21,42 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector T>
-    class device_obj<VectorExpr<ExprType::Relu, T>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Relu, T>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Relu, T>>;
+    template<Vector V>
+    class device_obj<VectorExpr<ExprType::Relu, V>>
+            : public device_obj<UnitaryVectorExpr<ExprType::Relu, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Relu, V>>;
     public:
-        using typename Base::ScalarType;
+        using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return relu(Base::getExpr().calc(index));
+        [[nodiscard]] __device__ T calc(size_t index) const {
+            if constexpr (isReverseDiff)
+                return calc_value(index);
+            else
+                return relu(Base::getExpr().calc(index));
         }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
+            return relu(Base::getExpr().calc_value(index));
+        }
+
+        template<Vector V1>
+        void reverse(const V1& grad) const noexcept requires(isReverseDiff);
     };
 
     template<Vector T>
-    [[nodiscard]] __host__ __device__ inline auto relu(T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Relu, T&&>>(std::forward<T>(v));
+    template<Vector V1>
+    void device_obj<VectorExpr<ExprType::Relu, T>>::reverse(const V1& grad) const noexcept requires(isReverseDiff) {
+        const auto& expr = Base::getExpr();
+        expr.reverse(hadamard(relu(unit(expr.values())), grad.values()));
+    }
+
+    template<Vector V>
+    [[nodiscard]] __host__ __device__ inline auto relu(V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprType::Relu, V&&>>(std::forward<V>(v));
     }
 }

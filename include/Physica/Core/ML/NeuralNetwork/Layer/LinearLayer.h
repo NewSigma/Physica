@@ -28,8 +28,9 @@ namespace Physica {
         using This = LinearLayer<T, WithBias>;
         using Base = LayerBase<This>;
 
-        constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
+        constexpr static int Option = MatrixOption::Row | MatrixOption::Element;
         using Tv = T::ValueType;
+        using MachineType = T::MachineType;
         using MatrixType = DenseMatrix<T, Option>;
         using BiasType = std::conditional<WithBias, VectorND<T>, PlainStruct<void>>::type;
     public:
@@ -149,9 +150,9 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     void LinearLayer<T, WithBias>::zero_grad() {
         if constexpr (ReverseDiff<T>) {
-            weights.grads() = Tv(0);
+            weights.grads().zeros();
             if constexpr (WithBias)
-                bias.grads() = Tv(0);
+                bias.grads().zeros();
         }
     }
 
@@ -180,7 +181,6 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     template<RNG R>
     void LinearLayer<T, WithBias>::random_xavier_uniform(Tv gain) {
-        using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.template random_any<R, decltype(dist)>(dist);
@@ -191,7 +191,6 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     template<RNG R>
     void LinearLayer<T, WithBias>::random_xavier_normal(Tv gain) {
-        using MachineType = T::MachineType;
         const auto deviation = (gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
         weights.template random_any<R, decltype(dist)>(dist);

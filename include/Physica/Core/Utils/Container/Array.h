@@ -101,20 +101,20 @@ namespace Physica {
         using Base::getDerived;
         constexpr static size_t MinDeltaSpace = 1024;
     private:
-        pointer arr;
-        size_t length;
-        size_t capacity;
+        pointer arr = nullptr;
+        size_t length = 0;
+        size_t capacity = 0;
         [[no_unique_address]] allocator_type alloc;
     public:
-        Array();
+        Array() = default;
         template<class... Args>
         explicit Array(size_t length_, Args&&... args);
         Array(std::initializer_list<T> list);
         template<size_t Length, class OtherAlloc>
         Array(const Array<T, Length, OtherAlloc>& other);
-        Array(const This& array);
+        __host__ __device__ Array(const This& array);
         Array(This&& array) noexcept;
-        ~Array();
+        __host__ __device__ ~Array();
         /* Operators */
         This& operator=(This array) noexcept { swap(array); return *this; }
         /* Operations */

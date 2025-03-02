@@ -19,6 +19,7 @@
 #pragma once
 
 #include "RValueMatrixImpl/RMatrixBlock.cuh"
+#include "RValueMatrix.h"
 
 namespace Physica {
     template<class Derived>
@@ -38,14 +39,23 @@ namespace Physica {
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColAtCompile = TraitsType::ColAtCompile;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
+        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
+        constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxThreadPerBlock = 256;
+    protected:
+        using T = ScalarType;
+        using Tr = T::RealType;
+        using Tv = T::ValueType;
+        using Trv = Tr::ValueType;
+    private:
+        using ValuesRtnTy = std::conditional<isDiffable, device_obj<ValueMatrix<Derived>>, device_obj<Derived>&>::type;
     public:
         ~device_obj() = default;
         /* Operations */
         template<Matrix M>
-        __host__ __device__ void assign(device_obj<LValueMatrix<M>>& target) const;
+        __host__ __device__ void assign(M& target) const requires(CUDA<M>);
         [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;
         [[nodiscard]] __host__ __device__ inline auto col(size_t c) noexcept;
@@ -83,14 +93,24 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
         [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
+
+        [[nodiscard]] __host__ __device__ auto reals() const noexcept;
+        [[nodiscard]] __host__ __device__ auto imags() const noexcept;
+        [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;
+        [[nodiscard]] __host__ __device__ auto norms() const noexcept;
+        [[nodiscard]] __host__ __device__ ValuesRtnTy values() const noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__ auto grads() const noexcept;
+
+        [[nodiscard]] __host__ __device__ std::pair<dim3, dim3> makeKernelConfig() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
         /* Static members */
-        [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<device_obj<Derived>>(major, minor); }
-        [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<device_obj<Derived>>(major, minor); }
+        [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
+        [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -110,6 +130,7 @@ namespace Physica {
 }
 
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
+#include "RValueMatrixImpl/MatrixConvert.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
 #include "RValueMatrixImpl/Hermite.cuh"
 #include "MatrixProduct/GEMM.cuh"

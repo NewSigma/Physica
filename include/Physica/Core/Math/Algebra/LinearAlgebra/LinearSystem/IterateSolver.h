@@ -104,7 +104,7 @@ namespace Physica {
         residual = -b;
         searchP = b;
         V& x = b;
-        x = T(0);
+        x.zeros();
 
         squaredRes0 = squaredRes = residual.squaredNorm();
         iteration = 0;
@@ -139,7 +139,7 @@ namespace Physica {
         residual = -b;
         dotTransFunc(b, searchP);
         V& x = b;
-        x = T(0);
+        x.zeros();
 
         squaredRes0 = squaredRes = searchP.squaredNorm();
         iteration = 0;

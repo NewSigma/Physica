@@ -97,6 +97,16 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Option, Row, Col, Allocator>::zeros() {
+        if constexpr (MatrixOption::isElementMatrix<This>())
+            Storage::asArray().zeros();
+        else {
+            for (auto& v : Storage::asArray())
+                v.zeros();
+        }
+    }
+
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator> DenseMatrix<T, Option, Row, Col, Allocator>::unitMatrix(size_t order) {
         DenseMatrix result(order, order);
         result.toUnitMatrix();

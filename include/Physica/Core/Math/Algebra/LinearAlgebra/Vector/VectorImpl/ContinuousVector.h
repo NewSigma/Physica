@@ -37,6 +37,7 @@ namespace Physica {
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -65,7 +66,7 @@ namespace Physica {
 
         template<Vector V>
         void resize(const V& x) { resize(x.getLength()); }
-        void resize(size_t length) { Base::getDerived().resize(length); }
+        auto resize(size_t length) { return Base::getDerived().resize(length); }
         template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
         [[nodiscard]] auto toNumpy() const;
@@ -83,6 +84,7 @@ namespace Physica {
         template<size_t Length = Dynamic>
         [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
 
+        void zeros();
         template<RNG R>
         inline void random_uniform();
         template<RNG R>

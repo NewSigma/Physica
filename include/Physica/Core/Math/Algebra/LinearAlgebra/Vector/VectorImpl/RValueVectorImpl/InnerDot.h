@@ -25,12 +25,13 @@ namespace Physica {
     class InnerDot {
         using This = InnerDot<T1, T2>;
         using Helper = Internal::EnableSIMD<T1, T2>;
-        using ScalarType = Helper::ResultType;
-        using PacketType = Helper::PacketType;
         constexpr static size_t SizeAtCompile = Helper::SizeAtCompile;
         constexpr static bool isFastPacket1 = Traits<T1>::FastPacket;
         constexpr static bool isFastPacket2 = Traits<T2>::FastPacket;
         constexpr static bool enableSIMD = isFastPacket1 && isFastPacket2 && Helper::value;
+    public:
+        using ScalarType = Helper::ResultType;
+        using PacketType = Helper::PacketType;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
     private:
@@ -109,7 +110,7 @@ namespace Physica {
     }
 
     template<Vector T1, Vector T2>
-    [[nodiscard]] inline auto operator*(const T1& v1, const T2& v2) noexcept {
+    [[nodiscard]] inline auto operator*(const T1& v1, const T2& v2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
         return InnerDot<T1, T2>(v1, v2).calc();
     }
 }

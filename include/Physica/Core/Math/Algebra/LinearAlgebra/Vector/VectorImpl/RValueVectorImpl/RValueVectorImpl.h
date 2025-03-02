@@ -537,8 +537,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::values() const noexcept {
-        return ValueVector<Derived>(Base::getDerived());
+    auto RValueVector<Derived>::values() const noexcept -> ValuesRtnTy {
+        return ValuesRtnTy(Base::getDerived());
     }
 
     template<class Derived>

@@ -19,8 +19,9 @@
 #pragma once
 
 #include <iostream>
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Parallel/Future/StreamFuture.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Core/Physics/MD/RPMD.h"
 
 namespace Physica {
@@ -48,13 +49,6 @@ namespace Physica {
             , lockedBuffer(numParticle * 2)
             , maxHandleNum(maxHandleNum_) {
         HardCore<T, IsFixedBoundary, NumReplica, Integrator, SeqExecutor>::checkParam(collideFactor, 1);
-    }
-
-    template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>&
-    HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::operator=(HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor> obj) noexcept {
-        swap(*this);
-        return *this;
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
@@ -131,7 +125,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    void HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::swap(HardCore& __restrict obj) noexcept {
+    void HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);

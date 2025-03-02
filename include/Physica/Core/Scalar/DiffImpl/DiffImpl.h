@@ -22,14 +22,14 @@
 
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order>::Diff(T v_) : v(std::move(v_)), g(0) {}
+    __host__ __device__ Diff<T, Mode, Order>::Diff(T v_) : v(std::move(v_)), g(0) {}
 
     template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order>::Diff(T v_, GradType g_) : v(std::move(v_)), g(std::move(g_)) {}
+    __host__ __device__ Diff<T, Mode, Order>::Diff(T v_, GradType g_) : v(std::move(v_)), g(std::move(g_)) {}
 
     template<Scalar T, DiffMode Mode, int Order>
     template<Scalar U>
-    Diff<T, Mode, Order>::Diff(const U& x) requires(!ReverseDiff<U>) {
+    __host__ __device__ Diff<T, Mode, Order>::Diff(const U& x) requires(!ReverseDiff<U>) {
         static_assert(T::isComplex || !U::isComplex, "[Error]: Cannot convert a complex to a real");
         if constexpr (Diffable<U>) {
             v = x.value();
@@ -42,20 +42,20 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline bool Diff<T, Mode, Order>::operator==(const This& other) const {
+    __host__ __device__ inline bool Diff<T, Mode, Order>::operator==(const This& other) const {
         return v == other.v && g == other.g;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int MaskOrder>
-    auto Diff<T, Mode, Order>::mask() const noexcept {
+    __host__ __device__ auto Diff<T, Mode, Order>::mask() const noexcept {
         using MaskedType = std::conditional<MaskOrder == 0, T, Diff<typename Base::ValueType, Mode, MaskOrder>>::type;
         using ResultType = std::conditional<std::less<int>{}(MaskOrder, Order), MaskedType, This>::type;
         return reinterpret_cast<const ResultType&>(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    T Diff<T, Mode, Order>::reverse(GradType grad_) const noexcept {
+    __host__ __device__ T Diff<T, Mode, Order>::reverse(GradType grad_) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
         auto& g1 = const_cast<GradType&>(grad());
         g1.value() += grad_.value();
@@ -65,7 +65,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline void Diff<T, Mode, Order>::zero_grad() {
+    __host__ __device__ inline void Diff<T, Mode, Order>::zero_grad() {
         g = 0;
     }
 
@@ -75,14 +75,14 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void Diff<T, Mode, Order>::swap(Diff& __restrict obj) noexcept {
+    __host__ __device__ void Diff<T, Mode, Order>::swap(Diff& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         v.swap(obj.v);
         g.swap(obj.g);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    void Diff<T, Mode, Order>::swap(ScalarRef<This>&& ref) noexcept {
+    __host__ __device__ void Diff<T, Mode, Order>::swap(ScalarRef<This>&& ref) noexcept {
         assert(ScalarPtr<This>(*this) != ScalarPtr<This>(ref) && "[Error]: Self swap is likely a bug");
         v.swap(ref.value());
         g.swap(ref.grad());
@@ -90,7 +90,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int GradOrder>
-    auto& Diff<T, Mode, Order>::grad() noexcept {
+    __host__ __device__ auto& Diff<T, Mode, Order>::grad() noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
         if constexpr (GradOrder == 1)
@@ -101,7 +101,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int GradOrder>
-    inline const auto& Diff<T, Mode, Order>::grad() const noexcept {
+    __host__ __device__ inline const auto& Diff<T, Mode, Order>::grad() const noexcept {
         return const_cast<This&>(*this).template grad<GradOrder>();
     }
 

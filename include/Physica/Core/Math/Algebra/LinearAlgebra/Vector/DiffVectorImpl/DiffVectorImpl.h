@@ -25,20 +25,22 @@ namespace Physica {
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length) : v(length), g(length) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, T init)
-            : v(length, init), g(length, 0) {}
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, T init) : v(length, init), g(length) {
+        g.zeros();
+    }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, ScalarType init) requires(isForwardDiff)
             : v(length, init.value()), g(length, init.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(initializer_list list) : v(list.size()), g(list.size(), 0) {
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(initializer_list list) : v(list.size()), g(list.size()) {
         size_t i = 0;
         for (auto& elem : list) {
             v[i] = elem.value();
             i += 1;
         }
+        g.zeros();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -48,7 +50,12 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<Vector V>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v_) requires(!ReverseDiff<V>) : DenseVector(v_.getLength()) {
-        v_.assign(*this);
+        if constexpr (isReverseDiff) {
+            v_.assign(v);
+            g.zeros();
+        }
+        else
+            v.assign(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -65,7 +72,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::zero_grad() {
-        g = T(0);
+        g.zeros();
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
@@ -105,13 +112,13 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    __host__ __device__ inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) noexcept -> PtrTy {
+    inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < getLength() && "[Error]: Index out of range");
         return PtrTy(v.data_ptr(index), g.data_ptr(index));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    __host__ __device__ inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
+    inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 
@@ -141,6 +148,6 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::linspace(T from, T to, size_t count) {
-        return This(ValueVector::linspace(from, to, count), GradVector(count, T(0)));
+        return This(ValueVector::linspace(from, to, count));
     }
 }

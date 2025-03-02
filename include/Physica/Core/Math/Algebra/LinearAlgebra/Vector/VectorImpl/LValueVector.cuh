@@ -31,6 +31,7 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
     protected:
+        using typename Base::Tv;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
@@ -44,17 +45,19 @@ namespace Physica {
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<V>& v);
 
         template<Scalar T> inline device_obj<Derived>& operator=(const T& x);
-        template<Scalar T> __device__ void operator+=(const T& x);
-        template<Scalar T> __device__ void operator-=(const T& x);
-        template<Scalar T> __device__ void operator*=(const T& x);
-        template<Scalar T> __device__ void operator/=(const T& x);
+        template<Scalar T> __host__ __device__ void operator+=(const T& x);
+        template<Scalar T> __host__ __device__ void operator-=(const T& x);
+        template<Scalar T> __host__ __device__ void operator*=(const T& x);
+        template<Scalar T> __host__ __device__ void operator/=(const T& x);
 
-        template<Vector V> __device__ inline void operator+=(const device_obj<V>& v);
-        template<Vector V> __device__ inline void operator-=(const device_obj<V>& v);
+        template<Vector V> __host__ __device__ inline void operator+=(const V& v) requires(CUDA<V>);
+        template<Vector V> __host__ __device__ inline void operator-=(const V& v) requires(CUDA<V>);
+
         [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return *data_ptr(index); }
+        [[nodiscard]] __device__ ConstRefTy calc(size_t index) const { return operator[](index); }
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return calc(index).value(); }
 
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline auto head(size_t to) noexcept;

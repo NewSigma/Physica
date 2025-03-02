@@ -23,13 +23,20 @@
 namespace Physica {
     template<Matrix T>
     class Transpose<T> : public RValueMatrix<Transpose<T>> {
-        using Base = RValueMatrix<Transpose<T>>;
+        using This = Transpose<T>;
+        using Base = RValueMatrix<This>;
 
         const T& matrix;
     public:        
         using typename Base::ScalarType;
     public:
         Transpose(const T& matrix_) : matrix(matrix_) {}
+        Transpose(const This&) = default;
+        Transpose(This&&) noexcept = default;
+        ~Transpose() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
@@ -39,13 +46,19 @@ namespace Physica {
     template<Vector T>
     class TransposeVector<T> : public RValueMatrix<TransposeVector<T>> {
         using This = TransposeVector<T>;
-    public:
         using Base = RValueMatrix<This>;
+    public:
         using typename Base::ScalarType;
     private:
         const T& vec;
     public:
         explicit TransposeVector(const T& vec_) : vec(vec_) {}
+        TransposeVector(const This&) = default;
+        TransposeVector(This&&) noexcept = default;
+        ~TransposeVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
         void assign(LValueMatrix<M>& target) const;

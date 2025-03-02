@@ -36,6 +36,7 @@ namespace Physica {
         using Base::isReverseDiff;
         using Base::MaxThreadPerBlock;
     protected:
+        using typename Base::T;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     public:
@@ -60,7 +61,7 @@ namespace Physica {
 
         template<Vector V>
         void resize(const V& x) { resize(x.getLength()); }
-        void resize(size_t length) { Base::getDerived().resize(length); }
+        auto resize(size_t length) { return Base::getDerived().resize(length); }
         template<Vector V> void toHost(ContinuousVector<V>& obj) const;
         template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;
 
@@ -76,6 +77,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline const auto segment(size_t from, size_t to) const noexcept;
+
+        void zeros();
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }

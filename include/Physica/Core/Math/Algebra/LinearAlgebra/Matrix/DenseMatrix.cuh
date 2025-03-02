@@ -26,17 +26,21 @@ namespace Physica {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     class device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
             : public device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>
+            , public CRCoro<device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>>
             , public device_obj<Array2D<T, Option, Row, Col, Allocator>> {
+        static_assert(!Diffable<T>, "[Error]: Use diffable matrix instead");
         using host_obj = DenseMatrix<T, Option, Row, Col, Allocator>;
-        using host_storage = host_obj::Storage;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>;
+        using Coro = CRCoro<This>;
         using Storage = device_obj<Array2D<T, Option, Row, Col, Allocator>>;
+    protected:
+        using typename Base::Tv;
     public:
         device_obj() = default;
+        device_obj(const host_obj& mat);
         __host__ __device__ device_obj(size_t row, size_t col);
         __host__ __device__ device_obj(size_t row, size_t col, T value);
-        device_obj(const host_obj& mat);
         template<Matrix M>
         device_obj(const device_obj<M>& mat);
         device_obj(const This&) = default;
@@ -47,8 +51,11 @@ namespace Physica {
         using Base::operator=;
         using Storage::operator();
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost()); }
         using Storage::resize;
+        [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost()); }
+
+        void zeros();
+
         using Storage::swap;
         /* Getters */
         using Base::data;
@@ -64,55 +71,6 @@ namespace Physica {
         template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
     };
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(
-            size_t row, size_t col) : Storage(row, col) {}
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(
-            size_t row, size_t col, T value) : Storage(row, col, std::move(value)) {}
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(const host_obj& mat)
-            : Storage(static_cast<const host_storage&>(mat).toDevice()) {}
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<Matrix M>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(
-            const device_obj<M>& mat) : device_obj(mat.getRow(), mat.getCol()) {
-        mat.getDerived().assign(*this);
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::unitMatrix(size_t order) {
-        return host_obj::unitMatrix(order).toDevice();
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RNG R>
-    inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform(
-            size_t row, size_t col) {
-        return host_obj::template random_uniform<R>(row, col).toDevice();
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RNG R>
-    inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal(
-            size_t row, size_t col) {
-        return host_obj::template random_normal<R>(row, col).toDevice();
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RNG R, class Distribution>
-    inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(
-            size_t row, size_t col, Distribution& dist) {
-        return host_obj::random_any(row, col, dist).toDevice();
-    }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     inline auto DenseMatrix<T, Option, Row, Col, Allocator>::toDevice() const {
@@ -144,3 +102,5 @@ namespace Physica {
     class Traits<device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>>
             : public Traits<DenseMatrix<T, Option, Row, Col, Allocator>> {};
 }
+
+#include "MatrixImpl/DenseMatrixImpl.cuh"

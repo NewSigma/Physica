@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,50 +19,38 @@
 #pragma once
 
 #include "../RValueMatrix.cuh"
-#include "Physica/Core/Exception/CUDA/CUDA.cuh"
-#include "Physica/Core/Parallel/CUDAContext.cuh" // IWYU pragma: export
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/PlainStruct.h"
 #include "Flatten.cuh" // IWYU pragma: export
 
 namespace Physica {
-    namespace Internal {
-        template<class Derived, Matrix M>
-        __global__ void RValueMatrix_assignToKernel(
-                Physica::PlainStruct<const device_obj<Derived>> source_, Physica::PlainStruct<device_obj<M>> target_) {
-            using ScalarType = device_obj<M>::ScalarType;
-            const auto& source = source_.getDerived();
-            auto& target = target_.getDerived();
-            const size_t maxMinor = source.getMaxMinor();
-            const size_t major = blockIdx.y;
-            const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
-            if (minor < maxMinor) {
-                const size_t row = target.rowFromMajorMinor(major, minor);
-                const size_t col = target.colFromMajorMinor(major, minor);
-                target.refFromMajorMinor(major, minor) = ScalarType(source.calc(row, col));
-            }
-        }
-    }
-
     template<class Derived>
     template<Matrix M>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(device_obj<LValueMatrix<M>>& target) const {
-        [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, M>;
-        const size_t maxMajor = target.getMaxMajor();
-        const size_t maxMinor = target.getMaxMinor();
-        if constexpr (IsHost()) {
-            const unsigned int numThread = std::min(maxMinor, MaxThreadPerBlock);
-            const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
-            const unsigned int numBlockY = maxMajor;
-            kernel<<<dim3{numBlockX, numBlockY}, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
-            check(cudaGetLastError());
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M& target) const requires(CUDA<M>) {
+        host_obj::assign_check(Base::getDerived(), target);
+        if (IsHost()) {
+            const auto config = target.makeKernelConfig();
+            CUDAExecutor::launch([source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
+                const auto& source = source_.getDerived();
+                auto& target = target_.getDerived();
+                const size_t maxMinor = target.getMaxMinor();
+                const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
+                if (minor < maxMinor) {
+                    const size_t major = blockIdx.y;
+                    const size_t r = target.rowFromMajorMinor(major, minor);
+                    const size_t c = target.colFromMajorMinor(major, minor);
+                    target(r, c) = source.calc(r, c);
+                }
+            }, config.first, config.second);
         }
         else {
-            using OtherScalar = M::ScalarType;
+            const size_t maxMajor = target.getMaxMajor();
+            const size_t maxMinor = target.getMaxMinor();
             for (size_t major = 0; major < maxMajor; ++major) {
                 for (size_t minor = 0; minor < maxMinor; ++minor) {
                     const size_t r = target.rowFromMajorMinor(major, minor);
                     const size_t c = target.colFromMajorMinor(major, minor);
-                    target.refFromMajorMinor(major, minor) = OtherScalar(calc(r, c));
+                    target(r, c) = calc(r, c);
                 }
             }
         }
@@ -237,5 +225,57 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::flatten() const noexcept {
         return device_obj<FlattenR<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::reals() const noexcept {
+        return device_obj<RealMatrix<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::imags() const noexcept {
+        return device_obj<ImagMatrix<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::squaredNorms() const noexcept {
+        return device_obj<SquaredNormMatrix<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::norms() const noexcept {
+        return device_obj<NormMatrix<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::values() const noexcept -> ValuesRtnTy {
+        return ValuesRtnTy(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::grads() const noexcept {
+        return device_obj<GradMatrix<Derived, GradOrder>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueMatrix<Derived>>::makeKernelConfig() const noexcept {
+        constexpr size_t MaxThread = MaxThreadPerBlock;
+        const size_t maxMajor = getMaxMajor();
+        const size_t maxMinor = getMaxMinor();
+        const unsigned int numThread = std::min(maxMinor, MaxThread);
+        const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
+        const unsigned int numBlockY = maxMajor;
+        return std::make_pair(dim3{numBlockX, numBlockY}, dim3{numThread});
+    }
+
+    template<class Derived>
+    __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::rowFromMajorMinor(size_t major, size_t minor) noexcept {
+        return MatrixOption::rowFromMajorMinor<device_obj<Derived>>(major, minor);
+    }
+
+    template<class Derived>
+    __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::colFromMajorMinor(size_t major, size_t minor) noexcept {
+        return MatrixOption::colFromMajorMinor<device_obj<Derived>>(major, minor);
     }
 }

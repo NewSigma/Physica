@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/PlainStruct.h"
+#include "GEVM.h"
 
 namespace Physica {
     template<Vector T, Matrix U>
@@ -35,10 +36,7 @@ namespace Physica {
         Physica::PlainStruct<const device_obj<T>> vec;
         Physica::PlainStruct<const device_obj<U>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& vec_, const device_obj<U>& mat_)
-                : vec(asStruct(vec_)), mat(asStruct(mat_)) {
-            assert(mat.getDerived().getRow() == 1);
-        }
+        __host__ __device__ device_obj(const device_obj<T>& vec_, const device_obj<U>& mat_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -52,16 +50,20 @@ namespace Physica {
     };
 
     template<Vector T, Matrix U>
-    __device__ device_obj<VectorMatrixProduct<T, U>>::ScalarType
-    device_obj<VectorMatrixProduct<T, U>>::calc(size_t row, size_t col) const {
+    __host__ __device__ device_obj<VectorMatrixProduct<T, U>>::device_obj(const device_obj<T>& vec_, const device_obj<U>& mat_)
+            : vec(asStruct(vec_)), mat(asStruct(mat_)) {
+        assert(mat_.getRow() == 1);
+    }
+
+    template<Vector T, Matrix U>
+    __device__ auto device_obj<VectorMatrixProduct<T, U>>::calc(size_t row, size_t col) const -> ScalarType {
         return vec.getDerived().calc(row) * mat.getDerived().calc(0, col);
     }
 
     template<Vector T, Matrix U>
-    [[nodiscard]] __host__ __device__ inline std::enable_if<U::RowAtCompile == 1, device_obj<VectorMatrixProduct<T, U>>>::type
-    operator*(const device_obj<T>& vec, const device_obj<U>& mat) noexcept {
+    [[nodiscard]] __host__ __device__ inline auto operator*(const device_obj<T>& vec, const device_obj<U>& mat) noexcept requires(U::RowAtCompile == 1) {
         assert(mat.getRow() == 1);
-        return {vec, mat};
+        return device_obj<VectorMatrixProduct<T, U>>(vec, mat);
     }
 }
 

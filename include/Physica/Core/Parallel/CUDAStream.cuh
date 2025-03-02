@@ -26,12 +26,13 @@ namespace Physica {
         cudaStream_t stream;
     public:
         CUDAStream();
+        CUDAStream(std::nullptr_t);
         CUDAStream(const CUDAStream&) = delete;
         CUDAStream(CUDAStream&& obj) noexcept;
         ~CUDAStream();
         /* Operators */
         CUDAStream& operator=(CUDAStream obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] operator cudaStream_t() const noexcept { return stream; }
+        [[nodiscard]] __host__ __device__ operator cudaStream_t() const noexcept { return stream; }
         /* Operations */
         [[nodiscard]] cudaError_t query() const;
         void wait() const;

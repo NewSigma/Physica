@@ -36,33 +36,39 @@ namespace Physica {
     template<class U>
     void device_obj<ContinuousVector<Derived>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
         static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        const size_t length = Base::getLength();
-        const unsigned int numThread = std::min(length, MaxThreadPerBlock);
-        const unsigned int numBlock = (length + numThread - 1) / numThread;
+        const auto config = Base::makeKernelConfig();
         if constexpr (Scalar<U>) {
-            CUDAExecutor::launch([x = asStruct(Base::getConstCastDerived()), g_ = grad] __device__() mutable {
-                x.getDerived().grads() += g_;
-            }, numBlock, numThread);
+            CUDAExecutor::launch([x_ = asStruct(Base::getConstCastDerived()), g = grad] __device__() mutable {
+                const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+                auto& x = x_.getDerived();
+                if (index < x.getLength())
+                    x.grads()[index] = g;
+            }, config.first, config.second);
         }
         else {
             static_assert(Vector<U>, "[Error]: Unexpected type");
+            static_assert(CUDA<U>, "[Error]: Cannot pass host grad to device");
             assert(Base::getLength() == grad.getLength());
-            CUDAExecutor::launch([x = asStruct(Base::getConstCastDerived()), g_ = asStruct(grad)] __device__() mutable {
-                x.getDerived().grads() += g_;
-            }, numBlock, numThread);
+            CUDAExecutor::launch([x_ = asStruct(Base::getConstCastDerived()), g_ = asStruct(grad)] __device__() mutable {
+                const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+                const auto& g = g_.getDerived();
+                auto& x = x_.getDerived();
+                if (index < x.getLength())
+                    x.grads()[index] = g.calc(index);
+            }, config.first, config.second);
         }
     }
 
     template<class Derived>
-    template<Vector T>
-    void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<T>& obj) const {
+    template<Vector V>
+    void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<V>& obj) const {
         toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
-    template<Vector T>
-    void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<T>& obj) const {
+    template<Vector V>
+    void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<V>& obj) const {
         obj.resize(Base::getLength());
         check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
     }
@@ -134,22 +140,33 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector T>
-    void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<T>>& obj) const {
+    void device_obj<ContinuousVector<Derived>>::zeros() {
+        if constexpr (Diffable<T>) {
+            auto p = data();
+            check(cudaMemsetAsync(p.value_ptr(), 0, Base::getLength() * sizeof(T), CUDAContext::getInstance()));
+            check(cudaMemsetAsync(p.grad_ptr(), 0, Base::getLength() * sizeof(T), CUDAContext::getInstance()));
+        }
+        else
+            check(cudaMemsetAsync(data(), 0, Base::getLength() * sizeof(T)));
+    }
+
+    template<class Derived>
+    template<Vector V>
+    void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<V>>& obj) const {
         toDeviceAsync(obj);
-        if constexpr (!std::is_trivially_copy_constructible<T>::value)
+        if constexpr (!std::is_trivially_copy_constructible<V>::value)
             CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
-    template<Vector T>
-    void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const {
-        static_assert(std::is_same<ScalarType, typename T::ScalarType>::value,
+    template<Vector V>
+    void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<V>>& obj) const {
+        static_assert(std::is_same<ScalarType, typename V::ScalarType>::value,
                 "[Error]: ScalarType inconsistent, additional buffer is necessary");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(ScalarType);
         obj.resize(length);
-        if constexpr (T::SizeAtCompile != Dynamic)
+        if constexpr (V::SizeAtCompile != Dynamic)
             memcpy(obj.data(), data(), size);
         else
             check(cudaMemcpyAsync(obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));

@@ -48,7 +48,7 @@ namespace Physica {
         DenseVector(std::initializer_list<T> list);
         explicit DenseVector(Storage array) noexcept;
         template<Vector V>
-        DenseVector(const V& v);
+        DenseVector(const V& v) requires(!CUDA<V>);
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;
@@ -57,14 +57,19 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
+        template<Vector V>
+        void resize(const V& x);
         using Storage::resize;
+
+        [[nodiscard]] inline auto toDevice() const;
+        [[nodiscard]] inline auto toDeviceAsync() const;
+        using Base::toDevice;
+        using Base::toDeviceAsync;
+
+        using Base::zeros;
         using Base::random_uniform;
         using Base::random_normal;
         using Base::random_any;
-
-        [[nodiscard]] inline auto toDevice() const;
-        using Base::toDevice;
-        using Base::toDeviceAsync;
 
         using Base::read;
         using Base::write;

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "LayerBase.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
+#include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica {
     template<class Derived>
@@ -29,18 +29,21 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = CRTPBase<This>;
         using device_obj_type = device_obj<Derived>;
-        using TraitsType = Traits<device_obj_type>;
     public:
-        using ScalarType = TraitsType::ScalarType;
-        using ValueType = ScalarType::ValueType;
-        using OutputType = TraitsType::OutputType;
+        using ScalarType = Traits<device_obj<Derived>>::ScalarType;
         constexpr static bool IsTrain = ScalarType::isDiffable;
-        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
+        constexpr static bool IsInfer = !IsTrain;
     public:
         ~device_obj() = default;
         /* Operations */
         template<class T>
-        [[nodiscard]] OutputType forward(const T& x) const { return Base::getDerived().template forward<T>(x); }
+        [[nodiscard]] auto forward(const T& x) const { return Base::getDerived().template forward<T>(x); }
+        auto reverse(const Derived& __restrict other) const noexcept;
+
+        template<class Optimizer>
+        auto step(Optimizer& opt) { return Base::getDerived().step(opt); }
+        auto step() { return Base::getDerived().step(); }
+        auto zero_grad() { return Base::getDerived().zero_grad(); }
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

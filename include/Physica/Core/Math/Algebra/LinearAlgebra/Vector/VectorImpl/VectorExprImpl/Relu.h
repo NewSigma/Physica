@@ -21,37 +21,42 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Relu, T> : public UnitaryVectorExpr<ExprType::Relu, T> {
-        using This = VectorExpr<ExprType::Relu, T>;
-        using Base = UnitaryVectorExpr<ExprType::Relu, T>;
+    template<Vector V>
+    class VectorExpr<ExprType::Relu, V> : public UnitaryVectorExpr<ExprType::Relu, V> {
+        using This = VectorExpr<ExprType::Relu, V>;
+        using Base = UnitaryVectorExpr<ExprType::Relu, V>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const {
+        [[nodiscard]] CoDiff<T> calc(size_t index) const {
             return relu(Base::getExpr().calc(index));
         }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const {
+        [[nodiscard]] Tv calc_value(size_t index) const {
             return relu(Base::getExpr().calc_value(index));
         }
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
-            const auto& grad = grad_.values();
-            for (size_t i = 0; i < Base::getLength(); ++i) {
-                auto v = Base::getExpr().calc(i);
-                v.reverse(v.isPositive() ? grad.calc(i) : ValueType(0));
-            }
-        }
+        template<Vector V1>
+        void reverse(const V1& grad_) const noexcept requires(isReverseDiff);
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto relu(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Relu, T&&>(std::forward<T>(v));
+    template<Vector V>
+    template<Vector V1>
+    void VectorExpr<ExprType::Relu, V>::reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
+        const auto& grad = grad_.values();
+        for (size_t i = 0; i < Base::getLength(); ++i) {
+            auto v = Base::getExpr().calc(i);
+            v.reverse(v.isPositive() ? grad.calc(i) : Tv(0));
+        }
+    }
+
+    template<Vector V>
+    [[nodiscard]] inline auto relu(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Relu, V&&>(std::forward<V>(v));
     }
 }

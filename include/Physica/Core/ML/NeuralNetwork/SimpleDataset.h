@@ -74,7 +74,7 @@ namespace Physica {
         reserve(size);
         for (size_t i = 0; i < size; ++i) {
             auto pair = other[i];
-            append(std::make_pair(OtherSample(std::move(pair.first)), OtherLabel(std::move(pair.second))));
+            append(std::make_pair(SampleType(std::move(pair.first)), LabelType(std::move(pair.second))));
         }
     }
 

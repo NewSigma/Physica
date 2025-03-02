@@ -25,13 +25,18 @@ namespace Physica {
     class device_obj<VectorExpr<ExprType::Add, T, U>>
             : public device_obj<BinaryVectorExpr<ExprType::Add, T, U>> {
         using Base = device_obj<BinaryVectorExpr<ExprType::Add, T, U>>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+        [[nodiscard]] __device__ T calc(size_t index) const {
             return Base::getLHS().calc(index) + Base::getRHS();
+        }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
+            return Base::getLHS().calc_value(index) + Base::getRHS().value();
         }
 
         template<Packet Pack>
@@ -49,13 +54,20 @@ namespace Physica {
     class device_obj<VectorExpr<ExprType::Add, T1, T2>>
             : public device_obj<BinaryVectorExpr<ExprType::Add, T1, T2>> {
         using Base = device_obj<BinaryVectorExpr<ExprType::Add, T1, T2>>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
-        using typename Base::ScalarType;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+        [[nodiscard]] __device__ T calc(size_t index) const {
             return Base::getLHS().calc(index) + Base::getRHS().calc(index);
+        }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
+            return Base::getLHS().calc_value(index) + Base::getRHS().calc_value(index);
         }
 
         template<Packet Pack>
@@ -69,7 +81,23 @@ namespace Physica {
             return Base::getLHS().template packetPartial<Pack>(index, count)
                  + Base::getRHS().template packetPartial<Pack>(index, count);
         }
+
+        template<class U>
+        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
+        auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
     };
+
+    template<Vector T1, Vector T2>
+    template<class U>
+    void device_obj<VectorExpr<ExprType::Add, T1, T2>>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+        static_assert(Vector<U>, "[Error]: Unexpected type");
+        const auto& grad = grad_.values();
+        assert(grad.getLength() == Base::getLength());
+        if constexpr (ReverseDiff<T1>)
+            Base::getLHS().reverse(grad);
+        if constexpr (ReverseDiff<T2>)
+            Base::getRHS().reverse(grad);
+    }
 
     template<Vector T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator+(T&& v, U&& x) noexcept requires(CUDA<T>) {

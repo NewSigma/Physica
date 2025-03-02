@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,26 +18,26 @@
  */
 #pragma once
 
-#include "../VectorExpr.h"
+#include "../VectorExpr.cuh"
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Unit, V>
-            : public UnitaryVectorExpr<ExprType::Unit, V> {
-        using Base = UnitaryVectorExpr<ExprType::Unit, V>;
+    class device_obj<VectorExpr<ExprType::Unit, V>>
+            : public device_obj<UnitaryVectorExpr<ExprType::Unit, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Unit, V>>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
 
-        [[nodiscard]] ValueType calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
+        [[nodiscard]] __device__ ValueType calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto unit(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Unit, V&&>(std::forward<V>(v));
+    [[nodiscard]] __host__ __device__ inline auto unit(V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprType::Unit, V&&>>(std::forward<V>(v));
     }
 }

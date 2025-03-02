@@ -22,40 +22,41 @@
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.cuh"
 #include "Physica/Core/ML/NeuralNetwork/SeqNet.cuh"
 #include "Physica/Core/ML/NeuralNetwork/SimpleDataset.h"
+#include "Physica/Core/ML/Optimizer/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Math/Optimization/Stochastic/SGD.cuh"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-
-template<Scalar> class MnistNet;
+constexpr size_t NumEpoch = 10;
+constexpr size_t BatchSize = 64;
+constexpr int HiddenW = 32;
+constexpr double LearnRate = 0.05;
 
 namespace Physica {
+    template<Scalar> class MnistNet;
+
     template<class T>
     class Traits<device_obj<MnistNet<T>>> : public Traits<device_obj<LinearLayer<T>>> {};
 
     template<Scalar T>
     class device_obj<MnistNet<T>> : public device_obj<SeqNet<MnistNet<T>>> {
-        using host_obj = MnistNet<T>;
-        using This = device_obj<host_obj>;
-        using Base = device_obj<SeqNet<host_obj>>;
-        using typename Base::ValueType;
-        using typename Base::OutputType;
-        using typename Base::LossType;
-        using Base::IsTrain;
+        using This = device_obj<MnistNet<T>>;
+        using Base = device_obj<SeqNet<MnistNet<T>>>;
+        using Tv = T::ValueType;
+
+        using Linear = device_obj<LinearLayer<T>>;
     public:
-        using device_obj_type = This;
-    private:
-        device_obj<LinearLayer<T>> layer1;
-        device_obj<LinearLayer<T, false>> layer2;
+        Linear layer1 = Linear(Mnist::NumPixelInImage, HiddenW);
+        Linear layer2 = Linear(HiddenW, 10);
+        SGD<Tv> opt = SGD<Tv>(LearnRate);
     public:
-        device_obj() = default;
         template<RNG R>
-        device_obj(size_t width1)
-                : layer1(decltype(layer1)::random_xavier_normal<R>(Mnist::NumPixelInImage, width1, 1))
-                , layer2(decltype(layer2)::random_xavier_normal<R>(width1, 10, 1)) {}
+        device_obj(R&) {
+            layer1.template random_xavier_normal<R>(1);
+            layer2.template random_xavier_normal<R>(1);
+        }
         template<Scalar U>
-        device_obj(const device_obj<MnistNet<U>>& net) : layer1(net.getLayer1()), layer2(net.getLayer2()) {}
+        device_obj(const device_obj<MnistNet<U>>& net) : layer1(net.layer1), layer2(net.layer2) {}
         device_obj(const This& other) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -63,34 +64,76 @@ namespace Physica {
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<Vector V>
-        [[nodiscard]] OutputType forward(const V& x) const {
-            OutputType result = relu(layer1.forward(x));
-            result = layer2.forward(result);
-            return result;
-        }
-
-        template<class Dataset>
-        [[nodiscard]] LossType loss(const Dataset& dataset, size_t index) const {
-            OutputType output;
-            if constexpr (IsTrain)
-                output = forward(dataset.getSamples()[index]);
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(const V& x) const {
+            auto y1 = layer1.forward(x);
+            CoDiff<device_obj<VectorND<T>>> y2 = relu(y1);
+            auto y3 = layer2.forward(y2);
+            if constexpr (Base::IsTrain)
+                y3 = co_yield std::move(y3);
             else
-                output = forward(dataset.getSamples()[index].getValues());
-            return device_obj<Loss<T>>::crossEntropy(output, dataset.getLabels()[index]);
+                co_return std::move(y3);
+        }
+
+        void reverse(const This& __restrict other) const noexcept {
+            assert(this != &other && "[Error]: Self reverse is invalid");
+            layer1.reverse(other.layer1);
+            layer2.reverse(other.layer2);
+        }
+
+        template<class Optimizer>
+        void step(Optimizer& opt_) {
+            layer1.step(opt_);
+            layer2.step(opt_);
+        }
+
+        void step() { step(opt); }
+
+        void zero_grad() {
+            layer1.zero_grad();
+            layer2.zero_grad();
         }
 
         template<class Dataset>
-        [[nodiscard]] LossType loss(const Dataset& dataset) const { return Base::loss(dataset); }
+        [[nodiscard]] CoDiff<T> loss(const Dataset& dataset, size_t index) const {
+            auto weights = forward(dataset.getSamples()[index]);
+            CUDAContext::getInstance().wait();
+            auto w = weights.toHost();
+            auto loss = w.crossEntropy(dataset.getLabels()[index]);
+            if constexpr (ReverseDiff<T>) {
+                auto tmp = co_yield loss.value();
+                loss.reverse_final(tmp.grad());
+                weights.reverse(w.grads().toDeviceAsync());
+            }
+            else
+                co_return std::move(loss);
+        }
 
         template<class Dataset>
-        ValueType calcAccuracy(const Dataset& dataset) const {
+        [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
+
+        size_t classify(const device_obj<VectorND<Tv>>& input) const {
+            static_assert(!Base::IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
+            const auto output = forward(input).toHost();
+            Tv max = output[0];
+            size_t index = 0;
+            for (size_t i = 1; i < output.getLength(); ++i) {
+                if (output[i] > max) {
+                    index = i;
+                    max = output[i].value();
+                }
+            }
+            return index;
+        }
+
+        template<class Dataset>
+        Tv calcAccuracy(const Dataset& dataset) const {
             const auto& testSamples = dataset.getSamples();
             const auto& testLabels = dataset.getLabels();
             const size_t numTestData = dataset.getSize();
             size_t count = 0;
             for (size_t i = 0; i < numTestData; ++i)
-                count += testLabels[i] == Base::classify(testSamples[i]);
-            return ValueType(count) / ValueType(numTestData);
+                count += testLabels[i] == classify(testSamples[i]);
+            return Tv(count) / Tv(numTestData);
         }
 
         void swap(This& __restrict obj) noexcept {
@@ -99,65 +142,46 @@ namespace Physica {
             layer1.swap(obj.layer1);
             layer2.swap(obj.layer2);
         }
-        /* Getters */
-        [[nodiscard]] const auto& getLayer1() const noexcept { return layer1; }
-        [[nodiscard]] const auto& getLayer2() const noexcept { return layer2; }
     };
 }
 
-using ValueType = float32;
-using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
-using DeviceVector = device_obj<Diff<VectorND<ValueType>, DiffMode::Reverse, 1>>;
-using Dataset = Mnist::DatasetType<DeviceVector>;
-using Optimizer = SGD<device_obj<ScalarType>>;
+using T = float32;
+using dfloat = Diff<T, DiffMode::Reverse>;
+using Dataset = Mnist::DatasetType<device_obj<VectorND<T>>>;
 using RandomType = Random<MT19937>;
-constexpr size_t numEpoch = 10;
-constexpr size_t batchSize = 64;
-constexpr double learnRate = 0.05;
 
-std::pair<Dataset, Dataset> makeDataset(const char* path) {
-    const Mnist mnist(path);
-    auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
+static std::pair<Dataset, Dataset> makeDataset() {
+    const Mnist mnist("./data");
+    auto dataset = mnist.makeTrainDataset<VectorND<T>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
-        sample = sample * ValueType(1.0 / 128) - ValueType(1);
+        sample = sample * T(1.0 / 128) - T(1);
     }
-    return dataset.template randomSplit<RandomType>(54000);
+    return dataset.randomSplit<RandomType>(54000);
 }
 
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        std::cout << "[Error]: Expect path to data\n";
-        return 1;
-    }
     ThreadPool::numThreadRequired = 4;
-    const auto dataset = makeDataset(argv[1]);
-    const size_t itePerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
 
-    auto opt = Optimizer(learnRate, batchSize);
-    opt.recordBegin();
-    auto nn = device_obj<MnistNet<ScalarType>>(32);
-    opt.recordEnd();
-
-    VectorND<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
-    for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
-        if (epoch != 0) {
-            for (size_t i = 0; i < itePerEpoch; ++i)
-                nn.train_step<Dataset, Optimizer, RandomType>(dataset.first, opt);
-        }
-
-        using VectorType = VectorND<ValueType>;
-        const auto nn_infer = device_obj<MnistNet<ValueType>>(nn);
+    const auto dataset = makeDataset();
+    const int64_t stepPerEpoch = (dataset.first.getSize() + BatchSize - 1) / BatchSize;
+    auto nn = device_obj<MnistNet<dfloat>>(RandomType::getInstance());
+    VectorND<T> loss_train(NumEpoch), loss_valid(NumEpoch), acc_train(NumEpoch), acc_valid(NumEpoch);
+    for (size_t epoch = 0; epoch < NumEpoch; ++epoch) {
+        const auto nn_infer = device_obj<MnistNet<T>>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
         acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
+
+        nn.train_step_for<Dataset, RandomType, SeqExecutor>(stepPerEpoch, BatchSize, dataset.first);
     }
 
     QApplication app(argc, argv);
-    Plot* plot = new Plot(-0.5, numEpoch - 0.5, 0, 3, 2, 1);
+    Plot* plot = new Plot(-0.5, NumEpoch - 0.5, 0, 3, 2, 1);
     auto& legend = plot->getLegend();
     legend.setAlignment(Qt::AlignRight);
+    legend.setMarkerShape(QLegend::MarkerShapeFromSeries);
     legend.show();
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
@@ -171,6 +195,7 @@ int main(int argc, char** argv) {
     axisRight->setLabelFormat("%.1f");
     axisRight->setRange(0, 1);
     axisRight->setTickInterval(0.2);
+    axisRight->setMinorTickCount(4);
     {
         auto& line = plot->line(loss_train);
         auto pen = line.pen();

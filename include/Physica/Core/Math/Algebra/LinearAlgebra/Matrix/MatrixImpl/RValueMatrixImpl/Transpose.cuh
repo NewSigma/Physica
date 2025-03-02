@@ -27,15 +27,21 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
 
-        const device_obj<T>& mat;
+        PlainStruct<const device_obj<T>> mat;
     public:
         using typename Base::ScalarType;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(mat_) {}
+        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.calc(col, row); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.getRow(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.getDerived().calc(col, row); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getDerived().getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.getDerived().getRow(); }
     };
 
     template<Vector T>
@@ -44,15 +50,21 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
 
-        const device_obj<T>& vec;
+        PlainStruct<const device_obj<T>> vec;
     public:
         using typename Base::ScalarType;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& vec_) : vec(vec_) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& vec_) : vec(asStruct(vec_)) {}
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
+        [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.getDerived().calc(col); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getDerived().getLength(); }
     };
 }
 

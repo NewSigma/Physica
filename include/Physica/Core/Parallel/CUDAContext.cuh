@@ -39,13 +39,13 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] operator cudaStream_t() const noexcept { return getStream(); }
+        [[nodiscard]] __host__ __device__ operator cudaStream_t() const noexcept { return getStream(); }
         [[nodiscard]] operator cublasContext*();
         /* Operations */
         using Base::query;
         using Base::wait;
         /* Getters */
-        [[nodiscard]] const CUDAStream& getStream() const noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ const CUDAStream& getStream() const noexcept { return *this; }
         /* Setters */
         void setPointerMode(bool isDeviceSide) noexcept;
         /* Static members */

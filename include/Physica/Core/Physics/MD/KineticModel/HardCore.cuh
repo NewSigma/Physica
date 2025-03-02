@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,9 +27,10 @@
 namespace Physica {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
     class HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor> {
-        constexpr static unsigned int WarpSize = Physica::CUDADevAttr::WarpSize;
+        using This = HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>;
         static_assert(NumReplica == 1, "[Error]: PIMD is not implemented");
         static_assert(Integrator == RPMDIntegrator::Exact, "[Error]: Cayley integrator not implemented");
+        constexpr static unsigned int WarpSize = Physica::CUDADevAttr::WarpSize;
     public:
         using RingPolymerType = HardCore<T, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
         using DeviceVector = device_obj<VectorND<T>>;
@@ -47,11 +48,11 @@ namespace Physica {
         size_t maxHandleNum;
     public:
         HardCore(T latticeSize_, T collideFactor_, T temperatureT_, size_t numParticle, size_t maxHandleNum_);
-        HardCore(const HardCore&) = default;
-        HardCore(HardCore&&) noexcept = default;
+        HardCore(const This&) = default;
+        HardCore(This&&) noexcept = default;
         ~HardCore() = default;
         /* Operators */
-        HardCore& operator=(HardCore obj) noexcept;
+        This& operator=(HardCore obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, T deltaT);
         void nve_step_for(T duration, RingPolymerType& ringPolymer, T deltaT);
@@ -63,7 +64,7 @@ namespace Physica {
 
         void updateMomentum(RingPolymerType& ringPolymer);
         void updateMass(RingPolymerType& ringPolymer);
-        void swap(HardCore& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
 
         __device__ inline void stepKernelImpl(T deltaT, size_t numStep);
         /* Getters */

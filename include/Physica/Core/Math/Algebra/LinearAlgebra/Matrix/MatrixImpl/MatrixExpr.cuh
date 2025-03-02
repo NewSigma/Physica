@@ -79,4 +79,5 @@ namespace Physica {
 }
 
 #include "MatrixExprImpl/Add.cuh"
+#include "MatrixExprImpl/Sub.cuh"
 #include "MatrixExprImpl/Mul.cuh"

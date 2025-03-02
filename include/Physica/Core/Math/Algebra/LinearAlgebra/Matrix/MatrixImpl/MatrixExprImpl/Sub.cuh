@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,29 +18,28 @@
  */
 #pragma once
 
-#include "../MatrixExpr.h"
+#include "../MatrixExpr.cuh"
 
 namespace Physica {
     template<class T, class U>
-    class MatrixExpr<ExprType::Sub, T, U>
-            : public BinaryMatrixExpr<ExprType::Sub, T, U> {
+    class device_obj<MatrixExpr<ExprType::Sub, T, U>> : public device_obj<BinaryMatrixExpr<ExprType::Sub, T, U>> {
         static_assert(Scalar<T> || Scalar<U>, "[Error]: Either types should be Scalar");
 
-        using Base = BinaryMatrixExpr<ExprType::Sub, T, U>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Sub, T, U>>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
             if constexpr (Matrix<T>)
                 return Base::getLHS().calc(row, col) - Base::getRHS();
             else
                 return Base::getLHS() - Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
             if constexpr (Matrix<T>)
                 return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
             else
@@ -49,25 +48,26 @@ namespace Physica {
     };
 
     template<Matrix T1, Matrix T2>
-    class MatrixExpr<ExprType::Sub, T1, T2>
-            : public BinaryMatrixExpr<ExprType::Sub, T1, T2> {
-        using Base = BinaryMatrixExpr<ExprType::Sub, T1, T2>;
-        using This = MatrixExpr<ExprType::Sub, T1, T2>;
+    class device_obj<MatrixExpr<ExprType::Sub, T1, T2>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Sub, T1, T2>> {
+        using host_obj = MatrixExpr<ExprType::Sub, T1, T2>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Sub, T1, T2>>;
         constexpr static bool IsSymm = MatrixOption::isSymmMatrix<T1>() && MatrixOption::isSymmMatrix<T2>();
         constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T1>() && MatrixOption::isHermiteMatrix<T2>();
-        using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
-        using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+        using TransposeRtnTy = std::conditional<IsSymm, const This&, device_obj<Transpose<host_obj>>>::type;
+        using HermiteRtnTy = std::conditional<IsHermite, const This&, device_obj<Hermite<host_obj>>>::type;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) - Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
             return Base::getLHS().calc_value(row, col) - Base::getRHS().calc_value(row, col);
         }
 
@@ -76,17 +76,17 @@ namespace Physica {
     };
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] inline auto operator-(T&& m, U&& x) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Sub, T&&, U&&>(std::forward<T>(m), std::forward<U>(x));
+    [[nodiscard]] __host__ __device__ inline auto operator-(T&& m, U&& x) noexcept requires(CUDA<T>) {
+        return device_obj<MatrixExpr<ExprType::Sub, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
     }
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] inline auto operator-(U&& x, T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Sub, U&&, T&&>(std::forward<U>(x), std::forward<T>(m));
+    [[nodiscard]] __host__ __device__ inline auto operator-(U&& x, T&& m) noexcept requires(CUDA<T>) {
+        return device_obj<MatrixExpr<ExprType::Sub, U&&, T&&>>(std::forward<U>(x), std::forward<T>(m));
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto operator-(T1&& m1, T2&& m2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return MatrixExpr<ExprType::Sub, T1&&, T2&&>(std::forward<T1>(m1), std::forward<T2>(m2));
+    [[nodiscard]] __host__ __device__ inline auto operator-(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>){
+        return device_obj<MatrixExpr<ExprType::Sub, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

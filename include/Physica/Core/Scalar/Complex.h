@@ -42,36 +42,36 @@ namespace Physica {
         T im;
     public:
         Complex() = default;
-        Complex(MachineType x) : This(T(x)) {}
+        __host__ __device__ Complex(MachineType x) : This(T(x)) {}
         Complex(double _Complex x);
-        Complex(T re_);
-        Complex(T re_, T im_);
-        Complex(std::initializer_list<T> list);
+        __host__ __device__ Complex(T re_);
+        __host__ __device__ Complex(T re_, T im_);
+        __host__ __device__ Complex(std::initializer_list<T> list);
         explicit Complex(std::complex<MachineType> c);
         template<Scalar U, DiffMode Mode, int Order>
-        explicit Complex(const Diff<U, Mode, Order>& d);
+        __host__ __device__ explicit Complex(const Diff<U, Mode, Order>& d);
         Complex(const This&) = default;
         Complex(This&&) noexcept = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
-        bool operator==(const This& other) const;
+        __host__ __device__ This& operator=(This obj) noexcept { swap(obj); return *this; }
+        __host__ __device__ bool operator==(const This& other) const;
         /* Operations */
-        [[nodiscard]] inline T squaredNorm() const;
-        [[nodiscard]] inline T norm() const;
-        [[nodiscard]] inline T phase() const;
-        [[nodiscard]] Complex unit() const;
+        [[nodiscard]] __host__ __device__ inline T squaredNorm() const;
+        [[nodiscard]] __host__ __device__ inline T norm() const;
+        [[nodiscard]] __host__ __device__ inline T phase() const;
+        [[nodiscard]] __host__ __device__ Complex unit() const;
 
         [[nodiscard]] inline PacketType packet() const;
         inline void writePacket(const PacketType packet);
-        void swap(Complex& __restrict obj) noexcept;
+        __host__ __device__ void swap(Complex& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ T& real() noexcept { return re; }
         [[nodiscard]] __host__ __device__ const T& real() const noexcept { return re; }
         [[nodiscard]] __host__ __device__ T& imag() noexcept { return im; }
         [[nodiscard]] __host__ __device__ const T& imag() const noexcept { return im; }
         [[nodiscard]] inline std::complex<MachineType> toMachine() const noexcept;
-        [[nodiscard]] bool isZero() const noexcept { return re.isZero() && im.isZero(); }
-        [[nodiscard]] bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
+        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return re.isZero() && im.isZero(); }
+        [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */
         [[nodiscard]] inline static Complex fromPhase(T phase);
         template<RNG R>
@@ -94,39 +94,31 @@ namespace Physica {
     Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator+(
-            const Complex<T>& c,const Real<Option>& s);
+    __host__ __device__ auto operator+(const Complex<T>& c,const Real<Option>& s);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator-(
-            const Complex<T>& c, const Real<Option>& s);
+    __host__ __device__ auto operator-(const Complex<T>& c, const Real<Option>& s);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator*(
-            const Complex<T>& c, const Real<Option>& s);
+    __host__ __device__ auto operator*(const Complex<T>& c, const Real<Option>& s);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator/(
-            const Complex<T>& c, const Real<Option>& s);
+    __host__ __device__ auto operator/(const Complex<T>& c, const Real<Option>& s);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator+(
-            const Real<Option>& s, const Complex<T>& c);
+    __host__ __device__ auto operator+(const Real<Option>& s, const Complex<T>& c);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator-(
-            const Real<Option>& s, const Complex<T>& c);
+    __host__ __device__ auto operator-(const Real<Option>& s, const Complex<T>& c);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator*(
-            const Real<Option>& s, const Complex<T>& c);
+    __host__ __device__ auto operator*(const Real<Option>& s, const Complex<T>& c);
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator/(
-            const Real<Option>& s, const Complex<T>& c);
+    __host__ __device__ auto operator/(const Real<Option>& s, const Complex<T>& c);
 
     template<Scalar T>
-    auto operator-(const Complex<T>& c) { return Complex<T>(-c.real(), -c.imag()); }
+    __host__ __device__ auto operator-(const Complex<T>& c) { return Complex<T>(-c.real(), -c.imag()); }
 
     template<Scalar T>
     std::ostream& operator<<(std::ostream& os, const Complex<T>& x) {

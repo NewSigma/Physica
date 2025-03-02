@@ -28,10 +28,9 @@ int main() {
     using VectorType = device_obj<VectorND<Diff<T, DiffMode::Reverse>>>;
     auto v = VectorType(8, 0);
     v.reverse(T(1));
-    CUDAExecutor::wait();
+    CUDAContext::getInstance().wait();
     const auto grads = v.grads().toHost();
 
-    std::cout << grads.format() << std::endl;
     for (auto elem : grads)
         if (elem != T(1))
             return 1;

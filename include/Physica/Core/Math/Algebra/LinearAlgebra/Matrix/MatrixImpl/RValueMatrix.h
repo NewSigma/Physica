@@ -56,12 +56,15 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
+        constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
+    private:
+        using ValuesRtnTy = std::conditional<isDiffable, ValueMatrix<Derived>, Derived&>::type;
     public:
         ~RValueMatrix() = default;
         /* Operations */
@@ -123,23 +126,25 @@ namespace Physica {
         [[nodiscard]] inline auto hermite() const noexcept;
         [[nodiscard]] inline auto flatten() const noexcept;
 
-        auto reals() const noexcept;
-        auto imags() const noexcept;
-        auto squaredNorms() const noexcept;
-        auto norms() const noexcept;
-        auto values() const noexcept;
+        [[nodiscard]] auto reals() const noexcept;
+        [[nodiscard]] auto imags() const noexcept;
+        [[nodiscard]] auto squaredNorms() const noexcept;
+        [[nodiscard]] auto norms() const noexcept;
+        [[nodiscard]] ValuesRtnTy values() const noexcept;
         template<int GradOrder = 1>
-        auto grads() const noexcept;
+        [[nodiscard]] auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
-        [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
+        [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
+        [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
 
         [[nodiscard]] bool isSymm() const noexcept;
         /* Static members */
-        [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
-        [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
+        [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
+        [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
+        template<Matrix M1, Matrix M2>
+        __host__ __device__ static void assign_check(const M1& source, const M2& target) noexcept;
     protected:
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;

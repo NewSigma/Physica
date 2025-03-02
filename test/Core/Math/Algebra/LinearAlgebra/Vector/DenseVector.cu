@@ -45,7 +45,7 @@ int main() {
         const VectorType answer = reciprocal(a);
         d_a = reciprocal(d_a);
         VectorType result;
-        CUDAExecutor::wait();
+        CUDAContext::getInstance().wait();
         d_a.toHost(result);
         if (!vectorNear(result, answer, 1E-15)) {
             std::cout << "[Error]: Reciprocal failed\n";
@@ -63,12 +63,13 @@ int main() {
         VectorType result(len);
         DeviceVector d_result(len);
         CUDAExecutor::launch([a = asStruct(d_a), b = asStruct(d_b), result = asStruct(d_result), factor] __device__() mutable {
-            result.getDerived() = a.getDerived() + b.getDerived() * factor;
+            int i = threadIdx.x;
+            result.getDerived()[i] = a.getDerived()[i] + b.getDerived()[i] * factor;
         }, 1, len).wait();
 
         d_result.toHost(result);
         if (!vectorNear(result, answer, 1E-6)) {
-            std::cout << "[Error]: Kernel failed\n";
+            std::cout << "[Error]: Bad result\n";
             return 1;
         }
     }

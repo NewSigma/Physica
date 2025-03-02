@@ -21,10 +21,3 @@ void device_obj<T>::toHostAsync(T&);
 ```
 
 将设备数据拷贝到主机。
-
-为充分利用并行能力, 每个线程至少拥有两个CUDA流
-
-1. 数据流 - Default stream
-2. 任务流 - CUDAContext::CUDAStream
-
-上述数据拷贝函数由数据流负责, 所有CUDA核函数将被提交到任务流. 数据流与任务流应进行必要的显式同步。

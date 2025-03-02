@@ -62,21 +62,19 @@ if(${PHYSICA_CUDA})
 
         set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
         set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
-        # Warning 20011: Call host function from host-device function
         # Warning 20208: Use long double in device code
         set(CMAKE_CUDA_FLAGS 
             ${CMAKE_CUDA_FLAGS}
+            --expt-relaxed-constexpr
+            --extended-lambda
+            --device-entity-has-hidden-visibility true
+            --ftz true
+            --default-stream per-thread
             --Wreorder
             --Wdefault-stream-launch
             --Wext-lambda-captures-this
-            --Wno-deprecated-declarations
             --Wno-deprecated-gpu-targets
-            --diag-suppress 20011
             --diag-suppress 20208
-            --default-stream per-thread
-            --expt-relaxed-constexpr
-            --expt-extended-lambda
-            --device-entity-has-hidden-visibility true
             ${CMAKE_CXX_FLAGS})
         string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
     endif()

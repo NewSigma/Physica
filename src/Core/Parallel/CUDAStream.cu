@@ -26,6 +26,8 @@ namespace Physica {
         cudaStreamCreate(&stream);
     }
 
+    CUDAStream::CUDAStream(std::nullptr_t) : stream(nullptr) {}
+
     CUDAStream::CUDAStream(CUDAStream&& obj) noexcept : stream(obj.stream) {
         obj.stream = nullptr;
     }

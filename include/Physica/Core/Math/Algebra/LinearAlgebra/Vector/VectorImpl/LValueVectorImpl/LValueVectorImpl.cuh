@@ -77,37 +77,37 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar T>
-    __device__ void device_obj<LValueVector<Derived>>::operator+=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const T& x) {
         Base::getDerived() = Base::getDerived() + x;
     }
 
     template<class Derived>
     template<Scalar T>
-    __device__ void device_obj<LValueVector<Derived>>::operator-=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const T& x) {
         Base::getDerived() = Base::getDerived() - x;
     }
 
     template<class Derived>
     template<Scalar T>
-    __device__ void device_obj<LValueVector<Derived>>::operator*=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator*=(const T& x) {
         Base::getDerived() = Base::getDerived() * x;
     }
 
     template<class Derived>
     template<Scalar T>
-    __device__ void device_obj<LValueVector<Derived>>::operator/=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator/=(const T& x) {
         Base::getDerived() = Base::getDerived() / x;
     }
 
     template<class Derived>
     template<Vector V>
-    __device__ inline void device_obj<LValueVector<Derived>>::operator+=(const device_obj<V>& v) {
+    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator+=(const V& v) requires(CUDA<V>) {
         Base::getDerived() = Base::getDerived() + v;
     }
 
     template<class Derived>
     template<Vector V>
-    __device__ inline void device_obj<LValueVector<Derived>>::operator-=(const device_obj<V>& v) {
+    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator-=(const V& v) requires(CUDA<V>) {
         Base::getDerived() += -v;
     }
 
@@ -149,11 +149,12 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ inline auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) -> PtrTy {
+        assert(index < Base::getLength());
         return Base::getDerived().data_ptr(index);
     }
 
     template<class Derived>
     __host__ __device__ inline auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) const -> ConstPtrTy {
-        return Base::getDerived().data_ptr(index);
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }

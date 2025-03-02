@@ -17,16 +17,18 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-/**
- * \class device_obj: Provide non-invasive implementation for device, which is determined by the nature of nvcc seperate compiling.
- * 
- * Resource is maintained by host and can be used on device.
- * 
- * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
- */
+
 #include <type_traits>
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
+    /**
+     * \class device_obj: Provide non-invasive implementation for device, which is determined by the nature of nvcc seperate compiling.
+     * 
+     * Resource is maintained by host and can be used on device.
+     * 
+     * Class name is compatible to \class thrust::device_ptr and \class thrust::device_reference.
+     */
     template<class T> class device_obj;
 
     template<class T>
@@ -50,7 +52,7 @@ namespace Physica {
     };
 
     template<class T>
-    concept CUDA = is_device_obj<std::remove_cvref_t<T>>::value;
+    concept CUDA = is_device_obj<typename remove_codiff<std::remove_cvref_t<T>>::Type>::value;
 
     template<CUDA T>
     class device_obj<T> {
