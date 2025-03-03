@@ -52,7 +52,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }
         [[nodiscard]] ValueType calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return vec.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
     };
 
     template<Vector T>

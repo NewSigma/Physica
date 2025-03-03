@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "../MatrixExpr.h"
+#include "../MatrixExpr.cuh"
 
 namespace Physica {
     template<class T, class U>
-    class MatrixExpr<ExprType::Div, T, U>
-            : public BinaryMatrixExpr<ExprType::Div, T, U> {
+    class device_obj<MatrixExpr<ExprType::Div, T, U>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Div, T, U>> {
         static_assert(Scalar<T> || Scalar<U>, "[Error]: Either types should be Scalar");
 
         using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
@@ -31,19 +31,19 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
-        MatrixExpr(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
+        device_obj(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
             if constexpr (Matrix<T>)
                 assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
         }
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
             if constexpr (Matrix<T>)
                 return Base::getLHS().calc(row, col) / Base::getRHS();
             else
                 return Base::getLHS() / Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const {
             if constexpr (Matrix<T>)
                 return Base::getLHS().calc_value(row, col) / Base::getRHS().value();
             else
@@ -52,38 +52,38 @@ namespace Physica {
     };
 
     template<Matrix T, Matrix U>
-    class MatrixExpr<ExprType::Div, T, U>
-            : public BinaryMatrixExpr<ExprType::Div, T, U> {
-        using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
+    class device_obj<MatrixExpr<ExprType::Div, T, U>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Div, T, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Div, T, U>>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
             assert(!Base::getRHS().calc(row, col).isZero() && "[Error]: Divide by zero");
             return Base::getLHS().calc(row, col) / Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const {
             assert(!Base::getRHS().calc_value(row, col).isZero() && "[Error]: Divide by zero");
             return Base::getLHS().calc_value(row, col) / Base::getRHS().calc_value(row, col);
         }
     };
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] inline auto operator/(T&& m, U&& x) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Div, T&&, U&&>(std::forward<T>(m), std::forward<U>(x));
+    [[nodiscard]] __host__ __device__ inline auto operator/(T&& m, U&& x) noexcept requires(CUDA<T>) {
+        return device_obj<MatrixExpr<ExprType::Div, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
     }
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] inline auto operator/(U&& x, T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Div, U&&, T&&>(std::forward<U>(x), std::forward<T>(m));
+    [[nodiscard]] __host__ __device__ inline auto operator/(U&& x, T&& m) noexcept requires(CUDA<T>) {
+        return device_obj<MatrixExpr<ExprType::Div, U&&, T&&>>(std::forward<U>(x), std::forward<T>(m));
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto divide(T1&& m1, T2&& m2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return MatrixExpr<ExprType::Div, T1&&, T2&&>(std::forward<T1>(m1), std::forward<T2>(m2));
+    [[nodiscard]] __host__ __device__ inline auto divide(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
+        return device_obj<MatrixExpr<ExprType::Div, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

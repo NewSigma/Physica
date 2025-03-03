@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix T>
-    [[nodiscard]] inline auto cos_elem(T&& m) noexcept {
+    [[nodiscard]] inline auto cos_elem(T&& m) noexcept requires(!CUDA<T>) {
         return MatrixExpr<ExprType::Cos, T&&>(std::forward<T>(m));
     }
 }

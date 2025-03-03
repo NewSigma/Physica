@@ -50,8 +50,8 @@ namespace Physica {
             for (size_t i = 0; i < Base::getMaxMajor(); ++i)
                 for (size_t j = 0; j < Base::getMaxMinor(); ++j)
                     refFromMajorMinor(i, j) = x;
-            return Base::getDerived();
         }
+        return Base::getDerived();
     }
 
     template<class Derived>

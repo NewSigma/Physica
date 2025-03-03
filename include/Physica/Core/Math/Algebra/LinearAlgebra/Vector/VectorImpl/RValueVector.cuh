@@ -74,8 +74,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ ValuesRtnTy values() const noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grads() const noexcept;
+
+        [[nodiscard]] __host__ __device__ std::pair<dim3, dim3> makeKernelConfig() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ static std::pair<dim3, dim3> makeKernelConfig(size_t length) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -83,8 +87,6 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
-        /* Operations */
-        [[nodiscard]] __host__ __device__ std::pair<dim3, dim3> makeKernelConfig() const noexcept;
     private:
         template<Vector V>
         __device__ void assign_impl(V& target) const requires(CUDA<V>);

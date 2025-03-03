@@ -38,7 +38,7 @@ namespace Physica {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
                 const size_t length = source.getLength();
-                const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+                const uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
                 if (index < length)
                     target[index] = source.calc(index);
             }, config.first, config.second);
@@ -152,10 +152,14 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ std::pair<dim3, dim3> device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
-        constexpr unsigned int MaxThread = MaxThreadPerBlock;
-        const unsigned int length = getLength();
-        const unsigned int numThread = std::min(length, MaxThread);
-        const unsigned int numBlock = (length + numThread - 1) / numThread;
+        return makeKernelConfig(getLength());
+    }
+
+    template<class Derived>
+    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueVector<Derived>>::makeKernelConfig(size_t length) noexcept {
+        constexpr uint32_t MaxThread = MaxThreadPerBlock;
+        const uint32_t numThread = std::min<uint32_t>(length, MaxThread);
+        const uint32_t numBlock = (length + numThread - 1) / numThread;
         return std::make_pair(dim3(numBlock), dim3(numThread));
     }
 

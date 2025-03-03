@@ -111,6 +111,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
+        [[nodiscard]] __host__ __device__ static std::pair<dim3, dim3> makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

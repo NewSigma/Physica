@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,7 @@
  */
 #pragma once
 
-#include <unordered_map>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Adam.h"
 
 namespace Physica {
     /**
@@ -28,21 +27,15 @@ namespace Physica {
      * [2] pytorch; https://pytorch.org/docs/stable/generated/torch.optim.Adam.html
      */
     template<Scalar T>
-    class Adam {
+    class device_obj<Adam<T>> {
         static_assert(!Diffable<T>);
-        using This = Adam<T>;
-    public:
-        struct Args {
-            T lr;
-            T beta1;
-            T beta2;
-            T epsilon;
-            T decay;
-        };
+        using host_obj = Adam<T>;
+        using This = device_obj<host_obj>;
+        using Args = host_obj::Args;
     private:
         struct VectorBuffer {
-            VectorND<T> m;
-            VectorND<T> v;
+            device_obj<VectorND<T>> m;
+            device_obj<VectorND<T>> v;
             T beta1t;
             T beta2t;
 
@@ -52,8 +45,8 @@ namespace Physica {
         };
 
         struct MatrixBuffer {
-            DenseMatrix<T> m;
-            DenseMatrix<T> v;
+            device_obj<DenseMatrix<T>> m;
+            device_obj<DenseMatrix<T>> v;
             T beta1t;
             T beta2t;
 
@@ -65,32 +58,30 @@ namespace Physica {
         std::unordered_map<void*, std::variant<VectorBuffer, MatrixBuffer>> targetBufferMap;
         Args args;
     public:
-        Adam(T lr = 1E-3, T beta1 = 0.9, T beta2 = 0.999, T epsilon = 1E-8, T decay = 0);
-        Adam(Args args_);
-        Adam(const Adam&) = default;
-        Adam(Adam&&) noexcept = default;
-        ~Adam() = default;
+        device_obj(T lr = 1E-3, T beta1 = 0.9, T beta2 = 0.999, T epsilon = 1E-8, T decay = 0);
+        device_obj(Args args_);
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
-        Adam& operator=(Adam obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<Diffable U>
         void step(U& target);
 
-        void swap(Adam& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const Args& getArgs() const noexcept { return args; }
         [[nodiscard]] Args& getArgs() noexcept { return args; }
         [[nodiscard]] T getLearnRate() const noexcept { return args.lr; }
-        /* Friends */
-        friend class device_obj<This>;
     };
 
     template<Scalar T>
-    Adam<T>::Adam(T lr, T beta1, T beta2, T epsilon, T decay)
-            : Adam(Args{.lr = lr, .beta1 = beta1, .beta2 = beta2, .epsilon = epsilon, .decay = decay}) {}
+    device_obj<Adam<T>>::device_obj(T lr, T beta1, T beta2, T epsilon, T decay)
+            : device_obj(Args{.lr = lr, .beta1 = beta1, .beta2 = beta2, .epsilon = epsilon, .decay = decay}) {}
 
     template<Scalar T>
-    Adam<T>::Adam(Args args_) : args(args_) {
+    device_obj<Adam<T>>::device_obj(Args args_) : args(args_) {
         assert(args.lr.isPositive());
         assert(args.beta1.isPositive() && args.beta1 < T(1));
         assert(args.beta2.isPositive() && args.beta2 < T(1));
@@ -100,7 +91,7 @@ namespace Physica {
 
     template<Scalar T>
     template<Diffable U>
-    void Adam<T>::step(U& target) {
+    void device_obj<Adam<T>>::step(U& target) {
         using BufferType = std::conditional<Vector<U>, VectorBuffer, MatrixBuffer>::type;
         if (!args.decay.isZero())
             target.grads() += args.decay * target.values();
@@ -136,7 +127,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void Adam<T>::swap(Adam& __restrict obj) noexcept {
+    void device_obj<Adam<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         targetBufferMap.swap(obj.targetBufferMap);
         std::swap(args, obj.args);

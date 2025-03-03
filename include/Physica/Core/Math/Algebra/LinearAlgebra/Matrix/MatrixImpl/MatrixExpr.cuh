@@ -34,7 +34,7 @@ namespace Physica {
 
         PlainStruct<const std::remove_cvref_t<M>> expr;
     public:
-        __host__ __device__ inline device_obj(M expr_) : expr(std::forward<M>(expr_)) {}
+        __host__ __device__ inline device_obj(M expr_) : expr(asStruct(expr_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -95,3 +95,5 @@ namespace Physica {
 #include "MatrixExprImpl/Add.cuh"
 #include "MatrixExprImpl/Sub.cuh"
 #include "MatrixExprImpl/Mul.cuh"
+#include "MatrixExprImpl/Div.cuh"
+#include "MatrixExprImpl/Sqrt.cuh"

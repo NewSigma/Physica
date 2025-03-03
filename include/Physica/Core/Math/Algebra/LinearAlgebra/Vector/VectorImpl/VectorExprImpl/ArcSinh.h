@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto arcsinh(T&& v) noexcept {
+    [[nodiscard]] inline auto arcsinh(T&& v) noexcept requires(!CUDA<T>) {
         return VectorExpr<ExprType::ArcSinh, T&&>(std::forward<T>(v));
     }
 }

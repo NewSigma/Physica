@@ -28,6 +28,8 @@ namespace Physica {
     template<Matrix M>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M& target) const requires(CUDA<M>) {
         host_obj::assign_check(Base::getDerived(), target);
+        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
+        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
         if (IsHost()) {
             const auto config = target.makeKernelConfig();
             CUDAExecutor::launch([source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
@@ -260,12 +262,15 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ std::pair<dim3, dim3> device_obj<RValueMatrix<Derived>>::makeKernelConfig() const noexcept {
+        return makeKernelConfig(getMaxMajor(), getMaxMinor());
+    }
+
+    template<class Derived>
+    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueMatrix<Derived>>::makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept {
         constexpr size_t MaxThread = MaxThreadPerBlock;
-        const size_t maxMajor = getMaxMajor();
-        const size_t maxMinor = getMaxMinor();
-        const unsigned int numThread = std::min(maxMinor, MaxThread);
-        const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
-        const unsigned int numBlockY = maxMajor;
+        const uint32_t numThread = std::min<uint32_t>(maxMinor, MaxThread);
+        const uint32_t numBlockX = (maxMinor + numThread - 1) / numThread;
+        const uint32_t numBlockY = maxMajor;
         return std::make_pair(dim3{numBlockX, numBlockY}, dim3{numThread});
     }
 

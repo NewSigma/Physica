@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,26 +18,28 @@
  */
 #pragma once
 
-#include "../VectorExpr.h"
+#include "../MatrixExpr.cuh"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Sech, T> : public UnitaryVectorExpr<ExprType::Sech, T> {
-        using This = VectorExpr<ExprType::Sech, T>;
-        using Base = UnitaryVectorExpr<ExprType::Sech, T>;
+    template<Matrix T>
+    class device_obj<MatrixExpr<ExprType::Sqrt, T>>
+            : public device_obj<UnitaryMatrixExpr<ExprType::Sqrt, T>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprType::Sqrt, T>>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return sech(Base::getExpr().calc(index)); }
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return sqrt(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return sech(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const {
+            return sqrt(Base::getExpr().calc_value(row, col));
+        }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto sech(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Sech, T&&>(std::forward<T>(v));
+    template<Matrix T>
+    [[nodiscard]] __host__ __device__ inline auto sqrt_elem(T&& m) noexcept requires(CUDA<T>) {
+        return device_obj<MatrixExpr<ExprType::Sqrt, T&&>>(std::forward<T>(m));
     }
 }

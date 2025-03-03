@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <stack>
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 #include "CUDAStream.cuh"
 
@@ -27,10 +28,14 @@ namespace Physica {
     /**
      * \class CUDAContext provides per-thread device resource management
      */
-    class PHYSICA_API CUDAContext : private CUDAStream {
+    class PHYSICA_API CUDAContext {
         using This = CUDAContext;
         using Base = CUDAStream;
+        struct StreamGuard {
+            ~StreamGuard() { CUDAContext::getInstance().streams.pop(); }
+        };
 
+        std::stack<CUDAStream> streams;
         cublasContext* cublas;
     public:
         CUDAContext(const This&) = delete;
@@ -39,13 +44,14 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        [[nodiscard]] __host__ __device__ operator cudaStream_t() const noexcept { return getStream(); }
+        [[nodiscard]] operator cudaStream_t() const noexcept { return getStream(); }
         [[nodiscard]] operator cublasContext*();
         /* Operations */
-        using Base::query;
-        using Base::wait;
+        StreamGuard push_stream();
+        cudaError_t query() { return getStream().query(); }
+        void wait() { getStream().wait(); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ const CUDAStream& getStream() const noexcept { return *this; }
+        [[nodiscard]] const CUDAStream& getStream() const noexcept { return streams.top(); }
         /* Setters */
         void setPointerMode(bool isDeviceSide) noexcept;
         /* Static members */

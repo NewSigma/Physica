@@ -38,12 +38,14 @@ namespace Physica {
     public:
         ScalarRef() = default;
         __host__ __device__ explicit ScalarRef(PtrTy ptr_) : PtrTy(ptr_) {}
-        ScalarRef(const ScalarRef&) = default;
-        ScalarRef(ScalarRef&&) noexcept = default;
+        ScalarRef(const This&) = default;
+        ScalarRef(This&&) noexcept = default;
         ~ScalarRef() = default;
         /* Operators */
         __host__ __device__ inline This& operator=(const This& other);
-        __host__ __device__ inline This& operator=(const ScalarType& other);
+        __host__ __device__ inline This& operator=(This&& other) noexcept;
+        template<Scalar U>
+        __host__ __device__ inline This& operator=(const U& other);
         __host__ __device__ inline This& operator=(int x) { return operator=(ScalarType(x)); }
         __host__ __device__ inline This& operator=(double x) { return operator=(ScalarType(x)); }
         [[nodiscard]] __host__ __device__ operator ScalarType() const requires(!ReverseDiff<T>);
@@ -79,16 +81,27 @@ namespace Physica {
     };
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarRef& other) {
+    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(const This& other) -> This& {
         value() = other.value();
         grad() = other.grad();
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline ScalarRef<Diff<T, Mode, Order>>& ScalarRef<Diff<T, Mode, Order>>::operator=(const ScalarType& other) {
+    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(This&& other) noexcept -> This& {
         value() = other.value();
         grad() = other.grad();
+        return *this;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    template<Scalar U>
+    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(const U& other) -> This& {
+        value() = other.value();
+        if constexpr (Diffable<U>)
+            grad() = other.grad();
+        else
+            zero_grad();
         return *this;
     }
 

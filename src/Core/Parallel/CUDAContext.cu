@@ -20,10 +20,17 @@
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
 namespace Physica {
-    CUDAContext::CUDAContext() : CUDAStream(nullptr), cublas(nullptr) {}
+    CUDAContext::CUDAContext() : cublas(nullptr) {
+        streams.push(CUDAStream(nullptr));
+    }
 
     CUDAContext::~CUDAContext() {
         cublasDestroy(cublas);
+    }
+
+    auto CUDAContext::push_stream() -> StreamGuard {
+        streams.push(CUDAStream());
+        return {};
     }
 
     CUDAContext::operator cublasContext*() {

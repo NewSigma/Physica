@@ -54,7 +54,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto tanh(T&& v) noexcept {
+    [[nodiscard]] inline auto tanh(T&& v) noexcept requires(!CUDA<T>) {
         return VectorExpr<ExprType::Tanh, T&&>(std::forward<T>(v));
     }
 }

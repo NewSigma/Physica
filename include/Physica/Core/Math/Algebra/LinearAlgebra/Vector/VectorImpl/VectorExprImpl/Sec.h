@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto sec(T&& v) noexcept {
+    [[nodiscard]] inline auto sec(T&& v) noexcept requires(!CUDA<T>) {
         return VectorExpr<ExprType::Sec, T&&>(std::forward<T>(v));
     }
 }

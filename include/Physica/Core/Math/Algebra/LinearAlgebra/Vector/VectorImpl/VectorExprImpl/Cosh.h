@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto cosh(T&& v) noexcept {
+    [[nodiscard]] inline auto cosh(T&& v) noexcept requires(!CUDA<T>) {
         return VectorExpr<ExprType::Cosh, T&&>(std::forward<T>(v));
     }
 }
