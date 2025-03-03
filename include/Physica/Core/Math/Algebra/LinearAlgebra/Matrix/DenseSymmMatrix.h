@@ -33,6 +33,8 @@ namespace Physica {
         using typename Base::ScalarType;
         using ColMatrix = This;
         using RowMatrix = This;
+    private:
+        using HermiteRtnTy = std::conditional<ScalarType::isComplex, Hermite<This>, const This&>::type;
     public:
         template<Matrix M>
         DenseSymmMatrix(const M& mat);
@@ -57,7 +59,7 @@ namespace Physica {
         [[nodiscard]] ScalarType max() const { return asVector().max(); }
         [[nodiscard]] ScalarType min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
-        [[nodiscard]] inline auto hermite() const noexcept;
+        [[nodiscard]] inline HermiteRtnTy hermite() const noexcept { return *this; }
         void swap(This& __restrict m) noexcept;
 
         template<RNG R>
@@ -96,7 +98,7 @@ namespace Physica {
         assert(mat.getRow() == mat.getCol());
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = i; j < mat.getRow(); ++j)
-                Base::operator()(i, j) = T(mat.calc(i, j));
+                Base::operator()(i, j) = mat.calc(i, j);
     }
 
     template<Scalar T, size_t Order>
@@ -128,14 +130,6 @@ namespace Physica {
     template<Scalar U>
     inline void DenseSymmMatrix<T, Order>::operator/=(const U& x) {
         asVector() /= x;
-    }
-
-    template<Scalar T, size_t Order>
-    inline auto DenseSymmMatrix<T, Order>::hermite() const noexcept {
-        if constexpr (T::isComplex)
-            return Base::hermite();
-        else
-            return *this;
     }
 
     template<Scalar T, size_t Order>

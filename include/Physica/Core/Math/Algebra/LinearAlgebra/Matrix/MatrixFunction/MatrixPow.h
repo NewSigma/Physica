@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
+
 namespace Physica {
     template<Matrix T>
     class MatrixPow : public RValueMatrix<MatrixPow<T>> {

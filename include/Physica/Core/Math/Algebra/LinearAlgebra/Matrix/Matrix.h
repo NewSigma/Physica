@@ -127,16 +127,18 @@ namespace Physica {
 
         template<class MatrixType>
         [[nodiscard]] __host__ __device__ consteval static bool isSymmMatrix() noexcept {
-            using TransposeType = decltype(std::declval<MatrixType>().transpose());
+            using M = std::remove_cvref_t<MatrixType>;
+            using TransposeType = decltype(std::declval<M>().transpose());
             using TransposeType1 = std::remove_cvref<TransposeType>::type;
-            return std::is_base_of<TransposeType1, MatrixType>::value;
+            return std::is_base_of<TransposeType1, M>::value;
         }
 
         template<class MatrixType>
         [[nodiscard]] __host__ __device__ consteval static bool isHermiteMatrix() noexcept {
-            using HermiteType = decltype(std::declval<MatrixType>().hermite());
+            using M = std::remove_cvref_t<MatrixType>;
+            using HermiteType = decltype(std::declval<M>().hermite());
             using HermiteType1 = std::remove_cvref<HermiteType>::type;
-            return std::is_base_of<HermiteType1, MatrixType>::value;
+            return std::is_base_of<HermiteType1, M>::value;
         }
     private:
         MatrixOption();

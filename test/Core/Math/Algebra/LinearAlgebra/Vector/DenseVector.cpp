@@ -155,6 +155,22 @@ static void softmaxTest() {
         exit(EXIT_FAILURE);
 }
 
+void testConverts() {
+    using T = float64;
+    using dfloat = Diff<T, DiffMode::Forward, 1>;
+    const VectorND<T> x{0};
+    VectorND<dfloat> y = x - T(0.5);
+    y[0].grad() = T(0.3);
+
+    VectorND<T> a = y.values();
+    if (a[0] != T(-0.5))
+        exit(EXIT_FAILURE);
+
+    a = y.grads();
+    if (a[0] != T(0.3))
+        exit(EXIT_FAILURE);
+}
+
 int main() {
     crossProductTest();
     innerDotTest();
@@ -162,5 +178,6 @@ int main() {
     lnSumExpTest();
     crossEntropyTest();
     softmaxTest();
+    testConverts();
     return 0;
 }

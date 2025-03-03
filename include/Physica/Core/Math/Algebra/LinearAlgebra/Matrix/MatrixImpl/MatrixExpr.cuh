@@ -25,9 +25,13 @@ namespace Physica {
     class device_obj<UnitaryMatrixExpr<Type, M>> : public device_obj<RValueMatrix<MatrixExpr<Type, M>>> {
         static_assert(CUDA<M>, "[Error]: Invalid type");
         using host_obj = UnitaryMatrixExpr<Type, M>;
+        using Derived = MatrixExpr<Type, M>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<MatrixExpr<Type, M>>>;
+        using Base = device_obj<RValueMatrix<Derived>>;
     private:
+        using TransposeRtnTy = std::conditional<MatrixOption::isSymmMatrix<M>(), const device_obj<Derived>&, device_obj<Transpose<Derived>>>::type;
+        using HermiteRtnTy = std::conditional<MatrixOption::isHermiteMatrix<M>(), const device_obj<Derived>&, device_obj<Hermite<Derived>>>::type;
+
         PlainStruct<const std::remove_cvref_t<M>> expr;
     public:
         __host__ __device__ inline device_obj(M expr_) : expr(std::forward<M>(expr_)) {}
@@ -37,6 +41,9 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] __host__ __device__ TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] __host__ __device__ HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
@@ -47,9 +54,13 @@ namespace Physica {
     class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
         static_assert(CUDA<LHS> && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
         using host_obj = BinaryMatrixExpr<Type, LHS, RHS>;
+        using Derived = MatrixExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>>;
     private:
+        using TransposeRtnTy = std::conditional<Traits<Derived>::isSymm, const device_obj<Derived>&, device_obj<Transpose<Derived>>>::type;
+        using HermiteRtnTy = std::conditional<Traits<Derived>::isHermite, const device_obj<Derived>&, device_obj<Hermite<Derived>>>::type;
+
         PlainStruct<const std::remove_cvref_t<LHS>> lhs;
         PlainStruct<const std::remove_cvref_t<RHS>> rhs;
     public:
@@ -65,6 +76,9 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] __host__ __device__ TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] __host__ __device__ HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getLHS().getCol(); }

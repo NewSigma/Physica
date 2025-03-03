@@ -99,17 +99,17 @@ namespace Physica {
     operator/(T&& x, U&& y) requires(Diffable<T>);
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator+(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
+    [[nodiscard]] inline auto operator+(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator-(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
+    [[nodiscard]] inline auto operator-(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator*(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
+    [[nodiscard]] inline auto operator*(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<T, U>::Type>
-    operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    operator/(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
 
     template<Scalar T>
     [[nodiscard]] inline CoDiff<T> operator-(T&& x) requires(Diffable<T>);

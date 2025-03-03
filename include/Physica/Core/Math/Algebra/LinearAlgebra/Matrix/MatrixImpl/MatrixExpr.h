@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Scalar/ExprType.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
     /**
@@ -29,11 +29,15 @@ namespace Physica {
 
     template<ExprType Type, Matrix M>
     class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
+        using Derived = MatrixExpr<Type, M>;
         using This = UnitaryMatrixExpr<Type, M>;
-        using Base = RValueMatrix<MatrixExpr<Type, M>>;
+        using Base = RValueMatrix<Derived>;
     public:
         using Base::isReverseDiff;
     private:
+        using TransposeRtnTy = std::conditional<MatrixOption::isSymmMatrix<M>(), const Derived&, Transpose<Derived>>::type;
+        using HermiteRtnTy = std::conditional<MatrixOption::isHermiteMatrix<M>(), const Derived&, Hermite<Derived>>::type;
+
         const LazyDestroy<M> expr;
     public:
         UnitaryMatrixExpr(M expr_) : expr(std::forward<M>(expr_)) {}
@@ -44,6 +48,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
@@ -53,11 +60,15 @@ namespace Physica {
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
         static_assert(Matrix<LHS> || Matrix<RHS>, "[Error]: Either types should be Matrix");
 
+        using Derived = MatrixExpr<Type, LHS, RHS>;
         using This = BinaryMatrixExpr<Type, LHS, RHS>;
-        using Base = RValueMatrix<MatrixExpr<Type, LHS, RHS>>;
+        using Base = RValueMatrix<Derived>;
     public:
         using Base::isReverseDiff;
     private:
+        using TransposeRtnTy = std::conditional<Traits<Derived>::isSymm, const This&, Transpose<This>>::type;
+        using HermiteRtnTy = std::conditional<Traits<Derived>::isHermite, const This&, Hermite<This>>::type;
+
         const LazyDestroy<LHS> lhs;
         const LazyDestroy<RHS> rhs;
     public:
@@ -74,6 +85,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const {
             if constexpr (Matrix<LHS>)
                 return getLHS().getRow();
@@ -94,6 +108,7 @@ namespace Physica {
 namespace Physica {
     template<ExprType Type, Matrix LHS, Matrix RHS>
     class Traits<MatrixExpr<Type, LHS, RHS>> {
+        using This = MatrixExpr<Type, LHS, RHS>;
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
         using ResultType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
@@ -111,10 +126,14 @@ namespace Physica {
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile > RHS1::RowAtCompile ? LHS1::RowAtCompile : RHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile > RHS1::ColAtCompile ? LHS1::ColAtCompile : RHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile > RHS1::SizeAtCompile ? LHS1::SizeAtCompile : RHS1::SizeAtCompile;
+
+        constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>() && MatrixOption::isSymmMatrix<RHS>();
+        constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && MatrixOption::isHermiteMatrix<RHS>();
     };
 
     template<ExprType Type, Matrix LHS, Scalar RHS>
     class Traits<MatrixExpr<Type, LHS, RHS>> {
+        using This = MatrixExpr<Type, LHS, RHS>;
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
     public:
@@ -123,6 +142,9 @@ namespace Physica {
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
+
+        constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>();
+        constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && !RHS1::isComplex;
     };
 
     template<ExprType Type, Scalar LHS, Matrix RHS>

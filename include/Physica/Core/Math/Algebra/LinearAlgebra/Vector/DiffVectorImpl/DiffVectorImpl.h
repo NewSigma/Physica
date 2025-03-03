@@ -55,7 +55,7 @@ namespace Physica {
             g.zeros();
         }
         else
-            v.assign(*this);
+            v_.assign(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>

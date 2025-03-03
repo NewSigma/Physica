@@ -132,7 +132,9 @@ namespace Physica {
     template<Scalar T>
     CoDiff<T> ln(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
-        assert(x.isPositive() && "[Error]: Invalid param");
+        if constexpr (!ScalarType::isComplex)
+            assert(x.isPositive() && "[Error]: Invalid param");
+
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             co_return ScalarType(ln(x.value()), x.grad() / GradType(x));
