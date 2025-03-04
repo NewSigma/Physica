@@ -42,7 +42,7 @@ namespace Physica {
     public:
         template<class Functor>
         __host__ __device__ static KernelFuture launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem = 0);
-        static void wait() { CUDAContext::getInstance().wait(); }
+        static inline void wait();
     };
 
     template<class Functor>
@@ -55,6 +55,11 @@ namespace Physica {
         Internal::kernel<<<numBlocks, numThreads, sharedMem, stream>>>(func);
         check(cudaGetLastError());
         return KernelFuture(stream);
+    }
+
+    inline void CUDAExecutor::wait() {
+        if constexpr (IsHost())
+            CUDAContext::getInstance().wait();
     }
 }
 

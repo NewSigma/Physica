@@ -45,7 +45,7 @@ namespace Physica {
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<DNN Net>
-        [[nodiscard]] CoDiff<T> forward(const Net& nn, VectorND<Tv>& x, const VectorND<Tv>& mask) const;
+        [[nodiscard]] CoDiff<T> forward(const Net& nn, VectorND<Tv>& x) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -68,10 +68,11 @@ namespace Physica {
 
     template<Scalar T>
     template<DNN Net>
-    auto LinearCoupler<T>::forward(const Net& nn, VectorND<Tv>& x, const VectorND<Tv>& mask) const -> CoDiff<T> {
-        assert(dim == x.getLength() && "[Error]: Dimensions do not match");
-        assert(x.getLength() == mask.getLength());
-        VectorND<Tv> xA = hadamard(x, mask);
+    auto LinearCoupler<T>::forward(const Net& nn, VectorND<Tv>& x) const -> CoDiff<T> {
+        assert(getDim() == x.getLength() && "[Error]: Dimensions do not match");
+        VectorND<Tv> xA(getDim());
+        xA.zeros();
+        xA.head(getDim() / 2) = x.head(getDim() / 2);
         VectorND<Tv> xB = x - xA;
         auto w1 = nn.forward(xA);
         auto w2 = nn.forward(xB);
@@ -95,7 +96,7 @@ namespace Physica {
     template<Scalar T>
     auto LinearCoupler<T>::transform(const VectorND<T>& weights, VectorND<Tv>& z) const -> CoDiff<T> {
         const auto factor = Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon());
-        const auto grid = weights.reshape_col(numBin, dim);
+        const auto grid = weights.reshape_col(numBin, getDim());
         const size_t length = z.getLength();
         Array<size_t> indexes(length);
         VectorND<T> deltas(length, 1);

@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "RValueVector.h"
 
@@ -51,7 +50,8 @@ namespace Physica {
         template<Vector V>
         __host__ __device__ void assign(V& target) const requires(CUDA<V>);
 
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
         template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packet(size_t index) const;
         template<Packet Pack>
@@ -63,7 +63,11 @@ namespace Physica {
         [[nodiscard]] __device__ inline Tr squaredNorm() const;
         [[nodiscard]] __device__ T max() const;
         [[nodiscard]] __device__ T min() const;
-        [[nodiscard]] __device__ T sum() const;
+        [[nodiscard]] __host__ __device__ T sum() const;
+        [[nodiscard]] __device__ T lnSumExp() const;
+        [[nodiscard]] __device__ T crossEntropy(size_t index) const;
+        [[nodiscard]] __device__ T lnSoftmax(size_t index) const;
+        [[nodiscard]] __device__ T softmax(size_t index) const;
         template<Vector V>
         [[nodiscard]] __device__ inline auto crossProduct(const device_obj<V>& v) const noexcept;
 

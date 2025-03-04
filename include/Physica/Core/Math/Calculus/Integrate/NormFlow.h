@@ -20,9 +20,11 @@
 
 #include "Physica/Core/ML/NeuralNetwork/Layer/LayerBase.h"
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "IntegrateImpl/AdaptiveBase.h"
 
 namespace Physica {
+    class CUDAExecutor;
     /**
      * Monte-carlo integration with neural importance sampling
      *
@@ -61,7 +63,6 @@ namespace Physica {
         /* Getters */
         using Base::getDim;
     private:
-        VectorND<Trv> makeMask() const;
         template<DNN Net, RNG R, class Executor>
         Trv trial_normal(Net& nn, FuncValue& mean, FuncValue& var);
         template<DNN Net, RNG R, class Executor>
@@ -122,25 +123,17 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    auto NormFlow<T, TakeLn>::makeMask() const -> VectorND<Trv> {
-        VectorND<Trv> mask(getDim(), 0);
-        mask.head(getDim() / 2) = Trv(1);
-        return mask;
-    }
-
-    template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, class Executor>
     auto NormFlow<T, TakeLn>::trial_normal(Net& nn, FuncValue& mean, FuncValue& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
-        const auto mask = makeMask();
 
         VectorND<Trv> x(getDim());
         Trv loss = 0;
         if constexpr (std::same_as<SeqExecutor, Executor>) {
             for (int i = 0; i < numSample; ++i) {
                 x.template random_uniform<R>();
-                const auto lnJ = nn.forward(x, mask);
+                const auto lnJ = nn.forward(x);
                 x = from + hadamard(coeff, x);
                 FuncValue y = nn(x);
                 FuncValue sample = y * exp(lnJ.value());
@@ -158,7 +151,7 @@ namespace Physica {
             Executor::parallel_for([&, this](size_t i) {
                 const int tid = Executor::getThreadID();
                 auto x = VectorND<Trv>::template random_uniform<R>(getDim());
-                const auto lnJ = nets[tid].forward(x, mask);
+                const auto lnJ = nets[tid].forward(x);
                 x = from + hadamard(coeff, x);
                 FuncValue y = nn(x);
                 samples[i] = y * exp(lnJ.value());
@@ -183,7 +176,6 @@ namespace Physica {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
         const auto lnVolume = ln(to - from).sum();
-        const auto mask = makeMask();
 
         VectorND<FuncValue> samples(numSample);
         Array<CoDiff<T>> lnJs(numSample);
@@ -191,22 +183,22 @@ namespace Physica {
         Trv loss = 0;
         if constexpr (std::same_as<SeqExecutor, Executor>) {
             VectorND<Trv> x(getDim());
-            for (size_t i = 0; i < numSample; ++i) {
+            for (int i = 0; i < numSample; ++i) {
                 x.template random_uniform<R>();
-                lnJs[i] = nn.forward(x, mask);
+                lnJs[i] = nn.forward(x);
                 lnJv[i] = lnJs[i].value();
                 x = from + hadamard(coeff, x);
                 samples[i] = nn(x);
             }
             loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
         }
-        else {
+        else if constexpr (std::same_as<ThreadExecutor, Executor>) {
             const int numThread = Executor::getNumThread();
             Array<Net> nets(numThread, nn);
             Executor::parallel_for([&, this](size_t i) {
                 const int tid = Executor::getThreadID();
                 auto x = VectorND<Trv>::template random_uniform<R>(getDim());
-                lnJs[i] = nets[tid].forward(x, mask);
+                lnJs[i] = nets[tid].forward(x);
                 lnJv[i] = lnJs[i].value();
                 x = from + hadamard(coeff, x);
                 samples[i] = nn(x);
@@ -215,6 +207,18 @@ namespace Physica {
 
             for (auto& net : nets)
                 nn.reverse(net);
+        }
+        else {
+            static_assert(std::same_as<CUDAExecutor, Executor>, "[Error]: Unsupported executor");
+            device_obj<VectorND<Trv>> x(getDim());
+            for (int i = 0; i < numSample; ++i) {
+                x.template random_uniform<R>();
+                lnJs[i] = nn.forward(x);
+                lnJv[i] = lnJs[i].value();
+                Executor::wait();
+                samples[i] = nn(from + hadamard(coeff, x.toHost()));
+            }
+            loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
         }
 
         Tv maxSample;

@@ -23,12 +23,18 @@
 namespace Physica {
     /**
      * This class helps implementing CRTP.
+     *
+     * Add host version since NVCC does not like SIMD
      */
     template<class T>
     class CRTPBase {
         using This = CRTPBase<T>;
         using U = Traits<T>::Derived;
     public:
+        [[nodiscard]] U& getDerived_host() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard]] const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard]] U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
+
         [[nodiscard]] __host__ __device__ U& getDerived() noexcept { return *static_cast<U*>(this); }
         [[nodiscard]] __host__ __device__ const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
         [[nodiscard]] __host__ __device__ U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }

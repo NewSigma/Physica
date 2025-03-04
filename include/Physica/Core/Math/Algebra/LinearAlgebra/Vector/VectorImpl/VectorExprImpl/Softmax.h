@@ -37,10 +37,22 @@ namespace Physica {
 
         [[nodiscard]] ScalarType calc(size_t i) const { return Base::getExpr().softmax(i); }
         [[nodiscard]] ValueType calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
+        [[nodiscard]] ScalarType calc(size_t i, ScalarType lnsumexp) const;
+        [[nodiscard]] ValueType calc_value(size_t i, ValueType lnsumexp) const;
 
         template<Vector U, Vector V>
         void reverse(const U& y, const V& grad_) const noexcept requires(isReverseDiff) ;
     };
+
+    template<Vector T>
+    auto VectorExpr<ExprType::Softmax, T>::calc(size_t i, ScalarType lnsumexp) const -> ScalarType {
+        return exp(Base::getExpr().calc(i) - lnsumexp);
+    }
+
+    template<Vector T>
+    auto VectorExpr<ExprType::Softmax, T>::calc_value(size_t i, ValueType lnsumexp) const -> ValueType {
+        return exp(Base::getExpr().calc_value(i) - lnsumexp);
+    }
 
     template<Vector T>
     template<Vector V, class Executor>

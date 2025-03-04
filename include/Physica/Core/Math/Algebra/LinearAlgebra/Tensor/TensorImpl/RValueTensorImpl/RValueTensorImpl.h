@@ -80,7 +80,7 @@ namespace Physica {
     auto RValueTensor<Derived>::getShape() const noexcept -> IndexArray {
         const auto& x = Base::getDerived();
         IndexArray shape(x.getDim());
-        for (int i = 0; i < shape.getLength(); ++i)
+        for (int i = 0; i < static_cast<int>(shape.getLength()); ++i)
             shape[i] = x.getShape(i);
         return shape;
     }

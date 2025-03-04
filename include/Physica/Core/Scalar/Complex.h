@@ -82,16 +82,16 @@ namespace Physica {
     };
 
     template<Scalar T>
-    inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2);
+    __host__ __device__ inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2);
 
     template<Scalar T>
-    inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2);
+    __host__ __device__ inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2);
 
     template<Scalar T>
-    Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2);
+    __host__ __device__ Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2);
 
     template<Scalar T>
-    Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2);
+    __host__ __device__ Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2);
 
     template<Scalar T, ScalarOption Option>
     __host__ __device__ auto operator+(const Complex<T>& c,const Real<Option>& s);

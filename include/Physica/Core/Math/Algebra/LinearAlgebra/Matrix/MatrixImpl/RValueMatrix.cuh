@@ -56,6 +56,7 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         __host__ __device__ void assign(M& target) const requires(CUDA<M>);
+
         [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;
         [[nodiscard]] __host__ __device__ inline auto col(size_t c) noexcept;
@@ -86,7 +87,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline const auto bottomRightCorner(size_t from) const noexcept;
         [[nodiscard]] __host__ __device__ inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
-        /* Operations */
+
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
 

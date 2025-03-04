@@ -134,17 +134,17 @@ namespace Physica {
     }
 #endif
     template<Scalar T>
-    inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2) {
+    __host__ __device__ inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2) {
         return Complex<T>(c1.real() + c2.real(), c1.imag() + c2.imag());
     }
 
     template<Scalar T>
-    inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2) {
+    __host__ __device__ inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2) {
         return Complex<T>(c1.real() - c2.real(), c1.imag() - c2.imag());
     }
 
     template<Scalar T>
-    Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2) {
+    __host__ __device__ Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2) {
         const auto& re_1 = c1.real();
         const auto& im_1 = c1.imag();
         const auto& re_2 = c2.real();
@@ -163,7 +163,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2) {
+    __host__ __device__ Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2) {
         const auto& re_1 = c1.real();
         const auto& im_1 = c1.imag();
         const auto& re_2 = c2.real();

@@ -379,7 +379,7 @@ namespace Physica {
 
     template<class Derived>
     template<Matrix M1, Matrix M2>
-    __host__ __device__ void RValueMatrix<Derived>::assign_check(const M1& source, const M2& target) noexcept {
+    __host__ __device__ void RValueMatrix<Derived>::assign_check(const M1&, const M2&) noexcept {
         static_assert(M1::RowAtCompile == M2::RowAtCompile || M1::RowAtCompile == Dynamic || M2::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(M1::ColAtCompile == M2::ColAtCompile || M1::ColAtCompile == Dynamic || M2::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
         static_assert(!M1::isComplex || M2::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");

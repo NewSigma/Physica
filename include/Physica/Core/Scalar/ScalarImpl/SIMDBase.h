@@ -131,9 +131,9 @@ namespace Physica {
     template<class Derived>
     inline SIMDBase<Derived>::FullRealType SIMDBase<Derived>::asReal() const {
         if constexpr (isComplex)
-            return Base::getDerived().asReal();
+            return Base::getDerived_host().asReal();
         else
-            return Base::getDerived();
+            return Base::getDerived_host();
     }
 }
 

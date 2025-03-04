@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,16 +18,15 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
-#include "../LValueMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.cuh"
+#include "../LValueMatrix.cuh"
 
 namespace Physica {
-    template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class LMatrixBlock;
-
     template<Matrix T, size_t Col>
-    class LMatrixBlock<T, 1, Col> : public LValueVector<LMatrixBlock<T, 1, Col>> {
-        using This = LMatrixBlock<T, 1, Col>;
-        using Base = LValueVector<This>;
+    class device_obj<LMatrixBlock<T, 1, Col>> : public device_obj<LValueVector<LMatrixBlock<T, 1, Col>>> {
+        using host_obj = LMatrixBlock<T, 1, Col>;
+        using This = device_obj<host_obj>;
+        using Base = LValueVector<host_obj>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
@@ -37,22 +36,22 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        T& mat;
+        device_obj<T>& mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
+        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
             assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
-        LMatrixBlock(const This&) = default;
-        LMatrixBlock(This&&) noexcept = default;
-        ~LMatrixBlock() = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
+        __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
@@ -65,9 +64,10 @@ namespace Physica {
     };
 
     template<Matrix T, size_t Row>
-    class LMatrixBlock<T, Row, 1> : public LValueVector<LMatrixBlock<T, Row, 1>> {
-        using This = LMatrixBlock<T, Row, 1>;
-        using Base = LValueVector<This>;
+    class device_obj<LMatrixBlock<T, Row, 1>> : public device_obj<LValueVector<LMatrixBlock<T, Row, 1>>> {
+        using host_obj = LMatrixBlock<T, Row, 1>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<LValueVector<host_obj>>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
@@ -77,23 +77,23 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        T& mat;
+        device_obj<T>& mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
                 : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        LMatrixBlock(const This&) = default;
-        LMatrixBlock(This&&) noexcept = default;
-        ~LMatrixBlock() = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
+        __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
@@ -106,9 +106,10 @@ namespace Physica {
     };
 
     template<Matrix T>
-    class LMatrixBlock<T, 1, 1> : public LValueVector<LMatrixBlock<T, 1, 1>> {
-        using This = LMatrixBlock<T, 1, 1>;
-        using Base = LValueVector<This>;
+    class device_obj<LMatrixBlock<T, 1, 1>> : public device_obj<LValueVector<LMatrixBlock<T, 1, 1>>> {
+        using host_obj = LMatrixBlock<T, 1, 1>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<LValueVector<host_obj>>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
@@ -118,23 +119,23 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        T& mat;
+        device_obj<T>& mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
                 : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
-        LMatrixBlock(const This&) = delete;
-        LMatrixBlock(This&&) noexcept = delete;
-        ~LMatrixBlock() = default;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
+        __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t index) {
@@ -147,9 +148,10 @@ namespace Physica {
     };
 
     template<Matrix T>
-    class LMatrixBlock<T, Dynamic, Dynamic> : public LValueMatrix<LMatrixBlock<T, Dynamic, Dynamic>> {
-        using This = LMatrixBlock<T, Dynamic, Dynamic>;
-        using Base = LValueMatrix<This>;
+    class device_obj<LMatrixBlock<T, Dynamic, Dynamic>> : public device_obj<LValueMatrix<LMatrixBlock<T, Dynamic, Dynamic>>> {
+        using host_obj = LMatrixBlock<T, Dynamic, Dynamic>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<LValueMatrix<host_obj>>;
     public:
         using typename Base::ScalarType;
         using Base::isComplex;
@@ -158,20 +160,20 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        T& mat;
+        device_obj<T>& mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        LMatrixBlock(const This&) = delete;
-        LMatrixBlock(This&&) noexcept = delete;
-        ~LMatrixBlock() = default;
+        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
-        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
+        __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
@@ -180,7 +182,8 @@ namespace Physica {
     };
 
     template<Matrix T>
-    LMatrixBlock<T, Dynamic, Dynamic>::LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+    __host__ __device__ device_obj<LMatrixBlock<T, Dynamic, Dynamic>>::device_obj(
+            device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(mat_)
             , fromRow(fromRow_)
             , rowCount(rowCount_)
@@ -191,29 +194,19 @@ namespace Physica {
     }
 
     template<Matrix T>
-    __host__ __device__ inline auto LMatrixBlock<T, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) -> PtrTy {
+    __host__ __device__ inline auto device_obj<LMatrixBlock<T, Dynamic, Dynamic>>::data_ptr(size_t row, size_t col) -> PtrTy {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);
     }
 
     template<Matrix T>
-    __host__ __device__ auto LMatrixBlock<T, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
+    __host__ __device__ auto device_obj<LMatrixBlock<T, Dynamic, Dynamic>>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 }
 
 namespace Physica {
     template<Matrix T, size_t Row, size_t Col>
-    class Traits<LMatrixBlock<T, Row, Col>> {
-    public:
-        using ScalarType = T::ScalarType;
-        constexpr static int Option = T::Option;
-        constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColAtCompile = Col;
-        constexpr static size_t SizeAtCompile = Row * Col;
-
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
-    };
+    class Traits<device_obj<LMatrixBlock<T, Row, Col>>> : public Traits<LMatrixBlock<T, Row, Col>> {};
 }

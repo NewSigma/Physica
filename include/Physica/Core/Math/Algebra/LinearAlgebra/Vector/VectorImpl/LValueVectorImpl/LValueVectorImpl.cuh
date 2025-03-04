@@ -112,6 +112,22 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<class T>
+    __host__ __device__ void device_obj<LValueVector<Derived>>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
+        static_assert(std::same_as<typename ScalarType::GradType, typename T::ScalarType>, "[Error]: Inconsistent ScalarType");
+        if constexpr (Scalar<T>) {
+            for (size_t i = 0; i < Base::getLength(); ++i)
+                (*this)[i].reverse(grad);
+        }
+        else {
+            static_assert(Vector<T>, "[Error]: Unexpected type");
+            assert(Base::getLength() == grad.getLength());
+            for (size_t i = 0; i < Base::getLength(); ++i)
+                (*this)[i].reverse(grad.calc(i));
+        }
+    }
+
+    template<class Derived>
     template<size_t Length>
     __host__ __device__ inline auto device_obj<LValueVector<Derived>>::head(size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), 0, to);

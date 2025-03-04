@@ -54,8 +54,8 @@ namespace Physica {
         template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
         template<Scalar T> void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Vector T, class Executor = SeqExecutor>
-        inline Derived& operator=(const T& v_);
+        template<Vector V, class Executor = SeqExecutor>
+        inline Derived& operator=(const V& v_) requires(!CUDA<V>);
         template<Vector V> inline void operator+=(const V& v);
         template<Vector V> inline void operator-=(const V& v);
 
@@ -86,17 +86,17 @@ namespace Physica {
         [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
 
         template<Matrix M>
-        auto reshape(const M& mat) noexcept;
+        [[nodiscard]] auto reshape(const M& mat) noexcept;
         template<Matrix M>
-        const auto reshape(const M& mat) const noexcept;
+        [[nodiscard]] const auto reshape(const M& mat) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_col(size_t row, size_t col) noexcept;
+        [[nodiscard]] auto reshape_col(size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        const auto reshape_col(size_t row, size_t col) const noexcept;
+        [[nodiscard]] const auto reshape_col(size_t row, size_t col) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_row(size_t row, size_t col) noexcept;
+        [[nodiscard]] auto reshape_row(size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        const auto reshape_row(size_t row, size_t col) const noexcept;
+        [[nodiscard]] const auto reshape_row(size_t row, size_t col) const noexcept;
 
         inline void toUnit();
         template<RNG R>

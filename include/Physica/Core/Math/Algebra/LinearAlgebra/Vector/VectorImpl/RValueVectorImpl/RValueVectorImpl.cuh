@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../RValueVector.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/PlainStruct.h"
 
@@ -105,12 +106,69 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::sum() const -> T {
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::sum() const -> T {
         assert(getLength() != 0);
-        auto result = T(0);
-        for (size_t i = 0; i < getLength(); ++i)
-            result += calc(i);
-        return result;
+        if (IsHost()) {
+            using U = std::conditional<isReverseDiff, Tv, T>::type;
+            const auto config = makeKernelConfig();
+            device_obj<VectorND<U>> buffer(MaxThreadPerBlock);
+            auto future = CUDAExecutor::launch([v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
+                const auto& v = v_.getDerived();
+                auto& buffer = buffer_.getDerived();
+                U local = 0;
+                for (int i = threadIdx.x; i < v.getLength(); i += MaxThreadPerBlock) {
+                    if constexpr (isReverseDiff)
+                        local += v.calc_value(i);
+                    else
+                        local += v.calc(i);
+                }
+                buffer[threadIdx.x] = local;
+            }, 1, MaxThreadPerBlock);
+
+            if constexpr (IsHost()) { // To silence warnings
+                future.wait();
+                return buffer.toHost().sum();
+            }
+            else
+                unreachable();
+        }
+        else {
+            auto result = T(0);
+            for (size_t i = 0; i < getLength(); ++i) {
+                if constexpr (isReverseDiff)
+                    result += calc_value(i);
+                else
+                    result += calc(i);
+            }
+            return result;
+        }
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::lnSumExp() const -> T {
+        const auto& v = Base::getDerived();
+        Tv m;
+        if constexpr (isComplex)
+            m = values().reals().max();
+        else
+            m = values().max();
+        return ln(exp(v - m).sum() + Trv(std::numeric_limits<Trv>::min())) + m; // Add min() to avoid ln(0)
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::crossEntropy(size_t index) const -> T {
+        const auto& v = Base::getDerived();
+        return (v - calc(index)).lnSumExp();
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::lnSoftmax(size_t index) const -> T {
+        return -crossEntropy(index);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::softmax(size_t index) const -> T {
+        return exp(lnSoftmax(index));
     }
 
     template<class Derived>

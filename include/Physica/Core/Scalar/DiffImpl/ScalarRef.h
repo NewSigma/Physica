@@ -46,8 +46,8 @@ namespace Physica {
         __host__ __device__ inline This& operator=(This&& other) noexcept;
         template<Scalar U>
         __host__ __device__ inline This& operator=(const U& other);
-        __host__ __device__ inline This& operator=(int x) { return operator=(ScalarType(x)); }
-        __host__ __device__ inline This& operator=(double x) { return operator=(ScalarType(x)); }
+        __host__ __device__ inline This& operator=(int x) { return operator=(T(x)); }
+        __host__ __device__ inline This& operator=(double x) { return operator=(T(x)); }
         [[nodiscard]] __host__ __device__ operator ScalarType() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }

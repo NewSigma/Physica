@@ -13,7 +13,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
 else()
     add_compile_options(-Wall -fno-plt -mrdrnd -fno-math-errno -fno-trapping-math -fno-signed-zeros -march=native)
     add_link_options(-Wl,-Bsymbolic,--as-needed,--gc-sections)
-    if(CMAKE_BUILD_TYPE MATCHES Release)
+    if(CMAKE_BUILD_TYPE MATCHES Debug)
+        add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Og>)
+    elseif(CMAKE_BUILD_TYPE MATCHES Release)
         add_link_options(-Wl,--strip-all)
     endif()
 
@@ -60,7 +62,7 @@ if(${PHYSICA_CUDA})
         # Reference: https://github.com/clangd/clangd/discussions/1676
         set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
 
-        set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
+        set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G -Xcompiler -Og")
         set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
         # Warning 20208: Use long double in device code
         set(CMAKE_CUDA_FLAGS 

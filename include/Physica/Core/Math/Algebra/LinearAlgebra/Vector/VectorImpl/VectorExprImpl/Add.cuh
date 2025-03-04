@@ -21,10 +21,10 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector T, Scalar U>
-    class device_obj<VectorExpr<ExprType::Add, T, U>>
-            : public device_obj<BinaryVectorExpr<ExprType::Add, T, U>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Add, T, U>>;
+    template<Vector V, Scalar U>
+    class device_obj<VectorExpr<ExprType::Add, V, U>>
+            : public device_obj<BinaryVectorExpr<ExprType::Add, V, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Add, V, U>>;
     protected:
         using typename Base::T;
         using typename Base::Tv;

@@ -21,11 +21,11 @@
 #include "../MatrixExpr.cuh"
 
 namespace Physica {
-    template<class T, class U>
-    class device_obj<MatrixExpr<ExprType::Sub, T, U>> : public device_obj<BinaryMatrixExpr<ExprType::Sub, T, U>> {
-        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either types should be Scalar");
+    template<class T1, class T2>
+    class device_obj<MatrixExpr<ExprType::Sub, T1, T2>> : public device_obj<BinaryMatrixExpr<ExprType::Sub, T1, T2>> {
+        static_assert(Scalar<T1> || Scalar<T2>, "[Error]: Either types should be Scalar");
 
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Sub, T, U>>;
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Sub, T1, T2>>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -33,14 +33,14 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
+            if constexpr (Matrix<T1>)
                 return Base::getLHS().calc(row, col) - Base::getRHS();
             else
                 return Base::getLHS() - Base::getRHS().calc(row, col);
         }
 
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
+            if constexpr (Matrix<T1>)
                 return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
             else
                 return Base::getLHS().value() - Base::getRHS().calc_value(row, col);

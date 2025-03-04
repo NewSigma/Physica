@@ -30,6 +30,7 @@ namespace Physica {
         using BlockType = device_obj<LVectorBlock<Derived, Length>>;
     public:
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
     protected:
         using typename Base::Tv;
         using PtrTy = ScalarType::PtrTy;
@@ -59,6 +60,9 @@ namespace Physica {
         [[nodiscard]] __device__ ConstRefTy calc(size_t index) const { return operator[](index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return calc(index).value(); }
 
+        template<class T>
+        __host__ __device__ void reverse(const T& grad) const noexcept requires(isReverseDiff);
+
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
@@ -71,6 +75,19 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline const auto segment(size_t from, size_t to) const noexcept;
+
+        template<Matrix M>
+        [[nodiscard]] __host__ __device__ auto reshape(const M& mat) noexcept;
+        template<Matrix M>
+        [[nodiscard]] __host__ __device__ const auto reshape(const M& mat) const noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto reshape_col(size_t row, size_t col) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ const auto reshape_col(size_t row, size_t col) const noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ auto reshape_row(size_t row, size_t col) noexcept;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ const auto reshape_row(size_t row, size_t col) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;

@@ -84,7 +84,7 @@ namespace Physica {
         __host__ __device__ bool operator==(const Real& s) const { return f == s.f; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
-        [[nodiscard]] inline Real mod() const noexcept;
+        [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
         __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] __host__ __device__ float toMachine() const noexcept { return f; }
@@ -111,7 +111,7 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ inline Real<Float32>::Real(const T& x) : f(float(x)) {}
 
-    inline Real<Float32> Real<Float32>::mod() const noexcept {
+    __host__ __device__ inline Real<Float32> Real<Float32>::mod() const noexcept {
         float buffer;
         return std::modf(toMachine(), &buffer);
     }
