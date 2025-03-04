@@ -115,7 +115,7 @@ namespace Physica {
             const auto col = grid.col(i).values();
             const Tv lnsumexp = col.lnSumExp();
             const Tv tmp = z[i] * factor;
-            const size_t index = tmp.toMachine();
+            const int index = tmp.toMachine();
             indexes[i] = index;
             const Tv p = softmax(col).calc(index, lnsumexp);
             deltas[i] = std::max(p, Tv(std::numeric_limits<Tv>::min()));

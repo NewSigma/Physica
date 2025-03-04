@@ -30,9 +30,9 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const device_obj<T>& v;
+        PlainStruct<const device_obj<T>> v;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(v_) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -40,9 +40,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.calc(s).real(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.calc_value(s).real(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.getDerived().calc(s).real(); }
+        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.getDerived().calc_value(s).real(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
     };
 
     template<class T>
@@ -54,9 +54,9 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const device_obj<T>& v;
+        PlainStruct<const device_obj<T>> v;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(v_) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -64,9 +64,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.calc(s).imag(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.calc_value(s).imag(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.getDerived().calc(s).imag(); }
+        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.getDerived().calc_value(s).imag(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
     };
 
     template<class T>
@@ -79,9 +79,9 @@ namespace Physica {
         using typename Base::ValueType;
         using Base::isReverseDiff;
     private:
-        const device_obj<T>& v;
+        PlainStruct<const device_obj<T>> v;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(v_) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -89,9 +89,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __device__ CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).squaredNorm(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.getDerived().calc(s).squaredNorm(); }
+        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.getDerived().calc_value(s).squaredNorm(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
     };
 
     template<class T>
@@ -103,9 +103,9 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const device_obj<T>& v;
+        PlainStruct<const device_obj<T>> v;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(v_) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -113,9 +113,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __device__ CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).norm(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.calc_value(s).norm(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.getDerived().calc(s).norm(); }
+        [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return v.getDerived().calc_value(s).norm(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
     };
 
     template<class T>
@@ -127,9 +127,9 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const device_obj<T>& v;
+        PlainStruct<const device_obj<T>> v;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(v_) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -137,9 +137,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.calc_value(s); }
+        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.getDerived().calc_value(s); }
         [[nodiscard]] __device__ ScalarType calc_value(size_t s) const { return calc(s); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
     };
 
     template<class T, int GradOrder>
@@ -151,9 +151,9 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const device_obj<T>& v;
+        PlainStruct<const device_obj<T>> v;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(v_) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& v_) : v(asStruct(v_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -161,9 +161,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return v.getDerived().calc(s).template grad<GradOrder>(); }
         [[nodiscard]] __device__ ValueType calc_value(size_t s) const { return calc(s).value(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
     };
 }
 

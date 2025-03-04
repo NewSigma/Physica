@@ -33,8 +33,10 @@ namespace Physica {
     }
 
     CUDAStream::~CUDAStream() {
-        cudaStreamDestroy(stream);
-        stream = nullptr;
+        if (stream != nullptr) {
+            cudaStreamDestroy(stream);
+            stream = nullptr;
+        }
     }
 
     cudaError_t CUDAStream::query() const {

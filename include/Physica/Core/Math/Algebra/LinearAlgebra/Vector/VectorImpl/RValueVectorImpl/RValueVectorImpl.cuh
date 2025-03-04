@@ -157,17 +157,20 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::crossEntropy(size_t index) const -> T {
+        assert(index < getLength() && "[Error]: Index overflow");
         const auto& v = Base::getDerived();
         return (v - calc(index)).lnSumExp();
     }
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::lnSoftmax(size_t index) const -> T {
+        assert(index < getLength() && "[Error]: Index overflow");
         return -crossEntropy(index);
     }
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::softmax(size_t index) const -> T {
+        assert(index < getLength() && "[Error]: Index overflow");
         return exp(lnSoftmax(index));
     }
 

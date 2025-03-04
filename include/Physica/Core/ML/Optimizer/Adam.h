@@ -47,8 +47,10 @@ namespace Physica {
             T beta2t;
 
             VectorBuffer() = default;
-            VectorBuffer(const Args& args, size_t length)
-                    : m(length, 0), v(length, 0), beta1t(args.beta1), beta2t(args.beta2) {}
+            VectorBuffer(const Args& args, size_t length) : m(length), v(length), beta1t(args.beta1), beta2t(args.beta2) {
+                m.zeros();
+                v.zeros();
+            }
         };
 
         struct MatrixBuffer {
@@ -58,8 +60,10 @@ namespace Physica {
             T beta2t;
 
             MatrixBuffer() = default;
-            MatrixBuffer(const Args& args, size_t row, size_t col)
-                    : m(row, col, 0), v(row, col, 0), beta1t(args.beta1), beta2t(args.beta2) {}
+            MatrixBuffer(const Args& args, size_t row, size_t col) : m(row, col), v(row, col), beta1t(args.beta1), beta2t(args.beta2) {
+                m.zeros();
+                v.zeros();
+            }
         };
 
         std::unordered_map<void*, std::variant<VectorBuffer, MatrixBuffer>> targetBufferMap;

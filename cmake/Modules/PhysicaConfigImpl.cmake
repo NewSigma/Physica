@@ -22,12 +22,12 @@ else()
     if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
         add_compile_options(-Wextra -fassume-sane-operators-new-delete)
     elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
-        add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fassume-sane-operator-new>) # -fassume-nothrow-exception-dtor
+        add_compile_options(-fassume-sane-operator-new) # -fassume-nothrow-exception-dtor
         # Workaround for P2014R0
         #
         # Reference:
         # [1] https://github.com/llvm/llvm-project/issues/56671
-        add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fcoro-aligned-allocation>)
+        add_compile_options(-fcoro-aligned-allocation)
         add_link_options(-lstdc++) # Add this if you prefer libstdc++
 
         if (CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
