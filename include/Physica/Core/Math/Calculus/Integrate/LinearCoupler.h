@@ -97,20 +97,21 @@ namespace Physica {
     auto LinearCoupler<T>::transform(const VectorND<T>& weights, VectorND<Tv>& z) const -> CoDiff<T> {
         const auto factor = Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon());
         const auto grid = weights.reshape_col(numBin, getDim());
-        const size_t length = z.getLength();
-        Array<size_t> indexes(length);
-        VectorND<T> deltas(length, 1);
+        const int dim = getDim();
+        Array<size_t> indexes(dim);
+        VectorND<T> deltas(dim, 1);
         VectorND<Tv> prob(numBin);
         int subdim = 0;
-        for (size_t i = 0; i < length; ++i) {
+        for (int i = 0; i < dim; ++i) {
             if (z[i].isZero())
                 continue;
-            prob = softmax(grid.col(i).values());
-
             const Tv tmp = z[i] * factor;
             const size_t index = tmp.toMachine();
             indexes[i] = index;
+
+            prob = softmax(grid.col(i).values());
             deltas[i] = std::max(prob[index], Tv(std::numeric_limits<Tv>::min()));
+
             Tv zi = tmp.mod() * prob[index];
             if (index > 0)
                 zi = std::min(Tv(1), zi + prob.head(index).sum());
@@ -123,11 +124,11 @@ namespace Physica {
         if constexpr (ReverseDiff<T>) {
             auto tmp = co_yield lnJ.value();
             lnJ.reverse_final(tmp.grad());
-            for (size_t i = 0; i < length; ++i) {
+            for (int i = 0; i < dim; ++i) {
                 if (z[i].isZero())
                     continue;
-                Tv s = grid.col(i).values().softmax(indexes[i]);
-                Tv g = (s - square(s)) * deltas[i].grad();
+                const Tv s = grid.col(i).values().softmax(indexes[i]);
+                const Tv g = (s - square(s)) * deltas[i].grad();
                 grid.col(i).reverse(-g / Tv(numBin));
                 grid(indexes[i], i).reverse(g);
             }

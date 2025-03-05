@@ -35,31 +35,33 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat, size_t fromRow_, [[maybe_unused]] size_t rowCount, size_t fromCol_, size_t colCount_)
-                : device_obj(mat, fromRow_, fromCol_, colCount_) {
+        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount, size_t fromCol_, size_t colCount_)
+                : device_obj(mat_, fromRow_, fromCol_, colCount_) {
             assert(rowCount == 1);
         }
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat, size_t fromRow_, size_t fromCol_, size_t colCount_)
-                : mat(mat.getDerived()), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
-            assert(fromRow < mat.getRow());
-            assert(fromCol + colCount <= mat.getCol());
+        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
+                : mat(asStruct(mat_.getDerived())), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
+            assert(fromRow < mat_.getRow());
+            assert(fromCol + colCount <= mat_.getCol());
         }
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
+        This& operator=(const This& m) { Base::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(fromRow, fromCol + index); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(fromRow, fromCol + index); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.getDerived().data_ptr(fromRow, fromCol + index); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.getDerived().data_ptr(fromRow, fromCol + index); }
     };
 
     template<Matrix T, size_t Row>
@@ -76,31 +78,33 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount)
-                : device_obj(mat, fromRow_, rowCount_, fromCol_) {
+        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount)
+                : device_obj(mat_, fromRow_, rowCount_, fromCol_) {
             assert(colCount == 1);
         }
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(mat.getDerived()), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(fromCol < mat.getCol());
+        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+                : mat(asStruct(mat_.getDerived())), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
+            assert(fromRow + rowCount <= mat_.getRow());
+            assert(fromCol < mat_.getCol());
         }
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
+        This& operator=(const This& m) { Base::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(fromRow + index, fromCol); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(fromRow + index, fromCol); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.getDerived().data_ptr(fromRow + index, fromCol); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.getDerived().data_ptr(fromRow + index, fromCol); }
     };
 
     template<Matrix T>
@@ -114,20 +118,22 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(mat.getDerived()), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(fromCol < mat.getCol());
+        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+                : mat(asStruct(mat_.getDerived())), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
+            assert(fromRow + rowCount <= mat_.getRow());
+            assert(fromCol < mat_.getCol());
         }
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
+        This& operator=(const This& m) { Base::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
@@ -135,9 +141,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t index) {
             assert(index == 0 && "[Error]: Index overflow");
-            return mat.data_ptr(fromRow, fromCol);
+            return mat.getDerived().data_ptr(fromRow, fromCol);
         }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t index) const {
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
             return const_cast<This&>(*this).data_ptr(index);
         }
     };
@@ -150,8 +156,11 @@ namespace Physica {
     public:
         using Base = device_obj<LValueMatrix<host_obj>>;
         using typename Base::ScalarType;
+    protected:
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
@@ -162,22 +171,42 @@ namespace Physica {
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
+        This& operator=(const This& m) { Base::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
+        /* Operations */
+        __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const;
     };
 
     template<Matrix T, size_t Row, size_t Col>
     __host__ __device__ device_obj<ContinuousMatrixBlock<T, Row, Col>>::device_obj(
             device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
-            : mat(mat_.getDerived())
+            : mat(asStruct(mat_.getDerived()))
             , fromRow(fromRow_)
             , rowCount(rowCount_)
             , fromCol(fromCol_)
             , colCount(colCount_) {
-        assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getCol());
+        assert(fromRow < mat_.getRow());
+        assert(fromCol < mat_.getCol());
+        assert((fromRow + rowCount) <= mat_.getRow());
+        assert((fromCol + colCount) <= mat_.getCol());
+    }
+
+    template<Matrix T, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<T, Row, Col>>::data_ptr(size_t row, size_t col) -> PtrTy {
+        assert(row < rowCount);
+        assert(col < colCount);
+        return mat.getDerived().data_ptr(row + fromRow, col + fromCol);
+    }
+
+    template<Matrix T, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<T, Row, Col>>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }
 

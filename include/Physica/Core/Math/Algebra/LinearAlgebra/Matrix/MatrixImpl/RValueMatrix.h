@@ -23,6 +23,7 @@
 namespace Physica {
     template<class Derived> class LValueMatrix;
     template<class Derived> class ContinuousMatrix;
+    template<class T, bool ReduceCol> class MatrixSum;
     template<class MatrixType> class Transpose;
     template<class MatrixType> class Conjugate;
     template<class MatrixType> class Hermite;
@@ -119,6 +120,7 @@ namespace Physica {
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
         [[nodiscard]] CoDiff<T> sum() const;
+        [[nodiscard]] auto sum_cols() const;
         [[nodiscard]] T mean() const;
         [[nodiscard]] T trace() const;
         [[nodiscard]] inline auto transpose() const noexcept;
@@ -176,11 +178,12 @@ namespace Physica {
 }
 
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
-#include "RValueMatrixImpl/Flatten.h"
-#include "RValueMatrixImpl/MatrixConvert.h"
+#include "RValueMatrixImpl/Sum.h"
 #include "RValueMatrixImpl/Transpose.h"
 #include "RValueMatrixImpl/Conjugate.h"
 #include "RValueMatrixImpl/Hermite.h"
+#include "RValueMatrixImpl/Flatten.h"
+#include "RValueMatrixImpl/MatrixConvert.h"
 #include "RValueMatrixImpl/ReshapedVector.h"
 #include "MatrixProduct/GEMM.h"
 #include "MatrixProduct/GEMV.h"

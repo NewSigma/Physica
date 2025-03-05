@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "RValueVector.h"
 
@@ -79,11 +80,11 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grads() const noexcept;
 
-        [[nodiscard]] __host__ __device__ std::pair<dim3, dim3> makeKernelConfig() const noexcept;
+        [[nodiscard]] __host__ __device__ KernelConfig makeKernelConfig() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
-        [[nodiscard]] __host__ __device__ static std::pair<dim3, dim3> makeKernelConfig(size_t length) noexcept;
+        [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t length) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

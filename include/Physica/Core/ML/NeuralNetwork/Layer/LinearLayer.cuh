@@ -30,14 +30,15 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<host_obj>>;
 
-        using HostMatrix = host_obj::MatrixType;
-        using MachineType = T::MachineType;
-        using MatrixType = device_obj<DenseMatrix<T, host_obj::Option>>;
+        using Tm = T::MachineType;
         using BiasType = std::conditional<WithBias, device_obj<VectorND<T>>, PlainStruct<void>>::type;
+    public:
+        template<Scalar U>
+        using MatrixND = host_obj::template MatrixND<U>;
     private:
         using Tv = T::ValueType;
 
-        MatrixType weights;
+        device_obj<MatrixND<T>> weights;
         [[no_unique_address]] BiasType bias;
     public:
         device_obj() = default;
@@ -50,8 +51,8 @@ namespace Physica {
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Vector V>
-        [[nodiscard]] inline CoDiff<device_obj<VectorND<T>>> forward(const V& x) const;
+        template<class U>
+        [[nodiscard]] auto forward(const U& x) const;
         void reverse(const This& __restrict other) const noexcept;
 
         template<class Optimizer>
@@ -82,6 +83,8 @@ namespace Physica {
     private:
         template<Vector V>
         [[nodiscard]] inline CoDiff<device_obj<VectorND<T>>> forward_impl(const V& x) const requires(CUDA<V>);
+        template<Matrix M>
+        [[nodiscard]] inline CoDiff<device_obj<MatrixND<T>>> forward_impl(const M& x) const requires(CUDA<M>);
     };
 
     template<Scalar T, bool WithBias>
@@ -105,10 +108,16 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<Vector V>
-    auto device_obj<LinearLayer<T, WithBias>>::forward(const V& x) const -> CoDiff<device_obj<VectorND<T>>> {
-        assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
-        if constexpr (CUDA<V>)
+    template<class U>
+    auto device_obj<LinearLayer<T, WithBias>>::forward(const U& x) const {
+        if constexpr (Vector<U>)
+            assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
+        else {
+            static_assert(Matrix<U>, "[Error]: Unexpected type");
+            assert(x.getRow() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
+        }
+
+        if constexpr (CUDA<U>)
             return forward_impl(x);
         else
             return forward_impl(x.toDevice());
@@ -198,7 +207,7 @@ namespace Physica {
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_uniform(Tv gain) {
         const auto factor = (gain * sqrt(Tv(6) / Tv(getInputDim() + getOutputDim()))).toMachine();
-        std::uniform_real_distribution<MachineType> dist(-factor, factor);
+        std::uniform_real_distribution<Tm> dist(-factor, factor);
         weights.template random_any<R, decltype(dist)>(dist);
         if constexpr (WithBias)
             bias.template random_any<R, decltype(dist)>(dist);
@@ -208,7 +217,7 @@ namespace Physica {
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(Tv gain) {
         const auto deviation = (gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()))).toMachine();
-        std::normal_distribution<MachineType> dist(0, deviation);
+        std::normal_distribution<Tm> dist(0, deviation);
         weights.template random_any<R, decltype(dist)>(dist);
         if constexpr (WithBias)
             bias.template random_any<R, decltype(dist)>(dist);
@@ -232,7 +241,30 @@ namespace Physica {
 
     template<Scalar T, bool WithBias>
     template<Vector V>
-    inline CoDiff<device_obj<VectorND<T>>> device_obj<LinearLayer<T, WithBias>>::forward_impl(const V& x) const requires(CUDA<V>) {
+    inline auto device_obj<LinearLayer<T, WithBias>>::forward_impl(const V& x) const -> CoDiff<device_obj<VectorND<T>>> requires(CUDA<V>) {
+        if constexpr (ReverseDiff<T>) {
+            auto expr1 = weights * x;
+            if constexpr (WithBias) {
+                auto expr2 = expr1 + bias;
+                const auto result = co_yield expr2.values();
+                expr2.reverse(result.grads());
+            }
+            else {
+                const auto result = co_yield expr1.values();
+                expr1.reverse(result.grads());
+            }
+        }
+        else {
+            if constexpr (WithBias)
+                co_return weights * x + bias;
+            else
+                co_return weights * x;
+        }
+    }
+
+    template<Scalar T, bool WithBias>
+    template<Matrix M>
+    inline auto device_obj<LinearLayer<T, WithBias>>::forward_impl(const M& x) const -> CoDiff<device_obj<MatrixND<T>>>  requires(CUDA<M>) {
         if constexpr (ReverseDiff<T>) {
             auto expr1 = weights * x;
             if constexpr (WithBias) {

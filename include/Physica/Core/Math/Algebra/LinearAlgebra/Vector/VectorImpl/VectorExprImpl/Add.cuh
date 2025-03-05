@@ -25,6 +25,8 @@ namespace Physica {
     class device_obj<VectorExpr<ExprType::Add, V, U>>
             : public device_obj<BinaryVectorExpr<ExprType::Add, V, U>> {
         using Base = device_obj<BinaryVectorExpr<ExprType::Add, V, U>>;
+    public:
+        using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -32,7 +34,10 @@ namespace Physica {
         using Base::Base;
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t index) const {
-            return Base::getLHS().calc(index) + Base::getRHS();
+            if constexpr (isReverseDiff)
+                return calc_value(index);
+            else
+                return Base::getLHS().calc(index) + Base::getRHS();
         }
 
         [[nodiscard]] __device__ Tv calc_value(size_t index) const {
@@ -48,22 +53,34 @@ namespace Physica {
         [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const {
             return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS());
         }
+
+        template<Vector V1>
+        void reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
+            const auto& grad = grad_.values();
+            if constexpr (ReverseDiff<T>)
+                Base::getLHS().reverse(grad);
+            if constexpr (ReverseDiff<U>)
+                Base::getRHS().reverse(grad.sum());
+        }
     };
 
     template<Vector T1, Vector T2>
     class device_obj<VectorExpr<ExprType::Add, T1, T2>>
             : public device_obj<BinaryVectorExpr<ExprType::Add, T1, T2>> {
         using Base = device_obj<BinaryVectorExpr<ExprType::Add, T1, T2>>;
+    public:
+        using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     public:
-        using Base::isReverseDiff;
-    public:
         using Base::Base;
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t index) const {
-            return Base::getLHS().calc(index) + Base::getRHS().calc(index);
+            if constexpr (isReverseDiff)
+                return calc_value(index);
+            else
+                return Base::getLHS().calc(index) + Base::getRHS().calc(index);
         }
 
         [[nodiscard]] __device__ Tv calc_value(size_t index) const {
@@ -102,6 +119,11 @@ namespace Physica {
     template<Vector T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator+(T&& v, U&& x) noexcept requires(CUDA<T>) {
         return device_obj<VectorExpr<ExprType::Add, T&&, U&&>>(std::forward<T>(v), std::forward<U>(x));
+    }
+
+    template<Scalar U, Vector T>
+    [[nodiscard]] __host__ __device__ inline auto operator+(U&& x, T&& v) noexcept requires(CUDA<T>) {
+        return std::forward<T>(v) + std::forward<U>(x);
     }
 
     template<Vector T1, Vector T2>

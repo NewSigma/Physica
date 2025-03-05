@@ -32,15 +32,15 @@ namespace Physica {
         using Base::isComplex;
         using Base::SizeAtCompile;
     private:
-        device_obj<T>& mat;
+        PlainStruct<const device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
-                : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
-            assert(fromRow < mat.getRow());
-            assert(fromCol + colCount <= mat.getCol());
+        __host__ __device__ device_obj(const device_obj<T>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
+                : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
+            assert(fromRow < mat_.getRow());
+            assert(fromCol + colCount <= mat_.getCol());
         }
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
@@ -48,11 +48,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             assert(index < colCount);
-            return mat.calc(fromRow, fromCol + index);
+            return mat.getDerived().calc(fromRow, fromCol + index);
         }
         [[nodiscard]] __device__ ValueType calc_value(size_t index) const {
             assert(index < colCount);
-            return mat.calc_value(fromRow, fromCol + index);
+            return mat.getDerived().calc_value(fromRow, fromCol + index);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
     };
@@ -68,15 +68,15 @@ namespace Physica {
         using Base::isComplex;
         using Base::SizeAtCompile;
     private:
-        device_obj<T>& mat;
+        PlainStruct<const device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(fromCol < mat.getCol());
+        __host__ __device__ device_obj(const device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+                : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
+            assert(fromRow + rowCount <= mat_.getRow());
+            assert(fromCol < mat_.getCol());
         }
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
@@ -84,11 +84,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             assert(index < rowCount);
-            return mat.calc(fromRow + index, fromCol);
+            return mat.getDerived().calc(fromRow + index, fromCol);
         }
         [[nodiscard]] __device__ ValueType calc_value(size_t index) const {
             assert(index < rowCount);
-            return mat.calc_value(fromRow + index, fromCol);
+            return mat.getDerived().calc_value(fromRow + index, fromCol);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
     };
@@ -102,13 +102,13 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        device_obj<T>& mat;
+        PlainStruct<const device_obj<T>> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        __host__ __device__ device_obj(const device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -121,28 +121,28 @@ namespace Physica {
 
     template<Matrix T>
     __host__ __device__ device_obj<RMatrixBlock<T, Dynamic, Dynamic>>::device_obj(
-            device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
-            : mat(mat_)
+            const device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+            : mat(asStruct(mat_))
             , fromRow(fromRow_)
             , rowCount(rowCount_)
             , fromCol(fromCol_)
             , colCount(colCount_) {
-        assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getCol());
+        assert((fromRow + rowCount) <= mat_.getRow());
+        assert((fromCol + colCount) <= mat_.getCol());
     }
 
     template<Matrix T>
     __device__ auto device_obj<RMatrixBlock<T, Dynamic, Dynamic>>::calc(size_t row, size_t col) const -> ScalarType {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat.calc(row + fromRow, col + fromCol);
+        return mat.getDerived().calc(row + fromRow, col + fromCol);
     }
 
     template<Matrix T>
     __device__ auto device_obj<RMatrixBlock<T, Dynamic, Dynamic>>::calc_value(size_t row, size_t col) const -> ValueType {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat.calc_value(row + fromRow, col + fromCol);
+        return mat.getDerived().calc_value(row + fromRow, col + fromCol);
     }
 }
 

@@ -19,7 +19,6 @@
 #pragma once
 
 #include "../RValueMatrix.cuh"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/PlainStruct.h"
 #include "Flatten.cuh" // IWYU pragma: export
 
@@ -31,7 +30,6 @@ namespace Physica {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
         if (IsHost()) {
-            const auto config = target.makeKernelConfig();
             CUDAExecutor::launch([source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
@@ -43,7 +41,7 @@ namespace Physica {
                     const size_t c = target.colFromMajorMinor(major, minor);
                     target(r, c) = source.calc(r, c);
                 }
-            }, config.first, config.second);
+            }, target.makeKernelConfig());
         }
         else {
             const size_t maxMajor = target.getMaxMajor();
@@ -52,10 +50,16 @@ namespace Physica {
                 for (size_t minor = 0; minor < maxMinor; ++minor) {
                     const size_t r = target.rowFromMajorMinor(major, minor);
                     const size_t c = target.colFromMajorMinor(major, minor);
-                    target(r, c) = calc(r, c);
+                    target(r, c) = Base::getDerived().calc(r, c);
                 }
             }
         }
+    }
+
+    template<class Derived>
+    template<Matrix M>
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(M& target) const requires(CUDA<M>) {
+        target = target + Base::getDerived();
     }
 
     template<class Derived>
@@ -209,9 +213,18 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline device_obj<RValueMatrix<Derived>>::ScalarType
-    __device__ device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const {
+    __device__ inline auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const -> ScalarType {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::sum_rows() const {
+        return device_obj<MatrixSum<Derived, false>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::sum_cols() const {
+        return device_obj<MatrixSum<Derived, true>>(Base::getDerived());
     }
 
     template<class Derived>
@@ -261,17 +274,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueMatrix<Derived>>::makeKernelConfig() const noexcept {
+    __host__ __device__ KernelConfig device_obj<RValueMatrix<Derived>>::makeKernelConfig() const noexcept {
         return makeKernelConfig(getMaxMajor(), getMaxMinor());
     }
 
     template<class Derived>
-    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueMatrix<Derived>>::makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept {
+    __host__ __device__ KernelConfig device_obj<RValueMatrix<Derived>>::makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept {
         constexpr size_t MaxThread = MaxThreadPerBlock;
         const uint32_t numThread = std::min<uint32_t>(maxMinor, MaxThread);
         const uint32_t numBlockX = (maxMinor + numThread - 1) / numThread;
         const uint32_t numBlockY = maxMajor;
-        return std::make_pair(dim3{numBlockX, numBlockY}, dim3{numThread});
+        return KernelConfig({numBlockX, numBlockY}, numThread);
     }
 
     template<class Derived>

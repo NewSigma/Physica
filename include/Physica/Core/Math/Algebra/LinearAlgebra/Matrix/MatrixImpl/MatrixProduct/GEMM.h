@@ -48,8 +48,8 @@ namespace Physica {
         using This = MatrixProduct<T1, T2>;
         using Base = RValueMatrix<This>;
     public:
-        using Base::isReverseDiff;
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
         using DefaultType = DenseMatrix<ScalarType,
                                         Internal::ProductOption<T1, T2>::Option,
                                         Base::RowAtCompile,
@@ -72,8 +72,12 @@ namespace Physica {
         template<Matrix M>
         void assign(LValueMatrix<M>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
-        /* Getters */
+
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+
+        template<Matrix M>
+        void reverse(const M& grad) const noexcept requires(isReverseDiff);
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] const T1& getLHS() const noexcept { return mat1; }
@@ -108,7 +112,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t col) const {
+    auto MatrixProduct<T1, T2>::calc(size_t row, size_t col) const -> ScalarType {
         ScalarType result(0);
         for (size_t i = 0; i < mat1.getCol(); ++i)
             result += ScalarType(mat1.calc(row, i)) * ScalarType(mat2.calc(i, col));
@@ -116,7 +120,17 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto operator*(const T1& mat1, const T2& mat2) noexcept requires((T1::ColAtCompile != 1 && T2::ColAtCompile != 1) || (T1::ColAtCompile == 1 && T2::ColAtCompile == 1)) {
+    template<Matrix M>
+    void MatrixProduct<T1, T2>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+        if constexpr (ReverseDiff<T1>)
+            mat1.reverse(grad * mat2.transpose());
+        if constexpr (ReverseDiff<T2>)
+            mat2.reverse(mat1.transpose() * grad);
+    }
+
+    template<Matrix T1, Matrix T2>
+    [[nodiscard]] inline auto operator*(const T1& mat1, const T2& mat2) noexcept
+            requires(((T1::ColAtCompile != 1 && T2::ColAtCompile != 1) || (T1::ColAtCompile == 1 && T2::ColAtCompile == 1)) && !CUDA<T1> && !CUDA<T2>) {
         assert(mat1.getCol() == mat2.getRow());
         return MatrixProduct<T1, T2>(mat1, mat2);
     }

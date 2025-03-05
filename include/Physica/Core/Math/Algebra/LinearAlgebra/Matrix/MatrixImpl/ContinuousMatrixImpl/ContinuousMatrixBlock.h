@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../ContinuousMatrix.h"
 
 namespace Physica {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class ContinuousMatrixBlock;
@@ -182,7 +184,7 @@ namespace Physica {
             assert(index == 0 && "[Error]: Index overflow");
             return pVecHead;
         }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t index) const {
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
             return const_cast<This&>(*this).data_ptr(index);
         }
     };
@@ -236,16 +238,14 @@ namespace Physica {
     }
 
     template<Matrix T, size_t Row, size_t Col>
-    __host__ __device__ ContinuousMatrixBlock<T, Row, Col>::PtrTy
-    ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) {
+    __host__ __device__ auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) -> PtrTy {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);
     }
 
     template<Matrix T, size_t Row, size_t Col>
-    __host__ __device__ ContinuousMatrixBlock<T, Row, Col>::ConstPtrTy
-    ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) const {
+    __host__ __device__ auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);

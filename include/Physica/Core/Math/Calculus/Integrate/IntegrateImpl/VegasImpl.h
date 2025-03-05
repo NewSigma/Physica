@@ -219,6 +219,7 @@ namespace Physica {
             deltas[i] = pointGrid(index + 1, i);
         }
         deltas -= x;
+        deltas.clamp_min(std::numeric_limits<T>::min());
         x += hadamard(deltas, VectorND<Trv>::template random_uniform<R>(getDim()));
         return std::make_pair(std::move(x), std::move(deltas));
     }

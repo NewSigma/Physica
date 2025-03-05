@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "../MatrixExpr.h"
+#include "../MatrixExpr.cuh"
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Ln, M>
-            : public UnitaryMatrixExpr<ExprType::Ln, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Ln, M>;
+    class device_obj<MatrixExpr<ExprType::Unit, M>>
+            : public device_obj<UnitaryMatrixExpr<ExprType::Unit, M>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprType::Unit, M>>;
     public:
         using typename Base::T;
         using typename Base::Tv;
@@ -32,25 +32,20 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return ln(Base::getExpr().calc(row, col)); }
-
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return ln(Base::getExpr().calc_value(row, col));
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
+            if constexpr (isReverseDiff)
+                return calc_value(row, col);
+            else
+                return Base::getExpr().calc(row, col).unit();
         }
 
-        template<Vector U>
-        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
+            return Base::getExpr().calc_value(row, col).unit();
+        }
     };
 
     template<Matrix M>
-    template<Vector U>
-    void MatrixExpr<ExprType::Ln, M>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
-        const auto& expr = Base::getExpr();
-        expr.reverse(divide(grad, expr.values()));
-    }
-
-    template<Matrix M>
-    [[nodiscard]] inline auto ln_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Ln, M&&>(std::forward<M>(m));
+    [[nodiscard]] __host__ __device__ inline auto unit_elem(M&& m) noexcept requires(CUDA<M>) {
+        return device_obj<MatrixExpr<ExprType::Unit, M&&>>(std::forward<M>(m));
     }
 }

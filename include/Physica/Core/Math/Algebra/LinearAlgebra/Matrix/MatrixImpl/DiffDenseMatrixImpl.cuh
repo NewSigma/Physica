@@ -47,6 +47,38 @@ namespace Physica {
     }
 
     template<tparams>
+    __host__ __device__ void device_obj<DenseMatrix>::resize(size_t row, size_t col) {
+        v.resize(row, col);
+        g.resize(row, col);
+    }
+
+    template<tparams>
+    inline auto device_obj<DenseMatrix>::toHost() const -> host_obj {
+        host_obj result = toHostAsync();
+        CUDAContext::getInstance().wait();
+        return result;
+    }
+
+    template<tparams>
+    inline auto device_obj<DenseMatrix>::toHostAsync() const -> host_obj {
+        host_obj result(getRow(), getCol());
+        toHostAsync(result);
+        return result;
+    }
+
+    template<tparams>
+    inline void device_obj<DenseMatrix>::toHost(host_obj& obj) const {
+        toHostAsync(obj);
+        CUDAContext::getInstance().wait();
+    }
+
+    template<tparams>
+    inline void device_obj<DenseMatrix>::toHostAsync(host_obj& obj) const {
+        v.toHostAsync(obj.v);
+        g.toHostAsync(obj.g);
+    }
+
+    template<tparams>
     template<RNG R>
     inline void device_obj<DenseMatrix>::random_uniform() {
         *this = random_uniform<R>(getRow(), getCol());
@@ -62,12 +94,6 @@ namespace Physica {
     template<RNG R, class Distribution>
     inline void device_obj<DenseMatrix>::random_any(Distribution& dist) {
         *this = random_any<R, Distribution>(getRow(), getCol(), dist);
-    }
-
-    template<tparams>
-    void device_obj<DenseMatrix>::resize(size_t row, size_t col) {
-        v.resize(row, col);
-        g.resize(row, col);
     }
 
     template<tparams>

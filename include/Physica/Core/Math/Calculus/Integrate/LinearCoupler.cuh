@@ -18,9 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
-#include "Physica/Core/Utils/Container/Array.cuh"
 #include "LinearCoupler.h"
+#include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.cuh"
 
 namespace Physica {
     /**
@@ -29,8 +28,12 @@ namespace Physica {
      */
     template<Scalar T>
     class device_obj<LinearCoupler<T>> {
+        constexpr static int Option = MatrixOption::Row | MatrixOption::Element;
         using This = device_obj<LinearCoupler<T>>;
         using Tv = T::ValueType;
+    public:
+        template<Scalar U>
+        using MatrixND = LinearLayer<T>::template MatrixND<U>;
     private:
         int dim;
         int numBin;
@@ -46,8 +49,8 @@ namespace Physica {
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<DNN Net>
-        [[nodiscard]] CoDiff<T> forward(const Net& nn, device_obj<VectorND<Tv>>& x) const;
-        CoDiff<T> transform(const device_obj<VectorND<T>>& weights, device_obj<VectorND<Tv>>& x2, int numActiveDim) const; // We have to make it public because of limitation of CUDA
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(const Net& nn, device_obj<MatrixND<Tv>>& x) const;
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& x2, int numActiveDim) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -68,91 +71,98 @@ namespace Physica {
 
     template<Scalar T>
     template<DNN Net>
-    auto device_obj<LinearCoupler<T>>::forward(const Net& nn, device_obj<VectorND<Tv>>& x) const -> CoDiff<T> {
-        assert(getDim() == x.getLength() && "[Error]: Dimensions do not match");
+    auto device_obj<LinearCoupler<T>>::forward(const Net& nn, device_obj<MatrixND<Tv>>& x) const -> CoDiff<device_obj<VectorND<T>>> {
+        assert(getDim() == x.getRow() && "[Error]: Dimensions do not match");
         const int dimA = getDim() / 2;
         const int dimB = dim - dimA;
-        device_obj<VectorND<Tv>> xA(getDim());
+        device_obj<MatrixND<Tv>> xA(getDim(), x.getCol());
         xA.zeros();
-        xA.head(dimA) = x.head(dimA);
-        device_obj<VectorND<Tv>> xB = x - xA;
+        xA.topRows(dimA) = x.topRows(dimA);
+        device_obj<MatrixND<Tv>> xB = x - xA;
 
         auto w1 = nn.forward(xA);
         auto w2 = nn.forward(xB);
-        auto lnJ = transform(w1, xB, dimB) + transform(w2, xA, dimA);
+        auto lnJs = transform(w1, xB, dimB) + transform(w2, xA, dimA);
         x = xA + xB;
         if constexpr (ReverseDiff<T>) {
-            auto result = co_yield lnJ.value();
-            lnJ.reverse(result.grad());
+            auto result = co_yield lnJs.values();
+            lnJs.reverse(result.grads());
         }
         else
-            co_return std::move(lnJ);
+            co_return std::move(lnJs);
     }
-
+    /**
+     * We have to make it public because of limitation of CUDA
+     */
     template<Scalar T>
-    auto device_obj<LinearCoupler<T>>::transform(const device_obj<VectorND<T>>& weights, device_obj<VectorND<Tv>>& z, int numActiveDim) const -> CoDiff<T> {
-        const size_t length = z.getLength();
-        device_obj<Array<size_t>> indexes(length);
-        device_obj<VectorND<T>> deltas(length, 1);
+    auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z, int numActiveDim) const -> CoDiff<device_obj<VectorND<T>>> {
+        const int numSample = z.getCol();
+        auto indexes = device_obj<Array2D<size_t, Option>>(getDim(), numSample);
+        auto deltas = device_obj<DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>>(numSample, getDim(), 1);
 
         const auto factor = Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon());
-        const auto config = z.makeKernelConfig();
+        auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
+        config.blocks.y = dim;
         CUDAExecutor::launch([*this,
                               weights_ = asStruct(weights),
                               z_ = asStruct(z),
                               indexes_ = asStruct(indexes),
                               deltas_ = asStruct(deltas),
                               factor] __device__() mutable {
-            const int i = blockIdx.x * blockDim.x + threadIdx.x;
-            const auto& weights = weights_.getDerived();
-            auto& z = z_.getDerived();
+            const int sample = blockIdx.x * blockDim.x + threadIdx.x;
+            const int dim = blockIdx.y;
+            const auto weights = weights_.getDerived().col(sample);
+            auto z = z_.getDerived().col(sample);
             auto& indexes = indexes_.getDerived();
             auto& deltas = deltas_.getDerived();
-
-            if (z[i].isZero())
+            if (z[dim].isZero())
                 return;
-            const auto grid = weights.reshape_col(numBin, getDim());
-            const auto col = grid.col(i).values();
-            const Tv lnsumexp = col.lnSumExp();
-            const Tv tmp = z[i] * factor;
+
+            const Tv tmp = z[dim] * factor;
             const int index = tmp.toMachine();
-            indexes[i] = index;
-            const Tv p = softmax(col).calc(index, lnsumexp);
-            deltas[i] = std::max(p, Tv(std::numeric_limits<Tv>::min()));
+            indexes(dim, sample) = index;
+
+            const auto grid = weights.reshape_row(getDim(), numBin);
+            const auto row = grid.row(dim).values();
+            const Tv lnsumexp = row.lnSumExp();
+            const Tv p = softmax(row).calc(index, lnsumexp);
+            deltas(sample, dim) = std::max(p, Tv(std::numeric_limits<Tv>::min()));
+
             Tv zi = tmp.mod() * p;
             for (int j = 0; j < index; ++j)
-                zi += softmax(col).calc(j, lnsumexp);
-            z[i] = std::min(Tv(1), zi);
-        }, config.first, config.second);
+                zi += softmax(row).calc(j, lnsumexp);
+            z[dim] = std::min(Tv(1), zi);
+        }, config);
 
-        auto expr = ln(deltas);
-        auto lnJ = expr.sum() + Tv(numActiveDim) * ln(factor);
+        auto expr = ln_elem(deltas);
+        CoDiff<device_obj<VectorND<T>>> lnJs = expr.sum_cols() + Tv(numActiveDim) * ln(factor);
         if constexpr (ReverseDiff<T>) {
-            auto tmp = co_yield lnJ.value();
-            lnJ.reverse_final(tmp.grad());
-            const auto config = z.makeKernelConfig();
+            auto tmp = co_yield lnJs.values();
+            lnJs.reverse_final(tmp.grads());
             CUDAExecutor::launch([*this,
                                   weights_ = asStruct(weights),
                                   z_ = asStruct(z),
                                   indexes_ = asStruct(indexes),
                                   deltas_ = asStruct(deltas)] __device__() mutable {
-                const int i = blockIdx.x * blockDim.x + threadIdx.x;
-                const auto& weights = weights_.getDerived();
+                const int sample = blockIdx.x * blockDim.x + threadIdx.x;
+                const int dim = blockIdx.y;
+                const auto weights = weights_.getDerived().col(sample);
                 const auto& indexes = indexes_.getDerived();
                 const auto& deltas = deltas_.getDerived();
-                auto& z = z_.getDerived();
-                if (z[i].isZero())
+                auto z = z_.getDerived().col(sample);
+                if (z[dim].isZero())
                     return;
 
-                const auto grid = weights.reshape_col(numBin, getDim());
-                Tv s = grid.col(i).values().softmax(indexes[i]);
-                Tv g = (s - square(s)) * deltas[i].grad();
-                grid.col(i).reverse(-g / Tv(numBin));
-                grid(indexes[i], i).reverse(g);
-            }, config.first, config.second);
+                const auto grid = weights.reshape_row(getDim(), numBin);
+                const int index = indexes(dim, sample);
+                const Tv s = grid.row(dim).values().softmax(index);
+                const Tv g = (s - square(s)) * deltas(sample, dim).grad();
+                grid.row(dim).reverse(-g / Tv(numBin));
+                grid(dim, index).reverse(g);
+            }, config);
         }
         else
-            co_return std::move(lnJ);
+            co_return std::move(lnJs);
     }
 
     template<Scalar T>

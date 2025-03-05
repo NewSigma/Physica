@@ -117,6 +117,8 @@ namespace Physica {
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
         using AllocatorType = Allocator;
+
+        constexpr static bool FastAssign = false;
     };
 }
 

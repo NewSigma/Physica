@@ -59,6 +59,14 @@ namespace Physica {
         using Base::operator=;
         using Base::operator();
         /* Operations */
+        using Base::resize;
+        __host__ __device__ void resize(size_t row, size_t col);
+
+        [[nodiscard]] inline host_obj toHost() const;
+        [[nodiscard]] inline host_obj toHostAsync() const;
+        inline void toHost(host_obj& obj) const;
+        inline void toHostAsync(host_obj& obj) const;
+
         template<RNG R>
         inline void random_uniform();
         template<RNG R>
@@ -66,7 +74,6 @@ namespace Physica {
         template<RNG R, class Distribution>
         inline void random_any(Distribution& dist);
 
-        void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::data;

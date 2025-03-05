@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <format>
 #include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
@@ -30,6 +31,13 @@ namespace Physica {
             return func();
         }
     }
+
+    struct KernelConfig {
+        dim3 blocks;
+        dim3 threads;
+
+        __host__ __device__ KernelConfig(dim3 blocks_, dim3 threads_) : blocks(blocks_), threads(threads_) {}
+    };
     /**
      * Single thread with cuda support
      */
@@ -41,18 +49,18 @@ namespace Physica {
         };
     public:
         template<class Functor>
-        __host__ __device__ static KernelFuture launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem = 0);
+        __host__ __device__ static KernelFuture launch(Functor func, KernelConfig config, size_t sharedMem = 0);
         static inline void wait();
     };
 
     template<class Functor>
-    __host__ __device__ auto CUDAExecutor::launch(Functor func, dim3 numBlocks, dim3 numThreads, size_t sharedMem) -> KernelFuture {
+    __host__ __device__ auto CUDAExecutor::launch(Functor func, KernelConfig config, size_t sharedMem) -> KernelFuture {
         cudaStream_t stream = nullptr;
         if constexpr (IsHost())
             stream = cudaStream_t(CUDAContext::getInstance().getStream());
         else
             noImpl("No dynamic parallel support");
-        Internal::kernel<<<numBlocks, numThreads, sharedMem, stream>>>(func);
+        Internal::kernel<<<config.blocks, config.threads, sharedMem, stream>>>(func);
         check(cudaGetLastError());
         return KernelFuture(stream);
     }
@@ -69,5 +77,19 @@ namespace Physica {
     public:
         constexpr static bool UseCPU = false;
         constexpr static bool UseCUDA = true;
+    };
+}
+
+namespace std {
+    template<>
+    struct formatter<Physica::KernelConfig, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::KernelConfig& obj, std::format_context& ctx) const {
+            return std::format_to(ctx.out(), "Blocks: ({}, {}, {})\nThreads: ({}, {}, {})",
+                    obj.blocks.x, obj.blocks.y, obj.blocks.z, obj.threads.x, obj.threads.y, obj.threads.z);
+        }
     };
 }

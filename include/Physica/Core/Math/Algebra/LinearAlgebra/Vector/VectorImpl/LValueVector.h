@@ -98,6 +98,8 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] const auto reshape_row(size_t row, size_t col) const noexcept;
 
+        void clamp_min(const Tv& minimum);
+        void clamp_max(const Tv& maximum);
         inline void toUnit();
         template<RNG R>
         inline void random_uniform();

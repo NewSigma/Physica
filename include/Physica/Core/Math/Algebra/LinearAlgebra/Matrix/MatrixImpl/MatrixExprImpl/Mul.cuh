@@ -21,6 +21,25 @@
 #include "../MatrixExpr.cuh"
 
 namespace Physica {
+    template<Matrix T1, Matrix T2>
+    class device_obj<MatrixExpr<ExprType::Mul, T1, T2>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>>;
+    public:
+        using typename Base::T;
+        using typename Base::Tv;
+    public:
+        using Base::Base;
+        /* Operations */
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
+            return Base::getLHS().calc(row, col) * Base::getRHS().calc(row, col);
+        }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
+            return Base::getLHS().calc_value(row, col) * Base::getRHS().calc_value(row, col);
+        }
+    };
+
     template<Matrix T, Scalar U>
     class device_obj<MatrixExpr<ExprType::Mul, T, U>>
             : public device_obj<BinaryMatrixExpr<ExprType::Mul, T, U>> {
@@ -43,5 +62,10 @@ namespace Physica {
     template<Matrix T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, T&& m) noexcept requires(CUDA<T>) {
         return m * x;
+    }
+
+    template<Matrix T1, Matrix T2>
+    [[nodiscard]] inline auto hadamard(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
+        return device_obj<MatrixExpr<ExprType::Mul, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

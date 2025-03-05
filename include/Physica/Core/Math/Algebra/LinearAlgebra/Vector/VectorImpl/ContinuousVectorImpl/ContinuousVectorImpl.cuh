@@ -36,14 +36,13 @@ namespace Physica {
     template<class U>
     void device_obj<ContinuousVector<Derived>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
         static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        const auto config = Base::makeKernelConfig();
         if constexpr (Scalar<U>) {
             CUDAExecutor::launch([x_ = asStruct(Base::getConstCastDerived()), g = grad] __device__() mutable {
                 const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
                 auto& x = x_.getDerived();
                 if (index < x.getLength())
                     x.grads()[index] = g;
-            }, config.first, config.second);
+            }, Base::makeKernelConfig());
         }
         else {
             static_assert(Vector<U>, "[Error]: Unexpected type");
@@ -55,7 +54,7 @@ namespace Physica {
                 auto& x = x_.getDerived();
                 if (index < x.getLength())
                     x.grads()[index] = g.calc(index);
-            }, config.first, config.second);
+            }, Base::makeKernelConfig());
         }
     }
 

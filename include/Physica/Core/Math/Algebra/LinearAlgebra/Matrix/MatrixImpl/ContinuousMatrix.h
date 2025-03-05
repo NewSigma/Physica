@@ -120,7 +120,7 @@ namespace Physica {
 
         template<Matrix M>
         void resize(const M& m) { resize(m.getRow(), m.getCol()); }
-        void resize(size_t r, size_t c) { Base::getDerived().resize(r, c); }
+        auto resize(size_t r, size_t c) { return Base::getDerived().resize(r, c); }
 
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;

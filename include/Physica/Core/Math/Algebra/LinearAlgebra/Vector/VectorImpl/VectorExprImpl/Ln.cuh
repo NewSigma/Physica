@@ -21,29 +21,29 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector T>
-    class device_obj<VectorExpr<ExprType::Ln, T>> : public device_obj<UnitaryVectorExpr<ExprType::Ln, T>> {
-        using This = device_obj<VectorExpr<ExprType::Ln, T>>;
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Ln, T>>;
+    template<Vector V>
+    class device_obj<VectorExpr<ExprType::Ln, V>> : public device_obj<UnitaryVectorExpr<ExprType::Ln, V>> {
+        using This = device_obj<VectorExpr<ExprType::Ln, V>>;
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Ln, V>>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+        using typename Base::T;
+        using typename Base::Tv;
         using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+        [[nodiscard]] __device__ T calc(size_t index) const {
             if constexpr (isReverseDiff)
                 return calc_value(index);
             else
                 return ln(Base::getExpr().calc(index));
         }
 
-        [[nodiscard]] __device__ ValueType calc_value(size_t index) const { return ln(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return ln(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto ln(T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Ln, T&&>>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto ln(V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprType::Ln, V&&>>(std::forward<V>(v));
     }
 }

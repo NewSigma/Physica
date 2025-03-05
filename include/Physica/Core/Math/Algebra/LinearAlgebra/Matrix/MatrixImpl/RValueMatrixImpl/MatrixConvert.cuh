@@ -32,7 +32,7 @@ namespace Physica {
     private:
         PlainStruct<const device_obj<T>> mat;
     public:
-    __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -57,7 +57,7 @@ namespace Physica {
     private:
         PlainStruct<const device_obj<T>> mat;
     public:
-    __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

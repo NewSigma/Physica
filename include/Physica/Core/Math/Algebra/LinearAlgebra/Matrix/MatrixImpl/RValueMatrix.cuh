@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "RValueMatrixImpl/RMatrixBlock.cuh"
 #include "RValueMatrix.h"
 
@@ -56,6 +57,8 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         __host__ __device__ void assign(M& target) const requires(CUDA<M>);
+        template<Matrix M>
+        __host__ __device__ void assign_add(M& target) const requires(CUDA<M>);
 
         [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;
@@ -88,9 +91,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
 
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+        [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+        [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
         [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
 
+        [[nodiscard]] __host__ __device__ auto sum_rows() const;
+        [[nodiscard]] __host__ __device__ auto sum_cols() const;
         [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
         [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
@@ -103,7 +109,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grads() const noexcept;
 
-        [[nodiscard]] __host__ __device__ std::pair<dim3, dim3> makeKernelConfig() const noexcept;
+        [[nodiscard]] __host__ __device__ KernelConfig makeKernelConfig() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
@@ -112,7 +118,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
-        [[nodiscard]] __host__ __device__ static std::pair<dim3, dim3> makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;
+        [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -132,9 +138,10 @@ namespace Physica {
 }
 
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
-#include "RValueMatrixImpl/MatrixConvert.cuh"
+#include "RValueMatrixImpl/Sum.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
 #include "RValueMatrixImpl/Hermite.cuh"
+#include "RValueMatrixImpl/MatrixConvert.cuh"
 #include "MatrixProduct/GEMM.cuh"
 #include "MatrixProduct/GEMV.cuh"
 #include "MatrixProduct/GEVM.cuh"

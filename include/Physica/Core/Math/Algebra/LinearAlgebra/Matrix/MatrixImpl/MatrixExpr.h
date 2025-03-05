@@ -74,9 +74,11 @@ namespace Physica {
     public:
         BinaryMatrixExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
             if constexpr (Matrix<LHS> && Matrix<RHS>) {
-                assert(lhs.getRow() == rhs.getRow());
-                assert(lhs.getCol() == rhs.getCol());
+                assert(getLHS().getRow() == getRHS().getRow());
+                assert(getLHS().getCol() == getRHS().getCol());
             }
+            else if constexpr (Vector<RHS>)
+                assert(getLHS().getCol() == getRHS().getLength());
         }
         BinaryMatrixExpr(const This&) = default;
         BinaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
@@ -149,6 +151,25 @@ namespace Physica {
 
     template<ExprType Type, Scalar LHS, Matrix RHS>
     class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
+
+    template<ExprType Type, Matrix LHS, Vector RHS>
+    class Traits<MatrixExpr<Type, LHS, RHS>> {
+        using This = MatrixExpr<Type, LHS, RHS>;
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
+    public:
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
+        constexpr static int Option = LHS1::Option;
+        constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
+        constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
+        constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
+
+        constexpr static bool isSymm = false;
+        constexpr static bool isHermite = false;
+    };
+
+    template<ExprType Type, Vector LHS, Matrix RHS>
+    class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
 }
 
 #include "MatrixExprImpl/Minus.h"
@@ -158,7 +179,9 @@ namespace Physica {
 #include "MatrixExprImpl/Div.h"
 #include "MatrixExprImpl/Reciprocal.h"
 #include "MatrixExprImpl/Sqrt.h"
+#include "MatrixExprImpl/Relu.h"
 #include "MatrixExprImpl/Abs.h"
+#include "MatrixExprImpl/Unit.h"
 #include "MatrixExprImpl/Square.h"
 #include "MatrixExprImpl/Ln.h"
 #include "MatrixExprImpl/Exp.h"

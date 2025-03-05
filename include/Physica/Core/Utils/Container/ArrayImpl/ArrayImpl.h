@@ -103,14 +103,14 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Allocator>::Array(const This& array) : length(array.length), capacity(array.capacity), alloc() {
+    __host__ __device__ Array<T, Dynamic, Allocator>::Array(const This& obj) : length(obj.length), capacity(obj.capacity), alloc() {
         if constexpr (IsHost()) {
             arr = alloc.allocate(capacity);
             if constexpr (!std::is_trivial<ElemType>::value)
                 for(size_t i = 0; i < length; ++i)
-                    alloc.construct(arr + i, array[i]);
+                    alloc.construct(arr + i, obj[i]);
             else
-                memcpy(arr, array.arr, length * sizeof(ElemType));
+                memcpy(arr, obj.arr, length * sizeof(ElemType));
         }
         else
             unreachable();  // Marked __device__ to silence warnings

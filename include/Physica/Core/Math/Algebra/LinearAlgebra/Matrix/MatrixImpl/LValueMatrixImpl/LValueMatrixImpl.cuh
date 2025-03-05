@@ -36,7 +36,6 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const T& x) {
         if (IsHost()) {
-            const auto config = Base::makeKernelConfig();
             CUDAExecutor::launch([m_ = asStruct(Base::getDerived()), x] __device__() mutable {
                 auto& m = m_.getDerived();
                 const size_t maxMinor = m.getMaxMinor();
@@ -44,7 +43,7 @@ namespace Physica {
                 const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
                 if (minor < maxMinor)
                     m.refFromMajorMinor(major, minor) = x;
-            }, config.first, config.second);
+            }, Base::makeKernelConfig());
         }
         else {
             for (size_t i = 0; i < Base::getMaxMajor(); ++i)
@@ -70,7 +69,7 @@ namespace Physica {
         static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
         assert(Base::getRow() == grad.getRow());
         assert(Base::getCol() == grad.getCol());
-        Base::getConstCastDerived().grads() += grad;
+        grad.assign_add(Base::getConstCastDerived().grads());
     }
 
     template<class Derived>

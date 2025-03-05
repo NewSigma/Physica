@@ -21,11 +21,9 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<class T, class U>
+    template<class T, class U> requires(Scalar<T> || Scalar<U>)
     class MatrixExpr<ExprType::Div, T, U>
             : public BinaryMatrixExpr<ExprType::Div, T, U> {
-        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either types should be Scalar");
-
         using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
@@ -48,6 +46,31 @@ namespace Physica {
                 return Base::getLHS().calc_value(row, col) / Base::getRHS().value();
             else
                 return Base::getLHS().value() / Base::getRHS().calc_value(row, col);
+        }
+    };
+
+    template<class T, class U> requires(Vector<T> || Vector<U>)
+    class MatrixExpr<ExprType::Div, T, U>
+            : public BinaryMatrixExpr<ExprType::Div, T, U> {
+        using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+    public:
+        using Base::Base;
+        /* Operations */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            if constexpr (Matrix<T>)
+                return Base::getLHS().calc(row, col) / Base::getRHS().calc(row);
+            else
+                return Base::getLHS().calc(row) / Base::getRHS().calc(row, col);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            if constexpr (Matrix<T>)
+                return Base::getLHS().calc_value(row, col) / Base::getRHS().calc_value(row);
+            else
+                return Base::getLHS().calc_value(row) / Base::getRHS().calc_value(row, col);
         }
     };
 
@@ -79,6 +102,16 @@ namespace Physica {
 
     template<Matrix T, Scalar U>
     [[nodiscard]] inline auto operator/(U&& x, T&& m) noexcept requires(!CUDA<T>) {
+        return MatrixExpr<ExprType::Div, U&&, T&&>(std::forward<U>(x), std::forward<T>(m));
+    }
+
+    template<Matrix T, Vector U>
+    [[nodiscard]] inline auto divide(T&& m, U&& x) noexcept requires(!CUDA<T> && !CUDA<U>) {
+        return MatrixExpr<ExprType::Div, T&&, U&&>(std::forward<T>(m), std::forward<U>(x));
+    }
+
+    template<Matrix T, Vector U>
+    [[nodiscard]] inline auto divide(U&& x, T&& m) noexcept requires(!CUDA<T> && !CUDA<U>) {
         return MatrixExpr<ExprType::Div, U&&, T&&>(std::forward<U>(x), std::forward<T>(m));
     }
 

@@ -35,13 +35,25 @@ namespace Physica {
         constexpr static bool isColMajor = !(Option & MatrixOption::Row);
         constexpr static size_t MaxMajor = isColMajor ? Col : Row;
         constexpr static size_t MaxMinor = isColMajor ? Row : Col;
+
+        template<class U>
+        struct Helper {
+            using VectorType = Array<T, MaxMinor>;
+            using EArrayType = Array<T, Row * Col>;
+        };
+
+        template<Scalar U>
+        struct Helper<U> {
+            using VectorType = DenseVector<T, MaxMinor>;
+            using EArrayType = DenseVector<T, Row * Col>;
+        };
     public:
-        using VectorType = std::conditional<Scalar<T>, DenseVector<T, MaxMinor>, Array<T, MaxMinor>>::type;
+        using VectorType = Helper<T>::VectorType;
         using InitializerType = std::conditional<isVectorStorage, VectorType, T>::type;
     private:
         using AllocatorV = Allocator::template rebind_alloc<VectorType>;
         using VArrayType = Array<VectorType, MaxMajor, AllocatorV>;
-        using EArrayType = std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
+        using EArrayType = Helper<T>::EArrayType;
         using ArrayType = std::conditional<isVectorStorage, VArrayType, EArrayType>::type;
         using IndexType = std::conditional<isDynamicArray, size_t, PlainStruct<void>>::type;
 

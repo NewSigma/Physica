@@ -41,7 +41,7 @@ namespace Physica {
 
     template<class T>
     struct is_hermite {
-        constexpr static bool value = std::is_same<T, typename remove_hermite<T>::Type>::value;
+        constexpr static bool value = !std::is_same<T, typename remove_hermite<T>::Type>::value;
     };
 
     template<Matrix T>

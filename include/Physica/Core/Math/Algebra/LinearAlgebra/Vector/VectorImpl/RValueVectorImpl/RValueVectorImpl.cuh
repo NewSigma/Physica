@@ -20,7 +20,6 @@
 
 #include "../RValueVector.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/PlainStruct.h"
 
 namespace Physica {
@@ -34,7 +33,6 @@ namespace Physica {
         static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
         assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
         if (IsHost()) {
-            auto config = makeKernelConfig();
             CUDAExecutor::launch([source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
@@ -42,7 +40,7 @@ namespace Physica {
                 const uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
                 if (index < length)
                     target[index] = source.calc(index);
-            }, config.first, config.second);
+            }, makeKernelConfig());
         }
         else
             assign_impl<V>(target);
@@ -123,7 +121,7 @@ namespace Physica {
                         local += v.calc(i);
                 }
                 buffer[threadIdx.x] = local;
-            }, 1, MaxThreadPerBlock);
+            }, KernelConfig(1, MaxThreadPerBlock));
 
             if constexpr (IsHost()) { // To silence warnings
                 future.wait();
@@ -212,16 +210,16 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
+    __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig() const noexcept {
         return makeKernelConfig(getLength());
     }
 
     template<class Derived>
-    __host__ __device__ std::pair<dim3, dim3> device_obj<RValueVector<Derived>>::makeKernelConfig(size_t length) noexcept {
+    __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig(size_t length) noexcept {
         constexpr uint32_t MaxThread = MaxThreadPerBlock;
         const uint32_t numThread = std::min<uint32_t>(length, MaxThread);
         const uint32_t numBlock = (length + numThread - 1) / numThread;
-        return std::make_pair(dim3(numBlock), dim3(numThread));
+        return KernelConfig(numBlock, numThread);
     }
 
     template<class Derived>

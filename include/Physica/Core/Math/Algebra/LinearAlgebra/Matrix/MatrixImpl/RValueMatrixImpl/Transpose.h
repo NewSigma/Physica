@@ -21,26 +21,50 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
+    template<class T>
+    struct remove_transpose {
+        using Type = T;
+    };
+
+    template<Matrix T>
+    struct remove_transpose<Transpose<T>> {
+        using Type = T;
+    };
+
+    template<Vector T>
+    struct remove_transpose<TransposeVector<T>> {
+        using Type = T;
+    };
+
+    template<class T>
+    struct is_transpose {
+        constexpr static bool value = !std::is_same<T, typename remove_transpose<T>::Type>::value;
+    };
+
     template<Matrix T>
     class Transpose<T> : public RValueMatrix<Transpose<T>> {
         using This = Transpose<T>;
         using Base = RValueMatrix<This>;
 
-        const T& matrix;
+        const T& mat;
     public:        
         using typename Base::ScalarType;
+        using typename Base::Tv;
     public:
-        Transpose(const T& matrix_) : matrix(matrix_) {}
+        Transpose(const T& mat_) : mat(mat_) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(col, row); }
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc_value(col, row); }
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.getRow(); }
     };
 
     template<Vector T>
@@ -49,6 +73,7 @@ namespace Physica {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::Tv;
     private:
         const T& vec;
     public:
@@ -62,8 +87,10 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         void assign(LValueMatrix<M>& target) const;
-        /* Getters */
+
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
+        [[nodiscard]] Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
     };

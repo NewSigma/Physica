@@ -183,6 +183,18 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueVector<Derived>::clamp_min(const Tv& minimum) {
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            (*this)[i] = std::max((*this)[i], minimum);
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::clamp_max(const Tv& maximum) {
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            (*this)[i] = std::min((*this)[i], maximum);
+    }
+
+    template<class Derived>
     inline void LValueVector<Derived>::toUnit() {
         Base::getDerived() *= reciprocal(Base::getDerived().norm());
     }

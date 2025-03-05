@@ -292,6 +292,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::sum_cols() const {
+        return MatrixSum<Derived, true>(Base::getDerived());
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::mean() const -> T {
         return sum() / Trv(getRow() * getCol());
     }

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/ML/NeuralNetwork/Layer/LayerBase.h"
+#include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "IntegrateImpl/AdaptiveBase.h"
@@ -39,6 +39,9 @@ namespace Physica {
         using FuncValue = std::conditional<ReverseDiff<T>, Tv, T>::type;
         using This = NormFlow<T, TakeLn>;
         using Base = AdaptiveBase<FuncValue, TakeLn>;
+
+        template<Scalar U>
+        using MatrixND = LinearLayer<T>::template MatrixND<U>;
     protected:
         using Base::from;
         using Base::to;
@@ -178,47 +181,57 @@ namespace Physica {
         const auto lnVolume = ln(to - from).sum();
 
         VectorND<FuncValue> samples(numSample);
-        Array<CoDiff<T>> lnJs(numSample);
-        VectorND<T> lnJv(numSample);
         Trv loss = 0;
-        if constexpr (std::same_as<SeqExecutor, Executor>) {
-            VectorND<Trv> x(getDim());
-            for (int i = 0; i < numSample; ++i) {
-                x.template random_uniform<R>();
-                lnJs[i] = nn.forward(x);
-                lnJv[i] = lnJs[i].value();
-                x = from + hadamard(coeff, x);
-                samples[i] = nn(x);
-            }
-            loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
-        }
-        else if constexpr (std::same_as<ThreadExecutor, Executor>) {
-            const int numThread = Executor::getNumThread();
-            Array<Net> nets(numThread, nn);
-            Executor::parallel_for([&, this](size_t i) {
-                const int tid = Executor::getThreadID();
-                auto x = VectorND<Trv>::template random_uniform<R>(getDim());
-                lnJs[i] = nets[tid].forward(x);
-                lnJv[i] = lnJs[i].value();
-                x = from + hadamard(coeff, x);
-                samples[i] = nn(x);
-            }, numSample, numThread).wait();
-            loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
+        if constexpr (std::same_as<CUDAExecutor, Executor>) {
+            auto x = device_obj<MatrixND<Tv>>::template random_uniform<R>(getDim(), numSample);
+            const auto lnJs = nn.forward(x);
 
-            for (auto& net : nets)
-                nn.reverse(net);
+            const auto y = x.toHost();
+            for (int i = 0; i < numSample; ++i)
+                samples[i] = nn(from + hadamard(coeff, y.col(i)));
+
+            const auto lnJv = lnJs.toHost();
+            {
+                const size_t numSample = samples.getLength();
+                const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
+                auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp();
+                loss = l.value();
+                if constexpr (ReverseDiff<T>)
+                    l.reverse();
+            }
+            lnJs.reverse(lnJv.grads().toDeviceAsync());
         }
         else {
-            static_assert(std::same_as<CUDAExecutor, Executor>, "[Error]: Unsupported executor");
-            device_obj<VectorND<Trv>> x(getDim());
-            for (int i = 0; i < numSample; ++i) {
-                x.template random_uniform<R>();
-                lnJs[i] = nn.forward(x);
-                lnJv[i] = lnJs[i].value();
-                Executor::wait();
-                samples[i] = nn(from + hadamard(coeff, x.toHost()));
+            Array<CoDiff<T>> lnJs(numSample);
+            VectorND<T> lnJv(numSample);
+            if constexpr (std::same_as<SeqExecutor, Executor>) {
+                VectorND<Trv> x(getDim());
+                for (int i = 0; i < numSample; ++i) {
+                    x.template random_uniform<R>();
+                    lnJs[i] = nn.forward(x);
+                    lnJv[i] = lnJs[i].value();
+                    x = from + hadamard(coeff, x);
+                    samples[i] = nn(x);
+                }
+                loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
             }
-            loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
+            else {
+                static_assert(std::same_as<ThreadExecutor, Executor>, "[Error]: Unsupported executor");
+                const int numThread = Executor::getNumThread();
+                Array<Net> nets(numThread, nn);
+                Executor::parallel_for([&, this](size_t i) {
+                    const int tid = Executor::getThreadID();
+                    auto x = VectorND<Trv>::template random_uniform<R>(getDim());
+                    lnJs[i] = nets[tid].forward(x);
+                    lnJv[i] = lnJs[i].value();
+                    x = from + hadamard(coeff, x);
+                    samples[i] = nn(x);
+                }, numSample, numThread).wait();
+                loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
+    
+                for (auto& net : nets)
+                    nn.reverse(net);
+            }
         }
 
         Tv maxSample;

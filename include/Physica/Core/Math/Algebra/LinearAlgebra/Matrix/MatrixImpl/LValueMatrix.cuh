@@ -52,6 +52,9 @@ namespace Physica {
         template<Scalar T> __host__ __device__ void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
         template<Scalar T> __host__ __device__ void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
 
+        template<Vector V> __host__ __device__ void operator+=(const V& m) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() + m; }
+        template<Vector V> __host__ __device__ void operator-=(const V& m) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() - m; }
+
         template<Matrix M> __host__ __device__ device_obj<Derived>& operator=(const M& m) requires(CUDA<M>);
         template<Matrix M> __host__ __device__ void operator+=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() + m; }
         template<Matrix M> __host__ __device__ void operator-=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() - m; }

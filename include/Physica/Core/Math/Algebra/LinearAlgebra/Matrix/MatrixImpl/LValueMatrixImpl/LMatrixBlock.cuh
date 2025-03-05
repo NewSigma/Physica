@@ -26,7 +26,7 @@ namespace Physica {
     class device_obj<LMatrixBlock<T, 1, Col>> : public device_obj<LValueVector<LMatrixBlock<T, 1, Col>>> {
         using host_obj = LMatrixBlock<T, 1, Col>;
         using This = device_obj<host_obj>;
-        using Base = LValueVector<host_obj>;
+        using Base = device_obj<LValueVector<host_obj>>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
@@ -36,14 +36,15 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
-            assert(fromRow < mat.getRow());
-            assert(fromCol + colCount <= mat.getCol());
+        __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
+                : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
+            assert(fromRow < mat_.getRow());
+            assert(fromCol + colCount <= mat_.getCol());
         }
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
@@ -56,7 +57,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
             assert(index < colCount);
-            return mat.data_ptr(fromRow, fromCol + index);
+            return mat.getDerived().data_ptr(fromRow, fromCol + index);
         }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
             return const_cast<This&>(*this).data_ptr(index);
@@ -77,13 +78,13 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
         __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
+                : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
@@ -98,7 +99,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
             assert(index < rowCount);
-            return mat.data_ptr(fromRow + index, fromCol);
+            return mat.getDerived().data_ptr(fromRow + index, fromCol);
         }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
             return const_cast<This&>(*this).data_ptr(index);
@@ -119,13 +120,13 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
         __host__ __device__ device_obj(device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
+                : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
         }
@@ -140,7 +141,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t index) {
             assert(index == 0 && "[Error]: Index overflow");
-            return mat.data_ptr(fromRow, fromCol);
+            return mat.getDerived().data_ptr(fromRow, fromCol);
         }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t index) const {
             return const_cast<This&>(*this).data_ptr(index);
@@ -160,7 +161,7 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
-        device_obj<T>& mat;
+        PlainStruct<device_obj<T>> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
@@ -184,7 +185,7 @@ namespace Physica {
     template<Matrix T>
     __host__ __device__ device_obj<LMatrixBlock<T, Dynamic, Dynamic>>::device_obj(
             device_obj<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
-            : mat(mat_)
+            : mat(asStruct(mat_))
             , fromRow(fromRow_)
             , rowCount(rowCount_)
             , fromCol(fromCol_)
@@ -197,7 +198,7 @@ namespace Physica {
     __host__ __device__ inline auto device_obj<LMatrixBlock<T, Dynamic, Dynamic>>::data_ptr(size_t row, size_t col) -> PtrTy {
         assert(row < rowCount);
         assert(col < colCount);
-        return mat.data_ptr(row + fromRow, col + fromCol);
+        return mat.getDerived().data_ptr(row + fromRow, col + fromCol);
     }
 
     template<Matrix T>
