@@ -272,7 +272,7 @@ namespace Physica {
     }
 
     template<ScalarOption Option>
-    Real<Option> lncosh(const Real<Option>& x) noexcept {
+    __host__ __device__ Real<Option> lncosh(const Real<Option>& x) noexcept {
         using T = Real<Option>;
         const auto x1 = abs(x);
         return x1 + ln1p(exp(-x1 * T(2))) - T(M_LN2);

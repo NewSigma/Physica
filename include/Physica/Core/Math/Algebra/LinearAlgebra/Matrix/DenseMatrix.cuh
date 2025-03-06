@@ -55,7 +55,10 @@ namespace Physica {
         __host__ __device__ void resize(const M& m) { resize(m.getRow(), m.getCol()); }
         using Storage::resize;
 
-        [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost()); }
+        [[nodiscard]] host_obj toHost() const;
+        [[nodiscard]] inline host_obj toHostAsync() const;
+        inline void toHost(host_obj& obj) const;
+        inline void toHostAsync(host_obj& obj) const;
 
         void zeros();
 

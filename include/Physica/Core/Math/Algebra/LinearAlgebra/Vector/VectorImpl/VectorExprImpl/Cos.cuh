@@ -22,28 +22,31 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprType::Ln, V>> : public device_obj<UnitaryVectorExpr<ExprType::Ln, V>> {
-        using This = device_obj<VectorExpr<ExprType::Ln, V>>;
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Ln, V>>;
+    class device_obj<VectorExpr<ExprType::Cos, V>>
+            : public device_obj<UnitaryVectorExpr<ExprType::Cos, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Cos, V>>;
     public:
+        using Base::isReverseDiff;
+    protected:
         using typename Base::T;
         using typename Base::Tv;
-        using Base::isReverseDiff;
     public:
         using Base::Base;
-        /* Operations */
+        /* Getters */
         [[nodiscard]] __device__ T calc(size_t index) const {
             if constexpr (isReverseDiff)
                 return calc_value(index);
             else
-                return ln(Base::getExpr().calc(index));
+                return cos(Base::getExpr().calc(index));
         }
 
-        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return ln(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
+            return cos(Base::getExpr().calc_value(index));
+        }
     };
 
     template<Vector V>
-    [[nodiscard]] __host__ __device__ inline auto ln(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprType::Ln, V&&>>(std::forward<V>(v));
+    [[nodiscard]] __host__ __device__ inline auto cos(V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprType::Cos, V&&>>(std::forward<V>(v));
     }
 }

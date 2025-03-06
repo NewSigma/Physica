@@ -167,6 +167,10 @@ namespace Physica {
         obj.resize(length);
         if constexpr (V::SizeAtCompile != Dynamic)
             memcpy(obj.data(), data(), size);
+        else if constexpr (Diffable<V>) {
+            Base::getDerived().values().toDeviceAsync(obj.getDerived().values());
+            Base::getDerived().grads().toDeviceAsync(obj.getDerived().grads());
+        }
         else
             check(cudaMemcpyAsync(obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));
     }

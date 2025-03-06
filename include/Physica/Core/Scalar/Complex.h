@@ -19,6 +19,9 @@
 #pragma once
 
 #include <complex>
+#ifdef PHYSICA_CUDA
+    #include <thrust/complex.h>
+#endif
 #include "Physica/Core/Scalar/Real.h" // IWYU pragma: export
 
 namespace Physica {
@@ -38,16 +41,21 @@ namespace Physica {
 
         constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
     private:
+        using Tm = Base::MachineType;
+    private:
         T re;
         T im;
     public:
         Complex() = default;
-        __host__ __device__ Complex(MachineType x) : This(T(x)) {}
+        __host__ __device__ Complex(Tm x) : This(T(x)) {}
         Complex(double _Complex x);
         __host__ __device__ Complex(T re_);
         __host__ __device__ Complex(T re_, T im_);
         __host__ __device__ Complex(std::initializer_list<T> list);
-        explicit Complex(std::complex<MachineType> c);
+        explicit Complex(std::complex<Tm> c);
+    #ifdef PHYSICA_CUDA
+        __host__ __device__ explicit Complex(thrust::complex<Tm> c);
+    #endif
         template<Scalar U, DiffMode Mode, int Order>
         __host__ __device__ explicit Complex(const Diff<U, Mode, Order>& d);
         Complex(const This&) = default;
@@ -61,6 +69,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline T phase() const;
         [[nodiscard]] __host__ __device__ Complex unit() const;
 
+        void toHostAsync(This&) const { unreachable(); } // Workaround for possible NVCC false positive diagnosis
+        const This& toDevice() const { unreachable(); } // Workaround for possible NVCC false positive diagnosis
+
         [[nodiscard]] inline PacketType packet() const;
         inline void writePacket(const PacketType packet);
         __host__ __device__ void swap(Complex& __restrict obj) noexcept;
@@ -69,7 +80,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const T& real() const noexcept { return re; }
         [[nodiscard]] __host__ __device__ T& imag() noexcept { return im; }
         [[nodiscard]] __host__ __device__ const T& imag() const noexcept { return im; }
-        [[nodiscard]] inline std::complex<MachineType> toMachine() const noexcept;
+        [[nodiscard]] __host__ __device__ inline std::complex<Tm> toMachine() const noexcept;
+        [[nodiscard]] __host__ __device__ auto toMachineThrust() const noexcept;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */

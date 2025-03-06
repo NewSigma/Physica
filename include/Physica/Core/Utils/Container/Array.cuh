@@ -28,7 +28,7 @@ namespace Physica {
     template<class T, size_t Length, class Allocator>
     class device_obj<Array<T, Length, Allocator>> : public Array<T, Length, Allocator> {
         static_assert(Length != Dynamic, "[Error]: Dynamic length is not implemented");
-        static_assert(std::is_trivial<T>::value, "[Error]: Fixed size array with non-trivial element is not supported, it is seldom used on cuda");
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: Fixed size array with non-trivial element is not supported, it is seldom used on cuda");
         using host_obj = Array<T, Length, Allocator>;
         using This = device_obj<host_obj>;
         using Base = host_obj;
@@ -75,7 +75,7 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = ArrayBase<device_obj<host_obj>, DeviceAllocator<T>>;
     public:
-        constexpr static bool isTrivial = std::is_trivial<T>::value;
+        constexpr static bool isTrivial = std::is_trivially_copyable<T>::value;
         using typename Base::allocator_type;
         using typename Base::value_type;
         using typename Base::pointer;
@@ -217,7 +217,7 @@ namespace Physica {
     template<class T, class Allocator>
     auto device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const -> PlainHostObj {
         PlainHostObj result(getLength());
-        check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+        check(cudaMemcpyAsync(result.data(), (void*)d_data, getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
         return result;
     }
 
@@ -260,9 +260,8 @@ namespace Physica {
         const auto buffer = toPlainHost();
         alloc.deallocate(d_data, capacity);
         d_data = alloc.allocate(size);
-        cudaMemcpyAsync(d_data, buffer.data(), getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice);
+        cudaMemcpyAsync(d_data, buffer.data(), getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance());
         capacity = size;
-        check(cudaStreamSynchronize(nullptr));
     }
 
     template<class T, class Allocator>
@@ -273,23 +272,23 @@ namespace Physica {
         if (capacity < size)
             reserve(size);
 
+        auto& ctx = CUDAContext::getInstance();
         if (length > size) {
             if constexpr (!isTrivial) {
                 const size_t delta = length - size;
                 Array<ElemType, Dynamic> buffer{};
                 buffer.reserve(delta);
-                check(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+                check(cudaMemcpyAsync(buffer.data(), d_data + size, delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx));
                 buffer.setLength(delta);
             }
         }
-        else {
+        else if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
             const size_t delta = size - length;
             Array<ElemType, Dynamic> buffer(delta);
             for (size_t i = 0; i < delta; ++i)
                 buffer.get_allocator().construct(buffer.data() + i, std::forward<Args>(args)...);
-            check(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+            check(cudaMemcpyAsync(d_data + length, buffer.data(), delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx));
             buffer.get_allocator().deallocate(buffer.release(), delta);
-            check(cudaStreamSynchronize(nullptr));
         }
         length = size;
     }

@@ -82,14 +82,16 @@ namespace Physica {
 
         auto w1 = nn.forward(xA);
         auto w2 = nn.forward(xB);
-        auto lnJs = transform(w1, xB, dimB) + transform(w2, xA, dimA);
+        auto lnJs1 = transform(w1, xB, dimB);
+        auto lnJs2 = transform(w2, xA, dimA);
         x = xA + xB;
         if constexpr (ReverseDiff<T>) {
-            auto result = co_yield lnJs.values();
-            lnJs.reverse(result.grads());
+            auto result = co_yield lnJs1.values() + lnJs2.values();
+            lnJs1.reverse(result.grads());
+            lnJs2.reverse(result.grads());
         }
         else
-            co_return std::move(lnJs);
+            co_return lnJs1 + lnJs2;
     }
     /**
      * We have to make it public because of limitation of CUDA

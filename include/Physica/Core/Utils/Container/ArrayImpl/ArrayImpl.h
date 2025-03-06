@@ -106,7 +106,7 @@ namespace Physica {
     __host__ __device__ Array<T, Dynamic, Allocator>::Array(const This& obj) : length(obj.length), capacity(obj.capacity), alloc() {
         if constexpr (IsHost()) {
             arr = alloc.allocate(capacity);
-            if constexpr (!std::is_trivial<ElemType>::value)
+            if constexpr (!std::is_trivially_copyable<ElemType>::value)
                 for(size_t i = 0; i < length; ++i)
                     alloc.construct(arr + i, obj[i]);
             else
@@ -127,7 +127,7 @@ namespace Physica {
     template<class T, class Allocator>
     __host__ __device__ Array<T, Dynamic, Allocator>::~Array() {
         if constexpr (IsHost()) {
-            if constexpr (!std::is_trivial<ElemType>::value)
+            if constexpr (!std::is_trivially_copyable<ElemType>::value)
                 if (arr != nullptr)
                     for(size_t i = 0; i < length; ++i)
                         alloc.destroy(arr + i);
@@ -202,7 +202,7 @@ namespace Physica {
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::decrease(size_t size) {
         assert(size <= capacity);
-        if(!std::is_trivial<T>::value) {
+        if(!std::is_trivially_copyable<T>::value) {
             for(size_t i = size; i < length; ++i)
                 (arr + i)->~T();
         }
@@ -238,7 +238,7 @@ namespace Physica {
     template<class T, class Allocator>
     inline void Array<T, Dynamic, Allocator>::setLength(size_t size) {
         assert(size <= getCapacity() && "[Error]: Requiring more elements than the array have");
-        if constexpr (!std::is_trivial<ElemType>::value) {
+        if constexpr (!std::is_trivially_copyable<ElemType>::value) {
             assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");
         }
         length = size;
@@ -251,7 +251,7 @@ namespace Physica {
             reserve(size);
 
         if (length > size) {
-            if constexpr (!std::is_trivial<T>::value)
+            if constexpr (!std::is_trivially_copyable<T>::value)
                 for (size_t i = size; i < length; ++i)
                     (arr + i)->~T();
             length = size;

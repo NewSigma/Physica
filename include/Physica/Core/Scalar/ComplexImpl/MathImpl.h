@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T>
-    T abs(const Complex<T>& c) {
+    __host__ __device__ T abs(const Complex<T>& c) {
         return c.norm();
     }
 
@@ -60,12 +60,18 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline Complex<T> ln(const Complex<T>& c) {
-        return Complex<T>(std::log(c.toMachine()));
+    __host__ __device__ inline Complex<T> ln(const Complex<T>& c) {
+        if constexpr (IsHost())
+            return Complex<T>(std::log(c.toMachine()));
+        else {
+        #ifdef PHYSICA_CUDA
+            return Complex<T>(thrust::log(c.toMachineThrust()));
+        #endif
+        }
     }
 
     template<Scalar T>
-    inline Complex<T> ln1p(const Complex<T>& c) {
+    __host__ __device__ inline Complex<T> ln1p(const Complex<T>& c) {
         return ln(T(1) + c);
     }
 
@@ -145,7 +151,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Complex<T> lncosh(const Complex<T>& c) {
+    __host__ __device__ Complex<T> lncosh(const Complex<T>& c) {
         const T abs_real = abs(c.real());
         const T norm1 = exp(T(-2) * abs_real);
         const T phase = c.real().isPositive() ? c.imag() : -c.imag();

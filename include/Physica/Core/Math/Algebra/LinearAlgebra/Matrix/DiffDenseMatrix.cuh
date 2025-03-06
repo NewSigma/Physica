@@ -93,7 +93,6 @@ namespace Physica {
         [[nodiscard]] inline static This random_normal(size_t row, size_t col);
         template<RNG R, class Distribution>
         [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
-    private:
     };
 }
 

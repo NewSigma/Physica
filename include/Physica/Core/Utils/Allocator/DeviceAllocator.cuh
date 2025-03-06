@@ -97,15 +97,15 @@ namespace Physica {
             ::new (static_cast<void*>(p)) value_type(std::forward<Args>(args)...);
         else {
             value_type temp(std::forward<Args>(args)...);
-            check(cudaMemcpy(p, &temp, sizeof(value_type), cudaMemcpyHostToDevice));
-            if constexpr (!std::is_trivial<value_type>::value)
+            check(cudaMemcpyAsync(p, &temp, sizeof(value_type), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+            if constexpr (!std::is_trivially_copyable<value_type>::value)
                 temp.release(); //Ownership has been given to device
         }
     }
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) noexcept {
-        if constexpr (!std::is_trivial<value_type>::value) {
+        if constexpr (!std::is_trivially_copyable<value_type>::value) {
             if constexpr (IsDevice())
                 p->~value_type();
             else {

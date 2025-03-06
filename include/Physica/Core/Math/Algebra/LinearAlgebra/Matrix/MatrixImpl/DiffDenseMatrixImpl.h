@@ -60,6 +60,12 @@ namespace Physica {
     }
 
     template<tparams>
+    void DiffDenseMatrix::resize(size_t row, size_t col) {
+        v.resize(row, col);
+        g.resize(row, col);
+    }
+
+    template<tparams>
     template<RNG R>
     inline void DiffDenseMatrix::random_uniform() {
         v.template random_uniform<R>();
@@ -78,12 +84,6 @@ namespace Physica {
     inline void DiffDenseMatrix::random_any(Distribution& dist) {
         v.template random_any<R, Distribution>(dist);
         g.zeros();
-    }
-
-    template<tparams>
-    void DiffDenseMatrix::resize(size_t row, size_t col) {
-        v.resize(row, col);
-        g.resize(row, col);
     }
 
     template<tparams>

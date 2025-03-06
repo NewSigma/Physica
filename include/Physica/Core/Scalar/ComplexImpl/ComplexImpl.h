@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T>
-    Complex<T>::Complex(double _Complex x) : This(std::complex<MachineType>(x)) {}
+    Complex<T>::Complex(double _Complex x) : This(std::complex<Tm>(x)) {}
 
     template<Scalar T>
     __host__ __device__ Complex<T>::Complex(T re_) : re(re_), im(0) {}
@@ -40,7 +40,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Complex<T>::Complex(std::complex<MachineType> c) : re(c.real()), im(c.imag()) {}
+    Complex<T>::Complex(std::complex<Tm> c) : re(c.real()), im(c.imag()) {}
+
+#ifdef PHYSICA_CUDA
+    template<Scalar T>
+    __host__ __device__ Complex<T>::Complex(thrust::complex<Tm> c) : re(c.real()), im(c.imag()) {}
+#endif
 
     template<Scalar T>
     template<Scalar U, DiffMode Mode, int Order>
@@ -94,8 +99,17 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline std::complex<typename Complex<T>::MachineType> Complex<T>::toMachine() const noexcept {
+    __host__ __device__ inline auto Complex<T>::toMachine() const noexcept -> std::complex<Tm> {
         return {re.toMachine(), im.toMachine()};
+    }
+
+    template<Scalar T>
+    __host__ __device__ auto Complex<T>::toMachineThrust() const noexcept {
+    #ifdef PHYSICA_CUDA
+        return thrust::complex<Tm>(toMachine());
+    #else
+        return;
+    #endif
     }
 
     template<Scalar T>

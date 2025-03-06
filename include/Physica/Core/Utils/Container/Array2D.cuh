@@ -55,6 +55,9 @@ namespace Physica {
         __host__ __device__ void resize(size_t row, size_t col, Args&&... args);
 
         [[nodiscard]] host_obj toHost() const;
+        [[nodiscard]] host_obj toHostAsync() const;
+        void toHost(host_obj& obj) const;
+        void toHostAsync(host_obj& obj) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */

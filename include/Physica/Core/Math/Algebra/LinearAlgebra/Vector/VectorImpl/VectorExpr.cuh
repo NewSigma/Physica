@@ -87,4 +87,7 @@ namespace Physica {
 #include "VectorExprImpl/Square.cuh"
 #include "VectorExprImpl/Ln.cuh"
 #include "VectorExprImpl/Exp.cuh"
+#include "VectorExprImpl/Cos.cuh"
+#include "VectorExprImpl/Tan.cuh"
+#include "VectorExprImpl/LnCosh.cuh"
 #include "VectorExprImpl/Softmax.cuh"

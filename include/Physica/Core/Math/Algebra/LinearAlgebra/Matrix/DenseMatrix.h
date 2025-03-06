@@ -75,12 +75,12 @@ namespace Physica {
         [[nodiscard]] inline auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
-        using Storage::swap;
 
         void zeros();
         using Base::random_any;
         using Base::random_normal;
         using Base::random_uniform;
+        using Storage::swap;
         /* Getters */
         using Base::data;
         using Storage::data_ptr;

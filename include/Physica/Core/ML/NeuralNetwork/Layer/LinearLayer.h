@@ -58,6 +58,10 @@ namespace Physica {
         void zero_grad();
 
         void resize(size_t inputDim, size_t outputDim);
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
+        void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
 
         void fill(Tv x);
         template<RNG R>

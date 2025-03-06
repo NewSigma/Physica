@@ -84,6 +84,23 @@ namespace Physica {
     }
 
     template<tparams>
+    auto device_obj<Array2D>::toHostAsync() const -> host_obj {
+        return host_obj(arr.toHostAsync(), r);
+    }
+
+    template<tparams>
+    void device_obj<Array2D>::toHost(host_obj& obj) const {
+        toHostAsync(arr);
+        CUDAContext::getInstance().wait();
+    }
+
+    template<tparams>
+    void device_obj<Array2D>::toHostAsync(host_obj& obj) const {
+        arr.toHostAsync(obj.arr);
+        obj.r = r;
+    }
+
+    template<tparams>
     void device_obj<Array2D>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);

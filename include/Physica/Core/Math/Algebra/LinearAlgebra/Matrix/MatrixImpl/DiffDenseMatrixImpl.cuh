@@ -135,4 +135,30 @@ namespace Physica {
 
 #undef tparams
 #undef DenseMatrix
+
+    template<Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col>
+    auto DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>::toDevice() const {
+        auto result = toDeviceAsync();
+        CUDAExecutor::wait();
+        return result;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col>
+    auto DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>::toDeviceAsync() const {
+        device_obj<This> result{};
+        toDeviceAsync(result);
+        return result;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col>
+    void DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>::toDevice(device_obj<This>& obj) const {
+        toDeviceAsync(obj);
+        CUDAExecutor::wait();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col>
+    void DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>::toDeviceAsync(device_obj<This>& obj) const {
+        v.toDeviceAsync(obj.values());
+        g.toDeviceAsync(obj.grads());
+    }
 }

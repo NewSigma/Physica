@@ -51,8 +51,10 @@ namespace Physica {
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class U>
-        [[nodiscard]] auto forward(const U& x) const;
+        template<Vector V>
+        [[nodiscard]] inline CoDiff<device_obj<VectorND<T>>> forward(const V& x) const requires(CUDA<V>);
+        template<Matrix M>
+        [[nodiscard]] inline CoDiff<device_obj<MatrixND<T>>> forward(const M& x) const requires(CUDA<M>);
         void reverse(const This& __restrict other) const noexcept;
 
         template<class Optimizer>
@@ -74,17 +76,17 @@ namespace Physica {
         void random_xavier_normal(Tv gain);
         template<RNG R, class Distribution>
         void random_any(Distribution& dist);
+
+        const H5Group read(const H5Loc& loc, const char* name);
+        H5Group write(H5Loc& loc, const char* name) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
         [[nodiscard]] const auto& getWeights() const noexcept { return weights; }
         [[nodiscard]] const auto& getBias() const noexcept requires(WithBias) { return bias; }
-    private:
-        template<Vector V>
-        [[nodiscard]] inline CoDiff<device_obj<VectorND<T>>> forward_impl(const V& x) const requires(CUDA<V>);
-        template<Matrix M>
-        [[nodiscard]] inline CoDiff<device_obj<MatrixND<T>>> forward_impl(const M& x) const requires(CUDA<M>);
+        /* Friends */
+        friend class LinearLayer<T, WithBias>;
     };
 
     template<Scalar T, bool WithBias>
@@ -108,19 +110,51 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<class U>
-    auto device_obj<LinearLayer<T, WithBias>>::forward(const U& x) const {
-        if constexpr (Vector<U>)
-            assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
-        else {
-            static_assert(Matrix<U>, "[Error]: Unexpected type");
-            assert(x.getRow() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
+    template<Vector V>
+    inline auto device_obj<LinearLayer<T, WithBias>>::forward(const V& x) const -> CoDiff<device_obj<VectorND<T>>> requires(CUDA<V>) {
+        assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
+        if constexpr (ReverseDiff<T>) {
+            auto expr1 = weights * x;
+            if constexpr (WithBias) {
+                auto expr2 = expr1 + bias;
+                const auto result = co_yield expr2.values();
+                expr2.reverse(result.grads());
+            }
+            else {
+                const auto result = co_yield expr1.values();
+                expr1.reverse(result.grads());
+            }
         }
+        else {
+            if constexpr (WithBias)
+                co_return weights * x + bias;
+            else
+                co_return weights * x;
+        }
+    }
 
-        if constexpr (CUDA<U>)
-            return forward_impl(x);
-        else
-            return forward_impl(x.toDevice());
+    template<Scalar T, bool WithBias>
+    template<Matrix M>
+    inline auto device_obj<LinearLayer<T, WithBias>>::forward(const M& x) const -> CoDiff<device_obj<MatrixND<T>>>  requires(CUDA<M>) {
+        assert(x.getRow() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
+        if constexpr (ReverseDiff<T>) {
+            auto expr1 = weights * x;
+            if constexpr (WithBias) {
+                auto expr2 = expr1 + bias;
+                const auto result = co_yield expr2.values();
+                expr2.reverse(result.grads());
+            }
+            else {
+                const auto result = co_yield expr1.values();
+                expr1.reverse(result.grads());
+            }
+        }
+        else {
+            if constexpr (WithBias)
+                co_return weights * x + bias;
+            else
+                co_return weights * x;
+        }
     }
 
     template<Scalar T, bool WithBias>
@@ -183,9 +217,9 @@ namespace Physica {
 
     template<Scalar T, bool WithBias>
     inline void device_obj<LinearLayer<T, WithBias>>::toHostAsync(host_obj& obj) const {
-        weights.toHostAsync(obj.getWeights());
+        weights.toHostAsync(obj.weights);
         if constexpr (WithBias)
-            bias.toHostAsync(obj.getBias());
+            bias.toHostAsync(obj.bias);
     }
 
     template<Scalar T, bool WithBias>
@@ -231,6 +265,22 @@ namespace Physica {
             bias.random_any(dist);
     }
 
+#ifdef PHYSICA_HDF5
+    template<Scalar T, bool WithBias>
+    const H5Group device_obj<LinearLayer<T, WithBias>>::read(const H5Loc& loc, const char* name) {
+        host_obj obj{};
+        auto group = obj.read(loc, name);
+        obj.toDeviceAsync(*this);
+        return group;
+    }
+
+    template<Scalar T, bool WithBias>
+    H5Group device_obj<LinearLayer<T, WithBias>>::write(H5Loc& loc, const char* name) const {
+        host_obj obj = toHost();
+        return obj.write(loc, name);
+    }
+#endif
+
     template<Scalar T, bool WithBias>
     void device_obj<LinearLayer<T, WithBias>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
@@ -240,49 +290,30 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<Vector V>
-    inline auto device_obj<LinearLayer<T, WithBias>>::forward_impl(const V& x) const -> CoDiff<device_obj<VectorND<T>>> requires(CUDA<V>) {
-        if constexpr (ReverseDiff<T>) {
-            auto expr1 = weights * x;
-            if constexpr (WithBias) {
-                auto expr2 = expr1 + bias;
-                const auto result = co_yield expr2.values();
-                expr2.reverse(result.grads());
-            }
-            else {
-                const auto result = co_yield expr1.values();
-                expr1.reverse(result.grads());
-            }
-        }
-        else {
-            if constexpr (WithBias)
-                co_return weights * x + bias;
-            else
-                co_return weights * x;
-        }
+    auto LinearLayer<T, WithBias>::toDevice() const {
+        auto result = toDeviceAsync();
+        CUDAExecutor::wait();
+        return result;
     }
 
     template<Scalar T, bool WithBias>
-    template<Matrix M>
-    inline auto device_obj<LinearLayer<T, WithBias>>::forward_impl(const M& x) const -> CoDiff<device_obj<MatrixND<T>>>  requires(CUDA<M>) {
-        if constexpr (ReverseDiff<T>) {
-            auto expr1 = weights * x;
-            if constexpr (WithBias) {
-                auto expr2 = expr1 + bias;
-                const auto result = co_yield expr2.values();
-                expr2.reverse(result.grads());
-            }
-            else {
-                const auto result = co_yield expr1.values();
-                expr1.reverse(result.grads());
-            }
-        }
-        else {
-            if constexpr (WithBias)
-                co_return weights * x + bias;
-            else
-                co_return weights * x;
-        }
+    auto LinearLayer<T, WithBias>::toDeviceAsync() const {
+        device_obj<This> result{};
+        toDeviceAsync(result);
+        return result;
+    }
+
+    template<Scalar T, bool WithBias>
+    void LinearLayer<T, WithBias>::toDevice(device_obj<This>& obj) const {
+        toDeviceAsync(obj);
+        CUDAExecutor::wait();
+    }
+
+    template<Scalar T, bool WithBias>
+    void LinearLayer<T, WithBias>::toDeviceAsync(device_obj<This>& obj) const {
+        weights.toDeviceAsync(obj.weights);
+        if constexpr (WithBias)
+            bias.toDeviceAsync(obj.bias);
     }
 }
 

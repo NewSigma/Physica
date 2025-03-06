@@ -136,7 +136,7 @@ namespace Physica {
     Real<Option> ln1pexp(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
-    Real<Option> lncosh(const Real<Option>& x) noexcept;
+    __host__ __device__ Real<Option> lncosh(const Real<Option>& x) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> floor(const Real<Option>& x) noexcept;

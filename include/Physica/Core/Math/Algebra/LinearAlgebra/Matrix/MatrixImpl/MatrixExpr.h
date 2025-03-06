@@ -129,6 +129,7 @@ namespace Physica {
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile > RHS1::ColAtCompile ? LHS1::ColAtCompile : RHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile > RHS1::SizeAtCompile ? LHS1::SizeAtCompile : RHS1::SizeAtCompile;
 
+        constexpr static bool FastAssign = false;
         constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>() && MatrixOption::isSymmMatrix<RHS>();
         constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && MatrixOption::isHermiteMatrix<RHS>();
     };
@@ -145,6 +146,7 @@ namespace Physica {
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
 
+        constexpr static bool FastAssign = false;
         constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>();
         constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && !RHS1::isComplex;
     };
@@ -164,6 +166,7 @@ namespace Physica {
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
 
+        constexpr static bool FastAssign = false;
         constexpr static bool isSymm = false;
         constexpr static bool isHermite = false;
     };

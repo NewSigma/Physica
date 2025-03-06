@@ -183,16 +183,16 @@ namespace Physica {
         VectorND<FuncValue> samples(numSample);
         Trv loss = 0;
         if constexpr (std::same_as<CUDAExecutor, Executor>) {
+            const auto from_d = from.toDeviceAsync();
+            const auto coeff_d = coeff.toDeviceAsync();
             auto x = device_obj<MatrixND<Tv>>::template random_uniform<R>(getDim(), numSample);
             const auto lnJs = nn.forward(x);
 
-            const auto y = x.toHost();
-            for (int i = 0; i < numSample; ++i)
-                samples[i] = nn(from + hadamard(coeff, y.col(i)));
-
-            const auto lnJv = lnJs.toHost();
+            const auto lnJv = lnJs.toHostAsync();
+            x = from_d + hadamard(coeff_d, x);
+            samples = nn(x).toHost();
+            CUDAExecutor::wait();
             {
-                const size_t numSample = samples.getLength();
                 const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
                 auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp();
                 loss = l.value();
@@ -200,6 +200,7 @@ namespace Physica {
                     l.reverse();
             }
             lnJs.reverse(lnJv.grads().toDeviceAsync());
+            samples += lnJv.values() + lnVolume;
         }
         else {
             Array<CoDiff<T>> lnJs(numSample);

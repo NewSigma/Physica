@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T>
-    T abs(const Complex<T>& c);
+    __host__ __device__ T abs(const Complex<T>& c);
 
     template<Scalar T>
     Complex<T> square(const Complex<T>& c);
@@ -34,10 +34,10 @@ namespace Physica {
     Complex<T> sqrt(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> ln(const Complex<T>& c);
+    __host__ __device__ inline Complex<T> ln(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> ln1p(const Complex<T>& c);
+    __host__ __device__ inline Complex<T> ln1p(const Complex<T>& c);
 
     template<Scalar T>
     inline Complex<T> ln1pexp(const Complex<T>& c);
@@ -82,7 +82,7 @@ namespace Physica {
     Complex<T> coth(const Complex<T>& c);
 
     template<Scalar T>
-    Complex<T> lncosh(const Complex<T>& c);
+    __host__ __device__ Complex<T> lncosh(const Complex<T>& c);
 }
 
 #include "MathImpl.h"
