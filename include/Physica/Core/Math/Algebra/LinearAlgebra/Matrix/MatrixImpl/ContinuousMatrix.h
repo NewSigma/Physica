@@ -125,13 +125,6 @@ namespace Physica {
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;
 
-        template<RNG R>
-        void random_uniform();
-        template<RNG R>
-        void random_normal();
-        template<RNG R, class Distribution>
-        void random_any(Distribution& dist);
-
         const H5DataSet<2> read(const H5Loc& loc, const char* name);
         H5DataSet<2> write(H5Loc& loc, const char* name) const;
 

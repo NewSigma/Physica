@@ -235,53 +235,6 @@ namespace Physica {
         return FlattenC<Derived>(Base::getConstCastDerived());
     }
 
-    template<class Derived>
-    template<RNG R>
-    void ContinuousMatrix<Derived>::random_uniform() {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            const size_t maxMajor = Base::getMaxMajor();
-            const size_t maxMinor = Base::getMaxMinor();
-            TracerType::getInstance().reserve(maxMajor * maxMinor);
-            for (size_t major = 0; major < maxMajor; ++major)
-                for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_uniform<R>();
-        }
-        else
-            Base::template random_uniform<R>();
-    }
-
-    template<class Derived>
-    template<RNG R>
-    void ContinuousMatrix<Derived>::random_normal() {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            const size_t maxMajor = Base::getMaxMajor();
-            const size_t maxMinor = Base::getMaxMinor();
-            TracerType::getInstance().reserve(maxMajor * maxMinor);
-            for (size_t major = 0; major < maxMajor; ++major)
-                for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_normal<R>();
-        }
-        else
-            Base::template random_normal<R>();
-    }
-
-    template<class Derived>
-    template<RNG R, class Distribution>
-    void ContinuousMatrix<Derived>::random_any(Distribution& dist) {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            const size_t maxMajor = Base::getMaxMajor();
-            const size_t maxMinor = Base::getMaxMinor();
-            TracerType::getInstance().reserve(maxMajor * maxMinor);
-            for (size_t major = 0; major < maxMajor; ++major)
-                for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_any<R, Distribution>(dist);
-        }
-        else
-            Base::template random_any<R, Distribution>(dist);
-    }
 #ifdef PHYSICA_HDF5
     template<class Derived>
     const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Loc& loc, const char* name) {

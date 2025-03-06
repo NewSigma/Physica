@@ -33,7 +33,9 @@ namespace Physica {
     __host__ __device__ device_obj<DenseMatrix>::device_obj(size_t row, size_t col) : Storage(row, col) {}
 
     template<tparams>
-    __host__ __device__ device_obj<DenseMatrix>::device_obj(size_t row, size_t col, T value) : Storage(row, col, std::move(value)) {}
+    __host__ __device__ device_obj<DenseMatrix>::device_obj(size_t row, size_t col, T value) : Storage(row, col) {
+        *this = value;
+    }
 
     template<tparams>
     template<Matrix M>
@@ -70,6 +72,44 @@ namespace Physica {
     }
 
     template<tparams>
+    template<RNG R>
+    void device_obj<DenseMatrix>::random_uniform() {
+        if constexpr (MatrixOption::isElementMatrix<This>()) {
+            check(curandSetStream(R::getInstance(), CUDAContext::getInstance()));
+            if constexpr (T::Option == Float32)
+                check(curandGenerateUniform(R::getInstance(), (Tm*)data(), getRow() * getCol()));
+            else if constexpr (T::Option == Float64)
+                check(curandGenerateUniformDouble(R::getInstance(), (Tm*)data(), getRow() * getCol()));
+            else
+                host_obj::template random_normal<R>(getRow(), getCol()).toDeviceAsync(*this);
+        }
+        else
+            host_obj::template random_normal<R>(getRow(), getCol()).toDeviceAsync(*this);
+    }
+
+    template<tparams>
+    template<RNG R>
+    void device_obj<DenseMatrix>::random_normal() {
+        if constexpr (MatrixOption::isElementMatrix<This>()) {
+            check(curandSetStream(R::getInstance(), CUDAContext::getInstance()));
+            if constexpr (T::Option == Float32)
+                check(curandGenerateNormal(R::getInstance(), data(), getRow() * getCol()));
+            else if constexpr (T::Option == Float64)
+                check(curandGenerateNormalDouble(R::getInstance(), data(), getRow() * getCol()));
+            else
+                host_obj::template random_normal<R>(getRow(), getCol()).toDeviceAsync(*this);
+        }
+        else
+            host_obj::template random_normal<R>(getRow(), getCol()).toDeviceAsync(*this);
+    }
+
+    template<tparams>
+    template<RNG R, class Distribution>
+    void device_obj<DenseMatrix>::random_any(Distribution& dist) {
+        host_obj::template random_any<R, Distribution>(getRow(), getCol(), dist).toDeviceAsync(*this);
+    }
+
+    template<tparams>
     inline auto device_obj<DenseMatrix>::unitMatrix(size_t order) -> This {
         return host_obj::unitMatrix(order).toDevice();
     }
@@ -77,19 +117,25 @@ namespace Physica {
     template<tparams>
     template<RNG R>
     inline auto device_obj<DenseMatrix>::random_uniform(size_t row, size_t col) -> This {
-        return host_obj::template random_uniform<R>(row, col).toDevice();
+        This result(row, col);
+        result.template random_uniform<R>();
+        return result;
     }
 
     template<tparams>
     template<RNG R>
     inline auto device_obj<DenseMatrix>::random_normal(size_t row, size_t col) -> This {
-        return host_obj::template random_normal<R>(row, col).toDevice();
+        This result(row, col);
+        result.template random_normal<R>();
+        return result;
     }
 
     template<tparams>
     template<RNG R, class Distribution>
     inline auto device_obj<DenseMatrix>::random_any(size_t row, size_t col, Distribution& dist) -> This {
-        return host_obj::template random_any<R, Distribution>(row, col, dist).toDevice();
+        This result(row, col);
+        result.template random_any<R, Distribution>(dist);
+        return result;
     }
 
 #undef DenseMatrix

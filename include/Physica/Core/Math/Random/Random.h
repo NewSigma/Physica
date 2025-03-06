@@ -19,6 +19,9 @@
 #pragma once
 
 #include <random>
+#ifdef PHYSICA_CUDA
+    #include "Physica/Core/Exception/CUDA/cuRAND.cuh"
+#endif
 #include "Physica/Core/Exception/MKL/VSL.h"
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "RandomSeed.h"
@@ -63,6 +66,7 @@ namespace Physica {
 
         GenType gen;
         VSLStreamStatePtr pStream;
+        curandGenerator_t curand;
 
         SeedType seed;
     public:
@@ -70,6 +74,7 @@ namespace Physica {
         /* Operators */
         [[nodiscard]] result_type operator()() { return gen(); }
         [[nodiscard]] operator VSLStreamStatePtr() noexcept { return pStream; }
+        [[nodiscard]] operator curandGenerator_t() noexcept { return curand; }
         /* Operations */
         [[nodiscard("[Info]: Record the new seed for reproducible result")]] SeedType reseed();
         /* Getters */
@@ -93,6 +98,7 @@ namespace Physica {
         [[nodiscard]] inline SeedType getThreadSeed() const noexcept;
         /* Static members */
         constexpr static int getMKLRngID();
+        constexpr static curandRngType_t curandRngID();
     };
 
     template<RandomOption Option, uint64_t FixedSeed>
@@ -103,6 +109,7 @@ namespace Physica {
     template<RandomOption Option, uint64_t FixedSeed>
     Random<Option, FixedSeed>::~Random() {
         check_vsl(vslDeleteStream(&pStream));
+        check(curandDestroyGenerator(curand));
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
@@ -117,6 +124,14 @@ namespace Physica {
         if constexpr (HasMKL()) {
             RandomSeed::toNextSeed(tseed);
             check_vsl(vslNewStream(&pStream, getMKLRngID(), tseed));
+        }
+        if constexpr (HasCUDA()) {
+        #ifdef PHYSICA_CUDA
+            RandomSeed::toNextSeed(tseed);
+            check(curandCreateGenerator(&curand, curandRngID()));
+            check(curandSetGeneratorOrdering(curand, CURAND_ORDERING_PSEUDO_DYNAMIC));
+            check(curandSetPseudoRandomGeneratorSeed(curand, tseed));
+        #endif
         }
         return seed;
     }
@@ -155,6 +170,15 @@ namespace Physica {
     constexpr int Random<Option, FixedSeed>::getMKLRngID() {
     #ifdef PHYSICA_MKL
         return VSL_BRNG_MT19937;
+    #else
+        return 0;
+    #endif
+    }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    constexpr curandRngType_t Random<Option, FixedSeed>::curandRngID() {
+    #ifdef PHYSICA_CUDA
+        return CURAND_RNG_PSEUDO_MTGP32;
     #else
         return 0;
     #endif

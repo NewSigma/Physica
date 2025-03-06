@@ -35,6 +35,8 @@
 #else
     #define __host__
     #define __device__
+    using curandGenerator_t = void*;
+    using curandRngType_t = int;
 #endif
 
 #ifdef __GNUC__

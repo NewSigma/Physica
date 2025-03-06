@@ -35,7 +35,9 @@ namespace Physica {
         using Coro = CRCoro<This>;
         using Storage = device_obj<Array2D<T, Option, Row, Col, Allocator>>;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
+        using Tm = T::MachineType;
     public:
         device_obj() = default;
         device_obj(const host_obj& mat);
@@ -61,6 +63,12 @@ namespace Physica {
         inline void toHostAsync(host_obj& obj) const;
 
         void zeros();
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
+        template<RNG R, class Distribution>
+        void random_any(Distribution& dist);
 
         using Storage::swap;
         /* Getters */
