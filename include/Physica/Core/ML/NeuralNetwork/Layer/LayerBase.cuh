@@ -30,6 +30,8 @@ namespace Physica {
         using Base = CRTPBase<This>;
         using device_obj_type = device_obj<Derived>;
     public:
+        template<Scalar U>
+        using MatrixND = DenseMatrix<U, MatrixOption::Col | MatrixOption::Element>;
         using ScalarType = Traits<device_obj<Derived>>::ScalarType;
         constexpr static bool IsTrain = ScalarType::isDiffable;
         constexpr static bool IsInfer = !IsTrain;

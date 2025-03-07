@@ -36,14 +36,15 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const T& x) {
         if (IsHost()) {
-            CUDAExecutor::launch([m_ = asStruct(Base::getDerived()), x] __device__() mutable {
+            auto func = [m_ = asStruct(Base::getDerived()), x] __device__() mutable {
                 auto& m = m_.getDerived();
                 const size_t maxMinor = m.getMaxMinor();
                 const size_t major = blockIdx.y;
                 const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
                 if (minor < maxMinor)
                     m.refFromMajorMinor(major, minor) = x;
-            }, Base::makeKernelConfig());
+            };
+            CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
         }
         else {
             for (size_t i = 0; i < Base::getMaxMajor(); ++i)

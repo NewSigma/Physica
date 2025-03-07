@@ -37,24 +37,26 @@ namespace Physica {
     void device_obj<ContinuousVector<Derived>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
         static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
         if constexpr (Scalar<U>) {
-            CUDAExecutor::launch([x_ = asStruct(Base::getConstCastDerived()), g = grad] __device__() mutable {
+            auto func = [x_ = asStruct(Base::getConstCastDerived()), g = grad] __device__() mutable {
                 const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
                 auto& x = x_.getDerived();
                 if (index < x.getLength())
                     x.grads()[index] = g;
-            }, Base::makeKernelConfig());
+            };
+            CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
         }
         else {
             static_assert(Vector<U>, "[Error]: Unexpected type");
             static_assert(CUDA<U>, "[Error]: Cannot pass host grad to device");
             assert(Base::getLength() == grad.getLength());
-            CUDAExecutor::launch([x_ = asStruct(Base::getConstCastDerived()), g_ = asStruct(grad)] __device__() mutable {
+            auto func = [x_ = asStruct(Base::getConstCastDerived()), g_ = asStruct(grad)] __device__() mutable {
                 const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
                 const auto& g = g_.getDerived();
                 auto& x = x_.getDerived();
                 if (index < x.getLength())
                     x.grads()[index] = g.calc(index);
-            }, Base::makeKernelConfig());
+            };
+            CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
         }
     }
 

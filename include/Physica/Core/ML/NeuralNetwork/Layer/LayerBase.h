@@ -20,6 +20,7 @@
 
 #include <concepts>
 #include "Physica/CRTPBase.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
     template<class Derived>
@@ -28,6 +29,8 @@ namespace Physica {
         using Base = CRTPBase<This>;
         using TraitsType = Traits<Derived>;
     public:
+        template<Scalar U>
+        using MatrixND = DenseMatrix<U, MatrixOption::Col | MatrixOption::Element>;
         using ScalarType = TraitsType::ScalarType;
         constexpr static bool IsTrain = ScalarType::isDiffable;
         constexpr static bool IsInfer = !IsTrain;

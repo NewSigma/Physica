@@ -26,8 +26,8 @@
 
 namespace Physica {
     namespace Internal {
-        template<class Functor>
-        __global__ void kernel(Functor func) {
+        template<class Functor, int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
+        __global__ void __launch_bounds__(MaxThreadsPerBlock, MinBlocksPerMultiprocessor) kernel(Functor func) {
             return func();
         }
     }
@@ -48,19 +48,19 @@ namespace Physica {
             void wait() { check(cudaStreamSynchronize(stream)); }
         };
     public:
-        template<class Functor>
+        template<class Functor, int MaxThreadsPerBlock = CUDADevAttr::MaxThreadsPerBlock, int MinBlocksPerMultiprocessor = 1>
         __host__ __device__ static KernelFuture launch(Functor func, KernelConfig config, size_t sharedMem = 0);
         static inline void wait();
     };
 
-    template<class Functor>
+    template<class Functor, int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
     __host__ __device__ auto CUDAExecutor::launch(Functor func, KernelConfig config, size_t sharedMem) -> KernelFuture {
         cudaStream_t stream = nullptr;
         if constexpr (IsHost())
             stream = cudaStream_t(CUDAContext::getInstance().getStream());
         else
             noImpl("No dynamic parallel support");
-        Internal::kernel<<<config.blocks, config.threads, sharedMem, stream>>>(func);
+        Internal::kernel<Functor, MaxThreadsPerBlock, MinBlocksPerMultiprocessor><<<config.blocks, config.threads, sharedMem, stream>>>(func);
         check(cudaGetLastError());
         return KernelFuture(stream);
     }

@@ -33,7 +33,7 @@ namespace Physica {
         using BiasType = std::conditional<WithBias, VectorND<T>, PlainStruct<void>>::type;
     public:
         template<Scalar U>
-        using MatrixND = DenseMatrix<U, MatrixOption::Col | MatrixOption::Element>;
+        using MatrixND = Base::template MatrixND<U>;
         using device_obj_type = device_obj<This>;
     private:
         MatrixND<T> weights;
@@ -70,6 +70,10 @@ namespace Physica {
         void random_xavier_uniform(Tv gain);
         template<RNG R>
         void random_xavier_normal(Tv gain);
+        template<RNG R>
+        void random_kaiming_uniform(Tv gain);
+        template<RNG R>
+        void random_kaiming_normal(Tv gain);
         template<RNG R, class Distribution>
         void random_any(Distribution& dist);
 
@@ -200,6 +204,29 @@ namespace Physica {
         weights.template random_any<R, decltype(dist)>(dist);
         if constexpr (WithBias)
             bias.template random_any<R, decltype(dist)>(dist);
+    }
+
+    template<Scalar T, bool WithBias>
+    template<RNG R>
+    void LinearLayer<T, WithBias>::random_kaiming_uniform(Tv gain) {
+        const Tm bound = (gain * sqrt(Tv(3) / Tv(getInputDim()))).toMachine();
+        std::uniform_real_distribution<Tm> dist(-bound, bound);
+        weights.template random_any<R, decltype(dist)>(dist);
+        if constexpr (WithBias)
+            bias.template random_any<R, decltype(dist)>(dist);
+    }
+
+    template<Scalar T, bool WithBias>
+    template<RNG R>
+    void LinearLayer<T, WithBias>::random_kaiming_normal(Tv gain) {
+        weights.template random_normal<R>();
+        if constexpr (WithBias)
+            bias.template random_normal<R>();
+
+        const Tv factor = gain / sqrt(Tv(getInputDim()));
+        weights *= factor;
+        if constexpr (WithBias)
+            bias *= factor;
     }
 
     template<Scalar T, bool WithBias>

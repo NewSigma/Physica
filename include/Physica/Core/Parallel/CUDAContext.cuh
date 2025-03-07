@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,13 +30,26 @@ namespace Physica {
      */
     class PHYSICA_API CUDAContext {
         using This = CUDAContext;
-        using Base = CUDAStream;
-        struct StreamGuard {
-            ~StreamGuard() { CUDAContext::getInstance().streams.pop(); }
+
+        struct Page {
+            int device;
+            CUDAStream stream;
+            cublasContext* cublas;
+
+            Page(int device_, CUDAStream stream_);
+            Page(const Page&) = delete;
+            Page(Page&&) noexcept = default;
+            ~Page();
+            /* Operators */
+            Page& operator=(const Page&) = delete;
+            Page& operator=(Page&&) noexcept = delete;
         };
 
-        std::stack<CUDAStream> streams;
-        cublasContext* cublas;
+        struct PageGuard {
+            ~PageGuard() { CUDAContext::getInstance().pages.pop(); }
+        };
+
+        std::stack<Page> pages;
     public:
         CUDAContext(const This&) = delete;
         CUDAContext(This&&) noexcept = delete;
@@ -45,13 +58,15 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] operator cudaStream_t() const noexcept { return getStream(); }
-        [[nodiscard]] operator cublasContext*();
+        [[nodiscard]] operator cublasContext*() const noexcept { return pages.top().cublas; }
         /* Operations */
-        StreamGuard push_stream();
-        cudaError_t query() { return getStream().query(); }
+        PageGuard push() { return push(device()); }
+        PageGuard push(int device);
+        [[nodiscard]] cudaError_t query() { return getStream().query(); }
         void wait() { getStream().wait(); }
         /* Getters */
-        [[nodiscard]] const CUDAStream& getStream() const noexcept { return streams.top(); }
+        [[nodiscard]] int device() const noexcept { return pages.top().device; }
+        [[nodiscard]] const CUDAStream& getStream() const noexcept { return pages.top().stream; }
         /* Setters */
         void setPointerMode(bool isDeviceSide) noexcept;
         /* Static members */

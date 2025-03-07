@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,28 +17,32 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
 namespace Physica {
-    CUDAContext::CUDAContext() : cublas(nullptr) {
-        streams.push(CUDAStream(nullptr));
+    CUDAContext::Page::Page(int device_, CUDAStream stream_) : device(device_), stream(std::move(stream_)) {
+        check(cublasCreate(&cublas));
+        check(cublasSetStream(cublas, stream));
     }
 
-    CUDAContext::~CUDAContext() {
+    CUDAContext::Page::~Page() {
         cublasDestroy(cublas);
     }
 
-    auto CUDAContext::push_stream() -> StreamGuard {
-        streams.push(CUDAStream());
-        return {};
+    CUDAContext::CUDAContext() {
+        pages.emplace(0, CUDAStream(nullptr));
     }
 
-    CUDAContext::operator cublasContext*() {
-        if (cublas == nullptr) {
-            check(cublasCreate(&cublas));
-            check(cublasSetStream(cublas, getStream()));
-        }
-        return cublas;
+    CUDAContext::~CUDAContext() {
+        while (!pages.empty())
+            pages.pop();
+    }
+
+    auto CUDAContext::push(int device) -> PageGuard {
+        check(cudaSetDevice(device));
+        pages.emplace(device, CUDAStream());
+        return {};
     }
 
     CUDAContext& CUDAContext::getInstance() noexcept {

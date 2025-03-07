@@ -35,33 +35,40 @@ namespace Physica {
         template<Scalar U>
         using MatrixND = LinearLayer<T>::template MatrixND<U>;
     private:
-        int dim;
+        device_obj<VectorND<Tv>> mask;
         int numBin;
     public:
         device_obj() = default;
-        device_obj(int dim_, int numBin_);
+        device_obj(int dim, int numBin_);
         template<Scalar U>
         device_obj(const device_obj<LinearCoupler<U>>& other);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<DNN Net>
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(const Net& nn, device_obj<MatrixND<Tv>>& x) const;
-        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& x2, int numActiveDim) const;
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& x2) const;
+
+        template<RNG R>
+        void random_shuffle();
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ int getDim() const noexcept { return dim; }
+        [[nodiscard]] __host__ __device__ int getDim() const noexcept { return mask.getLength(); }
         [[nodiscard]] __host__ __device__ int getNumBin() const noexcept { return numBin; }
+    private:
+        Tv calcFactor() const noexcept { return Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon()); }
     };
 
     template<Scalar T>
-    device_obj<LinearCoupler<T>>::device_obj(int dim_, int numBin_) : dim(dim_), numBin(numBin_) {
+    device_obj<LinearCoupler<T>>::device_obj(int dim, int numBin_) : mask(dim), numBin(numBin_) {
         assert(dim > 0);
         assert(numBin > 0);
+        mask.zeros();
+        mask.head(dim / 2) = Tv(1);
     }
 
     template<Scalar T>
@@ -73,20 +80,16 @@ namespace Physica {
     template<DNN Net>
     auto device_obj<LinearCoupler<T>>::forward(const Net& nn, device_obj<MatrixND<Tv>>& x) const -> CoDiff<device_obj<VectorND<T>>> {
         assert(getDim() == x.getRow() && "[Error]: Dimensions do not match");
-        const int dimA = getDim() / 2;
-        const int dimB = dim - dimA;
-        device_obj<MatrixND<Tv>> xA(getDim(), x.getCol());
-        xA.zeros();
-        xA.topRows(dimA) = x.topRows(dimA);
+        device_obj<MatrixND<Tv>> xA = hadamard(x, mask);
         device_obj<MatrixND<Tv>> xB = x - xA;
 
         auto w1 = nn.forward(xA);
         auto w2 = nn.forward(xB);
-        auto lnJs1 = transform(w1, xB, dimB);
-        auto lnJs2 = transform(w2, xA, dimA);
+        auto lnJs1 = transform(w1, xB);
+        auto lnJs2 = transform(w2, xA);
         x = xA + xB;
         if constexpr (ReverseDiff<T>) {
-            auto result = co_yield lnJs1.values() + lnJs2.values();
+            auto result = co_yield lnJs1.values() + lnJs2.values() + Tv(getDim()) * ln(calcFactor());
             lnJs1.reverse(result.grads());
             lnJs2.reverse(result.grads());
         }
@@ -97,80 +100,93 @@ namespace Physica {
      * We have to make it public because of limitation of CUDA
      */
     template<Scalar T>
-    auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z, int numActiveDim) const -> CoDiff<device_obj<VectorND<T>>> {
+    auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const -> CoDiff<device_obj<VectorND<T>>> {
         const int numSample = z.getCol();
         auto indexes = device_obj<Array2D<size_t, Option>>(getDim(), numSample);
         auto deltas = device_obj<DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>>(numSample, getDim(), 1);
 
-        const auto factor = Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon());
         auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
-        config.blocks.y = dim;
-        CUDAExecutor::launch([*this,
-                              weights_ = asStruct(weights),
-                              z_ = asStruct(z),
-                              indexes_ = asStruct(indexes),
-                              deltas_ = asStruct(deltas),
-                              factor] __device__() mutable {
+        config.blocks.y = getDim();
+        auto fwd = [dim = getDim(),
+                    numBin = numBin,
+                    weights_ = asStruct(weights),
+                    z_ = asStruct(z),
+                    indexes_ = asStruct(indexes),
+                    deltas_ = asStruct(deltas),
+                    factor = calcFactor()] __device__() mutable {
             const int sample = blockIdx.x * blockDim.x + threadIdx.x;
-            const int dim = blockIdx.y;
+            const int i = blockIdx.y;
             const auto weights = weights_.getDerived().col(sample);
             auto z = z_.getDerived().col(sample);
             auto& indexes = indexes_.getDerived();
             auto& deltas = deltas_.getDerived();
-            if (z[dim].isZero())
+            if (z[i].isZero())
                 return;
 
-            const Tv tmp = z[dim] * factor;
+            const Tv tmp = z[i] * factor;
             const int index = tmp.toMachine();
-            indexes(dim, sample) = index;
+            indexes(i, sample) = index;
 
-            const auto grid = weights.reshape_row(getDim(), numBin);
-            const auto row = grid.row(dim).values();
+            const auto grid = weights.reshape_row(dim, numBin);
+            const auto row = grid.row(i).values();
             const Tv lnsumexp = row.lnSumExp();
             const Tv p = softmax(row).calc(index, lnsumexp);
-            deltas(sample, dim) = std::max(p, Tv(std::numeric_limits<Tv>::min()));
+            deltas(sample, i) = std::max(p, Tv(std::numeric_limits<Tv>::min()));
 
             Tv zi = tmp.mod() * p;
             for (int j = 0; j < index; ++j)
                 zi += softmax(row).calc(j, lnsumexp);
-            z[dim] = std::min(Tv(1), zi);
-        }, config);
+            z[i] = std::min(Tv(1), zi);
+        };
+        CUDAExecutor::launch<decltype(fwd), device_obj<VectorND<T>>::MaxThreadPerBlock>(fwd, config);
 
         auto expr = ln_elem(deltas);
-        CoDiff<device_obj<VectorND<T>>> lnJs = expr.sum_cols() + Tv(numActiveDim) * ln(factor);
+        CoDiff<device_obj<VectorND<T>>> lnJs = expr.sum_cols();
         if constexpr (ReverseDiff<T>) {
             auto tmp = co_yield lnJs.values();
             lnJs.reverse_final(tmp.grads());
-            CUDAExecutor::launch([*this,
-                                  weights_ = asStruct(weights),
-                                  z_ = asStruct(z),
-                                  indexes_ = asStruct(indexes),
-                                  deltas_ = asStruct(deltas)] __device__() mutable {
+            auto func = [dim = getDim(),
+                         numBin = numBin,
+                         weights_ = asStruct(weights),
+                         z_ = asStruct(z),
+                         indexes_ = asStruct(indexes),
+                         deltas_ = asStruct(deltas)] __device__() mutable {
                 const int sample = blockIdx.x * blockDim.x + threadIdx.x;
-                const int dim = blockIdx.y;
+                const int i = blockIdx.y;
                 const auto weights = weights_.getDerived().col(sample);
                 const auto& indexes = indexes_.getDerived();
                 const auto& deltas = deltas_.getDerived();
                 auto z = z_.getDerived().col(sample);
-                if (z[dim].isZero())
+                if (z[i].isZero())
                     return;
 
-                const auto grid = weights.reshape_row(getDim(), numBin);
-                const int index = indexes(dim, sample);
-                const Tv s = grid.row(dim).values().softmax(index);
-                const Tv g = (s - square(s)) * deltas(sample, dim).grad();
-                grid.row(dim).reverse(-g / Tv(numBin));
-                grid(dim, index).reverse(g);
-            }, config);
+                const auto grid = weights.reshape_row(dim, numBin);
+                const int index = indexes(i, sample);
+                const Tv s = grid.row(i).values().softmax(index);
+                const Tv g = (s - square(s)) * deltas(sample, i).grad();
+                grid.row(i).reverse(-g / Tv(numBin));
+                grid(i, index).reverse(g);
+            };
+            CUDAExecutor::launch<decltype(func), device_obj<VectorND<T>>::MaxThreadPerBlock>(func, config);
         }
         else
             co_return std::move(lnJs);
     }
 
     template<Scalar T>
+    template<RNG R>
+    void device_obj<LinearCoupler<T>>::random_shuffle() {
+        VectorND<Tv> mask_shuffle(getDim());
+        mask_shuffle.zeros();
+        mask_shuffle.head(getDim() / 2) = Tv(1);
+        std::shuffle(mask_shuffle.begin(), mask_shuffle.end(), R::getInstance());
+        mask_shuffle.toDeviceAsync(mask);
+    }
+
+    template<Scalar T>
     void device_obj<LinearCoupler<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(dim, obj.dim);
+        mask.swap(obj.mask);
         std::swap(numBin, obj.numBin);
     }
 }

@@ -53,6 +53,7 @@ namespace Physica {
         [[nodiscard]] int getNumBin() const noexcept { return numBin; }
     private:
         CoDiff<T> transform(const VectorND<T>& weights, VectorND<Tv>& x2) const;
+        Tv calcFactor() const noexcept { return Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon()); }
     };
 
     template<Scalar T>
@@ -79,7 +80,7 @@ namespace Physica {
         auto lnJ = transform(w1, xB) + transform(w2, xA);
         x = xA + xB;
         if constexpr (ReverseDiff<T>) {
-            auto result = co_yield lnJ.value();
+            auto result = co_yield lnJ.value() + Tv(dim) * ln(calcFactor());
             lnJ.reverse(result.grad());
         }
         else
@@ -101,7 +102,6 @@ namespace Physica {
         Array<size_t> indexes(dim);
         VectorND<T> deltas(dim, 1);
         VectorND<Tv> prob(numBin);
-        int subdim = 0;
         for (int i = 0; i < dim; ++i) {
             if (z[i].isZero())
                 continue;
@@ -116,11 +116,10 @@ namespace Physica {
             if (index > 0)
                 zi = std::min(Tv(1), zi + prob.head(index).sum());
             z[i] = zi;
-            subdim += 1;
         }
 
         auto expr = ln(deltas);
-        auto lnJ = expr.sum() + Tv(subdim) * ln(factor);
+        auto lnJ = expr.sum();
         if constexpr (ReverseDiff<T>) {
             auto tmp = co_yield lnJ.value();
             lnJ.reverse_final(tmp.grad());

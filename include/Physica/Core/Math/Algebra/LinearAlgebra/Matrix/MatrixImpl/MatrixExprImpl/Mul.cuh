@@ -27,11 +27,20 @@ namespace Physica {
         using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, T, U>>;
     public:
         using typename Base::ScalarType;
+        using typename Base::Tv;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) * Base::getRHS();
+            if constexpr (isReverseDiff)
+                return calc_value(row, col);
+            else
+                return Base::getLHS().calc(row, col) * Base::getRHS();
+        }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
+            return Base::getLHS().calc_value(row, col) * Base::getRHS().value();
         }
     };
 

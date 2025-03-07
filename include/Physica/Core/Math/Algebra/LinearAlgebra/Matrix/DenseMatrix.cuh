@@ -44,7 +44,7 @@ namespace Physica {
         __host__ __device__ device_obj(size_t row, size_t col);
         __host__ __device__ device_obj(size_t row, size_t col, T value);
         template<Matrix M>
-        device_obj(const device_obj<M>& mat);
+        device_obj(const M& mat) requires(CUDA<M>);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

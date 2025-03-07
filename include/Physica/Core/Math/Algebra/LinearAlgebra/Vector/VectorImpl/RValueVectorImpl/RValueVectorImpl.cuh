@@ -33,14 +33,15 @@ namespace Physica {
         static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
         assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
         if (IsHost()) {
-            CUDAExecutor::launch([source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
+            auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
                 const size_t length = source.getLength();
                 const uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
                 if (index < length)
                     target[index] = source.calc(index);
-            }, makeKernelConfig());
+            };
+            CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, makeKernelConfig());
         }
         else
             assign_impl<V>(target);
@@ -110,7 +111,7 @@ namespace Physica {
             using U = std::conditional<isReverseDiff, Tv, T>::type;
             const auto config = makeKernelConfig();
             device_obj<VectorND<U>> buffer(MaxThreadPerBlock);
-            auto future = CUDAExecutor::launch([v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
+            auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
                 const auto& v = v_.getDerived();
                 auto& buffer = buffer_.getDerived();
                 U local = 0;
@@ -121,7 +122,8 @@ namespace Physica {
                         local += v.calc(i);
                 }
                 buffer[threadIdx.x] = local;
-            }, KernelConfig(1, MaxThreadPerBlock));
+            };
+            auto future = CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
 
             if constexpr (IsHost()) { // To silence warnings
                 future.wait();

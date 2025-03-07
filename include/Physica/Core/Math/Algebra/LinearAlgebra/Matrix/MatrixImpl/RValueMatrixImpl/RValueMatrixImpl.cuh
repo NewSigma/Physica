@@ -30,7 +30,7 @@ namespace Physica {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
         if (IsHost()) {
-            CUDAExecutor::launch([source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
+            auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
                 const size_t maxMinor = target.getMaxMinor();
@@ -41,7 +41,8 @@ namespace Physica {
                     const size_t c = target.colFromMajorMinor(major, minor);
                     target(r, c) = source.calc(r, c);
                 }
-            }, target.makeKernelConfig());
+            };
+            CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, target.makeKernelConfig());
         }
         else {
             const size_t maxMajor = target.getMaxMajor();

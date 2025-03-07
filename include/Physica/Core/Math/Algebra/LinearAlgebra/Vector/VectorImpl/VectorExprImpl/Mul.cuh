@@ -27,11 +27,20 @@ namespace Physica {
         using Base = device_obj<BinaryVectorExpr<ExprType::Mul, T, U>>;
     public:
         using typename Base::ScalarType;
+        using typename Base::Tv;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return Base::getLHS().calc(index) * Base::getRHS();
+            if constexpr (isReverseDiff)
+                return calc_value(index);
+            else
+                return Base::getLHS().calc(index) * Base::getRHS();
+        }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const {
+            return Base::getLHS().calc_value(index) * Base::getRHS().value();
         }
 
         template<Packet Pack>

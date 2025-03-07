@@ -39,7 +39,7 @@ namespace Physica {
 
     template<tparams>
     template<Matrix M>
-    device_obj<DenseMatrix>::device_obj(const device_obj<M>& mat) : device_obj(mat.getRow(), mat.getCol()) {
+    device_obj<DenseMatrix>::device_obj(const M& mat) requires(CUDA<M>) : device_obj(mat.getRow(), mat.getCol()) {
         mat.getDerived().assign(*this);
     }
 
@@ -93,9 +93,9 @@ namespace Physica {
         if constexpr (MatrixOption::isElementMatrix<This>()) {
             check(curandSetStream(R::getInstance(), CUDAContext::getInstance()));
             if constexpr (T::Option == Float32)
-                check(curandGenerateNormal(R::getInstance(), data(), getRow() * getCol()));
+                check(curandGenerateNormal(R::getInstance(), (Tm*)data(), getRow() * getCol(), 0, 1));
             else if constexpr (T::Option == Float64)
-                check(curandGenerateNormalDouble(R::getInstance(), data(), getRow() * getCol()));
+                check(curandGenerateNormalDouble(R::getInstance(), (Tm*)data(), getRow() * getCol(), 0, 1));
             else
                 host_obj::template random_normal<R>(getRow(), getCol()).toDeviceAsync(*this);
         }
