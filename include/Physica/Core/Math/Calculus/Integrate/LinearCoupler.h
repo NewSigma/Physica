@@ -99,7 +99,7 @@ namespace Physica {
         const auto factor = Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon());
         const auto grid = weights.reshape_col(numBin, getDim());
         const int dim = getDim();
-        Array<size_t> indexes(dim);
+        Array<size_t> indices(dim);
         VectorND<T> deltas(dim, 1);
         VectorND<Tv> prob(numBin);
         for (int i = 0; i < dim; ++i) {
@@ -107,7 +107,7 @@ namespace Physica {
                 continue;
             const Tv tmp = z[i] * factor;
             const size_t index = tmp.toMachine();
-            indexes[i] = index;
+            indices[i] = index;
 
             prob = softmax(grid.col(i).values());
             deltas[i] = std::max(prob[index], Tv(std::numeric_limits<Tv>::min()));
@@ -126,10 +126,10 @@ namespace Physica {
             for (int i = 0; i < dim; ++i) {
                 if (z[i].isZero())
                     continue;
-                const Tv s = grid.col(i).values().softmax(indexes[i]);
+                const Tv s = grid.col(i).values().softmax(indices[i]);
                 const Tv g = (s - square(s)) * deltas[i].grad();
                 grid.col(i).reverse(-g / Tv(numBin));
-                grid(indexes[i], i).reverse(g);
+                grid(indices[i], i).reverse(g);
             }
         }
         else

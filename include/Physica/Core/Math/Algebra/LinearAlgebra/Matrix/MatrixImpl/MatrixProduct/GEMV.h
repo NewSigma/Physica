@@ -55,7 +55,7 @@ namespace Physica {
 
         auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
+        [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const T& getLHS() const noexcept { return mat; }
         [[nodiscard]] const U& getRHS() const noexcept { return vec; }
     };

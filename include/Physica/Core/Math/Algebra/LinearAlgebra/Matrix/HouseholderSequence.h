@@ -55,8 +55,8 @@ namespace Physica {
         template<Matrix U>
         void assign(LValueMatrix<U>& target) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
+        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
         [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] size_t getShift() const noexcept { return shift; }
         /* Setters */

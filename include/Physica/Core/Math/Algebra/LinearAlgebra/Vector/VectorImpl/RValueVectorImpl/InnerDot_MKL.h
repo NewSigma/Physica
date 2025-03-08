@@ -24,9 +24,9 @@
 namespace Physica {
     template<Vector T1, Vector T2>
     InnerDot<T1, T2>::ScalarType InnerDot<T1, T2>::calc_mkl() const {
-        using MachineType = ScalarType::MachineType;
-        const auto* p1 = reinterpret_cast<const MachineType*>(v1.data());
-        const auto* p2 = reinterpret_cast<const MachineType*>(v2.data());
+        using Tm = ScalarType::MachineType;
+        const auto* p1 = reinterpret_cast<const Tm*>(v1.data());
+        const auto* p2 = reinterpret_cast<const Tm*>(v2.data());
         if constexpr (ScalarType::isComplex) {
             ScalarType result;
             if constexpr (ScalarType::Option == Float32)

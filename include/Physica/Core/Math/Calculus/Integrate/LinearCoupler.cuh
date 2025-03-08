@@ -102,7 +102,7 @@ namespace Physica {
     template<Scalar T>
     auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const -> CoDiff<device_obj<VectorND<T>>> {
         const int numSample = z.getCol();
-        auto indexes = device_obj<Array2D<size_t, Option>>(getDim(), numSample);
+        auto indices = device_obj<Array2D<size_t, Option>>(getDim(), numSample);
         auto deltas = device_obj<DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>>(numSample, getDim(), 1);
 
         auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
@@ -111,21 +111,21 @@ namespace Physica {
                     numBin = numBin,
                     weights_ = asStruct(weights),
                     z_ = asStruct(z),
-                    indexes_ = asStruct(indexes),
+                    indices_ = asStruct(indices),
                     deltas_ = asStruct(deltas),
                     factor = calcFactor()] __device__() mutable {
             const int sample = blockIdx.x * blockDim.x + threadIdx.x;
             const int i = blockIdx.y;
             const auto weights = weights_.getDerived().col(sample);
             auto z = z_.getDerived().col(sample);
-            auto& indexes = indexes_.getDerived();
+            auto& indices = indices_.getDerived();
             auto& deltas = deltas_.getDerived();
             if (z[i].isZero())
                 return;
 
             const Tv tmp = z[i] * factor;
             const int index = tmp.toMachine();
-            indexes(i, sample) = index;
+            indices(i, sample) = index;
 
             const auto grid = weights.reshape_row(dim, numBin);
             const auto row = grid.row(i).values();
@@ -149,19 +149,19 @@ namespace Physica {
                          numBin = numBin,
                          weights_ = asStruct(weights),
                          z_ = asStruct(z),
-                         indexes_ = asStruct(indexes),
+                         indices_ = asStruct(indices),
                          deltas_ = asStruct(deltas)] __device__() mutable {
                 const int sample = blockIdx.x * blockDim.x + threadIdx.x;
                 const int i = blockIdx.y;
                 const auto weights = weights_.getDerived().col(sample);
-                const auto& indexes = indexes_.getDerived();
+                const auto& indices = indices_.getDerived();
                 const auto& deltas = deltas_.getDerived();
                 auto z = z_.getDerived().col(sample);
                 if (z[i].isZero())
                     return;
 
                 const auto grid = weights.reshape_row(dim, numBin);
-                const int index = indexes(i, sample);
+                const int index = indices(i, sample);
                 const Tv s = grid.row(i).values().softmax(index);
                 const Tv g = (s - square(s)) * deltas(sample, i).grad();
                 grid.row(i).reverse(-g / Tv(numBin));

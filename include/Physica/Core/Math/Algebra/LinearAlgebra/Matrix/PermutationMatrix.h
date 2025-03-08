@@ -24,11 +24,11 @@
 namespace Physica {
     template<Scalar T>
     class PermutationMatrix : public RValueMatrix<PermutationMatrix<T>> {
-        Array<size_t> indexes;
+        Array<size_t> indices;
     public:
         PermutationMatrix() = default;
         PermutationMatrix(size_t order);
-        PermutationMatrix(Array<size_t> indexes_);
+        PermutationMatrix(Array<size_t> indices_);
         PermutationMatrix(const PermutationMatrix&) = default;
         PermutationMatrix(PermutationMatrix&&) noexcept = default;
         ~PermutationMatrix() = default;
@@ -40,25 +40,25 @@ namespace Physica {
         void swap(PermutationMatrix& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] size_t getRow() const noexcept { return indexes.getLength(); }
-        [[nodiscard]] size_t getCol() const noexcept { return indexes.getLength(); }
+        [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
+        [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
     };
 
     template<Scalar T>
-    PermutationMatrix<T>::PermutationMatrix(size_t order) : indexes(order) {
+    PermutationMatrix<T>::PermutationMatrix(size_t order) : indices(order) {
         for (size_t i = 0; i < order; ++i)
-            indexes[i] = i;
+            indices[i] = i;
     }
 
     template<Scalar T>
-    PermutationMatrix<T>::PermutationMatrix(Array<size_t> indexes_) : indexes(std::move(indexes_)) {
+    PermutationMatrix<T>::PermutationMatrix(Array<size_t> indices_) : indices(std::move(indices_)) {
         std::unordered_set<size_t> buffer{};
-        for (size_t index : indexes) {
-            if (index >= indexes.getLength())
+        for (size_t index : indices) {
+            if (index >= indices.getLength())
                 throw std::invalid_argument("[Error]: Invalid index");
             buffer.insert(index);
         }
-        if (buffer.size() != indexes.getLength())
+        if (buffer.size() != indices.getLength())
             throw std::invalid_argument("[Error]: Duplicate index is not allowed");
     }
 
@@ -70,26 +70,26 @@ namespace Physica {
 
     template<Scalar T>
     void PermutationMatrix<T>::swapRows(size_t row1, size_t row2) {
-        std::swap(indexes[row1], indexes[row2]);
+        std::swap(indices[row1], indices[row2]);
     }
 
     template<Scalar T>
     PermutationMatrix<T> PermutationMatrix<T>::inverse() const noexcept {
-        Array<size_t> result(indexes.getLength());
+        Array<size_t> result(indices.getLength());
         for (size_t i = 0; i < result.getLength(); ++i)
-            result[indexes[i]] = i;
+            result[indices[i]] = i;
         return PermutationMatrix<T>(std::move(result));
     }
 
     template<Scalar T>
     void PermutationMatrix<T>::swap(PermutationMatrix& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        indexes.swap(obj.indexes);
+        indices.swap(obj.indices);
     }
 
     template<Scalar T>
     T PermutationMatrix<T>::calc(size_t row, size_t col) const {
-        return indexes[row] == col ? T(1) : T(0);
+        return indices[row] == col ? T(1) : T(0);
     }
 }
 

@@ -51,9 +51,9 @@ namespace Physica {
         /* Operations */
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] PtrTy data_ptr(size_t index);
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<Vector T, size_t Length>
@@ -68,7 +68,7 @@ namespace Physica {
     LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    __host__ __device__ size_t LVectorBlock<T, Length>::getLength() const noexcept {
+    size_t LVectorBlock<T, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else
@@ -76,15 +76,13 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline LVectorBlock<T, Length>::PtrTy
-    LVectorBlock<T, Length>::data_ptr(size_t index) {
+    inline auto LVectorBlock<T, Length>::data_ptr(size_t index) -> PtrTy {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline LVectorBlock<T, Length>::ConstPtrTy
-    LVectorBlock<T, Length>::data_ptr(size_t index) const {
+    inline auto LVectorBlock<T, Length>::data_ptr(size_t index) const -> ConstPtrTy {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }

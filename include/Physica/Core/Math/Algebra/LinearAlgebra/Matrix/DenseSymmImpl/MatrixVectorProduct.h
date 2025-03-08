@@ -28,8 +28,9 @@ namespace Physica {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::Tv;
     private:
         const MatrixType& mat;
         const U& vec;
@@ -46,9 +47,9 @@ namespace Physica {
         inline void assign(V& target) const;
 
         [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
-        [[nodiscard]] inline ValueType calc_value(size_t index) const;
+        [[nodiscard]] inline Tv calc_value(size_t index) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
+        [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
@@ -87,7 +88,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order, Vector U>
-    inline auto MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>::calc_value(size_t index) const -> ValueType {
+    inline auto MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>::calc_value(size_t index) const -> Tv {
         return mat.values().row(index) * vec.values();
     }
 }

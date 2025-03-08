@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -53,7 +53,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] inline ValueType calc_value(size_t index) const;
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return expr.getRow(); }
+        [[nodiscard]] size_t getLength() const { return expr.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return expr; }
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     };

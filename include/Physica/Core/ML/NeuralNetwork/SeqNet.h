@@ -58,8 +58,8 @@ namespace Physica {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         const Tv mean_grad = reciprocal(Tv(batchSize));
         if constexpr (std::same_as<Executor, SeqExecutor>) {
-            const auto indexes = R::random_int(batchSize, 0, dataset.getSize() - 1);
-            for (auto index : indexes)
+            const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
+            for (auto index : indices)
                 loss<Dataset>(dataset, index).reverse(mean_grad);
         }
         else {
@@ -69,8 +69,8 @@ namespace Physica {
             Executor::parallel_for([this, mean_grad, batchSizePerThread, &dataset, &mutex](size_t) {
                 auto& nn = Base::getDerived();
                 Derived buffer = nn;
-                const auto indexes = R::random_int(batchSizePerThread, 0, dataset.getSize() - 1);
-                for (auto index : indexes)
+                const auto indices = R::random_int(batchSizePerThread, 0, dataset.getSize() - 1);
+                for (auto index : indices)
                     buffer.template loss<Dataset>(dataset, index).reverse(mean_grad);
                 std::unique_lock locker(mutex);
                 buffer.reverse(nn);

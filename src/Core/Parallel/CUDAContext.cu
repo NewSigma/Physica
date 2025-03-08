@@ -31,6 +31,7 @@ namespace Physica {
     }
 
     CUDAContext::CUDAContext() {
+        setDevice(0);
         pages.emplace(0, CUDAStream(nullptr));
     }
 
@@ -40,7 +41,7 @@ namespace Physica {
     }
 
     auto CUDAContext::push(int device) -> PageGuard {
-        check(cudaSetDevice(device));
+        setDevice(0);
         pages.emplace(device, CUDAStream());
         return {};
     }
@@ -48,5 +49,14 @@ namespace Physica {
     CUDAContext& CUDAContext::getInstance() noexcept {
         thread_local static auto* instance = new CUDAContext();
         return *instance;
+    }
+
+    void CUDAContext::setDevice(int device) {
+        check(cudaSetDevice(device));
+
+        uint64_t val = std::numeric_limits<uint64_t>::max();
+        cudaMemPool_t memPool;
+        check(cudaDeviceGetDefaultMemPool(&memPool, device));
+        check(cudaMemPoolSetAttribute(memPool, cudaMemPoolAttrReleaseThreshold, &val));
     }
 }

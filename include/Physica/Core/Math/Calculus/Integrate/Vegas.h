@@ -95,7 +95,7 @@ namespace Physica {
         Trv compress(VectorND<Trv>& vars);
 
         template<RNG R>
-        [[nodiscard]] std::pair<VectorND<Trv>, VectorND<Trv>> sample(const int* indexes) const;
+        [[nodiscard]] std::pair<VectorND<Trv>, VectorND<Trv>> sample(const int* indices) const;
         template<class Functor, RNG R, class Executor>
         void trial_normal(Functor func, T& mean, T& var);
         template<class Functor, RNG R, class Executor>

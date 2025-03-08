@@ -18,28 +18,27 @@
  */
 #pragma once
 
-#include <unordered_map>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "MomentSGD.h"
 
 namespace Physica {
     template<Scalar T>
-    class MomentSGD {
+    class device_obj<MomentSGD<T>> {
         static_assert(!Diffable<T>);
 
-        using This = MomentSGD<T>;
-        using VectorType = VectorND<T>;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using This = device_obj<MomentSGD<T>>;
+        using VectorType = device_obj<VectorND<T>>;
+        using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>>;
     private:
         std::unordered_map<void*, std::variant<VectorType, MatrixType>> targetBufferMap;
         T lr;
         T moment;
     public:
-        MomentSGD(T learnRate, T moment_);
-        MomentSGD(const This&) = default;
-        MomentSGD(This&&) noexcept = default;
-        ~MomentSGD() = default;
+        device_obj(T learnRate, T moment_);
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
-        This& operator=(MomentSGD obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<Diffable U>
         void step(U& target);
@@ -47,7 +46,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    MomentSGD<T>::MomentSGD(T learnRate, T moment_)
+    device_obj<MomentSGD<T>>::device_obj(T learnRate, T moment_)
             : lr(std::move(learnRate))
             , moment(std::move(moment_)) {
         assert(moment.isPositive() && "[Error]: Invalid moment");
@@ -55,7 +54,7 @@ namespace Physica {
 
     template<Scalar T>
     template<Diffable U>
-    void MomentSGD<T>::step(U& target) {
+    void device_obj<MomentSGD<T>>::step(U& target) {
         using BufferType = std::conditional<Vector<U>, VectorType, MatrixType>::type;
 
         void* pTarget = (void*)(&target);
@@ -77,10 +76,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void MomentSGD<T>::swap(This& __restrict obj) noexcept {
+    void device_obj<MomentSGD<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        lr.swap(obj.lr);
         targetBufferMap.swap(obj.targetBufferMap);
+        lr.swap(obj.lr);
         moment.swap(obj.moment);
     }
 }

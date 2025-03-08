@@ -32,8 +32,8 @@ namespace Physica {
         Conjugate(const T& matrix_) : matrix(matrix_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return matrix.getCol(); }
     };
 
     template<Vector T>

@@ -47,8 +47,8 @@ namespace Physica {
         [[nodiscard]] RealType calcTraceMu() const;
         /* Getters */
         [[nodiscard]] const T& getMatrix() const noexcept { return m; }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return m.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
     };
 
     template<Matrix T>

@@ -46,8 +46,8 @@ namespace Physica {
         [[nodiscard]] const BlockArray& getBlocks() const noexcept { return blocks; }
         [[nodiscard]] size_t getNumBlock() const noexcept { return blocks.getLength(); }
         [[nodiscard]] const Array<size_t>& getIndexEnds() const noexcept { return indexEnds; }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return indexEnds[getNumBlock() - 1]; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return indexEnds[getNumBlock() - 1]; }
+        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
     private:
         void updateEnds();
         size_t findBlock(size_t globalIndex) const;

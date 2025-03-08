@@ -78,8 +78,8 @@ namespace Physica {
         template<Matrix M>
         void reverse(const M& grad) const noexcept requires(isReverseDiff);
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat2.getCol(); }
+        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] const T1& getLHS() const noexcept { return mat1; }
         [[nodiscard]] const T2& getRHS() const noexcept { return mat2; }
     };

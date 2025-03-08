@@ -45,7 +45,6 @@ namespace Physica {
     protected:
         using typename Base::ConstRefTy;
     public:
-        using typename Base::ValueType;
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
         using initializer_list = std::initializer_list<typename Storage::InitializerType>;

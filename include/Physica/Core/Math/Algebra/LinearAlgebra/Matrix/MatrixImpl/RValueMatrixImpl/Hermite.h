@@ -55,8 +55,8 @@ namespace Physica {
         Hermite(const T& matrix_) : matrix(matrix_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row).conjugate(); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return matrix.getCol(); }
+        [[nodiscard]] size_t getCol() const noexcept { return matrix.getRow(); }
     };
 
     template<Vector T>
@@ -73,8 +73,8 @@ namespace Physica {
         void assign(M& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
+        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
     };
 
     template<Vector T>

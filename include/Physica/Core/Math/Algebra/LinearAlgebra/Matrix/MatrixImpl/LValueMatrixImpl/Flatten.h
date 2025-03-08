@@ -42,12 +42,12 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<Matrix T>
-    __host__ __device__ inline auto FlattenL<T>::data_ptr(size_t index) -> PtrTy {
+    inline auto FlattenL<T>::data_ptr(size_t index) -> PtrTy {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
@@ -56,7 +56,7 @@ namespace Physica {
     }
 
     template<Matrix T>
-    __host__ __device__ inline auto FlattenL<T>::data_ptr(size_t index) const -> ConstPtrTy {
+    inline auto FlattenL<T>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

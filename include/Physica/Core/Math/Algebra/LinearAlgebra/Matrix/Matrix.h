@@ -50,83 +50,83 @@ namespace Physica {
         };
     public:
         template<class MatrixType>
-        __host__ __device__ consteval static bool isColMatrix() {
+        consteval static bool isColMatrix() {
             return isAnyMajor<MatrixType>() || !(Traits<std::remove_cvref_t<MatrixType>>::Option & Row);
         }
 
         template<class MatrixType>
-        __host__ __device__ consteval static bool isRowMatrix() {
+        consteval static bool isRowMatrix() {
             return isAnyMajor<MatrixType>() || !isColMatrix<MatrixType>();
         }
 
         template<class MatrixType>
-        __host__ __device__ consteval static bool isAnyMajor() {
+        consteval static bool isAnyMajor() {
             return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyMajor;
         }
 
         template<class MatrixType>
-        __host__ __device__ consteval static int getMajor() {
+        consteval static int getMajor() {
             return isAnyMajor<MatrixType>() ? AnyMajor : (isColMatrix<MatrixType>() ? Col : Row);
         }
 
         template<class MatrixType>
-        __host__ __device__ consteval static bool isElementMatrix() {
+        consteval static bool isElementMatrix() {
             return isAnyStorage<MatrixType>() || Traits<std::remove_cvref_t<MatrixType>>::Option & Element;
         }
 
         template<class MatrixType>
-        __host__ __device__ consteval static bool isVectorMatrix() {
+        consteval static bool isVectorMatrix() {
             return isAnyStorage<MatrixType>() || !isElementMatrix<MatrixType>();
         }
 
         template<class MatrixType>
-        __host__ __device__ consteval static bool isAnyStorage() {
+        consteval static bool isAnyStorage() {
             return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyStorage;
         }
 
         template<class MatrixType>
-        __host__ __device__ consteval static int getStorage() {
+        consteval static int getStorage() {
             return isAnyStorage<MatrixType>() ? AnyStorage : (isElementMatrix<MatrixType>() ? Element : Vector);
         }
 
         template<class MatrixType1, class MatrixType2>
-        __host__ __device__ consteval static bool isSameMajor() { return getMajor<MatrixType1>() == getMajor<MatrixType2>(); }
+        consteval static bool isSameMajor() { return getMajor<MatrixType1>() == getMajor<MatrixType2>(); }
 
         template<class MatrixType1, class MatrixType2>
-        __host__ __device__ consteval static bool isSameStorage() { return getStorage<MatrixType1>() == getStorage<MatrixType2>(); }
+        consteval static bool isSameStorage() { return getStorage<MatrixType1>() == getStorage<MatrixType2>(); }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static size_t selectMajor(size_t row, size_t col) {
+        [[nodiscard]] constexpr static size_t selectMajor(size_t row, size_t col) {
             return isColMatrix<MatrixType>() ? col : row;
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static size_t selectMinor(size_t row, size_t col) {
+        [[nodiscard]] constexpr static size_t selectMinor(size_t row, size_t col) {
             return isColMatrix<MatrixType>() ? row : col;
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static size_t getMaxMajor(const MatrixType& mat) noexcept {
+        [[nodiscard]] constexpr static size_t getMaxMajor(const MatrixType& mat) noexcept {
             return isColMatrix<MatrixType>() ? mat.getCol() : mat.getRow();
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static size_t getMaxMinor(const MatrixType& mat) noexcept {
+        [[nodiscard]] constexpr static size_t getMaxMinor(const MatrixType& mat) noexcept {
             return isColMatrix<MatrixType>() ? mat.getRow() : mat.getCol();
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
+        [[nodiscard]] constexpr static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
             return isColMatrix<MatrixType>() ? minor : major;
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static size_t colFromMajorMinor(size_t major, size_t minor) noexcept {
+        [[nodiscard]] constexpr static size_t colFromMajorMinor(size_t major, size_t minor) noexcept {
             return isColMatrix<MatrixType>() ? major : minor;
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ consteval static bool isSymmMatrix() noexcept {
+        [[nodiscard]] consteval static bool isSymmMatrix() noexcept {
             using M = std::remove_cvref_t<MatrixType>;
             using TransposeType = decltype(std::declval<M>().transpose());
             using TransposeType1 = std::remove_cvref<TransposeType>::type;
@@ -134,7 +134,7 @@ namespace Physica {
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ consteval static bool isHermiteMatrix() noexcept {
+        [[nodiscard]] consteval static bool isHermiteMatrix() noexcept {
             using M = std::remove_cvref_t<MatrixType>;
             using HermiteType = decltype(std::declval<M>().hermite());
             using HermiteType1 = std::remove_cvref<HermiteType>::type;

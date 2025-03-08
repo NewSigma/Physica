@@ -210,11 +210,11 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<RNG R>
-    auto Vegas<T, TakeLn>::sample(const int* indexes) const -> std::pair<VectorND<Trv>, VectorND<Trv>> {
+    auto Vegas<T, TakeLn>::sample(const int* indices) const -> std::pair<VectorND<Trv>, VectorND<Trv>> {
         VectorND<Trv> x(getDim());
         VectorND<Trv> deltas(getDim());
         for (size_t i = 0; i < getDim(); ++i) {
-            int index = indexes[i];
+            int index = indices[i];
             x[i] = pointGrid(index, i);
             deltas[i] = pointGrid(index + 1, i);
         }
@@ -228,10 +228,10 @@ namespace Physica {
     template<class Functor, RNG R, class Executor>
     void Vegas<T, TakeLn>::trial_normal(Functor func, T& mean, T& var) {
         const int numSample = Base::getNumSample();
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
+        const auto indices = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
-            const auto pair = sample<R>(indexes.data_ptr(n * getDim()));
+            const auto pair = sample<R>(indices.data_ptr(n * getDim()));
             const auto& x = pair.first;
             const auto& deltas = pair.second;
             const T y = func(x);
@@ -245,7 +245,7 @@ namespace Physica {
             // Loss has minimal value to avoid the grid size reducing to 0
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indexes[n * getDim() + i];
+                const auto index = indices[n * getDim() + i];
                 toNextMean(lossMat(index, i), counts[index][i], l);
                 counts[index][i] += 1;
             }
@@ -256,10 +256,10 @@ namespace Physica {
     template<class Functor, RNG R, class Executor>
     void Vegas<T, TakeLn>::trial_ln(Functor func, T& mean, T& var) {
         const int numSample = Base::getNumSample();
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
+        const auto indices = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
-            const auto pair = sample<R>(indexes.data_ptr(n * getDim()));
+            const auto pair = sample<R>(indices.data_ptr(n * getDim()));
             const auto& x = pair.first;
             const auto& deltas = pair.second;
             const T lny = func(x);
@@ -280,7 +280,7 @@ namespace Physica {
 
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indexes[n * getDim() + i];
+                const auto index = indices[n * getDim() + i];
                 toNextMean(lossMat(index, i), counts[index][i], l);
                 counts[index][i] += 1;
             }

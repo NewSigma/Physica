@@ -139,8 +139,8 @@ namespace Physica {
         template<Matrix M>
         void assign(LValueMatrix<M>& target) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return hess.getSize(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return hess.getSize(); }
+        [[nodiscard]] size_t getRow() const noexcept { return hess.getSize(); }
+        [[nodiscard]] size_t getCol() const noexcept { return hess.getSize(); }
     };
 
     template<Scalar T, size_t Order>

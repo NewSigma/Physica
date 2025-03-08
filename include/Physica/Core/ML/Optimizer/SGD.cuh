@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,44 +21,50 @@
 #include "SGD.h"
 
 namespace Physica {
+    /**
+     * Stochastic gradient descent for auto diff
+     */
     template<Scalar T>
-    class SGD<device_obj<T>> {
-        static_assert(T::isDiffable, "[Error]: T must be differentiable");
-        using This = SGD<device_obj<T>>;
-        using DeviceScalar = device_obj<T>;
+    class device_obj<SGD<T>> {
+        static_assert(!Diffable<T>);
+        using host_obj = SGD<T>;
+        using This = device_obj<SGD<T>>;
+
+        T lr;
     public:
-        using ValueType = T::ValueType;
-        constexpr static size_t MaxNumThreadPerBlock = 256;
-    protected:
-        ValueType learnRate;
-        ValueType meanLearnRate;
-        unsigned int batchSize;
-        DeviceScalar from;
-        DeviceScalar to;
-    private:
-        using TracerType = DeviceScalar::TracerType;
-        using SegmentType = TracerType::SegmentType;
-    public:
-        SGD(ValueType learnRate_, unsigned int batchSize_);
-        SGD(const SGD&) = default;
-        SGD(SGD&&) noexcept = default;
-        ~SGD() = default;
+        inline device_obj(T lr_);
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
-        SGD& operator=(SGD obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        inline void recordBegin();
-        inline void recordEnd();
-        void step();
-        void swap(SGD& __restrict obj) noexcept;
+        template<Diffable U>
+        void step(U& target) const;
 
-        __device__ void stepKernelImpl(SegmentType& segment) const;
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] ValueType getLearnRate() const noexcept { return learnRate; }
-        [[nodiscard]] ValueType getMeanLearnRate() const noexcept { return meanLearnRate; }
-        [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
-        /* Setters */
-        void setLearnRate(ValueType lr);
+        [[nodiscard]] T& getLearnRate() noexcept { return lr; }
+        [[nodiscard]] const T& getLearnRate() const noexcept { return lr; }
     };
-}
 
-#include "SGDImpl.cuh"
+    template<Scalar T>
+    inline device_obj<SGD<T>>::device_obj(T lr_) : lr(lr_) {}
+
+    template<Scalar T>
+    template<Diffable U>
+    void device_obj<SGD<T>>::step(U& target) const {
+        if constexpr (Scalar<U>)
+            target.value() -= lr * target.grad().value();
+        else if constexpr (Vector<U> || Matrix<U>)
+            target.values() -= lr * target.grads().values();
+        else
+            target.step(*this);
+    }
+
+    template<Scalar T>
+    inline void device_obj<SGD<T>>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        lr.swap(obj.lr);
+    }
+}

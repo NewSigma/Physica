@@ -18,8 +18,7 @@
  */
 #pragma once
 
-#include <unordered_map>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Adadelta.h"
 
 namespace Physica {
     /**
@@ -28,24 +27,30 @@ namespace Physica {
      * [2] pytorch; https://pytorch.org/docs/stable/generated/torch.optim.Adadelta.html
      */
     template<Scalar T>
-    class Adadelta {
+    class device_obj<Adadelta<T>> {
         static_assert(!Diffable<T>);
-        using This = Adadelta<T>;
+        using This = device_obj<Adadelta<T>>;
     private:
         struct VectorBuffer {
-            VectorND<T> v;
-            VectorND<T> u;
+            device_obj<VectorND<T>> v;
+            device_obj<VectorND<T>> u;
 
             VectorBuffer() = default;
-            VectorBuffer(size_t length) : v(length, 0), u(length, 0){}
+            VectorBuffer(size_t length) : v(length), u(length){
+                v.zeros();
+                u.zeros();
+            }
         };
 
         struct MatrixBuffer {
-            DenseMatrix<T, MatrixOption::Col | MatrixOption::Element> v;
-            DenseMatrix<T, MatrixOption::Col | MatrixOption::Element> u;
+            device_obj<DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>> v;
+            device_obj<DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>> u;
 
             MatrixBuffer() = default;
-            MatrixBuffer(size_t row, size_t col) : v(row, col, 0), u(row, col, 0) {}
+            MatrixBuffer(size_t row, size_t col) : v(row, col), u(row, col) {
+                v.zeros();
+                u.zeros();
+            }
         };
 
         std::unordered_map<void*, std::variant<VectorBuffer, MatrixBuffer>> targetBufferMap;
@@ -54,11 +59,11 @@ namespace Physica {
         T epsilon = 1E-6;
         T decay = 0;
     public:
-        Adadelta() = default;
-        Adadelta(T lr_) : lr(lr_) {}
-        Adadelta(const This&) = default;
-        Adadelta(This&&) noexcept = default;
-        ~Adadelta() = default;
+        device_obj() = default;
+        device_obj(T lr_) : lr(lr_) {}
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -72,7 +77,7 @@ namespace Physica {
 
     template<Scalar T>
     template<Diffable U>
-    void Adadelta<T>::step(U& target) {
+    void device_obj<Adadelta<T>>::step(U& target) {
         using BufferType = std::conditional<Vector<U>, VectorBuffer, MatrixBuffer>::type;
         if (!decay.isZero())
             target.grads() += decay * target.values();
@@ -103,7 +108,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void Adadelta<T>::swap(This& __restrict obj) noexcept {
+    void device_obj<Adadelta<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         targetBufferMap.swap(obj.targetBufferMap);
         lr.swap(obj.lr);

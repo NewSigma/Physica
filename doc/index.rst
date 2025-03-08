@@ -20,8 +20,7 @@ Welcome to Physica's documentation!
 
    Core/index.rst
    Logger/index.rst
-   Utils/index.rst
-   General
+   StyleGuide
 
 Indices and tables
 ==================

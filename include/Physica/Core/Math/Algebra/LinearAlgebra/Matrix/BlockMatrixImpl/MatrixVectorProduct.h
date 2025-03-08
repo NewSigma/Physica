@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/BlockMatrix.h"
+
 namespace Physica {
     template<Matrix T, Vector U>
     class MatrixVectorProduct<BlockMatrix<T>, U>
@@ -26,7 +28,8 @@ namespace Physica {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     private:
         const BlockMatrix<T>& m;
         const U& v;
@@ -43,7 +46,7 @@ namespace Physica {
         void assign(V& target_) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
-        [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
+        [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const BlockMatrix<T>& getLHS() const noexcept { return m; }

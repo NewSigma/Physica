@@ -79,6 +79,7 @@ namespace Physica {
         /* Operations */
         template<Diffable U>
         void step(U& target);
+        void clear() { targetBufferMap.clear(); }
 
         void swap(Adam& __restrict obj) noexcept;
         /* Getters */

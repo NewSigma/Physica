@@ -73,6 +73,8 @@ namespace Physica {
         [[nodiscard]] static This& getInstance() noexcept;
     private:
         CUDAContext();
+        /* Operations */
+        static void setDevice(int device);
     };
 
     inline void CUDAContext::setPointerMode(bool isDeviceSide) noexcept {

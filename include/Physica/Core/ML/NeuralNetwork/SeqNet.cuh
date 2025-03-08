@@ -57,9 +57,9 @@ namespace Physica {
     template<class Dataset, RNG R, class Executor>
     void device_obj<SeqNet<Derived>>::train_step(int batchSize, const Dataset& dataset) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
-        const auto indexes = R::random_int(batchSize, 0, dataset.getSize() - 1);
+        const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
         const Tv mean_grad = reciprocal(Tv(batchSize));
-        for (auto index : indexes)
+        for (auto index : indices)
             loss<Dataset>(dataset, index).reverse(mean_grad);
         Base::step();
         Base::zero_grad();

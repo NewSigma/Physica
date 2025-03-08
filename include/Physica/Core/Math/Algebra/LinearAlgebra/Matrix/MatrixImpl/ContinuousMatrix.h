@@ -131,8 +131,8 @@ namespace Physica {
         [[nodiscard]] ValuesRtnTy values() noexcept;
         [[nodiscard]] const ValuesRtnTy values() const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
     protected:
         ContinuousMatrix() = default;
         ContinuousMatrix(const This&) = default;

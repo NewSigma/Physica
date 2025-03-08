@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,34 +21,14 @@
 #include "../LValueVector.cuh"
 
 namespace Physica {
-    namespace Internal {
-        template<class Derived, Scalar T>
-        __global__ void assignConst_kernel(
-                Physica::PlainStruct<Derived> target,
-                T constant) {
-            const unsigned int delta = gridDim.x * blockDim.x;
-            const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
-            const size_t length = target.getDerived().getLength();
-            for (unsigned int shift = 0; shift < length; shift += delta) {
-                const unsigned int index = id + shift;
-                if (index < length)
-                    target.getDerived()[index] = constant;
-            }
-        }
-    }
-
     template<class Derived>
-    __host__ __device__
-    inline device_obj<LValueVector<Derived>>&
-    device_obj<LValueVector<Derived>>::operator=(const device_obj<LValueVector<Derived>>& obj) {
+    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::operator=(const This& obj) -> This& {
         obj.assign(*this);
         return *this;
     }
 
     template<class Derived>
-    __host__ __device__
-    inline device_obj<LValueVector<Derived>>&
-    device_obj<LValueVector<Derived>>::operator=(device_obj<LValueVector<Derived>>&& obj) {
+    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::operator=(This&& obj) -> This& {
         return *this = obj;
     }
 
@@ -67,11 +47,21 @@ namespace Physica {
     template<class Derived>
     template<Scalar T>
     inline device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const T& x) {
-        constexpr unsigned int WarpSize = Physica::CUDADevAttr::WarpSize;
+        constexpr int WarpSize = Physica::CUDADevAttr::WarpSize;
         const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;
-        Internal::assignConst_kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), x);
-        check(cudaGetLastError());
+        auto func = [target_ = asStruct(Base::getDerived()), x] __device__() mutable {
+            const unsigned int delta = gridDim.x * blockDim.x;
+            const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
+            auto& target = target_.getDerived();
+            const size_t length = target.getLength();
+            for (unsigned int shift = 0; shift < length; shift += delta) {
+                const unsigned int index = id + shift;
+                if (index < length)
+                    target[index] = x;
+            }
+        };
+        CUDAExecutor::launch<decltype(func), WarpSize>(func, KernelConfig(numBlock, numThread));
         return Base::getDerived();
     }
 

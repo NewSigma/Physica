@@ -191,7 +191,6 @@ namespace Physica {
             const auto lnJv = lnJs.toHostAsync();
             x = from_d + hadamard(coeff_d, x);
             samples = nn(x).toHost();
-            CUDAExecutor::wait();
             {
                 const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
                 auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp();

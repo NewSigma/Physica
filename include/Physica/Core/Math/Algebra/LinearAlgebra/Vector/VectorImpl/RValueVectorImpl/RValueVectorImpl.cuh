@@ -123,10 +123,10 @@ namespace Physica {
                 }
                 buffer[threadIdx.x] = local;
             };
-            auto future = CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
+            CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
 
             if constexpr (IsHost()) { // To silence warnings
-                future.wait();
+                CUDAExecutor::wait();
                 return buffer.toHost().sum();
             }
             else

@@ -63,8 +63,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc_value(col, row); }
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getCol(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
+        [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
     };
 
     template<Vector T>
@@ -91,8 +91,8 @@ namespace Physica {
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         [[nodiscard]] Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
+        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
     };
 
     template<Vector T>

@@ -25,8 +25,8 @@ namespace Physica {
     class UnitMatrix : public RValueMatrix<UnitMatrix<T, Order>> {
         using This = UnitMatrix<T, Order>;
         using Base = RValueMatrix<This>;
-    public:
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     private:
         size_t order; // TODO: use void if Order != Dynamic
     public:
@@ -39,15 +39,15 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return T(row == col ? 1 : 0); }
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return ValueType(row == col ? 1 : 0); }
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return Tv(row == col ? 1 : 0); }
 
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] const This& conjugate() const noexcept { return *this; }
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return order; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return order; }
+        [[nodiscard]] size_t getRow() const noexcept { return order; }
+        [[nodiscard]] size_t getCol() const noexcept { return order; }
     };
 
     template<Scalar T, size_t Order>

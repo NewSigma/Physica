@@ -80,6 +80,9 @@ if(${PHYSICA_CUDA})
             ${CMAKE_CXX_FLAGS})
         string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
     endif()
+
+    set(CMAKE_BUILD_RPATH ${CUDAToolkit_LIBRARY_DIR})
+    set(CMAKE_INSTALL_RPATH ${CUDAToolkit_LIBRARY_DIR})
 endif()
 
 if(${CMAKE_INTERPROCEDURAL_OPTIMIZATION})

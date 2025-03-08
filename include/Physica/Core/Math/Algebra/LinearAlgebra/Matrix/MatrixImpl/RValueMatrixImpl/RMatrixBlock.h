@@ -56,7 +56,7 @@ namespace Physica {
             assert(index < colCount);
             return mat.calc_value(fromRow, fromCol + index);
         }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
+        [[nodiscard]] size_t getLength() const noexcept { return colCount; }
     };
 
     template<Matrix T>
@@ -90,7 +90,7 @@ namespace Physica {
             assert(index < rowCount);
             return mat.calc_value(fromRow + index, fromCol);
         }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
+        [[nodiscard]] size_t getLength() const noexcept { return rowCount; }
     };
 
     template<Matrix T>
@@ -114,8 +114,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] ValueType calc_value(size_t row, size_t col) const;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
+        [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
+        [[nodiscard]] size_t getCol() const noexcept { return colCount; }
     };
 
     template<Matrix T>

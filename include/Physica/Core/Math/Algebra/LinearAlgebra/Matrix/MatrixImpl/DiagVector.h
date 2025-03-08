@@ -62,8 +62,8 @@ namespace Physica {
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(index, index); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(index, index); }
+        [[nodiscard]] PtrTy data_ptr(size_t index) { return mat.data_ptr(index, index); }
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(index, index); }
     };
 }
 

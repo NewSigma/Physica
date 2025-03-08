@@ -55,7 +55,7 @@ namespace Physica {
 
         [[nodiscard]] ScalarType calc(size_t index) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
+        [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     private:

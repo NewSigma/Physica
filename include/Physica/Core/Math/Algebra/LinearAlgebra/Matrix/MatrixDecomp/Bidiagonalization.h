@@ -166,8 +166,8 @@ namespace Physica {
         template<Matrix M>
         void assign(LValueMatrix<M>& target) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return bidiag.working.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return bidiag.working.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return bidiag.working.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return bidiag.working.getCol(); }
     };
 
     template<Matrix T>

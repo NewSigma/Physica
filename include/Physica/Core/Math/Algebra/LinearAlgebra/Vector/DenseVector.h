@@ -83,8 +83,8 @@ namespace Physica {
         /* Getters */
         using Storage::getLength;
         using Storage::data;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return data() + index; }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return data() + index; }
+        [[nodiscard]] PtrTy data_ptr(size_t index) { return data() + index; }
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const { return data() + index; }
         /* Static members */
         [[nodiscard]] static This zeros(size_t len);
         template<RNG R>

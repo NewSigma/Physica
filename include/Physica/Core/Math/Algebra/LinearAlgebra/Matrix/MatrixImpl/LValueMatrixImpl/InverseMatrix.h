@@ -155,8 +155,8 @@ namespace Physica {
         void assign(M& target) const;
         /* Getters */
         [[nodiscard]] const T& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return matrix.getRow(); }
     };
 
     template<Matrix T>

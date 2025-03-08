@@ -4,7 +4,7 @@
 
 **Core**: 包含Physica核心功能的实现  
 **Gui**: 包含2D和3D绘图支持, 以Qt为绘图后端  
-**Logging**: 基于[NanoLog](https://github.com/PlatformLab/NanoLog)的高性能日志库  
+**Logger**: 基于[NanoLog](https://github.com/PlatformLab/NanoLog)的高性能日志库  
 **Python** Physica python接口后端  
 **phypy** Physica python接口  
 
