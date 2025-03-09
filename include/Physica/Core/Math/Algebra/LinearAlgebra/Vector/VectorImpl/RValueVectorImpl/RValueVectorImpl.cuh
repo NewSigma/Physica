@@ -145,6 +145,38 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::mean() const -> T {
+        return sum() / Trv(getLength());
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::variance() const -> T {
+        const auto& x = Base::getDerived();
+        const size_t length = getLength();
+        const auto x_mean = mean();
+        const auto expr = x - x_mean;
+        const auto expr2 = square(expr);
+        return expr2.sum() / Trv(length - 1);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::variance(const T& prior_mean) const -> T {
+        const auto& x = Base::getDerived();
+        const size_t length = getLength();
+        return (x - prior_mean).squaredNorm() / Trv(length - 1);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::deviation() const -> T {
+        return sqrt(variance());
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::deviation(const T& prior_mean) const -> T {
+        return sqrt(variance(prior_mean));
+    }
+
+    template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::lnSumExp() const -> T {
         const auto& v = Base::getDerived();
         Tv m;

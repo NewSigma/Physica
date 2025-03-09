@@ -197,9 +197,10 @@ namespace Physica {
         else
             Base::template random_any<R, decltype(dist)>(dist);
     }
+
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    const ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::read(const H5Loc& loc, const char* name) {
+    auto ContinuousVector<Derived>::read(const H5Loc& loc, const char* name) -> const DataSetType {
         const auto dataset = loc.openDataSet<DataDim>(name);
         const size_t length = dataset.getSize(0);
         resize(length);
@@ -218,7 +219,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::write(H5Loc& loc, const char* name) const {
+    auto ContinuousVector<Derived>::write(H5Loc& loc, const char* name) const -> DataSetType {
         const size_t length = Base::getLength();
         const auto memSpace = H5DataSpace<1>(length);
         DataSpaceType fileSpace;
@@ -244,6 +245,7 @@ namespace Physica {
         return std::cref(dataset);
     }
 #endif
+
     template<class Derived>
     auto ContinuousVector<Derived>::values() noexcept -> ValuesRtnTy {
         return Base::getDerived();

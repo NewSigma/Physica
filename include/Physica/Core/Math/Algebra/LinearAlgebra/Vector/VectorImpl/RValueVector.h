@@ -136,6 +136,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> variance() const;
         [[nodiscard]] T variance(const T& prior_mean) const;
         [[nodiscard]] T deviation() const;
+        [[nodiscard]] T deviation(const T& prior_mean) const;
         [[nodiscard]] CoDiff<T> lnSumExp() const;
         [[nodiscard]] CoDiff<T> crossEntropy(size_t index) const;
         [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const;

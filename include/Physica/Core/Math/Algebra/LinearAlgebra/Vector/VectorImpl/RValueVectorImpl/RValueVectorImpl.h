@@ -382,6 +382,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueVector<Derived>::deviation(const T& prior_mean) const -> T {
+        return sqrt(variance(prior_mean));
+    }
+
+    template<class Derived>
     auto RValueVector<Derived>::lnSumExp() const -> CoDiff<T> {
         const Derived& v = Base::getDerived();
         Tv m;

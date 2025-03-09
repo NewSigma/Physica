@@ -151,6 +151,23 @@ namespace Physica {
             check(cudaMemsetAsync(data(), 0, Base::getLength() * sizeof(T)));
     }
 
+#ifdef PHYSICA_HDF5
+    template<class Derived>
+    auto device_obj<ContinuousVector<Derived>>::read(const H5Loc& loc, const char* name) -> const DataSetType {
+        VectorND<T> buffer{};
+        auto dataset = buffer.read(loc, name);
+        buffer.toDeviceAsync(*this);
+        return dataset;
+    }
+
+    template<class Derived>
+    auto device_obj<ContinuousVector<Derived>>::write(H5Loc& loc, const char* name) const -> DataSetType {
+        VectorND<T> buffer{};
+        toHost(buffer);
+        return buffer.write(loc, name);
+    }
+#endif
+
     template<class Derived>
     template<Vector V>
     void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<V>>& obj) const {

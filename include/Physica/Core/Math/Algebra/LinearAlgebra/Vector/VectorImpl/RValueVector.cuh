@@ -65,6 +65,11 @@ namespace Physica {
         [[nodiscard]] __device__ T max() const;
         [[nodiscard]] __device__ T min() const;
         [[nodiscard]] __host__ __device__ T sum() const;
+        [[nodiscard]] __device__ T mean() const;
+        [[nodiscard]] __device__ T variance() const;
+        [[nodiscard]] __device__ T variance(const T& prior_mean) const;
+        [[nodiscard]] __device__ T deviation() const;
+        [[nodiscard]] __device__ T deviation(const T& prior_mean) const;
         [[nodiscard]] __device__ T lnSumExp() const;
         [[nodiscard]] __device__ T crossEntropy(size_t index) const;
         [[nodiscard]] __device__ T lnSoftmax(size_t index) const;

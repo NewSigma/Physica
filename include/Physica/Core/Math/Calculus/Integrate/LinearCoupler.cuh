@@ -49,7 +49,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<DNN Net>
-        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(const Net& nn, device_obj<MatrixND<Tv>>& x) const;
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(Net& nn, device_obj<MatrixND<Tv>>& x) const;
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& x2) const;
 
         template<RNG R>
@@ -78,7 +78,7 @@ namespace Physica {
 
     template<Scalar T>
     template<DNN Net>
-    auto device_obj<LinearCoupler<T>>::forward(const Net& nn, device_obj<MatrixND<Tv>>& x) const -> CoDiff<device_obj<VectorND<T>>> {
+    auto device_obj<LinearCoupler<T>>::forward(Net& nn, device_obj<MatrixND<Tv>>& x) const -> CoDiff<device_obj<VectorND<T>>> {
         assert(getDim() == x.getRow() && "[Error]: Dimensions do not match");
         device_obj<MatrixND<Tv>> xA = hadamard(x, mask);
         device_obj<MatrixND<Tv>> xB = x - xA;

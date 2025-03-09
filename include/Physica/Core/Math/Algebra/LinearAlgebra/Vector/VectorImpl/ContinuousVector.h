@@ -106,6 +106,8 @@ namespace Physica {
         ContinuousVector() = default;
         ContinuousVector(const This&) = default;
         ContinuousVector(This&&) noexcept = default;
+        /* Friends */
+        friend class device_obj<ContinuousVector<Derived>>;
     };
 }
 

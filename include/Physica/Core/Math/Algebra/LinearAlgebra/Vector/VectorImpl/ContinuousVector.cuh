@@ -26,12 +26,12 @@
 namespace Physica {
     template<class Derived>
     class device_obj<ContinuousVector<Derived>> : public device_obj<LValueVector<Derived>> {
+        using host_obj = ContinuousVector<Derived>;
         using Base = device_obj<LValueVector<Derived>>;
-        using This = device_obj<ContinuousVector<Derived>>;
+        using This = device_obj<host_obj>;
         template<size_t Length>
         using BlockType = device_obj<ContinuousVectorBlock<Derived, Length>>;
     public:
-        using host_obj = ContinuousVector<Derived>;
         using typename Base::ScalarType;
         using Base::isReverseDiff;
         using Base::MaxThreadPerBlock;
@@ -39,6 +39,8 @@ namespace Physica {
         using typename Base::T;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
+    private:
+        using DataSetType = host_obj::DataSetType;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -79,6 +81,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline const auto segment(size_t from, size_t to) const noexcept;
 
         void zeros();
+
+        const DataSetType read(const H5Loc& loc, const char* name);
+        DataSetType write(H5Loc& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }

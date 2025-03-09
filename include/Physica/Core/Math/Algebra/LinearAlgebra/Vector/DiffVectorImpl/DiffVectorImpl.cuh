@@ -25,7 +25,8 @@ namespace Physica {
     device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length) : v(length), g(length) {}
 
     template<Scalar T, int Order>
-    device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length, T init) : v(length, init), g(length) {
+    device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>::device_obj(size_t length, T init) : device_obj(length) {
+        v = init;
         g.zeros();
     }
 

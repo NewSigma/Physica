@@ -254,11 +254,11 @@ namespace Physica {
     template<Scalar T, bool WithBias>
     template<RNG R>
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(Tv gain) {
-        const auto deviation = (gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()))).toMachine();
-        std::normal_distribution<Tm> dist(0, deviation);
-        weights.template random_any<R, decltype(dist)>(dist);
+        const Tv deviation = gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()));
+        random_normal<R>();
+        weights *= deviation;
         if constexpr (WithBias)
-            bias.template random_any<R, decltype(dist)>(dist);
+            bias *= deviation;
     }
     
     template<Scalar T, bool WithBias>
