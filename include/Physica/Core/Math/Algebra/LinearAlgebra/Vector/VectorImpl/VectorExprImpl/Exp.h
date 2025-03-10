@@ -21,20 +21,21 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Exp, T> : public UnitaryVectorExpr<ExprType::Exp, T> {
-        using This = VectorExpr<ExprType::Exp, T>;
-        using Base = UnitaryVectorExpr<ExprType::Exp, T>;
+    template<Vector V>
+    class VectorExpr<ExprType::Exp, V> : public UnitaryVectorExpr<ExprType::Exp, V> {
+        using This = VectorExpr<ExprType::Exp, V>;
+        using Base = UnitaryVectorExpr<ExprType::Exp, V>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return exp(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return exp(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return exp(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return exp(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -50,9 +51,9 @@ namespace Physica {
         void reverse(const U& grad_) const noexcept requires(isReverseDiff);
     };
 
-    template<Vector T>
+    template<Vector V>
     template<class U>
-    void VectorExpr<ExprType::Exp, T>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Exp, V>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<U>)
             expr.reverse(exp(expr.values()) * grad_.value());
@@ -62,8 +63,8 @@ namespace Physica {
         }
     }
 
-    template<Vector T>
-    [[nodiscard]] inline auto exp(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Exp, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto exp(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Exp, V&&>(std::forward<V>(v));
     }
 }

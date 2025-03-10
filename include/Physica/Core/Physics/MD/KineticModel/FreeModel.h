@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -41,7 +41,8 @@ namespace Physica {
              size_t NumReplica,
              RPMDIntegrator Integrator>
     class FreeModel {
-        using ValueType = T::ValueType;
+        using This = FreeModel<T, Dim, NumReplica, Integrator>;
+        using Tv = T::ValueType;
         using ComplexType = Complex<T>;
         using MDType = RPMD<T, Dim, NumReplica>;
         using MDCellType = MDType::MDCellType;
@@ -62,16 +63,16 @@ namespace Physica {
     public:
         FreeModel();
         FreeModel(T temperatureT, size_t numReplica_);
-        FreeModel(const FreeModel&) = default;
-        FreeModel(FreeModel&&) noexcept = default;
+        FreeModel(const This&) = default;
+        FreeModel(This&&) noexcept = default;
         ~FreeModel() = default;
         /* Operators */
-        FreeModel& operator=(FreeModel obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, T deltaT);
         template<class Barostat>
         void npt_step(MDType& rpmd, Barostat& barostat, T deltaT);
-        void swap(FreeModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T getOmegaW() const noexcept { return omegaW; }
         /* Setters */
@@ -128,15 +129,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    FreeModel<T, Dim, NumReplica, Integrator>&
-    FreeModel<T, Dim, NumReplica, Integrator>::operator=(
-            FreeModel<T, Dim, NumReplica, Integrator> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    void FreeModel<T, Dim, NumReplica, Integrator>::swap(FreeModel& __restrict obj) noexcept {
+    void FreeModel<T, Dim, NumReplica, Integrator>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         omegaK.swap(obj.omegaK);
         omegaW.swap(obj.omegaW);
@@ -149,7 +142,7 @@ namespace Physica {
     void FreeModel<T, Dim, NumReplica, Integrator>::setTemperature(T temperatureT) {
         omegaW = RingPolymerType::calcOmegaW(temperatureT, numReplica);
         for (size_t i = 0; i < omegaK.getLength(); ++i)
-            omegaK[i] = omegaW * sin(ValueType(M_PI * i / numReplica)) * ValueType(2);
+            omegaK[i] = omegaW * sin(Tv(M_PI * i / numReplica)) * Tv(2);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>

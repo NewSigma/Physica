@@ -21,52 +21,52 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
-    class Conjugate<T> : public RValueMatrix<Conjugate<T>> {
-        using Base = RValueMatrix<Conjugate<T>>;
-    public:
-        using typename Base::ScalarType;
+    template<Matrix M>
+    class Conjugate<M> : public RValueMatrix<Conjugate<M>> {
+        using Base = RValueMatrix<Conjugate<M>>;
+    protected:
+        using typename Base::T;
     private:
-        const T& matrix;
+        const M& matrix;
     public:
-        Conjugate(const T& matrix_) : matrix(matrix_) {}
+        Conjugate(const M& matrix_) : matrix(matrix_) {}
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
         [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return matrix.getCol(); }
     };
 
-    template<Vector T>
-    class ConjugateVector<T> : public RValueVector<ConjugateVector<T>> {
-        using Base = RValueVector<ConjugateVector<T>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class ConjugateVector<V> : public RValueVector<ConjugateVector<V>> {
+        using Base = RValueVector<ConjugateVector<V>>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        const T& vec;
+        const V& vec;
     public:
-        explicit ConjugateVector(const T& vec_) : vec(vec_) {}
+        explicit ConjugateVector(const V& vec_) : vec(vec_) {}
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
-        void assign(V& target) const;
+        template<Vector V1, class Executor = SeqExecutor>
+        void assign(V1& target) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }
-        [[nodiscard]] ValueType calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
+        [[nodiscard]] T calc(size_t index) const { return vec.calc(index).conjugate(); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
         [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
     };
 
-    template<Vector T>
-    template<Vector V, class Executor>
-    void ConjugateVector<T>::assign(V& target) const {
+    template<Vector V>
+    template<Vector V1, class Executor>
+    void ConjugateVector<V>::assign(V1& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target[i] = calc(i);
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<Conjugate<T>> : public Traits<T> {};
+    template<Matrix M>
+    class Traits<Conjugate<M>> : public Traits<M> {};
 
-    template<Vector T>
-    class Traits<ConjugateVector<T>> : public Traits<T> {};
+    template<Vector V>
+    class Traits<ConjugateVector<V>> : public Traits<V> {};
 }

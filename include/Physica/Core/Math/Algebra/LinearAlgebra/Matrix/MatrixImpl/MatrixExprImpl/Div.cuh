@@ -27,7 +27,8 @@ namespace Physica {
         using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     public:
         device_obj(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
             if constexpr (Matrix<T>)
@@ -41,7 +42,7 @@ namespace Physica {
                 return Base::getLHS() / Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
             if constexpr (Matrix<T>)
                 return Base::getLHS().calc_value(row, col) / Base::getRHS().value();
             else
@@ -55,7 +56,8 @@ namespace Physica {
         using Base = device_obj<BinaryMatrixExpr<ExprType::Div, T, U>>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
@@ -66,7 +68,7 @@ namespace Physica {
                 return Base::getLHS().calc(row) / Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
             if constexpr (Matrix<T>)
                 return Base::getLHS().calc_value(row, col) / Base::getRHS().calc_value(row);
             else
@@ -80,7 +82,8 @@ namespace Physica {
         using Base = device_obj<BinaryMatrixExpr<ExprType::Div, T, U>>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
@@ -89,7 +92,7 @@ namespace Physica {
             return Base::getLHS().calc(row, col) / Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
             assert(!Base::getRHS().calc_value(row, col).isZero() && "[Error]: Divide by zero");
             return Base::getLHS().calc_value(row, col) / Base::getRHS().calc_value(row, col);
         }

@@ -21,25 +21,25 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<Matrix T>
-    class MatrixExpr<ExprType::Cos, T>
-            : public UnitaryMatrixExpr<ExprType::Cos, T> {
-        using Base = UnitaryMatrixExpr<ExprType::Cos, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Matrix M>
+    class MatrixExpr<ExprType::Cos, M>
+            : public UnitaryMatrixExpr<ExprType::Cos, M> {
+        using Base = UnitaryMatrixExpr<ExprType::Cos, M>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return cos(Base::getExpr().calc(row, col)); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return cos(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return cos(Base::getExpr().calc_value(row, col));
         }
     };
 
-    template<Matrix T>
-    [[nodiscard]] inline auto cos_elem(T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Cos, T&&>(std::forward<T>(m));
+    template<Matrix M>
+    [[nodiscard]] inline auto cos_elem(M&& m) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Cos, M&&>(std::forward<M>(m));
     }
 }

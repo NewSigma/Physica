@@ -21,23 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Cosh, T> : public UnitaryVectorExpr<ExprType::Cosh, T> {
-        using This = VectorExpr<ExprType::Cosh, T>;
-        using Base = UnitaryVectorExpr<ExprType::Cosh, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Cosh, V> : public UnitaryVectorExpr<ExprType::Cosh, V> {
+        using This = VectorExpr<ExprType::Cosh, V>;
+        using Base = UnitaryVectorExpr<ExprType::Cosh, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return cosh(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return cosh(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return cosh(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return cosh(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto cosh(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Cosh, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto cosh(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Cosh, V&&>(std::forward<V>(v));
     }
 }

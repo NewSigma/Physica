@@ -21,50 +21,51 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector T>
-    class device_obj<VectorExpr<ExprType::Softmax, T>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Softmax, T>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Softmax, T>>;
+    template<Vector V>
+    class device_obj<VectorExpr<ExprType::Softmax, V>>
+            : public device_obj<UnitaryVectorExpr<ExprType::Softmax, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Softmax, V>>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
-        __host__ __device__ inline void assign(V& v) const;
+        template<Vector V1, class Executor = SeqExecutor>
+        __host__ __device__ inline void assign(V1& v) const;
 
-        [[nodiscard]] __device__ ScalarType calc(size_t i) const { return Base::getExpr().softmax(i); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
-        [[nodiscard]] __device__ ScalarType calc(size_t i, ScalarType lnsumexp) const;
-        [[nodiscard]] __device__ ValueType calc_value(size_t i, ValueType lnsumexp) const;
+        [[nodiscard]] __device__ T calc(size_t i) const { return Base::getExpr().softmax(i); }
+        [[nodiscard]] __device__ Tv calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
+        [[nodiscard]] __device__ T calc(size_t i, T lnsumexp) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t i, Tv lnsumexp) const;
     };
 
-    template<Vector T>
-    __device__ auto device_obj<VectorExpr<ExprType::Softmax, T>>::calc(size_t i, ScalarType lnsumexp) const -> ScalarType {
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprType::Softmax, V>>::calc(size_t i, T lnsumexp) const -> T {
         return exp(Base::getExpr().calc(i) - lnsumexp);
     }
 
-    template<Vector T>
-    __device__ auto device_obj<VectorExpr<ExprType::Softmax, T>>::calc_value(size_t i, ValueType lnsumexp) const -> ValueType {
+    template<Vector V>
+    __device__ auto device_obj<VectorExpr<ExprType::Softmax, V>>::calc_value(size_t i, Tv lnsumexp) const -> Tv {
         return exp(Base::getExpr().calc_value(i) - lnsumexp);
     }
 
-    template<Vector T>
-    template<Vector V, class Executor>
-    __host__ __device__ inline void device_obj<VectorExpr<ExprType::Softmax, T>>::assign(V& v) const {
+    template<Vector V>
+    template<Vector V1, class Executor>
+    __host__ __device__ inline void device_obj<VectorExpr<ExprType::Softmax, V>>::assign(V1& v) const {
         if constexpr (IsHost())
             Base::assign(v);
         else {
             const auto& expr = Base::getExpr();
-            const ScalarType factor = expr.lnSumExp();
+            const T factor = expr.lnSumExp();
             v = exp(expr - factor);
         }
     }
 
-    template<Vector T>
-    [[nodiscard]] __host__ __device__ inline auto softmax(T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Softmax, T&&>>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] __host__ __device__ inline auto softmax(V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprType::Softmax, V&&>>(std::forward<V>(v));
     }
 }

@@ -18,23 +18,25 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Cbrt, T> : public UnitaryVectorExpr<ExprType::Cbrt, T> {
-        using This = VectorExpr<ExprType::Cbrt, T>;
-        using Base = UnitaryVectorExpr<ExprType::Cbrt, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Cbrt, V> : public UnitaryVectorExpr<ExprType::Cbrt, V> {
+        using This = VectorExpr<ExprType::Cbrt, V>;
+        using Base = UnitaryVectorExpr<ExprType::Cbrt, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return cbrt(Base::getExpr().calc(s)); }
+        [[nodiscard]] CoDiff<T> calc(size_t s) const { return cbrt(Base::getExpr().calc(s)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return cbrt(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const requires(!CUDA<T>) {
+        [[nodiscard]] Pack packet(size_t index) const requires(!CUDA<V>) {
             Pack result = Base::getExpr().template packet<Pack>(index);
             for (size_t i = 0; i < static_cast<size_t>(Pack::size()); ++i)
                 result.insert(i, cbrt(result[i]));
@@ -50,8 +52,8 @@ namespace Physica {
         }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto cbrt(T&& v) noexcept {
-        return VectorExpr<ExprType::Cbrt, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto cbrt(V&& v) noexcept {
+        return VectorExpr<ExprType::Cbrt, V&&>(std::forward<V>(v));
     }
 }

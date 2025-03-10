@@ -21,23 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Sin, T> : public UnitaryVectorExpr<ExprType::Sin, T> {
-        using This = VectorExpr<ExprType::Sin, T>;
-        using Base = UnitaryVectorExpr<ExprType::Sin, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Sin, V> : public UnitaryVectorExpr<ExprType::Sin, V> {
+        using This = VectorExpr<ExprType::Sin, V>;
+        using Base = UnitaryVectorExpr<ExprType::Sin, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return sin(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return sin(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return sin(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return sin(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto sin(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Sin, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto sin(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Sin, V&&>(std::forward<V>(v));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,9 +25,9 @@ namespace Physica {
     class RealVector : public RValueVector<RealVector<V>> {
         using This = RealVector<V>;
         using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
         const V& v;
     public:
@@ -39,8 +39,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).real(); }
-        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).real(); }
+        [[nodiscard]] T calc(size_t s) const { return v.calc(s).real(); }
+        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).real(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -48,9 +48,9 @@ namespace Physica {
     class ImagVector : public RValueVector<ImagVector<V>> {
         using This = ImagVector<V>;
         using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
         const V& v;
     public:
@@ -62,8 +62,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).imag(); }
-        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).imag(); }
+        [[nodiscard]] T calc(size_t s) const { return v.calc(s).imag(); }
+        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).imag(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -73,9 +73,10 @@ namespace Physica {
         using Base = RValueVector<This>;
         using ComplexType = V::ScalarType;
     public:
-        using typename Base::ScalarType;
-        using typename Base::Tv;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
         constexpr static bool isComplexV = V::isComplex;
 
@@ -89,7 +90,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).squaredNorm(); }
+        [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).squaredNorm(); }
 
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
 
@@ -135,7 +136,7 @@ namespace Physica {
                     const auto x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count1).squaredNorm());
 
                     if (flag)
-                        return Pack(x2.real(), SIMD<ScalarType, Size1>(0));
+                        return Pack(x2.real(), SIMD<T, Size1>(0));
                     const size_t count2 = count - count1;
                     const auto y2 = PacketType::asComplex(v.template packetPartial<PacketType>(index + Size / 2, count2).squaredNorm());
                     return Pack(x2.real(), y2.real());
@@ -159,9 +160,9 @@ namespace Physica {
     class NormVector : public RValueVector<NormVector<V>> {
         using This = NormVector<V>;
         using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
         const V& v;
     public:
@@ -173,8 +174,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).norm(); }
-        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).norm(); }
+        [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).norm(); }
+        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).norm(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -182,9 +183,8 @@ namespace Physica {
     class ValueVector : public RValueVector<ValueVector<V>> {
         using This = ValueVector<V>;
         using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
     private:
         const V& v;
     public:
@@ -196,8 +196,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc_value(s); }
-        [[nodiscard]] ScalarType calc_value(size_t s) const { return calc(s); }
+        [[nodiscard]] T calc(size_t s) const { return v.calc_value(s); }
+        [[nodiscard]] T calc_value(size_t s) const { return calc(s); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -205,9 +205,9 @@ namespace Physica {
     class GradVector : public RValueVector<GradVector<V, GradOrder>> {
         using This = GradVector<V, GradOrder>;
         using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
         const V& v;
     public:
@@ -219,8 +219,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
-        [[nodiscard]] ValueType calc_value(size_t s) const { return calc(s).value(); }
+        [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
+        [[nodiscard]] Tv calc_value(size_t s) const { return calc(s).value(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -230,9 +230,9 @@ namespace Physica {
 
         using This = DiffMaskVector<V, MaskOrder>;
         using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
         const V& v;
     public:
@@ -244,8 +244,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template mask<MaskOrder>(); }
-        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s); }
+        [[nodiscard]] T calc(size_t s) const { return v.calc(s).template mask<MaskOrder>(); }
+        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 

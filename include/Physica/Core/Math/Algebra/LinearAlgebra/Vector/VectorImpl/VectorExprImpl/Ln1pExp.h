@@ -21,23 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Ln1pExp, T> : public UnitaryVectorExpr<ExprType::Ln1pExp, T> {
-        using This = VectorExpr<ExprType::Ln1pExp, T>;
-        using Base = UnitaryVectorExpr<ExprType::Ln1pExp, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Ln1pExp, V> : public UnitaryVectorExpr<ExprType::Ln1pExp, V> {
+        using This = VectorExpr<ExprType::Ln1pExp, V>;
+        using Base = UnitaryVectorExpr<ExprType::Ln1pExp, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return ln1pexp(Base::getExpr().calc(index)); }
+        [[nodiscard]] T calc(size_t index) const { return ln1pexp(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return ln1pexp(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return ln1pexp(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto ln1pexp(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Ln1pExp, T&&>(std::forward(v));
+    template<Vector V>
+    [[nodiscard]] inline auto ln1pexp(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Ln1pExp, V&&>(std::forward(v));
     }
 }

@@ -52,7 +52,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
 
-        [[nodiscard]] __host__ __device__ ScalarType operator-() const { return -ScalarType(*this); }
+        [[nodiscard]] __host__ __device__ ScalarType operator-() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
         __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
@@ -108,6 +108,11 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ ScalarRef<Diff<T, Mode, Order>>::operator ScalarType() const requires(!ReverseDiff<T>) {
         return ScalarType(value(), grad());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::operator-() const -> ScalarType requires(!ReverseDiff<T>) {
+        return -ScalarType(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>

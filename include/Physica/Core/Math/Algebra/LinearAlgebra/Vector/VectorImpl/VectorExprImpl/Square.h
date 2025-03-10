@@ -21,20 +21,21 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Square, T> : public UnitaryVectorExpr<ExprType::Square, T> {
-        using This = VectorExpr<ExprType::Square, T>;
-        using Base = UnitaryVectorExpr<ExprType::Square, T>;
+    template<Vector V>
+    class VectorExpr<ExprType::Square, V> : public UnitaryVectorExpr<ExprType::Square, V> {
+        using This = VectorExpr<ExprType::Square, V>;
+        using Base = UnitaryVectorExpr<ExprType::Square, V>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return square(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return square(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return square(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return square(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -50,15 +51,15 @@ namespace Physica {
         void reverse(const U& grad_) const noexcept requires(isReverseDiff);
     };
 
-    template<Vector T>
+    template<Vector V>
     template<Scalar U>
-    void VectorExpr<ExprType::Square, T>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Square, V>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
-        expr.reverse(expr.values() * (ValueType(2) * grad_));
+        expr.reverse(expr.values() * (Tv(2) * grad_));
     }
 
-    template<Vector T>
-    [[nodiscard]] inline auto square(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Square, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto square(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Square, V&&>(std::forward<V>(v));
     }
 }

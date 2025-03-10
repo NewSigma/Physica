@@ -29,7 +29,6 @@ namespace Physica {
         using Base = device_obj<LValueVector<host_obj>>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
@@ -71,7 +70,6 @@ namespace Physica {
         using Base = device_obj<LValueVector<host_obj>>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
@@ -113,7 +111,6 @@ namespace Physica {
         using Base = device_obj<LValueVector<host_obj>>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:

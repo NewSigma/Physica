@@ -21,22 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T, Scalar U>
-    class VectorExpr<ExprType::Add, T, U>
-            : public BinaryVectorExpr<ExprType::Add, T, U> {
-        using Base = BinaryVectorExpr<ExprType::Add, T, U>;
+    template<Vector V, Scalar U>
+    class VectorExpr<ExprType::Add, V, U>
+            : public BinaryVectorExpr<ExprType::Add, V, U> {
+        using Base = BinaryVectorExpr<ExprType::Add, V, U>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
+        [[nodiscard]] CoDiff<T> calc(size_t s) const {
             return Base::getLHS().calc(s) + Base::getRHS();
         }
 
-        [[nodiscard]] ValueType calc_value(size_t s) const {
+        [[nodiscard]] Tv calc_value(size_t s) const {
             return Base::getLHS().calc_value(s) + Base::getRHS().value();
         }
 
@@ -50,35 +51,36 @@ namespace Physica {
             return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS(), count);
         }
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        template<Vector V1>
+        void reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
             const auto& grad = grad_.values();
-            if constexpr (ReverseDiff<T>)
+            if constexpr (ReverseDiff<V>)
                 Base::getLHS().reverse(grad);
             if constexpr (ReverseDiff<U>)
                 Base::getRHS().reverse(grad.sum());
         }
     };
 
-    template<Vector T1, Vector T2>
-    class VectorExpr<ExprType::Add, T1, T2>
-            : public BinaryVectorExpr<ExprType::Add, T1, T2> {
-        using Base = BinaryVectorExpr<ExprType::Add, T1, T2>;
+    template<Vector V1, Vector V2>
+    class VectorExpr<ExprType::Add, V1, V2>
+            : public BinaryVectorExpr<ExprType::Add, V1, V2> {
+        using Base = BinaryVectorExpr<ExprType::Add, V1, V2>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
         template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& v) const;
 
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
+        [[nodiscard]] CoDiff<T> calc(size_t s) const {
             return getLHS().calc(s) + getRHS().calc(s);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t s) const {
+        [[nodiscard]] Tv calc_value(size_t s) const {
             return Base::getLHS().calc_value(s) + Base::getRHS().calc_value(s);
         }
 
@@ -101,11 +103,11 @@ namespace Physica {
         using Base::getRHS;
     };
 
-    template<Vector T1, Vector T2>
+    template<Vector V1, Vector V2>
     template<Vector V, class Executor>
-    inline void VectorExpr<ExprType::Add, T1, T2>::assign(V& v) const {
-        constexpr bool FastAssign1 = Traits<std::remove_cvref_t<T1>>::FastAssign;
-        constexpr bool FastAssign2 = Traits<std::remove_cvref_t<T2>>::FastAssign;
+    inline void VectorExpr<ExprType::Add, V1, V2>::assign(V& v) const {
+        constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
+        constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {
             getLHS().template assign<V, Executor>(v);
             v += getRHS();
@@ -118,38 +120,38 @@ namespace Physica {
             Base::template assign<V, Executor>(v);
     }
 
-    template<Vector T1, Vector T2>
+    template<Vector V1, Vector V2>
     template<class U>
-    void VectorExpr<ExprType::Add, T1, T2>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Add, V1, V2>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
         if constexpr (Scalar<U>) {
-            if constexpr (ReverseDiff<T1>)
+            if constexpr (ReverseDiff<V1>)
                 Base::getLHS().reverse(grad_);
-            if constexpr (ReverseDiff<T2>)
+            if constexpr (ReverseDiff<V2>)
                 Base::getRHS().reverse(grad_);
         }
         else {
             static_assert(Vector<U>);
             const auto& grad = grad_.values();
             assert(grad.getLength() == Base::getLength());
-            if constexpr (ReverseDiff<T1>)
+            if constexpr (ReverseDiff<V1>)
                 Base::getLHS().reverse(grad);
-            if constexpr (ReverseDiff<T2>)
+            if constexpr (ReverseDiff<V2>)
                 Base::getRHS().reverse(grad);
         }
     }
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] inline auto operator+(T&& v, U&& x) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Add, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
+    template<Vector V, Scalar U>
+    [[nodiscard]] inline auto operator+(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Add, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
-    template<Scalar U, Vector T>
-    [[nodiscard]] inline auto operator+(U&& x, T&& v) noexcept requires(!CUDA<T>) {
-        return std::forward<T>(v) + std::forward<U>(x);
+    template<Scalar U, Vector V>
+    [[nodiscard]] inline auto operator+(U&& x, V&& v) noexcept requires(!CUDA<V>) {
+        return std::forward<V>(v) + std::forward<U>(x);
     }
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] inline auto operator+(T1&& v1, T2&& v2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return VectorExpr<ExprType::Add, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
+    template<Vector V1, Vector V2>
+    [[nodiscard]] inline auto operator+(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+        return VectorExpr<ExprType::Add, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

@@ -29,7 +29,8 @@ namespace Physica {
         using Base = BinaryVectorExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     public:
         VectorExpr(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
             if constexpr (Vector<T>)
@@ -43,7 +44,7 @@ namespace Physica {
                 return Base::getLHS() / Base::getRHS().calc(s);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t s) const {
+        [[nodiscard]] Tv calc_value(size_t s) const {
             if constexpr (Vector<T>)
                 return Base::getLHS().calc_value(s) / Base::getRHS().value();
             else
@@ -67,13 +68,14 @@ namespace Physica {
         }
     };
 
-    template<Vector T1, Vector T2>
-    class VectorExpr<ExprType::Div, T1, T2>
-            : public BinaryVectorExpr<ExprType::Div, T1, T2> {
-        using Base = BinaryVectorExpr<ExprType::Div, T1, T2>;
+    template<Vector V1, Vector V2>
+    class VectorExpr<ExprType::Div, V1, V2>
+            : public BinaryVectorExpr<ExprType::Div, V1, V2> {
+        using Base = BinaryVectorExpr<ExprType::Div, V1, V2>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
@@ -82,7 +84,7 @@ namespace Physica {
             return Base::getLHS().calc(s) / Base::getRHS().calc(s);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t s) const {
+        [[nodiscard]] Tv calc_value(size_t s) const {
             assert(!Base::getRHS().calc_value(s).isZero() && "[Error]: Divide by zero");
             return Base::getLHS().calc_value(s) / Base::getRHS().calc_value(s);
         }
@@ -110,8 +112,8 @@ namespace Physica {
         return VectorExpr<ExprType::Div, U&&, T&&>(std::forward<U>(x), std::forward<T>(v));
     }
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] inline auto divide(T1&& v1, T2&& v2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return VectorExpr<ExprType::Div, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
+    template<Vector V1, Vector V2>
+    [[nodiscard]] inline auto divide(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+        return VectorExpr<ExprType::Div, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

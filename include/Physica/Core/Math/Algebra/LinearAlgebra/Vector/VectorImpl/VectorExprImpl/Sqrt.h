@@ -21,19 +21,19 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Sqrt, T> : public UnitaryVectorExpr<ExprType::Sqrt, T> {
-        using This = VectorExpr<ExprType::Sqrt, T>;
-        using Base = UnitaryVectorExpr<ExprType::Sqrt, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Sqrt, V> : public UnitaryVectorExpr<ExprType::Sqrt, V> {
+        using This = VectorExpr<ExprType::Sqrt, V>;
+        using Base = UnitaryVectorExpr<ExprType::Sqrt, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return sqrt(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return sqrt(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return sqrt(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return sqrt(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const { return sqrt(Base::getExpr().template packet<Pack>(index)); }
@@ -42,8 +42,8 @@ namespace Physica {
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const { return sqrt(Base::getExpr().template packetPartial<Pack>(index, count)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto sqrt(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Sqrt, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto sqrt(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Sqrt, V&&>(std::forward<V>(v));
     }
 }

@@ -30,7 +30,8 @@ namespace Physica {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     private:
         const MatrixPow<T>& mpow;
         const U& v;
@@ -47,7 +48,7 @@ namespace Physica {
         inline void assign(V& target) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
-        [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
+        [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const MatrixPow<T>& getLHS() const noexcept { return mpow; }

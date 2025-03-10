@@ -21,23 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T, Scalar U>
-    class VectorExpr<ExprType::Pow, T, U>
-            : public BinaryVectorExpr<ExprType::Pow, T, U> {
-        using Base = BinaryVectorExpr<ExprType::Pow, T, U>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V, Scalar U>
+    class VectorExpr<ExprType::Pow, V, U>
+            : public BinaryVectorExpr<ExprType::Pow, V, U> {
+        using Base = BinaryVectorExpr<ExprType::Pow, V, U>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
+        [[nodiscard]] CoDiff<T> calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return pow(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return pow(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] inline auto pow(T&& v, U&& x) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Pow, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
+    template<Vector V, Scalar U>
+    [[nodiscard]] inline auto pow(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Pow, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 }

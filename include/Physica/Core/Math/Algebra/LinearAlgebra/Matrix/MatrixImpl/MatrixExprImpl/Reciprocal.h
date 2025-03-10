@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,25 +21,25 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<Matrix T>
-    class MatrixExpr<ExprType::Reciprocal, T>
-            : public UnitaryMatrixExpr<ExprType::Reciprocal, T> {
-        using Base = UnitaryMatrixExpr<ExprType::Reciprocal, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Matrix M>
+    class MatrixExpr<ExprType::Reciprocal, M>
+            : public UnitaryMatrixExpr<ExprType::Reciprocal, M> {
+        using Base = UnitaryMatrixExpr<ExprType::Reciprocal, M>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return reciprocal(Base::getExpr().calc(row, col)); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return reciprocal(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return reciprocal(Base::getExpr().calc_value(row, col));
         }
     };
 
-    template<Matrix T>
-    [[nodiscard]] inline auto reciprocal_elem(T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Reciprocal, T&&>(std::forward<T>(m));
+    template<Matrix M>
+    [[nodiscard]] inline auto reciprocal_elem(M&& m) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Reciprocal, M&&>(std::forward<M>(m));
     }
 }

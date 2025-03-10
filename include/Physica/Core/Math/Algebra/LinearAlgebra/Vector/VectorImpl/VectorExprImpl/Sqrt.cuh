@@ -21,23 +21,23 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector T>
-    class device_obj<VectorExpr<ExprType::Sqrt, T>> : public device_obj<UnitaryVectorExpr<ExprType::Sqrt, T>> {
-        using This = device_obj<VectorExpr<ExprType::Sqrt, T>>;
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Sqrt, T>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class device_obj<VectorExpr<ExprType::Sqrt, V>> : public device_obj<UnitaryVectorExpr<ExprType::Sqrt, V>> {
+        using This = device_obj<VectorExpr<ExprType::Sqrt, V>>;
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Sqrt, V>>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return sqrt(Base::getExpr().calc(index)); }
+        [[nodiscard]] __device__ T calc(size_t index) const { return sqrt(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] __device__ ValueType calc_value(size_t index) const { return sqrt(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] __device__ Tv calc_value(size_t index) const { return sqrt(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] __host__ __device__ inline auto sqrt(T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Sqrt, T&&>>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] __host__ __device__ inline auto sqrt(V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprType::Sqrt, V&&>>(std::forward<V>(v));
     }
 }

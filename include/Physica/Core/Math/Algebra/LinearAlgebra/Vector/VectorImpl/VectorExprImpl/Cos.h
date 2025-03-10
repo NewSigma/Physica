@@ -21,23 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Cos, T> : public UnitaryVectorExpr<ExprType::Cos, T> {
-        using This = VectorExpr<ExprType::Cos, T>;
-        using Base = UnitaryVectorExpr<ExprType::Cos, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Cos, V> : public UnitaryVectorExpr<ExprType::Cos, V> {
+        using This = VectorExpr<ExprType::Cos, V>;
+        using Base = UnitaryVectorExpr<ExprType::Cos, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return cos(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return cos(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return cos(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return cos(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto cos(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Cos, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto cos(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Cos, V&&>(std::forward<V>(v));
     }
 }

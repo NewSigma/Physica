@@ -30,7 +30,6 @@ namespace Physica {
         using Base = LValueVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
@@ -70,7 +69,6 @@ namespace Physica {
         using Base = LValueVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
@@ -111,7 +109,6 @@ namespace Physica {
         using Base = LValueVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:

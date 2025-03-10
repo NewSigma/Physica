@@ -21,19 +21,19 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Reciprocal, T> : public UnitaryVectorExpr<ExprType::Reciprocal, T> {
-        using This = VectorExpr<ExprType::Reciprocal, T>;
-        using Base = UnitaryVectorExpr<ExprType::Reciprocal, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Reciprocal, V> : public UnitaryVectorExpr<ExprType::Reciprocal, V> {
+        using This = VectorExpr<ExprType::Reciprocal, V>;
+        using Base = UnitaryVectorExpr<ExprType::Reciprocal, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return reciprocal(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return reciprocal(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return reciprocal(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return reciprocal(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -46,8 +46,8 @@ namespace Physica {
         }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto reciprocal(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Reciprocal, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto reciprocal(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Reciprocal, V&&>(std::forward<V>(v));
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,25 +21,25 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<Matrix T>
-    class MatrixExpr<ExprType::Sqrt, T>
-            : public UnitaryMatrixExpr<ExprType::Sqrt, T> {
-        using Base = UnitaryMatrixExpr<ExprType::Sqrt, T>;
+    template<Matrix M>
+    class MatrixExpr<ExprType::Sqrt, M>
+            : public UnitaryMatrixExpr<ExprType::Sqrt, M> {
+        using Base = UnitaryMatrixExpr<ExprType::Sqrt, M>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sqrt(Base::getExpr().calc(row, col)); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return sqrt(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return sqrt(Base::getExpr().calc_value(row, col));
         }
     };
 
-    template<Matrix T>
-    [[nodiscard]] inline auto sqrt_elem(T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Sqrt, T&&>(std::forward<T>(m));
+    template<Matrix M>
+    [[nodiscard]] inline auto sqrt_elem(M&& m) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Sqrt, M&&>(std::forward<M>(m));
     }
 }

@@ -21,19 +21,19 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Tan, T> : public UnitaryVectorExpr<ExprType::Tan, T> {
-        using This = VectorExpr<ExprType::Tan, T>;
-        using Base = UnitaryVectorExpr<ExprType::Tan, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Tan, V> : public UnitaryVectorExpr<ExprType::Tan, V> {
+        using This = VectorExpr<ExprType::Tan, V>;
+        using Base = UnitaryVectorExpr<ExprType::Tan, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return tan(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return tan(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return tan(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return tan(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const { return tan(Base::getExpr().template packet<Pack>(index)); }
@@ -42,8 +42,8 @@ namespace Physica {
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const { return tan(Base::getExpr().template packetPartial<Pack>(index, count)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto tan(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Tan, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto tan(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Tan, V&&>(std::forward<V>(v));
     }
 }

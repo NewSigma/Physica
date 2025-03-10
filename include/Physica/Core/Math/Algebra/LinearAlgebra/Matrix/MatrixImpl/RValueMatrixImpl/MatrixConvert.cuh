@@ -21,18 +21,18 @@
 #include "../RValueMatrix.cuh"
 
 namespace Physica {
-    template<class T>
-    class device_obj<RealMatrix<T>> : public device_obj<RValueMatrix<RealMatrix<T>>> {
-        using host_obj = RealMatrix<T>;
+    template<class M>
+    class device_obj<RealMatrix<M>> : public device_obj<RValueMatrix<RealMatrix<M>>> {
+        using host_obj = RealMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<T>> mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -40,24 +40,24 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).real(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).real(); }
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
 
-    template<class T>
-    class device_obj<ImagMatrix<T>> : public device_obj<RValueMatrix<ImagMatrix<T>>> {
-        using host_obj = ImagMatrix<T>;
+    template<class M>
+    class device_obj<ImagMatrix<M>> : public device_obj<RValueMatrix<ImagMatrix<M>>> {
+        using host_obj = ImagMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<T>> mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -65,24 +65,24 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).imag(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).imag(); }
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
 
-    template<class T>
-    class device_obj<SquaredNormMatrix<T>> : public device_obj<RValueMatrix<SquaredNormMatrix<T>>> {
-        using host_obj = SquaredNormMatrix<T>;
+    template<class M>
+    class device_obj<SquaredNormMatrix<M>> : public device_obj<RValueMatrix<SquaredNormMatrix<M>>> {
+        using host_obj = SquaredNormMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<T>> mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -90,24 +90,24 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).squaredNorm(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value().squaredNorm(); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).squaredNorm(); }
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value().squaredNorm(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
 
-    template<class T>
-    class device_obj<NormMatrix<T>> : public device_obj<RValueMatrix<NormMatrix<T>>> {
-        using host_obj = NormMatrix<T>;
+    template<class M>
+    class device_obj<NormMatrix<M>> : public device_obj<RValueMatrix<NormMatrix<M>>> {
+        using host_obj = NormMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<T>> mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -115,23 +115,23 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).norm(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value().norm(); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).norm(); }
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return mat.getDerived().calc(row, col).value().norm(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
 
-    template<class T>
-    class device_obj<ValueMatrix<T>> : public device_obj<RValueMatrix<ValueMatrix<T>>> {
-        using host_obj = ValueMatrix<T>;
+    template<class M>
+    class device_obj<ValueMatrix<M>> : public device_obj<RValueMatrix<ValueMatrix<M>>> {
+        using host_obj = ValueMatrix<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     private:
-        PlainStruct<const device_obj<T>> mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -139,24 +139,24 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.getDerived().calc_value(row, col); }
-        [[nodiscard]] __device__ ScalarType calc_value(size_t row, size_t col) const { return calc(row, col); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc_value(row, col); }
+        [[nodiscard]] __device__ T calc_value(size_t row, size_t col) const { return calc(row, col); }
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
 
-    template<class T, int GradOrder>
-    class device_obj<GradMatrix<T, GradOrder>> : public device_obj<RValueMatrix<GradMatrix<T, GradOrder>>> {
-        using host_obj = GradMatrix<T, GradOrder>;
+    template<class M, int GradOrder>
+    class device_obj<GradMatrix<M, GradOrder>> : public device_obj<RValueMatrix<GradMatrix<M, GradOrder>>> {
+        using host_obj = GradMatrix<M, GradOrder>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<T>> mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -164,29 +164,29 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).template grad<GradOrder>(); }
-        [[nodiscard]] __device__ ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return mat.getDerived().calc(row, col).template grad<GradOrder>(); }
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<device_obj<RealMatrix<T>>> : public Traits<RealMatrix<T>> {};
+    template<class M>
+    class Traits<device_obj<RealMatrix<M>>> : public Traits<RealMatrix<M>> {};
 
-    template<class T>
-    class Traits<device_obj<ImagMatrix<T>>> : public Traits<ImagMatrix<T>> {};
+    template<class M>
+    class Traits<device_obj<ImagMatrix<M>>> : public Traits<ImagMatrix<M>> {};
 
-    template<class T>
-    class Traits<device_obj<SquaredNormMatrix<T>>> : public Traits<SquaredNormMatrix<T>> {};
+    template<class M>
+    class Traits<device_obj<SquaredNormMatrix<M>>> : public Traits<SquaredNormMatrix<M>> {};
 
-    template<class T>
-    class Traits<device_obj<NormMatrix<T>>> : public Traits<NormMatrix<T>> {};
+    template<class M>
+    class Traits<device_obj<NormMatrix<M>>> : public Traits<NormMatrix<M>> {};
 
-    template<class T>
-    class Traits<device_obj<ValueMatrix<T>>> : public Traits<ValueMatrix<T>> {};
+    template<class M>
+    class Traits<device_obj<ValueMatrix<M>>> : public Traits<ValueMatrix<M>> {};
 
-    template<class T, int GradOrder>
-    class Traits<device_obj<GradMatrix<T, GradOrder>>> : public Traits<GradMatrix<T, GradOrder>> {};
+    template<class M, int GradOrder>
+    class Traits<device_obj<GradMatrix<M, GradOrder>>> : public Traits<GradMatrix<M, GradOrder>> {};
 }

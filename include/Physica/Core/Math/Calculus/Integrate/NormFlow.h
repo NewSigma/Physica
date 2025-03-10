@@ -75,7 +75,7 @@ namespace Physica {
 
         Trv calcLoss_normal(FuncValue y, const CoDiff<T>& lnJ);
         template<class Executor>
-        Trv calcLoss_ln(Trv lnVolume, const VectorND<FuncValue>& samples, const VectorND<T>& lnJv);
+        Trv calcLoss_ln(const VectorND<FuncValue>& samples, const VectorND<T>& lnJv);
     };
 
     template<Scalar T, bool TakeLn>
@@ -199,13 +199,7 @@ namespace Physica {
             lnJs.toHostAsync(lnJv);
             x = from_d + hadamard(coeff_d, x);
             samples = nn(x).toHost();
-            {
-                const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
-                auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(numSample));
-                if constexpr (ReverseDiff<T>)
-                    l.reverse();
-                loss = l.value();
-            }
+            loss = calcLoss_ln<Executor>(samples, lnJv);
             lnJs.reverse(lnJv.grads().toDeviceAsync());
             samples += lnJv.values() + lnVolume;
         }
@@ -236,7 +230,7 @@ namespace Physica {
                 }, numSample, numThread).wait();
             }
 
-            loss = calcLoss_ln<Executor>(lnVolume, samples, lnJv);
+            loss = calcLoss_ln<Executor>(samples, lnJv);
             auto futures = Executor::parallel_for([&, lnVolume](size_t i) {
                 auto& lnJ = lnJs[i];
                 samples[i] += lnJ.value() + lnVolume;
@@ -274,7 +268,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<class Executor>
-    auto NormFlow<T, TakeLn>::calcLoss_ln(Trv lnVolume, const VectorND<FuncValue>& samples, const VectorND<T>& lnJv) -> Trv {
+    auto NormFlow<T, TakeLn>::calcLoss_ln(const VectorND<FuncValue>& samples, const VectorND<T>& lnJv) -> Trv {
         const size_t numSample = samples.getLength();
         const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
         auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(numSample));

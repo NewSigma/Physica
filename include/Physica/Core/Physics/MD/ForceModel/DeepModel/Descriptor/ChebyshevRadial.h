@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,10 +31,11 @@ namespace Physica {
      */
     template<Scalar T, bool IsSmallCell>
     class ChebyshevRadial : protected PairModel<ChebyshevRadial<T, IsSmallCell>> {
+        using This = ChebyshevRadial<T, IsSmallCell>;
         using Base = PairModel<ChebyshevRadial<T, IsSmallCell>>;
-        using ValueType = T::ValueType;
+        using Tv = T::ValueType;
     public:
-        using MDCellType = MDCell<ValueType, 3>;
+        using MDCellType = MDCell<Tv, 3>;
         using ParticleType = MDCellType::ParticleType;
         using MassTypeMap = MDCellType::MassTypeMap;
         using DescriptorMatrix = DenseMatrix<T>;
@@ -44,14 +45,14 @@ namespace Physica {
         unsigned int maxOrder;
     public:
         ChebyshevRadial(MassTypeMap massTypeMap_, unsigned int maxOrder_, T cutoff);
-        ChebyshevRadial(const ChebyshevRadial&) = default;
-        ChebyshevRadial(ChebyshevRadial&&) noexcept = default;
+        ChebyshevRadial(const This&) = default;
+        ChebyshevRadial(This&&) noexcept = default;
         ~ChebyshevRadial() = default;
         /* Operators */
-        ChebyshevRadial& operator=(ChebyshevRadial obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] DescriptorArray project(const MDCellType& cell) const;
-        void swap(ChebyshevRadial& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] unsigned int getMaxOrder() const noexcept { return maxOrder; }
     private:
@@ -72,7 +73,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    void ChebyshevRadial<T, IsSmallCell>::swap(ChebyshevRadial& __restrict obj) noexcept {
+    void ChebyshevRadial<T, IsSmallCell>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         massTypeMap.swap(obj.massTypeMap);
@@ -80,8 +81,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    ChebyshevRadial<T, IsSmallCell>::DescriptorArray ChebyshevRadial<T, IsSmallCell>::project(
-            const MDCellType& cell) const {
+    auto ChebyshevRadial<T, IsSmallCell>::project(const MDCellType& cell) const -> DescriptorArray {
         const size_t numType = massTypeMap.size();
         DescriptorArray result(cell.getNumParticle(), maxOrder, numType, T(0));
         auto kernel = [this, &cell, &result](size_t i, size_t j, Vector3D<T> r, T norm1, T norm2) {

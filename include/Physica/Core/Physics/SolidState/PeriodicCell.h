@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -44,7 +44,7 @@ namespace Physica {
 
         using This = PeriodicCell<T, Dim>;
         using Base = Internal::PeriodicCellImpl;
-        using ValueType = T::ValueType;
+        using Tv = T::ValueType;
     public:
         using LatticeMatrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using InvLatticeMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
@@ -120,7 +120,7 @@ namespace Physica {
         [[nodiscard]] static T getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
-        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, ValueType cutoff);
+        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, Tv cutoff);
         template<class Functor>
         static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
         template<class Functor>
@@ -631,10 +631,9 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::SearchRangeType
-    PeriodicCell<T, Dim>::estimateRange(const LatticeMatrix& lattice, ValueType cutoff) {
+    auto PeriodicCell<T, Dim>::estimateRange(const LatticeMatrix& lattice, Tv cutoff) -> SearchRangeType {
         const auto repLatt = makeRepLattice(lattice);
-        const ValueType factor = cutoff * ValueType(1 / (2 * M_PI));
+        const Tv factor = cutoff * Tv(1 / (2 * M_PI));
         SearchRangeType range{};
         if constexpr (Dim == 1) {
             range[0] = static_cast<ssize_t>(double(factor * repLatt.row(0).norm()) + 1);

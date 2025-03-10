@@ -25,15 +25,15 @@ namespace Physica {
     class device_obj<VectorExpr<ExprType::Unit, V>>
             : public device_obj<UnitaryVectorExpr<ExprType::Unit, V>> {
         using Base = device_obj<UnitaryVectorExpr<ExprType::Unit, V>>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
+        [[nodiscard]] __device__ T calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
 
-        [[nodiscard]] __device__ ValueType calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
+        [[nodiscard]] __device__ Tv calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
     };
 
     template<Vector V>

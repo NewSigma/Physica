@@ -29,7 +29,8 @@ namespace Physica {
         using Base = BinaryMatrixExpr<ExprType::Sub, T, U>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
@@ -40,7 +41,7 @@ namespace Physica {
                 return Base::getLHS() - Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             if constexpr (Matrix<T>)
                 return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
             else
@@ -48,26 +49,26 @@ namespace Physica {
         }
     };
 
-    template<Matrix T1, Matrix T2>
-    class MatrixExpr<ExprType::Sub, T1, T2>
-            : public BinaryMatrixExpr<ExprType::Sub, T1, T2> {
-        using Base = BinaryMatrixExpr<ExprType::Sub, T1, T2>;
-        using This = MatrixExpr<ExprType::Sub, T1, T2>;
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<T1>() && MatrixOption::isSymmMatrix<T2>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T1>() && MatrixOption::isHermiteMatrix<T2>();
+    template<Matrix M1, Matrix M2>
+    class MatrixExpr<ExprType::Sub, M1, M2>
+            : public BinaryMatrixExpr<ExprType::Sub, M1, M2> {
+        using Base = BinaryMatrixExpr<ExprType::Sub, M1, M2>;
+        using This = MatrixExpr<ExprType::Sub, M1, M2>;
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M1>() && MatrixOption::isSymmMatrix<M2>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M1>() && MatrixOption::isHermiteMatrix<M2>();
         using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
         using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] T calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) - Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return Base::getLHS().calc_value(row, col) - Base::getRHS().calc_value(row, col);
         }
 
@@ -85,8 +86,8 @@ namespace Physica {
         return MatrixExpr<ExprType::Sub, U&&, T&&>(std::forward<U>(x), std::forward<T>(m));
     }
 
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto operator-(T1&& m1, T2&& m2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return MatrixExpr<ExprType::Sub, T1&&, T2&&>(std::forward<T1>(m1), std::forward<T2>(m2));
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] inline auto operator-(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
+        return MatrixExpr<ExprType::Sub, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

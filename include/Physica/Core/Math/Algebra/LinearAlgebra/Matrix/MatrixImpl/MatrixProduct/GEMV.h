@@ -24,19 +24,20 @@
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<T, U>> {
-        using This = MatrixVectorProduct<T, U>;
+    template<Matrix M, Vector U>
+    class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<M, U>> {
+        using This = MatrixVectorProduct<M, U>;
         using Base = RValueVector<This>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        const T& mat;
+        const M& mat;
         const U& vec;
     public:
-        MatrixVectorProduct(const T& mat_, const U& vec_);
+        MatrixVectorProduct(const M& mat_, const U& vec_);
         MatrixVectorProduct(const This&) = default;
         MatrixVectorProduct(This&&) noexcept = default;
         ~MatrixVectorProduct() = default;
@@ -47,8 +48,8 @@ namespace Physica {
         template<Vector V, class Executor = SeqExecutor>
         inline void assign(V& target) const;
 
-        [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
-        [[nodiscard]] inline ValueType calc_value(size_t index) const;
+        [[nodiscard]] inline CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] inline Tv calc_value(size_t index) const;
 
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff);
@@ -56,20 +57,20 @@ namespace Physica {
         auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
-        [[nodiscard]] const T& getLHS() const noexcept { return mat; }
+        [[nodiscard]] const M& getLHS() const noexcept { return mat; }
         [[nodiscard]] const U& getRHS() const noexcept { return vec; }
     };
 
-    template<Matrix T, Vector U>
-    MatrixVectorProduct<T, U>::MatrixVectorProduct(const T& mat_, const U& vec_) : mat(mat_), vec(vec_) {
+    template<Matrix M, Vector U>
+    MatrixVectorProduct<M, U>::MatrixVectorProduct(const M& mat_, const U& vec_) : mat(mat_), vec(vec_) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Matrix T, Vector U>
+    template<Matrix M, Vector U>
     template<Vector V, class Executor>
-    inline void MatrixVectorProduct<T, U>::assign(V& target) const {
+    inline void MatrixVectorProduct<M, U>::assign(V& target) const {
         if constexpr (isReverseDiff) {
-            if constexpr (MatrixOption::isColMatrix<T>()) {
+            if constexpr (MatrixOption::isColMatrix<M>()) {
                 target = mat.values().col(0) * vec.values().calc(0);
                 for (size_t i = 1; i < vec.getLength(); ++i)
                     target += mat.values().col(i) * vec.values().calc(i);
@@ -80,7 +81,7 @@ namespace Physica {
             }
         }
         else {
-            if constexpr (MatrixOption::isColMatrix<T>()) {
+            if constexpr (MatrixOption::isColMatrix<M>()) {
                 target = mat.col(0) * vec.calc(0);
                 for (size_t i = 1; i < vec.getLength(); ++i)
                     target += mat.col(i) * vec.calc(i);
@@ -92,23 +93,23 @@ namespace Physica {
         }
     }
 
-    template<Matrix T, Vector U>
-    inline auto MatrixVectorProduct<T, U>::calc(size_t index) const -> CoDiff<ScalarType> {
+    template<Matrix M, Vector U>
+    inline auto MatrixVectorProduct<M, U>::calc(size_t index) const -> CoDiff<T> {
         return mat.row(index) * vec;
     }
 
-    template<Matrix T, Vector U>
-    inline auto MatrixVectorProduct<T, U>::calc_value(size_t index) const -> ValueType {
+    template<Matrix M, Vector U>
+    inline auto MatrixVectorProduct<M, U>::calc_value(size_t index) const -> Tv {
         return mat.values().row(index) * vec.values();
     }
 
-    template<Matrix T, Vector U>
+    template<Matrix M, Vector U>
     template<Vector V>
-    void MatrixVectorProduct<T, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+    void MatrixVectorProduct<M, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
         assert(grad_.getLength() == getLength());
         const auto& grad = grad_.values();
-        if constexpr (ReverseDiff<T>) {
-            if constexpr (MatrixOption::isRowMatrix<T>()) {
+        if constexpr (ReverseDiff<M>) {
+            if constexpr (MatrixOption::isRowMatrix<M>()) {
                 for (size_t i = 0; i < mat.getRow(); ++i)
                     mat.row(i).reverse(grad[i] * vec.values());
             }
@@ -119,7 +120,7 @@ namespace Physica {
         }
 
         if constexpr (ReverseDiff<U>) {
-            if constexpr (MatrixOption::isRowMatrix<T>()) {
+            if constexpr (MatrixOption::isRowMatrix<M>()) {
                 for (size_t i = 0; i < getLength(); ++i)
                     vec.reverse(mat.values().row(i) * grad.calc(i));
             }
@@ -128,28 +129,28 @@ namespace Physica {
         }
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) noexcept requires(T::RowAtCompile != 1 && !CUDA<T> && !CUDA<U>) {
-        return MatrixVectorProduct<T, U>(mat, vec);
+    template<Matrix M, Vector U>
+    [[nodiscard]] inline auto operator*(const M& mat, const U& vec) noexcept requires(M::RowAtCompile != 1 && !CUDA<M> && !CUDA<U>) {
+        return MatrixVectorProduct<M, U>(mat, vec);
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) requires(T::RowAtCompile == 1 && U::SizeAtCompile == 1 && !CUDA<T> && !CUDA<U>) {
+    template<Matrix M, Vector U>
+    [[nodiscard]] inline auto operator*(const M& mat, const U& vec) requires(M::RowAtCompile == 1 && U::SizeAtCompile == 1 && !CUDA<M> && !CUDA<U>) {
         return mat.row(0) * vec;
     }
 }
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class Traits<MatrixVectorProduct<T, U>> {
-        using T1 = std::remove_cvref_t<T>;
+    template<Matrix M, Vector U>
+    class Traits<MatrixVectorProduct<M, U>> {
+        using M1 = std::remove_cvref_t<M>;
         using U1 = std::remove_cvref_t<U>;
-        static_assert(T1::ColAtCompile == U1::SizeAtCompile || T1::ColAtCompile == Dynamic || U1::SizeAtCompile == Dynamic,
+        static_assert(M1::ColAtCompile == U1::SizeAtCompile || M1::ColAtCompile == Dynamic || U1::SizeAtCompile == Dynamic,
                 "Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename U1::ScalarType>::Type;
-        constexpr static size_t SizeAtCompile = T1::RowAtCompile;
-        constexpr static bool FastAssign = MatrixOption::isColMatrix<T>();
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename U1::ScalarType>::Type;
+        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
+        constexpr static bool FastAssign = MatrixOption::isColMatrix<M>();
         constexpr static bool FastPacket = false;
     };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -62,7 +62,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    inline SIMDBase<Derived>::FullRealType SIMDBase<Derived>::squaredNorm() const {
+    inline auto SIMDBase<Derived>::squaredNorm() const -> FullRealType {
         const FullRealType x2 = square(asReal());
         if constexpr (isComplex)
             return x2 + x2.swapRealImag();
@@ -71,7 +71,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline SIMDBase<Derived>::FullRealType SIMDBase<Derived>::swapRealImag() const {
+    inline auto SIMDBase<Derived>::swapRealImag() const -> FullRealType {
         const auto x = asReal();
         if constexpr (ScalarType::Option == Float32)
             return x.template shuffle<1, 0, 3, 2>();
@@ -89,7 +89,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline SIMDBase<Derived>::FullRealType SIMDBase<Derived>::permRealImag() const noexcept {
+    inline auto SIMDBase<Derived>::permRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
         constexpr int Size1 = isComplex ? Size * 2 : Size;
         if constexpr (Size1 == 2)
@@ -105,7 +105,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline SIMDBase<Derived>::FullRealType SIMDBase<Derived>::scatterRealImag() const noexcept {
+    inline auto SIMDBase<Derived>::scatterRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
         constexpr int Size1 = isComplex ? Size * 2 : Size;
         if constexpr (Size1 == 2)
@@ -121,7 +121,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline SIMDBase<Derived>::ValueType SIMDBase<Derived>::value() const {
+    inline auto SIMDBase<Derived>::value() const -> ValueType {
         if constexpr (isDiffable)
             return Base::getDerived().value();
         else
@@ -129,7 +129,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline SIMDBase<Derived>::FullRealType SIMDBase<Derived>::asReal() const {
+    inline auto SIMDBase<Derived>::asReal() const -> FullRealType {
         if constexpr (isComplex)
             return Base::getDerived_host().asReal();
         else

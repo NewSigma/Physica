@@ -21,20 +21,21 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Ln, T> : public UnitaryVectorExpr<ExprType::Ln, T> {
-        using This = VectorExpr<ExprType::Ln, T>;
-        using Base = UnitaryVectorExpr<ExprType::Ln, T>;
+    template<Vector V>
+    class VectorExpr<ExprType::Ln, V> : public UnitaryVectorExpr<ExprType::Ln, V> {
+        using This = VectorExpr<ExprType::Ln, V>;
+        using Base = UnitaryVectorExpr<ExprType::Ln, V>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return ln(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return ln(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return ln(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return ln(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -50,9 +51,9 @@ namespace Physica {
         void reverse(const U& grad_) const noexcept requires(isReverseDiff);
     };
 
-    template<Vector T>
+    template<Vector V>
     template<class U>
-    void VectorExpr<ExprType::Ln, T>::reverse(const U& grad_) const noexcept requires(isReverseDiff){
+    void VectorExpr<ExprType::Ln, V>::reverse(const U& grad_) const noexcept requires(isReverseDiff){
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<U>)
             expr.reverse(grad_.value() / expr.values());
@@ -62,8 +63,8 @@ namespace Physica {
         }
     }
 
-    template<Vector T>
-    [[nodiscard]] inline auto ln(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Ln, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto ln(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Ln, V&&>(std::forward<V>(v));
     }
 }

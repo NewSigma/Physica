@@ -25,16 +25,6 @@
 namespace Physica {
     template<Scalar T, unsigned int Dim> class FireModel;
     template<Scalar T, unsigned int Dim, BaroType Type> class CFireModel;
-
-    template<Scalar T>
-    class RPMDBase {        
-    public:
-        using ValueType = T::ValueType;
-
-        [[nodiscard]] static uint64_t durationToStep(ValueType duration, ValueType timeStep) {
-            return double(duration / timeStep) + 0.5;
-        }
-    };
     /**
      * Refer to [1] for a general review
      * Original literature of RPMD is [3]
@@ -48,10 +38,9 @@ namespace Physica {
              unsigned int Dim = 3,
              size_t NumReplica = Dynamic,
              class ForceMatrixAllocator = HostAllocator<T>>
-    class RPMD final : public RPMDBase<T> {
+    class RPMD final {
         using This = RPMD<T, Dim, NumReplica, ForceMatrixAllocator>;
-        using Base = RPMDBase<T>;
-        using typename Base::ValueType;
+        using Tv = T::ValueType;
     public:
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
         using PhaseMatrix = RingPolymerType::PhaseMatrix;
@@ -195,6 +184,8 @@ namespace Physica {
         void forceStep(T deltaT);
         bool checkCentroid() const;
         void checkParam() const;
+        /* Static members */
+        [[nodiscard]] static uint64_t durationToStep(Tv duration, Tv timeStep);
     };
 }
 

@@ -25,15 +25,15 @@ namespace Physica {
     class VectorExpr<ExprType::Unit, V>
             : public UnitaryVectorExpr<ExprType::Unit, V> {
         using Base = UnitaryVectorExpr<ExprType::Unit, V>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
+        [[nodiscard]] T calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
 
-        [[nodiscard]] ValueType calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
+        [[nodiscard]] Tv calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
     };
 
     template<Vector V>

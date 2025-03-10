@@ -35,12 +35,13 @@ namespace Physica {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
-        using RealType = ScalarType::RealType;
         using ParamPair = std::pair<int, int>;
+    protected:
+        using typename Base::Tv;
+        using typename Base::Tr;
+        using typename Base::Trv;
+        using Tm = Tr::MachineType;
     private:
-        using RealValue = RealType::ValueType;
-        using MachineType = RealType::MachineType;
         constexpr static bool IsFloat = ScalarType::Option == Float;
         constexpr static int MaxNumTaylorTerm = 55;
         constexpr static int MaxNormOrder = 8;
@@ -64,19 +65,19 @@ namespace Physica {
         inline void assign(V& target) const;
 
         template<Vector V, class Executor = SeqExecutor>
-        void assign(V& target, RealType traceMu, ParamPair params) const;
+        void assign(V& target, Tr traceMu, ParamPair params) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
-        [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
+        [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         [[nodiscard]] auto calcTraceMu() const { return mexp.calcTraceMu(); }
         template<class Executor>
-        [[nodiscard]] ParamPair calcParam(RealType traceMu) const;
+        [[nodiscard]] ParamPair calcParam(Tr traceMu) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const MatrixExp<T>& getLHS() const noexcept { return mexp; }
         [[nodiscard]] const U& getRHS() const noexcept { return v; }
     private:
-        constexpr static MachineType calcTheta(int numTaylorTerm);
+        constexpr static Tm calcTheta(int numTaylorTerm);
     };
 
     template<Matrix T, Vector U>
@@ -88,32 +89,32 @@ namespace Physica {
     template<Matrix T, Vector U>
     template<Vector V, class Executor>
     inline void MatrixVectorProduct<MatrixExp<T>, U>::assign(V& target) const {
-        const RealType traceMu = calcTraceMu();
+        const Tr traceMu = calcTraceMu();
         assign<V, Executor>(target, traceMu, calcParam<Executor>(traceMu));
     }
 
     template<Matrix T, Vector U>
     template<Vector V, class Executor>
-    void MatrixVectorProduct<MatrixExp<T>, U>::assign(V& target, RealType traceMu, ParamPair params) const {
+    void MatrixVectorProduct<MatrixExp<T>, U>::assign(V& target, Tr traceMu, ParamPair params) const {
         using BufferType = DenseVector<ScalarType, U::SizeAtCompile>;
         assert(getLength() == target.getLength());
-        const RealType epsilon = std::numeric_limits<RealType>::epsilon();
+        const Tr epsilon = std::numeric_limits<Tr>::epsilon();
         const auto& mat = mexp.getMatrix();
         const int numTaylorTerm = params.first;
         const int numSplit = params.second;
-        const RealType factor = exp(traceMu / RealType(numSplit));
+        const Tr factor = exp(traceMu / Tr(numSplit));
 
         BufferType buffer, term;
         target = v;
         for (int i = 0; i < numSplit; ++i) {
             term = target;
-            RealType norm1 = term.normInf();
+            Tr norm1 = term.normInf();
             for (int n = 1; n <= numTaylorTerm; ++n) {
                 using ExprType1 = decltype(mat * term - traceMu * term);
-                term *= reciprocal(RealType(numSplit * n));
+                term *= reciprocal(Tr(numSplit * n));
                 buffer.template operator=<ExprType1, Executor>(mat * term - traceMu * term);
                 buffer.swap(term);
-                const RealType norm2 = term.normInf();
+                const Tr norm2 = term.normInf();
                 target += term;
                 if (norm1 + norm2 <= epsilon * target.normInf())
                     break;
@@ -126,17 +127,17 @@ namespace Physica {
     template<Matrix T, Vector U>
     template<class Executor>
     MatrixVectorProduct<MatrixExp<T>, U>::ParamPair
-    MatrixVectorProduct<MatrixExp<T>, U>::calcParam(RealType traceMu) const {
-        constexpr static MachineType NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
+    MatrixVectorProduct<MatrixExp<T>, U>::calcParam(Tr traceMu) const {
+        constexpr static Tm NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto unit = UnitMatrix<ScalarType>(getLength());
         const ScalarType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
-        const bool isSmallNorm = MachineType(norm1) <= NormLimit;
+        const bool isSmallNorm = Tm(norm1) <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;
         if (isSmallNorm) {
             int numSplit = 1;
             for (int numTerm = 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
-                const int split = int(MachineType(norm1) / calcTheta(numTerm)) + 1;
+                const int split = int(Tm(norm1) / calcTheta(numTerm)) + 1;
                 const int temp = numTerm * split;
                 if (cost > temp) {
                     cost = temp;
@@ -147,15 +148,15 @@ namespace Physica {
             return std::make_pair(numMinCostTerm, numSplit);
         }
 
-        RealValue powerNorms[MaxNormOrder];
-        const RealType normalizer = reciprocal(norm1); // pow() has the risk of overflow
+        Trv powerNorms[MaxNormOrder];
+        const Tr normalizer = reciprocal(norm1); // pow() has the risk of overflow
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
-            const RealType pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<Executor>(MaxNormIteration);
-            powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(RealValue(order))) * norm1.value();
+            const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<Executor>(MaxNormIteration);
+            powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * norm1.value();
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {
-            const MachineType powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]).toMachine();
+            const Tm powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]).toMachine();
             for (int numTerm = order * (order - 1) - 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
                 const int temp = numTerm * int(powerNorm / calcTheta(numTerm)) + numTerm;
                 if (cost > temp) {
@@ -168,7 +169,7 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    constexpr typename MatrixVectorProduct<MatrixExp<T>, U>::MachineType
+    constexpr typename MatrixVectorProduct<MatrixExp<T>, U>::Tm
     MatrixVectorProduct<MatrixExp<T>, U>::calcTheta(int numTaylorTerm) {
         assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
         const int bufferIndex = (numTaylorTerm - 1) / 5; 

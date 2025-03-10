@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,9 +29,10 @@ namespace Physica {
      */
     template<Scalar T>
     class AABModel {
+        using This = AABModel<T>;
     public:
         constexpr static unsigned int Dim = 3;
-        using ValueType = T::ValueType;
+        using Tv = T::ValueType;
         using MDCellType = MDCell<T, Dim>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
@@ -40,14 +41,14 @@ namespace Physica {
         /* Static members */
         static PermutationMatrix<T> sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
         static bool isCellOrdered(const MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
-        static VectorND<T> makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2);
+        static VectorND<T> makeCharges(size_t numMolecule, Tv atomCharge1, Tv atomCharge2);
     protected:
         AABModel() = default;
-        AABModel(const AABModel&) = default;
-        AABModel(AABModel&&) noexcept = default;
+        AABModel(const This&) = default;
+        AABModel(This&&) noexcept = default;
         /* Operators */
-        AABModel& operator=(const AABModel&) = default;
-        AABModel& operator=(AABModel&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
     };
 
     template<Scalar T>
@@ -139,7 +140,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    VectorND<T> AABModel<T>::makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2) {
+    VectorND<T> AABModel<T>::makeCharges(size_t numMolecule, Tv atomCharge1, Tv atomCharge2) {
         const size_t maxIndexH = 2 * numMolecule;
         const size_t minIndexO = maxIndexH;
         const size_t maxIndexO = minIndexO + numMolecule;

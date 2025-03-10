@@ -21,22 +21,22 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Abs, T> : public UnitaryVectorExpr<ExprType::Abs, T> {
-        using This = VectorExpr<ExprType::Abs, T>;
-        using Base = UnitaryVectorExpr<ExprType::Abs, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Abs, V> : public UnitaryVectorExpr<ExprType::Abs, V> {
+        using This = VectorExpr<ExprType::Abs, V>;
+        using Base = UnitaryVectorExpr<ExprType::Abs, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
-        constexpr static bool isComplexV = std::remove_cvref_t<T>::isComplex;
+        constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex;
         constexpr static bool isReverseDiff = Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -57,7 +57,7 @@ namespace Physica {
         template<class U>
         void reverse(const U& grad) const noexcept requires(isReverseDiff);
 
-        ScalarType max() const {
+        T max() const {
             if constexpr (isComplexV)
                 return sqrt(Base::getExpr().squaredNorms().max());
             else
@@ -65,9 +65,9 @@ namespace Physica {
         }
     };
 
-    template<Vector T>
+    template<Vector V>
     template<class U>
-    void VectorExpr<ExprType::Abs, T>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Abs, V>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<U>)
             expr.reverse(unit(expr.values()) * grad);
@@ -77,8 +77,8 @@ namespace Physica {
         }
     }
 
-    template<Vector T>
-    [[nodiscard]] inline auto abs(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Abs, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto abs(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Abs, V&&>(std::forward<V>(v));
     }
 }

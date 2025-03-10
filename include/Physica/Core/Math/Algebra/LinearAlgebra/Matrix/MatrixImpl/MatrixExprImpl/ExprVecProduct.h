@@ -21,18 +21,19 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T, Vector V>
+    template<Matrix M, Vector V>
     class MatrixVectorProduct;
 
-    template<ExprType Type, Matrix T, class U, Vector V>
-    class MatrixVectorProduct<MatrixExpr<Type, T, U>, V>
-            : public RValueVector<MatrixVectorProduct<MatrixExpr<Type, T, U>, V>> {
-        using MatrixType = MatrixExpr<Type, T, U>;
+    template<ExprType Type, Matrix M, class U, Vector V>
+    class MatrixVectorProduct<MatrixExpr<Type, M, U>, V>
+            : public RValueVector<MatrixVectorProduct<MatrixExpr<Type, M, U>, V>> {
+        using MatrixType = MatrixExpr<Type, M, U>;
         using This = MatrixVectorProduct<MatrixType, V>;
     public:
         using Base = RValueVector<This>;
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     private:
         const MatrixType& expr;
         const V& vec;
@@ -51,16 +52,16 @@ namespace Physica {
         template<Vector V1, class Executor = SeqExecutor>
         inline void assign(V1& target) const;
         /* Getters */
-        [[nodiscard]] inline ScalarType calc(size_t index) const;
-        [[nodiscard]] inline ValueType calc_value(size_t index) const;
+        [[nodiscard]] inline T calc(size_t index) const;
+        [[nodiscard]] inline Tv calc_value(size_t index) const;
         [[nodiscard]] size_t getLength() const { return expr.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return expr; }
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     };
 
-    template<ExprType Type, Matrix T, class U, Vector V>
+    template<ExprType Type, Matrix M, class U, Vector V>
     template<Vector V1, class Executor>
-    inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::assign(V1& target) const {
+    inline void MatrixVectorProduct<MatrixExpr<Type, M, U>, V>::assign(V1& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
             if constexpr (Type == ExprType::Add) {
@@ -82,21 +83,21 @@ namespace Physica {
             Base::assign(target);
     }
 
-    template<ExprType Type, Matrix T, class U, Vector V>
-    inline auto MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc(size_t index) const -> ScalarType {
+    template<ExprType Type, Matrix M, class U, Vector V>
+    inline auto MatrixVectorProduct<MatrixExpr<Type, M, U>, V>::calc(size_t index) const -> T {
         return expr.row(index) * vec;
     }
 
-    template<ExprType Type, Matrix T, class U, Vector V>
-    inline auto MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc_value(size_t index) const -> ValueType {
+    template<ExprType Type, Matrix M, class U, Vector V>
+    inline auto MatrixVectorProduct<MatrixExpr<Type, M, U>, V>::calc_value(size_t index) const -> Tv {
         return expr.row(index).values() * vec.values();
     }
 }
 
 namespace Physica {
-    template<ExprType Type, Matrix T, class U, Vector V>
-    class Traits<MatrixVectorProduct<MatrixExpr<Type, T, U>, V>> {
-        using MatrixType = MatrixExpr<Type, T, U>;
+    template<ExprType Type, Matrix M, class U, Vector V>
+    class Traits<MatrixVectorProduct<MatrixExpr<Type, M, U>, V>> {
+        using MatrixType = MatrixExpr<Type, M, U>;
         static_assert(MatrixType::ColAtCompile == V::SizeAtCompile || MatrixType::ColAtCompile == Dynamic || V::SizeAtCompile == Dynamic,
                       "Row and col do not match in matrix product");
 
@@ -104,7 +105,7 @@ namespace Physica {
             constexpr bool isScalarT2 = Scalar<U>;
             if constexpr (Type == ExprType::Add || Type == ExprType::Sub) {
                 if constexpr (!isScalarT2) {
-                    using LHS = decltype(std::declval<T>() * std::declval<V>());
+                    using LHS = decltype(std::declval<M>() * std::declval<V>());
                     using RHS = decltype(std::declval<U>() * std::declval<V>());
                     using ExprType = decltype(std::declval<LHS>() + std::declval<RHS>());
                     return Traits<ExprType>::FastAssign;

@@ -21,25 +21,25 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<Matrix T>
-    class MatrixExpr<ExprType::Exp, T>
-            : public UnitaryMatrixExpr<ExprType::Exp, T> {
-        using Base = UnitaryMatrixExpr<ExprType::Exp, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Matrix M>
+    class MatrixExpr<ExprType::Exp, M>
+            : public UnitaryMatrixExpr<ExprType::Exp, M> {
+        using Base = UnitaryMatrixExpr<ExprType::Exp, M>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return exp(Base::getExpr().calc(row, col)); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return exp(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return exp(Base::getExpr().calc_value(row, col));
         }
     };
 
-    template<Matrix T>
-    [[nodiscard]] inline auto exp_elem(T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Exp, T&&>(std::forward<T>(m));
+    template<Matrix M>
+    [[nodiscard]] inline auto exp_elem(M&& m) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Exp, M&&>(std::forward<M>(m));
     }
 }

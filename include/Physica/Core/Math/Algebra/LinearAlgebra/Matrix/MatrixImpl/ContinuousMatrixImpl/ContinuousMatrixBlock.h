@@ -29,7 +29,6 @@ namespace Physica {
         using Base = ContinuousVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
@@ -83,7 +82,6 @@ namespace Physica {
         using Base = ContinuousVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
@@ -137,7 +135,6 @@ namespace Physica {
         using Base = ContinuousVector<This>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;

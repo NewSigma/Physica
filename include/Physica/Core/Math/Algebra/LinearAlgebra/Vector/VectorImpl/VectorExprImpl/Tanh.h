@@ -21,20 +21,21 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Tanh, T> : public UnitaryVectorExpr<ExprType::Tanh, T> {
-        using This = VectorExpr<ExprType::Tanh, T>;
-        using Base = UnitaryVectorExpr<ExprType::Tanh, T>;
+    template<Vector V>
+    class VectorExpr<ExprType::Tanh, V> : public UnitaryVectorExpr<ExprType::Tanh, V> {
+        using This = VectorExpr<ExprType::Tanh, V>;
+        using Base = UnitaryVectorExpr<ExprType::Tanh, V>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return tanh(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return tanh(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return tanh(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return tanh(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -46,15 +47,15 @@ namespace Physica {
             return tanh(Base::getExpr().template packetPartial<Pack>(index, count));
         }
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        template<Vector V1>
+        void reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
             const auto& expr = Base::getExpr();
             expr.reverse(hadamard(square(sech(expr.values())), grad_));
         }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto tanh(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Tanh, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto tanh(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Tanh, V&&>(std::forward<V>(v));
     }
 }

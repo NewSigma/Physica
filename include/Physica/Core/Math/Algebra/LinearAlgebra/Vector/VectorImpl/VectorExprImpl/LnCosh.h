@@ -21,21 +21,21 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::LnCosh, T> : public UnitaryVectorExpr<ExprType::LnCosh, T> {
-        using This = VectorExpr<ExprType::LnCosh, T>;
-        using Base = UnitaryVectorExpr<ExprType::LnCosh, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::LnCosh, V> : public UnitaryVectorExpr<ExprType::LnCosh, V> {
+        using This = VectorExpr<ExprType::LnCosh, V>;
+        using Base = UnitaryVectorExpr<ExprType::LnCosh, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const {
+        [[nodiscard]] CoDiff<T> calc(size_t index) const {
             return lncosh(Base::getExpr().calc(index));
         }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const {
+        [[nodiscard]] Tv calc_value(size_t index) const {
             return lncosh(Base::getExpr().calc_value(index));
         }
 
@@ -50,8 +50,8 @@ namespace Physica {
         }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto lncosh(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::LnCosh, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto lncosh(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::LnCosh, V&&>(std::forward<V>(v));
     }
 }

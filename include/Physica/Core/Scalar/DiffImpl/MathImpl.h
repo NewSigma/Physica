@@ -43,7 +43,7 @@ namespace Physica {
     template<Scalar T>
     inline CoDiff<T> relu(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
-        using ValueType = ScalarType::ValueType;
+        using Tv = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             co_return ScalarType(relu(x.value()), x.value().isPositive() ? x.grad() : GradType(0));
@@ -53,24 +53,24 @@ namespace Physica {
             auto result = co_yield relu(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(x_.isPositive() ? g : ValueType(0));
+                x_.reverse(x_.isPositive() ? g : Tv(0));
         }
     }
 
     template<Scalar T>
     inline CoDiff<T> square(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
-        using ValueType = ScalarType::ValueType;
+        using Tv = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
-            co_return ScalarType(square(x.value()), GradType(ValueType(2) * x * x.grad()));
+            co_return ScalarType(square(x.value()), GradType(Tv(2) * x * x.grad()));
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield square(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(ValueType(2) * x_.value() * g);
+                x_.reverse(Tv(2) * x_.value() * g);
         }
     }
 
@@ -94,29 +94,29 @@ namespace Physica {
     template<Scalar T>
     CoDiff<T> sqrt(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
-        using ValueType = ScalarType::ValueType;
+        using Tv = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             const GradType v = sqrt(GradType(x));
-            co_return ScalarType(v.value(), ValueType(0.5) * x.grad() / v);
+            co_return ScalarType(v.value(), Tv(0.5) * x.grad() / v);
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto result = co_yield sqrt(x_.value());
             auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(reciprocal(result.value()) * ValueType(0.5));
+                x_.reverse(reciprocal(result.value()) * Tv(0.5));
         }
     }
 
     template<Scalar T>
     CoDiff<T> cbrt(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
-        using ValueType = ScalarType::ValueType;
+        using Tv = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             const GradType v = cbrt(GradType(x));
-            co_return ScalarType(v.value(), ValueType(1.0 / 3) * v * x.grad() / GradType(x));
+            co_return ScalarType(v.value(), Tv(1.0 / 3) * v * x.grad() / GradType(x));
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
@@ -124,7 +124,7 @@ namespace Physica {
             auto& g = result.grad();
             if (!g.isZero()) {
                 const auto x2_3 = result.value() / x_.value();
-                x_.reverse((ValueType(1.0 / 3) * g) * x2_3);
+                x_.reverse((Tv(1.0 / 3) * g) * x2_3);
             }
         }
     }
@@ -215,9 +215,9 @@ namespace Physica {
             co_return ScalarType(cos_value.value(), -sin_value * x.grad());
         }
         else {
-            using ValueType = ScalarType::ValueType;
+            using Tv = ScalarType::ValueType;
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            ValueType c, s;
+            Tv c, s;
             sincos(x_.value(), s, c);
             auto result = co_yield c;
             auto& g = result.grad();
@@ -236,9 +236,9 @@ namespace Physica {
             co_return ScalarType(sin_value.value(), cos_value * x.grad());
         }
         else {
-            using ValueType = ScalarType::ValueType;
+            using Tv = ScalarType::ValueType;
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            ValueType c, s;
+            Tv c, s;
             sincos(x_.value(), s, c);
             auto result = co_yield s;
             auto& g = result.grad();
@@ -258,8 +258,8 @@ namespace Physica {
             co_return;
         }
         else {
-            using ValueType = T::ValueType;
-            ValueType s, c;
+            using Tv = T::ValueType;
+            Tv s, c;
             sincos(x.value(), s, c);
             LazyDestroy<U&&> sin_ = std::forward<U>(sin_result);
             LazyDestroy<U&&> cos_ = std::forward<U>(cos_result);

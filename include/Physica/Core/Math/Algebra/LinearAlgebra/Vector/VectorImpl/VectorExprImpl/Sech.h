@@ -21,23 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Sech, T> : public UnitaryVectorExpr<ExprType::Sech, T> {
-        using This = VectorExpr<ExprType::Sech, T>;
-        using Base = UnitaryVectorExpr<ExprType::Sech, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::Sech, V> : public UnitaryVectorExpr<ExprType::Sech, V> {
+        using This = VectorExpr<ExprType::Sech, V>;
+        using Base = UnitaryVectorExpr<ExprType::Sech, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return sech(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return sech(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return sech(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return sech(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto sech(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Sech, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto sech(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Sech, V&&>(std::forward<V>(v));
     }
 }

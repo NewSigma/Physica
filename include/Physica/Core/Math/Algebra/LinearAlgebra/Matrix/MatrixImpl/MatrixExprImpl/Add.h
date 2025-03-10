@@ -21,40 +21,40 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<Matrix T, Scalar U>
-    class MatrixExpr<ExprType::Add, T, U>
-            : public BinaryMatrixExpr<ExprType::Add, T, U> {
-        using Base = BinaryMatrixExpr<ExprType::Add, T, U>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Matrix M, Scalar U>
+    class MatrixExpr<ExprType::Add, M, U>
+            : public BinaryMatrixExpr<ExprType::Add, M, U> {
+        using Base = BinaryMatrixExpr<ExprType::Add, M, U>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] T calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) + Base::getRHS();
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return Base::getLHS().calc_value(row, col) + Base::getRHS().value();
         }
     };
 
-    template<Matrix T, Vector U>
-    class MatrixExpr<ExprType::Add, T, U>
-            : public BinaryMatrixExpr<ExprType::Add, T, U> {
-        using Base = BinaryMatrixExpr<ExprType::Add, T, U>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Matrix M, Vector U>
+    class MatrixExpr<ExprType::Add, M, U>
+            : public BinaryMatrixExpr<ExprType::Add, M, U> {
+        using Base = BinaryMatrixExpr<ExprType::Add, M, U>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] T calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) + Base::getRHS().calc(row);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row);
         }
     };
@@ -68,17 +68,17 @@ namespace Physica {
         constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T1>() && MatrixOption::isHermiteMatrix<T2>();
         using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
         using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] T calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
         }
 
@@ -86,23 +86,23 @@ namespace Physica {
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
     };
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] inline auto operator+(T&& m, U&& x) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Add, T&&, U&&>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Scalar U>
+    [[nodiscard]] inline auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] inline auto operator+(U&& x, T&& m) noexcept requires(!CUDA<T>) {
+    template<Matrix M, Scalar U>
+    [[nodiscard]] inline auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M>) {
         return m + x;
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] inline auto operator+(T&& m, U&& x) noexcept requires(!CUDA<T> && !CUDA<U>) {
-        return MatrixExpr<ExprType::Add, T&&, U&&>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Vector U>
+    [[nodiscard]] inline auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M> && !CUDA<U>) {
+        return MatrixExpr<ExprType::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] inline auto operator+(U&& x, T&& m) noexcept requires(!CUDA<T> && !CUDA<U>) {
+    template<Matrix M, Vector U>
+    [[nodiscard]] inline auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<U>) {
         return m + x;
     }
 

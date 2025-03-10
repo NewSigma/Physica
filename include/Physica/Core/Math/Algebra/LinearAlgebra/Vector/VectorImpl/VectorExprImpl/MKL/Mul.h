@@ -21,24 +21,24 @@
 #include "../Mul.h"
 
 namespace Physica {
-    template<Vector T, Scalar U>
-    void VectorExpr<ExprType::Mul, T, U>::assign_add_mkl(void* y) const noexcept {
+    template<Vector V, Scalar U>
+    void VectorExpr<ExprType::Mul, V, U>::assign_add_mkl(void* y) const noexcept {
         const size_t n = Base::getLength();
         const auto alpha = Base::getRHS().toMachine();
         const void* x = Base::getLHS().data();
         if constexpr (isComplex) {
-            if constexpr (ScalarType::Option == Float32)
+            if constexpr (T::Option == Float32)
                 cblas_caxpy(n, &alpha, x, 1, y, 1);
             else {
-                static_assert(ScalarType::Option == Float64, "[Error]: Unexpected type");
+                static_assert(T::Option == Float64, "[Error]: Unexpected type");
                 cblas_zaxpy(n, &alpha, x, 1, y, 1);
             }
         }
         else {
-            if constexpr (ScalarType::Option == Float32)
+            if constexpr (T::Option == Float32)
                 cblas_saxpy(n, alpha, (float*)x, 1, (float*)y, 1);
             else {
-                static_assert(ScalarType::Option == Float64, "[Error]: Unexpected type");
+                static_assert(T::Option == Float64, "[Error]: Unexpected type");
                 cblas_daxpy(n, alpha, (double*)x, 1, (double*)y, 1);
             }
         }

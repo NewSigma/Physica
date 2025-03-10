@@ -21,20 +21,21 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::Minus, T>
-            : public UnitaryVectorExpr<ExprType::Minus, T> {
-        using Base = UnitaryVectorExpr<ExprType::Minus, T>;
+    template<Vector V>
+    class VectorExpr<ExprType::Minus, V>
+            : public UnitaryVectorExpr<ExprType::Minus, V> {
+        using Base = UnitaryVectorExpr<ExprType::Minus, V>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return -Base::getExpr().calc(s); }
+        [[nodiscard]] CoDiff<T> calc(size_t s) const { return -Base::getExpr().calc(s); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return -Base::getExpr().calc_value(index); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return -Base::getExpr().calc_value(index); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const { return -Base::getExpr().template packet<Pack>(index); }
@@ -48,8 +49,8 @@ namespace Physica {
         }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto operator-(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Minus, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto operator-(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Minus, V&&>(std::forward<V>(v));
     }
 }

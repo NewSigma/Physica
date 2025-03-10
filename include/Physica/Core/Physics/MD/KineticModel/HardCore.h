@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,14 +26,15 @@ namespace Physica {
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SeqExecutor>
     class HardCore : private FreeModel<T, 1, NumReplica, Integrator> {
+        using This = HardCore<T, IsFixedBoundary, NumReplica, Integrator>;
         using Base = FreeModel<T, 1, NumReplica, Integrator>;
-        using ValueType = T::ValueType;
+        using Tv = T::ValueType;
     public:
         using RingPolymerType = RingPolymer<T, 1, NumReplica>;
         using PhaseMatrix = RingPolymerType::PhaseMatrix;
     private:
         T latticeSize;
-        ValueType collideFactor;
+        Tv collideFactor;
         T temperatureT;
         VectorND<T> repMass;
         PhaseMatrix buffer;
@@ -41,27 +42,27 @@ namespace Physica {
         size_t handleNum;
     public:
         HardCore(T latticeSize_,
-                 ValueType collideFactor_,
+                 Tv collideFactor_,
                  T temperatureT_,
                  size_t numParticle,
                  size_t numReplica,
                  size_t maxHandleNum_);
-        HardCore(const HardCore&) = default;
-        HardCore(HardCore&&) noexcept = default;
+        HardCore(const This&) = default;
+        HardCore(This&&) noexcept = default;
         ~HardCore() = default;
         /* Operators */
-        HardCore& operator=(HardCore obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, T deltaT);
         void updateMass(const RingPolymerType& ringPolymer);
-        void swap(HardCore& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getCol(); }
         [[nodiscard]] const VectorND<T>& getRepMass() const noexcept { return repMass; }
         [[nodiscard]] size_t getHandleNum() { return handleNum; }
         /* Static members */
-        static void checkParam(ValueType collideFactor, size_t numReplica);
+        static void checkParam(Tv collideFactor, size_t numReplica);
         [[nodiscard]] __host__ __device__ static bool checkStepSize(
             T latticeSize,
             T temperatureT,
@@ -75,7 +76,7 @@ namespace Physica {
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
     HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::HardCore(
-            T latticeSize_, ValueType collideFactor_, T temperatureT_, size_t numParticle, size_t numReplica, size_t maxHandleNum_)
+            T latticeSize_, Tv collideFactor_, T temperatureT_, size_t numParticle, size_t numReplica, size_t maxHandleNum_)
             : Base(temperatureT_, numReplica)
             , latticeSize(latticeSize_)
             , collideFactor(collideFactor_)
@@ -89,7 +90,7 @@ namespace Physica {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
     void HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::nve_step(RingPolymerType& ringPolymer, T deltaT) {
         const size_t numParticle = getNumParticle();
-        const ValueType collideStep = collideFactor * deltaT.value();
+        const Tv collideStep = collideFactor * deltaT.value();
         auto& phase = ringPolymer.asMatrix();
         assert(numParticle == ringPolymer.getNumParticle());
         assert(getNumReplica() == ringPolymer.getNumReplica());
@@ -170,7 +171,7 @@ namespace Physica {
                 handleNum += 1;
             }
             else
-                to = (lStep + rStep) * ValueType(0.5);
+                to = (lStep + rStep) * Tv(0.5);
         }
 
         if constexpr (NumReplica == 1) {
@@ -185,7 +186,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
-    void HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::swap(HardCore& __restrict obj) noexcept {
+    void HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         latticeSize.swap(obj.latticeSize);
@@ -198,12 +199,12 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
-    void HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::checkParam(ValueType collideFactor, size_t numReplica) {
-        if (!(collideFactor < ValueType(1.0) && collideFactor.isPositive())) [[unlikely]]
+    void HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::checkParam(Tv collideFactor, size_t numReplica) {
+        if (!(collideFactor < Tv(1.0) && collideFactor.isPositive())) [[unlikely]]
             throw std::invalid_argument("[Error]: Collide factor must be in (0, 1)");
         if (NumReplica != Dynamic && NumReplica != numReplica) [[unlikely]]
             throw std::invalid_argument("[Error]: Number of replica is not consistent");
-        if (collideFactor <= ValueType(std::numeric_limits<T>::epsilon())) [[unlikely]]
+        if (collideFactor <= Tv(std::numeric_limits<T>::epsilon())) [[unlikely]]
             throw std::invalid_argument("[Error]: Collide factor is too small, numerical error will be large");
     }
 
@@ -213,8 +214,8 @@ namespace Physica {
             T temperatureT,
             T collideStep,
             T maxMass) {
-        const ValueType epsilonStep = latticeSize * std::numeric_limits<ValueType>::epsilon();
-        const ValueType meanVelocity = sqrt(ValueType(PhyConst<AU>::boltzmannK) * temperatureT / maxMass);
+        const Tv epsilonStep = latticeSize * std::numeric_limits<Tv>::epsilon();
+        const Tv meanVelocity = sqrt(Tv(PhyConst<AU>::boltzmannK) * temperatureT / maxMass);
         return collideStep * meanVelocity > epsilonStep;
     }
 

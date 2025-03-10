@@ -25,15 +25,15 @@ namespace Physica {
     class MatrixExpr<ExprType::Relu, M>
             : public UnitaryMatrixExpr<ExprType::Relu, M> {
         using Base = UnitaryMatrixExpr<ExprType::Relu, M>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return relu(Base::getExpr().calc(row, col)); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return relu(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return relu(Base::getExpr().calc_value(row, col));
         }
     };

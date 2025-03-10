@@ -33,7 +33,7 @@ namespace Physica {
         using This = Q_TIP4P<T, EwaldType>;
         using Base = AABModel<T>;
         using Base::Dim;
-        using ValueType = T::ValueType;
+        using Tv = T::ValueType;
         using REwaldType = Traits<EwaldType>::REwaldType;
         using BornChargeArray = REwaldType::BornChargeArray;
         constexpr static bool IsSmallCell = Traits<REwaldType>::IsSmallCell;
@@ -59,12 +59,12 @@ namespace Physica {
         EwaldType ewald;
         LJModelType lj_model;
     public:
-        Q_TIP4P(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_);
-        Q_TIP4P(const Q_TIP4P&) = default;
-        Q_TIP4P(Q_TIP4P&&) noexcept = default;
+        Q_TIP4P(const MDCellType& refer_cell, Tv cutoff, EwaldType ewald_);
+        Q_TIP4P(const This&) = default;
+        Q_TIP4P(This&&) noexcept = default;
         ~Q_TIP4P() = default;
         /* Operators */
-        Q_TIP4P& operator=(Q_TIP4P model) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
         [[nodiscard]] T potentialV_unsort(const MDCellType& cell) const;
@@ -86,7 +86,7 @@ namespace Physica {
         [[nodiscard]] BornChargeArray calcBornCharge() const;
         template<class Executor, bool UseDynamicPolar>
         [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell);
-        void swap(Q_TIP4P& __restrict model) noexcept;
+        void swap(This& __restrict model) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return getNumParticle() / 3; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return ewald.getNumParticle(); }
@@ -116,18 +116,12 @@ namespace Physica {
     };
 
     template<Scalar T, class EwaldType>
-    Q_TIP4P<T, EwaldType>::Q_TIP4P(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_)
+    Q_TIP4P<T, EwaldType>::Q_TIP4P(const MDCellType& refer_cell, Tv cutoff, EwaldType ewald_)
             : ewald(std::move(ewald_))
             , lj_model(lj_sigma, cutoff.value()) {
         assert(refer_cell.getNumParticle() % 3 == 0 && "[Error]: This is not a cell of water");
         const size_t numMolecule = refer_cell.getNumParticle() / 3;
         ewald = REwaldType(refer_cell.getLattice(), Base::makeCharges(numMolecule, charge * 0.5, -charge));
-    }
-
-    template<Scalar T, class EwaldType>
-    Q_TIP4P<T, EwaldType>& Q_TIP4P<T, EwaldType>::operator=(Q_TIP4P model) noexcept {
-        swap(model);
-        return *this;
     }
 
     template<Scalar T, class EwaldType>
@@ -244,8 +238,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    Q_TIP4P<T, EwaldType>::LatticeMatrix
-    Q_TIP4P<T, EwaldType>::virial(const MDCellType& cell) {
+    auto Q_TIP4P<T, EwaldType>::virial(const MDCellType& cell) -> LatticeMatrix {
         LatticeMatrix result(Dim, Dim, 0);
         const size_t numMolecule = getNumMolecule();
         const size_t offset = 2 * numMolecule;
@@ -300,7 +293,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    Q_TIP4P<T, EwaldType>::LatticeMatrix Q_TIP4P<T, EwaldType>::virial_morse(const MDCellType& cell) const {
+    auto Q_TIP4P<T, EwaldType>::virial_morse(const MDCellType& cell) const -> LatticeMatrix {
         LatticeMatrix result(Dim, Dim, 0);
         const size_t numMolecule = getNumMolecule();
         const size_t offset = 2 * numMolecule;
@@ -321,7 +314,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    Q_TIP4P<T, EwaldType>::BornChargeArray Q_TIP4P<T, EwaldType>::calcBornCharge() const {
+    auto Q_TIP4P<T, EwaldType>::calcBornCharge() const -> BornChargeArray {
         BornChargeArray result = ewald.calcBornCharge();
         for (size_t i = 0; i < result.getLength(); ++i) {
             auto diag = result[i].diag();
@@ -332,8 +325,7 @@ namespace Physica {
 
     template<Scalar T, class EwaldType>
     template<class Executor, bool UseDynamicPolar>
-    Q_TIP4P<T, EwaldType>::PositionMatrix
-    Q_TIP4P<T, EwaldType>::makeInducedDipole(const MDCellType& cell) {
+    auto Q_TIP4P<T, EwaldType>::makeInducedDipole(const MDCellType& cell) -> PositionMatrix {
         assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
         const size_t numMolecule = cell.getNumParticle() / 3;
         const PositionMatrix chargePos = makeChargePos(cell);
@@ -357,7 +349,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    void Q_TIP4P<T, EwaldType>::swap(Q_TIP4P& __restrict model) noexcept {
+    void Q_TIP4P<T, EwaldType>::swap(This& __restrict model) noexcept {
         assert(this != &model && "[Error]: Self swap is likely a bug");
         ewald.swap(model.ewald);
         lj_model.swap(model.lj_model);
@@ -369,8 +361,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    Q_TIP4P<T, EwaldType>::PositionMatrix
-    Q_TIP4P<T, EwaldType>::makePermanentDipole(const PeriodicCell<T, 3>& cell) {
+    auto Q_TIP4P<T, EwaldType>::makePermanentDipole(const PeriodicCell<T, 3>& cell) -> PositionMatrix {
         assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
         const size_t numMolecule = cell.getNumParticle() / 3;
         PositionMatrix dipoles(numMolecule, 3);
@@ -390,8 +381,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    Q_TIP4P<T, EwaldType>::PositionMatrix
-    Q_TIP4P<T, EwaldType>::makeChargePos(const MDCellType& cell) const {
+    auto Q_TIP4P<T, EwaldType>::makeChargePos(const MDCellType& cell) const -> PositionMatrix {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
         assert(ewald.getLattice() == cell.getLattice() && "[Error]: Lattice is not updated");

@@ -135,10 +135,10 @@ namespace Physica {
             kineticModel.nve_step(ringPolymer, timeStep);
         }
         else {
-            forceStep(timeStep * ValueType(0.5));
+            forceStep(timeStep * Tv(0.5));
             kineticModel.nve_step(ringPolymer, timeStep);
             updateForce<ForceModel, Executor>(forceModel);
-            forceStep(timeStep * ValueType(0.5));
+            forceStep(timeStep * Tv(0.5));
         }
     }
 
@@ -443,7 +443,7 @@ namespace Physica {
         for (size_t i = 0; i < getNumReplica(); ++i)
             kinetic += square(pos[i] - pos[(i + 1) % getNumReplica()]);
         const T factor = getMassVec()[dofIndex / Dim] * square(omegaW) / T(getNumReplica());
-        kinetic = (-kinetic * factor + repBeta) * ValueType(0.5);
+        kinetic = (-kinetic * factor + repBeta) * Tv(0.5);
         return kinetic;
     }
 
@@ -821,10 +821,15 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::checkParam() const {
         if constexpr (NumReplica != 1) {
-            const T cycle = ValueType(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
-            bool isSmallEnough = timeStep < cycle / ValueType(4);
+            const T cycle = Tv(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
+            bool isSmallEnough = timeStep < cycle / Tv(4);
             if (!isSmallEnough)
                 throw std::invalid_argument("[Error]: Time step is too large");
         }
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    uint64_t RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::durationToStep(Tv duration, Tv timeStep) {
+        return double(duration / timeStep) + 0.5;
     }
 }

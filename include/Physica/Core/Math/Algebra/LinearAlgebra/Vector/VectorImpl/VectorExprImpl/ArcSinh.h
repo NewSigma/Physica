@@ -21,23 +21,23 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T>
-    class VectorExpr<ExprType::ArcSinh, T> : public UnitaryVectorExpr<ExprType::ArcSinh, T> {
-        using This = VectorExpr<ExprType::ArcSinh, T>;
-        using Base = UnitaryVectorExpr<ExprType::ArcSinh, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Vector V>
+    class VectorExpr<ExprType::ArcSinh, V> : public UnitaryVectorExpr<ExprType::ArcSinh, V> {
+        using This = VectorExpr<ExprType::ArcSinh, V>;
+        using Base = UnitaryVectorExpr<ExprType::ArcSinh, V>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return arcsinh(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const { return arcsinh(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return arcsinh(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return arcsinh(Base::getExpr().calc_value(index)); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto arcsinh(T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::ArcSinh, T&&>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] inline auto arcsinh(V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::ArcSinh, V&&>(std::forward<V>(v));
     }
 }

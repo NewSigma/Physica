@@ -28,10 +28,10 @@ namespace Physica {
         using TraitsType = Traits<Derived>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+        using Tv = ScalarType::ValueType;
 
         using device_obj_type = device_obj<LinearLayer<ScalarType, true>>;
-        using DiffScalar1 = Diff<ValueType, DiffMode::Reverse, 1>;
+        using DiffScalar1 = Diff<Tv, DiffMode::Reverse, 1>;
         using LossType = Loss<ScalarType>::LossType;
         constexpr static bool IsTrain = ScalarType::Order == 2;
     public:

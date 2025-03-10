@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,25 +21,25 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<Matrix T>
-    class MatrixExpr<ExprType::Square, T>
-            : public UnitaryMatrixExpr<ExprType::Square, T> {
-        using Base = UnitaryMatrixExpr<ExprType::Square, T>;
-    public:
-        using typename Base::ScalarType;
-        using typename Base::ValueType;
+    template<Matrix M>
+    class MatrixExpr<ExprType::Square, M>
+            : public UnitaryMatrixExpr<ExprType::Square, M> {
+        using Base = UnitaryMatrixExpr<ExprType::Square, M>;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return square(Base::getExpr().calc(row, col)); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return square(Base::getExpr().calc(row, col)); }
 
-        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
             return square(Base::getExpr().calc_value(row, col));
         }
     };
 
-    template<Matrix T>
-    [[nodiscard]] inline auto square_elem(T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Square, T&&>(std::forward<T>(m));
+    template<Matrix M>
+    [[nodiscard]] inline auto square_elem(M&& m) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Square, M&&>(std::forward<M>(m));
     }
 }

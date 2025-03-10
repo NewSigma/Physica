@@ -29,8 +29,9 @@ namespace Physica {
         using Base = BinaryVectorExpr<ExprType::Sub, T, U>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
@@ -41,7 +42,7 @@ namespace Physica {
                 return Base::getLHS() - Base::getRHS().calc(s);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t s) const {
+        [[nodiscard]] Tv calc_value(size_t s) const {
             if constexpr (Vector<T>)
                 return Base::getLHS().calc_value(s) - Base::getRHS().value();
             else
@@ -79,11 +80,11 @@ namespace Physica {
                 if constexpr (ReverseDiff<T>)
                     lhs.reverse(grad);
                 if constexpr (ReverseDiff<U>)
-                    rhs.reverse(-grad * ValueType(Base::getLength()));
+                    rhs.reverse(-grad * Tv(Base::getLength()));
             }
             else {
                 if constexpr (ReverseDiff<T>)
-                    lhs.reverse(grad * ValueType(Base::getLength()));
+                    lhs.reverse(grad * Tv(Base::getLength()));
                 if constexpr (ReverseDiff<U>)
                     rhs.reverse(-grad);
             }
@@ -106,14 +107,15 @@ namespace Physica {
         }
     }
 
-    template<Vector T1, Vector T2>
-    class VectorExpr<ExprType::Sub, T1, T2>
-            : public BinaryVectorExpr<ExprType::Sub, T1, T2> {
-        using Base = BinaryVectorExpr<ExprType::Sub, T1, T2>;
+    template<Vector V1, Vector V2>
+    class VectorExpr<ExprType::Sub, V1, V2>
+            : public BinaryVectorExpr<ExprType::Sub, V1, V2> {
+        using Base = BinaryVectorExpr<ExprType::Sub, V1, V2>;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
@@ -124,7 +126,7 @@ namespace Physica {
             return getLHS().calc(s) - getRHS().calc(s);
         }
 
-        [[nodiscard]] ValueType calc_value(size_t s) const {
+        [[nodiscard]] Tv calc_value(size_t s) const {
             return getLHS().calc_value(s) - getRHS().calc_value(s);
         }
 
@@ -141,9 +143,9 @@ namespace Physica {
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
             const auto& grad = grad_.values();
-            if constexpr (ReverseDiff<T1>)
+            if constexpr (ReverseDiff<V1>)
                 Base::getLHS().reverse(grad);
-            if constexpr (ReverseDiff<T2>)
+            if constexpr (ReverseDiff<V2>)
                 Base::getRHS().reverse(grad);
         }
         /* Getters */
@@ -151,11 +153,11 @@ namespace Physica {
         using Base::getRHS;
     };
 
-    template<Vector T1, Vector T2>
+    template<Vector V1, Vector V2>
     template<Vector V, class Executor>
-    inline void VectorExpr<ExprType::Sub, T1, T2>::assign(V& v) const {
-        constexpr bool FastAssign1 = Traits<std::remove_cvref_t<T1>>::FastAssign;
-        constexpr bool FastAssign2 = Traits<std::remove_cvref_t<T2>>::FastAssign;
+    inline void VectorExpr<ExprType::Sub, V1, V2>::assign(V& v) const {
+        constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
+        constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {
             getLHS().template assign<V, Executor>(v);
             v -= getRHS();
@@ -178,8 +180,8 @@ namespace Physica {
         return VectorExpr<ExprType::Sub, U&&, T&&>(std::forward<U>(x), std::forward<T>(v));
     }
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] inline auto operator-(T1&& v1, T2&& v2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return VectorExpr<ExprType::Sub, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
+    template<Vector V1, Vector V2>
+    [[nodiscard]] inline auto operator-(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+        return VectorExpr<ExprType::Sub, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }
