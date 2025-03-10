@@ -63,14 +63,7 @@ namespace Physica {
 
     template<class Base>
     DiffCoro<Base>::~DiffCoro() {
-        if (handle) {
-            assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
-            handle.promise().obj = Base(static_cast<Base&&>(*this));
-            handle.resume();
-            assert(handle.done() && "[Error]: Invalid reverse diff");
-            handle.destroy();
-            handle = nullptr;
-        }
+        reverse_impl();
     }
 
     template<class Base>
@@ -80,11 +73,18 @@ namespace Physica {
     }
 
     template<class Base>
+    void DiffCoro<Base>::reverse_final() noexcept {
+        assert(handle != nullptr && "[Error]: Reverse has been finalized");
+        Base::reverse();
+        reverse_impl();
+    }
+
+    template<class Base>
     template<class T>
     void DiffCoro<Base>::reverse_final(T&& x) noexcept {
         assert(handle != nullptr && "[Error]: Reverse has been finalized");
         Base::reverse(std::forward<T>(x));
-        this->~DiffCoro();
+        reverse_impl();
     }
 
     template<class Base>
@@ -92,6 +92,18 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(handle, obj.handle);
+    }
+
+    template<class Base>
+    void DiffCoro<Base>::reverse_impl() noexcept {
+        if (handle) {
+            assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
+            handle.promise().obj = Base(static_cast<Base&&>(*this));
+            handle.resume();
+            assert(handle.done() && "[Error]: Invalid reverse diff");
+            handle.destroy();
+            handle = nullptr;
+        }
     }
 
     template<class Predicate, class Operation, class Functor>

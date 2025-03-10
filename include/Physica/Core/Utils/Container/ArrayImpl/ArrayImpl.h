@@ -79,6 +79,7 @@ namespace Physica {
     template<class T, class Allocator>
     template<class... Args>
     Array<T, Dynamic, Allocator>::Array(size_t length_, Args&&... args) : length(length_), capacity(length_), alloc() {
+        assert(length_ > 0 && "Unnecessary allocate a empty array");
         arr = alloc.allocate(capacity);
         if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
             for (size_t i = 0; i < length_; ++i)

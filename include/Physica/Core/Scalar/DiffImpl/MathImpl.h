@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T>
-    __host__ __device__ inline CoDiff<T> abs(T&& x) requires(Diffable<T>) {
+    inline CoDiff<T> abs(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
         if constexpr (ForwardDiff<T>)
             co_return ScalarType(abs(x.value()), x.value().isPositive() ? x.grad() : -x.grad());
@@ -36,7 +36,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    __host__ __device__ inline auto abs(const ScalarRef<Diff<T, DiffMode::Forward, Order>>& x) {
+    inline auto abs(const ScalarRef<Diff<T, DiffMode::Forward, Order>>& x) {
         return abs(Diff<T, DiffMode::Forward, Order>(x));
     }
 
@@ -58,7 +58,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ inline CoDiff<T> square(T&& x) requires(Diffable<T>) {
+    inline CoDiff<T> square(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
         using ValueType = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {
@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ inline CoDiff<T> reciprocal(T&& x) requires(Diffable<T>) {
+    inline CoDiff<T> reciprocal(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
@@ -92,7 +92,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ CoDiff<T> sqrt(T&& x) requires(Diffable<T>) {
+    CoDiff<T> sqrt(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
         using ValueType = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {

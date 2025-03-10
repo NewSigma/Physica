@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <format>
 #include <system_error>
 #include <curand.h>
 #include "Physica/Macro.h"
@@ -36,7 +35,7 @@ namespace Physica {
             Impl& operator=(Impl&&) noexcept = delete;
             /* Getters */
             [[nodiscard]] const char* name() const noexcept override final { return "cuRAND"; }
-            [[nodiscard]] std::string message(int code) const override final { return std::format("cuRAND return with code {}", code); }
+            [[nodiscard]] std::string message(int code) const override final;
         };
     public:
         cuRANDException(curandStatus_t code) noexcept : std::system_error(code, Impl()) {}

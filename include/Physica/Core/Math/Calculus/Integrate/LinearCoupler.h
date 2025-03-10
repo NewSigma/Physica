@@ -126,10 +126,11 @@ namespace Physica {
             for (int i = 0; i < dim; ++i) {
                 if (z[i].isZero())
                     continue;
-                const Tv s = grid.col(i).values().softmax(indices[i]);
+                const auto col = grid.col(i);
+                const Tv s = col.values().softmax(indices[i]);
                 const Tv g = (s - square(s)) * deltas[i].grad();
-                grid.col(i).reverse(-g / Tv(numBin));
-                grid(indices[i], i).reverse(g);
+                col.reverse(-g / Tv(numBin));
+                col[indices[i]].reverse(g);
             }
         }
         else

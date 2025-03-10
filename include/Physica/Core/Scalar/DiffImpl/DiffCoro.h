@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <format>
 #include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
@@ -81,9 +82,12 @@ namespace Physica {
         This& operator=(This&& obj) noexcept;
         using Base::operator=;
         /* Operations */
+        void reverse_final() noexcept;
         template<class T>
         void reverse_final(T&& x) noexcept;
         void swap(This& __restrict obj) noexcept;
+    private:
+        void reverse_impl() noexcept;
     };
 
     template<class Predicate, class Operation, class Functor>
@@ -99,6 +103,19 @@ namespace Physica {
 namespace Physica {
     template<class T>
     class Traits<DiffCoro<T>> : public Traits<T> {};
+}
+
+namespace std {
+    template<class Base>
+    struct formatter<Physica::DiffCoro<Base>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::DiffCoro<Base>& obj, std::format_context& ctx) const {
+            return formatter<Base, char>{}.format(obj, ctx);
+        }
+    };
 }
 
 #include "DiffCoroImpl.h"

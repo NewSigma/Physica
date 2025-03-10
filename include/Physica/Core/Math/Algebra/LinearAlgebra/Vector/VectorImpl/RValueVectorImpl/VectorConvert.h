@@ -21,17 +21,17 @@
 #include "../RValueVector.h"
 
 namespace Physica {
-    template<class T>
-    class RealVector : public RValueVector<RealVector<T>> {
-        using This = RealVector<T>;
+    template<class V>
+    class RealVector : public RValueVector<RealVector<V>> {
+        using This = RealVector<V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const T& v;
+        const V& v;
     public:
-        explicit RealVector(const T& v_) : v(v_) {}
+        explicit RealVector(const V& v_) : v(v_) {}
         RealVector(const This&) = default;
         RealVector(This&&) noexcept = default;
         ~RealVector() = default;
@@ -44,17 +44,17 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class T>
-    class ImagVector : public RValueVector<ImagVector<T>> {
-        using This = ImagVector<T>;
+    template<class V>
+    class ImagVector : public RValueVector<ImagVector<V>> {
+        using This = ImagVector<V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const T& v;
+        const V& v;
     public:
-        explicit ImagVector(const T& v_) : v(v_) {}
+        explicit ImagVector(const V& v_) : v(v_) {}
         ImagVector(const This&) = default;
         ImagVector(This&&) noexcept = default;
         ~ImagVector() = default;
@@ -67,21 +67,21 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class T>
-    class SquaredNormVector : public RValueVector<SquaredNormVector<T>> {
-        using This = SquaredNormVector<T>;
+    template<class V>
+    class SquaredNormVector : public RValueVector<SquaredNormVector<V>> {
+        using This = SquaredNormVector<V>;
         using Base = RValueVector<This>;
-        using ComplexType = T::ScalarType;
+        using ComplexType = V::ScalarType;
     public:
         using typename Base::ScalarType;
-        using typename Base::ValueType;
+        using typename Base::Tv;
         using Base::isReverseDiff;
     private:
-        constexpr static bool isComplexV = T::isComplex;
+        constexpr static bool isComplexV = V::isComplex;
 
-        const T& v;
+        const V& v;
     public:
-        explicit SquaredNormVector(const T& v_) : v(v_) {}
+        explicit SquaredNormVector(const V& v_) : v(v_) {}
         SquaredNormVector(const This&) = default;
         SquaredNormVector(This&&) noexcept = default;
         ~SquaredNormVector() = default;
@@ -91,7 +91,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).squaredNorm(); }
 
-        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
+        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -145,20 +145,27 @@ namespace Physica {
                 return square(v.template packetPartial<Pack>(index, count));
         }
 
+        template<Scalar U>
+        void reverse(const U& grad) const noexcept requires(isReverseDiff) {
+            v.reverse(Tv(2) * grad * v.values());
+        }
+
+        [[nodiscard]] auto values() const noexcept { return v.values().squaredNorms(); }
+        /* Getters */
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class T>
-    class NormVector : public RValueVector<NormVector<T>> {
-        using This = NormVector<T>;
+    template<class V>
+    class NormVector : public RValueVector<NormVector<V>> {
+        using This = NormVector<V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const T& v;
+        const V& v;
     public:
-        explicit NormVector(const T& v_) : v(v_) {}
+        explicit NormVector(const V& v_) : v(v_) {}
         NormVector(const This&) = default;
         NormVector(This&&) noexcept = default;
         ~NormVector() = default;
@@ -171,17 +178,17 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class T>
-    class ValueVector : public RValueVector<ValueVector<T>> {
-        using This = ValueVector<T>;
+    template<class V>
+    class ValueVector : public RValueVector<ValueVector<V>> {
+        using This = ValueVector<V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const T& v;
+        const V& v;
     public:
-        explicit ValueVector(const T& v_) : v(v_) {}
+        explicit ValueVector(const V& v_) : v(v_) {}
         ValueVector(const This&) = default;
         ValueVector(This&&) noexcept = default;
         ~ValueVector() = default;
@@ -194,17 +201,17 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class T, int GradOrder>
-    class GradVector : public RValueVector<GradVector<T, GradOrder>> {
-        using This = GradVector<T, GradOrder>;
+    template<class V, int GradOrder>
+    class GradVector : public RValueVector<GradVector<V, GradOrder>> {
+        using This = GradVector<V, GradOrder>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const T& v;
+        const V& v;
     public:
-        explicit GradVector(const T& v_) : v(v_) {}
+        explicit GradVector(const V& v_) : v(v_) {}
         GradVector(const This&) = default;
         GradVector(This&&) noexcept = default;
         ~GradVector() = default;
@@ -217,19 +224,19 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class T, int MaskOrder>
-    class DiffMaskVector : public RValueVector<DiffMaskVector<T, MaskOrder>> {
-        static_assert(MaskOrder < T::ScalarType::Order, "[Error]: We should return ref to original vector instead of DiffMaskVector, this is a bug");
+    template<class V, int MaskOrder>
+    class DiffMaskVector : public RValueVector<DiffMaskVector<V, MaskOrder>> {
+        static_assert(MaskOrder < V::ScalarType::Order, "[Error]: We should return ref to original vector instead of DiffMaskVector, this is a bug");
 
-        using This = DiffMaskVector<T, MaskOrder>;
+        using This = DiffMaskVector<V, MaskOrder>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     private:
-        const T& v;
+        const V& v;
     public:
-        DiffMaskVector(const T& v_) : v(v_) {}
+        DiffMaskVector(const V& v_) : v(v_) {}
         DiffMaskVector(const This&) = default;
         DiffMaskVector(This&&) noexcept = default;
         ~DiffMaskVector() = default;
@@ -242,59 +249,59 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<Vector T, int MaskOrder>
-    [[nodiscard]] inline std::conditional<std::less<int>{}(MaskOrder, T::ScalarType::Order), DiffMaskVector<T, MaskOrder>, const T&>::type
-    toDiffMaskVector(const RValueVector<T>& v) noexcept {
+    template<Vector V, int MaskOrder>
+    [[nodiscard]] inline std::conditional<std::less<int>{}(MaskOrder, V::ScalarType::Order), DiffMaskVector<V, MaskOrder>, const V&>::type
+    toDiffMaskVector(const RValueVector<V>& v) noexcept {
         return v.getDerived();
     }
 }
 
 namespace Physica {
-    template<class T>
-    class Traits<RealVector<T>> {
+    template<class V>
+    class Traits<RealVector<V>> {
     public:
-        using ScalarType = T::ScalarType::RealType;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        using ScalarType = V::ScalarType::RealType;
+        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = Traits<T>::FastPacket;
+        constexpr static bool FastPacket = Traits<V>::FastPacket;
     };
 
-    template<class T>
-    class Traits<ImagVector<T>> : public Traits<RealVector<T>> {};
+    template<class V>
+    class Traits<ImagVector<V>> : public Traits<RealVector<V>> {};
 
-    template<class T>
-    class Traits<SquaredNormVector<T>> : public Traits<RealVector<T>> {};
+    template<class V>
+    class Traits<SquaredNormVector<V>> : public Traits<RealVector<V>> {};
 
-    template<class T>
-    class Traits<NormVector<T>> : public Traits<RealVector<T>> {};
+    template<class V>
+    class Traits<NormVector<V>> : public Traits<RealVector<V>> {};
 
-    template<class T>
-    class Traits<ValueVector<T>> {
+    template<class V>
+    class Traits<ValueVector<V>> {
     public:
-        using ScalarType = T::ValueType;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
-    };
-
-    template<class T, int GradOrder>
-    class Traits<GradVector<T, GradOrder>> {
-        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toGradVector() call");
-    public:
-        using ScalarType = Internal::GradTypeHelper<typename T::ScalarType, GradOrder>::Type;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        using ScalarType = V::ValueType;
+        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };
 
-    template<class T, int MaskOrder>
-    class Traits<DiffMaskVector<T, MaskOrder>> {
-        using U = T::ScalarType;
+    template<class V, int GradOrder>
+    class Traits<GradVector<V, GradOrder>> {
+        static_assert(V::ScalarType::isDiffable, "[Error]: Unnecessary toGradVector() call");
+    public:
+        using ScalarType = Internal::GradTypeHelper<typename V::ScalarType, GradOrder>::Type;
+        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
+        constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = false;
+    };
+
+    template<class V, int MaskOrder>
+    class Traits<DiffMaskVector<V, MaskOrder>> {
+        using U = V::ScalarType;
         using ValueType = typename U::ValueType;
         static_assert(U::isDiffable, "[Error]: Unnecessary toDiffMaskVector() call");
     public:
         using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

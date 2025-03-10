@@ -201,10 +201,12 @@ namespace Physica {
     __host__ __device__ device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
         if constexpr (IsHost()) {
             if constexpr (!isTrivial) {
-                Array<ElemType, Dynamic> buffer(length);
-                auto& ctx = CUDAContext::getInstance();
-                cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
-                ctx.wait();
+                if (length != 0) {
+                    Array<ElemType, Dynamic> buffer(length);
+                    auto& ctx = CUDAContext::getInstance();
+                    cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
+                    ctx.wait();
+                }
             }
             alloc.deallocate(d_data, capacity);
             d_data = nullptr;
@@ -216,6 +218,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     auto device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const -> PlainHostObj {
+        assert(getLength() > 0 && "[Error]: Unnecessary memcpy a empty array");
         PlainHostObj result(getLength());
         check(cudaMemcpyAsync(result.data(), (void*)d_data, getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
         return result;
@@ -257,10 +260,14 @@ namespace Physica {
     template<class T, class Allocator>
     void device_obj<Array<T, Dynamic, Allocator>>::reserve(size_t size) {
         assert(size > getCapacity());
-        const auto buffer = toPlainHost();
-        alloc.deallocate(d_data, capacity);
-        d_data = alloc.allocate(size);
-        cudaMemcpyAsync(d_data, buffer.data(), getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance());
+        if (getCapacity() == 0 || getLength() == 0)
+            d_data = alloc.allocate(size);
+        else {
+            const auto buffer = toPlainHost();
+            alloc.deallocate(d_data, capacity);
+            d_data = alloc.allocate(size);
+            cudaMemcpyAsync(d_data, buffer.data(), getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance());
+        }
         capacity = size;
     }
 

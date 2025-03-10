@@ -62,6 +62,7 @@ namespace Physica {
 
     template<class T, size_t Align>
     [[nodiscard]] inline T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
+        assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = n * sizeof(T);
         void* p;
         if constexpr (OverAlign) {

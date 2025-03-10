@@ -160,7 +160,7 @@ namespace std {
         }
 
         auto format(const Physica::Diff<T, Mode, Order>& obj, std::format_context& ctx) const {
-            return std::format_to(ctx.out(), "{}", obj.value());
+            return formatter<T, char>{}.format(obj, ctx);
         }
     };
 }

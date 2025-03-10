@@ -22,19 +22,19 @@
 
 namespace Physica {
     template<Scalar T>
-    __host__ __device__ inline CoDiff<T> abs(T&& x) requires(Diffable<T>);
+    inline CoDiff<T> abs(T&& x) requires(Diffable<T>);
 
     template<Scalar T>
     inline CoDiff<T> relu(T&& x) requires(Diffable<T>);
 
     template<Scalar T>
-    __host__ __device__ inline CoDiff<T> square(T&& x) requires(Diffable<T>);
+    inline CoDiff<T> square(T&& x) requires(Diffable<T>);
 
     template<Scalar T>
-    __host__ __device__ inline CoDiff<T> reciprocal(T&& x) requires(Diffable<T>);
+    inline CoDiff<T> reciprocal(T&& x) requires(Diffable<T>);
 
     template<Scalar T>
-    __host__ __device__ CoDiff<T> sqrt(T&& x) requires(Diffable<T>);
+    CoDiff<T> sqrt(T&& x) requires(Diffable<T>);
 
     template<Scalar T>
     CoDiff<T> cbrt(T&& x) requires(Diffable<T>);

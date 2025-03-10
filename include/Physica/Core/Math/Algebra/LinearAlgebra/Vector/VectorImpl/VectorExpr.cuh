@@ -83,6 +83,7 @@ namespace Physica {
 #include "VectorExprImpl/Reciprocal.cuh"
 #include "VectorExprImpl/Sqrt.cuh"
 #include "VectorExprImpl/Relu.cuh"
+#include "VectorExprImpl/Abs.cuh"
 #include "VectorExprImpl/Unit.cuh"
 #include "VectorExprImpl/Square.cuh"
 #include "VectorExprImpl/Ln.cuh"

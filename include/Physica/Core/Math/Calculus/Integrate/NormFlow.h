@@ -48,9 +48,11 @@ namespace Physica {
         using Base::means;
         using Base::vars;
         using Base::loss;
+    private:
+        Trv decay;
     public:
-        using Base::Base;
         NormFlow() = default;
+        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_ = 0);
         NormFlow(const This&) = default;
         NormFlow(This&&) noexcept = default;
         ~NormFlow() = default;
@@ -73,8 +75,12 @@ namespace Physica {
 
         Trv calcLoss_normal(FuncValue y, const CoDiff<T>& lnJ);
         template<class Executor>
-        Trv calcLoss_ln(Trv lnVolume, VectorND<FuncValue>& samples, Array<CoDiff<T>>& lnJs, const VectorND<T>& lnJv);
+        Trv calcLoss_ln(Trv lnVolume, const VectorND<FuncValue>& samples, const VectorND<T>& lnJv);
     };
+
+    template<Scalar T, bool TakeLn>
+    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_)
+            : Base(std::move(from), std::move(to), numRefine, numSample), decay(decay_) {}
 
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, class Executor>
@@ -123,6 +129,7 @@ namespace Physica {
     void NormFlow<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
+        decay.swap(obj.decay);
     }
 
     template<Scalar T, bool TakeLn>
@@ -181,6 +188,7 @@ namespace Physica {
         const auto lnVolume = ln(to - from).sum();
 
         VectorND<FuncValue> samples(numSample);
+        VectorND<T> lnJv(numSample);
         Trv loss = 0;
         if constexpr (std::same_as<CUDAExecutor, Executor>) {
             const auto from_d = from.toDeviceAsync();
@@ -188,22 +196,22 @@ namespace Physica {
             auto x = device_obj<MatrixND<Tv>>::template random_uniform<R>(getDim(), numSample);
             const auto lnJs = nn.forward(x);
 
-            const auto lnJv = lnJs.toHostAsync();
+            lnJs.toHostAsync(lnJv);
             x = from_d + hadamard(coeff_d, x);
             samples = nn(x).toHost();
             {
                 const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
-                auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp();
-                loss = l.value();
+                auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(numSample));
                 if constexpr (ReverseDiff<T>)
                     l.reverse();
+                loss = l.value();
             }
             lnJs.reverse(lnJv.grads().toDeviceAsync());
             samples += lnJv.values() + lnVolume;
         }
         else {
             Array<CoDiff<T>> lnJs(numSample);
-            VectorND<T> lnJv(numSample);
+            Array<Net> nets;
             if constexpr (std::same_as<SeqExecutor, Executor>) {
                 VectorND<Trv> x(getDim());
                 for (int i = 0; i < numSample; ++i) {
@@ -213,12 +221,11 @@ namespace Physica {
                     x = from + hadamard(coeff, x);
                     samples[i] = nn(x);
                 }
-                loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
             }
             else {
                 static_assert(std::same_as<ThreadExecutor, Executor>, "[Error]: Unsupported executor");
                 const int numThread = Executor::getNumThread();
-                Array<Net> nets(numThread, nn);
+                nets.resize(numThread, nn);
                 Executor::parallel_for([&, this](size_t i) {
                     const int tid = Executor::getThreadID();
                     auto x = VectorND<Trv>::template random_uniform<R>(getDim());
@@ -227,11 +234,20 @@ namespace Physica {
                     x = from + hadamard(coeff, x);
                     samples[i] = nn(x);
                 }, numSample, numThread).wait();
-                loss = calcLoss_ln<Executor>(lnVolume, samples, lnJs, lnJv);
-    
+            }
+
+            loss = calcLoss_ln<Executor>(lnVolume, samples, lnJv);
+            auto futures = Executor::parallel_for([&, lnVolume](size_t i) {
+                auto& lnJ = lnJs[i];
+                samples[i] += lnJ.value() + lnVolume;
+                if constexpr (ReverseDiff<T>)
+                    lnJ.reverse_final(lnJv[i].grad());
+            }, numSample, Executor::getNumThread());
+            futures.wait();
+
+            if constexpr (!std::same_as<SeqExecutor, Executor>)
                 for (auto& net : nets)
                     nn.reverse(net);
-            }
         }
 
         Tv maxSample;
@@ -250,7 +266,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     auto NormFlow<T, TakeLn>::calcLoss_normal(FuncValue y, const CoDiff<T>& lnJ) -> Trv {
-        CoDiff<T> l = square(y * exp(lnJ));
+        CoDiff<T> l = square(y * exp(lnJ)) + exp(lnJ * Trv(2)) * decay;
         if constexpr (ReverseDiff<T>)
             l.reverse(reciprocal(Trv(Base::getNumSample())));
         return l.value();
@@ -258,25 +274,12 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<class Executor>
-    auto NormFlow<T, TakeLn>::calcLoss_ln(Trv lnVolume, VectorND<FuncValue>& samples, Array<CoDiff<T>>& lnJs, const VectorND<T>& lnJv) -> Trv {
+    auto NormFlow<T, TakeLn>::calcLoss_ln(Trv lnVolume, const VectorND<FuncValue>& samples, const VectorND<T>& lnJv) -> Trv {
         const size_t numSample = samples.getLength();
-        Trv result;
-        {
-            const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
-            auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp();
-            if constexpr (ReverseDiff<T>)
-                l.reverse();
-            result = l.value();
-        }
-
-        const int numThread = Executor::getNumThread();
-        auto futures = Executor::parallel_for([&, lnVolume](size_t i) {
-            auto& lnJ = lnJs[i];
-            samples[i] += lnJ.value() + lnVolume;
-            if constexpr (ReverseDiff<T>)
-                lnJ.reverse_final(lnJv[i].grad());
-        }, numSample, numThread);
-        futures.wait();
-        return result;
+        const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
+        auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(numSample));
+        if constexpr (ReverseDiff<T>)
+            l.reverse();
+        return l.value();
     }
 }

@@ -162,10 +162,11 @@ namespace Physica {
 
                 const auto grid = weights.reshape_row(dim, numBin);
                 const int index = indices(i, sample);
-                const Tv s = grid.row(i).values().softmax(index);
+                const auto row = grid.row(i);
+                const Tv s = row.values().softmax(index);
                 const Tv g = (s - square(s)) * deltas(sample, i).grad();
-                grid.row(i).reverse(-g / Tv(numBin));
-                grid(i, index).reverse(g);
+                row.reverse(-g / Tv(numBin));
+                row[index].reverse(g);
             };
             CUDAExecutor::launch<decltype(func), device_obj<VectorND<T>>::MaxThreadPerBlock>(func, config);
         }
