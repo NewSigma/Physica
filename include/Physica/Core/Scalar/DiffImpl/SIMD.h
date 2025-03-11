@@ -36,6 +36,14 @@ namespace Physica {
         using Type = Diff<T, Mode, Order>;
     };
 
+    template<DiffMode Mode, int Order, size_t Length>
+    class device_obj<BestPacket<Diff<float16, Mode, Order>, Length>> {
+        using ScalarType = std::conditional<Mode == DiffMode::Forward, Diff<float16, Mode, Order>, float16>::type;
+    public:
+        constexpr static size_t Size = Length == 1 ? 1 : 2;
+        using Type = SIMD<ScalarType, Size>;
+    };
+
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     class SIMD<Diff<T, Mode, Order>, Size> : public SIMDBase<SIMD<Diff<T, Mode, Order>, Size>> {
         using This = SIMD<Diff<T, Mode, Order>, Size>;

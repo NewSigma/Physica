@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -68,11 +68,12 @@ namespace Physica {
                                                                   const V2& initial)
             : objectiveMatG(objectiveMatG_)
             , objectiveVecC(objectiveVecC_)
-            , constraints(constraints_)
             , x(initial) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
         assert(constraints_.getCol() == 0 || constraints_.getCol() == objectiveVecC.getLength() + 1);
         assert(x.getLength() == objectiveVecC.getLength());
+        if (constraints_.getSize() != 0)
+            constraints = constraints_;
         compute();
     }
 

@@ -37,6 +37,7 @@ namespace Physica {
         using Base::MaxThreadPerBlock;
     protected:
         using typename Base::T;
+        using typename Base::Tv;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:

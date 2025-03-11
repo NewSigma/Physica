@@ -51,16 +51,20 @@ namespace Physica {
         assert(!x.isNegative());
         if constexpr (Option == Float32)
             return Real<Option>(::sqrtf(x.toMachine()));
-        else
+        else {
+            static_assert(Option == Float64, "[Error]: Unexpected type");
             return Real<Option>(::sqrt(x.toMachine()));
+        }
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> cbrt(const Real<Option>& x) noexcept {
         if constexpr (Option == Float32)
             return Real<Option>(::cbrtf(x.toMachine()));
-        else
+        else {
+            static_assert(Option == Float64, "[Error]: Unexpected type");
             return Real<Option>(::cbrt(x.toMachine()));
+        }
     }
 
     template<ScalarOption Option>
@@ -68,16 +72,20 @@ namespace Physica {
         assert(x.isPositive() && "[Error]: Invalid param");
         if constexpr (Option == Float32)
             return Real<Option>(::logf(x.toMachine()));
-        else
+        else {
+            static_assert(Option == Float64, "[Error]: Unexpected type");
             return Real<Option>(::log(x.toMachine()));
+        }
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> ln1p(const Real<Option>& x) noexcept {
         if constexpr (Option == Float32)
             return Real<Option>(::log1pf(x.toMachine()));
-        else
+        else {
+            static_assert(Option == Float64, "[Error]: Unexpected type");
             return Real<Option>(::log1p(x.toMachine()));
+        }
     }
     /**
      * \return log_a n
@@ -91,8 +99,10 @@ namespace Physica {
     __host__ __device__ inline Real<Option> exp(const Real<Option>& x) noexcept {
         if constexpr (Option == Float32)
             return Real<Option>(::expf(x.toMachine()));
-        else
+        else {
+            static_assert(Option == Float64, "[Error]: Unexpected type");
             return Real<Option>(::exp(x.toMachine()));
+        }
     }
 
     template<ScalarOption Option>
@@ -100,7 +110,7 @@ namespace Physica {
         if constexpr (Option == Float32)
             return Real<Option>(::powf(x.toMachine(), n.toMachine()));
         else {
-            static_assert(Option == Float64);
+            static_assert(Option == Float64, "[Error]: Unexpected type");
             return Real<Option>(::pow(x.toMachine(), n.toMachine()));
         }
     }

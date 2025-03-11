@@ -89,7 +89,7 @@ namespace Physica {
     template<Vector V, Scalar U>
     template<Vector V1, class Executor>
     inline void VectorExpr<ExprType::Mul, V, U>::assign_add(V1& v) const {
-        if constexpr (Internal::EnableMKL<V, V>::value)
+        if constexpr (Internal::EnableMKL<V, V1>::value)
             assign_add_mkl(v.data());
         else
             Base::assign_add(v);

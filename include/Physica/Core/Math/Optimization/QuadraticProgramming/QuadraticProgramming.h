@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -79,13 +79,15 @@ namespace Physica {
                                                   const V2& initial)
             : objectiveMatG(objectiveMatG_)
             , objectiveVecC(objectiveVecC_)
-            , equalityConstraint(equalityConstraint_)
-            , inequalityConstraint(inequalityConstraint_)
             , x(initial)
             , activeConstraintFlags(Array<bool>(inequalityConstraint_.getRow(), false)) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
-        assert(equalityConstraint.getCol() == 0 || equalityConstraint.getCol() == objectiveVecC.getLength() + 1);
-        assert(inequalityConstraint.getCol() == 0 || inequalityConstraint.getCol() == objectiveVecC.getLength() + 1);
+        assert(equalityConstraint_.getCol() == 0 || equalityConstraint_.getCol() == objectiveVecC.getLength() + 1);
+        assert(inequalityConstraint_.getCol() == 0 || inequalityConstraint_.getCol() == objectiveVecC.getLength() + 1);
+        if (equalityConstraint_.getSize() > 0)
+            equalityConstraint = equalityConstraint_;
+        if (inequalityConstraint_.getSize() > 0)
+            inequalityConstraint = inequalityConstraint_;
     }
 
     template<Scalar T>

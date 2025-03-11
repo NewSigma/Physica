@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "../SIMD.h"
 
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -56,34 +58,33 @@ namespace Physica {
             : values(other.value()), grads(other.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size>::ScalarType
-    SIMD<Diff<T, Mode, Order>, Size>::operator[](int index) const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator[](int index) const -> ScalarType {
         return ScalarType(values[index], grads[index]);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator+(const SIMD& other) const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator+(const SIMD& other) const -> This {
         return This(values + other.values, grads + other.grads);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator-(const SIMD& other) const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator-(const SIMD& other) const -> This {
         return This(values - other.values, grads - other.grads);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator*(const SIMD& x) const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const SIMD& x) const -> This {
         return This(values * x.value(), GradType(GradType(x) * grad() + GradType(*this) * x.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator*(const ScalarType& x) const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const ScalarType& x) const -> This {
         return This(values * x.value(), GradType(x.template mask<Order - 1>() * grad() + GradType(*this) * x.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     template<Scalar U>
-    inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator*(const U& x) const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const U& x) const -> This {
         if constexpr (U::isDiffable)
             return *this * ScalarType(x);
         else
@@ -91,19 +92,19 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator/(const SIMD& x) const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator/(const SIMD& x) const -> This {
         const auto x1 = GradType(x);
         const auto v = reciprocal(x1);
         return This(value() * v.value(), GradType((grad() * GradType(x1) - GradType(*this) * x.grad()) * square(v)));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator-() const {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator-() const -> This {
         return This(-values, -grads);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    SIMD<Diff<T, Mode, Order>, Size>::ValueType SIMD<Diff<T, Mode, Order>, Size>::reverse(GradType grad) const noexcept {
+    auto SIMD<Diff<T, Mode, Order>, Size>::reverse(GradType grad) const noexcept -> ValueType {
         grads += grad;
         return values;
     }
@@ -133,21 +134,19 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size>& SIMD<Diff<T, Mode, Order>, Size>::cutoff(int count) {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::cutoff(int count) -> This& {
         values.cutoff(count);
         grads.cutoff(count);
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size>::FullRealType
-    SIMD<Diff<T, Mode, Order>, Size>::swapRealImag() const noexcept {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::swapRealImag() const noexcept -> FullRealType {
         return FullRealType(values.swapRealImag(), grads.swapRealImag());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size>::FullRealType
-    SIMD<Diff<T, Mode, Order>, Size>::permRealImag() const noexcept {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::permRealImag() const noexcept -> FullRealType {
         return FullRealType(values.permRealImag(), grads.permRealImag());
     }
 
@@ -176,7 +175,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    SIMD<Diff<T, Mode, Order>, Size>::FullRealType SIMD<Diff<T, Mode, Order>, Size>::asReal() const noexcept {
+    auto SIMD<Diff<T, Mode, Order>, Size>::asReal() const noexcept -> FullRealType {
         if constexpr (T::isComplex)
             return FullRealType(values.asReal(), grads.asReal());
         else
@@ -184,24 +183,22 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size>::RealType
-    SIMD<Diff<T, Mode, Order>, Size>::real() const noexcept {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::real() const noexcept -> RealType {
         return RealType(values.real(), grads.real());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    inline SIMD<Diff<T, Mode, Order>, Size>::RealType
-    SIMD<Diff<T, Mode, Order>, Size>::imag() const noexcept {
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::imag() const noexcept -> RealType {
         return RealType(values.imag(), grads.imag());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
+    auto SIMD<Diff<T, Mode, Order>, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) -> This {
         return This(ValueType::select(flags, x.value(), y.value()), GradType::select(flags, x.grad(), y.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::asComplex(const FullRealType& reals) {
+    auto SIMD<Diff<T, Mode, Order>, Size>::asComplex(const FullRealType& reals) -> This {
         This result{};
         result.values = ValueType::asComplex(reals.value());
         result.grads = GradType::asComplex(reals.grad());

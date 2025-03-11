@@ -79,7 +79,9 @@ namespace Physica {
     template<class T, class Allocator>
     template<class... Args>
     Array<T, Dynamic, Allocator>::Array(size_t length_, Args&&... args) : length(length_), capacity(length_), alloc() {
-        assert(length_ > 0 && "Unnecessary allocate a empty array");
+        if (capacity == 0)
+            return;
+
         arr = alloc.allocate(capacity);
         if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
             for (size_t i = 0; i < length_; ++i)
@@ -106,6 +108,9 @@ namespace Physica {
     template<class T, class Allocator>
     __host__ __device__ Array<T, Dynamic, Allocator>::Array(const This& obj) : length(obj.length), capacity(obj.capacity), alloc() {
         if constexpr (IsHost()) {
+            if (capacity == 0)
+                return;
+
             arr = alloc.allocate(capacity);
             if constexpr (!std::is_trivially_copyable<ElemType>::value)
                 for(size_t i = 0; i < length; ++i)

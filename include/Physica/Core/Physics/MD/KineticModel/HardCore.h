@@ -26,7 +26,7 @@ namespace Physica {
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SeqExecutor>
     class HardCore : private FreeModel<T, 1, NumReplica, Integrator> {
-        using This = HardCore<T, IsFixedBoundary, NumReplica, Integrator>;
+        using This = HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>;
         using Base = FreeModel<T, 1, NumReplica, Integrator>;
         using Tv = T::ValueType;
     public:

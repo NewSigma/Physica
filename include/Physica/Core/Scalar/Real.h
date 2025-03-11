@@ -55,25 +55,25 @@ namespace Physica {
     };
 
     template<ScalarOption Op1, ScalarOption Op2>
-    auto operator+(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
+    __host__ __device__ auto operator+(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
         return ResultType(x) + ResultType(y);
     }
 
     template<ScalarOption Op1, ScalarOption Op2>
-    auto operator-(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
+    __host__ __device__ auto operator-(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
         return ResultType(x) - ResultType(y);
     }
 
     template<ScalarOption Op1, ScalarOption Op2>
-    auto operator*(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
+    __host__ __device__ auto operator*(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
         return ResultType(x) * ResultType(y);
     }
 
     template<ScalarOption Op1, ScalarOption Op2>
-    auto operator/(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
+    __host__ __device__ auto operator/(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
         return ResultType(x) / ResultType(y);
     }

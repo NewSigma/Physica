@@ -52,8 +52,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using Base::getLHS;
-        using Base::getRHS;
     public:
         using Base::Base;
         /* Operations */
@@ -69,6 +67,9 @@ namespace Physica {
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         [[nodiscard]] T sum() const { return Base::getLHS().sum() * Base::getRHS(); }
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
 
     template<Matrix M, Scalar U>

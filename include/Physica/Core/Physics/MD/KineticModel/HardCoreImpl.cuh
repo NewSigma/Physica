@@ -89,7 +89,7 @@ namespace Physica {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
     void HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::do_nve_step_for(
             T duration, T deltaT) {
-        const uint64_t step = RPMDBase<T>::durationToStep(duration, deltaT);
+        const uint64_t step = RPMD<T>::durationToStep(duration, deltaT);
         do_nve_step(deltaT, step);
     }
 

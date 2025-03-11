@@ -175,6 +175,8 @@ namespace Physica {
         void setLattice(LatticeMatrix lattice) { cell.setLattice(std::move(lattice)); }
         inline void setTemperature(T temperature);
         void setTimeStep(T timeStep_);
+        /* Static members */
+        [[nodiscard]] static uint64_t durationToStep(Tv duration, Tv timeStep);
     private:
         void toContractBeadRepr(size_t posID);
         void forceToNormRepr(size_t posID);
@@ -184,8 +186,6 @@ namespace Physica {
         void forceStep(T deltaT);
         bool checkCentroid() const;
         void checkParam() const;
-        /* Static members */
-        [[nodiscard]] static uint64_t durationToStep(Tv duration, Tv timeStep);
     };
 }
 

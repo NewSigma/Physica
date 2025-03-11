@@ -78,7 +78,10 @@ namespace Physica {
     template<Packet Pack>
     __device__ inline Pack device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
         Pack packet{};
-        packet.load(Base::data_ptr(index));
+        if constexpr (isReverseDiff)
+            packet.load(Base::data_ptr(index).value_ptr());
+        else
+            packet.load(Base::data_ptr(index));
         return packet;
     }
 
@@ -86,22 +89,33 @@ namespace Physica {
     template<Packet Pack>
     __device__ inline Pack device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
         Pack packet{};
-        packet.load_partial(Base::data_ptr(index), count);
+        if constexpr (isReverseDiff)
+            packet.load_partial(Base::data_ptr(index).value_ptr(), count);
+        else
+            packet.load_partial(Base::data_ptr(index), count);
         return packet;
     }
 
     template<class Derived>
     template<Packet Pack>
     __device__ inline void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const Pack packet) {
-        using LocalPacket = std::conditional<Pack::size() == 1, ScalarType, SIMD<ScalarType, Pack::size()>>::type;
-        LocalPacket(packet).store(Base::data_ptr(index));
+        using T1 = std::conditional<isReverseDiff, Tv, T>::type;
+        using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
+        if constexpr (isReverseDiff)
+            LocalPacket(packet).store(Base::data_ptr(index).value_ptr());
+        else
+            LocalPacket(packet).store(Base::data_ptr(index));
     }
 
     template<class Derived>
     template<Packet Pack>
     __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const Pack packet) {
-        using LocalPacket = std::conditional<Pack::size() == 1, ScalarType, SIMD<ScalarType, Pack::size()>>::type;
-        LocalPacket(packet).store_partial(Base::data_ptr(index), count);
+        using T1 = std::conditional<isReverseDiff, Tv, T>::type;
+        using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
+        if constexpr (isReverseDiff)
+            LocalPacket(packet).store_partial(Base::data_ptr(index).value_ptr(), count);
+        else
+            LocalPacket(packet).store_partial(Base::data_ptr(index), count);
     }
 
     template<class Derived>

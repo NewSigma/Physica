@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,19 +18,20 @@
  */
 #pragma once
 
-#include "Physica/Core/Utils/Unreachable.h"
+#include "Physica/Core/Scalar/RealImpl/Float16.h"
 
 namespace Physica {
     template<>
     class Traits<SIMD<Real<Float16>, 2>> {
     public:
+        constexpr static int Size = 2;
         using ScalarType = Real<Float16>;
         using ValueType = SIMD<Real<Float16>, 2>;
         using GradType = void;
         using RealType = ValueType;
         using FullRealType = RealType;
         using MachineType = __half2;
-        using BoolSIMDType = void;
+        using BoolSIMDType = PlainStruct<void>;
     };
 }
 
@@ -40,7 +41,6 @@ namespace Physica {
 
     template<size_t Length>
     class BestPacket<float16, Length> {
-        using ScalarType = float16;
     public:
         constexpr static size_t Size = Length == 1 ? 1 : 2;
         using Type = std::conditional<Length == 1, float16, SIMD<float16, 2>>::type;
@@ -52,14 +52,13 @@ namespace Physica {
     template<>
     class SIMD<Real<Float16>, 2> : public SIMDBase<SIMD<Real<Float16>, 2>>, private __half2 {
         constexpr static size_t Size = 2;
-        using ScalarType = Real<Float16>;
-        using This = SIMD<ScalarType, Size>;
+        using This = SIMD<float16, Size>;
         using Base = __half2;
     public:
         using Base::Base;
         SIMD() = default;
-        __host__ __device__ inline explicit SIMD(ScalarType v);
-        __host__ __device__ inline SIMD(ScalarType l, ScalarType h);
+        __host__ __device__ inline explicit SIMD(float16 v);
+        __host__ __device__ inline SIMD(float16 l, float16 h);
         __host__ __device__ inline explicit SIMD(Base value);
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
@@ -67,7 +66,7 @@ namespace Physica {
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] __host__ __device__ inline ScalarType operator[](int index) const noexcept;
+        [[nodiscard]] __host__ __device__ inline float16 operator[](int index) const noexcept;
         [[nodiscard]] __host__ __device__ inline SIMD operator+(const SIMD& other) const noexcept;
         [[nodiscard]] __host__ __device__ inline SIMD operator-(const SIMD& other) const noexcept;
         [[nodiscard]] __host__ __device__ inline SIMD operator*(const SIMD& other) const noexcept;
@@ -82,24 +81,24 @@ namespace Physica {
         //[[nodiscard]] inline BoolSIMDType operator>=(const SIMD& other) const { return !(*this < other); }
         //[[nodiscard]] inline BoolSIMDType operator<=(const SIMD& other) const { return !(*this > other); }
         /* Operations */
-        __host__ __device__ inline void load(const ScalarType* p);
-        __host__ __device__ inline void load_partial(const ScalarType* p, int n);
-        __host__ __device__ inline void store(ScalarType* p) const;
-        __host__ __device__ inline void store_partial(ScalarType* p, int n) const;
-        //inline void insert(int index, const ScalarType& value);
-        [[nodiscard]] __host__ __device__ inline ScalarType sum() const noexcept;
-        //[[nodiscard]] inline ScalarType max() const;
-        //[[nodiscard]] inline ScalarType min() const;
+        __host__ __device__ inline void load(const float16* p);
+        __host__ __device__ inline void load_partial(const float16* p, int n);
+        __host__ __device__ inline void store(float16* p) const;
+        __host__ __device__ inline void store_partial(float16* p, int n) const;
+        //inline void insert(int index, const float16& value);
+        [[nodiscard]] __host__ __device__ inline float16 sum() const noexcept;
+        //[[nodiscard]] inline float16 max() const;
+        //[[nodiscard]] inline float16 min() const;
         __host__ __device__ void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] __host__ __device__ Base& toMachine() noexcept { return *this; }
         [[nodiscard]] __host__ __device__ const Base& toMachine() const noexcept { return *this; }
     };
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(ScalarType v)
+    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(float16 v)
             : Base(__half2half2(v.toMachine())) {}
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(ScalarType l, ScalarType h)
+    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(float16 l, float16 h)
             : Base(make_half2(l.toMachine(), h.toMachine())) {}
 
     __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(Base value)
@@ -131,22 +130,22 @@ namespace Physica {
         return This(__hneg2(toMachine()));
     }
 
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::load(const ScalarType* p) {
+    __host__ __device__ inline void SIMD<Real<Float16>, 2>::load(const float16* p) {
         *reinterpret_cast<uint32_t*>(this) = *reinterpret_cast<const uint32_t*>(p);
     }
 
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::load_partial(const ScalarType* p, int n) {
+    __host__ __device__ inline void SIMD<Real<Float16>, 2>::load_partial(const float16* p, int n) {
         if (n == 1)
             (*this) = SIMD(*p, 0);
         else if (n == 2)
             load(p);
     }
 
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::store(ScalarType* p) const {
+    __host__ __device__ inline void SIMD<Real<Float16>, 2>::store(float16* p) const {
         *reinterpret_cast<uint32_t*>(p) = *reinterpret_cast<const uint32_t*>(this);
     }
 
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::store_partial(ScalarType* p, int n) const {
+    __host__ __device__ inline void SIMD<Real<Float16>, 2>::store_partial(float16* p, int n) const {
         if (n == 1)
             *p = operator[](0);
         else if (n == 2)

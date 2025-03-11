@@ -148,7 +148,7 @@ namespace Physica {
              class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nve_step_for(
             T duration, KineticModel& kineticModel, ForceModel& forceModel) {
-        const uint64_t step = Base::durationToStep(duration, timeStep);
+        const uint64_t step = durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
     }
@@ -206,7 +206,7 @@ namespace Physica {
             const Thermostat& thermostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        const uint64_t step = Base::durationToStep(duration, timeStep);
+        const uint64_t step = durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             nvt_step<Thermostat, R, KineticModel, ForceModel, Executor>(thermostat, kineticModel, forceModel);
     }
@@ -269,7 +269,7 @@ namespace Physica {
             Barostat& barostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        const uint64_t step = Base::durationToStep(duration, timeStep);
+        const uint64_t step = durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
             npt_step<Thermostat, R, Barostat, KineticModel, ForceModel, Executor>(thermostat, barostat, kineticModel, forceModel);
     }
@@ -694,7 +694,7 @@ namespace Physica {
     VectorND<T> RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::testNVE(
             T duration, KineticModel& kineticModel, ForceModel& forceModel) const {
         This rpmd = *this;
-        const uint64_t step = Base::durationToStep(duration, timeStep);
+        const uint64_t step = durationToStep(duration, timeStep);
         VectorND<T> pot(step);
         for (uint64_t i = 0; i < step; ++i) {
             rpmd.nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
@@ -747,6 +747,11 @@ namespace Physica {
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::setTimeStep(T timeStep_) {
         timeStep = timeStep_;
         checkParam();
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    uint64_t RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::durationToStep(Tv duration, Tv timeStep) {
+        return double(duration / timeStep) + 0.5;
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -826,10 +831,5 @@ namespace Physica {
             if (!isSmallEnough)
                 throw std::invalid_argument("[Error]: Time step is too large");
         }
-    }
-
-    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    uint64_t RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::durationToStep(Tv duration, Tv timeStep) {
-        return double(duration / timeStep) + 0.5;
     }
 }

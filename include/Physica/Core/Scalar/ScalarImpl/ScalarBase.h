@@ -110,10 +110,10 @@ namespace Physica {
         template<int MaskOrder>
         [[nodiscard]] auto mask() const noexcept;
 
-        __host__ __device__ inline Derived& load(const ScalarType* p);
-        __host__ __device__ inline void store(ScalarType* p) const;
-        __host__ __device__ inline Derived& load_partial(const ScalarType* p, int n);
-        __host__ __device__ inline void store_partial(ScalarType* p, int n) const;
+        __host__ __device__ inline Derived& load(ConstPtrTy p);
+        __host__ __device__ inline void store(PtrTy p) const;
+        __host__ __device__ inline Derived& load_partial(ConstPtrTy p, int n);
+        __host__ __device__ inline void store_partial(PtrTy p, int n) const;
         void insert(int index, ScalarType value);
 
         [[nodiscard]] __host__ __device__ inline RealType real() const;
@@ -251,25 +251,25 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline Derived& ScalarBase<Derived>::load(const ScalarType* p) {
-        this->getDerived() = *p;
+    __host__ __device__ inline Derived& ScalarBase<Derived>::load(ConstPtrTy p) {
+        this->getDerived() = (*p).value();
         return this->getDerived();
     }
 
     template<class Derived>
-    __host__ __device__ inline void ScalarBase<Derived>::store(ScalarType* p) const {
+    __host__ __device__ inline void ScalarBase<Derived>::store(PtrTy p) const {
         *p = this->getDerived().value();
     }
 
     template<class Derived>
-    __host__ __device__ inline Derived& ScalarBase<Derived>::load_partial(const ScalarType* p, int n) {
+    __host__ __device__ inline Derived& ScalarBase<Derived>::load_partial(ConstPtrTy p, int n) {
         if (n)
             load(p);
         return this->getDerived();
     }
 
     template<class Derived>
-    __host__ __device__ inline void ScalarBase<Derived>::store_partial(ScalarType* p, int n) const {
+    __host__ __device__ inline void ScalarBase<Derived>::store_partial(PtrTy p, int n) const {
         if (n)
             store(p);
     }

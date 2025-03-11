@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -18,9 +18,44 @@
  */
 #pragma once
 
+#include "Float16.h"
+
 namespace Physica {
     template<>
-    __host__ __device__ inline Real<Float16> abs(const Real<Float16>& s) noexcept {
-        return Real<Float16>(::__habs(s.toMachine()));
+    __host__ __device__ inline Real<Float16> abs(const Real<Float16>& x) noexcept {
+        return Real<Float16>(::__habs(x.toMachine()));
+    }
+
+    template<>
+    __host__ __device__ inline Real<Float16> sqrt(const Real<Float16>& x) noexcept {
+        if constexpr (IsHost())
+            return float16(sqrt(float32(x)));
+        else {
+        #ifdef __CUDA_ARCH__
+            return Real<Float16>(::hsqrt(x.toMachine()));
+        #endif
+        }
+    }
+
+    template<>
+    __host__ __device__ inline Real<Float16> ln(const Real<Float16>& x) noexcept {
+        if constexpr (IsHost())
+            return float16(ln(float32(x)));
+        else {
+        #ifdef __CUDA_ARCH__
+            return Real<Float16>(::hlog(x.toMachine()));
+        #endif
+        }
+    }
+
+    template<>
+    __host__ __device__ inline Real<Float16> exp(const Real<Float16>& x) noexcept {
+        if constexpr (IsHost())
+            return float16(exp(float32(x)));
+        else {
+        #ifdef __CUDA_ARCH__
+            return Real<Float16>(::hexp(x.toMachine()));
+        #endif
+        }
     }
 }

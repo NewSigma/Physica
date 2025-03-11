@@ -46,7 +46,7 @@ namespace Physica {
 
 namespace Physica {
     template<>
-    class Real<Float16> : public ScalarBase<Real<Float16>> {
+    class Real<Float16> : public ScalarBase<Real<Float16>>, public CRCoro<Real<Float16>> {
         using This = Real<Float16>;
         using Base = ScalarBase<This>;
     public:
@@ -55,10 +55,11 @@ namespace Physica {
         half h;
     public:
         constexpr Real() = default;
-        __host__ __device__ Real(int i) : h(i) {}
         __host__ __device__ Real(half f_) : h(f_) {}
-        __host__ __device__ Real(float f_) : h(f_) {}
-        __host__ __device__ Real(double d_) : h(d_) {}
+        template<std::integral I>
+        __host__ __device__ Real(I i) : h(i) {}
+        template<std::floating_point F>
+        __host__ __device__ Real(F f) : h(f) {}
         template<Scalar T>
         __host__ __device__ explicit inline Real(const T& x);
         constexpr Real(const This&) = default;
@@ -88,10 +89,35 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > half(0); }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < half(0); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }
+        /* Static members */
+        template<RNG R>
+        [[nodiscard]] inline static Real random_uniform();
+        template<RNG R>
+        [[nodiscard]] inline static Real random_normal();
+        template<RNG R, class Distribution>
+        [[nodiscard]] inline static Real random_any(Distribution& dist);
+    #ifdef PHYSICA_HDF5
+        [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_INT16; }
+    #endif
     };
 
     template<Scalar T>
     __host__ __device__ inline Real<Float16>::Real(const T& x) : h(x.toMachine()) {}
+
+    template<RNG R>
+    inline auto Real<Float16>::random_uniform() -> This {
+        return This(float32::random_uniform<R>());
+    }
+
+    template<RNG R>
+    inline auto Real<Float16>::random_normal() -> This {
+        return This(float32::random_normal<R>());
+    }
+
+    template<RNG R, class Distribution>
+    inline auto Real<Float16>::random_any(Distribution& dist) -> This {
+        return This(float32::random_any<R, Distribution>(dist));
+    }
 
     inline std::ostream& operator<<(std::ostream& os, const Real<Float16>& s) {
         const auto lastPrec = os.precision();

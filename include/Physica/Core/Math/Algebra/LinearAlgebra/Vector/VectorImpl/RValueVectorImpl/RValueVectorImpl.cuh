@@ -50,16 +50,22 @@ namespace Physica {
     template<class Derived>
     template<Packet Pack>
     __device__ inline Pack device_obj<RValueVector<Derived>>::packet(size_t index) const {
-        static_assert(Scalar<Pack>, "[Error]: Not implemented");
-        return calc(index);
+        assert(index + Pack::size() <= getLength());
+        if constexpr (Scalar<Pack>)
+            return calc(index);
+        else
+            return Pack(calc(index).value(), calc(index + 1).value());
     }
 
     template<class Derived>
     template<Packet Pack>
     __device__ inline Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
-        static_assert(Scalar<Pack>, "[Error]: Not implemented");
+        assert(index + Pack::size() <= getLength());
         assert(count == 1 && "[Error]: No need to call partial version");
-        return calc(index);
+        if constexpr (Scalar<Pack>)
+            return calc(index);
+        else
+            return Pack(calc(index).value(), 0_HF);
     }
 
     template<class Derived>

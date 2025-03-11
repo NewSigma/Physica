@@ -50,6 +50,7 @@ namespace Physica {
         template<Scalar U>
         [[nodiscard]] __host__ __device__ explicit operator ScalarPtr<Diff<U, Mode, Order>>() noexcept;
         [[nodiscard]] __host__ __device__ ScalarRef<ScalarType> operator*() const;
+        [[nodiscard]] __host__ __device__ ScalarRef<ScalarType> operator->() const;
         [[nodiscard]] __host__ __device__ This operator+(size_t n);
         __host__ __device__ inline This& operator++();
         __host__ __device__ inline This& operator--();
@@ -88,6 +89,11 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ auto ScalarPtr<Diff<T, Mode, Order>>::operator*() const -> ScalarRef<ScalarType> {
         return ScalarRef<ScalarType>(*this);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto ScalarPtr<Diff<T, Mode, Order>>::operator->() const -> ScalarRef<ScalarType> {
+        return *(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>

@@ -36,7 +36,7 @@ namespace Physica {
         using Tv = T::ValueType;
         using Tm = T::MachineType;
         constexpr static Tv Epsilon = std::numeric_limits<Tv>::epsilon();
-        constexpr static Tv Momentum = 0.9;
+        constexpr static Tv Momentum = 0.1;
     public:
         template<Scalar U>
         using MatrixND = Base::template MatrixND<U>;
@@ -107,7 +107,8 @@ namespace Physica {
         auto result = device_obj<MatrixND<T>>(hadamard(normal, gamma.values()) + beta.values());
         if constexpr (ReverseDiff<T>) {
             auto result_ = co_yield std::move(result);
-            x.reverse(hadamard(result_.grads(), divide(gamma.values(), sigma)));
+            if constexpr (Diffable<M>)
+                x.reverse(hadamard(result_.grads(), divide(gamma.values(), sigma)));
             gamma.reverse(hadamard(result_.grads(), normal).sum_cols());
             beta.reverse(result_.grads().sum_cols());
         }
