@@ -50,12 +50,14 @@ namespace Physica {
         class EnableSIMD {
             constexpr static size_t Size1 = T1::SizeAtCompile;
             constexpr static size_t Size2 = T2::SizeAtCompile;
+            using U1 = typename T1::ScalarType;
+            using U2 = typename T2::ScalarType;
         public:
             constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-            using ResultType = BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+            using ResultType = BinaryScalarOpRtnTy<U1, U2>::Type;
             using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
         private:
-            constexpr static bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
+            constexpr static bool isSameScalar = std::same_as<typename U1::ValueType, typename U2::ValueType>;
             constexpr static bool isBadPacket = PacketType::size() == 1;
             constexpr static bool isCUDA = CUDA<T1> || CUDA<T2>;
             constexpr static bool isFloat16 = ResultType::Option == Float16;
@@ -86,7 +88,6 @@ namespace Physica {
         using Base = CRTPBase<This>;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
-        using ValueType = ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;

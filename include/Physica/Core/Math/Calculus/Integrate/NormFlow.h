@@ -50,9 +50,11 @@ namespace Physica {
         using Base::loss;
     private:
         Trv decay;
+        Trv mixing;
+        Trv lastMean;
     public:
         NormFlow() = default;
-        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_ = 0);
+        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_ = 0, Trv mixing_ = 0.9);
         NormFlow(const This&) = default;
         NormFlow(This&&) noexcept = default;
         ~NormFlow() = default;
@@ -79,8 +81,8 @@ namespace Physica {
     };
 
     template<Scalar T, bool TakeLn>
-    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_)
-            : Base(std::move(from), std::move(to), numRefine, numSample), decay(decay_) {}
+    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_, Trv mixing_)
+            : Base(std::move(from), std::move(to), numRefine, numSample), decay(decay_), mixing(mixing_) {}
 
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, class Executor>
@@ -88,6 +90,7 @@ namespace Physica {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
         static_assert(std::same_as<FuncValue, CallResult>, "[Error]: Inconsistent ScalarType");
+        lastMean = 0;
 
         Trv result;
         for (int _ = 0; _ < numWarm; ++_) {
@@ -109,6 +112,7 @@ namespace Physica {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
         static_assert(std::same_as<FuncValue, CallResult>, "[Error]: Inconsistent ScalarType");
+        lastMean = 0;
 
         const int numRefine = Base::getNumRefine();
         FuncValue mean = 0, var = 0;
@@ -130,6 +134,8 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         decay.swap(obj.decay);
+        mixing.swap(obj.mixing);
+        lastMean.swap(obj.lastMean);
     }
 
     template<Scalar T, bool TakeLn>
@@ -270,7 +276,9 @@ namespace Physica {
     template<class Executor>
     auto NormFlow<T, TakeLn>::calcLoss_ln(const VectorND<FuncValue>& samples, const VectorND<T>& lnJv) -> Trv {
         const size_t numSample = samples.getLength();
-        const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
+        auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
+        mean = (Trv(1) - mixing) * mean + mixing * lastMean;
+        lastMean = mean;
         auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(numSample));
         if constexpr (ReverseDiff<T>)
             l.reverse();

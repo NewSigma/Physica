@@ -112,7 +112,7 @@ namespace Physica {
     operator/(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
 
     template<Scalar T>
-    [[nodiscard]] inline CoDiff<T> operator-(T&& x) requires(Diffable<T>);
+    [[nodiscard]] inline CoDiff<T> operator-(T&& x) noexcept requires(Diffable<T>);
 
     template<Scalar T>
     inline std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable) {

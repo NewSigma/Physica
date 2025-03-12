@@ -273,15 +273,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline CoDiff<T> operator-(T&& x) requires(Diffable<T>) {
+    inline CoDiff<T> operator-(T&& x) noexcept requires(Diffable<T>) {
         if constexpr (ForwardDiff<T>)
             co_return {-x.value(), -x.grad()};
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield -x_.value();
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(-g);
+            auto y = co_yield -x_.value();
+            x_.reverse(-y.grad());
         }
     }
 }

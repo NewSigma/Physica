@@ -35,7 +35,6 @@ namespace Physica {
         using BlockType = device_obj<RMatrixBlock<Derived>>;
     public:
         using ScalarType = TraitsType::ScalarType;
-        using ValueType = ScalarType::ValueType;
         constexpr static int Option = TraitsType::Option;
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColAtCompile = TraitsType::ColAtCompile;

@@ -278,7 +278,7 @@ namespace Physica {
     template<class V>
     class Traits<ValueVector<V>> {
     public:
-        using ScalarType = V::ValueType;
+        using ScalarType = V::ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = V::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

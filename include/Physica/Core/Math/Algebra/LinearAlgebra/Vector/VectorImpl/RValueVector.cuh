@@ -30,7 +30,6 @@ namespace Physica {
         using TraitsType = Traits<device_obj<Derived>>;
     public:
         using ScalarType = TraitsType::ScalarType;
-        using ValueType = ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
         using PacketType = device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
