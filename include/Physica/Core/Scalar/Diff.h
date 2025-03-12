@@ -133,7 +133,6 @@ namespace Physica {
         constexpr static bool isComplex = T::isComplex;
         constexpr static bool isForwardDiff = Mode == DiffMode::Forward;
         constexpr static bool isReverseDiff = Mode == DiffMode::Reverse;
-        constexpr static ExprType Source = ExprType::Set;
     private:
         using GradType = std::conditional<Order == 1, T, Diff<T, Mode, Order - 1>>::type;
     public:

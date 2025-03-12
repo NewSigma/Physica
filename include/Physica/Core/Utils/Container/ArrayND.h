@@ -86,7 +86,7 @@ namespace Physica {
         static IndexArray toIndexArray(Dims... dims) noexcept;
         template<class... Dims>
         static void toIndexArrayImpl(IndexArray& arr, int i, size_t dim0, Dims... dims) noexcept;
-        static void toIndexArrayImpl(IndexArray& arr, int i) noexcept {}
+        static void toIndexArrayImpl(IndexArray&, int) noexcept {}
     };
 }
 

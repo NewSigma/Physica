@@ -35,7 +35,6 @@ namespace Physica {
         using Coro = CRCoro<This>;
         using Storage = device_obj<Array2D<T, Option, Row, Col, Allocator>>;
     protected:
-        using typename Base::T;
         using typename Base::Tv;
         using Tm = T::MachineType;
     public:

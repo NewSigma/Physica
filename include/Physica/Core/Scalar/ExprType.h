@@ -23,9 +23,6 @@ namespace Physica {
      * \class ExprType is used in implementation of expression template and auto differential.
      */
     enum class ExprType : char {
-        Set,
-        Assign, //Cherry pick a node at forward pass, collect grads at backward pass
-        Diff, //Declare a differential at forward pass, jump to the grad node at backward pass
         Minus,
         Add,
         Sub,

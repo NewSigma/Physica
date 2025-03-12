@@ -70,12 +70,7 @@ namespace Physica {
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> ln(const Real<Option>& x) noexcept {
         assert(x.isPositive() && "[Error]: Invalid param");
-        if constexpr (Option == Float32)
-            return Real<Option>(::logf(x.toMachine()));
-        else {
-            static_assert(Option == Float64, "[Error]: Unexpected type");
-            return Real<Option>(::log(x.toMachine()));
-        }
+        return Real<Option>(std::log(x.toMachine()));
     }
 
     template<ScalarOption Option>
@@ -226,12 +221,12 @@ namespace Physica {
     }
 
     template<ScalarOption Option>
-    Real<Option> tanh(const Real<Option>& x) noexcept {
+    __host__ __device__ Real<Option> tanh(const Real<Option>& x) noexcept {
         return Real<Option>(std::tanh(x.toMachine()));
     }
 
     template<ScalarOption Option>
-    Real<Option> sech(const Real<Option>& x) noexcept {
+    __host__ __device__ Real<Option> sech(const Real<Option>& x) noexcept {
         return Real<Option>(1 / std::cosh(x.toMachine()));
     }
 

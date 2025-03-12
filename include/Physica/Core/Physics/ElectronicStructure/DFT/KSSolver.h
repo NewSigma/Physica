@@ -152,7 +152,6 @@ namespace Physica {
                     const auto& delta_rho = chargeMixer.getResidule().getTotalDensity().flatten();
                     const T error = delta_rho.squaredNorm();
                     const bool isConverged = error < criteria;
-                    std::cout << error << std::endl;
                     if (isConverged)
                         break;
                 }
@@ -211,7 +210,7 @@ namespace Physica {
     }
 
     template<Scalar T, class XCProvider>
-    void KSSolver<T, XCProvider>::calcDensity(const BasisType& orbit) {
+    void KSSolver<T, XCProvider>::calcDensity(const BasisType&) {
         noImpl("Wait for tensor module");
     }
 

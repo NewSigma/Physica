@@ -156,11 +156,9 @@ namespace Physica {
             LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() + y_.value();
             auto& g = result.grad();
-            if (!g.isZero()) {
-                x_.reverse(g);
-                if constexpr (Diffable<U>)
-                    y_.reverse(g);
-            }
+            x_.reverse(g);
+            if constexpr (Diffable<U>)
+                y_.reverse(g);
         }
     }
 
@@ -178,11 +176,9 @@ namespace Physica {
             LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() - y_.value();
             auto& g = result.grad();
-            if (!g.isZero()) {
-                x_.reverse(g);
-                if constexpr (Diffable<U>)
-                    y_.reverse(-g);
-            }
+            x_.reverse(g);
+            if constexpr (Diffable<U>)
+                y_.reverse(-g);
         }
     }
 
@@ -204,11 +200,9 @@ namespace Physica {
             LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() * y_.value();
             auto& g = result.grad();
-            if (!g.isZero()) {
-                x_.reverse(y_.value() * g);
-                if constexpr (Diffable<U>)
-                    y_.reverse(x_.value() * g);
-            }
+            x_.reverse(y_.value() * g);
+            if constexpr (Diffable<U>)
+                y_.reverse(x_.value() * g);
         }
     }
 
@@ -232,13 +226,10 @@ namespace Physica {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             LazyDestroy<U&&> y_ = std::forward<U>(y);
             auto result = co_yield x_.value() / y_.value();
-            auto& g = result.grad();
-            if (!g.isZero()) {
-                const auto factor = reciprocal(y_.value()) * g;
-                x_.reverse(factor);
-                if constexpr (Diffable<U>)
-                    y_.reverse(-factor * x_.value());
-            }
+            const auto factor = reciprocal(y_.value()) * result.grad();
+            x_.reverse(factor);
+            if constexpr (Diffable<U>)
+                y_.reverse(-factor * x_.value());
         }
     }
 

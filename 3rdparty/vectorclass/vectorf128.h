@@ -2422,35 +2422,73 @@ static inline Vec2d exp2(Vec2q const n) {
 *
 *****************************************************************************/
 
-template<class Pack>
-static inline __m128i reinterpret_i(Pack const x) requires(sizeof(Pack) == 16) {
-    if constexpr (std::same_as<Pack, __m128i>)
+#ifdef __clang__
+    template<class Pack>
+    static inline __m128i reinterpret_i(Pack const x) requires(sizeof(Pack) == 16) {
+        if constexpr (std::same_as<Pack, __m128i>)
+            return x;
+        else if constexpr (std::same_as<Pack, __m128>)
+            return _mm_castps_si128(x);
+        else
+            return _mm_castpd_si128(x);
+    }
+
+    template<class Pack>
+    static inline __m128 reinterpret_f(Pack const x) requires(sizeof(Pack) == 16) {
+        if constexpr (std::same_as<Pack, __m128i>)
+            return _mm_castsi128_ps(x);
+        else if constexpr (std::same_as<Pack, __m128>)
+            return x;
+        else
+            return _mm_castpd_ps(x);
+    }
+
+    template<class Pack>
+    static inline __m128d reinterpret_d(Pack const x) requires(sizeof(Pack) == 16) {
+        if constexpr (std::same_as<Pack, __m128i>)
+            return _mm_castsi128_pd(x);
+        else if constexpr (std::same_as<Pack, __m128>)
+            return _mm_castps_pd(x);
+        else
+            return x;
+    }
+#else
+    static inline __m128i reinterpret_i(__m128i const x) {
         return x;
-    else if constexpr (std::same_as<Pack, __m128>)
+    }
+
+    static inline __m128i reinterpret_i(__m128  const x) {
         return _mm_castps_si128(x);
-    else
+    }
+
+    static inline __m128i reinterpret_i(__m128d const x) {
         return _mm_castpd_si128(x);
-}
+    }
 
-template<class Pack>
-static inline __m128 reinterpret_f(Pack const x) requires(sizeof(Pack) == 16) {
-    if constexpr (std::same_as<Pack, __m128i>)
+    static inline __m128  reinterpret_f(__m128i const x) {
         return _mm_castsi128_ps(x);
-    else if constexpr (std::same_as<Pack, __m128>)
-        return x;
-    else
-        return _mm_castpd_ps(x);
-}
+    }
 
-template<class Pack>
-static inline __m128d reinterpret_d(Pack const x) requires(sizeof(Pack) == 16) {
-    if constexpr (std::same_as<Pack, __m128i>)
-        return _mm_castsi128_pd(x);
-    else if constexpr (std::same_as<Pack, __m128>)
-        return _mm_castps_pd(x);
-    else
+    static inline __m128  reinterpret_f(__m128  const x) {
         return x;
-}
+    }
+
+    static inline __m128  reinterpret_f(__m128d const x) {
+        return _mm_castpd_ps(x);
+    }
+
+    static inline __m128d reinterpret_d(__m128i const x) {
+        return _mm_castsi128_pd(x);
+    }
+
+    static inline __m128d reinterpret_d(__m128  const x) {
+        return _mm_castps_pd(x);
+    }
+
+    static inline __m128d reinterpret_d(__m128d const x) {
+        return x;
+    }
+#endif
 
 // Function infinite2d: returns a vector where all elements are +INF
 static inline Vec2d infinite2d() {

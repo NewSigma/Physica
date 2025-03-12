@@ -190,4 +190,6 @@ namespace Physica {
 #include "MatrixExprImpl/Exp.h"
 #include "MatrixExprImpl/Sin.h"
 #include "MatrixExprImpl/Cos.h"
+#include "MatrixExprImpl/Tanh.h"
+#include "MatrixExprImpl/Sech.h"
 #include "MatrixExprImpl/ExprVecProduct.h"

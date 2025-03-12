@@ -98,6 +98,13 @@ namespace Physica {
     void DiffCoro<Base>::reverse_impl() noexcept {
         if (handle) {
             assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
+            if constexpr (Scalar<Base>) {
+                if (Base::grad().isZero()) {
+                    handle.destroy();
+                    handle = nullptr;
+                    return;
+                }
+            }
             handle.promise().obj = Base(static_cast<Base&&>(*this));
             handle.resume();
             assert(handle.done() && "[Error]: Invalid reverse diff");

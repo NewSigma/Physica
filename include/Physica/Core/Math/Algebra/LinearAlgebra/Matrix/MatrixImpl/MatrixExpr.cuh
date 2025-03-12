@@ -124,4 +124,7 @@ namespace Physica {
 #include "MatrixExprImpl/Sqrt.cuh"
 #include "MatrixExprImpl/Relu.cuh"
 #include "MatrixExprImpl/Unit.cuh"
+#include "MatrixExprImpl/Square.cuh"
 #include "MatrixExprImpl/Ln.cuh"
+#include "MatrixExprImpl/Tanh.cuh"
+#include "MatrixExprImpl/Sech.cuh"

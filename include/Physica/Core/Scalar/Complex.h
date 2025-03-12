@@ -61,7 +61,8 @@ namespace Physica {
         Complex(const This&) = default;
         Complex(This&&) noexcept = default;
         /* Operators */
-        __host__ __device__ This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(const This&) = default;
+        This& operator=(This&&) = default;
         __host__ __device__ bool operator==(const This& other) const;
         /* Operations */
         [[nodiscard]] __host__ __device__ inline T squaredNorm() const;

@@ -28,10 +28,9 @@ namespace Physica {
             co_return ScalarType(abs(x.value()), x.value().isPositive() ? x.grad() : -x.grad());
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield abs(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(x_.isPositive() ? g : -g);
+            auto y = co_yield abs(x_.value());
+            auto& g = y.grad();
+            x_.reverse(x_.isPositive() ? g : -g);
         }
     }
 
@@ -50,10 +49,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield relu(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(x_.isPositive() ? g : Tv(0));
+            auto y = co_yield relu(x_.value());
+            x_.reverse(x_.isPositive() ? y.grad() : Tv(0));
         }
     }
 
@@ -67,10 +64,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield square(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(Tv(2) * x_.value() * g);
+            auto y = co_yield square(x_.value());
+            x_.reverse(Tv(2) * x_.value() * y.grad());
         }
     }
 
@@ -84,10 +79,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield reciprocal(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(-square(result.value()) * g);
+            auto y = co_yield reciprocal(x_.value());
+            x_.reverse(-square(y.value()) * y.grad());
         }
     }
 
@@ -102,10 +95,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield sqrt(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(reciprocal(result.value()) * Tv(0.5));
+            auto y = co_yield sqrt(x_.value());
+            x_.reverse(y.grad() / y.value() * Tv(0.5));
         }
     }
 
@@ -120,12 +111,9 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield cbrt(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero()) {
-                const auto x2_3 = result.value() / x_.value();
-                x_.reverse((Tv(1.0 / 3) * g) * x2_3);
-            }
+            auto y = co_yield cbrt(x_.value());
+            const auto x2_3 = y.value() / x_.value();
+            x_.reverse((Tv(1.0 / 3) * y.grad()) * x2_3);
         }
     }
 
@@ -141,10 +129,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield ln(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(g / x_.value());
+            auto y = co_yield ln(x_.value());
+            x_.reverse(y.grad() / x_.value());
         }
     }
 
@@ -180,10 +166,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield exp(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(result.value() * g);
+            auto y = co_yield exp(x_.value());
+            x_.reverse(y.value() * y.grad());
         }
     }
 
@@ -199,9 +183,8 @@ namespace Physica {
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             LazyDestroy<U&&> a_ = std::forward<U>(a);
-            auto result = co_yield pow(x_.value(), a_);
-            auto& g = result.grad();
-            x_.reverse(result.value() * g * a_ / x_.value());
+            auto y = co_yield pow(x_.value(), a_);
+            x_.reverse(y.value() * y.grad() * a_ / x_.value());
         }
     }
 
@@ -219,10 +202,8 @@ namespace Physica {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             Tv c, s;
             sincos(x_.value(), s, c);
-            auto result = co_yield c;
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(-s * g);
+            auto y = co_yield c;
+            x_.reverse(-s * y.grad());
         }
     }
 
@@ -240,10 +221,8 @@ namespace Physica {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             Tv c, s;
             sincos(x_.value(), s, c);
-            auto result = co_yield s;
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(c * g);
+            auto y = co_yield s;
+            x_.reverse(c * y.grad());
         }
     }
 
@@ -317,10 +296,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield cosh(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(sinh(x_.value()) * g);
+            auto y = co_yield cosh(x_.value());
+            x_.reverse(sinh(x_.value()) * y.grad());
         }
     }
 
@@ -333,10 +310,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield sinh(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(cosh(x_.value()) * g);
+            auto y = co_yield sinh(x_.value());
+            x_.reverse(cosh(x_.value()) * y.grad());
         }
     }
 
@@ -350,10 +325,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield tanh(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(square(sech(x_.value())) * g);
+            auto y = co_yield tanh(x_.value());
+            x_.reverse(square(sech(x_.value())) * y.grad());
         }
     }
 
@@ -366,10 +339,8 @@ namespace Physica {
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield lncosh(x_.value());
-            auto& g = result.grad();
-            if (!g.isZero())
-                x_.reverse(tanh(x_.value()) * g);
+            auto y = co_yield lncosh(x_.value());
+            x_.reverse(tanh(x_.value()) * y.grad());
         }
     }
 }

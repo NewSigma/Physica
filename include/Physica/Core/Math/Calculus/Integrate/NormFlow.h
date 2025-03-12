@@ -49,12 +49,13 @@ namespace Physica {
         using Base::vars;
         using Base::loss;
     private:
+        int batchsize;
         Trv decay;
         Trv mixing;
         Trv lastMean;
     public:
         NormFlow() = default;
-        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_ = 0, Trv mixing_ = 0.9);
+        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_ = 0, Trv mixing_ = 0.9);
         NormFlow(const This&) = default;
         NormFlow(This&&) noexcept = default;
         ~NormFlow() = default;
@@ -76,13 +77,20 @@ namespace Physica {
         Trv trial_ln(Net& nn, FuncValue& mean, FuncValue& var);
 
         Trv calcLoss_normal(FuncValue y, const CoDiff<T>& lnJ);
-        template<class Executor>
-        Trv calcLoss_ln(const VectorND<FuncValue>& samples, const VectorND<T>& lnJv);
+        template<Vector V, class Executor>
+        Trv calcLoss_ln(const V& samples, const VectorND<T>& lnJv);
     };
 
     template<Scalar T, bool TakeLn>
-    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, Trv decay_, Trv mixing_)
-            : Base(std::move(from), std::move(to), numRefine, numSample), decay(decay_), mixing(mixing_) {}
+    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_, Trv mixing_)
+            : Base(std::move(from), std::move(to), numRefine, (numSample + batchsize_ - 1) / batchsize_ * batchsize_)
+            , batchsize(batchsize_)
+            , decay(decay_)
+            , mixing(mixing_) {
+        assert(0 < batchsize && batchsize <= numSample && "[Error]: Invalid batchsize and cannot auto fix");
+        assert(!decay.isNegative());
+        assert(Trv(0) <= mixing && mixing <= Trv(1));
+    }
 
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, class Executor>
@@ -133,6 +141,7 @@ namespace Physica {
     void NormFlow<T, TakeLn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
+        std::swap(batchsize, obj.batchsize);
         decay.swap(obj.decay);
         mixing.swap(obj.mixing);
         lastMean.swap(obj.lastMean);
@@ -191,26 +200,32 @@ namespace Physica {
     auto NormFlow<T, TakeLn>::trial_ln(Net& nn, FuncValue& mean, FuncValue& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
-        const auto lnVolume = ln(to - from).sum();
+        const auto lnVolume = ln(coeff).sum();
 
         VectorND<FuncValue> samples(numSample);
-        VectorND<T> lnJv(numSample);
         Trv loss = 0;
         if constexpr (std::same_as<CUDAExecutor, Executor>) {
             const auto from_d = from.toDeviceAsync();
             const auto coeff_d = coeff.toDeviceAsync();
-            auto x = device_obj<MatrixND<Tv>>::template random_uniform<R>(getDim(), numSample);
-            const auto lnJs = nn.forward(x);
+            const int numBatch = numSample / batchsize;
 
-            lnJs.toHostAsync(lnJv);
-            x = from_d + hadamard(coeff_d, x);
-            samples = nn(x).toHost();
-            loss = calcLoss_ln<Executor>(samples, lnJv);
-            lnJs.reverse(lnJv.grads().toDeviceAsync());
-            samples += lnJv.values() + lnVolume;
+            VectorND<T> lnJv(batchsize);
+            for (int i = 0; i < numBatch; ++i) {
+                auto x = device_obj<MatrixND<Tv>>::template random_uniform<R>(getDim(), batchsize);
+                const auto lnJs = nn.forward(x);
+                auto seg = samples.segment(i * batchsize, (i + 1) * batchsize);
+
+                lnJs.toHostAsync(lnJv);
+                x = from_d + hadamard(coeff_d, x);
+                nn(x).toHost(seg);
+                loss = calcLoss_ln<decltype(seg), Executor>(seg, lnJv);
+                lnJs.reverse(lnJv.grads().toDeviceAsync());
+                seg += lnJv.values() + lnVolume;
+            }
         }
         else {
             Array<CoDiff<T>> lnJs(numSample);
+            VectorND<T> lnJv(batchsize);
             Array<Net> nets;
             if constexpr (std::same_as<SeqExecutor, Executor>) {
                 VectorND<Trv> x(getDim());
@@ -273,13 +288,13 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Executor>
-    auto NormFlow<T, TakeLn>::calcLoss_ln(const VectorND<FuncValue>& samples, const VectorND<T>& lnJv) -> Trv {
-        const size_t numSample = samples.getLength();
-        auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(numSample));
+    template<Vector V, class Executor>
+    auto NormFlow<T, TakeLn>::calcLoss_ln(const V& samples, const VectorND<T>& lnJv) -> Trv {
+        const size_t size = samples.getLength();
+        auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(size));
         mean = (Trv(1) - mixing) * mean + mixing * lastMean;
         lastMean = mean;
-        auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(numSample));
+        auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(size));
         if constexpr (ReverseDiff<T>)
             l.reverse();
         return l.value();
