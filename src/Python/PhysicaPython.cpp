@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <nanobind/stl/string.h>
 #include "Physica/Core/Exception/LLVMException.h"
 #include "Physica/Python/PhysicaPython.h"
 #include "Physica/Python/CXXPtr.h"
@@ -52,23 +53,23 @@ PhysicaPython& PhysicaPython::getInstance() noexcept {
     return *instance;
 }
 
-void pymain(py::module_& m);
+void pymain(nanobind::module_& m);
 
-PYBIND11_MODULE(PhysicaPython, m) {
+NB_MODULE(PhysicaPython, m) {
     m.doc() = "Backend of Physica Python interface";
-    py::register_exception<Physica::LLVMException>(m, "LLVMException");
+    std::ignore = nanobind::exception<LLVMException>(m, "LLVMException");
 
-    py::class_<CXXPtr>(m, "CXXPtr")
+    nanobind::class_<CXXPtr>(m, "CXXPtr")
             .def("__repr__", &CXXPtr::toString);
 
-    py::class_<CXXObj>(m, "CXXObj")
-            .def(py::init<CXXPtr, py::args>())
+    nanobind::class_<CXXObj>(m, "CXXObj")
+            .def(nanobind::init<CXXPtr, nanobind::args>())
             .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
             .def("construct", &CXXObj::construct)
-            .def("call", &CXXObj::call, py::return_value_policy::move);
+            .def("call", &CXXObj::call, nanobind::rv_policy::move);
 
-    py::class_<ASTCursor>(m, "ASTCursor")
-            .def(py::init([]() {
+    nanobind::class_<ASTCursor>(m, "ASTCursor")
+            .def(nanobind::new_([]() {
                 return ASTCursor(PhysicaPython::getInstance().getClang().getASTContext());
             }))
             .def("__repr__", &ASTCursor::toString)
@@ -79,12 +80,12 @@ PYBIND11_MODULE(PhysicaPython, m) {
             .def("reset", &ASTCursor::reset)
             .def("size", &ASTCursor::size);
 
-    m.def("init", [](std::string root) {
+    m.def("init", [](const char* root) {
         if (instance == nullptr)
             instance = new PhysicaPython(root);
     });
 
-    m.def("include", [](const char* includeName) -> CXXPtr { return (void*)PhysicaPython::getInstance().getClang().include(includeName); }, py::return_value_policy::move);
+    m.def("include", [](const char* includeName) -> CXXPtr { return (void*)PhysicaPython::getInstance().getClang().include(includeName); }, nanobind::rv_policy::move);
 
     m.def("compile", [](const char* moduleName) {
         PhysicaPython::getInstance().compile(moduleName);

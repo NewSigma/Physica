@@ -20,7 +20,6 @@
 
 #include <unordered_map>
 #include <filesystem>
-#include <pybind11/iostream.h>
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "Physica/Python/LLVM/Clang.h"
 #include "CXXType.h"
@@ -32,8 +31,6 @@ namespace Physica {
         using StrTypeMap = std::unordered_map<std::string, CXXType>;
         using LLJIT = llvm::orc::LLJIT;
 
-        py::scoped_ostream_redirect pyout;
-        py::scoped_estream_redirect pyerr;
         LLVM llvm;
         Clang clang;
         std::unique_ptr<LLJIT> jit;
@@ -48,7 +45,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] const CXXType& toCXXType(const std::string& typeName) const { return strTypeMap.at(typeName); }
-        [[nodiscard]] const CXXType& toCXXType(py::handle handle) const { return toCXXType(std::string(py::str(handle))); }
+        [[nodiscard]] const CXXType& toCXXType(nanobind::handle handle) const { return toCXXType(std::string(nanobind::str(handle).c_str())); }
 
         void compile(const char* moduleName);
         /* Getters */

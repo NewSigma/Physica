@@ -38,7 +38,7 @@ namespace Physica {
         const CXXRecordDecl* pDecl;
         void* pObj;
     public:
-        CXXObj(CXXPtr p, py::args tparams);
+        CXXObj(CXXPtr p, nanobind::args tparams);
         CXXObj(const CXXObj&) = delete;
         CXXObj(CXXObj&&) noexcept;
         ~CXXObj();
@@ -46,8 +46,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void construct(py::args args);
-        [[nodiscard]] py::object call(const char* rtnTyName, const char* name, py::args args);
+        void construct(nanobind::args args);
+        [[nodiscard]] nanobind::object call(const char* rtnTyName, const char* name, nanobind::args args);
         inline void swap(CXXObj& __restrict obj) noexcept;
         /* Getters */
         template<class T>
@@ -58,8 +58,8 @@ namespace Physica {
         CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept;
 
         static void* allocateObj(const CXXRecordDecl* pDecl);
-        [[nodiscard]] static const CXXRecordDecl* findSpecialization(const ClassTemplateDecl& templateDecl, py::args tparams);
-        [[nodiscard]] static bool matchParamT(const py::handle& pyarg, const clang::TemplateArgument& targ);
+        [[nodiscard]] static const CXXRecordDecl* findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams);
+        [[nodiscard]] static bool matchParamT(const nanobind::handle& pyarg, const clang::TemplateArgument& targ);
         [[nodiscard]] static ForeignFunc lookupFunc(clang::GlobalDecl decl);
     };
 

@@ -27,7 +27,7 @@
 
 using namespace Physica;
 
-CXXObj::CXXObj(CXXPtr p, py::args tparams) : pObj(nullptr) {
+CXXObj::CXXObj(CXXPtr p, nanobind::args tparams) : pObj(nullptr) {
     using namespace clang;
     const bool isPlainClass = tparams.size() == 0;
     if (isPlainClass) {
@@ -62,7 +62,7 @@ CXXObj::~CXXObj() {
     pObj = nullptr;
 }
 
-void CXXObj::construct(py::args) {
+void CXXObj::construct(nanobind::args) {
     assert(pDecl != nullptr);
     assert(pObj == nullptr && "[Error]: Double construct is not allowed");
     using DefaultCtorType = void (*)(void*);
@@ -81,7 +81,7 @@ void CXXObj::construct(py::args) {
         throw LLVMException("No available default contructor");
 }
 
-py::object CXXObj::call(const char* rtnTyName, const char* name, py::args args) {
+nanobind::object CXXObj::call(const char* rtnTyName, const char* name, nanobind::args args) {
     clang::GlobalDecl funcDecl;
     for (auto pFunc : pDecl->methods()) {
         using namespace clang;
@@ -127,7 +127,7 @@ void* CXXObj::allocateObj(const CXXRecordDecl* pDecl) {
     return std::aligned_alloc(ctx.getTypeAlign(type), ctx.getTypeSize(type));
 }
 
-const CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, py::args tparams) {
+const CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams) {
     using namespace clang;
     const size_t numArgs = tparams.size();
     for (const ClassTemplateSpecializationDecl* pSpec : templateDecl.specializations()) {
@@ -145,7 +145,7 @@ const CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl&
     return nullptr;
 }
 
-bool CXXObj::matchParamT(const py::handle& pyarg, const clang::TemplateArgument& targ) {
+bool CXXObj::matchParamT(const nanobind::handle& pyarg, const clang::TemplateArgument& targ) {
     using Kind = clang::TemplateArgument::ArgKind;
     switch (targ.getKind()) {
     case Kind::Null:
@@ -157,7 +157,7 @@ bool CXXObj::matchParamT(const py::handle& pyarg, const clang::TemplateArgument&
     case Kind::NullPtr:
         return false;
     case Kind::Integral:
-        return targ.getAsIntegral() == int64_t(pyarg.cast<py::int_>());
+        return targ.getAsIntegral() == int64_t(nanobind::int_(pyarg));
     case Kind::Template:
         return false;
     case Kind::TemplateExpansion:

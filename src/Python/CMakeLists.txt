@@ -1,14 +1,12 @@
 enable_language(C)
 ##############################################Libs################################################
-set(PYBIND11_FINDPYTHON ON)
-find_package(pybind11 REQUIRED CONFIG)
+find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+execute_process(COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+                OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
 
+find_package(nanobind REQUIRED CONFIG)
 find_package(LLVM REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)
-if (NOT ${LLVM_ENABLE_RTTI})
-    message(FATAL_ERROR "Build LLVM with RTTI is required")
-endif()
-
 find_package(FFI REQUIRED)
 #############################################Project##############################################
 file(GLOB_RECURSE SOURCES_PYTHON *.cpp)
@@ -16,10 +14,9 @@ if(${PHYSICA_CUDA})
     file(GLOB_RECURSE CUDA_SOURCES_PYTHON *.cu)
     list(APPEND SOURCES_PYTHON ${CUDA_SOURCES_PYTHON})
 endif()
-pybind11_add_module(PhysicaPython ${SOURCES_PYTHON})
+nanobind_add_module(PhysicaPython NOMINSIZE ${SOURCES_PYTHON})
 
 set(LLVM_INCLUDE_DIR "${LLVM_INSTALL_PREFIX}/lib/clang/${LLVM_VERSION_MAJOR}/include")
-target_include_directories(PhysicaPython SYSTEM PRIVATE ${pybind11_INCLUDE_DIRS})
 target_include_directories(PhysicaPython SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
 target_include_directories(PhysicaPython SYSTEM PRIVATE ${FFI_INCLUDE_DIRS})
 

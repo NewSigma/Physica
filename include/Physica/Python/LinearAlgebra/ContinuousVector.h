@@ -18,13 +18,15 @@
  */
 #pragma once
 
-#include <pybind11/numpy.h>
+#include <nanobind/ndarray.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/ContinuousVector.h"
 
 namespace Physica {
     template<class Derived>
     auto ContinuousVector<Derived>::toNumpy() const {
+        using namespace nanobind;
         using T = ScalarType::MachineType;
-        return pybind11::array_t<T>(Base::getLength(), (const T*)data());
+        using ResultType = ndarray<T, numpy>;
+        return ResultType((const T*)data(), Base::getLength());
     }
 }

@@ -18,17 +18,17 @@
  */
 #pragma once
 
-#include <pybind11/numpy.h>
+#include <nanobind/ndarray.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/ContinuousMatrix.h"
 
 namespace Physica {
     template<class Derived>
     auto ContinuousMatrix<Derived>::toNumpy() const {
+        using namespace nanobind;
         static_assert(MatrixOption::isElementMatrix<Derived>(), "[Error]: Vector storage cannot cast to numpy");
-        constexpr int Major = MatrixOption::getMajor<Derived>() == MatrixOption::Row
-                            ? pybind11::array::c_style
-                            : pybind11::array::f_style;
+        constexpr auto Major = MatrixOption::getMajor<Derived>() == MatrixOption::Row ? c_config : f_contig;
         using T = ScalarType::MachineType;
-        return pybind11::array_t<T, Major>({Base::getRow(), Base::getCol()}, (const T*)data());
+        using ResultType = ndarray<T, numpy, Major>;
+        return ResultType((const T*)data(), {Base::getRow(), Base::getCol()});
     }
 }

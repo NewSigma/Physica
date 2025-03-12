@@ -16,13 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 #include "Physica/Core/Version.h"
 
 using namespace Physica;
-namespace py = pybind11;
 
-void pymain(py::module_& m) {
+void pymain(nanobind::module_& m) {
     m.def("pymain", version, "This func is empty, you can include Physica headers to test your code.");
 
     m.def("version", version);

@@ -66,7 +66,7 @@ namespace Physica {
 
         GenType gen;
         VSLStreamStatePtr pStream;
-        curandGenerator_t curand;
+        [[no_unique_address]] curandGenerator_t curand;
 
         SeedType seed;
     public:
@@ -109,7 +109,9 @@ namespace Physica {
     template<RandomOption Option, uint64_t FixedSeed>
     Random<Option, FixedSeed>::~Random() {
         check_vsl(vslDeleteStream(&pStream));
+    #ifdef PHYSICA_CUDA
         check(curandDestroyGenerator(curand));
+    #endif
     }
 
     template<RandomOption Option, uint64_t FixedSeed>

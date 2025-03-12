@@ -33,14 +33,14 @@ CXXType::CXXType(clang::CXXRecordDecl* pDecl_) : pDecl(pDecl_) {
 CXXType::CXXType(ffi_type ffiType_)
         : pDecl(nullptr), ffiType(ffiType_) {}
 
-py::object CXXType::toPython(void* data) const {
+nanobind::object CXXType::toPython(void* data) const {
     switch (ffiType.type) {
     case FFI_TYPE_VOID:
-        return py::none();
+        return nanobind::none();
     case FFI_TYPE_FLOAT:
-        return py::float_(*reinterpret_cast<float*>(data));
+        return nanobind::float_(*reinterpret_cast<float*>(data));
     case FFI_TYPE_DOUBLE:
-        return py::float_(*reinterpret_cast<double*>(data));
+        return nanobind::float_(*reinterpret_cast<double*>(data));
     default:
         throw std::runtime_error("[Error]: Unknown type");
     }

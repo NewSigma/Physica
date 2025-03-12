@@ -20,9 +20,7 @@
 
 #include <ffi.h>
 #include <clang/AST/DeclCXX.h>
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
+#include <nanobind/nanobind.h>
 
 namespace Physica {
     class CXXType {
@@ -45,7 +43,7 @@ namespace Physica {
         CXXType& operator=(CXXType obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] const ffi_type* toFFI() const noexcept { return &ffiType; }
-        [[nodiscard]] py::object toPython(void* data) const;
+        [[nodiscard]] nanobind::object toPython(void* data) const;
         [[nodiscard]] Ptr allocate() const noexcept;
         void swap(CXXType& __restrict obj) noexcept;
         /* Getters */
