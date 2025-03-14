@@ -47,6 +47,11 @@ namespace Physica {
     }
 
     template<tparams>
+    void device_obj<DenseMatrix>::zero_grad() {
+        g.zeros();
+    }
+
+    template<tparams>
     __host__ __device__ void device_obj<DenseMatrix>::resize(size_t row, size_t col) {
         v.resize(row, col);
         g.resize(row, col);

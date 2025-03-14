@@ -28,7 +28,6 @@ namespace Physica {
      */
     template<Scalar T>
     class device_obj<LinearCoupler<T>> {
-        constexpr static int Option = MatrixOption::Row | MatrixOption::Element;
         using This = device_obj<LinearCoupler<T>>;
         using Tv = T::ValueType;
     public:
@@ -101,37 +100,42 @@ namespace Physica {
      */
     template<Scalar T>
     auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const -> CoDiff<device_obj<VectorND<T>>> {
+        constexpr static int Option = MatrixOption::Row | MatrixOption::Element;
         const int numSample = z.getCol();
         auto indices = device_obj<Array2D<size_t, Option>>(getDim(), numSample);
-        auto deltas = device_obj<DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>>(numSample, getDim(), 1);
+        auto deltas = device_obj<DenseMatrix<T, Option>>(numSample, getDim(), 1);
+        auto lnsumexps = device_obj<DenseMatrix<Tv, Option>>(numSample, getDim());
 
         auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
         config.blocks.y = getDim();
         auto fwd = [dim = getDim(),
                     numBin = numBin,
-                    weights_ = asStruct(weights),
+                    weights_ = asStruct(weights.values()),
                     z_ = asStruct(z),
                     indices_ = asStruct(indices),
-                    deltas_ = asStruct(deltas),
+                    deltas_ = asStruct(deltas.values()),
+                    lnsumexps_ = asStruct(lnsumexps),
                     factor = calcFactor()] __device__() mutable {
             const int sample = blockIdx.x * blockDim.x + threadIdx.x;
             const int i = blockIdx.y;
-            const auto weights = weights_.getDerived().col(sample);
             auto z = z_.getDerived().col(sample);
-            auto& indices = indices_.getDerived();
-            auto& deltas = deltas_.getDerived();
             if (z[i].isZero())
                 return;
 
+            auto& indices = indices_.getDerived();
             const Tv tmp = z[i] * factor;
             const int index = tmp.toMachine();
             indices(i, sample) = index;
 
+            const auto weights = weights_.getDerived().col(sample);
+            auto& deltas = deltas_.getDerived();
+            auto& lnsumexps = lnsumexps_.getDerived();
             const auto grid = weights.reshape_row(dim, numBin);
-            const auto row = grid.row(i).values();
+            const auto row = grid.row(i);
             const Tv lnsumexp = row.lnSumExp();
             const Tv p = softmax(row).calc(index, lnsumexp);
-            deltas(sample, i) = std::max(p, Tv(std::numeric_limits<Tv>::min()));
+            deltas(sample, i).value() = std::max(p, Tv(std::numeric_limits<Tv>::min()));
+            lnsumexps(sample, i) = lnsumexp;
 
             Tv zi = tmp.mod() * p;
             for (int j = 0; j < index; ++j)
@@ -150,21 +154,24 @@ namespace Physica {
                          weights_ = asStruct(weights),
                          z_ = asStruct(z),
                          indices_ = asStruct(indices),
-                         deltas_ = asStruct(deltas)] __device__() mutable {
+                         deltaG_ = asStruct(deltas.grads()),
+                         lnsumexps_ = asStruct(lnsumexps)] __device__() mutable {
                 const int sample = blockIdx.x * blockDim.x + threadIdx.x;
                 const int i = blockIdx.y;
                 const auto weights = weights_.getDerived().col(sample);
                 const auto& indices = indices_.getDerived();
-                const auto& deltas = deltas_.getDerived();
+                const auto& deltaG = deltaG_.getDerived();
+                const auto& lnsumexps = lnsumexps_.getDerived();
                 auto z = z_.getDerived().col(sample);
                 if (z[i].isZero())
                     return;
 
                 const auto grid = weights.reshape_row(dim, numBin);
-                const int index = indices(i, sample);
                 const auto row = grid.row(i);
-                const Tv s = row.values().softmax(index);
-                const Tv g = (s - square(s)) * deltas(sample, i).grad();
+                const int index = indices(i, sample);
+                const Tv lnsumexp = lnsumexps(sample, i);
+                const Tv s = softmax(row.values()).calc(index, lnsumexp);
+                const Tv g = (s - square(s)) * deltaG(sample, i);
                 row.reverse(-g / Tv(numBin));
                 row[index].reverse(g);
             };

@@ -59,6 +59,8 @@ namespace Physica {
         using Base::operator=;
         using Base::operator();
         /* Operations */
+        void zero_grad();
+
         using Base::resize;
         __host__ __device__ void resize(size_t row, size_t col);
 

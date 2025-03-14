@@ -87,15 +87,15 @@ namespace Physica {
         constexpr ~ScalarBase() = default;
         /* Operators */
         template<Scalar U>
-        __host__ __device__ inline void operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ inline void operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator+=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ inline void operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator-=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ inline void operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator*=(const U& x) requires(!isReverseDiff);
+        __host__ __device__ inline void operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator/=(const U& x) requires(!isReverseDiff);
+        __host__ __device__ inline void operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         __host__ __device__ inline bool operator>(float s) const noexcept;
         __host__ __device__ inline bool operator<(float s) const noexcept;
         __host__ __device__ inline bool operator>(double s) const noexcept;
@@ -154,16 +154,18 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ inline void ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         Base::getDerived() = ScalarType(x);
     }
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
-        if constexpr (isReverseDiff || ReverseDiff<U>)
+        if constexpr (ReverseDiff<U>)
+            y += x.value();
+        else if constexpr (isReverseDiff)
             y.value() += x;
         else
             y = y + x;
@@ -171,10 +173,12 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
-        if constexpr (isReverseDiff || ReverseDiff<U>)
+        if constexpr (ReverseDiff<U>)
+            y -= x.value();
+        else if constexpr (isReverseDiff)
             y.value() -= x;
         else
             y = y - x;
@@ -182,18 +186,28 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) requires(!isReverseDiff) {
+    __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
-        y = y * x;
+        if constexpr (ReverseDiff<U>)
+            y *= x.value();
+        else if constexpr (isReverseDiff)
+            y.value() *= x;
+        else
+            y = y * x;
     }
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) requires(!isReverseDiff) {
+    __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
         auto& y = Base::getDerived();
-        y = y / x;
+        if constexpr (ReverseDiff<U>)
+            y /= x.value();
+        else if constexpr (isReverseDiff)
+            y.value() /= x;
+        else
+            y = y / x;
     }
 
     template<class Derived>

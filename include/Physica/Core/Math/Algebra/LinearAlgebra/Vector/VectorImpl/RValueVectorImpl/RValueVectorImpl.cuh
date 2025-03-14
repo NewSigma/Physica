@@ -218,6 +218,50 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::max(int tid, int numThread, T* __restrict shared) const -> T {
+        T local = std::numeric_limits<T>::lowest();
+        for (int i = tid; i < getLength(); i += numThread)
+            local = std::max(local, calc(i));
+        shared[tid] = local;
+        __syncthreads();
+
+        for (int i = (numThread + 1) / 2; i > 0; i /= 2) {
+            if ((tid < i) && (tid + i < numThread))
+                shared[tid] = std::max(shared[tid], shared[tid + i]);
+            __syncthreads();
+        }
+        return shared[0];
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::sum(int tid, int numThread, T* __restrict shared) const -> T {
+        T local = 0;
+        for (int i = tid; i < getLength(); i += numThread)
+            local += calc(i);
+        shared[tid] = local;
+        __syncthreads();
+
+        for (int i = (numThread + 1) / 2; i > 0; i /= 2) {
+            if ((tid < i) && (tid + i < numThread))
+                shared[tid] += shared[tid + i];
+            __syncthreads();
+        }
+        return shared[0];
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::lnSumExp(int tid, int numThread, T* __restrict shared) const -> T {
+        assert(tid < numThread);
+        const auto& v = Base::getDerived();
+        Tv m;
+        if constexpr (isComplex)
+            m = values().reals().max(tid, numThread, shared);
+        else
+            m = values().max(tid, numThread, shared);
+        return ln(exp(v - m).sum(tid, numThread, shared) + Trv(std::numeric_limits<Trv>::min())) + m; // Add min() to avoid ln(0)
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<RValueVector<Derived>>::reals() const noexcept {
         return device_obj<RealVector<Derived>>(Base::getDerived());
     }

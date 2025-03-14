@@ -26,10 +26,12 @@ namespace Physica {
         using host_obj = MatrixSum<M, ReduceCol>;
         using This = device_obj<MatrixSum<M, ReduceCol>>;
         using Base = device_obj<RValueVector<host_obj>>;
+    public:
+        using Base::isReverseDiff;
+        using Base::MaxThreadPerBlock;
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using Base::isReverseDiff;
     private:
         PlainStruct<const device_obj<M>> mat;
     public:
@@ -48,6 +50,7 @@ namespace Physica {
         void reverse(const V& grad_) const noexcept requires(isReverseDiff);
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const;
+        [[nodiscard]] __host__ __device__ const device_obj<M>& getExpr() const noexcept { return mat.getDerived(); }
     };
 
     template<class M, bool ReduceCol>

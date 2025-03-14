@@ -3,7 +3,7 @@
 Physica is a high-performance and scalable C++ template library, dedicated to providing a rapid iteration platform for new algorithms. It provides the following two main features:
 
 - Differentiable linear algebra library that leverages SIMD and GPU acceleration
-- Domain specific composable module for computational physics
+- Domain specific composable modules for computational physics
 
 Physica is also an open source platform that maintains scientific code written in Physica and related data. We expect Physica, as a platform and not just a software, to promote the development of open science. The open source community continuously ensures that the results remain readable, reproducible and reliable.
 
@@ -22,7 +22,8 @@ Optimal performance and scalability: Balancing between performance, scalability 
 
 ## Features
 
-- Compiling time optimization using template expressions  
+- Operator fusion using template expressions both on CPU and GPU  
+- Coroutine based auto differentiation implementation  
 - Basic math library: Provides commonly used functions such as ODE, PDE, special functions, optimization, statistics, etc.
 - Classical molecular dynamics(MD), path integral molecular dynamics(PIMD) simulations using NVE, NVT and NPT ensembles
 - Multithreads and CUDA parallel support

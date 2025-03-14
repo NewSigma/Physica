@@ -76,6 +76,10 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] __device__ inline auto crossProduct(const device_obj<V>& v) const noexcept;
 
+        [[nodiscard]] __device__ T max(int tid, int numThread, T* __restrict shared) const;
+        [[nodiscard]] __device__ T sum(int tid, int numThread, T* __restrict shared) const;
+        [[nodiscard]] __device__ T lnSumExp(int tid, int numThread, T* __restrict shared) const;
+
         [[nodiscard]] __host__ __device__ auto reals() const noexcept;
         [[nodiscard]] __host__ __device__ auto imags() const noexcept;
         [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;

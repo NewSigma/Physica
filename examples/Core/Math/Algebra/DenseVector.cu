@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,21 +17,21 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using MatrixType = DenseHermiteMatrix<cfloat64>;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937>;
+using DVector = device_obj<VectorND<float64>>; // Simply address anything with device_obj<> to get its CUDA version
 
 int main() {
-    const auto mat = MatrixType::random_uniform<RandomType>(5000);
+    DVector a(8, 1.0);
+    auto b_ = VectorND<float64>{1, 2, 3, 4, 5, 6, 7, 8}; // Any host vector
+    DVector b = b_.toDeviceAsync(); // Async version, pass to GPU
+    auto c = DVector::random_uniform<RandomSource>(8);
+    DVector d(8);
 
-    JacobiDavidson<cfloat64> jd(mat.getRow(), 4);
-    jd.compute(mat, VectorND<cfloat64>::random_uniform<RandomType>(mat.getRow()));
-    jd.sort();
-
-    std::cout << jd.getEigenvalues().reals().format() << std::endl;
+    d = hadamard(sin(a) + b, square(c)); // Any combination is OK, kernel is fused and only 1 CUDA kernel will be issued
+    std::cout << d.toHost().format() << std::endl; // Sync version, wait for GPU finishing its work
     return 0;
 }

@@ -26,21 +26,32 @@ namespace Physica {
             : public device_obj<UnitaryMatrixExpr<ExprType::Ln, M>> {
         using Base = device_obj<UnitaryMatrixExpr<ExprType::Ln, M>>;
     public:
+        using Base::isReverseDiff;
+    protected:
         using typename Base::T;
         using typename Base::Tv;
-        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return ln(Base::getExpr().calc(row, col)); }
-
-        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return ln(Base::getExpr().calc_value(row, col));
-        }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
 
         template<Vector U>
         void reverse(const U& grad) const noexcept requires(isReverseDiff);
     };
+
+    template<Matrix M>
+    __device__ auto device_obj<MatrixExpr<ExprType::Ln, M>>::calc(size_t row, size_t col) const -> T {
+        if constexpr (isReverseDiff)
+            return calc_value(row, col);
+        else
+            return ln(Base::getExpr().calc(row, col));
+    }
+
+    template<Matrix M>
+    __device__ auto device_obj<MatrixExpr<ExprType::Ln, M>>::calc_value(size_t row, size_t col) const -> Tv {
+        return ln(Base::getExpr().calc_value(row, col));
+    }
 
     template<Matrix M>
     template<Vector U>

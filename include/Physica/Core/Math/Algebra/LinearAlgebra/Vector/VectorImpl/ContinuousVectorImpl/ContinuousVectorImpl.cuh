@@ -41,7 +41,7 @@ namespace Physica {
                 const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
                 auto& x = x_.getDerived();
                 if (index < x.getLength())
-                    x.grads()[index] = g;
+                    x.grads()[index] += g;
             };
             CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
         }
@@ -54,7 +54,7 @@ namespace Physica {
                 const auto& g = g_.getDerived();
                 auto& x = x_.getDerived();
                 if (index < x.getLength())
-                    x.grads()[index] = g.calc(index);
+                    x.grads()[index] += g.calc(index);
             };
             CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
         }
