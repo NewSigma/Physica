@@ -26,9 +26,7 @@ namespace Physica {
     inline void RValueVector<Derived>::assign(V& v) const {
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
-        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
-        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
+        assign_check(v);
 
         assert(getLength() == v.getLength() && "[Error]: Size mismatch between two vector");
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
@@ -44,9 +42,7 @@ namespace Physica {
     inline void RValueVector<Derived>::assign_add(V& v) const {
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
-        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
-        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
+        assign_check(v);
 
         assert(getLength() == v.getLength() && "[Error]: Size mismatch between two vector");
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
@@ -360,7 +356,7 @@ namespace Physica {
         const auto x_mean = mean();
         const auto expr = x - x_mean;
         const auto expr2 = square(expr);
-        auto result = expr2.sum() / Trv(length - 1);
+        auto result = expr2.sum() / Trv(length);
         if constexpr (isReverseDiff) {
             auto tmp = co_yield result.value();
             result.reverse(tmp.grad());
@@ -553,6 +549,16 @@ namespace Physica {
             return Base::getDerived().template grads<GradOrder>();
         else
             return grads_impl<GradOrder>();
+    }
+
+    template<class Derived>
+    template<Vector V>
+    __host__ __device__ void RValueVector<Derived>::assign_check(const V& target) noexcept {
+        constexpr static size_t Size1 = SizeAtCompile;
+        constexpr static size_t Size2 = V::SizeAtCompile;
+        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
+        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
+        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
     }
 
     template<class Derived>

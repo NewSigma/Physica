@@ -86,7 +86,6 @@ namespace Physica {
             , decay(decay_) {
         assert(0 < batchsize && batchsize <= numSample && "[Error]: Invalid batchsize and cannot auto fix");
         assert(!decay.isNegative());
-        assert(Trv(0) <= mixing && mixing <= Trv(1));
     }
 
     template<Scalar T, bool TakeLn>
@@ -180,7 +179,7 @@ namespace Physica {
             for (auto& net : nets)
                 nn.reverse(net);
             mean = samples.mean();
-            var = samples.variance(mean);
+            var = samples.variance();
         }
         const auto volume = (to - from).prod();
         mean *= volume;
@@ -203,8 +202,9 @@ namespace Physica {
             const int numBatch = numSample / batchsize;
 
             VectorND<T> lnJv(batchsize);
+            device_obj<MatrixND<Tv>> x(getDim(), batchsize);
             for (int i = 0; i < numBatch; ++i) {
-                auto x = device_obj<MatrixND<Tv>>::template random_uniform<R>(getDim(), batchsize);
+                x.template random_uniform<R>();
                 const auto lnJs = nn.forward(x);
                 auto seg = samples.segment(i * batchsize, (i + 1) * batchsize);
 
@@ -269,10 +269,8 @@ namespace Physica {
             maxSample = samples.max().value(); // Assuming f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);
 
-        mean = samples.mean();
-        var = samples.variance(mean);
-        mean = ln(mean) + maxSample;
-        var = ln(var) + Trv(2) * maxSample;
+        mean = ln(samples.mean()) + maxSample;
+        var = ln(samples.variance() + std::numeric_limits<T>::min()) + Trv(2) * maxSample;
         return loss - ln(Trv(numSample));
     }
 

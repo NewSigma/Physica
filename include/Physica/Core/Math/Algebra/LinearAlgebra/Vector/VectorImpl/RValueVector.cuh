@@ -25,7 +25,8 @@
 namespace Physica {
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public CRTPBase<device_obj<RValueVector<Derived>>> {
-        using This = device_obj<RValueVector<Derived>>;
+        using host_obj = RValueVector<Derived>;
+        using This = device_obj<host_obj>;
         using Base = CRTPBase<This>;
         using TraitsType = Traits<device_obj<Derived>>;
     public:

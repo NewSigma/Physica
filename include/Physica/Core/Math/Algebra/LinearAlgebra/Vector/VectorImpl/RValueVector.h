@@ -181,6 +181,9 @@ namespace Physica {
         [[nodiscard]] auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        /* Static members */
+        template<Vector V>
+        __host__ __device__ static void assign_check(const V& target) noexcept;
     protected:
         RValueVector() = default;
         RValueVector(const RValueVector&) = default;

@@ -144,8 +144,8 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
-        template<Matrix M1, Matrix M2>
-        __host__ __device__ static void assign_check(const M1& source, const M2& target) noexcept;
+        template<Matrix M>
+        __host__ __device__ static void assign_check(const M& target) noexcept;
     protected:
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;

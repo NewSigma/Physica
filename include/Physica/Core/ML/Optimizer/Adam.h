@@ -85,7 +85,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const Args& getArgs() const noexcept { return args; }
         [[nodiscard]] Args& getArgs() noexcept { return args; }
-        [[nodiscard]] T getLearnRate() const noexcept { return args.lr; }
+        [[nodiscard]] T& getLearnRate() noexcept { return args.lr; }
+        [[nodiscard]] const T& getLearnRate() const noexcept { return args.lr; }
         /* Friends */
         friend class device_obj<This>;
     };

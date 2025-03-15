@@ -35,28 +35,20 @@ namespace Physica {
     template<class Derived>
     template<class U>
     void device_obj<ContinuousVector<Derived>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
-        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        if constexpr (Scalar<U>) {
-            auto func = [x_ = asStruct(Base::getConstCastDerived()), g = grad] __device__() mutable {
-                const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-                auto& x = x_.getDerived();
-                if (index < x.getLength())
-                    x.grads()[index] += g;
-            };
-            CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
-        }
+        static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        if constexpr (Scalar<U>)
+            Base::getConstCastDerived().grads() += grad;
         else {
-            static_assert(Vector<U>, "[Error]: Unexpected type");
             static_assert(CUDA<U>, "[Error]: Cannot pass host grad to device");
-            assert(Base::getLength() == grad.getLength());
-            auto func = [x_ = asStruct(Base::getConstCastDerived()), g_ = asStruct(grad)] __device__() mutable {
-                const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-                const auto& g = g_.getDerived();
-                auto& x = x_.getDerived();
-                if (index < x.getLength())
-                    x.grads()[index] += g.calc(index);
-            };
-            CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
+            if constexpr (Vector<U>) {
+                assert(Base::getLength() == grad.getLength());
+                Base::getConstCastDerived().grads() += grad;
+            }
+            else {
+                static_assert(Matrix<U>, "[Error]: Unexpected type");
+                assert(Base::getLength() == grad.getRow());
+                reverse(grad.sum_cols());
+            }
         }
     }
 
@@ -71,7 +63,12 @@ namespace Physica {
     template<Vector V>
     void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<V>& obj) const {
         obj.resize(Base::getLength());
-        check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
+        if constexpr (Diffable<T>) {
+            Base::getDerived().values().toHostAsync(obj.getDerived().values());
+            Base::getDerived().grads().toHostAsync(obj.getDerived().grads());
+        }
+        else
+            check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
     }
 
     template<class Derived>
@@ -157,9 +154,8 @@ namespace Physica {
     template<class Derived>
     void device_obj<ContinuousVector<Derived>>::zeros() {
         if constexpr (Diffable<T>) {
-            auto p = data();
-            check(cudaMemsetAsync(p.value_ptr(), 0, Base::getLength() * sizeof(T), CUDAContext::getInstance()));
-            check(cudaMemsetAsync(p.grad_ptr(), 0, Base::getLength() * sizeof(T), CUDAContext::getInstance()));
+            Base::getDerived().values().zeros();
+            Base::getDerived().grads().zeros();
         }
         else
             check(cudaMemsetAsync(data(), 0, Base::getLength() * sizeof(T)));
@@ -193,10 +189,10 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<V>>& obj) const {
-        static_assert(std::is_same<ScalarType, typename V::ScalarType>::value,
+        static_assert(std::is_same<T, typename V::ScalarType>::value,
                 "[Error]: ScalarType inconsistent, additional buffer is necessary");
         const size_t length = Base::getLength();
-        const size_t size = length * sizeof(ScalarType);
+        const size_t size = length * sizeof(T);
         obj.resize(length);
         if constexpr (V::SizeAtCompile != Dynamic)
             memcpy(obj.data(), data(), size);

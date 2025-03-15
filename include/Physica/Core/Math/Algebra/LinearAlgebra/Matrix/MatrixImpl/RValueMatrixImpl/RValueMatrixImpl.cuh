@@ -26,9 +26,9 @@ namespace Physica {
     template<class Derived>
     template<Matrix M>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M& target) const requires(CUDA<M>) {
-        host_obj::assign_check(Base::getDerived(), target);
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+        host_obj::assign_check(target);
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
@@ -60,6 +60,9 @@ namespace Physica {
     template<class Derived>
     template<Matrix M>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(M& target) const requires(CUDA<M>) {
+        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
+        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+        host_obj::assign_check(target);
         target = target + Base::getDerived();
     }
 

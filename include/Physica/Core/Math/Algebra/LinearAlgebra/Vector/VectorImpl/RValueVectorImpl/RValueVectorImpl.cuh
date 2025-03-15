@@ -26,12 +26,8 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const requires(CUDA<V>) {
-        constexpr static size_t Size1 = SizeAtCompile;
-        constexpr static size_t Size2 = V::SizeAtCompile;
-        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
-        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
         assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+        host_obj::assign_check(target);
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();

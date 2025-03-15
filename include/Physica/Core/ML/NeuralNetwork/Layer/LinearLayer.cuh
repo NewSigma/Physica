@@ -88,7 +88,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
         [[nodiscard]] const auto& getWeights() const noexcept { return weights; }
+        [[nodiscard]] auto& getWeights() noexcept { return weights; }
         [[nodiscard]] const auto& getBias() const noexcept requires(WithBias) { return bias; }
+        [[nodiscard]] auto& getBias() noexcept requires(WithBias) { return bias; }
         /* Friends */
         friend class LinearLayer<T, WithBias>;
     };

@@ -83,8 +83,8 @@ namespace Physica {
         device_obj<MatrixND<Tv>> xB = x - xA;
 
         auto w1 = nn.forward(xA);
-        auto w2 = nn.forward(xB);
         auto lnJs1 = transform(w1, xB);
+        auto w2 = nn.forward(xB);
         auto lnJs2 = transform(w2, xA);
         x = xA + xB;
         if constexpr (ReverseDiff<T>) {
