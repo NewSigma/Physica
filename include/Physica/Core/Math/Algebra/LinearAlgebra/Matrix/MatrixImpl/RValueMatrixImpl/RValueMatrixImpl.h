@@ -331,8 +331,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::reals() const noexcept {
-        return RealMatrix<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::reals() const noexcept -> RealsRtnTy {
+        return RealsRtnTy(Base::getDerived());
     }
 
     template<class Derived>

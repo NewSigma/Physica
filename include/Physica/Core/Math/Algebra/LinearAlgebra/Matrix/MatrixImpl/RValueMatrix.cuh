@@ -50,6 +50,7 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     private:
+        using RealsRtnTy = std::conditional<isComplex, device_obj<RealMatrix<Derived>>, device_obj<Derived>&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, device_obj<ValueMatrix<Derived>>, device_obj<Derived>&>::type;
     public:
         ~device_obj() = default;
@@ -100,7 +101,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
 
-        [[nodiscard]] __host__ __device__ auto reals() const noexcept;
+        [[nodiscard]] __host__ __device__ RealsRtnTy reals() const noexcept;
         [[nodiscard]] __host__ __device__ auto imags() const noexcept;
         [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;
         [[nodiscard]] __host__ __device__ auto norms() const noexcept;

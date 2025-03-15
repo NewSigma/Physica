@@ -43,6 +43,7 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     private:
+        using RealsRtnTy = std::conditional<isComplex, device_obj<RealVector<Derived>>, device_obj<Derived>&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, device_obj<ValueVector<Derived>>, device_obj<Derived>&>::type;
     public:
         ~device_obj() = default;
@@ -80,7 +81,7 @@ namespace Physica {
         [[nodiscard]] __device__ T sum(int tid, int numThread, T* __restrict shared) const;
         [[nodiscard]] __device__ T lnSumExp(int tid, int numThread, T* __restrict shared) const;
 
-        [[nodiscard]] __host__ __device__ auto reals() const noexcept;
+        [[nodiscard]] __host__ __device__ RealsRtnTy reals() const noexcept;
         [[nodiscard]] __host__ __device__ auto imags() const noexcept;
         [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;
         [[nodiscard]] __host__ __device__ auto norms() const noexcept;

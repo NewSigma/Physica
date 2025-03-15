@@ -38,6 +38,7 @@ namespace Physica {
         T repelU;
         [[no_unique_address]] HopIndexArray hopIndexArr;
     public:
+        Hubbard() = default;
         Hubbard(Base lattice, T hoppingT_, T repelU_);
         Hubbard(const This&) = default;
         Hubbard(This&&) noexcept = default;

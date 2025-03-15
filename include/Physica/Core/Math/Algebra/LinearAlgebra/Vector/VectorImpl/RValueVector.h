@@ -102,6 +102,7 @@ namespace Physica {
     private:
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
+        using RealsRtnTy = std::conditional<isComplex, RealVector<Derived>, Derived&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, ValueVector<Derived>, Derived&>::type;
     public:
         ~RValueVector() = default;
@@ -171,7 +172,7 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         auto reshape_row(size_t row, size_t col) const noexcept;
 
-        [[nodiscard]] auto reals() const noexcept;
+        [[nodiscard]] RealsRtnTy reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;
         [[nodiscard]] auto squaredNorms() const noexcept;
         [[nodiscard]] auto norms() const noexcept;

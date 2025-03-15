@@ -51,11 +51,9 @@ namespace Physica {
     private:
         int batchsize;
         Trv decay;
-        Trv mixing;
-        Trv lastMean;
     public:
         NormFlow() = default;
-        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_ = 0, Trv mixing_ = 0.9);
+        NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_ = 0);
         NormFlow(const This&) = default;
         NormFlow(This&&) noexcept = default;
         ~NormFlow() = default;
@@ -82,11 +80,10 @@ namespace Physica {
     };
 
     template<Scalar T, bool TakeLn>
-    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_, Trv mixing_)
+    NormFlow<T, TakeLn>::NormFlow(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int batchsize_, Trv decay_)
             : Base(std::move(from), std::move(to), numRefine, (numSample + batchsize_ - 1) / batchsize_ * batchsize_)
             , batchsize(batchsize_)
-            , decay(decay_)
-            , mixing(mixing_) {
+            , decay(decay_) {
         assert(0 < batchsize && batchsize <= numSample && "[Error]: Invalid batchsize and cannot auto fix");
         assert(!decay.isNegative());
         assert(Trv(0) <= mixing && mixing <= Trv(1));
@@ -98,7 +95,6 @@ namespace Physica {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
         static_assert(std::same_as<FuncValue, CallResult>, "[Error]: Inconsistent ScalarType");
-        lastMean = 0;
 
         Trv result;
         for (int _ = 0; _ < numWarm; ++_) {
@@ -120,7 +116,6 @@ namespace Physica {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
         static_assert(std::same_as<FuncValue, CallResult>, "[Error]: Inconsistent ScalarType");
-        lastMean = 0;
 
         const int numRefine = Base::getNumRefine();
         FuncValue mean = 0, var = 0;
@@ -143,8 +138,6 @@ namespace Physica {
         Base::swap(obj);
         std::swap(batchsize, obj.batchsize);
         decay.swap(obj.decay);
-        mixing.swap(obj.mixing);
-        lastMean.swap(obj.lastMean);
     }
 
     template<Scalar T, bool TakeLn>
@@ -217,7 +210,11 @@ namespace Physica {
 
                 lnJs.toHostAsync(lnJv);
                 x = from_d + hadamard(coeff_d, x);
-                nn(x).toHost(seg);
+                constexpr bool DeviceEval = CUDA<decltype(nn(x))>;
+                if constexpr (DeviceEval)
+                    nn(x).toHost(seg);
+                else
+                    seg = nn(x);
                 loss = calcLoss_ln<decltype(seg), Executor>(seg, lnJv);
                 lnJs.reverse(lnJv.grads().toDeviceAsync());
                 seg += lnJv.values() + lnVolume;
@@ -291,9 +288,7 @@ namespace Physica {
     template<Vector V, class Executor>
     auto NormFlow<T, TakeLn>::calcLoss_ln(const V& samples, const VectorND<T>& lnJv) -> Trv {
         const size_t size = samples.getLength();
-        auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(size));
-        mean = (Trv(1) - mixing) * mean + mixing * lastMean;
-        lastMean = mean;
+        const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(size));
         auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(size));
         if constexpr (ReverseDiff<T>)
             l.reverse();

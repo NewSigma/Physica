@@ -244,8 +244,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::reals() const noexcept {
-        return device_obj<RealMatrix<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::reals() const noexcept -> RealsRtnTy {
+        return RealsRtnTy(Base::getDerived());
     }
 
     template<class Derived>

@@ -49,7 +49,6 @@ namespace Physica {
         using BlockType = RMatrixBlock<Derived>;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
-        using RealType = ScalarType::RealType;
         constexpr static int Option = Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
         constexpr static size_t ColAtCompile = Traits<Derived>::ColAtCompile;
@@ -64,6 +63,7 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     private:
+        using RealsRtnTy = std::conditional<isComplex, RealMatrix<Derived>, Derived&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, ValueMatrix<Derived>, Derived&>::type;
     public:
         ~RValueMatrix() = default;
@@ -127,7 +127,7 @@ namespace Physica {
         [[nodiscard]] inline auto hermite() const noexcept;
         [[nodiscard]] inline auto flatten() const noexcept;
 
-        [[nodiscard]] auto reals() const noexcept;
+        [[nodiscard]] RealsRtnTy reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;
         [[nodiscard]] auto squaredNorms() const noexcept;
         [[nodiscard]] auto norms() const noexcept;

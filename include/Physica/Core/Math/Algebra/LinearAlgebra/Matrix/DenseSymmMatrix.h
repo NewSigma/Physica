@@ -36,6 +36,7 @@ namespace Physica {
     private:
         using HermiteRtnTy = std::conditional<ScalarType::isComplex, Hermite<This>, const This&>::type;
     public:
+        DenseSymmMatrix() = default;
         template<Matrix M>
         DenseSymmMatrix(const M& mat);
         using Storage::Storage;
