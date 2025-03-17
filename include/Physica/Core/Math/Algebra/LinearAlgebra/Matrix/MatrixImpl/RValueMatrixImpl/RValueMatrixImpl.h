@@ -218,8 +218,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto RValueMatrix<Derived>::format() const noexcept {
-        return FormatedMatrix<Derived>(Base::getDerived());
+    template<Matrix M1, Matrix M2>
+    void RValueMatrix<Derived>::reverse(const M1&, const M2& grad) const noexcept requires(isReverseDiff) {
+        Base::getDerived().reverse(grad);
     }
 
     template<class Derived>
@@ -310,6 +311,11 @@ namespace Physica {
         for (size_t i = 0; i < getRow(); ++i)
             result += calc(i, i);
         return result;
+    }
+
+    template<class Derived>
+    inline auto RValueMatrix<Derived>::format() const noexcept {
+        return FormatedMatrix<Derived>(Base::getDerived());
     }
 
     template<class Derived>

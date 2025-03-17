@@ -56,7 +56,7 @@ namespace Physica {
     template<ExprType Type, class LHS, class RHS>
     class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
         static_assert(Matrix<LHS> || Matrix<RHS>, "[Error]: Either types should be Matrix");
-        static_assert(CUDA<LHS> && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
+        static_assert((CUDA<LHS> || Scalar<LHS>) && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
 
         using host_obj = BinaryMatrixExpr<Type, LHS, RHS>;
         using Derived = MatrixExpr<Type, LHS, RHS>;

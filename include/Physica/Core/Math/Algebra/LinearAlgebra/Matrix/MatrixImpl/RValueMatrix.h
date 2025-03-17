@@ -109,7 +109,8 @@ namespace Physica {
         [[nodiscard]] auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
         [[nodiscard]] inline auto calcFromMajorMinor(size_t major, size_t minor) const;
-        [[nodiscard]] inline auto format() const noexcept;
+        template<Matrix M1, Matrix M2>
+        void reverse(const M1& y, const M2& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] Tr norm1() const;
         template<class Executor = SeqExecutor>
@@ -123,6 +124,8 @@ namespace Physica {
         [[nodiscard]] auto sum_cols() const;
         [[nodiscard]] T mean() const;
         [[nodiscard]] T trace() const;
+
+        [[nodiscard]] inline auto format() const noexcept;
         [[nodiscard]] inline auto transpose() const noexcept;
         [[nodiscard]] inline auto conjugate() const noexcept;
         [[nodiscard]] inline auto hermite() const noexcept;

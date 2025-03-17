@@ -94,6 +94,8 @@ namespace Physica {
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
         [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
+        template<Matrix M1, Matrix M2>
+        void reverse(const M1& y, const M2& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] __host__ __device__ auto sum_rows() const;
         [[nodiscard]] __host__ __device__ auto sum_cols() const;

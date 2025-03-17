@@ -222,6 +222,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<Matrix M1, Matrix M2>
+    void device_obj<RValueMatrix<Derived>>::reverse(const M1&, const M2& grad) const noexcept requires(isReverseDiff) {
+        Base::getDerived().reverse(grad);
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::sum_rows() const {
         return device_obj<MatrixSum<Derived, false>>(Base::getDerived());
     }

@@ -70,6 +70,7 @@ namespace Physica {
             return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row);
         }
 
+        using Base::reverse;
         template<Matrix M1>
         void reverse(const M1& grad) const noexcept requires(isReverseDiff) {
             if constexpr (ReverseDiff<T>)

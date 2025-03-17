@@ -41,8 +41,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t i, T lnsumexp) const;
         [[nodiscard]] Tv calc_value(size_t i, Tv lnsumexp) const;
 
-        template<Vector U, Vector V1>
-        void reverse(const U& y, const V1& grad_) const noexcept requires(isReverseDiff) ;
+        template<Vector V1, Vector V2>
+        void reverse(const V1& y, const V2& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
@@ -64,8 +64,8 @@ namespace Physica {
     }
 
     template<Vector V>
-    template<Vector U, Vector V1>
-    void VectorExpr<ExprType::Softmax, V>::reverse(const U& y, const V1& grad_) const noexcept requires(isReverseDiff) {
+    template<Vector V1, Vector V2>
+    void VectorExpr<ExprType::Softmax, V>::reverse(const V1& y, const V2& grad_) const noexcept requires(isReverseDiff) {
         const auto& grad = grad_.values();
         Base::getExpr().reverse(hadamard(y, grad) - (y * grad) * y);
     }

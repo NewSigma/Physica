@@ -58,6 +58,8 @@ namespace Physica {
         [[nodiscard]] __device__ inline Pack packet(size_t index) const;
         template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
+        template<Vector V1, Vector V2>
+        void reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] __host__ __device__ inline auto transpose() const noexcept;
 

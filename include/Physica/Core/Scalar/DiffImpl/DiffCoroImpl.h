@@ -50,7 +50,7 @@ namespace Physica {
                 y.resize(x_);
                 x_.assign(y);
                 auto result = co_yield std::move(y);
-                x_.reverse(result.grads());
+                x_.reverse(result.values(), result.grads());
             }
         };
         fn(std::forward<T>(x)).swap(*this);

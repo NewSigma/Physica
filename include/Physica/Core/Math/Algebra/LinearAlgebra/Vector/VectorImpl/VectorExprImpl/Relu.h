@@ -41,6 +41,7 @@ namespace Physica {
             return relu(Base::getExpr().calc_value(index));
         }
 
+        using Base::reverse;
         template<Vector V1>
         void reverse(const V1& grad_) const noexcept requires(isReverseDiff);
     };

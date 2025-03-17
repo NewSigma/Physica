@@ -46,6 +46,7 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t index) const;
         [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
+        using Base::reverse;
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff);
         /* Getters */

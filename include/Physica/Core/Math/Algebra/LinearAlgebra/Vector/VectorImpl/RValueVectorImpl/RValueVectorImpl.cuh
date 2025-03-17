@@ -65,6 +65,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<Vector V1, Vector V2>
+    void device_obj<RValueVector<Derived>>::reverse(const V1&, const V2& grad) const noexcept requires(isReverseDiff) {
+        Base::getDerived().reverse(grad);
+    }
+
+    template<class Derived>
     __host__ __device__ inline auto device_obj<RValueVector<Derived>>::transpose() const noexcept {
         return device_obj<TransposeVector<Derived>>(Base::getDerived());
     }

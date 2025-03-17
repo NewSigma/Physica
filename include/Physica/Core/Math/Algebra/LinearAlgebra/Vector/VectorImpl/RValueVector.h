@@ -118,6 +118,8 @@ namespace Physica {
         [[nodiscard]] inline Pack packet(size_t index) const;
         template<Packet Pack>
         [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
+        template<Vector V1, Vector V2>
+        void reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] inline auto format() const;
         [[nodiscard]] auto transpose() const noexcept;

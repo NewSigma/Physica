@@ -122,6 +122,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<Vector V1, Vector V2>
+    void RValueVector<Derived>::reverse(const V1&, const V2& grad) const noexcept requires(isReverseDiff) {
+        Base::getDerived().reverse(grad);
+    }
+
+    template<class Derived>
     inline auto RValueVector<Derived>::format() const {
         return FormatedVector<Derived>(Base::getDerived());
     }

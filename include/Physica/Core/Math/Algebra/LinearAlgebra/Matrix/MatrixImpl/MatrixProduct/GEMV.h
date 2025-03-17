@@ -51,6 +51,7 @@ namespace Physica {
         [[nodiscard]] inline CoDiff<T> calc(size_t index) const;
         [[nodiscard]] inline Tv calc_value(size_t index) const;
 
+        using Base::reverse;
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff);
 

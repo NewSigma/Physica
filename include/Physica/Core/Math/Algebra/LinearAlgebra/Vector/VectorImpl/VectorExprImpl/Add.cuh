@@ -54,6 +54,7 @@ namespace Physica {
             return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS());
         }
 
+        using Base::reverse;
         template<Vector V1>
         void reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
             const auto& grad = grad_.values();
@@ -99,6 +100,7 @@ namespace Physica {
                  + Base::getRHS().template packetPartial<Pack>(index, count);
         }
 
+        using Base::reverse;
         template<class U>
         void reverse(const U& grad_) const noexcept requires(isReverseDiff);
         auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }

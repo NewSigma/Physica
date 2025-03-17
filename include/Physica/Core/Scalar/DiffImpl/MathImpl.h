@@ -318,15 +318,16 @@ namespace Physica {
     template<Scalar T>
     CoDiff<T> tanh(T&& x) requires(Diffable<T>) {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
+        using Tv = T::ValueType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             const GradType v = tanh(GradType(x));
-            co_return ResultType(v.value(), (T(1) - square(v)) * x.grad());
+            co_return ResultType(v.value(), (Tv(1) - square(v)) * x.grad());
         }
         else {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             auto y = co_yield tanh(x_.value());
-            x_.reverse(square(sech(x_.value())) * y.grad());
+            x_.reverse((Tv(1) - square(y.value())) * y.grad());
         }
     }
 
