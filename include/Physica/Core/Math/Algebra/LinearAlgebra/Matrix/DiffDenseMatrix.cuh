@@ -64,6 +64,7 @@ namespace Physica {
         using Base::resize;
         __host__ __device__ void resize(size_t row, size_t col);
 
+        void zeros();
         [[nodiscard]] inline host_obj toHost() const;
         [[nodiscard]] inline host_obj toHostAsync() const;
         inline void toHost(host_obj& obj) const;

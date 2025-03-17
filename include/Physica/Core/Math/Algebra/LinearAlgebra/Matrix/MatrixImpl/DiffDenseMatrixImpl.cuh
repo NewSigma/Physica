@@ -58,6 +58,12 @@ namespace Physica {
     }
 
     template<tparams>
+    void device_obj<DenseMatrix>::zeros() {
+        v.zeros();
+        g.zeros();
+    }
+
+    template<tparams>
     inline auto device_obj<DenseMatrix>::toHost() const -> host_obj {
         host_obj result = toHostAsync();
         CUDAContext::getInstance().wait();

@@ -212,7 +212,7 @@ namespace Physica {
         resize(length);
 
         const auto memSpace = H5DataSpace<1>(length);
-        if constexpr (isForwardDiff) {
+        if constexpr (isDiffable) {
             auto fileSpace = DataSpaceType({length, DiffOrder + 1});
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
@@ -229,7 +229,7 @@ namespace Physica {
         const size_t length = Base::getLength();
         const auto memSpace = H5DataSpace<1>(length);
         DataSpaceType fileSpace;
-        if constexpr (isForwardDiff)
+        if constexpr (isDiffable)
             fileSpace = DataSpaceType({length, DiffOrder + 1});
         else
             fileSpace = memSpace;
@@ -240,7 +240,7 @@ namespace Physica {
         else
             dataset = loc.createDataSet<DataDim>(name, Tv::getH5DataType(), fileSpace);
 
-        if constexpr (isForwardDiff) {
+        if constexpr (isDiffable) {
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
                 dataset.write(data()[i], Tv::getH5DataType(), memSpace, fileSpace);

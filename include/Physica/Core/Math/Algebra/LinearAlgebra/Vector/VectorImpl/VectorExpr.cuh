@@ -31,7 +31,7 @@ namespace Physica {
     private:
         PlainStruct<const std::remove_cvref_t<V>> expr;
     public:
-        __host__ __device__ inline device_obj(V expr_) : expr(asStruct(expr_)) {}
+        __host__ __device__ device_obj(V expr_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -43,6 +43,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto& getExpr() const { return expr.getDerived(); }
     };
 
+    template<ExprType Type, Vector V>
+    __host__ __device__ device_obj<UnitaryVectorExpr<Type, V>>::device_obj(V expr_) : expr(asStruct(expr_)) {}
+
     template<ExprType Type, Vector LHS, class RHS>
     class device_obj<BinaryVectorExpr<Type, LHS, RHS>> : public device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>> {
         static_assert(CUDA<LHS> && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
@@ -53,10 +56,7 @@ namespace Physica {
         PlainStruct<const std::remove_cvref_t<LHS>> lhs;
         PlainStruct<const std::remove_cvref_t<RHS>> rhs;
     public:
-        __host__ __device__ inline device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
-            if constexpr (Vector<RHS>)
-                assert(getLHS().getLength() == getRHS().getLength());
-        }
+        __host__ __device__ device_obj(LHS lhs_, RHS rhs_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -68,6 +68,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
     };
+
+    template<ExprType Type, Vector LHS, class RHS>
+    __host__ __device__ device_obj<BinaryVectorExpr<Type, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
+        if constexpr (Vector<RHS>)
+            assert(getLHS().getLength() == getRHS().getLength());
+    }
 }
 
 namespace Physica {

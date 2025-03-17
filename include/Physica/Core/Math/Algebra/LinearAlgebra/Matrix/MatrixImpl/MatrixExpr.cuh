@@ -34,7 +34,7 @@ namespace Physica {
 
         PlainStruct<const std::remove_cvref_t<M>> expr;
     public:
-        __host__ __device__ inline device_obj(M expr_) : expr(asStruct(expr_)) {}
+        __host__ __device__ device_obj(M expr_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -49,6 +49,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] __host__ __device__ const auto& getExpr() const { return expr.getDerived(); }
     };
+
+    template<ExprType Type, Matrix M>
+    __host__ __device__ device_obj<UnitaryMatrixExpr<Type, M>>::device_obj(M expr_) : expr(asStruct(expr_)) {}
 
     template<ExprType Type, class LHS, class RHS>
     class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
@@ -66,7 +69,7 @@ namespace Physica {
         PlainStruct<const std::remove_cvref_t<LHS>> lhs;
         PlainStruct<const std::remove_cvref_t<RHS>> rhs;
     public:
-        __host__ __device__ inline device_obj(LHS lhs_, RHS rhs_);
+        __host__ __device__ device_obj(LHS lhs_, RHS rhs_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

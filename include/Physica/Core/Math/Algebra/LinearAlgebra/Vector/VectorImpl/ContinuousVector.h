@@ -36,6 +36,7 @@ namespace Physica {
         using Base::SizeAtCompile;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
+        using Base::isDiffable;
     protected:
         using typename Base::T;
         using typename Base::Tv;

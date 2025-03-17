@@ -97,7 +97,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<class Functor, RNG R, class Executor>
-    Vegas<T, TakeLn>::Trv Vegas<T, TakeLn>::calcGridLoss(Functor func) const {
+    auto Vegas<T, TakeLn>::calcGridLoss(Functor func) const -> Trv {
         T mean, var;
         pre_trial();
         if constexpr (TakeLn)
@@ -151,7 +151,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    Vegas<T, TakeLn>::Trv Vegas<T, TakeLn>::compress(VectorND<Trv>& vars) {
+    auto Vegas<T, TakeLn>::compress(VectorND<Trv>& vars) -> Trv {
         const auto sum = vars.sum();
         const bool noData = sum.isZero();
         if (noData)

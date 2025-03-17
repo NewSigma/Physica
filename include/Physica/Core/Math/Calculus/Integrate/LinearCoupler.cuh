@@ -102,12 +102,12 @@ namespace Physica {
     auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const -> CoDiff<device_obj<VectorND<T>>> {
         constexpr static int Option = MatrixOption::Row | MatrixOption::Element;
         const int numSample = z.getCol();
+        assert(weights.getRow() == getDim() * numBin);
+        assert(weights.getCol() == numSample);
+
         auto indices = device_obj<Array2D<size_t, Option>>(getDim(), numSample);
         auto deltas = device_obj<DenseMatrix<T, Option>>(numSample, getDim(), 1);
         auto lnsumexps = device_obj<DenseMatrix<Tv, Option>>(numSample, getDim());
-
-        auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
-        config.blocks.y = getDim();
         auto fwd = [dim = getDim(),
                     numBin = numBin,
                     weights_ = asStruct(weights.values()),
@@ -142,6 +142,8 @@ namespace Physica {
                 zi += softmax(row).calc(j, lnsumexp);
             z[i] = std::min(Tv(1), zi);
         };
+        auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
+        config.blocks.y = getDim();
         CUDAExecutor::launch<decltype(fwd), device_obj<VectorND<T>>::MaxThreadPerBlock>(fwd, config);
 
         auto expr = ln_elem(deltas);

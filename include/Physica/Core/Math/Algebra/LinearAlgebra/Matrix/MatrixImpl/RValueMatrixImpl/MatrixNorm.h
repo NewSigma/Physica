@@ -101,6 +101,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::normF() const -> Tr {
+        return sqrt(squaredNorms().sum());
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::normInf() const -> Tr {
         Trv result = std::numeric_limits<T>::lowest();
         for (size_t i = 0; i < getRow(); ++i)

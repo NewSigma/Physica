@@ -96,6 +96,7 @@ namespace Physica {
 
     template<Scalar T>
     auto LinearCoupler<T>::transform(const VectorND<T>& weights, VectorND<Tv>& z) const -> CoDiff<T> {
+        assert(weights.getLength() == getDim() * numBin);
         const auto factor = Tv(numBin) * Tv(1 - std::numeric_limits<Tv>::epsilon());
         const auto grid = weights.reshape_col(numBin, getDim());
         const int dim = getDim();

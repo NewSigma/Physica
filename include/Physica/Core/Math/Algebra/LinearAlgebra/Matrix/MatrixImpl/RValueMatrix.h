@@ -114,6 +114,7 @@ namespace Physica {
         [[nodiscard]] Tr norm1() const;
         template<class Executor = SeqExecutor>
         [[nodiscard]] Tr norm1_power(unsigned int maxIteration) const;
+        [[nodiscard]] Tr normF() const;
         [[nodiscard]] Tr normInf() const;
 
         [[nodiscard]] T max() const;
