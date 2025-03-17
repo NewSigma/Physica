@@ -31,7 +31,7 @@ namespace Physica {
         using CoeffVector = DenseVector<T, ElementType::DegreeOfFreedom>;
         using MDCellType = SolverType::MDCellType;
         using KSpaceFCGrid = SolverType::KSpaceFCGrid;
-        using EigenValueGrid = GridStorage<VectorND<T>>;
+        using EigenValueGrid = ArrayND<VectorND<T>, 3>;
         constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
         constexpr static unsigned int ElementVolume = 8;
     protected:
@@ -66,15 +66,15 @@ namespace Physica {
     PhononDOS<T>::PhononDOS(
             MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim)
             : PhononDOS(std::move(unitCell), std::move(superSize), std::move(gridDim)) {
-        eigenvalues.forIndexInTensor([this, &forceConstants](Index3D index) {
-            const Index3D gridDim = eigenvalues.getDim();
+        eigenvalues.forND([this, &forceConstants](auto& eig, Index3D index) {
+            const Index3D gridDim = eigenvalues.getShape();
             Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
                 qPoint[i] = T(index[i]) / T(gridDim[i]);
             auto fcMatrix = solver.interpolatePoint(qPoint, forceConstants);
             solver.toDynamicMatrix(fcMatrix);
             const auto eigen = SolverType::diagonalize(fcMatrix);
-            eigenvalues(index) = solver.makeFreq(eigen);
+            eig = solver.makeFreq(eigen);
         });
     }
 
@@ -99,7 +99,7 @@ namespace Physica {
     template<Scalar T>
     T PhononDOS<T>::calcDOS(T freq, size_t band) const {
         T result = 0;
-        eigenvalues.forIndexInTensor([this, freq, band, &result](Index3D index) {
+        forND(eigenvalues.getShape(), [this, freq, band, &result](Index3D index) {
             result += calcElemDOS(freq, band, index);
         });
         result /= T(eigenvalues.getSize() * ElementVolume);
@@ -144,10 +144,10 @@ namespace Physica {
 
     template<Scalar T>
     T PhononDOS<T>::calcElemDOS(T freq, size_t band, Index3D index) const {
-        const Index3D gridDim = eigenvalues.getDim();
+        const Index3D shape = eigenvalues.getShape();
         Index3D index1{};
         for (unsigned int i = 0; i < Dim; ++i)
-            index1[i] = (index[i] + 1) % gridDim[i];
+            index1[i] = (index[i] + 1) % shape[i];
 
         CoeffVector cornerFreq{};
         cornerFreq[0] = eigenvalues(index)[band];

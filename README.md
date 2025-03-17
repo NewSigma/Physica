@@ -61,7 +61,8 @@ Compile Physica using the following command:
 mkdir -p /path/to/Physica/build
 cd /path/to/Physica/build
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release ../ # Note: Set CMake options as you need, refer to CMakeLists.txt for a full list of options
-make install -j<N>
+cmake --build .
+cmake --install .
 ```
 
 Test Physica using the following command:  

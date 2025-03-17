@@ -28,6 +28,7 @@ namespace Physica {
         using Base = RValueTensor<Derived>;
     public:
         using typename Base::ScalarType;
+        using typename Base::IndexArray;
         using Base::isReverseDiff;
     protected:
         using PtrTy = ScalarType::PtrTy;
@@ -57,6 +58,11 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
 
+        template<class Functor>
+        void forND(Functor func);
+        template<class Functor>
+        void forND(Functor func) const;
+
         [[nodiscard]] inline LTensorBlock<Derived> block(Index3D from, Index3D count);
         [[nodiscard]] inline const LTensorBlock<Derived> block(Index3D from, Index3D count) const;
 
@@ -69,9 +75,7 @@ namespace Physica {
         [[nodiscard]] ScalarType* data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }
         [[nodiscard]] const ScalarType* data_ptr(Index3D index) const { return Base::getDerived().data_ptr(index); }
         /* Static members */
-        using Base::forPointInTensor;
         using Base::forPointIndexInTensor;
-        using Base::forIndexInTensor;
     protected:
         LValueTensor() = default;
         LValueTensor(const This&) = default;

@@ -52,6 +52,22 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<class Functor>
+    void LValueTensor<Derived>::forND(Functor func) {
+        Physica::forND(Base::getShape(), [this, func](const IndexArray& index) {
+            func(operator()(index), index);
+        });
+    }
+
+    template<class Derived>
+    template<class Functor>
+    void LValueTensor<Derived>::forND(Functor func) const {
+        Physica::forND(Base::getShape(), [this, func](const IndexArray& index) {
+            func(operator()(index), index);
+        });
+    }
+
+    template<class Derived>
     inline LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) {
         return {Base::getDerived(), from, count};
     }

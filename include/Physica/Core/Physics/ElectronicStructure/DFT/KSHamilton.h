@@ -119,9 +119,9 @@ namespace Physica {
     void KSHamilton<T, IsSpinPolarized>::makeNearFreeHamilton(Vector3D<T> kPoint) {
         makeFreeHamilton(kPoint);
 
-        TensorBase::forIndexInTensor(basisDim, [this](Index3D index1) {
+        forND(basisDim, [this](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
-            TensorBase::forIndexInTensor(basisDim, [this, r, index1](Index3D index2) {
+            forND(basisDim, [this, r, index1](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceIonCoulomb.getShape());
                 hamiltonH(r, c) += kSpaceIonCoulomb(delta);
@@ -139,9 +139,9 @@ namespace Physica {
         fft_rho.transform();
         auto& kSpaceDensity = fft_rho.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());
-        TensorBase::forIndexInTensor(basisDim, [this, repVolume, &kSpaceDensity](Index3D index1) {
+        forND(basisDim, [this, repVolume, &kSpaceDensity](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
-            TensorBase::forIndexInTensor(basisDim, [this, repVolume, r, index1, &kSpaceDensity](Index3D index2) {
+            forND(basisDim, [this, repVolume, r, index1, &kSpaceDensity](Index3D index2) {
                 constexpr double factor = 1 / PhyConst<AU>::vacuumDielectric;
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getShape());
@@ -162,9 +162,9 @@ namespace Physica {
         fft_xc.transform();
         auto& kSpaceXC = fft_xc.getKSpace();
         const T repVolume = reciprocal(cell.getVolume());
-        TensorBase::forIndexInTensor(basisDim, [this, repVolume, &kSpaceXC](Index3D index1) {
+        forND(basisDim, [this, repVolume, &kSpaceXC](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
-            TensorBase::forIndexInTensor(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
+            forND(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceXC.getShape());
                 hamiltonH(r, c) += kSpaceXC(delta) * repVolume;

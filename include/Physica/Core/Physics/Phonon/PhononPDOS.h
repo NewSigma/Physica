@@ -63,15 +63,15 @@ namespace Physica {
             , direction(std::move(direction_))
             , projections(gridDim) {
         assert(direction.getLength() == getUnitCellDOF() && "[Error]: DOF of direction and unit cell do not match");
-        eigenvalues.forIndexInTensor([this, &forceConstants](Index3D index) {
-            const Index3D gridDim = eigenvalues.getDim();
+        eigenvalues.forND([this, &forceConstants](auto& eig, Index3D index) {
+            const Index3D shape = eigenvalues.getShape();
             Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
-                qPoint[i] = T(index[i]) / T(gridDim[i]);
+                qPoint[i] = T(index[i]) / T(shape[i]);
             auto fcMatrix = solver.interpolatePoint(qPoint, forceConstants);
             solver.toDynamicMatrix(fcMatrix);
             const auto eigen = SolverType::diagonalize(fcMatrix);
-            eigenvalues(index) = solver.makeFreq(eigen);
+            eig = solver.makeFreq(eigen);
 
             const size_t unitCellDOF = getUnitCellDOF();
             const auto eigenvectors = solver.makeEigenVectors(eigen);
@@ -93,8 +93,8 @@ namespace Physica {
     template<Scalar T>
     T PhononPDOS<T>::calcPDOS(T freq, size_t band) const {
         T result = 0;
-        eigenvalues.forIndexInTensor([this, freq, band, &result](Index3D index) {
-            const Index3D gridDim = eigenvalues.getDim();
+        forND(eigenvalues.getShape(), [this, freq, band, &result](Index3D index) {
+            const Index3D gridDim = eigenvalues.getShape();
             Index3D index1{};
             for (unsigned int i = 0; i < Dim; ++i)
                 index1[i] = (index[i] + 1) % gridDim[i];

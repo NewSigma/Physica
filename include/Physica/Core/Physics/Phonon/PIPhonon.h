@@ -96,35 +96,33 @@ namespace Physica {
                 const size_t offset_c = c * numCell;
                 buffer1 = ScalarType(0);
                 buffer2 = ScalarType(0);
-                DenseTensor<ScalarType>::forIndexInTensor(getSuperSize(),
-                    [&, this, offset_r, offset_c](Index3D cell1) {
-                        DenseTensor<ScalarType>::forIndexInTensor(getSuperSize(),
-                            [&, this, cell1, offset_r, offset_c](Index3D cell2) {
-                                const auto range = getSuperSize();
-                                Index3D delta;
-                                for (int i = 0; i < 3; ++i) {
-                                    ssize_t temp = static_cast<ssize_t>(cell1[i]) - static_cast<ssize_t>(cell2[i]);
-                                    if (temp < 0)
-                                        temp += range[i];
-                                    else if (temp >= static_cast<ssize_t>(range[i]))
-                                        temp -= range[i];
-                                    delta[i] = temp;
-                                }
+                forND(getSuperSize(), [&, this, offset_r, offset_c](Index3D cell1) {
+                    forND(getSuperSize(), [&, this, cell1, offset_r, offset_c](Index3D cell2) {
+                        const auto range = getSuperSize();
+                        Index3D delta;
+                        for (int i = 0; i < 3; ++i) {
+                            ssize_t temp = static_cast<ssize_t>(cell1[i]) - static_cast<ssize_t>(cell2[i]);
+                            if (temp < 0)
+                                temp += range[i];
+                            else if (temp >= static_cast<ssize_t>(range[i]))
+                                temp -= range[i];
+                            delta[i] = temp;
+                        }
 
-                                const size_t cell1_index1d = cell1[0] * superSizeY * superSizeZ + cell1[1] * superSizeZ + cell1[2];
-                                const size_t cell2_index1d = cell2[0] * superSizeY * superSizeZ + cell2[1] * superSizeZ + cell2[2];
-                                const size_t offset_buffer = delta[0] * superSizeY * superSizeZ + delta[1] * superSizeZ + delta[2];
+                        const size_t cell1_index1d = cell1[0] * superSizeY * superSizeZ + cell1[1] * superSizeZ + cell1[2];
+                        const size_t cell2_index1d = cell2[0] * superSizeY * superSizeZ + cell2[1] * superSizeZ + cell2[2];
+                        const size_t offset_buffer = delta[0] * superSizeY * superSizeZ + delta[1] * superSizeZ + delta[2];
 
-                                const size_t offset_r1 = offset_r + cell1_index1d;
-                                const ScalarType force_r = average_force[offset_r1];
-                                const ScalarType momentum_r = average_momentum[offset_r1];
-                                const size_t offset_c1 = offset_c + cell2_index1d;
-                                const ScalarType force_c = average_force[offset_c1];
-                                const ScalarType momentum_c = average_momentum[offset_c1];
-                                buffer1[offset_buffer] += force_r * force_c;
-                                buffer2[offset_buffer] += momentum_r * momentum_c;
-                            });
+                        const size_t offset_r1 = offset_r + cell1_index1d;
+                        const ScalarType force_r = average_force[offset_r1];
+                        const ScalarType momentum_r = average_momentum[offset_r1];
+                        const size_t offset_c1 = offset_c + cell2_index1d;
+                        const ScalarType force_c = average_force[offset_c1];
+                        const ScalarType momentum_c = average_momentum[offset_c1];
+                        buffer1[offset_buffer] += force_r * force_c;
+                        buffer2[offset_buffer] += momentum_r * momentum_c;
                     });
+                });
                 const ScalarType factor = reciprocal(ScalarType(numCell));
                 buffer1 *= factor;
                 buffer2 *= factor;

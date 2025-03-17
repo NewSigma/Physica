@@ -28,10 +28,10 @@ namespace Physica {
         using Index1D = Index3D::ElemType;
 
         Index3D index;
-        Index3D dim;
+        Index3D shape;
     public:
-        __host__ __device__ inline PeriodIndex3D(Index3D index_, Index3D dim_);
-        __host__ __device__ inline PeriodIndex3D(Index1D index_, Index3D dim_);
+        __host__ __device__ inline PeriodIndex3D(Index3D index_, Index3D shape_);
+        __host__ __device__ inline PeriodIndex3D(Index1D index_, Index3D shape_);
         PeriodIndex3D(const PeriodIndex3D&) = default;
         PeriodIndex3D(PeriodIndex3D&&) noexcept = default;
         ~PeriodIndex3D() = default;
@@ -47,17 +47,17 @@ namespace Physica {
         __host__ __device__ inline void normalize();
         __host__ __device__ inline void swap(PeriodIndex3D& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] Index3D getDim() const noexcept { return dim; }
+        [[nodiscard]] Index3D getShape() const noexcept { return shape; }
     private:
-        __host__ __device__ inline static Index3D toIndex3D(Index1D index, Index3D dim);
+        __host__ __device__ inline static Index3D toIndex3D(Index1D index, Index3D shape);
     };
 
-    __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index3D index_, Index3D dim_) : index(index_), dim(dim_) {
+    __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index3D index_, Index3D shape_) : index(index_), shape(shape_) {
         for (int i = 0; i < 3; ++i)
-            assert(dim[i] > 0 && "[Error]: Zero dim is not allowed");
+            assert(shape[i] > 0 && "[Error]: Zero shape is not allowed");
     }
 
-    __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index1D index_, Index3D dim_) : PeriodIndex3D(toIndex3D(index_, dim_), dim_) {}
+    __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index1D index_, Index3D shape_) : PeriodIndex3D(toIndex3D(index_, shape_), shape_) {}
 
     __host__ __device__ inline PeriodIndex3D& PeriodIndex3D::operator=(PeriodIndex3D obj) noexcept {
         swap(obj);
@@ -65,49 +65,49 @@ namespace Physica {
     }
 
     __host__ __device__ inline PeriodIndex3D PeriodIndex3D::operator+(const PeriodIndex3D& other) const {
-        assert(dim == other.dim && "[Error]: Inconsistent dimention");
+        assert(shape == other.shape && "[Error]: Inconsistent dimention");
         Index3D result{};
         for (int i = 0; i < 3; ++i)
-            result[i] = (index[i] + other.index[i]) % dim[i];
-        return PeriodIndex3D(result, dim);
+            result[i] = (index[i] + other.index[i]) % shape[i];
+        return PeriodIndex3D(result, shape);
     }
 
     __host__ __device__ inline PeriodIndex3D::Index1D PeriodIndex3D::toIndex1D() const {
-        return (index[0] * dim[1] + index[1]) * dim[2] + index[2];
+        return (index[0] * shape[1] + index[1]) * shape[2] + index[2];
     }
 
     __host__ __device__ inline bool PeriodIndex3D::isInReducedK() const {
-        const size_t kSpaceDimZ = FFT<Real<>>::rSizeToKSize(dim[2]);
+        const size_t kSpaceDimZ = FFT<Real<>>::rSizeToKSize(shape[2]);
         return index[2] < kSpaceDimZ;
     }
 
     __host__ __device__ inline Index3D PeriodIndex3D::toReducedK() const {
         Index3D result = index;
         if (!isInReducedK()) {
-            result[0] = (dim[0] - result[0]) % dim[0];
-            result[1] = (dim[1] - result[1]) % dim[1];
-            result[2] = dim[2] - result[2];
+            result[0] = (shape[0] - result[0]) % shape[0];
+            result[1] = (shape[1] - result[1]) % shape[1];
+            result[2] = shape[2] - result[2];
         }
         return result;
     }
 
     __host__ __device__ inline void PeriodIndex3D::normalize() {
         for (int i = 0; i < 3; ++i)
-            index[i] %= dim[i];
+            index[i] %= shape[i];
     }
 
     __host__ __device__ inline void PeriodIndex3D::swap(PeriodIndex3D& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         index.swap(obj.index);
-        dim.swap(obj.dim);
+        shape.swap(obj.shape);
     }
 
-    __host__ __device__ inline Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
+    __host__ __device__ inline Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D shape) {
         Index3D result{};
-        result[0] = index / (dim[1] * dim[2]);
-        const Index1D temp = index % (dim[1] * dim[2]);
-        result[1] = temp / dim[2];
-        result[2] = temp % dim[2];
+        result[0] = index / (shape[1] * shape[2]);
+        const Index1D temp = index % (shape[1] * shape[2]);
+        result[1] = temp / shape[2];
+        result[2] = temp % shape[2];
         return result;
     }
 }

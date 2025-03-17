@@ -81,6 +81,20 @@ namespace Physica {
     }
 
     template<class T, int Dim>
+    template<class Functor>
+    void ArrayND<T, Dim>::forND(Functor func) {
+        for (size_t i = 0; i < getSize(); ++i)
+            func(arr[i], toIndexND(i));
+    }
+
+    template<class T, int Dim>
+    template<class Functor>
+    void ArrayND<T, Dim>::forND(Functor func) const {
+        for (size_t i = 0; i < getSize(); ++i)
+            func(arr[i], toIndexND(i));
+    }
+
+    template<class T, int Dim>
     void ArrayND<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);

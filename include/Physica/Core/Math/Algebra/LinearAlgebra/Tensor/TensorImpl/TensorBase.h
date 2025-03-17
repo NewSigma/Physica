@@ -19,49 +19,15 @@
 #pragma once
 
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
+#include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
     class TensorBase {
     public:
         /* Static members */
         template<Scalar T, bool IsUnitLattice, class Functor>
-        static void forPointInTensor(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
-        template<Scalar T, bool IsUnitLattice, class Functor>
         static void forPointIndexInTensor(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
-        template<class Functor> static void forIndexInTensor(Index3D dim, Functor func);
     };
-
-    template<Scalar T, bool IsUnitLattice, class Functor>
-    void TensorBase::forPointInTensor(
-            Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
-        using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
-        using VectorType = Vector3D<T>;
-
-        LatticeMatrix sub_lattice{};
-        auto a1 = sub_lattice.row(0);
-        auto a2 = sub_lattice.row(1);
-        auto a3 = sub_lattice.row(2);
-        if constexpr (IsUnitLattice)
-            sub_lattice = lattice;
-        else {
-            a1 = lattice.row(0) * reciprocal(T(dim[0]));
-            a2 = lattice.row(1) * reciprocal(T(dim[1]));
-            a3 = lattice.row(2) * reciprocal(T(dim[2]));
-        }
-
-        VectorType v1, v2, v3;
-        for (size_t x = 0; x < dim[0]; ++x) {
-            v1 = T(x) * a1;
-            for (size_t y = 0; y < dim[1]; ++y) {
-                v2 = v1 + T(y) * a2;
-                for (size_t z = 0; z < dim[2]; ++z) {
-                    v3 = v2 + T(z) * a3;
-                    func(v3);
-                }
-            }
-        }
-    }
 
     template<Scalar T, bool IsUnitLattice, class Functor>
     void TensorBase::forPointIndexInTensor(
@@ -93,13 +59,5 @@ namespace Physica {
                 }
             }
         }
-    }
-
-    template<class Functor>
-    void TensorBase::forIndexInTensor(Index3D dim, Functor func) {
-        for (size_t x = 0; x < dim[0]; ++x)
-            for (size_t y = 0; y < dim[1]; ++y)
-                for (size_t z = 0; z < dim[2]; ++z)
-                    func(Index3D{x, y, z});
     }
 }

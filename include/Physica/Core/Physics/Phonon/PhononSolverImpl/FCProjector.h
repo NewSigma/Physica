@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Utils/Container/ArrayND.h"
 #include "FCSwapVector.h"
 
 namespace Physica {
@@ -78,7 +80,7 @@ namespace Physica {
     template<Scalar T>
     T FCProjector<T>::projectSwap(VectorType& v) const {
         T maxAbsDot = 0;
-        TensorBase::forIndexInTensor(superSize, [this, &v, &maxAbsDot](Index3D index) {
+        forND(superSize, [this, &v, &maxAbsDot](Index3D index) {
             T maxAbsDotInner = 0;
             for (size_t i = 0; i < numDOF; ++i) {
                 for (size_t j = i; j < numDOF; ++j) {
@@ -110,7 +112,7 @@ namespace Physica {
 
     template<Scalar T>
     FCProjector<T>::VectorType FCProjector<T>::toVector(const RSpaceFCGrid& fcGrid) const {
-        assert(fcGrid.getDim() == superSize && "[Error]: Cell sizes do not match");
+        assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
         assert(fcGrid(0, 0, 0).getRow() == numDOF && "[Error]: DOFs do not match");
         VectorType result(getNumForceConsts());
         for (size_t i = 0; i < result.getLength(); ++i) {
@@ -124,7 +126,7 @@ namespace Physica {
     template<Scalar T>
     void FCProjector<T>::toGrid(const VectorType& fcVector, RSpaceFCGrid& fcGrid) const {
         assert(fcVector.getLength() == getNumForceConsts() && "[Error]: This is not a force constants vector");
-        assert(fcGrid.getDim() == superSize && "[Error]: Cell sizes do not match");
+        assert(fcGrid.getShape() == superSize && "[Error]: Cell sizes do not match");
         assert(fcGrid(0, 0, 0).getRow() == numDOF && "[Error]: DOFs do not match");
         for (size_t i = 0; i < fcVector.getLength(); ++i) {
             const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);

@@ -21,6 +21,12 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
+    using Index2D = Array<size_t, 2>;
+    using Index3D = Array<size_t, 3>;
+    using Index4D = Array<size_t, 4>;
+    using Index5D = Array<size_t, 5>;
+    using IndexND = Array<size_t>;
+
     template<class T, int Dim = Dynamic>
     class ArrayND {
         static_assert(Dim >= 0, "[Error]: Invalid Dim");
@@ -67,6 +73,11 @@ namespace Physica {
         [[nodiscard]] size_t toIndex1D(const IndexArray& indices) const noexcept;
         [[nodiscard]] IndexArray toIndexND(size_t index) const noexcept;
 
+        template<class Functor>
+        void forND(Functor func);
+        template<class Functor>
+        void forND(Functor func) const;
+
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto& asArray() noexcept { return arr; }
@@ -88,6 +99,15 @@ namespace Physica {
         static void toIndexArrayImpl(IndexArray& arr, int i, size_t dim0, Dims... dims) noexcept;
         static void toIndexArrayImpl(IndexArray&, int) noexcept {}
     };
+
+    template<size_t Dim, class Functor>
+    void forND(const Array<size_t, Dim>& shape, Functor func) {
+        static_assert(Dim == 3, "[Error]: Not implemented");
+        for (size_t x = 0; x < shape[0]; ++x)
+            for (size_t y = 0; y < shape[1]; ++y)
+                for (size_t z = 0; z < shape[2]; ++z)
+                    func(Index3D{x, y, z});
+    }
 }
 
 #include "ArrayImpl/ArrayNDImpl.h"

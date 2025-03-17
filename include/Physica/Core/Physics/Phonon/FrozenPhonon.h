@@ -183,30 +183,26 @@ namespace Physica {
         const auto gridDim = Index3D{superSize[0], superSize[1], superSize[2]};
         rSpaceFC.resize(gridDim);
 
-        rSpaceFC.forIndexInTensor([&group, &rSpaceFC](Index3D index) {
-            char name[64]; // 64 shall be enough
-            sprintf(name, "%zu_%zu_%zu", index[0], index[1], index[2]);
-            rSpaceFC(index).read(group, name);
+        rSpaceFC.forND([&group](auto& fc, Index3D index) {
+            fc.read(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
         });
     }
 
     template<Scalar T>
     void FrozenPhonon<T>::write(const RSpaceFCGrid& rSpaceFC, H5Loc& loc, const char* name) {
         auto group = loc.openGroup(name);
-        const auto gridDim = rSpaceFC.getDim();
         /* Write superSize */ {
+            const auto shape = rSpaceFC.getShape();
             unsigned char superSize[Dim];
             for (unsigned int i = 0; i < Dim; ++i) {
-                assert(gridDim[i] <= std::numeric_limits<unsigned char>::max() && "[Error]: Unexpected large super cell");
-                superSize[i] = gridDim[i];
+                assert(shape[i] <= std::numeric_limits<unsigned char>::max() && "[Error]: Unexpected large super cell");
+                superSize[i] = shape[i];
             }
             group.writeAttr("SuperSize", superSize);
         }
 
-        rSpaceFC.forIndexInTensor([&group, &rSpaceFC](Index3D index) {
-            char name[64]; // 64 shall be enough
-            sprintf(name, "%zu_%zu_%zu", index[0], index[1], index[2]);
-            rSpaceFC(index).write(group, name);
+        rSpaceFC.forND([&group, &rSpaceFC](const auto& fc, Index3D index) {
+            fc.write(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
         });
     }
 #endif
@@ -217,7 +213,7 @@ namespace Physica {
         const Index3D gridDim{4 * superSize[0] + 1, 4 * superSize[1] + 1, 4 * superSize[2] + 1};
         const size_t numAtom = getNumUnitCellAtom();
         ArrayND<DenseMatrix<T>, 3> result(gridDim, numAtom, numAtom);
-        TensorBase::forIndexInTensor(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
+        forND(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
             const auto& unitCell = Base::getUnitCell();
             const Vector3D<T> factor{T(index[0]) - T(2 * superSize[0]),
                                   T(index[1]) - T(2 * superSize[1]),

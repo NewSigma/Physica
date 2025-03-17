@@ -286,6 +286,6 @@ namespace Physica {
             }
         }
         mean = ln(mean) + maxSample;
-        var = ln(var + std::numeric_limits<T>::min()) + Trv(2) * maxSample;
+        var = ln(var + Trv(std::numeric_limits<T>::min())) + Trv(2) * maxSample;
     }
 }

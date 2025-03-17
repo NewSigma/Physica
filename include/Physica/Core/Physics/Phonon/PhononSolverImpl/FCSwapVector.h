@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
+#include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
     /**

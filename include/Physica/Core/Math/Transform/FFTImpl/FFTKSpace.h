@@ -174,7 +174,6 @@ namespace Physica {
         /* Operations */
         template<Tensor T> inline void invTransform(const LValueTensor<T>& data);
         inline void resize([[maybe_unused]] Index3D size);
-        using TensorBase::forIndexInTensor;
         /* Getters */
         [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getKSpaceSize(); }
         [[nodiscard]] size_t getShape(int dim) const noexcept { return getShape()[dim]; }

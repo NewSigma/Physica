@@ -43,6 +43,7 @@ namespace Physica {
             return relu(Base::getExpr().calc_value(row, col));
         }
 
+        using Base::reverse;
         template<Matrix M1>
         void reverse(const M1& grad) const noexcept requires(isReverseDiff);
     };

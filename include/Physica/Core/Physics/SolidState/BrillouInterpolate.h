@@ -54,7 +54,7 @@ namespace Physica {
         ~BrillouInterpolate() = default;
         /* Operators */
         BrillouInterpolate& operator=(BrillouInterpolate obj) noexcept;
-        [[nodiscard]] T operator()(Vec3D kPoint);
+        [[nodiscard]] T operator()(Vec3D kPoint) const;
         /* Operations */
         RealType calcRoughness() const;
         void interpolate(const DenseTensor<T, 3>& data);
@@ -84,10 +84,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T BrillouInterpolate<T>::operator()(Vec3D kPoint) {
-        const Index3D baseDim = getBaseDim();
+    T BrillouInterpolate<T>::operator()(Vec3D kPoint) const {
         T result(0);
-        TensorBase::forIndexInTensor(baseDim, [this, kPoint, baseDim, &result](Index3D index) {
+        baseCoeff.forND([this, kPoint, &result](const auto& coeff, Index3D index) {
             RealType phase(0);
             for (size_t dim = 0; dim < Dim; ++dim)
                 phase += RealType(index[dim]) * kPoint[dim];
@@ -95,15 +94,15 @@ namespace Physica {
             const auto factor = cos(phase);
 
             if constexpr (!isComplex) {
-                PeriodIndex3D pIndex(index, baseDim);
+                PeriodIndex3D pIndex(index, getBaseDim());
                 if (pIndex.isInReducedK())
-                    result += (baseCoeff(index) * factor).real();
+                    result += (coeff * factor).real();
                 else
                     result += (baseCoeff(pIndex.toReducedK()).conjugate() * factor).real();
             }
             else {
-                (void)baseDim;
-                result += baseCoeff(index) * factor;
+                (void)this; // Silence unused 'this' warning;
+                result += coeff * factor;
             }
         });
         return result;
@@ -154,10 +153,10 @@ namespace Physica {
             fft.rawInvTransform();
 
             const Index3D baseDim = getBaseDim();
-            TensorBase::forIndexInTensor(baseDim, [this, &fft](Index3D rIndex) {
-                PeriodIndex3D pIndex(rIndex, dataDim);
+            baseCoeff.forND([this, &fft](auto& coeff, Index3D index) {
+                PeriodIndex3D pIndex(index, dataDim);
                 pIndex.normalize();
-                baseCoeff(rIndex) *= fft.getRSpace()(pIndex);
+                coeff *= fft.getRSpace()(pIndex);
             });
             baseCoeff(0, 0, 0) = average;
         }
@@ -172,10 +171,10 @@ namespace Physica {
             assert(!kPoint[i].isNegative());
         }
 
-        const Index3D dataDim = data.getDim();
+        const Index3D shape = data.getShape();
         Vec3D globalPos{};
         for (int i = 0; i < 3; ++i)
-            globalPos[i] = kPoint[i] * RealType(dataDim[i]);
+            globalPos[i] = kPoint[i] * RealType(shape[i]);
         const Index3D index0{size_t(double(globalPos[0])), size_t(double(globalPos[1])), size_t(double(globalPos[2]))};
         const Vec3D point1{RealType(index0[0]), RealType(index0[1]), RealType(index0[2])};
         const Vec3D point2{RealType(index0[0] + 1), RealType(index0[1] + 1), RealType(index0[2] + 1)};
@@ -197,7 +196,7 @@ namespace Physica {
         for (int x = 0; x < 2; ++x) {
             for (int y = 0; y < 2; ++y) {
                 for (int z = 0; z < 2; ++z) {
-                    Index3D index{(index0[0] + x) % dataDim[0], (index0[1] + y) % dataDim[1], index0[2] + z};
+                    Index3D index{(index0[0] + x) % shape[0], (index0[1] + y) % shape[1], index0[2] + z};
                     const RealType factor = ElementType::baseFunc(nodeArr[localNodeIndex], localPos);
                     result += factor * data(index);
                     localNodeIndex += 1;
@@ -210,14 +209,13 @@ namespace Physica {
     template<Scalar T>
     template<Matrix M>
     M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const ArrayND<M, 3>& matrixGrid) {
-        const Index3D gridDim = matrixGrid.getDim();
         const size_t order = matrixGrid(0, 0, 0).getRow();
         M result(order, order, T(0));
-        DenseTensor<ComplexType, 3> buffer(gridDim);
+        DenseTensor<ComplexType, 3> buffer(matrixGrid.getShape());
         for (size_t c = 0; c < order; ++c) {
             for (size_t r = 0; r < order; ++r) {
-                TensorBase::forIndexInTensor(gridDim, [r, c, &buffer, &matrixGrid](Index3D index) {
-                    buffer(index) = matrixGrid(index)(r, c);
+                buffer.forND([r, c, &matrixGrid](auto& elem, Index3D index) {
+                    elem = matrixGrid(index)(r, c);
                 });
                 interpolate(buffer);
                 const auto value = this->operator()(qPoint);
@@ -256,7 +254,6 @@ namespace Physica {
      */
     template<Scalar T>
     BrillouInterpolate<T>::CoeffMatrixM BrillouInterpolate<T>::makeMatrixM() const {
-        const auto baseDim = getBaseDim();
         const size_t numDataPoint = dataDim[0] * dataDim[1] * dataDim[2];
         CoeffMatrixM matrixM(numDataPoint, numDataPoint);
         for (size_t r = 0; r < numDataPoint; ++r) {
@@ -265,13 +262,13 @@ namespace Physica {
                 const PeriodIndex3D period_c(c, dataDim);
                 const auto kIndex = Index3D(period_r + period_c);
                 ComplexType elem(0);
-                TensorBase::forIndexInTensor(baseDim, [this, kIndex, &elem](Index3D rIndex) {
+                baseCoeff.forND([this, kIndex, &elem](const auto& coeff, Index3D index) {
                     RealType phase(0);
                     for (size_t i = 0; i < Dim; ++i)
-                        phase += RealType(rIndex[i] * kIndex[i]) / RealType(dataDim[i]);
+                        phase += RealType(index[i] * kIndex[i]) / RealType(dataDim[i]);
                     phase *= RealType(2 * M_PI);
                     const auto factor = cos(phase);
-                    elem += baseCoeff(rIndex) * factor;
+                    elem += coeff * factor;
                 });
                 matrixM(r, c) = matrixM(c, r) = elem;
             }

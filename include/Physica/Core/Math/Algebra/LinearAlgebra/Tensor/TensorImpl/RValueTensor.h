@@ -49,12 +49,13 @@ namespace Physica {
         template<Tensor X>
         void assign(X& x) const;
 
-        [[nodiscard]] ScalarType calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
-        [[nodiscard]] ScalarType calc(Index3D index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] auto calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
+        [[nodiscard]] auto calc(Index3D index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] size_t toIndex1D(const IndexArray& indices) const noexcept;
         [[nodiscard]] IndexArray toIndexND(size_t index) const noexcept;
 
-        template<class Functor> void forIndexInTensor(Functor func) const { TensorBase::forIndexInTensor(getDim(), func); }
+        template<class Functor>
+        void forND(Functor func) const;
 
         auto reals() const noexcept;
         auto imags() const noexcept;
@@ -69,12 +70,7 @@ namespace Physica {
         [[nodiscard]] auto getDim() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
-        using TensorBase::forPointInTensor;
         using TensorBase::forPointIndexInTensor;
-        using TensorBase::forIndexInTensor;
-        template<Scalar T, bool IsUnitLattice, class Functor>
-        inline static void forPointInTensor(
-                const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
         template<Scalar T, bool IsUnitLattice, class Functor>
         inline static void forPointIndexInTensor(
                 const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);

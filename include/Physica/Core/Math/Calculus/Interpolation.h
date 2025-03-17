@@ -199,11 +199,11 @@ namespace Physica {
         fft.transform();
 
         auto result = ResultType(newDim);
-        TensorBase::forIndexInTensor(newDim, [newDim, &fft, &result](Index3D rIndex) {
+        forND(newDim, [newDim, &fft, &result](Index3D rIndex) {
             const auto& kSpace = fft.getKSpace();
             const Index3D rSpaceSize = fft.getRSpaceSize();
             auto elem = ComplexType(0);
-            TensorBase::forIndexInTensor(rSpaceSize, [newDim, rSpaceSize, rIndex, &kSpace, &elem](Index3D kIndex) {
+            forND(rSpaceSize, [newDim, rSpaceSize, rIndex, &kSpace, &elem](Index3D kIndex) {
                 RealType phase(0);
                 for (size_t dim = 0; dim < Dim; ++dim)
                     phase += RealType(kIndex[dim] * rIndex[dim]) / newDim[dim];
@@ -252,7 +252,7 @@ namespace Physica {
         const Vector3D<RealType> relative_r = divide(r, period);
         const Index3D rSpaceSize = fft.getRSpaceSize();
         auto elem = ComplexType(0);
-        TensorBase::forIndexInTensor(rSpaceSize, [relative_r, rSpaceSize, &kSpace, &elem](Index3D kIndex) {
+        forND(rSpaceSize, [relative_r, rSpaceSize, &kSpace, &elem](Index3D kIndex) {
             RealType phase(0);
             for (size_t dim = 0; dim < Dim; ++dim)
                 phase += RealType(kIndex[dim]) * relative_r[dim];

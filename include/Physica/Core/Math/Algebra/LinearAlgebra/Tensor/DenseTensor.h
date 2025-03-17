@@ -44,8 +44,9 @@ namespace Physica {
         template<class... Args>
         inline void resize(IndexArray shape, Args&&... args);
 
-        using Base::toIndex1D;
-        using Base::toIndexND;
+        using Storage::toIndex1D;
+        using Storage::toIndexND;
+        using Storage::forND;
 
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */

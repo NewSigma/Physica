@@ -33,10 +33,4 @@ namespace Physica {
 
     template<class T>
     concept Tensor = Internal::TensorObj<std::remove_cvref_t<T>> || Internal::TensorObj<typename remove_codiff<std::remove_cvref_t<T>>::Type>;
-
-    using Index2D = Array<size_t, 2>;
-    using Index3D = Array<size_t, 3>;
-    using Index4D = Array<size_t, 4>;
-    using Index5D = Array<size_t, 5>;
-    using IndexND = Array<size_t>;
 }

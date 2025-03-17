@@ -43,6 +43,14 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<class Functor>
+    void RValueTensor<Derived>::forND(Functor func) const {
+        Physica::forND(getShape(), [this, func](const IndexArray& index) {
+            func(calc(index), index);
+        });
+    }
+
+    template<class Derived>
     auto RValueTensor<Derived>::reals() const noexcept {
         return RealTensor<Derived>(Base::getDerived());
     }
@@ -99,13 +107,6 @@ namespace Physica {
         for (int i = 1; i < getDim(); ++i)
             size *= getShape(i);
         return size;
-    }
-
-    template<class Derived>
-    template<Scalar T, bool IsUnitLattice, class Functor>
-    inline void RValueTensor<Derived>::forPointInTensor(
-            const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
-        return forPointInTensor<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class Derived>

@@ -52,7 +52,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const GridType& getCoeffGrid() const noexcept { return coeffGrid; }
         [[nodiscard]] size_t getNumPlainWave() const noexcept { return coeffGrid.getSize(); }
-        [[nodiscard]] Index3D getDim() const noexcept { return coeffGrid.getDim(); }
+        [[nodiscard]] Index3D getShape() const noexcept { return coeffGrid.getShape(); }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
         [[nodiscard]] T getCutEnergyPsi() const noexcept { return cutEnergyPsi; }
         /* Static members */
@@ -93,7 +93,7 @@ namespace Physica {
 
     template<Scalar T>
     inline Vector3D<T> PlainWaveBasis<T>::makeWaveVector(Index3D index) const noexcept {
-        return makeWaveVector(repLatt, index, getDim());
+        return makeWaveVector(repLatt, index, getShape());
     }
 
     template<Scalar T>
@@ -144,7 +144,7 @@ namespace Physica {
     template<Scalar T>
     template<class Functor>
     inline void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func) {
-        TensorBase::forIndexInTensor(dim, [&repLatt, dim, func](Index3D index) {
+        forND(dim, [&repLatt, dim, func](Index3D index) {
             func(makeWaveVector(repLatt, index, dim));
         });
     }
@@ -152,7 +152,7 @@ namespace Physica {
     template<Scalar T>
     template<class Functor>
     inline void PlainWaveBasis<T>::forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func) {
-        TensorBase::forIndexInTensor(dim, [&repLatt, dim, func](Index3D index) {
+        forND(dim, [&repLatt, dim, func](Index3D index) {
             func(makeWaveVector(repLatt, index, dim), index);
         });
     }
