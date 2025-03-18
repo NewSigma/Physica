@@ -108,7 +108,7 @@ namespace Physica {
         [[nodiscard]] ScalarType calc() const;
 
         template<int MaskOrder>
-        [[nodiscard]] auto mask() const noexcept;
+        [[nodiscard]] __host__ __device__ auto mask() const noexcept;
 
         __host__ __device__ inline Derived& load(ConstPtrTy p);
         __host__ __device__ inline void store(PtrTy p) const;
@@ -257,7 +257,7 @@ namespace Physica {
 
     template<class Derived>
     template<int MaskOrder>
-    auto ScalarBase<Derived>::mask() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::mask() const noexcept {
         if constexpr (isDiffable)
             return calc().template mask<MaskOrder>();
         else

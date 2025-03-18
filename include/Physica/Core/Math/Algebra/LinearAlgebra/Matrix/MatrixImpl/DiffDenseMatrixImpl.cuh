@@ -21,8 +21,8 @@
 #include "../DiffDenseMatrix.cuh"
 
 namespace Physica {
-#define tparams Scalar T, int Order, int Option
-#define DenseMatrix DenseMatrix<Diff<T, DiffMode::Reverse, Order>, Option>
+#define tparams Scalar T, DiffMode Mode, int Order, int Option
+#define DenseMatrix DenseMatrix<Diff<T, Mode, Order>, Option>
 
     template<tparams>
     device_obj<DenseMatrix>::device_obj(size_t row, size_t col) : v(row, col), g(row, col) {}
@@ -36,14 +36,26 @@ namespace Physica {
     template<tparams>
     template<Vector V>
     device_obj<DenseMatrix>::device_obj(const V& vec) requires(!ReverseDiff<V>)  : device_obj(vec.getLength(), 1) {
-        auto col = this->col(0);
-        vec.assign(col);
+        if constexpr (!Diffable<V>) {
+            auto col = v.col(0);
+            vec.assign(col);
+            g.zeros();
+        }
+        else {
+            auto col = this->col(0);
+            vec.assign(col);
+        }
     }
 
     template<tparams>
     template<Matrix M>
     device_obj<DenseMatrix>::device_obj(const M& mat) requires(!ReverseDiff<M>) : device_obj(mat.getRow(), mat.getCol()) {
-        mat.assign(*this);
+        if constexpr (!Diffable<M>) {
+            mat.assign(v);
+            g.zeros();
+        }
+        else
+            mat.assign(*this);
     }
 
     template<tparams>

@@ -50,7 +50,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<Vector V>
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v_) requires(!ReverseDiff<V>) : DenseVector(v_.getLength()) {
-        if constexpr (isReverseDiff) {
+        if constexpr (!Diffable<V>) {
             v_.assign(v);
             g.zeros();
         }

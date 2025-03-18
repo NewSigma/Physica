@@ -30,13 +30,15 @@ namespace Physica {
         using GradPtrTy = GradType::PtrTy;
     private:
         union {
-            std::pair<T*, GradPtrTy> pair;
+            struct {
+                T* pValue;
+                GradPtrTy pGrad;
+            };
             T* arr[Order + 1];
         };
     public:
         __host__ __device__ ScalarPtr() {}
-        __host__ __device__ ScalarPtr(std::pair<T*, GradPtrTy> pair_) : pair(std::move(pair_)) {}
-        __host__ __device__ ScalarPtr(T* pValue, GradPtrTy pGrad) : pair(std::make_pair(pValue, pGrad)) {}
+        __host__ __device__ ScalarPtr(T* pValue_, GradPtrTy pGrad_);
         __host__ __device__ explicit ScalarPtr(ScalarType& x);
         __host__ __device__ explicit ScalarPtr(ScalarRef<ScalarType>& x);
         ScalarPtr(const This&) = default;
@@ -60,10 +62,13 @@ namespace Physica {
         /* Operations */
         __host__ __device__ inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ T* value_ptr() const noexcept { return pair.first; }
+        [[nodiscard]] __host__ __device__ T* value_ptr() const noexcept { return pValue; }
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grad_ptr() const noexcept;
     };
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(T* pValue_, GradPtrTy pGrad_) : pValue(pValue_), pGrad(pGrad_) {}
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarType& x) : ScalarPtr(&x.value(), &x.grad()) {}
@@ -73,8 +78,8 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ inline bool ScalarPtr<Diff<T, Mode, Order>>::operator==(const This& other) const noexcept {
-        bool flag = pair.first == other.pair.first;
-        assert(flag == (pair.second == other.pair.second) && "[Error]: Bad ScalarPtr");
+        bool flag = pValue == other.pValue;
+        assert(flag == (pGrad == other.pGrad) && "[Error]: Bad ScalarPtr");
         return flag;
     }
 
@@ -117,12 +122,12 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ inline const ScalarPtr<Diff<T, Mode, Order>> ScalarPtr<Diff<T, Mode, Order>>::operator++(int) {
-        return This(pair.first++, pair.second++);
+        return This(pValue++, pGrad++);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ inline const ScalarPtr<Diff<T, Mode, Order>> ScalarPtr<Diff<T, Mode, Order>>::operator--(int) {
-        return This(pair.first--, pair.second--);
+        return This(pValue--, pGrad--);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -134,7 +139,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ inline void ScalarPtr<Diff<T, Mode, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        pair.swap(obj.pair);
+        std::swap(arr, obj.arr);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -142,8 +147,8 @@ namespace Physica {
     __host__ __device__ auto ScalarPtr<Diff<T, Mode, Order>>::grad_ptr() const noexcept {
         static_assert(GradOrder > 0, "[Error]: Invalid order");
         if constexpr (GradOrder == 1)
-            return pair.second;
+            return pGrad;
         else
-            return pair.second.template grad_ptr<GradOrder - 1>();
+            return pGrad.template grad_ptr<GradOrder - 1>();
     }
 }

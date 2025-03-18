@@ -48,15 +48,26 @@ namespace Physica {
     template<tparams>
     template<Vector V>
     DiffDenseMatrix::DenseMatrix(const V& vec) requires(!ReverseDiff<V>) : DenseMatrix(vec.getLength(), 1) {
-        auto col = this->col(0);
-        vec.assign(col);
+        if constexpr (!Diffable<V>) {
+            auto col = v.col(0);
+            vec.assign(col);
+            g.zeros();
+        }
+        else {
+            auto col = this->col(0);
+            vec.assign(col);
+        }
     }
 
     template<tparams>
     template<Matrix M>
     DiffDenseMatrix::DenseMatrix(const M& mat) requires(!ReverseDiff<M>) : DenseMatrix(mat.getRow(), mat.getCol()) {
-        mat.assign(v);
-        g.zeros();
+        if constexpr (!Diffable<M>) {
+            mat.assign(v);
+            g.zeros();
+        }
+        else
+            mat.assign(*this);
     }
 
     template<tparams>

@@ -123,9 +123,9 @@ namespace Physica {
     template<class Derived>
     inline auto SIMDBase<Derived>::value() const -> ValueType {
         if constexpr (isDiffable)
-            return Base::getDerived().value();
+            return Base::getDerived_host().value();
         else
-            return Base::getDerived();
+            return Base::getDerived_host();
     }
 
     template<class Derived>

@@ -69,6 +69,8 @@ namespace Physica {
         template<RNG R, class Distribution>
         inline void random_any(Distribution& dist);
 
+        using Base::read;
+        using Base::write;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Storage::data;

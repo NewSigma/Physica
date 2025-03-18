@@ -22,15 +22,18 @@
 #include "DiffVector.h"
 
 namespace Physica {
-    template<Scalar T, int Order>
-    class device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>
-            : public device_obj<ContinuousVector<DenseVector<Diff<T, DiffMode::Reverse, Order>>>> {
-        using host_obj = DenseVector<Diff<T, DiffMode::Reverse, Order>>;
+    template<Scalar T, DiffMode Mode, int Order>
+    class device_obj<DenseVector<Diff<T, Mode, Order>>>
+            : public device_obj<ContinuousVector<DenseVector<Diff<T, Mode, Order>>>>
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseVector<Diff<T, Mode, Order>>>>, PlainStruct<void>>::type {
+        using host_obj = DenseVector<Diff<T, Mode, Order>>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
     public:
-        using ScalarType = Base::ScalarType;
+        using typename Base::ScalarType;
         using Base::MaxThreadPerBlock;
+        using Base::isForwardDiff;
+        using Base::isReverseDiff;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -41,13 +44,14 @@ namespace Physica {
         using initializer_list = std::initializer_list<T>;
 
         ValueVector v;
-        device_obj<VectorND<T>> g;
+        GradVector g;
     public:
         device_obj() = default;
         explicit device_obj(size_t length);
         device_obj(size_t length, T init);
+        device_obj(size_t length, ScalarType init) requires(isForwardDiff);
         template<Vector V>
-        explicit device_obj(const V& v_) requires(!ReverseDiff<V>);
+        explicit(isReverseDiff) device_obj(const V& v_) requires(!ReverseDiff<V>);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -95,8 +99,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, int Order>
-    class Traits<device_obj<DenseVector<Diff<T, DiffMode::Reverse, Order>>>> : public Traits<DenseVector<Diff<T, DiffMode::Reverse, Order>>> {
+    template<Scalar T, DiffMode Mode, int Order>
+    class Traits<device_obj<DenseVector<Diff<T, Mode, Order>>>> : public Traits<DenseVector<Diff<T, Mode, Order>>> {
         static_assert(!Diffable<T>, "[Error]: Nested Diff<> is not allowed");
     };
 }

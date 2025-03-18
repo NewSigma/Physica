@@ -215,8 +215,10 @@ namespace Physica {
                     nn(x).toHost(seg);
                 else
                     seg = nn(x);
+
                 loss = calcLoss_ln<decltype(seg), Executor>(seg, lnJv);
-                lnJs.reverse(lnJv.grads().toDeviceAsync());
+                if constexpr (ReverseDiff<T>)
+                    lnJs.reverse(lnJv.grads().toDeviceAsync());
                 seg += lnJv.values() + lnVolume;
             }
         }
@@ -270,7 +272,7 @@ namespace Physica {
         samples = exp(samples - maxSample);
 
         mean = ln(samples.mean()) + maxSample;
-        var = ln(samples.variance() + std::numeric_limits<T>::min()) + Trv(2) * maxSample;
+        var = ln(samples.variance() + Trv(std::numeric_limits<T>::min())) + Trv(2) * maxSample;
         return loss - ln(Trv(numSample));
     }
 

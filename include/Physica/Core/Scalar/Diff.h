@@ -67,6 +67,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &v; }
         [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &g; }
+
+        using Base::value;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ inline auto& grad() noexcept;
         template<int GradOrder = 1>
@@ -81,38 +83,6 @@ namespace Physica {
         [[nodiscard]] inline static auto random_any(Distribution& dist);
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
-
-    template<Scalar T, Scalar U>
-    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
-    operator+(T&& x, U&& y) requires(Diffable<T>);
-
-    template<Scalar T, Scalar U> 
-    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
-    operator-(T&& x, U&& y) requires(Diffable<T>);
-
-    template<Scalar T, Scalar U>
-    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
-    operator*(T&& x, U&& y) requires(Diffable<T>);
-
-    template<Scalar T, Scalar U>
-    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
-    operator/(T&& x, U&& y) requires(Diffable<T>);
-
-    template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator+(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
-
-    template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator-(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
-
-    template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator*(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
-
-    template<Scalar T, Scalar U>
-    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
-    operator/(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>);
-
-    template<Scalar T>
-    [[nodiscard]] inline CoDiff<T> operator-(T&& x) noexcept requires(Diffable<T>);
 
     template<Scalar T>
     inline std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable) {
@@ -167,5 +137,6 @@ namespace std {
 #include "DiffImpl/DiffImpl.h"
 #include "DiffImpl/ScalarPtr.h"
 #include "DiffImpl/ScalarRef.h"
-#include "DiffImpl/Math.h"
+#include "DiffImpl/MathForward.h"
+#include "DiffImpl/MathReverse.h"
 #include "DiffImpl/SIMD.h"

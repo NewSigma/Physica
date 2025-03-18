@@ -65,6 +65,7 @@ namespace Physica {
     template<Scalar T, int Dim>
     void Hubbard<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
         hoppingT.swap(obj.hoppingT);
         repelU.swap(obj.repelU);
         hopIndexArr.swap(obj.hopIndexArr);

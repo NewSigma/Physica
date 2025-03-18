@@ -23,10 +23,12 @@
 #include "DiffDenseMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Order, int Option>
-    class device_obj<DenseMatrix<Diff<T, DiffMode::Reverse, Order>, Option>> : public device_obj<ContinuousMatrix<DenseMatrix<Diff<T, DiffMode::Reverse, Order>, Option>>> {
+    template<Scalar T, DiffMode Mode, int Order, int Option>
+    class device_obj<DenseMatrix<Diff<T, Mode, Order>, Option>>
+            : public device_obj<ContinuousMatrix<DenseMatrix<Diff<T, Mode, Order>, Option>>>
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseMatrix<Diff<T, Mode, Order>, Option>>>, PlainStruct<void>>::type {
         static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
-        using host_obj = DenseMatrix<Diff<T, DiffMode::Reverse, Order>, Option>;
+        using host_obj = DenseMatrix<Diff<T, Mode, Order>, Option>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousMatrix<host_obj>>;
     public:
@@ -100,11 +102,11 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, int Order, int Option>
-    class Traits<device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
+    template<Scalar T, DiffMode Mode, int Order, int Option>
+    class Traits<device_obj<Diff<DenseMatrix<T, Option>, Mode, Order>>>
             : public Traits<DenseMatrix<T, Option>> {
     public:
-        using ScalarType = device_obj<Diff<T, DiffMode::Reverse, Order>>;
+        using ScalarType = device_obj<Diff<T, Mode, Order>>;
     };
 }
 

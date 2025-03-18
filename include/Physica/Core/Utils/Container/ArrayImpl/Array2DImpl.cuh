@@ -30,7 +30,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ device_obj<Array2D>::device_obj(size_t row, size_t col, ElemType value) {
+    __host__ __device__ device_obj<Array2D>::device_obj(size_t row, size_t col, T value) {
         resize(row, col, std::move(value));
     }
 
@@ -39,13 +39,13 @@ namespace Physica {
             : arr(storage.arr), r(storage.r), size(storage.getSize()) {}
 
     template<tparams>
-    __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) -> ElemType& {
+    __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) -> T& {
         assert(r < getRow() && c < getCol());
         return *data_ptr(r, c);
     }
 
     template<tparams>
-    __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) const -> const ElemType& {
+    __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) const -> const T& {
         return const_cast<This&>(*this).operator()(r, c);
     }
 
@@ -149,7 +149,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) -> ElemType* {
+    __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) -> T* {
         assert(row < getRow());
         assert(col < getCol());
         if constexpr (isVectorStorage) {
@@ -167,7 +167,7 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) const -> const ElemType* {
+    __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) const -> const T* {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 

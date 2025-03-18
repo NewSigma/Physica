@@ -13,11 +13,11 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Notes on MNIST
 
-训练32神经元的单隐藏层神经网络进行手写数字识别
+Example-Mnist用于演示如何使用基于协程的自动微分搭建神经网络
 
 ![](./Mnist.png)
 
-**图1** Mnist训练曲线，使用Xavier-Normal初始化。验证集精度为96%，和已有结果接近$^{[1]}$。
+**图1** 训练32神经元的单隐藏层神经网络进行手写数字识别。验证集精度为96%，和已有结果接近$^{[1]}$。
 
 ## Reference
 

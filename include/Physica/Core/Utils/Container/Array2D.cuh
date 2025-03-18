@@ -32,7 +32,6 @@ namespace Physica {
         constexpr static bool isVectorStorage = host_obj::isVectorStorage;
         constexpr static bool isDynamicArray = host_obj::isDynamicArray;
         constexpr static bool isColMajor = host_obj::isColMajor;
-        using ElemType = std::conditional<isVectorStorage, T, typename ArrayType::ElemType>::type;
         using SizeType = std::conditional<isVectorStorage, size_t, PlainStruct<void>>::type;
     private:
         ArrayType arr;
@@ -41,15 +40,15 @@ namespace Physica {
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t col);
-        __host__ __device__ device_obj(size_t row, size_t col, ElemType value);
+        __host__ __device__ device_obj(size_t row, size_t col, T value);
         device_obj(const host_obj& storage);
         device_obj(const This&) = default;
         device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __device__ ElemType& operator()(size_t r, size_t c);
-        [[nodiscard]] __device__ const ElemType& operator()(size_t r, size_t c) const;
+        [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
+        [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
         template<class... Args>
         __host__ __device__ void resize(size_t row, size_t col, Args&&... args);
@@ -66,8 +65,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
-        [[nodiscard]] __host__ __device__ ElemType* data_ptr(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ const ElemType* data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const;
     private:
         __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
     };

@@ -20,6 +20,7 @@
 
 #include <fstream>
 #include "Physica/Core/Utils/Container/Array.h"
+#include "HDF5.h"
 
 namespace Physica {
     template<size_t Dim> class H5DataSpace;
