@@ -21,11 +21,7 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
-    template<Scalar T,
-             int Option,
-             size_t Row,
-             size_t Col,
-             class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     class DenseMatrix;
 
     namespace Internal {
@@ -50,18 +46,18 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using Base::isReverseDiff;
+        using Base::isComplex;
+    private:
         using DefaultType = DenseMatrix<ScalarType,
                                         Internal::ProductOption<T1, T2>::Option,
                                         Base::RowAtCompile,
                                         Base::ColAtCompile,
                                         HostAllocator<ScalarType>>;
-    private:
+
         const T1& mat1;
         const T2& mat2;
     public:
-        MatrixProduct(const T1& mat1_, const T2& mat2_) : mat1(mat1_), mat2(mat2_) {
-            assert(mat1.getCol() == mat2.getRow());
-        }
+        MatrixProduct(const T1& mat1_, const T2& mat2_);
         MatrixProduct(const This&) = default;
         MatrixProduct(This&&) noexcept = default;
         ~MatrixProduct() = default;
@@ -71,6 +67,10 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         void assign(LValueMatrix<M>& target) const;
+        template<Matrix M>
+        void assign_base(LValueMatrix<M>& target) const;
+        template<Matrix M>
+        void assign_mkl(LValueMatrix<M>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
@@ -82,11 +82,37 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] const T1& getLHS() const noexcept { return mat1; }
         [[nodiscard]] const T2& getRHS() const noexcept { return mat2; }
+        /* Friends */
+        friend class device_obj<This>;
     };
+
+    template<Matrix T1, Matrix T2>
+    MatrixProduct<T1, T2>::MatrixProduct(const T1& mat1_, const T2& mat2_) : mat1(mat1_), mat2(mat2_) {
+        assert(mat1.getCol() == mat2.getRow());
+    }
 
     template<Matrix T1, Matrix T2>
     template<Matrix M>
     void MatrixProduct<T1, T2>::assign(LValueMatrix<M>& target) const {
+        constexpr bool GoodScalar = ScalarType::Option == Float32 || ScalarType::Option == Float64;
+        constexpr bool SameScalar = std::same_as<typename T1::ScalarType, typename T2::ScalarType> && std::same_as<ScalarType, typename M::ScalarType>;
+        constexpr bool SameMajor = MatrixOption::getMajor<T1>() == MatrixOption::getMajor<T2>();
+        constexpr bool isContinuous = is_continuous<T1>::value && is_continuous<T2>::value && is_continuous<M>::value;
+        constexpr bool isElement = MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>() && MatrixOption::isElementMatrix<M>();
+        constexpr bool isDiffable = Diffable<ScalarType>;
+        constexpr bool UseMKL = HasMKL() && GoodScalar && SameScalar && SameMajor && isContinuous && isElement && !isDiffable;
+        constexpr bool SmallMatrix1 = 0 < T1::SizeAtCompile && T1::SizeAtCompile <= 64;
+        constexpr bool SmallMatrix2 = 0 < T2::SizeAtCompile && T2::SizeAtCompile <= 64;
+        constexpr bool SmallMatrix = SmallMatrix1 && SmallMatrix2;
+        if constexpr (UseMKL && !SmallMatrix)
+            assign_mkl(target);
+        else
+            assign_base(target);
+    }
+
+    template<Matrix T1, Matrix T2>
+    template<Matrix M>
+    void MatrixProduct<T1, T2>::assign_base(LValueMatrix<M>& target) const {
         constexpr static int defaultMajor = Internal::ProductOption<T1, T2>::Major;
         constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
         using TargetType = LValueMatrix<M>;
@@ -151,3 +177,7 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
+
+#ifdef PHYSICA_MKL
+    #include "GEMM_MKL.h"
+#endif

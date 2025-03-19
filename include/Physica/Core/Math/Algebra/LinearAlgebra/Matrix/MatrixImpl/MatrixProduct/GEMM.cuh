@@ -29,11 +29,12 @@ namespace Physica {
         using host_obj = MatrixProduct<T1, T2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using DefaultType = host_obj::DefaultType::device_obj_type;
     public:
         using typename Base::ScalarType;
-        using typename Base::Tv;
         using Base::isReverseDiff;
-        using DefaultType = host_obj::DefaultType::device_obj_type;
+    protected:
+        using typename Base::Tv;
     private:
         using Tm = ScalarType::MachineType;
 

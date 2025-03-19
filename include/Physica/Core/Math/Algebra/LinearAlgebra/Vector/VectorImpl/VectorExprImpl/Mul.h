@@ -40,6 +40,10 @@ namespace Physica {
         template<Vector V1, class Executor = SeqExecutor>
         inline void assign_add(V1& v) const;
 
+        template<Vector V1>
+        void assign_add_base(V1& v) const noexcept;
+        void assign_add_mkl(void* y) const noexcept;
+
         [[nodiscard]] CoDiff<T> calc(size_t index) const {
             return Base::getLHS().calc(index) * Base::getRHS();
         }
@@ -70,8 +74,6 @@ namespace Physica {
             if constexpr (ReverseDiff<U>)
                 rhs.reverse(lhs.values() * grad);
         }
-    private:
-        void assign_add_mkl(void* y) const noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -89,10 +91,22 @@ namespace Physica {
     template<Vector V, Scalar U>
     template<Vector V1, class Executor>
     inline void VectorExpr<ExprType::Mul, V, U>::assign_add(V1& v) const {
-        if constexpr (Internal::EnableMKL<V, V1>::value)
-            assign_add_mkl(v.data());
+        constexpr size_t Size = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
+        constexpr bool SmallVector = 0 < Size && Size <= 128;
+        if constexpr (Internal::EnableMKL<V, V1>::value && !SmallVector) {
+            if (Base::getLength() <= 128)
+                assign_add_base(v);
+            else
+                assign_add_mkl(v.data());
+        }
         else
-            Base::assign_add(v);
+            assign_add_base(v);
+    }
+
+    template<Vector V, Scalar U>
+    template<Vector V1>
+    void VectorExpr<ExprType::Mul, V, U>::assign_add_base(V1& v) const noexcept {
+        Base::assign_add(v);
     }
 
     template<Vector V1, Vector V2>

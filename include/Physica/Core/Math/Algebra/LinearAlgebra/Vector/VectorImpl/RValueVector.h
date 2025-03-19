@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/CRTPBase.h"
-#include "Physica/Core/Scalar/Real.h" // IWYU pragma: export
+#include "Physica/Core/Scalar/Complex.h" // IWYU pragma: export
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "Physica/Core/Parallel/Executor/SeqExecutor.h"
 #include "RValueVectorImpl/RVectorBlock.h"

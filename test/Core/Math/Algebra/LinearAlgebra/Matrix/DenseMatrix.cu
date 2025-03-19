@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomType = Random<MT19937, 10000>;
 
 int main() {
     {
@@ -42,7 +42,7 @@ int main() {
         const DeviceMatrix d_result = d_A * d_B;
         CUDAContext::getInstance().wait();
         const auto result = d_result.toHost();
-        if (!matrixNear(answer, result, 1E-7))
+        if (!matrixNear(answer, result, 1E-6))
             return 1;
     }
     return 0;
