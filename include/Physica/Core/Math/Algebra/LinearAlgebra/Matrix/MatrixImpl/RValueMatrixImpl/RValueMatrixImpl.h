@@ -391,6 +391,15 @@ namespace Physica {
     }
 
     template<class Derived>
+    bool RValueMatrix<Derived>::isFinite() const noexcept {
+        for (size_t r = 0; r < getRow(); ++r)
+            for (size_t c = 0; c < getCol(); ++c)
+                if (!calc(r, c).isFinite())
+                    return false;
+        return true;
+    }
+
+    template<class Derived>
     template<Matrix M>
     __host__ __device__ void RValueMatrix<Derived>::assign_check(const M&) noexcept {
         static_assert(RowAtCompile == M::RowAtCompile || RowAtCompile == Dynamic || M::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");

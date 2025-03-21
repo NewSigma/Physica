@@ -7,7 +7,7 @@ source:
   git_depth: 1
 
 requirements:
-  host:
+  build:
     - ninja>=1.11
     - cmake>=3.29
     - clang>=17.0.6

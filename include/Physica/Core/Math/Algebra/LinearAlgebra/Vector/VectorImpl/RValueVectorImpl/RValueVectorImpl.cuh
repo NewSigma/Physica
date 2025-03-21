@@ -269,6 +269,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::mean(int tid, int numThread, T* __restrict shared) const -> T {
+        return sum(tid, numThread, shared) / Trv(getLength());
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<RValueVector<Derived>>::reals() const noexcept -> RealsRtnTy {
         return RealsRtnTy(Base::getDerived());
     }

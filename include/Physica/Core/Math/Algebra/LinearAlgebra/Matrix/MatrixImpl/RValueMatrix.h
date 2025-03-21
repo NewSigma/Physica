@@ -145,6 +145,7 @@ namespace Physica {
         [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
 
         [[nodiscard]] bool isSymm() const noexcept;
+        [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }

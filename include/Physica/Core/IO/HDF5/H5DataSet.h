@@ -33,7 +33,7 @@ namespace Physica {
         H5DataSet() = default;
         H5DataSet(const H5::DataSet& obj);
         H5DataSet(const H5DataSet&) = default;
-        H5DataSet(H5DataSet&&) noexcept = delete;
+        H5DataSet(H5DataSet&&) noexcept = default;
         virtual ~H5DataSet() = default;
         /* Operators */
         inline H5DataSet& operator=(const H5DataSet& obj);

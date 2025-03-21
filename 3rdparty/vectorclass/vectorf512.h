@@ -1447,42 +1447,73 @@ static inline Vec8d exp2(Vec8q const n) {
 *****************************************************************************/
 
 // AVX512 requires gcc version 4.9 or higher. Apparently the problem with mangling intrinsic vector types no longer exists in gcc 4.x
+#ifdef __clang__
+    template<class Pack>
+    static inline __m512i reinterpret_i(Pack const x) requires(sizeof(Pack) == 64) {
+        if constexpr (std::same_as<Pack, __m128i>)
+            return x;
+        else if constexpr (std::same_as<Pack, __m128>)
+            return _mm512_castps_si512(x);
+        else
+            return _mm512_castpd_si512(x);
+    }
 
-static inline __m512i reinterpret_i (__m512i const x) {
-    return x;
-}
+    template<class Pack>
+    static inline __m512i reinterpret_f(Pack const x) requires(sizeof(Pack) == 64) {
+        if constexpr (std::same_as<Pack, __m128i>)
+            return _mm512_castsi512_ps(x);
+        else if constexpr (std::same_as<Pack, __m128>)
+            return x;
+        else
+            return _mm512_castpd_ps(x);
+    }
 
-static inline __m512i reinterpret_i (__m512  const x) {
-    return _mm512_castps_si512(x);
-}
+    template<class Pack>
+    static inline __m512i reinterpret_d(Pack const x) requires(sizeof(Pack) == 64) {
+        if constexpr (std::same_as<Pack, __m128i>)
+            return _mm512_castsi512_pd(x);
+        else if constexpr (std::same_as<Pack, __m128>)
+            return _mm512_castps_pd(x);
+        else
+            return x;
+    }
+#else
+    static inline __m512i reinterpret_i (__m512i const x) {
+        return x;
+    }
 
-static inline __m512i reinterpret_i (__m512d const x) {
-    return _mm512_castpd_si512(x);
-}
+    static inline __m512i reinterpret_i (__m512  const x) {
+        return _mm512_castps_si512(x);
+    }
 
-static inline __m512  reinterpret_f (__m512i const x) {
-    return _mm512_castsi512_ps(x);
-}
+    static inline __m512i reinterpret_i (__m512d const x) {
+        return _mm512_castpd_si512(x);
+    }
 
-static inline __m512  reinterpret_f (__m512  const x) {
-    return x;
-}
+    static inline __m512  reinterpret_f (__m512i const x) {
+        return _mm512_castsi512_ps(x);
+    }
 
-static inline __m512  reinterpret_f (__m512d const x) {
-    return _mm512_castpd_ps(x);
-}
+    static inline __m512  reinterpret_f (__m512  const x) {
+        return x;
+    }
 
-static inline __m512d reinterpret_d (__m512i const x) {
-    return _mm512_castsi512_pd(x);
-}
+    static inline __m512  reinterpret_f (__m512d const x) {
+        return _mm512_castpd_ps(x);
+    }
 
-static inline __m512d reinterpret_d (__m512  const x) {
-    return _mm512_castps_pd(x);
-}
+    static inline __m512d reinterpret_d (__m512i const x) {
+        return _mm512_castsi512_pd(x);
+    }
 
-static inline __m512d reinterpret_d (__m512d const x) {
-    return x;
-}
+    static inline __m512d reinterpret_d (__m512  const x) {
+        return _mm512_castps_pd(x);
+    }
+
+    static inline __m512d reinterpret_d (__m512d const x) {
+        return x;
+    }
+#endif
 
 // Function infinite4f: returns a vector where all elements are +INF
 static inline Vec16f infinite16f() {
