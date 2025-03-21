@@ -1,0 +1,36 @@
+package:
+  name: physica
+  version: 2025
+
+source:
+  git_url: https://gitee.com/newsigma/Physica
+  git_depth: 1
+
+requirements:
+  host:
+    - ninja>=1.11
+    - cmake>=3.29
+    - clang>=17.0.6
+    - fftw>=3.3.10
+    - hdf5>=1.14.1
+    - mkl>=2024.2
+    - mkl-devel>=2024.2
+    - mkl-include>=2024.2
+    - cuda-toolkit>=12.8
+  run:
+    - ninja>=1.11
+    - cmake>=3.29
+    - clang>=17.0.6
+    - fftw>=3.3.10
+    - hdf5>=1.14.1
+    - mkl>=2024.2
+    - mkl-devel>=2024.2
+    - mkl-include>=2024.2
+    - cuda-toolkit>=12.8
+
+test:
+
+about:
+  home: https://gitee.com/newsigma/Physica
+  license: GPLv3
+  summary: Modern template library for computational physics

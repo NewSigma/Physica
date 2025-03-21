@@ -98,9 +98,8 @@ include_directories(SYSTEM ${FFTW3_INCLUDE_DIRS})
 link_directories(${FFTW3_LIBRARY_DIRS})
 
 if (${PHYSICA_HDF5})
-    find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)
+    find_package(HDF5 REQUIRED COMPONENTS C CXX)
     add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
-    include_directories(SYSTEM ${HDF5_INCLUDE_DIR_CPP})
 endif()
 
 if(${PHYSICA_PROFILE})

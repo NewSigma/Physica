@@ -21,6 +21,7 @@ Welcome to Physica's documentation!
    Core/index.rst
    Logger/index.rst
    StyleGuide
+   Install
 
 Indices and tables
 ==================

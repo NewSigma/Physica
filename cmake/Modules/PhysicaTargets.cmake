@@ -10,7 +10,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
 endif()
 
 if(${PHYSICA_HDF5})
-    target_link_libraries(Physica::Core INTERFACE ${HDF5_CXX_SHARED_LIBRARY})
+    target_link_libraries(Physica::Core INTERFACE hdf5::hdf5 hdf5::hdf5_cpp)
 endif()
 
 if(${PHYSICA_CUDA})
