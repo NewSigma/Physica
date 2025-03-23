@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "DenseSymmImpl/HalfDenseMatrixStorage.h"
+#include "Physica/Core/Utils/Container/SymmArray.h"
 #include "DenseMatrix.h"
 
 namespace Physica {
@@ -34,8 +34,8 @@ namespace Physica {
         using MatrixType = DenseMatrix<T>;
 
         Array<MatrixType> chain;
-        HalfDenseMatrixStorage<size_t> price;
-        HalfDenseMatrixStorage<size_t> point;
+        SymmArray<size_t> price;
+        SymmArray<size_t> point;
     public:
         explicit MatrixChain(size_t length);
         MatrixChain(const This&) = default;

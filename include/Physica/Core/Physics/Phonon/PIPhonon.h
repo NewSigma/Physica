@@ -27,7 +27,7 @@ namespace Physica {
     class PIPhonon final {
         using ScalarType = float64;
         using ComplexType = Complex<ScalarType>;
-        using CorrMatrix = HalfDenseMatrixStorage<VectorND<ScalarType>, Dynamic>;
+        using CorrMatrix = SymmArray<VectorND<ScalarType>, Dynamic>;
         using FFT3D = FFT<ScalarType, 3>;
         constexpr static unsigned int Dim = 3;
         constexpr static double ConsiderAsZeroThrehold = 100 * std::numeric_limits<double>::epsilon();

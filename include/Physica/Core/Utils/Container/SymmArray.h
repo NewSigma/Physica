@@ -22,11 +22,11 @@
 
 namespace Physica {
     /**
-     * \class HalfDenseMatrixStorage stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
+     * \class SymmArray stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
      */
     template<class T, size_t Order = Dynamic>
-    class HalfDenseMatrixStorage : public ArrayBase<HalfDenseMatrixStorage<T, Order>, HostAllocator<T>> {
-        using This = HalfDenseMatrixStorage<T, Order>;
+    class SymmArray : public ArrayBase<SymmArray<T, Order>, HostAllocator<T>> {
+        using This = SymmArray<T, Order>;
         using Base = ArrayBase<This, HostAllocator<T>>;
         using typename Base::lvalue_reference;
         using typename Base::const_lvalue_reference;
@@ -36,17 +36,17 @@ namespace Physica {
         ArrayType arr;
         size_t order;
     public:
-        HalfDenseMatrixStorage() : arr(), order(Order) {}
-        HalfDenseMatrixStorage(size_t order_);
-        HalfDenseMatrixStorage(size_t order_, const T& t);
-        HalfDenseMatrixStorage(size_t row, size_t col);
-        HalfDenseMatrixStorage(size_t row, size_t col, const T& t);
-        HalfDenseMatrixStorage(std::initializer_list<T> list) : arr(list) {}
-        HalfDenseMatrixStorage(const This&) = default;
-        HalfDenseMatrixStorage(This&&) noexcept = default;
-        ~HalfDenseMatrixStorage() = default;
+        SymmArray() : arr(), order(Order) {}
+        SymmArray(size_t order_);
+        SymmArray(size_t order_, const T& t);
+        SymmArray(size_t row, size_t col);
+        SymmArray(size_t row, size_t col, const T& t);
+        SymmArray(std::initializer_list<T> list) : arr(list) {}
+        SymmArray(const This&) = default;
+        SymmArray(This&&) noexcept = default;
+        ~SymmArray() = default;
         /* Operators */
-        HalfDenseMatrixStorage& operator=(This obj) noexcept { swap(obj); return *this; }
+        SymmArray& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __host__ __device__ inline lvalue_reference operator()(size_t row, size_t col);
         [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
@@ -71,67 +71,67 @@ namespace Physica {
     };
 
     template<class T, size_t Order>
-    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t order_) : arr(order_ * (order_ + 1) / 2), order(order_) {}
+    SymmArray<T, Order>::SymmArray(size_t order_) : arr(order_ * (order_ + 1) / 2), order(order_) {}
     /**
      * If std::same_as<T, size_t> is true, the semantics is ambiguous.
      *
-     * Use either HalfDenseMatrixStorage(size_t) or HalfDenseMatrixStorage(size_t, size_t, size_t) in this case.
+     * Use either SymmArray(size_t) or SymmArray(size_t, size_t, size_t) in this case.
      */
     template<class T, size_t Order>
-    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t order_, const T& t)
+    SymmArray<T, Order>::SymmArray(size_t order_, const T& t)
             : arr(order_ * (order_ + 1) / 2, t), order(order_) {}
 
     template<class T, size_t Order>
-    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t col)
-            : HalfDenseMatrixStorage(row) {
+    SymmArray<T, Order>::SymmArray(size_t row, [[maybe_unused]] size_t col)
+            : SymmArray(row) {
         assert(row == col);
     }
 
     template<class T, size_t Order>
-    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t col, const T& t)
-            : HalfDenseMatrixStorage(row, t) {
+    SymmArray<T, Order>::SymmArray(size_t row, [[maybe_unused]] size_t col, const T& t)
+            : SymmArray(row, t) {
         assert(row == col);
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline HalfDenseMatrixStorage<T, Order>::lvalue_reference
-    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) {
+    __host__ __device__ inline SymmArray<T, Order>::lvalue_reference
+    SymmArray<T, Order>::operator()(size_t row, size_t col) {
         return (*this)[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline HalfDenseMatrixStorage<T, Order>::const_lvalue_reference
-    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) const {
+    __host__ __device__ inline SymmArray<T, Order>::const_lvalue_reference
+    SymmArray<T, Order>::operator()(size_t row, size_t col) const {
         return (*this)[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
     template<class... Args>
-    void HalfDenseMatrixStorage<T, Order>::resize(size_t row, [[maybe_unused]] size_t col, Args&&... args) {
+    void SymmArray<T, Order>::resize(size_t row, [[maybe_unused]] size_t col, Args&&... args) {
         assert(row == col);
         arr.resize(row * (row + 1) / 2, std::forward<Args>(args)...);
         order = row;
     }
 
     template<class T, size_t Order>
-    void HalfDenseMatrixStorage<T, Order>::swap(This& __restrict storage) noexcept {
+    void SymmArray<T, Order>::swap(This& __restrict storage) noexcept {
         assert(this != &storage && "[Error]: Self swap is likely a bug");
         arr.swap(storage.arr);
         std::swap(order, storage.order);
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) noexcept {
+    __host__ __device__ inline auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) noexcept {
         return arr.data() + toIndex1D(row, col);
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
+    __host__ __device__ inline auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
         return arr.data() + toIndex1D(row, col);
     }
 
     template<class T, size_t Order>
-    __host__ __device__ size_t HalfDenseMatrixStorage<T, Order>::toIndex1D(size_t r, size_t c) const noexcept {
+    __host__ __device__ size_t SymmArray<T, Order>::toIndex1D(size_t r, size_t c) const noexcept {
         assert(r < order && c < order);
         const bool exchange = c < r;
         const size_t min = exchange ? c : r;
@@ -142,7 +142,7 @@ namespace Physica {
 
 namespace Physica {
     template<class T, size_t Order>
-    class Traits<HalfDenseMatrixStorage<T, Order>> {
+    class Traits<SymmArray<T, Order>> {
         template<bool, size_t Size>
         struct Helper {
             using Type = DenseVector<T, Size>;
@@ -163,8 +163,8 @@ namespace Physica {
 
 namespace std {
     template<class T, size_t Order>
-    inline void swap(Physica::HalfDenseMatrixStorage<T, Order>& __restrict mat1,
-                     Physica::HalfDenseMatrixStorage<T, Order>& __restrict mat2) noexcept {
+    inline void swap(Physica::SymmArray<T, Order>& __restrict mat1,
+                     Physica::SymmArray<T, Order>& __restrict mat2) noexcept {
         mat1.swap(mat2);
     }
 }

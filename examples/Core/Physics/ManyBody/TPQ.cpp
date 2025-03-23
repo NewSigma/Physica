@@ -18,12 +18,12 @@
  */
 #include <iostream>
 #include <QApplication>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmImpl/HalfDenseMatrixStorage.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Core/Physics/ManyBody/TPQ.h"
+#include "Physica/Core/Utils/Container/SymmArray.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -57,8 +57,8 @@ VectorType calcPartition(ReprType repr_, const VectorType& betas) {
     return result;
 }
 
-HalfDenseMatrixStorage<VectorType> makePartitionMatrix(const VectorType& betas) {
-    HalfDenseMatrixStorage<VectorType> result(NumSite + 1);
+SymmArray<VectorType> makePartitionMatrix(const VectorType& betas) {
+    SymmArray<VectorType> result(NumSite + 1);
     for (unsigned int numSpinUp = 0; numSpinUp <= NumSite; ++numSpinUp) {
         for (unsigned int numSpinDown = numSpinUp; numSpinDown <= NumSite; ++numSpinDown) {
             const bool useInversionSymm = numSpinUp == numSpinDown;

@@ -19,15 +19,15 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
-#include "DenseSymmImpl/HalfDenseMatrixStorage.h"
+#include "Physica/Core/Utils/Container/SymmArray.h"
 
 namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order>>
-                          , private HalfDenseMatrixStorage<T, Order> {
+                          , private SymmArray<T, Order> {
         using This = DenseSymmMatrix<T, Order>;
         using Base = LValueMatrix<This>;
-        using Storage = HalfDenseMatrixStorage<T, Order>;
+        using Storage = SymmArray<T, Order>;
         using VectorStorage = Storage::ArrayType;
     public:
         using typename Base::ScalarType;

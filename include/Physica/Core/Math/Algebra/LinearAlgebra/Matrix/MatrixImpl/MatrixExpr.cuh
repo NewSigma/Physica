@@ -120,6 +120,7 @@ namespace Physica {
     class Traits<device_obj<MatrixExpr<type, T1, T2>>> : public Traits<MatrixExpr<type, T1, T2>> {};
 }
 
+#include "MatrixExprImpl/Minus.cuh"
 #include "MatrixExprImpl/Add.cuh"
 #include "MatrixExprImpl/Sub.cuh"
 #include "MatrixExprImpl/Mul.cuh"
@@ -129,5 +130,7 @@ namespace Physica {
 #include "MatrixExprImpl/Unit.cuh"
 #include "MatrixExprImpl/Square.cuh"
 #include "MatrixExprImpl/Ln.cuh"
+#include "MatrixExprImpl/Sin.cuh"
+#include "MatrixExprImpl/Cos.cuh"
 #include "MatrixExprImpl/Tanh.cuh"
 #include "MatrixExprImpl/Sech.cuh"

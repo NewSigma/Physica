@@ -21,7 +21,7 @@
 using namespace Physica;
 
 int main() {
-    HalfDenseMatrixStorage<float64> s(3, 3, 0);
+    SymmArray<float64> s(3, 3, 0);
     s(1, 0) = 5;
     if (s(0, 1) != float64(5))
         return 1;

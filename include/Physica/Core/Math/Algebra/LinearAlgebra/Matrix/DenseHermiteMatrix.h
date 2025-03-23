@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "DenseSymmImpl/HalfDenseMatrixStorage.h"
+#include "Physica/Core/Utils/Container/SymmArray.h"
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
@@ -26,10 +26,10 @@ namespace Physica {
 
     template<Scalar T, size_t Order = Dynamic>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order>>
-                             , private HalfDenseMatrixStorage<T, Order> {
+                             , private SymmArray<T, Order> {
         using This = DenseHermiteMatrix<T, Order>;
         using Base = RValueMatrix<This>;
-        using Storage = HalfDenseMatrixStorage<T, Order>;
+        using Storage = SymmArray<T, Order>;
         using VectorStorage = Storage::ArrayType;
     public:
         using typename Base::ScalarType;
