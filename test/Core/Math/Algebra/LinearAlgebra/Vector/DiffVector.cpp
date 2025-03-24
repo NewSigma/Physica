@@ -22,11 +22,11 @@
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 static void test_rev() {
     using VectorType = VectorND<Diff<float64, DiffMode::Reverse, 1>>;
-    auto v = VectorType::random_uniform<RandomType>(16);
+    auto v = VectorType::random_uniform<RandomSource>(16);
     v.sum().reverse();
     for (size_t i = 0; i < v.getLength(); ++i)
         if (v[i].grad() != float64(1)) [[unlikely]]
@@ -36,8 +36,8 @@ static void test_rev() {
 static void test_hdf5() {
 #ifdef PHYSICA_HDF5
     using dfloat = Diff<float64, DiffMode::Forward, 1>;
-    auto data = VectorND<dfloat>::random_uniform<RandomType>(36);
-    data.grads().random_uniform<RandomType>();
+    auto data = VectorND<dfloat>::random_uniform<RandomSource>(36);
+    data.grads().random_uniform<RandomSource>();
 
     TempFile tmp("/tmp/tmpXXXXXX");
     {

@@ -24,7 +24,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937, 3438603950906262893>;
+using RandomSource = Random<MT19937, 3438603950906262893>;
 using ScalarType = float64;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 constexpr size_t numReplica = 24;
@@ -39,7 +39,7 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 RPMD<ScalarType> makeSystem() {
     using MDCellType = RPMD<ScalarType>::MDCellType;
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
+    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -51,7 +51,7 @@ RPMD<ScalarType> makeSystem() {
 
 bool testDriftMomentum(double precision) {
     auto rpmd = makeSystem();
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     for (int i = 0; i < 3; ++i) {
         ScalarType sum = 0;
         for (size_t j = i; j < rpmd.getDOF(); j += 3)
@@ -66,7 +66,7 @@ bool testCalcKinetic(double precision) {
     using ForceModel = SilveraGoldman<ScalarType, true, false>;
 
     auto rpmd = makeSystem();
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(pair_cutoff);
     rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
 
@@ -91,14 +91,14 @@ void testMDRun() {
         ForceModel forceModel(pair_cutoff);
 
         auto rpmd = makeSystem();
-        rpmd.initMomentum<KineticModel, RandomType>();
+        rpmd.initMomentum<KineticModel, RandomSource>();
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

@@ -30,7 +30,7 @@ using ScalarType = float32;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
 using MDCellType = MDType::MDCellType;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -43,7 +43,7 @@ static MDType makeSystem(size_t numMolecular) {
     MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
     for (auto& elem : pos.asArray())
-        elem = dist(RandomType::getInstance());
+        elem = dist(RandomSource::getInstance());
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -61,7 +61,7 @@ static void bench(benchmark::State& state) {
     using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
     const size_t numMolecular = state.range();
     MDType rpmd = makeSystem(numMolecular);
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
     for (auto _ : state)
         rpmd.nve_step<KineticModel, ForceModel, AutoExecutor>(kineticModel, forceModel);

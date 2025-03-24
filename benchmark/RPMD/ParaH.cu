@@ -28,7 +28,7 @@ using namespace Physica;
 using Physica::Dynamic;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -43,7 +43,7 @@ static MDType makeSystem(size_t numMolecular) {
     MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
     for (auto& elem : pos.asArray())
-        elem = dist(RandomType::getInstance());
+        elem = dist(RandomSource::getInstance());
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -57,7 +57,7 @@ static void bench(benchmark::State& state) {
     const int numMolecular = state.range(0);
     KineticModel kineticModel(temperatureT, numReplica);
     MDType rpmd = makeSystem(numMolecular);
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(numMolecular, pair_cutoff);
     for (auto _ : state)
         rpmd.nve_step<KineticModel, ForceModel, CUDAExecutor>(kineticModel, forceModel);

@@ -26,7 +26,7 @@ using namespace Physica;
 using ScalarType = float32;
 using HostForceModel = SilveraGoldman<ScalarType, true, true>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomType = Random<MT19937, 15522090741289029828UL>;
+using RandomSource = Random<MT19937, 15522090741289029828UL>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -37,7 +37,7 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 RPMD<ScalarType> makeSystem(size_t numMolecular) {
     using MDCellType = RPMD<ScalarType>::MDCellType;
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
+    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 

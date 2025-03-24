@@ -26,7 +26,7 @@ using ValueType = float64;
 using dfloat = Diff<ValueType, DiffMode::Reverse, 1>;
 
 class PressTest {
-    using RandomType = Random<MT19937>;
+    using RandomSource = Random<MT19937>;
     using MDCellType = MDCell<dfloat>;
     using LatticeMatrix = MDCellType::LatticeMatrix;
     using PositionMatrix = MDCellType::PositionMatrix;
@@ -52,7 +52,7 @@ private:
         lattice *= latticeConst;
 
         PositionMatrix pos(numMolecular, 3);
-        pos.random_uniform<RandomType>();
+        pos.random_uniform<RandomSource>();
         pos *= latticeConst;
 
         MassVector massVec(numMolecular, mass);

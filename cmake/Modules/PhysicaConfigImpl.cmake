@@ -33,8 +33,8 @@ else()
         if (CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
             find_package(IntelSYCL REQUIRED)
             get_target_property(IntelSYCL_LIBRARY_PATH IntelSYCL::SYCL_CXX INTERFACE_LINK_DIRECTORIES)
-            set(CMAKE_BUILD_RPATH ${IntelSYCL_LIBRARY_PATH})
-            set(CMAKE_INSTALL_RPATH ${IntelSYCL_LIBRARY_PATH})
+            set(CMAKE_BUILD_RPATH ${CMAKE_BUILD_RPATH} ${IntelSYCL_LIBRARY_PATH})
+            set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${IntelSYCL_LIBRARY_PATH})
         endif()
     else()
         message(FATAL_ERROR "Unknown compiler")
@@ -62,7 +62,7 @@ if(${PHYSICA_CUDA})
         # Reference: https://github.com/clangd/clangd/discussions/1676
         set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
 
-        set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G -Xcompiler -Og")
+        set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -Xcompiler -Og")
         set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
         # Warning 20208: Use long double in device code
         set(CMAKE_CUDA_FLAGS 
@@ -81,8 +81,8 @@ if(${PHYSICA_CUDA})
         string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
     endif()
 
-    set(CMAKE_BUILD_RPATH ${CUDAToolkit_LIBRARY_DIR})
-    set(CMAKE_INSTALL_RPATH ${CUDAToolkit_LIBRARY_DIR})
+    set(CMAKE_BUILD_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
+    set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
 endif()
 
 if(${CMAKE_INTERPROCEDURAL_OPTIMIZATION})

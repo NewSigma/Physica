@@ -23,7 +23,7 @@
 using namespace Physica;
 
 using ScalarType = float64;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 using MDCellType = MDCell<ScalarType, 1>;
 constexpr double latticeSize = 20;
 constexpr size_t numMolecular = 20;
@@ -33,7 +33,7 @@ MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
     posVec *= ScalarType(latticeSize);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);

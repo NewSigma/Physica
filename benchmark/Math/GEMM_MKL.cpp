@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 template<int Order = 0>
 static void gemm_mkl(benchmark::State& state) {
@@ -28,8 +28,8 @@ static void gemm_mkl(benchmark::State& state) {
     using T = float64;
     using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
     const size_t order = state.range(0);
-    const auto m1 = MatrixType::template random_uniform<RandomType>(order, order);
-    const auto m2 = MatrixType::template random_uniform<RandomType>(order, order);
+    const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
+    const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
     MatrixType m(order, order);
     for (auto _ : state) {
         (m1 * m2).assign_mkl(m);

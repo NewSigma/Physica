@@ -25,14 +25,14 @@ using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 void func(size_t) {
     printf("Thread ID: %d\n", ThreadPool::getThreadID());
 }
 
 int main() {
-    const MatrixType A = MatrixType::random_uniform<RandomType>(4);
+    const MatrixType A = MatrixType::random_uniform<RandomSource>(4);
     ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
 

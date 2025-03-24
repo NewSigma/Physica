@@ -32,7 +32,7 @@ using dfloat = Diff<float64, DiffMode::Reverse, 1>;
  */
 class ForceConstTest {
     using MDCellType = MDCell<dfloat>;
-    using RandomType = Random<MT19937, 12345>;
+    using RandomSource = Random<MT19937, 12345>;
     constexpr static unsigned int numMolecular = 32;
     constexpr static double pair_cutoff = 15;
     constexpr static double molarVolume = 31.7;
@@ -53,7 +53,7 @@ public:
 private:
     static MDCellType makeSystem() {
         auto lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-        auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 

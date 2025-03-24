@@ -27,7 +27,7 @@ using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 using PDFType = ProbDistribution<ScalarType>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
@@ -46,7 +46,7 @@ static MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
@@ -60,7 +60,7 @@ static MDCellType makeSystem() {
 static void func(benchmark::State& state) {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
     MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
     ForceModel forceModel{};
     kineticModel.updateMass(rpmd.getRingPolymer());

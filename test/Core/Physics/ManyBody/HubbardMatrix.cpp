@@ -105,14 +105,14 @@ void testVecProduct() {
     constexpr int NumSite = 4;
     using ReprType = FermiRepr<1, NumSite, false>;
     using Hamilton = HubbardMatrix<float64, ReprType>;
-    using RandomType = Random<MT19937, 10000>;
+    using RandomSource = Random<MT19937, 10000>;
 
     LatticeModel<Dim> lattice({NumSite}, 1);
     Hubbard<float64, Dim> hubbard(lattice, HoppingT, RepelU);
     const auto repr = ReprType(2, 1);
     const Hamilton hamiltonH(hubbard, repr);
 
-    const auto v = VectorND<float64>::random_uniform<RandomType>(hamiltonH.getNumState());
+    const auto v = VectorND<float64>::random_uniform<RandomSource>(hamiltonH.getNumState());
     const VectorND<float64> v1 = hamiltonH * v;
     VectorND<float64> v2(v.getLength());
     for (size_t i = 0; i < v.getLength(); ++i)

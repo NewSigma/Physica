@@ -27,7 +27,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 using MDType = RPMD<ScalarType, 3, 1>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, false>;
@@ -77,7 +77,7 @@ MDCell<ScalarType> makeSystem() {
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
     MDType rpmd(makeSystem(), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
     const VectorType energy1 = rpmd.testNVE<KineticModel, ForceModel, ThreadExecutor>(

@@ -26,7 +26,7 @@ using namespace Physica;
 using ScalarType = float32;
 using VectorType = VectorND<ScalarType>;
 using DeviceVector = device_obj<VectorType>;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 int main() {
     const VectorType a{1, 2, 3, 4};
@@ -55,8 +55,8 @@ int main() {
     {
         constexpr size_t len = 32;
         const ScalarType factor = 1.4;
-        const auto a = VectorType::random_uniform<RandomType>(len);
-        const auto b = VectorType::random_uniform<RandomType>(len);
+        const auto a = VectorType::random_uniform<RandomSource>(len);
+        const auto b = VectorType::random_uniform<RandomSource>(len);
         const VectorType answer = a + b * factor;
         auto d_a = a.toDevice();
         auto d_b = b.toDevice();

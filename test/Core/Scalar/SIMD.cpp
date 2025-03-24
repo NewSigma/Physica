@@ -21,14 +21,14 @@
 #include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 
 template<Scalar T, int Size>
 void test() {
     constexpr double prec = T::Option == Float32 ? 1E-6 : 1E-15;
-    const auto x = SIMD<T, Size>::template random_uniform<RandomType>();
+    const auto x = SIMD<T, Size>::template random_uniform<RandomSource>();
     /* Divide */ {
-        const auto y = SIMD<T, Size>::template random_uniform<RandomType>();
+        const auto y = SIMD<T, Size>::template random_uniform<RandomSource>();
         const auto result = x / y;
         for (int i = 0; i < Size; ++i) {
             if (!scalarNear(result[i], x[i] / y[i], prec))

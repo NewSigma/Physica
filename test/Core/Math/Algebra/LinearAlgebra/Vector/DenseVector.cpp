@@ -23,7 +23,7 @@
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 static void crossProductTest() {
     using T = float32;
@@ -36,8 +36,8 @@ static void crossProductTest() {
 
 static void innerDotTest() {
     using T = float32;
-    const auto v1 = VectorND<Complex<T>>::random_uniform<RandomType>(16);
-    const auto v2 = VectorND<T>::random_uniform<RandomType>(16);
+    const auto v1 = VectorND<Complex<T>>::random_uniform<RandomSource>(16);
+    const auto v2 = VectorND<T>::random_uniform<RandomSource>(16);
     const auto dot1 = v1 * v2;
     const auto dot2 = hadamard(v1, v2).sum();
     if (!scalarNear(dot1, dot2, 1E-6))
@@ -48,7 +48,7 @@ static void hdfTest() {
 #ifdef PHYSICA_HDF5
     /* Real */ {
         using T = float64;
-        const auto data = VectorND<T>::template random_uniform<RandomType>(64);
+        const auto data = VectorND<T>::template random_uniform<RandomSource>(64);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         {
@@ -65,7 +65,7 @@ static void hdfTest() {
     }
     /* Complex */ {
         using T = Complex<float64>;
-        const auto data = VectorND<T>::template random_uniform<RandomType>(64);
+        const auto data = VectorND<T>::template random_uniform<RandomSource>(64);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         {
@@ -91,7 +91,7 @@ static void lnSumExpTest() {
     }
     /* Diff test */ {
         using dfloat = Diff<float32, DiffMode::Reverse, 1>;
-        const auto x = VectorND<dfloat>::random_uniform<RandomType>(8);
+        const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
         x.lnSumExp().reverse();
 
         for (size_t i = 0; i < x.getLength(); ++i) {
@@ -123,7 +123,7 @@ static void crossEntropyTest() {
     /* Diff test */ {
         using dfloat = Diff<float32, DiffMode::Reverse, 1>;
         constexpr int Label = 0;
-        const auto x = VectorND<dfloat>::random_uniform<RandomType>(8);
+        const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
         auto loss = [&x](size_t k) -> float32 {
             float32 result = 0;
             for (size_t i = 0; i < x.getLength(); ++i)
@@ -142,8 +142,8 @@ static void crossEntropyTest() {
 static void softmaxTest() {
     using T = float64;
     using dfloat = Diff<T, DiffMode::Reverse>;
-    const auto factors = VectorND<T>::random_uniform<RandomType>(8);
-    const auto x = VectorND<dfloat>::random_uniform<RandomType>(8);
+    const auto factors = VectorND<T>::random_uniform<RandomSource>(8);
+    const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
     const auto x1 = x;
     VectorND<T> y = softmax(x1.values());
     softmax(x1).reverse(y, factors);

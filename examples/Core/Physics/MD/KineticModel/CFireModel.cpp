@@ -30,7 +30,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937, 10002>;
+using RandomSource = Random<MT19937, 10002>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using BarostatType = Berendsen<ScalarType, 1, BaroType::XY>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>>;
@@ -71,7 +71,7 @@ MDCell<ScalarType> makeSystem() {
     pos = cell1.getPos();
     std::normal_distribution<double> dist(0, 0.5);
     for (auto& elem : pos.asArray())
-        elem += ScalarType::random_any<RandomType, decltype(dist)>(dist); //Perturbation
+        elem += ScalarType::random_any<RandomSource, decltype(dist)>(dist); //Perturbation
     cell1.setPos(pos);
     return cell1;
 }

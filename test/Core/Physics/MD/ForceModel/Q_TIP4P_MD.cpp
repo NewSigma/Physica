@@ -29,7 +29,7 @@ using ScalarType = float64;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
-using RandomType = Random<MT19937, 12989825518855205292UL>;
+using RandomSource = Random<MT19937, 12989825518855205292UL>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -39,8 +39,8 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 Vector3D<ScalarType> randomVector() {
-    const ScalarType theta(ScalarType::random_uniform<RandomType>() * M_PI);
-    const ScalarType phi(ScalarType::random_uniform<RandomType>() * M_PI * 2);
+    const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
+    const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
     Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
     result *= ScalarType(ForceModel::equalR);
     return result;
@@ -60,7 +60,7 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize) {
 
     CrystalCellType::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
-    auto& gen = RandomType::getInstance();
+    auto& gen = RandomSource::getInstance();
     for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
         if (i == 0) {
@@ -116,7 +116,7 @@ void testMD() {
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond = 0;
@@ -125,7 +125,7 @@ void testMD() {
     {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, decltype(forceModel), ThreadExecutor>(
+        rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, decltype(forceModel), ThreadExecutor>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
             kineticModel,
@@ -140,7 +140,7 @@ void testMD() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermoType, RandomType, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

@@ -26,7 +26,7 @@ using namespace Physica;
 
 namespace Physica {
     class Test {
-        using RandomType = Random<MT19937, 3251508104675666787>;
+        using RandomSource = Random<MT19937, 3251508104675666787>;
         using ValueType = float64;
         using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
@@ -54,8 +54,8 @@ namespace Physica {
         }
     private:
         static Vector3D<ScalarType> randomVector(ScalarType latticeConst) {
-            const ScalarType theta(ScalarType::random_uniform<RandomType>() * ScalarType(M_PI));
-            const ScalarType phi(ScalarType::random_uniform<RandomType>() * ScalarType(M_PI * 2));
+            const ScalarType theta(ScalarType::random_uniform<RandomSource>() * ScalarType(M_PI));
+            const ScalarType phi(ScalarType::random_uniform<RandomSource>() * ScalarType(M_PI * 2));
             Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
             result *= ScalarType(ForceModel::equalR / double(latticeConst.value())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;

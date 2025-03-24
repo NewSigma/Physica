@@ -28,7 +28,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937, 10002>;
+using RandomSource = Random<MT19937, 10002>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -66,7 +66,7 @@ MDCell<ScalarType> makeSystem() {
     pos = cell1.getPos();
     std::normal_distribution<double> dist(0, 0.5);
     for (auto& elem : pos)
-        elem += ScalarType::random_any<RandomType>(dist); //Perturbation
+        elem += ScalarType::random_any<RandomSource>(dist); //Perturbation
     cell1.setPos(pos);
     return cell1;
 }

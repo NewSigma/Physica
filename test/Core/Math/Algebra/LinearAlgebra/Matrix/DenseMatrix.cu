@@ -19,12 +19,12 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 
 using namespace Physica;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 
 int main() {
     {
         using MatrixType = DenseMatrix<float32>;
-        const MatrixType A = MatrixType::random_uniform<RandomType>(16, 16);
+        const MatrixType A = MatrixType::random_uniform<RandomSource>(16, 16);
         const auto d_A = A.toDevice();
         const MatrixType B = d_A.toHost();
         if (A.asArray() != B.asArray())
@@ -33,7 +33,7 @@ int main() {
     {
         using MatrixType = DenseMatrix<float32, MatrixOption::Col | MatrixOption::Element>;
         using DeviceMatrix = MatrixType::device_obj_type;
-        const MatrixType A = MatrixType::random_uniform<RandomType>(3, 4);
+        const MatrixType A = MatrixType::random_uniform<RandomSource>(3, 4);
         const MatrixType B = A.transpose();
         const MatrixType answer = A * B;
 

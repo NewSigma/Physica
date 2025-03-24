@@ -39,7 +39,7 @@ We provide a conda package to help fast deployment:
 conda install -c conda-forge -c nvidia newsigma::physica
 ```
 
-The package enables CUDA by default and has no Gui support. Refer to [Install.md](doc/Install.md), if you want to compile Physica manually.
+The package enables CUDA by default and has no Gui support. Refer to [Install.md](doc/Install.md) if you want to build Physica.
 
 ## Maintainers
 

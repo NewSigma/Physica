@@ -21,11 +21,11 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 template<Scalar T>
 static void lncosh(benchmark::State& state) {
-    const VectorND<T> data = VectorND<T>::template random_uniform<RandomType>(1024);
+    const VectorND<T> data = VectorND<T>::template random_uniform<RandomSource>(1024);
     VectorND<T> buffer(1024);
     for (auto _ : state) {
         buffer = lncosh(data);

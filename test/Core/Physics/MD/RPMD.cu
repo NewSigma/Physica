@@ -30,7 +30,7 @@ using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
-using RandomType = Random<MT19937, 3438603950906262893>;
+using RandomSource = Random<MT19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -43,7 +43,7 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 MDType makeSystem() {
     using MDCellType = MDType::MDCellType;
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
+    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -64,18 +64,18 @@ void testMDRun() {
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(numMolecular, pair_cutoff);
         auto rpmd = makeSystem();
-        rpmd.initMomentum<KineticModel, RandomType>();
+        rpmd.initMomentum<KineticModel, RandomSource>();
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, CUDAExecutor>(
+            rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, CUDAExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 kineticModel,
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, CUDAExecutor>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, CUDAExecutor>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

@@ -22,7 +22,7 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     ProbDistribution<float64> dist(-5, 5, 1000);
     for (int i = 0; i < NumSample; ++i) {
         dist.sample([](int n) -> float64 {
-            const auto temp = RandomType::random_int(n, 0, 1);
+            const auto temp = RandomSource::random_int(n, 0, 1);
             float64 result = 0;
             for (int i : temp)
                 result += float64(i == 0 ? 1.0 : -1.0);

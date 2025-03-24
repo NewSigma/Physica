@@ -23,7 +23,7 @@
 #include "Physica/Core/Scalar/Diff.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 template<Matrix T>
 bool eigenTest(const T& mat, double precision) {
@@ -67,7 +67,7 @@ int main() {
     }
     {
         using MatrixType = DenseSymmMatrix<float64>;
-        const auto mat = MatrixType::random_uniform<RandomType>(8);
+        const auto mat = MatrixType::random_uniform<RandomSource>(8);
         if (!eigenTest(mat, 1E-13))
             return 1;
     }

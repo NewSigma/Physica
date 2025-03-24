@@ -26,7 +26,7 @@ using namespace Physica;
 using RealType = float64;
 using ScalarType = Complex<RealType>;
 using VectorType = VectorND<RealType>;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 constexpr unsigned int NumSite = 6;
 constexpr unsigned int NumParticle = NumSite / 2;
 constexpr double HoppingT = 1.0;
@@ -55,7 +55,7 @@ void testEigen() {
 
         const size_t numState = model.getNumState();
         JacobiDavidson<RealType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform<RandomType>(numState));
+        jd.compute(model, VectorType::random_uniform<RandomSource>(numState));
         jd.sort();
         answer = jd.getEigenvalues()[0];
     }
@@ -67,7 +67,7 @@ void testEigen() {
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform<RandomType>(numState));
+        jd.compute(model, VectorType::random_uniform<RandomSource>(numState));
         jd.sort();
         result = jd.getEigenvalues()[0].real();
     }

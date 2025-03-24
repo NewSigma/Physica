@@ -22,16 +22,16 @@
 using namespace Physica;
 using T = float64;
 using MatrixType = DenseMatrix<T>;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 
 int main() {
     MatrixType a[6];
-    a[0] = MatrixType::random_uniform<RandomType>(30, 35);
-    a[1] = MatrixType::random_uniform<RandomType>(35, 15);
-    a[2] = MatrixType::random_uniform<RandomType>(15, 5);
-    a[3] = MatrixType::random_uniform<RandomType>(5, 10);
-    a[4] = MatrixType::random_uniform<RandomType>(10, 20);
-    a[5] = MatrixType::random_uniform<RandomType>(20, 25);
+    a[0] = MatrixType::random_uniform<RandomSource>(30, 35);
+    a[1] = MatrixType::random_uniform<RandomSource>(35, 15);
+    a[2] = MatrixType::random_uniform<RandomSource>(15, 5);
+    a[3] = MatrixType::random_uniform<RandomSource>(5, 10);
+    a[4] = MatrixType::random_uniform<RandomSource>(10, 20);
+    a[5] = MatrixType::random_uniform<RandomSource>(20, 25);
     /**
     * Reference:
     * [1] Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein . 算法导论(第三版)[M]. 北京: 机械工业出版社, 2013:215

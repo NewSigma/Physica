@@ -25,7 +25,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 void testLaglange() {
     const VectorType x{0, 1, 2};
@@ -36,7 +36,7 @@ void testLaglange() {
 }
 
 void testFFT1D() {
-    const auto data = VectorType::template random_normal<RandomType>(20);
+    const auto data = VectorType::template random_normal<RandomSource>(20);
     const auto result = interpolate_fft(data, 100);
 
     const size_t delta = result.getLength() / data.getLength();
@@ -60,7 +60,7 @@ void testFFT1D() {
 
 void testFFT3D() {
     using TensorType = DenseTensor<ScalarType, 3>;
-    const auto data = TensorType::random_uniform<RandomType>({5, 5, 5});
+    const auto data = TensorType::random_uniform<RandomSource>({5, 5, 5});
     {
         const auto result = interpolate_fft(data, {10, 10, 10});
         for (size_t i = 0; i < data.getSize(); ++i) {

@@ -239,8 +239,14 @@ namespace Physica {
     const H5Group LinearLayer<T, WithBias>::read(const H5Loc& loc, const char* name) {
         const auto group = loc.openGroup(name);
         weights.values().read(group, "Weight");
-        if constexpr (WithBias)
+        if constexpr (Diffable<T>)
+            weights.grads().resize(weights.values());
+
+        if constexpr (WithBias) {
             bias.values().read(group, "Bias");
+            if constexpr (Diffable<T>)
+                bias.grads().resize(bias.values());
+        }
         return group;
     }
 

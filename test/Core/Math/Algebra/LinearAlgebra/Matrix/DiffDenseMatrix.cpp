@@ -22,10 +22,10 @@
 using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<Diff<ScalarType, DiffMode::Reverse, 1>>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 int main() {
-    MatrixType m = MatrixType::random_uniform<RandomType>(4, 4);
+    MatrixType m = MatrixType::random_uniform<RandomSource>(4, 4);
     m.sum().reverse();
 
     auto v = m.flatten();

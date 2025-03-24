@@ -24,17 +24,17 @@
 using namespace Physica;
 using ScalarType = float64;
 using ComplexType = Complex<ScalarType>;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 int main() {
     using MatrixType = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
-    const MatrixType data = MatrixType::random_uniform<RandomType>(64);
+    const MatrixType data = MatrixType::random_uniform<RandomSource>(64);
     const DenseHermiteMatrix<ComplexType> hermite = data + data.hermite();
 
     EigenSolver<ComplexType> eig(hermite, false);
     eig.sort();
     JacobiDavidson<ComplexType> jd(hermite.getRow(), 48);
-    jd.compute(hermite, VectorND<ComplexType>::random_uniform<RandomType>(data.getRow()));
+    jd.compute(hermite, VectorND<ComplexType>::random_uniform<RandomSource>(data.getRow()));
     jd.sort();
 
     if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-13))

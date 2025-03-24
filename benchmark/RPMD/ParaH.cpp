@@ -27,7 +27,7 @@ using namespace Physica;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = SilveraGoldman<ScalarType, true>;
-using RandomType = Random<MT19937, 3438603950906262893>;
+using RandomSource = Random<MT19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -41,7 +41,7 @@ static RPMD<ScalarType> makeSystem(size_t numMolecular) {
     MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
     for (auto& elem : pos.asArray())
-        elem = dist(RandomType::getInstance());
+        elem = dist(RandomSource::getInstance());
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -57,7 +57,7 @@ static void bench(benchmark::State& state) {
 
     const int numMolecular = state.range(0);
     auto rpmd = makeSystem(numMolecular);
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     for (auto _ : state)
         rpmd.nve_step<KineticModel, ForceModel, ThreadExecutor>(kineticModel, forceModel);
 }

@@ -26,7 +26,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 constexpr unsigned int NumSiteX = 4;
 constexpr unsigned int NumSiteY = 2;
 constexpr unsigned int NumSite = NumSiteX * NumSiteY;
@@ -41,9 +41,9 @@ namespace {
         const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
         const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
         const Hamilton hamilton(hubbard, ReprType(4, 4));
-        auto psi = TPQ<ScalarType>::random_normal<RandomType>(hamilton.getNumState(), 0);
+        auto psi = TPQ<ScalarType>::random_normal<RandomSource>(hamilton.getNumState(), 0);
         psi.pre_nvt_step(hamilton, Beta);
-        psi.random_normal<RandomType>();
+        psi.random_normal<RandomSource>();
         for (auto _ : state)
             psi.template nvt_step<Hamilton, SeqExecutor>(hamilton, Beta);
     }

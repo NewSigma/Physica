@@ -27,7 +27,7 @@
 
 using namespace Physica;
 using ScalarType = float32;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 /**
  * Reference:
  * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:304-308
@@ -106,12 +106,12 @@ int main(int argc, char** argv) {
     VectorND<ScalarType> Cv(NumPoint);
     ThreadExecutor::parallel_for([&](size_t i) {
         Ising ising(20, 1, 1, t[i]);
-        ising.init<RandomType>();
-        ising.step<RandomType>(2000);
+        ising.init<RandomSource>();
+        ising.step<RandomSource>(2000);
 
         ScalarType energy = 0, energy2 = 0;
         for (size_t i = 0; i < NumSample; ++i) {
-            ising.step<RandomType>(10);
+            ising.step<RandomSource>(10);
             toNextMean(energy, i, ising.getEnergy());
             toNextMean(energy2, i, square(ising.getEnergy()));
         }

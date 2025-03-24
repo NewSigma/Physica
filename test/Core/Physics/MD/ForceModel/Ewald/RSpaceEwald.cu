@@ -27,11 +27,11 @@ using PositionMatrix = MDCellType::PositionMatrix;
 using MassVector = MDCellType::MassVector;
 using HostForceModel = RSpaceEwald<ScalarType>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 
 MDCellType makeSystem(size_t numMolecular) {
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::template random_uniform<RandomType>(numMolecular, 3);
+    auto pos = MDCellType::PositionMatrix::template random_uniform<RandomSource>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, 1.0);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
     cell.scale(ScalarType(20));

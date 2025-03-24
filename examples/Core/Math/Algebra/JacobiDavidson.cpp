@@ -23,13 +23,13 @@
 
 using namespace Physica;
 using MatrixType = DenseHermiteMatrix<cfloat64>;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 int main() {
-    const auto mat = MatrixType::random_uniform<RandomType>(5000);
+    const auto mat = MatrixType::random_uniform<RandomSource>(5000);
 
     JacobiDavidson<cfloat64> jd(mat.getRow(), 4);
-    jd.compute(mat, VectorND<cfloat64>::random_uniform<RandomType>(mat.getRow()));
+    jd.compute(mat, VectorND<cfloat64>::random_uniform<RandomSource>(mat.getRow()));
     jd.sort();
 
     std::cout << jd.getEigenvalues().reals().format() << std::endl;

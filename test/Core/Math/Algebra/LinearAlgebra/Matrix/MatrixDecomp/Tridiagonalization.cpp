@@ -23,7 +23,7 @@
 #include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 template<Matrix M>
 bool doTest(const M& source, double tolerance) {
@@ -49,7 +49,7 @@ int main() {
     }
     {
         using MatrixType = DenseSymmMatrix<RealType>;
-        const auto mat = MatrixType::random_uniform<RandomType>(8);
+        const auto mat = MatrixType::random_uniform<RandomSource>(8);
         if (!doTest(mat, 1E-12))
             return 1;
     }

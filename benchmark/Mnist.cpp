@@ -142,7 +142,7 @@ namespace Physica {
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse, 1>;
 using Dataset = Mnist::DatasetType<VectorND<T>>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 namespace {
     Dataset makeDataset() {
@@ -165,9 +165,9 @@ namespace {
             return;
         }
 
-        auto nn = MnistNet<dfloat>(RandomType::getInstance());
+        auto nn = MnistNet<dfloat>(RandomSource::getInstance());
         for (auto _ : state)
-            nn.train_step<Dataset, RandomType, SeqExecutor>(BatchSize, dataset);
+            nn.train_step<Dataset, RandomSource, SeqExecutor>(BatchSize, dataset);
     }
 }
 

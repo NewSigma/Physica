@@ -25,7 +25,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using ComplexType = Complex<ScalarType>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 namespace Physica {
     class Test {
@@ -36,7 +36,7 @@ namespace Physica {
             KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>> solver(silicon, 1.0, 4.5, bandGrid, 8);
 
             auto& orbit = solver.getOrbits()[0][SpinState::Up];
-            orbit.random_normal<RandomType>();
+            orbit.random_normal<RandomSource>();
             orbit.normalize();
             if (!scalarNear(orbit.calcNumElectron(), ScalarType(1), 1E-15))
                 exit(EXIT_FAILURE);
@@ -59,7 +59,7 @@ void testSi() {
         BandGrid<ScalarType, false> grid(Si.makeRepLattice(), 1, 1, 1, 14, 8);
         auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(
                 Si, cutEnergyPsi, cutEnergyRho, std::move(grid), 8);
-        solver.getOrbits()[0][SpinState::Up].random_normal<RandomType>();
+        solver.getOrbits()[0][SpinState::Up].random_normal<RandomSource>();
         solver.getDensity().initDensity(ScalarType(Si.getElectronCount()) / Si.getVolume());
         solver.solve(1E-3, 100);
         const auto& band = solver.getBand();

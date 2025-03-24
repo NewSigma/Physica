@@ -148,7 +148,7 @@ namespace Physica {
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse>;
 using Dataset = Mnist::DatasetType<device_obj<VectorND<T>>>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 static std::pair<Dataset, Dataset> makeDataset() {
     const Mnist mnist("./data");
@@ -157,7 +157,7 @@ static std::pair<Dataset, Dataset> makeDataset() {
         auto& sample = dataset.getSamples()[i];
         sample = sample * T(1.0 / 128) - T(1);
     }
-    return dataset.randomSplit<RandomType>(54000);
+    return dataset.randomSplit<RandomSource>(54000);
 }
 
 int main(int argc, char** argv) {
@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
 
     const auto dataset = makeDataset();
     const int64_t stepPerEpoch = (dataset.first.getSize() + BatchSize - 1) / BatchSize;
-    auto nn = device_obj<MnistNet<dfloat>>(RandomType::getInstance());
+    auto nn = device_obj<MnistNet<dfloat>>(RandomSource::getInstance());
     VectorND<T> loss_train(NumEpoch), loss_valid(NumEpoch), acc_train(NumEpoch), acc_valid(NumEpoch);
     for (size_t epoch = 0; epoch < NumEpoch; ++epoch) {
         const auto nn_infer = device_obj<MnistNet<T>>(nn);
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
         acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
 
-        nn.train_step_for<Dataset, RandomType, SeqExecutor>(stepPerEpoch, BatchSize, dataset.first);
+        nn.train_step_for<Dataset, RandomSource, SeqExecutor>(stepPerEpoch, BatchSize, dataset.first);
     }
 
     QApplication app(argc, argv);

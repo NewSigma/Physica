@@ -30,7 +30,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 using EwaldType = Ewald<ScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -41,8 +41,8 @@ constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>
 
 Vector3D<ScalarType> randomVector() {
     std::uniform_real_distribution dist{};
-    const ScalarType theta(ScalarType::random_uniform<RandomType>() * M_PI);
-    const ScalarType phi(ScalarType::random_uniform<RandomType>() * M_PI * 2);
+    const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
+    const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
     Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
     result *= ScalarType(ForceModel::equalR);
     return result;
@@ -62,7 +62,7 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize) {
 
     CrystalCellType::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
-    auto& gen = RandomType::getInstance();
+    auto& gen = RandomSource::getInstance();
     for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
         if (i == 0) {
@@ -111,7 +111,7 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
     const ThermoType thermo(temperatureT, thermostatTime);
     RPMD<ScalarType, 3, NumReplica> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 
-    rpmd.template initMomentum<KineticModel, RandomType>();
+    rpmd.template initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType());
     KineticModel kineticModel(temperatureT, numReplica);
 
@@ -129,10 +129,10 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 
     ThreadPool::numThreadRequired = 4;
     {
-        rpmd.template nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
+        rpmd.template nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(
             PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
         for (size_t i = 0; i < 1000 * (NumReplica == 0 ? 1 : 32); ++i) {
-            rpmd.template nvt_step<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.template nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(
                 thermo, kineticModel, forceModel);
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 using T = float32;
 
 int main() {

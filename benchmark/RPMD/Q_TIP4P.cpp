@@ -33,7 +33,7 @@ using ScalarType = float64;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using ThermoType = DoubleThermo<KineticModel>;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -43,8 +43,8 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 static Vector3D<ScalarType> randomVector() {
-    const ScalarType theta(ScalarType::random_uniform<RandomType>() * M_PI);
-    const ScalarType phi(ScalarType::random_uniform<RandomType>() * M_PI * 2);
+    const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
+    const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
     Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
     result *= ScalarType(ForceModel::equalR);
     return result;
@@ -110,7 +110,7 @@ static void bench(benchmark::State& state) {
     KineticModel kineticModel(temperatureT, numReplica);
     const ThermoType thermo(temperatureT, thermostatTime);
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomType>();
+    rpmd.initMomentum<KineticModel, RandomSource>();
     for (auto _ : state)
         rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
 }

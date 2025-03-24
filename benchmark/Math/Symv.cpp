@@ -20,14 +20,14 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 static void kernel(benchmark::State& state) {
     using T = float64;
     using MatrixType = DenseSymmMatrix<T>;
     const int size = state.range(0);
-    const auto m = MatrixType::random_uniform<RandomType>(size);
-    const auto v = VectorND<T>::random_uniform<RandomType>(size);
+    const auto m = MatrixType::random_uniform<RandomSource>(size);
+    const auto v = VectorND<T>::random_uniform<RandomSource>(size);
     VectorND<T> buffer(size);
     for (auto _ : state) {
         buffer = m * v;

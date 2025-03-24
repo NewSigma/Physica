@@ -20,12 +20,12 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 static void axpy_mkl(benchmark::State& state) {
     using T = float64;
     const int size = state.range(0);
-    auto x = VectorND<T>::random_uniform<RandomType>(size);
+    auto x = VectorND<T>::random_uniform<RandomSource>(size);
     VectorND<T> buffer(size);
     for (auto _ : state) {
         (x * T(2)).assign_add_mkl(buffer.data());

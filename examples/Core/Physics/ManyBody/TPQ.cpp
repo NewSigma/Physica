@@ -29,7 +29,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<MT19937, 10000>;
+using RandomSource = Random<MT19937, 10000>;
 constexpr unsigned int NumSite = 4;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;
@@ -47,7 +47,7 @@ VectorType calcPartition(ReprType repr_, const VectorType& betas) {
     auto psi = TPQ<ScalarType>(hamilton.getNumState());
     psi.pre_nvt_step(hamilton, deltaBeta);
     for (unsigned int i = 0; i < NumSample; ++i) {
-        psi.template random_normal<RandomType>(1);
+        psi.template random_normal<RandomSource>(1);
         for (unsigned int j = 0; j < NumBeta; ++j) {
             if (j != 0)
                 psi.nvt_step(hamilton, deltaBeta);

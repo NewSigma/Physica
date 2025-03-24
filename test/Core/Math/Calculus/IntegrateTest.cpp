@@ -55,11 +55,11 @@ int main() {
         const ScalarType answer = 1.317363136305819;
         ScalarType result, deviation;
         {
-            using RandomType = Random<MT19937, std::mt19937::default_seed>;
+            using RandomSource = Random<MT19937, std::mt19937::default_seed>;
             auto functor = [](Vector2D<ScalarType> x) -> ScalarType {
                 return reciprocal(sqrt(square(x[0]) + sin(x[1])));
             };
-            result = mc.solve_e<decltype(functor), RandomType>(6, functor, deviation);
+            result = mc.solve_e<decltype(functor), RandomSource>(6, functor, deviation);
         }
         const bool isGoodResult = std::isfinite(double(answer)) && std::isfinite(double(deviation));
         if (!isGoodResult || abs(answer - result) > deviation)

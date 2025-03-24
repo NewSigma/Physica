@@ -26,11 +26,11 @@ using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseSymmMatrix<ScalarType>;
-using RandomType = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 int main() {
-    const auto mat = MatrixType::random_uniform<RandomType>(16);
-    const VectorType v = VectorType::random_uniform<RandomType>(16);
+    const auto mat = MatrixType::random_uniform<RandomSource>(16);
+    const VectorType v = VectorType::random_uniform<RandomSource>(16);
 
     const auto solver = SymmEigenSolver<ScalarType>(mat, true);
     const VectorType eigenvalues = exp(solver.getEigenvalues());

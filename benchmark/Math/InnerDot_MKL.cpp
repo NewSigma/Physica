@@ -21,12 +21,12 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 
 template<Scalar T>
 static void innerDot_mkl(benchmark::State& state) {
-    const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomType>(1024);
-    const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomType>(1024);
+    const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
+    const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
     const auto dot = InnerDot(v1, v2);
     for (auto _ : state)
         dot.calc_mkl();

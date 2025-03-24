@@ -25,7 +25,7 @@ using namespace Physica;
 
 namespace Physica {
     class Test {
-        using RandomType = Random<MT19937>;
+        using RandomSource = Random<MT19937>;
         using dfloat = Diff<float64, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<dfloat>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
@@ -56,8 +56,8 @@ namespace Physica {
         static Vector3D<float64> randomVector(float64 latticeConst) {
             constexpr double equalR = PhyConst<AU>::angstormToBohr(1.62844); // Bond length of Si-O, refer to [1]
             std::uniform_real_distribution dist{};
-            const auto theta = float64::random_uniform<RandomType>() * float64(M_PI);
-            const auto phi = float64::random_uniform<RandomType>() * float64(M_PI * 2);
+            const auto theta = float64::random_uniform<RandomSource>() * float64(M_PI);
+            const auto phi = float64::random_uniform<RandomSource>() * float64(M_PI * 2);
             Vector3D<float64> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
             result *= float64(equalR / double(latticeConst.value())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;

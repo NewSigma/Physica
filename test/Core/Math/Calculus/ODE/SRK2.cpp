@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Statistics/LinearFit.h"
 
 using namespace Physica;
-using RandomType = Random<MT19937, 4036979388296844000UL>;
+using RandomSource = Random<MT19937, 4036979388296844000UL>;
 /**
  * We solve Eq. 5.1 of [1] and the slope of the result is expected to be lambda.
  *
@@ -42,7 +42,7 @@ int main() {
     for (size_t i = 0; i < iteration; ++i) {
         solver.solve([](T, const XVector& x) -> XVector { return {-T(lambda) * x[0]}; },
                      [](T, const XVector&) -> XVector {
-                         return {T(lambda) * sqrt(2 * stepSize * diffuseD) * T::random_normal<RandomType>()};
+                         return {T(lambda) * sqrt(2 * stepSize * diffuseD) * T::random_normal<RandomSource>()};
                      });
         toNextMean(y, i, solver.getSolution().row(0));
     }

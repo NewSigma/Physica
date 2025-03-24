@@ -32,13 +32,13 @@ static void func(benchmark::State& state) {
 
     using RealType = float64;
     using ScalarType = Complex<RealType>;
-    using RandomType = Random<MT19937>;
+    using RandomSource = Random<MT19937>;
     using ReprType = KFermiRepr<1, NumSite, true>;
 
     const LatticeModel<1> lattice({NumSite}, 1);
     const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
     const HubbardMatrix<ScalarType, ReprType> model(hubbard, ReprType({NumParticle, NumParticle}, 0));
-    auto v = VectorND<ScalarType>::random_uniform<RandomType>(model.getRow());
+    auto v = VectorND<ScalarType>::random_uniform<RandomSource>(model.getRow());
     VectorND<ScalarType> v1(model.getRow());
 
     for (auto _ : state) {
