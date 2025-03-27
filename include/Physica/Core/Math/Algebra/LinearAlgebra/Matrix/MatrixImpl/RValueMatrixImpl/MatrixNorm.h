@@ -61,8 +61,8 @@ namespace Physica {
 
             using MatVecDot = decltype(m.hermite() * unit(y));
             z.template operator=<MatVecDot, Executor>(m.hermite() * unit(y));
-            const Trv criteria = iteration == 0 ? (z.reals().sum() * factor) : z[index].real();
-            const bool isConverged = z.normInf() <= criteria * Trv(1 + std::numeric_limits<T>::epsilon());
+            const Trv criteria = iteration == 0 ? (z.reals().sum().value() * factor) : z[index].real().value();
+            const bool isConverged = z.values().normInf() <= criteria * Trv(1 + std::numeric_limits<T>::epsilon());
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1
             if (isConverged || isCycling) {
                 if constexpr (isComplex)

@@ -129,7 +129,7 @@ namespace std {
         }
 
         auto format(const Physica::Diff<T, Mode, Order>& obj, std::format_context& ctx) const {
-            return formatter<T, char>{}.format(obj, ctx);
+            return formatter<T, char>{}.format(obj.value(), ctx);
         }
     };
 }

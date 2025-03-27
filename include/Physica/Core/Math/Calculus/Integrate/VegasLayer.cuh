@@ -55,6 +55,7 @@ namespace Physica {
         auto write(H5Loc& loc, const char* name) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] const auto& getWeights() const noexcept { return weights; }
         [[nodiscard]] int getDim() const noexcept { return dim; }
         [[nodiscard]] int getNumBin() const noexcept { return weights.getLength() / getDim(); }
     };

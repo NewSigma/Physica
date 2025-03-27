@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/MathConst.h"
 #include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
 
 namespace Physica {
@@ -187,24 +186,26 @@ namespace Physica {
 
     template<>
     Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept {
-        using ScalarType = Real<FloatMP>;
-        auto func = [&](const ScalarType& x) -> ScalarType { return cos(x) - s; };
-        return bisectionMethod<decltype(func), ScalarType>(func,
-                                                           BasicConst::getInstance()._0,
-                                                           MathConst<ScalarType>::getInstance().PI,
-                                                           BasicConst::getInstance()._1,
-                                                           BasicConst::getInstance().Minus_1);
+        using T = Real<FloatMP>;
+        auto func = [&](const T& x) -> T { return cos(x) - s; };
+        return bisectionMethod<decltype(func), T>(
+                func,
+                BasicConst::getInstance()._0,
+                MathConst<T>::getInstance().PI,
+                BasicConst::getInstance()._1,
+                BasicConst::getInstance().Minus_1);
     }
 
     template<>
     Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept {
-        using ScalarType = Real<FloatMP>;
-        auto func = [&](const ScalarType& x) -> ScalarType { return sin(x) - s; };
-        return bisectionMethod<decltype(func), ScalarType>(func,
-                                                           MathConst<ScalarType>::getInstance().Minus_PI_2,
-                                                           MathConst<ScalarType>::getInstance().PI_2,
-                                                           BasicConst::getInstance().Minus_1,
-                                                           BasicConst::getInstance()._1);
+        using T = Real<FloatMP>;
+        auto func = [&](const T& x) -> T { return sin(x) - s; };
+        return bisectionMethod<decltype(func), T>(
+                func,
+                MathConst<T>::getInstance().Minus_PI_2,
+                MathConst<T>::getInstance().PI_2,
+                BasicConst::getInstance().Minus_1,
+                BasicConst::getInstance()._1);
     }
 
     template<>

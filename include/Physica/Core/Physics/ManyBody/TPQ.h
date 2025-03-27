@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,16 +35,17 @@ namespace Physica {
     class TPQ : public VectorND<T> {
         using This = TPQ<T>;
         using Base = VectorND<T>;
-        using RealType = T::RealType;
+        using Tr = T::RealType;
+        using Trv = Tr::ValueType;
 
-        RealType beta;
-        RealType traceMu;
+        Tr beta;
+        Tr traceMu;
         int numMinCostTerm;
         int numSplit;
     public:
         TPQ() = default;
         TPQ(size_t length);
-        TPQ(size_t length, RealType traceMu_, int numMinCostTerm_, int numSplit_);
+        TPQ(size_t length, Tr traceMu_, int numMinCostTerm_, int numSplit_);
         TPQ(const This&) = default;
         TPQ(This&&) noexcept = default;
         ~TPQ() = default;
@@ -52,27 +53,27 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class ModelType, class Executor = SeqExecutor>
-        void pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta);
+        void pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta);
         template<class ModelType, class Executor = SeqExecutor>
-        void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta);
+        void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta);
 
-        [[nodiscard]] inline RealType calcPartitionXi() const;
-        [[nodiscard]] inline RealType lnPartitionXi() const;
-        [[nodiscard]] RealType lnSquaredDot(const VectorND<RealType>& other) const;
+        [[nodiscard]] inline Tr calcPartitionXi() const;
+        [[nodiscard]] inline Tr lnPartitionXi() const;
+        [[nodiscard]] Tr lnSquaredDot(const VectorND<Tr>& other) const;
         void swap(This& __restrict obj) noexcept;
 
         template<RNG R>
-        inline void random_normal(RealType norm = 0);
+        inline void random_normal(Tr norm = 0);
         /* Getters */
-        [[nodiscard]] RealType getBeta() const noexcept { return beta; }
-        [[nodiscard]] RealType getTraceMu() const noexcept { return traceMu; }
+        [[nodiscard]] Tr getBeta() const noexcept { return beta; }
+        [[nodiscard]] Tr getTraceMu() const noexcept { return traceMu; }
         [[nodiscard]] int getNumMinCostTerm() const noexcept { return numMinCostTerm; }
         [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
         [[nodiscard]] const Base& asVector() const noexcept { return *this; }
         [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
         template<RNG R>
-        [[nodiscard]] static This random_normal(size_t len, RealType norm);
+        [[nodiscard]] static This random_normal(size_t len, Tr norm);
     private:
         using Base::random_uniform;
         using Base::random_any;
@@ -83,14 +84,14 @@ namespace Physica {
     TPQ<T>::TPQ(size_t length)
             : Base(length)
             , beta(0)
-            , traceMu(std::numeric_limits<RealType>::max())
+            , traceMu(std::numeric_limits<Tr>::max())
             , numMinCostTerm(0)
             , numSplit(0) {
         assert(length > 0 && "[Error]: Invalid length");
     }
 
     template<Scalar T>
-    TPQ<T>::TPQ(size_t length, RealType traceMu_, int numMinCostTerm_, int numSplit_)
+    TPQ<T>::TPQ(size_t length, Tr traceMu_, int numMinCostTerm_, int numSplit_)
             : TPQ(length) {
         traceMu = std::move(traceMu_);
         numMinCostTerm = numMinCostTerm_;
@@ -100,65 +101,61 @@ namespace Physica {
 
     template<Scalar T>
     template<class ModelType, class Executor>
-    void TPQ<T>::pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta) {
-        const RealType factor = deltaBeta * -0.5;
+    void TPQ<T>::pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta) {
+        const Tr factor = deltaBeta * Trv(-0.5);
         const auto& hamiltonH = hamiltonH_.getDerived();
-        const auto expr1 = factor * hamiltonH;
-        const auto expr2 = exp(expr1);
-        const auto expr3 = expr2 * asVector();
-        traceMu = expr3.calcTraceMu();
-        const auto params = expr3.template calcParam<Executor>(traceMu);
+        const auto expr = exp(factor * hamiltonH) * asVector();
+        traceMu = expr.calcTraceMu();
+        const auto params = expr.template calcParam<Executor>(traceMu);
         numMinCostTerm = params.first;
         numSplit = params.second;
     }
 
     template<Scalar T>
     template<class ModelType, class Executor>
-    void TPQ<T>::nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta) {
+    void TPQ<T>::nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta) {
         if (deltaBeta.isZero())
             return;
         using BufferType = VectorND<T>;
-        const RealType factor = deltaBeta * -0.5;
+        const Tr factor = deltaBeta * Trv(-0.5);
         const auto& hamiltonH = hamiltonH_.getDerived();
-        const auto expr1 = factor * hamiltonH;
-        const auto expr2 = exp(expr1);
-        const auto expr3 = expr2 * asVector();
+        const auto expr = exp(factor * hamiltonH) * asVector();
         BufferType dot(Base::getLength());
         if (isPrepared())
-            expr3.template assign<BufferType, Executor>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
+            expr.template assign<BufferType, Executor>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
         else
-            expr3.template assign<BufferType, Executor>(dot);
+            expr.template assign<BufferType, Executor>(dot);
         Base::swap(dot);
         beta += deltaBeta;
     }
 
     template<Scalar T>
-    inline TPQ<T>::RealType TPQ<T>::calcPartitionXi() const {
+    auto TPQ<T>::calcPartitionXi() const -> Tr {
         return Base::squaredNorm();
     }
 
     template<Scalar T>
-    inline TPQ<T>::RealType TPQ<T>::lnPartitionXi() const {
-        const bool isUnderflow = abs(asVector()).max() < RealType(std::numeric_limits<RealType>::min());
+    auto TPQ<T>::lnPartitionXi() const -> Tr {
+        const bool isUnderflow = abs(asVector()).max() < Tr(std::numeric_limits<Tr>::min());
         if (isUnderflow)
-            return RealType(-std::numeric_limits<T>::max());
+            return Tr(-std::numeric_limits<T>::max());
         return Base::lnSquaredNorm();
     }
 
     template<Scalar T>
-    TPQ<T>::RealType TPQ<T>::lnSquaredDot(const VectorND<RealType>& other) const {
+    auto TPQ<T>::lnSquaredDot(const VectorND<Tr>& other) const -> Tr {
         assert(Base::getLength() == other.getLength() && "[Error]: Dimensions do not match");
-        const RealType maxabs = abs(asVector()).max();
-        const bool isUnderflow = maxabs < RealType(std::numeric_limits<RealType>::min());
+        const Tr maxabs = abs(asVector()).max();
+        const bool isUnderflow = maxabs < Tr(std::numeric_limits<Tr>::min());
         if (isUnderflow)
-            return RealType(-std::numeric_limits<T>::max());
-        const RealType factor = reciprocal(maxabs);
+            return Tr(-std::numeric_limits<T>::max());
+        const Tr factor = reciprocal(maxabs);
         const auto expr1 = asVector() * factor;
         const auto expr2 = expr1.squaredNorms();
-        const RealType dot = hadamard(expr2, other).sum();
+        const Tr dot = hadamard(expr2, other).sum();
         if (dot.isZero())
-            return RealType(-std::numeric_limits<T>::max());
-        return ln(dot) + RealType(2) * ln(maxabs);
+            return Tr(-std::numeric_limits<T>::max());
+        return ln(dot) + Tr(2) * ln(maxabs);
     }
 
     template<Scalar T>
@@ -173,17 +170,17 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    inline void TPQ<T>::random_normal(RealType norm) {
+    inline void TPQ<T>::random_normal(Tr norm) {
         const bool useDefault = norm.isZero();
         if (useDefault) // Default norm is as small as possible while keep all effective digits
-            norm = RealType(std::numeric_limits<RealType>::min() / std::numeric_limits<RealType>::epsilon());
+            norm = Tr(std::numeric_limits<Tr>::min() / std::numeric_limits<Tr>::epsilon());
         Base::template random_normal<R>();
         asVector() *= norm;
     }
 
     template<Scalar T>
     template<RNG R>
-    TPQ<T> TPQ<T>::random_normal(size_t len, RealType norm) {
+    TPQ<T> TPQ<T>::random_normal(size_t len, Tr norm) {
         This result(len);
         result.random_normal<R>(norm);
         return result;
@@ -191,7 +188,7 @@ namespace Physica {
 
     template<Scalar T>
     bool TPQ<T>::isPrepared() const {
-        const bool muReady = traceMu != RealType(std::numeric_limits<RealType>::max());
+        const bool muReady = traceMu != Tr(std::numeric_limits<Tr>::max());
         return muReady && numMinCostTerm > 0 && numSplit > 0;
     }
 }

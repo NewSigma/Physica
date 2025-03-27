@@ -4,6 +4,7 @@ add_subdirectory(Math)
 physica_add_test(Complex Scalar/Complex.cpp)
 physica_add_test(Diff Scalar/Diff.cpp)
 physica_add_test(Integer Scalar/Integer.cpp)
+physica_add_test(MathConst Scalar/MathConst.cpp)
 physica_add_test(Real Scalar/Real.cpp)
 physica_add_test(SIMD Scalar/SIMD.cpp)
 ## ML

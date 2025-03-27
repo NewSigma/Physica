@@ -17,5 +17,3 @@ physica_add_test(NumCharacter Statistics/NumCharacter.cpp)
 physica_add_test(LinearFit Statistics/LinearFit.cpp)
 # Transform
 physica_add_test(FFT Transform/FFT.cpp)
-
-physica_add_test(MathConst MathConst.cpp)

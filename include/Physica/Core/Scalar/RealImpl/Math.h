@@ -137,6 +137,18 @@ namespace Physica {
     }
 
     template<ScalarOption Option>
+    __host__ __device__ inline Real<Option> cospi(const Real<Option>& x) noexcept {
+    #ifdef __CUDA_ARCH__
+        if constexpr (Option == Float32)
+            return Real<Option>(::cospif(x.toMachine()));
+        else
+            return Real<Option>(::cospi(x.toMachine()));
+    #else
+        return cos(MathConst<Real<Option>>::pi * x);
+    #endif
+    }
+
+    template<ScalarOption Option>
     __host__ __device__ inline Real<Option> sin(const Real<Option>& x) noexcept {
         if constexpr (Option == Float32)
             return Real<Option>(::sinf(x.toMachine()));
@@ -145,15 +157,43 @@ namespace Physica {
     }
 
     template<ScalarOption Option>
+    __host__ __device__ inline Real<Option> sinpi(const Real<Option>& x) noexcept {
+    #ifdef __CUDA_ARCH__
+        if constexpr (Option == Float32)
+            return Real<Option>(::sinpif(x.toMachine()));
+        else
+            return Real<Option>(::sinpi(x.toMachine()));
+    #else
+        return sin(MathConst<Real<Option>>::pi * x);
+    #endif
+    }
+
+    template<ScalarOption Option>
     __host__ __device__ inline void sincos(Real<Option> x, Real<Option>& sin_result, Real<Option>& cos_result) noexcept {
         using MachineType = Real<Option>::MachineType;
         MachineType sin_temp, cos_temp;
-        if constexpr (Option == Double)
-            ::sincos(x.toMachine(), (double*)&sin_temp, (double*)&cos_temp);
+        if constexpr (Option == Float32)
+            ::sincosf(x.toMachine(), &sin_temp, &cos_temp);
         else
-            ::sincosf(x.toMachine(), (float*)&sin_temp, (float*)&cos_temp);
+            ::sincos(x.toMachine(), &sin_temp, &cos_temp);
         sin_result = sin_temp;
         cos_result = cos_temp;
+    }
+
+    template<ScalarOption Option>
+    __host__ __device__ inline void sincospi(Real<Option> x, Real<Option>& sin_result, Real<Option>& cos_result) noexcept {
+    #ifdef __CUDA_ARCH__
+        using MachineType = Real<Option>::MachineType;
+        MachineType sin_temp, cos_temp;
+        if constexpr (Option == Float32)
+            ::sincospif(x.toMachine(), &sin_temp, &cos_temp);
+        else
+            ::sincospi(x.toMachine(), &sin_temp, &cos_temp);
+        sin_result = sin_temp;
+        cos_result = cos_temp;
+    #else
+        return sincos(MathConst<Real<Option>>::pi * x, sin_result, cos_result);
+    #endif
     }
 
     template<ScalarOption Option>
@@ -165,8 +205,20 @@ namespace Physica {
     }
 
     template<ScalarOption Option>
+    __host__ __device__ inline Real<Option> tanpi(const Real<Option>& x) noexcept {
+        Real<Option> sinpi_, cospi_;
+        sincospi(x, sinpi_, cospi_);
+        return sinpi_ / cospi_;
+    }
+
+    template<ScalarOption Option>
     Real<Option> sec(const Real<Option>& x) noexcept {
         return reciprocal(cos(x));
+    }
+
+    template<ScalarOption Option>
+    Real<Option> secpi(const Real<Option>& x) noexcept {
+        return reciprocal(cospi(x));
     }
 
     template<ScalarOption Option>
@@ -175,8 +227,22 @@ namespace Physica {
     }
 
     template<ScalarOption Option>
+    Real<Option> cscpi(const Real<Option>& x) noexcept {
+        return reciprocal(sinpi(x));
+    }
+
+    template<ScalarOption Option>
     Real<Option> cot(const Real<Option>& x) noexcept {
-        return cos(x) / sin(x);
+        Real<Option> sin_, cos_;
+        sincos(x, sin_, cos_);
+        return cos_ / sin_;
+    }
+
+    template<ScalarOption Option>
+    Real<Option> cotpi(const Real<Option>& x) noexcept {
+        Real<Option> sinpi_, cospi_;
+        sincospi(x, sinpi_, cospi_);
+        return cospi_ / sinpi_;
     }
 
     template<ScalarOption Option>

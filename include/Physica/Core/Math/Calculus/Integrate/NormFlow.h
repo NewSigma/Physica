@@ -160,6 +160,7 @@ namespace Physica {
             loss /= Trv(numSample);
         }
         else {
+            static_assert(std::same_as<ThreadExecutor, Executor>, "[Error]: Unsupported executor");
             const int numThread = Executor::getNumThread();
             Array<Net> nets(numThread, nn);
 

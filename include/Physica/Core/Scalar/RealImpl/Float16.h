@@ -145,5 +145,3 @@ namespace std {
         }
     };
 }
-
-#include "MathFP16.h"
