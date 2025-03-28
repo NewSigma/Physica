@@ -35,11 +35,11 @@ static void kernel(benchmark::State& state) {
     }
 }
 
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kNanosecond)->Arg(2);
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kNanosecond)->Arg(4);
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kNanosecond)->Arg(8);
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kNanosecond)->Arg(64);
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kMicrosecond)->Arg(256);
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kMicrosecond)->Arg(1024);
-BENCHMARK(kernel)->Name("symv")->Unit(benchmark::kMillisecond)->Arg(16384);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kNanosecond)->Arg(2);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kNanosecond)->Arg(4);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kNanosecond)->Arg(8);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kNanosecond)->Arg(16);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kNanosecond)->Arg(64);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kMicrosecond)->Arg(256);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kMicrosecond)->Arg(1024);
+BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kMillisecond)->Arg(16384);

@@ -21,56 +21,52 @@
 #include "MatrixPow.h"
 
 namespace Physica {
-    template<Matrix T, Vector U> class MatrixVectorProduct;
-
-    template<Matrix T, Vector U>
-    class MatrixVectorProduct<MatrixPow<T>, U>
-            : public RValueVector<MatrixVectorProduct<MatrixPow<T>, U>> {
-        using This = MatrixVectorProduct<MatrixPow<T>, U>;
+    template<Matrix M, Vector V>
+    class MatPowVecProd : public RValueVector<MatPowVecProd<M, V>> {
+        using This = MatPowVecProd<M, V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     protected:
         using typename Base::Tv;
     private:
-        const MatrixPow<T>& mpow;
-        const U& v;
+        const LazyDestroy<M> mpow;
+        const LazyDestroy<V> v;
     public:
-        MatrixVectorProduct(const MatrixPow<T>& mpow_, const U& v_);
-        MatrixVectorProduct(const This&) = default;
-        MatrixVectorProduct(This&&) noexcept = default;
-        ~MatrixVectorProduct() = default;
+        MatPowVecProd(M&& mpow_, V&& v_);
+        MatPowVecProd(const This&) = default;
+        MatPowVecProd(This&&) noexcept = default;
+        ~MatPowVecProd() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
-        inline void assign(V& target) const;
+        template<Vector V1, class Executor = SeqExecutor>
+        inline void assign(V1& target) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const MatrixPow<T>& getLHS() const noexcept { return mpow; }
-        [[nodiscard]] const U& getRHS() const noexcept { return v; }
+        [[nodiscard]] const MatrixPow<M>& getLHS() const noexcept { return mpow; }
+        [[nodiscard]] const V& getRHS() const noexcept { return v; }
     };
 
-    template<Matrix T, Vector U>
-    MatrixVectorProduct<MatrixPow<T>, U>::MatrixVectorProduct(
-            const MatrixPow<T>& mpow_, const U& v_) : mpow(mpow_), v(v_) {
+    template<Matrix M, Vector V>
+    MatPowVecProd<M, V>::MatPowVecProd(M&& mpow_, V&& v_) : mpow(std::forward<M>(mpow_)), v(std::forward<V>(v_)) {
         assert(mpow.getCol() == v.getLength());
     }
 
-    template<Matrix T, Vector U>
-    template<Vector V, class Executor>
-    inline void MatrixVectorProduct<MatrixPow<T>, U>::assign(V& target) const {
+    template<Matrix M, Vector V>
+    template<Vector V1, class Executor>
+    inline void MatPowVecProd<M, V>::assign(V1& target) const {
         const int power = mpow.getPower();
         if (power == 0) {
             target = v;
             return;
         }
 
-        V buffer = mpow.getMatrix() * v;
+        V1 buffer = mpow.getMatrix() * v;
         for (int i = 1; i < power; ++i) {
             buffer.swap(target);
             buffer = mpow.getMatrix() * target;
@@ -80,6 +76,6 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class Traits<MatrixVectorProduct<MatrixPow<T>, U>> : public Traits<MatrixVectorProduct<T, U>> {};
+    template<Matrix M, Vector V>
+    class Traits<MatPowVecProd<M, V>> : public Traits<GEMV<M, V>> {};
 }

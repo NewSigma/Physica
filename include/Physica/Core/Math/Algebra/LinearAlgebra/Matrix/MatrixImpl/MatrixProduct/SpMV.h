@@ -23,36 +23,35 @@
 namespace Physica {
     template<Scalar T, int Option> class SparseMatrix;
 
-    template<Scalar T, int Option, Vector U>
-    class MatrixVectorProduct<SparseMatrix<T, Option>, U>
-            : public RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, U>> {
+    template<Scalar T, int Option, Vector V>
+    class SpMV : public RValueVector<SpMV<T, Option, V>> {
+        using Base = RValueVector<SpMV<T, Option, V>>;
     public:
-        using Base = RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, U>>;
         using typename Base::ScalarType;
         using MatrixType = SparseMatrix<T, Option>;
-        static_assert(MatrixType::ColAtCompile == U::SizeAtCompile,
+        static_assert(MatrixType::ColAtCompile == V::SizeAtCompile,
                       "Row and column do not match in matrix product");
     private:
         const MatrixType& mat;
-        const U& vec;
+        const V& vec;
     public:
-        MatrixVectorProduct(const MatrixType& mat_, const U& vec_)
+        SpMV(const MatrixType& mat_, const V& vec_)
                 : mat(mat_), vec(vec_) {
             assert(mat.getCol() == vec.getLength());
         }
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
-        void assign(V& target) const;
+        template<Vector V1, class Executor = SeqExecutor>
+        void assign(V1& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
-        [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const U& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
 
-    template<Scalar T, int Option, Vector U>
-    template<Vector V, class Executor>
-    void MatrixVectorProduct<SparseMatrix<T, Option>, U>::assign(V& target) const {
+    template<Scalar T, int Option, Vector V>
+    template<Vector V1, class Executor>
+    void SpMV<T, Option, V>::assign(V1& target) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();
@@ -80,9 +79,8 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Option, Vector U>
-    MatrixVectorProduct<SparseMatrix<T, Option>, U>::ScalarType
-    MatrixVectorProduct<SparseMatrix<T, Option>, U>::calc(size_t index) const {
+    template<Scalar T, int Option, Vector V>
+    auto SpMV<T, Option, V>::calc(size_t index) const -> ScalarType {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();

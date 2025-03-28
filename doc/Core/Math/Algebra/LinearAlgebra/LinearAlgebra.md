@@ -64,11 +64,11 @@ $$\mathbf{y = x}$$
 
 存在特殊情况，包括但不限于稀疏结构、对称性等，使得模板特化的性能高于for循环或SIMD。
 
-模板特化使用函数assignTo实现，FastAssign = true表示assignTo实现的性能将优于for或SIMD的实现。
+模板特化使用函数assign实现，FastAssign = true表示assign实现的性能将优于for或SIMD的实现。
 
-assignTo具有整体性，因此FastAssign具有传播性。
+assign具有整体性，因此FastAssign具有传播性。
 
-该选项可用于实现启发性表达式变换。
+该选项用于实现启发性表达式变换。
 
 **FastPacket**
 

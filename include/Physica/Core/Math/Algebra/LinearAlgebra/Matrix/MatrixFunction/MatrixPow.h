@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,55 +21,74 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
-    class MatrixPow : public RValueMatrix<MatrixPow<T>> {
-        using This = MatrixPow<T>;
+    template<Matrix M, Vector V> class MatPowVecProd;
+
+    template<Matrix M>
+    class MatrixPow : public RValueMatrix<MatrixPow<M>> {
+        using This = MatrixPow<M>;
         using Base = RValueMatrix<This>;
 
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<T>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T>();
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M>();
         using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
         using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     private:
-        const T& m;
+        const LazyDestroy<M> m;
         int power;
     public:
-        MatrixPow(const T& m_, int power_);
-        MatrixPow(const This&) = delete;
-        MatrixPow(This&&) = delete;
+        MatrixPow(M&& m_, int power_);
+        MatrixPow(const This&) = default;
+        MatrixPow(This&&) = default;
         ~MatrixPow() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) const& noexcept;
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) && noexcept;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
+        [[nodiscard]] T calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
 
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         /* Getters */
-        [[nodiscard]] const T& getMatrix() const noexcept { return m; }
+        [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
         [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
         [[nodiscard]] int getPower() const noexcept { return power; }
     };
 
-    template<Matrix T>
-    MatrixPow<T>::MatrixPow(const T& m_, int power_) : m(m_), power(power_) {}
+    template<Matrix M>
+    MatrixPow<M>::MatrixPow(M&& m_, int power_) : m(std::forward<M>(m_)), power(power_) {}
 
-    template<Matrix T>
-    [[nodiscard]] inline MatrixPow<T> pow(const T& m, int power) noexcept {
-        return MatrixPow<T>(m, power);
+    template<Matrix M>
+    template<Vector V>
+    auto MatrixPow<M>::operator*(V&& v) const& noexcept {
+        return MatPowVecProd<const This&, V&&>(*this, std::forward<V>(v));
+    }
+
+    template<Matrix M>
+    template<Vector V>
+    auto MatrixPow<M>::operator*(V&& v) && noexcept {
+        return MatPowVecProd<This&&, V&&>(std::move(*this), std::forward<V>(v));
+    }
+
+    template<Matrix M>
+    [[nodiscard]] inline auto pow(M&& m, int power) noexcept {
+        return MatrixPow<M&&>(std::forward<M>(m), power);
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<MatrixPow<T>> : public Traits<T> {
+    template<Matrix M>
+    class Traits<MatrixPow<M>> : public Traits<std::remove_cvref_t<M>> {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
     };
 }
 
-#include "MatrixPowVecProduct.h"
+#include "MatPowVecProd.h"

@@ -18,63 +18,81 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
+#include "../MatrixExpr.h"
 
 namespace Physica {
     template<Matrix M, Vector V>
-    class MatrixVectorProduct;
-
-    template<ExprType Type, Matrix M, class U, Vector V>
-    class MatrixVectorProduct<MatrixExpr<Type, M, U>, V>
-            : public RValueVector<MatrixVectorProduct<MatrixExpr<Type, M, U>, V>> {
-        using MatrixType = MatrixExpr<Type, M, U>;
-        using This = MatrixVectorProduct<MatrixType, V>;
-    public:
+    class MatExprVecProd : public RValueVector<MatExprVecProd<M, V>> {
+        using This = MatExprVecProd<M, V>;
         using Base = RValueVector<This>;
+        using M1 = std::remove_cvref_t<M>;
+        constexpr static ExprType Type = Traits<M1>::Type;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const MatrixType& expr;
-        const V& vec;
+        const LazyDestroy<M> expr;
+        const LazyDestroy<V> vec;
     public:
-        MatrixVectorProduct(const MatrixType& expr_, const V& vec_)
-                : expr(expr_), vec(vec_) {
-            assert(expr.getCol() == vec.getLength());
-        }
-        MatrixVectorProduct(const This&) = default;
-        MatrixVectorProduct(This&&) noexcept = default;
-        ~MatrixVectorProduct() = default;
+        MatExprVecProd(M&& expr_, V&& vec_);
+        MatExprVecProd(const This&) = default;
+        MatExprVecProd(This&&) noexcept = default;
+        ~MatExprVecProd() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] auto operator-() const noexcept;
         /* Operations */
         template<Vector V1, class Executor = SeqExecutor>
         inline void assign(V1& target) const;
-        /* Getters */
+        template<Vector V1, class Executor = SeqExecutor>
+        inline void assign_add(V1& target) const;
+
         [[nodiscard]] inline T calc(size_t index) const;
         [[nodiscard]] inline Tv calc_value(size_t index) const;
+        /* Getters */
         [[nodiscard]] size_t getLength() const { return expr.getRow(); }
-        [[nodiscard]] const MatrixType& getLHS() const noexcept { return expr; }
-        [[nodiscard]] const V& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const auto& getLHS() const noexcept { return expr; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
 
-    template<ExprType Type, Matrix M, class U, Vector V>
+    template<Matrix M, Vector V>
+    MatExprVecProd<M, V>::MatExprVecProd(M&& expr_, V&& vec_) : expr(std::forward<M>(expr_)), vec(std::forward<V>(vec_)) {
+        assert(expr.getCol() == vec.getLength());
+    }
+
+    template<Matrix M, Vector V>
+    auto MatExprVecProd<M, V>::operator-() const noexcept {
+        if constexpr (Traits<M1>::FastAssign)
+            return (-getLHS()) * getRHS();
+        else
+            return getLHS() * (-getRHS());
+    }
+
+    template<Matrix M, Vector V>
     template<Vector V1, class Executor>
-    inline void MatrixVectorProduct<MatrixExpr<Type, M, U>, V>::assign(V1& target) const {
+    inline void MatExprVecProd<M, V>::assign(V1& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
-            if constexpr (Type == ExprType::Add) {
-                using ExprAdd = decltype(expr.getLHS() * vec + expr.getRHS() * vec);
-                target.template operator=<ExprAdd, Executor>(expr.getLHS() * vec + expr.getRHS() * vec);
+            if constexpr (Type == ExprType::Minus) {
+                const auto& lhs = getLHS();
+                const auto& rhs = getRHS();
+                if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
+                    ((-lhs) * rhs).template assign<V1, Executor>(target);
+                else
+                    (lhs * (-rhs)).template assign<V1, Executor>(target);
+            }
+            else if constexpr (Type == ExprType::Add) {
+                auto expr1 = expr.getLHS() * vec + expr.getRHS() * vec;
+                target.template operator=<decltype(expr1), Executor>(expr1);
             }
             else if constexpr (Type == ExprType::Sub) {
-                using ExprSub = decltype(expr.getLHS() * vec - expr.getRHS() * vec);
-                target.template operator=<ExprSub, Executor>(expr.getLHS() * vec - expr.getRHS() * vec);
+                auto expr1 = expr.getLHS() * vec - expr.getRHS() * vec;
+                target.template operator=<decltype(expr1), Executor>(expr1);
             }
             else if constexpr (Type == ExprType::Mul) {
-                using ExprMul = decltype((expr.getLHS() * vec) * expr.getRHS());
-                target.template operator=<ExprMul, Executor>((expr.getLHS() * vec) * expr.getRHS());
+                auto expr1 = (expr.getLHS() * vec) * expr.getRHS();
+                target.template operator=<decltype(expr1), Executor>(expr1);
             }
             else
                 static_assert(!FastAssign, "[Error]: assign is not implemented");
@@ -83,43 +101,80 @@ namespace Physica {
             Base::assign(target);
     }
 
-    template<ExprType Type, Matrix M, class U, Vector V>
-    inline auto MatrixVectorProduct<MatrixExpr<Type, M, U>, V>::calc(size_t index) const -> T {
+    template<Matrix M, Vector V>
+    template<Vector V1, class Executor>
+    inline void MatExprVecProd<M, V>::assign_add(V1& target) const {
+        constexpr bool FastAssign = Traits<This>::FastAssign;
+        if constexpr (FastAssign) {
+            if constexpr (Type == ExprType::Minus) {
+                const auto& lhs = getLHS();
+                const auto& rhs = getRHS();
+                if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
+                    ((-lhs) * rhs).template assign_add<V1, Executor>(target);
+                else
+                    (lhs * (-rhs)).template assign_add<V1, Executor>(target);
+            }
+            else if constexpr (Type == ExprType::Add) {
+                auto expr1 = expr.getLHS() * vec + expr.getRHS() * vec;
+                expr1.template assign_add<V1, Executor>(target);
+            }
+            else if constexpr (Type == ExprType::Sub) {
+                auto expr1 = expr.getLHS() * vec - expr.getRHS() * vec;
+                expr1.template assign_add<V1, Executor>(target);
+            }
+            else if constexpr (Type == ExprType::Mul) {
+                auto expr1 = (expr.getLHS() * vec) * expr.getRHS();
+                expr1.template assign_add<V1, Executor>(target);
+            }
+            else
+                static_assert(!FastAssign, "[Error]: assign is not implemented");
+        }
+        else
+            Base::assign_add(target);
+    }
+
+    template<Matrix M, Vector V>
+    inline auto MatExprVecProd<M, V>::calc(size_t index) const -> T {
         return expr.row(index) * vec;
     }
 
-    template<ExprType Type, Matrix M, class U, Vector V>
-    inline auto MatrixVectorProduct<MatrixExpr<Type, M, U>, V>::calc_value(size_t index) const -> Tv {
+    template<Matrix M, Vector V>
+    inline auto MatExprVecProd<M, V>::calc_value(size_t index) const -> Tv {
         return expr.row(index).values() * vec.values();
     }
 }
 
 namespace Physica {
-    template<ExprType Type, Matrix M, class U, Vector V>
-    class Traits<MatrixVectorProduct<MatrixExpr<Type, M, U>, V>> {
-        using MatrixType = MatrixExpr<Type, M, U>;
-        static_assert(MatrixType::ColAtCompile == V::SizeAtCompile || MatrixType::ColAtCompile == Dynamic || V::SizeAtCompile == Dynamic,
+    template<Matrix M, Vector V>
+    class Traits<MatExprVecProd<M, V>> {
+        using M1 = std::remove_cvref_t<M>;
+        using V1 = std::remove_cvref_t<V>;
+        static_assert(M1::ColAtCompile == V1::SizeAtCompile || M1::ColAtCompile == Dynamic || V1::SizeAtCompile == Dynamic,
                       "Row and col do not match in matrix product");
 
         constexpr static bool calcFastAssign() {
-            constexpr bool isScalarT2 = Scalar<U>;
-            if constexpr (Type == ExprType::Add || Type == ExprType::Sub) {
-                if constexpr (!isScalarT2) {
-                    using LHS = decltype(std::declval<M>() * std::declval<V>());
-                    using RHS = decltype(std::declval<U>() * std::declval<V>());
-                    using ExprType = decltype(std::declval<LHS>() + std::declval<RHS>());
-                    return Traits<ExprType>::FastAssign;
+            using U = Traits<M1>::RHS;
+            constexpr bool isScalarU = Scalar<U>;
+            constexpr ExprType Type = Traits<M1>::Type;
+
+            if constexpr (Type == ExprType::Minus)
+                return Traits<M1>::FastAssign;
+            else if constexpr (Type == ExprType::Add || Type == ExprType::Sub) {
+                if constexpr (!isScalarU) {
+                    using M2 = Traits<M1>::LHS;
+                    using Add = decltype(std::declval<M2>() * std::declval<V>() + std::declval<U>() * std::declval<V>());
+                    return Traits<Add>::FastAssign;
                 }
                 return false;
             }
-            if constexpr (Type == ExprType::Mul) {
-                return isScalarT2;
-            }
-            return false;
+            else if constexpr (Type == ExprType::Mul)
+                return isScalarU;
+            else
+                return false;
         }
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename MatrixType::ScalarType, typename V::ScalarType>::Type;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
+        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
 
         constexpr static bool FastAssign = calcFastAssign();
         constexpr static bool FastPacket = false;

@@ -41,8 +41,10 @@ namespace Physica {
     template<class T, int GradOrder> class GradVector;
 
     template<class T>
-    struct is_continuous {
-        constexpr static bool value = std::is_base_of<ContinuousVector<T>, T>::value || std::is_base_of<ContinuousMatrix<T>, T>::value;
+    class is_continuous {
+        using U = std::remove_cvref<T>::type;
+    public:
+        constexpr static bool value = std::is_base_of<ContinuousVector<U>, U>::value || std::is_base_of<ContinuousMatrix<U>, U>::value;
     };
 
     namespace Internal {

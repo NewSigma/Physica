@@ -99,6 +99,8 @@ namespace Physica {
 #include "RealImpl/FloatMP.h"
 #include "RealImpl/MathConst.h"
 #include "RealImpl/Math.h"
-#include "RealImpl/MathFP16.h"
+#ifdef PHYSICA_CUDA 
+    #include "RealImpl/MathFP16.h"
+#endif
 #include "RealImpl/MathFPMP.h"
 #include "RealImpl/SIMD.h"

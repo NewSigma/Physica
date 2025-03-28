@@ -23,9 +23,9 @@
 
 namespace Physica {
     template<Scalar T, Representation U, Vector V>
-    class MatrixVectorProduct<HubbardMatrix<T, U>, V> : public RValueVector<MatrixVectorProduct<HubbardMatrix<T, U>, V>> {
+    class HubbardVecProd : public RValueVector<HubbardVecProd<T, U, V>> {
         using MatrixType = HubbardMatrix<T, U>;
-        using This = MatrixVectorProduct<MatrixType, V>;
+        using This = HubbardVecProd<T, U, V>;
         using Base = RValueVector<This>;
         using FFTType = MatrixType::FFTType;
         using StateType = U::StateType;
@@ -40,12 +40,10 @@ namespace Physica {
         const MatrixType& mat;
         const V& vec;
     public:
-        MatrixVectorProduct(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
-            assert(mat.getCol() == vec.getLength());
-        }
-        MatrixVectorProduct(const This&) = default;
-        MatrixVectorProduct(This&&) noexcept = default;
-        ~MatrixVectorProduct() = default;
+        HubbardVecProd(const MatrixType& mat_, const V& vec_);
+        HubbardVecProd(const This&) = default;
+        HubbardVecProd(This&&) noexcept = default;
+        ~HubbardVecProd() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -68,8 +66,13 @@ namespace Physica {
     };
 
     template<Scalar T, Representation U, Vector V>
+    HubbardVecProd<T, U, V>::HubbardVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+        assert(mat.getCol() == vec.getLength());
+    }
+
+    template<Scalar T, Representation U, Vector V>
     template<Vector V1, class Executor>
-    inline void MatrixVectorProduct<HubbardMatrix<T, U>, V>::assign(V1& target) const {
+    inline void HubbardVecProd<T, U, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = RealType(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
@@ -97,8 +100,7 @@ namespace Physica {
     }
 
     template<Scalar T, Representation U, Vector V>
-    MatrixVectorProduct<HubbardMatrix<T, U>, V>::ScalarType
-    MatrixVectorProduct<HubbardMatrix<T, U>, V>::calc(size_t index) const {
+    auto HubbardVecProd<T, U, V>::calc(size_t index) const -> ScalarType {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -mat.getHoppingT();
         const auto state = getRepr()[index];
@@ -130,7 +132,7 @@ namespace Physica {
 
     template<Scalar T, Representation U, Vector V>
     template<Vector V1>
-    void MatrixVectorProduct<HubbardMatrix<T, U>, V>::sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    void HubbardVecProd<T, U, V>::sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -149,7 +151,7 @@ namespace Physica {
 
     template<Scalar T, Representation U, Vector V>
     template<Vector V1>
-    void MatrixVectorProduct<HubbardMatrix<T, U>, V>::dotImpl(V1& target, ScalarType factor, size_t index) const {
+    void HubbardVecProd<T, U, V>::dotImpl(V1& target, ScalarType factor, size_t index) const {
         const auto state = getRepr()[index];
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
@@ -199,7 +201,7 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, Representation U, Vector V>
-    class Traits<MatrixVectorProduct<HubbardMatrix<T, U>, V>> {
+    class Traits<HubbardVecProd<T, U, V>> {
         using MatrixType = HubbardMatrix<T, U>;
         using T1 = V::ScalarType;
     public:

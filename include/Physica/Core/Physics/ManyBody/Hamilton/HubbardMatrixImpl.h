@@ -30,6 +30,12 @@ namespace Physica {
     }
 
     template<Scalar T, Representation U>
+    template<Vector V>
+    auto HubbardMatrix<T, U>::operator*(const V& v) const noexcept {
+        return HubbardVecProd<T, U, V>(*this, v);
+    }
+
+    template<Scalar T, Representation U>
     template<class Functor>
     void HubbardMatrix<T, U>::forNeighSites(Functor func, int site) const {
         if constexpr (Dim == 1)

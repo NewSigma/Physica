@@ -22,6 +22,9 @@
 #include "Physica/Core/Utils/Container/SymmArray.h"
 
 namespace Physica {
+    template<Scalar T, size_t Order, Vector V>
+    class SyMV;
+
     template<Scalar T, size_t Order = Dynamic>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order>>
                           , private SymmArray<T, Order> {
@@ -47,11 +50,15 @@ namespace Physica {
         using Base::operator=;
         using Base::operator();
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+
         template<Scalar U> inline This& operator=(const U& x);
         template<Scalar U> inline void operator+=(const U& x);
         template<Scalar U> inline void operator-=(const U& x);
         template<Scalar U> inline void operator*=(const U& x);
         template<Scalar U> inline void operator/=(const U& x);
+
+        template<Vector V>
+        [[nodiscard]] auto operator*(const V& v) const noexcept;
         /* Operations */
         using Base::assign;
         using Base::calc;
@@ -134,6 +141,12 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    template<Vector V>
+    auto DenseSymmMatrix<T, Order>::operator*(const V& v) const noexcept {
+        return SyMV<T, Order, V>(*this, v);
+    }
+
+    template<Scalar T, size_t Order>
     void DenseSymmMatrix<T, Order>::swap(This& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
@@ -205,4 +218,4 @@ namespace std {
     }
 }
 
-#include "DenseSymmImpl/MatrixVectorProduct.h"
+#include "MatrixImpl/MatrixProduct/SyMV.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,70 +22,89 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
-    class MatrixExp : public RValueMatrix<MatrixExp<T>> {
-        using This = MatrixExp<T>;
+    template<Matrix M, Vector V> class MatExpVecProd;
+
+    template<Matrix M>
+    class MatrixExp : public RValueMatrix<MatrixExp<M>> {
+        using This = MatrixExp<M>;
         using Base = RValueMatrix<This>;
-    public:
-        using typename Base::ScalarType;
-        using RealType = ScalarType::RealType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tr;
     private:
-        const T& m;
+        const LazyDestroy<M> m;
     public:
-        MatrixExp(const T& m_);
-        MatrixExp(const This&) = delete;
-        MatrixExp(This&&) noexcept = delete;
+        MatrixExp(M&& m_);
+        MatrixExp(const This&) = default;
+        MatrixExp(This&&) noexcept = default;
         ~MatrixExp() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
-        [[nodiscard]] ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
 
-        [[nodiscard]] RealType calcTraceMu() const;
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) const& noexcept;
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) && noexcept;
+        /* Operations */
+        template<Matrix M1>
+        void assign(LValueMatrix<M1>& target) const;
+        [[nodiscard]] T calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
+
+        [[nodiscard]] Tr calcTraceMu() const;
         /* Getters */
-        [[nodiscard]] const T& getMatrix() const noexcept { return m; }
+        [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
         [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return m.getCol(); }
     };
 
-    template<Matrix T>
-    MatrixExp<T>::MatrixExp(const T& m_) : m(m_) {
+    template<Matrix M>
+    MatrixExp<M>::MatrixExp(M&& m_) : m(std::forward<M>(m_)) {
         assert(m.getRow() == m.getCol());
     }
 
-    template<Matrix T>
     template<Matrix M>
-    void MatrixExp<T>::assign(LValueMatrix<M>& target) const {
-        const RealType traceMu = calcTraceMu();
-        const auto params = ((*this) * VectorND<ScalarType>(getRow())).template calcParam<SeqExecutor>(traceMu);
+    template<Vector V>
+    auto MatrixExp<M>::operator*(V&& v) const& noexcept {
+        return MatExpVecProd<const This&, V&&>(*this, std::forward<V>(v));
+    }
+
+    template<Matrix M>
+    template<Vector V>
+    auto MatrixExp<M>::operator*(V&& v) && noexcept {
+        return MatExpVecProd<This&&, V&&>(std::move(*this), std::forward<V>(v));
+    }
+
+    template<Matrix M>
+    template<Matrix M1>
+    void MatrixExp<M>::assign(LValueMatrix<M1>& target) const {
+        const Tr traceMu = calcTraceMu();
+        const auto params = ((*this) * VectorND<T>(getRow())).template calcParam<SeqExecutor>(traceMu);
         for (size_t i = 0; i < getCol(); ++i) {
             auto col = target.col(i);
-            ((*this) * UnitVector<ScalarType>(i, getRow())).assign(col, traceMu, params);
+            ((*this) * UnitVector<T>(i, getRow())).assign(col, traceMu, params);
         }
     }
 
-    template<Matrix T>
-    auto MatrixExp<T>::calcTraceMu() const -> RealType {
-        const ScalarType trace = m.trace();
+    template<Matrix M>
+    auto MatrixExp<M>::calcTraceMu() const -> Tr {
+        const T trace = m.trace();
         assert(trace.imag().isZero() && "[Error]: Not implemented");
-        return trace.real() / RealType(getRow());
+        return trace.real() / Tr(getRow());
     }
 
-    template<Matrix T>
-    [[nodiscard]] inline auto exp(const T& m) noexcept {
-        return MatrixExp<T>(m);
+    template<Matrix M>
+    [[nodiscard]] inline auto exp(M&& m) noexcept {
+        return MatrixExp<M&&>(std::forward<M>(m));
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<MatrixExp<T>> : public Traits<T> {
+    template<Matrix M>
+    class Traits<MatrixExp<M>> : public Traits<std::remove_cvref_t<M>> {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
     };
 }
 
-#include "MatrixExpVecProduct.h"
+#include "MatExpVecProd.h"

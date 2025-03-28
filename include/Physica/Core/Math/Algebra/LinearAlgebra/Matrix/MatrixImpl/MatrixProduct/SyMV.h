@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "../DenseSymmMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
 namespace Physica {
-    template<Scalar T, size_t Order, Vector U>
-    class MatrixVectorProduct<DenseSymmMatrix<T, Order>, U> : public RValueVector<MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>> {
+    template<Scalar T, size_t Order, Vector V>
+    class SyMV : public RValueVector<SyMV<T, Order, V>> {
         using MatrixType = DenseSymmMatrix<T, Order>;
-        using This = MatrixVectorProduct<MatrixType, U>;
+        using This = SyMV<T, Order, V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
@@ -33,18 +33,18 @@ namespace Physica {
         using typename Base::Tv;
     private:
         const MatrixType& mat;
-        const U& vec;
+        const V& vec;
     public:
-        MatrixVectorProduct(const MatrixType& mat_, const U& vec_);
-        MatrixVectorProduct(const This&) = delete;
-        MatrixVectorProduct(This&&) noexcept = default;
-        ~MatrixVectorProduct() = default;
+        SyMV(const MatrixType& mat_, const V& vec_);
+        SyMV(const This&) = delete;
+        SyMV(This&&) noexcept = default;
+        ~SyMV() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
-        inline void assign(V& target) const;
+        template<Vector V1, class Executor = SeqExecutor>
+        inline void assign(V1& target) const;
 
         [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
         [[nodiscard]] inline Tv calc_value(size_t index) const;
@@ -54,14 +54,14 @@ namespace Physica {
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
 
-    template<Scalar T, size_t Order, Vector U>
-    MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>::MatrixVectorProduct(const MatrixType& mat_, const U& vec_) : mat(mat_), vec(vec_) {
+    template<Scalar T, size_t Order, Vector V>
+    SyMV<T, Order, V>::SyMV(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Scalar T, size_t Order, Vector U>
-    template<Vector V, class Executor>
-    inline void MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>::assign(V& target) const {
+    template<Scalar T, size_t Order, Vector V>
+    template<Vector V1, class Executor>
+    inline void SyMV<T, Order, V>::assign(V1& target) const {
         const size_t length = getLength();
         assert(length == target.getLength());
         if (length >= 16) {
@@ -82,23 +82,23 @@ namespace Physica {
             Base::assign(target);
     }
 
-    template<Scalar T, size_t Order, Vector U>
-    inline auto MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>::calc(size_t index) const -> CoDiff<ScalarType> {
+    template<Scalar T, size_t Order, Vector V>
+    inline auto SyMV<T, Order, V>::calc(size_t index) const -> CoDiff<ScalarType> {
         return mat.row(index) * vec;
     }
 
-    template<Scalar T, size_t Order, Vector U>
-    inline auto MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>::calc_value(size_t index) const -> Tv {
+    template<Scalar T, size_t Order, Vector V>
+    inline auto SyMV<T, Order, V>::calc_value(size_t index) const -> Tv {
         return mat.values().row(index) * vec.values();
     }
 }
 
 namespace Physica {
-    template<Scalar T, size_t Order, Vector U>
-    class Traits<MatrixVectorProduct<DenseSymmMatrix<T, Order>, U>> {
+    template<Scalar T, size_t Order, Vector V>
+    class Traits<SyMV<T, Order, V>> {
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
-        constexpr static size_t SizeAtCompile = U::SizeAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename V::ScalarType>::Type;
+        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;
     };

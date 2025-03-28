@@ -26,6 +26,7 @@ namespace Physica {
      * \class MatrixExpr represents \param T \param type \param U. e.g. matrix + scalar, expression * expression
      */
     template<ExprType Type, class T, class U = T> class MatrixExpr;
+    template<Matrix M, Vector V> class MatExprVecProd;
 
     template<ExprType Type, Matrix M>
     class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
@@ -47,6 +48,11 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) const& noexcept requires(!CUDA<V>);
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) && noexcept requires(!CUDA<V>);
         /* Operations */
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
@@ -54,7 +60,20 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
+        [[nodiscard]] auto& getExpr() noexcept { return expr; }
     };
+
+    template<ExprType Type, Matrix M>
+    template<Vector V>
+    auto UnitaryMatrixExpr<Type, M>::operator*(V&& v) const& noexcept requires(!CUDA<V>) {
+        return MatExprVecProd<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
+    }
+
+    template<ExprType Type, Matrix M>
+    template<Vector V>
+    auto UnitaryMatrixExpr<Type, M>::operator*(V&& v) && noexcept requires(!CUDA<V>) {
+        return MatExprVecProd<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
+    }
 
     template<ExprType Type, class LHS, class RHS>
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
@@ -86,6 +105,11 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) const& noexcept requires(!CUDA<V>);
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) && noexcept requires(!CUDA<V>);
         /* Operations */
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
@@ -104,13 +128,31 @@ namespace Physica {
         }
         [[nodiscard]] const auto& getLHS() const noexcept { return lhs; }
         [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
+        [[nodiscard]] auto& getLHS() noexcept { return lhs; }
+        [[nodiscard]] auto& getRHS() noexcept { return rhs; }
     };
+
+    template<ExprType Type, class LHS, class RHS>
+    template<Vector V>
+    auto BinaryMatrixExpr<Type, LHS, RHS>::operator*(V&& v) const& noexcept requires(!CUDA<V>) {
+        return MatExprVecProd<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    template<Vector V>
+    auto BinaryMatrixExpr<Type, LHS, RHS>::operator*(V&& v) && noexcept requires(!CUDA<V>) {
+        return MatExprVecProd<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
+    }
 }
 
 namespace Physica {
-    template<ExprType Type, Matrix LHS, Matrix RHS>
-    class Traits<MatrixExpr<Type, LHS, RHS>> {
-        using This = MatrixExpr<Type, LHS, RHS>;
+    template<ExprType Type_, Matrix LHS_, Matrix RHS_>
+    class Traits<MatrixExpr<Type_, LHS_, RHS_>> {
+    public:
+        constexpr static ExprType Type = Type_;
+        using LHS = LHS_;
+        using RHS = RHS_;
+    private:
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
         using ResultType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
@@ -134,29 +176,13 @@ namespace Physica {
         constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && MatrixOption::isHermiteMatrix<RHS>();
     };
 
-    template<ExprType Type, Matrix LHS, Scalar RHS>
-    class Traits<MatrixExpr<Type, LHS, RHS>> {
-        using This = MatrixExpr<Type, LHS, RHS>;
-        using LHS1 = std::remove_cvref_t<LHS>;
-        using RHS1 = std::remove_cvref_t<RHS>;
+    template<ExprType Type_, Matrix LHS_, Vector RHS_>
+    class Traits<MatrixExpr<Type_, LHS_, RHS_>> {
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, RHS1>::Type;
-        constexpr static int Option = LHS1::Option;
-        constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
-        constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
-        constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
-
-        constexpr static bool FastAssign = false;
-        constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>();
-        constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && !RHS1::isComplex;
-    };
-
-    template<ExprType Type, Scalar LHS, Matrix RHS>
-    class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
-
-    template<ExprType Type, Matrix LHS, Vector RHS>
-    class Traits<MatrixExpr<Type, LHS, RHS>> {
-        using This = MatrixExpr<Type, LHS, RHS>;
+        constexpr static ExprType Type = Type_;
+        using LHS = LHS_;
+        using RHS = RHS_;
+    private:
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
     public:
@@ -172,6 +198,30 @@ namespace Physica {
     };
 
     template<ExprType Type, Vector LHS, Matrix RHS>
+    class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
+
+    template<ExprType Type_, Matrix LHS_, Scalar RHS_>
+    class Traits<MatrixExpr<Type_, LHS_, RHS_>> {
+    public:
+        constexpr static ExprType Type = Type_;
+        using LHS = LHS_;
+        using RHS = RHS_;
+    private:
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
+    public:
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, RHS1>::Type;
+        constexpr static int Option = LHS1::Option;
+        constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
+        constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
+        constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
+
+        constexpr static bool FastAssign = Traits<LHS1>::FastAssign;
+        constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>();
+        constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && !RHS1::isComplex;
+    };
+
+    template<ExprType Type, Scalar LHS, Matrix RHS>
     class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
 }
 

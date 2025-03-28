@@ -23,8 +23,8 @@
 
 namespace Physica {
     template<Matrix T, Vector U>
-    class device_obj<MatrixVectorProduct<T, U>> : public device_obj<RValueVector<MatrixVectorProduct<T, U>>> {
-        using host_obj = MatrixVectorProduct<T, U>;
+    class device_obj<GEMV<T, U>> : public device_obj<RValueVector<GEMV<T, U>>> {
+        using host_obj = GEMV<T, U>;
         using Base = device_obj<RValueVector<host_obj>>;
         using This = device_obj<host_obj>;
         using DeviceVector = device_obj<U>;
@@ -59,18 +59,18 @@ namespace Physica {
     };
 
     template<Matrix T, Vector U>
-    __host__ __device__ device_obj<MatrixVectorProduct<T, U>>::device_obj(T mat_, U vec_) : mat(asStruct(mat_)), vec(asStruct(vec_)) {
+    __host__ __device__ device_obj<GEMV<T, U>>::device_obj(T mat_, U vec_) : mat(asStruct(mat_)), vec(asStruct(vec_)) {
         assert(getLHS().getCol() == getRHS().getLength());
     }
 
     template<Matrix T, Vector U>
-    __device__ inline auto device_obj<MatrixVectorProduct<T, U>>::calc(size_t index) const -> ScalarType {
+    __device__ inline auto device_obj<GEMV<T, U>>::calc(size_t index) const -> ScalarType {
         return getLHS().row(index) * getRHS();
     }
 
     template<Matrix T, Vector U>
     template<Vector V>
-    __host__ __device__ void device_obj<MatrixVectorProduct<T, U>>::assign(device_obj<V>& target) const {
+    __host__ __device__ void device_obj<GEMV<T, U>>::assign(device_obj<V>& target) const {
         if constexpr (IsHost())
             Base::template assign<V>(target);
         else {
@@ -88,7 +88,7 @@ namespace Physica {
 
     template<Matrix T, Vector U>
     template<Vector V>
-    void device_obj<MatrixVectorProduct<T, U>>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+    void device_obj<GEMV<T, U>>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
         assert(grad_.getLength() == getLength());
         const auto& grad = grad_.values();
         const auto& m = mat.getDerived();
@@ -101,11 +101,11 @@ namespace Physica {
 
     template<Matrix T, Vector U>
     [[nodiscard]] __host__ __device__ inline auto operator*(T&& m, U&& v) noexcept requires(std::remove_cvref_t<T>::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
-        return device_obj<MatrixVectorProduct<T&&, U&&>>(std::forward<T>(m), std::forward<U>(v));
+        return device_obj<GEMV<T&&, U&&>>(std::forward<T>(m), std::forward<U>(v));
     }
 }
 
 namespace Physica {
     template<Matrix T, Vector U>
-    class Traits<device_obj<MatrixVectorProduct<T, U>>> : public Traits<MatrixVectorProduct<T, U>> {};
+    class Traits<device_obj<GEMV<T, U>>> : public Traits<GEMV<T, U>> {};
 }

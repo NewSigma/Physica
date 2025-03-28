@@ -47,7 +47,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const { return expr.getDerived(); }
+        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return expr.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto& getExpr() noexcept { return expr.getDerived(); }
     };
 
     template<ExprType Type, Matrix M>
@@ -84,6 +85,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCol() const;
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto& getLHS() noexcept { return lhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto& getRHS() noexcept { return rhs.getDerived(); }
     };
 
     template<ExprType Type, class LHS, class RHS>

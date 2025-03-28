@@ -33,21 +33,71 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t s) const { return -Base::getExpr().calc(s); }
+        template<Vector V1, class Executor = SeqExecutor>
+        inline void assign(V1& v) const;
 
-        [[nodiscard]] Tv calc_value(size_t index) const { return -Base::getExpr().calc_value(index); }
+        [[nodiscard]] CoDiff<T> calc(size_t s) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const { return -Base::getExpr().template packet<Pack>(index); }
-
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const { return -Base::getExpr().template packetPartial<Pack>(index, count); }
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
         template<class U>
-        void reverse(const U& grad_) const noexcept requires(isReverseDiff) {
-            Base::getExpr().reverse(-grad_);
-        }
+        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector V>
+    template<Vector V1, class Executor>
+    inline void VectorExpr<ExprType::Minus, V>::assign(V1& v) const {
+        const auto& expr = Base::getExpr();
+        constexpr bool IsBinaryExpr = requires { expr.getLHS() * expr.getRHS(); };
+
+        if constexpr (IsBinaryExpr) {
+            const auto& lhs = expr.getLHS();
+            const auto& rhs = expr.getRHS();
+            constexpr bool IsMatVecProd = Matrix<decltype(lhs)> && Vector<decltype(rhs)>;
+            if constexpr (IsMatVecProd) {
+                if constexpr (Traits<std::remove_cvref_t<decltype(lhs)>>::FastAssign)
+                    ((-lhs) * rhs).template assign<V1, Executor>(v);
+                else
+                    (lhs * (-rhs)).template assign<V1, Executor>(v);
+            }
+            else
+                Base::template assign<V1, Executor>(v);
+        }
+        else
+            Base::template assign<V1, Executor>(v);
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Minus, V>::calc(size_t s) const -> CoDiff<T> {
+        return -Base::getExpr().calc(s);
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Minus, V>::calc_value(size_t index) const -> Tv {
+        return -Base::getExpr().calc_value(index);
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Minus, V>::packet(size_t index) const {
+        return -Base::getExpr().template packet<Pack>(index);
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Minus, V>::packetPartial(size_t index, size_t count) const {
+        return -Base::getExpr().template packetPartial<Pack>(index, count);
+    }
+
+    template<Vector V>
+    template<class U>
+    void VectorExpr<ExprType::Minus, V>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+        Base::getExpr().reverse(-grad_);
+    }
 
     template<Vector V>
     [[nodiscard]] inline auto operator-(V&& v) noexcept requires(!CUDA<V>) {

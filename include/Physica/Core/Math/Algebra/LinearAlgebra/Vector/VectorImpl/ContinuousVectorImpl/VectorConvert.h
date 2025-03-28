@@ -40,6 +40,8 @@ namespace Physica {
         This& operator=(This&&) = delete;
 
         using Base::operator=;
+        /* Operations */
+        void resize([[maybe_unused]] size_t length) { assert(length == v.getLength()); }
         /* Getters */
         [[nodiscard]] PtrTy data_ptr(size_t i) { return (*v.data_ptr(i)).value_ptr(); }
         [[nodiscard]] ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }
@@ -65,6 +67,8 @@ namespace Physica {
         This& operator=(This&&) = delete;
 
         using Base::operator=;
+        /* Operations */
+        void resize([[maybe_unused]] size_t length) { assert(length == v.getLength()); }
         /* Getters */
         [[nodiscard]] PtrTy data_ptr(size_t i) { return v.data_ptr(i).template grad_ptr<GradOrder>(); }
         [[nodiscard]] ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }

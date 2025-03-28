@@ -43,7 +43,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
     NumAve = 100
     # ExpandCoef = 10 增加展开阶数可以减小TPQ和FullDiag的偏差
 
-经测试，在4x4 Hubbard模型上Physica相比HPhi 3.5.2快1300倍(未发表)
+在Intel(R) Xeon(R) Platinum 8358 + 256G平台上，4x4 Hubbard模型上Physica相比HPhi 3.5.2快1300倍
 
 ## Reference
 

@@ -67,6 +67,13 @@ namespace Physica {
         using ValuesRtnTy = std::conditional<isDiffable, ValueMatrix<Derived>, Derived&>::type;
     public:
         ~RValueMatrix() = default;
+        /* Operators */
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>);
+        template<Vector V>
+        [[nodiscard]] auto operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>);
+        template<Vector V>
+        [[nodiscard]] auto operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>);
         /* Operations */
         template<Matrix M>
         void assign(M& target) const;

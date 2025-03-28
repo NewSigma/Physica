@@ -20,7 +20,7 @@
 
 #include <iosfwd>
 #include <string>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Scalar/Real.h"
 
 namespace Physica {
     /**
@@ -66,4 +66,7 @@ namespace Physica {
         void readStr(std::istream& is, Array<char>& buffer, std::string& saveTo);
         bool readBool(std::istream& is, Array<char>& buffer);
     };
+
+    std::ostream& operator<<(std::ostream& os, const PWscfIn& input);
+    std::istream& operator>>(std::istream& is, PWscfIn& input);
 }

@@ -51,6 +51,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const { return getExpr().getLength(); }
         [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
+        [[nodiscard]] auto& getExpr() noexcept { return expr; }
     };
 
     template<ExprType Type, class LHS, class RHS>
@@ -81,6 +82,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] const auto& getLHS() const noexcept { return lhs; }
         [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
+        [[nodiscard]] auto& getLHS() noexcept { return lhs; }
+        [[nodiscard]] auto& getRHS() noexcept { return rhs; }
     };
 
     template<ExprType Type, class LHS, class RHS>
@@ -107,12 +110,20 @@ namespace Physica {
         constexpr static bool FastAssign2 = Traits<RHS1>::FastAssign;
         constexpr static bool FastPacket1 = Traits<LHS1>::FastPacket;
         constexpr static bool FastPacket2 = Traits<RHS1>::FastPacket;
-        constexpr static bool IsAddOrSub = Type == ExprType::Add || Type == ExprType::Sub;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
+
+        constexpr static bool calcFastAssign() {
+            if constexpr (Type == ExprType::Minus)
+                return Traits<LHS1>::FastAssign;
+            else if constexpr (Type == ExprType::Add || Type == ExprType::Sub)
+                return FastAssign1 || FastAssign2;
+            else
+                return false;
+        }
     public:
         using ScalarType = std::conditional<Type == ExprType::Abs, Tr, T12>::type;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-        constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
+        constexpr static bool FastAssign = calcFastAssign();
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 

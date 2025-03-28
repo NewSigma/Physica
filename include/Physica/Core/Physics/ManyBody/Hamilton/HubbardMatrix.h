@@ -24,6 +24,8 @@
 #include "HamiltonMatrix.h"
 
 namespace Physica {
+    template<Scalar, Representation, Vector>
+    class HubbardVecProd;
     class ThreadExecutor;
     /**
      * Refer to [1] for applied symmetries
@@ -61,6 +63,9 @@ namespace Physica {
         ~HubbardMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+
+        template<Vector V>
+        [[nodiscard]] auto operator*(const V& v) const noexcept;
         /* Operations */
         template<class Functor>
         void forNeighSites(Functor func, int site) const;
@@ -78,7 +83,8 @@ namespace Physica {
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
     private:
-        template<Matrix, Vector> friend class MatrixVectorProduct;
+        template<Scalar, Representation, Vector>
+        friend class HubbardVecProd;
     };
 }
 
@@ -92,4 +98,4 @@ namespace Physica {
 }
 
 #include "HubbardMatrixImpl.h"
-#include "HubbardVecProduct.h"
+#include "HubbardVecProd.h"

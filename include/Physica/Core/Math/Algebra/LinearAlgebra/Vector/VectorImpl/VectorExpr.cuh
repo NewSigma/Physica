@@ -40,7 +40,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const { return getExpr().getLength(); }
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const { return expr.getDerived(); }
+        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return expr.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto& getExpr() noexcept { return expr.getDerived(); }
     };
 
     template<ExprType Type, Vector V>
@@ -67,6 +68,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getLength(); }
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto& getLHS() noexcept { return lhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto& getRHS() noexcept { return rhs.getDerived(); }
     };
 
     template<ExprType Type, Vector LHS, class RHS>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,15 +23,13 @@
 #include "MatrixPow.h"
 
 namespace Physica {
-    template<Matrix T, Vector U> class MatrixVectorProduct;
     /**
      * Reference:
      * [1] SIAM J. Sci. Comput. 33(2), 488–511 (2011); https://doi.org/10.1137/100788860
      */
-    template<Matrix T, Vector U>
-    class MatrixVectorProduct<MatrixExp<T>, U>
-            : public RValueVector<MatrixVectorProduct<MatrixExp<T>, U>> {
-        using This = MatrixVectorProduct<MatrixExp<T>, U>;
+    template<Matrix M, Vector V>
+    class MatExpVecProd : public RValueVector<MatExpVecProd<M, V>> {
+        using This = MatExpVecProd<M, V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
@@ -47,25 +45,25 @@ namespace Physica {
         constexpr static int MaxNormOrder = 8;
         constexpr static int MaxNormIteration = 16;
         constexpr static int BufferSize = 11;
-        constexpr static float theta_single[BufferSize]{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
-        constexpr static double theta_double[BufferSize]{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
+        constexpr static float ThetaFloat32[BufferSize]{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
+        constexpr static double ThetaFloat64[BufferSize]{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
 
-        const MatrixExp<T>& mexp;
-        const U& v;
+        const LazyDestroy<M> mexp;
+        const LazyDestroy<V> v;
     public:
-        MatrixVectorProduct(const MatrixExp<T>& mexp_, const U& v_);
-        MatrixVectorProduct(const This&) = default;
-        MatrixVectorProduct(This&&) noexcept = default;
-        ~MatrixVectorProduct() = default;
+        MatExpVecProd(M&& mexp_, V&& v_);
+        MatExpVecProd(const This&) = default;
+        MatExpVecProd(This&&) noexcept = default;
+        ~MatExpVecProd() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
-        inline void assign(V& target) const;
+        template<Vector V1, class Executor = SeqExecutor>
+        inline void assign(V1& target) const;
 
-        template<Vector V, class Executor = SeqExecutor>
-        void assign(V& target, Tr traceMu, ParamPair params) const;
+        template<Vector V1, class Executor = SeqExecutor>
+        void assign(V1& target, Tr traceMu, ParamPair params) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
@@ -74,29 +72,28 @@ namespace Physica {
         [[nodiscard]] ParamPair calcParam(Tr traceMu) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const MatrixExp<T>& getLHS() const noexcept { return mexp; }
-        [[nodiscard]] const U& getRHS() const noexcept { return v; }
+        [[nodiscard]] const auto& getLHS() const noexcept { return mexp; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return v; }
     private:
         constexpr static Tm calcTheta(int numTaylorTerm);
     };
 
-    template<Matrix T, Vector U>
-    MatrixVectorProduct<MatrixExp<T>, U>::MatrixVectorProduct(
-            const MatrixExp<T>& mexp_, const U& v_) : mexp(mexp_), v(v_) {
+    template<Matrix M, Vector V>
+    MatExpVecProd<M, V>::MatExpVecProd(M&& mexp_, V&& v_) : mexp(std::forward<M>(mexp_)), v(std::forward<V>(v_)) {
         assert(mexp.getCol() == v.getLength());
     }
 
-    template<Matrix T, Vector U>
-    template<Vector V, class Executor>
-    inline void MatrixVectorProduct<MatrixExp<T>, U>::assign(V& target) const {
+    template<Matrix M, Vector V>
+    template<Vector V1, class Executor>
+    inline void MatExpVecProd<M, V>::assign(V1& target) const {
         const Tr traceMu = calcTraceMu();
-        assign<V, Executor>(target, traceMu, calcParam<Executor>(traceMu));
+        assign<V1, Executor>(target, traceMu, calcParam<Executor>(traceMu));
     }
 
-    template<Matrix T, Vector U>
-    template<Vector V, class Executor>
-    void MatrixVectorProduct<MatrixExp<T>, U>::assign(V& target, Tr traceMu, ParamPair params) const {
-        using BufferType = DenseVector<ScalarType, U::SizeAtCompile>;
+    template<Matrix M, Vector V>
+    template<Vector V1, class Executor>
+    void MatExpVecProd<M, V>::assign(V1& target, Tr traceMu, ParamPair params) const {
+        using BufferType = DenseVector<ScalarType, std::remove_cvref_t<V>::SizeAtCompile>;
         assert(getLength() == target.getLength());
         const Tr epsilon = std::numeric_limits<Tr>::epsilon();
         const auto& mat = mexp.getMatrix();
@@ -124,10 +121,9 @@ namespace Physica {
         }
     }
 
-    template<Matrix T, Vector U>
+    template<Matrix M, Vector V>
     template<class Executor>
-    MatrixVectorProduct<MatrixExp<T>, U>::ParamPair
-    MatrixVectorProduct<MatrixExp<T>, U>::calcParam(Tr traceMu) const {
+    auto MatExpVecProd<M, V>::calcParam(Tr traceMu) const -> ParamPair {
         constexpr static Tm NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto unit = UnitMatrix<ScalarType>(getLength());
         const ScalarType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
@@ -168,16 +164,15 @@ namespace Physica {
         return std::make_pair(numMinCostTerm, std::max(cost / numMinCostTerm, 1));
     }
 
-    template<Matrix T, Vector U>
-    constexpr typename MatrixVectorProduct<MatrixExp<T>, U>::Tm
-    MatrixVectorProduct<MatrixExp<T>, U>::calcTheta(int numTaylorTerm) {
+    template<Matrix M, Vector V>
+    constexpr auto MatExpVecProd<M, V>::calcTheta(int numTaylorTerm) -> Tm {
         assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
         const int bufferIndex = (numTaylorTerm - 1) / 5; 
-        return IsFloat ? theta_single[bufferIndex] : theta_double[bufferIndex];
+        return IsFloat ? ThetaFloat32[bufferIndex] : ThetaFloat64[bufferIndex];
     }
 }
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class Traits<MatrixVectorProduct<MatrixExp<T>, U>> : public Traits<MatrixVectorProduct<T, U>> {};
+    template<Matrix M, Vector V>
+    class Traits<MatExpVecProd<M, V>> : public Traits<GEMV<M, V>> {};
 }

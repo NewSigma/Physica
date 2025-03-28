@@ -33,56 +33,53 @@ namespace Physica {
         using typename Base::Tv;
     public:
         using Base::Base;
+        /* Operators */
+        [[nodiscard]] auto operator-() const& noexcept;
+        [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
         template<Vector V1, class Executor = SeqExecutor>
         inline void assign(V1& v) const;
 
         template<Vector V1, class Executor = SeqExecutor>
         inline void assign_add(V1& v) const;
-
         template<Vector V1>
         void assign_add_base(V1& v) const noexcept;
         void assign_add_mkl(void* y) const noexcept;
 
-        [[nodiscard]] CoDiff<T> calc(size_t index) const {
-            return Base::getLHS().calc(index) * Base::getRHS();
-        }
-
-        [[nodiscard]] Tv calc_value(size_t index) const {
-            return Base::getLHS().calc_value(index) * Base::getRHS().value();
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            return Base::getLHS().template packet<Pack>(index) * Pack(Base::getRHS());
-        }
-
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<Pack>(index, count) * Pack(Base::getRHS());
-        }
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
-        [[nodiscard]] T sum() const { return Base::getLHS().sum() * Base::getRHS(); }
+        [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
 
         template<Vector V1>
-        void reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
-            const auto& grad = grad_.values();
-            const auto& lhs = Base::getLHS();
-            const auto& rhs = Base::getRHS();
-            if constexpr (ReverseDiff<V>)
-                lhs.reverse(rhs.value() * grad);
-            if constexpr (ReverseDiff<U>)
-                rhs.reverse(lhs.values() * grad);
-        }
+        void reverse(const V1& grad_) const noexcept requires(isReverseDiff);
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprType::Mul, V, U>::operator-() const& noexcept {
+        return getLHS() * (-getRHS());
+    }
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprType::Mul, V, U>::operator-() && noexcept {
+        return std::move(getLHS()) * (-getRHS());
+    }
 
     template<Vector V, Scalar U>
     template<Vector V1, class Executor>
     inline void VectorExpr<ExprType::Mul, V, U>::assign(V1& v) const {
         constexpr bool FastAssign = Traits<std::remove_cvref_t<V>>::FastAssign;
         if constexpr (FastAssign) {
-            Base::getLHS().template assign<V1, Executor>(v);
-            v *= Base::getRHS();
+            getLHS().template assign<V1, Executor>(v);
+            v *= getRHS();
         }
         else
             Base::assign(v);
@@ -107,6 +104,40 @@ namespace Physica {
     template<Vector V1>
     void VectorExpr<ExprType::Mul, V, U>::assign_add_base(V1& v) const noexcept {
         Base::assign_add(v);
+    }
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprType::Mul, V, U>::calc(size_t index) const -> CoDiff<T> {
+        return getLHS().calc(index) * getRHS();
+    }
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprType::Mul, V, U>::calc_value(size_t index) const -> Tv {
+        return getLHS().calc_value(index) * getRHS().value();
+    }
+
+    template<Vector V, Scalar U>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Mul, V, U>::packet(size_t index) const {
+        return getLHS().template packet<Pack>(index) * Pack(getRHS());
+    }
+
+    template<Vector V, Scalar U>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Mul, V, U>::packetPartial(size_t index, size_t count) const {
+        return getLHS().template packetPartial<Pack>(index, count) * Pack(getRHS());
+    }
+
+    template<Vector V, Scalar U>
+    template<Vector V1>
+    void VectorExpr<ExprType::Mul, V, U>::reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
+        const auto& grad = grad_.values();
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        if constexpr (ReverseDiff<V>)
+            lhs.reverse(rhs.value() * grad);
+        if constexpr (ReverseDiff<U>)
+            rhs.reverse(lhs.values() * grad);
     }
 
     template<Vector V1, Vector V2>

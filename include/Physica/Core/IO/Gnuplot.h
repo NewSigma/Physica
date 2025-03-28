@@ -42,4 +42,7 @@ namespace Physica {
         [[nodiscard]] const DataArray& getXDatas() const noexcept { return xDatas; }
         [[nodiscard]] const DataArray& getYDatas() const noexcept { return yDatas; }
     };
+
+    std::ostream& operator<<(std::ostream& os, const Gnuplot& gnuplot);
+    std::istream& operator>>(std::istream& is, Gnuplot& gnuplot);
 }

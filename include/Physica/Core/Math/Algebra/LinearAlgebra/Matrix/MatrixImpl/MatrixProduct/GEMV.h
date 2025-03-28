@@ -25,8 +25,8 @@
 
 namespace Physica {
     template<Matrix M, Vector U>
-    class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<M, U>> {
-        using This = MatrixVectorProduct<M, U>;
+    class GEMV : public RValueVector<GEMV<M, U>> {
+        using This = GEMV<M, U>;
         using Base = RValueVector<This>;
     public:
         using Base::isReverseDiff;
@@ -34,13 +34,13 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const M& mat;
-        const U& vec;
+        const LazyDestroy<M> mat;
+        const LazyDestroy<U> vec;
     public:
-        MatrixVectorProduct(const M& mat_, const U& vec_);
-        MatrixVectorProduct(const This&) = default;
-        MatrixVectorProduct(This&&) noexcept = default;
-        ~MatrixVectorProduct() = default;
+        GEMV(M&& mat_, U&& vec_);
+        GEMV(const This&) = default;
+        GEMV(This&&) noexcept = default;
+        ~GEMV() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -58,18 +58,18 @@ namespace Physica {
         auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
-        [[nodiscard]] const M& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const U& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
 
     template<Matrix M, Vector U>
-    MatrixVectorProduct<M, U>::MatrixVectorProduct(const M& mat_, const U& vec_) : mat(mat_), vec(vec_) {
+    GEMV<M, U>::GEMV(M&& mat_, U&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<U>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
     template<Matrix M, Vector U>
     template<Vector V, class Executor>
-    inline void MatrixVectorProduct<M, U>::assign(V& target) const {
+    inline void GEMV<M, U>::assign(V& target) const {
         if constexpr (isReverseDiff) {
             if constexpr (MatrixOption::isColMatrix<M>()) {
                 target = mat.values().col(0) * vec.values().calc(0);
@@ -95,18 +95,18 @@ namespace Physica {
     }
 
     template<Matrix M, Vector U>
-    inline auto MatrixVectorProduct<M, U>::calc(size_t index) const -> CoDiff<T> {
+    inline auto GEMV<M, U>::calc(size_t index) const -> CoDiff<T> {
         return mat.row(index) * vec;
     }
 
     template<Matrix M, Vector U>
-    inline auto MatrixVectorProduct<M, U>::calc_value(size_t index) const -> Tv {
+    inline auto GEMV<M, U>::calc_value(size_t index) const -> Tv {
         return mat.values().row(index) * vec.values();
     }
 
     template<Matrix M, Vector U>
     template<Vector V>
-    void MatrixVectorProduct<M, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+    void GEMV<M, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
         assert(grad_.getLength() == getLength());
         const auto& grad = grad_.values();
         if constexpr (ReverseDiff<M>) {
@@ -130,20 +130,28 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector U>
-    [[nodiscard]] inline auto operator*(const M& mat, const U& vec) noexcept requires(M::RowAtCompile != 1 && !CUDA<M> && !CUDA<U>) {
-        return MatrixVectorProduct<M, U>(mat, vec);
+    template<class Derived>
+    template<Vector V>
+    auto RValueMatrix<Derived>::operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
+        return GEMV<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
     }
 
-    template<Matrix M, Vector U>
-    [[nodiscard]] inline auto operator*(const M& mat, const U& vec) requires(M::RowAtCompile == 1 && U::SizeAtCompile == 1 && !CUDA<M> && !CUDA<U>) {
-        return mat.row(0) * vec;
+    template<class Derived>
+    template<Vector V>
+    auto RValueMatrix<Derived>::operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
+        return GEMV<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
+    }
+
+    template<class Derived>
+    template<Vector V>
+    auto RValueMatrix<Derived>::operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>) {
+        return row(0) * v;
     }
 }
 
 namespace Physica {
     template<Matrix M, Vector U>
-    class Traits<MatrixVectorProduct<M, U>> {
+    class Traits<GEMV<M, U>> {
         using M1 = std::remove_cvref_t<M>;
         using U1 = std::remove_cvref_t<U>;
         static_assert(M1::ColAtCompile == U1::SizeAtCompile || M1::ColAtCompile == Dynamic || U1::SizeAtCompile == Dynamic,

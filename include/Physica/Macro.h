@@ -53,10 +53,8 @@
 #endif
 
 namespace Physica {
-    namespace Core {}
-    using namespace Core;
-
-    template<class T> class Traits;
+    template<class T>
+    class Traits;
     /**
      * Forward declaration for friend-class-based tests
      */

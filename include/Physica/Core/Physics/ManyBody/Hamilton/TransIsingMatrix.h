@@ -23,6 +23,9 @@
 #include "HamiltonMatrix.h"
 
 namespace Physica {
+    template<Scalar, Representation, Vector>
+    class TransIsingVecProd;
+
     template<Scalar T, Representation U>
     class TransIsingMatrix : public HamiltonMatrix<TransIsingMatrix<T, U>>, public TransIsing<T, U::Dim> {
         using This = TransIsingMatrix<T, U>;
@@ -31,6 +34,7 @@ namespace Physica {
 
         using StateType = U::StateType;
     public:
+        using typename Base::ScalarType;
         constexpr static int Dim = U::Dim;
         constexpr static int NumSite = StateType::NumSite;
         constexpr static int SiteDOF = StateType::SiteDOF;
@@ -44,6 +48,9 @@ namespace Physica {
         ~TransIsingMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+
+        template<Vector V>
+        [[nodiscard]] auto operator*(const V& v) const noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
@@ -56,6 +63,12 @@ namespace Physica {
 
     template<Scalar T, Representation U>
     TransIsingMatrix<T, U>::TransIsingMatrix(ModelBase model, U repr_) : ModelBase(std::move(model)), repr(std::move(repr_)) {}
+
+    template<Scalar T, Representation U>
+    template<Vector V>
+    auto TransIsingMatrix<T, U>::operator*(const V& v) const noexcept {
+        return TransIsingVecProd<T, U, V>(*this, v);
+    }
 
     template<Scalar T, Representation U>
     T TransIsingMatrix<T, U>::calc(size_t row, size_t col) const {
@@ -90,4 +103,4 @@ namespace Physica {
     };
 }
 
-#include "TransIsingVecProduct.h" // IWYU pragma: export
+#include "TransIsingVecProd.h" // IWYU pragma: export

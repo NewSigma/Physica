@@ -559,7 +559,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V>
-    __host__ __device__ void RValueVector<Derived>::assign_check(const V& target) noexcept {
+    __host__ __device__ void RValueVector<Derived>::assign_check(const V&) noexcept {
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");

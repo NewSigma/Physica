@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,10 +25,11 @@ namespace Physica {
     class UnitMatrix : public RValueMatrix<UnitMatrix<T, Order>> {
         using This = UnitMatrix<T, Order>;
         using Base = RValueMatrix<This>;
+        using IndexType = std::conditional<Order == Dynamic, size_t, PlainStruct<void>>::type;
     protected:
         using typename Base::Tv;
     private:
-        size_t order; // TODO: use void if Order != Dynamic
+        [[no_unique_address]] IndexType order;
     public:
         UnitMatrix() = default;
         UnitMatrix(size_t order_);
@@ -37,6 +38,8 @@ namespace Physica {
         ~UnitMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+        template<Vector V>
+        [[nodiscard]] V&& operator*(V&& v) const noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return T(row == col ? 1 : 0); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return Tv(row == col ? 1 : 0); }
@@ -46,13 +49,20 @@ namespace Physica {
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return order; }
-        [[nodiscard]] size_t getCol() const noexcept { return order; }
+        [[nodiscard]] size_t getRow() const noexcept;
+        [[nodiscard]] size_t getCol() const noexcept;
     };
 
     template<Scalar T, size_t Order>
     UnitMatrix<T, Order>::UnitMatrix(size_t order_) : order(order_) {
-        assert((Order == Dynamic || Order == order) && "[Error]: tparam and param is not consistent");
+        assert((Order == Dynamic || Order == order_) && "[Error]: tparam and param is not consistent");
+    }
+
+    template<Scalar T, size_t Order>
+    template<Vector V>
+    V&& UnitMatrix<T, Order>::operator*(V&& v) const noexcept {
+        assert(getCol() == v.getLength());
+        return std::forward<V>(v);
     }
 
     template<Scalar T, size_t Order>
@@ -61,11 +71,16 @@ namespace Physica {
         std::swap(order, obj.order);
     }
 
-    template<Scalar T, size_t Order, Vector U>
-    [[nodiscard]] inline const U&
-    operator*([[maybe_unused]] const UnitMatrix<T, Order>& mat, const U& vec) noexcept {
-        assert(mat.getCol() == vec.getLength());
-        return vec;
+    template<Scalar T, size_t Order>
+    size_t UnitMatrix<T, Order>::getRow() const noexcept {
+        if constexpr (Order == Dynamic)
+            return order;
+        return Order;
+    }
+
+    template<Scalar T, size_t Order>
+    size_t UnitMatrix<T, Order>::getCol() const noexcept {
+        return getRow();
     }
 }
 
@@ -78,5 +93,7 @@ namespace Physica {
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
+
+        constexpr static bool FastAssign = true;
     };
 }

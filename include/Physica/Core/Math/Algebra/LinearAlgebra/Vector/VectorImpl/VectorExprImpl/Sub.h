@@ -163,6 +163,7 @@ namespace Physica {
             v -= getRHS();
         }
         else if constexpr (FastAssign2) {
+            static_assert(Traits<decltype(-getRHS())>::FastAssign, "[Debug]: Fast minus implementation is missing");
             (-getRHS()).template assign<V, Executor>(v);
             v += getLHS();
         }

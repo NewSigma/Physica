@@ -23,10 +23,9 @@
 
 namespace Physica {
     template<Scalar T, Representation U, Vector V>
-    class MatrixVectorProduct<TransIsingMatrix<T, U>, V>
-            : public RValueVector<MatrixVectorProduct<TransIsingMatrix<T, U>, V>> {
+    class TransIsingVecProd : public RValueVector<TransIsingVecProd<T, U, V>> {
         using MatrixType = TransIsingMatrix<T, U>;
-        using This = MatrixVectorProduct<MatrixType, V>;
+        using This = TransIsingVecProd<T, U, V>;
         using Base = RValueVector<This>;
 
         using StateType = U::StateType;
@@ -40,10 +39,10 @@ namespace Physica {
         const MatrixType& mat;
         const V& vec;
     public:
-        MatrixVectorProduct(const MatrixType& mat_, const V& vec_);
-        MatrixVectorProduct(const This&) = default;
-        MatrixVectorProduct(This&&) noexcept = default;
-        ~MatrixVectorProduct() = default;
+        TransIsingVecProd(const MatrixType& mat_, const V& vec_);
+        TransIsingVecProd(const This&) = default;
+        TransIsingVecProd(This&&) noexcept = default;
+        ~TransIsingVecProd() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -64,13 +63,13 @@ namespace Physica {
     };
 
     template<Scalar T, Representation U, Vector V>
-    MatrixVectorProduct<TransIsingMatrix<T, U>, V>::MatrixVectorProduct(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+    TransIsingVecProd<T, U, V>::TransIsingVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
         assert(mat.getCol() == vec.getLength());
     }
 
     template<Scalar T, Representation U, Vector V>
     template<Vector V1, class Executor>
-    inline void MatrixVectorProduct<TransIsingMatrix<T, U>, V>::assign(V1& target) const {
+    inline void TransIsingVecProd<T, U, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = RealType(0);
 
@@ -96,7 +95,7 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, Representation U, Vector V>
-    class Traits<MatrixVectorProduct<TransIsingMatrix<T, U>, V>> {
+    class Traits<TransIsingVecProd<T, U, V>> {
         using MatrixType = TransIsingMatrix<T, U>;
         using T1 = V::ScalarType;
     public:

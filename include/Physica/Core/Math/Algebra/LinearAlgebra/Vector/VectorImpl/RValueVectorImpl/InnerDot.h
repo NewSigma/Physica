@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<Vector T1, Vector T2>
-    CoDiff<typename InnerDot<T1, T2>::ScalarType> InnerDot<T1, T2>::calc_base() const {
+    auto InnerDot<T1, T2>::calc_base() const -> CoDiff<ScalarType> {
         if constexpr (isReverseDiff) {
             auto result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<T1>)
