@@ -150,9 +150,7 @@ namespace Physica {
         if (isUnderflow)
             return Tr(-std::numeric_limits<T>::max());
         const Tr factor = reciprocal(maxabs);
-        const auto expr1 = asVector() * factor;
-        const auto expr2 = expr1.squaredNorms();
-        const Tr dot = hadamard(expr2, other).sum();
+        const Tr dot = hadamard((asVector() * factor).squaredNorms(), other).sum();
         if (dot.isZero())
             return Tr(-std::numeric_limits<T>::max());
         return ln(dot) + Tr(2) * ln(maxabs);

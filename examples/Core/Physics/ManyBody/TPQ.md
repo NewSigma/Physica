@@ -13,9 +13,11 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # TPQ
 
+本示例用于演示如何制备TPQ态和使用TPQ态计算可观测量。
+
 ## Introduction
 
-热力学纯态(Thermo Pure Quantum, TPQ)$^{[1]}$, 用于近似计算有限温多体系统的各种力学量和热力学量。随着系统格点数增加，计算结果依概率以指数速度收敛到严格解。这种收敛是相当快的，实际上4格点的条件下已与精确对角化结果非常接近。TPQ相比精确对角化的改进在于，将计算有限温所需的$O(N)$个本征向量减少到1个随机向量，极大地减少了内存需求。
+热力学纯态(Thermo Pure Quantum, TPQ)$^{[1]}$, 用于近似计算有限温多体系统的各种力学量和热力学量。随着系统格点数增加，计算结果依概率以指数速度收敛到严格解。这种收敛是相当快的，4格点的条件下TPQ结果已与精确对角化结果非常接近。TPQ相比精确对角化的改进在于，将计算有限温所需的$O(N)$个本征向量减少到1个随机向量，极大地减少了内存需求。
 
 ## 数值结果
 
@@ -43,7 +45,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
     NumAve = 100
     # ExpandCoef = 10 增加展开阶数可以减小TPQ和FullDiag的偏差
 
-在Intel(R) Xeon(R) Platinum 8358 + 256G平台上，4x4 Hubbard模型上Physica相比HPhi 3.5.2快1300倍
+经测试, 在Intel(R) Xeon(R) Platinum 8358 + 256G平台上，4x4 Hubbard模型上Physica相比HPhi 3.5.2快1300倍
 
 ## Reference
 

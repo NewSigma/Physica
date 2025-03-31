@@ -34,15 +34,16 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col, T value) : r(row) {
+    template<class... Args>
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col, Args&&... args) : r(row) {
         if constexpr (isVectorStorage) {
             if constexpr (isColMajor)
-                arr = ArrayType(col, row, std::move(value));
+                arr = ArrayType(col, row, std::forward<Args>(args)...);
             else
-                arr = ArrayType(row, col, std::move(value));
+                arr = ArrayType(row, col, std::forward<Args>(args)...);
         }
         else
-            arr = ArrayType(row * col, std::move(value));
+            arr = ArrayType(row * col, std::forward<Args>(args)...);
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -92,7 +93,6 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class... Args>
     void Array2D<T, Option, Row, Col, Allocator>::resize(size_t order) {
         resize(order, order);
     }

@@ -62,7 +62,8 @@ namespace Physica {
     public:
         Array2D() = default;
         Array2D(size_t row, size_t col);
-        Array2D(size_t row, size_t col, T value);
+        template<class... Args>
+        Array2D(size_t row, size_t col, Args&&... args);
         Array2D(std::initializer_list<InitializerType> list);
         Array2D(const This&) = default;
         Array2D(This&&) noexcept = default;
@@ -74,7 +75,6 @@ namespace Physica {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
-        template<class... Args>
         void resize(size_t order);
 
         [[nodiscard]] inline auto toDevice() const;
