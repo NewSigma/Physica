@@ -68,6 +68,7 @@ namespace Physica {
     template<Scalar T>
     template<Matrix M>
     auto device_obj<VegasLayer<T>>::forward(const M& x) const -> CoDiff<device_obj<MatrixND<T>>> requires(CUDA<M>) {
+        assert(x.getRow() == weights.getLength());
         CoDiff<device_obj<MatrixND<T>>> y = x + weights;
         if constexpr (ReverseDiff<T>) {
             auto co_y = co_yield y.values();

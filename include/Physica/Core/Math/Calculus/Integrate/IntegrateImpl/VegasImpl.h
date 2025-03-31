@@ -235,6 +235,7 @@ namespace Physica {
             const auto& x = pair.first;
             const auto& deltas = pair.second;
             const T y = func(x);
+            assert(y.isFinite() && "[Error]: Bad value");
             const T xy = y * (deltas * Trv(getNumPoint())).prod();
             samples[n] = xy;
         }, numSample, Executor::getNumThread()).wait();
@@ -263,6 +264,7 @@ namespace Physica {
             const auto& x = pair.first;
             const auto& deltas = pair.second;
             const T lny = func(x);
+            assert(lny.isFinite() && "[Error]: Bad value");
             const T lnxy = lny + ln(deltas).sum() + Trv(getDim()) * ln(Trv(getNumPoint()));
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();

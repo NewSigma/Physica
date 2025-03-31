@@ -22,7 +22,7 @@ Optimal performance and scalability: Balancing between performance, scalability 
 
 ## Features
 
-- Operator fusion using template expressions both on CPU and GPU  
+- Operator fusion using template expressions for both CPU and GPU  
 - Coroutine based auto differentiation implementation  
 - Basic math library: Provides commonly used functions such as ODE, PDE, special functions, optimization, statistics, etc.
 - Classical molecular dynamics(MD), path integral molecular dynamics(PIMD) simulations using NVE, NVT and NPT ensembles

@@ -1,4 +1,4 @@
-OS: Ubuntu24.04  
+OS: Ubuntu 24.04  
 Compiler: clang 18.1.3 + NVCC 12.8.93  
 Hardware: Intel(R) Core(TM) i7-14700KF + 32G + NVIDIA GeForce RTX 4060  
 Date: 2025-3-28  

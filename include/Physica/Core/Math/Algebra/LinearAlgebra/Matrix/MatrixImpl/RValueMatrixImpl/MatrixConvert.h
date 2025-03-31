@@ -188,7 +188,7 @@ namespace Physica {
     template<class M>
     class Traits<ValueMatrix<M>> {
     public:
-        using ScalarType = M::Tv;
+        using ScalarType = M::ScalarType::ValueType;
         constexpr static int Option = M::Option;
         constexpr static size_t RowAtCompile = M::RowAtCompile;
         constexpr static size_t ColAtCompile = M::ColAtCompile;
@@ -197,9 +197,9 @@ namespace Physica {
 
     template<class M, int GradOrder>
     class Traits<GradMatrix<M, GradOrder>> {
-        static_assert(M::T::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+        static_assert(M::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = Internal::GradTypeHelper<typename M::T, GradOrder>::Type;
+        using ScalarType = Internal::GradTypeHelper<typename M::ScalarType, GradOrder>::Type;
         constexpr static int Option = M::Option;
         constexpr static size_t RowAtCompile = M::RowAtCompile;
         constexpr static size_t ColAtCompile = M::ColAtCompile;

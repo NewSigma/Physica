@@ -1,4 +1,4 @@
-OS: Ubuntu24.04  
+OS: Ubuntu 24.04  
 Compiler: IntelLLVM 2025.0.1  
 Hardware: Intel(R) Core(TM) i7-14700KF + 32G  
 Date: 2025-3-19  

@@ -43,7 +43,7 @@ namespace Physica {
     private:
         using ValueVector = DenseVector<T, Length>;
         using GradType = ScalarType::GradType;
-        using GradVector = std::conditional<Order == 1, ValueVector, DenseVector<GradType, Length>>::type;
+        using GradVector = std::conditional<Order == 1, ValueVector, DenseVector<GradType, Length, Allocator>>::type;
         using initializer_list = std::initializer_list<typename std::conditional<isForwardDiff, Diff<T, Mode, Order>, T>::type>;
 
         ValueVector v;

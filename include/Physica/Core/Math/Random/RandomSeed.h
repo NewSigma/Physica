@@ -60,7 +60,13 @@ namespace Physica {
             throw RdrandException();
         }
     #endif
-        // Generate a sequence of random seed (using the PCG-XSH-RS scheme)
+        /**
+         * Generate a sequence of random seed (using the PCG-XSH-RS scheme)
+         *
+         * Reference:
+         * [1] Eigen; https://eigen.tuxfamily.org/  
+         * [2] https://www.pcg-random.org/
+         */
         static uint32_t toNextSeed(uint64_t& state) noexcept {
             const uint64_t current = state;
             state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
