@@ -59,7 +59,7 @@ namespace Physica {
         Real(const Integer& i) : Real(double(i)) {}
         Real(const Rational& r) : Real(double(r)) {}
         template<Scalar T>
-        __host__ __device__ explicit inline Real(const T& x);
+        __host__ __device__ explicit(Float64 < T::Option) inline Real(const T& x);
         constexpr Real(const Real&) = default;
         constexpr Real(Real&&) noexcept = default;
         constexpr ~Real() = default;

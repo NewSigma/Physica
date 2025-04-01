@@ -56,11 +56,12 @@ namespace Physica {
     #ifdef PHYSICA_CUDA
         __host__ __device__ explicit Complex(thrust::complex<Tm> c);
     #endif
-        template<Scalar U, DiffMode Mode, int Order>
-        __host__ __device__ explicit Complex(const Diff<U, Mode, Order>& d);
+        template<Scalar U>
+        __host__ __device__ explicit((T::Option < U::Option) || Diffable<U>) Complex(const U& x);
         Complex(const This&) = default;
         Complex(This&&) noexcept = default;
         /* Operators */
+        using Base::operator=;
         This& operator=(const This&) = default;
         This& operator=(This&&) = default;
         __host__ __device__ bool operator==(const This& other) const;

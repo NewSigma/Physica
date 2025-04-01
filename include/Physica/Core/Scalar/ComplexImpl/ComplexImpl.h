@@ -48,8 +48,15 @@ namespace Physica {
 #endif
 
     template<Scalar T>
-    template<Scalar U, DiffMode Mode, int Order>
-    __host__ __device__ Complex<T>::Complex(const Diff<U, Mode, Order>& d) : Complex(d.value()) {}
+    template<Scalar U>
+    __host__ __device__ Complex<T>::Complex(const U& x) {
+        if constexpr (Diffable<U>)
+            *this = x.value();
+        else if constexpr (U::isComplex)
+            *this = This(T(x.real()), T(x.imag()));
+        else
+            *this = This(T(x.real()));
+    }
 
     template<Scalar T>
     __host__ __device__ inline bool Complex<T>::operator==(const This& other) const {

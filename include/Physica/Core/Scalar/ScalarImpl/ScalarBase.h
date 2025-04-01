@@ -87,7 +87,7 @@ namespace Physica {
         constexpr ~ScalarBase() = default;
         /* Operators */
         template<Scalar U>
-        __host__ __device__ inline void operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ inline Derived& operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
         __host__ __device__ inline void operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
@@ -154,8 +154,8 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        Base::getDerived() = ScalarType(x);
+    __host__ __device__ inline Derived& ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
+        return Base::getDerived() = ScalarType(x);
     }
 
     template<class Derived>
