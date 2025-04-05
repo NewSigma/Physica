@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "Math.h"
 
 namespace Physica {
     template<Scalar T, size_t Size>
@@ -112,16 +114,29 @@ namespace Physica {
         using RealType = ResultType::RealType;
         if constexpr (ResultType::isSeparatable) {
             using FullRealType = ResultType::FullRealType;
-            const RealType x_re = x.real();
-            const RealType x_im = x.imag();
-            const RealType re = ln(square(x_re) + square(x_im)) * T(0.5);
-            const RealType im = arctan2(x_im, x_re);
+            const auto x1 = ResultType::asComplex(x.asReal());
+            auto x_re = x1.real();
+            auto x_im = x1.imag();
+
+            const auto factor = reciprocal(std::max(abs(x_re), abs(x_im)));
+            const auto lnF = ln(factor);
+            x_re *= factor;
+            x_im *= factor;            
+
+            const auto re = ln(square(x_re) + square(x_im)) * T(0.5) - RealType(lnF);
+            const auto im = arctan2(x_im, x_re);
             return ResultType::asComplex(FullRealType(re, im).scatterRealImag());
         }
         else {
-            const RealType re = ln(x.squaredNorm()) * T(0.5);
-            const auto pair = x.makeFullRealImag();
-            const RealType im = arctan2(pair.second, pair.first);
+            const auto x1 = abs(x.asReal());
+            const auto factor = reciprocal(std::max(x1, x1.swapRealImag()));
+            const auto lnF = ln(factor);
+
+            const auto x2 = ResultType::asComplex(x.asReal() * factor);
+            const auto re = ln(x2.squaredNorm()) * T(0.5) - RealType(lnF);
+            const auto pair = x2.makeFullRealImag();
+            const auto im = arctan2(pair.second, pair.first);
+
             RealType result;
             if constexpr (T::Option == Float32)
                 result = RealType::template blend<0, 4, 3, 7>(re, im);

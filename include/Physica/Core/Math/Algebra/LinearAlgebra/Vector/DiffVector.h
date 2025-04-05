@@ -44,7 +44,6 @@ namespace Physica {
         using ValueVector = DenseVector<T, Length>;
         using GradType = ScalarType::GradType;
         using GradVector = std::conditional<Order == 1, ValueVector, DenseVector<GradType, Length, Allocator>>::type;
-        using initializer_list = std::initializer_list<typename std::conditional<isForwardDiff, Diff<T, Mode, Order>, T>::type>;
 
         ValueVector v;
         GradVector g;
@@ -53,7 +52,8 @@ namespace Physica {
         explicit DenseVector(size_t length);
         DenseVector(size_t length, T init);
         DenseVector(size_t length, ScalarType init) requires(isForwardDiff);
-        DenseVector(initializer_list list);
+        DenseVector(std::initializer_list<T> list);
+        DenseVector(std::initializer_list<ScalarType> list) requires(isForwardDiff);
         DenseVector(ValueVector v_, GradVector g_) noexcept;
         template<Vector V>
         explicit(isReverseDiff) DenseVector(const V& v_) requires(!ReverseDiff<V>);

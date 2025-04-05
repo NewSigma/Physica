@@ -18,13 +18,14 @@
  */
 #pragma once
 
+#include <format>
 #include <vectorclass/vectorclass.h>
 #include <vectorclass/vectormath_exp.h>
 #include <vectorclass/vectormath_trig.h>
 #include <vectorclass/vectormath_hyp.h>
-#include "Physica/PlainStruct.h"
+#include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Scalar/ScalarImpl/SIMDBase.h"
-#include "SIMDImpl/Instruset.h"
+#include "Physica/PlainStruct.h"
 
 namespace Physica {
     template<Scalar T, size_t Size> class BoolSIMD;
@@ -110,6 +111,7 @@ namespace Physica {
         [[nodiscard]] This value() const noexcept { return *this; }
         [[nodiscard]] auto isPositive() const noexcept { return operator>(This(0)); }
         [[nodiscard]] auto isNegative() const noexcept { return operator<(This(0)); }
+        [[nodiscard]] BoolSIMDType isFinite() const noexcept;
         /* Static members */
         template<int... Order>
         inline static SIMD blend(const SIMD& x, const SIMD& y);
@@ -221,6 +223,19 @@ namespace std {
         else
             return Physica::min(a.toMachine(), b.toMachine());
     }
+
+    template<Physica::Scalar T, size_t Size>
+    struct formatter<PacketType, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const PacketType& obj, std::format_context& ctx) const {
+            for (size_t i = 0; i < Size - 1; ++i)
+                std::format_to(ctx.out(), "{} ", obj[i]);
+            return std::format_to(ctx.out(), "{}", obj[Size - 1]);
+        }
+    };
 
 #undef PacketType
 }

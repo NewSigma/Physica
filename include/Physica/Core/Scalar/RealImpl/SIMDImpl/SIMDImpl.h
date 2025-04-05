@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,8 @@
 
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Utils/Unreachable.h"
-#include "../SIMD.h"
+#include "Physica/Core/Scalar/RealImpl/SIMD.h"
+#include "Instruset.h"
 
 namespace Physica {
     template<Scalar T, size_t Size>
@@ -247,6 +248,27 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Size>
+    auto SIMD<T, Size>::isFinite() const noexcept -> BoolSIMDType {
+        return BoolSIMDType(is_finite(toMachine()));
+    }
+
+    template<Scalar T, size_t Size>
+    template<int... Order>
+    inline SIMD<T, Size> SIMD<T, Size>::blend(const SIMD& x, const SIMD& y) {
+        static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
+        if constexpr (Size == 2)
+            return Physica::blend2<Order...>(x.toMachine(), y.toMachine());
+        else if constexpr (Size == 4)
+            return Physica::blend4<Order...>(x.toMachine(), y.toMachine());
+        else if constexpr (Size == 8)
+            return Physica::blend8<Order...>(x.toMachine(), y.toMachine());
+        else {
+            static_assert(Size == 16, "[Error]: Unexpected size");
+            return Physica::blend16<Order...>(x.toMachine(), y.toMachine());
+        }
+    }
+
+    template<Scalar T, size_t Size>
     template<bool... Flags>
     SIMD<T, Size> SIMD<T, Size>::makeSignBits() {
         using IntType = std::conditional<T::Option == Float32, uint32_t, uint64_t>::type;
@@ -284,22 +306,6 @@ namespace Physica {
                 };
                 return __m512d(mm512_setr_epi64(Functor(Flags)...));
             }
-        }
-    }
-
-    template<Scalar T, size_t Size>
-    template<int... Order>
-    inline SIMD<T, Size> SIMD<T, Size>::blend(const SIMD& x, const SIMD& y) {
-        static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
-        if constexpr (Size == 2)
-            return Physica::blend2<Order...>(x.toMachine(), y.toMachine());
-        else if constexpr (Size == 4)
-            return Physica::blend4<Order...>(x.toMachine(), y.toMachine());
-        else if constexpr (Size == 8)
-            return Physica::blend8<Order...>(x.toMachine(), y.toMachine());
-        else {
-            static_assert(Size == 16, "[Error]: Unexpected size");
-            return Physica::blend16<Order...>(x.toMachine(), y.toMachine());
         }
     }
 

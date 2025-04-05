@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,43 +18,23 @@
  */
 #pragma once
 
+#include "Math.h"
+
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline auto abs(const SIMD<Diff<T, Mode, Order>, Size>& x) {
+        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        if constexpr (Mode == DiffMode::Forward) {
-            using GradPacket = ResultType::GradType;
-            return ResultType(abs(x.value()), GradPacket::select(x.value().isPositive(), x.grad(), -x.grad()));
-        }
-        else {
-            using PlainSIMD = SIMD<T, Size>;
-            using TracerType = T::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(abs(x.toMachine()));
-            const auto newHeadNode = tracer.pushOperation(values, ExprType::Abs);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return ResultType(values, newHeadNode);
-        }
+        using GradPacket = ResultType::GradType;
+        return ResultType(abs(x.value()), GradPacket::select(x.value().isPositive(), x.grad(), -x.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline auto square(const SIMD<Diff<T, Mode, Order>, Size>& x) {
+        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        if constexpr (Mode == DiffMode::Forward) {
-            using GradPacket = ResultType::GradType;
-            return ResultType(square(x.value()), GradPacket(x) * x.grad() * T(2));
-        }
-        else {
-            using PlainSIMD = SIMD<T, Size>;
-            using TracerType = T::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(square(x.toMachine()));
-            const auto newHeadNode = tracer.pushOperation(values, ExprType::Square);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return ResultType(values, newHeadNode);
-        }
+        using GradPacket = ResultType::GradType;
+        return ResultType(square(x.value()), GradPacket(x) * x.grad() * T(2));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -71,7 +51,7 @@ namespace Physica {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
-        return ResultType(ln(x.value()), reciprocal(GradPacket(x)) * x.grad());
+        return ResultType(ln(x.value()), x.grad() / GradPacket(x));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -79,7 +59,7 @@ namespace Physica {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
-        return ResultType(ln1p(x.value()), reciprocal(GradPacket(1) + GradPacket(x)) * x.grad());
+        return ResultType(ln1p(x.value()), x.grad() / (GradPacket(1) + GradPacket(x)));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -89,29 +69,6 @@ namespace Physica {
         using GradPacket = ResultType::GradType;
         const auto y = exp(GradPacket(x));
         return ResultType(y.value(), y * x.grad());
-    }
-
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto sincos(
-            const SIMD<Diff<T, Mode, Order>, Size>& x,
-            SIMD<Diff<T, Mode, Order>, Size>& s,
-            SIMD<Diff<T, Mode, Order>, Size>& c) {
-        static_assert(Mode == DiffMode::Reverse, "[Error]: Not implemented");
-        using ScalarType = Diff<T, Mode, Order>;
-        Physica::sincos(x.toMachine(), s.toMachine(), c.toMachine());
-        if constexpr (Mode == DiffMode::Reverse) {
-            using TracerType = ScalarType::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const auto sinHeadNode = tracer.pushOperation(s, ExprType::Sin);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            s = SIMD<ScalarType, Size>(s, sinHeadNode);
-
-            const auto cosHeadNode = tracer.pushOperation(c, ExprType::Cos);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            c = SIMD<ScalarType, Size>(c, cosHeadNode);
-        }
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>

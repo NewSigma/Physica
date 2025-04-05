@@ -47,7 +47,7 @@ namespace Physica {
         }
         else {
             if (x_j.isZero())
-                return ResultType{Tr(x_i.isPositive() ? 1.0 : -1.0), 0};
+                return ResultType{Tr(x_i.isPositive() ? 1.0 : -1.0), Tr(0)};
 
             T rep_norm = reciprocal(sqrt(square(x_i) + square(x_j)));
             T cos = x_i * rep_norm;

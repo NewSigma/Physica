@@ -563,7 +563,7 @@ namespace Physica {
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        static_assert(V::isComplex || !isComplex, "[Error]: Cannot convert a complex to a real");
+        static_assert(V::isComplex || !isComplex, "[Error]: Assign a complex vector to real vector discards imags");
         static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
     }
 

@@ -119,7 +119,6 @@ auto ThreadPool::getThreadInfo() noexcept -> ThreadInfo& {
     if (info == nullptr) {
         info.reset(new ThreadInfo());
         info->id = MainThreadID;
-        info->numScheduled = 0;
         info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
     }
     return *info;

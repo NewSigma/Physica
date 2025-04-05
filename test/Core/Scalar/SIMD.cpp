@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,21 +24,13 @@ using namespace Physica;
 using RandomSource = Random<MT19937, 10000>;
 
 template<Scalar T, int Size>
-void test() {
+void testMath(const SIMD<T, Size>& x) {
     constexpr double prec = T::Option == Float32 ? 1E-6 : 1E-15;
-    const auto x = SIMD<T, Size>::template random_uniform<RandomSource>();
     /* Divide */ {
         const auto y = SIMD<T, Size>::template random_uniform<RandomSource>();
         const auto result = x / y;
         for (int i = 0; i < Size; ++i) {
             if (!scalarNear(result[i], x[i] / y[i], prec))
-                exit(EXIT_FAILURE);
-        }
-    }
-    /* Sqrt */ {
-        const auto result = sqrt(x);
-        for (int i = 0; i < Size; ++i) {
-            if (!scalarNear(result[i], sqrt(x[i]), prec))
                 exit(EXIT_FAILURE);
         }
     }
@@ -60,6 +52,30 @@ void test() {
         const auto result = lncosh(x);
         for (int i = 0; i < Size; ++i) {
             if (!scalarNear(result[i], lncosh(x[i]), prec))
+                exit(EXIT_FAILURE);
+        }
+    }
+}
+
+template<Scalar T, int Size>
+void test() {
+    constexpr double prec = T::Option == Float32 ? 1E-6 : 1E-15;
+    auto x = SIMD<T, Size>(std::numeric_limits<T>::min());
+    /* Divide */ {
+        const auto result = SIMD<T, Size>(0) / x;
+        for (int i = 0; i < Size; ++i) {
+            if (!result[i].isZero())
+                exit(EXIT_FAILURE);
+        }
+    }
+    testMath<T, Size>(x);
+
+    x = SIMD<T, Size>::template random_uniform<RandomSource>();
+    testMath<T, Size>(x);
+    /* Sqrt */ {
+        const auto result = sqrt(x);
+        for (int i = 0; i < Size; ++i) {
+            if (!scalarNear(result[i], sqrt(x[i]), prec))
                 exit(EXIT_FAILURE);
         }
     }

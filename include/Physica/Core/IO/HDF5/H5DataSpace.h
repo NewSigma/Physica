@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,12 +18,14 @@
  */
 #pragma once
 
+#include "Physica/Core/IO/HDF5/HDF5.h"
 #include "DataSpaceImpl/DataSpaceBase.h"
 #include "DataSpaceImpl/SubDataSpace.h"
 
 namespace Physica {
     template<size_t Dim>
     class H5DataSpace : public DataSpaceBase<H5DataSpace<Dim>>, public H5::DataSpace {
+        static_assert(Dim > 0, "[Error]: Invalid dim");
         using Base = DataSpaceBase<H5DataSpace<Dim>>;
         using ImplType = H5::DataSpace;
         using This = H5DataSpace<Dim>;

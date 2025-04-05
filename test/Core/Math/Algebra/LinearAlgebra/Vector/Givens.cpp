@@ -27,7 +27,7 @@ using ComplexType = Complex<RealType>;
 
 template<Scalar T>
 void test1() {
-    Vector2D<T> v{2, 1};
+    Vector2D<T> v{T(2), T(1)};
     auto givens_vector = givens(v, 0, 1);
     DenseMatrix<T> v_mat = v;
     applyGivens(givens_vector, v_mat, 0, 1);

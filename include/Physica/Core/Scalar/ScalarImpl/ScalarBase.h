@@ -104,6 +104,12 @@ namespace Physica {
         __host__ __device__ inline bool operator>(const T& s) const noexcept;
         template<Scalar T>
         __host__ __device__ inline bool operator<(const T& s) const noexcept;
+        template<Scalar T>
+        __host__ __device__ inline bool operator>=(const T& x) const noexcept;
+        template<Scalar T>
+        __host__ __device__ inline bool operator<=(const T& x) const noexcept;
+        template<Scalar T>
+        __host__ __device__ inline bool operator!=(const T& x) const noexcept;
         /* Operations */
         [[nodiscard]] ScalarType calc() const;
 
@@ -161,7 +167,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
+        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y += x.value();
@@ -174,7 +180,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
+        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y -= x.value();
@@ -187,7 +193,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
+        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y *= x.value();
@@ -200,7 +206,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Cannot assign complex to real");
+        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y /= x.value();
@@ -248,6 +254,24 @@ namespace Physica {
     __host__ __device__ inline bool ScalarBase<Derived>::operator<(const T& s) const noexcept {
         static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
         return value() < s.value();
+    }
+
+    template<class Derived>
+    template<Scalar T>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator>=(const T& x) const noexcept {
+        return !operator<(x);
+    }
+
+    template<class Derived>
+    template<Scalar T>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator<=(const T& x) const noexcept {
+        return !operator>(x);
+    }
+
+    template<class Derived>
+    template<Scalar T>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator!=(const T& x) const noexcept {
+        return !operator==(x);
     }
 
     template<class Derived>
@@ -459,8 +483,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline T operator+(const T& x) {
-        return T(x);
+    inline T&& operator+(T&& x) noexcept {
+        return std::forward<T>(x);
     }
 
     template<Scalar T>
@@ -472,20 +496,6 @@ namespace Physica {
     template<Scalar T>
     inline void operator>>=(T& x, int bits) { x = x >> bits; }
 
-    template<Scalar T>
-    __host__ __device__ inline bool operator>=(const T& x, const T& y) {
-        return !(x < y);
-    }
-
-    template<Scalar T>
-    __host__ __device__ inline bool operator<=(const T& x, const T& y) {
-        return !(x > y);
-    }
-
-    template<Scalar T>
-    __host__ __device__ inline bool operator!=(const T& x, const T& y) {
-        return !(x == y);
-    }
 
     template<Scalar T>
     [[nodiscard]] bool absCompare(const T& x, const T& y) {

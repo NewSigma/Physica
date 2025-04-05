@@ -52,7 +52,6 @@ namespace Physica {
 
         struct ThreadInfo {
             int id;
-            uint64_t numScheduled;
             uint64_t randState;
         };
 
@@ -99,20 +98,14 @@ namespace Physica {
     template<class Function, class... Args>
     auto ThreadPool::schedule(Function func, Args&&... args) noexcept {
         using ResultType = std::invoke_result<Function, Args&&...>::type;
-        int schedule_to;
-        auto& info = getThreadInfo();
-        if (isMainThread())
-            schedule_to = info.numScheduled % getNumThreads();
-        else
-            schedule_to = info.id;
-        info.numScheduled += 1;
-
         std::packaged_task<ResultType()> task(std::bind(func, std::forward<Args>(args)...));
         auto result = task.get_future();
-        auto& data = thread_data[schedule_to];
-        data.queueMutex.lock();
-        data.queue.emplace(new PackagedTask(std::move(task)));
-        data.queueMutex.unlock();
+        {
+            const int schedule_to = isMainThread() ? 0 : getThreadInfo().id;
+            auto& data = thread_data[schedule_to];
+            std::unique_lock locker(data.queueMutex);
+            data.queue.emplace(new PackagedTask(std::move(task)));
+        }
         cond.notify_one();
         return result;
     }

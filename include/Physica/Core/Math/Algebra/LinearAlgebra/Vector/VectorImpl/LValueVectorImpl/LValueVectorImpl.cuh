@@ -92,12 +92,14 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator+=(const V& v) requires(CUDA<V>) {
+        assert(Base::getLength() == v.getLength());
         Base::getDerived() = Base::getDerived() + v;
     }
 
     template<class Derived>
     template<Vector V>
     __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator-=(const V& v) requires(CUDA<V>) {
+        assert(Base::getLength() == v.getLength());
         Base::getDerived() += -v;
     }
 

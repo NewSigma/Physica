@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -61,6 +61,7 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ inline Complex<T> ln(const Complex<T>& c) {
+        assert(!c.isZero());
         if constexpr (IsHost())
             return Complex<T>(std::log(c.toMachine()));
         else {

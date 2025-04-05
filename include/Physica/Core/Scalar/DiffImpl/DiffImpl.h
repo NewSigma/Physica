@@ -30,7 +30,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     template<Scalar U>
     __host__ __device__ Diff<T, Mode, Order>::Diff(const U& x) requires(!ReverseDiff<U>) {
-        static_assert(T::isComplex || !U::isComplex, "[Error]: Cannot convert a complex to a real");
+        static_assert(T::isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
         if constexpr (Diffable<U>) {
             v = x.value();
             g = x.grad().template mask<Order - 1>();
@@ -237,17 +237,35 @@ namespace Physica {
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator+(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
-        return std::forward<T>(y) + std::forward<U>(x);
+        using ResultType = decltype(std::forward<T>(y) + std::forward<U>(x));
+        if constexpr (IsHost() || ForwardDiff<T>)
+            return std::forward<T>(y) + std::forward<U>(x);
+        else {
+            unreachable();
+            return ResultType{};
+        }
     }
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator-(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
-        return -(std::forward<T>(y) - std::forward<U>(x));
+        using ResultType = decltype(-(std::forward<T>(y) - std::forward<U>(x)));
+        if constexpr (IsHost() || ForwardDiff<T>)
+            return -(std::forward<T>(y) - std::forward<U>(x));
+        else {
+            unreachable();
+            return ResultType{};
+        }
     }
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
-        return std::forward<T>(y) * std::forward<U>(x);
+        using ResultType = decltype(std::forward<T>(y) * std::forward<U>(x));
+        if constexpr (IsHost() || ForwardDiff<T>)
+            return std::forward<T>(y) * std::forward<U>(x);
+        else {
+            unreachable();
+            return ResultType{};
+        }
     }
 
     template<Scalar T, Scalar U>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/Scalar.h"
+#include "Physica/Core/Scalar/Diff.h"
 
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -38,9 +38,6 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline auto exp(const SIMD<Diff<T, Mode, Order>, Size>& x);
-
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto sincos(const SIMD<Diff<T, Mode, Order>, Size>& x, SIMD<Diff<T, Mode, Order>, Size>& s, SIMD<Diff<T, Mode, Order>, Size>& c);
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline auto tanh(const SIMD<Diff<T, Mode, Order>, Size>& x);

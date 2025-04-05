@@ -29,6 +29,7 @@ static void lncosh(benchmark::State& state) {
     VectorND<T> buffer(1024);
     for (auto _ : state) {
         buffer = lncosh(data);
+        benchmark::DoNotOptimize(buffer);
         benchmark::ClobberMemory();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,9 +18,14 @@
  */
 #pragma once
 
+#include "Physica/Core/Scalar/ComplexImpl/SIMD.h"
+
 namespace Physica {
     template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size>::SIMD(int x) : SIMD(ScalarType(x)) {}
+
+    template<Scalar T, size_t Size>
+    SIMD<Complex<T>, Size>::SIMD(double x) : SIMD(ScalarType(x)) {}
 
     template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size>::SIMD(ScalarType x) {
@@ -82,7 +87,9 @@ namespace Physica {
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator/(const SIMD& other) const {
         const auto pair = makeFullRealImag();
-        return asComplex(mul_addsub(pair.second, other.swapRealImag(), -pair.first * other.asReal()) / other.squaredNorm());
+        const T factor = reciprocal(abs(other.asReal()).max()); // Avoid underflow
+        const auto normed = other * factor;
+        return asComplex(mul_addsub(pair.second, normed.swapRealImag(), -pair.first * normed.asReal()) / normed.squaredNorm() * factor);
     }
 
     template<Scalar T, size_t Size>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
+
+#include "Physica/Core/Scalar/Complex.h"
 
 namespace Physica {
     template<Scalar T, size_t Length>
@@ -54,6 +56,7 @@ namespace Physica {
     public:
         SIMD() = default;
         explicit SIMD(int x);
+        explicit SIMD(double x);
         explicit SIMD(ScalarType x);
         SIMD(ScalarType x, int count);
         SIMD(const SIMD&) = default;
@@ -93,6 +96,7 @@ namespace Physica {
         /* Getters */
         using Base::size;
         using Base::value;
+        using RealBase::isFinite;
         [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(FullRealType::getHigh()); }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -51,12 +51,12 @@ namespace Physica {
     };
 
     template<class Functor, class... Args>
-    ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) noexcept {
+    auto ThreadExecutor::schedule(Functor func, Args&&... args) noexcept -> FutureType {
         return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);
     }
 
     template<class Functor>
-    FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(Functor func, size_t loopCount) {
+    auto ThreadExecutor::parallel_for(Functor func, size_t loopCount) -> FutureGroup<FutureType> {
         using ResultType = std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount > 0);
@@ -69,8 +69,7 @@ namespace Physica {
     }
 
     template<class Functor>
-    FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
-            Functor func, size_t loopCount, int core) {
+    auto ThreadExecutor::parallel_for(Functor func, size_t loopCount, int core) -> FutureGroup<FutureType> {
         using ResultType = std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(core > 0 && "[Error]: core must be a positive int");
@@ -91,7 +90,7 @@ namespace Physica {
             auto_wait(future);
     }
 
-    inline ThreadExecutor::Range ThreadExecutor::splitJob(size_t loopCount, int core, int part) {
+    inline auto ThreadExecutor::splitJob(size_t loopCount, int core, int part) -> Range {
         assert(0 <= part && "[Error]: part must be a positive int");
         assert(part < core && "[Error]: More partition than core number requested");
         const size_t maxLoopPerCore = (loopCount + core - 1) / core;
