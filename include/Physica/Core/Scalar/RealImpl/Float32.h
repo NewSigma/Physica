@@ -60,7 +60,7 @@ namespace Physica {
         Real(const Integer& i) : Real(float(double(i))) {}
         Real(const Rational& r) : Real(float(double(r))) {}
         template<Scalar T>
-        __host__ __device__ explicit(Float32 < T::Option) inline Real(const T& x);
+        __host__ __device__ explicit(Float32 < T::Option) inline Real(const T& x) requires(!Diffable<T>);
         constexpr Real(const Real&) = default;
         constexpr Real(Real&&) noexcept = default;
         constexpr ~Real() = default;
@@ -109,7 +109,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    __host__ __device__ inline Real<Float32>::Real(const T& x) : f(float(x)) {}
+    __host__ __device__ inline Real<Float32>::Real(const T& x) requires(!Diffable<T>) : f(float(x)) {}
 
     __host__ __device__ inline Real<Float32> Real<Float32>::mod() const noexcept {
         float buffer;

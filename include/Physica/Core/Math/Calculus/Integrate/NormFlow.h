@@ -36,9 +36,10 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
-        using FuncValue = std::conditional<ReverseDiff<T>, Tv, T>::type;
+        using IntegT = std::conditional<ReverseDiff<T>, Tv, T>::type;
+        using TrainT = std::conditional<ReverseDiff<T>, T, Tv>::type;
         using This = NormFlow<T, TakeLn>;
-        using Base = AdaptiveBase<FuncValue, TakeLn>;
+        using Base = AdaptiveBase<IntegT, TakeLn>;
 
         template<Scalar U>
         using MatrixND = LinearLayer<T>::template MatrixND<U>;
@@ -70,13 +71,13 @@ namespace Physica {
         using Base::getDim;
     private:
         template<DNN Net, RNG R, class Executor>
-        Trv trial_normal(Net& nn, FuncValue& mean, FuncValue& var);
+        Trv trial_normal(Net& nn, IntegT& mean, IntegT& var);
         template<DNN Net, RNG R, class Executor>
-        Trv trial_ln(Net& nn, FuncValue& mean, FuncValue& var);
+        Trv trial_ln(Net& nn, IntegT& mean, IntegT& var);
 
-        Trv calcLoss_normal(FuncValue y, const CoDiff<T>& lnJ);
+        Trv calcLoss_normal(IntegT y, const CoDiff<TrainT>& lnJ);
         template<Vector V, class Executor>
-        Trv calcLoss_ln(const V& samples, const VectorND<T>& lnJv);
+        Trv calcLoss_ln(const V& samples, const VectorND<TrainT>& lnJv);
     };
 
     template<Scalar T, bool TakeLn>
@@ -93,11 +94,11 @@ namespace Physica {
     auto NormFlow<T, TakeLn>::warmup(Net& nn, int numWarm) -> Trv {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
-        static_assert(std::same_as<FuncValue, CallResult>, "[Error]: Inconsistent ScalarType");
+        static_assert(std::same_as<IntegT, CallResult>, "[Error]: Inconsistent ScalarType");
 
         Trv result;
         for (int _ = 0; _ < numWarm; ++_) {
-            FuncValue mean = 0, var = 0;
+            IntegT mean = 0, var = 0;
             if constexpr (TakeLn)
                 result = trial_ln<Net, R, Executor>(nn, mean, var);
             else
@@ -114,10 +115,10 @@ namespace Physica {
     void NormFlow<T, TakeLn>::integral(Net& nn) {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
-        static_assert(std::same_as<FuncValue, CallResult>, "[Error]: Inconsistent ScalarType");
+        static_assert(std::same_as<IntegT, CallResult>, "[Error]: Inconsistent ScalarType");
 
         const int numRefine = Base::getNumRefine();
-        FuncValue mean = 0, var = 0;
+        IntegT mean = 0, var = 0;
         for (int refine = 0; refine < numRefine; ++refine) {
             if constexpr (TakeLn)
                 loss[refine] = trial_ln<Net, R, Executor>(nn, mean, var);
@@ -141,7 +142,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, class Executor>
-    auto NormFlow<T, TakeLn>::trial_normal(Net& nn, FuncValue& mean, FuncValue& var) -> Trv {
+    auto NormFlow<T, TakeLn>::trial_normal(Net& nn, IntegT& mean, IntegT& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
 
@@ -152,8 +153,8 @@ namespace Physica {
                 x.template random_uniform<R>();
                 const auto lnJ = nn.forward(x);
                 x = from + hadamard(coeff, x);
-                FuncValue y = nn(x);
-                FuncValue sample = y * exp(lnJ.value());
+                IntegT y = nn(x);
+                IntegT sample = y * exp(lnJ.value());
                 toNextVariance(var, mean, i, sample);
                 loss += calcLoss_normal(nn(x), lnJ);
             }
@@ -164,14 +165,14 @@ namespace Physica {
             const int numThread = Executor::getNumThread();
             Array<Net> nets(numThread, nn);
 
-            VectorND<FuncValue> samples(numSample);
+            VectorND<IntegT> samples(numSample);
             VectorND<Trv> losses(numThread, 0);
             Executor::parallel_for([&, this](size_t i) {
                 const int tid = Executor::getThreadID();
                 auto x = VectorND<Trv>::template random_uniform<R>(getDim());
                 const auto lnJ = nets[tid].forward(x);
                 x = from + hadamard(coeff, x);
-                FuncValue y = nn(x);
+                IntegT y = nn(x);
                 samples[i] = y * exp(lnJ.value());
                 losses[tid] += calcLoss_normal(y, lnJ);
             }, numSample, numThread).wait();
@@ -190,19 +191,19 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<DNN Net, RNG R, class Executor>
-    auto NormFlow<T, TakeLn>::trial_ln(Net& nn, FuncValue& mean, FuncValue& var) -> Trv {
+    auto NormFlow<T, TakeLn>::trial_ln(Net& nn, IntegT& mean, IntegT& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
         const auto lnVolume = ln(coeff).sum();
 
-        VectorND<FuncValue> samples(numSample);
+        VectorND<IntegT> samples(numSample);
         Trv loss = 0;
         if constexpr (std::same_as<CUDAExecutor, Executor>) {
             const auto from_d = from.toDeviceAsync();
             const auto coeff_d = coeff.toDeviceAsync();
             const int numBatch = numSample / batchsize;
 
-            VectorND<T> lnJv(batchsize);
+            VectorND<TrainT> lnJv(batchsize);
             device_obj<MatrixND<Tv>> x(getDim(), batchsize);
             for (int i = 0; i < numBatch; ++i) {
                 x.template random_uniform<R>();
@@ -278,7 +279,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    auto NormFlow<T, TakeLn>::calcLoss_normal(FuncValue y, const CoDiff<T>& lnJ) -> Trv {
+    auto NormFlow<T, TakeLn>::calcLoss_normal(IntegT y, const CoDiff<TrainT>& lnJ) -> Trv {
         CoDiff<T> l = square(y * exp(lnJ)) + exp(lnJ * Trv(2)) * decay;
         if constexpr (ReverseDiff<T>)
             l.reverse(reciprocal(Trv(Base::getNumSample())));
@@ -287,7 +288,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     template<Vector V, class Executor>
-    auto NormFlow<T, TakeLn>::calcLoss_ln(const V& samples, const VectorND<T>& lnJv) -> Trv {
+    auto NormFlow<T, TakeLn>::calcLoss_ln(const V& samples, const VectorND<TrainT>& lnJv) -> Trv {
         const size_t size = samples.getLength();
         const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(size));
         auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(size));

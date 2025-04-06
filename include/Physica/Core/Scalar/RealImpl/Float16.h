@@ -61,7 +61,7 @@ namespace Physica {
         template<std::floating_point F>
         __host__ __device__ Real(F f) : h(f) {}
         template<Scalar T>
-        __host__ __device__ explicit(Float16 < T::Option) inline Real(const T& x);
+        __host__ __device__ explicit(Float16 < T::Option) inline Real(const T& x) requires(!Diffable<T>);
         constexpr Real(const This&) = default;
         constexpr Real(This&&) noexcept = default;
         constexpr ~Real() = default;
@@ -102,7 +102,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    __host__ __device__ inline Real<Float16>::Real(const T& x) : h(x.toMachine()) {}
+    __host__ __device__ inline Real<Float16>::Real(const T& x) requires(!Diffable<T>) : h(x.toMachine()) {}
 
     template<RNG R>
     inline auto Real<Float16>::random_uniform() -> This {

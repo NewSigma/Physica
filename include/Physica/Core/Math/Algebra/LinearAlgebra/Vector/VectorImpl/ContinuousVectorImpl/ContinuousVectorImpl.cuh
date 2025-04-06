@@ -62,6 +62,7 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<V>& obj) const {
+        static_assert(std::same_as<ScalarType, typename V::ScalarType>, "[Error]: Incompatible ScalarType");
         obj.resize(Base::getLength());
         if constexpr (Diffable<T>) {
             Base::getDerived().values().toHostAsync(obj.getDerived().values());

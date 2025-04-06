@@ -53,6 +53,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
 
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
+        using Base::operator!=;
         __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
         template<Scalar U>

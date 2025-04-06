@@ -38,15 +38,15 @@ namespace Physica {
     __host__ __device__ auto square(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
-        using GradType = T::GradType;
-        return ResultType(square(x.value()), GradType(Tv(2) * x * x.grad()));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(square(x.value()), Tv(2) * x.template mask<GradOrder>() * x.grad());
     }
 
     template<Scalar T>
     __host__ __device__ auto reciprocal(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
-        using GradType = std::remove_reference_t<T>::GradType;
-        const GradType v = reciprocal(GradType(x));
+        constexpr int GradOrder = T::GradType::Order;
+        const auto v = reciprocal(x.template mask<GradOrder>());
         return ResultType(v.value(), -x.grad() * square(v));
     }
 
@@ -54,8 +54,8 @@ namespace Physica {
     __host__ __device__ auto sqrt(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
-        using GradType = T::GradType;
-        const GradType v = sqrt(GradType(x));
+        constexpr int GradOrder = T::GradType::Order;
+        const auto v = sqrt(x.template mask<GradOrder>());
         return ResultType(v.value(), Tv(0.5) * x.grad() / v);
     }
 
@@ -63,32 +63,33 @@ namespace Physica {
     __host__ __device__ auto cbrt(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
-        using GradType = T::GradType;
-        const GradType v = cbrt(GradType(x));
-        return ResultType(v.value(), Tv(1.0 / 3) * v * x.grad() / GradType(x));
+        constexpr int GradOrder = T::GradType::Order;
+        const auto v = cbrt(x.template mask<GradOrder>());
+        return ResultType(v.value(), Tv(1.0 / 3) * v * x.grad() / x.template mask<GradOrder>());
     }
 
     template<Scalar T>
     __host__ __device__ auto ln(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
-        using GradType = T::GradType;
+        constexpr int GradOrder = T::GradType::Order;
         if constexpr (!T::isComplex)
             assert(x.isPositive() && "[Error]: Invalid param");
-        return ResultType(ln(x.value()), x.grad() / GradType(x));
+        return ResultType(ln(x.value()), x.grad() / x.template mask<GradOrder>());
     }
 
     template<Scalar T, int Order>
     auto ln1p(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(ln1p(x.value()), x.grad() / (T(1) + GradType(x)));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(ln1p(x.value()), x.grad() / (T(1) + x.template mask<GradOrder>()));
     }
 
     template<Scalar T, int Order>
     auto ln1pexp(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        const GradType x1 = GradType(x);
+        constexpr int GradOrder = GradType::Order;
+        const GradType x1 = x.template mask<GradOrder>();
         GradType g;
         if (x.value().real().isPositive())
             g = reciprocal(GradType(1) + exp(-x1));
@@ -105,17 +106,16 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ auto exp(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
-        using GradType = T::GradType;
-        const GradType v = exp(GradType(x));
+        constexpr int GradOrder = T::GradType::Order;
+        const auto v = exp(x.template mask<GradOrder>());
         return ResultType(v.value(), v * x.grad());
     }
 
     template<Scalar T, Scalar U>
     __host__ __device__ auto pow(T&& x, U&& a) requires(ForwardDiff<T> && !Diffable<U>) {
         using ResultType = T::ScalarType;
-        using GradType = T::GradType;
-        constexpr int GradOrder = GradType::Order;
-        const auto y = pow(GradType(x), a);
+        constexpr int GradOrder = T::GradType::Order;
+        const auto y = pow(x.template mask<GradOrder>(), a);
         return ResultType(y.value(), x.grad() * y / x.template mask<GradOrder>() * a);
     }
 
@@ -126,8 +126,9 @@ namespace Physica {
     __host__ __device__ auto cos(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using GradType = T::GradType;
+        constexpr int GradOrder = GradType::Order;
         GradType sin_value, cos_value;
-        sincos(GradType(x), sin_value, cos_value);
+        sincos(x.template mask<GradOrder>(), sin_value, cos_value);
         return ResultType(cos_value.value(), -sin_value * x.grad());
     }
 
@@ -135,8 +136,9 @@ namespace Physica {
     __host__ __device__ auto sin(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using GradType = T::GradType;
+        constexpr int GradOrder = GradType::Order;
         GradType sin_value, cos_value;
-        sincos(GradType(x), sin_value, cos_value);
+        sincos(x.template mask<GradOrder>(), sin_value, cos_value);
         return ResultType(sin_value.value(), cos_value * x.grad());
     }
 
@@ -144,8 +146,9 @@ namespace Physica {
     __host__ __device__ void sincos(const T& x, U& sin_result, U& cos_result) requires(ForwardDiff<T> && ForwardDiff<U>) {
         using ResultType = U::ScalarType;
         using GradType = T::GradType;
+        constexpr int GradOrder = GradType::Order;
         GradType sin_value, cos_value;
-        sincos(GradType(x), sin_value, cos_value);
+        sincos(x.template mask<GradOrder>(), sin_value, cos_value);
         sin_result = ResultType(sin_value, cos_value * x.grad());
         cos_result = ResultType(cos_value, -sin_value * x.grad());
     }
@@ -153,15 +156,15 @@ namespace Physica {
     template<Scalar T, int Order>
     auto tan(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(tan(x.value()), x.grad() * square(sec(GradType(x))));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(tan(x.value()), x.grad() * square(sec(x.template mask<GradOrder>())));
     }
 
     template<Scalar T, int Order>
     auto sec(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        const auto x1 = GradType(x);
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template mask<GradOrder>();
         const auto v = sec(x1);
         return ResultType(v.value(), x.grad() * v * tan(x1));
     }
@@ -169,8 +172,8 @@ namespace Physica {
     template<Scalar T, int Order>
     auto csc(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        const auto x1 = GradType(x);
+        constexpr int GradOrder = T::GradType::Order;
+        const auto x1 = x.template mask<GradOrder>();
         const auto v = csc(x1);
         return ResultType(v.value(), -x.grad() * v * cot(x1));
     }
@@ -178,15 +181,15 @@ namespace Physica {
     template<Scalar T, int Order>
     auto cot(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(cot(x.value()), -x.grad() * square(csc(GradType(x))));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(cot(x.value()), -x.grad() * square(csc(x.template mask<GradOrder>())));
     }
 
     template<Scalar T, int Order>
     auto arccos(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(arccos(x.value()), -x.grad() / sqrt(T(1) - square(GradType(x))));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(arccos(x.value()), -x.grad() / sqrt(T(1) - square(x.template mask<GradOrder>())));
     }
 
     /*
@@ -210,23 +213,23 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ auto cosh(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
-        using GradType = T::GradType;
-        return ResultType(cosh(x.value()), x.grad() * sinh(GradType(x)));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(cosh(x.value()), x.grad() * sinh(x.template mask<GradOrder>()));
     }
 
     template<Scalar T>
     __host__ __device__ auto sinh(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
-        using GradType = T::GradType;
-        return ResultType(sinh(x.value()), x.grad() * cosh(GradType(x)));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(sinh(x.value()), x.grad() * cosh(x.template mask<GradOrder>()));
     }
 
     template<Scalar T>
     __host__ __device__ auto tanh(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
-        using GradType = T::GradType;
-        const GradType v = tanh(GradType(x));
+        constexpr int GradOrder = T::GradType::Order;
+        const auto v = tanh(x.template mask<GradOrder>());
         return ResultType(v.value(), (Tv(1) - square(v)) * x.grad());
     }
 
@@ -262,8 +265,8 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ auto lncosh(const T& x) requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
-        using GradType = T::GradType;
-        return ResultType(lncosh(x.value()), x.grad() * tanh(GradType(x)));
+        constexpr int GradOrder = T::GradType::Order;
+        return ResultType(lncosh(x.value()), x.grad() * tanh(x.template mask<GradOrder>()));
     }
 
     template<Scalar T, int Order>
