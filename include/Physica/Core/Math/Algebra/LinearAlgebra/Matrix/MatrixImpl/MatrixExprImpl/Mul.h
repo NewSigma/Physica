@@ -75,6 +75,8 @@ namespace Physica {
     class MatrixExpr<ExprType::Mul, M1, M2>
             : public BinaryMatrixExpr<ExprType::Mul, M1, M2> {
         using Base = BinaryMatrixExpr<ExprType::Mul, M1, M2>;
+    public:
+        using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -82,13 +84,31 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) * Base::getRHS().calc(row, col);
+            return getLHS().calc(row, col) * getRHS().calc(row, col);
         }
 
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) * Base::getRHS().calc_value(row, col);
+            return getLHS().calc_value(row, col) * getRHS().calc_value(row, col);
         }
+
+        template<Matrix U>
+        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        using Base::reverse;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Matrix M1, Matrix M2>
+    template<Matrix U>
+    void MatrixExpr<ExprType::Mul, M1, M2>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        if constexpr (Diffable<M1>)
+            lhs.reverse(hadamard(rhs.values(), grad));
+        if constexpr (Diffable<M2>)
+            rhs.reverse(hadamard(lhs.values(), grad));
+    }
 
     template<Matrix M, Scalar U>
     [[nodiscard]] inline auto operator*(M&& m, U&& x) noexcept requires(!CUDA<M>) {

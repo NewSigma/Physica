@@ -476,6 +476,14 @@ namespace Physica {
     }
 
     template<class Derived>
+    bool RValueVector<Derived>::isFinite() const {
+        for(size_t i = 0; i < getLength(); ++i)
+            if (!calc(i).isFinite())
+                return false;
+        return true;
+    }
+
+    template<class Derived>
     template<Vector V>
     inline auto RValueVector<Derived>::crossProduct(const V& v) const noexcept {
         return CrossProduct<Derived, V>(Base::getDerived(), v);

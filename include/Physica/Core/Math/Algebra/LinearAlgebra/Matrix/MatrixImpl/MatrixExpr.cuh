@@ -135,5 +135,7 @@ namespace Physica {
 #include "MatrixExprImpl/Ln.cuh"
 #include "MatrixExprImpl/Sin.cuh"
 #include "MatrixExprImpl/Cos.cuh"
+#include "MatrixExprImpl/Cosh.cuh"
+#include "MatrixExprImpl/Sinh.cuh"
 #include "MatrixExprImpl/Tanh.cuh"
 #include "MatrixExprImpl/Sech.cuh"

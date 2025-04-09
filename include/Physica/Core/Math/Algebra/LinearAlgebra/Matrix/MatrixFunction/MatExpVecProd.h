@@ -107,10 +107,12 @@ namespace Physica {
             term = target;
             Tr norm1 = term.normInf();
             for (int n = 1; n <= numTaylorTerm; ++n) {
-                using ExprType1 = decltype(mat * term - traceMu * term);
                 term *= reciprocal(Tr(numSplit * n));
-                buffer.template operator=<ExprType1, Executor>(mat * term - traceMu * term);
-                buffer.swap(term);
+                {
+                    auto expr = mat * term - traceMu * term;
+                    buffer.template operator=<decltype(expr), Executor>(expr);
+                    buffer.swap(term);
+                }
                 const Tr norm2 = term.normInf();
                 target += term;
                 if (norm1 + norm2 <= epsilon * target.normInf())

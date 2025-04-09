@@ -97,10 +97,10 @@ namespace Physica {
         Real& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Real& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] int getLength() const noexcept { return length; }
-        [[nodiscard]] int getPower() const noexcept { return power; }
-        [[nodiscard]] int getSize() const noexcept { return std::abs(length); }
-        [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }
+        [[nodiscard]] __host__ __device__ int getLength() const noexcept { return length; }
+        [[nodiscard]] __host__ __device__ int getPower() const noexcept { return power; }
+        [[nodiscard]] __host__ __device__ int getSize() const noexcept { return std::abs(length); }
+        [[nodiscard]] __host__ __device__ bool isZero() const { return byte[getSize() - 1] == 0; }
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }

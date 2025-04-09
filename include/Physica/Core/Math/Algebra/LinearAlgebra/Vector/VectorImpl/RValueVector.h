@@ -149,6 +149,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> softmax(size_t index) const;
         [[nodiscard]] CoDiff<T> prod() const;
         [[nodiscard]] bool isZeros() const;
+        [[nodiscard]] bool isFinite() const;
         template<Vector V>
         [[nodiscard]] inline auto crossProduct(const V& v) const noexcept;
         template<Vector V>

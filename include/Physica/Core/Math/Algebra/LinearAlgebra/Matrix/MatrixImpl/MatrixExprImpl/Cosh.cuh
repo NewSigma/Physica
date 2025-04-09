@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,30 @@
  */
 #pragma once
 
-#include "../MatrixExpr.h"
+#include "../MatrixExpr.cuh"
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Square, M>
-            : public UnitaryMatrixExpr<ExprType::Square, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Square, M>;
+    class device_obj<MatrixExpr<ExprType::Cosh, M>>
+            : public device_obj<UnitaryMatrixExpr<ExprType::Cosh, M>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprType::Cosh, M>>;
     public:
-        using Base::isReverseDiff;
-    protected:
         using typename Base::T;
         using typename Base::Tv;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
+            if constexpr (isReverseDiff)
+                return calc_value(row, col);
+            else
+                return cosh(Base::getExpr().calc(row, col));
+        }
+
+        [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
+            return cosh(Base::getExpr().calc_value(row, col));
+        }
 
         template<Matrix U>
         void reverse(const U& grad) const noexcept requires(isReverseDiff);
@@ -42,24 +49,14 @@ namespace Physica {
     };
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Square, M>::calc(size_t row, size_t col) const -> T {
-        return square(Base::getExpr().calc(row, col));
-    }
-
-    template<Matrix M>
-    auto MatrixExpr<ExprType::Square, M>::calc_value(size_t row, size_t col) const -> Tv {
-        return square(Base::getExpr().calc_value(row, col));
-    }
-
-    template<Matrix M>
     template<Matrix U>
-    void MatrixExpr<ExprType::Square, M>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<MatrixExpr<ExprType::Cosh, M>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
-        expr.reverse(Tv(2) * hadamard(expr.values(), grad));
+        expr.reverse(hadamard(sinh_elem(expr.values()), grad));
     }
 
     template<Matrix M>
-    [[nodiscard]] inline auto square_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Square, M&&>(std::forward<M>(m));
+    [[nodiscard]] __host__ __device__ inline auto cosh_elem(M&& m) noexcept requires(CUDA<M>) {
+        return device_obj<MatrixExpr<ExprType::Cosh, M&&>>(std::forward<M>(m));
     }
 }

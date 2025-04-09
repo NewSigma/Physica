@@ -50,6 +50,7 @@ namespace Physica {
         Sec,
         ArcCos,
         Cosh,
+        Sinh,
         Tanh,
         Sech,
         ArcSinh,

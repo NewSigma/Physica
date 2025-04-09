@@ -19,10 +19,13 @@
 #pragma once
 
 #include <format>
-#include <vectorclass/vectorclass.h>
-#include <vectorclass/vectormath_exp.h>
-#include <vectorclass/vectormath_trig.h>
-#include <vectorclass/vectormath_hyp.h>
+#pragma GCC diagnostic push // Necessary when install
+#pragma GCC diagnostic ignored "-Wunused-function"
+    #include <vectorclass/vectorclass.h>
+    #include <vectorclass/vectormath_exp.h>
+    #include <vectorclass/vectormath_trig.h>
+    #include <vectorclass/vectormath_hyp.h>
+#pragma GCC diagnostic pop
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Scalar/ScalarImpl/SIMDBase.h"
 #include "Physica/PlainStruct.h"

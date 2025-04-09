@@ -21,18 +21,19 @@
 #include "../MatrixExpr.cuh"
 
 namespace Physica {
-    template<Matrix T, Scalar U>
-    class device_obj<MatrixExpr<ExprType::Mul, T, U>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Mul, T, U>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, T, U>>;
+    template<Matrix M, Scalar U>
+    class device_obj<MatrixExpr<ExprType::Mul, M, U>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Mul, M, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, M, U>>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::Tv;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
             if constexpr (isReverseDiff)
                 return calc_value(row, col);
             else
@@ -49,13 +50,18 @@ namespace Physica {
             : public device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>> {
         using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>>;
     public:
+        using Base::isReverseDiff;
+    protected:
         using typename Base::T;
         using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) * Base::getRHS().calc(row);
+            if constexpr (isReverseDiff)
+                return calc_value(row, col);
+            else
+                return Base::getLHS().calc(row, col) * Base::getRHS().calc(row);
         }
 
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
@@ -63,42 +69,65 @@ namespace Physica {
         }
     };
 
-    template<Matrix T1, Matrix T2>
-    class device_obj<MatrixExpr<ExprType::Mul, T1, T2>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>>;
+    template<Matrix M1, Matrix M2>
+    class device_obj<MatrixExpr<ExprType::Mul, M1, M2>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Mul, M1, M2>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, M1, M2>>;
     public:
+        using Base::isReverseDiff;
+    protected:
         using typename Base::T;
         using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) * Base::getRHS().calc(row, col);
+            if constexpr (isReverseDiff)
+                return calc_value(row, col);
+            else
+                return getLHS().calc(row, col) * getRHS().calc(row, col);
         }
 
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) * Base::getRHS().calc_value(row, col);
+            return getLHS().calc_value(row, col) * getRHS().calc_value(row, col);
         }
+
+        template<Matrix U>
+        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        using Base::reverse;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(T&& m, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<MatrixExpr<ExprType::Mul, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M1, Matrix M2>
+    template<Matrix U>
+    void device_obj<MatrixExpr<ExprType::Mul, M1, M2>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        if constexpr (Diffable<M1>)
+            lhs.reverse(hadamard(rhs.values(), grad));
+        if constexpr (Diffable<M2>)
+            rhs.reverse(hadamard(lhs.values(), grad));
     }
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, T&& m) noexcept requires(CUDA<T>) {
+    template<Matrix M, Scalar U>
+    [[nodiscard]] __host__ __device__ inline auto operator*(M&& m, U&& x) noexcept requires(CUDA<M>) {
+        return device_obj<MatrixExpr<ExprType::Mul, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
+    }
+
+    template<Matrix M, Scalar U>
+    [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, M&& m) noexcept requires(CUDA<M>) {
         return m * x;
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ inline auto hadamard(T&& m, U&& x) noexcept requires(CUDA<T> && CUDA<U>) {
-        return device_obj<MatrixExpr<ExprType::Mul, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Vector V>
+    [[nodiscard]] __host__ __device__ inline auto hadamard(M&& m, V&& x) noexcept requires(CUDA<M> && CUDA<V>) {
+        return device_obj<MatrixExpr<ExprType::Mul, M&&, V&&>>(std::forward<M>(m), std::forward<V>(x));
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ inline auto hadamard(U&& x, T&& m) noexcept requires(CUDA<T> && CUDA<U>) {
+    template<Matrix M, Vector V>
+    [[nodiscard]] __host__ __device__ inline auto hadamard(V&& x, M&& m) noexcept requires(CUDA<M> && CUDA<V>) {
         return hadamard(m, x);
     }
 

@@ -48,22 +48,12 @@ namespace Physica {
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> sqrt(const Real<Option>& x) noexcept {
         assert(!x.isNegative());
-        if constexpr (Option == Float32)
-            return Real<Option>(::sqrtf(x.toMachine()));
-        else {
-            static_assert(Option == Float64, "[Error]: Unexpected type");
-            return Real<Option>(::sqrt(x.toMachine()));
-        }
+        return Real<Option>(std::sqrt(x.toMachine()));
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> cbrt(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::cbrtf(x.toMachine()));
-        else {
-            static_assert(Option == Float64, "[Error]: Unexpected type");
-            return Real<Option>(::cbrt(x.toMachine()));
-        }
+        return Real<Option>(std::cbrt(x.toMachine()));
     }
 
     template<ScalarOption Option>
@@ -275,13 +265,13 @@ namespace Physica {
     }
 
     template<ScalarOption Option>
-    Real<Option> cosh(const Real<Option>& x) noexcept {
+    __host__ __device__ Real<Option> cosh(const Real<Option>& x) noexcept {
         return Real<Option>(std::cosh(x.toMachine()));
     }
 
 
     template<ScalarOption Option>
-    Real<Option> sinh(const Real<Option>& x) noexcept {
+    __host__ __device__ Real<Option> sinh(const Real<Option>& x) noexcept {
         return Real<Option>(std::sinh(x.toMachine()));
     }
 
