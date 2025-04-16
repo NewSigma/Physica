@@ -55,6 +55,7 @@ namespace Physica {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
+        assert(!x.isNegative());
         const auto v = sqrt(x.template mask<GradOrder>());
         return ResultType(v.value(), Tv(0.5) * x.grad() / v);
     }
@@ -77,11 +78,12 @@ namespace Physica {
         return ResultType(ln(x.value()), x.grad() / x.template mask<GradOrder>());
     }
 
-    template<Scalar T, int Order>
-    auto ln1p(const Diff<T, DiffMode::Forward, Order>& x) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
+    template<Scalar T>
+    auto ln1p(const T& x) requires(ForwardDiff<T>) {
+        using ResultType = T::ScalarType;
+        using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
-        return ResultType(ln1p(x.value()), x.grad() / (T(1) + x.template mask<GradOrder>()));
+        return ResultType(ln1p(x.value()), x.grad() / (Tv(1) + x.template mask<GradOrder>()));
     }
 
     template<Scalar T, int Order>

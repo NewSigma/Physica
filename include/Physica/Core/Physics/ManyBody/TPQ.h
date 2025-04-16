@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Hamilton/HamiltonMatrix.h"
 
@@ -37,6 +37,7 @@ namespace Physica {
         using Base = VectorND<T>;
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
+        using MatrixND = DenseMatrix<T>;
 
         Tr beta;
         Tr traceMu;
@@ -57,8 +58,8 @@ namespace Physica {
         template<class ModelType, class Executor = SeqExecutor>
         void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta);
 
-        [[nodiscard]] inline Tr calcPartitionXi() const;
-        [[nodiscard]] inline Tr lnPartitionXi() const;
+        [[nodiscard]] Tr calcPartitionXi() const;
+        [[nodiscard]] Tr lnPartitionXi() const;
         [[nodiscard]] Tr lnSquaredDot(const VectorND<Tr>& other) const;
         void swap(This& __restrict obj) noexcept;
 
@@ -74,6 +75,7 @@ namespace Physica {
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_normal(size_t len, Tr norm);
+        [[nodiscard]] static Tr calcObserveUVT(Tr beta, Tr mu, const MatrixND& lnPartitionNVT, const MatrixND& observeNVT);
     private:
         using Base::random_uniform;
         using Base::random_any;
@@ -182,6 +184,28 @@ namespace Physica {
         This result(len);
         result.random_normal<R>(norm);
         return result;
+    }
+
+    template<Scalar T>
+    auto TPQ<T>::calcObserveUVT(Tr beta, Tr mu, const MatrixND& lnPartitionNVT, const MatrixND& observeNVT) -> Tr {
+        assert(lnPartitionNVT.getRow() == lnPartitionNVT.getCol());
+        assert(lnPartitionNVT.getRow() == observeNVT.getRow());
+        assert(lnPartitionNVT.getCol() == observeNVT.getCol());
+        const size_t order = observeNVT.getRow();
+        auto buffer = MatrixND(order, order);
+        for (size_t i = 0; i < order; ++i)
+            for (size_t j = 0; j < order; ++j)
+                buffer(i, j) = Tr(i + j);
+        buffer *= beta * mu;
+
+        auto weights = MatrixND(order, order);
+        for (size_t i = 0; i < order; ++i) {
+            for (size_t j = 0; j < order; ++j) {
+                const auto shift = buffer(i, j) + lnPartitionNVT(i, j);
+                weights(i, j) = exp(-(buffer + lnPartitionNVT - shift).lnSumExp());
+            }
+        }
+        return hadamard(weights, observeNVT).sum();
     }
 
     template<Scalar T>

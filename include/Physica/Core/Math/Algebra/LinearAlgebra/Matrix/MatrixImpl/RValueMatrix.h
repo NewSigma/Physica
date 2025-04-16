@@ -131,6 +131,7 @@ namespace Physica {
         [[nodiscard]] auto sum_cols() const;
         [[nodiscard]] T mean() const;
         [[nodiscard]] T trace() const;
+        [[nodiscard]] CoDiff<T> lnSumExp() const;
 
         [[nodiscard]] inline auto format() const noexcept;
         [[nodiscard]] inline auto transpose() const noexcept;

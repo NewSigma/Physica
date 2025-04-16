@@ -77,13 +77,13 @@ namespace Physica {
         template<RNG R, class Distribution>
         void random_any(Distribution& dist) { asVector().template random_any<R, Distribution>(dist); }
 
-        inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
-        inline H5DataSet<1> write(H5Loc& loc, const char* name) const;
+        using Storage::read;
+        using Storage::write;
         /* Getters */
         using Storage::data_ptr;
         using Storage::getCol;
-        using Storage::getOrder;
         using Storage::getRow;
+        using Storage::getOrder;
         using Storage::toIndex1D;
         [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
@@ -185,17 +185,6 @@ namespace Physica {
         result.template random_any<R, Distribution>(dist);
         return result;
     }
-#ifdef PHYSICA_HDF5
-    template<Scalar T, size_t Order>
-    inline const H5DataSet<1> DenseSymmMatrix<T, Order>::read(const H5Loc& loc, const char* name) {
-        return asVector().read(loc, name);
-    }
-
-    template<Scalar T, size_t Order>
-    inline H5DataSet<1> DenseSymmMatrix<T, Order>::write(H5Loc& loc, const char* name) const {
-        return asVector().write(loc, name);
-    }
-#endif
 }
 
 namespace Physica {

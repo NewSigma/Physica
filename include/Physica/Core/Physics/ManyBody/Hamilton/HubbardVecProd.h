@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,8 +34,11 @@ namespace Physica {
         constexpr static unsigned int SiteDOF = MatrixType::SiteDOF;
         constexpr static bool IsTransInvariant = MatrixType::IsTransInvariant;
     public:
-        using ScalarType = Base::ScalarType;
-        using RealType = ScalarType::RealType;
+        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
+        using typename Base::Tr;
+        using typename Base::Tv;
     private:
         const MatrixType& mat;
         const V& vec;
@@ -52,6 +55,7 @@ namespace Physica {
         inline void assign(V1& target) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
@@ -74,7 +78,7 @@ namespace Physica {
     template<Vector V1, class Executor>
     inline void HubbardVecProd<T, U, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
-        target = RealType(0);
+        target = Tr(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
             std::mutex mutex{};
             auto future = Executor::parallel_for([&](unsigned int thread) {
@@ -113,21 +117,26 @@ namespace Physica {
                 const bool upOccupy2 = state.isUpOccupy(site1);
                 const bool downOccupy2 = state.isDownOccupy(site1);
                 if (upOccupy1 != upOccupy2) {
-                    const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                    const ScalarType hopUp = hop * Tr(state.hopUpSign(site, site1));
                     const size_t index1 = getRepr()[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
                     result += vec.calc(index1) * (upOccupy1 ? hopUp : -hopUp);
                 }
 
                 if (downOccupy1 != downOccupy2) {
-                    const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                    const ScalarType hopDown = hop * Tr(state.hopDownSign(site, site1));
                     const size_t index1 = getRepr()[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
                     result += vec.calc(index1) * (downOccupy1 ? hopDown : -hopDown);
                 }
             }, site);
             numRepel += upOccupy1 && downOccupy1;
         }
-        result += vec.calc(index) * (mat.getRepelU() * RealType(numRepel));
+        result += vec.calc(index) * (mat.getRepelU() * Tr(numRepel));
         return result;
+    }
+
+    template<Scalar T, Representation U, Vector V>
+    auto HubbardVecProd<T, U, V>::calc_value(size_t index) const -> Tv {
+        return calc(index).value();
     }
 
     template<Scalar T, Representation U, Vector V>
@@ -139,14 +148,14 @@ namespace Physica {
         auto& rSpace = fft.getRSpace();
         int sign = 1;
         for (int i = 0; i < int(NumSite); ++i) {
-            rSpace[i] = RealType(reducedPsi == psi ? sign : 0);
+            rSpace[i] = Tr(reducedPsi == psi ? sign : 0);
             sign *= psi.lShiftSign();
             psi <<= 1;
         }
         FFTType::transform(mat.planProvider, fft);
         const auto& repr = getRepr();
         const size_t index = repr[reducedPsi];
-        target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
+        target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(Tr(repr.getPeriods()[index])) * factor;
     }
 
     template<Scalar T, Representation U, Vector V>
@@ -156,14 +165,14 @@ namespace Physica {
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
             static_assert(Dim == 1 && "[Error]: Not implemented");
-            const RealType normalizer = sqrt(RealType(getRepr().getPeriods()[index])) / RealType(NumSite);
+            const Tr normalizer = sqrt(Tr(getRepr().getPeriods()[index])) / Tr(NumSite);
             const ScalarType hop = -factor * normalizer * getHoppingT();
 
             auto fft = FFTType::makeEmptyFFT(NumSite);
             for (int site = 0; site < int(NumSite); ++site) {
                 const auto site1 = (site + 1) % NumSite;
-                const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
-                const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                const ScalarType hopUp = hop * Tr(state.hopUpSign(site, site1));
+                const ScalarType hopDown = hop * Tr(state.hopDownSign(site, site1));
                 sumHopping(target, fft, hopUp, state.hopUp(site, site1));
                 sumHopping(target, fft, -hopUp, state.hopUp(site1, site));
                 sumHopping(target, fft, hopDown, state.hopDown(site, site1));
@@ -181,13 +190,13 @@ namespace Physica {
                     const bool upOccupy2 = state.isUpOccupy(site1);
                     const bool downOccupy2 = state.isDownOccupy(site1);
                     if (upOccupy1 != upOccupy2) {
-                        const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                        const ScalarType hopUp = hop * Tr(state.hopUpSign(site, site1));
                         const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
                         target[index] += upOccupy1 ? hopUp : -hopUp;
                     }
 
                     if (downOccupy1 != downOccupy2) {
-                        const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                        const ScalarType hopDown = hop * Tr(state.hopDownSign(site, site1));
                         const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
                         target[index] += downOccupy1 ? hopDown : -hopDown;
                     }
@@ -195,7 +204,7 @@ namespace Physica {
                 numRepel += upOccupy1 && downOccupy1;
             }
         }
-        target[index] += factor * (getRepelU() * RealType(numRepel));
+        target[index] += factor * (getRepelU() * Tr(numRepel));
     }
 }
 
