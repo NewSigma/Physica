@@ -26,7 +26,7 @@ namespace Physica {
         using ScalarType = Diff<T, Mode, Order>;
     public:
         constexpr static size_t Size = BestPacket<T, Length>::Size;
-        using Type = std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
+        using Type = std::conditional<Size <= 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length>

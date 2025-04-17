@@ -18,11 +18,19 @@
  */
 #pragma once
 
+#include "Physica/Core/Scalar/RealImpl/FloatMP.h"
 #include "AddBasic.h"
 #include "DivBasic.h"
 #include "ArraySupport.h"
 
 namespace Physica {
+    template<std::integral T>
+    Real<FloatMP>::Real(T x) : Real(SignedMPUnit(x)) {
+        assert(x <= std::numeric_limits<SignedMPUnit>::max());
+    }
+
+    template<Scalar T>
+    Real<FloatMP>::Real(const T& x) requires(!Diffable<T>) : Real(double(x)) {}
     /**
      * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
      * This function provide a quick sign check compare to using isPositive() and isNegative().

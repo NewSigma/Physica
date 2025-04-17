@@ -64,12 +64,7 @@ namespace Physica {
 
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> ln1p(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::log1pf(x.toMachine()));
-        else {
-            static_assert(Option == Float64, "[Error]: Unexpected type");
-            return Real<Option>(::log1p(x.toMachine()));
-        }
+        return Real<Option>(std::log1p(x.toMachine()));
     }
     /**
      * \return log_a n

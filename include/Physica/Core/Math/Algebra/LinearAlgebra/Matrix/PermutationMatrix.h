@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,22 +24,25 @@
 namespace Physica {
     template<Scalar T>
     class PermutationMatrix : public RValueMatrix<PermutationMatrix<T>> {
+        using This = PermutationMatrix<T>;
+
         Array<size_t> indices;
     public:
         PermutationMatrix() = default;
         PermutationMatrix(size_t order);
         PermutationMatrix(Array<size_t> indices_);
-        PermutationMatrix(const PermutationMatrix&) = default;
-        PermutationMatrix(PermutationMatrix&&) noexcept = default;
+        PermutationMatrix(const This&) = default;
+        PermutationMatrix(This&&) noexcept = default;
         ~PermutationMatrix() = default;
         /* Operators */
-        PermutationMatrix& operator=(PermutationMatrix obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void swapRows(size_t row1, size_t row2);
         [[nodiscard]] PermutationMatrix inverse() const noexcept;
-        void swap(PermutationMatrix& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] auto& getIndices() noexcept { return indices; }
         [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
     };
@@ -63,12 +66,6 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PermutationMatrix<T>& PermutationMatrix<T>::operator=(PermutationMatrix obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T>
     void PermutationMatrix<T>::swapRows(size_t row1, size_t row2) {
         std::swap(indices[row1], indices[row2]);
     }
@@ -82,7 +79,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void PermutationMatrix<T>::swap(PermutationMatrix& __restrict obj) noexcept {
+    void PermutationMatrix<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         indices.swap(obj.indices);
     }

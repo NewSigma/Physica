@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,16 +22,21 @@
 
 namespace Physica {
     template<>
-    __host__ __device__ Real<FloatMP> abs(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> abs(const Real<FloatMP>& s) noexcept;
 
     template<>
-    __host__ __device__ Real<FloatMP> sqrt(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> sqrt(const Real<FloatMP>& s) noexcept;
 
     template<>
-    __host__ __device__ Real<FloatMP> ln(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> ln(const Real<FloatMP>& s) noexcept;
 
     template<>
-    __host__ __device__ Real<FloatMP> exp(const Real<FloatMP>& s) noexcept;
+    __host__ __device__ inline Real<FloatMP> ln1p(const Real<FloatMP>& x) noexcept {
+        return ln(Real<FloatMP>(1) + x);
+    }
+
+    template<>
+    PHYSICA_API __host__ __device__ Real<FloatMP> exp(const Real<FloatMP>& s) noexcept;
 
     //!Compute a ^ unit.
     inline Real<FloatMP> powWord(const Real<FloatMP>& a, MPUnit unit) {
@@ -79,53 +84,53 @@ namespace Physica {
     }
 
     template<>
-    Real<FloatMP> factorial(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> factorial(const Real<FloatMP>& s) noexcept;
 
     template<>
-    __host__ __device__ Real<FloatMP> cos(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> cos(const Real<FloatMP>& s) noexcept;
 
     template<>
-    __host__ __device__ Real<FloatMP> sin(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> sin(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> arctan(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> arctan(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> cosh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> cosh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> sinh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> sinh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> tanh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> tanh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> sech(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> sech(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> csch(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> csch(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> coth(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> coth(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> arccosh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> arccosh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> arcsinh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> arcsinh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> arctanh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> arctanh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Real<FloatMP> arccoth(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API Real<FloatMP> arccoth(const Real<FloatMP>& s) noexcept;
 
     template<>
-    __host__ __device__ Real<FloatMP> floor(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> floor(const Real<FloatMP>& s) noexcept;
 }

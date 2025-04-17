@@ -38,16 +38,17 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = ScalarType;
         using ComplexType = Complex<ScalarType>;
-        using MachineType = ScalarType;
+        using MachineType = double;
     };
 }
 
 namespace Physica {
     constexpr int GlobalPrecision = 4;
+    static_assert(GlobalPrecision > 1, "GlobalPrecision must be larger than 1.");
 
     template<>
-    class PHYSICA_API Real<FloatMP> : public ScalarBase<Real<FloatMP>> {
-        static_assert(GlobalPrecision > 1, "GlobalPrecision must be larger than 1.");
+    class PHYSICA_API Real<FloatMP> : public ScalarBase<Real<FloatMP>>, public CRCoro<Real<FloatMP>> {
+        using This = Real<FloatMP>;
     public:
         using ScalarType = Real<FloatMP>;
     private:
@@ -71,11 +72,14 @@ namespace Physica {
     public:
         Real();
         Real(int length_, int power_);
-        Real(int i);
         Real(SignedMPUnit unit);
+        template<std::integral T>
+        Real(T x);
         Real(double d);
         Real(const Integer& i);
         Real(const Rational& r);
+        template<Scalar T>
+        Real(const T& x) requires(!Diffable<T>);
         explicit Real(const char* s);
         explicit Real(const wchar_t* s);
         Real(const Real& s);
@@ -101,6 +105,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ int getPower() const noexcept { return power; }
         [[nodiscard]] __host__ __device__ int getSize() const noexcept { return std::abs(length); }
         [[nodiscard]] __host__ __device__ bool isZero() const { return byte[getSize() - 1] == 0; }
+        [[nodiscard]] MachineType toMachine() const noexcept { return double(*this); }
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }
@@ -138,10 +143,10 @@ namespace Physica {
     inline Real<FloatMP> operator++(Real<FloatMP>& s, int);
     inline Real<FloatMP> operator--(Real<FloatMP>& s, int);
     /* Compare */
-    bool absCompare(const Real<FloatMP>& s1, const Real<FloatMP>& s2);
-    bool operator> (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
-    bool operator< (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
-    bool operator== (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
+    PHYSICA_API bool absCompare(const Real<FloatMP>& s1, const Real<FloatMP>& s2);
+    PHYSICA_API bool operator> (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
+    PHYSICA_API bool operator< (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
+    PHYSICA_API bool operator== (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
 }
 
 namespace std {

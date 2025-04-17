@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,24 +19,18 @@
 #include "Physica/Core/Scalar/Real.h"
 
 namespace Physica {
-    //////////////////////////////////FloatMP///////////////////////////////////
     Real<FloatMP>::Real() : byte(nullptr), length(0), power(0) {}
 
     Real<FloatMP>::Real(int length_, int power_)
             : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
             , length(length_), power(power_) {
-        /**
-         * Length of scalar must not equal to INT_MIN or -length will make no sense.
-         */
-        assert(length != INT_MIN);
+        assert(length != INT_MIN && "Length of scalar must not equal to INT_MIN or -length will make no sense");
     }
-
-    Real<FloatMP>::Real(int i) : Real(static_cast<SignedMPUnit>(i)) {}
 
     Real<FloatMP>::Real(SignedMPUnit unit)
             : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
             , length(unit > 0 ? 1 : -1), power(0) {
-            byte[0] = unit > 0 ? unit : -unit;
+        byte[0] = unit > 0 ? unit : -unit;
     }
 
     Real<FloatMP>::Real(double d) {

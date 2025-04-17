@@ -27,7 +27,7 @@ namespace Physica {
         using ScalarType = Complex<T>;
     public:
         constexpr static size_t Size = RealPacket::Size / 2;
-        using Type = std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
+        using Type = std::conditional<Size <= 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
     template<Scalar T, size_t Length>

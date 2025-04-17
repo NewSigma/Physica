@@ -23,6 +23,9 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
+    template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
+    class SVD;
+
     template<class Derived>
     auto RValueMatrix<Derived>::norm1() const -> Tr {
         Tr maxNorm1 = 0;
@@ -62,7 +65,7 @@ namespace Physica {
             using MatVecDot = decltype(m.hermite() * unit(y));
             z.template operator=<MatVecDot, Executor>(m.hermite() * unit(y));
             const Trv criteria = iteration == 0 ? (z.reals().sum().value() * factor) : z[index].real().value();
-            const bool isConverged = z.values().normInf() <= criteria * Trv(1 + std::numeric_limits<T>::epsilon());
+            const bool isConverged = z.values().normInf() <= criteria * Trv(std::numeric_limits<T>::epsilon() + 1);
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1
             if (isConverged || isCycling) {
                 if constexpr (isComplex)
@@ -111,5 +114,13 @@ namespace Physica {
         for (size_t i = 0; i < getRow(); ++i)
             result = std::max(abs(row(i)).sum(), result);
         return result;
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::cond2() const -> T {
+        SVD<T, RowAtCompile, ColAtCompile> svd(getRow(), getCol());
+        svd.compute(Base::getDerived());
+        const auto& s = svd.getSingulars();
+        return s.max() / s.min();
     }
 }

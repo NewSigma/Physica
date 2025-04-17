@@ -71,9 +71,12 @@ namespace Physica {
         class EnableMKL {
             using U1 = std::remove_cvref<T1>::type;
             using U2 = std::remove_cvref<T2>::type;
+            using ScalarType1 = U1::ScalarType;
+            using ScalarType2 = U2::ScalarType;
         public:
             constexpr static bool value = HasMKL()
-                                       && std::same_as<typename U1::ScalarType, typename U2::ScalarType>
+                                       && std::same_as<ScalarType1, ScalarType2>
+                                       && (ScalarType1::Option == Float32 || ScalarType1::Option == Float64)
                                        && is_continuous<U1>::value
                                        && is_continuous<U2>::value
                                        && !Diffable<U1>

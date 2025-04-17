@@ -124,6 +124,7 @@ namespace Physica {
         [[nodiscard]] Tr norm1_power(unsigned int maxIteration) const;
         [[nodiscard]] Tr normF() const;
         [[nodiscard]] Tr normInf() const;
+        [[nodiscard]] T cond2() const;
 
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
