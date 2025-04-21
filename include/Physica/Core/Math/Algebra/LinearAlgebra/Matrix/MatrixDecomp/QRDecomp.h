@@ -42,9 +42,9 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<Matrix M>
-        void compute(const M& source);
+        void compute(const M& source, bool pivote = false);
         template<Matrix M>
-        void compute_mkl(const M& source);
+        void compute_mkl(const M& source, bool pivote = false);
 
         [[nodiscard]] VectorND<T> toQTD();
 
@@ -73,9 +73,11 @@ namespace Physica {
 
     template<Scalar T>
     template<Matrix M>
-    void QRDecomp<T>::compute(const M& source) {
+    void QRDecomp<T>::compute(const M& source, bool pivote) {
+        assert(getRow() == source.getRow());
+        assert(getCol() == source.getCol());
         if constexpr (HasMKL())
-            compute_mkl(source);
+            compute_mkl(source, pivote);
         else
             noImpl(__func__);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,8 +28,8 @@ namespace Physica {
         using typename Base::ScalarType;
         using typename Base::ElementType;
     private:
-        using typename Base::VectorType;
         using Base::mesh;
+        using typename Base::VectorType;
 
         Functor func;
     public:
@@ -43,7 +43,8 @@ namespace Physica {
      * ScalarType Functor(VectorType)
      */
     template<class MeshType, class Functor>
-    PoissonModel<MeshType, Functor>::PoissonModel(MeshType mesh, Functor func_) : Base(std::move(mesh)), func(std::move(func_)) {}
+    PoissonModel<MeshType, Functor>::PoissonModel(MeshType mesh, Functor func_)
+            : Base(std::move(mesh)), func(std::move(func_)) {}
 
     template<class MeshType, class Functor>
     template<class Integrator>
@@ -66,27 +67,26 @@ namespace Physica {
                             const auto inv_jacobi = elem.inv_jacobi(p);
                             const VectorType g1 = inv_jacobi.transpose() * elem.grad(i, p);
                             const VectorType g2 = inv_jacobi.transpose() * elem.grad(j, p);
-                            return abs(elem.jacobi(p).determinate()) * (g1 * g2);
+                            return abs(elem.jacobi(p).det()) * (g1 * g2);
                         };
                         const ScalarType integral = ElementType::template gauss_integral<decltype(func), -1>(func);
 
                         switch (nodeTypes[baseNode]) {
-                            case NodeType::Free: {
-                                const size_t col = Base::nodeToVar(baseNode);
-                                const ScalarType value = Base::A.calc(row, col) + integral;
-                                Base::A.insert(value, row, col);
-                                break;
-                            }
-                            case NodeType::Dirichlet: {
-                                Base::b[row] -= coeffs[baseNode] * integral;
-                                break;
-                            }
+                        case NodeType::Free: {
+                            const size_t col = Base::nodeToVar(baseNode);
+                            const ScalarType value = Base::A.calc(row, col) + integral;
+                            Base::A.insert(value, row, col);
+                            break;
+                        }
+                        case NodeType::Dirichlet:
+                            Base::b[row] -= coeffs[baseNode] * integral;
+                            break;
                         }
                     }
 
                     Base::b[row] -= Integrator::run([&, i](VectorType p) {
-                                        return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * func(elem.toGlobalPos(p));
-                                    });
+                        return abs(elem.jacobi(p).det()) * elem.baseFunc(i, p) * func(elem.toGlobalPos(p));
+                    });
                 }
             }
         }

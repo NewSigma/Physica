@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,9 +32,12 @@ namespace Physica {
         const T& mat;
     public:
         explicit DiagVector(const T& mat_) : mat(mat_) {}
-        DiagVector(const This&) = delete;
-        DiagVector(This&&) = delete;
+        DiagVector(const This&) = default;
+        DiagVector(This&&) = default;
         ~DiagVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return mat.calc(index, index); }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
@@ -53,8 +56,8 @@ namespace Physica {
         T& mat;
     public:
         explicit DiagVector(T& mat_) : mat(mat_) {}
-        DiagVector(const This&) = delete;
-        DiagVector(This&&) = delete;
+        DiagVector(const This&) = default;
+        DiagVector(This&&) = default;
         ~DiagVector() = default;
         /* Operators */
         using Base::operator=;

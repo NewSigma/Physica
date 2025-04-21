@@ -64,6 +64,80 @@ namespace Physica {
     }
 
     template<Scalar T>
+    template<Scalar U>
+    __host__ __device__ auto Complex<T>::operator+(const U& x) const {
+        using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
+        if constexpr (U::isComplex)
+            return RtnType(real() + x.real(), imag() + x.imag());
+        else
+            return RtnType(real() + x.real(), imag());
+    }
+
+    template<Scalar T>
+    template<Scalar U>
+    __host__ __device__ auto Complex<T>::operator-(const U& x) const {
+        using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
+        if constexpr (U::isComplex)
+            return RtnType(real() - x.real(), imag() - x.imag());
+        else
+            return RtnType(real() - x.real(), imag());
+    }
+
+    template<Scalar T>
+    template<Scalar U>
+    __host__ __device__ auto Complex<T>::operator*(const U& x) const {
+        using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
+        if constexpr (U::isComplex) {
+            const auto& re_1 = real();
+            const auto& im_1 = imag();
+            const auto& re_2 = x.real();
+            const auto& im_2 = x.imag();
+            /*
+             * Optimize:
+             * Use (a + ib)(c + id) = (ac - bd) + i((a + b)(c + d) - ac - bd)
+             * instead of (a + ib)(c + id) = (ac - bd) + i(ad + bc) to avoid multiply.
+             * But it is unclear if this method is useful to every machine.
+             * May be add checks and use Config.h to determine which method to use.
+             */
+            const auto ac = re_1 * re_2;
+            const auto bd = im_1 * im_2;
+            return RtnType(ac - bd, (re_1 + im_1) * (re_2 + im_2) - ac - bd);
+        }
+        else
+            return RtnType(real() * x, imag() * x);
+    }
+
+    template<Scalar T>
+    template<Scalar U>
+    __host__ __device__ auto Complex<T>::operator/(const U& x) const {
+        using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
+        if constexpr (U::isComplex) {
+            const auto& re_1 = real();
+            const auto& im_1 = imag();
+            const auto& re_2 = x.real();
+            const auto& im_2 = x.imag();
+            /*
+             * Optimize: Using the same method with operator*().
+             */
+            const auto ac = re_1 * re_2;
+            const auto bd = im_1 * im_2;
+            // May overflow
+            // Algorithm 116; https://dl.acm.org/doi/pdf/10.1145/368637.368661
+            const auto divisor = square(re_2) + square(im_2);
+            return RtnType((ac + bd) / divisor, ((re_1 + im_1) * (re_2 - im_2) - ac + bd) / divisor);
+        }
+        else {
+            const auto rep = reciprocal(x);
+            return RtnType(real() * rep, imag() * rep);
+        }
+    }
+
+    template<Scalar T>
+    __host__ __device__ auto Complex<T>::operator-() const -> This {
+        return Complex<T>(-real(), -imag());
+    }
+
+    template<Scalar T>
     __host__ __device__ inline T Complex<T>::squaredNorm() const {
         return square(re) + square(im);
     }
@@ -141,6 +215,7 @@ namespace Physica {
         T im = T::template random_normal<R>();
         return Complex(std::move(re), std::move(im));
     }
+
 #ifdef PHYSICA_HDF5
     template<Scalar T>
     const H5::DataType& Complex<T>::getH5DataType() {
@@ -154,93 +229,30 @@ namespace Physica {
         return *instance;
     }
 #endif
-    template<Scalar T>
-    __host__ __device__ inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2) {
-        return Complex<T>(c1.real() + c2.real(), c1.imag() + c2.imag());
+
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator+(const T& x, const Complex<U>& y) requires(!T::isComplex) {
+        return y + x;
     }
 
-    template<Scalar T>
-    __host__ __device__ inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2) {
-        return Complex<T>(c1.real() - c2.real(), c1.imag() - c2.imag());
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator-(const T& x, const Complex<U>& y) requires(!T::isComplex) {
+        using RtnType = Internal::BinaryScalarOpRtnTy<T, Complex<U>>::Type;
+        return RtnType(x - y.real(), -y.imag());
     }
 
-    template<Scalar T>
-    __host__ __device__ Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2) {
-        const auto& re_1 = c1.real();
-        const auto& im_1 = c1.imag();
-        const auto& re_2 = c2.real();
-        const auto& im_2 = c2.imag();
-        /*
-         * Optimize:
-         * Use (a + ib)(c + id) = (ac - bd) + i((a + b)(c + d) - ac - bd)
-         * instead of (a + ib)(c + id) = (ac - bd) + i(ad + bc) to avoid multiply.
-         * But it is unclear if this method is useful to every machine.
-         * May be add checks and use Config.h to determine which method to use.
-         */
-        const auto ac = re_1 * re_2;
-        const auto bd = im_1 * im_2;
-        return Complex<T>(ac - bd
-                , (re_1 + im_1) * (re_2 + im_2) - ac - bd);
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator*(const T& x, const Complex<U>& y) requires(!T::isComplex) {
+        return y * x;
     }
 
-    template<Scalar T>
-    __host__ __device__ Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2) {
-        const auto& re_1 = c1.real();
-        const auto& im_1 = c1.imag();
-        const auto& re_2 = c2.real();
-        const auto& im_2 = c2.imag();
-        /*
-         * Optimize: Using the same method with operator*().
-         */
-        const auto ac = re_1 * re_2;
-        const auto bd = im_1 * im_2;
-        const auto divisor = square(re_2) + square(im_2);
-        return Complex<T>((ac + bd) / divisor
-                , ((re_1 + im_1) * (re_2 - im_2) - ac + bd) / divisor);
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator+(const Complex<T>& c,const Real<Option>& s) {
-        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() + s, c.imag());
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator-(const Complex<T>& c, const Real<Option>& s) {
-        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() - s, c.imag());
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator*(const Complex<T>& c, const Real<Option>& s) {
-        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() * s, c.imag() * s);
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator/(const Complex<T>& c, const Real<Option>& s) {
-        const auto rep = reciprocal(s);
-        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(c.real() * rep, c.imag() * rep);
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator+(const Real<Option>& s, const Complex<T>& c) {
-        return c + s;
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator-(const Real<Option>& s, const Complex<T>& c) {
-        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(s - c.real(), -c.imag());
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator*(const Real<Option>& s, const Complex<T>& c) {
-        return c * s;
-    }
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator/(const Real<Option>& s, const Complex<T>& c) {
-        const auto& re = c.real();
-        const auto& im = c.imag();
-        const auto divisor = s * reciprocal(square(re) + square(im));
-        return Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type>(re * divisor, -im * divisor);
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator/(const T& x, const Complex<U>& y) requires(!T::isComplex) {
+        using RtnType = Internal::BinaryScalarOpRtnTy<T, Complex<U>>::Type;
+        const auto& re = y.real();
+        const auto& im = y.imag();
+        const auto divisor = x * reciprocal(square(re) + square(im));
+        return RtnType(re * divisor, -im * divisor);
     }
 }
 

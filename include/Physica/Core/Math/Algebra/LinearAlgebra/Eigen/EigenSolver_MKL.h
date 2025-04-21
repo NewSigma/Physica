@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,6 @@ namespace Physica {
         constexpr int Major = MatrixOption::isRowMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr int Layout = Major == MatrixOption::Row ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
         using WorkingMatrixMKL = DenseMatrix<T, Major | MatrixOption::Element>;
-        using Tm = std::conditional<isComplex, typename ComplexType::MKL_Complex, typename T::MachineType>::type;
 
         pre_compute(source, computeEigenvectors_);
         const size_t order = source.getRow();
@@ -54,7 +53,7 @@ namespace Physica {
                 else
                     check_lapack(LAPACKE_dgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order));
                 for (size_t i = 0; i < order; ++i)
-                    eigenvalues[i] = ComplexType(ereal[i], eimag[i]);
+                    eigenvalues[i] = Tc(ereal[i], eimag[i]);
             }
         }
         else {
@@ -76,7 +75,7 @@ namespace Physica {
                 else
                     check_lapack(LAPACKE_dgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, wr, wi, nullptr, order));
                 for (size_t i = 0; i < order; ++i)
-                    eigenvalues[i] = ComplexType(ereal[i], eimag[i]);
+                    eigenvalues[i] = Tc(ereal[i], eimag[i]);
             }
         }
     }

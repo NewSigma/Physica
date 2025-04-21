@@ -35,6 +35,7 @@ namespace Physica {
     template<class T> class NormMatrix;
     template<class T> class ValueMatrix;
     template<class T, int GradOrder> class GradMatrix;
+    template<Scalar> class QRDecomp;
     /**
      * \class RValueMatrix: The base class of all matrixes
      */
@@ -133,6 +134,8 @@ namespace Physica {
         [[nodiscard]] T mean() const;
         [[nodiscard]] T trace() const;
         [[nodiscard]] CoDiff<T> lnSumExp() const;
+        [[nodiscard]] CoDiff<T> det() const;
+        [[nodiscard]] T lnAbsDet() const;
 
         [[nodiscard]] inline auto format() const noexcept;
         [[nodiscard]] inline auto transpose() const noexcept;

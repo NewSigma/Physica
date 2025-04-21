@@ -156,6 +156,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
+        /* Static members */
+        constexpr static void checkComplexCompare();
     };
 
     template<class Derived>
@@ -218,25 +220,25 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ inline bool ScalarBase<Derived>::operator>(float s) const noexcept {
-        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        checkComplexCompare();
         return float(value()) > s;
     }
 
     template<class Derived>
     __host__ __device__ inline bool ScalarBase<Derived>::operator<(float s) const noexcept {
-        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        checkComplexCompare();
         return float(value()) < s;
     }
 
     template<class Derived>
     __host__ __device__ inline bool ScalarBase<Derived>::operator>(double s) const noexcept {
-        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        checkComplexCompare();
         return double(value()) > s;
     }
 
     template<class Derived>
     __host__ __device__ inline bool ScalarBase<Derived>::operator<(double s) const noexcept {
-        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        checkComplexCompare();
         return double(value()) < s;
     }
     /**
@@ -430,6 +432,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isPositive() const noexcept {
+        checkComplexCompare();
         if constexpr (isDiffable)
             return value().isPositive();
         else
@@ -438,6 +441,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::isNegative() const noexcept {
+        checkComplexCompare();
         if constexpr (isDiffable)
             return value().isNegative();
         else
@@ -447,6 +451,11 @@ namespace Physica {
     template<class Derived>
     inline bool ScalarBase<Derived>::matchSign(const ScalarType& s1, const ScalarType& s2) {
         return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
+    }
+
+    template<class Derived>
+    constexpr void ScalarBase<Derived>::checkComplexCompare() {
+        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
     }
 
     template<Scalar T>

@@ -34,15 +34,15 @@ namespace Physica {
     class EigenSolver {
         using This = EigenSolver<T, Order>;
         constexpr static bool isComplex = T::isComplex;
+        using Tr = T::RealType;
+        using Tc = Tr::ComplexType;
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        using WorkingMatrix = Schur<T, Order>::WorkingMatrix;
     public:
-        using RealType = T::RealType;
-        using ComplexType = RealType::ComplexType;
-        using EigenvalueVector = DenseVector<ComplexType, Order>;
-        using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
+        using EigenvalueVector = DenseVector<Tc, Order>;
+        using EigenvectorMatrix = DenseMatrix<Tc, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
         using RawEigenvectorType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
     private:
-        using WorkingMatrix = Schur<T, Order>::WorkingMatrix;
-
         EigenvalueVector eigenvalues;
         RawEigenvectorType rawEigenvectors;
         bool computeEigenvectors;
@@ -92,7 +92,7 @@ namespace Physica {
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
         void computeComplexMatEigenvectors(WorkingMatrix& matrixT);
         /* Static members */
-        static bool defaultComp(ComplexType a, ComplexType b) noexcept;
+        static bool defaultComp(Tc a, Tc b) noexcept;
     };
 
     template<Scalar T, size_t Order>
@@ -261,8 +261,8 @@ namespace Physica {
                     auto fromCol1 = rawEigenvectors.col(i);
                     auto fromCol2 = rawEigenvectors.col(i + 1);
                     for (size_t j = 0; j < order; ++j) {
-                        toCol1[j] = ComplexType(fromCol1[j].real(), fromCol2[j].real());
-                        toCol2[j] = ComplexType(fromCol1[j].real(), -fromCol2[j].real());
+                        toCol1[j] = Tc(fromCol1[j].real(), fromCol2[j].real());
+                        toCol2[j] = Tc(fromCol1[j].real(), -fromCol2[j].real());
                     }
                     toCol1.toUnit();
                     toCol2.toUnit();
@@ -452,7 +452,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    bool EigenSolver<T, Order>::defaultComp(ComplexType a, ComplexType b) noexcept {
+    bool EigenSolver<T, Order>::defaultComp(Tc a, Tc b) noexcept {
         return a.real() < b.real();
     }
 }

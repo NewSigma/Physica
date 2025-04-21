@@ -64,7 +64,17 @@ namespace Physica {
         using Base::operator=;
         This& operator=(const This&) = default;
         This& operator=(This&&) = default;
-        __host__ __device__ bool operator==(const This& other) const;
+        [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
+
+        template<Scalar U>
+        [[nodiscard]] __host__ __device__ auto operator+(const U& x) const;
+        template<Scalar U>
+        [[nodiscard]] __host__ __device__ auto operator-(const U& x) const;
+        template<Scalar U>
+        [[nodiscard]] __host__ __device__ auto operator*(const U& x) const;
+        template<Scalar U>
+        [[nodiscard]] __host__ __device__ auto operator/(const U& x) const;
+        [[nodiscard]] __host__ __device__ This operator-() const;
         /* Operations */
         [[nodiscard]] __host__ __device__ inline T squaredNorm() const;
         [[nodiscard]] __host__ __device__ inline T norm() const;
@@ -95,44 +105,17 @@ namespace Physica {
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 
-    template<Scalar T>
-    __host__ __device__ inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2);
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator+(const T& x, const Complex<U>& y) requires(!T::isComplex);
 
-    template<Scalar T>
-    __host__ __device__ inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2);
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator-(const T& x, const Complex<U>& y) requires(!T::isComplex);
 
-    template<Scalar T>
-    __host__ __device__ Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2);
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator*(const T& x, const Complex<U>& y) requires(!T::isComplex);
 
-    template<Scalar T>
-    __host__ __device__ Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator+(const Complex<T>& c,const Real<Option>& s);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator-(const Complex<T>& c, const Real<Option>& s);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator*(const Complex<T>& c, const Real<Option>& s);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator/(const Complex<T>& c, const Real<Option>& s);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator+(const Real<Option>& s, const Complex<T>& c);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator-(const Real<Option>& s, const Complex<T>& c);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator*(const Real<Option>& s, const Complex<T>& c);
-
-    template<Scalar T, ScalarOption Option>
-    __host__ __device__ auto operator/(const Real<Option>& s, const Complex<T>& c);
-
-    template<Scalar T>
-    __host__ __device__ auto operator-(const Complex<T>& c) { return Complex<T>(-c.real(), -c.imag()); }
+    template<Scalar T, Scalar U>
+    __host__ __device__ auto operator/(const T& x, const Complex<U>& y) requires(!T::isComplex);
 
     template<Scalar T>
     std::ostream& operator<<(std::ostream& os, const Complex<T>& x) {

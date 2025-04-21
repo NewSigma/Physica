@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Scalar/Real.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermutationMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
@@ -39,7 +39,7 @@ namespace Physica {
     public:
         ~AABModel() = default;
         /* Static members */
-        static PermutationMatrix<T> sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
+        static PermMatrix<T> sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
         static bool isCellOrdered(const MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
         static VectorND<T> makeCharges(size_t numMolecule, Tv atomCharge1, Tv atomCharge2);
     protected:
@@ -52,7 +52,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    PermutationMatrix<T> AABModel<T>::sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2) {
+    PermMatrix<T> AABModel<T>::sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2) {
         using MassVector = MDCellType::MassVector;
         const auto& source = cell.getPos();
         const size_t numAtom = source.getRow();
@@ -117,7 +117,7 @@ namespace Physica {
             }
             cell = MDCellType(cell.getLattice(), std::move(new_pos), std::move(new_mass));
         }
-        return PermutationMatrix<T>(std::move(orderStage2));
+        return PermMatrix<T>(std::move(orderStage2));
     }
 
     template<Scalar T>

@@ -319,6 +319,30 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::det() const -> CoDiff<T> {
+        assert(getRow() == getCol() && "[Error]: Determinate requires square matrix");
+        constexpr size_t Order = RowAtCompile > ColAtCompile ? RowAtCompile : ColAtCompile;
+        if constexpr (Order == 1)
+            return calc(0, 0);
+        else if constexpr (Order == 2)
+            return calc(0, 0) * calc(1, 1) - calc(0, 1) * calc(1, 0);
+        else if constexpr (Order == 3)
+            return calc(0, 0) * (calc(1, 1) * calc(2, 2) - calc(1, 2) * calc(2, 1))
+                 + calc(0, 1) * (calc(1, 2) * calc(2, 0) - calc(1, 0) * calc(2, 2))
+                 + calc(0, 2) * (calc(1, 0) * calc(2, 1) - calc(1, 1) * calc(2, 0));
+        else {
+            QRDecomp<T> qr(Base::getDerived());
+            return qr.getMatrixR().diag().prod();
+        }
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::lnAbsDet() const -> T {
+        QRDecomp<T> qr(Base::getDerived());
+        return ln(abs(qr.getMatrixR().diag())).sum();
+    }
+
+    template<class Derived>
     inline auto RValueMatrix<Derived>::format() const noexcept {
         return FormatedMatrix<Derived>(Base::getDerived());
     }

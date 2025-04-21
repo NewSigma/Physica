@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -95,26 +95,25 @@ namespace Physica {
                         const size_t baseNode = nodes[j];
                         const ScalarType integral = ElementType::gauss_integral(
                                 [=, &elem](VectorType p) {
-                                    return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * elem.baseFunc(j, p);
+                                    return abs(elem.jacobi(p).det()) * elem.baseFunc(i, p) * elem.baseFunc(j, p);
                                 });
 
                         switch (nodeTypes[baseNode]) {
-                            case NodeType::Free: {
-                                const size_t col = Base::nodeToVar(baseNode);
-                                const ScalarType value = Base::A.calc(row, col) + integral;
-                                Base::A.insert(value, row, col);
-                                break;
-                            }
-                            case NodeType::Dirichlet: {
-                                Base::b[row] -= coeffs[baseNode] * integral;
-                                break;
-                            }
+                        case NodeType::Free: {
+                            const size_t col = Base::nodeToVar(baseNode);
+                            const ScalarType value = Base::A.calc(row, col) + integral;
+                            Base::A.insert(value, row, col);
+                            break;
+                        }
+                        case NodeType::Dirichlet:
+                            Base::b[row] -= coeffs[baseNode] * integral;
+                            break;
                         }
                     }
 
                     const auto func = [&, i](VectorType p) -> ScalarType {
                         const VectorType globalPos = elem.toGlobalPos(p);
-                        return abs(elem.jacobi(p).determinate()) * elem.baseFunc(i, p) * initial(globalPos);
+                        return abs(elem.jacobi(p).det()) * elem.baseFunc(i, p) * initial(globalPos);
                     };
                     Base::b[row] += ElementType::template gauss_integral<decltype(func), 0>(func);
                 }
@@ -161,7 +160,7 @@ namespace Physica {
                             const ScalarType result2 = (force(globalPos) + (diffuseD - 1) * d_diffuseD) * (elem.baseFunc(j, p) * global_grad_i[1]);
 
                             const ScalarType result3 = -diffuseD * (global_grad_i[1] * global_grad_j[1]);
-                            return (result1 + result2 + result3) * abs(elem.jacobi(p).determinate());
+                            return (result1 + result2 + result3) * abs(elem.jacobi(p).det());
                         };
                         const ScalarType integral = ElementType::template gauss_integral<decltype(func), 0>(func);
                         const size_t col = Base::nodeToVar(baseNode);

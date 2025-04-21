@@ -96,7 +96,7 @@ namespace Physica {
         inline void setLattice(LatticeMatrix lattice);
         /* Static members */
         [[nodiscard]] static PositionMatrix makePermanentDipole(const PeriodicCell<T, 3>& cell);
-        inline static PermutationMatrix<T> sortPosition(MDCellType& cell);
+        inline static PermMatrix<T> sortPosition(MDCellType& cell);
     private:
         PositionMatrix makeChargePos(const MDCellType& cell) const;
 
@@ -376,7 +376,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    inline PermutationMatrix<T> Q_TIP4P<T, EwaldType>::sortPosition(MDCellType& cell) {
+    inline PermMatrix<T> Q_TIP4P<T, EwaldType>::sortPosition(MDCellType& cell) {
         return Base::sortPosition(cell, 1, 8);
     }
 

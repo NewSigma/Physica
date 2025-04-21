@@ -22,46 +22,6 @@
 #include "Flatten.h"
 
 namespace Physica {
-    namespace Internal {
-        /**
-         * \tparam rank
-         * The rank of matrix.
-         */
-        template<class Derived, size_t rank>
-        class DeterminateImpl {
-        public:
-            static typename Derived::ScalarType run([[maybe_unused]] const Derived& m) {
-                noImpl("High order determinate");
-            }
-        };
-
-        template<class Derived>
-        class DeterminateImpl<Derived, 1> {
-        public:
-            static inline CoDiff<typename Derived::ScalarType> run(const Derived& m) {
-                return m(0, 0);
-            }
-        };
-
-        template<class Derived>
-        class DeterminateImpl<Derived, 2> {
-        public:
-            static inline CoDiff<typename Derived::ScalarType> run(const Derived& m) {
-                return m(0, 0) * m(1, 1) - m(0, 1) * m(1, 0);
-            }
-        };
-
-        template<class Derived>
-        class DeterminateImpl<Derived, 3> {
-        public:
-            static inline CoDiff<typename Derived::ScalarType> run(const Derived& m) {
-                return m(0, 0) * (m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1))
-                     + m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2))
-                     + m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0));
-            }
-        };
-    }
-
     template<class Derived>
     inline LValueMatrix<Derived>& LValueMatrix<Derived>::operator=(const This& m) {
         return operator=<Derived>(m);
@@ -302,15 +262,6 @@ namespace Physica {
     template<class Derived>
     auto LValueMatrix<Derived>::inverse() const noexcept {
         return InverseMatrix<Derived>(this->getDerived());
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::determinate() const -> CoDiff<ScalarType> {
-        assert(Base::getDerived().getRow() == Base::getDerived().getCol());
-        constexpr size_t RowAtCompile = Traits<Derived>::RowAtCompile;
-        constexpr size_t ColAtCompile = Traits<Derived>::ColAtCompile;
-        constexpr size_t Rank = RowAtCompile > ColAtCompile ? RowAtCompile : ColAtCompile;
-        return Internal::DeterminateImpl<Derived, Rank>::run(Base::getDerived());
     }
     /**
      * Reduce the element at one row using the other row.

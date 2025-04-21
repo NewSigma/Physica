@@ -18,16 +18,18 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermutationMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Exception/MKL/Lapack.h"
 #include "QRDecomp.h"
 
 namespace Physica {
     template<Scalar T>
     template<Matrix M>
-    void QRDecomp<T>::compute_mkl(const M& source) {
+    void QRDecomp<T>::compute_mkl(const M& source, bool pivote) {
         static_assert(T::Option == Float32 || T::Option == Float64);
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        assert(getRow() == source.getRow());
+        assert(getCol() == source.getCol());
         working = source;
 
         constexpr int Layout = LAPACK_COL_MAJOR;
@@ -35,22 +37,37 @@ namespace Physica {
         const size_t n = getCol();
         const size_t lda = m;
         auto* a = reinterpret_cast<Tm*>(working.data());
-
-        PermutationMatrix<T> perm(n);
-        auto* jpvt = reinterpret_cast<MKL_INT64*>(perm.getIndices().data());
         auto* tau = reinterpret_cast<Tm*>(taus.data());
 
-        if constexpr (isComplex) {
-            if constexpr (T::Option == Float32)
-                check_lapack(LAPACKE_cgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
-            else
-                check_lapack(LAPACKE_zgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
+        if (pivote) {
+            Array<size_t> perm(n, 0);
+            auto* jpvt = reinterpret_cast<MKL_INT64*>(perm.data());
+            if constexpr (isComplex) {
+                if constexpr (T::Option == Float32)
+                    check_lapack(LAPACKE_cgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
+                else
+                    check_lapack(LAPACKE_zgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
+            }
+            else {
+                if constexpr (T::Option == Float32)
+                    check_lapack(LAPACKE_sgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
+                else
+                    check_lapack(LAPACKE_dgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
+            }
         }
         else {
-            if constexpr (T::Option == Float32)
-                check_lapack(LAPACKE_sgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
-            else
-                check_lapack(LAPACKE_dgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
+            if constexpr (isComplex) {
+                if constexpr (T::Option == Float32)
+                    check_lapack(LAPACKE_cgeqrf_64(Layout, m, n, a, lda, tau));
+                else
+                    check_lapack(LAPACKE_zgeqrf_64(Layout, m, n, a, lda, tau));
+            }
+            else {
+                if constexpr (T::Option == Float32)
+                    check_lapack(LAPACKE_sgeqrf_64(Layout, m, n, a, lda, tau));
+                else
+                    check_lapack(LAPACKE_dgeqrf_64(Layout, m, n, a, lda, tau));
+            }
         }
     }
 

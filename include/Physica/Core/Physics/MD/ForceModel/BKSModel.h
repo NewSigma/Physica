@@ -91,7 +91,7 @@ namespace Physica {
         /* Setters */
         inline void setLattice(LatticeMatrix lattice);
         /* Static members */
-        inline static PermutationMatrix<T> sortPosition(MDCellType& cell);
+        inline static PermMatrix<T> sortPosition(MDCellType& cell);
     private:
         [[nodiscard]] inline static T pot_functor_impl(T A, T b, T c, T r, T r2);
         [[nodiscard]] inline static bool isCellOrdered(const MDCellType& cell);
@@ -215,7 +215,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    inline PermutationMatrix<T> BKSModel<T, EwaldType, AvoidTooNear>::sortPosition(MDCellType& cell) {
+    inline PermMatrix<T> BKSModel<T, EwaldType, AvoidTooNear>::sortPosition(MDCellType& cell) {
         return AABModelType::sortPosition(cell, 8, 14);
     }
 

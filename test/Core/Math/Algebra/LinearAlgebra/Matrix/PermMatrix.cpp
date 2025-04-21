@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermutationMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
@@ -24,7 +24,7 @@ using namespace Physica;
 using ScalarType = float64;
 
 int main() {
-    const PermutationMatrix<ScalarType> perm({0, 3, 2, 1});
+    const PermMatrix<ScalarType> perm({0, 3, 2, 1});
     const VectorND<ScalarType> v{0, 1, 2, 3};
     const VectorND<ScalarType> perm_v = perm * v;
     {

@@ -23,38 +23,39 @@
 
 namespace Physica {
     template<Scalar T>
-    class PermutationMatrix : public RValueMatrix<PermutationMatrix<T>> {
-        using This = PermutationMatrix<T>;
+    class PermMatrix : public RValueMatrix<PermMatrix<T>> {
+        using This = PermMatrix<T>;
 
         Array<size_t> indices;
     public:
-        PermutationMatrix() = default;
-        PermutationMatrix(size_t order);
-        PermutationMatrix(Array<size_t> indices_);
-        PermutationMatrix(const This&) = default;
-        PermutationMatrix(This&&) noexcept = default;
-        ~PermutationMatrix() = default;
+        PermMatrix() = default;
+        PermMatrix(size_t order);
+        PermMatrix(Array<size_t> indices_);
+        PermMatrix(const This&) = default;
+        PermMatrix(This&&) noexcept = default;
+        ~PermMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+
         void swapRows(size_t row1, size_t row2);
-        [[nodiscard]] PermutationMatrix inverse() const noexcept;
+        [[nodiscard]] PermMatrix inverse() const noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] auto& getIndices() noexcept { return indices; }
+        [[nodiscard]] const auto& getIndices() const noexcept { return indices; }
         [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
     };
 
     template<Scalar T>
-    PermutationMatrix<T>::PermutationMatrix(size_t order) : indices(order) {
+    PermMatrix<T>::PermMatrix(size_t order) : indices(order) {
         for (size_t i = 0; i < order; ++i)
             indices[i] = i;
     }
 
     template<Scalar T>
-    PermutationMatrix<T>::PermutationMatrix(Array<size_t> indices_) : indices(std::move(indices_)) {
+    PermMatrix<T>::PermMatrix(Array<size_t> indices_) : indices(std::move(indices_)) {
         std::unordered_set<size_t> buffer{};
         for (size_t index : indices) {
             if (index >= indices.getLength())
@@ -66,33 +67,33 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void PermutationMatrix<T>::swapRows(size_t row1, size_t row2) {
+    T PermMatrix<T>::calc(size_t row, size_t col) const {
+        return indices[row] == col ? T(1) : T(0);
+    }
+
+    template<Scalar T>
+    void PermMatrix<T>::swapRows(size_t row1, size_t row2) {
         std::swap(indices[row1], indices[row2]);
     }
 
     template<Scalar T>
-    PermutationMatrix<T> PermutationMatrix<T>::inverse() const noexcept {
+    PermMatrix<T> PermMatrix<T>::inverse() const noexcept {
         Array<size_t> result(indices.getLength());
         for (size_t i = 0; i < result.getLength(); ++i)
             result[indices[i]] = i;
-        return PermutationMatrix<T>(std::move(result));
+        return PermMatrix<T>(std::move(result));
     }
 
     template<Scalar T>
-    void PermutationMatrix<T>::swap(This& __restrict obj) noexcept {
+    void PermMatrix<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         indices.swap(obj.indices);
-    }
-
-    template<Scalar T>
-    T PermutationMatrix<T>::calc(size_t row, size_t col) const {
-        return indices[row] == col ? T(1) : T(0);
     }
 }
 
 namespace Physica {
     template<Scalar T>
-    class Traits<PermutationMatrix<T>> {
+    class Traits<PermMatrix<T>> {
     public:
         using ScalarType = T;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;

@@ -112,7 +112,6 @@ namespace Physica {
         [[nodiscard]] inline const auto diag() const noexcept;
 
         [[nodiscard]] auto inverse() const noexcept;
-        [[nodiscard]] CoDiff<ScalarType> determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void colReduce(size_t c1, size_t c2, size_t elementIndex);
         inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
