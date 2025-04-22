@@ -1,0 +1,119 @@
+/*
+ * Copyright 2025 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "../RValueMatrixImpl.h"
+
+namespace Physica {
+    template<Matrix M>
+    class TrigUpper<M> : public RValueMatrix<TrigUpper<M>> {
+        using This = TrigUpper<M>;
+        using Base = RValueMatrix<This>;
+
+        const M& mat;
+    public:
+        using typename Base::T;
+        using typename Base::Tv;
+    public:
+        TrigUpper(const M& mat_) : mat(mat_) {}
+        TrigUpper(const This&) = default;
+        TrigUpper(This&&) noexcept = default;
+        ~TrigUpper() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+        /* Getters */
+        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return mat.getCol(); }
+    };
+
+    template<Matrix M>
+    auto TrigUpper<M>::calc(size_t row, size_t col) const -> T {
+        if (row > col)
+            return T(0);
+        return mat.calc(row, col);
+    }
+
+    template<Matrix M>
+    auto TrigUpper<M>::calc_value(size_t row, size_t col) const -> Tv {
+        if (row > col)
+            return Tv(0);
+        return mat.calc_value(row, col);
+    }
+
+    template<Matrix M>
+    class TrigLower<M> : public RValueMatrix<TrigLower<M>> {
+        using This = TrigLower<M>;
+        using Base = RValueMatrix<This>;
+
+        const M& mat;
+    public:
+        using typename Base::T;
+        using typename Base::Tv;
+    public:
+        TrigLower(const M& mat_) : mat(mat_) {}
+        TrigLower(const This&) = default;
+        TrigLower(This&&) noexcept = default;
+        ~TrigLower() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+        /* Getters */
+        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return mat.getCol(); }
+    };
+
+    template<Matrix M>
+    auto TrigLower<M>::calc(size_t row, size_t col) const -> T {
+        if (row < col)
+            return T(0);
+        return mat.calc(row, col);
+    }
+
+    template<Matrix M>
+    auto TrigLower<M>::calc_value(size_t row, size_t col) const -> Tv {
+        if (row < col)
+            return Tv(0);
+        return mat.calc_value(row, col);
+    }
+}
+
+namespace Physica {
+    template<Matrix M>
+    class Traits<TrigUpper<M>> : public Traits<M> {
+    public:
+        constexpr static int Option = MatrixOption::getMajor<M>() | MatrixOption::AnyStorage;
+    };
+
+    template<Matrix M>
+    class Traits<TrigLower<M>> : public Traits<M> {
+    public:
+        constexpr static int Option = MatrixOption::getMajor<M>() | MatrixOption::AnyStorage;
+    };
+}
+
+#include "TrigInverse.h"

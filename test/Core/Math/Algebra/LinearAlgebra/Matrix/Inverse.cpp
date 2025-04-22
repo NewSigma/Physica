@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,7 @@ using namespace Physica;
 int main() {
     typedef DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 4, 4> Matrix4x4;
     const Matrix4x4 input{{1, 1, 1, 1}, {1, 1, -1, -1}, {1, -1, 1, -1}, {1, -1, -1, 1}};
-    InverseMatrix<Matrix4x4> inv(input);
+    Inverse<Matrix4x4> inv(input);
     const Matrix4x4 result(inv);
     const Matrix4x4 answer{{0.25, 0.25, 0.25, 0.25}, {0.25, 0.25, -0.25, -0.25}, {0.25, -0.25, 0.25, -0.25}, {0.25, -0.25, -0.25, 0.25}};
     if (!matrixNear(answer, result, 1E-15))

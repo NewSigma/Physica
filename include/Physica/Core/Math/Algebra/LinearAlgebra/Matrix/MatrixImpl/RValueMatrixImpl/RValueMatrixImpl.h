@@ -26,6 +26,14 @@
 namespace Physica {
     template<class Derived>
     template<Matrix M>
+    auto RValueMatrix<Derived>::operator*(const M& mat) const noexcept
+            requires(((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>) {
+        assert(getCol() == mat.getRow());
+        return MatrixProduct<Derived, M>(Base::getDerived(), mat);
+    }
+
+    template<class Derived>
+    template<Matrix M>
     void RValueMatrix<Derived>::assign(M& target) const {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
@@ -343,28 +351,43 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto RValueMatrix<Derived>::format() const noexcept {
+    auto RValueMatrix<Derived>::format() const noexcept {
         return FormatedMatrix<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueMatrix<Derived>::transpose() const noexcept {
+    auto RValueMatrix<Derived>::inverse() const noexcept {
+        return Inverse<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::transpose() const noexcept {
         return Transpose<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueMatrix<Derived>::conjugate() const noexcept {
+    auto RValueMatrix<Derived>::conjugate() const noexcept {
         return Conjugate<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueMatrix<Derived>::hermite() const noexcept {
+    auto RValueMatrix<Derived>::hermite() const noexcept {
         return Hermite<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueMatrix<Derived>::flatten() const noexcept {
+    auto RValueMatrix<Derived>::flatten() const noexcept {
         return FlattenR<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::triu() const noexcept {
+        return TrigUpper<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::tril() const noexcept {
+        return TrigLower<Derived>(Base::getDerived());
     }
 
     template<class Derived>
@@ -436,6 +459,12 @@ namespace Physica {
         static_assert(!isComplex || M::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");
     }
 
+    template<class Derived>
+    template<Matrix M>
+    __host__ __device__ constexpr bool RValueMatrix<Derived>::matmul_check() noexcept {
+        return ((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>;
+    }
+
     template<Matrix T1, Matrix T2>
     bool matrixNear(const T1& m1, const T2& m2, double precision) {
         assert(m1.getRow() == m2.getRow());
@@ -460,3 +489,13 @@ namespace Physica {
         return true;
     }
 }
+
+#include "Sum.h"
+#include "Inverse.h"
+#include "Transpose.h"
+#include "Conjugate.h"
+#include "Hermite.h"
+#include "Flatten.h"
+#include "Trig/Trig.h"
+#include "MatrixConvert.h"
+#include "ReshapedVector.h"

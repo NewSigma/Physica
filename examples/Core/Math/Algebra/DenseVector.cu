@@ -22,7 +22,7 @@
 
 using namespace Physica;
 using RandomSource = Random<MT19937>;
-using DVector = device_obj<VectorND<float64>>; // Simply address anything with device_obj<> to get its CUDA version
+using DVector = device_obj<VectorND<float64>>; // Simply dress anything with device_obj<> to get its CUDA version
 
 int main() {
     DVector a(8, 1.0);

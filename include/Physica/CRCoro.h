@@ -33,7 +33,7 @@ namespace Physica {
     class CRCoro : public CRTPBase<CRCoro<T>> {
         static_assert(std::is_object<T>::value, "[Error]: Must save the return by value");
         using This = CRCoro<T>;
-        using Base = CRTPBase<CRCoro<T>>;
+        using Base = CRTPBase<This>;
 
         struct RValueWrapper {
             T* p;

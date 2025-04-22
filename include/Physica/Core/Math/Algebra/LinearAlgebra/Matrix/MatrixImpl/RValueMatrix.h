@@ -23,19 +23,24 @@
 namespace Physica {
     template<class Derived> class LValueMatrix;
     template<class Derived> class ContinuousMatrix;
-    template<class T, bool ReduceCol> class MatrixSum;
-    template<class MatrixType> class Transpose;
-    template<class MatrixType> class Conjugate;
-    template<class MatrixType> class Hermite;
+    template<class, bool ReduceCol> class MatrixSum;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
+    template<class> class Inverse;
+    template<class> class Transpose;
+    template<class> class Conjugate;
+    template<class> class Hermite;
     template<class> class FlattenR;
-    template<class T> class RealMatrix;
-    template<class T> class ImagMatrix;
-    template<class T> class SquaredNormMatrix;
-    template<class T> class NormMatrix;
-    template<class T> class ValueMatrix;
-    template<class T, int GradOrder> class GradMatrix;
+    template<class> class TrigUpper;
+    template<class> class TrigLower;
+
+    template<class> class RealMatrix;
+    template<class> class ImagMatrix;
+    template<class> class SquaredNormMatrix;
+    template<class> class NormMatrix;
+    template<class> class ValueMatrix;
+    template<class, int GradOrder> class GradMatrix;
     template<Scalar> class QRDecomp;
+    template<Matrix, Matrix> class MatrixProduct;
     /**
      * \class RValueMatrix: The base class of all matrixes
      */
@@ -75,6 +80,8 @@ namespace Physica {
         [[nodiscard]] auto operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>);
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>);
+        template<Matrix M>
+        [[nodiscard]] auto operator*(const M& mat) const noexcept requires(((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>);
         /* Operations */
         template<Matrix M>
         void assign(M& target) const;
@@ -137,11 +144,14 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> det() const;
         [[nodiscard]] T lnAbsDet() const;
 
-        [[nodiscard]] inline auto format() const noexcept;
-        [[nodiscard]] inline auto transpose() const noexcept;
-        [[nodiscard]] inline auto conjugate() const noexcept;
-        [[nodiscard]] inline auto hermite() const noexcept;
-        [[nodiscard]] inline auto flatten() const noexcept;
+        [[nodiscard]] auto format() const noexcept;
+        [[nodiscard]] auto inverse() const noexcept;
+        [[nodiscard]] auto transpose() const noexcept;
+        [[nodiscard]] auto conjugate() const noexcept;
+        [[nodiscard]] auto hermite() const noexcept;
+        [[nodiscard]] auto flatten() const noexcept;
+        [[nodiscard]] auto triu() const noexcept;
+        [[nodiscard]] auto tril() const noexcept;
 
         [[nodiscard]] RealsRtnTy reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;
@@ -163,6 +173,8 @@ namespace Physica {
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
         template<Matrix M>
         __host__ __device__ static void assign_check(const M& target) noexcept;
+        template<Matrix M>
+        __host__ __device__ constexpr static bool matmul_check() noexcept;
     protected:
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;
@@ -194,13 +206,6 @@ namespace Physica {
 }
 
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
-#include "RValueMatrixImpl/Sum.h"
-#include "RValueMatrixImpl/Transpose.h"
-#include "RValueMatrixImpl/Conjugate.h"
-#include "RValueMatrixImpl/Hermite.h"
-#include "RValueMatrixImpl/Flatten.h"
-#include "RValueMatrixImpl/MatrixConvert.h"
-#include "RValueMatrixImpl/ReshapedVector.h"
 #include "MatrixProduct/GEMM.h"
 #include "MatrixProduct/GEMV.h"
 #include "MatrixProduct/GEVM.h"

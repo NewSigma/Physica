@@ -237,35 +237,26 @@ namespace Physica {
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator+(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
-        using ResultType = decltype(std::forward<T>(y) + std::forward<U>(x));
         if constexpr (IsHost() || ForwardDiff<T>)
             return std::forward<T>(y) + std::forward<U>(x);
-        else {
+        else
             unreachable();
-            return ResultType{};
-        }
     }
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator-(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
-        using ResultType = decltype(-(std::forward<T>(y) - std::forward<U>(x)));
         if constexpr (IsHost() || ForwardDiff<T>)
             return -(std::forward<T>(y) - std::forward<U>(x));
-        else {
+        else
             unreachable();
-            return ResultType{};
-        }
     }
 
     template<Scalar T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
-        using ResultType = decltype(std::forward<T>(y) * std::forward<U>(x));
         if constexpr (IsHost() || ForwardDiff<T>)
             return std::forward<T>(y) * std::forward<U>(x);
-        else {
+        else
             unreachable();
-            return ResultType{};
-        }
     }
 
     template<Scalar T, Scalar U>

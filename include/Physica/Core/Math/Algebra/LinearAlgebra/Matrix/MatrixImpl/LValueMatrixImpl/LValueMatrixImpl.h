@@ -258,11 +258,6 @@ namespace Physica {
     inline const auto LValueMatrix<Derived>::diag() const noexcept {
         return DiagVector<Derived, true>(Base::getConstCastDerived());
     }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::inverse() const noexcept {
-        return InverseMatrix<Derived>(this->getDerived());
-    }
     /**
      * Reduce the element at one row using the other row.
      * \param r1

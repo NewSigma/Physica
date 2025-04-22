@@ -1,5 +1,5 @@
 include(CTest)
-add_custom_target(Tests)
+add_custom_target(Tests COMMAND ctest --parallel WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 function(physica_add_test NAME SOURCES)
     add_executable(Test-${NAME})

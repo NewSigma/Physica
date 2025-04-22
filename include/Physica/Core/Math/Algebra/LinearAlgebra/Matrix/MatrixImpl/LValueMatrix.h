@@ -22,7 +22,6 @@
 #include "LValueMatrixImpl/LMatrixBlock.h"
 
 namespace Physica {
-    template<class MatrixType> class InverseMatrix;
     template<class> class FlattenL;
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
@@ -111,7 +110,6 @@ namespace Physica {
         [[nodiscard]] inline auto diag() noexcept;
         [[nodiscard]] inline const auto diag() const noexcept;
 
-        [[nodiscard]] auto inverse() const noexcept;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void colReduce(size_t c1, size_t c2, size_t elementIndex);
         inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
@@ -151,4 +149,3 @@ namespace Physica {
 
 #include "LValueMatrixImpl/LValueMatrixImpl.h"
 #include "LValueMatrixImpl/ReshapedVector.h"
-#include "LValueMatrixImpl/InverseMatrix.h"

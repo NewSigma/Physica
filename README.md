@@ -10,7 +10,7 @@ Physica is also an open source platform that maintains scientific code written i
 ## Table of Contents
 
 - [Design philosophy](#philosophy)
-- [Features](#feature)
+- [Features](#features)
 - [Usage](#usage)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)

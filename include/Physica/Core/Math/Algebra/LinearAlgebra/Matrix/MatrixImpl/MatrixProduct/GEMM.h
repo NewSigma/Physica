@@ -25,39 +25,40 @@ namespace Physica {
     class DenseMatrix;
 
     namespace Internal {
-        template<Matrix T1, Matrix T2>
+        template<Matrix M1, Matrix M2>
         struct ProductOption {
-            constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
-            constexpr static bool RowMajor = MatrixOption::isRowMatrix<T1>();
+            constexpr static bool SameMajor = MatrixOption::isSameMajor<M1, M2>();
+            constexpr static bool RowMajor = MatrixOption::isRowMatrix<M1>();
             constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Col)
                                                                : int(MatrixOption::Row))
                                                    : int(MatrixOption::AnyMajor);
-            constexpr static int Storage = (MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>())
+            constexpr static int Storage = (MatrixOption::isElementMatrix<M1>() && MatrixOption::isElementMatrix<M2>())
                                          ? MatrixOption::Element
                                          : MatrixOption::Vector;
             constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major) | Storage;
         };
     }
 
-    template<Matrix T1, Matrix T2>
-    class MatrixProduct : public RValueMatrix<MatrixProduct<T1, T2>> {
-        using This = MatrixProduct<T1, T2>;
+    template<Matrix M1, Matrix M2>
+    class MatrixProduct : public RValueMatrix<MatrixProduct<M1, M2>> {
+        using This = MatrixProduct<M1, M2>;
         using Base = RValueMatrix<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isReverseDiff;
         using Base::isComplex;
+    protected:
+        using typename Base::T;
     private:
-        using DefaultType = DenseMatrix<ScalarType,
-                                        Internal::ProductOption<T1, T2>::Option,
+        using DefaultType = DenseMatrix<T,
+                                        Internal::ProductOption<M1, M2>::Option,
                                         Base::RowAtCompile,
                                         Base::ColAtCompile,
-                                        HostAllocator<ScalarType>>;
+                                        HostAllocator<T>>;
 
-        const T1& mat1;
-        const T2& mat2;
+        const M1& mat1;
+        const M2& mat2;
     public:
-        MatrixProduct(const T1& mat1_, const T2& mat2_);
+        MatrixProduct(const M1& mat1_, const M2& mat2_);
         MatrixProduct(const This&) = default;
         MatrixProduct(This&&) noexcept = default;
         ~MatrixProduct() = default;
@@ -73,36 +74,36 @@ namespace Physica {
         void assign_mkl(LValueMatrix<M>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
 
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+        [[nodiscard]] T calc(size_t row, size_t col) const;
 
         template<Matrix M>
         void reverse(const M& grad) const noexcept requires(isReverseDiff);
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] const T1& getLHS() const noexcept { return mat1; }
-        [[nodiscard]] const T2& getRHS() const noexcept { return mat2; }
+        [[nodiscard]] const M1& getLHS() const noexcept { return mat1; }
+        [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
         /* Friends */
         friend class device_obj<This>;
     };
 
-    template<Matrix T1, Matrix T2>
-    MatrixProduct<T1, T2>::MatrixProduct(const T1& mat1_, const T2& mat2_) : mat1(mat1_), mat2(mat2_) {
+    template<Matrix M1, Matrix M2>
+    MatrixProduct<M1, M2>::MatrixProduct(const M1& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {
         assert(mat1.getCol() == mat2.getRow());
     }
 
-    template<Matrix T1, Matrix T2>
+    template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void MatrixProduct<T1, T2>::assign(LValueMatrix<M>& target) const {
-        constexpr bool GoodScalar = ScalarType::Option == Float32 || ScalarType::Option == Float64;
-        constexpr bool SameScalar = std::same_as<typename T1::ScalarType, typename T2::ScalarType> && std::same_as<ScalarType, typename M::ScalarType>;
-        constexpr bool SameMajor = MatrixOption::getMajor<T1>() == MatrixOption::getMajor<T2>();
-        constexpr bool isContinuous = is_continuous<T1>::value && is_continuous<T2>::value && is_continuous<M>::value;
-        constexpr bool isElement = MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>() && MatrixOption::isElementMatrix<M>();
-        constexpr bool isDiffable = Diffable<ScalarType>;
+    void MatrixProduct<M1, M2>::assign(LValueMatrix<M>& target) const {
+        constexpr bool GoodScalar = T::Option == Float32 || T::Option == Float64;
+        constexpr bool SameScalar = std::same_as<typename M1::ScalarType, typename M2::ScalarType> && std::same_as<T, typename M::ScalarType>;
+        constexpr bool SameMajor = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M2>();
+        constexpr bool isContinuous = is_continuous<M1>::value && is_continuous<M2>::value && is_continuous<M>::value;
+        constexpr bool isElement = MatrixOption::isElementMatrix<M1>() && MatrixOption::isElementMatrix<M2>() && MatrixOption::isElementMatrix<M>();
+        constexpr bool isDiffable = Diffable<T>;
         constexpr bool UseMKL = HasMKL() && GoodScalar && SameScalar && SameMajor && isContinuous && isElement && !isDiffable;
-        constexpr bool SmallMatrix1 = 0 < T1::SizeAtCompile && T1::SizeAtCompile <= 64;
-        constexpr bool SmallMatrix2 = 0 < T2::SizeAtCompile && T2::SizeAtCompile <= 64;
+        constexpr bool SmallMatrix1 = 0 < M1::SizeAtCompile && M1::SizeAtCompile <= 64;
+        constexpr bool SmallMatrix2 = 0 < M2::SizeAtCompile && M2::SizeAtCompile <= 64;
         constexpr bool SmallMatrix = SmallMatrix1 && SmallMatrix2;
         if constexpr (UseMKL && !SmallMatrix)
             assign_mkl(target);
@@ -110,19 +111,18 @@ namespace Physica {
             assign_base(target);
     }
 
-    template<Matrix T1, Matrix T2>
+    template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void MatrixProduct<T1, T2>::assign_base(LValueMatrix<M>& target) const {
-        constexpr static int defaultMajor = Internal::ProductOption<T1, T2>::Major;
+    void MatrixProduct<M1, M2>::assign_base(LValueMatrix<M>& target) const {
+        constexpr static int defaultMajor = Internal::ProductOption<M1, M2>::Major;
         constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
         using TargetType = LValueMatrix<M>;
-        using T = TargetType::ScalarType;
         if constexpr (isAnyMajor) {
             for (size_t i = 0; i < target.getMaxMajor(); ++i) {
                 for (size_t j = 0; j < target.getMaxMinor(); ++j) {
                     const size_t r = MatrixOption::rowFromMajorMinor<TargetType>(i, j);
                     const size_t c = MatrixOption::colFromMajorMinor<TargetType>(i, j);
-                    target.refFromMajorMinor(i, j) = T(calc(r, c));
+                    target.refFromMajorMinor(i, j) = calc(r, c);
                 }
             }
         }
@@ -131,49 +131,42 @@ namespace Physica {
                 for (size_t j = 0; j < (defaultMajor == MatrixOption::Col ?  getRow() : getCol()); ++j) {
                     const size_t r = MatrixOption::rowFromMajorMinor<DefaultType>(i, j);
                     const size_t c = MatrixOption::colFromMajorMinor<DefaultType>(i, j);
-                    target(r, c) = T(calc(r, c));
+                    target(r, c) = calc(r, c);
                 }
             }
         }
     }
 
-    template<Matrix T1, Matrix T2>
-    auto MatrixProduct<T1, T2>::calc(size_t row, size_t col) const -> ScalarType {
-        ScalarType result(0);
+    template<Matrix M1, Matrix M2>
+    auto MatrixProduct<M1, M2>::calc(size_t row, size_t col) const -> T {
+        T result(0);
         for (size_t i = 0; i < mat1.getCol(); ++i)
-            result += ScalarType(mat1.calc(row, i)) * ScalarType(mat2.calc(i, col));
+            result += mat1.calc(row, i) * mat2.calc(i, col);
         return result;
     }
 
-    template<Matrix T1, Matrix T2>
+    template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void MatrixProduct<T1, T2>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
-        if constexpr (ReverseDiff<T1>)
+    void MatrixProduct<M1, M2>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+        if constexpr (ReverseDiff<M1>)
             mat1.reverse(grad * mat2.transpose());
-        if constexpr (ReverseDiff<T2>)
+        if constexpr (ReverseDiff<M2>)
             mat2.reverse(mat1.transpose() * grad);
-    }
-
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto operator*(const T1& mat1, const T2& mat2) noexcept
-            requires(((T1::ColAtCompile != 1 && T2::ColAtCompile != 1) || (T1::ColAtCompile == 1 && T2::ColAtCompile == 1)) && !CUDA<T1> && !CUDA<T2>) {
-        assert(mat1.getCol() == mat2.getRow());
-        return MatrixProduct<T1, T2>(mat1, mat2);
     }
 }
 
 namespace Physica {
-    template<Matrix T1, Matrix T2>
-    class Traits<MatrixProduct<T1, T2>> {
-        static_assert(T1::ColAtCompile == T2::RowAtCompile ||
-                      T1::ColAtCompile == Dynamic ||
-                      T2::RowAtCompile == Dynamic,
+    template<Matrix M1, Matrix M2>
+    class Traits<MatrixProduct<M1, M2>> {
+        static_assert(M1::ColAtCompile == M2::RowAtCompile ||
+                      M1::ColAtCompile == Dynamic ||
+                      M2::RowAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-        constexpr static size_t RowAtCompile = T1::RowAtCompile;
-        constexpr static size_t ColAtCompile = T2::ColAtCompile;
+        constexpr static size_t RowAtCompile = M1::RowAtCompile;
+        constexpr static size_t ColAtCompile = M2::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

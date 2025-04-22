@@ -26,8 +26,8 @@ namespace Physica {
     void MatrixProduct<T1, T2>::assign_mkl(LValueMatrix<M>& target) const {
         constexpr int Major = MatrixOption::isRowMatrix<T1>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr auto Layout = Major == MatrixOption::Row ? CblasRowMajor : CblasColMajor;
-        using ComplexType = ScalarType::ComplexType;
-        using Tm = std::conditional<isComplex, typename ComplexType::MKL_Complex, typename ScalarType::MachineType>::type;
+        using Tc = T::ComplexType;
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         const size_t m = getRow();
         const size_t n = getCol();
         const size_t k = mat1.getCol();
@@ -41,13 +41,13 @@ namespace Physica {
         if constexpr (isComplex) {
             const Tm alpha = 1;
             const Tm beta = 0;
-            if constexpr (ScalarType::Option == Float32)
+            if constexpr (T::Option == Float32)
                 cblas_cgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
             else
                 cblas_zgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
         }
         else {
-            if constexpr (ScalarType::Option == Float32)
+            if constexpr (T::Option == Float32)
                 cblas_sgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);
             else
                 cblas_dgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);

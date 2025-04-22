@@ -144,30 +144,42 @@ namespace Physica {
         };
     }
 
-    template<Matrix T>
-    class InverseMatrix<T> : public RValueMatrix<InverseMatrix<T>> {
-        const T& matrix;
+    template<Matrix M>
+    class Inverse<M> : public RValueMatrix<Inverse<M>> {
+        using This = Inverse<M>;
+
+        const M& mat;
     public:
-        InverseMatrix(const LValueMatrix<T>& matrix_) : matrix(matrix_.getDerived()) {
-            assert(matrix.getRow() == matrix.getCol());
-        }
-        template<Matrix M>
-        void assign(M& target) const;
+        explicit Inverse(const M& mat_);
+        Inverse(const This&) = default;
+        Inverse(This&&) noexcept = default;
+        ~Inverse() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        /* Operations */
+        template<Matrix M1>
+        void assign(M1& target) const;
         /* Getters */
-        [[nodiscard]] const T& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] const M& getExpr() const noexcept { return mat; }
+        [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
     };
 
-    template<Matrix T>
     template<Matrix M>
-    void InverseMatrix<T>::assign(M& target) const {
-        constexpr size_t Size = T::RowAtCompile == Dynamic ? M::RowAtCompile : T::RowAtCompile;
-        Internal::InverseImpl<T, M, Size>::run(matrix, target);
+    Inverse<M>::Inverse(const M& mat_) : mat(mat_) {
+        assert(mat.getRow() == mat.getCol());
+    }
+
+    template<Matrix M>
+    template<Matrix M1>
+    void Inverse<M>::assign(M1& target) const {
+        constexpr size_t Size = M::RowAtCompile == Dynamic ? M1::RowAtCompile : M::RowAtCompile;
+        Internal::InverseImpl<M, M1, Size>::run(mat, target);
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<InverseMatrix<T>> : public Traits<T> {};
+    template<Matrix M>
+    class Traits<Inverse<M>> : public Traits<M> {};
 }

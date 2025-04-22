@@ -86,7 +86,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template <Matrix T>
+    template<Matrix T>
     class Traits<Hermite<T>> {
     private:
         constexpr static int OtherMajor = MatrixOption::isColMatrix<T>() ? MatrixOption::Row : MatrixOption::Col;
@@ -100,7 +100,7 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <Vector T>
+    template<Vector T>
     class Traits<HermiteVector<T>> {
     public:
         using ScalarType = T::ScalarType;

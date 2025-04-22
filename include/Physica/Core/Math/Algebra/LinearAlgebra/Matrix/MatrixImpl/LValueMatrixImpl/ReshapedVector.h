@@ -22,6 +22,9 @@
 
 namespace Physica {
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
+    class RValueReshapedVector;
+
+    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
     class LValueReshapedVector : public LValueMatrix<LValueReshapedVector<T, MatrixMajor, Row, Col>> {
         using This = LValueReshapedVector<T, MatrixMajor, Row, Col>;
         using Base = LValueMatrix<This>;

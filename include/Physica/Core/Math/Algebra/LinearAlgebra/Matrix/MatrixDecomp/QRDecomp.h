@@ -56,7 +56,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
         [[nodiscard]] MatrixND getMatrixQ() const noexcept;
-        [[nodiscard]] MatrixND getMatrixR() const noexcept;
+        [[nodiscard]] auto getMatrixR() const noexcept;
         [[nodiscard]] MatrixND getMatrixQ_mkl() const noexcept;
     };
 
@@ -115,11 +115,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto QRDecomp<T>::getMatrixR() const noexcept -> MatrixND {
-        MatrixND result = working;
-        for (size_t i = 0; i < taus.getLength() && i < getRow() - 1; ++i)
-            result.col(i).tail(i + 1).zeros();
-        return result;
+    auto QRDecomp<T>::getMatrixR() const noexcept {
+        return working.triu();
     }
 }
 

@@ -67,13 +67,13 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
 
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator+(const U& x) const;
+        [[nodiscard]] __host__ __device__ auto operator+(const U& x) const requires(!Diffable<U>);
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator-(const U& x) const;
+        [[nodiscard]] __host__ __device__ auto operator-(const U& x) const requires(!Diffable<U>);
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator*(const U& x) const;
+        [[nodiscard]] __host__ __device__ auto operator*(const U& x) const requires(!Diffable<U>);
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator/(const U& x) const;
+        [[nodiscard]] __host__ __device__ auto operator/(const U& x) const requires(!Diffable<U>);
         [[nodiscard]] __host__ __device__ This operator-() const;
         /* Operations */
         [[nodiscard]] __host__ __device__ inline T squaredNorm() const;
@@ -104,18 +104,6 @@ namespace Physica {
         [[nodiscard]] static Complex random_normal();
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
-
-    template<Scalar T, Scalar U>
-    __host__ __device__ auto operator+(const T& x, const Complex<U>& y) requires(!T::isComplex);
-
-    template<Scalar T, Scalar U>
-    __host__ __device__ auto operator-(const T& x, const Complex<U>& y) requires(!T::isComplex);
-
-    template<Scalar T, Scalar U>
-    __host__ __device__ auto operator*(const T& x, const Complex<U>& y) requires(!T::isComplex);
-
-    template<Scalar T, Scalar U>
-    __host__ __device__ auto operator/(const T& x, const Complex<U>& y) requires(!T::isComplex);
 
     template<Scalar T>
     std::ostream& operator<<(std::ostream& os, const Complex<T>& x) {
