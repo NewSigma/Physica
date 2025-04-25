@@ -139,7 +139,7 @@ namespace Physica {
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>& Random<Option, FixedSeed>::getInstance() noexcept {
+    auto Random<Option, FixedSeed>::getInstance() noexcept -> This& {
         thread_local static This instance{};
         return instance;
     }

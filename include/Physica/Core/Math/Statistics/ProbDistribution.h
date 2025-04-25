@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,12 +23,10 @@
 namespace Physica {
     template<Scalar T>
     class ProbDistribution {
-        using This = ProbDistribution;
-        using BucketType = Array<size_t>;
-        using VectorType = VectorND<T>;
+        using This = ProbDistribution<T>;
 
-        BucketType bucket;
-        VectorType seperates;
+        Array<size_t> bucket;
+        VectorND<T> seperates;
         T repDelta;
     public:
         ProbDistribution(T from, T to, size_t numBin);
@@ -40,13 +38,13 @@ namespace Physica {
         void operator+=(const This& pdf);
         /* Operations */
         void sample(T data);
-        inline void sample(VectorType datas);
+        inline void sample(VectorND<T> datas);
         void clear();
-        [[nodiscard]] VectorType makePosition() const;
-        [[nodiscard]] VectorType makeDistribution() const;
+        [[nodiscard]] VectorND<T> makePosition() const;
+        [[nodiscard]] VectorND<T> makeDistribution() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
+        [[nodiscard]] const auto& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }
         [[nodiscard]] T getFromPoint() const noexcept { return seperates[0]; }
         [[nodiscard]] T getToPoint() const noexcept { return *seperates.crbegin(); }
@@ -57,7 +55,7 @@ namespace Physica {
     template<Scalar T>
     ProbDistribution<T>::ProbDistribution(T from, T to, size_t numBin)
             : bucket(numBin, 0)
-            , seperates(VectorType::linspace(from, to, numBin + 1))
+            , seperates(VectorND<T>::linspace(from, to, numBin + 1))
             , repDelta(T(numBin) / (to - from)) {
         assert(from < to);
     }
@@ -70,7 +68,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void ProbDistribution<T>::sample(VectorType datas) {
+    inline void ProbDistribution<T>::sample(VectorND<T> datas) {
         for (auto data : datas)
             sample(data);
     }
@@ -82,17 +80,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    ProbDistribution<T>::VectorType
-    ProbDistribution<T>::makePosition() const {
+    auto ProbDistribution<T>::makePosition() const -> VectorND<T> {
         const T delta = (getToPoint() - getFromPoint()) / T(getNumBin());
         return seperates.head(getNumBin()) + (delta * 0.5);
     }
 
     template<Scalar T>
-    ProbDistribution<T>::VectorType
-    ProbDistribution<T>::makeDistribution() const {
+    auto ProbDistribution<T>::makeDistribution() const -> VectorND<T> {
         const T factor = repDelta / T(calcNumSample());
-        VectorType result(getNumBin());
+        VectorND<T> result(getNumBin());
         for (size_t i = 0; i < result.getLength(); ++i)
             result[i] = T(bucket[i]) * factor;
         return result;

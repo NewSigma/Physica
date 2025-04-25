@@ -157,19 +157,22 @@ namespace Physica {
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
         /* Static members */
-        constexpr static void checkComplexCompare();
+        template<Scalar U>
+        consteval static void checkAssign();
+        consteval static void checkComplexCompare();
     };
 
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline Derived& ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
+        checkAssign<U>();
         return Base::getDerived() = ScalarType(x);
     }
 
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
+        checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y += x.value();
@@ -182,7 +185,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
+        checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y -= x.value();
@@ -195,7 +198,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
+        checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y *= x.value();
@@ -208,7 +211,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
+        checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y /= x.value();
@@ -454,7 +457,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    constexpr void ScalarBase<Derived>::checkComplexCompare() {
+    template<Scalar U>
+    consteval void ScalarBase<Derived>::checkAssign() {
+        static_assert(isDiffable || !U::isDiffable, "[Error]: Assign diffable scalar to normal scalar discards grad");
+        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
+    }
+
+    template<class Derived>
+    consteval void ScalarBase<Derived>::checkComplexCompare() {
         static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
     }
 

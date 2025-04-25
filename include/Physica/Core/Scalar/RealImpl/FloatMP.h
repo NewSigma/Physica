@@ -96,6 +96,9 @@ namespace Physica {
         [[nodiscard]] Real operator<<(int bits) const;
         [[nodiscard]] Real operator>>(int bits) const;
         [[nodiscard]] Real operator-() const;
+        [[nodiscard]] bool operator> (const Real& other) const;
+        [[nodiscard]] bool operator< (const Real& other) const;
+        [[nodiscard]] bool operator== (const Real& other) const;
         /* Operations */
         Real& toOpposite() noexcept { length = -length; return *this; }
         Real& toAbs() noexcept { length = getSize(); return *this; }
@@ -144,10 +147,10 @@ namespace Physica {
     inline Real<FloatMP> operator--(Real<FloatMP>& s, int);
     /* Compare */
     PHYSICA_API bool absCompare(const Real<FloatMP>& s1, const Real<FloatMP>& s2);
-    PHYSICA_API bool operator> (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
-    PHYSICA_API bool operator< (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
-    PHYSICA_API bool operator== (const Real<FloatMP>& s1, const Real<FloatMP>& s2);
 }
+
+#include "FloatMPImpl/Const.h"
+#include "FloatMPImpl/FloatMPImpl.h"
 
 namespace std {
     template<>
@@ -160,7 +163,23 @@ namespace std {
             return result;
         }
     };
-}
 
-#include "FloatMPImpl/Const.h"
-#include "FloatMPImpl/FloatMPImpl.h"
+    template<>
+    struct formatter<Physica::Real<Physica::FloatMP>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Real<Physica::FloatMP>& obj, std::format_context& ctx) const {
+            const auto& basicConst = Physica::BasicConst::getInstance();
+            const int power = obj.getPower();
+            int exp = int(power * basicConst.ln_2_10);
+            double coefficient = std::exp(power * basicConst.ln_2 - exp * basicConst.ln_10) * obj[obj.getSize() - 1];
+            while (coefficient > 10) {
+                ++exp;
+                coefficient /= 10;
+            }
+            return std::format_to(ctx.out(), "{} * 10 ^ {}", coefficient, exp);
+        }
+    };
+}

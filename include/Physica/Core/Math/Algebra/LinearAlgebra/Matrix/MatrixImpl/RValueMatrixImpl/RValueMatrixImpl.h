@@ -457,6 +457,7 @@ namespace Physica {
         static_assert(RowAtCompile == M::RowAtCompile || RowAtCompile == Dynamic || M::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == M::ColAtCompile || ColAtCompile == Dynamic || M::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
         static_assert(!isComplex || M::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");
+        static_assert(!isDiffable || M::isDiffable, "[Error]: Assign a diffable matrix to normal matrix discards grads");
     }
 
     template<class Derived>

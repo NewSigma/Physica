@@ -46,7 +46,7 @@ namespace Physica {
         template<Matrix M>
         void compute_mkl(const M& source, bool pivote = false);
 
-        [[nodiscard]] VectorND<T> toQTD();
+        [[nodiscard]] VectorND<T> toQDT();
 
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
@@ -83,12 +83,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    VectorND<T> QRDecomp<T>::toQTD() {
+    VectorND<T> QRDecomp<T>::toQDT() {
         const size_t length = taus.getLength();
         VectorND<T> diag(length);
         for (size_t i = 0; i < length; ++i) {
             diag[i] = working(i, i);
-            working.col(i).head(i + 1) *= reciprocal(diag[i]);
+            working.row(i).tail(i) *= reciprocal(diag[i]);
         }
         return diag;
     }

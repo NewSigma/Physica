@@ -23,12 +23,12 @@
 
 namespace Physica {
     template<class Derived>
-    inline LValueMatrix<Derived>& LValueMatrix<Derived>::operator=(const This& m) {
+    auto LValueMatrix<Derived>::operator=(const This& m) -> This& {
         return operator=<Derived>(m);
     }
 
     template<class Derived>
-    inline LValueMatrix<Derived>& LValueMatrix<Derived>::operator=(This&& m) {
+    auto LValueMatrix<Derived>::operator=(This&& m) -> This& {
         return operator=<Derived>(m);
     }
 
@@ -37,14 +37,12 @@ namespace Physica {
     Derived& LValueMatrix<Derived>::operator=(const M& m) {
         if constexpr (std::is_same<Derived, M>::value)
             assert(this != &m && "[Error]: Self assign is likely a bug");
-        static_assert(RowAtCompile == Dynamic || M::RowAtCompile == Dynamic || RowAtCompile == M::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
-        static_assert(!(!isComplex && M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
+        Base::assign_check(m);
         Base::getDerived().resize(m.getRow(), m.getCol());
         m.assign(Base::getDerived());
         return Base::getDerived();
     }
-    
+
     template<class Derived>
     template<Scalar T>
     Derived& LValueMatrix<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {

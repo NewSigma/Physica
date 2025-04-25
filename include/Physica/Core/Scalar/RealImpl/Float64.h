@@ -91,7 +91,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
-        [[nodiscard]] bool isInteger() const;
         /* Static Members */
         [[nodiscard]] inline static Real nan() noexcept;
         template<RNG R>
@@ -143,6 +142,11 @@ namespace Physica {
 
     inline std::ostream& operator<<(std::ostream& os, const Real<Float64>& x) {
         return os << std::format("{}", x.toMachine());
+    }
+
+    inline std::istream& operator>>(std::istream& is, Real<Float64>& scalar) {
+        is >> scalar.d;
+        return is;
     }
 }
 
