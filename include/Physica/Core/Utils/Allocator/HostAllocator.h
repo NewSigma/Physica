@@ -93,6 +93,7 @@ namespace Physica {
 
     template<class T, size_t Align>
     T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) noexcept {
+        assert(new_size > 0 && "[Error]: Allocate nothing");
         T* new_p = allocate(new_size);
         if (p == nullptr)
             return new_p;

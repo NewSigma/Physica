@@ -51,7 +51,6 @@ namespace Physica {
         Complex(double _Complex x);
         __host__ __device__ Complex(T re_);
         __host__ __device__ Complex(T re_, T im_);
-        __host__ __device__ Complex(std::initializer_list<T> list);
         explicit Complex(std::complex<Tm> c);
     #ifdef PHYSICA_CUDA
         __host__ __device__ explicit Complex(thrust::complex<Tm> c);

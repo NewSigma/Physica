@@ -76,8 +76,8 @@ namespace Physica {
         __host__ __device__ Real operator-(const Real& s) const { return Real(f - s.f); }
         __host__ __device__ Real operator*(const Real& s) const { return Real(f * s.f); }
         __host__ __device__ Real operator/(const Real& s) const { return Real(f / s.f); }
-        Real operator<<(int i) const { return Real(f * std::pow(2, i)); }
-        Real operator>>(int i) const { return Real(f / std::pow(2, i)); }
+        __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(f, i)); }
+        __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(f, -i)); }
         __host__ __device__ Real operator-() const noexcept { return Real(-f); }
         __host__ __device__ bool operator>(const Real& s) const { return f > s.f; }
         __host__ __device__ bool operator<(const Real& s) const { return f < s.f; }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -75,11 +75,15 @@ namespace Physica {
     Hubbard<T, Dim>::HopIndexArray Hubbard<T, Dim>::makeHopIndexArray() {
         const auto numSite = Base::getNumSuperCellSite();
         HopIndexArray result(numSite);
-        Base::forSiteInLattice([this, numSite, &result](IndexType index) {
+        Base::forSiteInLattice([this, numSite, &result](const IndexType index) {
             const auto& dims = Base::getDims();
             Array<size_t> hopTargets{};
             hopTargets.reserve(numSite * Dim * 2);
             for (int dim = 0; dim < Dim; ++dim) {
+                const bool isMultiCount = dims[dim] == 2 && index[dim] == 1;
+                if (isMultiCount)
+                    continue;
+
                 IndexType index1 = index;
                 index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
                 hopTargets.append(IndexType::toIndex1D(dims, index1));

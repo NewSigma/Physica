@@ -31,15 +31,6 @@ namespace Physica {
     __host__ __device__ Complex<T>::Complex(T re_, T im_) : re(re_), im(im_) {}
 
     template<Scalar T>
-    __host__ __device__ Complex<T>::Complex(std::initializer_list<T> list) {
-        assert(list.size() == 2);
-        auto ite = list.begin();
-        re = *ite;
-        ++ite;
-        im = *ite;
-    }
-
-    template<Scalar T>
     Complex<T>::Complex(std::complex<Tm> c) : re(c.real()), im(c.imag()) {}
 
 #ifdef PHYSICA_CUDA

@@ -106,12 +106,10 @@ namespace Physica {
     }
 
     template<Scalar T, Representation U>
-    HubbardMatrix<T, U>::RealType
-    HubbardMatrix<T, U>::hoppingElem(StateType rowPsi, StateType colPsi) const {
+    auto HubbardMatrix<T, U>::hoppingElem(StateType rowPsi, StateType colPsi) const -> RealType {
         int count = 0;
-        if constexpr (Dim == 1) {
-            for (int site = 0; site < int(NumSite); ++site) {
-                const auto site1 = (site + 1) % NumSite;
+        for (int site = 0; site < int(NumSite); ++site) {
+            forNeighSites([&count, rowPsi, colPsi](int site, int site1) {
                 const int signUp = colPsi.hopUpSign(site, site1);
                 const int signDown = colPsi.hopDownSign(site, site1);
                 int n1 = 0;
@@ -121,28 +119,7 @@ namespace Physica {
                 n2 += rowPsi == colPsi.hopDown(site, site1);
                 n2 -= rowPsi == colPsi.hopDown(site1, site);
                 count += n1 * signUp + n2 * signDown;
-            }
-        }
-        else {
-            ModelBase::forSiteInLattice([this, &count, rowPsi, colPsi](IndexType index) {
-                const auto& dims = ModelBase::getDims();
-                const int site = IndexType::toIndex1D(dims, index);
-                for (unsigned int dim = 0; dim < Dim; ++dim) {
-                    IndexType index1 = index;
-                    index1[dim] = (index1[dim] + 1) % ModelBase::getSuperSize()[dim];
-
-                    const int site1 = IndexType::toIndex1D(dims, index1);
-                    const int signUp = colPsi.hopUpSign(site, site1);
-                    const int signDown = colPsi.hopDownSign(site, site1);
-                    int n1 = 0;
-                    n1 += rowPsi == colPsi.hopUp(site, site1);
-                    n1 -= rowPsi == colPsi.hopUp(site1, site);
-                    int n2 = 0;
-                    n2 += rowPsi == colPsi.hopDown(site, site1);
-                    n2 -= rowPsi == colPsi.hopDown(site1, site);
-                    count += n1 * signUp + n2 * signDown;
-                }
-            });
+            }, site);
         }
         return RealType(-count) * getHoppingT();
     }

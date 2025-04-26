@@ -95,7 +95,6 @@ namespace Physica {
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
             alloc.construct(arr + i, *ite);
-        setLength(list.size());
     }
 
     template<class T, class Allocator>
@@ -177,7 +176,7 @@ namespace Physica {
         }
     }
     /**
-     * resize() is inlined, if there is no need to resize, we avoid the overhead of a slow function call
+     * resize() is inlined, if there is no need to resize, we avoid the overhead of slow resizeImpl() call
      */
     template<class T, class Allocator>
     template<class... Args>
@@ -188,8 +187,12 @@ namespace Physica {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::squeeze() {
-        arr = alloc.reallocate(arr, length, capacity);
-        capacity = length;
+        if (length == 0)
+            *this = Array();
+        else {
+            arr = alloc.reallocate(arr, length, capacity);
+            capacity = length;
+        }
     }
     /*!
      * Increase the capacity.
