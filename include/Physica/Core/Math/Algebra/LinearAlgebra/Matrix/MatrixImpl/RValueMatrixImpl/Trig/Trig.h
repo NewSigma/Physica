@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../RValueMatrixImpl.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
     template<Matrix M>
@@ -26,12 +27,12 @@ namespace Physica {
         using This = TrigUpper<M>;
         using Base = RValueMatrix<This>;
 
-        const M& mat;
+        M& mat;
     public:
         using typename Base::T;
         using typename Base::Tv;
     public:
-        TrigUpper(const M& mat_) : mat(mat_) {}
+        TrigUpper(M& mat_) : mat(mat_) {}
         TrigUpper(const This&) = default;
         TrigUpper(This&&) noexcept = default;
         ~TrigUpper() = default;
@@ -41,6 +42,10 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+
+        [[nodiscard]] T lnAbsDet() const;
+
+        [[nodiscard]] VectorND<T> toDT();
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
@@ -59,6 +64,22 @@ namespace Physica {
         if (row > col)
             return Tv(0);
         return mat.calc_value(row, col);
+    }
+
+    template<Matrix M>
+    auto TrigUpper<M>::lnAbsDet() const -> T {
+        return ln(abs(Base::diag())).sum();
+    }
+
+    template<Matrix M>
+    auto TrigUpper<M>::toDT() -> VectorND<T> {
+        const size_t length = getRow();
+        VectorND<T> diag(length);
+        for (size_t i = 0; i < length; ++i) {
+            diag[i] = calc(i, i);
+            mat.row(i).tail(i) *= reciprocal(diag[i]);
+        }
+        return diag;
     }
 
     template<Matrix M>
@@ -81,6 +102,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+
+        [[nodiscard]] T lnAbsDet() const;
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
@@ -99,6 +122,11 @@ namespace Physica {
         if (row < col)
             return Tv(0);
         return mat.calc_value(row, col);
+    }
+
+    template<Matrix M>
+    auto TrigLower<M>::lnAbsDet() const -> T {
+        return ln(abs(Base::diags())).sum();
     }
 }
 

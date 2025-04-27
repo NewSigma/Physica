@@ -46,6 +46,7 @@ namespace Physica {
         template<Matrix M>
         void compute_mkl(const M& source, bool pivote = false);
 
+        [[nodiscard]] T calcDetQ() const;
         [[nodiscard]] VectorND<T> toQDT();
 
         void resize(size_t row, size_t col);
@@ -80,6 +81,14 @@ namespace Physica {
             compute_mkl(source, pivote);
         else
             noImpl(__func__);
+    }
+
+    template<Scalar T>
+    T QRDecomp<T>::calcDetQ() const {
+        int sign = 0;
+        for (auto tau : taus)
+            sign += tau.isPositive();
+        return T(sign % 2 == 0 ? 1.0 : -1.0);
     }
 
     template<Scalar T>

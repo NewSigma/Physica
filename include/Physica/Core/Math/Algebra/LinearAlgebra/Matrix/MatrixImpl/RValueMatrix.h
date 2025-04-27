@@ -120,6 +120,10 @@ namespace Physica {
         [[nodiscard]] inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
         [[nodiscard]] inline auto diag() noexcept;
         [[nodiscard]] inline const auto diag() const noexcept;
+        [[nodiscard]] auto triu() noexcept;
+        [[nodiscard]] const auto triu() const noexcept;
+        [[nodiscard]] auto tril() noexcept;
+        [[nodiscard]] const auto tril() const noexcept;
 
         [[nodiscard]] auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
@@ -150,8 +154,6 @@ namespace Physica {
         [[nodiscard]] auto conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
         [[nodiscard]] auto flatten() const noexcept;
-        [[nodiscard]] auto triu() const noexcept;
-        [[nodiscard]] auto tril() const noexcept;
 
         [[nodiscard]] RealsRtnTy reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;

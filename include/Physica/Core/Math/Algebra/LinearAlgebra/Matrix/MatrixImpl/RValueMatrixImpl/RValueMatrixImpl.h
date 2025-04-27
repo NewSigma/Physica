@@ -221,6 +221,26 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::triu() noexcept {
+        return TrigUpper<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    const auto RValueMatrix<Derived>::triu() const noexcept {
+        return TrigUpper<Derived>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::tril() noexcept {
+        return TrigLower<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    const auto RValueMatrix<Derived>::tril() const noexcept {
+        return TrigLower<Derived>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
     inline auto RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
@@ -378,16 +398,6 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::flatten() const noexcept {
         return FlattenR<Derived>(Base::getDerived());
-    }
-
-    template<class Derived>
-    auto RValueMatrix<Derived>::triu() const noexcept {
-        return TrigUpper<Derived>(Base::getDerived());
-    }
-
-    template<class Derived>
-    auto RValueMatrix<Derived>::tril() const noexcept {
-        return TrigLower<Derived>(Base::getDerived());
     }
 
     template<class Derived>

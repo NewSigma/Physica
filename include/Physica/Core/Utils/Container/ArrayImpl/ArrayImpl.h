@@ -220,14 +220,6 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::swap(Array& __restrict array) noexcept {
-        assert(this != &array && "[Error]: Self swap is likely a bug");
-        std::swap(arr, array.arr);
-        std::swap(length, array.length);
-        std::swap(capacity, array.capacity);
-    }
-
-    template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::clear() noexcept {
         for (size_t i = 0; i < length; ++i)
             alloc.destroy(arr + i);
@@ -235,11 +227,32 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    inline Array<T, Dynamic, Allocator>::pointer Array<T, Dynamic, Allocator>::release() noexcept {
+    inline auto Array<T, Dynamic, Allocator>::release() noexcept -> pointer {
         pointer p = arr;
         arr = nullptr;
         length = capacity = 0;
         return p;
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        std::swap(arr, obj.arr);
+        std::swap(length, obj.length);
+        std::swap(capacity, obj.capacity);
+    }
+
+    template<class T, class Allocator>
+    __host__ __device__ auto Array<T, Dynamic, Allocator>::data() noexcept -> pointer {
+        if constexpr (Align == Dynamic)
+            return arr;
+        else
+            return std::assume_aligned<Align, ElemType>(arr);
+    }
+
+    template<class T, class Allocator>
+    __host__ __device__ auto Array<T, Dynamic, Allocator>::data() const noexcept -> const_pointer {
+        return const_cast<This&>(*this).data();
     }
     /**
      * Low level api. Designed for performance. Elements between old length and \param size have not allocated. DO NOT try to visit them.

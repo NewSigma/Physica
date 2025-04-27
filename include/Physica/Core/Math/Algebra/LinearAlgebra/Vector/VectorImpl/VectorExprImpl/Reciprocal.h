@@ -25,6 +25,8 @@ namespace Physica {
     class VectorExpr<ExprType::Reciprocal, V> : public UnitaryVectorExpr<ExprType::Reciprocal, V> {
         using This = VectorExpr<ExprType::Reciprocal, V>;
         using Base = UnitaryVectorExpr<ExprType::Reciprocal, V>;
+    public:
+        using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -44,7 +46,24 @@ namespace Physica {
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
             return (Pack(1) / Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
         }
+
+        template<Vector V1>
+        void reverse(const V1& grad) const noexcept requires(isReverseDiff);
+        template<Vector V1, Vector V2>
+        void reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector V>
+    template<Vector V1>
+    void VectorExpr<ExprType::Reciprocal, V>::reverse(const V1& grad) const noexcept requires(isReverseDiff) {
+        reverse(Base::getExpr().values(), grad);
+    }
+
+    template<Vector V>
+    template<Vector V1, Vector V2>
+    void VectorExpr<ExprType::Reciprocal, V>::reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff) {
+        Base::getExpr().reverse(hadamard(-square(y.values()), grad));
+    }
 
     template<Vector V>
     [[nodiscard]] inline auto reciprocal(V&& v) noexcept requires(!CUDA<V>) {

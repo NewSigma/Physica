@@ -49,8 +49,12 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
+        [[nodiscard]] T lnAbsDet() const;
+
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
-        inline void swap(This& __restrict obj) noexcept;
+
+        void resize(size_t order);
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto& diag() noexcept { return diags; }
         [[nodiscard]] const auto& diag() const noexcept { return diags; }
@@ -78,7 +82,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    auto DiagMatrix<T, Order>::calc(size_t row, size_t col) const -> T {
+    T DiagMatrix<T, Order>::calc(size_t row, size_t col) const {
         if (row != col)
             return T(0);
         return diags[row];
@@ -90,7 +94,17 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    inline void DiagMatrix<T, Order>::swap(This& __restrict obj) noexcept {
+    T DiagMatrix<T, Order>::lnAbsDet() const {
+        return ln(abs(diags)).sum();
+    }
+
+    template<Scalar T, size_t Order>
+    void DiagMatrix<T, Order>::resize(size_t order) {
+        diags.resize(order);
+    }
+
+    template<Scalar T, size_t Order>
+    void DiagMatrix<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(diags, obj.diags);
     }
@@ -121,3 +135,5 @@ namespace Physica {
         constexpr static bool FastAssign = true;
     };
 }
+
+#include "DiagMatrixImpl/InverseGEMM.h"

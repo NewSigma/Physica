@@ -18,22 +18,20 @@
  */
 #pragma once
 
-#include "Trig.h"
+#include "../DiagMatrix.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2>
-    class MatrixProduct<Inverse<TrigUpper<M1>>, M2> : public RValueMatrix<MatrixProduct<Inverse<TrigUpper<M1>>, M2>> {
-        using This = MatrixProduct<Inverse<TrigUpper<M1>>, M2>;
+    template<Matrix M1, Scalar U, size_t Order>
+    class MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>> : public RValueMatrix<MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>> {
+        using This = MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>;
         using Base = RValueMatrix<This>;
-    public:
-        using Base::isComplex;
     protected:
         using typename Base::T;
     private:
-        const TrigUpper<M1>& mat1;
-        const M2& mat2;
+        const M1& mat1;
+        const DiagMatrix<U, Order>& mat2;
     public:
-        MatrixProduct(const Inverse<TrigUpper<M1>>& inv, const M2& mat2_);
+        MatrixProduct(const M1& inv, const Inverse<DiagMatrix<U, Order>>& mat2_);
         MatrixProduct(const This&) = default;
         MatrixProduct(This&&) noexcept = default;
         ~MatrixProduct() = default;
@@ -43,28 +41,21 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         void assign(M& target) const;
-        template<Matrix M>
-        void assign_mkl(M& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] auto getLHS() const noexcept { return mat1.inverse(); }
-        [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
+        [[nodiscard]] const M1& getLHS() const noexcept { return mat1; }
+        [[nodiscard]] auto getRHS() const noexcept { return mat2.inverse(); }
     };
 
-    template<Matrix M1, Matrix M2>
-    MatrixProduct<Inverse<TrigUpper<M1>>, M2>::MatrixProduct(const Inverse<TrigUpper<M1>>& inv, const M2& mat2_) : mat1(inv.getExpr()), mat2(mat2_) {}
+    template<Matrix M1, Scalar U, size_t Order>
+    MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>::MatrixProduct(
+            const M1& mat1_, const Inverse<DiagMatrix<U, Order>>& inv) : mat1(mat1_), mat2(inv.getExpr()) {}
 
-    template<Matrix M1, Matrix M2>
+    template<Matrix M1, Scalar U, size_t Order>
     template<Matrix M>
-    void MatrixProduct<Inverse<TrigUpper<M1>>, M2>::assign(M& target) const {
-        if constexpr (HasMKL())
-            assign_mkl(target);
-        else
-            noImpl(__func__);
+    void MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>::assign(M& target) const {
+        for (size_t i = 0; i < getCol(); ++i)
+            target.col(i) = mat1.col(i) * reciprocal(mat2.diag()[i]);
     }
 }
-
-#ifdef PHYSICA_MKL
-    #include "TrigInverse_MKL.h"
-#endif

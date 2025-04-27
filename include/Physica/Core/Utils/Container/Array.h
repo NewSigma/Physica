@@ -45,9 +45,11 @@ namespace Physica {
         using typename Base::const_lvalue_reference;
         using typename Base::rvalue_reference;
     private:
+        constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
+
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wattributes"
-        alignas(std::allocator_traits<Allocator>::Align) T arr[Length];
+        alignas(Align) T arr[Length];
     #pragma GCC diagnostic pop
         [[no_unique_address]] allocator_type alloc;
     public:
@@ -100,6 +102,7 @@ namespace Physica {
     private:
         using Base::getDerived;
         constexpr static size_t MinDeltaSpace = 1024;
+        constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
     private:
         pointer arr = nullptr;
         size_t length = 0;
@@ -127,18 +130,18 @@ namespace Physica {
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
-        void swap(Array& __restrict array) noexcept;
         void clear() noexcept;
         [[nodiscard]] inline pointer release() noexcept;
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
+        void swap(This& __restrict obj) noexcept;
 
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ pointer data() noexcept;
+        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept;
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
