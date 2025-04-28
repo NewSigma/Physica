@@ -41,13 +41,13 @@ namespace Physica {
         if constexpr (isComplex) {
             const Tm alpha = 1;
             const Tm beta = 0;
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cblas_cgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
             else
                 cblas_zgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
         }
         else {
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cblas_sgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);
             else
                 cblas_dgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);

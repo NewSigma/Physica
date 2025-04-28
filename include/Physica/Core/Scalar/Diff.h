@@ -45,7 +45,7 @@ namespace Physica {
         __host__ __device__ Diff(T v_, GradType g_);
         Diff(DiffCoro<This>) requires(isReverseDiff) = delete;
         template<Scalar U>
-        __host__ __device__ explicit(T::Option < U::Option) Diff(const U& x) requires(!ReverseDiff<U>);
+        __host__ __device__ explicit(T::Prec < U::Prec) Diff(const U& x) requires(!ReverseDiff<U>);
         Diff(const This&) requires(isForwardDiff) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
@@ -98,7 +98,7 @@ namespace Physica {
         using RealT = T::RealType;
         using ComplexT = T::ComplexType;
     public:
-        constexpr static ScalarOption Option = T::Option;
+        constexpr static FloatPrec Prec = T::Prec;
         constexpr static int Order = Order_;
         constexpr static bool isComplex = T::isComplex;
         constexpr static bool isForwardDiff = Mode == DiffMode::Forward;

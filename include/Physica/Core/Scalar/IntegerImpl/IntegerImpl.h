@@ -21,9 +21,9 @@
 #include "IntegerArithmetic.h"
 
 namespace Physica {
-    template<ScalarOption Option>
-    Integer::Integer(const Real<Option>& s) {
-        if constexpr (Option == FloatMP) {
+    template<FloatPrec Prec>
+    Integer::Integer(const Real<Prec>& s) {
+        if constexpr (Prec == FloatMP) {
             const auto power = s.getPower();
             if (power < 0) {
                 byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));

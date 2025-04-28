@@ -56,7 +56,7 @@ namespace Physica {
         using Base = CRTPBase<This>;
         using TraitsType = Traits<Derived>;
     public:
-        constexpr static ScalarOption Option = TraitsType::Option;
+        constexpr static FloatPrec Prec = TraitsType::Prec;
         constexpr static int Order = TraitsType::Order;
         constexpr static bool isComplex = TraitsType::isComplex;
         constexpr static bool isForwardDiff = TraitsType::isForwardDiff;

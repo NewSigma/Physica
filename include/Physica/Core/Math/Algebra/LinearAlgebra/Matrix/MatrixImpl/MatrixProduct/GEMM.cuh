@@ -157,12 +157,12 @@ namespace Physica {
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
-        if constexpr (ScalarType::Option == Float16)
+        if constexpr (ScalarType::Prec == Float16)
             check(cublasHgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
-        else if constexpr (ScalarType::Option == Float32)
+        else if constexpr (ScalarType::Prec == Float32)
             check(cublasSgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
         else {
-            static_assert(ScalarType::Option == Float64, "[Error]: Unknown ScalarType");
+            static_assert(ScalarType::Prec == Float64, "[Error]: Unknown ScalarType");
             check(cublasDgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
         }
     }

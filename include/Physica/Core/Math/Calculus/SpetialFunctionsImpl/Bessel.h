@@ -25,9 +25,9 @@ namespace Physica {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:171
      */
-    template<ScalarOption Option>
-    Real<Option> besselJ0(const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselJ0(const Real<Prec>& x) {
+        using T = Real<Prec>;
         T ax = abs(x);
         T y, ans1, ans2;
         if (ax < T(8)) {
@@ -50,9 +50,9 @@ namespace Physica {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:171
      */
-    template<ScalarOption Option>
-    Real<Option> besselJ1(const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselJ1(const Real<Prec>& x) {
+        using T = Real<Prec>;
         T ax = abs(x);
         T y, ans1, ans2;
         if (ax < T(8)) {
@@ -76,9 +76,9 @@ namespace Physica {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:173
      */
-    template<ScalarOption Option>
-    Real<Option> besselJn(const Integer& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselJn(const Integer& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         constexpr int iexp = std::numeric_limits<typename T::MachineType>::max_exponent / 2;
         constexpr int acc = 160;
 
@@ -131,8 +131,8 @@ namespace Physica {
         }
     }
 
-    template<ScalarOption Option>
-    Real<Option> besselJ(const Integer& n, const Real<Option>& x) {
+    template<FloatPrec Prec>
+    Real<Prec> besselJ(const Integer& n, const Real<Prec>& x) {
         assert(!n.isNegative());
         if (n == 0)
             return besselJ0(x);
@@ -144,9 +144,9 @@ namespace Physica {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:171
      */
-    template<ScalarOption Option>
-    Real<Option> besselY0(const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselY0(const Real<Prec>& x) {
+        using T = Real<Prec>;
         T y, ans1, ans2;
         if (x < T(8)) {
             y = square(x);
@@ -168,9 +168,9 @@ namespace Physica {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:172
      */
-    template<ScalarOption Option>
-    Real<Option> besselY1(const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselY1(const Real<Prec>& x) {
+        using T = Real<Prec>;
         T y, ans1, ans2;
         if (x < T(8)) {
             y = square(x);
@@ -192,9 +192,9 @@ namespace Physica {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:173
      */
-    template<ScalarOption Option>
-    Real<Option> besselYn(const Integer& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselYn(const Integer& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         assert(n > 1);
         const T two_x = T(2) / x;
         T bym = besselY0(x);
@@ -212,14 +212,14 @@ namespace Physica {
          * Reference:
          * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:182
          */
-        template<ScalarOption Option>
+        template<FloatPrec Prec>
         void besselChebyshevHelper(
-                const Real<Option>& x
-                , Real<Option>& gamma1
-                , Real<Option>& gamma2
-                , Real<Option>& gamma_plus
-                , Real<Option>& gamma_minus) {
-            using T = Real<Option>;
+                const Real<Prec>& x
+                , Real<Prec>& gamma1
+                , Real<Prec>& gamma2
+                , Real<Prec>& gamma_plus
+                , Real<Prec>& gamma_minus) {
+            using T = Real<Prec>;
             assert(abs(x) <= T(0.5));
             const static DenseVector<T, 7> coeff1{-1.142022680371168, 6.5165112670737E-3, 3.087090173086E-4, -3.4706269647E-6, 6.9437664E-9, 3.67795E-11, -1.356E-13};
             const static DenseVector<T, 8> coeff2{1.843740587300905, -7.68528408447867E-2, 1.2719271366546E-3, -4.9717367042E-6, -3.31261198E-8, 2.423096E-10, -1.702E-13, -1.49E-15};
@@ -239,15 +239,15 @@ namespace Physica {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:180
      */
-    template<ScalarOption Option>
+    template<FloatPrec Prec>
     void besselJn_Yn_dJn_dYn(
-            const Real<Option>& n
-            , const Real<Option>& x
-            , Real<Option>& __restrict Jn
-            , Real<Option>& __restrict Yn
-            , Real<Option>& __restrict dJn
-            , Real<Option>& __restrict dYn) {
-        using T = Real<Option>;
+            const Real<Prec>& n
+            , const Real<Prec>& x
+            , Real<Prec>& __restrict Jn
+            , Real<Prec>& __restrict Yn
+            , Real<Prec>& __restrict dJn
+            , Real<Prec>& __restrict dYn) {
+        using T = Real<Prec>;
         constexpr double xmin = 2;
         constexpr double half = 0.5;
         constexpr double pi_trivial = M_PI;
@@ -412,46 +412,46 @@ namespace Physica {
         dYn = n * reciprocal_x * Yv - Yv_1;
     }
 
-    template<ScalarOption Option>
-    Real<Option> besselJn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselJn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return Jn;
     }
 
-    template<ScalarOption Option>
-    Real<Option> besseldJn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besseldJn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return dJn;
     }
 
-    template<ScalarOption Option>
-    Real<Option> besselYn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besselYn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return Yn;
     }
 
-    template<ScalarOption Option>
-    Real<Option> besseldYn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> besseldYn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         T Jn, dJn, Yn, dYn;
         besselJn_Yn_dJn_dYn(n, x, Jn, Yn, dJn, dYn);
         return dYn;
     }
 
-    template<ScalarOption Option>
-    void sphericalBesselJn_Yn_dJn_dYn(const Real<Option>& n
-            , const Real<Option>& x
-            , Real<Option>& __restrict jn
-            , Real<Option>& __restrict yn
-            , Real<Option>& __restrict djn
-            , Real<Option>& __restrict dyn) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    void sphericalBesselJn_Yn_dJn_dYn(const Real<Prec>& n
+            , const Real<Prec>& x
+            , Real<Prec>& __restrict jn
+            , Real<Prec>& __restrict yn
+            , Real<Prec>& __restrict djn
+            , Real<Prec>& __restrict dyn) {
+        using T = Real<Prec>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -465,9 +465,9 @@ namespace Physica {
         dyn = factor * (dYn - Yn / (x * T(2)));
     }
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesselJn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesselJn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -478,9 +478,9 @@ namespace Physica {
         return factor * Jn;
     }
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesseldJn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesseldJn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -491,9 +491,9 @@ namespace Physica {
         return factor * (dJn - Jn / (x * T(2)));
     }
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesselYn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesselYn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);
@@ -504,9 +504,9 @@ namespace Physica {
         return factor * Yn;
     }
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesseldYn(const Real<Option>& n, const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesseldYn(const Real<Prec>& n, const Real<Prec>& x) {
+        using T = Real<Prec>;
         assert(!n.isNegative() && x.isPositive());
 
         const T sqrt_pi_2(1.2533141373155002512);

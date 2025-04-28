@@ -25,7 +25,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     template<Matrix M>
     void EigenSolver<T, Order>::compute_mkl(const M& source, bool computeEigenvectors_) {
-        static_assert(T::Option == Float32 || T::Option == Float64);
+        static_assert(T::Prec == Float32 || T::Prec == Float64);
         constexpr int Major = MatrixOption::isRowMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr int Layout = Major == MatrixOption::Row ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
         using WorkingMatrixMKL = DenseMatrix<T, Major | MatrixOption::Element>;
@@ -38,7 +38,7 @@ namespace Physica {
             auto* vl = reinterpret_cast<Tm*>(rawEigenvectors.data());
             if constexpr (isComplex) {
                 auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order));
                 else
                     check_lapack(LAPACKE_zgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order));
@@ -48,7 +48,7 @@ namespace Physica {
                 VectorND<T> eimag(order);
                 auto* wr = reinterpret_cast<Tm*>(ereal.data());
                 auto* wi = reinterpret_cast<Tm*>(eimag.data());
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_sgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order));
                 else
                     check_lapack(LAPACKE_dgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order));
@@ -60,7 +60,7 @@ namespace Physica {
             MKL_INT64 sdim;
             if constexpr (isComplex) {
                 auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, w, nullptr, order));
                 else
                     check_lapack(LAPACKE_zgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, w, nullptr, order));
@@ -70,7 +70,7 @@ namespace Physica {
                 VectorND<T> eimag(order);
                 auto* wr = reinterpret_cast<Tm*>(ereal.data());
                 auto* wi = reinterpret_cast<Tm*>(eimag.data());
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_sgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, wr, wi, nullptr, order));
                 else
                     check_lapack(LAPACKE_dgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, wr, wi, nullptr, order));

@@ -24,9 +24,9 @@
 namespace Physica {
     template<class> class MathConst;
 
-    template<ScalarOption Option>
-    class MathConst<Real<Option>> {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    class MathConst<Real<Prec>> {
+        using T = Real<Prec>;
         using MachineType = T::MachineType;
     public:
         constexpr static T e = std::numbers::e_v<MachineType>;

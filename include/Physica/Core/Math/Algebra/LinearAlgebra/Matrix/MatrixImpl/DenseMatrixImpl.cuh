@@ -75,9 +75,9 @@ namespace Physica {
     void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform() {
         if constexpr (MatrixOption::isElementMatrix<This>()) {
             check(curandSetStream(R::getInstance(), CUDAContext::getInstance()));
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 check(curandGenerateUniform(R::getInstance(), (Tm*)data(), getRow() * getCol()));
-            else if constexpr (T::Option == Float64)
+            else if constexpr (T::Prec == Float64)
                 check(curandGenerateUniformDouble(R::getInstance(), (Tm*)data(), getRow() * getCol()));
             else
                 host_obj::template random_uniform<R>(getRow(), getCol()).toDeviceAsync(*this);
@@ -91,9 +91,9 @@ namespace Physica {
     void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal() {
         if constexpr (MatrixOption::isElementMatrix<This>()) {
             check(curandSetStream(R::getInstance(), CUDAContext::getInstance()));
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 check(curandGenerateNormal(R::getInstance(), (Tm*)data(), getRow() * getCol(), 0, 1));
-            else if constexpr (T::Option == Float64)
+            else if constexpr (T::Prec == Float64)
                 check(curandGenerateNormalDouble(R::getInstance(), (Tm*)data(), getRow() * getCol(), 0, 1));
             else
                 *this = device_obj<DenseMatrix<float32, Option, Row, Col, Allocator>>::template random_normal<R>(getRow(), getCol());

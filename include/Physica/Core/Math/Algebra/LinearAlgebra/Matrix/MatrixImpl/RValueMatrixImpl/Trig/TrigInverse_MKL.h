@@ -42,13 +42,13 @@ namespace Physica {
         auto* b = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = Layout == CblasColMajor ? m : n;
         if constexpr (isComplex) {
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cblas_ctrsm_64(Layout, Side, Uplo, TransA, Diag, m, n, &alpha, a, lda, b, ldb);
             else
                 cblas_ztrsm_64(Layout, Side, Uplo, TransA, Diag, m, n, &alpha, a, lda, b, ldb);
         }
         else {
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cblas_strsm_64(Layout, Side, Uplo, TransA, Diag, m, n, alpha, a, lda, b, ldb);
             else
                 cblas_dtrsm_64(Layout, Side, Uplo, TransA, Diag, m, n, alpha, a, lda, b, ldb);

@@ -62,11 +62,11 @@ namespace Physica {
 
     template<Scalar T> T lnGamma(const T& s_);
 
-    template<ScalarOption Option>
-    inline Real<Option> gamma(const Real<Option>& s);
+    template<FloatPrec Prec>
+    inline Real<Prec> gamma(const Real<Prec>& s);
 
-    template<ScalarOption Option>
-    inline Real<Option> beta(const Real<Option>& s1, const Real<Option>& s2);
+    template<FloatPrec Prec>
+    inline Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2);
 
     template<Scalar T> T gammaP(const T& a_, const T& x_);
 
@@ -74,81 +74,81 @@ namespace Physica {
 
     template<Scalar T> T bigamma(const T& x, const T& step);
 
-    template<ScalarOption Option>
-    Real<Option> erf(const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> erf(const Real<Prec>& x);
 
     template<Scalar T> T erfc(const T& x_);
 
-    template<ScalarOption Option>
-    Real<Option> standardNormalDistribution(const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> standardNormalDistribution(const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselJ0(const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselJ0(const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselJ1(const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselJ1(const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselJn(const Integer& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselJn(const Integer& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselJ(const Integer& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselJ(const Integer& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselY0(const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselY0(const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselY1(const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselY1(const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselYn(const Integer& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselYn(const Integer& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
+    template<FloatPrec Prec>
     void besselJn_Yn_dJn_dYn(
-            const Real<Option>& n
-            , const Real<Option>& x
-            , Real<Option>& __restrict Jn
-            , Real<Option>& __restrict Yn
-            , Real<Option>& __restrict dJn
-            , Real<Option>& __restrict dYn);
+            const Real<Prec>& n
+            , const Real<Prec>& x
+            , Real<Prec>& __restrict Jn
+            , Real<Prec>& __restrict Yn
+            , Real<Prec>& __restrict dJn
+            , Real<Prec>& __restrict dYn);
 
-    template<ScalarOption Option>
-    Real<Option> besselJn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselJn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besseldJn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besseldJn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besselYn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besselYn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> besseldYn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> besseldYn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    void sphericalBesselJn_Yn_dJn_dYn(const Real<Option>& n
-            , const Real<Option>& x
-            , Real<Option>& __restrict jn
-            , Real<Option>& __restrict yn
-            , Real<Option>& __restrict djn
-            , Real<Option>& __restrict dyn);
+    template<FloatPrec Prec>
+    void sphericalBesselJn_Yn_dJn_dYn(const Real<Prec>& n
+            , const Real<Prec>& x
+            , Real<Prec>& __restrict jn
+            , Real<Prec>& __restrict yn
+            , Real<Prec>& __restrict djn
+            , Real<Prec>& __restrict dyn);
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesselJn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesselJn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesseldJn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesseldJn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesselYn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesselYn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> sphericalBesseldYn(const Real<Option>& n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> sphericalBesseldYn(const Real<Prec>& n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> legendreP(unsigned int l, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> legendreP(unsigned int l, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    Real<Option> legendreP(unsigned int l, unsigned int m, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> legendreP(unsigned int l, unsigned int m, const Real<Prec>& x);
 
     template<Scalar T>
     Complex<T> sphericalHarmomicY(unsigned int l, int m, const T& theta, const T& phi);
@@ -187,14 +187,14 @@ namespace Physica {
 
     template<Scalar T> T hermiteH(unsigned int n, const T& x);
 
-    template<ScalarOption Option>
-    Real<Option> incompBeta(const Real<Option>& a, const Real<Option>& b, const Real<Option>& x);
+    template<FloatPrec Prec>
+    Real<Prec> incompBeta(const Real<Prec>& a, const Real<Prec>& b, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    inline Real<Option> studentT(size_t n, const Real<Option>& x);
+    template<FloatPrec Prec>
+    inline Real<Prec> studentT(size_t n, const Real<Prec>& x);
 
-    template<ScalarOption Option>
-    inline Real<Option> distributionF(const Real<Option>& v1, const Real<Option>& v2, const Real<Option>& x);
+    template<FloatPrec Prec>
+    inline Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x);
 }
 
 #include "SpetialFunctionsImpl/Bessel.h"

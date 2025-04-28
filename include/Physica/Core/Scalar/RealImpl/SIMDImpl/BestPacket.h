@@ -28,8 +28,8 @@ namespace Physica {
     class BestPacket {
         static_assert(!T::isComplex, "[Error]: This specialization does not handle complex");
         static_assert(!T::isForwardDiff, "[Error]: This specialization does not handle forward diff");
-        constexpr static bool isFloat32 = T::Option == Float32;
-        constexpr static bool isFloatMP = T::Option == FloatMP;
+        constexpr static bool isFloat32 = T::Prec == Float32;
+        constexpr static bool isFloatMP = T::Prec == FloatMP;
         constexpr static bool isDynamic = Length == Dynamic;
         constexpr static size_t size128 = isFloat32 ? 4 : 2;
         constexpr static size_t size256 = isFloat32 ? 8 : 4;

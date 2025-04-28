@@ -26,7 +26,7 @@ namespace Physica {
     template<Scalar T>
     template<Matrix M>
     void QRDecomp<T>::compute_mkl(const M& source, bool pivote) {
-        static_assert(T::Option == Float32 || T::Option == Float64);
+        static_assert(T::Prec == Float32 || T::Prec == Float64);
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
@@ -43,13 +43,13 @@ namespace Physica {
             Array<size_t> perm(n, 0);
             auto* jpvt = reinterpret_cast<MKL_INT64*>(perm.data());
             if constexpr (isComplex) {
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
                 else
                     check_lapack(LAPACKE_zgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
             }
             else {
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_sgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
                 else
                     check_lapack(LAPACKE_dgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
@@ -57,13 +57,13 @@ namespace Physica {
         }
         else {
             if constexpr (isComplex) {
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgeqrf_64(Layout, m, n, a, lda, tau));
                 else
                     check_lapack(LAPACKE_zgeqrf_64(Layout, m, n, a, lda, tau));
             }
             else {
-                if constexpr (T::Option == Float32)
+                if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_sgeqrf_64(Layout, m, n, a, lda, tau));
                 else
                     check_lapack(LAPACKE_dgeqrf_64(Layout, m, n, a, lda, tau));
@@ -73,7 +73,7 @@ namespace Physica {
 
     template<Scalar T>
     auto QRDecomp<T>::getMatrixQ_mkl() const noexcept -> MatrixND {
-        static_assert(T::Option == Float32 || T::Option == Float64);
+        static_assert(T::Prec == Float32 || T::Prec == Float64);
         static_assert(!isComplex);
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
 
@@ -87,7 +87,7 @@ namespace Physica {
         auto* a = reinterpret_cast<Tm*>(result.data());
         auto* tau = reinterpret_cast<const Tm*>(taus.data());
 
-        if constexpr (T::Option == Float32)
+        if constexpr (T::Prec == Float32)
             check_lapack(LAPACKE_sorgqr_64(Layout, m, n, k, a, lda, tau));
         else
             check_lapack(LAPACKE_dorgqr_64(Layout, m, n, k, a, lda, tau));

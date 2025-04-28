@@ -37,7 +37,7 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using typename Base::MachineType;
-        using MKL_Complex = std::conditional<T::Option == Float32, MKL_Complex8, MKL_Complex16>::type;
+        using MKL_Complex = std::conditional<T::Prec == Float32, MKL_Complex8, MKL_Complex16>::type;
 
         constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
     private:
@@ -56,7 +56,7 @@ namespace Physica {
         __host__ __device__ explicit Complex(thrust::complex<Tm> c);
     #endif
         template<Scalar U>
-        __host__ __device__ explicit((T::Option < U::Option) || Diffable<U>) Complex(const U& x);
+        __host__ __device__ explicit((T::Prec < U::Prec) || Diffable<U>) Complex(const U& x);
         Complex(const This&) = default;
         Complex(This&&) noexcept = default;
         /* Operators */
@@ -116,7 +116,7 @@ namespace Physica {
         static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
         static_assert(!T::isDiffable, "[Error]: Diff mark should locate in outsite");
     public:
-        constexpr static ScalarOption Option = Traits<T>::Option;
+        constexpr static FloatPrec Prec = Traits<T>::Prec;
         constexpr static int Order = 0;
         constexpr static bool isComplex = true;
         constexpr static bool isForwardDiff = false;

@@ -29,14 +29,14 @@ namespace Physica {
         const auto* p2 = reinterpret_cast<const Tm*>(v2.data());
         if constexpr (ScalarType::isComplex) {
             ScalarType result;
-            if constexpr (ScalarType::Option == Float32)
+            if constexpr (ScalarType::Prec == Float32)
                 cblas_cdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
             else
                 cblas_zdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
             return result;
         }
         else {
-            if constexpr (ScalarType::Option == Float32)
+            if constexpr (ScalarType::Prec == Float32)
                 return ScalarType(cblas_sdot_64(v1.getLength(), p1, 1, p2, 1));
             else
                 return ScalarType(cblas_ddot_64(v1.getLength(), p1, 1, p2, 1));

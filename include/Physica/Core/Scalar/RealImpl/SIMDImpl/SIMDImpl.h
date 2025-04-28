@@ -44,7 +44,7 @@ namespace Physica {
                 *this = SIMD(HalfType(x, count), HalfType(0));
         }
         else {
-            if constexpr (T::Option == Float32) {
+            if constexpr (T::Prec == Float32) {
                 const float f = float(x);
                 switch(count) {
                 case 1:
@@ -61,7 +61,7 @@ namespace Physica {
                 }
             }
             else {
-                static_assert(T::Option == Float64, "[Error]: Unsupported float type");
+                static_assert(T::Prec == Float64, "[Error]: Unsupported float type");
                 *this = SIMD(Pack(double(x), 0.0));
             }
         }
@@ -183,7 +183,7 @@ namespace Physica {
     template<int... Order>
     inline SIMD<T, Size> SIMD<T, Size>::shuffle() const {
         constexpr unsigned int mask = makeShuffleMask<Order...>(0);
-        if constexpr (T::Option == Float32) {
+        if constexpr (T::Prec == Float32) {
             static_assert(sizeof...(Order) == 4, "[Error]: Invalid number of orders");
             if constexpr (Size == 4)
                 return _mm_shuffle_ps(*this, *this, mask);
@@ -271,14 +271,14 @@ namespace Physica {
     template<Scalar T, size_t Size>
     template<bool... Flags>
     SIMD<T, Size> SIMD<T, Size>::makeSignBits() {
-        using IntType = std::conditional<T::Option == Float32, uint32_t, uint64_t>::type;
+        using IntType = std::conditional<T::Prec == Float32, uint32_t, uint64_t>::type;
         constexpr auto Functor = [](bool flag) consteval -> IntType {
-            constexpr IntType Mask = T::Option == Float32 ? IntType(0x80000000U) : IntType(0x8000000000000000U);
+            constexpr IntType Mask = T::Prec == Float32 ? IntType(0x80000000U) : IntType(0x8000000000000000U);
             return flag ? Mask : 0;
         };
 
         static_assert(sizeof...(Flags) == Size, "[Error]: Size do not match");
-        if constexpr (T::Option == Float32) {
+        if constexpr (T::Prec == Float32) {
             if constexpr (Size == 4)
                 return __m128(_mm_setr_epi32(Functor(Flags)...));
             else if constexpr (Size == 8)
@@ -329,7 +329,7 @@ namespace Physica {
     template<int Order, int... Orders>
     constexpr unsigned int SIMD<T, Size>::makeShuffleMask(int order) {
         int result = order;
-        if constexpr (T::Option == Float32) {
+        if constexpr (T::Prec == Float32) {
             static_assert(0 <= Order && Order < 4, "[Error]: Invalid order");
             result |= Order << ((4 - (sizeof...(Orders) + 1)) * 2);
         }
@@ -377,7 +377,7 @@ namespace Physica {
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDiffable, "[Error]: Not implemented");
-        if constexpr (T::Option == Float32) {
+        if constexpr (T::Prec == Float32) {
             if constexpr (Size == 4) {
                 if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
                     return  _mm_fmaddsub_ps(a, b, c);
@@ -407,7 +407,7 @@ namespace Physica {
             }
         }
         else {
-            static_assert(T::Option == Float64, "[Error]: Unexpected float type");
+            static_assert(T::Prec == Float64, "[Error]: Unexpected float type");
             if constexpr (Size == 2) {
                 if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
                     return  _mm_fmaddsub_pd(a, b, c);

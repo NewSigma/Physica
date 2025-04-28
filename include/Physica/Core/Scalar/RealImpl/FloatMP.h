@@ -24,7 +24,7 @@ namespace Physica {
     template<>
     class Traits<Real<FloatMP>> {
     public:
-        constexpr static ScalarOption Option = FloatMP;
+        constexpr static FloatPrec Prec = FloatMP;
         constexpr static int Order = 0;
         constexpr static bool isComplex = false;
         constexpr static bool isForwardDiff = false;
@@ -130,9 +130,9 @@ namespace Physica {
         inline void cutZero();
         /* Friends */
         friend class Integer;
-        template<ScalarOption Option> __host__ __device__ friend Real<Option> square(const Real<Option>& s) noexcept;
-        template<ScalarOption Option> __host__ __device__ friend Real<Option> sqrt(const Real<Option>& s) noexcept;
-        template<ScalarOption Option> __host__ __device__ friend Real<Option> ln(const Real<Option>& s) noexcept;
+        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> square(const Real<Prec>& s) noexcept;
+        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> sqrt(const Real<Prec>& s) noexcept;
+        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> ln(const Real<Prec>& s) noexcept;
         /* Static members */
         inline static Real<FloatMP> add(const Real& s1, const Real& s2);
         inline static Real<FloatMP> sub(const Real& s1, const Real& s2);

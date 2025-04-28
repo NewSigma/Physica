@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,11 +22,11 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
-    class BlockMatrix : public RValueMatrix<BlockMatrix<T>> {
-        using This = BlockMatrix<T>;
+    template<Matrix M>
+    class BlockMatrix : public RValueMatrix<BlockMatrix<M>> {
+        using This = BlockMatrix<M>;
         using Base = RValueMatrix<This>;
-        using BlockArray = Array<T>;
+        using BlockArray = Array<M>;
     public:
         using typename Base::ScalarType;
     private:
@@ -53,14 +53,14 @@ namespace Physica {
         size_t findBlock(size_t globalIndex) const;
     };
 
-    template<Matrix T>
-    BlockMatrix<T>::BlockMatrix(BlockArray blocks_) : blocks(std::move(blocks_)) {
+    template<Matrix M>
+    BlockMatrix<M>::BlockMatrix(BlockArray blocks_) : blocks(std::move(blocks_)) {
         assert(getNumBlock() != 0 && "[Error]: Empty blocks does nothing");
         updateEnds();
     }
 
-    template<Matrix T>
-    BlockMatrix<T>::ScalarType BlockMatrix<T>::calc(size_t row, size_t col) const {
+    template<Matrix M>
+    BlockMatrix<M>::ScalarType BlockMatrix<M>::calc(size_t row, size_t col) const {
         const size_t indexR = findBlock(row);
         const size_t indexC = findBlock(col);
         if (indexR != indexC)
@@ -69,15 +69,15 @@ namespace Physica {
         return blocks[indexR].calc(row - shift, col - shift);
     }
 
-    template<Matrix T>
-    void BlockMatrix<T>::swap(This& __restrict obj) noexcept {
+    template<Matrix M>
+    void BlockMatrix<M>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         blocks.swap(obj.blocks);
         indexEnds.swap(obj.indexEnds);
     }
 
-    template<Matrix T>
-    void BlockMatrix<T>::updateEnds() {
+    template<Matrix M>
+    void BlockMatrix<M>::updateEnds() {
         const size_t numBlock = getNumBlock();
         indexEnds.resize(numBlock);
         size_t end = 0;
@@ -87,8 +87,8 @@ namespace Physica {
         }
     }
 
-    template<Matrix T>
-    size_t BlockMatrix<T>::findBlock(size_t globalIndex) const {
+    template<Matrix M>
+    size_t BlockMatrix<M>::findBlock(size_t globalIndex) const {
         assert(globalIndex < getRow() && "[Error]: Index out of range");
         for (size_t i = 0; i < getNumBlock(); ++i) {
             const bool inTheBlock = globalIndex < indexEnds[i];
@@ -100,11 +100,11 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<BlockMatrix<T>> {
+    template<Matrix M>
+    class Traits<BlockMatrix<M>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static int Option = T::Option;
+        using ScalarType = M::ScalarType;
+        constexpr static int Prec = M::Prec;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

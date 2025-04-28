@@ -51,7 +51,7 @@ namespace Physica {
     template<class T>
     concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
 
-    enum ScalarOption {
+    enum FloatPrec {
         Float16 = 0,
         Float32 = 1,
         Float64 = 2,
@@ -77,7 +77,7 @@ namespace Physica {
     /**
      * \class Real is a advanced float type that supports multiple precision
      */
-    template<ScalarOption Option = Float64> class Real;
+    template<FloatPrec Prec = Float64> class Real;
     template<class T> class Complex;
 
     template<class T>
@@ -177,7 +177,7 @@ namespace Physica {
             static_assert(std::is_class<T1>::value);
             static_assert(std::is_class<T2>::value);
 
-            constexpr static ScalarOption Option = std::max(T1::Option, T2::Option);
+            constexpr static FloatPrec Prec = std::max(T1::Prec, T2::Prec);
             constexpr static bool isComplex = T1::isComplex || T2::isComplex;
             constexpr static bool isDiffable1 = T1::isDiffable;
             constexpr static bool isDiffable2 = T2::isDiffable;
@@ -193,7 +193,7 @@ namespace Physica {
             constexpr static int Order = UseMixOrder ? std::min(Order1, Order2) : std::max(Order1, Order2);
             static_assert(!(Mode == DiffMode::Reverse && UseMixOrder), "[Error]: Reverse mode does not support mixed order");
 
-            using Type0 = Real<Option>;
+            using Type0 = Real<Prec>;
             using Type1 = std::conditional<isComplex, Complex<Type0>, Type0>::type;
             using Type2 = std::conditional<isDiffable, Diff<Type1, Mode, Order>, Type1>::type;
         public:

@@ -27,18 +27,18 @@ namespace Physica {
         const auto alpha = Base::getRHS().toMachine();
         const void* x = Base::getLHS().data();
         if constexpr (isComplex) {
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cblas_caxpy(n, &alpha, x, 1, y, 1);
             else {
-                static_assert(T::Option == Float64, "[Error]: Unexpected type");
+                static_assert(T::Prec == Float64, "[Error]: Unexpected type");
                 cblas_zaxpy(n, &alpha, x, 1, y, 1);
             }
         }
         else {
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cblas_saxpy(n, alpha, (float*)x, 1, (float*)y, 1);
             else {
-                static_assert(T::Option == Float64, "[Error]: Unexpected type");
+                static_assert(T::Prec == Float64, "[Error]: Unexpected type");
                 cblas_daxpy(n, alpha, (double*)x, 1, (double*)y, 1);
             }
         }

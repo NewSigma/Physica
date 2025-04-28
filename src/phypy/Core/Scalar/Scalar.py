@@ -19,7 +19,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 from phypy import CXXObj
 
-class ScalarOption(Enum):
+class FloatPrec(Enum):
     Float32 = 0
     Float64 = 1
     FloatMP = 2
@@ -27,16 +27,16 @@ class ScalarOption(Enum):
 class Real(CXXObj):
     __pDecl = None
 
-    def __init__(self, Option: ScalarOption = ScalarOption.Float64) -> None:
-        super().__init__(Real.__pDecl, Option.value)
+    def __init__(self, Prec: FloatPrec = FloatPrec.Float64) -> None:
+        super().__init__(Real.__pDecl, Prec.value)
         super().construct()
-        self.__Option = Option
+        self.__Option = Prec
 
     def __float__(self):
-        match self.Option:
-            case ScalarOption.Float32:
+        match self.Prec:
+            case FloatPrec.Float32:
                 rtnTyName = 'float'
-            case ScalarOption.Float64:
+            case FloatPrec.Float64:
                 rtnTyName = 'double'
             case _:
                 raise NotImplementedError
@@ -46,7 +46,7 @@ class Real(CXXObj):
         return repr(float(self))
 
     @property
-    def Option(self):
+    def Prec(self):
         return self.__Option
 
     @staticmethod
@@ -57,4 +57,4 @@ class Real(CXXObj):
 
 Real.include()
 
-__all__ = [ScalarOption.__name__, Real.__name__]
+__all__ = [FloatPrec.__name__, Real.__name__]

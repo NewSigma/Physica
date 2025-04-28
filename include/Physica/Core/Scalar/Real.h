@@ -54,27 +54,27 @@ namespace Physica {
         };
     };
 
-    template<ScalarOption Op1, ScalarOption Op2>
-    __host__ __device__ auto operator+(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator+(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) + ResultType(y);
     }
 
-    template<ScalarOption Op1, ScalarOption Op2>
-    __host__ __device__ auto operator-(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator-(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) - ResultType(y);
     }
 
-    template<ScalarOption Op1, ScalarOption Op2>
-    __host__ __device__ auto operator*(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator*(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) * ResultType(y);
     }
 
-    template<ScalarOption Op1, ScalarOption Op2>
-    __host__ __device__ auto operator/(Real<Op1> x, Real<Op2> y) requires(Op1 != Op2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Op1>, Real<Op2>>::Type;
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator/(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) / ResultType(y);
     }
 

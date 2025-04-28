@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,8 +25,8 @@ using namespace Physica;
 
 template<Scalar T>
 void VASPTest() {
-    constexpr static bool isFloat = T::Option == Float;
-    constexpr double prec = isFloat ? 2E-5 : 1E-5;
+    constexpr static bool isFloat32 = T::Prec == Float32;
+    constexpr double prec = isFloat32 ? 2E-5 : 1E-5;
 
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
     CrystalCell<T> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<T>::Type::Direct}, {14});
@@ -41,7 +41,7 @@ void VASPTest() {
  */
 template<Scalar T>
 void madelungTest() {
-    constexpr static bool isFloat = T::Option == Float;
+    constexpr static bool isFloat32 = T::Prec == Float32;
     using EwaldType = Ewald<T>;
     {
         const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);
@@ -59,7 +59,7 @@ void madelungTest() {
         EwaldType ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
         const auto energy = ewald.potentialV(NaCl.getPos());
         const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
-        constexpr double prec = isFloat ? 1E-6 : 1E-7;
+        constexpr double prec = isFloat32 ? 1E-6 : 1E-7;
         if (!scalarNear(madelung, T(1.7475645946331822), prec))
             exit(EXIT_FAILURE);
     }
@@ -72,7 +72,7 @@ void madelungTest() {
         EwaldType ewald(CsCl.getLattice(), {1, -1});
         const auto energy = ewald.potentialV(CsCl.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
-        constexpr double prec = isFloat ? 1E-5 : 1E-9;
+        constexpr double prec = isFloat32 ? 1E-5 : 1E-9;
         if (!scalarNear(madelung, T(1.76267477307099), prec))
             exit(EXIT_FAILURE);
     }
@@ -86,7 +86,7 @@ void madelungTest() {
         EwaldType ewald(ZnS.getLattice(), {1, -1});
         const auto energy = ewald.potentialV(ZnS.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
-        constexpr double prec = isFloat ? 1E-5 : 1E-9;
+        constexpr double prec = isFloat32 ? 1E-5 : 1E-9;
         if (!scalarNear(madelung, T(1.63805505338879), prec))
             exit(EXIT_FAILURE);
     }

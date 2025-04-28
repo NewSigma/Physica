@@ -35,7 +35,7 @@ namespace Physica {
             *this = asComplex({h.asReal(), h.asReal()});
         }
         else {
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 *this = asComplex({x.real(), x.imag(), x.real(), x.imag()});
             else
                 *this = asComplex({x.real(), x.imag()});
@@ -127,7 +127,7 @@ namespace Physica {
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size>::FullRealPair SIMD<Complex<T>, Size>::makeFullRealImag() const noexcept {
         FullRealType re, im;
-        if constexpr (T::Option == Float32) {
+        if constexpr (T::Prec == Float32) {
             re = FullRealType::template shuffle<0, 0, 2, 2>();
             im = FullRealType::template shuffle<1, 1, 3, 3>();
         }
@@ -154,7 +154,7 @@ namespace Physica {
         if constexpr (isSeparatable)
             return getHigh().sum() + getLow().sum();
         else {
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 return operator[](0) + operator[](1);
             else
                 return operator[](0);
@@ -167,7 +167,7 @@ namespace Physica {
             return permRealImag().getLow();
         else {
             const RealBase zero(0);
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 return RealBase::template blend<0, 4, 2, 6>(asReal(), zero);
             else
                 return RealBase::template blend<0, 2>(asReal(), zero);
@@ -180,7 +180,7 @@ namespace Physica {
             return permRealImag().getHigh();
         else {
             const RealBase zero(0);
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 return RealBase::template blend<1, 4, 3, 6>(asReal(), zero);
             else
                 return RealBase::template blend<1, 3>(asReal(), zero);

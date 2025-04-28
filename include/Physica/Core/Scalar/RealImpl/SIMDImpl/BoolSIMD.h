@@ -82,7 +82,7 @@ namespace Physica {
     public:
         using ScalarType = T;
     private:
-        constexpr static bool isSinglePrec = ScalarType::Option == Float;
+        constexpr static bool isSinglePrec = ScalarType::Prec == Float;
             
         using Size2Type = std::conditional<isSinglePrec, void, Vec2db>::type;
         using Size4Type = std::conditional<isSinglePrec, Vec4fb, Vec4db>::type;

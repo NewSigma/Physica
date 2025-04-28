@@ -21,76 +21,76 @@
 #include "Float64.h"
 
 namespace Physica {
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> abs(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::fabsf(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> abs(const Real<Prec>& x) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::fabsf(x.toMachine()));
         else
-            return Real<Option>(::fabs(x.toMachine()));
+            return Real<Prec>(::fabs(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> relu(const Real<Option>& x) noexcept {
-        return x.isPositive() ? x : Real<Option>(0);
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> relu(const Real<Prec>& x) noexcept {
+        return x.isPositive() ? x : Real<Prec>(0);
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> square(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> square(const Real<Prec>& x) noexcept {
         return x * x;
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> reciprocal(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> reciprocal(const Real<Prec>& x) noexcept {
         assert(!x.isZero() && "[Error]: Divide by zero");
-        return Real<Option>(1) / x;
+        return Real<Prec>(1) / x;
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> sqrt(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> sqrt(const Real<Prec>& x) noexcept {
         assert(!x.isNegative());
-        return Real<Option>(std::sqrt(x.toMachine()));
+        return Real<Prec>(std::sqrt(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> cbrt(const Real<Option>& x) noexcept {
-        return Real<Option>(std::cbrt(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> cbrt(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::cbrt(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> ln(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> ln(const Real<Prec>& x) noexcept {
         assert(x.isPositive() && "[Error]: Invalid param");
-        return Real<Option>(std::log(x.toMachine()));
+        return Real<Prec>(std::log(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> ln1p(const Real<Option>& x) noexcept {
-        return Real<Option>(std::log1p(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> ln1p(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::log1p(x.toMachine()));
     }
     /**
      * \return log_a n
      */
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> log(const Real<Option>& x, const Real<Option>& a) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> log(const Real<Prec>& x, const Real<Prec>& a) noexcept {
         return ln(x) / ln(a);
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> exp(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::expf(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> exp(const Real<Prec>& x) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::expf(x.toMachine()));
         else {
-            static_assert(Option == Float64, "[Error]: Unexpected type");
-            return Real<Option>(::exp(x.toMachine()));
+            static_assert(Prec == Float64, "[Error]: Unexpected type");
+            return Real<Prec>(::exp(x.toMachine()));
         }
     }
 
-    template<ScalarOption Option>
-    Real<Option> pow(const Real<Option>& x, const Real<Option>& n) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::powf(x.toMachine(), n.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> pow(const Real<Prec>& x, const Real<Prec>& n) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::powf(x.toMachine(), n.toMachine()));
         else {
-            static_assert(Option == Float64, "[Error]: Unexpected type");
-            return Real<Option>(::pow(x.toMachine(), n.toMachine()));
+            static_assert(Prec == Float64, "[Error]: Unexpected type");
+            return Real<Prec>(::pow(x.toMachine(), n.toMachine()));
         }
     }
     /*!
@@ -99,8 +99,8 @@ namespace Physica {
      *
      * Fix: Easily overflow.
      */
-    template<ScalarOption Option>
-    Real<Option> factorial(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> factorial(const Real<Prec>& x) noexcept {
         using FloatType = decltype(x.toMachine());
         const auto trivial = x.toMachine();
         FloatType temp = 1;
@@ -109,54 +109,54 @@ namespace Physica {
             temp += 1;
             result *= temp;
         }
-        return Real<Option>(result);
+        return Real<Prec>(result);
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> cos(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::cosf(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> cos(const Real<Prec>& x) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::cosf(x.toMachine()));
         else
-            return Real<Option>(::cos(x.toMachine()));
+            return Real<Prec>(::cos(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> cospi(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> cospi(const Real<Prec>& x) noexcept {
     #ifdef __CUDA_ARCH__
-        if constexpr (Option == Float32)
-            return Real<Option>(::cospif(x.toMachine()));
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::cospif(x.toMachine()));
         else
-            return Real<Option>(::cospi(x.toMachine()));
+            return Real<Prec>(::cospi(x.toMachine()));
     #else
-        return cos(MathConst<Real<Option>>::pi * x);
+        return cos(MathConst<Real<Prec>>::pi * x);
     #endif
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> sin(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::sinf(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> sin(const Real<Prec>& x) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::sinf(x.toMachine()));
         else
-            return Real<Option>(::sin(x.toMachine()));
+            return Real<Prec>(::sin(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> sinpi(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> sinpi(const Real<Prec>& x) noexcept {
     #ifdef __CUDA_ARCH__
-        if constexpr (Option == Float32)
-            return Real<Option>(::sinpif(x.toMachine()));
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::sinpif(x.toMachine()));
         else
-            return Real<Option>(::sinpi(x.toMachine()));
+            return Real<Prec>(::sinpi(x.toMachine()));
     #else
-        return sin(MathConst<Real<Option>>::pi * x);
+        return sin(MathConst<Real<Prec>>::pi * x);
     #endif
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline void sincos(Real<Option> x, Real<Option>& sin_result, Real<Option>& cos_result) noexcept {
-        using MachineType = Real<Option>::MachineType;
+    template<FloatPrec Prec>
+    __host__ __device__ inline void sincos(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
+        using MachineType = Real<Prec>::MachineType;
         MachineType sin_temp, cos_temp;
-        if constexpr (Option == Float32)
+        if constexpr (Prec == Float32)
             ::sincosf(x.toMachine(), &sin_temp, &cos_temp);
         else
             ::sincos(x.toMachine(), &sin_temp, &cos_temp);
@@ -164,188 +164,188 @@ namespace Physica {
         cos_result = cos_temp;
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline void sincospi(Real<Option> x, Real<Option>& sin_result, Real<Option>& cos_result) noexcept {
+    template<FloatPrec Prec>
+    __host__ __device__ inline void sincospi(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
     #ifdef __CUDA_ARCH__
-        using MachineType = Real<Option>::MachineType;
+        using MachineType = Real<Prec>::MachineType;
         MachineType sin_temp, cos_temp;
-        if constexpr (Option == Float32)
+        if constexpr (Prec == Float32)
             ::sincospif(x.toMachine(), &sin_temp, &cos_temp);
         else
             ::sincospi(x.toMachine(), &sin_temp, &cos_temp);
         sin_result = sin_temp;
         cos_result = cos_temp;
     #else
-        return sincos(MathConst<Real<Option>>::pi * x, sin_result, cos_result);
+        return sincos(MathConst<Real<Prec>>::pi * x, sin_result, cos_result);
     #endif
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> tan(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::tanf(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> tan(const Real<Prec>& x) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::tanf(x.toMachine()));
         else
-            return Real<Option>(::tan(x.toMachine()));
+            return Real<Prec>(::tan(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> tanpi(const Real<Option>& x) noexcept {
-        Real<Option> sinpi_, cospi_;
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> tanpi(const Real<Prec>& x) noexcept {
+        Real<Prec> sinpi_, cospi_;
         sincospi(x, sinpi_, cospi_);
         return sinpi_ / cospi_;
     }
 
-    template<ScalarOption Option>
-    Real<Option> sec(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> sec(const Real<Prec>& x) noexcept {
         return reciprocal(cos(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> secpi(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> secpi(const Real<Prec>& x) noexcept {
         return reciprocal(cospi(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> csc(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> csc(const Real<Prec>& x) noexcept {
         return reciprocal(sin(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> cscpi(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> cscpi(const Real<Prec>& x) noexcept {
         return reciprocal(sinpi(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> cot(const Real<Option>& x) noexcept {
-        Real<Option> sin_, cos_;
+    template<FloatPrec Prec>
+    Real<Prec> cot(const Real<Prec>& x) noexcept {
+        Real<Prec> sin_, cos_;
         sincos(x, sin_, cos_);
         return cos_ / sin_;
     }
 
-    template<ScalarOption Option>
-    Real<Option> cotpi(const Real<Option>& x) noexcept {
-        Real<Option> sinpi_, cospi_;
+    template<FloatPrec Prec>
+    Real<Prec> cotpi(const Real<Prec>& x) noexcept {
+        Real<Prec> sinpi_, cospi_;
         sincospi(x, sinpi_, cospi_);
         return cospi_ / sinpi_;
     }
 
-    template<ScalarOption Option>
-    Real<Option> arccos(const Real<Option>& x) noexcept {
-        return Real<Option>(std::acos(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> arccos(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::acos(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arcsin(const Real<Option>& x) noexcept {
-        return Real<Option>(std::asin(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> arcsin(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::asin(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arctan(const Real<Option>& x) noexcept {
-        return Real<Option>(std::atan(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> arctan(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::atan(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arcsec(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> arcsec(const Real<Prec>& x) noexcept {
         return arccos(reciprocal(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arccsc(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> arccsc(const Real<Prec>& x) noexcept {
         return arcsin(reciprocal(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arccot(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> arccot(const Real<Prec>& x) noexcept {
         return arctan(reciprocal(x));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ Real<Option> cosh(const Real<Option>& x) noexcept {
-        return Real<Option>(std::cosh(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ Real<Prec> cosh(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::cosh(x.toMachine()));
     }
 
 
-    template<ScalarOption Option>
-    __host__ __device__ Real<Option> sinh(const Real<Option>& x) noexcept {
-        return Real<Option>(std::sinh(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ Real<Prec> sinh(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::sinh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ Real<Option> tanh(const Real<Option>& x) noexcept {
-        return Real<Option>(std::tanh(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ Real<Prec> tanh(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::tanh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ Real<Option> sech(const Real<Option>& x) noexcept {
-        return Real<Option>(1 / std::cosh(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ Real<Prec> sech(const Real<Prec>& x) noexcept {
+        return Real<Prec>(1 / std::cosh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> csch(const Real<Option>& x) noexcept {
-        return Real<Option>(1 / std::sinh(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> csch(const Real<Prec>& x) noexcept {
+        return Real<Prec>(1 / std::sinh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> coth(const Real<Option>& x) noexcept {
-        return Real<Option>(1 / std::tanh(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> coth(const Real<Prec>& x) noexcept {
+        return Real<Prec>(1 / std::tanh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arccosh(const Real<Option>& x) noexcept {
-        return Real<Option>(std::acosh(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> arccosh(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::acosh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arcsinh(const Real<Option>& x) noexcept {
-        return Real<Option>(std::asinh(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> arcsinh(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::asinh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arctanh(const Real<Option>& x) noexcept {
-        return Real<Option>(std::atanh(x.toMachine()));
+    template<FloatPrec Prec>
+    Real<Prec> arctanh(const Real<Prec>& x) noexcept {
+        return Real<Prec>(std::atanh(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arcsech(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> arcsech(const Real<Prec>& x) noexcept {
         return arccosh(reciprocal(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arccsch(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> arccsch(const Real<Prec>& x) noexcept {
         return arcsinh(reciprocal(x));
     }
 
-    template<ScalarOption Option>
-    Real<Option> arccoth(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> arccoth(const Real<Prec>& x) noexcept {
         auto trivial = x.toMachine();
-        return Real<Option>(std::log((trivial + 1) / (trivial - 1)) / 2);
+        return Real<Prec>(std::log((trivial + 1) / (trivial - 1)) / 2);
     }
 
-    template<ScalarOption Option>
-    Real<Option> ln1pexp(const Real<Option>& x) noexcept {
+    template<FloatPrec Prec>
+    Real<Prec> ln1pexp(const Real<Prec>& x) noexcept {
         return relu(x) + ln1p(exp(-abs(x)));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ Real<Option> lncosh(const Real<Option>& x) noexcept {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    __host__ __device__ Real<Prec> lncosh(const Real<Prec>& x) noexcept {
+        using T = Real<Prec>;
         const auto x1 = abs(x);
         return x1 + ln1p(exp(-x1 * T(2))) - T(M_LN2);
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ Real<Option> floor(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::floorf(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ Real<Prec> floor(const Real<Prec>& x) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::floorf(x.toMachine()));
         else
-            return Real<Option>(::floor(x.toMachine()));
+            return Real<Prec>(::floor(x.toMachine()));
     }
 
-    template<ScalarOption Option>
-    __host__ __device__ inline Real<Option> ceil(const Real<Option>& x) noexcept {
-        if constexpr (Option == Float32)
-            return Real<Option>(::ceilf(x.toMachine()));
+    template<FloatPrec Prec>
+    __host__ __device__ inline Real<Prec> ceil(const Real<Prec>& x) noexcept {
+        if constexpr (Prec == Float32)
+            return Real<Prec>(::ceilf(x.toMachine()));
         else
-            return Real<Option>(::ceil(x.toMachine()));
+            return Real<Prec>(::ceil(x.toMachine()));
     }
 }

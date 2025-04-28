@@ -40,7 +40,7 @@ namespace Physica {
         using typename Base::Trv;
         using Tm = Tr::MachineType;
     private:
-        constexpr static bool IsFloat = ScalarType::Option == Float;
+        constexpr static bool IsFloat = ScalarType::Prec == Float;
         constexpr static int MaxNumTaylorTerm = 55;
         constexpr static int MaxNormOrder = 8;
         constexpr static int MaxNormIteration = 16;

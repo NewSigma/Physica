@@ -19,8 +19,8 @@
 #pragma once
 
 namespace Physica {
-    template<ScalarOption Option, bool errorTrack>
-    Real<Option> lnGamma(const Real<Option>& s);
+    template<FloatPrec Prec, bool errorTrack>
+    Real<Prec> lnGamma(const Real<Prec>& s);
 
     template<Scalar T>
     T hermiteH(unsigned int n, const T& x) {

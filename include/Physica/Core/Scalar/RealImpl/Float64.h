@@ -26,7 +26,7 @@ namespace Physica {
     template<>
     class Traits<float64> {
     public:
-        constexpr static ScalarOption Option = Float64;
+        constexpr static FloatPrec Prec = Float64;
         constexpr static int Order = 0;
         constexpr static bool isComplex = false;
         constexpr static bool isForwardDiff = false;
@@ -59,7 +59,7 @@ namespace Physica {
         Real(const Integer& i) : Real(double(i)) {}
         Real(const Rational& r) : Real(double(r)) {}
         template<Scalar T>
-        __host__ __device__ explicit(Float64 < T::Option) Real(const T& x) requires(!T::isComplex && !Diffable<T>);
+        __host__ __device__ explicit(Float64 < T::Prec) Real(const T& x) requires(!T::isComplex && !Diffable<T>);
         constexpr Real(const Real&) = default;
         constexpr Real(Real&&) noexcept = default;
         constexpr ~Real() = default;

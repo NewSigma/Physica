@@ -88,7 +88,7 @@ namespace Physica {
     template<Scalar T>
     T lnGamma(const T& s) {
         assert(s.isPositive());
-        if constexpr (T::Option == Double) {
+        if constexpr (T::Prec == Double) {
             /**
              * Double version is implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
              * 
@@ -128,13 +128,13 @@ namespace Physica {
         }
     }
 
-    template<ScalarOption Option>
-    inline Real<Option> gamma(const Real<Option>& s) {
+    template<FloatPrec Prec>
+    inline Real<Prec> gamma(const Real<Prec>& s) {
         return exp(lnGamma(s));
     }
 
-    template<ScalarOption Option>
-    inline Real<Option> beta(const Real<Option>& s1, const Real<Option>& s2) {
+    template<FloatPrec Prec>
+    inline Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2) {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
@@ -155,9 +155,9 @@ namespace Physica {
         return Differential<T>::ridders(lnGamma<T>, x, step);
     }
 
-    template<ScalarOption Option>
-    Real<Option> erf(const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> erf(const Real<Prec>& x) {
+        using T = Real<Prec>;
         T x2 = square(x);
         return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
     }
@@ -168,9 +168,9 @@ namespace Physica {
         return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
     }
 
-    template<ScalarOption Option>
-    Real<Option> standardNormalDistribution(const Real<Option>& x) {
-        using T = Real<Option>;
+    template<FloatPrec Prec>
+    Real<Prec> standardNormalDistribution(const Real<Prec>& x) {
+        using T = Real<Prec>;
         return (erf(x / sqrt(T(2))) + T(1)) >> 1U;
     }
 }

@@ -35,10 +35,10 @@ namespace Physica {
         const RealPack x1 = x.asReal();
         const RealPack t1 = x1 * x1;
         RealPack t2;
-        if constexpr (T::Option == Float32)
+        if constexpr (T::Prec == Float32)
             t2 = t1.template shuffle<1, 0, 3, 2>();
         else {
-            static_assert(T::Option == Float64, "[Error]: Not implemented");
+            static_assert(T::Prec == Float64, "[Error]: Not implemented");
             if constexpr (Size == 1)
                 t2 = t1.template shuffle<1, 0>();
             else if constexpr (Size == 2)
@@ -51,10 +51,10 @@ namespace Physica {
 
         const RealPack t3 = sqrt(t1 + t2);
         RealPack t4;
-        if constexpr (T::Option == Float32)
+        if constexpr (T::Prec == Float32)
             t4 = x1.template shuffle<0, 0, 2, 2>();
         else {
-            static_assert(T::Option == Float64, "[Error]: Not implemented");
+            static_assert(T::Prec == Float64, "[Error]: Not implemented");
             if constexpr (Size == 1)
                 t4 = x1.template shuffle<0, 0>();
             else if constexpr (Size == 2)
@@ -100,7 +100,7 @@ namespace Physica {
             const RealType factor = exp(pair.first);
             RealType s, c, cs;
             sincos(pair.second, s, c);
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cs = RealType::template blend<0, 4, 3, 7>(c, s);
             else
                 cs = RealType::template blend<0, 2>(c, s);
@@ -138,7 +138,7 @@ namespace Physica {
             const auto im = arctan2(pair.second, pair.first);
 
             RealType result;
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 result = RealType::template blend<0, 4, 3, 7>(re, im);
             else
                 result = RealType::template blend<0, 2>(re, im);
@@ -187,7 +187,7 @@ namespace Physica {
             const RealType phase = RealType::select(re.isPositive(), -im, im);
             RealType s, c, cs;
             sincos(phase, s, c);
-            if constexpr (T::Option == Float32)
+            if constexpr (T::Prec == Float32)
                 cs = RealType::template blend<0, 4, 3, 7>(c, s);
             else
                 cs = RealType::template blend<0, 2>(c, s);

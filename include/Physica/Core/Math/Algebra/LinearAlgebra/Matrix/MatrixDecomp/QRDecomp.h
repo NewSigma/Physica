@@ -52,6 +52,7 @@ namespace Physica {
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] auto& getWorking() noexcept { return working; }
         [[nodiscard]] const auto& getWorking() const noexcept { return working; }
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
@@ -96,6 +97,11 @@ namespace Physica {
         const size_t length = taus.getLength();
         VectorND<T> diag(length);
         for (size_t i = 0; i < length; ++i) {
+            if (working(i, i).isZero()) {
+                diag[i] = 1;
+                continue;
+            }
+
             diag[i] = working(i, i);
             working.row(i).tail(i) *= reciprocal(diag[i]);
         }

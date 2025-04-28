@@ -95,7 +95,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     template<Matrix M>
     void MatrixProduct<M1, M2>::assign(LValueMatrix<M>& target) const {
-        constexpr bool GoodScalar = T::Option == Float32 || T::Option == Float64;
+        constexpr bool GoodScalar = T::Prec == Float32 || T::Prec == Float64;
         constexpr bool SameScalar = std::same_as<typename M1::ScalarType, typename M2::ScalarType> && std::same_as<T, typename M::ScalarType>;
         constexpr bool SameMajor = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M2>();
         constexpr bool isContinuous = is_continuous<M1>::value && is_continuous<M2>::value && is_continuous<M>::value;

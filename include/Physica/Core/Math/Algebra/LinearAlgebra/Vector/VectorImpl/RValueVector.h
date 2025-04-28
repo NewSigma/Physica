@@ -62,7 +62,7 @@ namespace Physica {
             constexpr static bool isSameScalar = std::same_as<typename U1::ValueType, typename U2::ValueType>;
             constexpr static bool isBadPacket = PacketType::size() == 1;
             constexpr static bool isCUDA = CUDA<T1> || CUDA<T2>;
-            constexpr static bool isFloat16 = ResultType::Option == Float16;
+            constexpr static bool isFloat16 = ResultType::Prec == Float16;
         public:
             constexpr static bool value = (isCUDA == isFloat16) && isSameScalar && !isBadPacket;
         };
@@ -76,7 +76,7 @@ namespace Physica {
         public:
             constexpr static bool value = HasMKL()
                                        && std::same_as<ScalarType1, ScalarType2>
-                                       && (ScalarType1::Option == Float32 || ScalarType1::Option == Float64)
+                                       && (ScalarType1::Prec == Float32 || ScalarType1::Prec == Float64)
                                        && is_continuous<U1>::value
                                        && is_continuous<U2>::value
                                        && !Diffable<U1>

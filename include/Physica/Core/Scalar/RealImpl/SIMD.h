@@ -35,7 +35,7 @@ namespace Physica {
 
     template<Scalar T, size_t Size>
     class SIMD : public SIMDBase<SIMD<T, Size>> {
-        constexpr static bool isFloat32 = T::Option == Float32;
+        constexpr static bool isFloat32 = T::Prec == Float32;
         constexpr static bool isForward = T::isForwardDiff;
         using This = SIMD<T, Size>;
         using Base = SIMDBase<This>;
@@ -164,8 +164,8 @@ namespace Physica {
     public:
         constexpr static int Size = S;
     private:
-        constexpr static bool isFloat32 = T::Option == Float32;
-        static_assert(isFloat32 || T::Option == Float64, "[Error]: Unsupported float type");
+        constexpr static bool isFloat32 = T::Prec == Float32;
+        static_assert(isFloat32 || T::Prec == Float64, "[Error]: Unsupported float type");
         static_assert(!T::isComplex, "[Error]: The main template targets on real scalar");
         static_assert(!T::isDiffable, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");

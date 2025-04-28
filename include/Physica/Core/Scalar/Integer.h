@@ -24,7 +24,7 @@
 #include "Scalar.h"
 
 namespace Physica {
-    template<ScalarOption Option> class Real;
+    template<FloatPrec Prec> class Real;
 
     class PHYSICA_API Integer {
         //Store effective digits using little endian standard.
@@ -41,8 +41,8 @@ namespace Physica {
         int length;
     public:
         Integer(int i); //NOLINT Conversion is always available.
-        template<ScalarOption Option>
-        explicit Integer(const Real<Option>& s);
+        template<FloatPrec Prec>
+        explicit Integer(const Real<Prec>& s);
         Integer(const Integer& toCopy);
         Integer(Integer&& toMove) noexcept;
         ~Integer();

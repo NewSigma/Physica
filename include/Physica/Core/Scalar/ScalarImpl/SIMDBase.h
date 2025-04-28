@@ -73,7 +73,7 @@ namespace Physica {
     template<class Derived>
     inline auto SIMDBase<Derived>::swapRealImag() const -> FullRealType {
         const auto x = asReal();
-        if constexpr (ScalarType::Option == Float32)
+        if constexpr (ScalarType::Prec == Float32)
             return x.template shuffle<1, 0, 3, 2>();
         else {
             constexpr int Size1 = isComplex ? Size * 2 : Size;
