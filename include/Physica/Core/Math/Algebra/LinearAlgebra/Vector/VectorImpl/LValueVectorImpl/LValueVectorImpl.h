@@ -195,8 +195,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void LValueVector<Derived>::toUnit() {
-        Base::getDerived() *= reciprocal(Base::getDerived().norm());
+    void LValueVector<Derived>::toUnit() {
+        auto& x = Base::getDerived();
+        x *= reciprocal(x.norm());
+    }
+
+    template<class Derived>
+    auto LValueVector<Derived>::householder() -> Tr {
+        return householder(Base::getDerived());
     }
 
     template<class Derived>

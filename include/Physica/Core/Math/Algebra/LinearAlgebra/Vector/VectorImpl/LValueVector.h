@@ -38,6 +38,7 @@ namespace Physica {
         using Base::isReverseDiff;
     protected:
         using typename Base::Tv;
+        using typename Base::Tr;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
@@ -100,7 +101,10 @@ namespace Physica {
 
         void clamp_min(const Tv& minimum);
         void clamp_max(const Tv& maximum);
-        inline void toUnit();
+        void toUnit();
+        using Base::householder;
+        Tr householder();
+
         template<RNG R>
         inline void random_uniform();
         template<RNG R>

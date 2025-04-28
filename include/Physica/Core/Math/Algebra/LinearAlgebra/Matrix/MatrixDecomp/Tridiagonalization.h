@@ -101,7 +101,7 @@ namespace Physica {
                 unit = temp.calc(0).unit();
 
             auto p = buffer.head(order - i - 1);
-            const RealType norm = householder(temp, p);
+            const RealType norm = temp.householder(p);
             for (size_t j = 0; j < p.getLength(); ++j)
                 working(i, i + j + 1) = p[j].conjugate();
             normBuffer[i] = -norm * unit;

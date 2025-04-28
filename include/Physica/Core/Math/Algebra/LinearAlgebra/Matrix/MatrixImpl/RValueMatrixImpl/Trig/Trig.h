@@ -144,4 +144,5 @@ namespace Physica {
     };
 }
 
+#include "TrigGEMM.h"
 #include "TrigInverse.h"

@@ -91,7 +91,7 @@ namespace Physica {
             auto row = working.row(i);
             auto sub_row = row.tail(i + 1);
             auto unit = sub_row[0].unit();
-            subDiag[i] = -householderInPlace(sub_row) * unit;
+            subDiag[i] = -sub_row.householder() * unit;
             auto corner2 = working.bottomRightCorner(i + 1);
             applyHouseholder(corner2, sub_row);
         }
@@ -104,7 +104,7 @@ namespace Physica {
             auto col = working.col(i);
             auto sub_col = col.tail(i);
             auto unit = sub_col[0].unit();
-            mainDiag[i] = -householderInPlace(sub_col) * unit;
+            mainDiag[i] = -sub_col.householder() * unit;
         }
         else {
             mainDiag[i] = -working(i, i);
@@ -150,7 +150,7 @@ namespace Physica {
         auto col = working.col(colIndex);
         auto sub_col = col.tail(colIndex);
         const ScalarType unit = sub_col[0].unit();
-        mainDiag[colIndex] = -householderInPlace(sub_col) * unit;
+        mainDiag[colIndex] = -sub_col.householder() * unit;
         auto corner = working.bottomRightCorner(colIndex, colIndex + 1);
         applyHouseholder(sub_col, corner);
     }

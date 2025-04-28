@@ -255,7 +255,7 @@ namespace Physica {
         if (sub_order != 2) {
             Vector3D<T> householderVector{};
             col_1_M[2] = subBlock(1, 0) * subBlock(2, 1);
-            householder(col_1_M, householderVector);
+            col_1_M.householder(householderVector);
             {
                 auto block = matrixT.rightCols(lower);
                 auto rows = block.rows(lower, 3);
@@ -274,7 +274,7 @@ namespace Physica {
         }
         else {
             Vector2D<T> householderVector{};
-            householder(col_1_M.head(2), householderVector);
+            col_1_M.head(2).householder(householderVector);
             {
                 auto block = matrixT.rightCols(lower);
                 auto rows = block.rows(lower, 2);
@@ -301,7 +301,7 @@ namespace Physica {
         for (size_t i = 0; i < sub_order - 3; ++i) {
             auto block = matrixT.rows(lower + i + 1, 3);
             auto target_col = block.col(lower + i);
-            const auto norm = householder(target_col, householderVector3D);
+            const auto norm = target_col.householder(householderVector3D);
             target_col[0] = target_col[0].isNegative() ? norm : -norm;
             target_col.tail(1) = T(0);
             {
@@ -322,7 +322,7 @@ namespace Physica {
         auto householderVector2D = householderVector3D.head(2);
         auto block = matrixT.rows(lower + sub_order - 2, 2);
         auto target_col = block.col(lower + sub_order - 3);
-        const auto norm = householder(target_col, householderVector2D);
+        const auto norm = target_col.householder(householderVector2D);
         target_col[0] = target_col[0].isNegative() ? norm : -norm;
         target_col[1] = T(0);
         {

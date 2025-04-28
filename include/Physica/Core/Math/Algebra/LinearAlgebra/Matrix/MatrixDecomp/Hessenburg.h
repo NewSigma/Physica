@@ -110,7 +110,7 @@ namespace Physica {
             else
                 unit = temp[0].unit();
 
-            const RealType norm = householderInPlace(temp);
+            const RealType norm = temp.householder();
             normVector[i] = -norm * unit;
 
             if (!norm.isZero()) {

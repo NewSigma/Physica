@@ -158,6 +158,9 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] T angleTo(const V& v) const noexcept;
 
+        template<Vector V>
+        Tr householder(V& target) const;
+
         template<size_t Length = Dynamic>
         [[nodiscard]] inline auto head(size_t to) & noexcept;
         template<size_t Length = Dynamic>

@@ -494,6 +494,46 @@ namespace Physica {
     auto RValueVector<Derived>::angleTo(const V& v) const noexcept -> T {
         return arccos(Base::getDerived() * v / (norm() * v.norm()));
     }
+    /**
+     * The first element of \param target will be the factor to construct houseHolder matrix.
+     * The other parts of \param target will be essential HouseHolder vector.
+     * 
+     * \return The norm of \param source
+     * 
+     * References:
+     * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
+     * [2] Eigen; https://eigen.tuxfamily.org/
+     */
+    template<class Derived>
+    template<Vector V>
+    auto RValueVector<Derived>::householder(V& target) const -> Tr {
+        assert(getLength() == target.getLength());
+        assert(getLength() > 1 && "[Error]: Unnecessary householder call");
+
+        const T v0 = calc(0);
+        const Tr sourceNorm0 = v0.squaredNorm();
+        const Tr squaredTailNorm = tail(1).squaredNorm();
+        if (squaredTailNorm > std::numeric_limits<T>::min()) [[likely]] {
+            const Tr norm = sqrt(squaredTailNorm + sourceNorm0);
+            const T factor = v0.unit() * norm;
+            const T factor1 = v0 + factor;
+            const T factor2 = reciprocal(factor1);
+
+            target.tail(1) = tail(1) * factor2;
+            target[0] = (factor1 / factor).real();
+            return norm;
+        }
+        else {
+            const bool isZeroVector = sourceNorm0 < std::numeric_limits<T>::min();
+            if (isZeroVector) {
+                target = Trv(0);
+                return Trv(0);
+            }
+            target[0] = Trv(2);
+            target.tail(1) = Trv(0);
+            return sqrt(sourceNorm0);
+        }
+    }
 
     template<class Derived>
     template<size_t Length>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -113,11 +113,11 @@ namespace Physica {
         MatrixType temp = lattice.transpose();
         using VectorType = Vector3D<T>;
         VectorType buffer{};
-        householder(temp.col(0), buffer);
+        temp.col(0).householder(buffer);
         applyHouseholder(buffer, temp);
 
         auto buffer1 = buffer.head(2);
-        householder(temp.col(1).tail(1), buffer1);
+        temp.col(1).tail(1).householder(buffer1);
         auto corner = temp.bottomRightCorner(1);
         applyHouseholder(buffer1, corner);
         for (int i = 0; i < 3; ++i) {

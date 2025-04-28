@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ using T = float64;
 void emptyVectorTest() {
     using VectorType = Vector4D<T>;
     VectorType x{0, 0, 0, 0};
-    householderInPlace(x);
+    x.householder();
     for (auto& elem : x)
         if (!elem.isZero())
             exit(EXIT_FAILURE);
@@ -39,7 +39,7 @@ void emptyComplexVectorTest() {
     using ComplexVector = Vector4D<ComplexType>;
     const ComplexVector x = Vector4D<T>{0, 0, 1, 0};
     ComplexVector v(4);
-    const T norm = householder(x, v);
+    const T norm = x.householder(v);
     const ComplexType tau = v[0];
     const ComplexType beta = -norm * x[0].unit();
     v[0] = ComplexType(1);
@@ -58,7 +58,7 @@ int main() {
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
         VectorType v(rank);
-        const T norm = householder(x, v);
+        const T norm = x.householder(v);
         const T tau = v[0];
         const T beta = x[0].isNegative() ? norm : -norm;
         v[0] = 1;
@@ -75,7 +75,7 @@ int main() {
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
         VectorType v(rank);
-        [[maybe_unused]] const T norm = householder(x, v);
+        [[maybe_unused]] const T norm = x.householder(v);
 
         using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, 4, 4>;
         const MatrixType m{x, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
@@ -100,7 +100,7 @@ int main() {
         const VectorType x{{1, 1}, {3, -5}};
         const size_t rank = x.getLength();
         VectorType v(rank);
-        const T norm = householder(x, v);
+        const T norm = x.householder(v);
 
         const MatrixType m{x, {{-2, 7}, {1, 6}}};
         MatrixType householderMat = MatrixType::unitMatrix(2);
