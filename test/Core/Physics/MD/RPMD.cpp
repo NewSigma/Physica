@@ -78,7 +78,7 @@ bool testCalcKinetic(double precision) {
 }
 /**
  * Reference:
- * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
+ * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
  */
 void testMDRun() {
     using ForceModel = SilveraGoldman<ScalarType, true, false>;

@@ -28,7 +28,7 @@ using dfloat = Diff<float64, DiffMode::Reverse, 1>;
  * Params referenced from [1]
  * 
  * Reference:
- * [1] J. Chem. Phys. 122:184503 (2005); https://doi.org/10.1063/1.1893956
+ * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
  */
 class ForceConstTest {
     using MDCellType = MDCell<dfloat>;

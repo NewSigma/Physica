@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,7 +24,8 @@
 namespace Physica {
     /*
      * Return the precomputed reciprocal.
-     * Reference: T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
+     * Reference:
+     * [1] T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
      */
     inline MPUnit getInverse(MPUnit unit) {
         MPUnit unit0 = unit & 1U;
@@ -64,7 +65,8 @@ namespace Physica {
      *
      * A full word here indicates that the highest bit of divisor is set.
      *
-     * Reference: T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
+     * Reference:
+     * [1] T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
      */
     inline void div2WordByFullWord(MPUnit& quotient, MPUnit& remainder
             , MPUnit high, MPUnit low, MPUnit divisor) {
@@ -134,7 +136,8 @@ namespace Physica {
      * dividend[len] < divisor[len - 1].
      * len >= 1 to avoid invalid read.
      *
-     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:4-8
+     * Reference:
+     * [1] MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:4-8
      */
     inline MPUnit divArrByFullArrWith1Word(const MPUnit* __restrict dividend
             , const MPUnit* __restrict divisor, size_t len) {

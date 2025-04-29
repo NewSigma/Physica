@@ -10,7 +10,7 @@ Physica在前向传播完成时暂停协程以等待未来的梯度。使用RAII
 
     Rule  2: What’s good for function values is good for their derivatives.
 
-若前向传播不抛出异常, 则要求反向传播亦不得抛出异常, 否则程序非良构。
+规定若前向传播不抛出异常, 则要求反向传播亦不得抛出异常, 否则程序非良构。
 
 提供以下函数
 

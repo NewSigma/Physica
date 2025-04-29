@@ -149,7 +149,7 @@ void testMD() {
 }
 /**
  * Reference:
- * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
+ * [1] J. Chem. Phys. 131, 024501 (2009); https://doi.org/10.1063/1.3167790
  */
 int main() {
     testSort();

@@ -48,7 +48,7 @@ RPMD<ScalarType> makeSystem(size_t numMolecular) {
 }
 /**
  * Reference:
- * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
+ * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
  */
 int main() {
     HostForceModel hostModel(pair_cutoff);

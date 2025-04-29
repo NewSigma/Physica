@@ -64,7 +64,7 @@ namespace Physica {
          * Generate a sequence of random seed (using the PCG-XSH-RS scheme)
          *
          * Reference:
-         * [1] Eigen; https://eigen.tuxfamily.org/  
+         * [1] Eigen; https://eigen.tuxfamily.org  
          * [2] https://www.pcg-random.org/
          */
         static uint32_t toNextSeed(uint64_t& state) noexcept {

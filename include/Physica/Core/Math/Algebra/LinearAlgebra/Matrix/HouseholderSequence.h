@@ -28,7 +28,7 @@ namespace Physica {
      * Read data from columns of source, otherwise read from rows
      *
      * Reference:
-     * [1] Eigen; https://eigen.tuxfamily.org/
+     * [1] Eigen; https://eigen.tuxfamily.org
      */
     template<Matrix T, bool ColWiseRead = true>
     class HouseholderSequence : public RValueMatrix<HouseholderSequence<T, ColWiseRead>> {

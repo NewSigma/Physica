@@ -502,7 +502,7 @@ namespace Physica {
      * 
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
-     * [2] Eigen; https://eigen.tuxfamily.org/
+     * [2] Eigen; https://eigen.tuxfamily.org
      */
     template<class Derived>
     template<Vector V>

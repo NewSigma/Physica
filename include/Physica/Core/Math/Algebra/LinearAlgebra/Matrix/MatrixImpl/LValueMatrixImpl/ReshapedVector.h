@@ -45,6 +45,9 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        using Base::operator=;
+        /* Operations */
+        void resize(size_t row, size_t col);
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
@@ -59,6 +62,13 @@ namespace Physica {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
+    }
+
+    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
+    void LValueReshapedVector<T, MatrixMajor, Row, Col>::resize(
+            [[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+        assert(row == getRow());
+        assert(col == getCol());
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>

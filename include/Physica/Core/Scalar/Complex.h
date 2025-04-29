@@ -80,9 +80,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline T phase() const;
         [[nodiscard]] __host__ __device__ Complex unit() const;
 
-        void toHostAsync(This&) const { unreachable(); } // Workaround for possible NVCC false positive diagnosis
-        const This& toDevice() const { unreachable(); } // Workaround for possible NVCC false positive diagnosis
-
         [[nodiscard]] inline PacketType packet() const;
         inline void writePacket(const PacketType packet);
         __host__ __device__ void swap(Complex& __restrict obj) noexcept;

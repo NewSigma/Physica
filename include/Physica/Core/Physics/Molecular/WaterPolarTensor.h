@@ -26,7 +26,7 @@ namespace Physica {
      * \class WaterPolarTensor provides polarization tensor of water molecular at CCSD/W6 precision as introduced in [1].
      * 
      * Reference:
-     * [1] Avila, G. Ab initio dipole polarizability surfaces of water molecule: static and dynamic at 514.5 nm. J. Chem. Phys. 122, 144310 (2005).
+     * [1] J. Chem. Phys. 122, 144310 (2005); https://doi.org/10.1063/1.1867437
      */
     template<Scalar T, bool UseDynamicPolar>
     class WaterPolarTensor {

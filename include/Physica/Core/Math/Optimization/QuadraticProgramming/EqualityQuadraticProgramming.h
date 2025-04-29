@@ -32,7 +32,7 @@ namespace Physica {
      * constraints is matrix [A b]
      * 
      * Reference:
-     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.448-496
+     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:448-496
      */
     template<Scalar T>
     class EqualityQuadraticProgramming {

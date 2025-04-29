@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,7 +27,7 @@ namespace Physica {
      * 
      * Reference:
      * [1] J. Chem. Phys. 153, 114107 (2020); https://doi.org/10.1063/5.0020514
-     * [2] https://doi.org/10.48550/arXiv.2111.06402
+     * [2] arXiv:2111.06402; https://doi.org/10.48550/arXiv.2111.06402
      */
     template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
     class SCRBaro : private Berendsen<T, NumReplica, Type> {

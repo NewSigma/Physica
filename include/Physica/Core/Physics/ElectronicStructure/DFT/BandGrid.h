@@ -114,7 +114,7 @@ namespace Physica {
     }
     /**
      * Reference:
-     * [1] Bross H. On the Efficiency of Different Schemes for the Evaluation of the Density of States and Related Properties in Solids[J]. Physica Status Solidi, 2010, 179(2):429-439.
+     * [1] phys. stat. sol. (b) 179, 429-439 (2010); https://doi.org/10.1002/pssb.2221790218
      */
     template<Scalar T, bool isSpinPolarized>
     template<Vector V>
@@ -160,7 +160,7 @@ namespace Physica {
      * \returns Gradient of energy in t-coordinate defined in [1]
      * 
      * Reference:
-     * [1] Bross H. On the Efficiency of Different Schemes for the Evaluation of the Density of States and Related Properties in Solids[J]. Physica Status Solidi, 2010, 179(2):429-439.
+     * [1] phys. stat. sol. (b) 179, 429-439 (2010); https://doi.org/10.1002/pssb.2221790218
      */
     template<Scalar T, bool isSpinPolarized>
     Vector3D<T> BandGrid<T, isSpinPolarized>::gradEnergy(size_t kPointId) const {

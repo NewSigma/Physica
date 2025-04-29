@@ -29,7 +29,7 @@ namespace Physica {
      * 
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
-     * [2] Eigen; https://gitlab.com/libeigen/eigen
+     * [2] Eigen; https://eigen.tuxfamily.org
      */
     template<Scalar T, size_t Order = Dynamic>
     class Schur : public Decouplable {
@@ -202,7 +202,7 @@ namespace Physica {
     }
     /**
      * Reference:
-     * [1] Eigen; https://gitlab.com/libeigen/eigen
+     * [1] Eigen; https://eigen.tuxfamily.org
      */
     template<Scalar T, size_t Order>
     Vector3D<T> Schur<T, Order>::realShift(size_t upper, size_t iter) {

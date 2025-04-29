@@ -25,7 +25,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] Clementi E, Davis D R. Electronic structure of large molecular systems[J]. Journal of Computational Physics, 1966, 1(2):223-244.
+     * [1] Journal of Computational Physics 1(2), 223-244 (1966); https://doi.org/10.1016/0021-9991(66)90004-0
      * [2] Saunders V R. An Introduction to Molecular Integral Evaluation[M]. Springer Netherlands, 1975.
      */
     template<Scalar T>

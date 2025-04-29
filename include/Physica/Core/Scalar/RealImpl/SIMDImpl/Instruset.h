@@ -21,7 +21,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] vectorclass2 https://github.com/vectorclass/version2/blob/master/instrset.h
+     * [1] vectorclass2; https://github.com/vectorclass/version2/blob/master/instrset.h
      */
     class Instruset {
     public:

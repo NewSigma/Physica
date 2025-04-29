@@ -60,7 +60,7 @@ ScalarType theory_stationary(VectorType pos) {
 }
 /**
  * Reference:
- * [1] Spencer B F, Bergman L A. On the numerical solution of the Fokker-Planck equation for nonlinear stochastic systems[J]. Nonlinear Dynamics, 1993, 4(4):357-372.
+ * [1] Nonlinear Dyn 4, 357–372 (1993); https://doi.org/10.1007/BF00120671
  */
 int main() {
     using ElementType = Rectangle1<ScalarType>;

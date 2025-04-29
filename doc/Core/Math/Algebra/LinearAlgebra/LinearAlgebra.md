@@ -76,5 +76,5 @@ FastPacket = true表示可以快速构造SIMD对象. 对于右值表达式, 需�
 
 ## Reference
 
-[1] Eigen; https://eigen.tuxfamily.org/
+[1] Eigen; https://eigen.tuxfamily.org
 [2] Armadillo; https://arma.sourceforge.net/

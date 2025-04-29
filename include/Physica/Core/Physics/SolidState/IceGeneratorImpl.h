@@ -103,7 +103,7 @@ namespace Physica {
     }
     /**
      * Reference:
-     * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
+     * [1] J. Chem. Phys. 118, 9291 (2003); https://doi.org/10.1063/1.1568337
      */
     template<Scalar T>
     template<RNG R>
@@ -170,7 +170,7 @@ namespace Physica {
     }
     /**
      * Reference:
-     * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
+     * [1] J. Chem. Phys. 118, 9291 (2003); https://doi.org/10.1063/1.1568337
      */
     template<Scalar T>
     IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRingMove(

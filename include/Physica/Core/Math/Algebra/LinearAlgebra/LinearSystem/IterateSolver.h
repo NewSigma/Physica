@@ -94,7 +94,7 @@ namespace Physica {
      * Pertinent for large-scale problem, \param dotFunc must be symmetric and positive definite
      * 
      * Reference:
-     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.112
+     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:112
      */
     template<Scalar T>
     template<class Functor, Vector V>

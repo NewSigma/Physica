@@ -37,7 +37,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] Eigen; https://eigen.tuxfamily.org/
+     * [1] Eigen; https://eigen.tuxfamily.org
      */
     class PHYSICA_API ThreadPool final {
         using This = ThreadPool;

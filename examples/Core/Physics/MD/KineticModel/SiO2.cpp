@@ -42,6 +42,7 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(10);
 constexpr size_t numStep = 1000;
 /**
  * Initial structure from [1], modifying lattice according to [2]
+ *
  * Reference:
  * [1] Materials Project, mp-7000; https://doi.org/10.17188/1272685
  * [2] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584

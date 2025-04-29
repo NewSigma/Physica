@@ -45,6 +45,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        __host__ __device__ void resize(size_t row, size_t col);
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
@@ -59,6 +61,13 @@ namespace Physica {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
+    }
+
+    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
+    __host__ __device__ void device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::resize(
+            [[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+        assert(row == getRow());
+        assert(col == getCol());
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>

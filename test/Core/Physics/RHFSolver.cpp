@@ -42,7 +42,7 @@ ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const Ve
 }
 /**
  * Reference:
- * [1] Koga T, Tatewaki H, Shimazaki T. Chemically reliable uncontracted Gaussian-type basis sets for atoms H to Lr [J].Chemical Physics Letters, 2000, 328(4-6):473-482.
+ * [1] Chemical Physics Letters 328(4-6), 473-482 (2000); https://doi.org/10.1016/S0009-2614(00)00948-9
  */
 int main() {
     {

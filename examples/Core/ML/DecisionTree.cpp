@@ -25,7 +25,7 @@ using ScalarType = float64;
 using TreeType = DecisionTree<ScalarType, DecisionTreeType::Classify>;
 /*
  * Reference:
- * [1] Glass Identification Data Set(https://archive.ics.uci.edu/ml/datasets/Glass+Identification)
+ * [1] Glass Identification Data Set; https://archive.ics.uci.edu/ml/datasets/Glass+Identification
  */
 int main() {
     std::ifstream fin("glass.data");

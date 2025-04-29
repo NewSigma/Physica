@@ -28,7 +28,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] Frey B. J., Dueck D. Clustering by Passing Messages Between Data Points[J]. Science. 2007 Feb 16;315(5814):972-6
+     * [1] Science 315(5814), 972-976 (2007); https://doi.org/10.1126/science.1136800
      */
     template<Scalar T>
     class AP {

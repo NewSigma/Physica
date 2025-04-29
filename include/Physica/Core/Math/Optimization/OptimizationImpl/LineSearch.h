@@ -23,7 +23,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.56-62
+     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:56-62
      */
     template<Scalar T, size_t Dim>
     class LineSearch {

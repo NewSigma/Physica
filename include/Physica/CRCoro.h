@@ -51,7 +51,7 @@ namespace Physica {
         std::suspend_never initial_suspend() noexcept { return {}; }
         std::suspend_always final_suspend() noexcept { return {}; }
         void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
-        void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
+        void unhandled_exception() { throw; }
     protected:
         CRCoro() = default;
         CRCoro(const This&) = default;

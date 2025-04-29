@@ -31,7 +31,7 @@ namespace Physica {
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:43-88
      * [2] Larsen A, Poulsen R S. Applied Hartree-Fock methods.
-     * [3] Kudin K N, Scuseria G E, Cances E. A black-box self-consistent field convergence algorithm: One step closer[J]. Journal of Chemical Physics, 2002, 116(19):8255-8261.
+     * [3] J. Chem. Phys. 116(19), 8255-8261 (2002); https://doi.org/10.1063/1.1470195
      */
     template<class BaseSetType>
     class RHFSolver {

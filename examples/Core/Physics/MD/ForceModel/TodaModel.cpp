@@ -140,7 +140,7 @@ Plot& plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density)
 }
 /**
  * Reference:
- * [1] L. Y. Zhu and J. Wang, Phys. Rev. E 98, 022117 (2018)
+ * [1] Phys. Rev. E 98, 022117 (2018); https://doi.org/10.1103/PhysRevE.98.022117
  */
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;

@@ -24,7 +24,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.121-122
+     * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:121-122
      */
     template<Scalar T, size_t Dim>
     class ConjugateGradient {

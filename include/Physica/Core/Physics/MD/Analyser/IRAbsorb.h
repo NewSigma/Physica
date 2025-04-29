@@ -25,7 +25,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] S. Habershon, G. S. Fanourgakis, and D. E. Manolopoulos, J. Chem. Phys. 129, 074501 (2008).
+     * [1] J. Chem. Phys. 129, 074501 (2008); https://doi.org/10.1063/1.2968555
      */
     template<Scalar T>
     class IRAbsorb {

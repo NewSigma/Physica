@@ -27,7 +27,7 @@ namespace Physica {
      * VectorType RandomFunc(T x, VectorType y);
      * 
      * Reference:
-     * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
+     * [1] Phys. Rev. A 45, 600 (1992); https://doi.org/10.1103/PhysRevA.45.600
      */
     template<Scalar T, size_t Dim>
     class SRK2 : public ODESolver<T, Dim> {

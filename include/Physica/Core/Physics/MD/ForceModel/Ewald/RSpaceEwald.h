@@ -26,7 +26,7 @@
 namespace Physica {
     /**
      * Reference:
-     * [1] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
+     * [1] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications[M]; San Diego: Academic, 2002:304-306
      */
     template<Scalar T, bool IsSmallCell = false>
     class RSpaceEwald : public PairModel<RSpaceEwald<T, IsSmallCell>> {

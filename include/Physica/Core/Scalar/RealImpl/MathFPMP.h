@@ -64,7 +64,8 @@ namespace Physica {
     /*!
      * Calculate a^n.
      *
-     * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:45
+     * Reference:
+     * [1] MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:45
      */
     inline Real<FloatMP> powScalar(const Real<FloatMP>& a, const Real<FloatMP>& n) {
         const auto size = n.getSize();

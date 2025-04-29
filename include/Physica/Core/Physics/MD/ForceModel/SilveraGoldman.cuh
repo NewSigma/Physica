@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,7 +26,7 @@ namespace Physica {
      * Potential that suits para-hydrogen
      * 
      * Reference:
-     * [1] I. F. Silvera and V. V. Goldman, J. Chem. Phys. 69, 4209 (1978).
+     * [1] J. Chem. Phys. 69, 4209 (1978); https://doi.org/10.1063/1.437103
      */
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
     class device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>> final
