@@ -39,7 +39,7 @@ namespace Physica {
     template<Scalar T,
              unsigned int Dim,
              size_t NumReplica,
-             RPMDIntegrator Integrator>
+             RPMDIntegrator Integrator = RPMDIntegrator::Exact>
     class FreeModel {
         using This = FreeModel<T, Dim, NumReplica, Integrator>;
         using Tv = T::ValueType;

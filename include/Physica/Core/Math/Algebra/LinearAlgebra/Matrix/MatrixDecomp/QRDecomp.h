@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
@@ -43,6 +44,8 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         void compute(const M& source, bool pivote = false);
+        template<Matrix M>
+        void compute_base(const M& source, bool pivote = false);
         template<Matrix M>
         void compute_mkl(const M& source, bool pivote = false);
 
@@ -78,10 +81,28 @@ namespace Physica {
     void QRDecomp<T>::compute(const M& source, bool pivote) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
-        if constexpr (HasMKL())
+        if constexpr (HasMKL() && (M::SizeAtCompile > 16 || M::SizeAtCompile == Dynamic))
             compute_mkl(source, pivote);
         else
-            noImpl(__func__);
+            compute_base(source, pivote);
+    }
+
+    template<Scalar T>
+    template<Matrix M>
+    void QRDecomp<T>::compute_base(const M& source, bool pivote) {
+        working = source;
+
+        size_t i = 0;
+        for (; i < source.getCol() - 1; ++i) {
+            auto col = working.col(i);
+            auto buffer = col.tail(i);
+            const auto unit = buffer[0].unit();
+            const auto norm = buffer.householder();
+            auto corner = working.bottomRightCorner(i, i + 1);
+            applyHouseholder(buffer, corner);
+            taus[i] = std::exchange(col[i], -norm * unit);
+        }
+        taus[i] = 0; // For historic reason, BLAS-like interface will allocate a unused element
     }
 
     template<Scalar T>

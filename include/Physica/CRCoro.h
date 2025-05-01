@@ -19,8 +19,8 @@
 #pragma once
 
 #include <cstdlib>
-#include <exception>
 #include <coroutine>
+#include <utility>
 #include "CRTPBase.h"
 
 namespace Physica {
@@ -51,7 +51,7 @@ namespace Physica {
         std::suspend_never initial_suspend() noexcept { return {}; }
         std::suspend_always final_suspend() noexcept { return {}; }
         void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
-        void unhandled_exception() { throw; }
+        [[noreturn]] void unhandled_exception() { throw; }
     protected:
         CRCoro() = default;
         CRCoro(const This&) = default;

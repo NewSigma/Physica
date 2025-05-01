@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,17 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
+#include <iostream>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
 
 using namespace Physica;
-using Matrix3D = DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3>;
+using Matrix3D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element, 3, 3>;
+
+void testQR(const QRDecomp<float64>& qr, const Matrix3D& answer) {
+    Matrix3D matrixQ = qr.getMatrixQ();
+    Matrix3D matrixR = qr.getMatrixR();
+    Matrix3D result = matrixQ * matrixR;
+    if (!matrixNear(result, answer, 1E-15))
+        exit(1);
+}
 
 int main() {
-    const Matrix3D mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
-    LUDecomp<float64, false> lu(mat1);
-    Matrix3D decomp = lu.getMatrixLU();
-    Matrix3D answer{{2, 3, 4}, {0.5, -0.5, 7}, {0.5, -1, -1}};
-    if (!matrixNear(decomp, answer, 1E-15))
-        exit(1);
+    const Matrix3D answer{2, 3, 4, 1, 1, 9, 1, 2, -6};
+    QRDecomp<float64> qr(3, 3);
+    if constexpr (HasMKL()) {
+        qr.compute_mkl(answer);
+        testQR(qr, answer);
+    }
+    qr.compute_base(answer);
+    testQR(qr, answer);
     return 0;
 }

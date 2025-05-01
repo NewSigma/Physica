@@ -49,8 +49,6 @@ namespace Physica {
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
     private:
-        using FireModelType = FireModel<T, Dim>;
-
         MDCellType cell;
         RingPolymerType ringPolymer;
         ForceMatrix forceBuffer;
@@ -62,6 +60,7 @@ namespace Physica {
         T temperatureT;
         T timeStep;
     public:
+        RPMD() = default;
         RPMD(MDCellType cell_,
              size_t numReplica,
              size_t numContract,
@@ -71,29 +70,29 @@ namespace Physica {
         RPMD(RPMD&&) noexcept = default;
         ~RPMD() = default;
         /* Operators */
-        RPMD& operator=(RPMD obj) noexcept;
+        RPMD& operator=(RPMD obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class ForceModel, class Executor> void updateForce(ForceModel& model);
         template<class KineticModel,
                  class ForceModel,
-                 class Executor>
+                 class Executor = SeqExecutor>
         void nve_step(KineticModel& kineticModel, ForceModel& forceModel);
         template<class KineticModel,
                  class ForceModel,
-                 class Executor>
+                 class Executor = SeqExecutor>
         void nve_step_for(T duration, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
                  RNG R,
                  class KineticModel,
                  class ForceModel,
-                 class Executor>
+                 class Executor = SeqExecutor>
         void nvt_step(const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  RNG R,
                  class KineticModel,
                  class ForceModel,
-                 class Executor>
+                 class Executor = SeqExecutor>
         void nvt_step_for(T duration, const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
@@ -101,23 +100,25 @@ namespace Physica {
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
-                 class Executor>
+                 class Executor = SeqExecutor>
         void npt_step(const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  RNG R,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
-                 class Executor>
+                 class Executor = SeqExecutor>
         void npt_step_for(T duration, const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
-        template<class KineticModel, class ForceModel, class Executor>
-        void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
-        template<BaroType Type, class KineticModel, class ForceModel, class Executor>
+        template<class KineticModel, class ForceModel, class Executor = SeqExecutor>
+        void fire_vstep(FireModel<T, Dim>& fire, KineticModel& kineticModel, ForceModel& forceModel);
+        template<BaroType Type, class KineticModel, class ForceModel, class Executor = SeqExecutor>
         void fire_pstep(CFireModel<T, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
 
-        template<class KineticModel, RNG R> inline void initMomentum();
-        template<class KineticModel> inline void scaleVelocity();
+        template<class KineticModel, RNG R>
+        void initMomentum();
+        template<class KineticModel>
+        void scaleVelocity();
         void normalizeCentroid();
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
@@ -127,7 +128,7 @@ namespace Physica {
         template<class KineticModel> [[nodiscard]] T calcKinetic(size_t dofIndex) const;
         template<class KineticModel> [[nodiscard]] T calcKineticPrim() const;
         template<class KineticModel> [[nodiscard]] T calcKineticPrim(size_t dofIndex) const;
-        [[nodiscard]] inline T calcKineticClassical() const;
+        [[nodiscard]] T calcKineticClassical() const;
 
         template<class ForceModel, class Executor> [[nodiscard]] T calcPotential(const ForceModel& model) const;
         template<class ForceModel> [[nodiscard]] T calcPotentialClassical(const ForceModel& model) const;
@@ -159,21 +160,21 @@ namespace Physica {
         [[nodiscard]] const MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] T getVolume() const noexcept { return cell.getVolume(); }
-        [[nodiscard]] RingPolymerType& getRingPolymer() noexcept { return ringPolymer; }
-        [[nodiscard]] const RingPolymerType& getRingPolymer() const noexcept { return ringPolymer; }
+        [[nodiscard]] auto& getRingPolymer() noexcept { return ringPolymer; }
+        [[nodiscard]] const auto& getRingPolymer() const noexcept { return ringPolymer; }
         [[nodiscard]] PhaseMatrix& getPhaseMatrix() noexcept { return ringPolymer.asMatrix(); }
         [[nodiscard]] const PhaseMatrix& getPhaseMatrix() const noexcept { return ringPolymer.asMatrix(); }
         [[nodiscard]] size_t getDOF() const noexcept { return ringPolymer.getDOF(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return ringPolymer.getNumReplica(); }
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }
-        [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
+        [[nodiscard]] const auto& getForce() const noexcept { return forceBuffer; }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
         [[nodiscard]] bool isContractEnabled() const noexcept { return (NumReplica != 1) && (getNumReplica() != getNumContract()); }
         [[nodiscard]] T getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] T getTimeStep() const noexcept { return timeStep; }
         /* Setters */
         void setLattice(LatticeMatrix lattice) { cell.setLattice(std::move(lattice)); }
-        inline void setTemperature(T temperature);
+        void setTemperature(T temperature) noexcept;
         void setTimeStep(T timeStep_);
         /* Static members */
         [[nodiscard]] static uint64_t durationToStep(Tv duration, Tv timeStep);
@@ -185,7 +186,8 @@ namespace Physica {
         void decontract();
         void forceStep(T deltaT);
         bool checkCentroid() const;
-        void checkParam() const;
+        template<class KineticModel, class ForceModel>
+        constexpr static void checkRelaxParam();
     };
 }
 

@@ -22,10 +22,10 @@
 #include "HubbardMatrix.h"
 
 namespace Physica {
-    template<Scalar T, Representation U, Vector V>
-    class HubbardVecProd : public RValueVector<HubbardVecProd<T, U, V>> {
-        using MatrixType = HubbardMatrix<T, U>;
-        using This = HubbardVecProd<T, U, V>;
+    template<Scalar T0, Representation U, Vector V>
+    class HubbardVecProd : public RValueVector<HubbardVecProd<T0, U, V>> {
+        using MatrixType = HubbardMatrix<T0, U>;
+        using This = HubbardVecProd<T0, U, V>;
         using Base = RValueVector<This>;
         using FFTType = MatrixType::FFTType;
         using StateType = U::StateType;
@@ -69,14 +69,14 @@ namespace Physica {
         [[nodiscard]] const U& getRepr() const noexcept { return mat.getRepr(); }
     };
 
-    template<Scalar T, Representation U, Vector V>
-    HubbardVecProd<T, U, V>::HubbardVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+    template<Scalar T0, Representation U, Vector V>
+    HubbardVecProd<T0, U, V>::HubbardVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Scalar T, Representation U, Vector V>
+    template<Scalar T0, Representation U, Vector V>
     template<Vector V1, class Executor>
-    inline void HubbardVecProd<T, U, V>::assign(V1& target) const {
+    inline void HubbardVecProd<T0, U, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = Tr(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
@@ -103,8 +103,8 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, Representation U, Vector V>
-    auto HubbardVecProd<T, U, V>::calc(size_t index) const -> ScalarType {
+    template<Scalar T0, Representation U, Vector V>
+    auto HubbardVecProd<T0, U, V>::calc(size_t index) const -> ScalarType {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -mat.getHoppingT();
         const auto state = getRepr()[index];
@@ -134,14 +134,14 @@ namespace Physica {
         return result;
     }
 
-    template<Scalar T, Representation U, Vector V>
-    auto HubbardVecProd<T, U, V>::calc_value(size_t index) const -> Tv {
+    template<Scalar T0, Representation U, Vector V>
+    auto HubbardVecProd<T0, U, V>::calc_value(size_t index) const -> Tv {
         return calc(index).value();
     }
 
-    template<Scalar T, Representation U, Vector V>
+    template<Scalar T0, Representation U, Vector V>
     template<Vector V1>
-    void HubbardVecProd<T, U, V>::sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    void HubbardVecProd<T0, U, V>::sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -158,9 +158,9 @@ namespace Physica {
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(Tr(repr.getPeriods()[index])) * factor;
     }
 
-    template<Scalar T, Representation U, Vector V>
+    template<Scalar T0, Representation U, Vector V>
     template<Vector V1>
-    void HubbardVecProd<T, U, V>::dotImpl(V1& target, ScalarType factor, size_t index) const {
+    void HubbardVecProd<T0, U, V>::dotImpl(V1& target, ScalarType factor, size_t index) const {
         const auto state = getRepr()[index];
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
@@ -209,12 +209,12 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, Representation U, Vector V>
-    class Traits<HubbardVecProd<T, U, V>> {
-        using MatrixType = HubbardMatrix<T, U>;
+    template<Scalar T0, Representation U, Vector V>
+    class Traits<HubbardVecProd<T0, U, V>> {
+        using MatrixType = HubbardMatrix<T0, U>;
         using T1 = V::ScalarType;
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<T, T1>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<T0, T1>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;

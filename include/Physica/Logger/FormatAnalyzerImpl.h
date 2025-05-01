@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include <utility>
 #include <cstring>
+#include "Physica/Logger/LoggerType.h"
 
 namespace Physica {
     /*!

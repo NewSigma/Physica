@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -11,13 +11,13 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# RDF
+# RPMD
 
 ## Introduction
 
 在分子动力学模拟中，我们通常采用波恩奥本海默近似。即考虑到原子核质量远大于电子质量，忽略电子和声子的相互作用。原子核坐标作为体系哈密顿量的参数，其运动规律由牛顿第二定律描述。但是在含有轻元素的体系中，该近似不能很好的解释实验现象。比如室温下水的RDF:
 
-![](./RDF.png)
+![](./Analyser/RDF.png)
 
 **图1** 298K下水的氢原子间RDF，PIMD结果与文献[1]吻合良好。由于核量子效应PIMD的第一个峰显著低于MD的第一个峰。
 
@@ -62,7 +62,7 @@ $$Q \approx \frac{1}{(2\pi\hbar)^{Nn}} \int \text{d}\mathbf{q} \text{d}\mathbf{p
  
 其中
 
-$$H_n = \sum^N_{i = 1} \sum^n_{j = 1} [\frac{[p_i^{(j)}]^2}{2m} + \frac{1}{2}m\omega_n^2 (q_i^{(j)} - q_i^{(j + 1)})^2 + V(q_i^{(j)})]; \quad \beta_n = \beta/n \omega_n = (\beta_n \hbar)^{-1}$$
+$$H_n = \sum^N_{i = 1} \sum^n_{j = 1} [\frac{[p_i^{(j)}]^2}{2m} + \frac{1}{2}m\omega_n^2 (q_i^{(j)} - q_i^{(j + 1)})^2 + V(q_i^{(j)})]; \quad \beta_n = \beta/n \quad \omega_n = (\beta_n \hbar)^{-1}$$
  
 上式中当$n = 1$时，$H_1$是经典系统的哈密顿量，对应着PIMD退化为MD。为了理解$H_n$的物理意义，我们注意到第二项为简谐势贡献，其弹性常数$k \propto \omega_n^2 = (\beta_n \hbar)^{-2}$包含量子力学的特征常数$\hbar$。因此第二项为纯粹的量子效应。若不考虑量子贡献，配分函数可以分离变量
 

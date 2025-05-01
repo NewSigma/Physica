@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     plot->getAxisY()->setLabelFormat("%d");
     plot->getAxisX()->setTitleText("T");
     plot->getAxisY()->setTitleText("C<sub>v</sub>");
-    plot->scatter(t, Cv).setMarkerSize(10);
+    plot->line(t, Cv);
     plot->show();
     return QApplication::exec();
 }

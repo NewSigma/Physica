@@ -23,24 +23,28 @@
 namespace Physica {
     template<Matrix M, Vector V>
     void applyHouseholder(const V& householder, M& mat) {
-        using ScalarType = M::ScalarType;
-        using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
+        using T = M::ScalarType;
+        using BufferType = DenseVector<T, V::SizeAtCompile>;
+        assert(householder.getLength() == mat.getRow());
         BufferType copy = householder;
-        auto temp = ScalarType(1);
-        temp.swap(copy[0]);
-        const BufferType temp1 = copy * temp;
+
+        const T factor = copy[0];
+        copy[0] = T(1);
+        const BufferType temp1 = copy * factor;
         mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
     template<Matrix M, Vector V>
     void applyHouseholder(M& mat, const V& householder) {
-        using ScalarType = M::ScalarType;
-        using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
+        using T = M::ScalarType;
+        using BufferType = DenseVector<T, V::SizeAtCompile>;
+        assert(householder.getLength() == mat.getCol());
         BufferType copy = householder;
-        ScalarType temp = ScalarType(1);
-        temp.swap(copy[0]);
+
         using ProductType = decltype(mat * copy);
-        using BufferType1 = DenseVector<ScalarType, ProductType::SizeAtCompile>;
-        mat -= BufferType1(mat * copy) * (copy.hermite() * temp);
+        using BufferType1 = DenseVector<T, ProductType::SizeAtCompile>;
+        const T factor = copy[0];
+        copy[0] = T(1);
+        mat -= BufferType1(mat * copy) * (copy.hermite() * factor);
     }
 }

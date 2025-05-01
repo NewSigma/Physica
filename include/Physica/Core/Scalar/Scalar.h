@@ -106,7 +106,7 @@ namespace Physica {
             std::suspend_never initial_suspend() noexcept { return {}; }
             std::suspend_always final_suspend() noexcept { return {}; }
             void return_void() noexcept {}
-            void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
+            [[noreturn]] void unhandled_exception() { throw; }
         };
     public:
         using promise_type = Promise;

@@ -25,17 +25,26 @@ namespace Physica {
     Complex<T>::Complex(double _Complex x) : This(std::complex<Tm>(x)) {}
 
     template<Scalar T>
+    __host__ __device__ Complex<T>::Complex(Tm x) : This(T(x)) {}
+
+    template<Scalar T>
     __host__ __device__ Complex<T>::Complex(T re_) : re(re_), im(0) {}
 
     template<Scalar T>
     __host__ __device__ Complex<T>::Complex(T re_, T im_) : re(re_), im(im_) {}
 
     template<Scalar T>
-    Complex<T>::Complex(std::complex<Tm> c) : re(c.real()), im(c.imag()) {}
+    Complex<T>::Complex(std::complex<Tm> x) : re(x.real()), im(x.imag()) {}
+
+    template<Scalar T>
+    Complex<T>::Complex(MKL_Complex8 x) : This(x.real, x.imag) {}
+
+    template<Scalar T>
+    Complex<T>::Complex(MKL_Complex16 x) : This(x.real, x.imag) {}
 
 #ifdef PHYSICA_CUDA
     template<Scalar T>
-    __host__ __device__ Complex<T>::Complex(thrust::complex<Tm> c) : re(c.real()), im(c.imag()) {}
+    __host__ __device__ Complex<T>::Complex(thrust::complex<Tm> x) : re(x.real()), im(x.imag()) {}
 #endif
 
     template<Scalar T>

@@ -60,7 +60,7 @@ namespace Physica {
                 return suspend_yield{};
             }
             void return_void() noexcept {}
-            void unhandled_exception() { throw; }
+            [[noreturn]] void unhandled_exception() { throw; }
 
             void swap(This& __restrict obj_) noexcept { obj.swap(obj_); }
         };

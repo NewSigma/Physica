@@ -80,7 +80,6 @@ namespace Physica {
                                        && is_continuous<U1>::value
                                        && is_continuous<U2>::value
                                        && !Diffable<U1>
-                                       && !Diffable<U2>
                                        && (EnableSIMD<U1, U2>::SizeAtCompile == Dynamic);
         };
     }
@@ -126,6 +125,21 @@ namespace Physica {
         template<Vector V1, Vector V2>
         void reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff);
 
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline auto head(size_t to) & noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const auto head(size_t to) const& noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline auto tail(size_t from) & noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const auto tail(size_t from) const& noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline auto segment(size_t from, size_t to) & noexcept;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const auto segment(size_t from, size_t to) const& noexcept;
+        [[nodiscard]] inline auto reversal() noexcept;
+        [[nodiscard]] inline const auto reversal() const noexcept;
+
         [[nodiscard]] inline auto format() const;
         [[nodiscard]] auto transpose() const noexcept;
         [[nodiscard]] auto conjugate() const noexcept;
@@ -160,21 +174,6 @@ namespace Physica {
 
         template<Vector V>
         Tr householder(V& target) const;
-
-        template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto head(size_t to) & noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto head(size_t to) const& noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto tail(size_t from) & noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto tail(size_t from) const& noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto segment(size_t from, size_t to) & noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto segment(size_t from, size_t to) const& noexcept;
-        [[nodiscard]] inline auto reversal() noexcept;
-        [[nodiscard]] inline const auto reversal() const noexcept;
 
         template<Matrix M>
         auto reshape(const M& mat) const noexcept;

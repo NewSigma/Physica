@@ -25,8 +25,16 @@
 #ifdef PHYSICA_MKL
     #include <mkl_types.h>
 #else
-    struct MKL_Complex8 {};
-    struct MKL_Complex16 {};
+    struct MKL_Complex8 {
+        float real;
+        float imag;
+    };
+
+    struct MKL_Complex16 {
+        double real;
+        double imag;
+    };
+
     using VSLStreamStatePtr = void*;
 #endif
 

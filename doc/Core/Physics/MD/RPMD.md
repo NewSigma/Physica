@@ -13,9 +13,20 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # RPMD
 
-一维体系的RPMD哈密顿量为
+## Overview
+
+一般的分子动力学模拟，由四个核心概念构成:
+
+    运动学模型(KineticModel): 运动学方程、积分算法、边界条件、构型约束条件
+    相互作用模型(ForceModel): 力场
+    热浴(Thermostat): 控温算法, NVT、NPT
+    压浴(Barostat): 控压算法, NPT only
+
+四者由class RPMD有机集成。以一维体系为例, RPMD哈密顿量为
 
 $$H_n = \sum_i^N \sum_j^n [\frac{[p_i^{(j)}]^2}{2m_i} + \frac{1}{2} m_i \omega_n^2 (q_i^{(j)} - q_i^{(j + 1)})^2] + \sum_j^n V(\mathbf{q}^{(j)})$$
+
+其中$n$为NumReplica, 当$n = 1$时, 哈密顿量退化为经典分子动力学(MD)的哈密顿量。class RPMD致力于将MD和RPMD在一个统一的框架下实现。
 
 正则系综固定边界条件下的配分函数为
 

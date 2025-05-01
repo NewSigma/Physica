@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,6 +31,7 @@ namespace Physica {
      */
     template<class KineticModel>
     class DoubleThermo {
+        using This = DoubleThermo<KineticModel>;
         using TraitsType = Traits<KineticModel>;
         using ScalarType = TraitsType::ScalarType;
         constexpr static unsigned int Dim = TraitsType::Dim;
@@ -43,16 +44,17 @@ namespace Physica {
         ScalarType temperatureT;
         ScalarType thermostatTime;
     public:
+        DoubleThermo() = default;
         DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_);
-        DoubleThermo(const DoubleThermo&) = default;
-        DoubleThermo(DoubleThermo&&) noexcept = default;
+        DoubleThermo(const This&) = default;
+        DoubleThermo(This&&) noexcept = default;
         ~DoubleThermo() = default;
         /* Operators */
-        DoubleThermo& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
+        This& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<RNG R, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
-        void swap(DoubleThermo& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
@@ -109,7 +111,7 @@ namespace Physica {
     }
 
     template<class KineticModel>
-    void DoubleThermo<KineticModel>::swap(DoubleThermo& __restrict obj) noexcept {
+    void DoubleThermo<KineticModel>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);

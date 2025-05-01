@@ -31,8 +31,7 @@ namespace Physica {
             T temperatureT_,
             T timeStep_)
             : cell(std::move(cell_))
-            , fftContract(numContract, PlanFlag::Estimate)
-            , timeStep(std::move(timeStep_)) {
+            , fftContract(numContract, PlanFlag::Estimate) {
         assert(0 < numContract && numContract <= numReplica);
         assert(NumReplica == Dynamic || NumReplica == numReplica);
         ringPolymer = RingPolymerType(cell, numReplica);
@@ -45,15 +44,7 @@ namespace Physica {
         }
 
         setTemperature(temperatureT_);
-        checkParam();
-    }
-
-    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>&
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::operator=(
-            RPMD<T, Dim, NumReplica, ForceMatrixAllocator> obj) noexcept {
-        swap(obj);
-        return *this;
+        setTimeStep(timeStep_);
     }
     /**
      * Contract method to improve performance introduced in [1]
@@ -284,12 +275,8 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel, class ForceModel, class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::fire_vstep(
-            FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel) {
-        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
-        static_assert(IsPeriodBoundary1 == IsPeriodBoundary2, "[Error]: Inconsistent boundary condition");
-        static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
-        static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
+            FireModel<T, Dim>& fire, KineticModel& kineticModel, ForceModel& forceModel) {
+        checkRelaxParams<KineticModel, ForceModel>();
 
         kineticModel.nve_step(ringPolymer, timeStep);
         updateForce<ForceModel, Executor>(forceModel);
@@ -306,11 +293,7 @@ namespace Physica {
             CFireModel<T, Dim, Type>& cfire,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
-        static_assert(IsPeriodBoundary1 == IsPeriodBoundary2, "[Error]: Inconsistent boundary condition");
-        static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
-        static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
+        checkRelaxParams<KineticModel, ForceModel>();
 
         kineticModel.nve_step(ringPolymer, timeStep);
         cfire.nve_step(*this);
@@ -326,13 +309,13 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel, RNG R>
-    inline void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::initMomentum() {
+    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::initMomentum() {
         return ringPolymer.template initMomentum<KineticModel, R>(temperatureT);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel>
-    inline void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::scaleVelocity() {
+    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::scaleVelocity() {
         ringPolymer.template scaleVelocity<KineticModel>(temperatureT);
     }
     /**
@@ -358,14 +341,12 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::phaseToCell(size_t replica) const {
+    auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::phaseToCell(size_t replica) const -> MDCellType {
         return MDCellType(cell.getLattice(), ringPolymer.makeBeadPos(replica), cell.getMassVec());
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::contractToCell(size_t contract) const {
+    auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::contractToCell(size_t contract) const -> MDCellType {
         assert(contract < getNumContract());
         PositionMatrix pos(getNumParticle(), Dim);
         auto phase = posContract.col(contract);
@@ -378,8 +359,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeAverageCell() const {
+    auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeAverageCell() const -> MDCellType {
         return MDCellType(getLattice(), ringPolymer.makeCentroidPos(), cell.getMassVec());
     }
     /**
@@ -448,7 +428,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    inline T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKineticClassical() const {
+    T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKineticClassical() const {
         return ringPolymer.calcKineticClassical();
     }
 
@@ -520,8 +500,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(ForceModel& model) const {
+    auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(ForceModel& model) const -> LatticeMatrix {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if constexpr (NumReplica == 1)
             return makeStressClassical<ForceModel, Executor>(model);
@@ -576,8 +555,7 @@ namespace Physica {
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(ForceModel& model) const {
+    auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(ForceModel& model) const -> LatticeMatrix {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
         if constexpr (NumReplica == 1)
@@ -630,8 +608,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(ForceModel& model) const {
+    auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(ForceModel& model) const -> LatticeMatrix {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
         LatticeMatrix result(Dim, Dim, 0);
@@ -738,7 +715,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    inline void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(T temperature) {
+    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(T temperature) noexcept {
         assert(!temperature.isNegative() && "[Error]: Negative temperature is not physical");
         temperatureT = temperature;
     }
@@ -746,7 +723,12 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::setTimeStep(T timeStep_) {
         timeStep = timeStep_;
-        checkParam();
+        if constexpr (NumReplica != 1) {
+            const T cycle = Tv(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
+            bool isSmallEnough = timeStep < cycle / Tv(4);
+            if (!isSmallEnough)
+                throw std::invalid_argument("[Error]: Time step is too large");
+        }
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -824,12 +806,12 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::checkParam() const {
-        if constexpr (NumReplica != 1) {
-            const T cycle = Tv(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
-            bool isSmallEnough = timeStep < cycle / Tv(4);
-            if (!isSmallEnough)
-                throw std::invalid_argument("[Error]: Time step is too large");
-        }
+    template<class KineticModel, class ForceModel>
+    constexpr void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::checkRelaxParam() {
+        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
+        static_assert(IsPeriodBoundary1 == IsPeriodBoundary2, "[Error]: Inconsistent boundary condition");
+        static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
+        static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
     }
 }

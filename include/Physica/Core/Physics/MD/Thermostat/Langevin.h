@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,9 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
+
 namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica> class RingPolymer;
     /**
@@ -28,6 +31,7 @@ namespace Physica {
      */
     template<Scalar T, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class Langevin {
+        using This = Langevin<T, Dim, NumReplica>;
         using MDCellType = MDCell<T, Dim>;
         using MassVector = MDCellType::MassVector;
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
@@ -37,16 +41,17 @@ namespace Physica {
         T thermostatTime;
         bool removeDrift;
     public:
+        Langevin() = default;
         Langevin(T temperatureT_, T thermostatTime_, bool removeDrift_);
-        Langevin(const Langevin&) = default;
-        Langevin(Langevin&&) noexcept = default;
+        Langevin(const This&) = default;
+        Langevin(This&&) noexcept = default;
         ~Langevin() = default;
         /* Operators */
-        Langevin& operator=(Langevin obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<RNG R, class Executor>
         void step(RingPolymerType& ringPolymer, T deltaT) const;
-        void swap(Langevin& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isRemoveDriftEnabled() const noexcept { return removeDrift; }
         /* Setters */
@@ -67,13 +72,6 @@ namespace Physica {
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_)
             , removeDrift(removeDrift_) {}
-
-    template<Scalar T, unsigned int Dim, size_t NumReplica>
-    Langevin<T, Dim, NumReplica>&
-    Langevin<T, Dim, NumReplica>::operator=(Langevin<T, Dim, NumReplica> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     template<RNG R, class Executor>
@@ -133,7 +131,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    void Langevin<T, Dim, NumReplica>::swap(Langevin& __restrict obj) noexcept {
+    void Langevin<T, Dim, NumReplica>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);

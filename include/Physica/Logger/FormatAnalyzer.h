@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,7 +34,6 @@ namespace Physica {
     template<size_t N, std::size_t... Indices>
     constexpr std::array<ArgType, sizeof...(Indices)>
     analyzeFormatStringHelper(const char (&format)[N], std::index_sequence<Indices...>);
-
 }
 
 #include "FormatAnalyzerImpl.h"

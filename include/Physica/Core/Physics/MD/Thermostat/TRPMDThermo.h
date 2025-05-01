@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,6 +27,7 @@ namespace Physica {
      */
     template<Scalar T, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class TRPMDThermo {
+        using This = TRPMDThermo<T, Dim, NumReplica>;
         using MDCellType = MDCell<T, Dim>;
         using MassVector = MDCellType::MassVector;
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
@@ -34,16 +35,17 @@ namespace Physica {
 
         T temperatureT;
     public:
+        TRPMDThermo() = default;
         TRPMDThermo(T temperatureT_);
-        TRPMDThermo(const TRPMDThermo&) = default;
-        TRPMDThermo(TRPMDThermo&&) noexcept = default;
+        TRPMDThermo(const This&) = default;
+        TRPMDThermo(This&&) noexcept = default;
         ~TRPMDThermo() = default;
         /* Operators */
-        TRPMDThermo& operator=(TRPMDThermo obj) noexcept;
+        This& operator=(This obj) noexcept{ swap(obj); return *this; }
         /* Operations */
         template<RNG R, class Executor>
         void step(RingPolymerType& ringPolymer, T deltaT) const;
-        void swap(TRPMDThermo& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(T temperatureT_) { temperatureT = temperatureT_; }
     };
@@ -51,13 +53,6 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     TRPMDThermo<T, Dim, NumReplica>::TRPMDThermo(T temperatureT_)
             : temperatureT(temperatureT_) {}
-
-    template<Scalar T, unsigned int Dim, size_t NumReplica>
-    TRPMDThermo<T, Dim, NumReplica>&
-    TRPMDThermo<T, Dim, NumReplica>::operator=(TRPMDThermo<T, Dim, NumReplica> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     template<RNG R, class Executor>
@@ -94,7 +89,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    void TRPMDThermo<T, Dim, NumReplica>::swap(TRPMDThermo& __restrict obj) noexcept {
+    void TRPMDThermo<T, Dim, NumReplica>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
     }

@@ -47,13 +47,15 @@ namespace Physica {
         T im;
     public:
         Complex() = default;
-        __host__ __device__ Complex(Tm x) : This(T(x)) {}
         Complex(double _Complex x);
+        __host__ __device__ Complex(Tm x);
         __host__ __device__ Complex(T re_);
         __host__ __device__ Complex(T re_, T im_);
-        explicit Complex(std::complex<Tm> c);
+        Complex(std::complex<Tm> x);
+        Complex(MKL_Complex8 x);
+        Complex(MKL_Complex16 x);
     #ifdef PHYSICA_CUDA
-        __host__ __device__ explicit Complex(thrust::complex<Tm> c);
+        __host__ __device__ Complex(thrust::complex<Tm> x);
     #endif
         template<Scalar U>
         __host__ __device__ explicit((T::Prec < U::Prec) || Diffable<U>) Complex(const U& x);
