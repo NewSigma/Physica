@@ -56,6 +56,10 @@ void T::swap(T& __restrict obj) noexcept {
 
 类模板的静态断言应尽可能放置在Traits中
 
+### RTTI
+
+不得使用
+
 ## 命名
 
 Namespace: 大驼峰式

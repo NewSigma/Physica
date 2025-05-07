@@ -20,8 +20,6 @@
 
 using namespace Physica;
 
-#ifdef PHYSICA_CUDA
-
 std::string cuRANDException::Impl::message(int code) const {
     switch (code) {
     case CURAND_STATUS_SUCCESS:;
@@ -54,5 +52,3 @@ std::string cuRANDException::Impl::message(int code) const {
         return "Bad error code";
     }
 }
-
-#endif

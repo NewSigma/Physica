@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifdef PHYSICA_MPI
-
 #include "Physica/Core/Exception/MPIException.h"
 #include <mpi/mpi.h>
 
@@ -29,5 +27,3 @@ std::string MPIException::Impl::message(int err) const {
     MPI_Error_string(err, buffer, &resultlen);
     return buffer;
 }
-
-#endif

@@ -68,6 +68,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
+        using Tc = T::ComplexType;
     private:
         using RealsRtnTy = std::conditional<isComplex, RealMatrix<Derived>, Derived&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, ValueMatrix<Derived>, Derived&>::type;

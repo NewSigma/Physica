@@ -82,6 +82,14 @@ $$n^2 H = \sum_{\alpha} \frac{1}{2m} |\tilde{p}_\alpha|^2 + \frac{1}{2} m \omega
 
 where $\omega_\alpha = 2 \omega \sin(\frac{\pi}{n} \alpha))$
 
+# 关于积分器
+
+一般使用BAOAB和BCOCB积分器，演化算符
+
+$$\hat S = \hat B \hat A \hat O \hat A \hat B$$
+
+n个时间步后分子动力学的过程为$\hat S^n$，为了实现上的方便默认不初始化$t = 0$时的力，因此实际计算的是$\hat B^{-1} \hat S^n$。该区别对平衡态分子动力学影响有限。
+
 ## Reference
 
 [1] J. Chem. Phys. 133, 124104 (2010); https://doi.org/10.1063/1.3489925

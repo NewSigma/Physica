@@ -93,7 +93,7 @@ namespace Physica {
         working = source;
 
         size_t i = 0;
-        for (; i < source.getCol() - 1; ++i) {
+        for (; i < taus.getLength() - 1; ++i) {
             auto col = working.col(i);
             auto buffer = col.tail(i);
             const auto unit = buffer[0].unit();
@@ -102,7 +102,6 @@ namespace Physica {
             applyHouseholder(buffer, corner);
             taus[i] = std::exchange(col[i], -norm * unit);
         }
-        taus[i] = 0; // For historic reason, BLAS-like interface will allocate a unused element
     }
 
     template<Scalar T>
@@ -132,7 +131,9 @@ namespace Physica {
     template<Scalar T>
     void QRDecomp<T>::resize(size_t row, size_t col) {
         working.resize(row, col);
-        taus.resize(std::min(row, col));
+        auto l = std::min(row, col);
+        taus.resize(l);
+        taus[l - 1] = 0; // For historic reason, BLAS-like interface will allocate a unused element
     }
 
     template<Scalar T>

@@ -77,5 +77,7 @@ namespace Physica {
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile > T::ColAtCompile ? T::RowAtCompile : T::ColAtCompile;
+        constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = false;
     };
 }

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
@@ -35,7 +36,6 @@ namespace Physica {
         using Tf = Diff<T, DiffMode::Forward, 1>;
         using ModelType = Hubbard<T, Dim>;
         using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, NumSite, NumSite>;
-        using GreenMatrix = DenseMatrix<Tf, MatrixOption::Col | MatrixOption::Element, NumSite, NumSite>;
     private:
         DenseSymmMatrix<T, NumSite> hoppingMatrix;
         ModelType hubbard;
@@ -55,6 +55,12 @@ namespace Physica {
         MatrixType matrixQ;
         MatrixType matrixR;
         MatrixType buffer;
+
+        T lnPartitionZ;
+        T signU = 1;
+        T signD = 1;
+        MatrixType greenU;
+        MatrixType greenD;
     public:
         DQMC() = default;
         DQMC(ModelType hubbard_, T beta_, T chemMu_, int numSplit);
@@ -69,10 +75,6 @@ namespace Physica {
         template<RNG R>
         void step_for(int numStep);
 
-        [[nodiscard]] std::pair<T, T> lnPartition();
-        [[nodiscard]] std::pair<Tf, T> calcDensity();
-        [[nodiscard]] std::pair<GreenMatrix, T> calcGreen(bool spin);
-
         template<RNG R>
         void random_uniform();
         void swap(This& __restrict obj) noexcept;
@@ -84,15 +86,21 @@ namespace Physica {
         [[nodiscard]] T getBeta() const noexcept { return beta; }
         [[nodiscard]] const auto getAuxField() const noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
         [[nodiscard]] int getNumSplit() const noexcept { return chain.getLength(); }
+
+        [[nodiscard]] T getLnPartitionZ() const noexcept { return lnPartitionZ; }
+        [[nodiscard]] T getSignU() const noexcept { return signU; }
+        [[nodiscard]] T getSignD() const noexcept { return signD; }
+        [[nodiscard]] T getSign() const noexcept { return signU * signD; }
+        [[nodiscard]] const auto& getGreenU() const noexcept { return greenU; }
+        [[nodiscard]] const auto& getGreenD() const noexcept { return greenD; }
         /* Setters */
         void setBeta(T beta_);
         void setChemMu(T chemMu_);
     private:
         void makeHoppingMatrix();
         void makeWeightMatrix(bool spin);
-        std::pair<T, T> lnPartitionImpl(bool spin);
-        std::pair<Tf, T> calcDensityImpl(bool spin);
-        std::pair<GreenMatrix, T> calcGreenImpl(bool spin);
+        std::pair<T, T> lnPartition(bool spin);
+        void calcGreen(bool spin);
 
         T calcLnSpinWaveWeight(int split) const;
         T calcLnSpinWaveWeight(T sumSpin) const;
@@ -115,6 +123,8 @@ namespace Physica {
         diagS1.resize(numSite);
         for (auto& m : chain)
             m.resize(numSite);
+        greenU.resize(numSite, numSite);
+        greenD.resize(numSite, numSite);
 
         makeHoppingMatrix();
         setBeta(std::move(beta_));
@@ -140,6 +150,9 @@ namespace Physica {
             }
             spins[site] = -spins[site];
         }
+
+        calcGreen(true);
+        calcGreen(false);
     }
 
     template<Scalar T, int Dim, int NumSite>
@@ -148,27 +161,6 @@ namespace Physica {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         for (int i = 0; i < numStep; ++i)
             step<R>();
-    }
-
-    template<Scalar T, int Dim, int NumSite>
-    auto DQMC<T, Dim, NumSite>::lnPartition() -> std::pair<T, T> {
-        const auto [lnZ1, sign1] = lnPartitionImpl(true);
-        const auto [lnZ2, sign2] = lnPartitionImpl(false);
-        return std::make_pair(lnZ1 + lnZ2, sign1 * sign2);
-    }
-
-    template<Scalar T, int Dim, int NumSite>
-    auto DQMC<T, Dim, NumSite>::calcDensity() -> std::pair<Tf, T>  {
-        const auto [rho1, sign1] = calcDensityImpl(true);
-        const auto [rho2, sign2] = calcDensityImpl(false);
-        return std::make_pair(rho1 + rho2, sign1 * sign2);
-    }
-
-    template<Scalar T, int Dim, int NumSite>
-    auto DQMC<T, Dim, NumSite>::calcGreen(bool spin) -> std::pair<GreenMatrix, T> {
-        const auto [g1, sign1] = calcDensityImpl(spin);
-        const auto [g2, sign2] = calcDensityImpl(!spin);
-        return std::make_pair(g1 + g2, sign1 * sign2);
     }
 
     template<Scalar T, int Dim, int NumSite>
@@ -199,6 +191,12 @@ namespace Physica {
         matrixQ.swap(obj.matrixQ);
         matrixR.swap(obj.matrixR);
         buffer.swap(obj.buffer);
+
+        lnPartitionZ.swap(obj.lnPartitionZ);
+        signU.swap(obj.signU);
+        signD.swap(obj.signD);
+        greenU.swap(obj.greenU);
+        greenD.swap(obj.greenD);
     }
 
     template<Scalar T, int Dim, int NumSite>
@@ -263,11 +261,9 @@ namespace Physica {
         diagS = unit(diagB);
         diagB = ln(abs(diagB));
 
-        matrixQ = qr.getMatrixQ();
         matrixR = qr.getMatrixR();
         for (int i = numSplit - 2; i >= 0; --i) {
-            qr.compute(chain[i] * matrixQ);
-            matrixQ = qr.getMatrixQ();
+            qr.compute(chain[i] * qr.getMatrixQ());
             /* Make new diag matrix */ {
                 const auto triu = qr.getMatrixR();
                 const auto diagR = triu.diag();
@@ -281,7 +277,7 @@ namespace Physica {
                         working(r, c) = 1;
                         continue;
                     }
-                    working(r, c) *= -exp(-diagB1[r] + diagB[c]) * diagS1[r] * diagS[c];
+                    working(r, c) *= -exp(-diagB1[r] + diagB[c]) * (diagS1[r] * diagS[c]);
                 }
             }
             diagB1.swap(diagB);
@@ -303,11 +299,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Dim, int NumSite>
-    auto DQMC<T, Dim, NumSite>::lnPartitionImpl(bool spin) -> std::pair<T, T> {
+    auto DQMC<T, Dim, NumSite>::lnPartition(bool spin) -> std::pair<T, T> {
         makeWeightMatrix(spin);
         T sign = qr.calcDetQ();
-        matrixQ *= matrixDb.inverse();
-        qr.compute(matrixQ.transpose() + matrixDs * matrixR);
+        buffer = qr.getMatrixQ() * matrixDb.inverse();
+        qr.compute(buffer.transpose() + matrixDs * matrixR);
 
         T lnZ = matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
         for (int i = 0; i < getNumSplit(); ++i)
@@ -317,22 +313,17 @@ namespace Physica {
     }
 
     template<Scalar T, int Dim, int NumSite>
-    auto DQMC<T, Dim, NumSite>::calcDensityImpl(bool spin) -> std::pair<Tf, T> {
-        const auto [lnZ, sign] = lnPartitionImpl(spin);
-        matrixR = matrixQ * qr.getMatrixQ();
-        buffer = qr.getMatrixR().inverse() * matrixR.transpose();
-        return std::make_pair(Tf(lnZ, T(1) - buffer.trace() / T(getNumSite())), sign);
-    }
+    void DQMC<T, Dim, NumSite>::calcGreen(bool spin) {
+        const auto [lnZ, sign] = lnPartition(spin);
+        lnPartitionZ = lnZ;
+        if (spin)
+            signU = sign;
+        else
+            signD = sign;
 
-    template<Scalar T, int Dim, int NumSite>
-    auto DQMC<T, Dim, NumSite>::calcGreenImpl(bool spin) -> std::pair<GreenMatrix, T> {
-        const auto [lnZ, sign] = lnPartitionImpl(spin);
-        GreenMatrix result(getNumSite(), getNumSite(), lnZ);
-        if (spin) {
-            matrixR = matrixQ * qr.getMatrixQ();
-            result.grads() = qr.getMatrixR().inverse() * matrixR.transpose();
-        }
-        return std::make_pair(std::move(result), sign);
+        auto& green = spin ? greenU : greenD;
+        matrixQ = buffer * qr.getMatrixQ();
+        green = qr.getMatrixR().inverse() * matrixQ.transpose();
     }
 
     template<Scalar T, int Dim, int NumSite>

@@ -18,8 +18,8 @@
  */
 #ifdef PHYSICA_MPI
 
-    #include "Physica/Core/Parallel/Executor/MPIExecutor.h"
-    #include "Physica/Core/Exception/MPIException.h"
+#include "Physica/Core/Parallel/Executor/MPIExecutor.h"
+#include "Physica/Core/Exception/MPIException.h"
 
 using namespace Physica;
 

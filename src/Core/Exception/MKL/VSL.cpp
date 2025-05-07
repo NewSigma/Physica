@@ -18,8 +18,6 @@
  */
 #include "Physica/Core/Exception/MKL/VSL.h"
 
-#ifdef PHYSICA_MKL
-
 using namespace Physica;
 
 std::string VSLException::Impl::message(int code) const {
@@ -65,5 +63,3 @@ std::string VSLException::Impl::message(int code) const {
         return "Bad error code";
     }
 }
-
-#endif
