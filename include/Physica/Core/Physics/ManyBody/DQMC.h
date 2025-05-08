@@ -85,6 +85,7 @@ namespace Physica {
         [[nodiscard]] T getRepelU() const noexcept { return hubbard.getRepelU(); }
         [[nodiscard]] T getBeta() const noexcept { return beta; }
         [[nodiscard]] const auto getAuxField() const noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
+        [[nodiscard]] auto getAuxField() noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
         [[nodiscard]] int getNumSplit() const noexcept { return chain.getLength(); }
 
         [[nodiscard]] T getLnPartitionZ() const noexcept { return lnPartitionZ; }
@@ -100,12 +101,11 @@ namespace Physica {
         void makeHoppingMatrix();
         void makeWeightMatrix(bool spin);
         std::pair<T, T> lnPartition(bool spin);
-        void calcGreen(bool spin);
+        T calcGreen(bool spin);
+        void update();
 
         T calcLnSpinWaveWeight(int split) const;
         T calcLnSpinWaveWeight(T sumSpin) const;
-        /* Getters */
-        [[nodiscard]] auto getAuxField() noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
     };
 
     template<Scalar T, int Dim, int NumSite>
@@ -150,9 +150,7 @@ namespace Physica {
             }
             spins[site] = -spins[site];
         }
-
-        calcGreen(true);
-        calcGreen(false);
+        update();
     }
 
     template<Scalar T, int Dim, int NumSite>
@@ -168,6 +166,7 @@ namespace Physica {
     void DQMC<T, Dim, NumSite>::random_uniform() {
         aux.template random_uniform<R>();
         aux = unit(aux - T(0.5));
+        update();
     }
 
     template<Scalar T, int Dim, int NumSite>
@@ -313,9 +312,8 @@ namespace Physica {
     }
 
     template<Scalar T, int Dim, int NumSite>
-    void DQMC<T, Dim, NumSite>::calcGreen(bool spin) {
+    T DQMC<T, Dim, NumSite>::calcGreen(bool spin) {
         const auto [lnZ, sign] = lnPartition(spin);
-        lnPartitionZ = lnZ;
         if (spin)
             signU = sign;
         else
@@ -324,6 +322,12 @@ namespace Physica {
         auto& green = spin ? greenU : greenD;
         matrixQ = buffer * qr.getMatrixQ();
         green = qr.getMatrixR().inverse() * matrixQ.transpose();
+        return lnZ;
+    }
+
+    template<Scalar T, int Dim, int NumSite>
+    void DQMC<T, Dim, NumSite>::update() {
+        lnPartitionZ = calcGreen(true) + calcGreen(false);
     }
 
     template<Scalar T, int Dim, int NumSite>

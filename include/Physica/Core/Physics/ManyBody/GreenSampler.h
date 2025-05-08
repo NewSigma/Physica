@@ -48,8 +48,11 @@ namespace Physica {
         [[nodiscard]] T calc();
         [[nodiscard]] T calcSign() const;
 
+        void reset() { cursor = 0; }
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] const auto& getSamples() const noexcept { return samples; }
+        [[nodiscard]] const auto& getSigns() const noexcept { return signs; }
         [[nodiscard]] size_t getNumSample() const noexcept { return samples.getLength(); }
     };
 
@@ -82,7 +85,8 @@ namespace Physica {
     template<Scalar T>
     T GreenSampler<T>::calc() {
         samples -= samples.values().max();
-        return ln(exp(samples) * signs).grad();
+        const Tf sum = exp(samples) * signs;
+        return sum.grad() / sum.value(); // Avoid ln, its grad is well defined but value may give NAN
     }
 
     template<Scalar T>
