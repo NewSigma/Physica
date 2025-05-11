@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
@@ -104,7 +103,7 @@ namespace Physica {
         T calcGreen(bool spin);
         void update();
 
-        T calcLnSpinWaveWeight(int split) const;
+        T calcLnSpinWaveWeight(int site) const;
         T calcLnSpinWaveWeight(T sumSpin) const;
     };
 
@@ -134,21 +133,25 @@ namespace Physica {
     template<Scalar T, int Dim, int NumSite>
     template<RNG R>
     void DQMC<T, Dim, NumSite>::step() {
-        const Array<int> sites = R::random_int(getNumSplit(), 0, getNumSite() - 1);
+        const Array<int> splits = R::random_int(getNumSite(), 0, getNumSplit() - 1);
+        const auto probs = VectorND<T>::template random_uniform<R>(getNumSplit());
+
         auto field = getAuxField();
-        for (int split = 0; split < getNumSplit(); ++split) {
-            auto spins = field.col(split);
-            const int site = sites[split];
+        for (int site = 0; site < getNumSite(); ++site) {
+            auto spins = field.row(site);
+            spins *= (probs[site] > T(0.5)) ? T(1) : T(-1);
+
+            const int split = splits[site];
             const T sumSpin0 = spins.sum();
-            const T sumSpin1 = sumSpin0 - T(2) * spins[site];
+            const T sumSpin1 = sumSpin0 - T(2) * spins[split];
             const T delta = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
             if (delta.isNegative()) {
                 const T p = T::template random_uniform<R>();
                 const bool accept = p < exp(delta);
                 if (!accept)
-                    return;
+                    continue;
             }
-            spins[site] = -spins[site];
+            spins[split] = -spins[split];
         }
         update();
     }
@@ -305,7 +308,7 @@ namespace Physica {
         qr.compute(buffer.transpose() + matrixDs * matrixR);
 
         T lnZ = matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        for (int i = 0; i < getNumSplit(); ++i)
+        for (int i = 0; i < getNumSite(); ++i)
             lnZ -= calcLnSpinWaveWeight(i);
         sign *= qr.calcDetQ() * unit(qr.getMatrixR().diag()).prod();
         return std::make_pair(lnZ, sign);
@@ -331,10 +334,10 @@ namespace Physica {
     }
 
     template<Scalar T, int Dim, int NumSite>
-    T DQMC<T, Dim, NumSite>::calcLnSpinWaveWeight(int split) const {
-        assert(0 <= split && split < getNumSplit());
+    T DQMC<T, Dim, NumSite>::calcLnSpinWaveWeight(int site) const {
+        assert(0 <= site && site < getNumSite());
         const auto field = getAuxField();
-        const auto spins = field.col(split);
+        const auto spins = field.row(site);
         return calcLnSpinWaveWeight(spins.sum());
     }
 

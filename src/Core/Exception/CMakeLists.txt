@@ -6,6 +6,6 @@ if (${PHYSICA_MKL})
     target_sources(PhysicaCore PRIVATE MKL/VSL.cpp)
 endif()
 
-if (${PHYSICA_MKL})
+if (${PHYSICA_MPI})
     target_sources(PhysicaCore PRIVATE MPIException.cpp)
 endif()

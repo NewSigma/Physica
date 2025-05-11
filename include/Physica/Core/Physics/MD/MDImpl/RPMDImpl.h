@@ -276,7 +276,7 @@ namespace Physica {
     template<class KineticModel, class ForceModel, class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::fire_vstep(
             FireModel<T, Dim>& fire, KineticModel& kineticModel, ForceModel& forceModel) {
-        checkRelaxParams<KineticModel, ForceModel>();
+        checkRelaxParam<KineticModel, ForceModel>();
 
         kineticModel.nve_step(ringPolymer, timeStep);
         updateForce<ForceModel, Executor>(forceModel);
@@ -293,7 +293,7 @@ namespace Physica {
             CFireModel<T, Dim, Type>& cfire,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        checkRelaxParams<KineticModel, ForceModel>();
+        checkRelaxParam<KineticModel, ForceModel>();
 
         kineticModel.nve_step(ringPolymer, timeStep);
         cfire.nve_step(*this);

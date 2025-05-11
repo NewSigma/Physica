@@ -45,6 +45,8 @@ namespace Physica {
         /* Operations */
         template<int Dim, int NumSite>
         void sample(const DQMC<T, Dim, NumSite>& dqmc, Observable type);
+        template<int Dim, int NumSite>
+        void sample(const DQMC<T, Dim, NumSite>& dqmc, T observe);
         [[nodiscard]] T calc();
         [[nodiscard]] T calcSign() const;
 
@@ -75,7 +77,12 @@ namespace Physica {
         default:
             unreachable();
         }
+        sample(dqmc, observe);
+    }
 
+    template<Scalar T>
+    template<int Dim, int NumSite>
+    void GreenSampler<T>::sample(const DQMC<T, Dim, NumSite>& dqmc, T observe) {
         samples[cursor].value() = dqmc.getLnPartitionZ();
         samples[cursor].grad() = observe;
         signs[cursor] = dqmc.getSign();
