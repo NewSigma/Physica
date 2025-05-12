@@ -139,7 +139,7 @@ namespace Physica {
     template<Scalar T>
     void QRDecomp<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        working.swap(obj);
+        working.swap(obj.working);
         taus.swap(obj.taus);
     }
 

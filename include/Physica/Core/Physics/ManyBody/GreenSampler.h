@@ -43,10 +43,8 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        template<int Dim, int NumSite>
-        void sample(const DQMC<T, Dim, NumSite>& dqmc, Observable type);
-        template<int Dim, int NumSite>
-        void sample(const DQMC<T, Dim, NumSite>& dqmc, T observe);
+        void sample(const DQMC<T>& dqmc, Observable type);
+        void sample(const DQMC<T>& dqmc, T observe);
         [[nodiscard]] T calc();
         [[nodiscard]] T calcSign() const;
 
@@ -64,8 +62,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<int Dim, int NumSite>
-    void GreenSampler<T>::sample(const DQMC<T, Dim, NumSite>& dqmc, Observable type) {
+    void GreenSampler<T>::sample(const DQMC<T>& dqmc, Observable type) {
         T observe;
         switch (type) {
         case Density:
@@ -81,8 +78,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<int Dim, int NumSite>
-    void GreenSampler<T>::sample(const DQMC<T, Dim, NumSite>& dqmc, T observe) {
+    void GreenSampler<T>::sample(const DQMC<T>& dqmc, T observe) {
         samples[cursor].value() = dqmc.getLnPartitionZ();
         samples[cursor].grad() = observe;
         signs[cursor] = dqmc.getSign();

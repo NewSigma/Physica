@@ -18,35 +18,23 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
-#include "Physica/Core/Physics/ManyBody/Model/Hubbard.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
+#include "DQMCImpl/HubbardParams.h"
 
 namespace Physica {
-    template<Scalar T, int Dim, int NumSite = Dynamic>
+    template<Scalar T>
     class DQMC {
-        static_assert(!Diffable<T>);
-        static_assert(!T::isComplex, "[Error]: Model param must be real");
-        static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
-        using This = DQMC<T, Dim, NumSite>;
-        using Tc = T::ComplexType;
-        using Tf = Diff<T, DiffMode::Forward, 1>;
-        using ModelType = Hubbard<T, Dim>;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, NumSite, NumSite>;
+        using This = DQMC<T>;
+        using Params = HubbardParams<T>;
+    public:
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
     private:
-        DenseSymmMatrix<T, NumSite> hoppingMatrix;
-        ModelType hubbard;
-        T alpha;
-        T beta;
-        T chemMu;
-
+        const Params& params;
         VectorND<T> aux;
-
         QRDecomp<T> qr;
         Array<MatrixType> chain;
-        MatrixType expB;
+
         DiagMatrix<T> matrixDb;
         DiagMatrix<T> matrixDs;
         VectorND<T> diagB1;
@@ -61,8 +49,8 @@ namespace Physica {
         MatrixType greenU;
         MatrixType greenD;
     public:
-        DQMC() = default;
-        DQMC(ModelType hubbard_, T beta_, T chemMu_, int numSplit);
+        DQMC() = delete;
+        DQMC(const Params& params_);
         DQMC(const This&) = default;
         DQMC(This&&) noexcept = default;
         ~DQMC() = default;
@@ -78,14 +66,10 @@ namespace Physica {
         void random_uniform();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return hoppingMatrix; }
-        [[nodiscard]] size_t getNumSite() const noexcept { return hubbard.getNumSuperCellSite(); }
-        [[nodiscard]] T getHoppingT() const noexcept { return hubbard.getHoppingT(); }
-        [[nodiscard]] T getRepelU() const noexcept { return hubbard.getRepelU(); }
-        [[nodiscard]] T getBeta() const noexcept { return beta; }
+        [[nodiscard]] int getNumSite() const noexcept { return qr.getRow(); }
+        [[nodiscard]] int getNumSplit() const noexcept { return chain.getLength(); }
         [[nodiscard]] const auto getAuxField() const noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
         [[nodiscard]] auto getAuxField() noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
-        [[nodiscard]] int getNumSplit() const noexcept { return chain.getLength(); }
 
         [[nodiscard]] T getLnPartitionZ() const noexcept { return lnPartitionZ; }
         [[nodiscard]] T getSignU() const noexcept { return signU; }
@@ -93,11 +77,8 @@ namespace Physica {
         [[nodiscard]] T getSign() const noexcept { return signU * signD; }
         [[nodiscard]] const auto& getGreenU() const noexcept { return greenU; }
         [[nodiscard]] const auto& getGreenD() const noexcept { return greenD; }
-        /* Setters */
-        void setBeta(T beta_);
-        void setChemMu(T chemMu_);
     private:
-        void makeHoppingMatrix();
+        DQMC(const Params& params_, int numSite, int numSplit);
         void makeWeightMatrix(bool spin);
         std::pair<T, T> lnPartition(bool spin);
         T calcGreen(bool spin);
@@ -107,32 +88,31 @@ namespace Physica {
         T calcLnSpinWaveWeight(T sumSpin) const;
     };
 
-    template<Scalar T, int Dim, int NumSite>
-    DQMC<T, Dim, NumSite>::DQMC(ModelType hubbard_, T beta_, T chemMu_, int numSplit)
-            : hubbard(std::move(hubbard_))
-            , chain(numSplit) {
-        assert(!hubbard.getRepelU().isNegative() && "[Error]: It is assumed U >= 0");
+    template<Scalar T>
+    DQMC<T>::DQMC(const Params& params_)
+            : DQMC(params_, params_.getNumSite(), params_.getNumSplit()) {}
+
+    template<Scalar T>
+    DQMC<T>::DQMC(const Params& params_, int numSite, int numSplit)
+            : params(params_)
+            , aux(numSite * numSplit)
+            , qr(numSite, numSite)
+            , chain(numSplit)
+            , matrixDb(numSite)
+            , matrixDs(numSite)
+            , diagB1(numSite)
+            , diagS1(numSite)
+            , greenU(numSite, numSite)
+            , greenD(numSite, numSite) {
+        assert(numSite > 0 && "[Error]: Invalid NumSite");
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
-        const int numSite = getNumSite();
-        qr.resize(numSite, numSite);
-        aux.resize(numSite * numSplit);
-        matrixDb.resize(numSite);
-        matrixDs.resize(numSite);
-        diagB1.resize(numSite);
-        diagS1.resize(numSite);
         for (auto& m : chain)
             m.resize(numSite);
-        greenU.resize(numSite, numSite);
-        greenD.resize(numSite, numSite);
-
-        makeHoppingMatrix();
-        setBeta(std::move(beta_));
-        setChemMu(std::move(chemMu_));
     }
 
-    template<Scalar T, int Dim, int NumSite>
+    template<Scalar T>
     template<RNG R>
-    void DQMC<T, Dim, NumSite>::step() {
+    void DQMC<T>::step() {
         const Array<int> splits = R::random_int(getNumSite(), 0, getNumSplit() - 1);
         const auto probs = VectorND<T>::template random_uniform<R>(getNumSplit());
 
@@ -156,36 +136,30 @@ namespace Physica {
         update();
     }
 
-    template<Scalar T, int Dim, int NumSite>
+    template<Scalar T>
     template<RNG R>
-    void DQMC<T, Dim, NumSite>::step_for(int numStep) {
+    void DQMC<T>::step_for(int numStep) {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         for (int i = 0; i < numStep; ++i)
             step<R>();
     }
 
-    template<Scalar T, int Dim, int NumSite>
+    template<Scalar T>
     template<RNG R>
-    void DQMC<T, Dim, NumSite>::random_uniform() {
+    void DQMC<T>::random_uniform() {
         aux.template random_uniform<R>();
         aux = unit(aux - T(0.5));
         update();
     }
 
-    template<Scalar T, int Dim, int NumSite>
-    void DQMC<T, Dim, NumSite>::swap(This& __restrict obj) noexcept {
+    template<Scalar T>
+    void DQMC<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        hoppingMatrix.swap(obj.hoppingMatrix);
-        hubbard.swap(obj.hubbard);
-        alpha.swap(obj.alpha);
-        beta.swap(obj.beta);
-        chemMu.swap(obj.chemMu);
-
+        std::swap(params, obj.params);
         aux.swap(obj.aux);
-
         qr.swap(obj.qr);
         chain.swap(obj.chain);
-        expB.swap(obj.expB);
+        
         matrixDb.swap(obj.matrixDb);
         matrixDs.swap(obj.matrixDs);
         diagB1.swap(obj.diagB1);
@@ -200,57 +174,22 @@ namespace Physica {
         greenU.swap(obj.greenU);
         greenD.swap(obj.greenD);
     }
-
-    template<Scalar T, int Dim, int NumSite>
-    void DQMC<T, Dim, NumSite>::setBeta(T beta_) {
-        assert(!beta_.isNegative() && "[Error]: Negative temperature is invalid");
-        beta = std::move(beta_);
-
-        const T betaM = beta / T(getNumSplit());
-        const T x = betaM * getRepelU();
-        alpha = x * T(0.5) + ln1p(sqrt(T(1) - exp(-x)));
-
-        DenseSymmMatrix<T, NumSite> hoppingMatrixB = hoppingMatrix * betaM;
-        expB = exp(hoppingMatrixB);
-    }
-
-    template<Scalar T, int Dim, int NumSite>
-    void DQMC<T, Dim, NumSite>::setChemMu(T chemMu_) {
-        chemMu = std::move(chemMu_);
-    }
-
-    template<Scalar T, int Dim, int NumSite>
-    void DQMC<T, Dim, NumSite>::makeHoppingMatrix() {
-        const size_t numSite = getNumSite();
-        hoppingMatrix.resize(numSite);
-        hoppingMatrix = T(0);
-
-        for (size_t from = 0; from < numSite; ++from) {
-            if constexpr (ModelType::UntrivialNearestNeighbor) {
-                const auto& targets = hubbard.getHopIndexArray()[from];
-                for (size_t to : targets)
-                    hoppingMatrix(from, to) = -getHoppingT();
-            }
-            else
-                hoppingMatrix(from, (from + 1) % numSite) = -getHoppingT();
-        }
-    }
     /**
      * Reference:
      * [1] Linear Algebra and its Applications 435(3), 659-673 (2011); https://doi.org/10.1016/j.laa.2010.06.023
      */
-    template<Scalar T, int Dim, int NumSite>
-    void DQMC<T, Dim, NumSite>::makeWeightMatrix(bool spin) {
+    template<Scalar T>
+    void DQMC<T>::makeWeightMatrix(bool spin) {
         const int numSplit = getNumSplit();
         /* Init chain */ {
             const auto field = getAuxField();
             for (int i = 0; i < numSplit; ++i) {
                 const auto col = field.col(i);
                 auto& m = chain[i];
-                m = expB;
+                m = params.getExpB();
                 for (size_t j = 0; j < getNumSite(); ++j) {
                     const auto sigma = spin ? col.calc(j) : -col.calc(j);
-                    m.col(j) *= exp(alpha * sigma);
+                    m.col(j) *= exp(params.getAlpha() * sigma);
                 }
             }
         }
@@ -289,7 +228,7 @@ namespace Physica {
             buffer.swap(matrixR);
         }
 
-        const T shift = beta * (chemMu - getRepelU() * T(0.5));
+        const T shift = params.calcShift();
         for (size_t i = 0; i < getNumSite(); ++i) {
             const T lnD = diagB[i] + shift;
             const T expD = exp(lnD);
@@ -300,22 +239,20 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Dim, int NumSite>
-    auto DQMC<T, Dim, NumSite>::lnPartition(bool spin) -> std::pair<T, T> {
+    template<Scalar T>
+    auto DQMC<T>::lnPartition(bool spin) -> std::pair<T, T> {
         makeWeightMatrix(spin);
         T sign = qr.calcDetQ();
         buffer = qr.getMatrixQ() * matrixDb.inverse();
         qr.compute(buffer.transpose() + matrixDs * matrixR);
 
         T lnZ = matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        for (int i = 0; i < getNumSite(); ++i)
-            lnZ -= calcLnSpinWaveWeight(i);
         sign *= qr.calcDetQ() * unit(qr.getMatrixR().diag()).prod();
         return std::make_pair(lnZ, sign);
     }
 
-    template<Scalar T, int Dim, int NumSite>
-    T DQMC<T, Dim, NumSite>::calcGreen(bool spin) {
+    template<Scalar T>
+    T DQMC<T>::calcGreen(bool spin) {
         const auto [lnZ, sign] = lnPartition(spin);
         if (spin)
             signU = sign;
@@ -328,22 +265,24 @@ namespace Physica {
         return lnZ;
     }
 
-    template<Scalar T, int Dim, int NumSite>
-    void DQMC<T, Dim, NumSite>::update() {
+    template<Scalar T>
+    void DQMC<T>::update() {
         lnPartitionZ = calcGreen(true) + calcGreen(false);
+        for (int i = 0; i < getNumSite(); ++i)
+            lnPartitionZ -= calcLnSpinWaveWeight(i);
     }
 
-    template<Scalar T, int Dim, int NumSite>
-    T DQMC<T, Dim, NumSite>::calcLnSpinWaveWeight(int site) const {
+    template<Scalar T>
+    T DQMC<T>::calcLnSpinWaveWeight(int site) const {
         assert(0 <= site && site < getNumSite());
         const auto field = getAuxField();
         const auto spins = field.row(site);
         return calcLnSpinWaveWeight(spins.sum());
     }
 
-    template<Scalar T, int Dim, int NumSite>
-    T DQMC<T, Dim, NumSite>::calcLnSpinWaveWeight(T sumSpin) const {
-        const T factor = lncosh(beta * (chemMu - getRepelU() * 0.5));
-        return ln1pexp(lncosh(alpha * sumSpin) - factor);
+    template<Scalar T>
+    T DQMC<T>::calcLnSpinWaveWeight(T sumSpin) const {
+        const T factor = lncosh(params.calcShift());
+        return ln1pexp(lncosh(params.getAlpha() * sumSpin) - factor);
     }
 }
