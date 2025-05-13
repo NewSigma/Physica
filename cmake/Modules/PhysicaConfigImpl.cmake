@@ -90,11 +90,15 @@ if(${PHYSICA_CUDA})
     set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
 endif()
 
-if(${CMAKE_INTERPROCEDURAL_OPTIMIZATION})
+if(CMAKE_BUILD_TYPE MATCHES Release)
     include(CheckIPOSupported)
-    check_ipo_supported()
+    check_ipo_supported(RESULT Result OUTPUT Output)
+    if(${Result})
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+    else()
+        message(AUTHOR_WARNING ${Output})
+    endif()
 endif()
-
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ##############################################Libs################################################
 # FFTW3

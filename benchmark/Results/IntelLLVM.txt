@@ -1,104 +1,128 @@
 OS: Ubuntu 24.04  
 Compiler: IntelLLVM 2025.0.1  
 Hardware: Intel(R) Core(TM) i7-14700KF + 32G  
-Date: 2025-4-28  
+Date: 2025-5-13  
 Maintainer: Weibo He (NewSigma@163.com)  
 
-Physica 2025    Hash: 8ab4606a423b487d9f677184f2853461df12206f
+Physica 2025    Hash: 00e5d80018c19f6d7ba4da0c1185748e6ffcbd91
 MKL: Intel(R) oneAPI Math Kernel Library Version 2024.2.2-Product Build 20240823 for Intel(R) 64 architecture applications
 
 -----------------------------------------------------------------
 Benchmark                       Time             CPU   Iterations
 -----------------------------------------------------------------
-HubbardMatrix1D              5.18 ms         5.18 ms          134
-TPQ                         0.831 s         0.831 s             1
-axpy/2                       1.79 ns         1.79 ns    386791995
-axpy/4                       1.79 ns         1.79 ns    389255702
-axpy/8                       1.80 ns         1.80 ns    384014208
-axpy/16                      1.84 ns         1.84 ns    372621725
-axpy/64                      3.69 ns         3.69 ns    191029728
-axpy/256                     16.6 ns         16.6 ns     42362801
-axpy/1024                    56.0 ns         56.0 ns     12333189
-axpy/16384                   1703 ns         1703 ns       413636
-axpy base/2                  6.73 ns         6.73 ns    103663617
-axpy base/4                  1.82 ns         1.82 ns    383578504
-axpy base/8                  1.82 ns         1.82 ns    384416472
-axpy base/16                 1.82 ns         1.82 ns    385045929
-axpy base/64                 3.37 ns         3.37 ns    210075169
-axpy base/256                13.0 ns         13.0 ns     53317480
-axpy base/1024               58.2 ns         58.2 ns     12025158
-axpy base/16384              1871 ns         1871 ns       412365
-EigenSolver_s_direct          273 ms          273 ms            3
-EigenSolver_sv_direct         399 ms          399 ms            2
-EigenSolver_s_base           2499 ms         2499 ms            1
-EigenSolver_sv_base          4422 ms         4421 ms            1
-GEMM/2                      0.362 ns        0.362 ns   1942235276
-GEMM/4                      0.547 ns        0.547 ns   1276881479
-GEMM/8                       46.7 ns         46.7 ns     15027951
-GEMM/16                       142 ns          142 ns      4920502
-GEMM/32                       851 ns          851 ns       820466
-GEMM/64                      6.34 us         6.34 us       109253
-GEMM/256                    0.410 ms        0.410 ms         1712
-GEMM/1024                    25.9 ms         25.9 ms           27
-GEMM/4096                    1688 ms         1688 ms            1
-GEMM base/2                 0.364 ns        0.364 ns   1938619415
-GEMM base/4                 0.545 ns        0.545 ns   1277238339
-GEMM base/8                  46.6 ns         46.6 ns     15000414
-GEMM base/16                  157 ns          157 ns      4463140
-GEMM base/32                 1104 ns         1104 ns       634267
-GEMM base/64                 78.5 us         78.5 us         8908
-GEMM base/256                7.44 ms         7.43 ms           94
-GEMM base/1024               2309 ms         2309 ms            1
-innerDot float32             24.6 ns         24.6 ns     28738203
-innerDot float64             46.7 ns         46.7 ns     15099479
-innerDot cfloat32            92.0 ns         92.0 ns      7603632
-innerDot cfloat64             185 ns          185 ns      3781768
-innerDot_base float32        69.7 ns         69.7 ns     10044854
-innerDot_base float64         148 ns          148 ns      4746347
-innerDot_base cfloat32        111 ns          111 ns      6296062
-innerDot_base cfloat64        209 ns          209 ns      3335916
-lncosh float32                861 ns          861 ns       809641
-lncosh float64               2098 ns         2098 ns       333968
-lncosh cfloat32              6637 ns         6636 ns       105303
-lncosh cfloat64             15652 ns        15650 ns        44733
-SyMV/2                       21.3 ns         21.3 ns     32420951
-SyMV/4                       40.4 ns         40.4 ns     17279511
-SyMV/8                       92.4 ns         92.4 ns      7640271
-SyMV/16                       139 ns          139 ns      4981055
-SyMV/64                       643 ns          643 ns      1077427
-SyMV/256                     6.37 us         6.37 us       107985
-SyMV/1024                    88.5 us         88.5 us         7774
-SyMV/16384                   55.1 ms         55.1 ms           13
-UnitMV 1/256                 13.8 ns         13.8 ns     50595914
-UnitMV 2/256                 22.6 ns         22.6 ns     30960330
-UnitMV 3/256                 16.7 ns         16.7 ns     41685800
-axpy mkl/2                   5.05 ns         5.05 ns    138472258
-axpy mkl/4                   5.29 ns         5.29 ns    132223864
-axpy mkl/8                   5.49 ns         5.49 ns    125346586
-axpy mkl/16                  5.50 ns         5.50 ns    125854292
-axpy mkl/64                  6.87 ns         6.87 ns    101903607
-axpy mkl/256                 16.5 ns         16.5 ns     42317914
-axpy mkl/1024                55.1 ns         55.1 ns     12546573
-axpy mkl/16384               1681 ns         1681 ns       414719
-EigenSolver_s_mkl             267 ms          267 ms            3
-EigenSolver_sv_mkl            384 ms          383 ms            2
-GEMM mkl/2                   44.6 ns         44.6 ns     15589283
-GEMM mkl/4                   43.7 ns         43.7 ns     16100159
-GEMM mkl/8                   54.1 ns         54.1 ns     12838820
-GEMM mkl/16                   140 ns          140 ns      4926566
-GEMM mkl/32                   840 ns          840 ns       827557
-GEMM mkl/64                  6.34 us         6.34 us       109522
-GEMM mkl/256                0.406 ms        0.406 ms         1710
-GEMM mkl/1024                25.7 ms         25.7 ms           27
-GEMM mkl/4096                1677 ms         1677 ms            1
-innerDot_mkl float32         24.3 ns         24.3 ns     28505331
-innerDot_mkl float64         46.2 ns         46.2 ns     15304079
-innerDot_mkl cfloat32        91.9 ns         91.9 ns      7591490
-innerDot_mkl cfloat64         185 ns          185 ns      3786018
-HardCore                     2.27 us         2.27 us       375073
-ParaH/108                    1.41 ms         1.17 ms          594
-ParaH/256                    6.00 ms         4.89 ms          145
-ParaH/500                    7.80 ms         6.41 ms          111
-ParaH/864                    10.7 ms         9.47 ms           75
-Q_TIP4P                      25.9 ms         25.9 ms           27
-Mnist                        3.70 ms         3.69 ms          190
+HubbardMatrix1D              5.31 ms         5.31 ms          131
+TPQ                         0.820 s         0.820 s             1
+axpy/2                       1.82 ns         1.82 ns    383876471
+axpy/4                       1.79 ns         1.79 ns    389096083
+axpy/8                       1.80 ns         1.80 ns    388302828
+axpy/16                      1.84 ns         1.84 ns    381697413
+axpy/64                      3.71 ns         3.71 ns    186932483
+axpy/256                     16.6 ns         16.6 ns     41697130
+axpy/1024                    55.9 ns         55.8 ns     12437842
+axpy/16384                   1673 ns         1673 ns       417856
+axpy base/2                  6.63 ns         6.63 ns    105382241
+axpy base/4                  1.79 ns         1.79 ns    389548754
+axpy base/8                  1.79 ns         1.79 ns    390616006
+axpy base/16                 1.81 ns         1.81 ns    389106540
+axpy base/64                 3.65 ns         3.65 ns    190956392
+axpy base/256                12.9 ns         12.9 ns     54094931
+axpy base/1024               57.1 ns         57.0 ns     12108672
+axpy base/16384              1661 ns         1661 ns       419411
+EigenSolver_s_direct          263 ms          263 ms            3
+EigenSolver_sv_direct         381 ms          381 ms            2
+EigenSolver_s_base           2451 ms         2450 ms            1
+EigenSolver_sv_base          4349 ms         4348 ms            1
+GEMM/2                      0.358 ns        0.358 ns   1952161855
+GEMM/4                      0.539 ns        0.539 ns   1278048439
+GEMM/8                       45.9 ns         45.9 ns     15240886
+GEMM/16                       139 ns          139 ns      5008654
+GEMM/32                       838 ns          837 ns       835143
+GEMM/64                      6.28 us         6.28 us       109993
+GEMM/256                    0.403 ms        0.403 ms         1745
+GEMM/1024                    25.3 ms         25.3 ms           28
+GEMM/4096                    1657 ms         1657 ms            1
+GEMM base/2                 0.358 ns        0.358 ns   1950431891
+GEMM base/4                 0.538 ns        0.538 ns   1278338061
+GEMM base/8                  45.9 ns         45.9 ns     15263829
+GEMM base/16                  154 ns          154 ns      4535620
+GEMM base/32                 1076 ns         1076 ns       646805
+GEMM base/64                 77.4 us         77.4 us         8965
+GEMM base/256                7.31 ms         7.31 ms           95
+GEMM base/1024               2629 ms         2628 ms            1
+innerDot float32             24.4 ns         24.4 ns     28634146
+innerDot float64             45.8 ns         45.8 ns     15330121
+innerDot cfloat32            90.5 ns         90.5 ns      7683850
+innerDot cfloat64             182 ns          181 ns      3839122
+innerDot_base float32        68.9 ns         68.8 ns     10137137
+innerDot_base float64         148 ns          148 ns      4734856
+innerDot_base cfloat32        110 ns          110 ns      6371982
+innerDot_base cfloat64        205 ns          205 ns      3405639
+lncosh float32                849 ns          849 ns       821461
+lncosh float64               2059 ns         2059 ns       339407
+lncosh cfloat32              6537 ns         6535 ns       105965
+lncosh cfloat64             15373 ns        15370 ns        45470
+QR/2                         36.5 ns         36.5 ns     19153594
+QR/4                          118 ns          118 ns      5850943
+QR/8                          335 ns          335 ns      2086840
+QR/16                        1106 ns         1106 ns       637959
+QR/32                        4224 ns         4224 ns       163589
+QR/64                        16.7 us         16.7 us        41715
+QR/256                      0.490 ms        0.490 ms         1439
+QR/1024                      22.9 ms         22.9 ms           30
+QR base/2                    36.6 ns         36.5 ns     19006729
+QR base/4                     118 ns          118 ns      5884781
+QR base/8                     373 ns          372 ns      1892880
+QR base/16                   1663 ns         1662 ns       415405
+QR base/32                   7700 ns         7699 ns        89951
+QR base/64                   51.7 us         51.6 us        13511
+QR base/256                  3.41 ms         3.41 ms          205
+QR base/1024                  237 ms          237 ms            3
+SyMV/2                       21.4 ns         21.4 ns     32525431
+SyMV/4                       40.5 ns         40.4 ns     17349046
+SyMV/8                       91.6 ns         91.6 ns      7615000
+SyMV/16                       131 ns          131 ns      5342074
+SyMV/64                       735 ns          735 ns       953138
+SyMV/256                     6.41 us         6.41 us       107678
+SyMV/1024                    89.0 us         88.9 us         7874
+SyMV/16384                   54.8 ms         54.8 ms           13
+UnitMV 1/256                 13.7 ns         13.7 ns     51012992
+UnitMV 2/256                 22.5 ns         22.5 ns     31005621
+UnitMV 3/256                 16.5 ns         16.5 ns     42346242
+axpy mkl/2                   4.76 ns         4.76 ns    145400096
+axpy mkl/4                   5.02 ns         5.02 ns    137287813
+axpy mkl/8                   5.23 ns         5.23 ns    132048317
+axpy mkl/16                  5.29 ns         5.29 ns    131832177
+axpy mkl/64                  6.69 ns         6.69 ns    105104466
+axpy mkl/256                 16.4 ns         16.4 ns     42444795
+axpy mkl/1024                55.2 ns         55.2 ns     12665152
+axpy mkl/16384               1676 ns         1676 ns       415871
+EigenSolver_s_mkl             266 ms          266 ms            3
+EigenSolver_sv_mkl            383 ms          383 ms            2
+GEMM mkl/2                   42.8 ns         42.8 ns     16320056
+GEMM mkl/4                   44.9 ns         44.8 ns     15447321
+GEMM mkl/8                   54.5 ns         54.5 ns     12859649
+GEMM mkl/16                   139 ns          139 ns      5001804
+GEMM mkl/32                   838 ns          838 ns       834897
+GEMM mkl/64                  6.28 us         6.28 us       111370
+GEMM mkl/256                0.401 ms        0.401 ms         1746
+GEMM mkl/1024                25.3 ms         25.3 ms           28
+GEMM mkl/4096                1666 ms         1666 ms            1
+innerDot_mkl float32         24.0 ns         24.0 ns     28926327
+innerDot_mkl float64         45.7 ns         45.6 ns     15327590
+innerDot_mkl cfloat32        90.4 ns         90.4 ns      7739266
+innerDot_mkl cfloat64         182 ns          182 ns      3826192
+QR mkl/2                     56.1 ns         56.1 ns     12337993
+QR mkl/4                      125 ns          125 ns      5503704
+QR mkl/8                      334 ns          334 ns      2095479
+QR mkl/16                    1192 ns         1192 ns       587590
+QR mkl/32                    4241 ns         4239 ns       166150
+QR mkl/64                    16.7 us         16.7 us        41933
+QR mkl/256                  0.484 ms        0.484 ms         1430
+QR mkl/1024                  23.2 ms         23.1 ms           30
+HardCore                     2.24 us         2.24 us       383723
+ParaH/108                    1.43 ms         1.18 ms          579
+ParaH/256                    6.00 ms         4.87 ms          144
+ParaH/500                    7.74 ms         6.23 ms          111
+ParaH/864                    10.7 ms         9.55 ms           78
+Q_TIP4P                      25.8 ms         25.8 ms           27
+Mnist                        3.63 ms         3.62 ms          193
