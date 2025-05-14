@@ -27,6 +27,7 @@
 using namespace Physica;
 using T = float64;
 using ODE = ODESolver<T, 1>;
+constexpr double MassKr = PhyConst<SI>::relativeAtomMass[36];
 
 struct ProgramArgs {
     T epsilon;
@@ -97,7 +98,7 @@ T calcPhase(const ProgramArgs& args, const VectorND<T>& h, const VectorND<T>& wa
 }
 
 T calcCrossSection(double energy) {
-    const double reducedMass = 83.8 / (83.8 + 1) * PhyConst<SI>::protonMass; //83.8 is the relative atomic mass of Kr
+    const double reducedMass = MassKr / (MassKr + 1) * PhyConst<SI>::protonMass;
     ProgramArgs args(5.9, 3.57, reducedMass, 5 * 3.57, energy, 0);
     const T l_max = T(2 * M_PI) * args.r_max / args.wave_length;
     T crossSection = 0;
@@ -117,7 +118,7 @@ T calcCrossSection(double energy) {
 }
 
 void plotPWBaseWave(double energy, double radialNum) {
-    const double reducedMass = 83.8 / (83.8 + 1) * PhyConst<SI>::protonMass; //83.8 is the relative atomic mass of Kr
+    const double reducedMass = MassKr / (MassKr + 1) * PhyConst<SI>::protonMass;
     ProgramArgs args(5.9, 3.57, reducedMass, 5 * 3.57, energy, radialNum);
     auto solver = solveEqu(args);
     const auto& h = solver->getX();

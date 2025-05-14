@@ -64,6 +64,9 @@ namespace Physica {
 
     template<Vector T1, Vector T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
+        sample.assign_check(mean);
+        sample.assign_check(var);
+
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
@@ -73,6 +76,9 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
+        sample.assign_check(mean);
+        sample.assign_check(var);
+
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));

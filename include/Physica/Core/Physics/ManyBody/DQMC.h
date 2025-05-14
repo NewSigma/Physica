@@ -114,7 +114,7 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step() {
         const Array<int> splits = R::random_int(getNumSite(), 0, getNumSplit() - 1);
-        const auto probs = VectorND<T>::template random_uniform<R>(getNumSplit());
+        const auto probs = VectorND<T>::template random_uniform<R>(getNumSite());
 
         auto field = getAuxField();
         for (int site = 0; site < getNumSite(); ++site) {
@@ -187,7 +187,7 @@ namespace Physica {
                 const auto col = field.col(i);
                 auto& m = chain[i];
                 m = params.getExpB();
-                for (size_t j = 0; j < getNumSite(); ++j) {
+                for (int j = 0; j < getNumSite(); ++j) {
                     const auto sigma = spin ? col.calc(j) : -col.calc(j);
                     m.col(j) *= exp(params.getAlpha() * sigma);
                 }
@@ -212,8 +212,8 @@ namespace Physica {
                 diagS1 = unit(diagR);
             }
             auto& working = qr.getWorking();
-            for (size_t r = 0; r < getNumSite(); ++r) {
-                for (size_t c = r; c < getNumSite(); ++c) {
+            for (int r = 0; r < getNumSite(); ++r) {
+                for (int c = r; c < getNumSite(); ++c) {
                     if (r == c) {
                         working(r, c) = 1;
                         continue;
@@ -229,13 +229,13 @@ namespace Physica {
         }
 
         const T shift = params.calcShift();
-        for (size_t i = 0; i < getNumSite(); ++i) {
+        for (int i = 0; i < getNumSite(); ++i) {
             const T lnD = diagB[i] + shift;
-            const T expD = exp(lnD);
+            const T expD = exp(-abs(lnD));
             const T sign = diagS[i];
             const bool sep = lnD.isPositive();
             diagB[i] = sep ? expD : T(1);
-            diagS[i] = (sep ? T(1) : std::max(expD, T(std::numeric_limits<T>::min()))) * sign;
+            diagS[i] = (sep ? T(1) : expD) * sign;
         }
     }
 
@@ -243,10 +243,13 @@ namespace Physica {
     auto DQMC<T>::lnPartition(bool spin) -> std::pair<T, T> {
         makeWeightMatrix(spin);
         T sign = qr.calcDetQ();
-        buffer = qr.getMatrixQ() * matrixDb.inverse();
+        buffer = qr.getMatrixQ() * matrixDb;
         qr.compute(buffer.transpose() + matrixDs * matrixR);
+        // Handle potential underflow
+        matrixDb.diag() += T(std::numeric_limits<T>::min());
+        qr.getWorking().diag() += T(std::numeric_limits<T>::min());
 
-        T lnZ = matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
+        T lnZ = -matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
         sign *= qr.calcDetQ() * unit(qr.getMatrixR().diag()).prod();
         return std::make_pair(lnZ, sign);
     }

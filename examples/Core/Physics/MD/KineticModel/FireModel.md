@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -15,7 +15,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Introduction
 
-原子结构优化在第一性原理模拟或分子动力学模拟中占据重要地位。其中，FIRE结构优化算法相较于传统的共轭梯度算法具有显著的优势，其性能甚至能与更为复杂的拟牛顿法相媲美$^{[1]}$。本文展示如何使用FIRE算法进行定体结构优化和定压结构优化。我们还发现了固定步长的FIRE算法在性能上优于自适应步长的FIRE算法，这一发现为我们在实际应用中选择合适的算法提供了有力证据。
+原子结构优化是第一性原理模拟或分子动力学模拟中重要的步骤。其中，FIRE结构优化算法相较于传统的共轭梯度算法具有显著的优势，其性能甚至能与更为复杂的拟牛顿法相媲美$^{[1]}$。本文演示如何使用FIRE算法进行定体结构优化和定压结构优化。我们还发现了固定步长的FIRE算法在性能上优于自适应步长的FIRE算法，这一发现为我们在实际应用中选择合适的算法提供了参考证据。
 
 ## 定体结构优化(FireModel)
 
@@ -87,7 +87,7 @@ $$\mathbf{\Pi} = (1 - \alpha) \mathbf{\Pi}' + \alpha \frac{|\mathbf{\Pi}|}{|\mat
 
 ![](./QE/OptQE1.png)
 
-**图2** 固定优化200步，Fire不能达到比BFGS更低的力
+**图2** 力随迭代步数变化曲线，固定步数为200步，Fire可到到比Damp更高的精度。
 
 ## Reference
 

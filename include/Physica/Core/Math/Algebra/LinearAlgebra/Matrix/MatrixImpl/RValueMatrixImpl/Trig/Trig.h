@@ -68,6 +68,7 @@ namespace Physica {
 
     template<Matrix M>
     auto TrigUpper<M>::lnAbsDet() const -> T {
+        assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
         return ln(abs(Base::diag())).sum();
     }
 
@@ -126,6 +127,7 @@ namespace Physica {
 
     template<Matrix M>
     auto TrigLower<M>::lnAbsDet() const -> T {
+        assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
         return ln(abs(Base::diags())).sum();
     }
 }
