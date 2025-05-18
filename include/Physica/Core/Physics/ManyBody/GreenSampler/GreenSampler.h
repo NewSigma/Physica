@@ -41,6 +41,7 @@ namespace Physica {
         void sample(const DQMC<T>& dqmc);
         [[nodiscard]] T calc(const VectorND<T>& observes) const;
         [[nodiscard]] T calcSign() const;
+        [[nodiscard]] T lnPartitionZ() const;
 
         void reset() { cursor = 0; }
         void swap(This& __restrict obj) noexcept;
@@ -77,6 +78,11 @@ namespace Physica {
     template<Scalar T>
     T GreenSampler<T>::calcSign() const {
         return samples.lnSumExp().grad();
+    }
+
+    template<Scalar T>
+    T GreenSampler<T>::lnPartitionZ() const {
+        return ln(exp(getLnPartitionZs()) * getSigns());
     }
 
     template<Scalar T>

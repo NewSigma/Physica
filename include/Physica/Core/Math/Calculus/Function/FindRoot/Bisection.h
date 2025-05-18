@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,15 +19,16 @@
 #pragma once
 
 #include <cassert>
+#include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
-    template<Scalar T, class Function>
-    T bisection(Function func, const T& n, const T& x1, const T& x2, const T& y1, const T& y2) {
+    template<Scalar T, class Functor>
+    [[nodiscard]] T bisection(Functor func, const T& target, const T& x1, const T& x2, const T& y1, const T& y2) noexcept(std::is_nothrow_invocable_v<Functor, T>) {
         const T epsilon = std::numeric_limits<T>::epsilon();
-        assert(T(n - y1).isPositive() ^ T(n - y2).isPositive()); //(n - y1) and (n - y2) have different sign
-        if(n == y1)
+        assert(T(target - y1).isPositive() ^ T(target - y2).isPositive() && "[Error]: (target - y1) and (target - y2) must have different sign");
+        if (target == y1)
             return T(x1);
-        if(n == y2)
+        if (target == y2)
             return T(x2);
 
         T result = (x1 + x2) / T(2);
@@ -38,29 +39,27 @@ namespace Physica {
         T y_left(y1);
 
         T y_result;
-        bool delta_left_sign = n > y_left;
+        bool delta_left_sign = target > y_left;
         bool delta_right_sign;
         do {
             y_result = func(result);
-            delta_right_sign = n > y_result;
+            delta_right_sign = target > y_result;
 
-            if(delta_left_sign == delta_right_sign) {
+            if (delta_left_sign == delta_right_sign) {
                 x_left = result;
                 y_left = y_result;
-                delta_left_sign = n > y_left;
+                delta_left_sign = target > y_left;
             }
             else
                 x_right = result;
             result = (x_left + x_right) / T(2);
             error /= T(2);
-        } while(error > abs(epsilon * result));
+        } while (error > abs(epsilon * result));
         return result;
     }
 
-    template<Scalar T, class Function>
-    T bisection(Function func, const T& n, const T& x1, const T& x2) {
-        T y1 = func(x1);
-        T y2 = func(x2);
-        return bisection(func, n, x1, x2, y1, y2);
+    template<Scalar T, class Functor>
+    [[nodiscard]] T bisection(Functor func, const T& target, const T& x1, const T& x2) noexcept(std::is_nothrow_invocable_v<Functor, T>) {
+        return bisection(func, target, x1, x2, func(x1), func(x2));
     }
 }

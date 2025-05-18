@@ -33,13 +33,13 @@ Optimal performance and scalability: Balancing between performance, scalability 
 
 ## Usage
 
-We provide a conda package to help fast deployment:
+We provide a conda package to help with fast deployment:
 
 ``` Bash
 conda install -c conda-forge -c nvidia newsigma::physica
 ```
 
-The package enables CUDA by default and has no Gui support. Refer to [Install.md](doc/Install.md) if you want to build Physica.
+which installs the required dependencies to build Physica. Refer to [Install.md](doc/Install.md) for instructions on how to build Physica.
 
 ## Maintainers
 
