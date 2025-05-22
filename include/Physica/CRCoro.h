@@ -39,6 +39,7 @@ namespace Physica {
             T* p;
 
             ~RValueWrapper() {
+                // Workaround, wait for CWG2563
                 std::coroutine_handle<T>::from_promise(*p).destroy();
             }
 

@@ -28,6 +28,7 @@ namespace Physica {
     DiffCoro<Base>::DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {
         /**
          * Workaround for [1]
+         * Remove it once we dump to clang 21
          *
          * Reference:
          * [1] https://github.com/llvm/llvm-project/issues/123347
