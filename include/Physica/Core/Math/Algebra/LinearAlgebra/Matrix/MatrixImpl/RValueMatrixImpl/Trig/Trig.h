@@ -32,7 +32,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     public:
-        TrigUpper(M& mat_) : mat(mat_) {}
+        TrigUpper(M& mat_);
         TrigUpper(const This&) = default;
         TrigUpper(This&&) noexcept = default;
         ~TrigUpper() = default;
@@ -51,6 +51,11 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getCol(); }
     };
+
+    template<Matrix M>
+    TrigUpper<M>::TrigUpper(M& mat_) : mat(mat_) {
+        assert(mat.isSquare());
+    }
 
     template<Matrix M>
     auto TrigUpper<M>::calc(size_t row, size_t col) const -> T {
@@ -88,12 +93,12 @@ namespace Physica {
         using This = TrigLower<M>;
         using Base = RValueMatrix<This>;
 
-        const M& mat;
+        M& mat;
     public:
         using typename Base::T;
         using typename Base::Tv;
     public:
-        TrigLower(const M& mat_) : mat(mat_) {}
+        TrigLower(const M& mat_);
         TrigLower(const This&) = default;
         TrigLower(This&&) noexcept = default;
         ~TrigLower() = default;
@@ -110,6 +115,11 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getCol(); }
     };
+
+    template<Matrix M>
+    TrigLower<M>::TrigLower(const M& mat_) : mat(mat_) {
+        assert(mat.isSquare());
+    }
 
     template<Matrix M>
     auto TrigLower<M>::calc(size_t row, size_t col) const -> T {

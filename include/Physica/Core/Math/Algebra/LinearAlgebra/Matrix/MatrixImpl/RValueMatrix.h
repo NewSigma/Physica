@@ -169,6 +169,7 @@ namespace Physica {
         [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
         [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
 
+        [[nodiscard]] bool isSquare() const noexcept;
         [[nodiscard]] bool isSymm() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */

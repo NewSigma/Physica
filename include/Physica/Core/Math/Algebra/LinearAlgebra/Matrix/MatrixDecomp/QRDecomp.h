@@ -31,6 +31,7 @@ namespace Physica {
     private:
         MatrixND working;
         VectorND<T> taus;
+        VectorND<T> vecD;
     public:
         QRDecomp() = default;
         QRDecomp(size_t row, size_t col);
@@ -50,7 +51,7 @@ namespace Physica {
         void compute_mkl(const M& source, bool pivote = false);
 
         [[nodiscard]] T calcDetQ() const;
-        [[nodiscard]] VectorND<T> toQDT();
+        void toQDT();
 
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
@@ -58,6 +59,7 @@ namespace Physica {
         [[nodiscard]] auto& getWorking() noexcept { return working; }
         [[nodiscard]] const auto& getWorking() const noexcept { return working; }
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
+        [[nodiscard]] const auto& getVecD() const noexcept { return vecD; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
         [[nodiscard]] MatrixND getMatrixQ() const noexcept;
@@ -113,19 +115,18 @@ namespace Physica {
     }
 
     template<Scalar T>
-    VectorND<T> QRDecomp<T>::toQDT() {
+    void QRDecomp<T>::toQDT() {
         const size_t length = taus.getLength();
-        VectorND<T> diag(length);
+        vecD.resize(length);
         for (size_t i = 0; i < length; ++i) {
             if (working(i, i).isZero()) {
-                diag[i] = 1;
+                vecD[i] = 1;
                 continue;
             }
 
-            diag[i] = working(i, i);
-            working.row(i).tail(i) *= reciprocal(diag[i]);
+            vecD[i] = working(i, i);
+            working.row(i).tail(i) *= reciprocal(vecD[i]);
         }
-        return diag;
     }
 
     template<Scalar T>

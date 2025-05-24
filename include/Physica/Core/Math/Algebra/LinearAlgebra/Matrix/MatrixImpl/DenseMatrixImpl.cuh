@@ -39,7 +39,7 @@ namespace Physica {
     template<tparams>
     template<Matrix M>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(const M& mat) requires(CUDA<M>) : device_obj(mat.getRow(), mat.getCol()) {
-        mat.getDerived().assign(*this);
+        mat.assign(*this);
     }
 
     template<tparams>

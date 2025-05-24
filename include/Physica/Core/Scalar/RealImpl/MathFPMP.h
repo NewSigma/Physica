@@ -94,43 +94,43 @@ namespace Physica {
     PHYSICA_API __host__ __device__ Real<FloatMP> sin(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> arctan(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> arctan(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> cosh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> cosh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> sinh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> sinh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> tanh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> tanh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> sech(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> sech(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> csch(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> csch(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> coth(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> coth(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> arccosh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> arccosh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> arcsinh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> arcsinh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> arctanh(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> arctanh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    PHYSICA_API Real<FloatMP> arccoth(const Real<FloatMP>& s) noexcept;
+    PHYSICA_API __host__ __device__ Real<FloatMP> arccoth(const Real<FloatMP>& s) noexcept;
 
     template<>
     PHYSICA_API __host__ __device__ Real<FloatMP> floor(const Real<FloatMP>& s) noexcept;

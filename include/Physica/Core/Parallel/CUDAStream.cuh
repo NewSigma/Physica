@@ -23,7 +23,7 @@
 
 namespace Physica {
     class PHYSICA_API CUDAStream {
-        cudaStream_t stream;
+        cudaStream_t stream = nullptr;
     public:
         CUDAStream();
         CUDAStream(std::nullptr_t);

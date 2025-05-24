@@ -90,6 +90,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline const auto bottomRightCorner(size_t from) const noexcept;
         [[nodiscard]] __host__ __device__ inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto triu() noexcept;
+        [[nodiscard]] __host__ __device__ const auto triu() const noexcept;
+        [[nodiscard]] __host__ __device__ auto tril() noexcept;
+        [[nodiscard]] __host__ __device__ const auto tril() const noexcept;
 
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
@@ -117,6 +121,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
+
+        [[nodiscard]] __host__ __device__ bool isSquare() const noexcept;
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;

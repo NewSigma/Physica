@@ -22,7 +22,7 @@ using namespace Physica;
 
 std::string cuRANDException::Impl::message(int code) const {
     switch (code) {
-    case CURAND_STATUS_SUCCESS:;
+    case CURAND_STATUS_SUCCESS:
         return "No error";
     case CURAND_STATUS_VERSION_MISMATCH:
         return "Header file and linked library version do not match";

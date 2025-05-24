@@ -44,7 +44,8 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         [[nodiscard]] __host__ __device__ host_obj toHost() const { return *this; }
-        __host__ __device__ void toHost(host_obj& obj) const { obj = *this; }
+        __host__ __device__ void toHost(host_obj& obj) const noexcept { obj = *this; }
+        __host__ __device__ void toHostAsync(host_obj& obj) const noexcept { toHost(obj); }
         __host__ __device__ void swap(This& __restrict obj) noexcept { host_obj::swap(obj); }
     };
 

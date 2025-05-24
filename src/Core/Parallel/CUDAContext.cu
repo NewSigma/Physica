@@ -24,10 +24,17 @@ namespace Physica {
     CUDAContext::Page::Page(int device_, CUDAStream stream_) : device(device_), stream(std::move(stream_)) {
         check(cublasCreate(&cublas));
         check(cublasSetStream(cublas, stream));
+
+        check(cusolverDnCreate(&cuSolverDn));
+        check(cusolverDnSetStream(cuSolverDn, stream));
+
+        check(cusolverDnCreateParams(&cuSolverDnParams));
     }
 
     CUDAContext::Page::~Page() {
         cublasDestroy(cublas);
+        cusolverDnDestroy(cuSolverDn);
+        cusolverDnDestroyParams(cuSolverDnParams);
     }
 
     CUDAContext::CUDAContext() {

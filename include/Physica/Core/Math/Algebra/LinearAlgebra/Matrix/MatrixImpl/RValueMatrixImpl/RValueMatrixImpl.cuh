@@ -217,6 +217,26 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu() noexcept {
+        return device_obj<TrigUpper<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ const auto device_obj<RValueMatrix<Derived>>::triu() const noexcept {
+        return device_obj<TrigUpper<Derived>>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril() noexcept {
+        return device_obj<TrigLower<Derived>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ const auto device_obj<RValueMatrix<Derived>>::tril() const noexcept {
+        return device_obj<TrigLower<Derived>>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
     __device__ inline auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const -> ScalarType {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
@@ -289,12 +309,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ KernelConfig device_obj<RValueMatrix<Derived>>::makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept {
-        constexpr size_t MaxThread = MaxThreadPerBlock;
-        const uint32_t numThread = std::min<uint32_t>(maxMinor, MaxThread);
-        const uint32_t numBlockX = (maxMinor + numThread - 1) / numThread;
-        const uint32_t numBlockY = maxMajor;
-        return KernelConfig({numBlockX, numBlockY}, numThread);
+    __host__ __device__ bool device_obj<RValueMatrix<Derived>>::isSquare() const noexcept {
+        return getRow() == getCol();
     }
 
     template<class Derived>
@@ -306,4 +322,15 @@ namespace Physica {
     __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::colFromMajorMinor(size_t major, size_t minor) noexcept {
         return MatrixOption::colFromMajorMinor<device_obj<Derived>>(major, minor);
     }
+
+    template<class Derived>
+    __host__ __device__ KernelConfig device_obj<RValueMatrix<Derived>>::makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept {
+        constexpr size_t MaxThread = MaxThreadPerBlock;
+        const uint32_t numThread = std::min<uint32_t>(maxMinor, MaxThread);
+        const uint32_t numBlockX = (maxMinor + numThread - 1) / numThread;
+        const uint32_t numBlockY = maxMajor;
+        return KernelConfig({numBlockX, numBlockY}, numThread);
+    }
 }
+
+#include "Trig/Trig.cuh"

@@ -39,7 +39,7 @@
 #endif
 
 #ifdef PHYSICA_CUDA
-    #include <cuda_runtime_api.h>
+    #include <cuda_runtime.h>
 #else
     #define __host__
     #define __device__

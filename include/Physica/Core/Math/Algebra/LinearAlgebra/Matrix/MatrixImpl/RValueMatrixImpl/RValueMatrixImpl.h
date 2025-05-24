@@ -441,8 +441,13 @@ namespace Physica {
     }
 
     template<class Derived>
+    bool RValueMatrix<Derived>::isSquare() const noexcept {
+        return getRow() == getCol();
+    }
+
+    template<class Derived>
     bool RValueMatrix<Derived>::isSymm() const noexcept {
-        if (getRow() != getCol())
+        if (!isSquare())
             return false;
         const size_t order = getRow();
         for (size_t r = 0; r < order; ++r)

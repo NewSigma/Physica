@@ -90,7 +90,7 @@ namespace Physica {
 
     template<tparams>
     void device_obj<Array2D>::toHost(host_obj& obj) const {
-        toHostAsync(arr);
+        toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
 

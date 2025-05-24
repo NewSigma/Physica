@@ -20,6 +20,7 @@
 
 #include <stack>
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
+#include "Physica/Core/Exception/CUDA/cuSolver.cuh"
 #include "CUDAStream.cuh"
 
 struct cublasContext;
@@ -32,9 +33,11 @@ namespace Physica {
         using This = CUDAContext;
 
         struct Page {
-            int device;
+            int device = 0;
             CUDAStream stream;
-            cublasContext* cublas;
+            cublasContext* cublas = nullptr;
+            cusolverDnContext* cuSolverDn = nullptr;
+            cusolverDnParams* cuSolverDnParams = nullptr;
 
             Page(int device_, CUDAStream stream_);
             Page(const Page&) = delete;
@@ -59,6 +62,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] operator cudaStream_t() const noexcept { return getStream(); }
         [[nodiscard]] operator cublasContext*() const noexcept { return pages.top().cublas; }
+        [[nodiscard]] operator cusolverDnContext*() const noexcept { return pages.top().cuSolverDn; }
+        [[nodiscard]] operator cusolverDnParams*() const noexcept { return pages.top().cuSolverDnParams; }
         /* Operations */
         PageGuard push() { return push(device()); }
         PageGuard push(int device);
