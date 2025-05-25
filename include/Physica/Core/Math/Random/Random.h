@@ -87,6 +87,7 @@ namespace Physica {
 
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
+        [[nodiscard]] static void random_int(Array<int>& arr, int from, int to);
     private:
         Random();
         Random(const This&) = default;
@@ -143,21 +144,26 @@ namespace Physica {
         thread_local static This instance{};
         return instance;
     }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    Array<int> Random<Option, FixedSeed>::random_int(size_t length, int from, int to) {
+        Array<int> result(length);
+        random_int(result, from, to);
+        return result;
+    }
     /**
      * Range: [from, to]
      */
     template<RandomOption Option, uint64_t FixedSeed>
-    Array<int> Random<Option, FixedSeed>::random_int(size_t length, int from, int to) {
+    void Random<Option, FixedSeed>::random_int(Array<int>& arr, int from, int to) {
         assert(from <= to && to < INT_MAX);
-        Array<int> result(length);
         if constexpr (HasMKL())
-            check_vsl(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
+            check_vsl(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), arr.getLength(), arr.data(), from, to + 1));
         else {
             std::uniform_int_distribution<int> dist(from, to);
-            for (int& i : result)
+            for (int& i : arr)
                 i = dist(getInstance());
         }
-        return result;
     }
 
     template<RandomOption Option, uint64_t FixedSeed>

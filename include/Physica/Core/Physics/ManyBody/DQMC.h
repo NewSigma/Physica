@@ -82,14 +82,18 @@ namespace Physica {
         DQMC(const Params& params_, int numSite, int numSplit);
         /* Operations */
         void initChain();
-        void flip(int site, int split);
         template<RNG R>
         void flip();
+        template<RNG R>
+        void flip(int numStep);
         void makeWeightMatrix(bool spin);
         std::pair<T, T> lnPartition(bool spin);
         std::pair<T, T> lnPartition();
         T calcGreen(bool spin);
         void update();
+
+        T calcLnSpinWaveWeight(int site) const;
+        T calcLnSpinWaveWeight(T sumSpin) const;
     };
 
     template<Scalar T>
@@ -127,9 +131,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void DQMC<T>::step_for(int numStep) {
-        assert(numStep >= 0 && "[Error]: Invalid step num");
-        for (int i = 0; i < numStep; ++i)
-            flip<R>();
+        flip<R>(numStep);
         update();
     }
 
@@ -184,9 +186,23 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::flip(int site, int split) {
+    template<RNG R>
+    void DQMC<T>::flip() {
+        auto& rng = R::getInstance();
+        const int site = std::uniform_int_distribution<>(0, getNumSite() - 1)(rng);
+        const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(rng);
+
         auto field = getAuxField();
         auto spins = field.row(site);
+        const T sumSpin0 = spins.sum();
+        const T sumSpin1 = sumSpin0 - T(2) * spins[split];
+        const T delta = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
+        if (delta.isNegative()) {
+            const T p = T::template random_uniform<R>();
+            const bool accept = p < exp(delta);
+            if (!accept)
+                return;
+        }
         spins[split] = -spins[split];
 
         const T factor = T(2) * params.getAlpha() * spins[split];
@@ -196,24 +212,28 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void DQMC<T>::flip() {
-        const Array<int> splits = R::random_int(getNumSite(), 0, getNumSplit() - 1);
-        for (int site = 0; site < getNumSite(); ++site) {
-            const int split = splits[site];
-            flip(site, split);
-
-            const T lnZ1 = lnPartition().first;
-            const T delta = lnZ1 - lnPartitionZ;
-            if (delta.isNegative()) {
-                const T p = T::template random_uniform<R>();
-                const bool accept = p < exp(delta);
-                if (!accept) {
-                    flip(site, split);
-                    continue;
+    void DQMC<T>::flip(int numStep) {
+        assert(numStep >= 0 && "[Error]: Invalid step num");
+        Array<int> splits(getNumSite());
+        auto field = getAuxField();
+        for (int step = 0; step < numStep; ++step) {
+            R::random_int(splits, 0, getNumSplit() - 1);
+            for (int site = 0; site < getNumSite(); ++site) {
+                auto spins = field.row(site);
+                const int split = splits[site];
+                const T sumSpin0 = spins.sum();
+                const T sumSpin1 = sumSpin0 - T(2) * spins[split];
+                const T delta = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
+                if (delta.isNegative()) {
+                    const T p = T::template random_uniform<R>();
+                    const bool accept = p < exp(delta);
+                    if (!accept)
+                        continue;
                 }
+                spins[split] = -spins[split];
             }
-            lnPartitionZ = lnZ1;
         }
+        initChain();
     }
     /**
      * Reference:
@@ -226,10 +246,10 @@ namespace Physica {
         auto& diagB = matrixDb.diag();
         auto& diagS = matrixDs.diag();
         qr.compute(chain[numSplit - 1]);
+        qr.toQDT();
 
-        diagB = qr.toQDT();
-        diagS = unit(diagB);
-        diagB = ln(abs(diagB));
+        diagS = unit(qr.getVecD());
+        diagB = ln(abs(qr.getVecD()));
 
         matrixR = qr.getMatrixR();
         for (int i = numSplit - 2; i >= 0; --i) {
@@ -248,6 +268,7 @@ namespace Physica {
                         continue;
                     }
                     working(r, c) *= -exp(-diagB1[r] + diagB[c]) * (diagS1[r] * diagS[c]);
+                    assert(working(r, c).isFinite() && "[Error]: Prec is too low");
                 }
             }
             diagB1.swap(diagB);
@@ -307,5 +328,21 @@ namespace Physica {
     template<Scalar T>
     void DQMC<T>::update() {
         lnPartitionZ = calcGreen(true) + calcGreen(false);
+        for (int i = 0; i < getNumSite(); ++i)
+            lnPartitionZ -= calcLnSpinWaveWeight(i);
+    }
+
+    template<Scalar T>
+    T DQMC<T>::calcLnSpinWaveWeight(int site) const {
+        assert(0 <= site && site < getNumSite());
+        const auto field = getAuxField();
+        const auto spins = field.row(site);
+        return calcLnSpinWaveWeight(spins.sum());
+    }
+
+    template<Scalar T>
+    T DQMC<T>::calcLnSpinWaveWeight(T sumSpin) const {
+        const T factor = lncosh(params.calcShift());
+        return ln1pexp(lncosh(params.getAlpha() * sumSpin) - factor);
     }
 }
