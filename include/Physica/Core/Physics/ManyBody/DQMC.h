@@ -29,6 +29,10 @@ namespace Physica {
         using Params = HubbardParams<T>;
     public:
         using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        enum FlipMethod {
+            MH,
+            Spin
+        };
     private:
         const Params& params;
         VectorND<T> aux;
@@ -58,9 +62,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RNG R>
+        template<RNG R, FlipMethod Method>
         void step();
-        template<RNG R>
+        template<RNG R, FlipMethod Method>
         void step_for(int numStep);
 
         template<RNG R>
@@ -82,18 +86,19 @@ namespace Physica {
         DQMC(const Params& params_, int numSite, int numSplit);
         /* Operations */
         void initChain();
-        template<RNG R>
-        void flip();
-        template<RNG R>
-        void flip(int numStep);
+        void single_flip(int site, int split);
         void makeWeightMatrix(bool spin);
         std::pair<T, T> lnPartition(bool spin);
         std::pair<T, T> lnPartition();
         T calcGreen(bool spin);
+        template<FlipMethod Method>
         void update();
 
         T calcLnSpinWaveWeight(int site) const;
         T calcLnSpinWaveWeight(T sumSpin) const;
+        /* Static members */
+        template<RNG R>
+        static bool accept(T deltaW) noexcept;
     };
 
     template<Scalar T>
@@ -122,17 +127,76 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, DQMC<T>::FlipMethod Method>
     void DQMC<T>::step() {
-        flip<R>();
-        update();
+        auto& rng = R::getInstance();
+        const int site = std::uniform_int_distribution<>(0, getNumSite() - 1)(rng);
+        const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(rng);
+        if constexpr (Method == MH) {
+            single_flip(site, split);
+
+            const T lnZ0 = lnPartitionZ;
+            const T lnZ1 = lnPartition().first;
+            if (!accept<R>(lnZ1 - lnZ0)) {
+                single_flip(site, split);
+                return;
+            }
+            lnPartitionZ = lnZ1;
+        }
+        else {
+            auto field = getAuxField();
+            auto spins = field.row(site);
+            const T sumSpin0 = spins.sum();
+            const T sumSpin1 = sumSpin0 - T(2) * spins[split];
+            const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
+            if (!accept<R>(deltaW))
+                return;
+
+            single_flip(site, split);
+        }
+        update<Method>();
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, DQMC<T>::FlipMethod Method>
     void DQMC<T>::step_for(int numStep) {
-        flip<R>(numStep);
-        update();
+        assert(numStep >= 0 && "[Error]: Invalid step num");
+        Array<int> splits(getNumSite());
+        if constexpr (Method == MH) {
+            for (int step = 0; step < numStep; ++step) {
+                R::random_int(splits, 0, getNumSplit() - 1);
+                for (int site = 0; site < getNumSite(); ++site) {
+                    const int split = splits[site];
+                    single_flip(site, split);
+
+                    const T lnZ0 = lnPartitionZ;
+                    const T lnZ1 = lnPartition().first;
+                    if (!accept<R>(lnZ1 - lnZ0)) {
+                        single_flip(site, split);
+                        continue;
+                    }
+                    lnPartitionZ = lnZ1;
+                }
+            }
+        }
+        else {
+            for (int step = 0; step < numStep; ++step) {
+                R::random_int(splits, 0, getNumSplit() - 1);
+                for (int site = 0; site < getNumSite(); ++site) {
+                    auto field = getAuxField();
+                    auto spins = field.row(site);
+                    const int split = splits[site];
+                    const T sumSpin0 = spins.sum();
+                    const T sumSpin1 = sumSpin0 - T(2) * spins[split];
+                    const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
+                    if (!accept<R>(deltaW))
+                        continue;
+                    spins[split] = -spins[split];
+                }
+            }
+            initChain();
+        }
+        update<Method>();
     }
 
     template<Scalar T>
@@ -141,7 +205,7 @@ namespace Physica {
         aux.template random_uniform<R>();
         aux = unit(aux - T(0.5));
         initChain();
-        update();
+        update<MH>();
     }
 
     template<Scalar T>
@@ -186,54 +250,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
-    void DQMC<T>::flip() {
-        auto& rng = R::getInstance();
-        const int site = std::uniform_int_distribution<>(0, getNumSite() - 1)(rng);
-        const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(rng);
-
+    void DQMC<T>::single_flip(int site, int split) {
         auto field = getAuxField();
         auto spins = field.row(site);
-        const T sumSpin0 = spins.sum();
-        const T sumSpin1 = sumSpin0 - T(2) * spins[split];
-        const T delta = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
-        if (delta.isNegative()) {
-            const T p = T::template random_uniform<R>();
-            const bool accept = p < exp(delta);
-            if (!accept)
-                return;
-        }
         spins[split] = -spins[split];
 
         const T factor = T(2) * params.getAlpha() * spins[split];
         chainU[split].col(site) *= exp(factor);
         chainD[split].col(site) *= exp(-factor);
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    void DQMC<T>::flip(int numStep) {
-        assert(numStep >= 0 && "[Error]: Invalid step num");
-        Array<int> splits(getNumSite());
-        auto field = getAuxField();
-        for (int step = 0; step < numStep; ++step) {
-            R::random_int(splits, 0, getNumSplit() - 1);
-            for (int site = 0; site < getNumSite(); ++site) {
-                auto spins = field.row(site);
-                const int split = splits[site];
-                const T sumSpin0 = spins.sum();
-                const T sumSpin1 = sumSpin0 - T(2) * spins[split];
-                const T delta = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
-                if (delta.isNegative()) {
-                    const T p = T::template random_uniform<R>();
-                    const bool accept = p < exp(delta);
-                    if (!accept)
-                        continue;
-                }
-                spins[split] = -spins[split];
-            }
-        }
-        initChain();
     }
     /**
      * Reference:
@@ -326,10 +350,13 @@ namespace Physica {
     }
 
     template<Scalar T>
+    template<DQMC<T>::FlipMethod Method>
     void DQMC<T>::update() {
         lnPartitionZ = calcGreen(true) + calcGreen(false);
-        for (int i = 0; i < getNumSite(); ++i)
-            lnPartitionZ -= calcLnSpinWaveWeight(i);
+        if constexpr (Method == Spin) {
+            for (int i = 0; i < getNumSite(); ++i)
+                lnPartitionZ -= calcLnSpinWaveWeight(i);
+        }
     }
 
     template<Scalar T>
@@ -344,5 +371,15 @@ namespace Physica {
     T DQMC<T>::calcLnSpinWaveWeight(T sumSpin) const {
         const T factor = lncosh(params.calcShift());
         return ln1pexp(lncosh(params.getAlpha() * sumSpin) - factor);
+    }
+
+    template<Scalar T>
+    template<RNG R>
+    bool DQMC<T>::accept(T deltaW) noexcept {
+        if (deltaW.isPositive())
+            return true;
+
+        const T p = T::template random_uniform<R>();
+        return p < exp(deltaW);
     }
 }

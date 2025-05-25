@@ -87,7 +87,7 @@ namespace Physica {
 
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
-        [[nodiscard]] static void random_int(Array<int>& arr, int from, int to);
+        static void random_int(Array<int>& arr, int from, int to);
     private:
         Random();
         Random(const This&) = default;
