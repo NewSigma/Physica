@@ -152,7 +152,16 @@ namespace Physica {
             if (!accept<R>(deltaW))
                 return;
 
-            single_flip(site, split);
+            const T p = T::template random_uniform<R>();
+            if (p < 0.5) {
+                for (int i = 0; i < getNumSite(); ++i) {
+                    if (i == site)
+                        continue;
+                    single_flip(site, split);
+                }
+            }
+            else
+                single_flip(site, split);
         }
         update<Method>();
     }
@@ -191,6 +200,10 @@ namespace Physica {
                     const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
                     if (!accept<R>(deltaW))
                         continue;
+
+                    const T p = T::template random_uniform<R>();
+                    if (p < 0.5)
+                        spins = -spins;
                     spins[split] = -spins[split];
                 }
             }
