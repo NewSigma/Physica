@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M1, Scalar U, size_t Order>
-    class MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>> : public RValueMatrix<MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>> {
-        using This = MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>;
+    class GEMM<M1, Inverse<DiagMatrix<U, Order>>> : public RValueMatrix<GEMM<M1, Inverse<DiagMatrix<U, Order>>>> {
+        using This = GEMM<M1, Inverse<DiagMatrix<U, Order>>>;
         using Base = RValueMatrix<This>;
     protected:
         using typename Base::T;
@@ -31,10 +31,10 @@ namespace Physica {
         const M1& mat1;
         const DiagMatrix<U, Order>& mat2;
     public:
-        MatrixProduct(const M1& inv, const Inverse<DiagMatrix<U, Order>>& mat2_);
-        MatrixProduct(const This&) = default;
-        MatrixProduct(This&&) noexcept = default;
-        ~MatrixProduct() = default;
+        GEMM(const M1& inv, const Inverse<DiagMatrix<U, Order>>& mat2_);
+        GEMM(const This&) = default;
+        GEMM(This&&) noexcept = default;
+        ~GEMM() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -49,12 +49,12 @@ namespace Physica {
     };
 
     template<Matrix M1, Scalar U, size_t Order>
-    MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>::MatrixProduct(
+    GEMM<M1, Inverse<DiagMatrix<U, Order>>>::GEMM(
             const M1& mat1_, const Inverse<DiagMatrix<U, Order>>& inv) : mat1(mat1_), mat2(inv.getExpr()) {}
 
     template<Matrix M1, Scalar U, size_t Order>
     template<Matrix M>
-    void MatrixProduct<M1, Inverse<DiagMatrix<U, Order>>>::assign(M& target) const {
+    void GEMM<M1, Inverse<DiagMatrix<U, Order>>>::assign(M& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = mat1.col(i) * reciprocal(mat2.diag()[i]);
     }

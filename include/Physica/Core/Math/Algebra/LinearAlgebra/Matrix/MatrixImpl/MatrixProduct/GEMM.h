@@ -40,8 +40,8 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    class MatrixProduct : public RValueMatrix<MatrixProduct<M1, M2>> {
-        using This = MatrixProduct<M1, M2>;
+    class GEMM : public RValueMatrix<GEMM<M1, M2>> {
+        using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
     public:
         using Base::isReverseDiff;
@@ -58,10 +58,10 @@ namespace Physica {
         const M1& mat1;
         const M2& mat2;
     public:
-        MatrixProduct(const M1& mat1_, const M2& mat2_);
-        MatrixProduct(const This&) = default;
-        MatrixProduct(This&&) noexcept = default;
-        ~MatrixProduct() = default;
+        GEMM(const M1& mat1_, const M2& mat2_);
+        GEMM(const This&) = default;
+        GEMM(This&&) noexcept = default;
+        ~GEMM() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -88,13 +88,13 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    MatrixProduct<M1, M2>::MatrixProduct(const M1& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {
+    GEMM<M1, M2>::GEMM(const M1& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {
         assert(mat1.getCol() == mat2.getRow());
     }
 
     template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void MatrixProduct<M1, M2>::assign(LValueMatrix<M>& target) const {
+    void GEMM<M1, M2>::assign(LValueMatrix<M>& target) const {
         constexpr bool GoodScalar = T::Prec == Float32 || T::Prec == Float64;
         constexpr bool SameScalar = std::same_as<typename M1::ScalarType, typename M2::ScalarType> && std::same_as<T, typename M::ScalarType>;
         constexpr bool SameMajor = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M2>();
@@ -113,7 +113,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void MatrixProduct<M1, M2>::assign_base(LValueMatrix<M>& target) const {
+    void GEMM<M1, M2>::assign_base(LValueMatrix<M>& target) const {
         constexpr static int defaultMajor = Internal::ProductOption<M1, M2>::Major;
         constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
         using TargetType = LValueMatrix<M>;
@@ -138,7 +138,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    auto MatrixProduct<M1, M2>::calc(size_t row, size_t col) const -> T {
+    auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> T {
         T result(0);
         for (size_t i = 0; i < mat1.getCol(); ++i)
             result += mat1.calc(row, i) * mat2.calc(i, col);
@@ -147,7 +147,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void MatrixProduct<M1, M2>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+    void GEMM<M1, M2>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
         if constexpr (ReverseDiff<M1>)
             mat1.reverse(grad * mat2.transpose());
         if constexpr (ReverseDiff<M2>)
@@ -157,7 +157,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
-    class Traits<MatrixProduct<M1, M2>> {
+    class Traits<GEMM<M1, M2>> {
         static_assert(M1::ColAtCompile == M2::RowAtCompile ||
                       M1::ColAtCompile == Dynamic ||
                       M2::RowAtCompile == Dynamic,

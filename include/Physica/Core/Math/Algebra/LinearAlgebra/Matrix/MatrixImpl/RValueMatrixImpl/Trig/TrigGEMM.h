@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
-    class MatrixProduct<TrigUpper<M1>, M2> : public RValueMatrix<MatrixProduct<TrigUpper<M1>, M2>> {
-        using This = MatrixProduct<TrigUpper<M1>, M2>;
+    class GEMM<TrigUpper<M1>, M2> : public RValueMatrix<GEMM<TrigUpper<M1>, M2>> {
+        using This = GEMM<TrigUpper<M1>, M2>;
         using Base = RValueMatrix<This>;
     public:
         using Base::isComplex;
@@ -33,10 +33,10 @@ namespace Physica {
         const TrigUpper<M1>& mat1;
         const M2& mat2;
     public:
-        MatrixProduct(const TrigUpper<M1>& inv, const M2& mat2_);
-        MatrixProduct(const This&) = default;
-        MatrixProduct(This&&) noexcept = default;
-        ~MatrixProduct() = default;
+        GEMM(const TrigUpper<M1>& inv, const M2& mat2_);
+        GEMM(const This&) = default;
+        GEMM(This&&) noexcept = default;
+        ~GEMM() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -53,11 +53,11 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    MatrixProduct<TrigUpper<M1>, M2>::MatrixProduct(const TrigUpper<M1>& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {}
+    GEMM<TrigUpper<M1>, M2>::GEMM(const TrigUpper<M1>& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {}
 
     template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void MatrixProduct<TrigUpper<M1>, M2>::assign(M& target) const {
+    void GEMM<TrigUpper<M1>, M2>::assign(M& target) const {
         if constexpr (HasMKL())
             assign_mkl(target);
         else

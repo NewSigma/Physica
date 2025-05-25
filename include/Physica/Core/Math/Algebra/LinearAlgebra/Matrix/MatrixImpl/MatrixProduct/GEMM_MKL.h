@@ -23,7 +23,7 @@
 namespace Physica {
     template<Matrix T1, Matrix T2>
     template<Matrix M>
-    void MatrixProduct<T1, T2>::assign_mkl(LValueMatrix<M>& target) const {
+    void GEMM<T1, T2>::assign_mkl(LValueMatrix<M>& target) const {
         constexpr int Major = MatrixOption::isRowMatrix<T1>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr auto Layout = Major == MatrixOption::Row ? CblasRowMajor : CblasColMajor;
         using Tc = T::ComplexType;

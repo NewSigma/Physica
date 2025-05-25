@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
-    class device_obj<MatrixProduct<TrigUpper<M1>, M2>> : public device_obj<RValueMatrix<MatrixProduct<TrigUpper<M1>, M2>>> {
-        using host_obj = MatrixProduct<TrigUpper<M1>, M2>;
+    class device_obj<GEMM<TrigUpper<M1>, M2>> : public device_obj<RValueMatrix<GEMM<TrigUpper<M1>, M2>>> {
+        using host_obj = GEMM<TrigUpper<M1>, M2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
     public:
@@ -54,11 +54,11 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    device_obj<MatrixProduct<TrigUpper<M1>, M2>>::device_obj(const device_obj<TrigUpper<M1>>& mat1_, const device_obj<M2>& mat2_) : mat1(mat1_), mat2(mat2_) {}
+    device_obj<GEMM<TrigUpper<M1>, M2>>::device_obj(const device_obj<TrigUpper<M1>>& mat1_, const device_obj<M2>& mat2_) : mat1(mat1_), mat2(mat2_) {}
 
     template<Matrix M1, Matrix M2>
     template<Matrix M>
-    void device_obj<MatrixProduct<TrigUpper<M1>, M2>>::assign(M& target) const {
+    void device_obj<GEMM<TrigUpper<M1>, M2>>::assign(M& target) const {
         constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = CUBLAS_SIDE_LEFT;
         constexpr auto Uplo = CUBLAS_FILL_MODE_UPPER;

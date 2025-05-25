@@ -29,7 +29,7 @@ namespace Physica {
     auto RValueMatrix<Derived>::operator*(const M& mat) const noexcept
             requires(((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>) {
         assert(getCol() == mat.getRow());
-        return MatrixProduct<Derived, M>(Base::getDerived(), mat);
+        return GEMM<Derived, M>(Base::getDerived(), mat);
     }
 
     template<class Derived>

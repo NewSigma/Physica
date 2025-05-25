@@ -25,8 +25,8 @@
 
 namespace Physica {
     template<Matrix T1, Matrix T2>
-    class device_obj<MatrixProduct<T1, T2>> : public device_obj<RValueMatrix<MatrixProduct<T1, T2>>> {
-        using host_obj = MatrixProduct<T1, T2>;
+    class device_obj<GEMM<T1, T2>> : public device_obj<RValueMatrix<GEMM<T1, T2>>> {
+        using host_obj = GEMM<T1, T2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
         using DefaultType = host_obj::DefaultType::device_obj_type;
@@ -73,13 +73,13 @@ namespace Physica {
     };
 
     template<Matrix T1, Matrix T2>
-    __host__ __device__ device_obj<MatrixProduct<T1, T2>>::device_obj(const T1& mat1_, const T2& mat2_) : mat1(asStruct(mat1_)), mat2(asStruct(mat2_)) {
+    __host__ __device__ device_obj<GEMM<T1, T2>>::device_obj(const T1& mat1_, const T2& mat2_) : mat1(asStruct(mat1_)), mat2(asStruct(mat2_)) {
         assert(mat1_.getCol() == mat2_.getRow());
     }
 
     template<Matrix T1, Matrix T2>
     template<Matrix M>
-    __host__ __device__ void device_obj<MatrixProduct<T1, T2>>::assign(M& target) const requires(CUDA<M>) {
+    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign(M& target) const requires(CUDA<M>) {
         if constexpr (IsHost())
             assign_impl_cublas<M, false>(target);
         else
@@ -88,7 +88,7 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     template<Matrix M>
-    __host__ __device__ void device_obj<MatrixProduct<T1, T2>>::assign_add(M& target) const requires(CUDA<M>) {
+    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign_add(M& target) const requires(CUDA<M>) {
         if constexpr (IsHost())
             assign_impl_cublas<M, true>(target);
         else
@@ -97,7 +97,7 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     template<Matrix M>
-    void device_obj<MatrixProduct<T1, T2>>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<GEMM<T1, T2>>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
         if constexpr (ReverseDiff<T1>)
             getLHS().reverse(grad * getRHS().values().transpose());
         if constexpr (ReverseDiff<T2>)
@@ -106,7 +106,7 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     template<Matrix M, bool AssignAdd>
-    void device_obj<MatrixProduct<T1, T2>>::assign_impl_cublas(M& target) const requires(CUDA<M>) {
+    void device_obj<GEMM<T1, T2>>::assign_impl_cublas(M& target) const requires(CUDA<M>) {
         using U1 = remove_transpose<T1>::Type;
         using U2 = remove_transpose<T2>::Type;
         constexpr bool IsDeviceMatrix = Traits<T1>::SizeAtCompile == Dynamic && Traits<T2>::SizeAtCompile == Dynamic;
@@ -170,13 +170,13 @@ namespace Physica {
     template<Matrix T1, Matrix T2>
     [[nodiscard]] __host__ __device__ inline auto operator*(const T1& mat1, const T2& mat2) noexcept
             requires(((T1::ColAtCompile != 1 && T2::ColAtCompile != 1) || (T1::ColAtCompile == 1 && T2::ColAtCompile == 1)) && CUDA<T1> && CUDA<T2>) {
-        return device_obj<MatrixProduct<T1, T2>>(mat1, mat2);
+        return device_obj<GEMM<T1, T2>>(mat1, mat2);
     }
 }
 
 namespace Physica {
     template<Matrix T1, Matrix T2>
-    class Traits<device_obj<MatrixProduct<T1, T2>>> : public Traits<MatrixProduct<T1, T2>> {
+    class Traits<device_obj<GEMM<T1, T2>>> : public Traits<GEMM<T1, T2>> {
     public:
         constexpr static bool FastAssign = true;
     };
