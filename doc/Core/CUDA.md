@@ -21,3 +21,28 @@ void device_obj<T>::toHostAsync(T&);
 ```
 
 将设备数据拷贝到主机。
+
+仅需在异步接口非构造中实现核心逻辑, 其余三者在该接口基础上封装:
+
+```C++
+auto T::toDevice() const {
+    auto result = toDeviceAsync();
+    CUDAExecutor::wait();
+    return result;
+}
+
+auto T::toDeviceAsync() const {
+    device_obj<This> result{};
+    toDeviceAsync(result);
+    return result;
+}
+
+void T::toDevice(device_obj<This>& obj) const {
+    toDeviceAsync(obj);
+    CUDAExecutor::wait();
+ }
+
+void T::toDeviceAsync(device_obj<This>& obj) const {
+    /* Impl */
+}
+```

@@ -27,6 +27,7 @@ namespace Physica {
     template<Scalar T>
     class HubbardParams {
         using This = HubbardParams<T>;
+    public:
         using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
     private:
         DenseSymmMatrix<T> hoppingMatrix;
@@ -48,11 +49,16 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calcShift() const noexcept;
 
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
+        void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
+
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] int getNumSite() const noexcept { return hoppingMatrix.getOrder(); }
-        [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
         [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return hoppingMatrix; }
+        [[nodiscard]] int getNumSite() const noexcept { return expB.getRow(); }
+        [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
         [[nodiscard]] const auto& getExpB() const noexcept { return expB; }
         [[nodiscard]] T getAlpha() const noexcept { return alpha; }
         [[nodiscard]] T getBeta() const noexcept { return beta; }
@@ -64,6 +70,8 @@ namespace Physica {
     private:
         template<int Dim>
         void makeHoppingMatrix(const Hubbard<T, Dim>& hubbard);
+        /* Friends */
+        friend class device_obj<This>;
     };
 
     template<Scalar T>

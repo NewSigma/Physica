@@ -27,18 +27,20 @@ namespace Physica {
     class DQMC {
         using This = DQMC<T>;
         using Params = HubbardParams<T>;
+        using MatrixType = Params::MatrixType;
+        using MatrixChain = Array<MatrixType>;
     public:
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
         enum FlipMethod {
             MH,
-            Spin
+            Spin,
+            Uniform
         };
     private:
         const Params& params;
         VectorND<T> aux;
         QRDecomp<T> qr;
-        Array<MatrixType> chainU;
-        Array<MatrixType> chainD;
+        MatrixChain chainU;
+        MatrixChain chainD;
 
         DiagMatrix<T> matrixDb;
         DiagMatrix<T> matrixDs;
@@ -67,8 +69,6 @@ namespace Physica {
         template<RNG R, FlipMethod Method>
         void step_for(int numStep);
 
-        template<RNG R>
-        void random_uniform();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
@@ -83,13 +83,15 @@ namespace Physica {
         [[nodiscard]] const auto& getGreenU() const noexcept { return greenU; }
         [[nodiscard]] const auto& getGreenD() const noexcept { return greenD; }
     private:
-        DQMC(const Params& params_, int numSite, int numSplit);
         /* Operations */
+        void resize(int numSite, int numSplit);
+        template<RNG R>
+        void random_uniform();
+
         void initChain();
         void single_flip(int site, int split);
         void makeWeightMatrix(bool spin);
         std::pair<T, T> lnPartition(bool spin);
-        std::pair<T, T> lnPartition();
         T calcGreen(bool spin);
         template<FlipMethod Method>
         void update();
@@ -102,28 +104,8 @@ namespace Physica {
     };
 
     template<Scalar T>
-    DQMC<T>::DQMC(const Params& params_)
-            : DQMC(params_, params_.getNumSite(), params_.getNumSplit()) {}
-
-    template<Scalar T>
-    DQMC<T>::DQMC(const Params& params_, int numSite, int numSplit)
-            : params(params_)
-            , aux(numSite * numSplit)
-            , qr(numSite, numSite)
-            , chainU(numSplit)
-            , chainD(numSplit)
-            , matrixDb(numSite)
-            , matrixDs(numSite)
-            , diagB1(numSite)
-            , diagS1(numSite)
-            , greenU(numSite, numSite)
-            , greenD(numSite, numSite) {
-        assert(numSite > 0 && "[Error]: Invalid NumSite");
-        assert(numSplit > 0 && "[Error]: Invalid NumSplit");
-        for (int i = 0; i < numSplit; ++i) {
-            chainU[i].resize(numSite);
-            chainD[i].resize(numSite);
-        }
+    DQMC<T>::DQMC(const Params& params_) : params(params_) {
+        resize(params.getNumSite(), params.getNumSplit());
     }
 
     template<Scalar T>
@@ -141,9 +123,8 @@ namespace Physica {
                 single_flip(site, split);
                 return;
             }
-            lnPartitionZ = lnZ1;
         }
-        else {
+        else if constexpr (Method == Spin) {
             auto field = getAuxField();
             auto spins = field.row(site);
             const T sumSpin0 = spins.sum();
@@ -163,6 +144,8 @@ namespace Physica {
             else
                 single_flip(site, split);
         }
+        else
+            random_uniform<R>();
         update<Method>();
     }
 
@@ -188,7 +171,7 @@ namespace Physica {
                 }
             }
         }
-        else {
+        else if constexpr (Method == Spin) {
             for (int step = 0; step < numStep; ++step) {
                 R::random_int(splits, 0, getNumSplit() - 1);
                 for (int site = 0; site < getNumSite(); ++site) {
@@ -209,16 +192,9 @@ namespace Physica {
             }
             initChain();
         }
+        else
+            random_uniform<R>();
         update<Method>();
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    void DQMC<T>::random_uniform() {
-        aux.template random_uniform<R>();
-        aux = unit(aux - T(0.5));
-        initChain();
-        update<MH>();
     }
 
     template<Scalar T>
@@ -246,18 +222,49 @@ namespace Physica {
     }
 
     template<Scalar T>
+    void DQMC<T>::resize(int numSite, int numSplit) {
+        assert(numSite > 0 && "[Error]: Invalid NumSite");
+        assert(numSplit > 0 && "[Error]: Invalid NumSplit");
+        aux.resize(numSite * numSplit);
+        qr.resize(numSite, numSite);
+        chainU.resize(numSplit);
+        chainD.resize(numSplit);
+        for (int i = 0; i < numSplit; ++i) {
+            chainU[i].resize(numSite);
+            chainD[i].resize(numSite);
+        }
+
+        matrixDb.resize(numSite);
+        matrixDs.resize(numSite);
+        diagB1.resize(numSite);
+        diagS1.resize(numSite);
+        matrixQ.resize(numSite, numSite);
+        matrixR.resize(numSite, numSite);
+        buffer.resize(numSite, numSite);
+        greenU.resize(numSite, numSite);
+        greenD.resize(numSite, numSite);
+    }
+
+    template<Scalar T>
+    template<RNG R>
+    void DQMC<T>::random_uniform() {
+        aux.template random_uniform<R>();
+        aux = unit(aux - T(0.5));
+        initChain();
+    }
+
+    template<Scalar T>
     void DQMC<T>::initChain() {
         const int numSplit = getNumSplit();
         const auto field = getAuxField();
-        for (int i = 0; i < numSplit; ++i) {
-            const auto col = field.col(i);
-            auto& mU = chainU[i];
-            auto& mD = chainD[i];
-            mU = mD = params.getExpB();
-            for (int j = 0; j < getNumSite(); ++j) {
-                const T factor = params.getAlpha() * col.calc(j);
-                mU.col(j) *= exp(factor);
-                mD.col(j) *= exp(-factor);
+        const auto& expB = params.getExpB();
+        for (int split = 0; split < numSplit; ++split) {
+            auto& mU = chainU[split];
+            auto& mD = chainD[split];
+            for (int site = 0; site < getNumSite(); ++site) {
+                const T factor = params.getAlpha() * field(site, split);
+                mU.col(site) = expB.col(site) * exp(factor);
+                mD.col(site) = expB.col(site) * exp(-factor);
             }
         }
     }
@@ -339,13 +346,6 @@ namespace Physica {
         T lnZ = -matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
         sign *= qr.calcDetQ() * unit(qr.getMatrixR().diag()).prod();
         return std::make_pair(lnZ, sign);
-    }
-
-    template<Scalar T>
-    std::pair<T, T> DQMC<T>::lnPartition() {
-        const auto [lnZ1, sign1] = lnPartition(true);
-        const auto [lnZ2, sign2] = lnPartition(false);
-        return std::make_pair(lnZ1 + lnZ2, sign1 * sign2);
     }
 
     template<Scalar T>
