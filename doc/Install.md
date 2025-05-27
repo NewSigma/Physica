@@ -7,7 +7,7 @@ We adopt CMake as our building system:
 A C++ compiler that support C++ 20, the following compilers passed our test:
 
 [GCC](https://gcc.gnu.org/) N/A (Bug 104177)  
-[clang](https://clang.llvm.org/) 17.0.6  
+[clang](https://clang.llvm.org/) 18.1.3  
 [IntelLLVM](https://www.intel.cn/content/www/cn/zh/developer/tools/oneapi/dpc-compiler.html) 2025.0  
 
 Addtional libraries:
