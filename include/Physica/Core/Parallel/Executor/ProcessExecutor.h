@@ -19,8 +19,10 @@
 #pragma once
 
 #include <cassert>
+#include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Parallel/SubProcess.h"
+#include "Physica/Core/Parallel/Task.h"
 
 namespace Physica {
     class ProcessExecutor {
@@ -33,11 +35,11 @@ namespace Physica {
         template<class Functor, class... Args>
         static FutureType schedule(Functor func, Args&&... args);
         template<class Functor>
-        static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+        static Task<> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
     };
 
     template<class Functor, class... Args>
-    ProcessExecutor::FutureType ProcessExecutor::schedule(Functor func, Args&&... args) {
+    auto ProcessExecutor::schedule(Functor func, Args&&... args) -> FutureType {
         using ResultType = std::invoke_result<Functor, Args&&...>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: ProcessExecutor does not support functors with return value");
 
@@ -46,8 +48,7 @@ namespace Physica {
     }
 
     template<class Functor>
-    FutureGroup<typename ProcessExecutor::FutureType> ProcessExecutor::parallel_for(
-            Functor func, unsigned int loopCount, unsigned int core) {
+    Task<> ProcessExecutor::parallel_for(Functor func, unsigned int loopCount, unsigned int core) {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount >= core);
@@ -56,18 +57,21 @@ namespace Physica {
         const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
         unsigned int from = 0; 
         unsigned int to = maxLoopPerCore;
-        FutureGroup<FutureType> result(core);
+        Array<FutureType> futures(core);
         for (unsigned int _ = 0; _ < core; ++_) {
             SubProcess process([=]() {
                                    for (unsigned int i = from; i < to; ++i)
                                        func(i);
                                }, nice_incr);
-            result.append(process.execute());
+            futures.append(process.execute());
             from += maxLoopPerCore;
             const unsigned int next_to = to + maxLoopPerCore;
             to = next_to > loopCount ? loopCount : next_to;
         }
-        return result;
+        co_await std::suspend_always{};
+
+        for (auto& future : futures)
+            std::ignore = future.wait();
     }
 }
 

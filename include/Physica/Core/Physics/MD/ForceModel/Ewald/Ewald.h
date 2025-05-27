@@ -148,11 +148,11 @@ namespace Physica {
     template<class Executor>
     VectorND<T> Ewald<T, REwaldType>::force(const PositionMatrix& pos) {
         VectorND<T> result;
-        auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
+        auto kSpaceTask = Executor::schedule([this, pos, &result]() {
             result = force_long<SeqExecutor>(pos);
         });
         const VectorND<T> rSpaceSum = Base::template force_short<Executor>(pos);
-        Executor::auto_wait(kSpaceFuture);
+        kSpaceTask.wait_async();
         result += rSpaceSum;
         return result;
     }

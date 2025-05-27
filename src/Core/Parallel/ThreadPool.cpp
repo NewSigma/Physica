@@ -35,7 +35,19 @@ ThreadPool::~ThreadPool() {
     waitExit();
 }
 
-std::unique_ptr<Task> ThreadPool::steal() {
+void ThreadPool::schedule(Handle handle) noexcept {
+    assert(handle != nullptr);
+    assert(!handle.done());
+    {
+        const int schedule_to = isMainThread() ? 0 : getThreadInfo().id;
+        auto& data = thread_data[schedule_to];
+        std::unique_lock locker(data.queueMutex);
+        data.queue.push(handle);
+    }
+    cond.notify_one();
+}
+
+auto ThreadPool::steal() -> Handle {
     const auto random = RandomSeed::toNextSeed(getThreadInfo().randState);
     const int numThreads = getNumThreads();
     for (int i = 0; i < numThreads; ++i) {
@@ -43,12 +55,12 @@ std::unique_ptr<Task> ThreadPool::steal() {
         std::unique_lock locker(data.queueMutex);
         auto& queue = data.queue;
         if (!queue.empty()) {
-            std::unique_ptr<Task> task(std::move(queue.front()));
+            Handle handle = queue.front();
             queue.pop();
-            return task;
+            return handle;
         }
     }
-    return std::unique_ptr<Task>(nullptr);
+    return nullptr;
 }
 
 void ThreadPool::waitExit() {
@@ -89,21 +101,23 @@ void ThreadPool::workerMainLoop(int thread_id) noexcept {
     auto& queue = data.queue;
     std::unique_lock locker(data.queueMutex, std::defer_lock);
     while (true) {
-        std::unique_ptr<Task> task = nullptr;
+        Handle handle = nullptr;
         locker.lock();
         if (!queue.empty()) {
-            task = std::move(queue.front());
+            handle = std::move(queue.front());
             queue.pop();
             locker.unlock();
         }
         else {
             locker.unlock();
-            task = steal();
+            handle = steal();
         }
 
-        if (task != nullptr) {
+        if (handle) {
             cond.notify_one();
-            task->execute();
+            handle.resume();
+            if (!handle.done())
+                schedule(handle);
         }
         else {
             std::unique_lock poolLocker(poolMutex);

@@ -27,12 +27,9 @@
 #include <thread>
 #include <mutex>
 #include <queue>
-#include <functional>
 #include <condition_variable>
-#include <future>
 #include <limits>
 #include "Physica/Core/Utils/Container/Array.h"
-#include "PackagedTask.h"
 
 namespace Physica {
     /**
@@ -41,10 +38,10 @@ namespace Physica {
      */
     class PHYSICA_API ThreadPool final {
         using This = ThreadPool;
-    public:
+        using Handle = std::coroutine_handle<>;
         struct ThreadData {
             std::unique_ptr<std::thread> thread;
-            std::queue<std::unique_ptr<Task>> queue;
+            std::queue<Handle> queue;
             std::mutex queueMutex;
 
             ThreadData() : thread(), queue(), queueMutex() {}
@@ -54,7 +51,7 @@ namespace Physica {
             int id;
             uint64_t randState;
         };
-
+    public:
         static int numThreadRequired;
     private:
         // Larger than any thread ID, main thread is not controled by thread pool
@@ -72,9 +69,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class Function, class... Args>
-        auto schedule(Function func, Args&&... args) noexcept;
-        std::unique_ptr<Task> steal();
+        void schedule(Handle handle) noexcept;
+        [[nodiscard]] Handle steal();
         void waitExit();
         void restart();
         /* Getters */
@@ -94,21 +90,6 @@ namespace Physica {
         [[nodiscard]] static int getNumProcesser() noexcept;
         [[nodiscard]] static int makeNumThread() noexcept;
     };
-
-    template<class Function, class... Args>
-    auto ThreadPool::schedule(Function func, Args&&... args) noexcept {
-        using ResultType = std::invoke_result<Function, Args&&...>::type;
-        std::packaged_task<ResultType()> task(std::bind(func, std::forward<Args>(args)...));
-        auto result = task.get_future();
-        {
-            const int schedule_to = isMainThread() ? 0 : getThreadInfo().id;
-            auto& data = thread_data[schedule_to];
-            std::unique_lock locker(data.queueMutex);
-            data.queue.emplace(new PackagedTask(std::move(task)));
-        }
-        cond.notify_one();
-        return result;
-    }
 
     inline int ThreadPool::getThreadID() noexcept {
         return getThreadInfo().id;

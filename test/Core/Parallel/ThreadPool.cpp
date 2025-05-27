@@ -37,10 +37,14 @@ int main() {
     ThreadPool& pool = ThreadPool::getInstance();
 
     VectorType result_seq(4);
+    SeqExecutor::parallel_for([&](unsigned int i) {
+        result_seq[i] = A.col(i).sum();
+    }, 4, 4);
+
     VectorType result_par(4);
-    auto sum_col = [&](VectorType& result, unsigned int i) { result[i] = A.col(i).sum(); };
-    SeqExecutor::parallel_for([=, &result_seq](unsigned int i) { sum_col(result_seq, i); }, 4, 4);
-    ThreadExecutor::parallel_for([=, &result_par](unsigned int i) { sum_col(result_par, i); }, 4, 4).wait();
+    ThreadExecutor::parallel_for([&](unsigned int i) {
+        result_par[i] = A.col(i).sum();
+    }, 4, 4).wait();
 
     pool.shouldExit();
     return result_seq != result_par;

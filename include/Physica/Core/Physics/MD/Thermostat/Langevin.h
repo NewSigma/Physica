@@ -82,7 +82,7 @@ namespace Physica {
         const auto& massVec = ringPolymer.getMassVec();
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
-            auto future = Executor::parallel_for(
+            Executor::parallel_for(
                 [deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto mass = massVec[i / Dim];
@@ -102,8 +102,7 @@ namespace Physica {
                         langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                     }
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                }, dof, Executor::getNumThread());
-            Executor::auto_wait(future);
+                }, dof, Executor::getNumThread()).wait_async();
         }
         else {
             for (size_t i = 0; i < dof; ++i) {

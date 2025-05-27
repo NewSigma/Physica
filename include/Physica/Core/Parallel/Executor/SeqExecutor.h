@@ -20,23 +20,27 @@
 
 #include <type_traits>
 #include <cassert>
-#include "Physica/Core/Parallel/Future/DummyFuture.h"
+#include <utility>
 
 namespace Physica {
     class SeqExecutor {
+        class DummyFuture {
+        public:
+            constexpr static void wait() {}
+            constexpr static void wait_async() {}
+            constexpr static void get() {}
+        };
     public:
-        using FutureType = DummyFuture;
         using Range = std::pair<unsigned int, unsigned int>;
     public:
         /* Operations */
         template<class Functor, class... Args>
-        inline static FutureType schedule(Functor func, Args&&... args);
+        static DummyFuture schedule(Functor func, Args&&... args);
         template<class Functor>
-        inline static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
+        static DummyFuture parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
-        inline static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
-        static void auto_wait(FutureType&) {}
-        static void auto_wait(FutureGroup<FutureType>&) {}
+        static DummyFuture parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+
         static void wait() {}
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getNumThread() { return 1; }
@@ -45,34 +49,32 @@ namespace Physica {
     };
 
     template<class Functor, class... Args>
-    inline SeqExecutor::FutureType SeqExecutor::schedule(Functor func, Args&&... args) {
+    auto SeqExecutor::schedule(Functor func, Args&&... args) -> DummyFuture {
         func(std::forward<Args>(args)...);
-        return FutureType{};
+        return {};
     }
 
     template<class Functor>
-    inline FutureGroup<typename SeqExecutor::FutureType> SeqExecutor::parallel_for(
-            Functor func, unsigned int loopCount) {
+    auto SeqExecutor::parallel_for(Functor func, unsigned int loopCount) -> DummyFuture {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount > 0);
         for (unsigned int i = 0; i < loopCount; ++i)
             func(i);
-        return FutureGroup<FutureType>{};
+        return {};
     }
 
     template<class Functor>
-    inline FutureGroup<typename SeqExecutor::FutureType> SeqExecutor::parallel_for(
-            Functor func, unsigned int loopCount, unsigned int) {
+    auto SeqExecutor::parallel_for(
+            Functor func, unsigned int loopCount, unsigned int) -> DummyFuture {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         for (unsigned int i = 0; i < loopCount; ++i)
             func(i);
-        return FutureGroup<FutureType>{};
+        return {};
     }
 
-    inline SeqExecutor::Range SeqExecutor::splitJob(
-            unsigned int loopCount, [[maybe_unused]] unsigned int core, [[maybe_unused]] unsigned int part) {
+    inline auto SeqExecutor::splitJob(unsigned int loopCount, [[maybe_unused]] unsigned int core, [[maybe_unused]] unsigned int part) -> Range {
         assert(part == 0 && core == 1 && "[Error]: SeqExecutor do not support other param");
         return std::make_pair(0, loopCount);
     }

@@ -27,7 +27,6 @@
     #include <unistd.h>
 #endif
 #include "Physica/Macro.h"
-#include "FutureGroup.h"
 
 namespace Physica {
     class PHYSICA_API ProcessFuture {

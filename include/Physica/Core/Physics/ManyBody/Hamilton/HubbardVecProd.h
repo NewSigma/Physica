@@ -81,7 +81,7 @@ namespace Physica {
         target = Tr(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
             std::mutex mutex{};
-            auto future = Executor::parallel_for([&](unsigned int thread) {
+            Executor::parallel_for([&](unsigned int thread) {
                 const size_t length = getLength();
                 VectorND<ScalarType> local(length, 0);
                 SparseVector<ScalarType> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
@@ -93,8 +93,7 @@ namespace Physica {
                 }
                 std::unique_lock locker(mutex);
                 target += local;
-            }, Executor::getNumThread());
-            Executor::auto_wait(future);
+            }, Executor::getNumThread()).wait_async();
         }
         else {
             const size_t length = getLength();

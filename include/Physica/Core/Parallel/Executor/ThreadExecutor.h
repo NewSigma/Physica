@@ -21,9 +21,8 @@
 #include <type_traits>
 #include <future>
 #include <cassert>
-#include "Physica/Core/Parallel/Future/FutureGroup.h"
-#include "Physica/Core/Parallel/ThreadPool.h"
 #include "SeqExecutor.h"
+#include "Physica/Core/Parallel/Task.h"
 
 namespace Physica {
     class PHYSICA_API ThreadExecutor {
@@ -32,16 +31,14 @@ namespace Physica {
         using Range = SeqExecutor::Range;
     public:
         /* Operations */
-        template<class Functor, class... Args>
+        template<class Functor>
         [[nodiscard("[Warn]: Discarding async return value or exception")]]
-        static FutureType schedule(Functor func, Args&&... args) noexcept;
+        static Task<Thread> schedule(Functor func) noexcept;
         template<class Functor>
-        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, size_t loopCount);
+        [[nodiscard]] static Task<> parallel_for(Functor func, size_t loopCount);
         template<class Functor>
-        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, size_t loopCount, int core);
+        [[nodiscard]] static Task<> parallel_for(Functor func, size_t loopCount, int core);
 
-        static void auto_wait(FutureType& future);
-        inline static void auto_wait(FutureGroup<FutureType>& group);
         static void wait() {}
         /* Getters */
         [[nodiscard]] static int getThreadID() { return ThreadPool::getInstance().getThreadID(); }
@@ -50,44 +47,51 @@ namespace Physica {
         [[nodiscard]] inline static Range splitJob(size_t loopCount, int core, int part);
     };
 
-    template<class Functor, class... Args>
-    auto ThreadExecutor::schedule(Functor func, Args&&... args) noexcept -> FutureType {
-        return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);
+    template<class Functor>
+    Task<Thread> ThreadExecutor::schedule(Functor func) noexcept {
+        func();
+        co_return;
     }
 
     template<class Functor>
-    auto ThreadExecutor::parallel_for(Functor func, size_t loopCount) -> FutureGroup<FutureType> {
+    Task<> ThreadExecutor::parallel_for(Functor func, size_t loopCount) {
         using ResultType = std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount > 0);
-        FutureGroup<FutureType> result(loopCount);
+        Array<Task<Thread>> tasks(loopCount);
         for (size_t i = 0; i < loopCount; ++i) {
-            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, size_t>::value;
-            result.append(ThreadPool::getInstance().schedule([func, i]() noexcept(isNothrow) -> void { func(i); }));
+            tasks[i] = [](auto func, size_t i) noexcept -> Task<Thread> {
+                func(i);
+                co_return;
+            }(func, i);
         }
-        return result;
+
+        for (auto& task : tasks) {
+            while (!task.done())
+                co_await std::suspend_always{};
+            task.get();
+        }
     }
 
     template<class Functor>
-    auto ThreadExecutor::parallel_for(Functor func, size_t loopCount, int core) -> FutureGroup<FutureType> {
+    Task<> ThreadExecutor::parallel_for(Functor func, size_t loopCount, int core) {
         using ResultType = std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(core > 0 && "[Error]: core must be a positive int");
-        FutureGroup<FutureType> result(core);
+        Array<Task<Thread>> tasks(core);
         for (int i = 0; i < core; ++i) {
-            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, size_t>::value;
-            const auto range = splitJob(loopCount, core, i);
-            result.append(ThreadPool::getInstance().schedule([range, func]() noexcept(isNothrow) -> void {
+            tasks[i] = [](auto func, Range range) noexcept -> Task<Thread> {
                 for (size_t loop = range.first; loop < range.second; ++loop)
                     func(loop);
-            }));
+                co_return;
+            }(func, splitJob(loopCount, core, i));
         }
-        return result;
-    }
 
-    inline void ThreadExecutor::auto_wait(FutureGroup<FutureType>& group) {
-        for (auto& future : group.getFutures())
-            auto_wait(future);
+        for (auto& task : tasks) {
+            while (!task.done())
+                co_await std::suspend_always{};
+            task.get();
+        }
     }
 
     inline auto ThreadExecutor::splitJob(size_t loopCount, int core, int part) -> Range {

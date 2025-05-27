@@ -109,7 +109,7 @@ namespace Physica {
             result = force_long<SeqExecutor>(pos);
         });
         const VectorND<T> rSpaceSum = Base::template force_short<SeqExecutor>(pos);
-        Executor::auto_wait(kSpaceFuture);
+        kSpaceFuture.wait_async();
         result += rSpaceSum;
         return result;
     }

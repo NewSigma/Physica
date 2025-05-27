@@ -172,12 +172,12 @@ namespace Physica {
     void BKSModel<T, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         static_assert(!Traits<Executor>::UseCUDA, "[Error]: CUDA is not supported");
         assert(cell.getNumParticle() % 3 == 0);
-        auto future = Executor::schedule([this, &cell, &result]() {
+        auto task = Executor::schedule([this, &cell, &result]() {
             result = force_short<Executor>(cell);
         });
 
         const VectorND<T> coulomb = force_long<Executor>(cell);
-        Executor::auto_wait(future);
+        task.wait_async();
         result += coulomb;
     }
 

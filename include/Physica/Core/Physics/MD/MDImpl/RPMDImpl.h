@@ -70,10 +70,8 @@ namespace Physica {
 
             if constexpr (NumReplica == 1)
                 kernel(0);
-            else {
-                auto future = Executor::parallel_for(kernel, getNumReplica());
-                Executor::auto_wait(future);
-            }
+            else
+                Executor::parallel_for(kernel, getNumReplica()).wait_async();
             Executor::wait();
             return;
         }
@@ -90,7 +88,7 @@ namespace Physica {
                     saveTo = model.template force_uncontract<Executor>(std::move(cell));
                 }
             };
-            auto future_uncontract = Executor::parallel_for(kernel_uncontract, Executor::getNumThread());
+            auto task_uncontract = Executor::parallel_for(kernel_uncontract, Executor::getNumThread());
 
             contract();
             auto kernel_contract = [&](unsigned int thread) {
@@ -103,10 +101,10 @@ namespace Physica {
                     saveTo = model.template force_contract<Executor>(std::move(cell));
                 }
             };
-            auto future_contract = Executor::parallel_for(kernel_contract, Executor::getNumThread());
+            auto task_contract = Executor::parallel_for(kernel_contract, Executor::getNumThread());
 
-            Executor::auto_wait(future_uncontract);
-            Executor::auto_wait(future_contract);
+            task_uncontract.wait_async();
+            task_contract.wait_async();
             decontract();
         }
         else

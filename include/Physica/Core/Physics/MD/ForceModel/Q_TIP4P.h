@@ -161,7 +161,7 @@ namespace Physica {
     void Q_TIP4P<T, EwaldType>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         assert(cell.getNumParticle() % 3 == 0);
         VectorND<T> temp(getNumParticle() * 3, 0);
-        auto future = Executor::schedule([this, &cell, &temp]() {
+        auto task = Executor::schedule([this, &cell, &temp]() {
             force_short_interMolecule<Executor>(cell, temp);
             force_short_intraMolecule(cell, temp);
         });
@@ -170,7 +170,7 @@ namespace Physica {
         result = force_long_PartialChargeRepr<Executor>(chargePos);
         result += force_short_PartialChargeRepr<Executor>(chargePos);
         changeRepr(result);
-        Executor::auto_wait(future);
+        task.wait_async();
         result += temp;
     }
 

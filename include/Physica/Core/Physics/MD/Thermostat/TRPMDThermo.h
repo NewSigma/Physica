@@ -63,7 +63,7 @@ namespace Physica {
         const T repBeta = ringPolymer.calcRepBeta(temperatureT);
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
-            auto future = Executor::parallel_for(
+            Executor::parallel_for(
                 [repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
@@ -83,8 +83,7 @@ namespace Physica {
                                 buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                     }
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                }, dof, Executor::getNumThread());
-            Executor::auto_wait(future);
+                }, dof, Executor::getNumThread()).wait_async();
         }
     }
 
