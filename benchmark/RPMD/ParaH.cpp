@@ -20,7 +20,6 @@
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 
 using namespace Physica;
@@ -59,7 +58,7 @@ static void bench(benchmark::State& state) {
     auto rpmd = makeSystem(numMolecular);
     rpmd.initMomentum<KineticModel, RandomSource>();
     for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, ThreadExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, Thread>(kineticModel, forceModel);
 }
 
 BENCHMARK(bench)->Name("ParaH")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);

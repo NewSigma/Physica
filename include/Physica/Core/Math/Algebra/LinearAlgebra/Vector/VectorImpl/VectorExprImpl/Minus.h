@@ -33,7 +33,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         inline void assign(V1& v) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     inline void VectorExpr<ExprType::Minus, V>::assign(V1& v) const {
         const auto& expr = Base::getExpr();
         constexpr bool IsBinaryExpr = requires { expr.getLHS() * expr.getRHS(); };
@@ -60,15 +60,15 @@ namespace Physica {
             constexpr bool IsMatVecProd = Matrix<decltype(lhs)> && Vector<decltype(rhs)>;
             if constexpr (IsMatVecProd) {
                 if constexpr (Traits<std::remove_cvref_t<decltype(lhs)>>::FastAssign)
-                    ((-lhs) * rhs).template assign<V1, Executor>(v);
+                    ((-lhs) * rhs).template assign<V1, P>(v);
                 else
-                    (lhs * (-rhs)).template assign<V1, Executor>(v);
+                    (lhs * (-rhs)).template assign<V1, P>(v);
             }
             else
-                Base::template assign<V1, Executor>(v);
+                Base::template assign<V1, P>(v);
         }
         else
-            Base::template assign<V1, Executor>(v);
+            Base::template assign<V1, P>(v);
     }
 
     template<Vector V>

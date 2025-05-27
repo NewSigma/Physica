@@ -18,7 +18,6 @@
  */
 #include <random>
 #include <algorithm>
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
@@ -74,7 +73,7 @@ ScalarType calcThermoFlux(MDType& rpmd) {
 }
 
 void testMergeStep() {
-    using KineticModel = HardCore<ScalarType, true, 1, RPMDIntegrator::Exact, CUDAExecutor>;
+    using KineticModel = HardCore<ScalarType, true, 1, RPMDIntegrator::Exact, GPU>;
     MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
@@ -110,18 +109,18 @@ void testCpuGpuCompare() {
         rpmd.initMomentum<KineticModel, RandomSource>();
 
         ForceModel forceModel{};
-        rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, Sequential>(kineticModel, forceModel);
         cpu_data[0] = calcThermoFlux(rpmd);
-        rpmd.nve_step_for<KineticModel, ForceModel, SeqExecutor>(1.0, kineticModel, forceModel);
+        rpmd.nve_step_for<KineticModel, ForceModel, Sequential>(1.0, kineticModel, forceModel);
         for (size_t j = 1; j < NumData; ++j) {
             cpu_data[j] = calcThermoFlux(rpmd);
-            rpmd.nve_step_for<KineticModel, ForceModel, SeqExecutor>(1.0, kineticModel, forceModel);
+            rpmd.nve_step_for<KineticModel, ForceModel, Sequential>(1.0, kineticModel, forceModel);
             scaleVelocity(rpmd);
         }
     }
     ScalarType gpu_data[NumData];
     {
-        using KineticModel = HardCore<ScalarType, IsFixedBoundary, 1, RPMDIntegrator::Exact, CUDAExecutor>;
+        using KineticModel = HardCore<ScalarType, IsFixedBoundary, 1, RPMDIntegrator::Exact, GPU>;
         std::ignore = RandomSource::getInstance().reseed();
         MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);

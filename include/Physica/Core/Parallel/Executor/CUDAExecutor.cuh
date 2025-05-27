@@ -22,7 +22,6 @@
 #include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Parallel/CUDAContext.cuh"
-#include "SeqExecutor.h"
 
 namespace Physica {
     namespace Internal {
@@ -41,7 +40,7 @@ namespace Physica {
     /**
      * Single thread with cuda support
      */
-    class CUDAExecutor : public SeqExecutor {
+    class CUDAExecutor {
         struct KernelFuture {
             cudaStream_t stream;
 
@@ -69,15 +68,6 @@ namespace Physica {
         if constexpr (IsHost())
             CUDAContext::getInstance().wait();
     }
-}
-
-namespace Physica {
-    template<>
-    class Traits<CUDAExecutor> {
-    public:
-        constexpr static bool UseCPU = false;
-        constexpr static bool UseCUDA = true;
-    };
 }
 
 namespace std {

@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "Physica/Gui/Plot/Plot3D.h"
 
 using namespace Physica;
@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     ProbDistribution2D<ScalarType> pdf(-10, 10, -10, 10, 100, 100);
     for (size_t i = 0; i < numStep; ++i) {
         ForceModel forceModel{};
-        rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, SeqExecutor>(thermo, kineticModel, forceModel);
+        rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(thermo, kineticModel, forceModel);
         pdf.sample(rpmd.getRingPolymer().asMatrix()(0, 0), rpmd.getRingPolymer().asMatrix()(1, 0));
     }
     const auto grid = pdf.makePosition();

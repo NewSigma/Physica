@@ -22,7 +22,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -104,7 +103,7 @@ int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
     const auto t = VectorND<ScalarType>::linspace(1, 7, NumPoint);
     VectorND<ScalarType> Cv(NumPoint);
-    ThreadExecutor::parallel_for([&](size_t i) {
+    parallel_for<Thread>([&](size_t i) {
         Ising ising(20, 1, 1, t[i]);
         ising.init<RandomSource>();
         ising.step<RandomSource>(2000);

@@ -37,10 +37,10 @@ namespace Physica {
         [[nodiscard]] auto operator-() const& noexcept;
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         inline void assign(V1& v) const;
 
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         inline void assign_add(V1& v) const;
         template<Vector V1>
         void assign_add_base(V1& v) const noexcept;
@@ -74,11 +74,11 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     inline void VectorExpr<ExprType::Mul, V, U>::assign(V1& v) const {
         constexpr bool FastAssign = Traits<std::remove_cvref_t<V>>::FastAssign;
         if constexpr (FastAssign) {
-            getLHS().template assign<V1, Executor>(v);
+            getLHS().template assign<V1, P>(v);
             v *= getRHS();
         }
         else
@@ -86,7 +86,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     inline void VectorExpr<ExprType::Mul, V, U>::assign_add(V1& v) const {
         constexpr size_t Size = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
         constexpr bool SmallVector = 0 < Size && Size <= 128;

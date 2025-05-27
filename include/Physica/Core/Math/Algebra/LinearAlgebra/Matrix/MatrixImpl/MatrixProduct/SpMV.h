@@ -40,7 +40,7 @@ namespace Physica {
             assert(mat.getCol() == vec.getLength());
         }
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         void assign(V1& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
@@ -50,7 +50,7 @@ namespace Physica {
     };
 
     template<Scalar T, int Option, Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     void SpMV<T, Option, V>::assign(V1& target) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();

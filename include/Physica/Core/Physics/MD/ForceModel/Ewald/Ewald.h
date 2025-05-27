@@ -62,10 +62,10 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T potentialV(const PositionMatrix& pos) const;
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const PositionMatrix& pos);
         using Base::force_short;
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const;
@@ -145,20 +145,20 @@ namespace Physica {
     }
 
     template<Scalar T, class REwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Ewald<T, REwaldType>::force(const PositionMatrix& pos) {
         VectorND<T> result;
-        auto kSpaceTask = Executor::schedule([this, pos, &result]() {
-            result = force_long<SeqExecutor>(pos);
+        auto kSpaceTask = schedule<P>([this, pos, &result]() {
+            result = force_long<Sequential>(pos);
         });
-        const VectorND<T> rSpaceSum = Base::template force_short<Executor>(pos);
-        kSpaceTask.wait_async();
+        const VectorND<T> rSpaceSum = Base::template force_short<P>(pos);
+        kSpaceTask.wait();
         result += rSpaceSum;
         return result;
     }
 
     template<Scalar T, class REwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Ewald<T, REwaldType>::force_long(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         VectorND<T> kSpaceSum(numParticle * Dim, 0);

@@ -20,7 +20,6 @@
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include <iostream>
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
@@ -112,7 +111,7 @@ static void bench(benchmark::State& state) {
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum<KineticModel, RandomSource>();
     for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, Sequential>(kineticModel, forceModel);
 }
 
 BENCHMARK(bench)->Name("Q_TIP4P")->Unit(benchmark::kMillisecond);

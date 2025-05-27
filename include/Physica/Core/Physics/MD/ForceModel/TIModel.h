@@ -54,9 +54,9 @@ namespace Physica {
         [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
         [[nodiscard]] ScalarType deltaPotentialV(const MDCellType& cell) const;
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
 
         void swap(TIModel& __restrict obj) noexcept;
@@ -95,21 +95,22 @@ namespace Physica {
     }
 
     template<class ForceModel>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<typename TIModel<ForceModel>::ScalarType> TIModel<ForceModel>::force(const MDCellType& cell) const {
         const VectorND<ScalarType> hamonicF = hamonic.force(cell);
         if (lambda.isZero())
             return hamonicF;
-        return lambda * original.template force<Executor>(cell) + (ScalarType(1) - lambda) * hamonicF;
+        return lambda * original.template force<P>(cell) + (ScalarType(1) - lambda) * hamonicF;
     }
 
     template<class ForceModel>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void TIModel<ForceModel>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         if (!lambda.isZero())
-            original.template forceAsync<V, Executor>(cell, result);
-        const VectorND<ScalarType> hamonicF = hamonic.template force<Executor>(cell);
-        Executor::wait();
+            original.template forceAsync<V, P>(cell, result);
+        const VectorND<ScalarType> hamonicF = hamonic.template force<P>(cell);
+        if constexpr (P == GPU)
+            Task<GPU>::wait();
         result = lambda * result.getDerived() + (ScalarType(1) - lambda) * hamonicF;
     }
 

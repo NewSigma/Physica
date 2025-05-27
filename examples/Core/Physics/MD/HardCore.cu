@@ -21,7 +21,6 @@
 #include <QApplication>
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Gui/Plot/Plot.h"
 
@@ -40,7 +39,7 @@ using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact, CUDAExecutor>;
+using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact, GPU>;
 using RandomSource = Random<MT19937>;
 
 MDCellType makeSystem() {
@@ -74,7 +73,7 @@ int main(int argc, char** argv) {
     VectorType mean(record.getRow()), devia(record.getRow());
     {
         ThreadPool::numThreadRequired = record.getCol();
-        ThreadExecutor::parallel_for([&record](unsigned int sys) {
+        parallel_for<Thread>([&record](unsigned int sys) {
             MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
             KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
             kineticModel.updateMass(rpmd.getRingPolymer());

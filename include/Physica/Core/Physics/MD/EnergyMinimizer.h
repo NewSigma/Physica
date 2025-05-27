@@ -40,20 +40,20 @@ namespace Physica {
         /* Operators */
         EnergyMinimizer& operator=(EnergyMinimizer obj) noexcept;
         /* Operations */
-        template<class ForceModel, class Executor, class Optimizer>
+        template<class ForceModel, ExecutePolicy P, class Optimizer>
         void pre_pos_step(const ForceModel& model, Optimizer& optimizer);
-        template<class ForceModel, class Executor, class Optimizer>
+        template<class ForceModel, ExecutePolicy P, class Optimizer>
         void pos_step(const ForceModel& model, Optimizer& optimizer);
-        template<class ForceModel, class Executor, class Optimizer>
+        template<class ForceModel, ExecutePolicy P, class Optimizer>
         void pre_lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep);
-        template<class ForceModel, class Executor, class Optimizer>
+        template<class ForceModel, ExecutePolicy P, class Optimizer>
         void lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep);
         void swap(EnergyMinimizer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getCell() const noexcept { return cell; }
     private:
         template<class ForceModel> auto makePosStepFunc(const ForceModel& model);
-        template<class ForceModel, class Executor> auto makePosStepGrad(const ForceModel& model);
+        template<class ForceModel, ExecutePolicy P> auto makePosStepGrad(const ForceModel& model);
         template<class ForceModel> auto makeLattice2DStepFunc(const ForceModel& model);
         template<class ForceModel> auto makeLattice2DStepGrad(const ForceModel& model, T diffStep);
     };
@@ -70,25 +70,25 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class ForceModel, class Executor, class Optimizer>
+    template<class ForceModel, ExecutePolicy P, class Optimizer>
     void EnergyMinimizer<T, Dim>::pre_pos_step(const ForceModel& model, Optimizer& optimizer) {
         const auto func = makePosStepFunc(model);
-        const auto grad = makePosStepGrad<ForceModel, Executor>(model);
+        const auto grad = makePosStepGrad<ForceModel, P>(model);
         optimizer.init(cell.getPos().flatten(), func, grad);
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class ForceModel, class Executor, class Optimizer>
+    template<class ForceModel, ExecutePolicy P, class Optimizer>
     void EnergyMinimizer<T, Dim>::pos_step(const ForceModel& model, Optimizer& optimizer) {
         assert(optimizer.getDim() == cell.getDOF() && "[Error]: pre_pos_step must be called before this function");
         const auto func = makePosStepFunc(model);
-        const auto grad = makePosStepGrad<ForceModel, Executor>(model);
+        const auto grad = makePosStepGrad<ForceModel, P>(model);
         optimizer.step(func, grad);
         cell.setPos(optimizer.getArgX().reshape(cell.getPos()));
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class ForceModel, class Executor, class Optimizer>
+    template<class ForceModel, ExecutePolicy P, class Optimizer>
     void EnergyMinimizer<T, Dim>::pre_lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep) {
         assert(cell.getLattice()(0, 1).isZero());
         assert(cell.getLattice()(0, 2).isZero());
@@ -102,7 +102,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class ForceModel, class Executor, class Optimizer>
+    template<class ForceModel, ExecutePolicy P, class Optimizer>
     void EnergyMinimizer<T, Dim>::lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep) {
         assert(optimizer.getDim() == 3 && "[Error]: pre_lattice2D_step must be called before this function");
         const auto func = makeLattice2DStepFunc(model);
@@ -134,11 +134,11 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class ForceModel, class Executor>
+    template<class ForceModel, ExecutePolicy P>
     auto EnergyMinimizer<T, Dim>::makePosStepGrad(const ForceModel& model) {
         const auto grad = [this, &model](const VectorType& v) -> VectorType {
             const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
-            return -model.template force<Executor, true>(temp);
+            return -model.template force<P, true>(temp);
         };
         return grad;
     }

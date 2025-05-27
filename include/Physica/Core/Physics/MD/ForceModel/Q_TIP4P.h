@@ -69,22 +69,22 @@ namespace Physica {
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
         [[nodiscard]] T potentialV_unsort(const MDCellType& cell) const;
 
-        template<class Executor> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
-        template<class Executor> [[nodiscard]] VectorND<T> force_unsort(const MDCellType& cell);
-        template<Vector V, class Executor>
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_unsort(const MDCellType& cell);
+        template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
-        template<class Executor> [[nodiscard]] inline VectorND<T> force_short(const MDCellType& cell);
-        template<class Executor> [[nodiscard]] VectorND<T> force_short_unsort(const MDCellType& cell);
-        template<class Executor> [[nodiscard]] VectorND<T> force_long(const MDCellType& cell);
-        template<class Executor> [[nodiscard]] VectorND<T> force_long_unsort(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] inline VectorND<T> force_short(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short_unsort(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long_unsort(const MDCellType& cell);
 
-        template<class Executor> [[nodiscard]] VectorND<T> force_contract(const MDCellType& cell);
-        template<class Executor> [[nodiscard]] VectorND<T> force_uncontract(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_contract(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_uncontract(const MDCellType& cell);
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell);
         [[nodiscard]] LatticeMatrix virial_morse(const MDCellType& cell) const;
         [[nodiscard]] BornChargeArray calcBornCharge() const;
-        template<class Executor, bool UseDynamicPolar>
+        template<ExecutePolicy P, bool UseDynamicPolar>
         [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell);
         void swap(This& __restrict model) noexcept;
         /* Getters */
@@ -103,10 +103,10 @@ namespace Physica {
         T potentialVWithoutEwald(const MDCellType& cell) const;
         T ewaldEnergy(const MDCellType& cell) const;
 
-        template<class Executor> void force_short_interMolecule(const MDCellType& cell, VectorND<T>& shortForce) const;
+        template<ExecutePolicy P> void force_short_interMolecule(const MDCellType& cell, VectorND<T>& shortForce) const;
         void force_short_intraMolecule(const MDCellType& cell, VectorND<T>& shortForce) const;
-        template<class Executor> [[nodiscard]] VectorND<T> force_short_PartialChargeRepr(const PositionMatrix& chargePos);
-        template<class Executor> [[nodiscard]] inline VectorND<T> force_long_PartialChargeRepr(const PositionMatrix& chargePos);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short_PartialChargeRepr(const PositionMatrix& chargePos);
+        template<ExecutePolicy P> [[nodiscard]] inline VectorND<T> force_long_PartialChargeRepr(const PositionMatrix& chargePos);
         template<Vector V> void changeRepr(ContinuousVector<V>& ewaldForce) const;
 
         [[nodiscard]] static T modifiedMorsePot(T r);
@@ -139,77 +139,77 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force(const MDCellType& cell) {
         VectorND<T> result;
-        forceAsync<VectorND<T>, Executor>(cell, result);
+        forceAsync<VectorND<T>, P>(cell, result);
         return result;
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force_unsort(const MDCellType& cell) {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
-        const VectorND<T> sort_f = force<Executor>(copy);
+        const VectorND<T> sort_f = force<P>(copy);
         const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
         return unsort_f.flatten();
     }
 
     template<Scalar T, class EwaldType>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void Q_TIP4P<T, EwaldType>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         assert(cell.getNumParticle() % 3 == 0);
         VectorND<T> temp(getNumParticle() * 3, 0);
-        auto task = Executor::schedule([this, &cell, &temp]() {
-            force_short_interMolecule<Executor>(cell, temp);
+        auto task = schedule<P>([this, &cell, &temp]() {
+            force_short_interMolecule<P>(cell, temp);
             force_short_intraMolecule(cell, temp);
         });
 
         const auto chargePos = makeChargePos(cell);
-        result = force_long_PartialChargeRepr<Executor>(chargePos);
-        result += force_short_PartialChargeRepr<Executor>(chargePos);
+        result = force_long_PartialChargeRepr<P>(chargePos);
+        result += force_short_PartialChargeRepr<P>(chargePos);
         changeRepr(result);
-        task.wait_async();
+        task.wait();
         result += temp;
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline VectorND<T> Q_TIP4P<T, EwaldType>::force_short(const MDCellType& cell) {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
-        VectorND<T> result = force_short_PartialChargeRepr<Executor>(makeChargePos(cell));
+        VectorND<T> result = force_short_PartialChargeRepr<P>(makeChargePos(cell));
         changeRepr(result);
-        force_short_interMolecule<Executor>(cell, result);
+        force_short_interMolecule<P>(cell, result);
         force_short_intraMolecule(cell, result);
         return result;
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force_short_unsort(const MDCellType& cell) {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
-        const VectorND<T> sort_f = force_short<Executor>(copy);
+        const VectorND<T> sort_f = force_short<P>(copy);
         const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
         return unsort_f.flatten();
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force_long(const MDCellType& cell) {
-        auto result = force_long_PartialChargeRepr<Executor>(makeChargePos(cell));
+        auto result = force_long_PartialChargeRepr<P>(makeChargePos(cell));
         changeRepr(result);
         return result;
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force_long_unsort(const MDCellType& cell) {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
-        const VectorND<T> sort_f = force_long<Executor>(copy);
+        const VectorND<T> sort_f = force_long<P>(copy);
         const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
         return unsort_f.flatten();
     }
@@ -220,17 +220,17 @@ namespace Physica {
      * [1] J. Chem. Phys. 129, 024105 (2008); https://doi.org/10.1063/1.2953308
      */
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force_contract(const MDCellType& cell) {
-        auto result = force_long_PartialChargeRepr<Executor>(makeChargePos(cell));
-        result += force_short_PartialChargeRepr<Executor>(makeChargePos(cell));
+        auto result = force_long_PartialChargeRepr<P>(makeChargePos(cell));
+        result += force_short_PartialChargeRepr<P>(makeChargePos(cell));
         changeRepr(result);
-        force_short_interMolecule<Executor>(cell, result);
+        force_short_interMolecule<P>(cell, result);
         return result;
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force_uncontract(const MDCellType& cell) {
         VectorND<T> result(3 * getNumMolecule() * Dim, 0);
         force_short_intraMolecule(cell, result);
@@ -324,12 +324,12 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor, bool UseDynamicPolar>
+    template<ExecutePolicy P, bool UseDynamicPolar>
     auto Q_TIP4P<T, EwaldType>::makeInducedDipole(const MDCellType& cell) -> PositionMatrix {
         assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
         const size_t numMolecule = cell.getNumParticle() / 3;
         const PositionMatrix chargePos = makeChargePos(cell);
-        VectorND<T> coulomb = force_short_PartialChargeRepr<Executor>(chargePos) + force_long_PartialChargeRepr<Executor>(chargePos);
+        VectorND<T> coulomb = force_short_PartialChargeRepr<P>(chargePos) + force_long_PartialChargeRepr<P>(chargePos);
         changeRepr(coulomb);
         const T repCharge = reciprocal(T(charge));
 
@@ -453,11 +453,11 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     void Q_TIP4P<T, EwaldType>::force_short_interMolecule(const MDCellType& cell, VectorND<T>& shortForce) const {
         const size_t numMolecule = getNumMolecule();
         auto force_oxygen = shortForce.tail(2 * numMolecule * Dim);
-        force_oxygen += lj_model.template force<Executor>(makeCellWithoutH(cell)) * T(epsilon4);
+        force_oxygen += lj_model.template force<P>(makeCellWithoutH(cell)) * T(epsilon4);
     }
 
     template<Scalar T, class EwaldType>
@@ -519,9 +519,9 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force_short_PartialChargeRepr(const PositionMatrix& chargePos) {
-        VectorND<T> coulomb = ewald.template force_short<Executor>(chargePos);
+        VectorND<T> coulomb = ewald.template force_short<P>(chargePos);
         PeriodicCell<T, 3> chargeCell(ewald.getLattice(), chargePos, MDCellType::Type::Cartesian);
         const size_t numMolecule = getNumMolecule();
         const size_t minIndexO = 2 * numMolecule;
@@ -558,9 +558,9 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline VectorND<T> Q_TIP4P<T, EwaldType>::force_long_PartialChargeRepr(const PositionMatrix& chargePos) {
-        return ewald.template force_long<Executor>(chargePos);
+        return ewald.template force_long<P>(chargePos);
     }
     /**
      * Change representation: from partial charge representation to HOH representation

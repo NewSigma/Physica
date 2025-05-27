@@ -18,7 +18,6 @@
  */
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Physics/MD/Barostat/SCRBaro.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
@@ -70,7 +69,7 @@ static void bench(benchmark::State& state) {
     ThermoType thermo(temperatureT, thermostatTime);
     BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
     for (auto _ : state)
-        rpmd.npt_step<ThermoType, RandomSource, BarostatType, KineticModel, decltype(forceModel), CUDAExecutor>(
+        rpmd.npt_step<ThermoType, RandomSource, BarostatType, KineticModel, decltype(forceModel), GPU>(
                 thermo,
                 barostat,
                 kineticModel,

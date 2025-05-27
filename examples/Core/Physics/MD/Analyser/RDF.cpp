@@ -23,7 +23,6 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/Analyser/RDF.h"
 #include "Physica/Gui/Plot/Plot.h"
 
@@ -129,10 +128,10 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 
     ThreadPool::numThreadRequired = 4;
     {
-        rpmd.template nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(
+        rpmd.template nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
             PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
         for (size_t i = 0; i < 1000 * (NumReplica == 0 ? 1 : 32); ++i) {
-            rpmd.template nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.template nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
                 thermo, kineticModel, forceModel);
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));

@@ -34,9 +34,9 @@ namespace Physica {
     public:
         ~SeqNet() = default;
         /* Operations */
-        template<class Dataset, RNG R, class Executor>
+        template<class Dataset, RNG R, ExecutePolicy P>
         void train_step(int batchSize, const Dataset& dataset);
-        template<class Dataset, RNG R, class Executor>
+        template<class Dataset, RNG R, ExecutePolicy P>
         void train_step_for(int64_t numStep, int batchSize, const Dataset& dataset);
 
         template<class Dataset>
@@ -53,20 +53,20 @@ namespace Physica {
     };
 
     template<class Derived>
-    template<class Dataset, RNG R, class Executor>
+    template<class Dataset, RNG R, ExecutePolicy P>
     void SeqNet<Derived>::train_step(int batchSize, const Dataset& dataset) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         const Tv mean_grad = reciprocal(Tv(batchSize));
-        if constexpr (std::same_as<Executor, SeqExecutor>) {
+        if constexpr (P == Sequential) {
             const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
             for (auto index : indices)
                 loss<Dataset>(dataset, index).reverse(mean_grad);
         }
         else {
-            const int numThread = Executor::getNumThread();
+            const int numThread = ThreadPool::getInstance().getNumThreads();
             const int batchSizePerThread = (batchSize + numThread - 1) / numThread;
             std::mutex mutex{};
-            Executor::parallel_for([this, mean_grad, batchSizePerThread, &dataset, &mutex](size_t) {
+            parallel_for<P>([this, mean_grad, batchSizePerThread, &dataset, &mutex](size_t) {
                 auto& nn = Base::getDerived();
                 Derived buffer = nn;
                 const auto indices = R::random_int(batchSizePerThread, 0, dataset.getSize() - 1);
@@ -81,10 +81,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Dataset, RNG R, class Executor>
+    template<class Dataset, RNG R, ExecutePolicy P>
     void SeqNet<Derived>::train_step_for(int64_t numStep, int batchSize, const Dataset& dataset) {
         for (int64_t _ = 0; _ < numStep; ++_)
-            train_step<Dataset, R, Executor>(batchSize, dataset);
+            train_step<Dataset, R, P>(batchSize, dataset);
     }
 
     template<class Derived>

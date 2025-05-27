@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,24 +19,26 @@
 #pragma once
 
 #include "Physica/Core/Parallel/CUDAContext.cuh"
-#include "ThreadExecutor.h"
-
-namespace Physica {
-    /**
-     * \class AutoExecutor is devoted to provide a load balancing heterogeneous computing.
-     */
-    class AutoExecutor : public ThreadExecutor {
-        using Base = ThreadExecutor;
-    public:
-        static void wait() { CUDAContext::getInstance().wait(); }
-    };
-}
 
 namespace Physica {
     template<>
-    class Traits<AutoExecutor> {
+    class Task<GPU> {
+        using This = Task<GPU>;
     public:
-        constexpr static bool UseCPU = true;
-        constexpr static bool UseCUDA = HasCUDA();
+        static void wait();
     };
+
+    inline void Task<GPU>::wait() {
+        CUDAContext::getInstance().wait();
+    }
+
+    template<ExecutePolicy P>
+    Task<Concurrent> parallel_for(auto func, size_t num_loop) noexcept requires(P == GPU) {
+        return parallel_for<Thread>(func, num_loop);
+    }
+
+    template<ExecutePolicy P>
+    Task<Concurrent> parallel_for(auto func, size_t num_loop, int part) noexcept requires(P == GPU) {
+        return parallel_for<Thread>(func, num_loop, part);
+    }
 }

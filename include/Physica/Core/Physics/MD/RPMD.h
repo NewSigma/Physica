@@ -72,27 +72,27 @@ namespace Physica {
         /* Operators */
         RPMD& operator=(RPMD obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ForceModel, class Executor> void updateForce(ForceModel& model);
+        template<class ForceModel, ExecutePolicy P> void updateForce(ForceModel& model);
         template<class KineticModel,
                  class ForceModel,
-                 class Executor = SeqExecutor>
+                 ExecutePolicy P = Sequential>
         void nve_step(KineticModel& kineticModel, ForceModel& forceModel);
         template<class KineticModel,
                  class ForceModel,
-                 class Executor = SeqExecutor>
+                 ExecutePolicy P = Sequential>
         void nve_step_for(T duration, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
                  RNG R,
                  class KineticModel,
                  class ForceModel,
-                 class Executor = SeqExecutor>
+                 ExecutePolicy P = Sequential>
         void nvt_step(const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  RNG R,
                  class KineticModel,
                  class ForceModel,
-                 class Executor = SeqExecutor>
+                 ExecutePolicy P = Sequential>
         void nvt_step_for(T duration, const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
@@ -100,19 +100,19 @@ namespace Physica {
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
-                 class Executor = SeqExecutor>
+                 ExecutePolicy P = Sequential>
         void npt_step(const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  RNG R,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
-                 class Executor = SeqExecutor>
+                 ExecutePolicy P = Sequential>
         void npt_step_for(T duration, const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
-        template<class KineticModel, class ForceModel, class Executor = SeqExecutor>
+        template<class KineticModel, class ForceModel, ExecutePolicy P = Sequential>
         void fire_vstep(FireModel<T, Dim>& fire, KineticModel& kineticModel, ForceModel& forceModel);
-        template<BaroType Type, class KineticModel, class ForceModel, class Executor = SeqExecutor>
+        template<BaroType Type, class KineticModel, class ForceModel, ExecutePolicy P = Sequential>
         void fire_pstep(CFireModel<T, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class KineticModel, RNG R>
@@ -130,24 +130,24 @@ namespace Physica {
         template<class KineticModel> [[nodiscard]] T calcKineticPrim(size_t dofIndex) const;
         [[nodiscard]] T calcKineticClassical() const;
 
-        template<class ForceModel, class Executor> [[nodiscard]] T calcPotential(const ForceModel& model) const;
+        template<class ForceModel, ExecutePolicy P> [[nodiscard]] T calcPotential(const ForceModel& model) const;
         template<class ForceModel> [[nodiscard]] T calcPotentialClassical(const ForceModel& model) const;
 
         [[nodiscard]] T calcClassicalElastic() const;
         template<class ForceModel> [[nodiscard]] T calcClassicalInternalEnergy(const ForceModel& model) const;
 
         template<class KineticModel> [[nodiscard]] T calcTemperature() const;
-        template<class KineticModel, class ForceModel, class Executor>
+        template<class KineticModel, class ForceModel, ExecutePolicy P>
         [[nodiscard]] T calcPressThermo(ForceModel& model) const;
 
-        template<class ForceModel, class Executor>
+        template<class ForceModel, ExecutePolicy P>
         [[nodiscard]] LatticeMatrix makeStressPrim(ForceModel& model) const;
-        template<class ForceModel, class Executor>
+        template<class ForceModel, ExecutePolicy P>
         [[nodiscard]] LatticeMatrix makeStressVirial(ForceModel& model) const;
-        template<class ForceModel, class Executor>
+        template<class ForceModel, ExecutePolicy P>
         [[nodiscard]] LatticeMatrix makeStressClassical(ForceModel& model) const;
 
-        template<class KineticModel, class ForceModel, class Executor>
+        template<class KineticModel, class ForceModel, ExecutePolicy P>
         VectorND<T> testNVE(T duration, KineticModel& kineticModel, ForceModel& forceModel) const;
 
         void read(const H5Loc& loc, const char* name);

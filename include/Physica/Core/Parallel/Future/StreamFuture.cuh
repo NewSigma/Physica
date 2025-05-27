@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -37,7 +37,8 @@ namespace Physica {
         /* Operations */
         void wait();
         /* Static members */
-        [[nodiscard]] static std::unique_ptr<StreamFuture> makeFuture(); //[Warn]: Discard a future may leak exceptions
+        [[nodiscard("[Warn]: Discard a future may leak exceptions")]]
+        static std::unique_ptr<StreamFuture> makeFuture(); //
     private:
         StreamFuture();
         static void taskDoneCallback(void* p_future);

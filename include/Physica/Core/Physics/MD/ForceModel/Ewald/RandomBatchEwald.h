@@ -53,10 +53,10 @@ namespace Physica {
         RandomBatchEwald& operator=(RandomBatchEwald obj) noexcept { swap(obj); return *this; }
         RandomBatchEwald& operator=(Base base);
         /* Operations */
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const PositionMatrix& pos) const;
         using Base::force_short;
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] T calcDefaultIntegralLimit() const;
@@ -102,20 +102,20 @@ namespace Physica {
     }
 
     template<Scalar T, RNG R>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> RandomBatchEwald<T, R>::force(const PositionMatrix& pos) const {
         VectorND<T> result;
-        auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
-            result = force_long<SeqExecutor>(pos);
+        auto kSpaceFuture = schedule<P>([this, pos, &result]() {
+            result = force_long<Sequential>(pos);
         });
-        const VectorND<T> rSpaceSum = Base::template force_short<SeqExecutor>(pos);
-        kSpaceFuture.wait_async();
+        const VectorND<T> rSpaceSum = Base::template force_short<Sequential>(pos);
+        kSpaceFuture.wait();
         result += rSpaceSum;
         return result;
     }
     //TODO: time reversal symmetry?
     template<Scalar T, RNG R>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> RandomBatchEwald<T, R>::force_long(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         VectorND<T> kSpaceSum(numParticle * Dim, 0);

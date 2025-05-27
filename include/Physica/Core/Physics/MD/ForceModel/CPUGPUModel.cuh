@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Parallel/ThreadPool.h"
-#include "Physica/Core/Parallel/Executor/AutoExecutor.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica {
@@ -38,14 +37,14 @@ namespace Physica {
         template<class... Args>
         CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs);
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell);
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
 
-        template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) { return force<Executor>(cell); }
-        template<class Executor>
+        template<ExecutePolicy P>
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) { return force<P>(cell); }
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getNumParticle() * 3, 0); }
         /* Getters */
         [[nodiscard]] size_t getNumCUDAThread() const noexcept { return deviceModels.getLength(); }
@@ -60,24 +59,24 @@ namespace Physica {
     }
 
     template<class HostModel, class DeviceModel>
-    template<class Executor>
+    template<ExecutePolicy P>
     DenseVector<typename CPUGPUModel<HostModel, DeviceModel>::ScalarType> CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) {
         VectorND<ScalarType> result(cell.getDOF());
-        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
+        forceAsync<VectorND<ScalarType>, P>(cell, result);
         CUDAContext::getInstance().wait();
         return result;
     }
 
     template<class HostModel, class DeviceModel>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
-        static_assert(Traits<Executor>::UseCUDA, "[Error]: Invalid executor");
+        static_assert(P == GPU, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadID();
         const bool useCPU = ThreadPool::isMainThread() || static_cast<size_t>(threadId) >= getNumCUDAThread();
         if (useCPU)
-            result = hostModel.template force<ThreadExecutor>(cell);
+            result = hostModel.template force<Thread>(cell);
         else
-            deviceModels[threadId].template forceAsync<V, CUDAExecutor>(cell, result);
+            deviceModels[threadId].template forceAsync<V, GPU>(cell, result);
     }
 }
 

@@ -71,30 +71,30 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Executor>
+    template<ExecutePolicy P>
     auto device_obj<PairModel<Derived>>::force(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos) -> VectorND<ScalarType> {
-        forceAsync<PageLockedVector, Executor>(lattice, invLattice, cartesianPos, swapBuffer);
+        forceAsync<PageLockedVector, P>(lattice, invLattice, cartesianPos, swapBuffer);
         CUDAContext::getInstance().wait();
         return swapBuffer;
     }
 
     template<class Derived>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline auto device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) -> VectorND<ScalarType> {
-        return force<Executor>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
+        return force<P>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void device_obj<PairModel<Derived>>::forceAsync(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos,
             ContinuousVector<V>& result) {
-        static_assert(std::is_same<Executor, CUDAExecutor>::value, "[Error]: Incorrect type of executor");
+        static_assert(P == GPU, "[Error]: Incorrect policy");
         dim3 gridDims;
         size_t numThread;
         preParallel(lattice, invLattice, cartesianPos, gridDims, numThread);
@@ -117,19 +117,19 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
-        forceAsync<V, Executor>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
+        forceAsync<V, P>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline auto device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) -> VectorND<ScalarType> {
-        return force<Executor>(cell);
+        return force<P>(cell);
     }
 
     template<class Derived>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline auto device_obj<PairModel<Derived>>::force_long(const MDCellType& cell) const -> VectorND<ScalarType> {
         return VectorND<ScalarType>(cell.getNumParticle() * 3, 0);
     }

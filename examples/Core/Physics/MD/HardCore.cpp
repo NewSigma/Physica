@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     MatrixType record(10000, rpmd.getNumParticle());
     for (size_t i = 0; i < record.getRow(); ++i) {
         ForceModel forceModel{};
-        rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, Sequential>(kineticModel, forceModel);
         record.row(i) = rpmd.getRingPolymer().makeBeadPos(0).col(0);
     }
     const VectorType t = VectorType::linspace(0, record.getRow() * timeStep, record.getRow());

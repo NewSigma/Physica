@@ -21,7 +21,6 @@
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -81,15 +80,15 @@ int main(int argc, char** argv) {
     rpmd.initMomentum<KineticModel, RandomSource>();
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
-    const VectorType energy1 = rpmd.testNVE<KineticModel, ForceModel, ThreadExecutor>(
+    const VectorType energy1 = rpmd.testNVE<KineticModel, ForceModel, Thread>(
             PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
     
     rpmd.setTimeStep(timeStep * 2);
-    const VectorType energy2 = rpmd.testNVE<KineticModel, ForceModel, ThreadExecutor>(
+    const VectorType energy2 = rpmd.testNVE<KineticModel, ForceModel, Thread>(
             PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
 
     rpmd.setTimeStep(timeStep * 5);
-    const VectorType energy5 = rpmd.testNVE<KineticModel, ForceModel, ThreadExecutor>(
+    const VectorType energy5 = rpmd.testNVE<KineticModel, ForceModel, Thread>(
             PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
 
     QApplication app(argc, argv);

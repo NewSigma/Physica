@@ -43,7 +43,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept{ swap(obj); return *this; }
         /* Operations */
-        template<RNG R, class Executor>
+        template<RNG R, ExecutePolicy P>
         void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(This& __restrict obj) noexcept;
         /* Setters */
@@ -55,7 +55,7 @@ namespace Physica {
             : temperatureT(temperatureT_) {}
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<RNG R, class Executor>
+    template<RNG R, ExecutePolicy P>
     void TRPMDThermo<T, Dim, NumReplica>::step(RingPolymerType& ringPolymer, T deltaT) const {
         if constexpr (NumReplica == 1)
             return;
@@ -63,7 +63,7 @@ namespace Physica {
         const T repBeta = ringPolymer.calcRepBeta(temperatureT);
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
-            Executor::parallel_for(
+            parallel_for<P>(
                 [repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
@@ -83,7 +83,7 @@ namespace Physica {
                                 buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                     }
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                }, dof, Executor::getNumThread()).wait_async();
+                }, dof, 0).wait();
         }
     }
 

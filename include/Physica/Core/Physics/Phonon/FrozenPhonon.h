@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Math/Optimization/OptimizationImpl/QuadraticSearch.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "PhononSolver.h"
 
 namespace Physica {
@@ -98,7 +98,7 @@ namespace Physica {
             const T copy = toDisplace;
             toDisplace += displace;
             VectorND<T> forceConst =
-                    model.template force<SeqExecutor>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
+                    model.template force<Sequential>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
             toDisplace = copy;
 
             for (size_t cell = 0; cell < getNumCell(); ++cell) {

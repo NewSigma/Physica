@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 
 namespace Physica {
     /**
@@ -70,7 +70,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] inline T potentialV(const PositionMatrix& pos) const;
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] inline VectorND<T> force_short(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const;
@@ -132,9 +132,9 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    template<class Executor> 
+    template<ExecutePolicy P> 
     inline VectorND<T> RSpaceEwald<T, IsSmallCell>::force_short(const PositionMatrix& pos) const {
-        const VectorND<T> rSpaceSum = Base::template force<SeqExecutor>(lattice, pos);
+        const VectorND<T> rSpaceSum = Base::template force<Sequential>(lattice, pos);
         return rSpaceSum;
     }
     /**

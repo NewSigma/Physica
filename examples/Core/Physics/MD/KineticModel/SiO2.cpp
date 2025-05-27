@@ -25,7 +25,6 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -97,9 +96,9 @@ int main() {
         KineticModel kineticModel(temperatureT, 1);
         ThermoType thermo(temperatureT, thermostatTime, true);
 
-        rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(
+        rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
                 PhyConst<AU>::secondToTime(1E-12), thermo, kineticModel, forceModel);
-        energy[step] = rpmd.calcPotential<ForceModel, SeqExecutor>(forceModel);
+        energy[step] = rpmd.calcPotential<ForceModel, Sequential>(forceModel);
     }
 
     H5File h5f("SiO2.h5", H5File::ReadWrite | H5File::Creat);

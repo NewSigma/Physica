@@ -49,7 +49,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RNG R, class Executor>
+        template<RNG R, ExecutePolicy P>
         void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -74,7 +74,7 @@ namespace Physica {
             , removeDrift(removeDrift_) {}
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<RNG R, class Executor>
+    template<RNG R, ExecutePolicy P>
     void Langevin<T, Dim, NumReplica>::step(RingPolymerType& ringPolymer, T deltaT) const {
         const size_t dof = ringPolymer.getDOF();
         const T repBeta = ringPolymer.calcRepBeta(temperatureT);
@@ -82,7 +82,7 @@ namespace Physica {
         const auto& massVec = ringPolymer.getMassVec();
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
-            Executor::parallel_for(
+            parallel_for<P>(
                 [deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto mass = massVec[i / Dim];
@@ -102,7 +102,7 @@ namespace Physica {
                         langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                     }
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                }, dof, Executor::getNumThread()).wait_async();
+                }, dof, 0).wait();
         }
         else {
             for (size_t i = 0; i < dof; ++i) {

@@ -26,8 +26,8 @@
 
 namespace Physica {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    class HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor> {
-        using This = HardCore<T, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>;
+    class HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU> {
+        using This = HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>;
         static_assert(NumReplica == 1, "[Error]: PIMD is not implemented");
         static_assert(Integrator == RPMDIntegrator::Exact, "[Error]: Cayley integrator not implemented");
         constexpr static unsigned int WarpSize = Physica::CUDADevAttr::WarpSize;

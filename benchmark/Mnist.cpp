@@ -167,7 +167,7 @@ namespace {
 
         auto nn = MnistNet<dfloat>(RandomSource::getInstance());
         for (auto _ : state)
-            nn.train_step<Dataset, RandomSource, SeqExecutor>(BatchSize, dataset);
+            nn.train_step<Dataset, RandomSource, Sequential>(BatchSize, dataset);
     }
 }
 

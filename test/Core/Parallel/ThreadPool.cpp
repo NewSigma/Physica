@@ -17,9 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Parallel/Parallel.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -37,12 +36,12 @@ int main() {
     ThreadPool& pool = ThreadPool::getInstance();
 
     VectorType result_seq(4);
-    SeqExecutor::parallel_for([&](unsigned int i) {
+    parallel_for<Sequential>([&](unsigned int i) {
         result_seq[i] = A.col(i).sum();
     }, 4, 4);
 
     VectorType result_par(4);
-    ThreadExecutor::parallel_for([&](unsigned int i) {
+    parallel_for<Thread>([&](unsigned int i) {
         result_par[i] = A.col(i).sum();
     }, 4, 4).wait();
 

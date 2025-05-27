@@ -18,7 +18,6 @@
  */
 #include <iostream>
 #include <QtWidgets/QApplication>
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 #include "Physica/Core/Math/Calculus/Function/FindRoot/Bisection.h"
 #include "Physica/Gui/Plot/Plot.h"
@@ -176,7 +175,7 @@ int main(int argc, char** argv) {
         assert(length % threadCount == 0);
         assert(taskPerThread % 2 == 0);
         ThreadPool::numThreadRequired = threadCount;
-        ThreadExecutor::parallel_for([&](size_t i) {
+        parallel_for<Thread>([&](size_t i) {
             WaterDropArgs args{startRadius, sigma, rho, 1, g};
             args.radius = startRadius + T(halfTaskPerThread * i * plotStepSize);
             parallelSolve(args, { r_arr

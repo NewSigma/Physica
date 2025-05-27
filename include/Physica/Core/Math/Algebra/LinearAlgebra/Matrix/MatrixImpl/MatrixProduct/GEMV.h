@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 
 namespace Physica {
     template<Matrix M, Vector U>
@@ -45,7 +45,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
+        template<Vector V, ExecutePolicy P = Sequential>
         inline void assign(V& target) const;
 
         [[nodiscard]] inline CoDiff<T> calc(size_t index) const;
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<Matrix M, Vector U>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void GEMV<M, U>::assign(V& target) const {
         if constexpr (isReverseDiff) {
             if constexpr (MatrixOption::isColMatrix<M>()) {

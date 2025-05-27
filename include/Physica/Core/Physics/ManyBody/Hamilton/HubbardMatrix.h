@@ -26,7 +26,7 @@
 namespace Physica {
     template<Scalar, Representation, Vector>
     class HubbardVecProd;
-    class ThreadExecutor;
+    class Thread;
     /**
      * Refer to [1] for applied symmetries
      * 

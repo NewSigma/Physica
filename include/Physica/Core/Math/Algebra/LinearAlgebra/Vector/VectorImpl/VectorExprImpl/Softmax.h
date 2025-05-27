@@ -33,7 +33,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         inline void assign(V1& v) const;
 
         [[nodiscard]] T calc(size_t i) const { return Base::getExpr().softmax(i); }
@@ -56,7 +56,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     inline void VectorExpr<ExprType::Softmax, V>::assign(V1& v) const {
         const auto& expr = Base::getExpr();
         const T factor = expr.lnSumExp();

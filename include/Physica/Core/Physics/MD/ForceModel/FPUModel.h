@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 
 namespace Physica {
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
@@ -36,13 +36,13 @@ namespace Physica {
         /* Operators */
         FPUModel& operator=(FPUModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
-        template<class Executor>
-        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-        template<class Executor>
+        template<ExecutePolicy P>
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
@@ -50,17 +50,17 @@ namespace Physica {
     };
 
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> FPUModel<T, IsPeriodBoundary, Dim>::force(const MDCellType& cell) const {
         VectorND<T> result(cell.getNumParticle());
-        forceAsync<VectorND<T>, Executor>(cell, result);
+        forceAsync<VectorND<T>, P>(cell, result);
         return result;
     }
 
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void FPUModel<T, IsPeriodBoundary, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
-        static_assert(std::is_same<Executor, SeqExecutor>::value, "[Error]: Parallelization not implemented");
+        static_assert(P == Sequential, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         result = T(0);

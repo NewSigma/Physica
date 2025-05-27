@@ -56,7 +56,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RNG R, class Executor>
+    template<class Functor, RNG R, ExecutePolicy P>
     auto Vegas<T, TakeLn>::warmup(Functor func, int numWarm) -> Trv {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
@@ -66,16 +66,16 @@ namespace Physica {
         for (int _ = 0; _ < numWarm; ++_) {
             pre_trial();
             if constexpr (TakeLn)
-                trial_ln<Functor, R, Executor>(func, mean, var);
+                trial_ln<Functor, R, P>(func, mean, var);
             else
-                trial_normal<Functor, R, Executor>(func, mean, var);
-            refineGrid<Executor>();
+                trial_normal<Functor, R, P>(func, mean, var);
+            refineGrid<P>();
         }
         return calcGridLossImpl();
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RNG R, class Executor>
+    template<class Functor, RNG R, ExecutePolicy P>
     void Vegas<T, TakeLn>::integral(Functor func) {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
@@ -85,25 +85,25 @@ namespace Physica {
         for (int refine = 0; refine < numRefine; ++refine) {
             pre_trial();
             if constexpr (TakeLn)
-                trial_ln<Functor, R, Executor>(func, mean, var);
+                trial_ln<Functor, R, P>(func, mean, var);
             else
-                trial_normal<Functor, R, Executor>(func, mean, var);
+                trial_normal<Functor, R, P>(func, mean, var);
             means[refine] = mean;
             vars[refine] = var;
             loss[refine] = calcGridLossImpl();
-            refineGrid<Executor>();
+            refineGrid<P>();
         }
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RNG R, class Executor>
+    template<class Functor, RNG R, ExecutePolicy P>
     auto Vegas<T, TakeLn>::calcGridLoss(Functor func) const -> Trv {
         T mean, var;
         pre_trial();
         if constexpr (TakeLn)
-            trial_ln<Functor, R, Executor>(func, mean, var);
+            trial_ln<Functor, R, P>(func, mean, var);
         else
-            trial_normal<Functor, R, Executor>(func, mean, var);
+            trial_normal<Functor, R, P>(func, mean, var);
         return calcGridLossImpl();
     }
 
@@ -170,9 +170,9 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Executor>
+    template<ExecutePolicy P>
     void Vegas<T, TakeLn>::refineGrid() {
-        Executor::parallel_for([this](size_t dim) {
+        parallel_for<P>([this](size_t dim) {
             const auto meanVar = compress(lossMat.asArray()[dim]);
             const bool noData = meanVar.isZero();
             if (noData) [[unlikely]] // No data in the dimension, usually we should have enough samples to avoid it
@@ -194,7 +194,7 @@ namespace Physica {
             }
             newPoints[i] = oldPoints[i];
             oldPoints = newPoints * mixBeta + oldPoints * (Trv(1) - mixBeta);
-        }, getDim(), Executor::getNumThread()).wait();
+        }, getDim(), 0).wait();
     }
 
     template<Scalar T, bool TakeLn>
@@ -225,12 +225,12 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RNG R, class Executor>
+    template<class Functor, RNG R, ExecutePolicy P>
     void Vegas<T, TakeLn>::trial_normal(Functor func, T& mean, T& var) {
         const int numSample = Base::getNumSample();
         const auto indices = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
-        Executor::parallel_for([&, this](size_t n) {
+        parallel_for<P>([&, this](size_t n) {
             const auto pair = sample<R>(indices.data_ptr(n * getDim()));
             const auto& x = pair.first;
             const auto& deltas = pair.second;
@@ -238,7 +238,7 @@ namespace Physica {
             assert(y.isFinite() && "[Error]: Bad value");
             const T xy = y * (deltas * Trv(getNumPoint())).prod();
             samples[n] = xy;
-        }, numSample, Executor::getNumThread()).wait();
+        }, numSample, 0).wait();
 
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
@@ -254,12 +254,12 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<class Functor, RNG R, class Executor>
+    template<class Functor, RNG R, ExecutePolicy P>
     void Vegas<T, TakeLn>::trial_ln(Functor func, T& mean, T& var) {
         const int numSample = Base::getNumSample();
         const auto indices = R::getInstance().random_int(getDim() * numSample, 0, getNumPoint() - 2);
         VectorND<T> samples(numSample);
-        Executor::parallel_for([&, this](size_t n) {
+        parallel_for<P>([&, this](size_t n) {
             const auto pair = sample<R>(indices.data_ptr(n * getDim()));
             const auto& x = pair.first;
             const auto& deltas = pair.second;
@@ -267,7 +267,7 @@ namespace Physica {
             assert(lny.isFinite() && "[Error]: Bad value");
             const T lnxy = lny + ln(deltas).sum() + Trv(getDim()) * ln(Trv(getNumPoint()));
             samples[n] = lnxy;
-        }, numSample, Executor::getNumThread()).wait();
+        }, numSample, 0).wait();
 
         Tv maxSample;
         if constexpr (T::isComplex)

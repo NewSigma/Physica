@@ -41,7 +41,7 @@ namespace Physica {
         /* Operations */
         template<RNG R,
                  class ForceModel,
-                 class Executor>
+                 ExecutePolicy P>
         void nvt_step(const ForceModel& forceModel);
         void normalizePos() { cell.normalize(); }
         void swap(MonteCarlo& __restrict mc) noexcept;
@@ -62,7 +62,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<RNG R, class ForceModel, class Executor>
+    template<RNG R, class ForceModel, ExecutePolicy P>
     void MonteCarlo<T, Dim>::nvt_step(const ForceModel& forceModel) {
         std::uniform_real_distribution<> uniform_dist{};
 

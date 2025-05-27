@@ -54,7 +54,7 @@ namespace Physica {
     public:
         static int numThreadRequired;
     private:
-        // Larger than any thread ID, main thread is not controled by thread pool
+        // Larger than any thread ID, main thread is not maintained by thread pool
         constexpr static int MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
 
         Array<ThreadData> thread_data;

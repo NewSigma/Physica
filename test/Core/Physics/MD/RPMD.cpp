@@ -21,7 +21,6 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica;
 using RandomSource = Random<MT19937, 3438603950906262893>;
@@ -68,7 +67,7 @@ bool testCalcKinetic(double precision) {
     auto rpmd = makeSystem();
     rpmd.initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(pair_cutoff);
-    rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
+    rpmd.updateForce<ForceModel, Thread>(forceModel);
 
     const ScalarType kinetic1 = rpmd.calcKinetic<KineticModel>();
     ScalarType kinetic2 = 0;
@@ -94,11 +93,11 @@ void testMDRun() {
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
                 PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

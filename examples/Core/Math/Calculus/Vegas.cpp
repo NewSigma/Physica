@@ -20,7 +20,6 @@
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Calculus/Integrate/Vegas.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -48,7 +47,7 @@ void plotCompressRate() {
     const char* names[3]{"0.1", "0.2", "0.5"};
     for (int i = 0; i < 3; ++i) {
         Vegas<T, false> vegas(from, to, 100, 100000, 10, rates[i]);
-        vegas.integral<decltype(func), RandomSource, ThreadExecutor>(func);
+        vegas.integral<decltype(func), RandomSource, Thread>(func);
         VectorND<T> vars = ln(vegas.getLoss());
         plot->line(vars).setName(names[i]);
     }
@@ -73,7 +72,7 @@ void plotNumPoint() {
     const char* names[3]{"10", "100", "1000"};
     for (int i = 0; i < 3; ++i) {
         Vegas<T, false> vegas(from, to, 1000, 100000, points[i], 0.1);
-        vegas.integral<decltype(func), RandomSource, ThreadExecutor>(func);
+        vegas.integral<decltype(func), RandomSource, Thread>(func);
         VectorND<T> vars = ln(vegas.getLoss());
         plot->line(vars).setName(names[i]);
     }
@@ -98,7 +97,7 @@ void plotNumSample() {
     const char* names[2]{"10<sup>4</sup>", "10<sup>5</sup>"};
     for (int i = 0; i < 2; ++i) {
         Vegas<T, false> vegas(from, to, 1000, samples[i], 1000, 0.1);
-        vegas.integral<decltype(func), RandomSource, ThreadExecutor>(func);
+        vegas.integral<decltype(func), RandomSource, Thread>(func);
         VectorND<T> vars = ln(vegas.getLoss());
         plot->line(vars).setName(names[i]);
     }

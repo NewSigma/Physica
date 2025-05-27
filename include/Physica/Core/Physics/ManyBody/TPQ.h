@@ -53,9 +53,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ModelType, class Executor = SeqExecutor>
+        template<class ModelType, ExecutePolicy P = Sequential>
         void pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta);
-        template<class ModelType, class Executor = SeqExecutor>
+        template<class ModelType, ExecutePolicy P = Sequential>
         void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta);
 
         [[nodiscard]] Tr calcPartitionXi() const;
@@ -102,19 +102,19 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class ModelType, class Executor>
+    template<class ModelType, ExecutePolicy P>
     void TPQ<T>::pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta) {
         const Tr factor = deltaBeta * Trv(-0.5);
         const auto& hamiltonH = hamiltonH_.getDerived();
         const auto expr = exp(factor * hamiltonH) * asVector();
         traceMu = expr.calcTraceMu();
-        const auto params = expr.template calcParam<Executor>(traceMu);
+        const auto params = expr.template calcParam<P>(traceMu);
         numMinCostTerm = params.first;
         numSplit = params.second;
     }
 
     template<Scalar T>
-    template<class ModelType, class Executor>
+    template<class ModelType, ExecutePolicy P>
     void TPQ<T>::nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta) {
         if (deltaBeta.isZero())
             return;
@@ -124,9 +124,9 @@ namespace Physica {
         const auto expr = exp(factor * hamiltonH) * asVector();
         BufferType dot(Base::getLength());
         if (isPrepared())
-            expr.template assign<BufferType, Executor>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
+            expr.template assign<BufferType, P>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
         else
-            expr.template assign<BufferType, Executor>(dot);
+            expr.template assign<BufferType, P>(dot);
         Base::swap(dot);
         beta += deltaBeta;
     }

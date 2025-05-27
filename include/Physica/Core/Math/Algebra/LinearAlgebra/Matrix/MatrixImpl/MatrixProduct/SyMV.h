@@ -43,7 +43,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         inline void assign(V1& target) const;
 
         [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order, Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     inline void SyMV<T, Order, V>::assign(V1& target) const {
         const size_t length = getLength();
         assert(length == target.getLength());

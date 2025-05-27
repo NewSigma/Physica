@@ -133,7 +133,7 @@ namespace Physica {
         void reverse(const M1& y, const M2& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] Tr norm1() const;
-        template<class Executor = SeqExecutor>
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] Tr norm1_power(unsigned int maxIteration) const;
         [[nodiscard]] Tr normF() const;
         [[nodiscard]] Tr normInf() const;

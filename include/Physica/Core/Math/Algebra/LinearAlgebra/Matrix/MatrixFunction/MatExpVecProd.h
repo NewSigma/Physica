@@ -59,16 +59,16 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         inline void assign(V1& target) const;
 
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         void assign(V1& target, Tr traceMu, ParamPair params) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         [[nodiscard]] auto calcTraceMu() const { return mexp.calcTraceMu(); }
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] ParamPair calcParam(Tr traceMu) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
@@ -84,14 +84,14 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     inline void MatExpVecProd<M, V>::assign(V1& target) const {
         const Tr traceMu = calcTraceMu();
-        assign<V1, Executor>(target, traceMu, calcParam<Executor>(traceMu));
+        assign<V1, P>(target, traceMu, calcParam<P>(traceMu));
     }
 
     template<Matrix M, Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     void MatExpVecProd<M, V>::assign(V1& target, Tr traceMu, ParamPair params) const {
         using BufferType = DenseVector<ScalarType, std::remove_cvref_t<V>::SizeAtCompile>;
         assert(getLength() == target.getLength());
@@ -110,7 +110,7 @@ namespace Physica {
                 term *= reciprocal(Tr(numSplit * n));
                 {
                     auto expr = mat * term - traceMu * term;
-                    buffer.template operator=<decltype(expr), Executor>(expr);
+                    buffer.template operator=<decltype(expr), P>(expr);
                     buffer.swap(term);
                 }
                 const Tr norm2 = term.normInf();
@@ -124,11 +124,11 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    template<class Executor>
+    template<ExecutePolicy P>
     auto MatExpVecProd<M, V>::calcParam(Tr traceMu) const -> ParamPair {
         constexpr static Tm NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto unit = UnitMatrix<ScalarType>(getLength());
-        const ScalarType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
+        const ScalarType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<P>(MaxNormIteration);
         const bool isSmallNorm = Tm(norm1) <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;
@@ -149,7 +149,7 @@ namespace Physica {
         Trv powerNorms[MaxNormOrder];
         const Tr normalizer = reciprocal(norm1); // pow() has the risk of overflow
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
-            const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<Executor>(MaxNormIteration);
+            const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<P>(MaxNormIteration);
             powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * norm1.value();
         }
 

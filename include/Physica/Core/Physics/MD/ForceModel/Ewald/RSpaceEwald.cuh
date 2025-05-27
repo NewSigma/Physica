@@ -64,7 +64,7 @@ namespace Physica {
         /* Operator */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] inline VectorND<T> force_short(const PositionMatrix& pos);
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos);
@@ -109,11 +109,11 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline VectorND<T> device_obj<RSpaceEwald<T, IsSmallCell>>::force_short(const PositionMatrix& pos) {
-        static_assert(std::is_same<Executor, CUDAExecutor>::value, "[Error]: Invalid executor");
+        static_assert(P == GPU, "[Error]: Incorrect policy");
         static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");
-        const VectorND<T> rSpaceSum = Base::template force<CUDAExecutor>(lattice.toHost(), invLatt, pos);
+        const VectorND<T> rSpaceSum = Base::template force<GPU>(lattice.toHost(), invLatt, pos);
         return rSpaceSum;
     }
 

@@ -119,7 +119,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
+        template<Vector V, ExecutePolicy P = Sequential>
         inline void assign(V& v) const;
 
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
@@ -154,21 +154,21 @@ namespace Physica {
     };
 
     template<Vector V1, Vector V2>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void VectorExpr<ExprType::Sub, V1, V2>::assign(V& v) const {
         constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
         constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {
-            getLHS().template assign<V, Executor>(v);
+            getLHS().template assign<V, P>(v);
             v -= getRHS();
         }
         else if constexpr (FastAssign2) {
             static_assert(Traits<decltype(-getRHS())>::FastAssign, "[Debug]: Fast minus implementation is missing");
-            (-getRHS()).template assign<V, Executor>(v);
+            (-getRHS()).template assign<V, P>(v);
             v += getLHS();
         }
         else
-            Base::template assign<V, Executor>(v);
+            Base::template assign<V, P>(v);
     }
 
     template<Vector T, Scalar U>

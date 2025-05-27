@@ -43,9 +43,9 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] Tv potentialV(const MDCellType& cell) const;
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<Tv> force(const MDCellType& cell) const;
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */

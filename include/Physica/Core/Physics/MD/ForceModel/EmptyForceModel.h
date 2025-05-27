@@ -46,13 +46,13 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T potentialV([[maybe_unused]] const MDCellType& cell) const { return 0; }
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const;
-        template<class Executor>
-        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-        template<class Executor>
+        template<ExecutePolicy P>
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
 
         [[nodiscard]] T forceConst([[maybe_unused]] const MDCellType& cell, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return T(0); }
@@ -62,7 +62,7 @@ namespace Physica {
     };
 
     template<Scalar T, unsigned int Dim>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void EmptyForceModel<T, Dim>::forceAsync(
             [[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const {
         assert(result.getLength() == cell.getDOF() && "[Error]: Array length does not match");

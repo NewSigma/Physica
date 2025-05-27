@@ -21,7 +21,7 @@
 #include "Physica/CRTPBase.h"
 #include "Physica/Core/Scalar/Complex.h" // IWYU pragma: export
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVectorImpl/RVectorBlock.h"
 
 namespace Physica {
@@ -111,9 +111,9 @@ namespace Physica {
     public:
         ~RValueVector() = default;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
+        template<Vector V, ExecutePolicy P = Sequential>
         inline void assign(V& v) const;
-        template<Vector V, class Executor = SeqExecutor>
+        template<Vector V, ExecutePolicy P = Sequential>
         inline void assign_add(V& v) const;
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
@@ -205,12 +205,12 @@ namespace Physica {
         template<int GradOrder>
         auto grads_impl() const noexcept;
     private:
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         inline void assign_for(V& v) const;
-        template<Vector V, class Executor, size_t Size>
+        template<Vector V, ExecutePolicy P, size_t Size>
         inline void assign_simd(V& v) const;
 
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         inline void assign_add_for(V& v) const;
         template<Vector V, size_t Size>
         inline void assign_add_simd(V& v) const;

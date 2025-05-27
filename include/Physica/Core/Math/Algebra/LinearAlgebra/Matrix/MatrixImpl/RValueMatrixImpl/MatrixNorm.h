@@ -44,7 +44,7 @@ namespace Physica {
      * [1] SIAM J. Sci. Stat. Comput. 11, 804–809 (1990); https://doi.org/10.1137/0911047
      */
     template<class Derived>
-    template<class Executor>
+    template<ExecutePolicy P>
     auto RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const -> Tr {
         assert(getRow() == getCol() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
@@ -60,10 +60,10 @@ namespace Physica {
         size_t lastIndex = 0;
         size_t index = 0;
         while (iteration < maxIteration) {
-            y.template operator=<decltype(m * x), Executor>(m * x);
+            y.template operator=<decltype(m * x), P>(m * x);
 
             using MatVecDot = decltype(m.hermite() * unit(y));
-            z.template operator=<MatVecDot, Executor>(m.hermite() * unit(y));
+            z.template operator=<MatVecDot, P>(m.hermite() * unit(y));
             const Trv criteria = iteration == 0 ? (z.reals().sum().value() * factor) : z[index].real().value();
             const bool isConverged = z.values().normInf() <= criteria * Trv(std::numeric_limits<T>::epsilon() + 1);
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1

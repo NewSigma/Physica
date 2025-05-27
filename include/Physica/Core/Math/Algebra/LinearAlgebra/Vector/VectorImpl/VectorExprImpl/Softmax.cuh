@@ -33,7 +33,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         __host__ __device__ inline void assign(V1& v) const;
 
         [[nodiscard]] __device__ T calc(size_t i) const { return Base::getExpr().softmax(i); }
@@ -53,7 +53,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     __host__ __device__ inline void device_obj<VectorExpr<ExprType::Softmax, V>>::assign(V1& v) const {
         if constexpr (IsHost())
             Base::assign(v);

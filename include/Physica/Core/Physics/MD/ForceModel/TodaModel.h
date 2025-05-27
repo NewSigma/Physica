@@ -42,13 +42,13 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
-        template<class Executor>
-        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-        template<class Executor>
+        template<ExecutePolicy P>
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         
         [[nodiscard]] T forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
@@ -88,16 +88,16 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> TodaModel<T, IsPeriodBoundary>::force(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         VectorND<T> result(numParticle);
-        forceAsync<VectorND<T>, Executor>(cell, result);
+        forceAsync<VectorND<T>, P>(cell, result);
         return result;
     }
 
     template<Scalar T, bool IsPeriodBoundary>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void TodaModel<T, IsPeriodBoundary>::forceAsync(
             const MDCellType& cell, ContinuousVector<V>& result) const {
         const size_t numParticle = cell.getNumParticle();

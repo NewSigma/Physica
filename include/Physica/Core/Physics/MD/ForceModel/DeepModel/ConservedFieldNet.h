@@ -38,7 +38,7 @@ namespace Physica {
         ConservedFieldNet(const ConservedFieldNet&) = delete;
         ~ConservedFieldNet() = default;
         /* Operations */
-        template<class Dataset, class Optimizer, class RandomSource, class Executor>
+        template<class Dataset, class Optimizer, class RandomSource, ExecutePolicy P>
         void train_step(const Dataset& dataset, Optimizer& opt);
 
         template<class Dataset>

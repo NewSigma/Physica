@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 
 using namespace Physica;
 using namespace Physica;
@@ -81,7 +81,7 @@ int main() {
         ScalarType temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
             ForceModel forceModel{};
-            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, SeqExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(thermo, kineticModel, forceModel);
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);

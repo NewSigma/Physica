@@ -23,7 +23,6 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/LJModel1.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -104,7 +103,7 @@ int main(int argc, char** argv) {
         ThreadPool::numThreadRequired = 4;
         std::mutex mutex{};
         size_t sys = 0;
-        ThreadExecutor::parallel_for([&](unsigned int) {
+        parallel_for<Thread>([&](unsigned int) {
             auto rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
             rpmd.initMomentum<KineticModel, RandomSource>();
 
@@ -116,12 +115,12 @@ int main(int argc, char** argv) {
             Correlation<ScalarType> sampler(numStep);
             VectorType corr_dir_sample(numStep, 0);
             for (size_t sample = 0; sample < numSample; ++sample) {
-                rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, SeqExecutor>(
+                rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(
                         PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
                 const ScalarType p0 = ringPolymer.makeCentroidMomentum()(0, 0);
                 for (unsigned int step = 0; step < numStep; ++step) {
                     const ScalarType p1 = ringPolymer.makeCentroidMomentum()(0, 0);
-                    rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, SeqExecutor>(
+                    rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(
                             thermo, kineticModel, forceModel);
                     sampler.sample(p1);
                     toNextMean(corr_dir_sample[step], sample, p0 * p1);

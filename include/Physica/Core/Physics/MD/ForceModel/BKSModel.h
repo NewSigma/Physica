@@ -75,11 +75,11 @@ namespace Physica {
 
         [[nodiscard]] inline T potentialV(const MDCellType& cell) const;
 
-        template<class Executor> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
-        template<Vector V, class Executor>
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
+        template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
-        template<class Executor> [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const;
-        template<class Executor> [[nodiscard]] inline VectorND<T> force_long(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const;
+        template<ExecutePolicy P> [[nodiscard]] inline VectorND<T> force_long(const MDCellType& cell);
 
         [[nodiscard]] inline LatticeMatrix virial(const MDCellType& cell);
         void swap(BKSModel& __restrict obj) noexcept;
@@ -160,37 +160,37 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force(const MDCellType& cell) {
         VectorND<T> result;
-        forceAsync<VectorND<T>, Executor>(cell, result);
+        forceAsync<VectorND<T>, P>(cell, result);
         return result;
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void BKSModel<T, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
-        static_assert(!Traits<Executor>::UseCUDA, "[Error]: CUDA is not supported");
+        static_assert(P != GPU, "[Error]: CUDA is not supported");
         assert(cell.getNumParticle() % 3 == 0);
-        auto task = Executor::schedule([this, &cell, &result]() {
-            result = force_short<Executor>(cell);
+        auto task = schedule<P>([this, &cell, &result]() {
+            result = force_short<P>(cell);
         });
 
-        const VectorND<T> coulomb = force_long<Executor>(cell);
-        task.wait_async();
+        const VectorND<T> coulomb = force_long<P>(cell);
+        task.wait();
         result += coulomb;
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force_short(const MDCellType& cell) const {
-        return Base::template force_short<Executor>(cell);
+        return Base::template force_short<P>(cell);
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force_long(const MDCellType& cell) {
-        return ewald.template force<Executor>(cell.getPos());
+        return ewald.template force<P>(cell.getPos());
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>

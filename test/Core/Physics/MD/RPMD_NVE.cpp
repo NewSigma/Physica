@@ -20,7 +20,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
@@ -69,7 +69,7 @@ int main() {
         kineticModel.updateMass(rpmd.getRingPolymer());
         ForceModel forceModel{};
         for (size_t i = 0; i < nve.getLength(); ++i) {
-            rpmd.nve_step<KineticModel, ForceModel, SeqExecutor>(kineticModel, forceModel);
+            rpmd.nve_step<KineticModel, ForceModel, Sequential>(kineticModel, forceModel);
             nve[i] = (rpmd.calcClassicalInternalEnergy(forceModel)) / ScalarType(numMolecular * numReplica);
         }
     }

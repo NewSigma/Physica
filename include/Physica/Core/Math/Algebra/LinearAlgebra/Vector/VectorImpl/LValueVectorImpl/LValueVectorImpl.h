@@ -32,13 +32,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline Derived& LValueVector<Derived>::operator=(const V& v) requires(!CUDA<V>) {
         if constexpr (std::is_same<Derived, V>::value)
             assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
         x.resize(v.getLength());
-        v.template assign<Derived, Executor>(x);
+        v.template assign<Derived, P>(x);
         return x;
     }
 

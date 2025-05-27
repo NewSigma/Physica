@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,68 +18,42 @@
  */
 #pragma once
 
-#include "Task.h"
+#include "Physica/Macro.h"
 
 namespace Physica {
-    template<ParallelPolicy P>
+    enum ExecutePolicy {
+        Sequential,
+        Concurrent,
+        Thread,
+        GPU
+    };
+    /**
+     * \class Task maintains lifetime of async tasks
+     */
+    template<ExecutePolicy P>
+    class [[nodiscard]] Task;
+
+    template<ExecutePolicy P>
     [[nodiscard]] Task<P> schedule(auto func) noexcept {
+        static_assert(P != Concurrent, "[Error]: Not support");
         func();
         co_return;
     }
 
-    template<ParallelPolicy P>
-    [[nodiscard]] Task<> parallel_for(auto func, size_t num_loop) {
-        assert(num_loop > 0);
-        if constexpr (P == Concurrent) {
-            for (size_t i = 0; i < num_loop; ++i)
-                func(i);
-            co_return;
-        }
-        else {
-            Array<Task<Thread>> tasks(num_loop);
-            for (size_t i = 0; i < num_loop; ++i) {
-                tasks[i] = [](auto func, size_t i) noexcept -> Task<Thread> {
-                    func(i);
-                    co_return;
-                }(func, i);
-            }
-
-            co_await std::suspend_always{};
-            for (auto& task : tasks)
-                task.wait();
-        }
+    template<ExecutePolicy P>
+    void parallel_for(auto func, size_t num_loop) noexcept {
+        static_assert(P == Sequential, "[Error]: Not implemented");
     }
 
-    template<ParallelPolicy P>
-    [[nodiscard]] Task<> parallel_for(auto func, size_t num_loop, int part) {
-        assert(part > 0 && "[Error]: part must be a positive int");
-        if constexpr (P == Concurrent) {
-            for (size_t i = 0; i < num_loop; ++i)
-                func(i);
-            co_return;
-        }
-        else {
-            using Range = std::pair<unsigned int, unsigned int>;
-            static auto splitJob = [](size_t num_loop, int part, int i) {
-                assert(0 <= i && i < part);
-                const size_t maxLoopPerCore = (num_loop + part - 1) / part;
-                const size_t from = i * maxLoopPerCore; 
-                const size_t to = std::min(from + maxLoopPerCore, num_loop);
-                return std::make_pair(from, to);
-            };
-
-            Array<Task<Thread>> tasks(part);
-            for (int i = 0; i < part; ++i) {
-                tasks[i] = [](auto func, Range range) noexcept -> Task<Thread> {
-                    for (size_t loop = range.first; loop < range.second; ++loop)
-                        func(loop);
-                    co_return;
-                }(func, splitJob(num_loop, part, i));
-            }
-
-            co_await std::suspend_always{};
-            for (auto& task : tasks)
-                task.wait();
-        }
+    template<ExecutePolicy P>
+    void parallel_for(auto func, size_t num_loop, int part) noexcept {
+        static_assert(P == Sequential, "[Error]: Not implemented");
     }
 }
+
+#include "Task/Sequential.h"
+#include "Task/Concurrent.h"
+#include "Task/Thread.h"
+#ifdef PHYSICA_CUDA
+    #include "Task/GPU.cuh"
+#endif

@@ -63,17 +63,17 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> potentialV(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         [[nodiscard]] inline CoDiff<T> potentialV(const MDCellType& cell) const;
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] inline VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const;
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
-        template<class Executor>
-        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-        template<class Executor>
+        template<ExecutePolicy P>
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getNumParticle() * 3, 0); }
 
         [[nodiscard]] CoDiff<T> forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
@@ -156,23 +156,23 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<typename PairModel<Derived>::T> PairModel<Derived>::force(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
         const size_t DOF = cartesianPos.getRow() * cartesianPos.getCol();
         VectorND<T> result(DOF);
-        forceAsync<VectorND<T>, Executor>(lattice, cartesianPos, result);
+        forceAsync<VectorND<T>, P>(lattice, cartesianPos, result);
         return result;
     }
 
     template<class Derived>
-    template<class Executor>
+    template<ExecutePolicy P>
     inline VectorND<typename PairModel<Derived>::T> PairModel<Derived>::force(const MDCellType& cell) const {
-        return force<Executor>(cell.getLattice(), cell.getPos());
+        return force<P>(cell.getLattice(), cell.getPos());
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void PairModel<Derived>::forceAsync(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const {
         result = T(0);
@@ -188,9 +188,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
-        forceAsync<V, Executor>(cell.getLattice(), cell.getPos(), result);
+        forceAsync<V, P>(cell.getLattice(), cell.getPos(), result);
     }
 
     template<class Derived>

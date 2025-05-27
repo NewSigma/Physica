@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
         acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
 
-        nn.train_step_for<Dataset, RandomSource, SeqExecutor>(stepPerEpoch, BatchSize, dataset.first);
+        nn.train_step_for<Dataset, RandomSource, Sequential>(stepPerEpoch, BatchSize, dataset.first);
     }
 
     QApplication app(argc, argv);

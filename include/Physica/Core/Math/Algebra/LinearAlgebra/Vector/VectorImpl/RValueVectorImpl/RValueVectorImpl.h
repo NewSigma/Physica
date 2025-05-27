@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void RValueVector<Derived>::assign(V& v) const {
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
@@ -31,14 +31,14 @@ namespace Physica {
         assert(getLength() == v.getLength() && "[Error]: Size mismatch between two vector");
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
             constexpr static size_t Size = Size1 > Size2 ? Size1 : Size2;
-            assign_simd<V, Executor, Size>(v);
+            assign_simd<V, P, Size>(v);
         }
         else
-            assign_for<V, Executor>(v);
+            assign_for<V, P>(v);
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void RValueVector<Derived>::assign_add(V& v) const {
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
@@ -50,7 +50,7 @@ namespace Physica {
             assign_add_simd<V, Size>(v);
         }
         else
-            assign_add_for<V, Executor>(v);
+            assign_add_for<V, P>(v);
     }
 
     template<class Derived>
@@ -622,18 +622,18 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void RValueVector<Derived>::assign_for(V& v) const {
-        Executor::parallel_for([&, this](size_t i) {
+        parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] = calc_value(i);
             else
                 v[i] = calc(i);
-        }, getLength(), Executor::getNumThread()).wait();
+        }, getLength(), 0).wait();
     }
 
     template<class Derived>
-    template<Vector V, class Executor, size_t Size>
+    template<Vector V, ExecutePolicy P, size_t Size>
     inline void RValueVector<Derived>::assign_simd(V& v) const {
         using Pack = BestPacket<typename V::ScalarType, Size>::Type;
         constexpr static size_t PacketSize = Pack::size();
@@ -655,7 +655,7 @@ namespace Physica {
                 return;
 
             const size_t to = length / PacketSize * PacketSize;
-            if constexpr (std::is_same<Executor, SeqExecutor>::value) {
+            if constexpr (P == Sequential) {
                 size_t i = 0;
                 for (; i < to; i += PacketSize)
                     v.writePacket(i, v0.template packet<Pack>(i));
@@ -667,10 +667,10 @@ namespace Physica {
             }
             else {
                 const size_t numLoop = to / PacketSize;
-                auto future = Executor::parallel_for([&, this](size_t i) {
+                auto future = parallel_for<P>([&, this](size_t i) {
                     const size_t i1 = i * PacketSize;
                     v.writePacket(i1, v0.template packet<Pack>(i1));
-                }, numLoop, Executor::getNumThread());
+                }, numLoop, 0);
 
                 if (to != length) {
                     const size_t count = length % PacketSize;
@@ -682,14 +682,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void RValueVector<Derived>::assign_add_for(V& v) const {
-        Executor::parallel_for([&, this](size_t i) {
+        parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] += calc_value(i);
             else
                 v[i] += calc(i);
-        }, getLength(), Executor::getNumThread()).wait();
+        }, getLength(), 0).wait();
     }
 
     template<class Derived>

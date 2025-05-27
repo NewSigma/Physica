@@ -43,13 +43,13 @@ namespace Physica {
         /* Operators */
         QEModel& operator=(QEModel obj) noexcept;
         /* Operations */
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept;
-        template<class Executor>
-        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
-        template<class Executor>
+        template<ExecutePolicy P>
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         void swap(QEModel& __restrict obj) noexcept;
         /* Getters */
@@ -76,15 +76,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class Executor>
+    template<ExecutePolicy P>
     VectorND<T> QEModel<T>::force(const MDCellType& cell) const {
         VectorND<T> result(cell.getNumParticle());
-        forceAsync<VectorND<T>, Executor>(cell, result);
+        forceAsync<VectorND<T>, P>(cell, result);
         return result;
     }
 
     template<Scalar T>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     void QEModel<T>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept {
         assert(cell.getNumParticle() == getNumParticle());
         try {

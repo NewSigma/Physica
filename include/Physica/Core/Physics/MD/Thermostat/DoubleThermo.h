@@ -52,7 +52,7 @@ namespace Physica {
         /* Operators */
         This& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RNG R, class Executor>
+        template<RNG R, ExecutePolicy P>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(This& __restrict obj) noexcept;
         /* Setters */
@@ -69,7 +69,7 @@ namespace Physica {
             , thermostatTime(thermostatTime_) {}
 
     template<class KineticModel>
-    template<RNG R, class Executor>
+    template<RNG R, ExecutePolicy P>
     void DoubleThermo<KineticModel>::step(
             RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
@@ -77,7 +77,7 @@ namespace Physica {
         if constexpr (NumReplica != 1) {
             const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
-            Executor::parallel_for(
+            parallel_for<P>(
                 [factor_translational, repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
@@ -100,7 +100,7 @@ namespace Physica {
                                 buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                     }
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                }, dof, Executor::getNumThread()).wait_async();
+                }, dof, 0).wait();
         }
         else {
             for (size_t i = 0; i < dof; ++i) {

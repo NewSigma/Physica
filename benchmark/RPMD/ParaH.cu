@@ -21,7 +21,6 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
@@ -60,7 +59,7 @@ static void bench(benchmark::State& state) {
     rpmd.initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(numMolecular, pair_cutoff);
     for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, CUDAExecutor>(kineticModel, forceModel);
+        rpmd.nve_step<KineticModel, ForceModel, GPU>(kineticModel, forceModel);
 }
 
 BENCHMARK(bench)->Name("ParaH cuda")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);

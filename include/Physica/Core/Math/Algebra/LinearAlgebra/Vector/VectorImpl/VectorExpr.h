@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include "Physica/Core/Scalar/ExprType.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVector.h"
 
 namespace Physica {

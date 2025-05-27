@@ -23,7 +23,6 @@
 #include "Physica/Core/ML/NeuralNetwork/SeqNet.h"
 #include "Physica/Core/ML/Optimizer/SGD.h"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Scalar/Diff.h"
 #include "Physica/Gui/Plot/Plot.h"
 
@@ -172,7 +171,7 @@ int main(int argc, char** argv) {
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
         acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
 
-        nn.train_step_for<Dataset, RandomSource, SeqExecutor>(stepPerEpoch, BatchSize, dataset.first);
+        nn.train_step_for<Dataset, RandomSource, Sequential>(stepPerEpoch, BatchSize, dataset.first);
     }
 
     QApplication app(argc, argv);

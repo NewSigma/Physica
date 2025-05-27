@@ -27,7 +27,6 @@
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -74,9 +73,9 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
     for (size_t sys = 0; sys < numSystem; ++sys) {
         ScalarType temp = 0;
         for (size_t i = 0; i < numStep; ++i) {
-            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, SeqExecutor>(
+            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(
                     thermo, kineticModel, forceModel);
-            toNextMean(temp, i, rpmd.makeStressClassical<ForceModel, SeqExecutor>(forceModel)(0, 0));
+            toNextMean(temp, i, rpmd.makeStressClassical<ForceModel, Sequential>(forceModel)(0, 0));
         }
         toNextVariance(variance, mean, sys, temp);
     }
@@ -85,7 +84,7 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
 
 Plot& plotPress(const VectorType& lattices, const VectorType& density) {
     VectorType meanPress(lattices.getLength()), deviaPress(lattices.getLength());
-    ThreadExecutor::parallel_for([&meanPress, &deviaPress, &lattices](unsigned int i) {
+    parallel_for<Thread>([&meanPress, &deviaPress, &lattices](unsigned int i) {
         auto pair = calcPress(8, 100000, lattices[i]);
         meanPress[i] = pair.first;
         deviaPress[i] = pair.second;
@@ -114,7 +113,7 @@ Plot& plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density)
     VectorType deltaFreeEnergy(lattices.getLength());
     {
         deltaFreeEnergy[lattices.getLength() - 1] = 0;
-        ThreadExecutor::parallel_for([&deltaFreeEnergy, &density](unsigned int i) {
+        parallel_for<Thread>([&deltaFreeEnergy, &density](unsigned int i) {
             Integrate<IntegrateMethod::Simpson, ScalarType, 1> simpson({{density[i + 1]}, {density[i]}}, 0.0001);
             deltaFreeEnergy[i] = simpson.solve([&](ScalarType rho) -> ScalarType {
                 const ScalarType numParticle = numMolecular;

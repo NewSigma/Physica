@@ -73,7 +73,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V, class Executor = SeqExecutor>
+        template<Vector V, ExecutePolicy P = Sequential>
         inline void assign(V& v) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const {
@@ -104,20 +104,20 @@ namespace Physica {
     };
 
     template<Vector V1, Vector V2>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     inline void VectorExpr<ExprType::Add, V1, V2>::assign(V& v) const {
         constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
         constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {
-            getLHS().template assign<V, Executor>(v);
+            getLHS().template assign<V, P>(v);
             v += getRHS();
         }
         else if constexpr (FastAssign2) {
-                getRHS().template assign<V, Executor>(v);
+                getRHS().template assign<V, P>(v);
                 v += getLHS();
         }
         else
-            Base::template assign<V, Executor>(v);
+            Base::template assign<V, P>(v);
     }
 
     template<Vector V1, Vector V2>

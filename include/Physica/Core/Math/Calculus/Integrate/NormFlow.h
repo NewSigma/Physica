@@ -19,8 +19,7 @@
 #pragma once
 
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
-#include "Physica/Core/Parallel/Executor/SeqExecutor.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "IntegrateImpl/AdaptiveBase.h"
 
 namespace Physica {
@@ -61,22 +60,22 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<DNN Net, RNG R, class Executor = SeqExecutor>
+        template<DNN Net, RNG R, ExecutePolicy P = Sequential>
         Trv warmup(Net& nn, int numWarm);
-        template<DNN Net, RNG R, class Executor = SeqExecutor>
+        template<DNN Net, RNG R, ExecutePolicy P = Sequential>
         void integral(Net& nn);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::getDim;
     private:
-        template<DNN Net, RNG R, class Executor>
+        template<DNN Net, RNG R, ExecutePolicy P>
         Trv trial_normal(Net& nn, IntegT& mean, IntegT& var);
-        template<DNN Net, RNG R, class Executor>
+        template<DNN Net, RNG R, ExecutePolicy P>
         Trv trial_ln(Net& nn, IntegT& mean, IntegT& var);
 
         Trv calcLoss_normal(IntegT y, const CoDiff<TrainT>& lnJ);
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         Trv calcLoss_ln(const V& samples, const VectorND<TrainT>& lnJv);
     };
 
@@ -90,7 +89,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RNG R, class Executor>
+    template<DNN Net, RNG R, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::warmup(Net& nn, int numWarm) -> Trv {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
@@ -100,9 +99,9 @@ namespace Physica {
         for (int _ = 0; _ < numWarm; ++_) {
             IntegT mean = 0, var = 0;
             if constexpr (TakeLn)
-                result = trial_ln<Net, R, Executor>(nn, mean, var);
+                result = trial_ln<Net, R, P>(nn, mean, var);
             else
-                result = trial_normal<Net, R, Executor>(nn, mean, var);
+                result = trial_normal<Net, R, P>(nn, mean, var);
 
             nn.step();
             nn.zero_grad();
@@ -111,7 +110,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RNG R, class Executor>
+    template<DNN Net, RNG R, ExecutePolicy P>
     void NormFlow<T, TakeLn>::integral(Net& nn) {
         using CallResult = std::invoke_result<Net, VectorND<Trv>>::type;
         static_assert(Scalar<CallResult>, "[Error]: Integrand should embed into network");
@@ -121,9 +120,9 @@ namespace Physica {
         IntegT mean = 0, var = 0;
         for (int refine = 0; refine < numRefine; ++refine) {
             if constexpr (TakeLn)
-                loss[refine] = trial_ln<Net, R, Executor>(nn, mean, var);
+                loss[refine] = trial_ln<Net, R, P>(nn, mean, var);
             else
-                loss[refine] = trial_normal<Net, R, Executor>(nn, mean, var);
+                loss[refine] = trial_normal<Net, R, P>(nn, mean, var);
             means[refine] = mean;
             vars[refine] = var;
 
@@ -141,14 +140,14 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RNG R, class Executor>
+    template<DNN Net, RNG R, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::trial_normal(Net& nn, IntegT& mean, IntegT& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
 
         VectorND<Trv> x(getDim());
         Trv loss = 0;
-        if constexpr (std::same_as<SeqExecutor, Executor>) {
+        if constexpr (P == Sequential) {
             for (int i = 0; i < numSample; ++i) {
                 x.template random_uniform<R>();
                 const auto lnJ = nn.forward(x);
@@ -161,14 +160,15 @@ namespace Physica {
             loss /= Trv(numSample);
         }
         else {
-            static_assert(std::same_as<ThreadExecutor, Executor>, "[Error]: Unsupported executor");
-            const int numThread = Executor::getNumThread();
+            static_assert(P == Thread, "[Error]: Unsupported executor");
+            const int numThread = ThreadPool::getInstance().getNumThreads();
             Array<Net> nets(numThread, nn);
 
             VectorND<IntegT> samples(numSample);
             VectorND<Trv> losses(numThread, 0);
-            Executor::parallel_for([&, this](size_t i) {
-                const int tid = Executor::getThreadID();
+            parallel_for<P>([&, this](size_t i) {
+                // TODO: Use a chained wait to avoid tid use
+                const int tid = ThreadPool::getInstance().getThreadID();
                 auto x = VectorND<Trv>::template random_uniform<R>(getDim());
                 const auto lnJ = nets[tid].forward(x);
                 x = from + hadamard(coeff, x);
@@ -176,10 +176,10 @@ namespace Physica {
                 samples[i] = y * exp(lnJ.value());
                 losses[tid] += calcLoss_normal(y, lnJ);
             }, numSample, numThread).wait();
-            loss = losses.mean();
 
             for (auto& net : nets)
                 nn.reverse(net);
+            loss = losses.mean();
             mean = samples.mean();
             var = samples.variance();
         }
@@ -190,7 +190,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<DNN Net, RNG R, class Executor>
+    template<DNN Net, RNG R, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::trial_ln(Net& nn, IntegT& mean, IntegT& var) -> Trv {
         const int numSample = Base::getNumSample();
         const VectorND<Trv> coeff = to - from;
@@ -198,7 +198,7 @@ namespace Physica {
 
         VectorND<IntegT> samples(numSample);
         Trv loss = 0;
-        if constexpr (std::same_as<CUDAExecutor, Executor>) {
+        if constexpr (P == GPU) {
             const auto from_d = from.toDeviceAsync();
             const auto coeff_d = coeff.toDeviceAsync();
             const int numBatch = numSample / batchsize;
@@ -218,7 +218,7 @@ namespace Physica {
                 else
                     seg = nn(x);
 
-                loss = calcLoss_ln<decltype(seg), Executor>(seg, lnJv);
+                loss = calcLoss_ln<decltype(seg), P>(seg, lnJv);
                 if constexpr (ReverseDiff<T>)
                     lnJs.reverse(lnJv.grads().toDeviceAsync());
                 seg += lnJv.values() + lnVolume;
@@ -228,7 +228,7 @@ namespace Physica {
             Array<CoDiff<T>> lnJs(numSample);
             VectorND<T> lnJv(batchsize);
             Array<Net> nets;
-            if constexpr (std::same_as<SeqExecutor, Executor>) {
+            if constexpr (P == Sequential) {
                 VectorND<Trv> x(getDim());
                 for (int i = 0; i < numSample; ++i) {
                     x.template random_uniform<R>();
@@ -239,31 +239,30 @@ namespace Physica {
                 }
             }
             else {
-                static_assert(std::same_as<ThreadExecutor, Executor>, "[Error]: Unsupported executor");
-                const int numThread = Executor::getNumThread();
+                static_assert(P == Thread, "[Error]: Unsupported executor");
+                const int numThread = ThreadPool::getInstance().getNumThreads();
                 nets.resize(numThread, nn);
-                Executor::parallel_for([&, this](size_t i) {
-                    const int tid = Executor::getThreadID();
+                parallel_for<P>([&, this](size_t i) {
+                    // TODO: Use a chained wait to avoid tid use
+                    const int tid = ThreadPool::getInstance().getThreadID();
                     auto x = VectorND<Trv>::template random_uniform<R>(getDim());
                     lnJs[i] = nets[tid].forward(x);
                     lnJv[i] = lnJs[i].value();
                     x = from + hadamard(coeff, x);
                     samples[i] = nn(x);
                 }, numSample, numThread).wait();
+
+                for (auto& net : nets)
+                    nn.reverse(net);
             }
 
-            loss = calcLoss_ln<Executor>(samples, lnJv);
-            auto futures = Executor::parallel_for([&, lnVolume](size_t i) {
+            loss = calcLoss_ln<P>(samples, lnJv);
+            parallel_for<P>([&, lnVolume](size_t i) {
                 auto& lnJ = lnJs[i];
                 samples[i] += lnJ.value() + lnVolume;
                 if constexpr (ReverseDiff<T>)
                     lnJ.reverse_final(lnJv[i].grad());
-            }, numSample, Executor::getNumThread());
-            futures.wait();
-
-            if constexpr (!std::same_as<SeqExecutor, Executor>)
-                for (auto& net : nets)
-                    nn.reverse(net);
+            }, numSample, 0).wait();
         }
 
         Tv maxSample;
@@ -287,7 +286,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<Vector V, class Executor>
+    template<Vector V, ExecutePolicy P>
     auto NormFlow<T, TakeLn>::calcLoss_ln(const V& samples, const VectorND<TrainT>& lnJv) -> Trv {
         const size_t size = samples.getLength();
         const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(size));

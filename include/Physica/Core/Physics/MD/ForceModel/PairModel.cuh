@@ -69,25 +69,25 @@ namespace Physica {
 
         [[nodiscard]] T potentialV(const MDCellType& hostCell) const;
 
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos);
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] inline VectorND<T> force(const MDCellType& hostCell);
 
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         void forceAsync(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos,
                 ContinuousVector<V>& result);
-        template<Vector V, class Executor>
+        template<Vector V, ExecutePolicy P>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] inline VectorND<T> force_short(const MDCellType& cell);
-        template<class Executor>
+        template<ExecutePolicy P>
         [[nodiscard]] inline VectorND<T> force_long(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(

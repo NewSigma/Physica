@@ -51,7 +51,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V1, class Executor = SeqExecutor>
+        template<Vector V1, ExecutePolicy P = Sequential>
         inline void assign(V1& target) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const;
@@ -75,17 +75,19 @@ namespace Physica {
     }
 
     template<Scalar T0, Representation U, Vector V>
-    template<Vector V1, class Executor>
+    template<Vector V1, ExecutePolicy P>
     inline void HubbardVecProd<T0, U, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = Tr(0);
-        if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
+        if constexpr (P == Thread) {
             std::mutex mutex{};
-            Executor::parallel_for([&](unsigned int thread) {
+            parallel_for<P>([&](unsigned int thread) {
+                const int numThread = ThreadPool::getInstance().getNumThreads();
                 const size_t length = getLength();
                 VectorND<ScalarType> local(length, 0);
                 SparseVector<ScalarType> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
-                const auto range = Executor::splitJob(length, Executor::getNumThread(), thread);
+
+                const auto range = Task<Thread>::splitJob(length, numThread, thread);
                 for (unsigned int i = range.first; i < range.second; ++i) {
                     mat.dotImpl(buffer, vec.calc(i), i);
                     local += buffer;
@@ -93,7 +95,7 @@ namespace Physica {
                 }
                 std::unique_lock locker(mutex);
                 target += local;
-            }, Executor::getNumThread()).wait_async();
+            }, 0).wait();
         }
         else {
             const size_t length = getLength();

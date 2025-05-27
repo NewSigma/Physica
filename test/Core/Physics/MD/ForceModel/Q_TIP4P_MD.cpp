@@ -22,7 +22,6 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -125,7 +124,7 @@ void testMD() {
     {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, decltype(forceModel), ThreadExecutor>(
+        rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, decltype(forceModel), Thread>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
             kineticModel,
@@ -140,7 +139,7 @@ void testMD() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, decltype(forceModel), Thread>(thermo, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

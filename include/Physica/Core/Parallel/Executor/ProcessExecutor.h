@@ -22,7 +22,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 #include "Physica/Core/Parallel/SubProcess.h"
-#include "Physica/Core/Parallel/Task.h"
+#include "Physica/Core/Parallel/Parallel.h"
 
 namespace Physica {
     class ProcessExecutor {
@@ -35,7 +35,7 @@ namespace Physica {
         template<class Functor, class... Args>
         static FutureType schedule(Functor func, Args&&... args);
         template<class Functor>
-        static Task<> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+        static Task<Concurrent> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
     };
 
     template<class Functor, class... Args>
@@ -48,7 +48,7 @@ namespace Physica {
     }
 
     template<class Functor>
-    Task<> ProcessExecutor::parallel_for(Functor func, unsigned int loopCount, unsigned int core) {
+    Task<Concurrent> ProcessExecutor::parallel_for(Functor func, unsigned int loopCount, unsigned int core) {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount >= core);
@@ -73,13 +73,4 @@ namespace Physica {
         for (auto& future : futures)
             std::ignore = future.wait();
     }
-}
-
-namespace Physica {
-    template<>
-    class Traits<ProcessExecutor> {
-    public:
-        constexpr static bool UseCPU = true;
-        constexpr static bool UseCUDA = false;
-    };
 }

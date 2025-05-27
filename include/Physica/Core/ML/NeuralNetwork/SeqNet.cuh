@@ -35,9 +35,9 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operations */
-        template<class Dataset, RNG R, class Executor>
+        template<class Dataset, RNG R, ExecutePolicy P>
         void train_step(int batchSize, const Dataset& dataset);
-        template<class Dataset, RNG R, class Executor>
+        template<class Dataset, RNG R, ExecutePolicy P>
         void train_step_for(int64_t numStep, int batchSize, const Dataset& dataset);
 
         template<class Dataset>
@@ -54,7 +54,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    template<class Dataset, RNG R, class Executor>
+    template<class Dataset, RNG R, ExecutePolicy P>
     void device_obj<SeqNet<Derived>>::train_step(int batchSize, const Dataset& dataset) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
@@ -66,10 +66,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Dataset, RNG R, class Executor>
+    template<class Dataset, RNG R, ExecutePolicy P>
     void device_obj<SeqNet<Derived>>::train_step_for(int64_t numStep, int batchSize, const Dataset& dataset) {
         for (int64_t _ = 0; _ < numStep; ++_)
-            train_step<Dataset, R, Executor>(batchSize, dataset);
+            train_step<Dataset, R, P>(batchSize, dataset);
     }
 
     template<class Derived>

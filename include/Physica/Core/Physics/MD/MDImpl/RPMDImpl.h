@@ -53,11 +53,11 @@ namespace Physica {
      * [1] J. Chem. Phys. 129, 024105 (2008); https://doi.org/10.1063/1.2953308
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<class ForceModel, ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::updateForce(ForceModel& model) {
         constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
-        constexpr bool UseCUDA = Traits<Executor>::UseCUDA;
-        static_assert(!UseCUDA || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
+        constexpr ExecutePolicy HostPolicy = P == GPU ? Thread : P;
+        static_assert((P != GPU) || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
                 , "[Error]: Allocator is not page locked, performance will decrease");
         if (!isContractEnabled()) {
             auto kernel = [this, &model](unsigned int replica) {
@@ -65,46 +65,40 @@ namespace Physica {
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
-                model.template forceAsync<decltype(saveTo), Executor>(std::move(cell), saveTo);
+                model.template forceAsync<decltype(saveTo), P>(std::move(cell), saveTo);
             };
 
             if constexpr (NumReplica == 1)
                 kernel(0);
             else
-                Executor::parallel_for(kernel, getNumReplica()).wait_async();
-            Executor::wait();
+                parallel_for<HostPolicy>(kernel, getNumReplica()).wait();
+
+            if constexpr (P == GPU)
+                Task<P>::wait();
             return;
         }
 
         constexpr bool IsContractable = Traits<ForceModel>::IsContractable;
         if constexpr (IsContractable) {
-            auto kernel_uncontract = [&](unsigned int thread) {
-                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
-                for (size_t replica = range.first; replica < range.second; ++replica) {
-                    MDCellType cell = phaseToCell(replica);
-                    if constexpr (IsPeriodBoundary)
-                        cell.normalize();
-                    auto saveTo = forceBuffer.col(replica);
-                    saveTo = model.template force_uncontract<Executor>(std::move(cell));
-                }
-            };
-            auto task_uncontract = Executor::parallel_for(kernel_uncontract, Executor::getNumThread());
+            auto task_uncontract = parallel_for<HostPolicy>([&](size_t replica) {
+                MDCellType cell = phaseToCell(replica);
+                if constexpr (IsPeriodBoundary)
+                    cell.normalize();
+                auto saveTo = forceBuffer.col(replica);
+                saveTo = model.template force_uncontract<P>(std::move(cell));
+            }, getNumReplica(), 0);
 
             contract();
-            auto kernel_contract = [&](unsigned int thread) {
-                const auto range = Executor::splitJob(getNumContract(), Executor::getNumThread(), thread);
-                for (size_t contract = range.first; contract < range.second; ++contract) {
-                    MDCellType cell = contractToCell(contract);
-                    if constexpr (IsPeriodBoundary)
-                        cell.normalize();
-                    auto saveTo = forceContract.col(contract);
-                    saveTo = model.template force_contract<Executor>(std::move(cell));
-                }
-            };
-            auto task_contract = Executor::parallel_for(kernel_contract, Executor::getNumThread());
+            auto task_contract = parallel_for<HostPolicy>([&](size_t contract) {
+                MDCellType cell = contractToCell(contract);
+                if constexpr (IsPeriodBoundary)
+                    cell.normalize();
+                auto saveTo = forceContract.col(contract);
+                saveTo = model.template force_contract<P>(std::move(cell));
+            }, getNumContract(), 0);
 
-            task_uncontract.wait_async();
-            task_contract.wait_async();
+            task_uncontract.wait();
+            task_contract.wait();
             decontract();
         }
         else
@@ -114,7 +108,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel,
              class ForceModel,
-             class Executor>
+             ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nve_step(KineticModel& kineticModel, ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
@@ -126,7 +120,7 @@ namespace Physica {
         else {
             forceStep(timeStep * Tv(0.5));
             kineticModel.nve_step(ringPolymer, timeStep);
-            updateForce<ForceModel, Executor>(forceModel);
+            updateForce<ForceModel, P>(forceModel);
             forceStep(timeStep * Tv(0.5));
         }
     }
@@ -134,12 +128,12 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel,
              class ForceModel,
-             class Executor>
+             ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nve_step_for(
             T duration, KineticModel& kineticModel, ForceModel& forceModel) {
         const uint64_t step = durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
+            nve_step<KineticModel, ForceModel, P>(kineticModel, forceModel);
     }
     /**
      * BAOAB integrator as introduced in [1]
@@ -152,7 +146,7 @@ namespace Physica {
              RNG R,
              class KineticModel,
              class ForceModel,
-             class Executor>
+             ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nvt_step(
             const Thermostat& thermostat,
             KineticModel& kineticModel,
@@ -163,7 +157,7 @@ namespace Physica {
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
         constexpr bool isSeedFixed = Traits<R>::IsSeedFixed;
-        using NoRandExecutor = std::conditional<isSeedFixed, SeqExecutor, Executor>::type;
+        constexpr auto NoRandPolicy = isSeedFixed ? Sequential : P;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
@@ -171,15 +165,15 @@ namespace Physica {
 
         if constexpr (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
+            thermostat.template step<R, NoRandPolicy>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
         }
         else {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
+            thermostat.template step<R, NoRandPolicy>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            updateForce<ForceModel, Executor>(forceModel);
+            updateForce<ForceModel, P>(forceModel);
             forceStep(timeStep * 0.5);
         }
     }
@@ -189,7 +183,7 @@ namespace Physica {
              RNG R,
              class KineticModel,
              class ForceModel,
-             class Executor>
+             ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nvt_step_for(
             T duration,
             const Thermostat& thermostat,
@@ -197,7 +191,7 @@ namespace Physica {
             ForceModel& forceModel) {
         const uint64_t step = durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            nvt_step<Thermostat, R, KineticModel, ForceModel, Executor>(thermostat, kineticModel, forceModel);
+            nvt_step<Thermostat, R, KineticModel, ForceModel, P>(thermostat, kineticModel, forceModel);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -206,7 +200,7 @@ namespace Physica {
              class Barostat,
              class KineticModel,
              class ForceModel,
-             class Executor>
+             ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::npt_step(
             const Thermostat& thermostat,
             Barostat& barostat,
@@ -221,7 +215,7 @@ namespace Physica {
         static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
 
         constexpr bool isSeedFixed = Traits<R>::IsSeedFixed;
-        using NoRandExecutor = std::conditional<isSeedFixed, SeqExecutor, Executor>::type;
+        constexpr auto NoRandPolicy = isSeedFixed ? Sequential : P;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
@@ -230,28 +224,28 @@ namespace Physica {
         if constexpr (BarostatOrder == 2) {
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
-            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
+            thermostat.template step<R, NoRandPolicy>(ringPolymer, timeStep);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
-            updateForce<ForceModel, Executor>(forceModel);
+            updateForce<ForceModel, P>(forceModel);
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
         }
         else {
-            const LatticeMatrix stress = makeStressPrim<ForceModel, Executor>(forceModel);
+            const LatticeMatrix stress = makeStressPrim<ForceModel, P>(forceModel);
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
-            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
+            thermostat.template step<R, NoRandPolicy>(ringPolymer, timeStep);
             barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             if constexpr (Traits<ForceModel>::IsLatticeDependent)
                 forceModel.setLattice(getLattice());
-            updateForce<ForceModel, Executor>(forceModel);
+            updateForce<ForceModel, P>(forceModel);
             forceStep(timeStep * 0.5);
         }
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class Thermostat, RNG R, class Barostat, class KineticModel, class ForceModel, class Executor>
+    template<class Thermostat, RNG R, class Barostat, class KineticModel, class ForceModel, ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::npt_step_for(
             T duration,
             const Thermostat& thermostat,
@@ -260,7 +254,7 @@ namespace Physica {
             ForceModel& forceModel) {
         const uint64_t step = durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            npt_step<Thermostat, R, Barostat, KineticModel, ForceModel, Executor>(thermostat, barostat, kineticModel, forceModel);
+            npt_step<Thermostat, R, Barostat, KineticModel, ForceModel, P>(thermostat, barostat, kineticModel, forceModel);
     }
     /**
      * fire_vstep is fire_v(olume)step
@@ -271,13 +265,13 @@ namespace Physica {
      * [1] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class KineticModel, class ForceModel, class Executor>
+    template<class KineticModel, class ForceModel, ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::fire_vstep(
             FireModel<T, Dim>& fire, KineticModel& kineticModel, ForceModel& forceModel) {
         checkRelaxParam<KineticModel, ForceModel>();
 
         kineticModel.nve_step(ringPolymer, timeStep);
-        updateForce<ForceModel, Executor>(forceModel);
+        updateForce<ForceModel, P>(forceModel);
         fire.paramStep(*this);
         forceStep(fire.getTimeStep());
         fire.mixingStep(*this);
@@ -286,7 +280,7 @@ namespace Physica {
      * fire_pstep is fire_p(ress)step
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<BaroType Type, class KineticModel, class ForceModel, class Executor>
+    template<BaroType Type, class KineticModel, class ForceModel, ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::fire_pstep(
             CFireModel<T, Dim, Type>& cfire,
             KineticModel& kineticModel,
@@ -297,7 +291,7 @@ namespace Physica {
         cfire.nve_step(*this);
         if constexpr (Traits<ForceModel>::IsLatticeDependent)
             forceModel.setLattice(getLattice());
-        updateForce<ForceModel, Executor>(forceModel);
+        updateForce<ForceModel, P>(forceModel);
         const LatticeMatrix stress = forceModel.virial(phaseToCell(0));
         cfire.paramStep(*this);
         forceStep(cfire.getTimeStep());
@@ -431,13 +425,13 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<class ForceModel, ExecutePolicy P>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPotential(const ForceModel& model) const {
         VectorND<T> temp(getNumReplica());
         auto kernel = [this, model, &temp](unsigned int replica) {
             temp[replica] = model.potentialV(phaseToCell(replica));
         };
-        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        parallel_for<P>(kernel, getNumReplica(), 0).wait();
         return temp.mean();
     }
 
@@ -477,7 +471,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class KineticModel, class ForceModel, class Executor>
+    template<class KineticModel, class ForceModel, ExecutePolicy P>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPressThermo(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
@@ -497,11 +491,11 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<class ForceModel, ExecutePolicy P>
     auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(ForceModel& model) const -> LatticeMatrix {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if constexpr (NumReplica == 1)
-            return makeStressClassical<ForceModel, Executor>(model);
+            return makeStressClassical<ForceModel, P>(model);
 
         Array<LatticeMatrix> buffer(getNumReplica());
         const T squaredOmegaW = square(ringPolymer.calcOmegaW(temperatureT));
@@ -541,7 +535,7 @@ namespace Physica {
                 buffer[replica] += model.virial(cell);
             }
         };
-        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        parallel_for<P>(kernel, getNumReplica(), 0).wait();
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < buffer.getLength(); ++i)
             toNextMean(result, i, buffer[i]);
@@ -552,12 +546,12 @@ namespace Physica {
      * [1] Comp. Phys. Comm. 185, 1019 (2013); https://doi.org/10.1016/j.cpc.2013.10.027
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<class ForceModel, ExecutePolicy P>
     auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(ForceModel& model) const -> LatticeMatrix {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
         if constexpr (NumReplica == 1)
-            return makeStressClassical<ForceModel, Executor>(model);
+            return makeStressClassical<ForceModel, P>(model);
 
         Array<LatticeMatrix> buffer(getNumReplica());
         const auto centroidPos = ringPolymer.makeCentroidPos();
@@ -597,7 +591,7 @@ namespace Physica {
                 buffer[replica] += model.virial(cell);
             }
         };
-        Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+        parallel_for<P>(kernel, getNumReplica(), 0).wait();
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < buffer.getLength(); ++i)
             toNextMean(result, i, buffer[i]);
@@ -605,7 +599,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<class ForceModel, ExecutePolicy P>
     auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(ForceModel& model) const -> LatticeMatrix {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
@@ -657,7 +651,7 @@ namespace Physica {
                     buffer[replica] += model.virial(cell);
                 }
             };
-            Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+            parallel_for<P>(kernel, getNumReplica(), 0).wait();
             for (size_t i = 0; i < buffer.getLength(); ++i)
                 toNextMean(result, i, buffer[i]);
         }
@@ -665,15 +659,15 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class KineticModel, class ForceModel, class Executor>
+    template<class KineticModel, class ForceModel, ExecutePolicy P>
     VectorND<T> RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::testNVE(
             T duration, KineticModel& kineticModel, ForceModel& forceModel) const {
         This rpmd = *this;
         const uint64_t step = durationToStep(duration, timeStep);
         VectorND<T> pot(step);
         for (uint64_t i = 0; i < step; ++i) {
-            rpmd.nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
-            pot[i] = rpmd.calcKinetic<KineticModel>() + rpmd.calcPotential<ForceModel, Executor>(forceModel);
+            rpmd.nve_step<KineticModel, ForceModel, P>(kineticModel, forceModel);
+            pot[i] = rpmd.calcKinetic<KineticModel>() + rpmd.calcPotential<ForceModel, P>(forceModel);
         }
         pot -= T(pot[0]);
         return pot;
