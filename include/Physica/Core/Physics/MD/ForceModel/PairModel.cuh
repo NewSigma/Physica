@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -97,10 +97,10 @@ namespace Physica {
         [[nodiscard]] inline LatticeMatrix virial(const MDCellType& hostCell);
         void swap(This& __restrict obj) noexcept;
 
-        __device__ void forceKernelImpl();
-        __device__ void postForceKernelImpl();
-        __device__ void virialKernelImpl();
-        __device__ void postVirialKernelImpl();
+        __device__ void forceKernel();
+        __device__ void postForceKernel();
+        __device__ void virialKernel();
+        __device__ void postVirialKernel();
         /* Getters */
         [[nodiscard]] __host__ __device__ const T& getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] __host__ __device__ const T& getSquaredCutoff() const noexcept { return squared_cutoff; }

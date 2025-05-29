@@ -55,8 +55,8 @@ namespace Physica {
         /* Operators */
         [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t index);
         [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t index) const;
-        bool operator==(const ArrayBase& array) const;
-        bool operator!=(const ArrayBase& array) const { return !(*this == array); }
+        __host__ __device__ bool operator==(const ArrayBase& array) const;
+        __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterators */
         __host__ __device__ FIteType begin() noexcept { return FIteType(data()); }
         __host__ __device__ CFIteType begin() const noexcept { return cbegin(); }

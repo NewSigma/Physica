@@ -47,7 +47,7 @@ namespace Physica {
             void wait() { check(cudaStreamSynchronize(stream)); }
         };
     public:
-        template<class Functor, int MaxThreadsPerBlock = CUDADevAttr::MaxThreadsPerBlock, int MinBlocksPerMultiprocessor = 1>
+        template<class Functor, int MaxThreadsPerBlock = Dynamic, int MinBlocksPerMultiprocessor = Dynamic>
         __host__ __device__ static KernelFuture launch(Functor func, KernelConfig config, size_t sharedMem = 0);
         static inline void wait();
     };

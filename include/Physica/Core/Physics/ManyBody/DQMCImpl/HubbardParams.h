@@ -112,7 +112,7 @@ namespace Physica {
         const T x = betaM * repelU;
         alpha = x * T(0.5) + ln1p(sqrt(T(1) - exp(-x)));
 
-        DenseSymmMatrix<T> hoppingMatrixB = hoppingMatrix * betaM;
+        DenseSymmMatrix<T> hoppingMatrixB = -betaM * hoppingMatrix;
         expB = exp(hoppingMatrixB);
     }
 

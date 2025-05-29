@@ -43,6 +43,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
+        [[nodiscard]] T det() const;
         [[nodiscard]] T lnAbsDet() const;
 
         [[nodiscard]] VectorND<T> toDT();
@@ -69,6 +70,11 @@ namespace Physica {
         if (row > col)
             return Tv(0);
         return mat.calc_value(row, col);
+    }
+
+    template<Matrix M>
+    auto TrigUpper<M>::det() const -> T {
+        return Base::diag().prod();
     }
 
     template<Matrix M>
@@ -109,6 +115,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
+        [[nodiscard]] T det() const;
         [[nodiscard]] T lnAbsDet() const;
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
@@ -136,9 +143,14 @@ namespace Physica {
     }
 
     template<Matrix M>
+    auto TrigLower<M>::det() const -> T {
+        return Base::diag().prod();
+    }
+
+    template<Matrix M>
     auto TrigLower<M>::lnAbsDet() const -> T {
         assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
-        return ln(abs(Base::diags())).sum();
+        return ln(abs(Base::diag())).sum();
     }
 }
 

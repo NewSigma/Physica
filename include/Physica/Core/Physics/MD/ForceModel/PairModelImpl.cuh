@@ -24,32 +24,6 @@
 #include "PairModel.cuh"
 
 namespace Physica {
-    namespace Internal {
-        template<class T>
-        __global__ void PairModel_forceKernel(Physica::PlainStruct<device_obj<T>> pair) {
-            static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
-            pair.getDerived().forceKernelImpl();
-        }
-
-        template<class T>
-        __global__ void PairModel_postForceKernel(Physica::PlainStruct<device_obj<T>> pair) {
-            static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
-            pair.getDerived().postForceKernelImpl();
-        }
-
-        template<class T>
-        __global__ void PairModel_virialKernel(Physica::PlainStruct<device_obj<T>> pair) {
-            static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
-            pair.getDerived().virialKernelImpl();
-        }
-
-        template<class T>
-        __global__ void PairModel_postVirialKernel(Physica::PlainStruct<device_obj<T>> pair) {
-            static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
-            pair.getDerived().postVirialKernelImpl();
-        }
-    }
-
     template<class Derived>
     device_obj<PairModel<Derived>>::device_obj(size_t numParticle) : cell(numParticle), swapBuffer(numParticle * Dim) {}
 
@@ -108,11 +82,15 @@ namespace Physica {
                 forceBuffer.resize(cell.getDOF(), 1);
         }
 
-        Internal::PairModel_forceKernel<Derived>
-                <<<gridDims, numThread, numThread * sizeof(DeviceVector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
-        if constexpr (IsSmallCell)
-            Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
-        check(cudaGetLastError());
+        CUDAExecutor::launch([pair = asStruct(Base::getDerived())] __device__() mutable {
+            pair.getDerived().forceKernel();
+        }, KernelConfig(gridDims, numThread), numThread * sizeof(DeviceVector3D));
+
+        if constexpr (IsSmallCell) {
+            CUDAExecutor::launch([pair = asStruct(Base::getDerived())] __device__() mutable {
+                pair.getDerived().postForceKernel();
+            }, KernelConfig(gridDims.x, numThread), numThread * sizeof(DeviceVector3D));
+        }
         forceBuffer.col(0).toHostAsync(result);
     }
 
@@ -146,11 +124,13 @@ namespace Physica {
         const size_t numParticle = cartesianPos.getRow();
         virialBuffer.resize(NumVirialElem, numParticle);
 
-        Internal::PairModel_virialKernel<Derived>
-                <<<gridDims, numThread, numThread * sizeof(DeviceVector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
-        Internal::PairModel_postVirialKernel<Derived>
-                <<<1, NumVirialElem, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
-        check(cudaGetLastError());
+        CUDAExecutor::launch([pair = asStruct(Base::getDerived())] __device__() mutable {
+            pair.getDerived().virialKernel();
+        }, KernelConfig(gridDims, numThread), numThread * sizeof(DeviceVector3D));
+
+        CUDAExecutor::launch([pair = asStruct(Base::getDerived())] __device__() mutable {
+            pair.getDerived().postVirialKernel();
+        }, KernelConfig(1, NumVirialElem));
 
         auto head = swapBuffer.head(NumVirialElem);
         virialBuffer.col(0).toHostAsync(head);
@@ -181,7 +161,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<PairModel<Derived>>::forceKernelImpl() {
+    __device__ void device_obj<PairModel<Derived>>::forceKernel() {
         DeviceVector3D atomForce(3, 0);
         auto kernel = [this, &atomForce](size_t i, size_t j, DeviceVector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
@@ -199,7 +179,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<PairModel<Derived>>::postForceKernelImpl() {
+    __device__ void device_obj<PairModel<Derived>>::postForceKernel() {
         const size_t numParticle = cell.getNumParticle();
         const size_t atom = blockIdx.x * blockDim.x + threadIdx.x;
         if (atom >= numParticle)
@@ -212,7 +192,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<PairModel<Derived>>::virialKernelImpl() {
+    __device__ void device_obj<PairModel<Derived>>::virialKernel() {
         using DeviceMatrix = DeviceMDCell::LatticeMatrix;
         DeviceMatrix atomVirial(Dim, Dim, 0);
         auto kernel = [this, &atomVirial](size_t i, size_t j, DeviceVector3D r, ScalarType norm1, ScalarType norm2) {
@@ -230,7 +210,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ void device_obj<PairModel<Derived>>::postVirialKernelImpl() {
+    __device__ void device_obj<PairModel<Derived>>::postVirialKernel() {
         const size_t numParticle = cell.getNumParticle();
         ScalarType virial = 0;
         for (size_t i = 0; i < numParticle; ++i)
@@ -354,6 +334,7 @@ namespace Physica {
                     const ScalarType norm2 = r.squaredNorm();
                     const bool isNotSelf = atom1 != atom2;
                     if (isNotSelf && norm2 < squared_cutoff) {
+                        assert(norm2.isPositive() && "Atom overlap");
                         const ScalarType norm1 = sqrt(norm2);
                         func(atom1, atom2, r, norm1, norm2);
                     }
@@ -362,9 +343,11 @@ namespace Physica {
             cellList.forNeighInRange(centerCell, [this, &pos, &func, atom1](DeviceVector3D translate, Index3D neigh) {
                 const DeviceVector3D from = pos.row(atom1) - translate;
                 cellList.forAtomInCell(neigh, [this, &pos, &from, &func, atom1](size_t atom2) {
+                    assert(atom1 != atom2);
                     auto to = pos.row(atom2);
                     DeviceVector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
+                    assert(norm2.isPositive() && "Atom overlap");
                     if (norm2 < squared_cutoff) {
                         const ScalarType norm1 = sqrt(norm2);
                         func(atom1, atom2, r, norm1, norm2);

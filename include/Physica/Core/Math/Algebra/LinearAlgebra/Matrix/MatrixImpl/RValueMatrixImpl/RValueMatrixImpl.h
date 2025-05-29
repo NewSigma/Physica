@@ -360,7 +360,7 @@ namespace Physica {
                  + calc(0, 2) * (calc(1, 0) * calc(2, 1) - calc(1, 1) * calc(2, 0));
         else {
             QRDecomp<T> qr(Base::getDerived());
-            return qr.getMatrixR().diag().prod();
+            return qr.calcDetQ() * qr.getMatrixR().det();
         }
     }
 

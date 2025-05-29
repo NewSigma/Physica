@@ -17,36 +17,15 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica;
-using Matrix3D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element, 3, 3>;
 using Matrix4D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element, 4, 4>;
 
-template<Matrix M>
-void composite(const QRDecomp<float64>& qr, const M& m) {
-    Matrix3D matrixQ = qr.getMatrixQ();
-    Matrix3D matrixR = qr.getMatrixR();
-    Matrix3D result = matrixQ * matrixR;
-    if (!matrixNear(result, m, 1E-15))
-        exit(1);
-}
-
-template<Matrix M>
-void testQR(const M& m) {
-    QRDecomp<float64> qr(m.getRow(), m.getCol());
-    if constexpr (HasMKL()) {
-        qr.compute_mkl(m);
-        composite(qr, m);
-    }
-    qr.compute_base(m);
-    composite(qr, m);
-}
-
 int main() {
-    const Matrix3D m1{2, 3, 4, 1, 1, 9, 1, 2, -6};
     const Matrix4D m2{0, 0.125, 0.125, 0, 0.125, 0, 0, 0.125, 0.125, 0, 0, 0.125, 0, 0.125, 0.125, 0};
-    testQR(m1);
-    testQR(m2);
-    return 0;
+    Matrix4D e2 = (exp(m2));
+    return !scalarNear(float64(1), e2.det(), 1E-15);
 }

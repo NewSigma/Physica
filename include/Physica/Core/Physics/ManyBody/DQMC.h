@@ -23,6 +23,10 @@
 #include "DQMCImpl/HubbardParams.h"
 
 namespace Physica {
+    /**
+     * Reference:
+     * [1] Phys. Rev. B 40, 506; https://doi.org/10.1103/PhysRevB.40.506
+     */
     template<Scalar T>
     class DQMC {
         using This = DQMC<T>;
@@ -46,8 +50,7 @@ namespace Physica {
         DiagMatrix<T> matrixDs;
         VectorND<T> diagB1;
         VectorND<T> diagS1;
-        MatrixType matrixQ;
-        MatrixType matrixR;
+        MatrixType matrixT;
         MatrixType buffer;
 
         T lnPartitionZ;
@@ -92,6 +95,7 @@ namespace Physica {
         void single_flip(int site, int split);
         void makeWeightMatrix(bool spin);
         std::pair<T, T> lnPartition(bool spin);
+        std::pair<T, T> lnPartition();
         T calcGreen(bool spin);
         template<FlipMethod Method>
         void update();
@@ -210,8 +214,7 @@ namespace Physica {
         matrixDs.swap(obj.matrixDs);
         diagB1.swap(obj.diagB1);
         diagS1.swap(obj.diagS1);
-        matrixQ.swap(obj.matrixQ);
-        matrixR.swap(obj.matrixR);
+        matrixT.swap(obj.matrixT);
         buffer.swap(obj.buffer);
 
         lnPartitionZ.swap(obj.lnPartitionZ);
@@ -238,8 +241,7 @@ namespace Physica {
         matrixDs.resize(numSite);
         diagB1.resize(numSite);
         diagS1.resize(numSite);
-        matrixQ.resize(numSite, numSite);
-        matrixR.resize(numSite, numSite);
+        matrixT.resize(numSite, numSite);
         buffer.resize(numSite, numSite);
         greenU.resize(numSite, numSite);
         greenD.resize(numSite, numSite);
@@ -295,7 +297,7 @@ namespace Physica {
         diagS = unit(qr.getVecD());
         diagB = ln(abs(qr.getVecD()));
 
-        matrixR = qr.getMatrixR();
+        matrixT = qr.getMatrixR();
         for (int i = numSplit - 2; i >= 0; --i) {
             qr.compute(chain[i] * qr.getMatrixQ());
             /* Make new diag matrix */ {
@@ -318,8 +320,8 @@ namespace Physica {
             diagB1.swap(diagB);
             diagS = hadamard(diagS, diagS1);
 
-            buffer = qr.getMatrixR() * matrixR;
-            buffer.swap(matrixR);
+            buffer = qr.getMatrixR() * matrixT;
+            buffer.swap(matrixT);
         }
 
         const T shift = params.calcShift();
@@ -338,7 +340,7 @@ namespace Physica {
         makeWeightMatrix(spin);
         T sign = qr.calcDetQ();
         buffer = qr.getMatrixQ() * matrixDb;
-        qr.compute(buffer.transpose() + matrixDs * matrixR);
+        qr.compute(buffer.transpose() + matrixDs * matrixT);
         // Handle potential underflow
         matrixDb.diag() += T(std::numeric_limits<T>::min());
         qr.getWorking().diag() += T(std::numeric_limits<T>::min());
@@ -346,6 +348,13 @@ namespace Physica {
         T lnZ = -matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
         sign *= qr.calcDetQ() * unit(qr.getMatrixR().diag()).prod();
         return std::make_pair(lnZ, sign);
+    }
+
+    template<Scalar T>
+    std::pair<T, T> DQMC<T>::lnPartition() {
+        auto [lnZ1, sign1] = lnPartition(true);
+        auto [lnZ2, sign2] = lnPartition(false);
+        return std::make_pair(lnZ1 + lnZ2, sign1 * sign2);
     }
 
     template<Scalar T>
@@ -357,8 +366,8 @@ namespace Physica {
             signD = sign;
 
         auto& green = spin ? greenU : greenD;
-        matrixQ = buffer * qr.getMatrixQ();
-        green = qr.getMatrixR().inverse() * matrixQ.transpose();
+        matrixT = buffer * qr.getMatrixQ();
+        green = qr.getMatrixR().inverse() * matrixT.transpose();
         return lnZ;
     }
 

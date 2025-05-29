@@ -35,7 +35,7 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    bool ArrayBase<Derived, Allocator>::operator==(const ArrayBase& array) const {
+    __host__ __device__ bool ArrayBase<Derived, Allocator>::operator==(const ArrayBase& array) const {
         if (getLength() != array.getLength())
             return false;
         if (getCapacity() != array.getCapacity())
