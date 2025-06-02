@@ -45,8 +45,8 @@ namespace Physica {
         constexpr static int MaxNormOrder = 8;
         constexpr static int MaxNormIteration = 16;
         constexpr static int BufferSize = 11;
-        constexpr static float ThetaFloat32[BufferSize]{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
-        constexpr static double ThetaFloat64[BufferSize]{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
+        constexpr static std::array<float, BufferSize> ThetaFloat32{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
+        constexpr static std::array<double, BufferSize> ThetaFloat64{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
 
         const LazyDestroy<M> mexp;
         const LazyDestroy<V> v;

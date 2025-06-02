@@ -101,12 +101,9 @@ namespace Physica {
             auto corner = result.topLeftCorner(2);
             corner *= diffuseFactor;
         }
-        else if constexpr (Type == BaroType::Z) {
-            result(2, 2) = T::template random_normal<R>() * diffuseFactor;
-        }
         else {
-            constexpr bool Unreachable = Type == BaroType::Anisotropic;
-            static_assert(Unreachable, "[Error]: Not implemented");
+            static_assert(Type == BaroType::Z, "[Error]: Not implemented");
+            result(2, 2) = T::template random_normal<R>() * diffuseFactor;
         }
         return result;
     }

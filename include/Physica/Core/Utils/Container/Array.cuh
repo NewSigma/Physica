@@ -102,11 +102,11 @@ namespace Physica {
     public:
         device_obj() = default;
         template<class... Args>
-        __host__ __device__ explicit device_obj(size_t length_, Args&&... args);
+        explicit device_obj(size_t length_, Args&&... args);
         explicit device_obj(const host_obj& array);
         device_obj(const This& obj);
         device_obj(This&& obj) noexcept;
-        __host__ __device__ ~device_obj();
+        ~device_obj();
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
@@ -156,11 +156,8 @@ namespace Physica {
 
     template<class T, class Allocator>
     template<class... Args>
-    __host__ __device__ device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args) {
-        if constexpr (IsHost())
-            host_obj(length_, std::forward<Args>(args)...).toDevice(*this);
-        else
-            unreachable(); // Marked __device__ to silence warnings
+    device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args) {
+        host_obj(length_, std::forward<Args>(args)...).toDevice(*this);
     }
 
     template<class T, class Allocator>
@@ -199,22 +196,18 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
-        if constexpr (IsHost()) {
-            if constexpr (!isTrivial) {
-                if (length != 0) {
-                    Array<ElemType, Dynamic> buffer(length);
-                    auto& ctx = CUDAContext::getInstance();
-                    cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
-                    ctx.wait();
-                }
+    device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
+        if constexpr (!isTrivial) {
+            if (length != 0) {
+                Array<ElemType, Dynamic> buffer(length);
+                auto& ctx = CUDAContext::getInstance();
+                cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
+                ctx.wait();
             }
-            alloc.deallocate(d_data, capacity);
-            d_data = nullptr;
-            length = capacity = 0;
         }
-        else
-            unreachable(); // Marked __device__ to silence warnings
+        alloc.deallocate(d_data, capacity);
+        d_data = nullptr;
+        length = capacity = 0;
     }
 
     template<class T, class Allocator>

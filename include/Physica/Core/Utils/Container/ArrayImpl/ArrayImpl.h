@@ -24,7 +24,6 @@
     #include <thrust/swap.h>
 #endif
 #include "../Array.h"
-#include "Physica/Core/Utils/Unreachable.h"
 
 namespace Physica {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
@@ -105,20 +104,16 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Allocator>::Array(const This& obj) : length(obj.length), capacity(obj.capacity), alloc() {
-        if constexpr (IsHost()) {
-            if (capacity == 0)
-                return;
+    Array<T, Dynamic, Allocator>::Array(const This& obj) : length(obj.length), capacity(obj.capacity), alloc() {
+        if (capacity == 0)
+            return;
 
-            arr = alloc.allocate(capacity);
-            if constexpr (!std::is_trivially_copyable<ElemType>::value)
-                for(size_t i = 0; i < length; ++i)
-                    alloc.construct(arr + i, obj[i]);
-            else
-                memcpy(arr, obj.arr, length * sizeof(ElemType));
-        }
+        arr = alloc.allocate(capacity);
+        if constexpr (!std::is_trivially_copyable<ElemType>::value)
+            for(size_t i = 0; i < length; ++i)
+                alloc.construct(arr + i, obj[i]);
         else
-            unreachable();  // Marked __device__ to silence warnings
+            memcpy(arr, obj.arr, length * sizeof(ElemType));
     }
 
     template<class T, class Allocator>
@@ -130,16 +125,12 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ Array<T, Dynamic, Allocator>::~Array() {
-        if constexpr (IsHost()) {
-            if constexpr (!std::is_trivially_copyable<ElemType>::value)
-                if (arr != nullptr)
-                    for(size_t i = 0; i < length; ++i)
-                        alloc.destroy(arr + i);
-            alloc.deallocate(arr, length);
-        }
-        else
-            unreachable();  // Marked __device__ to silence warnings
+    Array<T, Dynamic, Allocator>::~Array() {
+        if constexpr (!std::is_trivially_copyable<ElemType>::value)
+            if (arr != nullptr)
+                for(size_t i = 0; i < length; ++i)
+                    alloc.destroy(arr + i);
+        alloc.deallocate(arr, length);
     }
 
     template<class T, class Allocator>

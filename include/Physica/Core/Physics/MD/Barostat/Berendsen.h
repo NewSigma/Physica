@@ -95,12 +95,9 @@ namespace Physica {
             for (size_t i = 0; i < 2; ++i)
                 result(i, i) -= centerTargetP;
         }
-        else if constexpr (Type == BaroType::Z) {
-            result(2, 2) = lastStress(2, 2) - centerTargetP;
-        }
         else {
-            constexpr bool Unreachable = Type == BaroType::Anisotropic;
-            static_assert(Unreachable, "[Error]: Not implemented");
+            static_assert(Type == BaroType::Z, "[Error]: Not implemented");
+            result(2, 2) = lastStress(2, 2) - centerTargetP;
         }
         result *= compressRate / T(Dim);
         return result;
@@ -191,12 +188,9 @@ namespace Physica {
                 for (size_t c = 0; c < 2; ++c)
                     result(r, c) = kernel(r, c);
         }
-        else if constexpr (Type == BaroType::Z) {
-            result(2, 2) = kernel(2, 2);
-        }
         else {
-            constexpr bool Unreachable = Type == BaroType::Anisotropic;
-            static_assert(Unreachable, "[Error]: Not implemented");
+            static_assert(Type == BaroType::Z, "[Error]: Not implemented");
+            result(2, 2) = kernel(2, 2);
         }
         return result;
     }

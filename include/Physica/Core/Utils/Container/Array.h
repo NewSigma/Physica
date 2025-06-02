@@ -115,9 +115,9 @@ namespace Physica {
         Array(std::initializer_list<T> list);
         template<size_t Length, class OtherAlloc>
         Array(const Array<T, Length, OtherAlloc>& other);
-        __host__ __device__ Array(const This& obj);
+        Array(const This& obj);
         Array(This&& array) noexcept;
-        __host__ __device__ ~Array();
+        ~Array();
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */

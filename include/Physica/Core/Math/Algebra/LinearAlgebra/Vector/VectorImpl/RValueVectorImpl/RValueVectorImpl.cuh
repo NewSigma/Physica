@@ -117,12 +117,7 @@ namespace Physica {
         assert(getLength() != 0);
         if (IsHost()) {
             using U = std::conditional<isReverseDiff, Tv, T>::type;
-            device_obj<VectorND<U>> buffer;
-            if constexpr (IsHost()) // To silence warnings
-                buffer = device_obj<VectorND<U>>(MaxThreadPerBlock);
-            else
-                unreachable();
-
+            auto buffer = device_obj<VectorND<U>>(MaxThreadPerBlock);
             auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
                 const auto& v = v_.getDerived();
                 auto& buffer = buffer_.getDerived();
