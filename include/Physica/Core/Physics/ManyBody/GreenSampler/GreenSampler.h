@@ -62,15 +62,12 @@ namespace Physica {
         samples.values()[cursor] = dqmc.getLnPartitionZ();
         samples.grads()[cursor] = dqmc.getSign();
         cursor = (cursor + 1) % getNumSample();
-
-        bool full = cursor == 0;
-        if (full)
-            samples -= getLnPartitionZs().max();
     }
 
     template<Scalar T>
     T GreenSampler<T>::calc(const VectorND<T>& observes) const {
-        VectorND<Tf> buffer(getLnPartitionZs(), observes);
+        const T factor = getLnPartitionZs().max();
+        VectorND<Tf> buffer(getLnPartitionZs() - factor, observes);
         const Tf sum = exp(buffer) * getSigns();
         return sum.grad() / sum.value(); // Avoid ln, its grad is well defined but value may give NAN
     }
@@ -82,7 +79,8 @@ namespace Physica {
 
     template<Scalar T>
     T GreenSampler<T>::lnPartitionZ() const {
-        return ln(exp(getLnPartitionZs()) * getSigns());
+        const T factor = getLnPartitionZs().max();
+        return ln(exp(getLnPartitionZs() - factor) * getSigns()) + factor;
     }
 
     template<Scalar T>

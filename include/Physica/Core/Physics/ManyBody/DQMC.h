@@ -48,8 +48,6 @@ namespace Physica {
 
         DiagMatrix<T> matrixDb;
         DiagMatrix<T> matrixDs;
-        VectorND<T> diagB1;
-        VectorND<T> diagS1;
         MatrixType matrixT;
         MatrixType buffer;
 
@@ -97,7 +95,6 @@ namespace Physica {
         std::pair<T, T> lnPartition(bool spin);
         std::pair<T, T> lnPartition();
         T calcGreen(bool spin);
-        template<FlipMethod Method>
         void update();
 
         T calcLnSpinWaveWeight(int site) const;
@@ -134,23 +131,24 @@ namespace Physica {
             const T sumSpin0 = spins.sum();
             const T sumSpin1 = sumSpin0 - T(2) * spins[split];
             const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
-            if (!accept<R>(deltaW))
-                return;
+            const bool flip1 = accept<R>(deltaW);
+            if (flip1)
+                single_flip(site, split);
 
             const T p = T::template random_uniform<R>();
-            if (p < 0.5) {
-                for (int i = 0; i < getNumSite(); ++i) {
-                    if (i == site)
-                        continue;
-                    single_flip(site, split);
-                }
+            const bool flip2 = p < 0.5;
+            if (flip2) {
+                for (int i = 0; i < getNumSite(); ++i)
+                    single_flip(i, split);
             }
-            else
-                single_flip(site, split);
+
+            const bool noFlip = !flip1 && !flip2;
+            if (noFlip)
+                return;
         }
         else
             random_uniform<R>();
-        update<Method>();
+        update();
     }
 
     template<Scalar T>
@@ -185,20 +183,19 @@ namespace Physica {
                     const T sumSpin0 = spins.sum();
                     const T sumSpin1 = sumSpin0 - T(2) * spins[split];
                     const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
-                    if (!accept<R>(deltaW))
-                        continue;
+                    if (accept<R>(deltaW))
+                        spins[split] = -spins[split];
 
                     const T p = T::template random_uniform<R>();
                     if (p < 0.5)
                         spins = -spins;
-                    spins[split] = -spins[split];
                 }
             }
             initChain();
         }
         else
             random_uniform<R>();
-        update<Method>();
+        update();
     }
 
     template<Scalar T>
@@ -212,8 +209,6 @@ namespace Physica {
         
         matrixDb.swap(obj.matrixDb);
         matrixDs.swap(obj.matrixDs);
-        diagB1.swap(obj.diagB1);
-        diagS1.swap(obj.diagS1);
         matrixT.swap(obj.matrixT);
         buffer.swap(obj.buffer);
 
@@ -239,8 +234,6 @@ namespace Physica {
 
         matrixDb.resize(numSite);
         matrixDs.resize(numSite);
-        diagB1.resize(numSite);
-        diagS1.resize(numSite);
         matrixT.resize(numSite, numSite);
         buffer.resize(numSite, numSite);
         greenU.resize(numSite, numSite);
@@ -289,49 +282,23 @@ namespace Physica {
     void DQMC<T>::makeWeightMatrix(bool spin) {
         const int numSplit = getNumSplit();
         const auto& chain = spin ? chainU : chainD;
-        auto& diagB = matrixDb.diag();
-        auto& diagS = matrixDs.diag();
         qr.compute(chain[numSplit - 1]);
         qr.toQDT();
-
-        diagS = unit(qr.getVecD());
-        diagB = ln(abs(qr.getVecD()));
-
         matrixT = qr.getMatrixR();
         for (int i = numSplit - 2; i >= 0; --i) {
-            qr.compute(chain[i] * qr.getMatrixQ());
-            /* Make new diag matrix */ {
-                const auto triu = qr.getMatrixR();
-                const auto diagR = triu.diag();
-                diagB1 = diagB + ln(abs(diagR));
-                diagS1 = unit(diagR);
-            }
-            auto& working = qr.getWorking();
-            for (int r = 0; r < getNumSite(); ++r) {
-                for (int c = r; c < getNumSite(); ++c) {
-                    if (r == c) {
-                        working(r, c) = 1;
-                        continue;
-                    }
-                    working(r, c) *= -exp(-diagB1[r] + diagB[c]) * (diagS1[r] * diagS[c]);
-                    assert(working(r, c).isFinite() && "[Error]: Prec is too low");
-                }
-            }
-            diagB1.swap(diagB);
-            diagS = hadamard(diagS, diagS1);
-
+            qr.compute(chain[i] * qr.getMatrixQ() * DiagMatrix<T>(qr.getVecD()));
+            qr.toQDT();
             buffer = qr.getMatrixR() * matrixT;
             buffer.swap(matrixT);
         }
 
         const T shift = params.calcShift();
         for (int i = 0; i < getNumSite(); ++i) {
-            const T lnD = diagB[i] + shift;
-            const T expD = exp(-abs(lnD));
-            const T sign = diagS[i];
-            const bool sep = lnD.isPositive();
-            diagB[i] = sep ? expD : T(1);
-            diagS[i] = (sep ? T(1) : expD) * sign;
+            const T originD = qr.getVecD()[i] * exp(shift);
+            const T absD = abs(originD);
+            const bool sep = absD > T(1);
+            matrixDb.diag()[i] = sep ? reciprocal(absD) : T(1);
+            matrixDs.diag()[i] = sep ? originD.unit() : originD;
         }
     }
 
@@ -372,13 +339,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<DQMC<T>::FlipMethod Method>
     void DQMC<T>::update() {
         lnPartitionZ = calcGreen(true) + calcGreen(false);
-        if constexpr (Method == Spin) {
-            for (int i = 0; i < getNumSite(); ++i)
-                lnPartitionZ -= calcLnSpinWaveWeight(i);
-        }
     }
 
     template<Scalar T>
