@@ -82,6 +82,8 @@ namespace Physica {
         using Base::random_normal;
         using Base::random_uniform;
         using Storage::swap;
+
+        using Base::read;
         /* Getters */
         using Base::data;
         using Storage::data_ptr;
@@ -101,6 +103,7 @@ namespace Physica {
         [[nodiscard]] inline static auto random_any(size_t row, size_t col, Distribution& dist);
         template<Vector V>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const V& vecInCols, const V& vecInRows);
+        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
         friend class device_obj<This>;

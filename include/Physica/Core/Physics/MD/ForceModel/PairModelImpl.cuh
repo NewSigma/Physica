@@ -343,7 +343,6 @@ namespace Physica {
             cellList.forNeighInRange(centerCell, [this, &pos, &func, atom1](DeviceVector3D translate, Index3D neigh) {
                 const DeviceVector3D from = pos.row(atom1) - translate;
                 cellList.forAtomInCell(neigh, [this, &pos, &from, &func, atom1](size_t atom2) {
-                    assert(atom1 != atom2);
                     auto to = pos.row(atom2);
                     DeviceVector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();

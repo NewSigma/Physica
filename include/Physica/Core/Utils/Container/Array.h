@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -84,6 +84,8 @@ namespace Physica {
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
         void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p);
     };
 
     template<class T, class Allocator>
@@ -148,6 +150,8 @@ namespace Physica {
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
         inline void setLength(size_t size);
+        /* Static members */
+        [[nodiscard]] static This read(size_t length, const T* __restrict p);
     private:
         template<class... Args>
         void resizeImpl(size_t size, Args&&... args);

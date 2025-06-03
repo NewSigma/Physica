@@ -215,6 +215,17 @@ namespace Physica {
             return arr.getLength();
     }
 
+    /**
+     * Helper function that communicates with C libraries.
+     */
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    auto Array2D<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This requires(MatrixOption::isElementMatrix<This>()) {
+        This result{};
+        result.arr = ArrayType::read(row * col, p);
+        result.r = row;
+        return result;
+    }
+
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::toIndex1D(size_t r, size_t c) const {
         if constexpr (isColMajor)

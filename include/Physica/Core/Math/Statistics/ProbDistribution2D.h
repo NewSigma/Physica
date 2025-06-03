@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -107,8 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    ProbDistribution2D<T>::MeshType
-    ProbDistribution2D<T>::makePosition() const {
+    auto ProbDistribution2D<T>::makePosition() const -> MeshType {
         const T deltaX = (getToPointX() - getFromPointX()) / T(getNumBinX());
         const T deltaY = (getToPointY() - getFromPointY()) / T(getNumBinY());
         VectorType translateX = seperatesX.head(getNumBinX()) + (deltaX * 0.5);
@@ -117,8 +116,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    ProbDistribution2D<T>::MatrixType
-    ProbDistribution2D<T>::makeDistribution() const {
+    auto ProbDistribution2D<T>::makeDistribution() const -> MatrixType {
         const T factor = repDeltaX * repDeltaY / T(calcNumSample());
         MatrixType result(getNumBinX(), getNumBinY());
         for (size_t i = 0; i < result.getCol(); ++i) {

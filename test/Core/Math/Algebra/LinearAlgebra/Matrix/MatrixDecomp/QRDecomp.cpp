@@ -25,9 +25,9 @@ using Matrix4D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element,
 
 template<Matrix M>
 void composite(const QRDecomp<float64>& qr, const M& m) {
-    Matrix3D matrixQ = qr.getMatrixQ();
-    Matrix3D matrixR = qr.getMatrixR();
-    Matrix3D result = matrixQ * matrixR;
+    M matrixQ = qr.getMatrixQ();
+    M matrixR = qr.getMatrixR();
+    M result = matrixQ * matrixR;
     if (!matrixNear(result, m, 1E-15))
         exit(1);
 }

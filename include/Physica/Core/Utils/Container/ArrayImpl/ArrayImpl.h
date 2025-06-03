@@ -48,11 +48,8 @@ namespace Physica {
 
     template<class T, size_t Length, class Allocator>
     template<size_t OtherLength, class OtherAlloc>
-    Array<T, Length, Allocator>::Array(const Array<T, OtherLength, OtherAlloc>& other) {
+    Array<T, Length, Allocator>::Array(const Array<T, OtherLength, OtherAlloc>& other) : Array(read(Length, other.data())) {
         static_assert(OtherLength == Length || OtherLength == Dynamic, "[Error]: Length do not match");
-        assert(other.getLength() == Length && "[Error]: Length do not match");
-        for (size_t i = 0; i < Length; ++i)
-            arr[i] = other[i];
     }
     /**
      * Initializing new elements will not work. A fixed array is assumed to be initialized upon construction.
@@ -73,6 +70,18 @@ namespace Physica {
             std::swap(arr[i], array[i]);
         #endif
         }
+    }
+    /**
+     * Helper function that communicates with C libraries.
+     */
+    template<class T, size_t Length, class Allocator>
+    __host__ __device__ auto Array<T, Length, Allocator>::read([[maybe_unused]] size_t length, const T* __restrict p) -> This {
+        assert(length == Length && "[Error]: Length do not match");
+        assert(p != nullptr);
+        This result(length);
+        for (size_t i = 0; i < Length; ++i)
+            result[i] = p[i];
+        return result;
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
@@ -255,6 +264,21 @@ namespace Physica {
             assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");
         }
         length = size;
+    }
+    /**
+     * Helper function that communicates with C libraries.
+     */
+    template<class T, class Allocator>
+    auto Array<T, Dynamic, Allocator>::read(size_t length, const T* __restrict p) -> This {
+        assert(p != nullptr);
+        This result(length);
+        if constexpr (!std::is_trivially_copyable<ElemType>::value) {
+            for (size_t i = 0; i < length; ++i)
+                result[i] = p[i];
+        }
+        else
+            memcpy(result.arr, p, length * sizeof(ElemType));
+        return result;
     }
 
     template<class T, class Allocator>

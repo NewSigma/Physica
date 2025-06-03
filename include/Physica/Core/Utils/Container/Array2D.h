@@ -93,12 +93,22 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        /* Static members */
+        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
     private:
         Array2D(ArrayType arr_, IndexType r_);
 
         __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
         /* Friends */
         friend class device_obj<This>;
+    };
+}
+
+namespace Physica {
+    template<class T, int Op, size_t Row, size_t Col, class Allocator>
+    class Traits<Array2D<T, Op, Row, Col, Allocator>> {
+    public:
+        constexpr static int Option = Op;
     };
 }
 

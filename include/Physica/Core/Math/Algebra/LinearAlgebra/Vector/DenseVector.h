@@ -96,6 +96,7 @@ namespace Physica {
         template<RNG R, class Distribution>
         [[nodiscard]] static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static This linspace(T from, T to, size_t count);
+        [[nodiscard]] static This read(size_t length, const T* __restrict p);
     };
 
     template<Scalar T> using Vector1D = DenseVector<T, 1>;

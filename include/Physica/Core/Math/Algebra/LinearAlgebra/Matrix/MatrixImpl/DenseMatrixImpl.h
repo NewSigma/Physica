@@ -142,8 +142,7 @@ namespace Physica {
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<Vector V>
-    std::pair<DenseMatrix<T, Option, Row, Col, Allocator>, DenseMatrix<T, Option, Row, Col, Allocator>>
-    DenseMatrix<T, Option, Row, Col, Allocator>::meshgrid(const V& vecX, const V& vecY) {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::meshgrid(const V& vecX, const V& vecY) -> std::pair<This, This> {
         using MatrixType = DenseMatrix<T, Option, Row, Col, Allocator>;
         const size_t row = vecY.getLength();
         const size_t col = vecX.getLength();
@@ -156,5 +155,12 @@ namespace Physica {
             }
         }
         return std::make_pair(std::move(x), std::move(y));
+    }
+    /**
+     * Helper function that communicates with C libraries.
+     */
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This requires(MatrixOption::isElementMatrix<This>()) {
+        return This(Storage::read(row, col, p));
     }
 }
