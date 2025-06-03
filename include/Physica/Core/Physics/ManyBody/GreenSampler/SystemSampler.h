@@ -22,6 +22,12 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica {
+    /**
+     * Defination of AFM, refer to [1]
+     *
+     * Reference:
+     * [1] Phys. Rev. Lett. 62, 591; https://doi.org/10.1103/PhysRevLett.62.591
+     */
     template<Scalar T>
     class SystemSampler : public GreenSampler<T> {
         using This = SystemSampler<T>;
@@ -71,7 +77,7 @@ namespace Physica {
             for (int i = 0; i < numSite; ++i)
                 flatten[i] = dqmc.getGreenU().diag()[i] - dqmc.getGreenD().diag()[i];
             fft.transform();
-            observes[cursor] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite * numSite));
+            observes[cursor] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
             break;
         }
         case CDW: {
@@ -79,7 +85,7 @@ namespace Physica {
             for (int i = 0; i < numSite; ++i)
                 flatten[i] = T(2) - dqmc.getGreenU().diag()[i] - dqmc.getGreenD().diag()[i];
             fft.transform();
-            observes[cursor] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite * numSite));
+            observes[cursor] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
             break;
         }
         default:

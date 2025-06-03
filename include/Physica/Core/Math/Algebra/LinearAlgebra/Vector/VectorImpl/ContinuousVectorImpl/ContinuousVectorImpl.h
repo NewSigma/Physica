@@ -144,14 +144,7 @@ namespace Physica {
     template<class Derived>
     template<RNG R>
     inline void ContinuousVector<Derived>::random_uniform() {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            const size_t length = Base::getLength();
-            TracerType::getInstance().reserve(length);
-            for (size_t i = 0; i < length; ++i)
-                this->operator[](i) = ScalarType::template random_uniform<R>();
-        }
-        else if constexpr (HasMKL()) {
+        if constexpr (HasMKL()) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Prec == Float32)
@@ -168,14 +161,7 @@ namespace Physica {
     template<class Derived>
     template<RNG R>
     inline void ContinuousVector<Derived>::random_normal() {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            const size_t length = Base::getLength();
-            TracerType::getInstance().reserve(length);
-            for (size_t i = 0; i < length; ++i)
-                this->operator[](i) = ScalarType::template random_normal<R>();
-        }
-        else if constexpr (HasMKL() && !isForwardDiff) {
+        if constexpr (HasMKL() && !isForwardDiff) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Prec == Float32)
@@ -192,15 +178,7 @@ namespace Physica {
     template<class Derived>
     template<RNG R, class Distribution>
     inline void ContinuousVector<Derived>::random_any(Distribution& dist) {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            const size_t length = Base::getLength();
-            TracerType::getInstance().reserve(length);
-            for (size_t i = 0; i < length; ++i)
-                this->operator[](i) = ScalarType::template random_any<R, decltype(dist)>(dist);
-        }
-        else
-            Base::template random_any<R, decltype(dist)>(dist);
+        Base::template random_any<R, decltype(dist)>(dist);
     }
 
 #ifdef PHYSICA_HDF5

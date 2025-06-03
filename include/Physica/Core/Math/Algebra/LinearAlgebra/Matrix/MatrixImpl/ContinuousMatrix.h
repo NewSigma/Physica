@@ -57,7 +57,6 @@ namespace Physica {
         using Base::operator=;
         inline This& operator=(const This& obj);
         This& operator=(This&& obj) noexcept = delete;
-        Derived& operator=(const ScalarType& s);
         /* Operations */
         [[nodiscard]] auto toNumpy() const;
 

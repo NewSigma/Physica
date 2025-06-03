@@ -147,7 +147,7 @@ namespace Physica {
         for (auto& arr : counts)
             for (int& elem : arr)
                 elem = 0;
-        lossMat = std::numeric_limits<T>::min(); // Initial value avoids situation where number of samples is too small to sample effective data
+        lossMat = Trv(std::numeric_limits<T>::min()); // Initial value avoids situation where number of samples is too small to sample effective data
     }
 
     template<Scalar T, bool TakeLn>

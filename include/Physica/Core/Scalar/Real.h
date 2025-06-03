@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,6 +27,35 @@
 
 namespace Physica {
     template<Scalar, class RandomSource> class GaussRandomPool;
+    using float16 = Real<Float16>;
+    using float32 = Real<Float32>;
+    using float64 = Real<Float64>;
+    /**
+     * We promote to the minimal type if precisions do not match.
+     */
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator+(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
+        return ResultType(x) + ResultType(y);
+    }
+
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator-(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
+        return ResultType(x) - ResultType(y);
+    }
+
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator*(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
+        return ResultType(x) * ResultType(y);
+    }
+
+    template<FloatPrec Prec1, FloatPrec Prec2>
+    __host__ __device__ auto operator/(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
+        return ResultType(x) / ResultType(y);
+    }
 
     union float_extract {
     private:
@@ -53,41 +82,9 @@ namespace Physica {
             unsigned int sign : Flag ? 1 : 32;
         };
     };
-
-    template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator+(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
-        return ResultType(x) + ResultType(y);
-    }
-
-    template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator-(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
-        return ResultType(x) - ResultType(y);
-    }
-
-    template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator*(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
-        return ResultType(x) * ResultType(y);
-    }
-
-    template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator/(Real<Prec1> x, Real<Prec2> y) requires(Prec1 != Prec2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
-        return ResultType(x) / ResultType(y);
-    }
-
-    inline double convertDoubleImpl(int length, int power, MPUnit* __restrict byte);
-
-    using float16 = Real<Float16>;
-    using float32 = Real<Float32>;
-    using float64 = Real<Float64>;
 }
 
 #include "Rational.h"
-#include "RealImpl/RealImpl.h"
-
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "ScalarImpl/ScalarBase.h"

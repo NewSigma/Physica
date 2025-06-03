@@ -21,6 +21,7 @@
 #include <cstring>
 #include "Physica/Core/Scalar/Integer.h"
 #include "Physica/Core/Scalar/Real.h"
+#include "Physica/Core/Scalar/RealImpl/FloatMPImpl/ArraySupport.h"
 
 using namespace Physica;
 
@@ -310,7 +311,7 @@ Integer Integer::operator--(int) {
 Integer::operator double() const {
     if (isZero())
         return 0;
-    return convertDoubleImpl(length, length - 1, byte);
+    return Real<FloatMP>::toDouble(byte, length, length - 1);
 }
 
 void Integer::swap(Integer& __restrict i) noexcept {

@@ -114,9 +114,10 @@ namespace Physica {
         [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }
         /* Setters */
         void setPower(int i) noexcept { power = i; }
-        void setByte(unsigned int index, MPUnit value) { assert(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
+        void setByte(unsigned int index, MPUnit value) noexcept;
         /* Static members */
-        static inline bool matchSign(const Real& s1, const Real& s2);
+        [[nodiscard]] static bool matchSign(const Real& s1, const Real& s2) noexcept;
+        [[nodiscard]] static double toDouble(MPUnit* __restrict byte, int length, int power) noexcept;
     private:
         /**
          * Degigned for performance,
@@ -127,30 +128,41 @@ namespace Physica {
          */
         Real(MPUnit* byte_, int length_, int power_) : byte(byte_), length(length_), power(power_) {}
         /* Operations */
-        inline void cutZero();
+        void cutZero();
         /* Friends */
         friend class Integer;
         template<FloatPrec Prec> __host__ __device__ friend Real<Prec> square(const Real<Prec>& s) noexcept;
         template<FloatPrec Prec> __host__ __device__ friend Real<Prec> sqrt(const Real<Prec>& s) noexcept;
         template<FloatPrec Prec> __host__ __device__ friend Real<Prec> ln(const Real<Prec>& s) noexcept;
         /* Static members */
-        inline static Real<FloatMP> add(const Real& s1, const Real& s2);
-        inline static Real<FloatMP> sub(const Real& s1, const Real& s2);
-        inline static Real<FloatMP> mul(const Real& s1, const Real& s2);
-        inline static Real<FloatMP> div(const Real& s1, const Real& s2);
-        inline static bool cutLength(Real<FloatMP>& s);
+        static Real<FloatMP> add(const Real& s1, const Real& s2);
+        static Real<FloatMP> sub(const Real& s1, const Real& s2);
+        static Real<FloatMP> mul(const Real& s1, const Real& s2);
+        static Real<FloatMP> div(const Real& s1, const Real& s2);
+        static bool cutLength(Real<FloatMP>& s);
     };
 
-    inline Real<FloatMP>& operator++(Real<FloatMP>& s);
-    inline Real<FloatMP>& operator--(Real<FloatMP>& s);
-    inline Real<FloatMP> operator++(Real<FloatMP>& s, int);
-    inline Real<FloatMP> operator--(Real<FloatMP>& s, int);
-    /* Compare */
+    template<std::integral T>
+    Real<FloatMP>::Real(T x) : Real(SignedMPUnit(x)) {
+        assert(x <= std::numeric_limits<SignedMPUnit>::max());
+    }
+
+    template<Scalar T>
+    Real<FloatMP>::Real(const T& x) requires(!Diffable<T>) : Real(double(x)) {}
+
+    inline void Real<FloatMP>::setByte(unsigned int index, MPUnit value) noexcept {
+        assert(index < static_cast<unsigned int>(getSize()));
+        byte[index] = value;
+    }
+
+    PHYSICA_API Real<FloatMP>& operator++(Real<FloatMP>& s);
+    PHYSICA_API Real<FloatMP>& operator--(Real<FloatMP>& s);
+    PHYSICA_API Real<FloatMP> operator++(Real<FloatMP>& s, int);
+    PHYSICA_API Real<FloatMP> operator--(Real<FloatMP>& s, int);
     PHYSICA_API bool absCompare(const Real<FloatMP>& s1, const Real<FloatMP>& s2);
 }
 
 #include "FloatMPImpl/Const.h"
-#include "FloatMPImpl/FloatMPImpl.h"
 
 namespace std {
     template<>

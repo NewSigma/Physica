@@ -170,7 +170,7 @@ namespace Physica {
 
     namespace Internal {
         /**
-         * \class BinaryScalarOpRtnTy returns a type that can exactly represent the two input scalars.
+         * \class BinaryScalarOpRtnTy returns the minimal type that can exactly represent the two input scalars.
          */
         template<Scalar T1, Scalar T2>
         class BinaryScalarOpRtnTy {

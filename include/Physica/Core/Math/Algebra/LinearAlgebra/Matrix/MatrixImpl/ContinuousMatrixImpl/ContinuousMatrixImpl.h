@@ -28,17 +28,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    Derived& ContinuousMatrix<Derived>::operator=(const ScalarType& s) {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            const size_t maxMajor = Base::getMaxMajor();
-            const size_t maxMinor = Base::getMaxMinor();
-            TracerType::getInstance().reserve(maxMajor * maxMinor);
-        }
-        return Base::operator=(s); // TODO: Optimize it using SIMD
-    }
-
-    template<class Derived>
     inline auto ContinuousMatrix<Derived>::row(size_t r) noexcept {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)

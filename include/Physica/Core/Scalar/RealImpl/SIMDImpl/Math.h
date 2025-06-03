@@ -45,34 +45,12 @@ namespace Physica {
 
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> sqrt(const SIMD<T, Size>& x) {
-        if constexpr (!T::isDiffable)
-            return SIMD<T, Size>(sqrt(x.toMachine()));
-        else {
-            using PlainSIMD = SIMD<typename T::ValueType, Size>;
-            using TracerType = T::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(sqrt(x.toMachine()));
-            const size_t newHeadNode = tracer.pushOperation(values, ExprType::Sqrt);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return {values, newHeadNode};
-        }
+        return SIMD<T, Size>(sqrt(x.toMachine()));
     }
 
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> cbrt(const SIMD<T, Size>& x) {
-        if constexpr (!T::isDiffable)
-            return SIMD<T, Size>(cbrt(x.toMachine()));
-        else {
-            using PlainSIMD = SIMD<typename T::ValueType, Size>;
-            using TracerType = T::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(cbrt(x.toMachine()));
-            const size_t newHeadNode = tracer.pushOperation(values, ExprType::Cbrt);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return {values, newHeadNode};
-        }
+        return SIMD<T, Size>(cbrt(x.toMachine()));
     }
 
     template<Scalar T, size_t Size>
