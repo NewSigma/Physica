@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T>
-    inline CoDiff<T> abs(T&& x) requires(ReverseDiff<T>) {
+    inline CoDiff<T> abs(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield abs(x_.value());
         auto& g = y.grad();
@@ -30,7 +30,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline CoDiff<T> relu(T&& x) requires(ReverseDiff<T>) {
+    inline CoDiff<T> relu(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield relu(x_.value());
@@ -38,7 +38,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline CoDiff<T> square(T&& x) requires(ReverseDiff<T>) {
+    inline CoDiff<T> square(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield square(x_.value());
@@ -46,14 +46,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline CoDiff<T> reciprocal(T&& x) requires(ReverseDiff<T>) {
+    inline CoDiff<T> reciprocal(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield reciprocal(x_.value());
         x_.reverse(-square(y.value()) * y.grad());
     }
 
     template<Scalar T>
-    CoDiff<T> sqrt(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> sqrt(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield sqrt(x_.value());
@@ -61,7 +61,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> cbrt(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> cbrt(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield cbrt(x_.value());
@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> ln(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> ln(T&& x) noexcept requires(ReverseDiff<T>) {
         if constexpr (!T::isComplex)
             assert(x.isPositive() && "[Error]: Invalid param");
 
@@ -86,14 +86,14 @@ namespace Physica {
     //auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a);
     
     template<Scalar T>
-    CoDiff<T> exp(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield exp(x_.value());
         x_.reverse(y.value() * y.grad());
     }
 
     template<Scalar T, Scalar U>
-    CoDiff<T> pow(T&& x, U&& a) requires(ReverseDiff<T> && !Diffable<U>) {
+    CoDiff<T> pow(T&& x, U&& a) noexcept requires(ReverseDiff<T> && !Diffable<U>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> a_ = std::forward<U>(a);
         auto y = co_yield pow(x_.value(), a_);
@@ -104,7 +104,7 @@ namespace Physica {
     //auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n);
 
     template<Scalar T>
-    CoDiff<T> cos(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         Tv c, s;
@@ -114,7 +114,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CoDiff<T> sin(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> sin(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         Tv c, s;
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    CoDiff<void> sincos(const T& x, U&& sin_result, U&& cos_result) requires(ReverseDiff<T> && ReverseDiff<U>) {
+    CoDiff<void> sincos(const T& x, U&& sin_result, U&& cos_result) noexcept requires(ReverseDiff<T> && ReverseDiff<U>) {
         using Tv = T::ValueType;
         Tv s, c;
         sincos(x.value(), s, c);
@@ -168,27 +168,26 @@ namespace Physica {
     */
 
     template<Scalar T>
-    CoDiff<T> cosh(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> cosh(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield cosh(x_.value());
         x_.reverse(sinh(x_.value()) * y.grad());
     }
 
     template<Scalar T>
-    CoDiff<T> sinh(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> sinh(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield sinh(x_.value());
         x_.reverse(cosh(x_.value()) * y.grad());
     }
 
     template<Scalar T>
-    CoDiff<T> tanh(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> tanh(T&& x) noexcept requires(ReverseDiff<T>) {
         using Tv = std::remove_reference_t<T>::ValueType;
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield tanh(x_.value());
         x_.reverse((Tv(1) - square(y.value())) * y.grad());
     }
-
 
     /*
     template<Scalar T, int Order>
@@ -220,7 +219,7 @@ namespace Physica {
     */
 
     template<Scalar T>
-    CoDiff<T> lncosh(T&& x) requires(ReverseDiff<T>) {
+    CoDiff<T> lncosh(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         auto y = co_yield lncosh(x_.value());
         x_.reverse(tanh(x_.value()) * y.grad());

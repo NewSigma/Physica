@@ -209,7 +209,7 @@ namespace Physica {
     [[nodiscard]] inline CoDiff<SIMD<Diff<T, Mode, Order>, Size>> mul_add(
             const SIMD<Diff<T, Mode, Order>, Size>& a,
             const SIMD<Diff<T, Mode, Order>, Size>& b,
-            const SIMD<Diff<T, Mode, Order>, Size>& c) {
+            const SIMD<Diff<T, Mode, Order>, Size>& c) noexcept {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = ResultType::GradType;

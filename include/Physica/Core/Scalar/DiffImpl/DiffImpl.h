@@ -143,7 +143,7 @@ namespace Physica {
 #endif
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(const T& x, const U& y) requires(ForwardDiff<T>) {
+    [[nodiscard]] __host__ __device__ auto operator+(const T& x, const U& y) noexcept requires(ForwardDiff<T>) {
         using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
         if constexpr (Diffable<U>)
             return ResultType{x.value() + y.value(), x.grad() + y.grad()};
@@ -152,7 +152,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator+(T&& x, U&& y) -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    [[nodiscard]] inline auto operator+(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
@@ -164,7 +164,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator-(const T& x, const U& y) requires(ForwardDiff<T>) {
+    [[nodiscard]] __host__ __device__ auto operator-(const T& x, const U& y) noexcept requires(ForwardDiff<T>) {
         using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
         if constexpr (Diffable<U>)
             return ResultType{x.value() - y.value(), x.grad() - y.grad()};
@@ -173,7 +173,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator-(T&& x, U&& y) -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    [[nodiscard]] inline auto operator-(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
@@ -185,7 +185,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator*(const T& x, const U& y) requires(ForwardDiff<T>) {
+    [[nodiscard]] __host__ __device__ auto operator*(const T& x, const U& y) noexcept requires(ForwardDiff<T>) {
         using ResultType = typename Internal::BinaryScalarOpRtnTy<T, U>::Type;
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
@@ -197,7 +197,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator*(T&& x, U&& y) -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    [[nodiscard]] inline auto operator*(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
@@ -209,7 +209,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator/(const T& x, const U& y) requires(ForwardDiff<T>) {
+    [[nodiscard]] __host__ __device__ inline auto operator/(const T& x, const U& y) noexcept requires(ForwardDiff<T>) {
         using ResultType = typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type;
         if constexpr (Diffable<U>) {
             using GradType = ResultType::GradType;
@@ -224,7 +224,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator/(T&& x, U&& y) -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    [[nodiscard]] inline auto operator/(T&& x, U&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
@@ -236,7 +236,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator+(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
+    [[nodiscard]] __host__ __device__ inline auto operator+(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
         if constexpr (IsHost() || ForwardDiff<T>)
             return std::forward<T>(y) + std::forward<U>(x);
         else
@@ -244,7 +244,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator-(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
+    [[nodiscard]] __host__ __device__ inline auto operator-(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
         if constexpr (IsHost() || ForwardDiff<T>)
             return -(std::forward<T>(y) - std::forward<U>(x));
         else
@@ -252,7 +252,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, T&& y) requires(Diffable<T> && !Diffable<U>) {
+    [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, T&& y) noexcept requires(Diffable<T> && !Diffable<U>) {
         if constexpr (IsHost() || ForwardDiff<T>)
             return std::forward<T>(y) * std::forward<U>(x);
         else
@@ -260,14 +260,14 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator/(const U& x, const T& y) requires(ForwardDiff<T> && !Diffable<U>) {
+    [[nodiscard]] __host__ __device__ auto operator/(const U& x, const T& y) noexcept requires(ForwardDiff<T> && !Diffable<U>) {
         using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
         const auto rep = reciprocal(y.value());
         return ResultType(x * rep, -x * square(rep) * y.grad());
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator/(U&& x, T&& y) -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    [[nodiscard]] inline auto operator/(U&& x, T&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T> && !Diffable<U>) {
         const auto rep = reciprocal(std::forward<T>(y));
         auto result = co_yield x * rep.value();
