@@ -30,7 +30,6 @@ namespace Physica {
         PositionMatrix buffer;
         T repTemperature;
         T lastEnergy;
-        std::uniform_real_distribution<MachineType> dist;
     public:
         MonteCarlo(MDCellType cell_, T temperatureT, T sigma);
         MonteCarlo(const MonteCarlo&) = default;
@@ -51,7 +50,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     MonteCarlo<T, Dim>::MonteCarlo(MDCellType cell_, T temperatureT, T sigma)
-            : cell(std::move(cell_)), repTemperature(reciprocal(temperatureT)), lastEnergy(0), dist(-MachineType(sigma), MachineType(sigma)) {
+            : cell(std::move(cell_)), repTemperature(reciprocal(temperatureT)), lastEnergy(0) {
         buffer.resize(cell.getNumParticle(), Dim);
     }
 
@@ -64,8 +63,6 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     template<RNG R, class ForceModel, ExecutePolicy P>
     void MonteCarlo<T, Dim>::nvt_step(const ForceModel& forceModel) {
-        std::uniform_real_distribution<> uniform_dist{};
-
         for (size_t i = 0; i < cell.getNumParticle(); ++i) {
             for (unsigned int j = 0; j < Dim; ++j)
                 buffer(i, j) = cell.getPos()(i, j) + T::template random_uniform<R>();
@@ -94,6 +91,5 @@ namespace Physica {
         buffer.swap(mc.buffer);
         repTemperature.swap(mc.repTemperature);
         lastEnergy.swap(mc.lastEnergy);
-        dist.swap(mc.dist);
     }
 }

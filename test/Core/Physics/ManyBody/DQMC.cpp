@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/ManyBody/DQMC.h"
 
 using namespace Physica;
-using T = float32;
+using T = float64;
 using RandomType = Random<MT19937>;
 constexpr int Dim = 2;
 constexpr double HoppingT = 1;

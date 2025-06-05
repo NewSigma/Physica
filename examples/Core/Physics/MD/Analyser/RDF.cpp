@@ -39,7 +39,6 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 Vector3D<ScalarType> randomVector() {
-    std::uniform_real_distribution dist{};
     const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
     const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
     Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};

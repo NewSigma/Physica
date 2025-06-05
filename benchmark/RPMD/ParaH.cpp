@@ -37,10 +37,7 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 static RPMD<ScalarType> makeSystem(size_t numMolecular) {
     using MDCellType = RPMD<ScalarType>::MDCellType;
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    MDCellType::PositionMatrix pos(numMolecular, 3);
-    std::uniform_real_distribution dist{};
-    for (auto& elem : pos.asArray())
-        elem = dist(RandomSource::getInstance());
+    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 

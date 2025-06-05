@@ -62,7 +62,6 @@ static MDCell<ScalarType> makeSystem(unsigned int cellSize) {
     lattice *= latticeFactor;
 
     CrystalCellType::PositionMatrix pos(numAtom, 3);
-    std::uniform_real_distribution dist{};
     for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
         if (i == 0) {

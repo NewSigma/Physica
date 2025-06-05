@@ -45,7 +45,6 @@ using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exac
 static MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
-    std::uniform_real_distribution dist{};
     auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);

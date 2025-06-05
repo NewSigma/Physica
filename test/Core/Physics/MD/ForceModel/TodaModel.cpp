@@ -32,7 +32,6 @@ constexpr double unitMassM = 1;
 MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
-    std::uniform_real_distribution dist{};
     auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
     posVec *= ScalarType(latticeSize);
     std::sort(posVec.begin(), posVec.end());

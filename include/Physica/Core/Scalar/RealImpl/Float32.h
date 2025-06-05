@@ -126,8 +126,7 @@ namespace Physica {
 
     template<RNG R>
     inline Real<Float32> Real<Float32>::random_uniform() {
-        std::uniform_real_distribution<float> dist{};
-        return Real(dist(R::getInstance()));
+        return Real(std::generate_canonical<float, std::numeric_limits<float>::digits>(R::getInstance()));
     }
 
     template<RNG R>

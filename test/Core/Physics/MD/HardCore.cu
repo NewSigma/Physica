@@ -40,11 +40,9 @@ using ForceModel = EmptyForceModel<ScalarType, 1>;
 
 MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
+    posVec *= ScalarType(latticeSize);
 
-    std::uniform_real_distribution dist{};
-    VectorND<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(RandomSource::getInstance()) * latticeSize;
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
