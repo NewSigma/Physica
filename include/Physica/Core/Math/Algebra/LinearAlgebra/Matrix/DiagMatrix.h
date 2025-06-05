@@ -136,4 +136,5 @@ namespace Physica {
     };
 }
 
+#include "DiagMatrixImpl/GEMM.h"
 #include "DiagMatrixImpl/InverseGEMM.h"
