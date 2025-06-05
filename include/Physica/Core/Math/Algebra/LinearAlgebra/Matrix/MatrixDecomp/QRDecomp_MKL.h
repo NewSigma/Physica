@@ -18,16 +18,14 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Exception/MKL/Lapack.h"
 #include "QRDecomp.h"
 
 namespace Physica {
-    template<Scalar T>
+    template<Scalar T, bool Pivot>
     template<Matrix M>
-    void QRDecomp<T>::compute_mkl(const M& source, bool pivote) {
+    void QRDecomp<T, Pivot>::compute_mkl(const M& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
         working = source;
@@ -39,9 +37,8 @@ namespace Physica {
         auto* a = reinterpret_cast<Tm*>(working.data());
         auto* tau = reinterpret_cast<Tm*>(taus.data());
 
-        if (pivote) {
-            Array<size_t> perm(n, 0);
-            auto* jpvt = reinterpret_cast<MKL_INT64*>(perm.data());
+        if constexpr (Pivot) {
+            auto* jpvt = reinterpret_cast<MKL_INT64*>(perm.getIndices().data());
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
@@ -54,6 +51,9 @@ namespace Physica {
                 else
                     check_lapack(LAPACKE_dgeqp3_64(Layout, m, n, a, lda, jpvt, tau));
             }
+
+            for (auto& index : perm.getIndices())
+                index -= 1;
         }
         else {
             if constexpr (isComplex) {
@@ -71,8 +71,8 @@ namespace Physica {
         }
     }
 
-    template<Scalar T>
-    auto QRDecomp<T>::getMatrixQ_mkl() const noexcept -> MatrixND {
+    template<Scalar T, bool Pivot>
+    auto QRDecomp<T, Pivot>::getMatrixQ_mkl() const noexcept -> MatrixND {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         static_assert(!isComplex);
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;

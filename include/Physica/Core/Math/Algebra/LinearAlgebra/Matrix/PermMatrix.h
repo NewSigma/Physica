@@ -39,11 +39,15 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
+        [[nodiscard]] T det() const;
+        [[nodiscard]] constexpr static T lnAbsDet() noexcept { return T(0); }
+
         void swapRows(size_t row1, size_t row2);
         [[nodiscard]] PermMatrix inverse() const noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getIndices() const noexcept { return indices; }
+        [[nodiscard]] auto& getIndices() noexcept { return indices; }
         [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
     };
@@ -69,6 +73,17 @@ namespace Physica {
     template<Scalar T>
     T PermMatrix<T>::calc(size_t row, size_t col) const {
         return indices[row] == col ? T(1) : T(0);
+    }
+
+    template<Scalar T>
+    T PermMatrix<T>::det() const {
+        int count = 0;
+        for (size_t i = 0; i < getRow(); ++i) {
+            for (size_t j = i + 1; j < getRow(); ++j) {
+                count += indices[j] < indices[i];
+            }
+        }
+        return T((count % 2 == 0) ? 1.0 : -1.0);
     }
 
     template<Scalar T>

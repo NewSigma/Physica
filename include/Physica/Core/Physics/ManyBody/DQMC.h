@@ -91,10 +91,10 @@ namespace Physica {
 
         void initChain();
         void single_flip(int site, int split);
-        void makeWeightMatrix(bool spin);
-        std::pair<T, T> lnPartition(bool spin);
+        void makeWeightMatrix(const MatrixChain& chain);
+        std::pair<T, T> lnPartition(const MatrixChain& chain);
         std::pair<T, T> lnPartition();
-        T calcGreen(bool spin);
+        std::pair<T, T> calcGreen(const MatrixChain& chain, MatrixType& green);
         void update();
 
         T calcLnSpinWaveWeight(int site) const;
@@ -279,22 +279,22 @@ namespace Physica {
      * [1] Linear Algebra and its Applications 435(3), 659-673 (2011); https://doi.org/10.1016/j.laa.2010.06.023
      */
     template<Scalar T>
-    void DQMC<T>::makeWeightMatrix(bool spin) {
+    void DQMC<T>::makeWeightMatrix(const MatrixChain& chain) {
         const int numSplit = getNumSplit();
-        const auto& chain = spin ? chainU : chainD;
         qr.compute(chain[numSplit - 1]);
-        qr.toQDT();
+        auto matrixD = DiagMatrix<T>(qr.toQDT());
         matrixT = qr.getMatrixR();
         for (int i = numSplit - 2; i >= 0; --i) {
-            qr.compute(chain[i] * qr.getMatrixQ() * DiagMatrix<T>(qr.getVecD()));
-            qr.toQDT();
+            buffer = chain[i] * qr.getMatrixQ();
+            qr.compute(buffer * matrixD);
+            matrixD.diag() = qr.toQDT();
             buffer = qr.getMatrixR() * matrixT;
             buffer.swap(matrixT);
         }
 
         const T shift = params.calcShift();
         for (int i = 0; i < getNumSite(); ++i) {
-            const T originD = qr.getVecD()[i] * exp(shift);
+            const T originD = matrixD.diag()[i] * exp(shift);
             const T absD = abs(originD);
             const bool sep = absD > T(1);
             matrixDb.diag()[i] = sep ? reciprocal(absD) : T(1);
@@ -303,8 +303,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    std::pair<T, T> DQMC<T>::lnPartition(bool spin) {
-        makeWeightMatrix(spin);
+    std::pair<T, T> DQMC<T>::lnPartition(const MatrixChain& chain) {
+        makeWeightMatrix(chain);
         T sign = qr.calcDetQ();
         buffer = qr.getMatrixQ() * matrixDb;
         qr.compute(buffer.transpose() + matrixDs * matrixT);
@@ -319,28 +319,26 @@ namespace Physica {
 
     template<Scalar T>
     std::pair<T, T> DQMC<T>::lnPartition() {
-        auto [lnZ1, sign1] = lnPartition(true);
-        auto [lnZ2, sign2] = lnPartition(false);
+        auto [lnZ1, sign1] = lnPartition(chainU);
+        auto [lnZ2, sign2] = lnPartition(chainD);
         return std::make_pair(lnZ1 + lnZ2, sign1 * sign2);
     }
 
     template<Scalar T>
-    T DQMC<T>::calcGreen(bool spin) {
-        const auto [lnZ, sign] = lnPartition(spin);
-        if (spin)
-            signU = sign;
-        else
-            signD = sign;
-
-        auto& green = spin ? greenU : greenD;
+    std::pair<T, T> DQMC<T>::calcGreen(const MatrixChain& chain, MatrixType& green) {
+        auto pair = lnPartition(chain);
         matrixT = buffer * qr.getMatrixQ();
         green = qr.getMatrixR().inverse() * matrixT.transpose();
-        return lnZ;
+        return pair;
     }
 
     template<Scalar T>
     void DQMC<T>::update() {
-        lnPartitionZ = calcGreen(true) + calcGreen(false);
+        auto [lnZ1, sign1] = calcGreen(chainU, greenU);
+        auto [lnZ2, sign2] = calcGreen(chainD, greenD);
+        lnPartitionZ = lnZ1 + lnZ2;
+        signU = sign1;
+        signD = sign2;
     }
 
     template<Scalar T>

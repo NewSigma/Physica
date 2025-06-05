@@ -20,11 +20,12 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
 
 using namespace Physica;
-using Matrix3D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element, 3, 3>;
-using Matrix4D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element, 4, 4>;
+using T = float64;
+using Matrix3D = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, 3, 3>;
+using Matrix4D = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, 4, 4>;
 
 template<Matrix M>
-void composite(const QRDecomp<float64>& qr, const M& m) {
+void testQR(const QRDecomp<T, false>& qr, const M& m) {
     M matrixQ = qr.getMatrixQ();
     M matrixR = qr.getMatrixR();
     M result = matrixQ * matrixR;
@@ -33,20 +34,34 @@ void composite(const QRDecomp<float64>& qr, const M& m) {
 }
 
 template<Matrix M>
-void testQR(const M& m) {
-    QRDecomp<float64> qr(m.getRow(), m.getCol());
+void testQRP(const QRDecomp<T, true>& qr, const M& m) {
+    M matrixQ = qr.getMatrixQ();
+    M matrixR = qr.getMatrixR();
+    M result0 = matrixQ * matrixR;
+    M result1 = result0 * qr.getMatrixP();
+    if (!matrixNear(result1, m, 1E-15))
+        exit(1);
+}
+
+template<Matrix M>
+void testDecomp(const M& m) {
+    QRDecomp<T, false> qr(m.getRow(), m.getCol());
+    QRDecomp<T, true> qrp(m.getRow(), m.getCol());
     if constexpr (HasMKL()) {
         qr.compute_mkl(m);
-        composite(qr, m);
+        qrp.compute_mkl(m);
+        testQR(qr, m);
+        testQRP(qrp, m);
     }
-    qr.compute_base(m);
-    composite(qr, m);
+
+    qr.compute_mkl(m);
+    testQR(qr, m);
 }
 
 int main() {
     const Matrix3D m1{2, 3, 4, 1, 1, 9, 1, 2, -6};
     const Matrix4D m2{0, 0.125, 0.125, 0, 0.125, 0, 0, 0.125, 0.125, 0, 0, 0.125, 0, 0.125, 0.125, 0};
-    testQR(m1);
-    testQR(m2);
+    testDecomp(m1);
+    testDecomp(m2);
     return 0;
 }

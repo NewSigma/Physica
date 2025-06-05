@@ -39,7 +39,7 @@ namespace Physica {
     template<class> class NormMatrix;
     template<class> class ValueMatrix;
     template<class, int GradOrder> class GradMatrix;
-    template<Scalar> class QRDecomp;
+    template<Scalar, bool Pivot> class QRDecomp;
     template<Matrix, Matrix> class GEMM;
     /**
      * \class RValueMatrix: The base class of all matrixes

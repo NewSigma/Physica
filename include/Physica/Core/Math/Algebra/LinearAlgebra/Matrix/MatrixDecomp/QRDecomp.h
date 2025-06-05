@@ -18,20 +18,26 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
-    template<Scalar T>
+    /**
+     * Decompose matrix like A = QR(no pivoting), or A = QRP(poviting)
+     */
+    template<Scalar T, bool Pivot = false>
     class QRDecomp {
-        using This = QRDecomp<T>;
+        constexpr static bool isComplex = T::isComplex;
+        using This = QRDecomp<T, Pivot>;
         using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
         using Tc = T::ComplexType;
-        constexpr static bool isComplex = T::isComplex;
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        using Perm = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
     private:
         MatrixND working;
         VectorND<T> taus;
-        VectorND<T> vecD;
+        [[no_unique_address]] Perm perm;
     public:
         QRDecomp() = default;
         QRDecomp(size_t row, size_t col);
@@ -44,14 +50,14 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<Matrix M>
-        void compute(const M& source, bool pivote = false);
+        void compute(const M& source);
         template<Matrix M>
-        void compute_base(const M& source, bool pivote = false);
+        void compute_base(const M& source);
         template<Matrix M>
-        void compute_mkl(const M& source, bool pivote = false);
+        void compute_mkl(const M& source);
 
         [[nodiscard]] T calcDetQ() const;
-        void toQDT();
+        [[nodiscard]] VectorND<T> toQDT();
 
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
@@ -59,39 +65,40 @@ namespace Physica {
         [[nodiscard]] auto& getWorking() noexcept { return working; }
         [[nodiscard]] const auto& getWorking() const noexcept { return working; }
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
-        [[nodiscard]] const auto& getVecD() const noexcept { return vecD; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
         [[nodiscard]] MatrixND getMatrixQ() const noexcept;
         [[nodiscard]] auto getMatrixR() const noexcept;
         [[nodiscard]] MatrixND getMatrixQ_mkl() const noexcept;
+        [[nodiscard]] const auto& getMatrixP() const noexcept requires(Pivot) { return perm; }
     };
 
-    template<Scalar T>
-    QRDecomp<T>::QRDecomp(size_t row, size_t col) {
+    template<Scalar T, bool Pivot>
+    QRDecomp<T, Pivot>::QRDecomp(size_t row, size_t col) {
         resize(row, col);
     }
 
-    template<Scalar T>
+    template<Scalar T, bool Pivot>
     template<Matrix M>
-    QRDecomp<T>::QRDecomp(const M& source) : QRDecomp(source.getRow(), source.getCol()) {
+    QRDecomp<T, Pivot>::QRDecomp(const M& source) : QRDecomp(source.getRow(), source.getCol()) {
         compute(source);
     }
 
-    template<Scalar T>
+    template<Scalar T, bool Pivot>
     template<Matrix M>
-    void QRDecomp<T>::compute(const M& source, bool pivote) {
+    void QRDecomp<T, Pivot>::compute(const M& source) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
         if constexpr (HasMKL() && (M::SizeAtCompile > 16 || M::SizeAtCompile == Dynamic))
-            compute_mkl(source, pivote);
+            compute_mkl<M>(source);
         else
-            compute_base(source, pivote);
+            compute_base<M>(source);
     }
 
-    template<Scalar T>
+    template<Scalar T, bool Pivot>
     template<Matrix M>
-    void QRDecomp<T>::compute_base(const M& source, bool pivote) {
+    void QRDecomp<T, Pivot>::compute_base(const M& source) {
+        assert(!Pivot && "Not implemented");
         working = source;
 
         size_t i = 0;
@@ -106,18 +113,20 @@ namespace Physica {
         }
     }
 
-    template<Scalar T>
-    T QRDecomp<T>::calcDetQ() const {
+    template<Scalar T, bool Pivot>
+    T QRDecomp<T, Pivot>::calcDetQ() const {
         int sign = 0;
         for (auto tau : taus)
             sign += tau.isPositive();
         return T(sign % 2 == 0 ? 1.0 : -1.0);
     }
-
-    template<Scalar T>
-    void QRDecomp<T>::toQDT() {
+    /**
+     * Decompose matrix like A = QDT(no pivoting), or A = QDTP(poviting), where D is diagonal
+     */
+    template<Scalar T, bool Pivot>
+    VectorND<T> QRDecomp<T, Pivot>::toQDT() {
         const size_t length = taus.getLength();
-        vecD.resize(length);
+        VectorND<T> vecD(length);
         for (size_t i = 0; i < length; ++i) {
             if (working(i, i).isZero()) {
                 vecD[i] = 1;
@@ -127,33 +136,37 @@ namespace Physica {
             vecD[i] = working(i, i);
             working.row(i).tail(i) *= reciprocal(vecD[i]);
         }
+        return vecD;
     }
 
-    template<Scalar T>
-    void QRDecomp<T>::resize(size_t row, size_t col) {
+    template<Scalar T, bool Pivot>
+    void QRDecomp<T, Pivot>::resize(size_t row, size_t col) {
         working.resize(row, col);
         auto l = std::min(row, col);
         taus.resize(l);
         taus[l - 1] = 0; // For historic reason, BLAS-like interface will allocate a unused element
+        if constexpr (Pivot)
+            perm = Perm(col);
     }
 
-    template<Scalar T>
-    void QRDecomp<T>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, bool Pivot>
+    void QRDecomp<T, Pivot>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         taus.swap(obj.taus);
+        perm.swap(obj.perm);
     }
 
-    template<Scalar T>
-    auto QRDecomp<T>::getMatrixQ() const noexcept -> MatrixND {
+    template<Scalar T, bool Pivot>
+    auto QRDecomp<T, Pivot>::getMatrixQ() const noexcept -> MatrixND {
         if constexpr (HasMKL())
             return getMatrixQ_mkl();
         else
             noImpl(__func__);
     }
 
-    template<Scalar T>
-    auto QRDecomp<T>::getMatrixR() const noexcept {
+    template<Scalar T, bool Pivot>
+    auto QRDecomp<T, Pivot>::getMatrixR() const noexcept {
         return working.triu();
     }
 }

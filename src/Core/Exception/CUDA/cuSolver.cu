@@ -43,7 +43,7 @@ std::string cuSolverException::Impl::message(int code) const {
     case CUSOLVER_STATUS_NOT_SUPPORTED:
         return "Not support";
     case CUSOLVER_STATUS_ZERO_PIVOT:
-        return "Zero pivote";
+        return "Zero pivot";
     case CUSOLVER_STATUS_INVALID_LICENSE:
         return "Invalid license";
     case CUSOLVER_STATUS_IRS_PARAMS_NOT_INITIALIZED:

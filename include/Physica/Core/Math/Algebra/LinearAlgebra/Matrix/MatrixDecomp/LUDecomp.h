@@ -21,11 +21,11 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
-    template<Scalar T, bool Pivote>
+    template<Scalar T, bool Pivot>
     class LUDecomp {
         using This = LUDecomp;
         using WorkingMatrix = DenseMatrix<T>;
-        using BiasArray = std::conditional<Pivote, Array<size_t>, PlainStruct<void>>::type; //TODO: use permutation matrix instead
+        using BiasArray = std::conditional<Pivot, Array<size_t>, PlainStruct<void>>::type; //TODO: use permutation matrix instead
     private:
         WorkingMatrix working;
         [[no_unique_address]] BiasArray biasOrder;
@@ -55,33 +55,33 @@ namespace Physica {
         void decomp_col(size_t col);
     };
 
-    template<Scalar T, bool Pivote>
-    LUDecomp<T, Pivote>::LUDecomp(size_t size) {
+    template<Scalar T, bool Pivot>
+    LUDecomp<T, Pivot>::LUDecomp(size_t size) {
         resize(size);
     }
 
-    template<Scalar T, bool Pivote>
+    template<Scalar T, bool Pivot>
     template<Matrix M>
-    LUDecomp<T, Pivote>::LUDecomp(const M& source) : LUDecomp(source.getRow()) {
+    LUDecomp<T, Pivot>::LUDecomp(const M& source) : LUDecomp(source.getRow()) {
         compute(source);
     }
 
-    template<Scalar T, bool Pivote>
+    template<Scalar T, bool Pivot>
     template<Matrix M>
-    void LUDecomp<T, Pivote>::compute(const M& source) {
+    void LUDecomp<T, Pivot>::compute(const M& source) {
         assert(source.getRow() == source.getCol());
         const size_t order = source.getRow();
         if (order != getOrder())
             resize(order);
 
-        if constexpr (Pivote) {
+        if constexpr (Pivot) {
             for(size_t i = 0; i < order; ++i)
                 biasOrder[i] = i;
         }
 
         working = source;
         for (size_t i = 0; i < order; ++i) {
-            if constexpr (Pivote) {
+            if constexpr (Pivot) {
                 size_t j = working.partialPivoting(i);
                 std::swap(biasOrder[i], biasOrder[j]);
             }
@@ -89,26 +89,26 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, bool Pivote>
-    void LUDecomp<T, Pivote>::resize(size_t size) {
+    template<Scalar T, bool Pivot>
+    void LUDecomp<T, Pivot>::resize(size_t size) {
         working.resize(size, size);
-        if constexpr (Pivote)
+        if constexpr (Pivot)
             biasOrder.resize(size);
     }
 
-    template<Scalar T, bool Pivote>
-    void LUDecomp<T, Pivote>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, bool Pivot>
+    void LUDecomp<T, Pivot>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj);
-        if constexpr (Pivote)
+        if constexpr (Pivot)
             biasOrder.swap(biasOrder);
     }
     /**
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
-    template<Scalar T, bool Pivote>
-    void LUDecomp<T, Pivote>::decomp_col(size_t col) {
+    template<Scalar T, bool Pivot>
+    void LUDecomp<T, Pivot>::decomp_col(size_t col) {
         const size_t alpha = col + 1;
         for (size_t j = 1; j < alpha; ++j)
             working(j, col) -= working.row(j).head(j) * working.col(col).head(j);
