@@ -49,7 +49,7 @@ namespace Physica {
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
 
-        template<Scalar T> inline Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
+        template<Scalar T> Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
         template<Scalar T> void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
         template<Scalar T> void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
         template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }

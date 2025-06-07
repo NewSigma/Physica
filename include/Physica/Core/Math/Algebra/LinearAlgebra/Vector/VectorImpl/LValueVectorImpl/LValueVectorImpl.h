@@ -44,7 +44,7 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar T>
-    inline Derived& LValueVector<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
+    Derived& LValueVector<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
         for (size_t i = 0; i < Base::getLength(); ++i) {
             if constexpr (ReverseDiff<T>)
                 (*this)[i] = x.value();

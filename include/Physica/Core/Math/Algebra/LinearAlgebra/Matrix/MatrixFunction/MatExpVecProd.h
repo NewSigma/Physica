@@ -101,7 +101,7 @@ namespace Physica {
         const int numSplit = params.second;
         const Tr factor = exp(traceMu / Tr(numSplit));
 
-        BufferType buffer, term;
+        BufferType buffer(getLength()), term;
         target = v;
         for (int i = 0; i < numSplit; ++i) {
             term = target;
@@ -110,7 +110,7 @@ namespace Physica {
                 term *= reciprocal(Tr(numSplit * n));
                 {
                     auto expr = mat * term - traceMu * term;
-                    buffer.template operator=<decltype(expr), P>(expr);
+                    expr.template assign<BufferType, P>(buffer);
                     buffer.swap(term);
                 }
                 const Tr norm2 = term.normInf();

@@ -52,20 +52,20 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign(V1& target) const;
+        void assign(V1& target) const;
 
-        [[nodiscard]] ScalarType calc(size_t index) const;
+        [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     private:
-        template<Vector V1> void sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const;
-        template<Vector V1> void dotImpl(V1& target, ScalarType factor, size_t index) const;
+        template<Vector V1> void sumHopping(V1& target, FFTType& fft, T factor, StateType psi) const;
+        template<Vector V1> void dotImpl(V1& target, T factor, size_t index) const;
         /* Getters */
-        [[nodiscard]] ScalarType getHoppingT() const noexcept { return mat.getHoppingT(); }
-        [[nodiscard]] ScalarType getRepelU() const noexcept { return mat.getRepelU(); }
+        [[nodiscard]] T getHoppingT() const noexcept { return mat.getHoppingT(); }
+        [[nodiscard]] T getRepelU() const noexcept { return mat.getRepelU(); }
         [[nodiscard]] const U& getRepr() const noexcept { return mat.getRepr(); }
     };
 
@@ -76,7 +76,7 @@ namespace Physica {
 
     template<Scalar T0, Representation U, Vector V>
     template<Vector V1, ExecutePolicy P>
-    inline void HubbardVecProd<T0, U, V>::assign(V1& target) const {
+    void HubbardVecProd<T0, U, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = Tr(0);
         if constexpr (P == Thread) {
@@ -84,12 +84,12 @@ namespace Physica {
             parallel_for<P>([&](unsigned int thread) {
                 const int numThread = ThreadPool::getInstance().getNumThreads();
                 const size_t length = getLength();
-                VectorND<ScalarType> local(length, 0);
-                SparseVector<ScalarType> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
+                VectorND<T> local(length, 0);
+                SparseVector<T> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
 
                 const auto range = Task<Thread>::splitJob(length, numThread, thread);
                 for (unsigned int i = range.first; i < range.second; ++i) {
-                    mat.dotImpl(buffer, vec.calc(i), i);
+                    dotImpl(buffer, vec.calc(i), i);
                     local += buffer;
                     buffer.clear();
                 }
@@ -105,11 +105,11 @@ namespace Physica {
     }
 
     template<Scalar T0, Representation U, Vector V>
-    auto HubbardVecProd<T0, U, V>::calc(size_t index) const -> ScalarType {
+    auto HubbardVecProd<T0, U, V>::calc(size_t index) const -> T {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
-        const ScalarType hop = -mat.getHoppingT();
+        const T hop = -mat.getHoppingT();
         const auto state = getRepr()[index];
-        ScalarType result = 0;
+        T result = 0;
         int numRepel = 0;
         for (int site = 0; site < int(NumSite); ++site) {
             const bool upOccupy1 = state.isUpOccupy(site);
@@ -118,13 +118,13 @@ namespace Physica {
                 const bool upOccupy2 = state.isUpOccupy(site1);
                 const bool downOccupy2 = state.isDownOccupy(site1);
                 if (upOccupy1 != upOccupy2) {
-                    const ScalarType hopUp = hop * Tr(state.hopUpSign(site, site1));
+                    const T hopUp = hop * Tr(state.hopUpSign(site, site1));
                     const size_t index1 = getRepr()[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
                     result += vec.calc(index1) * (upOccupy1 ? hopUp : -hopUp);
                 }
 
                 if (downOccupy1 != downOccupy2) {
-                    const ScalarType hopDown = hop * Tr(state.hopDownSign(site, site1));
+                    const T hopDown = hop * Tr(state.hopDownSign(site, site1));
                     const size_t index1 = getRepr()[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
                     result += vec.calc(index1) * (downOccupy1 ? hopDown : -hopDown);
                 }
@@ -142,7 +142,7 @@ namespace Physica {
 
     template<Scalar T0, Representation U, Vector V>
     template<Vector V1>
-    void HubbardVecProd<T0, U, V>::sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    void HubbardVecProd<T0, U, V>::sumHopping(V1& target, FFTType& fft, T factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -161,19 +161,19 @@ namespace Physica {
 
     template<Scalar T0, Representation U, Vector V>
     template<Vector V1>
-    void HubbardVecProd<T0, U, V>::dotImpl(V1& target, ScalarType factor, size_t index) const {
+    void HubbardVecProd<T0, U, V>::dotImpl(V1& target, T factor, size_t index) const {
         const auto state = getRepr()[index];
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
             static_assert(Dim == 1 && "[Error]: Not implemented");
             const Tr normalizer = sqrt(Tr(getRepr().getPeriods()[index])) / Tr(NumSite);
-            const ScalarType hop = -factor * normalizer * getHoppingT();
+            const T hop = -factor * normalizer * getHoppingT();
 
             auto fft = FFTType::makeEmptyFFT(NumSite);
             for (int site = 0; site < int(NumSite); ++site) {
                 const auto site1 = (site + 1) % NumSite;
-                const ScalarType hopUp = hop * Tr(state.hopUpSign(site, site1));
-                const ScalarType hopDown = hop * Tr(state.hopDownSign(site, site1));
+                const T hopUp = hop * Tr(state.hopUpSign(site, site1));
+                const T hopDown = hop * Tr(state.hopDownSign(site, site1));
                 sumHopping(target, fft, hopUp, state.hopUp(site, site1));
                 sumHopping(target, fft, -hopUp, state.hopUp(site1, site));
                 sumHopping(target, fft, hopDown, state.hopDown(site, site1));
@@ -182,7 +182,7 @@ namespace Physica {
             }
         }
         else {
-            const ScalarType hop = -factor * getHoppingT();
+            const T hop = -factor * getHoppingT();
             for (int site = 0; site < int(NumSite); ++site) {
                 const bool upOccupy1 = state.isUpOccupy(site);
                 const bool downOccupy1 = state.isDownOccupy(site);
@@ -191,13 +191,13 @@ namespace Physica {
                     const bool upOccupy2 = state.isUpOccupy(site1);
                     const bool downOccupy2 = state.isDownOccupy(site1);
                     if (upOccupy1 != upOccupy2) {
-                        const ScalarType hopUp = hop * Tr(state.hopUpSign(site, site1));
+                        const T hopUp = hop * Tr(state.hopUpSign(site, site1));
                         const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
                         target[index] += upOccupy1 ? hopUp : -hopUp;
                     }
 
                     if (downOccupy1 != downOccupy2) {
-                        const ScalarType hopDown = hop * Tr(state.hopDownSign(site, site1));
+                        const T hopDown = hop * Tr(state.hopDownSign(site, site1));
                         const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
                         target[index] += downOccupy1 ? hopDown : -hopDown;
                     }

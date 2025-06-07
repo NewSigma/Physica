@@ -70,7 +70,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         void schedule(Handle handle) noexcept;
-        [[nodiscard]] Handle steal();
+        [[nodiscard]] Handle steal() noexcept;
         void waitExit();
         void restart();
         /* Getters */

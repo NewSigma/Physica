@@ -52,6 +52,7 @@ namespace Physica {
 
     inline TaskBase::~TaskBase() {
         if (h) {
+            assert(h.done());
             h.destroy();
             h = nullptr;
         }

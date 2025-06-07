@@ -23,14 +23,20 @@
 
 namespace Physica {
     template<class Derived>
-    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const This& v) {
+    Derived& ContinuousVector<Derived>::operator=(const This& v) {
         Base::operator=(v);
-        return *this;
+        return Base::getDerived();
     }
 
     template<class Derived>
-    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(This&& v) {
+    Derived& ContinuousVector<Derived>::operator=(This&& v) {
         return *this = v;
+    }
+
+    template<class Derived>
+    template<Vector V, ExecutePolicy P>
+    Derived& ContinuousVector<Derived>::operator=(const V& v_) requires(!CUDA<V>) {
+        return Base::template operator=<V, P>(v_);
     }
 
     template<class Derived>
@@ -130,7 +136,9 @@ namespace Physica {
     inline const auto ContinuousVector<Derived>::segment(size_t from, size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
-
+    /**
+     * Prefer zeros() over simply assigning zeros for better performance.
+     */
     template<class Derived>
     void ContinuousVector<Derived>::zeros() {
         if constexpr (Diffable<T>) {

@@ -23,11 +23,12 @@ using namespace Physica;
 
 int ThreadPool::numThreadRequired = 0;
 
-ThreadPool::ThreadPool(int numThreads)
-        : thread_data(numThreads), exit(false) {
+ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");
     for (int i = 0; i < numThreads; ++i) {
-        thread_data[i].thread.reset(new std::thread([this, i]() noexcept { workerMainLoop(i); }));
+        thread_data[i].thread.reset(new std::thread([i]() noexcept {
+            getInstance().workerMainLoop(i);
+        }));
     }
 }
 
@@ -47,7 +48,7 @@ void ThreadPool::schedule(Handle handle) noexcept {
     cond.notify_one();
 }
 
-auto ThreadPool::steal() -> Handle {
+auto ThreadPool::steal() noexcept -> Handle {
     const auto random = RandomSeed::toNextSeed(getThreadInfo().randState);
     const int numThreads = getNumThreads();
     for (int i = 0; i < numThreads; ++i) {
@@ -114,6 +115,7 @@ void ThreadPool::workerMainLoop(int thread_id) noexcept {
         }
 
         if (handle) {
+            assert(!handle.done() && "Data race");
             cond.notify_one();
             handle.resume();
             if (!handle.done())
