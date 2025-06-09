@@ -33,7 +33,7 @@ using RandomSource = Random<MT19937, 10000>;
 constexpr unsigned int NumSite = 4;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;
-constexpr unsigned int NumSample = 100;
+constexpr unsigned int NumSample = 1000;
 constexpr unsigned int NumBeta = 41;
 
 template<class ReprType>
@@ -96,11 +96,10 @@ VectorType makeDensity(const VectorType& betas) {
     return result;
 }
 
-int main(int argc, char** argv) {
+void plotTPQ() {
     const auto betas = VectorType::linspace(0, 4, NumBeta);
     const auto rhos = makeDensity(betas);
 
-    QApplication app(argc, argv);
     Plot* plot = new Plot(0, 4, 0.5, 1.05, 1, 0.2);
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
@@ -110,5 +109,64 @@ int main(int argc, char** argv) {
     axisY->setLabelFormat("%.1f");
     plot->line(betas, rhos);
     plot->show();
-    return QApplication::exec();
+    QApplication::exec();
+}
+
+void plotAll() {
+    const auto betas = VectorType::linspace(0, 4, NumBeta);
+    VectorType tpq_hphi, fulldiag_hphi, tpq, fulldiag;
+    H5File h5f("TPQ.h5", H5File::ReadOnly);
+    tpq_hphi.read(h5f, "TPQ_HPhi");
+    fulldiag_hphi.read(h5f, "FullDiag_HPhi");
+    tpq.read(h5f, "TPQ");
+    fulldiag.read(h5f, "FullDiag");
+
+    Plot* plot = new Plot(0, 4, 0.5, 1.05, 1, 0.2);
+    plot->getLegend().setAlignment(Qt::AlignRight);
+    auto* axisX = plot->getAxisX();
+    auto* axisY = plot->getAxisY();
+    axisX->setTitleText("&beta;");
+    axisX->setLabelFormat("%d");
+    axisY->setTitleText("&rho;");
+    axisY->setLabelFormat("%.1f");
+
+    auto& scatter_tpq = plot->scatter(betas, tpq_hphi);
+    scatter_tpq.setName("TPQ(HPhi)");
+    scatter_tpq.setMarkerSize(10);
+    auto pen1 = scatter_tpq.pen();
+    pen1.setColor(scatter_tpq.color());
+    scatter_tpq.setPen(pen1);
+    scatter_tpq.setColor(Qt::transparent);
+
+    auto& scatter_fd = plot->scatter(betas, fulldiag_hphi);
+    scatter_fd.setName("FullDiag(HPhi)");
+    scatter_fd.setMarkerSize(10);
+    auto pen2 = scatter_fd.pen();
+    pen2.setColor(scatter_fd.color());
+    scatter_fd.setPen(pen2);
+    scatter_fd.setColor(Qt::transparent);
+
+    auto& line_tpq = plot->line(betas, tpq);
+    line_tpq.setName("TPQ");
+    line_tpq.setColor(pen1.color());
+
+    auto& line_fd = plot->line(betas, fulldiag);
+    line_fd.setName("FullDiag");
+    auto pen = line_fd.pen();
+    pen.setColor(pen2.color());
+    pen.setStyle(Qt::DashLine);
+    QList<qreal> dashes;
+    dashes << 20 << 20;
+    pen.setDashPattern(dashes);
+    line_fd.setPen(pen);
+
+    plot->show();
+    QApplication::exec();
+}
+
+int main(int argc, char** argv) {
+    QApplication app(argc, argv);
+    plotTPQ();
+    plotAll();
+    return 0;
 }

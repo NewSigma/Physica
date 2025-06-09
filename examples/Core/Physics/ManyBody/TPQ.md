@@ -21,7 +21,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## 数值结果
 
-![](./TPQ_FD.png)
+![](./TPQ.png)
 
 **图1** 分别使用Physica和HPhi 3.5.2$^{[2]}$计算Hubbard模型倒温度$\beta$与粒子密度间关系，使用全对角化和TPQ两种方法，$U/t = 8$，格点数$L = 4$。由于不能自适应地调整展开阶数，HPhi计算结果不稳定。
 
