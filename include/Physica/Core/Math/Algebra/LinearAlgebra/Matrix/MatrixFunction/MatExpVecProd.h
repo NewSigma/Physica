@@ -59,15 +59,18 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
+        template<Vector V1, bool NoFactor = false, ExecutePolicy P = Sequential>
         inline void assign(V1& target) const;
 
-        template<Vector V1, ExecutePolicy P = Sequential>
+        template<Vector V1, bool NoFactor = false, ExecutePolicy P = Sequential>
+        inline void assign(V1& target, Tr traceMu) const;
+
+        template<Vector V1, bool NoFactor = false, ExecutePolicy P = Sequential>
         void assign(V1& target, Tr traceMu, ParamPair params) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
-        [[nodiscard]] auto calcTraceMu() const { return mexp.calcTraceMu(); }
+        [[nodiscard]] Tr calcTraceMu() const { return mexp.calcTraceMu(); }
         template<ExecutePolicy P>
         [[nodiscard]] ParamPair calcParam(Tr traceMu) const;
         /* Getters */
@@ -84,14 +87,19 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    template<Vector V1, ExecutePolicy P>
+    template<Vector V1, bool NoFactor, ExecutePolicy P>
     inline void MatExpVecProd<M, V>::assign(V1& target) const {
-        const Tr traceMu = calcTraceMu();
-        assign<V1, P>(target, traceMu, calcParam<P>(traceMu));
+        assign<V1, NoFactor, P>(target, calcTraceMu());
     }
 
     template<Matrix M, Vector V>
-    template<Vector V1, ExecutePolicy P>
+    template<Vector V1, bool NoFactor, ExecutePolicy P>
+    inline void MatExpVecProd<M, V>::assign(V1& target, Tr traceMu) const {
+        assign<V1, NoFactor, P>(target, traceMu, calcParam<P>(traceMu));
+    }
+
+    template<Matrix M, Vector V>
+    template<Vector V1, bool NoFactor, ExecutePolicy P>
     void MatExpVecProd<M, V>::assign(V1& target, Tr traceMu, ParamPair params) const {
         using BufferType = DenseVector<ScalarType, std::remove_cvref_t<V>::SizeAtCompile>;
         assert(getLength() == target.getLength());
@@ -119,7 +127,9 @@ namespace Physica {
                     break;
                 norm1 = norm2;
             }
-            target *= factor;
+
+            if constexpr (!NoFactor)
+                target *= factor;
         }
     }
 

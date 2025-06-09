@@ -39,10 +39,12 @@ namespace Physica {
         using Trv = Tr::ValueType;
         using MatrixND = DenseMatrix<T>;
 
-        Tr beta;
-        Tr traceMu;
-        int numMinCostTerm;
-        int numSplit;
+        Tr beta = 0;
+        Tr lnZ0 = 0; // Collect constant contribution, improve numerical stability
+
+        Tr traceMu = T::nan();
+        int numMinCostTerm = 0;
+        int numSplit = 0;
     public:
         TPQ() = default;
         TPQ(size_t length);
@@ -67,9 +69,9 @@ namespace Physica {
         inline void random_normal(Tr norm = 0);
         /* Getters */
         [[nodiscard]] Tr getBeta() const noexcept { return beta; }
-        [[nodiscard]] Tr getTraceMu() const noexcept { return traceMu; }
-        [[nodiscard]] int getNumMinCostTerm() const noexcept { return numMinCostTerm; }
-        [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
+        [[nodiscard]] Tr getTraceMu() const noexcept;
+        [[nodiscard]] int getNumMinCostTerm() const noexcept;
+        [[nodiscard]] int getNumSplit() const noexcept;
         [[nodiscard]] const Base& asVector() const noexcept { return *this; }
         [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
@@ -79,22 +81,16 @@ namespace Physica {
     private:
         using Base::random_uniform;
         using Base::random_any;
-        [[nodiscard]] bool isPrepared() const;
+        [[nodiscard]] bool isPrepared() const noexcept;
     };
 
     template<Scalar T>
-    TPQ<T>::TPQ(size_t length)
-            : Base(length)
-            , beta(0)
-            , traceMu(std::numeric_limits<Tr>::max())
-            , numMinCostTerm(0)
-            , numSplit(0) {
+    TPQ<T>::TPQ(size_t length) : Base(length) {
         assert(length > 0 && "[Error]: Invalid length");
     }
 
     template<Scalar T>
-    TPQ<T>::TPQ(size_t length, Tr traceMu_, int numMinCostTerm_, int numSplit_)
-            : TPQ(length) {
+    TPQ<T>::TPQ(size_t length, Tr traceMu_, int numMinCostTerm_, int numSplit_) : TPQ(length) {
         traceMu = std::move(traceMu_);
         numMinCostTerm = numMinCostTerm_;
         numSplit = numSplit_;
@@ -108,6 +104,7 @@ namespace Physica {
         const auto& hamiltonH = hamiltonH_.getDerived();
         const auto expr = exp(factor * hamiltonH) * asVector();
         traceMu = expr.calcTraceMu();
+
         const auto params = expr.template calcParam<P>(traceMu);
         numMinCostTerm = params.first;
         numSplit = params.second;
@@ -124,16 +121,19 @@ namespace Physica {
         const auto expr = exp(factor * hamiltonH) * asVector();
         BufferType dot(Base::getLength());
         if (isPrepared())
-            expr.template assign<BufferType, P>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
-        else
-            expr.template assign<BufferType, P>(dot);
+            expr.template assign<BufferType, true, P>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
+        else {
+            traceMu = expr.calcTraceMu();
+            expr.template assign<BufferType, true, P>(dot, traceMu);
+        }
         Base::swap(dot);
         beta += deltaBeta;
+        lnZ0 += traceMu;
     }
 
     template<Scalar T>
     auto TPQ<T>::calcPartitionXi() const -> Tr {
-        return Base::squaredNorm();
+        return Base::squaredNorm() * exp(Tr(2) * lnZ0);
     }
 
     template<Scalar T>
@@ -141,7 +141,7 @@ namespace Physica {
         const bool isUnderflow = abs(asVector()).max() < Tr(std::numeric_limits<Tr>::min());
         if (isUnderflow)
             return Tr(-std::numeric_limits<T>::max());
-        return Base::lnSquaredNorm();
+        return Base::lnSquaredNorm() + Tr(2) * lnZ0;
     }
 
     template<Scalar T>
@@ -163,6 +163,7 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         beta.swap(obj.beta);
+        lnZ0.swap(obj.lnZ0);
         traceMu.swap(obj.traceMu);
         std::swap(numMinCostTerm, obj.numMinCostTerm);
         std::swap(numSplit, obj.numSplit);
@@ -176,6 +177,9 @@ namespace Physica {
             norm = Tr(std::numeric_limits<Tr>::min() / std::numeric_limits<Tr>::epsilon());
         Base::template random_normal<R>();
         asVector() *= norm;
+
+        beta = 0;
+        lnZ0 = 0;
     }
 
     template<Scalar T>
@@ -184,6 +188,24 @@ namespace Physica {
         This result(len);
         result.random_normal<R>(norm);
         return result;
+    }
+
+    template<Scalar T>
+    auto TPQ<T>::getTraceMu() const noexcept -> Tr {
+        assert(traceMu.isFinite() && "[Error]: Trace is not ready");
+        return traceMu;
+    }
+
+    template<Scalar T>
+    int TPQ<T>::getNumMinCostTerm() const noexcept {
+        assert(isPrepared());
+        return numMinCostTerm;
+    }
+
+    template<Scalar T>
+    int TPQ<T>::getNumSplit() const noexcept {
+        assert(isPrepared());
+        return numSplit;
     }
 
     template<Scalar T>
@@ -209,8 +231,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    bool TPQ<T>::isPrepared() const {
-        const bool muReady = traceMu != Tr(std::numeric_limits<Tr>::max());
-        return muReady && numMinCostTerm > 0 && numSplit > 0;
+    bool TPQ<T>::isPrepared() const noexcept {
+        return traceMu.isFinite() && numMinCostTerm > 0 && numSplit > 0;
     }
 }
