@@ -118,8 +118,6 @@ void ThreadPool::workerMainLoop(int thread_id) noexcept {
             assert(!handle.done() && "Data race");
             cond.notify_one();
             handle.resume();
-            if (!handle.done())
-                schedule(handle);
         }
         else {
             std::unique_lock poolLocker(poolMutex);

@@ -78,26 +78,13 @@ namespace Physica {
     template<Vector V1, ExecutePolicy P>
     void HubbardVecProd<T0, U, V>::assign(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
-        target = Tr(0);
         if constexpr (P == Thread) {
-            std::mutex mutex{};
-            parallel_for<P>([&](unsigned int thread) {
-                const int numThread = ThreadPool::getInstance().getNumThreads();
-                const size_t length = getLength();
-                VectorND<T> local(length, 0);
-                SparseVector<T> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
-
-                const auto range = Task<Thread>::splitJob(length, numThread, thread);
-                for (unsigned int i = range.first; i < range.second; ++i) {
-                    dotImpl(buffer, vec.calc(i), i);
-                    local += buffer;
-                    buffer.clear();
-                }
-                std::unique_lock locker(mutex);
-                target += local;
-            }, 0).wait();
+            parallel_for<Thread>([&](size_t i) {
+                target[i] = calc(i);
+            }, getLength(), 0).wait();
         }
         else {
+            target = Tr(0);
             const size_t length = getLength();
             for (size_t i = 0; i < length; ++i)
                 dotImpl<V1>(target, vec.calc(i), i);

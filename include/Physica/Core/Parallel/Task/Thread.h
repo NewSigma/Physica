@@ -67,11 +67,8 @@ namespace Physica {
     inline void Task<Thread>::wait() {
         while (!done()) {
             auto handle = ThreadPool::getInstance().steal();
-            if (handle) {
+            if (handle)
                 handle.resume();
-                if (!handle.done())
-                    ThreadPool::getInstance().schedule(handle);
-            }
             else
                 std::this_thread::yield();
         }

@@ -45,6 +45,7 @@ namespace Physica {
         QRDecomp<T> qr;
         MatrixChain chainU;
         MatrixChain chainD;
+        T lnZ0;
 
         DiagMatrix<T> matrixDb;
         DiagMatrix<T> matrixDs;
@@ -95,6 +96,7 @@ namespace Physica {
         std::pair<T, T> lnPartition(const MatrixChain& chain);
         std::pair<T, T> lnPartition();
         std::pair<T, T> calcGreen(const MatrixChain& chain, MatrixType& green);
+        template<FlipMethod Method>
         void update();
 
         T calcLnSpinWaveWeight(int site) const;
@@ -119,7 +121,6 @@ namespace Physica {
         if constexpr (Method == MH) {
             single_flip(site, split);
 
-            const T lnZ0 = lnPartitionZ;
             const T lnZ1 = lnPartition().first;
             if (!accept<R>(lnZ1 - lnZ0)) {
                 single_flip(site, split);
@@ -149,7 +150,7 @@ namespace Physica {
         }
         else
             random_uniform<R>();
-        update();
+        update<Method>();
     }
 
     template<Scalar T>
@@ -158,22 +159,22 @@ namespace Physica {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         if constexpr (Method == Uniform) {
             random_uniform<R>();
-            update();
+            update<Method>();
             return;
         }
 
-        const Array<int> splits = R::random_int(getNumSite() * numStep, 0, getNumSplit() - 1);
-        const auto props = VectorND<T>::template random_uniform<R>(getNumSite() * numStep);
+        auto splits = Array<int>(getNumSite());
+        auto props = VectorND<T>(getNumSite());
         if constexpr (Method == MH) {
             for (int step = 0; step < numStep; ++step) {
+                R::random_int(splits, 0, getNumSplit() - 1);
+                props.template random_uniform<R>();
                 for (int site = 0; site < getNumSite(); ++site) {
-                    const int index = step * getNumSite() + site;
-                    const int split = splits[index];
+                    const int split = splits[site];
                     single_flip(site, split);
 
-                    const T lnZ0 = lnPartitionZ;
                     const T lnZ1 = lnPartition().first;
-                    if (!accept(lnZ1 - lnZ0, props[index])) {
+                    if (!accept(lnZ1 - lnZ0, props[site])) {
                         single_flip(site, split);
                         continue;
                     }
@@ -181,28 +182,34 @@ namespace Physica {
                 }
             }
         }
-        else {
-            static_assert(Method == Spin);
+        else if constexpr (Method == Spin) {
             for (int step = 0; step < numStep; ++step) {
+                R::random_int(splits, 0, getNumSplit() - 1);
+                props.template random_uniform<R>();
                 for (int site = 0; site < getNumSite(); ++site) {
-                    const int index = step * getNumSite() + site;
-                    const int split = splits[index];
+                    const int split = splits[site];
                     auto field = getAuxField();
                     auto spins = field.row(site);
                     const T sumSpin0 = spins.sum();
                     const T sumSpin1 = sumSpin0 - T(2) * spins[split];
                     const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
-                    if (accept(deltaW, props[index]))
+                    if (accept(deltaW, props[site]))
                         spins[split] = -spins[split];
-
-                    const T p = T::template random_uniform<R>();
-                    if (p < 0.5)
-                        spins = -spins;
                 }
+            }
+
+            for (int site = 0; site < getNumSite(); ++site) {
+                const T p = T::template random_uniform<R>();
+                auto field = getAuxField();
+                auto spins = field.row(site);
+                if (p < 0.5)
+                    spins = -spins;
             }
             initChain();
         }
-        update();
+        else
+            noImpl("Unknown Flip Method");
+        update<Method>();
     }
 
     template<Scalar T>
@@ -340,10 +347,19 @@ namespace Physica {
     }
 
     template<Scalar T>
+    template<DQMC<T>::FlipMethod Method>
     void DQMC<T>::update() {
         auto [lnZ1, sign1] = calcGreen(chainU, greenU);
         auto [lnZ2, sign2] = calcGreen(chainD, greenD);
         lnPartitionZ = lnZ1 + lnZ2;
+        if constexpr (Method == MH) {
+            lnZ0 = lnPartitionZ;
+            lnPartitionZ = 0;
+        }
+        else if constexpr (Method == Spin) {
+            for (int i = 0; i < getNumSite(); ++i)
+                lnPartitionZ -= calcLnSpinWaveWeight(i);
+        }
         signU = sign1;
         signD = sign2;
     }
