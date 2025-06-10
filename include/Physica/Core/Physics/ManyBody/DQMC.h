@@ -42,15 +42,14 @@ namespace Physica {
     private:
         const Params& params;
         VectorND<T> aux;
-        QRDecomp<T> qr;
         MatrixChain chainU;
         MatrixChain chainD;
-        T lnZ0;
 
-        DiagMatrix<T> matrixDb;
-        DiagMatrix<T> matrixDs;
-        MatrixType matrixT;
+        Array<QRDecomp<T>> qr;
+        Array<MatrixType> matrixQs;
+        Array<DiagMatrix<T>> matrixDs;
         MatrixType buffer;
+        T lnZ0;
 
         T lnPartitionZ;
         T signU = 1;
@@ -101,6 +100,9 @@ namespace Physica {
 
         T calcLnSpinWaveWeight(int site) const;
         T calcLnSpinWaveWeight(T sumSpin) const;
+        /* Getters */
+        [[nodiscard]] auto& getDiagB() noexcept { return matrixDs[0]; }
+        [[nodiscard]] auto& getDiagS() noexcept { return matrixDs[1]; }
         /* Static members */
         template<RNG R>
         static bool accept(T deltaW) noexcept;
@@ -217,13 +219,13 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(params, obj.params);
         aux.swap(obj.aux);
-        qr.swap(obj.qr);
+
         chainU.swap(obj.chainU);
         chainD.swap(obj.chainD);
-        
-        matrixDb.swap(obj.matrixDb);
+
+        qr.swap(obj.qr);
+        matrixQs.swap(obj.matrixQs);
         matrixDs.swap(obj.matrixDs);
-        matrixT.swap(obj.matrixT);
         buffer.swap(obj.buffer);
 
         lnPartitionZ.swap(obj.lnPartitionZ);
@@ -237,8 +239,8 @@ namespace Physica {
     void DQMC<T>::resize(int numSite, int numSplit) {
         assert(numSite > 0 && "[Error]: Invalid NumSite");
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
+        const int numQR = (numSplit + 1) / 2;
         aux.resize(numSite * numSplit);
-        qr.resize(numSite, numSite);
         chainU.resize(numSplit);
         chainD.resize(numSplit);
         for (int i = 0; i < numSplit; ++i) {
@@ -246,9 +248,9 @@ namespace Physica {
             chainD[i].resize(numSite);
         }
 
-        matrixDb.resize(numSite);
-        matrixDs.resize(numSite);
-        matrixT.resize(numSite, numSite);
+        qr.resize(numQR, numSite, numSite);
+        matrixQs.resize(numQR, numSite, numSite);
+        matrixDs.resize(numQR, numSite);
         buffer.resize(numSite, numSite);
         greenU.resize(numSite, numSite);
         greenD.resize(numSite, numSite);
@@ -295,39 +297,66 @@ namespace Physica {
     template<Scalar T>
     void DQMC<T>::makeWeightMatrix(const MatrixChain& chain) {
         const int numSplit = getNumSplit();
-        qr.compute(chain[numSplit - 1]);
-        auto matrixD = DiagMatrix<T>(qr.toQDT());
-        matrixT = qr.getMatrixR();
-        for (int i = numSplit - 2; i >= 0; --i) {
-            buffer = chain[i] * qr.getMatrixQ();
-            qr.compute(buffer * matrixD);
-            matrixD.diag() = qr.toQDT();
-            buffer = qr.getMatrixR() * matrixT;
-            buffer.swap(matrixT);
+        for (int i = 0; i < numSplit; i += 2) {
+            const int index = i / 2;
+            auto& qri = qr[index];
+            if (i + 1 < numSplit) [[likely]]
+                qri.compute(chain[i] * chain[i + 1]);
+            else
+                qri.compute(chain[i]);
+            matrixQs[index] = qri.getMatrixQ();
+            qri.toQDT(matrixDs[index].diag());
+            qri.getWorking() = qri.getMatrixR();
+        }
+
+        int step = 1;
+        while (step < qr.getLength()) {
+            for (int i = 0; i + step < qr.getLength(); i += step * 2) {
+                const int i1 = i;
+                const int i2 = i + step;
+                auto& d1 = matrixDs[i1];
+                auto& d2 = matrixDs[i2];
+
+                auto& qr1 = qr[i1];
+                auto& qr2 = qr[i2];
+                buffer = qr1.getMatrixR() * matrixQs[i2];
+                buffer = d1 * buffer;
+                buffer = buffer * d2;
+
+                qr1.compute(buffer);
+                qr1.toQDT(d1.diag());
+                buffer = matrixQs[i1] * qr1.getMatrixQ();
+                buffer.swap(matrixQs[i1]);
+                buffer = qr1.getMatrixR() * qr2.getMatrixR();
+                buffer.swap(qr1.getWorking());
+            }
+            step *= 2;
         }
 
         const T shift = params.calcShift();
+        const auto& matrixD0 = matrixDs[0];
         for (int i = 0; i < getNumSite(); ++i) {
-            const T originD = matrixD.diag()[i] * exp(shift);
+            const T originD = matrixD0.diag()[i] * exp(shift);
             const T absD = abs(originD);
             const bool sep = absD > T(1);
-            matrixDb.diag()[i] = sep ? reciprocal(absD) : T(1);
-            matrixDs.diag()[i] = sep ? originD.unit() : originD;
+            getDiagB().diag()[i] = sep ? reciprocal(absD) : T(1);
+            getDiagS().diag()[i] = sep ? originD.unit() : originD;
         }
     }
 
     template<Scalar T>
     std::pair<T, T> DQMC<T>::lnPartition(const MatrixChain& chain) {
         makeWeightMatrix(chain);
-        T sign = qr.calcDetQ();
-        buffer = qr.getMatrixQ() * matrixDb;
-        qr.compute(buffer.transpose() + matrixDs * matrixT);
+        auto& qr0 = qr[0];
+        T sign = qr0.calcDetQ();
+        buffer = matrixQs[0] * getDiagB();
+        qr0.compute(buffer.transpose() + getDiagS() * qr0.getWorking());
         // Handle potential underflow
-        matrixDb.diag() += T(std::numeric_limits<T>::min());
-        qr.getWorking().diag() += T(std::numeric_limits<T>::min());
+        getDiagB().diag() += T(std::numeric_limits<T>::min());
+        qr0.getWorking().diag() += T(std::numeric_limits<T>::min());
 
-        T lnZ = -matrixDb.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        sign *= qr.calcDetQ() * unit(qr.getMatrixR().diag()).prod();
+        T lnZ = -getDiagB().lnAbsDet() + qr0.getMatrixR().lnAbsDet();
+        sign *= qr0.calcDetQ() * unit(qr0.getMatrixR().diag()).prod();
         return std::make_pair(lnZ, sign);
     }
 
@@ -340,9 +369,10 @@ namespace Physica {
 
     template<Scalar T>
     std::pair<T, T> DQMC<T>::calcGreen(const MatrixChain& chain, MatrixType& green) {
-        auto pair = lnPartition(chain);
-        matrixT = buffer * qr.getMatrixQ();
-        green = qr.getMatrixR().inverse() * matrixT.transpose();
+        const auto pair = lnPartition(chain);
+        const auto& qr0 = qr[0];
+        matrixQs[0] = buffer * qr0.getMatrixQ();
+        green = qr0.getMatrixR().inverse() * matrixQs[0].transpose();
         return pair;
     }
 

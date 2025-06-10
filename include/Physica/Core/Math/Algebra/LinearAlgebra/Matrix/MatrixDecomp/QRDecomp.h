@@ -57,6 +57,7 @@ namespace Physica {
         void compute_mkl(const M& source);
 
         [[nodiscard]] T calcDetQ() const;
+        void toQDT(VectorND<T>& diagD);
         [[nodiscard]] VectorND<T> toQDT();
 
         void resize(size_t row, size_t col);
@@ -124,18 +125,23 @@ namespace Physica {
      * Decompose matrix like A = QDT(no pivoting), or A = QDTP(poviting), where D is diagonal
      */
     template<Scalar T, bool Pivot>
-    VectorND<T> QRDecomp<T, Pivot>::toQDT() {
+    void QRDecomp<T, Pivot>::toQDT(VectorND<T>& diagD) {
         const size_t length = taus.getLength();
-        VectorND<T> vecD(length);
+        assert(diagD.getLength() == length);
         for (size_t i = 0; i < length; ++i) {
             if (working(i, i).isZero()) {
-                vecD[i] = 1;
+                diagD[i] = 1;
                 continue;
             }
-
-            vecD[i] = working(i, i);
-            working.row(i).tail(i) *= reciprocal(vecD[i]);
+            diagD[i] = working(i, i);
+            working.row(i).tail(i) *= reciprocal(diagD[i]);
         }
+    }
+
+    template<Scalar T, bool Pivot>
+    VectorND<T> QRDecomp<T, Pivot>::toQDT() {
+        VectorND<T> vecD(taus.getLength());
+        toQDT(vecD);
         return vecD;
     }
 

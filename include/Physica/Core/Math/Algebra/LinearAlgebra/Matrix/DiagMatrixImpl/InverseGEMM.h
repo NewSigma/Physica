@@ -31,7 +31,7 @@ namespace Physica {
         const M1& mat1;
         const DiagMatrix<U, Order>& mat2;
     public:
-        GEMM(const M1& inv, const Inverse<DiagMatrix<U, Order>>& mat2_);
+        GEMM(const M1& mat1_, const Inverse<DiagMatrix<U, Order>>& mat2_);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -57,5 +57,43 @@ namespace Physica {
     void GEMM<M1, Inverse<DiagMatrix<U, Order>>>::assign(M& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = mat1.col(i) * reciprocal(mat2.diag()[i]);
+    }
+
+    template<Scalar U, size_t Order, Matrix M2>
+    class GEMM<Inverse<DiagMatrix<U, Order>>, M2> : public RValueMatrix<GEMM<Inverse<DiagMatrix<U, Order>>, M2>> {
+        using This = GEMM<Inverse<DiagMatrix<U, Order>>, M2>;
+        using Base = RValueMatrix<This>;
+    protected:
+        using typename Base::T;
+    private:
+        const DiagMatrix<U, Order>& mat1;
+        const M2& mat2;
+    public:
+        GEMM(const Inverse<DiagMatrix<U, Order>>& mat1_, const M2& mat2_);
+        GEMM(const This&) = default;
+        GEMM(This&&) noexcept = default;
+        ~GEMM() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        template<Matrix M>
+        void assign(M& target) const;
+        /* Getters */
+        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
+        [[nodiscard]] auto getLHS() const noexcept { return mat1.inverse(); }
+        [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
+    };
+
+    template<Scalar U, size_t Order, Matrix M2>
+    GEMM<Inverse<DiagMatrix<U, Order>>, M2>::GEMM(
+            const Inverse<DiagMatrix<U, Order>>& mat1_, const M2& mat2_) : mat1(mat1_.getExpr()), mat2(mat2_) {}
+
+    template<Scalar U, size_t Order, Matrix M2>
+    template<Matrix M>
+    void GEMM<Inverse<DiagMatrix<U, Order>>, M2>::assign(M& target) const {
+        for (size_t i = 0; i < getCol(); ++i)
+            target.row(i) = reciprocal(mat1.diag()[i]) * mat2.row(i);
     }
 }
