@@ -404,8 +404,7 @@ namespace Physica {
 
     template<Scalar T>
     T DQMC<T>::calcLnSpinWaveWeight(T sumSpin) const {
-        const T factor = lncosh(params.calcShift());
-        return ln1pexp(lncosh(params.getAlpha() * sumSpin) - factor);
+        return ln1pexp(lncosh(params.getAlpha() * sumSpin) - params.getLnCoshShift());
     }
 
     template<Scalar T>

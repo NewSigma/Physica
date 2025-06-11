@@ -32,6 +32,7 @@ else()
 
         if (CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
             find_package(IntelSYCL REQUIRED)
+            add_compile_options(-fp-model=precise)
             get_target_property(IntelSYCL_LIBRARY_PATH IntelSYCL::SYCL_CXX INTERFACE_LINK_DIRECTORIES)
             set(CMAKE_BUILD_RPATH ${CMAKE_BUILD_RPATH} ${IntelSYCL_LIBRARY_PATH})
             set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${IntelSYCL_LIBRARY_PATH})

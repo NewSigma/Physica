@@ -37,6 +37,8 @@ namespace Physica {
         T repelU;
         T chemMu;
         int numSplit;
+
+        T lnCoshShift;
     public:
         HubbardParams() = default;
         template<int Dim>
@@ -64,8 +66,8 @@ namespace Physica {
         [[nodiscard]] T getBeta() const noexcept { return beta; }
         [[nodiscard]] T getRepelU() const noexcept { return repelU; }
         [[nodiscard]] T getChemMu() const noexcept { return chemMu; }
+        [[nodiscard]] T getLnCoshShift() const noexcept { return lnCoshShift; }
         /* Setters */
-        void setBeta(T beta_, int numSplit);
         void setChemMu(T chemMu_);
     private:
         template<int Dim>
@@ -77,12 +79,22 @@ namespace Physica {
     template<Scalar T>
     template<int Dim>
     HubbardParams<T>::HubbardParams(const Hubbard<T, Dim>& hubbard, T beta_, T chemMu_, int numSplit_)
-            : repelU(hubbard.getRepelU()), numSplit(numSplit_) {
+            : beta(beta_)
+            , repelU(hubbard.getRepelU())
+            , chemMu(chemMu_) 
+            , numSplit(numSplit_) {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
         assert(!repelU.isNegative() && "[Error]: It is assumed U >= 0");
+        assert(!beta.isNegative() && "[Error]: Negative temperature is invalid");
+        assert(numSplit > 0 && "[Error]: Invalid NumSplit");
         makeHoppingMatrix(hubbard);
-        setBeta(std::move(beta_), numSplit);
-        setChemMu(std::move(chemMu_));
+
+        const T betaM = beta / T(numSplit);
+        const T x = betaM * repelU;
+        alpha = x * T(0.5) + ln1p(sqrt(T(1) - exp(-x)));
+
+        DenseSymmMatrix<T> hoppingMatrixB = -betaM * hoppingMatrix;
+        expB = exp(hoppingMatrixB);
     }
 
     template<Scalar T>
@@ -100,25 +112,14 @@ namespace Physica {
         repelU.swap(obj.repelU);
         chemMu.swap(obj.chemMu);
         std::swap(numSplit, obj.numSplit);
-    }
 
-    template<Scalar T>
-    void HubbardParams<T>::setBeta(T beta_, int numSplit) {
-        assert(!beta_.isNegative() && "[Error]: Negative temperature is invalid");
-        assert(numSplit > 0 && "[Error]: Invalid NumSplit");
-        beta = std::move(beta_);
-
-        const T betaM = beta / T(numSplit);
-        const T x = betaM * repelU;
-        alpha = x * T(0.5) + ln1p(sqrt(T(1) - exp(-x)));
-
-        DenseSymmMatrix<T> hoppingMatrixB = -betaM * hoppingMatrix;
-        expB = exp(hoppingMatrixB);
+        lnCoshShift.swap(obj.lnCoshShift);
     }
 
     template<Scalar T>
     void HubbardParams<T>::setChemMu(T chemMu_) {
         chemMu = std::move(chemMu_);
+        lnCoshShift = lncosh(calcShift());
     }
 
     template<Scalar T>
