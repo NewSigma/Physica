@@ -110,11 +110,6 @@ find_package(FFTW3 REQUIRED)
 include_directories(SYSTEM ${FFTW3_INCLUDE_DIRS})
 link_directories(${FFTW3_LIBRARY_DIRS})
 
-if (${PHYSICA_HDF5})
-    find_package(HDF5 REQUIRED COMPONENTS C CXX)
-    add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
-endif()
-
 if(${PHYSICA_PROFILE})
     find_package(GPerfTools REQUIRED)
     include_directories(SYSTEM ${GPerfTools_INCLUDE_DIR})
@@ -143,10 +138,20 @@ if(${PHYSICA_MPI})
     include_directories(SYSTEM ${MPI_CXX_INCLUDE_DIRS})
 endif()
 
+if (${PHYSICA_HDF5})
+    find_package(HDF5 REQUIRED COMPONENTS C CXX)
+    add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
+endif()
+
 if(${PHYSICA_CUDA})
     include_directories(SYSTEM ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
     set(CUDA_MATH_INCLUDE_DIRECTORIES ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}/../../../../../math_libs/include)
     if (EXISTS ${CUDA_MATH_INCLUDE_DIRECTORIES}) # NVIDIA HPC SDK seems do not put math includes in standard location
         include_directories(SYSTEM ${CUDA_MATH_INCLUDE_DIRECTORIES})
     endif()
+endif()
+
+if(${PHYSICA_MIMALLOC})
+    find_package(mimalloc REQUIRED)
+    add_definitions(-DPHYSICA_MIMALLOC)
 endif()

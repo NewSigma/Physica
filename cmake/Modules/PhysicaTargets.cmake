@@ -24,6 +24,10 @@ endif()
 if(${PHYSICA_MPI})
     target_link_libraries(Physica::Core INTERFACE MPI::MPI_CXX)
 endif()
+
+if(${PHYSICA_MIMALLOC})
+    target_link_libraries(Physica::Core INTERFACE mimalloc)
+endif()
 ##############################################Gui################################################
 if(${PHYSICA_GUI})
     add_library(Physica::Gui INTERFACE IMPORTED)
