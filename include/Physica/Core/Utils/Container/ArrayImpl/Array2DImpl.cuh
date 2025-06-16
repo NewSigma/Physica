@@ -180,24 +180,24 @@ namespace Physica {
     }
 
     template<tparams>
-    inline auto Array2D::toDevice() const {
+    auto Array2D::toDevice() const {
         return device_obj<This>(*this);
     }
 
     template<tparams>
-    inline auto Array2D::toDeviceAsync() const {
+    auto Array2D::toDeviceAsync() const {
         device_obj<This> result(getRow(), getCol());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));
     }
 
     template<tparams>
-    inline void Array2D::toDevice(device_obj<This>& obj) const {
+    void Array2D::toDevice(device_obj<This>& obj) const {
         arr.toDevice(obj.asArray());
     }
 
     template<tparams>
-    inline void Array2D::toDeviceAsync(device_obj<This>& obj) const {
+    void Array2D::toDeviceAsync(device_obj<This>& obj) const {
         arr.toDeviceAsync(obj.asArray());
     }
 

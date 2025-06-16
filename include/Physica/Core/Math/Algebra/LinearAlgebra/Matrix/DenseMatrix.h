@@ -52,6 +52,7 @@ namespace Physica {
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Col>;
     public:
         DenseMatrix() = default;
+        explicit DenseMatrix(size_t order);
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T value);
         DenseMatrix(initializer_list list);

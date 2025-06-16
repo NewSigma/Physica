@@ -214,19 +214,12 @@ namespace Physica {
         assert(lnPartitionNVT.getRow() == observeNVT.getRow());
         assert(lnPartitionNVT.getCol() == observeNVT.getCol());
         const size_t order = observeNVT.getRow();
-        auto buffer = MatrixND(order, order);
+        auto weights = DenseMatrix<T>(order);
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
-                buffer(i, j) = Tr(i + j);
-        buffer *= beta * mu;
-
-        auto weights = MatrixND(order, order);
-        for (size_t i = 0; i < order; ++i) {
-            for (size_t j = 0; j < order; ++j) {
-                const auto shift = buffer(i, j) + lnPartitionNVT(i, j);
-                weights(i, j) = exp(-(buffer + lnPartitionNVT - shift).lnSumExp());
-            }
-        }
+                weights(i, j) = T(i + j);
+        weights = lnPartitionNVT + weights * (beta * mu);
+        weights = exp_elem(weights - weights.lnSumExp());
         return hadamard(weights, observeNVT).sum();
     }
 

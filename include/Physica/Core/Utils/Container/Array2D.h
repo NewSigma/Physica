@@ -61,6 +61,7 @@ namespace Physica {
         [[no_unique_address]] IndexType r = 0;
     public:
         Array2D() = default;
+        explicit Array2D(size_t order);
         Array2D(size_t row, size_t col);
         template<class... Args>
         Array2D(size_t row, size_t col, Args&&... args);
@@ -77,10 +78,10 @@ namespace Physica {
         void resize(size_t row, size_t col, Args&&... args);
         void resize(size_t order);
 
-        [[nodiscard]] inline auto toDevice() const;
-        [[nodiscard]] inline auto toDeviceAsync() const;
-        inline void toDevice(device_obj<This>& obj) const;
-        inline void toDeviceAsync(device_obj<This>& obj) const;
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
+        void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
 
         void swap(This& __restrict obj) noexcept;
         void swap_row(size_t r1, size_t r2) noexcept;

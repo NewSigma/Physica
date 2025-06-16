@@ -22,6 +22,9 @@
 
 namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t order) : Array2D(order, order) {}
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
     Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col) : r(row) {
         if constexpr (isVectorStorage) {
             if constexpr (isColMajor)
@@ -214,7 +217,6 @@ namespace Physica {
         else
             return arr.getLength();
     }
-
     /**
      * Helper function that communicates with C libraries.
      */
