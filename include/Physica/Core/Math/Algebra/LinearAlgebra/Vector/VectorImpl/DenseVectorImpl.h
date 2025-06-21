@@ -49,11 +49,8 @@ namespace Physica {
 
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
-        This result{};
-        result.reserve(len);
-        for(size_t i = 0; i < len; ++i)
-            result.get_allocator().construct(result.data() + i, T(0));
-        result.setLength(len);
+        This result(len);
+        result.zeros();
         return result;
     }
 

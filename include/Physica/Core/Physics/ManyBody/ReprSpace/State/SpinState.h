@@ -60,8 +60,8 @@ namespace Physica {
         void operator^=(const This& psi) noexcept { (*this) = (*this) ^ psi; }
         /* Operations */
         [[nodiscard]] This flip(int8_t site) const;
-        [[nodiscard]] inline This hop(int8_t from, int8_t to) const;
-        [[nodiscard]] inline int hopSign(int8_t from, int8_t to) const;
+        [[nodiscard]] This hop(int8_t from, int8_t to) const noexcept;
+        [[nodiscard]] int hopSign(int8_t from, int8_t to) const noexcept;
         [[nodiscard]] This transReduce(int period = 1) const;
         [[nodiscard]] int lShiftSign() const;
         [[nodiscard]] int calcPeriod() const;

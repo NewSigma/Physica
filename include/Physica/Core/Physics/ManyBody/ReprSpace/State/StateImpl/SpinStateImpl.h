@@ -73,7 +73,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline auto SpinState<Dim, NumSite>::hop(int8_t from, int8_t to) const -> This {
+    inline auto SpinState<Dim, NumSite>::hop(int8_t from, int8_t to) const noexcept -> This {
         assert(from != to && "[Error]: Assuming different sites");
         const bool canHop = isOccupy(from) && !isOccupy(to);
         if (!canHop)
@@ -84,7 +84,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline int SpinState<Dim, NumSite>::hopSign(int8_t from, int8_t to) const {
+    int SpinState<Dim, NumSite>::hopSign(int8_t from, int8_t to) const noexcept {
         const int numElectron = std::popcount(occupyBits >> (from + 1)) - std::popcount(occupyBits >> (to + 1));
         const bool flag1 = from < to;
         const bool flag2 = numElectron % 2 == 0;

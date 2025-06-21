@@ -110,7 +110,14 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator> DenseMatrix<T, Option, Row, Col, Allocator>::unitMatrix(size_t order) {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
+        DenseMatrix result(row, col);
+        result.zeros();
+        return result;
+    }
+
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::unitMatrix(size_t order) -> This {
         DenseMatrix result(order, order);
         result.toUnitMatrix();
         return result;
@@ -118,8 +125,7 @@ namespace Physica {
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<RNG R>
-    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(
-            size_t row, size_t col) {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_uniform<R>();
         return result;
@@ -127,8 +133,7 @@ namespace Physica {
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<RNG R>
-    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(
-            size_t row, size_t col) {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_normal<R>();
         return result;
@@ -136,8 +141,7 @@ namespace Physica {
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<RNG R, class Distribution>
-    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
-            size_t row, size_t col, Distribution& dist) {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(size_t row, size_t col, Distribution& dist) -> This {
         This result(row, col);
         result.template random_any<R, Distribution>(dist);
         return result;

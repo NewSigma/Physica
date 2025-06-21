@@ -68,7 +68,7 @@ namespace Physica {
         [[nodiscard]] auto operator*(const V& v) const noexcept;
         /* Operations */
         template<class Functor>
-        void forNeighSites(Functor func, int site) const;
+        void forNeighSites(Functor func, int site) const noexcept(std::is_nothrow_invocable_v<Functor, int, int>);
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] T trace() const;

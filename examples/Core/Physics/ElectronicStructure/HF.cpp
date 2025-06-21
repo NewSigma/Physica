@@ -40,7 +40,7 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
     config.setOrbitState(0, ElectronConfig::DoubleOccupacy);
 
     const VectorND<ScalarType> alphas{13.00773, 1.962079, 0.444529, 0.1219492, 13.00773, 1.962079, 0.444529, 0.1219492};
-    RHFSolver<GaussBase<ScalarType>> solver = RHFSolver<GaussBase<ScalarType>>(H2, config, alphas.getLength());
+    auto solver = RHFSolver<GaussBase<ScalarType>>(H2, config, alphas.getLength());
     auto& baseSet = solver.getBaseSet();
     for (size_t i = 0; i < alphas.getLength(); ++i)
         baseSet[i] = GaussBase<ScalarType>(i < 4 ? pos_H1 : pos_H2, abs(alphas[i]), 0, 0, 0);
@@ -89,9 +89,9 @@ int main(int argc, char** argv) {
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     axisX->setLabelFormat("%d");
-    axisX->setTitleText("R/Bohr radii");
+    axisX->setTitleText("r/a.u.");
     axisY->setLabelFormat("%d");
-    axisY->setTitleText("Energy/Hartree");
+    axisY->setTitleText("E/a.u.");
 
     plot->spline(r, electronEnergy).setName("E<sub>electron</sub>");
     plot->spline(r, potentialEnergy).setName("E<sub>nuclear</sub>");

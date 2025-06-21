@@ -45,19 +45,19 @@ namespace Physica {
         [[nodiscard]] inline bool operator<(const This& other) const noexcept;
         [[nodiscard]] bool operator>=(const This& other) const noexcept { return !((*this) < other); }
         [[nodiscard]] bool operator<=(const This& other) const noexcept { return !((*this) > other); }
-        [[nodiscard]] This operator<<(int shift) const noexcept { return FermiState(spinUp << shift, spinDown << shift); }
-        [[nodiscard]] This operator>>(int shift) const noexcept { return FermiState(spinUp >> shift, spinDown >> shift); }
+        [[nodiscard]] This operator<<(int shift) const noexcept { return This(spinUp << shift, spinDown << shift); }
+        [[nodiscard]] This operator>>(int shift) const noexcept { return This(spinUp >> shift, spinDown >> shift); }
         void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
-        [[nodiscard]] FermiState hopUp(uint8_t from, uint8_t to) const;
-        [[nodiscard]] FermiState hopDown(uint8_t from, uint8_t to) const;
-        [[nodiscard]] inline int hopUpSign(uint8_t from, uint8_t to) const;
-        [[nodiscard]] inline int hopDownSign(uint8_t from, uint8_t to) const;
-        [[nodiscard]] FermiState transReduce() const;
+        [[nodiscard]] This hopUp(uint8_t from, uint8_t to) const noexcept;
+        [[nodiscard]] This hopDown(uint8_t from, uint8_t to) const noexcept;
+        [[nodiscard]] int hopUpSign(uint8_t from, uint8_t to) const noexcept;
+        [[nodiscard]] int hopDownSign(uint8_t from, uint8_t to) const noexcept;
+        [[nodiscard]] This transReduce() const;
         [[nodiscard]] inline int lShiftSign() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;
-        inline void swap(FermiState& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Spin getSpinUp() const noexcept { return spinUp; }
         [[nodiscard]] Spin getSpinDown() const noexcept { return spinDown; }

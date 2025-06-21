@@ -45,7 +45,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::hopUp(uint8_t from, uint8_t to) const {
+    auto FermiState<Dim, NumSite>::hopUp(uint8_t from, uint8_t to) const noexcept -> This {
         auto newSpinUp = spinUp.hop(from, to);
         const bool hopFailed = newSpinUp.isVacuum() && !spinUp.isVacuum();
         if (hopFailed)
@@ -54,7 +54,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::hopDown(uint8_t from, uint8_t to) const {
+    auto FermiState<Dim, NumSite>::hopDown(uint8_t from, uint8_t to) const noexcept -> This {
         auto newSpinDown = spinDown.hop(from, to);
         const bool hopFailed = newSpinDown.isVacuum() && !spinDown.isVacuum();
         if (hopFailed)
@@ -63,17 +63,17 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline int FermiState<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const {
+    inline int FermiState<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const noexcept {
         return spinUp.hopSign(from, to);
     }
 
     template<int Dim, int NumSite>
-    inline int FermiState<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const {
+    inline int FermiState<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const noexcept {
         return spinDown.hopSign(from, to);
     }
 
     template<int Dim, int NumSite>
-    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::transReduce() const {
+    auto FermiState<Dim, NumSite>::transReduce() const -> This {
         if constexpr (Dim != 1)
             noImpl(__func__);
         This result = *this, temp = *this;

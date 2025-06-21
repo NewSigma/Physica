@@ -51,7 +51,7 @@ VectorType calcPartition(ReprType repr_, const VectorType& betas) {
         for (unsigned int j = 0; j < NumBeta; ++j) {
             if (j != 0)
                 psi.nvt_step(hamilton, deltaBeta);
-            toNextMean(result[j], i, psi.calcPartitionXi());
+            toNextMean(result[j], i, exp(psi.lnPartitionZ()));
         }
     }
     return result;

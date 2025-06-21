@@ -37,7 +37,7 @@ namespace Physica {
 
     template<Scalar T, Representation U>
     template<class Functor>
-    void HubbardMatrix<T, U>::forNeighSites(Functor func, int site) const {
+    void HubbardMatrix<T, U>::forNeighSites(Functor func, int site) const noexcept(std::is_nothrow_invocable_v<Functor, int, int>) {
         if constexpr (Dim == 1)
             func(site, (site + 1) % NumSite);
         else {

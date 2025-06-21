@@ -60,8 +60,7 @@ namespace Physica {
         template<class ModelType, ExecutePolicy P = Sequential>
         void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, Tr deltaBeta);
 
-        [[nodiscard]] Tr calcPartitionXi() const;
-        [[nodiscard]] Tr lnPartitionXi() const;
+        [[nodiscard]] Tr lnPartitionZ() const;
         [[nodiscard]] Tr lnSquaredDot(const VectorND<Tr>& other) const;
         void swap(This& __restrict obj) noexcept;
 
@@ -132,12 +131,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto TPQ<T>::calcPartitionXi() const -> Tr {
-        return Base::squaredNorm() * exp(Tr(2) * lnZ0);
-    }
-
-    template<Scalar T>
-    auto TPQ<T>::lnPartitionXi() const -> Tr {
+    auto TPQ<T>::lnPartitionZ() const -> Tr {
         const bool isUnderflow = abs(asVector()).max() < Tr(std::numeric_limits<Tr>::min());
         if (isUnderflow)
             return Tr(-std::numeric_limits<T>::max());
@@ -155,7 +149,7 @@ namespace Physica {
         const Tr dot = hadamard((asVector() * factor).squaredNorms(), other).sum();
         if (dot.isZero())
             return Tr(-std::numeric_limits<T>::max());
-        return ln(dot) + Tr(2) * ln(maxabs);
+        return ln(dot) + Tr(2) * (ln(maxabs) + lnZ0);
     }
 
     template<Scalar T>

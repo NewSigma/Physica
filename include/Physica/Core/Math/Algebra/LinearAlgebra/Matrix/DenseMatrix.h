@@ -91,19 +91,19 @@ namespace Physica {
         using Storage::getCol;
         using Storage::getRow;
         /* Static members */
-        [[nodiscard]] static DenseMatrix zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
-        [[nodiscard]] static DenseMatrix zeros(size_t row, size_t col) { return DenseMatrix(row, col, T(0)); }
-        [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
+        [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
+        [[nodiscard]] static This zeros(size_t row, size_t col);
+        [[nodiscard]] static This unitMatrix(size_t order);
         template<RNG R>
-        [[nodiscard]] static DenseMatrix random_uniform(size_t order) { return random_uniform<R>(order, order); }
+        [[nodiscard]] static This random_uniform(size_t order) { return random_uniform<R>(order, order); }
         template<RNG R>
-        [[nodiscard]] inline static auto random_uniform(size_t row, size_t col);
+        [[nodiscard]] static This random_uniform(size_t row, size_t col);
         template<RNG R>
-        [[nodiscard]] inline static auto random_normal(size_t row, size_t col);
+        [[nodiscard]] static This random_normal(size_t row, size_t col);
         template<RNG R, class Distribution>
-        [[nodiscard]] inline static auto random_any(size_t row, size_t col, Distribution& dist);
+        [[nodiscard]] static This random_any(size_t row, size_t col, Distribution& dist);
         template<Vector V>
-        [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const V& vecInCols, const V& vecInRows);
+        [[nodiscard]] static std::pair<This, This> meshgrid(const V& vecInCols, const V& vecInRows);
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}

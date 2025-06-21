@@ -1,6 +1,6 @@
 find_path(FFTW3_INCLUDE_DIRS fftw3.h HINTS ${FFTW3_ROOT})
-find_library(FFTW3_LIBRARY libfftw3.so HINTS ${FFTW3_ROOT})
-find_library(FFTW3f_LIBRARY libfftw3f.so HINTS ${FFTW3_ROOT})
+find_library(FFTW3_LIBRARY fftw3 HINTS ${FFTW3_ROOT})
+find_library(FFTW3f_LIBRARY fftw3f HINTS ${FFTW3_ROOT})
 
 set(FFTW3_LIBRARIES ${FFTW3_LIBRARY} ${FFTW3f_LIBRARY})
 

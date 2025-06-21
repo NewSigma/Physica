@@ -150,7 +150,13 @@ namespace Physica {
     template<Vector V1>
     void HubbardVecProd<T0, U, V>::dotImpl(V1& target, T factor, size_t index) const {
         const auto state = getRepr()[index];
-        int numRepel = 0;
+        /* On site contribution */ {
+            int numRepel = 0;
+            for (int site = 0; site < int(NumSite); ++site)
+                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+            target[index] += factor * (getRepelU() * Tr(numRepel));
+        }
+
         if constexpr (IsTransInvariant) {
             static_assert(Dim == 1 && "[Error]: Not implemented");
             const Tr normalizer = sqrt(Tr(getRepr().getPeriods()[index])) / Tr(NumSite);
@@ -165,7 +171,6 @@ namespace Physica {
                 sumHopping(target, fft, -hopUp, state.hopUp(site1, site));
                 sumHopping(target, fft, hopDown, state.hopDown(site, site1));
                 sumHopping(target, fft, -hopDown, state.hopDown(site1, site));
-                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
             }
         }
         else {
@@ -173,26 +178,24 @@ namespace Physica {
             for (int site = 0; site < int(NumSite); ++site) {
                 const bool upOccupy1 = state.isUpOccupy(site);
                 const bool downOccupy1 = state.isDownOccupy(site);
-                mat.forNeighSites([this, &target, &state, hop, upOccupy1, downOccupy1](int site, int site1) {
+                mat.forNeighSites([this, &target, &state, hop, upOccupy1, downOccupy1](int site, int site1) noexcept {
                     const auto& repr = getRepr();
                     const bool upOccupy2 = state.isUpOccupy(site1);
                     const bool downOccupy2 = state.isDownOccupy(site1);
                     if (upOccupy1 != upOccupy2) {
-                        const T hopUp = hop * Tr(state.hopUpSign(site, site1));
                         const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
-                        target[index] += upOccupy1 ? hopUp : -hopUp;
+                        const bool sign = state.hopUpSign(site, site1) == 1;
+                        target[index] += (upOccupy1 == sign) ? hop : -hop;
                     }
 
                     if (downOccupy1 != downOccupy2) {
-                        const T hopDown = hop * Tr(state.hopDownSign(site, site1));
                         const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
-                        target[index] += downOccupy1 ? hopDown : -hopDown;
+                        const bool sign = state.hopDownSign(site, site1) == 1;
+                        target[index] += (downOccupy1 == sign) ? hop : -hop;
                     }
                 }, site);
-                numRepel += upOccupy1 && downOccupy1;
             }
         }
-        target[index] += factor * (getRepelU() * Tr(numRepel));
     }
 }
 

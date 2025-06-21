@@ -1,5 +1,5 @@
 find_path(GPerfTools_INCLUDE_DIR gperftools/tcmalloc.h)
-find_library(GPerfTools_LIBRARY libprofiler.so)
+find_library(GPerfTools_LIBRARY profiler)
 
 set(GPerfTools_INCLUDE_DIRS ${GPerfTools_INCLUDE_DIR})
 set(GPerfTools_LIBRARIES ${GPerfTools_LIBRARY})
