@@ -28,6 +28,7 @@
 namespace Physica {
     template<Scalar T>
     class QEModel {
+        using This = QEModel<T>;
         using MDCellType = MDCell<T>;
         using ElementTypeArray = Poscar<T>::ElementTypeArray;
 
@@ -37,11 +38,11 @@ namespace Physica {
         unsigned int numMPIProcess;
     public:
         QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_, unsigned int numMPIProcess_);
-        QEModel(const QEModel&) = default;
-        QEModel(QEModel&&) noexcept = default;
+        QEModel(const This&) = default;
+        QEModel(This&&) noexcept = default;
         ~QEModel() = default;
         /* Operators */
-        QEModel& operator=(QEModel obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
@@ -51,7 +52,7 @@ namespace Physica {
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
-        void swap(QEModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return elementTypes.getLength(); }
         [[nodiscard]] unsigned int getNumMPIProcess() const noexcept { return numMPIProcess; }
@@ -120,13 +121,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    QEModel<T>& QEModel<T>::operator=(QEModel obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T>
-    void QEModel<T>::swap(QEModel& __restrict obj) noexcept {
+    void QEModel<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pathToPW.swap(obj.pathToPW);
         input.swap(obj.input);

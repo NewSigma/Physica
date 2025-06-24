@@ -107,8 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    Hamonic<T, Dim>::ForceConstMatrix
-    Hamonic<T, Dim>::forceConst(const MDCellType& cell) const {
+    auto Hamonic<T, Dim>::forceConst(const MDCellType& cell) const -> ForceConstMatrix {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof, T(0));
@@ -118,7 +117,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    Hamonic<T, Dim>::LatticeMatrix Hamonic<T, Dim>::virial(const MDCellType& cell) const {
+    auto Hamonic<T, Dim>::virial(const MDCellType& cell) const -> LatticeMatrix {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < getNumParticle(); ++i) {

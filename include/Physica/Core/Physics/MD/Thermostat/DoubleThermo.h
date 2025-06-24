@@ -33,19 +33,19 @@ namespace Physica {
     class DoubleThermo {
         using This = DoubleThermo<KineticModel>;
         using TraitsType = Traits<KineticModel>;
-        using ScalarType = TraitsType::ScalarType;
+        using T = TraitsType::ScalarType;
         constexpr static unsigned int Dim = TraitsType::Dim;
         constexpr static size_t NumReplica = TraitsType::NumReplica;
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using MDCellType = MDCell<T, Dim>;
         using MassVector = MDCellType::MassVector;
-        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
+        using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
         using BufferType = RingPolymerType::BufferType;
 
-        ScalarType temperatureT;
-        ScalarType thermostatTime;
+        T temperatureT;
+        T thermostatTime;
     public:
         DoubleThermo() = default;
-        DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_);
+        DoubleThermo(T temperatureT_, T thermostatTime_);
         DoubleThermo(const This&) = default;
         DoubleThermo(This&&) noexcept = default;
         ~DoubleThermo() = default;
@@ -53,50 +53,50 @@ namespace Physica {
         This& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<RNG R, ExecutePolicy P>
-        void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
+        void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(This& __restrict obj) noexcept;
         /* Setters */
-        void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
-        void setThermostatTime(ScalarType time) { thermostatTime = time; }
+        void setTemperature(T temperatureT_) { temperatureT = temperatureT_; }
+        void setThermostatTime(T time) { thermostatTime = time; }
     private:
         template<RNG R>
-        ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT) const;
+        T makeTranslationalFactor(const RingPolymerType& ringPolymer, T deltaT) const;
     };
 
     template<class KineticModel>
-    DoubleThermo<KineticModel>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
+    DoubleThermo<KineticModel>::DoubleThermo(T temperatureT_, T thermostatTime_)
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_) {}
 
     template<class KineticModel>
     template<RNG R, ExecutePolicy P>
     void DoubleThermo<KineticModel>::step(
-            RingPolymerType& ringPolymer, ScalarType deltaT) const {
+            RingPolymerType& ringPolymer, T deltaT) const {
         const size_t dof = ringPolymer.getDOF();
-        const ScalarType factor_translational = makeTranslationalFactor<R>(ringPolymer, deltaT);
+        const T factor_translational = makeTranslationalFactor<R>(ringPolymer, deltaT);
         if constexpr (NumReplica != 1) {
-            const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
-            const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
+            const T repBeta = ringPolymer.calcRepBeta(temperatureT);
+            const T omegaW = ringPolymer.calcOmegaW(temperatureT);
             parallel_for<P>(
                 [factor_translational, repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
 
                     const auto mass = massVec[i / Dim];
-                    const ScalarType factor = sqrt(repBeta * mass);
-                    auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica);
+                    const T factor = sqrt(repBeta * mass);
+                    auto fft = FFT<T, 1>::makeEmptyFFT(numReplica);
                     BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                     ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
                     fft.getRSpace().template random_normal<R>();
-                    FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
+                    FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
                     /* Translational mode */ {
                         buffer(0, 0) *= factor_translational;
                     }
                     for (size_t j = 1; j < buffer.getCol(); ++j) {
-                        const ScalarType phase = M_PI * j / numReplica;
-                        const ScalarType viscosityY = sin(phase) * omegaW;
-                        Langevin<ScalarType, Dim>::langevinImpl(
+                        const T phase = M_PI * j / numReplica;
+                        const T viscosityY = sin(phase) * omegaW;
+                        Langevin<T, Dim>::langevinImpl(
                                 buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                     }
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
@@ -118,23 +118,23 @@ namespace Physica {
 
     template<class KineticModel>
     template<RNG R>
-    DoubleThermo<KineticModel>::ScalarType DoubleThermo<KineticModel>::makeTranslationalFactor(
-            const RingPolymerType& ringPolymer, ScalarType deltaT) const {
-        using Integrator = SRK2<ScalarType, 1>;
+    auto DoubleThermo<KineticModel>::makeTranslationalFactor(
+            const RingPolymerType& ringPolymer, T deltaT) const -> T {
+        using Integrator = SRK2<T, 1>;
         using VectorType = Integrator::VectorType;
 
         if (temperatureT.isZero())
             return 0;
         const size_t dof = ringPolymer.getDOF();
-        [[maybe_unused]] ScalarType unused = 0;
-        const ScalarType nowT = ringPolymer.template calcTemperature<KineticModel>();
+        [[maybe_unused]] T unused = 0;
+        const T nowT = ringPolymer.template calcTemperature<KineticModel>();
         VectorType sol{nowT};
         Integrator::step(deltaT, unused, sol,
-                            [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
+                            [this]([[maybe_unused]] T x, VectorType sol) -> VectorType {
                                 return {(temperatureT - sol[0]) / thermostatTime};
                             },
-                            [this, dof]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                const ScalarType rand = ScalarType::template random_normal<R>();
+                            [this, dof]([[maybe_unused]] T x, VectorType sol) -> VectorType {
+                                const T rand = T::template random_normal<R>();
                                 return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * rand};
                             });
         if (!sol[0].isPositive()) [[unlikely]]

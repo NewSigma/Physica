@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/ThreadPool.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Parallel/Parallel.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica {
@@ -29,7 +30,7 @@ namespace Physica {
     class CPUGPUModel {
         static_assert(!is_device_obj<HostModel>::value, "[Error]: Host model must not be device object");
         static_assert(!is_device_obj<DeviceModel>::value, "[Error]: device_obj<> is unnecessary");
-        using ScalarType = HostModel::ScalarType;
+        using T = HostModel::ScalarType;
         using MDCellType = HostModel::MDCellType;
         HostModel hostModel;
         Array<device_obj<DeviceModel>> deviceModels;
@@ -38,14 +39,14 @@ namespace Physica {
         CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs);
 
         template<ExecutePolicy P>
-        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell);
+        [[nodiscard]] VectorND<T> force(const MDCellType& cell);
         template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
 
         template<ExecutePolicy P>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) { return force<P>(cell); }
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) { return force<P>(cell); }
         template<ExecutePolicy P>
-        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getNumParticle() * 3, 0); }
+        [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getNumParticle() * 3, 0); }
         /* Getters */
         [[nodiscard]] size_t getNumCUDAThread() const noexcept { return deviceModels.getLength(); }
     };
@@ -60,9 +61,9 @@ namespace Physica {
 
     template<class HostModel, class DeviceModel>
     template<ExecutePolicy P>
-    DenseVector<typename CPUGPUModel<HostModel, DeviceModel>::ScalarType> CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) {
-        VectorND<ScalarType> result(cell.getDOF());
-        forceAsync<VectorND<ScalarType>, P>(cell, result);
+    auto CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) -> DenseVector<T> {
+        VectorND<T> result(cell.getDOF());
+        forceAsync<VectorND<T>, P>(cell, result);
         CUDAContext::getInstance().wait();
         return result;
     }

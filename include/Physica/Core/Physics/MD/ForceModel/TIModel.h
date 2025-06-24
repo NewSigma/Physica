@@ -30,6 +30,7 @@ namespace Physica {
      */
     template<class ForceModel>
     class TIModel {
+        using This = TIModel<ForceModel>;
         using ScalarType = Traits<ForceModel>::ScalarType;
         using HamonicType = Hamonic<ScalarType, 3>;
         using MDCellType = HamonicType::MDCellType;
@@ -45,11 +46,11 @@ namespace Physica {
         ScalarType lambda;
     public:
         TIModel(ForceModel original_, const MDCellType& refCell, VectorND<ScalarType> springCoeffs, ScalarType temperatureT_);
-        TIModel(const TIModel&) = default;
-        TIModel(TIModel&&) noexcept = default;
+        TIModel(const This&) = default;
+        TIModel(This&&) noexcept = default;
         ~TIModel() = default;
         /* Operators */
-        TIModel& operator=(TIModel obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
         [[nodiscard]] ScalarType deltaPotentialV(const MDCellType& cell) const;
@@ -59,7 +60,7 @@ namespace Physica {
         template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
 
-        void swap(TIModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getRefHelmholtzF() const noexcept { return refHelmholtzF; }
         /* Setters */
@@ -115,7 +116,7 @@ namespace Physica {
     }
 
     template<class ForceModel>
-    void TIModel<ForceModel>::swap(TIModel& __restrict obj) noexcept {
+    void TIModel<ForceModel>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         original.swap(obj.original);
         hamonic.swap(obj.hamonic);

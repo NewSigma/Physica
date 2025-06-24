@@ -64,8 +64,8 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] __host__ __device__ inline T force_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] __host__ __device__ T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] __host__ __device__ T force_functor(size_t i, size_t j, T r, T r2) const;
 
         [[nodiscard]] T potentialV(const MDCellType& hostCell) const;
 
@@ -75,7 +75,7 @@ namespace Physica {
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos);
         template<ExecutePolicy P>
-        [[nodiscard]] inline VectorND<T> force(const MDCellType& hostCell);
+        [[nodiscard]] VectorND<T> force(const MDCellType& hostCell);
 
         template<Vector V, ExecutePolicy P>
         void forceAsync(
@@ -84,17 +84,17 @@ namespace Physica {
                 const PositionMatrix& cartesianPos,
                 ContinuousVector<V>& result);
         template<Vector V, ExecutePolicy P>
-        inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
         template<ExecutePolicy P>
-        [[nodiscard]] inline VectorND<T> force_short(const MDCellType& cell);
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell);
         template<ExecutePolicy P>
-        [[nodiscard]] inline VectorND<T> force_long(const MDCellType& cell) const;
+        [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos);
-        [[nodiscard]] inline LatticeMatrix virial(const MDCellType& hostCell);
+        [[nodiscard]] LatticeMatrix virial(const MDCellType& hostCell);
         void swap(This& __restrict obj) noexcept;
 
         __device__ void forceKernel();

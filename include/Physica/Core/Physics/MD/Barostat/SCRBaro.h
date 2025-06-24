@@ -86,8 +86,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
-    SCRBaro<T, NumReplica, R, Type>::LatticeMatrix
-    SCRBaro<T, NumReplica, R, Type>::makeDiffuseMatrix(T pressPerDOF) const {
+    auto SCRBaro<T, NumReplica, R, Type>::makeDiffuseMatrix(T pressPerDOF) const -> LatticeMatrix {
         const T diffuseFactor = sqrt(T(2.0 / Dim) * Base::compressRate * pressPerDOF);
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (Type == BaroType::Anisotropic) {

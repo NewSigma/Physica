@@ -70,8 +70,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    EmptyForceModel<T, Dim>::ForceConstMatrix
-    EmptyForceModel<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const {
+    auto EmptyForceModel<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const -> ForceConstMatrix {
         return ForceConstMatrix(cell.getDOF(), T(0));
     }
 }

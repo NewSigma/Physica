@@ -33,14 +33,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline auto
-    device_obj<PairModel<Derived>>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const -> ScalarType {
+    __host__ __device__ auto device_obj<PairModel<Derived>>::pot_functor(
+            size_t i, size_t j, ScalarType r, ScalarType r2) const -> ScalarType {
         return Base::getDerived().pot_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    __host__ __device__ inline auto
-    device_obj<PairModel<Derived>>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const -> ScalarType {
+    __host__ __device__ auto device_obj<PairModel<Derived>>::force_functor(
+            size_t i, size_t j, ScalarType r, ScalarType r2) const -> ScalarType {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
 
@@ -57,7 +57,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    inline auto device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) -> VectorND<ScalarType> {
+    auto device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) -> VectorND<ScalarType> {
         return force<P>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
 
@@ -96,19 +96,19 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P>
-    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
+    void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         forceAsync<V, P>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
     template<ExecutePolicy P>
-    inline auto device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) -> VectorND<ScalarType> {
+    auto device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) -> VectorND<ScalarType> {
         return force<P>(cell);
     }
 
     template<class Derived>
     template<ExecutePolicy P>
-    inline auto device_obj<PairModel<Derived>>::force_long(const MDCellType& cell) const -> VectorND<ScalarType> {
+    auto device_obj<PairModel<Derived>>::force_long(const MDCellType& cell) const -> VectorND<ScalarType> {
         return VectorND<ScalarType>(cell.getNumParticle() * 3, 0);
     }
 
@@ -144,7 +144,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto device_obj<PairModel<Derived>>::virial(const MDCellType& hostCell) -> LatticeMatrix {
+    auto device_obj<PairModel<Derived>>::virial(const MDCellType& hostCell) -> LatticeMatrix {
         return virial(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
 

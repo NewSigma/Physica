@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -19,4 +19,4 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Reference
 
-[1] Phys. Rev. 188, 1407; https://doi.org/10.1103/PhysRev.188.1407
+[1] Phys. Rev. 188, 1407 (1969); https://doi.org/10.1103/PhysRev.188.1407

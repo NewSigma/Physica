@@ -64,37 +64,37 @@ namespace Physica {
         [[no_unique_address]] DoublePotType doublePot0_SiO;
     public:
         BKSModel(const MDCellType& refer_cell, Tv cutoff, EwaldType ewald_);
-        BKSModel(const BKSModel&) = default;
-        BKSModel(BKSModel&&) noexcept = default;
+        BKSModel(const This&) = default;
+        BKSModel(This&&) noexcept = default;
         ~BKSModel() = default;
         /* Operators */
-        BKSModel& operator=(BKSModel obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] T pot_functor(size_t i, size_t j, T r, T r2) const;
         [[nodiscard]] T force_functor(size_t i, size_t j, T r, T r2) const;
 
-        [[nodiscard]] inline T potentialV(const MDCellType& cell) const;
+        [[nodiscard]] T potentialV(const MDCellType& cell) const;
 
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
         template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const;
-        template<ExecutePolicy P> [[nodiscard]] inline VectorND<T> force_long(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long(const MDCellType& cell);
 
-        [[nodiscard]] inline LatticeMatrix virial(const MDCellType& cell);
-        void swap(BKSModel& __restrict obj) noexcept;
+        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell);
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return getNumParticle() / 3; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return ewald.getNumParticle(); }
         [[nodiscard]] const EwaldType& getEwald() const noexcept { return ewald; }
         [[nodiscard]] const MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Setters */
-        inline void setLattice(LatticeMatrix lattice);
+        void setLattice(LatticeMatrix lattice);
         /* Static members */
-        inline static PermMatrix<T> sortPosition(MDCellType& cell);
+        static PermMatrix<T> sortPosition(MDCellType& cell);
     private:
-        [[nodiscard]] inline static T pot_functor_impl(T A, T b, T c, T r, T r2);
-        [[nodiscard]] inline static bool isCellOrdered(const MDCellType& cell);
+        [[nodiscard]] static T pot_functor_impl(T A, T b, T c, T r, T r2);
+        [[nodiscard]] static bool isCellOrdered(const MDCellType& cell);
     };
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
@@ -155,7 +155,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    inline T BKSModel<T, EwaldType, AvoidTooNear>::potentialV(const MDCellType& cell) const {
+    T BKSModel<T, EwaldType, AvoidTooNear>::potentialV(const MDCellType& cell) const {
         return Base::potentialV(cell) + ewald.potentialV(cell.getPos());
     }
 
@@ -189,18 +189,17 @@ namespace Physica {
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
     template<ExecutePolicy P>
-    inline VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force_long(const MDCellType& cell) {
+    VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force_long(const MDCellType& cell) {
         return ewald.template force<P>(cell.getPos());
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    BKSModel<T, EwaldType, AvoidTooNear>::LatticeMatrix
-    inline BKSModel<T, EwaldType, AvoidTooNear>::virial(const MDCellType& cell) {
+    auto BKSModel<T, EwaldType, AvoidTooNear>::virial(const MDCellType& cell) -> LatticeMatrix {
         return Base::virial(cell) + ewald.virial(cell.getPos());
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    void BKSModel<T, EwaldType, AvoidTooNear>::swap(BKSModel& __restrict obj) noexcept {
+    void BKSModel<T, EwaldType, AvoidTooNear>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         ewald.swap(obj.ewald);
         if constexpr (AvoidTooNear) {
@@ -210,24 +209,24 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    inline void BKSModel<T, EwaldType, AvoidTooNear>::setLattice(LatticeMatrix lattice) {
+    void BKSModel<T, EwaldType, AvoidTooNear>::setLattice(LatticeMatrix lattice) {
         ewald.setLattice(std::move(lattice));
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    inline PermMatrix<T> BKSModel<T, EwaldType, AvoidTooNear>::sortPosition(MDCellType& cell) {
+    PermMatrix<T> BKSModel<T, EwaldType, AvoidTooNear>::sortPosition(MDCellType& cell) {
         return AABModelType::sortPosition(cell, 8, 14);
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    inline T BKSModel<T, EwaldType, AvoidTooNear>::pot_functor_impl(
+    T BKSModel<T, EwaldType, AvoidTooNear>::pot_functor_impl(
             T A, T b, T c, T r, T r2) {
         const T r4 = square(r2);
         return A * exp(-b * r) - c / (r2 * r4);
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    inline bool BKSModel<T, EwaldType, AvoidTooNear>::isCellOrdered(const MDCellType& cell) {
+    bool BKSModel<T, EwaldType, AvoidTooNear>::isCellOrdered(const MDCellType& cell) {
         return AABModelType::isCellOrdered(cell, 8, 14);
     }
 }

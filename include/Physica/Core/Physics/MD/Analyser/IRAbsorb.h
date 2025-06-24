@@ -72,13 +72,13 @@ namespace Physica {
             , filter(filterRange, filterRange, filterOrder, deltaT) {}
 
     template<Scalar T>
-    IRAbsorb<T>::VectorType IRAbsorb<T>::makeWaveNum() const {
+    auto IRAbsorb<T>::makeWaveNum() const -> VectorType {
         const size_t size = fft.getKSpaceSize();
         return VectorType::linspace(0, getDeltaWaveNum() * (size - 1), size);
     }
 
     template<Scalar T>
-    IRAbsorb<T>::VectorType IRAbsorb<T>::makeSpectrum() {
+    auto IRAbsorb<T>::makeSpectrum() -> VectorType {
         auto& rSpace = fft.getRSpace();
         rSpace = dipoleCorr;
         {

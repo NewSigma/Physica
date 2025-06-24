@@ -27,6 +27,7 @@
 namespace Physica {
     template<Scalar T>
     class VASPModel {
+        using This = VASPModel<T>;
         using MDCellType = MDCell<T>;
         using WorkingDirType = TempDir<15>;
     private:
@@ -44,11 +45,11 @@ namespace Physica {
             const char* pathToKpoints,
             Array<size_t> numOfEachType_,
             unsigned int numMPIProcess_);
-        VASPModel(const VASPModel&) = delete;
-        VASPModel(VASPModel&&) noexcept = default;
+        VASPModel(const This&) = delete;
+        VASPModel(This&&) noexcept = default;
         ~VASPModel() = default;
         /* Operators */
-        VASPModel& operator=(VASPModel obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
@@ -58,7 +59,7 @@ namespace Physica {
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
-        void swap(VASPModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const WorkingDirType& getWorkingDir() const noexcept { return workingDir; }
         [[nodiscard]] size_t getNumParticle() const noexcept;
@@ -128,7 +129,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void VASPModel<T>::swap(VASPModel& __restrict obj) noexcept {
+    void VASPModel<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pathToVasp.swap(obj.pathToVasp);
         workingDir.swap(obj.workingDir);

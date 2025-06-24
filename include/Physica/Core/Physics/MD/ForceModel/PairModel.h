@@ -56,21 +56,21 @@ namespace Physica {
     public:
         ~PairModel() = default;
         /* Operations */
-        [[nodiscard]] inline CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
-        [[nodiscard]] inline CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
-        [[nodiscard]] inline CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
+        [[nodiscard]] CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
 
         [[nodiscard]] CoDiff<T> potentialV(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
-        [[nodiscard]] inline CoDiff<T> potentialV(const MDCellType& cell) const;
+        [[nodiscard]] CoDiff<T> potentialV(const MDCellType& cell) const;
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         template<ExecutePolicy P>
-        [[nodiscard]] inline VectorND<T> force(const MDCellType& cell) const;
+        [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
         template<Vector V, ExecutePolicy P>
-        inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const;
+        void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const;
         template<Vector V, ExecutePolicy P>
-        inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
@@ -107,17 +107,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto PairModel<Derived>::pot_functor(size_t i, size_t j, const T& r, const T& r2) const -> CoDiff<T> {
+    auto PairModel<Derived>::pot_functor(size_t i, size_t j, const T& r, const T& r2) const -> CoDiff<T> {
         return Base::getDerived().pot_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline auto PairModel<Derived>::force_functor(size_t i, size_t j, const T& r, const T& r2) const -> CoDiff<T> {
+    auto PairModel<Derived>::force_functor(size_t i, size_t j, const T& r, const T& r2) const -> CoDiff<T> {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline auto PairModel<Derived>::forceConst_functor(const T& r, const T& r2) const -> CoDiff<T> {
+    auto PairModel<Derived>::forceConst_functor(const T& r, const T& r2) const -> CoDiff<T> {
         return Base::getDerived().forceConst_functor(r, r2);
     }
 
@@ -151,7 +151,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto PairModel<Derived>::potentialV(const MDCellType& cell) const -> CoDiff<T> {
+    auto PairModel<Derived>::potentialV(const MDCellType& cell) const -> CoDiff<T> {
         return potentialV(cell.getLattice(), cell.getPos());
     }
 
@@ -167,13 +167,13 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    inline VectorND<typename PairModel<Derived>::T> PairModel<Derived>::force(const MDCellType& cell) const {
+    VectorND<typename PairModel<Derived>::T> PairModel<Derived>::force(const MDCellType& cell) const {
         return force<P>(cell.getLattice(), cell.getPos());
     }
 
     template<class Derived>
     template<Vector V, ExecutePolicy P>
-    inline void PairModel<Derived>::forceAsync(
+    void PairModel<Derived>::forceAsync(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const {
         result = T(0);
         auto kernel = [this, &result](size_t i, size_t j, Vec3D r, const T& norm1, const T& norm2) {
@@ -189,7 +189,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P>
-    inline void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
+    void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
         forceAsync<V, P>(cell.getLattice(), cell.getPos(), result);
     }
 

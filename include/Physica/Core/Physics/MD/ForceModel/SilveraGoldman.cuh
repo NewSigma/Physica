@@ -55,9 +55,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] __host__ __device__ inline T force_functor(size_t i, size_t j, T r, T r2) const;
-        inline void swap(This& __restrict obj) noexcept;
+        [[nodiscard]] __host__ __device__ T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] __host__ __device__ T force_functor(size_t i, size_t j, T r, T r2) const;
+        void swap(This& __restrict obj) noexcept;
     };
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
@@ -69,12 +69,12 @@ namespace Physica {
             : device_obj(numParticle, obj.getCutoff()) {}
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline void device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::swap(This& __restrict obj) noexcept {
+    void device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::swap(This& __restrict obj) noexcept {
         Base::swap(obj);
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    __host__ __device__ inline T device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::pot_functor(
+    __host__ __device__ T device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::pot_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, T r2) const {
         T result = exp(-r2 * gamma - r * beta + alpha);
         const T rep_r = reciprocal(r);
@@ -96,7 +96,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    __host__ __device__ inline T device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::force_functor(
+    __host__ __device__ T device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::force_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, T r2) const {
         const T factor = r * (gamma * 2) + beta;
         T result = exp(-r2 * gamma - (r * beta - alpha)) * factor;

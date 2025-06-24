@@ -31,16 +31,16 @@ namespace Physica {
         CoDiff<T> sigma1;
     public:
         LJModel(T sigma_, Tv cutoff);
-        LJModel(const LJModel&) = default;
-        LJModel(LJModel&&) noexcept = default;
+        LJModel(const This&) = default;
+        LJModel(This&&) noexcept = default;
         ~LJModel() = default;
         /* Operators */
-        LJModel& operator=(LJModel obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(LJModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Static members */
-        [[nodiscard]] inline CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
-        [[nodiscard]] inline CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
     };
 
     template<Scalar T, bool IsSmallCell>
@@ -51,13 +51,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    LJModel<T, IsSmallCell>& LJModel<T, IsSmallCell>::operator=(LJModel obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T, bool IsSmallCell>
-    inline CoDiff<T> LJModel<T, IsSmallCell>::pot_functor(size_t, size_t, const T&, const T& r2) const {
+    CoDiff<T> LJModel<T, IsSmallCell>::pot_functor(size_t, size_t, const T&, const T& r2) const {
         auto rep_r2 = square(sigma) / r2;
         auto rep_r4 = square(rep_r2);
         auto rep_r6 = rep_r4 * rep_r2;
@@ -72,7 +66,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline CoDiff<T> LJModel<T, IsSmallCell>::force_functor(size_t, size_t, const T& r, const T&) const {
+    CoDiff<T> LJModel<T, IsSmallCell>::force_functor(size_t, size_t, const T& r, const T&) const {
         auto rep_r = sigma / r;
         auto rep_r2 = square(rep_r);
         auto rep_r4 = square(rep_r2);
@@ -89,7 +83,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    void LJModel<T, IsSmallCell>::swap(LJModel& __restrict obj) noexcept {
+    void LJModel<T, IsSmallCell>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);

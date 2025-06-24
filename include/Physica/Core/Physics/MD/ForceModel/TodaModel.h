@@ -27,6 +27,7 @@ namespace Physica {
      */
     template<Scalar T, bool IsPeriodBoundary>
     class TodaModel {
+        using This = TodaModel<T, IsPeriodBoundary>;
         using MDCellType = MDCell<T, 1>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using ForceConstMatrix = EmptyForceModel<T, 1>::ForceConstMatrix;
@@ -34,11 +35,11 @@ namespace Physica {
         T springLength;
     public:
         TodaModel(T springLength_) : springLength(std::move(springLength_)) {}
-        TodaModel(const TodaModel&) = default;
-        TodaModel(TodaModel&&) noexcept = default;
+        TodaModel(const This&) = default;
+        TodaModel(This&&) noexcept = default;
         ~TodaModel() = default;
         /* Operators */
-        TodaModel& operator=(TodaModel obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
 
@@ -55,7 +56,7 @@ namespace Physica {
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
-        void swap(TodaModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
     };
 
     template<Scalar T, bool IsPeriodBoundary>
@@ -254,7 +255,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary>
-    void TodaModel<T, IsPeriodBoundary>::swap(TodaModel& __restrict obj) noexcept {
+    void TodaModel<T, IsPeriodBoundary>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }

@@ -129,8 +129,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
-    FPUModel<T, IsPeriodBoundary, Dim>::LatticeMatrix
-    FPUModel<T, IsPeriodBoundary, Dim>::virial(const MDCellType& cell) const {
+    auto FPUModel<T, IsPeriodBoundary, Dim>::virial(const MDCellType& cell) const -> LatticeMatrix {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         T result = 0;

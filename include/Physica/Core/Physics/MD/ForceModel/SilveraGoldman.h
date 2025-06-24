@@ -45,30 +45,23 @@ namespace Physica {
         using typename Base::Tv;
     public:
         SilveraGoldman(Tv cutoff_);
-        SilveraGoldman(const SilveraGoldman&) = default;
-        SilveraGoldman(SilveraGoldman&&) noexcept = default;
+        SilveraGoldman(const This&) = default;
+        SilveraGoldman(This&&) noexcept = default;
         ~SilveraGoldman() = default;
         /* Operators */
-        SilveraGoldman& operator=(SilveraGoldman obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] inline CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
         [[nodiscard]] inline CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
         [[nodiscard]] inline CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
-        inline void swap(SilveraGoldman& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
     };
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
     SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::SilveraGoldman(Tv cutoff_) : Base(std::move(cutoff_)) {}
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>&
-    SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::operator=(SilveraGoldman obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline void SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::swap(SilveraGoldman& __restrict obj) noexcept {
+    inline void SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::swap(This& __restrict obj) noexcept {
         Base::swap(obj);
     }
 

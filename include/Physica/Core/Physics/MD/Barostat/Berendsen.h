@@ -78,8 +78,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumReplica, BaroType Type>
-    Berendsen<T, NumReplica, Type>::LatticeMatrix
-    Berendsen<T, NumReplica, Type>::makeDecayMatrix(const LatticeMatrix& stress, T pressPerDOF) {
+    auto Berendsen<T, NumReplica, Type>::makeDecayMatrix(const LatticeMatrix& stress, T pressPerDOF) -> LatticeMatrix {
         lastStress = stress;
         LatticeMatrix result{};
         result = T(0);
@@ -132,8 +131,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumReplica, BaroType Type>
-    Berendsen<T, NumReplica, Type>::LatticeMatrix
-    Berendsen<T, NumReplica, Type>::makeScaleMatrix(const InvLatticeMatrix& invLatt, const LatticeMatrix& deltaLattice) {
+    auto Berendsen<T, NumReplica, Type>::makeScaleMatrix(const InvLatticeMatrix& invLatt, const LatticeMatrix& deltaLattice) -> LatticeMatrix {
         LatticeMatrix result;
         if constexpr (Type == BaroType::Anisotropic)
             result = deltaLattice * invLatt;
@@ -173,8 +171,7 @@ namespace Physica {
 
     template<Scalar T, size_t NumReplica, BaroType Type>
     template<class Integrator>
-    Berendsen<T, NumReplica, Type>::LatticeMatrix
-    Berendsen<T, NumReplica, Type>::makeDeltaLattice(Integrator kernel) {
+    auto Berendsen<T, NumReplica, Type>::makeDeltaLattice(Integrator kernel) -> LatticeMatrix {
         using ResultType = std::invoke_result<Integrator, size_t, size_t>::type;
         static_assert(std::is_same<T, ResultType>::value, "[Error]: Invalid integrator");
         LatticeMatrix result(Dim, Dim, 0);

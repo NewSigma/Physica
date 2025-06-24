@@ -73,7 +73,7 @@ namespace Physica {
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_unsort(const MDCellType& cell);
         template<Vector V, ExecutePolicy P>
         void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
-        template<ExecutePolicy P> [[nodiscard]] inline VectorND<T> force_short(const MDCellType& cell);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short(const MDCellType& cell);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short_unsort(const MDCellType& cell);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long(const MDCellType& cell);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long_unsort(const MDCellType& cell);
@@ -93,10 +93,10 @@ namespace Physica {
         [[nodiscard]] const EwaldType& getEwald() const noexcept { return ewald; }
         [[nodiscard]] const MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Setters */
-        inline void setLattice(LatticeMatrix lattice);
+        void setLattice(LatticeMatrix lattice);
         /* Static members */
         [[nodiscard]] static PositionMatrix makePermanentDipole(const PeriodicCell<T, 3>& cell);
-        inline static PermMatrix<T> sortPosition(MDCellType& cell);
+        static PermMatrix<T> sortPosition(MDCellType& cell);
     private:
         PositionMatrix makeChargePos(const MDCellType& cell) const;
 
@@ -106,13 +106,13 @@ namespace Physica {
         template<ExecutePolicy P> void force_short_interMolecule(const MDCellType& cell, VectorND<T>& shortForce) const;
         void force_short_intraMolecule(const MDCellType& cell, VectorND<T>& shortForce) const;
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short_PartialChargeRepr(const PositionMatrix& chargePos);
-        template<ExecutePolicy P> [[nodiscard]] inline VectorND<T> force_long_PartialChargeRepr(const PositionMatrix& chargePos);
+        template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long_PartialChargeRepr(const PositionMatrix& chargePos);
         template<Vector V> void changeRepr(ContinuousVector<V>& ewaldForce) const;
 
         [[nodiscard]] static T modifiedMorsePot(T r);
         [[nodiscard]] static T modifiedMorseForce(T r);
-        [[nodiscard]] inline static MDCellType makeCellWithoutH(const MDCellType& original);
-        [[nodiscard]] inline static bool isCellOrdered(const MDCellType& cell);
+        [[nodiscard]] static MDCellType makeCellWithoutH(const MDCellType& original);
+        [[nodiscard]] static bool isCellOrdered(const MDCellType& cell);
     };
 
     template<Scalar T, class EwaldType>
@@ -176,7 +176,7 @@ namespace Physica {
 
     template<Scalar T, class EwaldType>
     template<ExecutePolicy P>
-    inline VectorND<T> Q_TIP4P<T, EwaldType>::force_short(const MDCellType& cell) {
+    VectorND<T> Q_TIP4P<T, EwaldType>::force_short(const MDCellType& cell) {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
         VectorND<T> result = force_short_PartialChargeRepr<P>(makeChargePos(cell));
@@ -356,7 +356,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    inline void Q_TIP4P<T, EwaldType>::setLattice(LatticeMatrix lattice) {
+    void Q_TIP4P<T, EwaldType>::setLattice(LatticeMatrix lattice) {
         ewald.setLattice(std::move(lattice));
     }
 
@@ -376,7 +376,7 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    inline PermMatrix<T> Q_TIP4P<T, EwaldType>::sortPosition(MDCellType& cell) {
+    PermMatrix<T> Q_TIP4P<T, EwaldType>::sortPosition(MDCellType& cell) {
         return Base::sortPosition(cell, 1, 8);
     }
 
@@ -559,7 +559,7 @@ namespace Physica {
 
     template<Scalar T, class EwaldType>
     template<ExecutePolicy P>
-    inline VectorND<T> Q_TIP4P<T, EwaldType>::force_long_PartialChargeRepr(const PositionMatrix& chargePos) {
+    VectorND<T> Q_TIP4P<T, EwaldType>::force_long_PartialChargeRepr(const PositionMatrix& chargePos) {
         return ewald.template force_long<P>(chargePos);
     }
     /**
@@ -603,14 +603,13 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    inline Q_TIP4P<T, EwaldType>::MDCellType Q_TIP4P<T, EwaldType>::makeCellWithoutH(
-            const MDCellType& original) {
+    auto Q_TIP4P<T, EwaldType>::makeCellWithoutH(const MDCellType& original) -> MDCellType {
         const size_t numMolecule = original.getNumParticle() / 3;
         return MDCellType(original.getLattice(), original.getPos().bottomRows(2 * numMolecule), original.getMassVec());
     }
 
     template<Scalar T, class EwaldType>
-    inline bool Q_TIP4P<T, EwaldType>::isCellOrdered(const MDCellType& cell) {
+    bool Q_TIP4P<T, EwaldType>::isCellOrdered(const MDCellType& cell) {
         return Base::isCellOrdered(cell, 1, 8);
     }
 }

@@ -38,16 +38,16 @@ namespace Physica {
         T factor;
     public:
         LJModel1(T sigma_, T epsilon_, Tv cutoff);
-        LJModel1(const LJModel1&) = default;
-        LJModel1(LJModel1&&) noexcept = default;
+        LJModel1(const This&) = default;
+        LJModel1(This&&) noexcept = default;
         ~LJModel1() = default;
         /* Operators */
-        LJModel1& operator=(LJModel1 obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(LJModel1& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Static members */
-        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T force_functor(size_t i, size_t j, T r, T r2) const;
     };
 
     template<Scalar T, bool IsSmallCell>
@@ -58,13 +58,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    LJModel1<T, IsSmallCell>& LJModel1<T, IsSmallCell>::operator=(LJModel1 obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<Scalar T, bool IsSmallCell>
-    inline T LJModel1<T, IsSmallCell>::pot_functor(
+    T LJModel1<T, IsSmallCell>::pot_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] T r, T r2) const {
         const T rep_r2 = T(sigma * sigma) / r2;
         const T rep_r4 = square(rep_r2);
@@ -74,7 +68,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T LJModel1<T, IsSmallCell>::force_functor(
+    T LJModel1<T, IsSmallCell>::force_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, [[maybe_unused]] T r2) const {
         const T rep_r = sigma / r;
         const T rep_r2 = square(rep_r);
@@ -86,7 +80,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    void LJModel1<T, IsSmallCell>::swap(LJModel1& __restrict obj) noexcept {
+    void LJModel1<T, IsSmallCell>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);
