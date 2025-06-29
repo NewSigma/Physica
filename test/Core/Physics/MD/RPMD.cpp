@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -67,7 +67,7 @@ bool testCalcKinetic(double precision) {
     auto rpmd = makeSystem();
     rpmd.initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(pair_cutoff);
-    rpmd.updateForce<ForceModel, Thread>(forceModel);
+    rpmd.updateForce<Thread>(forceModel);
 
     const ScalarType kinetic1 = rpmd.calcKinetic<KineticModel>();
     ScalarType kinetic2 = 0;
@@ -93,11 +93,11 @@ void testMDRun() {
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
+            rpmd.nvt_step_for<RandomSource, Thread>(
                 PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

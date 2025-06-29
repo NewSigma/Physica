@@ -55,7 +55,7 @@ namespace Physica {
         half h;
     public:
         constexpr Real() = default;
-        __host__ __device__ Real(half f_) : h(f_) {}
+        __host__ __device__ Real(half f_) noexcept : h(f_) {}
         template<std::integral I>
         __host__ __device__ Real(I i) : h(i) {}
         template<std::floating_point F>
@@ -71,16 +71,16 @@ namespace Physica {
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        __host__ __device__ explicit operator float() const { return h; }
-        __host__ __device__ explicit operator double() const { return h; }
-        __host__ __device__ Real operator+(const Real& s) const { return Real(h + s.h); }
-        __host__ __device__ Real operator-(const Real& s) const { return Real(h - s.h); }
-        __host__ __device__ Real operator*(const Real& s) const { return Real(h * s.h); }
-        __host__ __device__ Real operator/(const Real& s) const { return Real(h / s.h); }
+        __host__ __device__ explicit operator float() const noexcept { return h; }
+        __host__ __device__ explicit operator double() const noexcept { return h; }
+        __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(h + s.h); }
+        __host__ __device__ Real operator-(const Real& s) const noexcept { return Real(h - s.h); }
+        __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(h * s.h); }
+        __host__ __device__ Real operator/(const Real& s) const noexcept;
         __host__ __device__ Real operator-() const noexcept { return Real(-h); }
-        __host__ __device__ bool operator>(const Real& s) const { return h > s.h; }
-        __host__ __device__ bool operator<(const Real& s) const { return h < s.h; }
-        __host__ __device__ bool operator==(const Real& s) const { return h == s.h; }
+        __host__ __device__ bool operator>(const Real& s) const noexcept { return h > s.h; }
+        __host__ __device__ bool operator<(const Real& s) const noexcept { return h < s.h; }
+        __host__ __device__ bool operator==(const Real& s) const noexcept { return h == s.h; }
         /* Operations */
         __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
@@ -103,6 +103,11 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ Real<Float16>::Real(const T& x) requires(!T::isComplex && !Diffable<T>) : h(x.toMachine()) {}
+
+    __host__ __device__ inline Real<Float16> Real<Float16>::operator/(const This& s) const noexcept {
+        assert(!s.isZero() && "[Error]: Divide by zero");
+        return Real(h / s.h);
+    }
 
     template<RNG R>
     inline auto Real<Float16>::random_uniform() -> This {

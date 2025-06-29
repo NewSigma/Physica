@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     ProbDistribution2D<ScalarType> pdf(-10, 10, -10, 10, 100, 100);
     for (size_t i = 0; i < numStep; ++i) {
         ForceModel forceModel{};
-        rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(thermo, kineticModel, forceModel);
+        rpmd.nvt_step<RandomSource, Sequential>(thermo, kineticModel, forceModel);
         pdf.sample(rpmd.getRingPolymer().asMatrix()(0, 0), rpmd.getRingPolymer().asMatrix()(1, 0));
     }
     const auto grid = pdf.makePosition();

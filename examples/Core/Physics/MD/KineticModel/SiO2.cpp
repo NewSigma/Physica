@@ -96,9 +96,9 @@ int main() {
         KineticModel kineticModel(temperatureT, 1);
         ThermoType thermo(temperatureT, thermostatTime, true);
 
-        rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
+        rpmd.nvt_step_for<RandomSource, Thread>(
                 PhyConst<AU>::secondToTime(1E-12), thermo, kineticModel, forceModel);
-        energy[step] = rpmd.calcPotential<ForceModel, Sequential>(forceModel);
+        energy[step] = rpmd.calcPotential<Sequential>(forceModel);
     }
 
     H5File h5f("SiO2.h5", H5File::ReadWrite | H5File::Creat);

@@ -44,21 +44,21 @@ namespace Physica {
         using ForceConstMatrix = DenseSymmMatrix<T>;
     public:
         /* Operations */
-        [[nodiscard]] T potentialV([[maybe_unused]] const MDCellType& cell) const { return 0; }
+        [[nodiscard]] T potentialV(const MDCellType&) const { return 0; }
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         template<Vector V, ExecutePolicy P>
-        void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const;
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
 
-        [[nodiscard]] T forceConst([[maybe_unused]] const MDCellType& cell, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return T(0); }
-        [[nodiscard]] ForceConstMatrix forceConst([[maybe_unused]] const MDCellType& cell) const;
+        [[nodiscard]] T forceConst(const MDCellType&, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return T(0); }
+        [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
-        [[nodiscard]] LatticeMatrix virial([[maybe_unused]] const MDCellType& cell) const { return LatticeMatrix(Dim, Dim, 0); }
+        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const { return LatticeMatrix(Dim, Dim, 0); }
     };
 
     template<Scalar T, unsigned int Dim>
@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    auto EmptyForceModel<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const -> ForceConstMatrix {
+    auto EmptyForceModel<T, Dim>::forceConst(const MDCellType& cell) const -> ForceConstMatrix {
         return ForceConstMatrix(cell.getDOF(), T(0));
     }
 }

@@ -55,7 +55,7 @@ static void bench(benchmark::State& state) {
     auto rpmd = makeSystem(numMolecular);
     rpmd.initMomentum<KineticModel, RandomSource>();
     for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, Thread>(kineticModel, forceModel);
+        rpmd.nve_step<Thread>(kineticModel, forceModel);
 }
 
 BENCHMARK(bench)->Name("ParaH")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);

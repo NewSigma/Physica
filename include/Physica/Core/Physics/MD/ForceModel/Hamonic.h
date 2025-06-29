@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,6 +24,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     class Hamonic : private EmptyForceModel<T, Dim> {
         using Base = EmptyForceModel<T, Dim>;
+        using This = Hamonic<T, Dim>;
     public:
         using typename Base::MDCellType;
         using typename Base::LatticeMatrix;
@@ -34,11 +35,11 @@ namespace Physica {
         VectorND<T> springCoeffs;
     public:
         Hamonic(PositionMatrix sites_, VectorND<T> springCoeffs_);
-        Hamonic(const Hamonic&) = default;
-        Hamonic(Hamonic&&) noexcept = default;
+        Hamonic(const This&) = default;
+        Hamonic(This&&) noexcept = default;
         ~Hamonic() = default;
         /* Operators */
-        Hamonic& operator=(Hamonic obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
 
@@ -54,7 +55,7 @@ namespace Physica {
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
-        void swap(Hamonic& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return sites.getRow(); }
         [[nodiscard]] const VectorND<T>& getSpringCoeffs() const noexcept { return springCoeffs; }
@@ -130,7 +131,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    void Hamonic<T, Dim>::swap(Hamonic& __restrict obj) noexcept {
+    void Hamonic<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         sites.swap(obj.sites);
         springCoeffs.swap(obj.springCoeffs);

@@ -80,15 +80,15 @@ int main(int argc, char** argv) {
     rpmd.initMomentum<KineticModel, RandomSource>();
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
-    const VectorType energy1 = rpmd.testNVE<KineticModel, ForceModel, Thread>(
+    const VectorType energy1 = rpmd.testNVE<Thread>(
             PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
     
     rpmd.setTimeStep(timeStep * 2);
-    const VectorType energy2 = rpmd.testNVE<KineticModel, ForceModel, Thread>(
+    const VectorType energy2 = rpmd.testNVE<Thread>(
             PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
 
     rpmd.setTimeStep(timeStep * 5);
-    const VectorType energy5 = rpmd.testNVE<KineticModel, ForceModel, Thread>(
+    const VectorType energy5 = rpmd.testNVE<Thread>(
             PhyConst<AU>::secondToTime(1E-12), kineticModel, forceModel);
 
     QApplication app(argc, argv);

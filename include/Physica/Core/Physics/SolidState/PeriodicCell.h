@@ -63,11 +63,11 @@ namespace Physica {
         PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_);
         template<Scalar U>
         PeriodicCell(const PeriodicCell<U, Dim>& cell);
-        PeriodicCell(const PeriodicCell&) = default;
-        PeriodicCell(PeriodicCell&&) noexcept = default;
+        PeriodicCell(const This&) = default;
+        PeriodicCell(This&&) noexcept = default;
         ~PeriodicCell() = default;
         /* Operators */
-        PeriodicCell& operator=(PeriodicCell cell) noexcept;
+        This& operator=(This cell) noexcept;
         /* Operations */
         [[nodiscard]] VectorType minDistVector(size_t id_from, size_t id_to) const;
         [[nodiscard]] VectorType minDistVector(VectorType from, size_t id_to) const;
@@ -89,7 +89,7 @@ namespace Physica {
 
         H5Group read(const H5Loc& loc, const char* name);
         H5Group write(H5Loc& loc, const char* name) const;
-        void swap(PeriodicCell& __restrict cell) noexcept;
+        void swap(This& __restrict cell) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getDim() { return Dim; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -399,11 +399,11 @@ namespace Physica {
     }
 #endif
     template<Scalar T, unsigned int Dim>
-    void PeriodicCell<T, Dim>::swap(PeriodicCell& __restrict cell) noexcept {
-        assert(this != &cell && "[Error]: Self swap is likely a bug");
-        lattice.swap(cell.lattice);
-        pos.swap(cell.pos);
-        std::swap(type, cell.type);
+    void PeriodicCell<T, Dim>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        lattice.swap(obj.lattice);
+        pos.swap(obj.pos);
+        std::swap(type, obj.type);
     }
 
     template<Scalar T, unsigned int Dim>

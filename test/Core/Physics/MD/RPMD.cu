@@ -68,14 +68,14 @@ void testMDRun() {
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, GPU>(
+            rpmd.nvt_step_for<RandomSource, GPU>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 kineticModel,
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, GPU>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<RandomSource, GPU>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

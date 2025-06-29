@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     VectorType f2norm(2000);
     VectorType press(2000);
     for (size_t i = 0; i < f2norm.getLength(); ++i) {
-        rpmd.fire_pstep<BaroType::XY, KineticModel, ForceModel, Sequential>(fire, kineticModel, forceModel);
+        rpmd.fire_pstep<BaroType::XY, Sequential>(fire, kineticModel, forceModel);
         f2norm[i] = fire.getForceNorm();
         //const auto virial = forceModel.virial(rpmd.phaseToCell(0));
         //press[i] = abs(virial(0, 0) + virial(1, 1)) * ScalarType(0.5);

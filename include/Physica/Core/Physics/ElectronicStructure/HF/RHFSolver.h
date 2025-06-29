@@ -95,7 +95,7 @@ namespace Physica {
                                 const DenseVector<T, EDIISBufferSize>& energyBuffer);
         MatrixND DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat);
         void updateWaves(const MatrixND& inv_cholesky);
-        [[nodiscard]] T updateSelfConsistentEnergy(DenseVector<T, EDIISBufferSize>& energyBuffer);
+        void updateSelfConsistentEnergy(DenseVector<T, EDIISBufferSize>& energyBuffer);
     };
 
     template<class BaseSetType>
@@ -162,10 +162,14 @@ namespace Physica {
             eigenSolver.sort();
 
             updateWaves(inv_cholesky);
+            updateSelfConsistentEnergy(energyBuffer);
 
-            const T delta = updateSelfConsistentEnergy(energyBuffer);
-            if (delta < criteria)
-                return true;
+            if (iteration > 0) {
+                const T oldSelfConsistentEnergy = energyBuffer[EDIISBufferSize - 2];
+                const T delta = abs((oldSelfConsistentEnergy - selfConsistentEnergy) / oldSelfConsistentEnergy);
+                if (delta < criteria)
+                    return true;
+            }
 
             if ((++iteration) > maxIte)
                 return false;
@@ -353,7 +357,7 @@ namespace Physica {
     }
 
     template<class BaseSetType>
-    auto RHFSolver<BaseSetType>::updateSelfConsistentEnergy(DenseVector<T, EDIISBufferSize>& energyBuffer) -> T {
+    void RHFSolver<BaseSetType>::updateSelfConsistentEnergy(DenseVector<T, EDIISBufferSize>& energyBuffer) {
         for (size_t i = 0; i < energyBuffer.getLength() - 1; ++i)
             energyBuffer[i].swap(energyBuffer[i + 1]);
 
@@ -370,10 +374,6 @@ namespace Physica {
             selfConsistentEnergy += isSingleOccupacy ? temp : (T(2) * temp);
         }
         selfConsistentEnergy *= T(0.5);
-        auto ite = energyBuffer.rbegin();
-        *ite = selfConsistentEnergy;
-        const T oldSelfConsistentEnergy = *(++ite);
-        const T delta = abs((oldSelfConsistentEnergy - selfConsistentEnergy) / oldSelfConsistentEnergy);
-        return delta;
+        energyBuffer[EDIISBufferSize - 1] = selfConsistentEnergy;
     }
 }

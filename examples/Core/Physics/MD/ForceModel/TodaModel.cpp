@@ -73,9 +73,9 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
     for (size_t sys = 0; sys < numSystem; ++sys) {
         ScalarType temp = 0;
         for (size_t i = 0; i < numStep; ++i) {
-            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(
+            rpmd.nvt_step<RandomSource, Sequential>(
                     thermo, kineticModel, forceModel);
-            toNextMean(temp, i, rpmd.makeStressClassical<ForceModel, Sequential>(forceModel)(0, 0));
+            toNextMean(temp, i, rpmd.makeStressClassical<Sequential>(forceModel)(0, 0));
         }
         toNextVariance(variance, mean, sys, temp);
     }

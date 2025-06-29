@@ -127,11 +127,9 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 
     ThreadPool::numThreadRequired = 4;
     {
-        rpmd.template nvt_step_for<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
-            PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
+        rpmd.template nvt_step_for<RandomSource, Thread>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
         for (size_t i = 0; i < 1000 * (NumReplica == 0 ? 1 : 32); ++i) {
-            rpmd.template nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Thread>(
-                thermo, kineticModel, forceModel);
+            rpmd.template nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));
         }

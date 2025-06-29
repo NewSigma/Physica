@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -94,7 +94,7 @@ namespace Physica {
     }
 
     template<int Dim>
-    LatticeModel<Dim>::IndexType LatticeModel<Dim>::getDims() const noexcept {
+    auto LatticeModel<Dim>::getDims() const noexcept -> IndexType {
         if constexpr (Dim == 1)
             return IndexType{superSize[0], numUnitCellSite};
         if constexpr (Dim == 2)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -81,7 +81,7 @@ int main() {
         ScalarType temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
             ForceModel forceModel{};
-            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, ForceModel, Sequential>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<RandomSource, Sequential>(thermo, kineticModel, forceModel);
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);

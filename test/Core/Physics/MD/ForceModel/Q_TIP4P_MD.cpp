@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -124,7 +124,7 @@ void testMD() {
     {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<ThermoType, RandomSource, KineticModel, decltype(forceModel), Thread>(
+        rpmd.nvt_step_for<RandomSource, Thread>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
             kineticModel,
@@ -139,7 +139,7 @@ void testMD() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermoType, RandomSource, KineticModel, decltype(forceModel), Thread>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

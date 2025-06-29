@@ -56,7 +56,7 @@ namespace Physica {
         float f;
     public:
         constexpr Real() = default;
-        __host__ __device__ constexpr Real(float f_) : f(f_) {}
+        __host__ __device__ constexpr Real(float f_) noexcept : f(f_) {}
         Real(const Integer& i) : Real(float(double(i))) {}
         Real(const Rational& r) : Real(float(double(r))) {}
         template<Scalar T>
@@ -70,18 +70,18 @@ namespace Physica {
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        __host__ __device__ explicit operator float() const { return f; }
-        __host__ __device__ explicit operator double() const { return f; }
-        __host__ __device__ Real operator+(const Real& s) const { return Real(f + s.f); }
-        __host__ __device__ Real operator-(const Real& s) const { return Real(f - s.f); }
-        __host__ __device__ Real operator*(const Real& s) const { return Real(f * s.f); }
-        __host__ __device__ Real operator/(const Real& s) const { return Real(f / s.f); }
+        __host__ __device__ explicit operator float() const noexcept { return f; }
+        __host__ __device__ explicit operator double() const noexcept { return f; }
+        __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(f + s.f); }
+        __host__ __device__ Real operator-(const Real& s) const noexcept { return Real(f - s.f); }
+        __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(f * s.f); }
+        __host__ __device__ Real operator/(const Real& s) const noexcept;
         __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(f, i)); }
         __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(f, -i)); }
         __host__ __device__ Real operator-() const noexcept { return Real(-f); }
-        __host__ __device__ bool operator>(const Real& s) const { return f > s.f; }
-        __host__ __device__ bool operator<(const Real& s) const { return f < s.f; }
-        __host__ __device__ bool operator==(const Real& s) const { return f == s.f; }
+        __host__ __device__ bool operator>(const Real& s) const noexcept { return f > s.f; }
+        __host__ __device__ bool operator<(const Real& s) const noexcept { return f < s.f; }
+        __host__ __device__ bool operator==(const Real& s) const noexcept { return f == s.f; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
@@ -109,6 +109,11 @@ namespace Physica {
 
     template<Scalar T>
     __host__ __device__ Real<Float32>::Real(const T& x) requires(!T::isComplex && !Diffable<T>) : f(float(x)) {}
+
+    __host__ __device__ inline Real<Float32> Real<Float32>::operator/(const This& s) const noexcept {
+        assert(!s.isZero() && "[Error]: Divide by zero");
+        return Real(f / s.f);
+    }
 
     __host__ __device__ inline Real<Float32> Real<Float32>::mod() const noexcept {
         float buffer;

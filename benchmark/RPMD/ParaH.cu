@@ -56,7 +56,7 @@ static void bench(benchmark::State& state) {
     rpmd.initMomentum<KineticModel, RandomSource>();
     ForceModel forceModel(numMolecular, pair_cutoff);
     for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, GPU>(kineticModel, forceModel);
+        rpmd.nve_step<GPU>(kineticModel, forceModel);
 }
 
 BENCHMARK(bench)->Name("ParaH cuda")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);

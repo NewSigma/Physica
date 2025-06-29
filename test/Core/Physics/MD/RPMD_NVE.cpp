@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -68,7 +68,7 @@ int main() {
         kineticModel.updateMass(rpmd.getRingPolymer());
         ForceModel forceModel{};
         for (size_t i = 0; i < nve.getLength(); ++i) {
-            rpmd.nve_step<KineticModel, ForceModel, Sequential>(kineticModel, forceModel);
+            rpmd.nve_step<Sequential>(kineticModel, forceModel);
             nve[i] = (rpmd.calcClassicalInternalEnergy(forceModel)) / ScalarType(numMolecular * numReplica);
         }
     }

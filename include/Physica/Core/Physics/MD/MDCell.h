@@ -26,8 +26,9 @@
 namespace Physica {
     template<Scalar T, unsigned int Dim = 3>
     class MDCell : public PeriodicCell<T, Dim> {
-    public:
         using Base = PeriodicCell<T, Dim>;
+        using This = MDCell<T, Dim>;
+    public:
         using typename Base::LatticeMatrix;
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
@@ -48,6 +49,11 @@ namespace Physica {
         template<Scalar U>
         MDCell(Poscar<U> poscar);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
+        MDCell(const This&) = default;
+        MDCell(This&&) noexcept = default;
+        ~MDCell() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void scale(const T& factor);
         void normalize();
@@ -63,6 +69,7 @@ namespace Physica {
         MDCell makeSuperCell(Array<size_t, 3> size) const { return makeSuperCell<Option>(size[0], size[1], size[2]); }
 
         [[nodiscard]] MassTypeMap makeMassTypeMap() const;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
@@ -72,7 +79,7 @@ namespace Physica {
         /* Setters */
         void setLattice(const MDCell& cell);
         void setLattice(LatticeMatrix new_lattice);
-        inline void setMass(size_t atom, T value);
+        void setMass(size_t atom, T value);
     protected:
         void toDirect() { Base::toDirect(invLattice); }
     private:
@@ -178,15 +185,14 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    MDCell<T, Dim>
-    MDCell<T, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
-        MDCell result = *this;
+    auto MDCell<T, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const -> This {
+        This result = *this;
         result.toSuperCell<Option>(x, y, z);
         return result;
     }
 
     template<Scalar T, unsigned int Dim>
-    MDCell<T, Dim>::MassTypeMap MDCell<T, Dim>::makeMassTypeMap() const {
+    auto MDCell<T, Dim>::makeMassTypeMap() const -> MassTypeMap {
         ParticleType nextType = 0;
         std::unordered_map<T, ParticleType> massToType{};
         std::set<T> massSet{};
@@ -198,6 +204,14 @@ namespace Physica {
             nextType += 1;
         }
         return massToType;
+    }
+
+    template<Scalar T, unsigned int Dim>
+    void MDCell<T, Dim>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
+        massVec.swap(obj.massVec);
+        invLattice.swap(obj.invLattice);
     }
 
     template<Scalar T, unsigned int Dim>
@@ -213,7 +227,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    inline void MDCell<T, Dim>::setMass(size_t atom, T value) {
+    void MDCell<T, Dim>::setMass(size_t atom, T value) {
         assert(atom < Base::getNumParticle() && "[Error]: Index out of range");
         assert(value.isPositive() && "[Error]: Mass must be positive");
         massVec[atom] = value;
