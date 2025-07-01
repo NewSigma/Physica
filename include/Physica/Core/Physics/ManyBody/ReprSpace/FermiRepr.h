@@ -61,10 +61,10 @@ namespace Physica {
         [[nodiscard]] int getNumSpinUp() const noexcept { return numSpinUp; }
         [[nodiscard]] int getNumSpinDown() const noexcept { return numSpinDown; }
         [[nodiscard]] int getNumParticle() const noexcept { return numSpinUp + numSpinDown; }
-        [[nodiscard]] const StateArray& getUpStates() const noexcept { return upStates; }
-        [[nodiscard]] const StateIndexMap& getUpIndexMap() const noexcept { return upIndexMap; }
-        [[nodiscard]] inline const StateArray& getDownStates() const noexcept;
-        [[nodiscard]] inline const StateIndexMap& getDownIndexMap() const noexcept;
+        [[nodiscard]] const auto& getUpStates() const noexcept { return upStates; }
+        [[nodiscard]] const auto& getUpIndexMap() const noexcept { return upIndexMap; }
+        [[nodiscard]] const StateArray& getDownStates() const noexcept;
+        [[nodiscard]] const StateIndexMap& getDownIndexMap() const noexcept;
         [[nodiscard]] size_t getNumState() const noexcept { return getNumUpStates() * getNumDownStates(); }
         [[nodiscard]] size_t getNumUpStates() const noexcept { return getUpStates().getLength(); }
         [[nodiscard]] size_t getNumDownStates() const noexcept { return getDownStates().getLength(); }
@@ -121,7 +121,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite, bool UseInversionSymm>
-    inline auto FermiRepr<Dim, NumSite, UseInversionSymm>::getDownStates() const noexcept -> const StateArray& {
+    auto FermiRepr<Dim, NumSite, UseInversionSymm>::getDownStates() const noexcept -> const StateArray& {
         if constexpr (UseInversionSymm)
             return upStates;
         else
@@ -129,7 +129,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite, bool UseInversionSymm>
-    inline auto FermiRepr<Dim, NumSite, UseInversionSymm>::getDownIndexMap() const noexcept -> const StateIndexMap& {
+    auto FermiRepr<Dim, NumSite, UseInversionSymm>::getDownIndexMap() const noexcept -> const StateIndexMap& {
         if constexpr (UseInversionSymm)
             return getUpIndexMap();
         else

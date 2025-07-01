@@ -23,14 +23,14 @@
 
 namespace Physica {
     template<Scalar T>
-    __host__ __device__ inline void toNextMean(T& mean, size_t lastNumSample, T sample) {
+    __host__ __device__ void toNextMean(T& mean, size_t lastNumSample, T sample) noexcept {
         const T factor1 = T(lastNumSample);
         const T factor2 = reciprocal(T(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
     }
 
     template<Vector T1, Vector T2>
-    inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
+    void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) noexcept {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
@@ -38,24 +38,15 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
+    void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) noexcept {
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
     }
 
-    template<Vector T>
-    T::ScalarType mean_stable(const T& x) {
-        using ScalarType = T::ScalarType;
-        ScalarType result = 0;
-        for (size_t i = 0; i < x.getLength(); ++i)
-            toNextMean(result, i, x.calc(i));
-        return result;
-    }
-
     template<Scalar T>
-    inline void toNextVariance(T& var, T& mean, size_t lastNumSample, T sample) {
+    void toNextVariance(T& var, T& mean, size_t lastNumSample, T sample) noexcept {
         const T factor1 = T(lastNumSample);
         const T factor2 = reciprocal(T(lastNumSample + 1));
         var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
@@ -63,7 +54,7 @@ namespace Physica {
     }
 
     template<Vector T1, Vector T2>
-    inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
+    void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) noexcept {
         sample.assign_check(mean);
         sample.assign_check(var);
 
@@ -75,7 +66,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
+    void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) noexcept {
         sample.assign_check(mean);
         sample.assign_check(var);
 
@@ -99,7 +90,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    inline T::ScalarType deviation_stable(const T& x) {
+    T::ScalarType deviation_stable(const T& x) {
         return sqrt(variance_stable(x));
     }
 
@@ -118,8 +109,7 @@ namespace Physica {
         using ScalarType = T::ScalarType;
         const ScalarType x_mean = x.mean();
         const ScalarType y_mean = y.mean();
-        DenseVector<typename T::ScalarType, T::SizeAtCompile> temp = hadamard((x - x_mean), (y - y_mean));
-        return temp.sum() / ScalarType(temp.getLength() - 1);
+        return hadamard((x - x_mean), (y - y_mean)).sum() / ScalarType(x.getLength() - 1);
     }
 
     template<Vector T>

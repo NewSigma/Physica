@@ -26,16 +26,8 @@ using namespace Physica;
 RingBuffer::RingBuffer(size_t size) : buffer(size) {
     bufferReader = bufferWriter = buffer.data();
 }
-/*!
- * Read data from src and write bytes bytes to the buffer.
- *
- * \param src
- * Read bytes from it.
- *
- * \param bytes
- * Number of bytes to be read and write.
- */
-void RingBuffer::writeBytes(const char* src, size_t bytes) {
+
+void RingBuffer::writeBytes(const char*  __restrict src, size_t bytes) noexcept {
     assert(bytes < getSize());
     const size_t leftSpace = getSize() - (bufferWriter - buffer.data());
     if (bytes < leftSpace) {
@@ -53,16 +45,8 @@ void RingBuffer::writeBytes(const char* src, size_t bytes) {
         bufferWriter = buffer.data() + leftBytes;
     }
 }
-/*!
- * Read data from buffer and write bytes bytes to the dest.
- *
- * \param dest
- * Save bytes to it.
- *
- * \param bytes
- * Number of bytes to be read and write.
- */
-void RingBuffer::readBytes(char* dest, size_t bytes) {
+
+void RingBuffer::readBytes(char*  __restrict dest, size_t bytes) noexcept {
     const size_t leftSpace = getSize() - (bufferReader - buffer.data());
     if (bytes <= leftSpace) {
         while (bufferReader == bufferWriter)
@@ -80,7 +64,7 @@ void RingBuffer::readBytes(char* dest, size_t bytes) {
     }
 }
 
-void RingBuffer::creadBytes(char* dest, size_t bytes, size_t bias) const {
+void RingBuffer::creadBytes(char*  __restrict dest, size_t bytes, size_t bias) const noexcept {
     const char* startPos = buffer.data() + (bufferReader - buffer.data() + bias) % getSize();
     const size_t leftSpace = getSize() - (startPos - buffer.data());
     if (bytes <= leftSpace) {

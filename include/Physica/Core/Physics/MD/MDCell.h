@@ -110,6 +110,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     template<Scalar U>
     MDCell<T, Dim>::MDCell(PeriodicCell<U, Dim> cell, MassVector massVec_) : massVec(std::move(massVec_)) {
+        assert(cell.getNumParticle() == massVec.getLength());
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
         Base::operator=(Base(cell.getLattice(), cell.getPos(), Type::Cartesian));
@@ -124,6 +125,7 @@ namespace Physica {
     MDCell<T, Dim>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
             : Base(std::move(lattice), std::move(pos), Base::Type::Cartesian)
             , massVec(std::move(massVec_)) {
+        assert(Base::getNumParticle() == massVec.getLength());
         invLattice = Base::makeInvLattice();
     }
 

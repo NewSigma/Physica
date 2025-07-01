@@ -39,12 +39,17 @@ namespace Physica {
     class PHYSICA_API ThreadPool final {
         using This = ThreadPool;
         using Handle = std::coroutine_handle<>;
-        struct ThreadData {
+        class ThreadData {
+        public:
             std::unique_ptr<std::thread> thread;
+        private:
             std::queue<Handle> queue;
-            std::mutex queueMutex;
-
-            ThreadData() : thread(), queue(), queueMutex() {}
+            std::mutex mutex;
+        public:
+            ThreadData() : thread(), queue(), mutex() {}
+            /* Operations */
+            void push(Handle handle) noexcept;
+            Handle pop() noexcept;
         };
 
         struct ThreadInfo {

@@ -38,6 +38,8 @@ namespace Physica {
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
         using MatrixND = DenseMatrix<T>;
+        // The lowest minus float number, keep enough digits for later algebra
+        constexpr static Tr Smallest = -std::numeric_limits<T>::max() * std::numeric_limits<Tr>::epsilon();
 
         Tr beta = 0;
         Tr lnZ0 = 0; // Collect constant contribution, improve numerical stability
@@ -134,7 +136,7 @@ namespace Physica {
     auto TPQ<T>::lnPartitionZ() const -> Tr {
         const bool isUnderflow = abs(asVector()).max() < Tr(std::numeric_limits<Tr>::min());
         if (isUnderflow)
-            return Tr(-std::numeric_limits<T>::max());
+            return Smallest;
         return Base::lnSquaredNorm() + Tr(2) * lnZ0;
     }
 
@@ -144,11 +146,12 @@ namespace Physica {
         const Tr maxabs = abs(asVector()).max();
         const bool isUnderflow = maxabs < Tr(std::numeric_limits<Tr>::min());
         if (isUnderflow)
-            return Tr(-std::numeric_limits<T>::max());
+            return Smallest;
+
         const Tr factor = reciprocal(maxabs);
         const Tr dot = hadamard((asVector() * factor).squaredNorms(), other).sum();
         if (dot.isZero())
-            return Tr(-std::numeric_limits<T>::max());
+            return Smallest;
         return ln(dot) + Tr(2) * (ln(maxabs) + lnZ0);
     }
 
@@ -167,7 +170,7 @@ namespace Physica {
     template<RNG R>
     inline void TPQ<T>::random_normal(Tr norm) {
         const bool useDefault = norm.isZero();
-        if (useDefault) // Default norm is as small as possible while keep all effective digits
+        if (useDefault) // Default norm is the smallest positive float number while keep all effective digits
             norm = Tr(std::numeric_limits<Tr>::min() / std::numeric_limits<Tr>::epsilon());
         Base::template random_normal<R>();
         asVector() *= norm;

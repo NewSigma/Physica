@@ -50,6 +50,7 @@ namespace Physica {
     public:
         auto get_return_object() noexcept { return RValueWrapper(&Base::getDerived()); }
         std::suspend_never initial_suspend() noexcept { return {}; }
+        void await_transform(auto&&) noexcept = delete;
         std::suspend_always final_suspend() noexcept { return {}; }
         void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
         [[noreturn]] void unhandled_exception() { throw; }

@@ -53,6 +53,7 @@ namespace Physica {
             /* Operations */
             auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
             std::suspend_never initial_suspend() noexcept { return {}; }
+            void await_transform(auto&&) noexcept = delete;
             std::suspend_always final_suspend() noexcept { return {}; }
             template<class T>
             auto yield_value(T&& arg) noexcept {

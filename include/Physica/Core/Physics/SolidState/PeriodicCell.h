@@ -762,9 +762,11 @@ namespace Physica {
         assert(factor.isPositive());
         assert(type == Type::Direct);
         lattice *= factor;
-        co_await std::suspend_always{};
-        if constexpr (ReverseDiff<T>)
+        if constexpr (ReverseDiff<T>) {
+            co_await std::suspend_always{};
             factor.reverse(lattice.grads().sum());
+        }
+        co_return;
     }
 
     template<Scalar T, unsigned int Dim>
@@ -773,9 +775,11 @@ namespace Physica {
         assert(type == Type::Cartesian);
         lattice *= factor;
         pos *= factor;
-        co_await std::suspend_always{};
-        if constexpr (ReverseDiff<T>)
+        if constexpr (ReverseDiff<T>) {
+            co_await std::suspend_always{};
             factor.reverse(lattice.grads().sum() + pos.grads().sum());
+        }
+        co_return;
     }
 
     template<Scalar T, unsigned int Dim>

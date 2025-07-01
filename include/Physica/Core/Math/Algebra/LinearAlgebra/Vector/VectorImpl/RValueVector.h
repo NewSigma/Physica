@@ -152,11 +152,12 @@ namespace Physica {
         [[nodiscard]] inline Tr lnSquaredNorm() const;
         [[nodiscard]] inline Tr normInf() const;
 
-        [[nodiscard]] CoDiff<T> max() const;
-        [[nodiscard]] CoDiff<T> min() const;
-        [[nodiscard]] CoDiff<T> sum() const;
-        [[nodiscard]] CoDiff<T> mean() const;
-        [[nodiscard]] CoDiff<T> variance() const;
+        [[nodiscard]] CoDiff<T> max() const noexcept;
+        [[nodiscard]] CoDiff<T> min() const noexcept;
+        [[nodiscard]] CoDiff<T> sum() const noexcept;
+        [[nodiscard]] CoDiff<T> mean() const noexcept;
+        [[nodiscard]] CoDiff<T> mean_stable() const noexcept;
+        [[nodiscard]] CoDiff<T> variance() const noexcept;
         [[nodiscard]] T variance(const T& prior_mean) const;
         [[nodiscard]] T deviation() const;
         [[nodiscard]] T deviation(const T& prior_mean) const;

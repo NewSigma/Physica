@@ -23,6 +23,21 @@ using namespace Physica;
 
 int ThreadPool::numThreadRequired = 0;
 
+void ThreadPool::ThreadData::push(Handle handle) noexcept {
+    std::unique_lock locker(mutex);
+    queue.push(handle);
+}
+
+auto ThreadPool::ThreadData::pop() noexcept -> Handle {
+    Handle handle = nullptr;
+    std::unique_lock locker(mutex);
+    if (!queue.empty()) {
+        handle = queue.front();
+        queue.pop();
+    }
+    return handle;
+}
+
 ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");
     for (int i = 0; i < numThreads; ++i) {
@@ -39,12 +54,8 @@ ThreadPool::~ThreadPool() {
 void ThreadPool::schedule(Handle handle) noexcept {
     assert(handle != nullptr);
     assert(!handle.done());
-    {
-        const int schedule_to = isMainThread() ? 0 : getThreadInfo().id;
-        auto& data = thread_data[schedule_to];
-        std::unique_lock locker(data.queueMutex);
-        data.queue.push(handle);
-    }
+    const int schedule_to = isMainThread() ? 0 : getThreadInfo().id;
+    thread_data[schedule_to].push(std::move(handle));
     cond.notify_one();
 }
 
@@ -52,14 +63,9 @@ auto ThreadPool::steal() noexcept -> Handle {
     const auto random = RandomSeed::toNextSeed(getThreadInfo().randState);
     const int numThreads = getNumThreads();
     for (int i = 0; i < numThreads; ++i) {
-        ThreadData& data = thread_data[(random + i) % numThreads];
-        std::unique_lock locker(data.queueMutex);
-        auto& queue = data.queue;
-        if (!queue.empty()) {
-            Handle handle = queue.front();
-            queue.pop();
+        Handle handle = thread_data[(random + i) % numThreads].pop();
+        if (handle)
             return handle;
-        }
     }
     return nullptr;
 }
@@ -99,20 +105,10 @@ void ThreadPool::workerMainLoop(int thread_id) noexcept {
     auto& threadInfo = getThreadInfo();
     threadInfo.id = thread_id;
     auto& data = thread_data[thread_id];
-    auto& queue = data.queue;
-    std::unique_lock locker(data.queueMutex, std::defer_lock);
     while (true) {
-        Handle handle = nullptr;
-        locker.lock();
-        if (!queue.empty()) {
-            handle = std::move(queue.front());
-            queue.pop();
-            locker.unlock();
-        }
-        else {
-            locker.unlock();
+        Handle handle = data.pop();
+        if (!handle)
             handle = steal();
-        }
 
         if (handle) {
             assert(!handle.done() && "Data race");

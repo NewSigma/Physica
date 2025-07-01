@@ -21,6 +21,10 @@
 #include "FormatedVector.h"
 
 namespace Physica {
+    // Forward Decl
+    template<Scalar T>
+    __host__ __device__ void toNextMean(T& mean, size_t lastNumSample, T sample) noexcept;
+
     template<class Derived>
     template<Vector V, ExecutePolicy P>
     inline void RValueVector<Derived>::assign(V& v) const {
@@ -207,7 +211,8 @@ namespace Physica {
     auto RValueVector<Derived>::lnSquaredNorm() const -> Tr {
         const auto& derived = Base::getDerived();
         const Tr maxabs = abs(derived).max();
-        assert(maxabs > Trv(std::numeric_limits<T>::min()) && "[Error]: ln(0) is not allowed");
+        // We require a small threhold to avoid latter ill-conditioned reciprocal.
+        assert(maxabs > Trv(std::numeric_limits<T>::min()) && "[Error]: Vectors near zero are invalid");
         const Tr factor = reciprocal(maxabs);
         return ln((derived * factor).squaredNorm()) + Tr(2) * ln(maxabs);
     }
@@ -218,7 +223,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::max() const -> CoDiff<T> {
+    auto RValueVector<Derived>::max() const noexcept -> CoDiff<T> {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         assert(getLength() != 0);
 
@@ -281,7 +286,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::min() const -> CoDiff<T> {
+    auto RValueVector<Derived>::min() const noexcept -> CoDiff<T> {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         assert(getLength() != 0);
 
@@ -344,7 +349,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::sum() const -> CoDiff<T> {
+    auto RValueVector<Derived>::sum() const noexcept -> CoDiff<T> {
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         if constexpr (isReverseDiff) {
             auto result = co_yield values().sum();
@@ -387,12 +392,27 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::mean() const -> CoDiff<T> {
+    auto RValueVector<Derived>::mean() const noexcept -> CoDiff<T> {
         return sum() / Trv(getLength());
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::variance() const -> CoDiff<T> {
+    auto RValueVector<Derived>::mean_stable() const noexcept -> CoDiff<T> {
+        auto result = T(0);
+        const auto& v = Base::getDerived();
+        for(size_t i = 0; i < getLength(); ++i)
+            toNextMean(result, i, v.calc(i));
+
+        if constexpr (isReverseDiff) {
+            auto y = co_yield std::move(result);
+            v.reverse(y.grad());
+        }
+        else
+            co_return std::move(result);
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::variance() const noexcept -> CoDiff<T> {
         const auto& x = Base::getDerived();
         const size_t length = getLength();
         const auto x_mean = mean();

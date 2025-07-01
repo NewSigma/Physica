@@ -25,15 +25,7 @@ namespace Physica {
         using This = RingBuffer;
 
         Array<char> buffer;
-        /*!
-         * Directs to the next position of buffer to be read.
-         * It is always behind of bufferReader.
-         */
         char* bufferReader;
-        /*!
-         * Directs to the next available position of buffer to write.
-         * It is always in front of bufferReader.
-         */
         char* bufferWriter;
     public:
         explicit RingBuffer(size_t size);
@@ -43,46 +35,33 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<typename T> inline void write(T t);
-        template<typename T> inline void read(T* t);
-        template<typename T> inline void cread(T* t, size_t bias) const;
-        void writeBytes(const char* src, size_t bytes);
-        void readBytes(char* dest, size_t bytes);
-        void creadBytes(char* dest, size_t bytes, size_t bias) const;
+        template<typename T> inline void write(T t) noexcept;
+        template<typename T> inline void read(T* __restrict t) noexcept;
+        template<typename T> inline void cread(T* __restrict t, size_t bias) const noexcept;
+        void writeBytes(const char* __restrict src, size_t bytes) noexcept;
+        void readBytes(char* __restrict dest, size_t bytes) noexcept;
+        void creadBytes(char* __restrict dest, size_t bytes, size_t bias) const noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] bool isEmpty() const noexcept { return bufferReader == bufferWriter; }
+        [[nodiscard]] bool empty() const noexcept { return bufferReader == bufferWriter; }
         [[nodiscard]] size_t getSize() const noexcept { return buffer.getLength(); }
     };
-    /*!
-     * Write T to the buffer.
-     *
-     * \tparam T
-     * Arbitrary type.
-     *
-     * \param t
-     * Data of t will be stored to the buffer.
-     */
+
     template<typename T>
-    inline void RingBuffer::write(T t) {
+    void RingBuffer::write(T t) noexcept {
+        static_assert(std::is_trivially_copyable<T>::value);
         writeBytes(reinterpret_cast<const char*>(&t), sizeof(T));
     }
-    /*!
-     * Read a T from the buffer and store it to t.
-     *
-     * \tparam T
-     * Arbitrary type.
-     *
-     * \param t
-     * The data of T will be save to the position directed by t.
-     */
+
     template<typename T>
-    inline void RingBuffer::read(T* t) {
+    void RingBuffer::read(T* __restrict t) noexcept {
+        static_assert(std::is_trivially_copyable<T>::value);
         readBytes(reinterpret_cast<char*>(t), sizeof(T));
     }
 
     template<typename T>
-    inline void RingBuffer::cread(T* t, size_t bias) const {
+    void RingBuffer::cread(T* __restrict t, size_t bias) const noexcept {
+        static_assert(std::is_trivially_copyable<T>::value);
         creadBytes(reinterpret_cast<char*>(t), sizeof(T), bias);
     }
 }
