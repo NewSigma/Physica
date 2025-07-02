@@ -118,8 +118,7 @@ namespace Physica {
         DiffCoro(const This&) = delete;
         DiffCoro(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
         ~DiffCoro() {
-            if (handle) {
-                assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
+            if (!handle.done()) {
                 handle.resume();
                 assert(handle.done() && "[Error]: Invalid reverse diff");
                 handle.destroy();

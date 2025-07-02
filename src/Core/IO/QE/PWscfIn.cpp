@@ -33,9 +33,9 @@ std::ostream& Physica::operator<<(std::ostream& os, const PWscfIn& input) {
         os << "  calculation = '" << PWscfIn::calculationToStr(input.calculation) << "'\n";
         os << "  tstress = ." << (input.tstress ? "true" : "false") << ".\n";
         os << "  tprnfor = ." << (input.tprnfor ? "true" : "false") << ".\n";
-        os << "  outdir = '" << input.outdir.c_str() << "'\n";
-        os << "  prefix = '" << input.prefix.c_str() << "'\n";
-        os << "  pseudo_dir = '" << input.pseudo_dir.c_str() << "'\n";
+        os << "  outdir = '" << input.outdir.data() << "'\n";
+        os << "  prefix = '" << input.prefix.data() << "'\n";
+        os << "  pseudo_dir = '" << input.pseudo_dir.data() << "'\n";
     }
     os << "/\n";
     return os;
@@ -133,10 +133,10 @@ void PWscfIn::setCalculation(const std::string& str) {
         calculation = VC_MD;
 }
 
-void PWscfIn::readStr(std::istream& is, Array<char>& buffer, std::string& saveTo) {
+void PWscfIn::readStr(std::istream& is, Array<char>& buffer, Array<char>& saveTo) {
     is.ignore(std::numeric_limits<std::streamsize>::max(), '\'');
     is.getline(buffer.data(), buffer.getLength(), '\'');
-    saveTo = buffer.data();
+    saveTo = buffer;
 }
 
 bool PWscfIn::readBool(std::istream& is, Array<char>& buffer) {

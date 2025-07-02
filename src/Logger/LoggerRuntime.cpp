@@ -105,7 +105,7 @@ void LoggerRuntime::logThreadMain() {
         LogBuffer& buffer = *bufferList[processingBufferID];
         bufferListMutex.unlock();
 
-        while (!buffer.isEmpty()) {
+        while (!buffer.empty()) {
             size_t loggerID;
             buffer.read(&loggerID);
             loggerList[loggerID]->log(buffer);
@@ -120,7 +120,7 @@ void LoggerRuntime::findNextBufferToLog() noexcept {
     newBufferList.reserve(bufferList.size());
     for (auto ite = bufferList.begin(); ite != bufferList.end(); ++ite) {
         auto buffer = *ite;
-        if (!(buffer->isEmpty() && buffer->getShouldDelete()))
+        if (!(buffer->empty() && buffer->getShouldDelete()))
             newBufferList.push_back(buffer);
     }
     bufferList.swap(newBufferList);
@@ -129,7 +129,7 @@ void LoggerRuntime::findNextBufferToLog() noexcept {
     for (size_t i = 0; i < size; ++i) {
         processingBufferID = static_cast<int>((processingBufferID + 1) % size);
         auto* buffer = bufferList[processingBufferID];
-        if (!buffer->isEmpty())
+        if (!buffer->empty())
             return;
     }
     processingBufferID = -1;

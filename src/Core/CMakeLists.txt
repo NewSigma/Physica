@@ -13,7 +13,6 @@ endif()
 
 target_sources(PhysicaCore PRIVATE Version.cpp)
 target_link_libraries(PhysicaCore PUBLIC Physica::Core)
-target_link_options(PhysicaCore INTERFACE -Wl,--as-needed)
 
 install(TARGETS PhysicaCore DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Core DESTINATION include/Physica)

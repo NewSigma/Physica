@@ -44,9 +44,9 @@ namespace Physica {
         CalculationType calculation;
         bool tstress;
         bool tprnfor;
-        std::string outdir;
-        std::string prefix;
-        std::string pseudo_dir;
+        Array<char> outdir;
+        Array<char> prefix;
+        Array<char> pseudo_dir;
     public:
         PWscfIn() = default;
         PWscfIn(const PWscfIn&) = default;
@@ -63,7 +63,7 @@ namespace Physica {
     private:
         void readControl(std::istream& is, Array<char>& buffer);
         void setCalculation(const std::string& str);
-        void readStr(std::istream& is, Array<char>& buffer, std::string& saveTo);
+        void readStr(std::istream& is, Array<char>& buffer, Array<char>& saveTo);
         bool readBool(std::istream& is, Array<char>& buffer);
     };
 
