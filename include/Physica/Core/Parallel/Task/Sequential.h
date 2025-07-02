@@ -51,17 +51,17 @@ namespace Physica {
     };
 
     template<ExecutePolicy P>
-    Task<Sequential> parallel_for(auto func, size_t num_loop) noexcept requires(P == Sequential) {
+    Task<Sequential> parallel_for(auto fn, size_t num_loop) noexcept(std::is_nothrow_invocable<decltype(fn)>::value) requires(P == Sequential) {
         assert(num_loop > 0);
         for (size_t i = 0; i < num_loop; ++i)
-            func(i);
+            fn(i);
         return {};
     }
 
     template<ExecutePolicy P>
-    Task<Sequential> parallel_for(auto func, size_t num_loop, int part) noexcept requires(P == Sequential) {
+    Task<Sequential> parallel_for(auto fn, size_t num_loop, int part) noexcept(std::is_nothrow_invocable<decltype(fn), int>::value) requires(P == Sequential) {
         for (size_t i = 0; i < num_loop; ++i)
-            func(i);
+            fn(i);
         return {};
     }
 }

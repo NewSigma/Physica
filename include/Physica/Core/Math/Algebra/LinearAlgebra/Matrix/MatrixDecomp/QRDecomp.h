@@ -68,9 +68,9 @@ namespace Physica {
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
-        [[nodiscard]] MatrixND getMatrixQ() const noexcept;
+        [[nodiscard]] MatrixND getMatrixQ() const;
         [[nodiscard]] auto getMatrixR() const noexcept;
-        [[nodiscard]] MatrixND getMatrixQ_mkl() const noexcept;
+        [[nodiscard]] MatrixND getMatrixQ_mkl() const;
         [[nodiscard]] const auto& getMatrixP() const noexcept requires(Pivot) { return perm; }
     };
 
@@ -164,7 +164,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixQ() const noexcept -> MatrixND {
+    auto QRDecomp<T, Pivot>::getMatrixQ() const -> MatrixND {
         if constexpr (HasMKL())
             return getMatrixQ_mkl();
         else

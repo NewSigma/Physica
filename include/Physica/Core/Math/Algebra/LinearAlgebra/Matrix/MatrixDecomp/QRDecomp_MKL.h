@@ -72,7 +72,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixQ_mkl() const noexcept -> MatrixND {
+    auto QRDecomp<T, Pivot>::getMatrixQ_mkl() const -> MatrixND {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         static_assert(!isComplex);
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;

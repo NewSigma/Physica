@@ -48,18 +48,19 @@ namespace Physica {
     auto RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const -> Tr {
         assert(getRow() == getCol() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
-        using VectorType = VectorND<ScalarType>;
-        const Derived& m = Base::getDerived();
         const size_t length = getRow();
-        const Trv factor = reciprocal(Trv(length));
+        if (length == 1) [[unlikely]]
+            return abs(calc(0, 0));
 
+        const Trv factor = reciprocal(Trv(length));
         VectorND<Tr> x(length, factor);
-        VectorType y(length);
-        VectorType z(length);
+        VectorND<T> y(length);
+        VectorND<T> z(length);
         unsigned int iteration = 0;
         size_t lastIndex = 0;
         size_t index = 0;
         while (iteration < maxIteration) {
+            const Derived& m = Base::getDerived();
             y.template operator=<decltype(m * x), P>(m * x);
 
             using MatVecDot = decltype(m.hermite() * unit(y));
@@ -71,7 +72,7 @@ namespace Physica {
                 if constexpr (isComplex)
                     return y.norm1();
                 else {
-                    VectorType v = VectorType::linspace(1, 2, length) + ScalarType(1);
+                    VectorND<T> v = VectorND<T>::linspace(1, 2, length) + Tr(1);
                     for (size_t i = 0; i < length; i += 2)
                         v[i] = -v[i];
                     x = m * v;
