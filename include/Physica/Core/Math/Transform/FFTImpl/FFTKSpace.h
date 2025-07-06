@@ -42,8 +42,7 @@ namespace Physica {
         using VectorBase::operator[];
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const;
-        template<Vector T>
-        inline void invTransform(const T& data);
+        void invTransform(const Vector auto& data);
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
@@ -73,8 +72,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector T>
-    inline void FFTKSpace<Derived, 1>::invTransform(const T& data) {
+    void FFTKSpace<Derived, 1>::invTransform(const Vector auto& data) {
         assert(data.getLength() == getLength());
         *this = data;
         Base::getDerived().invTransform();
@@ -111,8 +109,7 @@ namespace Physica {
         using MatrixBase::operator=;
         using MatrixBase::operator();
         /* Operations */
-        template<Matrix T>
-        inline void invTransform(const T& data);
+        void invTransform(const Matrix auto& data);
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
@@ -133,8 +130,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix T>
-    inline void FFTKSpace<Derived, 2>::invTransform(const T& data) {
+    inline void FFTKSpace<Derived, 2>::invTransform(const Matrix auto& data) {
         assert(data.getRow() == getRow());
         assert(data.getCol() == getCol());
         *this = data;
@@ -172,8 +168,8 @@ namespace Physica {
         using TensorBase::operator=;
         using TensorBase::operator();
         /* Operations */
-        template<Tensor T> inline void invTransform(const LValueTensor<T>& data);
-        inline void resize([[maybe_unused]] Index3D size);
+        void invTransform(const Tensor auto& data);
+        void resize([[maybe_unused]] Index3D size);
         /* Getters */
         [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getKSpaceSize(); }
         [[nodiscard]] size_t getShape(int dim) const noexcept { return getShape()[dim]; }
@@ -197,8 +193,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Tensor T>
-    inline void FFTKSpace<Derived, 3>::invTransform(const LValueTensor<T>& data) {
+    void FFTKSpace<Derived, 3>::invTransform(const Tensor auto& data) {
         assert(data.getDimX() == getDimX());
         assert(data.getDimY() == getDimY());
         assert(data.getDimZ() == getDimZ());
@@ -207,7 +202,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void FFTKSpace<Derived, 3>::resize([[maybe_unused]] Index3D size) {
+    void FFTKSpace<Derived, 3>::resize([[maybe_unused]] Index3D size) {
         assert(getDimX() == size[0]);
         assert(getDimY() == size[1]);
         assert(getDimZ() == size[2]);

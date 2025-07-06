@@ -22,9 +22,8 @@
 
 namespace Physica {
     template<class Derived>
-    template<Tensor T>
-    Derived& LValueTensor<Derived>::operator=(const T& other) {
-        if constexpr (std::is_same<Derived, T>::value)
+    Derived& LValueTensor<Derived>::operator=(const Tensor auto& other) {
+        if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(other)>>::value)
             assert(this != &other && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
         x.resize(other.getShape());
@@ -40,30 +39,26 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Tensor X>
-    inline void LValueTensor<Derived>::operator+=(const X& x) {
+    void LValueTensor<Derived>::operator+=(const Tensor auto& x) {
         Base::getDerived() = Base::getDerived() + x;
     }
 
     template<class Derived>
-    template<Tensor X>
-    inline void LValueTensor<Derived>::operator-=(const X& x) {
+    void LValueTensor<Derived>::operator-=(const Tensor auto& x) {
         Base::getDerived() = Base::getDerived() - x;
     }
 
     template<class Derived>
-    template<class Functor>
-    void LValueTensor<Derived>::forND(Functor func) {
-        Physica::forND(Base::getShape(), [this, func](const IndexArray& index) {
-            func(operator()(index), index);
+    void LValueTensor<Derived>::forND(std::invocable<T&, IndexArray> auto fn) {
+        Physica::forND(Base::getShape(), [this, fn](const IndexArray& index) {
+            fn(operator()(index), index);
         });
     }
 
     template<class Derived>
-    template<class Functor>
-    void LValueTensor<Derived>::forND(Functor func) const {
-        Physica::forND(Base::getShape(), [this, func](const IndexArray& index) {
-            func(operator()(index), index);
+    void LValueTensor<Derived>::forND(std::invocable<const T&, IndexArray> auto fn) const {
+        Physica::forND(Base::getShape(), [this, fn](const IndexArray& index) {
+            fn(operator()(index), index);
         });
     }
 

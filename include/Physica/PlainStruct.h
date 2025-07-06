@@ -32,16 +32,14 @@ namespace Physica {
         using This = PlainStruct<void>;
     public:
         constexpr PlainStruct() = default;
-        template<class T>
-        constexpr PlainStruct(T&&) {}
+        constexpr PlainStruct(auto&&) {}
         constexpr PlainStruct(const This&) = default;
         constexpr PlainStruct(This&&) noexcept = default;
         constexpr ~PlainStruct() = default;
         /* Operators */
         constexpr This& operator=(const This&) { return *this; }
         constexpr This& operator=(This&&) { return *this; }
-        template<class T>
-        constexpr void operator=(T&&) {}
+        constexpr void operator=(auto&&) {}
         /* Operations */
         void swap(PlainStruct<void>&) {}
     };
@@ -67,12 +65,12 @@ namespace Physica {
     };
 
     template<class T>
-    [[nodiscard]] __host__ __device__ inline auto asStruct(const T& obj) noexcept {
+    [[nodiscard]] __host__ __device__ auto asStruct(const T& obj) noexcept {
         return PlainStruct<const T>(reinterpret_cast<const PlainStruct<const T>&>(obj));
     }
 
     template<class T>
-    [[nodiscard]] __host__ __device__ inline auto asStruct(T& obj) noexcept {
+    [[nodiscard]] __host__ __device__ auto asStruct(T& obj) noexcept {
         return PlainStruct<T>(reinterpret_cast<PlainStruct<T>&>(obj));
     }
 }

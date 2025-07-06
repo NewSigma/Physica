@@ -91,9 +91,9 @@ namespace Physica {
     }
 
     template<tparams>
-    template<RNG R, class Distribution>
-    inline void DiffDenseMatrix::random_any(Distribution& dist) {
-        v.template random_any<R, Distribution>(dist);
+    template<RNG R>
+    inline void DiffDenseMatrix::random_any(auto& distribution) {
+        v.template random_any<R>(distribution);
         g.zeros();
     }
 
@@ -148,9 +148,9 @@ namespace Physica {
     }
 
     template<tparams>
-    template<RNG R, class Distribution>
-    inline auto DiffDenseMatrix::random_any(size_t row, size_t col, Distribution& dist) {
-        return This(ValueMatrix::template random_any<R, Distribution>(row, col, dist));
+    template<RNG R>
+    inline auto DiffDenseMatrix::random_any(size_t row, size_t col, auto& distribution) {
+        return This(ValueMatrix::template random_any<R>(row, col, distribution));
     }
 
 #undef DiffDenseMatrix

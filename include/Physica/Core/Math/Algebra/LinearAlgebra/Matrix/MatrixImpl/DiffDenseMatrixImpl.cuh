@@ -114,9 +114,9 @@ namespace Physica {
     }
 
     template<tparams>
-    template<RNG R, class Distribution>
-    inline void device_obj<DenseMatrix>::random_any(Distribution& dist) {
-        *this = random_any<R, Distribution>(getRow(), getCol(), dist);
+    template<RNG R>
+    inline void device_obj<DenseMatrix>::random_any(auto& distribution) {
+        *this = random_any<R>(getRow(), getCol(), distribution);
     }
 
     template<tparams>
@@ -151,9 +151,9 @@ namespace Physica {
     }
 
     template<tparams>
-    template<RNG R, class Distribution>
-    inline auto device_obj<DenseMatrix>::random_any(size_t row, size_t col, Distribution& dist) -> This {
-        return This(ValueMatrix::template random_any<R, Distribution>(row, col, dist));
+    template<RNG R>
+    inline auto device_obj<DenseMatrix>::random_any(size_t row, size_t col, auto& distribution) -> This {
+        return This(ValueMatrix::template random_any<R>(row, col, distribution));
     }
 
 #undef tparams

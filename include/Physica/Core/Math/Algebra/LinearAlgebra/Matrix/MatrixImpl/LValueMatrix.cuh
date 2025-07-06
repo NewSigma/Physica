@@ -46,18 +46,24 @@ namespace Physica {
         This& operator=(const This& m) = delete;
         This& operator=(This&& m) = delete;
 
-        template<Scalar T> __host__ __device__ device_obj<Derived>& operator=(const T& x);
-        template<Scalar T> __host__ __device__ void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
-        template<Scalar T> __host__ __device__ void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
-        template<Scalar T> __host__ __device__ void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
-        template<Scalar T> __host__ __device__ void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
+        template<Scalar T>
+        __host__ __device__ device_obj<Derived>& operator=(const T& x);
+        __host__ __device__ void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
+        __host__ __device__ void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
+        __host__ __device__ void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
+        __host__ __device__ void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Vector V> __host__ __device__ void operator+=(const V& m) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() + m; }
-        template<Vector V> __host__ __device__ void operator-=(const V& m) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() - m; }
+        template<Vector V>
+        __host__ __device__ void operator+=(const V& v) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() + v; }
+        template<Vector V>
+        __host__ __device__ void operator-=(const V& v) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() - v; }
 
-        template<Matrix M> __host__ __device__ device_obj<Derived>& operator=(const M& m) requires(CUDA<M>);
-        template<Matrix M> __host__ __device__ void operator+=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() + m; }
-        template<Matrix M> __host__ __device__ void operator-=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() - m; }
+        template<Matrix M>
+        __host__ __device__ device_obj<Derived>& operator=(const M& m) requires(CUDA<M>);
+        template<Matrix M>
+        __host__ __device__ void operator+=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() + m; }
+        template<Matrix M>
+        __host__ __device__ void operator-=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() - m; }
 
         [[nodiscard]] __device__ RefTy operator()(size_t row, size_t col);
         [[nodiscard]] __device__ ConstRefTy operator()(size_t row, size_t col) const;
@@ -65,8 +71,7 @@ namespace Physica {
         [[nodiscard]] __device__ ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
-        template<Matrix M>
-        void reverse(const M& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Scalar auto& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;

@@ -48,19 +48,16 @@ namespace Physica {
     public:
         SymmEigenSolver();
         SymmEigenSolver(size_t size);
-        template<Matrix M>
-        SymmEigenSolver(const M& source, bool computeEigenvectors_);
+        SymmEigenSolver(const Matrix auto& source, bool computeEigenvectors_);
         SymmEigenSolver(const This&) = default;
         SymmEigenSolver(This&& solver) noexcept = default;
         ~SymmEigenSolver() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source, bool computeEigenvectors_);
+        void compute(const Matrix auto& source, bool computeEigenvectors_);
         void sort();
-        template<class Compare>
-        void sort(Compare comp);
+        void sort(std::invocable<RealType, RealType> auto comp);
         void resize(size_t size);
         void swap(This& __restrict solver) noexcept;
         /* Getters */
@@ -81,15 +78,13 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    SymmEigenSolver<T, Order>::SymmEigenSolver(const M& source, bool computeEigenvectors_)
+    SymmEigenSolver<T, Order>::SymmEigenSolver(const Matrix auto& source, bool computeEigenvectors_)
             : SymmEigenSolver(source.getRow()) {
         compute(source, computeEigenvectors_);
     }
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void SymmEigenSolver<T, Order>::compute(const M& source, bool computeEigenvectors_) {
+    void SymmEigenSolver<T, Order>::compute(const Matrix auto& source, bool computeEigenvectors_) {
         assert(source.isSymm() && "[Error]: Bad symm matrix");
         assert(source.getRow() == eigenvalues.getLength() && "[Error]: Dimensions do not match");
         computeEigenvectors = computeEigenvectors_;
@@ -140,8 +135,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<class Compare>
-    void SymmEigenSolver<T, Order>::sort(Compare comp) {
+    void SymmEigenSolver<T, Order>::sort(std::invocable<RealType, RealType> auto comp) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;

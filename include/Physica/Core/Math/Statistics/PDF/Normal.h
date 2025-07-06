@@ -33,8 +33,7 @@ namespace Physica {
         /* Operator */
         Normal& operator=(Normal obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] T operator()(const T& x) const;
-        template<Vector V>
-        [[nodiscard]] VectorND<T> operator()(const V& x) const;
+        [[nodiscard]] VectorND<T> operator()(const Vector auto& x) const;
         /* Operations */
         void swap(Normal& __restrict obj) noexcept;
     };
@@ -51,8 +50,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Vector V>
-    VectorND<T> Normal<T>::operator()(const V& x) const {
+    VectorND<T> Normal<T>::operator()(const Vector auto& x) const {
         const T repDevia = reciprocal(deviation);
         const T factor = repDevia / sqrt(T(2 * M_PI));
         return exp(square((x - mean) * repDevia) * T(-0.5)) * factor;

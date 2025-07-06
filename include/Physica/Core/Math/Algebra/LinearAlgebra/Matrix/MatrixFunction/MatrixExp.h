@@ -47,8 +47,7 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] auto operator*(V&& v) && noexcept;
         /* Operations */
-        template<Matrix M1>
-        void assign(LValueMatrix<M1>& target) const;
+        void assign(Matrix auto& target) const;
         [[nodiscard]] T calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
 
         [[nodiscard]] Tr calcTraceMu() const;
@@ -76,8 +75,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    template<Matrix M1>
-    void MatrixExp<M>::assign(LValueMatrix<M1>& target) const {
+    void MatrixExp<M>::assign(Matrix auto& target) const {
         const Tr traceMu = calcTraceMu();
         const auto params = ((*this) * VectorND<T>(getRow())).template calcParam<Sequential>(traceMu);
         for (size_t i = 0; i < getCol(); ++i) {

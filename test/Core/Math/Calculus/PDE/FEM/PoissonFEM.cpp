@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -46,9 +46,8 @@ ScalarType theory_solution(VectorType p) {
 
 template<class ElementType>
 struct ElementIntegratorPacker {
-    template<class Functor>
-    static ScalarType run(Functor func) {
-        return ElementType::gauss_integral(std::move(func));
+    static ScalarType run(std::invocable<VectorType> auto fn) {
+        return ElementType::gauss_integral(std::move(fn));
     }
 };
 

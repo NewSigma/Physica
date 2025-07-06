@@ -48,8 +48,8 @@ namespace Physica {
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result) const;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
@@ -62,9 +62,9 @@ namespace Physica {
     };
 
     template<Scalar T, unsigned int Dim>
-    template<Vector V, ExecutePolicy P>
+    template<ExecutePolicy P>
     void EmptyForceModel<T, Dim>::forceAsync(
-            [[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const {
+            [[maybe_unused]] const MDCellType& cell, Vector auto& result) const {
         assert(result.getLength() == cell.getDOF() && "[Error]: Array length does not match");
         result = T(0);
     }

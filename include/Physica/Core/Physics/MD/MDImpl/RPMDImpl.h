@@ -69,7 +69,7 @@ namespace Physica {
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
-                model.template forceAsync<decltype(saveTo), P>(std::move(cell), saveTo);
+                model.template forceAsync<P>(std::move(cell), saveTo);
             };
 
             if constexpr (NumReplica == 1)

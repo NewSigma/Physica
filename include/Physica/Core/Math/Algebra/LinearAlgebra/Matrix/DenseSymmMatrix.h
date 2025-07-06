@@ -40,8 +40,7 @@ namespace Physica {
         using HermiteRtnTy = std::conditional<ScalarType::isComplex, Hermite<This>, const This&>::type;
     public:
         DenseSymmMatrix() = default;
-        template<Matrix M>
-        DenseSymmMatrix(const M& mat);
+        DenseSymmMatrix(const Matrix auto& mat);
         using Storage::Storage;
         DenseSymmMatrix(const This&) = default;
         DenseSymmMatrix(This&&) noexcept = default;
@@ -51,11 +50,11 @@ namespace Physica {
         using Base::operator();
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
-        template<Scalar U> inline This& operator=(const U& x);
-        template<Scalar U> inline void operator+=(const U& x);
-        template<Scalar U> inline void operator-=(const U& x);
-        template<Scalar U> inline void operator*=(const U& x);
-        template<Scalar U> inline void operator/=(const U& x);
+        This& operator=(const Scalar auto& x);
+        void operator+=(const Scalar auto& x);
+        void operator-=(const Scalar auto& x);
+        void operator*=(const Scalar auto& x);
+        void operator/=(const Scalar auto& x);
 
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept;
@@ -74,8 +73,8 @@ namespace Physica {
         void random_uniform() { asVector().template random_uniform<R>(); }
         template<RNG R>
         void random_normal() { asVector().template random_normal<R>(); }
-        template<RNG R, class Distribution>
-        void random_any(Distribution& dist) { asVector().template random_any<R, Distribution>(dist); }
+        template<RNG R>
+        void random_any(auto& distribution) { asVector().template random_any<R>(distribution); }
 
         using Storage::read;
         using Storage::write;
@@ -93,16 +92,14 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t order);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t order);
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist);
+        template<RNG R>
+        [[nodiscard]] inline static This random_any(size_t order, auto& distribution);
     };
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
      */
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    DenseSymmMatrix<T, Order>::DenseSymmMatrix(const M& mat)
-            : DenseSymmMatrix(mat.getRow()) {
+    DenseSymmMatrix<T, Order>::DenseSymmMatrix(const Matrix auto& mat) : DenseSymmMatrix(mat.getRow()) {
         assert(mat.getRow() == mat.getCol());
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = i; j < mat.getRow(); ++j)
@@ -110,33 +107,28 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Scalar U>
-    inline DenseSymmMatrix<T, Order>& DenseSymmMatrix<T, Order>::operator=(const U& x) {
+    DenseSymmMatrix<T, Order>& DenseSymmMatrix<T, Order>::operator=(const Scalar auto& x) {
         asVector() = x;
         return *this;
     }
 
     template<Scalar T, size_t Order>
-    template<Scalar U>
-    inline void DenseSymmMatrix<T, Order>::operator+=(const U& x) {
+    void DenseSymmMatrix<T, Order>::operator+=(const Scalar auto& x) {
         asVector() += x;
     }
 
     template<Scalar T, size_t Order>
-    template<Scalar U>
-    inline void DenseSymmMatrix<T, Order>::operator-=(const U& x) {
+    void DenseSymmMatrix<T, Order>::operator-=(const Scalar auto& x) {
         asVector() -= x;
     }
 
     template<Scalar T, size_t Order>
-    template<Scalar U>
-    inline void DenseSymmMatrix<T, Order>::operator*=(const U& x) {
+    void DenseSymmMatrix<T, Order>::operator*=(const Scalar auto& x) {
         asVector() *= x;
     }
 
     template<Scalar T, size_t Order>
-    template<Scalar U>
-    inline void DenseSymmMatrix<T, Order>::operator/=(const U& x) {
+    void DenseSymmMatrix<T, Order>::operator/=(const Scalar auto& x) {
         asVector() /= x;
     }
 
@@ -178,11 +170,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<RNG R, class Distribution>
+    template<RNG R>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
+    DenseSymmMatrix<T, Order>::random_any(size_t order, auto& distribution) {
         This result(order);
-        result.template random_any<R, Distribution>(dist);
+        result.template random_any<R>(distribution);
         return result;
     }
 }

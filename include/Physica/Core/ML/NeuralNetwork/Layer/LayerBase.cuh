@@ -38,12 +38,10 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operations */
-        template<class T>
-        [[nodiscard]] auto forward(const T& x) const { return Base::getDerived().template forward<T>(x); }
+        [[nodiscard]] auto forward(const auto& x) const { return Base::getDerived().forward(x); }
         auto reverse(const Derived& __restrict other) const noexcept;
 
-        template<class Optimizer>
-        auto step(Optimizer& opt) { return Base::getDerived().step(opt); }
+        auto step(auto& optimizer) { return Base::getDerived().step(optimizer); }
         auto step() { return Base::getDerived().step(); }
         auto zero_grad() { return Base::getDerived().zero_grad(); }
     protected:

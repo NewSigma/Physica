@@ -49,17 +49,14 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        __host__ __device__ void assign(M& target) const requires(CUDA<M>);
-        template<Matrix M>
-        __host__ __device__ void assign_add(M& target) const requires(CUDA<M>);
+        __host__ __device__ void assign(Matrix auto& target) const requires(CUDA<decltype(target)>);
+        __host__ __device__ void assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>);
 
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
         [[nodiscard]] __device__ Tv calc_value(size_t, size_t) const { noImpl("GEMM.calc_value() is low performance and should be avoided"); }
 
-        template<Matrix M>
-        void reverse(const M& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
         __host__ __device__ auto values() const noexcept { return getLHS().values() * getRHS().values(); }
         /* Getters */
@@ -78,8 +75,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    template<Matrix M>
-    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign(M& target) const requires(CUDA<M>) {
+    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign(Matrix auto& target) const requires(CUDA<decltype(target)>) {
         if constexpr (IsHost())
             assign_impl_cublas<M, false>(target);
         else
@@ -87,8 +83,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    template<Matrix M>
-    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign_add(M& target) const requires(CUDA<M>) {
+    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>) {
         if constexpr (IsHost())
             assign_impl_cublas<M, true>(target);
         else
@@ -96,8 +91,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    template<Matrix M>
-    void device_obj<GEMM<T1, T2>>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<GEMM<T1, T2>>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
         if constexpr (ReverseDiff<T1>)
             getLHS().reverse(grad * getRHS().values().transpose());
         if constexpr (ReverseDiff<T2>)

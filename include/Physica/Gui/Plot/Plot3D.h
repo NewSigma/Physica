@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,10 +32,7 @@ namespace Physica {
     public:
         Plot3D(QWidget* parent = nullptr);
         /* Operations */
-        template<Matrix T>
-        QSurface3DSeries& surf(const T& x,
-                               const T& y,
-                               const T& z);
+        QSurface3DSeries& surf(const Matrix auto& x, const Matrix auto& y, const Matrix auto& z);
         /* Getters */
         [[nodiscard]] QValue3DAxis* getAxisX() const noexcept { return surface->axisX(); }
         [[nodiscard]] QValue3DAxis* getAxisY() const noexcept { return surface->axisZ(); }
@@ -49,10 +46,7 @@ namespace Physica {
         [[nodiscard]] static QLinearGradient makeDefaultGrad();
     };
 
-    template<Matrix T>
-    QSurface3DSeries& Plot3D::surf(const T& x,
-                                   const T& y,
-                                   const T& z) {
+    QSurface3DSeries& Plot3D::surf(const Matrix auto& x, const Matrix auto& y, const Matrix auto& z) {
         assert(x.getCol() == y.getCol() && x.getRow() == y.getRow());
         assert(y.getCol() == z.getCol() && y.getRow() == z.getRow());
         auto* series = new QSurface3DSeries(new QSurfaceDataProxy());

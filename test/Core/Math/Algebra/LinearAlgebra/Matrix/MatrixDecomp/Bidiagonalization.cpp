@@ -23,14 +23,14 @@ using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
-template<Matrix T>
-bool doTest(const T& source, double tolerance) {
+template<Matrix M>
+bool doTest(const M& source, double tolerance) {
     Bidiagonalization obj(source);
-    T U = obj.getMatrixU();
-    T V = obj.getMatrixV();
-    T B = obj.getMatrixB();
+    M U = obj.getMatrixU();
+    M V = obj.getMatrixV();
+    M B = obj.getMatrixB();
 
-    T A = (U * B).compute() * V.transpose();
+    M A = (U * B).compute() * V.transpose();
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;

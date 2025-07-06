@@ -41,8 +41,7 @@ namespace Physica {
     public:
         QRDecomp() = default;
         QRDecomp(size_t row, size_t col);
-        template<Matrix M>
-        QRDecomp(const M& source);
+        QRDecomp(const Matrix auto& source);
         QRDecomp(const This&) = default;
         QRDecomp(This&&) noexcept = default;
         ~QRDecomp() = default;
@@ -51,10 +50,8 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         void compute(const M& source);
-        template<Matrix M>
-        void compute_base(const M& source);
-        template<Matrix M>
-        void compute_mkl(const M& source);
+        void compute_base(const Matrix auto& source);
+        void compute_mkl(const Matrix auto& source);
 
         [[nodiscard]] T calcDetQ() const;
         void toQDT(VectorND<T>& diagD);
@@ -80,8 +77,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    template<Matrix M>
-    QRDecomp<T, Pivot>::QRDecomp(const M& source) : QRDecomp(source.getRow(), source.getCol()) {
+    QRDecomp<T, Pivot>::QRDecomp(const Matrix auto& source) : QRDecomp(source.getRow(), source.getCol()) {
         compute(source);
     }
 
@@ -97,8 +93,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    template<Matrix M>
-    void QRDecomp<T, Pivot>::compute_base(const M& source) {
+    void QRDecomp<T, Pivot>::compute_base(const Matrix auto& source) {
         assert(!Pivot && "Not implemented");
         working = source;
 

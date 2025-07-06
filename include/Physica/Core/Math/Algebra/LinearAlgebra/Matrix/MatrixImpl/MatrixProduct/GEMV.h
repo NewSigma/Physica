@@ -45,15 +45,14 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, ExecutePolicy P = Sequential>
-        inline void assign(V& target) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign(Vector auto& target) const;
 
         [[nodiscard]] inline CoDiff<T> calc(size_t index) const;
         [[nodiscard]] inline Tv calc_value(size_t index) const;
 
         using Base::reverse;
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
 
         auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
@@ -68,8 +67,8 @@ namespace Physica {
     }
 
     template<Matrix M, Vector U>
-    template<Vector V, ExecutePolicy P>
-    inline void GEMV<M, U>::assign(V& target) const {
+    template<ExecutePolicy P>
+    inline void GEMV<M, U>::assign(Vector auto& target) const {
         if constexpr (isReverseDiff) {
             if constexpr (MatrixOption::isColMatrix<M>()) {
                 target = mat.values().col(0) * vec.values().calc(0);
@@ -105,8 +104,7 @@ namespace Physica {
     }
 
     template<Matrix M, Vector U>
-    template<Vector V>
-    void GEMV<M, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+    void GEMV<M, U>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
         assert(grad_.getLength() == getLength());
         const auto& grad = grad_.values();
         if constexpr (ReverseDiff<M>) {

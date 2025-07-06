@@ -37,13 +37,12 @@ namespace Physica {
         [[nodiscard]] auto operator-() const& noexcept;
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign(V1& v) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign(Vector auto& v) const;
 
-        template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign_add(V1& v) const;
-        template<Vector V1>
-        void assign_add_base(V1& v) const noexcept;
+        template<ExecutePolicy P = Sequential>
+        inline void assign_add(Vector auto& v) const;
+        void assign_add_base(Vector auto& v) const noexcept;
         void assign_add_mkl(void* y) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
@@ -56,8 +55,7 @@ namespace Physica {
 
         [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
 
-        template<Vector V1>
-        void reverse(const V1& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -74,11 +72,11 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<Vector V1, ExecutePolicy P>
-    inline void VectorExpr<ExprType::Mul, V, U>::assign(V1& v) const {
+    template<ExecutePolicy P>
+    inline void VectorExpr<ExprType::Mul, V, U>::assign(Vector auto& v) const {
         constexpr bool FastAssign = Traits<std::remove_cvref_t<V>>::FastAssign;
         if constexpr (FastAssign) {
-            getLHS().template assign<V1, P>(v);
+            getLHS().template assign<P>(v);
             v *= getRHS();
         }
         else
@@ -86,8 +84,9 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<Vector V1, ExecutePolicy P>
-    inline void VectorExpr<ExprType::Mul, V, U>::assign_add(V1& v) const {
+    template<ExecutePolicy P>
+    inline void VectorExpr<ExprType::Mul, V, U>::assign_add(Vector auto& v) const {
+        using V1 = std::remove_cvref_t<decltype(v)>;
         constexpr size_t Size = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
         constexpr bool SmallVector = 0 < Size && Size <= 128;
         if constexpr (Internal::EnableMKL<V, V1>::value && !SmallVector) {
@@ -101,8 +100,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<Vector V1>
-    void VectorExpr<ExprType::Mul, V, U>::assign_add_base(V1& v) const noexcept {
+    void VectorExpr<ExprType::Mul, V, U>::assign_add_base(Vector auto& v) const noexcept {
         Base::assign_add(v);
     }
 
@@ -129,8 +127,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    template<Vector V1>
-    void VectorExpr<ExprType::Mul, V, U>::reverse(const V1& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Mul, V, U>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
         const auto& grad = grad_.values();
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
@@ -170,21 +167,19 @@ namespace Physica {
             return Base::getLHS().template packetPartial<Pack>(index, count) * Base::getRHS().template packetPartial<Pack>(index, count);
         }
 
-        template<class U>
-        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V1, Vector V2>
-    template<class U>
-    void VectorExpr<ExprType::Mul, V1, V2>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
-        if constexpr (Scalar<U>) {
+    void VectorExpr<ExprType::Mul, V1, V2>::reverse(const auto& grad_) const noexcept requires(isReverseDiff) {
+        if constexpr (Scalar<decltype(grad_)>) {
             if constexpr (ReverseDiff<V1>)
                 Base::getLHS().reverse(Base::getRHS().values() * grad_);
             if constexpr (ReverseDiff<V2>)
                 Base::getRHS().reverse(Base::getLHS().values() * grad_);
         }
         else {
-            static_assert(Vector<U>);
+            static_assert(Vector<decltype(grad_)>);
             const auto& grad = grad_.values();
             if constexpr (ReverseDiff<V1>)
                 Base::getLHS().reverse(hadamard(Base::getRHS().values(), grad));

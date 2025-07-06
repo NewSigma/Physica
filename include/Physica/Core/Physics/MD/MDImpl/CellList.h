@@ -52,11 +52,11 @@ namespace Physica {
         CellList& operator=(CellList obj) noexcept;
         /* Operations */
         void update(PositionMatrix pos);
-        inline void update(const MDCellType& mdCell);
-        template<class Functor> void forCellInList(Functor func) const;
-        template<class Functor> void forNeighInRange(Index3D centerCell, Functor func) const;
-        template<class Functor> void forReducedNeighInRange(Index3D centerCell, Functor func) const;
-        template<class Functor> inline void forAtomInCell(Index3D cellIndex, Functor func) const;
+        void update(const MDCellType& mdCell);
+        void forCellInList(std::invocable<Index3D> auto fn) const;
+        void forNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const;
+        void forReducedNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const;
+        void forAtomInCell(Index3D cellIndex, std::invocable<size_t> auto fn) const;
 
         [[nodiscard]] size_t calcMaxNumAtomInCell() const noexcept;
 
@@ -162,17 +162,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class Functor>
-    void CellList<T>::forCellInList(Functor func) const {
+    void CellList<T>::forCellInList(std::invocable<Index3D> auto fn) const {
         for (size_t x = 0; x < getCellGridDimX(); ++x)
             for (size_t y = 0; y < getCellGridDimY(); ++y)
                 for (size_t z = 0; z < getCellGridDimZ(); ++z)
-                    func(Index3D{x, y, z});
+                    fn(Index3D{x, y, z});
     }
 
     template<Scalar T>
-    template<class Functor>
-    void CellList<T>::forNeighInRange(Index3D centerCell, Functor func) const {
+    void CellList<T>::forNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
@@ -192,15 +190,14 @@ namespace Physica {
                         continue;
                     const int indexShiftZ = findNeighbor<2>(cellGridDim, centerZ, deltaZ, index);
                     const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
-                    func(neighShifts[indexShift], index);
+                    fn(neighShifts[indexShift], index);
                 }
             }
         }
     }
 
     template<Scalar T>
-    template<class Functor>
-    void CellList<T>::forReducedNeighInRange(Index3D centerCell, Functor func) const {
+    void CellList<T>::forReducedNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const {
         Index3D index{};
         const size_t centerX = centerCell[0];
         for (int deltaX = 0; deltaX <= 1; ++deltaX) {
@@ -214,20 +211,19 @@ namespace Physica {
                 for (int deltaZ = ((deltaX == 0 && deltaY == 0) ? 1 : -1); deltaZ <= 1; ++deltaZ) {
                     const int indexShiftZ = findNeighbor<2>(cellGridDim, centerZ, deltaZ, index);
                     const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
-                    func(neighShifts[indexShift], index);
+                    fn(neighShifts[indexShift], index);
                 }
             }
         }
     }
 
     template<Scalar T>
-    template<class Functor>
-    inline void CellList<T>::forAtomInCell(Index3D cellIndex, Functor func) const {
+    void CellList<T>::forAtomInCell(Index3D cellIndex, std::invocable<size_t> auto fn) const {
         const auto index1D = PeriodIndex3D(cellIndex, cellGridDim).toIndex1D();
         const size_t cellBegin = cellStartOffset[index1D];
         const size_t cellEnd = cellStartOffset[index1D + 1];
         for (size_t i = cellBegin; i < cellEnd; ++i)
-            func(cellAtomMap[i]);
+            fn(cellAtomMap[i]);
     }
 
     template<Scalar T>

@@ -214,8 +214,7 @@ private:
         return exp(ScalarType(-baseSetCoeff[n]) * square(s));
     }
 
-    template<Vector T>
-    void plotWave(Plot& plot, const LValueVector<T>& coeff) {
+    void plotWave(Plot& plot, const Vector auto& coeff) {
         constexpr size_t SampleCount = 100;
         DenseVector<ScalarType, SampleCount> x{};
         DenseVector<ScalarType, SampleCount> y{};
@@ -354,8 +353,7 @@ private:
         return energy;
     }
 
-    template<Vector T>
-    void plotWave(Plot& plot, const LValueVector<T>& coeff) {
+    void plotWave(Plot& plot, const Vector auto& coeff) {
         constexpr size_t SampleCount = 100;
         DenseVector<ScalarType, SampleCount> x{};
         DenseVector<ScalarType, SampleCount> y{};

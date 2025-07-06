@@ -47,21 +47,17 @@ namespace Physica {
             return (Pack(1) / Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
         }
 
-        template<Vector V1>
-        void reverse(const V1& grad) const noexcept requires(isReverseDiff);
-        template<Vector V1, Vector V2>
-        void reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
-    template<Vector V1>
-    void VectorExpr<ExprType::Reciprocal, V>::reverse(const V1& grad) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Reciprocal, V>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
         reverse(Base::getExpr().values(), grad);
     }
 
     template<Vector V>
-    template<Vector V1, Vector V2>
-    void VectorExpr<ExprType::Reciprocal, V>::reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Reciprocal, V>::reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff) {
         Base::getExpr().reverse(hadamard(-square(y.values()), grad));
     }
 

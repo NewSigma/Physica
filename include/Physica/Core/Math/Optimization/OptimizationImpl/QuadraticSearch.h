@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,8 +31,7 @@ namespace Physica {
         /* Operators */
         QuadraticSearch& operator=(QuadraticSearch obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Functor>
-        void step(Functor func);
+        void step(std::invocable<T> auto fn);
         void swap(QuadraticSearch& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getOptimalIndex() const noexcept;
@@ -44,17 +43,14 @@ namespace Physica {
     QuadraticSearch<T>::QuadraticSearch(Vector3D<T> x_, Vector3D<T> y_) : x(std::move(x_)), y(std::move(y_)) {}
 
     template<Scalar T>
-    template<class Functor>
-    void QuadraticSearch<T>::step(Functor func) {
-        using ResultType = std::invoke_result<Functor, T>::type;
-        static_assert(std::is_same<T, ResultType>::value, "[Error]: Invalid functor");
+    void QuadraticSearch<T>::step(std::invocable<T> auto fn) {
         const T term1 = x[0] * (y[1] - y[2]);
         const T term2 = x[1] * (y[2] - y[0]);
         const T term3 = x[2] * (y[0] - y[1]);
         const T temp1 = x[0] * term1 + x[1] * term2 + x[2] * term3;
         const T temp2 = term1 + term2 + term3;
         const T new_x = temp1 / (temp2 * T(2));
-        const T new_y = func(new_x);
+        const T new_y = fn(new_x);
 
         const int index = getOptimalIndex();
         x[index] = new_x;

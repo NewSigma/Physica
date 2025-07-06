@@ -58,8 +58,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Vector V>
-        [[nodiscard]] CoDiff<VectorND<T>> forward(const V& x) const {
+        [[nodiscard]] CoDiff<VectorND<T>> forward(const Vector auto& x) const {
             auto y1 = layer1.forward(x);
             CoDiff<VectorND<T>> y2 = relu(y1);
             auto y3 = layer2.forward(y2);
@@ -75,10 +74,9 @@ namespace Physica {
             layer2.reverse(other.layer2);
         }
 
-        template<class Optimizer>
-        void step(Optimizer& opt_) {
-            layer1.step(opt_);
-            layer2.step(opt_);
+        void step(auto& optimizer) {
+            layer1.step(optimizer);
+            layer2.step(optimizer);
         }
 
         void step() { step(opt); }
@@ -88,8 +86,7 @@ namespace Physica {
             layer2.zero_grad();
         }
 
-        template<class Dataset>
-        [[nodiscard]] CoDiff<T> loss(const Dataset& dataset, size_t index) const {
+        [[nodiscard]] CoDiff<T> loss(const auto& dataset, size_t index) const {
             auto weights = forward(dataset.getSamples()[index]);
             auto loss = weights.crossEntropy(dataset.getLabels()[index]);
             if constexpr (ReverseDiff<T>) {
@@ -100,8 +97,7 @@ namespace Physica {
                 co_return std::move(loss);
         }
 
-        template<class Dataset>
-        [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
+        [[nodiscard]] T loss(const auto& dataset) const { return Base::loss(dataset); }
 
         size_t classify(const VectorND<Tv>& input) const {
             static_assert(!Base::IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
@@ -117,8 +113,7 @@ namespace Physica {
             return index;
         }
 
-        template<class Dataset>
-        Tv calcAccuracy(const Dataset& dataset) const {
+        Tv calcAccuracy(const auto& dataset) const {
             const auto& testSamples = dataset.getSamples();
             const auto& testLabels = dataset.getLabels();
             const size_t numTestData = dataset.getSize();
@@ -167,7 +162,7 @@ namespace {
 
         auto nn = MnistNet<dfloat>(RandomSource::getInstance());
         for (auto _ : state)
-            nn.train_step<Dataset, RandomSource, Sequential>(BatchSize, dataset);
+            nn.train_step<RandomSource, Sequential>(BatchSize, dataset);
     }
 }
 

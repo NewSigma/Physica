@@ -43,19 +43,18 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
     protected:
+        using T = ScalarType;
         using IndexArray = Array<size_t, Dim>;
     public:
         /* Operations */
-        template<Tensor X>
-        void assign(X& x) const;
+        void assign(Tensor auto& x) const;
 
         [[nodiscard]] auto calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
         [[nodiscard]] auto calc(Index3D index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] size_t toIndex1D(const IndexArray& indices) const noexcept;
         [[nodiscard]] IndexArray toIndexND(size_t index) const noexcept;
 
-        template<class Functor>
-        void forND(Functor func) const;
+        void forND(std::invocable<T, IndexArray> auto fn) const;
 
         auto reals() const noexcept;
         auto imags() const noexcept;
@@ -71,9 +70,9 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept;
         /* Static members */
         using TensorBase::forPointIndexInTensor;
-        template<Scalar T, bool IsUnitLattice, class Functor>
+        template<Scalar T, bool IsUnitLattice>
         inline static void forPointIndexInTensor(
-                const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+                const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn);
         
         [[nodiscard]] static size_t toSize(const IndexArray& shape);
     protected:

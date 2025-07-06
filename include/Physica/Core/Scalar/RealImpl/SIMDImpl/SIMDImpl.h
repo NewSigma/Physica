@@ -25,8 +25,7 @@
 
 namespace Physica {
     template<Scalar T, size_t Size>
-    template<Scalar U>
-    SIMD<T, Size>::SIMD(const U& x) : pack(x.value().toMachine()) {}
+    SIMD<T, Size>::SIMD(const Scalar auto& x) : pack(x.value().toMachine()) {}
 
     template<Scalar T, size_t Size>
     SIMD<T, Size>::SIMD(T x, int count) {

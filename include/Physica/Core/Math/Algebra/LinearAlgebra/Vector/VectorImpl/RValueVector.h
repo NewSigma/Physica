@@ -111,10 +111,10 @@ namespace Physica {
     public:
         ~RValueVector() = default;
         /* Operations */
-        template<Vector V, ExecutePolicy P = Sequential>
-        inline void assign(V& v) const;
-        template<Vector V, ExecutePolicy P = Sequential>
-        inline void assign_add(V& v) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign(Vector auto& v) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign_add(Vector auto& v) const;
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] auto calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
@@ -122,8 +122,7 @@ namespace Physica {
         [[nodiscard]] inline Pack packet(size_t index) const;
         template<Packet Pack>
         [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
-        template<Vector V1, Vector V2>
-        void reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
         [[nodiscard]] inline auto head(size_t to) & noexcept;
@@ -168,13 +167,10 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> prod() const;
         [[nodiscard]] bool isZeros() const;
         [[nodiscard]] bool isFinite() const;
-        template<Vector V>
-        [[nodiscard]] inline auto crossProduct(const V& v) const noexcept;
-        template<Vector V>
-        [[nodiscard]] T angleTo(const V& v) const noexcept;
+        [[nodiscard]] auto crossProduct(const Vector auto& v) const noexcept;
+        [[nodiscard]] T angleTo(const Vector auto& v) const noexcept;
 
-        template<Vector V>
-        Tr householder(V& target) const;
+        Tr householder(Vector auto& target) const;
 
         template<Matrix M>
         auto reshape(const M& mat) const noexcept;

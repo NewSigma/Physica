@@ -41,10 +41,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(M& target) const;
-        template<Matrix M>
-        void assign_mkl(M& target) const;
+        void assign(Matrix auto& target) const;
+        void assign_mkl(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
@@ -56,8 +54,7 @@ namespace Physica {
     GEMM<TrigUpper<M1>, M2>::GEMM(const TrigUpper<M1>& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {}
 
     template<Matrix M1, Matrix M2>
-    template<Matrix M>
-    void GEMM<TrigUpper<M1>, M2>::assign(M& target) const {
+    void GEMM<TrigUpper<M1>, M2>::assign(Matrix auto& target) const {
         if constexpr (HasMKL())
             assign_mkl(target);
         else

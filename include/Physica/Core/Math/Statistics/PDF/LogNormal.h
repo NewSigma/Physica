@@ -32,8 +32,7 @@ namespace Physica {
         /* Operators */
         LogNormal& operator=(LogNormal obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] T operator()(const T& x) const;
-        template<Vector V>
-        [[nodiscard]] VectorND<T> operator()(const V& x) const;
+        [[nodiscard]] VectorND<T> operator()(const Vector auto& x) const;
         /* Operations */
         void swap(LogNormal& __restrict obj) noexcept;
     };
@@ -48,8 +47,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Vector V>
-    VectorND<T> LogNormal<T>::operator()(const V& x) const {
+    VectorND<T> LogNormal<T>::operator()(const Vector auto& x) const {
         return divide(normal(ln(x)), x);
     }
 

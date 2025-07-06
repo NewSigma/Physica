@@ -36,7 +36,7 @@ int main() {
             return exp(T(-100) * (x - r1).squaredNorm()) + exp(T(-100) * (x - r2).squaredNorm());
         };
         auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
-        vegas.integral<decltype(func), RandomSource>(func);
+        vegas.integral<RandomSource>(func);
 
         const T temp = erf(T(5));
         const T answer = T(std::numbers::pi * std::numbers::pi / 10000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
@@ -52,7 +52,7 @@ int main() {
             return T((flag1 || flag2) ? 1 : 0);
         };
         auto vegas = Vegas<T, false>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 100000, 1000, 0.2);
-        vegas.integral<decltype(func), RandomSource>(func);
+        vegas.integral<RandomSource>(func);
 
         const T answer = square(T(std::numbers::pi * R * R));
         const T result = vegas.calcMean();
@@ -64,7 +64,7 @@ int main() {
             return T(-100) * (x - r1).squaredNorm();
         };
         auto vegas = Vegas<T, true>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
-        vegas.integral<decltype(func), RandomSource>(func);
+        vegas.integral<RandomSource>(func);
 
         const T temp = erf(T(5));
         const T answer = T(std::numbers::pi * std::numbers::pi / 20000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));

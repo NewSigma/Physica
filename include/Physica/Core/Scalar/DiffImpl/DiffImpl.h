@@ -123,9 +123,9 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    template<RNG R, class Distribution>
-    inline auto Diff<T, Mode, Order>::random_any(Distribution& dist) {
-        return Diff(T::template random_any<R, Distribution>(dist));
+    template<RNG R>
+    inline auto Diff<T, Mode, Order>::random_any(auto& distribution) {
+        return Diff(T::template random_any<R>(distribution));
     }
 
 #ifdef PHYSICA_HDF5

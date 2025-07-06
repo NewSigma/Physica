@@ -54,16 +54,12 @@ namespace Physica {
         [[nodiscard]] __device__ inline Pack packet(size_t index) const;
         template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
-        template<Packet Pack>
-        __device__ inline void writePacket(size_t index, const Pack packet);
-        template<Packet Pack>
-        __device__ inline void writePacketPartial(size_t index, size_t count, const Pack packet);
+        __device__ inline void writePacket(size_t index, const Packet auto packet);
+        __device__ inline void writePacketPartial(size_t index, size_t count, const Packet auto packet);
 
-        template<class U>
-        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
-        template<Vector V>
-        void resize(const V& x) { resize(x.getLength()); }
+        void resize(const Vector auto& x) { resize(x.getLength()); }
         auto resize(size_t length) { return Base::getDerived().resize(length); }
         template<Vector V> void toHost(ContinuousVector<V>& obj) const;
         template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;

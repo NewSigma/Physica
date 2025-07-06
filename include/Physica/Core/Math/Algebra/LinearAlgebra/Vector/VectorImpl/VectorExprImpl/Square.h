@@ -47,13 +47,11 @@ namespace Physica {
             return square(Base::getExpr().template packetPartial<Pack>(index, count));
         }
 
-        template<Scalar U>
-        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Scalar auto& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
-    template<Scalar U>
-    void VectorExpr<ExprType::Square, V>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Square, V>::reverse(const Scalar auto& grad_) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
         expr.reverse(expr.values() * (Tv(2) * grad_));
     }

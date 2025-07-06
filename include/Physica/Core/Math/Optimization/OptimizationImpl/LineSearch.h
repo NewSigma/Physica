@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,14 +42,29 @@ namespace Physica {
         /* Operators */
         LineSearch& operator=(LineSearch obj) noexcept;
         /* Operations */
-        template<class Functor, class GradFunctor>
-        [[nodiscard]] T run(Functor func, GradFunctor grad, const VectorType& x, const VectorType& gradient, const VectorType& direction) const;
+        [[nodiscard]] T run(
+                std::invocable<VectorType> auto fn,
+                std::invocable<VectorType> auto grad,
+                const VectorType& x,
+                const VectorType& gradient,
+                const VectorType& direction) const;
         void swap(LineSearch& __restrict obj) noexcept;
     private:
-        template<class Functor, class GradFunctor>
-        [[nodiscard]] T zoom(Functor func, GradFunctor grad, const VectorType& x, const VectorType& gradient, const VectorType& direction, T step1, T step2) const;
-        template<class Functor, class GradFunctor>
-        [[nodiscard]] T interpolate(Functor func, GradFunctor grad, const VectorType& x, const VectorType& direction, const T& step1, const T& step2) const;
+        [[nodiscard]] T zoom(
+                std::invocable<VectorType> auto fn,
+                std::invocable<VectorType> auto grad,
+                const VectorType& x,
+                const VectorType& gradient,
+                const VectorType& direction,
+                T step1,
+                T step2) const;
+        [[nodiscard]] T interpolate(
+                std::invocable<VectorType> auto fn,
+                std::invocable<VectorType> auto grad,
+                const VectorType& x,
+                const VectorType& direction,
+                const T& step1,
+                const T& step2) const;
     };
 
     template<Scalar T, size_t Dim>
@@ -75,10 +90,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
     T LineSearch<T, Dim>::run(
-            Functor func,
-            GradFunctor grad,
+            std::invocable<VectorType> auto fn,
+            std::invocable<VectorType> auto grad,
             const VectorType& x,
             const VectorType& gradient,
             const VectorType& direction) const {
@@ -88,7 +102,7 @@ namespace Physica {
         const T step_upper = maxStepSize;
         T step = maxStepSize / T(2);
 
-        const T phi_0 = func(x);
+        const T phi_0 = fn(x);
         const T diff_phi_0 = gradient * direction;
         assert(diff_phi_0.isNegative());
 
@@ -97,17 +111,17 @@ namespace Physica {
         size_t i = 0;
         while (true) {
             x1 = x + step * direction;
-            const T y = func(x1);
+            const T y = fn(x1);
             const bool violatesWolfe = y > (phi_0 + decreaseCondNum * step * diff_phi_0);
             const bool isIncreased = (y >= last_y) && (i > 0);
             if (violatesWolfe || isIncreased)
-                return zoom(func, grad, x, gradient, direction, step_lower, step);
+                return zoom(fn, grad, x, gradient, direction, step_lower, step);
 
             const T diff_phi = grad(x1) * direction;
             if (abs(diff_phi) <= -curvatureCondNum * diff_phi_0)
                 return step;
             if (!diff_phi.isNegative())
-                return zoom(func, grad, x, gradient, direction, step, step_lower);
+                return zoom(fn, grad, x, gradient, direction, step, step_lower);
             
             step_lower = step;
             step = (step_lower + step_upper) / T(2);
@@ -130,25 +144,24 @@ namespace Physica {
      * \param step1 does not necessarily less than \param step2
      */
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
     T LineSearch<T, Dim>::zoom(
-            Functor func,
-            GradFunctor grad,
+            std::invocable<VectorType> auto fn,
+            std::invocable<VectorType> auto grad,
             const VectorType& x,
             const VectorType& gradient,
             const VectorType& direction,
             T step1,
             T step2) const {
-        const T phi_0 = func(x);
+        const T phi_0 = fn(x);
         const T diff_phi_0 = gradient * direction;
 
-        T last_y = func(VectorType(x + step1 * direction));
+        T last_y = fn(VectorType(x + step1 * direction));
         VectorType x1 = VectorType(x.getLength());
         while (true) {
-            const T step = interpolate(func, grad, x, direction, step1, step2);
+            const T step = interpolate(fn, grad, x, direction, step1, step2);
 
             x1 = x + step * direction;
-            const T y = func(x1);
+            const T y = fn(x1);
             const bool violatesWolfe = y > (phi_0 + decreaseCondNum * step * diff_phi_0);
             const bool isIncreased = y >= last_y;
             if (violatesWolfe || isIncreased)
@@ -169,10 +182,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
     T LineSearch<T, Dim>::interpolate(
-            Functor func,
-            GradFunctor grad,
+            std::invocable<VectorType> auto fn,
+            std::invocable<VectorType> auto grad,
             const VectorType& x,
             const VectorType& direction,
             const T& step1,
@@ -183,7 +195,7 @@ namespace Physica {
         const T diff1 = grad(x1) * direction;
         const T diff2 = grad(x2) * direction;
         const T delta_step = step1 - step2;
-        const T d1 = diff1 + diff2 - T(3) * (func(x1) - func(x2)) / delta_step;
+        const T d1 = diff1 + diff2 - T(3) * (fn(x1) - fn(x2)) / delta_step;
         const T squared_d2 = square(d1) - diff1 * diff2;
         assert(!squared_d2.isNegative());
         T d2 = sqrt(squared_d2);

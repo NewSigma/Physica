@@ -44,7 +44,7 @@ namespace Physica {
                 if (minor < maxMinor)
                     m.refFromMajorMinor(major, minor) = x;
             };
-            CUDAExecutor::launch<decltype(func), Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
+            CUDAExecutor::launch<Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
         }
         else {
             for (size_t i = 0; i < Base::getMaxMajor(); ++i)
@@ -65,8 +65,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    void device_obj<LValueMatrix<Derived>>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<LValueMatrix<Derived>>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+        using M = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
         assert(Base::getRow() == grad.getRow());
         assert(Base::getCol() == grad.getCol());

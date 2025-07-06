@@ -31,8 +31,7 @@ namespace Physica {
         explicit Cholesky(const T& source_);
         ~Cholesky() = default;
         /* Operations */
-        template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return source.getRow(); }
@@ -46,10 +45,8 @@ namespace Physica {
      * Implemented the square method
      */
     template<Matrix T>
-    template<Matrix M>
-    void Cholesky<T>::assign(LValueMatrix<M>& target) const {
-        using ResultType = M;
-        using ScalarType = ResultType::ScalarType;
+    void Cholesky<T>::assign(Matrix auto& target) const {
+        using ScalarType = std::remove_cvref_t<decltype(target)>::ScalarType;
         const size_t order = source.getRow();
         /* Handle first vector */ {
             const auto diag = sqrt(source(0, 0));

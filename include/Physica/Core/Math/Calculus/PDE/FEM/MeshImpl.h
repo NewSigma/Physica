@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -47,20 +47,9 @@ namespace Physica {
         }
         throw std::invalid_argument("[Error]: Accessing point outside domain of definition");
     }
-    /**
-     * \tparam Detector
-     * A functor defined as
-     * bool Detector(VectorType)
-     * \returns true if the given node is on the boundary
-     * 
-     * \tparam Conditioner
-     * A functor defined as
-     * ScalarType Conditioner(VectorType)
-     * \returns the dirichlet boundary value
-     */
+
     template<class T>
-    template<class Detector, class Conditioner>
-    void Mesh<T>::addDirichletBoundary(Detector detector, Conditioner conditioner) {
+    void Mesh<T>::addDirichletBoundary(std::invocable<VectorType> auto detector, std::invocable<VectorType> auto conditioner) {
         for (const auto& elem : elements) {
             for (size_t i = 0; i < ElementType::getNumNodes(); ++i) {
                 const VectorType pos = elem.getNodePos(i);

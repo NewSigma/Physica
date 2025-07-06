@@ -37,8 +37,7 @@ namespace Physica {
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
 
         using Base::reverse;
-        template<Matrix U>
-        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
     };
 
     template<Matrix M>
@@ -55,8 +54,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    template<Matrix U>
-    void device_obj<MatrixExpr<ExprType::Minus, M>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<MatrixExpr<ExprType::Minus, M>>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
         Base::getExpr().reverse(-grad);
     }
 

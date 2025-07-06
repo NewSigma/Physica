@@ -47,8 +47,7 @@ namespace Physica {
         template<Matrix M>
         [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const M& x) const requires(CUDA<M>);
 
-        template<class Optimizer>
-        void step(Optimizer& opt);
+        void step(auto& optimizer);
         void zero_grad();
 
         const auto read(const H5Loc& loc, const char* name);
@@ -79,9 +78,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class Optimizer>
-    void device_obj<VegasLayer<T>>::step(Optimizer& opt) {
-        opt.step(weights);
+    void device_obj<VegasLayer<T>>::step(auto& optimizer) {
+        optimizer.step(weights);
 
         auto func = [v_ = asStruct(weights.values()), numDim = dim] __device__() mutable {
             extern __shared__ Tv buffer[];

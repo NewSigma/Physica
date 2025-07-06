@@ -42,8 +42,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V, ExecutePolicy P = Sequential>
-        void assign(V& target_) const;
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& target_) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
@@ -60,8 +60,8 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    template<Vector V, ExecutePolicy P>
-    void MatrixVectorProduct<BlockMatrix<T>, U>::assign(V& target) const {
+    template<ExecutePolicy P>
+    void MatrixVectorProduct<BlockMatrix<T>, U>::assign(Vector auto& target) const {
         assert(getLength() == target.getLength() && "[Error]: Dimensions do not match");
         size_t from = 0;
         for (size_t i = 0; i < m.getNumBlocks(); ++i) {

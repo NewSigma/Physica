@@ -40,8 +40,8 @@ namespace Physica {
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell);
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result);
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) { return force<P>(cell); }
@@ -69,8 +69,8 @@ namespace Physica {
     }
 
     template<class HostModel, class DeviceModel>
-    template<Vector V, ExecutePolicy P>
-    void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
+    template<ExecutePolicy P>
+    void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, Vector auto& result) {
         static_assert(P == GPU, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadID();
         const bool useCPU = ThreadPool::isMainThread() || static_cast<size_t>(threadId) >= getNumCUDAThread();

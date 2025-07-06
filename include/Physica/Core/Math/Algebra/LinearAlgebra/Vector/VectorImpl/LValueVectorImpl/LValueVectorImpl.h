@@ -32,13 +32,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    inline Derived& LValueVector<Derived>::operator=(const V& v) requires(!CUDA<V>) {
-        if constexpr (std::is_same<Derived, V>::value)
+    template<ExecutePolicy P>
+    inline Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
+        if constexpr (std::is_same<const Derived&, decltype(v)>::value)
             assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
         x.resize(v.getLength());
-        v.template assign<Derived, P>(x);
+        v.template assign<P>(x);
         return x;
     }
 
@@ -55,14 +55,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V>
-    inline void LValueVector<Derived>::operator+=(const V& v) {
+    inline void LValueVector<Derived>::operator+=(const Vector auto& v) {
         v.assign_add(Base::getDerived());
     }
 
     template<class Derived>
-    template<Vector V>
-    inline void LValueVector<Derived>::operator-=(const V& v) {
+    inline void LValueVector<Derived>::operator-=(const Vector auto& v) {
         Base::getDerived() += -v; // To avoid alias
     }
 
@@ -87,8 +85,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    void LValueVector<Derived>::writePacket(size_t index, const Pack packet) {
+    void LValueVector<Derived>::writePacket(size_t index, const Packet auto packet) {
+        using Pack = std::remove_cvref_t<decltype(packet)>;
         using T = Traits<Pack>::ScalarType;
         if constexpr (T::isForwardDiff) {
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
@@ -103,8 +101,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Packet Pack>
-    void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+    void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const Packet auto packet) {
+        using Pack = std::remove_cvref_t<decltype(packet)>;
         using T = Traits<Pack>::ScalarType;
         if constexpr (T::isForwardDiff) {
             for (size_t i = 0; i < count; ++i, ++index)
@@ -131,15 +129,15 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class T>
-    void LValueVector<Derived>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
-        static_assert(std::same_as<typename ScalarType::GradType, typename T::ScalarType>, "[Error]: Inconsistent ScalarType");
-        if constexpr (Scalar<T>) {
+    void LValueVector<Derived>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+        using U = std::remove_cvref_t<decltype(grad)>;
+        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        if constexpr (Scalar<U>) {
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);
         }
         else {
-            static_assert(Vector<T>, "[Error]: Unexpected type");
+            static_assert(Vector<U>, "[Error]: Unexpected type");
             assert(Base::getLength() == grad.getLength());
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad.calc(i));
@@ -220,10 +218,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RNG R, class Distribution>
-    inline void LValueVector<Derived>::random_any(Distribution& dist) {
+    template<RNG R>
+    inline void LValueVector<Derived>::random_any(auto& distribution) {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::template random_any<R, Distribution>(dist);
+            this->operator[](i) = ScalarType::template random_any<R>(distribution);
     }
 
     template<class Derived>

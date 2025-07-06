@@ -35,27 +35,25 @@ namespace Physica {
         using LossType = Loss<ScalarType>::LossType;
         constexpr static bool IsTrain = ScalarType::Order == 2;
     public:
-        ConservedFieldNet(const ConservedFieldNet&) = delete;
+        ConservedFieldNet(const This&) = delete;
         ~ConservedFieldNet() = default;
         /* Operations */
-        template<class Dataset, class Optimizer, class RandomSource, ExecutePolicy P>
-        void train_step(const Dataset& dataset, Optimizer& opt);
+        template<class RandomSource, ExecutePolicy P>
+        void train_step(const auto& dataset, auto& optimizer) { noImpl(__func__); }
 
-        template<class Dataset>
-        [[nodiscard]] ScalarType loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
-        template<class Dataset>
-        [[nodiscard]] ScalarType loss(const Dataset& dataset) const;
+        [[nodiscard]] ScalarType loss(const auto& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
+        [[nodiscard]] ScalarType loss(const auto& dataset) const;
     protected:
         ConservedFieldNet() = default;
-        ConservedFieldNet(ConservedFieldNet&&) noexcept = default;
+        ConservedFieldNet(This&&) noexcept = default;
         /* Operators */
-        ConservedFieldNet& operator=(ConservedFieldNet obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        inline void swap(ConservedFieldNet& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
     };
 
     template<class Derived>
-    inline void ConservedFieldNet<Derived>::swap(ConservedFieldNet& __restrict obj) noexcept {
+    inline void ConservedFieldNet<Derived>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         if constexpr (IsTrain)
             diffGuard.swap(obj.diffGuard);

@@ -34,15 +34,13 @@ namespace Physica {
     public:
         ~SeqNet() = default;
         /* Operations */
-        template<class Dataset, RNG R, ExecutePolicy P>
-        void train_step(int batchSize, const Dataset& dataset);
-        template<class Dataset, RNG R, ExecutePolicy P>
-        void train_step_for(int64_t numStep, int batchSize, const Dataset& dataset);
+        template<RNG R, ExecutePolicy P>
+        void train_step(int batchSize, const auto& dataset);
+        template<RNG R, ExecutePolicy P>
+        void train_step_for(int64_t numStep, int batchSize, const auto& dataset);
 
-        template<class Dataset>
-        [[nodiscard]] auto loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
-        template<class Dataset>
-        [[nodiscard]] ScalarType loss(const Dataset& dataset) const;
+        [[nodiscard]] auto loss(const auto& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
+        [[nodiscard]] ScalarType loss(const auto& dataset) const;
     protected:
         SeqNet() = default;
         SeqNet(const SeqNet&) = default;
@@ -53,14 +51,14 @@ namespace Physica {
     };
 
     template<class Derived>
-    template<class Dataset, RNG R, ExecutePolicy P>
-    void SeqNet<Derived>::train_step(int batchSize, const Dataset& dataset) {
+    template<RNG R, ExecutePolicy P>
+    void SeqNet<Derived>::train_step(int batchSize, const auto& dataset) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         const Tv mean_grad = reciprocal(Tv(batchSize));
         if constexpr (P == Sequential) {
             const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
             for (auto index : indices)
-                loss<Dataset>(dataset, index).reverse(mean_grad);
+                loss(dataset, index).reverse(mean_grad);
         }
         else {
             const int numThread = ThreadPool::getInstance().getNumThreads();
@@ -71,7 +69,7 @@ namespace Physica {
                 Derived buffer = nn;
                 const auto indices = R::random_int(batchSizePerThread, 0, dataset.getSize() - 1);
                 for (auto index : indices)
-                    buffer.template loss<Dataset>(dataset, index).reverse(mean_grad);
+                    buffer.loss(dataset, index).reverse(mean_grad);
                 std::unique_lock locker(mutex);
                 buffer.reverse(nn);
             }, numThread, numThread).wait();
@@ -81,15 +79,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Dataset, RNG R, ExecutePolicy P>
-    void SeqNet<Derived>::train_step_for(int64_t numStep, int batchSize, const Dataset& dataset) {
+    template<RNG R, ExecutePolicy P>
+    void SeqNet<Derived>::train_step_for(int64_t numStep, int batchSize, const auto& dataset) {
         for (int64_t _ = 0; _ < numStep; ++_)
-            train_step<Dataset, R, P>(batchSize, dataset);
+            train_step<R, P>(batchSize, dataset);
     }
 
     template<class Derived>
-    template<class Dataset>
-    [[nodiscard]] auto SeqNet<Derived>::loss(const Dataset& dataset) const -> ScalarType {
+    [[nodiscard]] auto SeqNet<Derived>::loss(const auto& dataset) const -> ScalarType {
         static_assert(!IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
         ScalarType result = 0;

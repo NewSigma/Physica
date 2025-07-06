@@ -38,8 +38,8 @@ namespace Physica {
         /* Operations */
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result) const;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
@@ -58,8 +58,8 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
-    template<Vector V, ExecutePolicy P>
-    void FPUModel<T, IsPeriodBoundary, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
+    template<ExecutePolicy P>
+    void FPUModel<T, IsPeriodBoundary, Dim>::forceAsync(const MDCellType& cell, Vector auto& result) const {
         static_assert(P == Sequential, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();

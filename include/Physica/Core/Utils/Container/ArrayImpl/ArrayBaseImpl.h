@@ -47,8 +47,7 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    template<class T>
-    void ArrayBase<Derived, Allocator>::read(const T& loc, const char* name) {
+    void ArrayBase<Derived, Allocator>::read(const auto& loc, const char* name) {
         const auto group = loc.openGroup(name);
         char buffer[32]; //32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
@@ -58,8 +57,7 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    template<class T>
-    void ArrayBase<Derived, Allocator>::write(T& loc, const char* name) const {
+    void ArrayBase<Derived, Allocator>::write(auto& loc, const char* name) const {
         auto group = loc.openGroup(name);
         char buffer[32]; //32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {

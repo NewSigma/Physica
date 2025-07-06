@@ -54,8 +54,7 @@ namespace Physica {
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return getExpr().calc(col, row); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return getExpr().calc_value(col, row); }
 
-        template<Vector V>
-        void reverse(const V& grad) const noexcept requires(isReverseDiff) { getExpr().reverse(grad.transpose()); }
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) { getExpr().reverse(grad.transpose()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat.getDerived(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getExpr().getCol(); }
@@ -85,8 +84,7 @@ namespace Physica {
         [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.getDerived().calc(col); }
         [[nodiscard]] __device__ Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
 
-        template<Vector V>
-        void reverse(const V& grad) const noexcept requires(isReverseDiff) { vec.getDerived().reverse(grad); }
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) { vec.getDerived().reverse(grad); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getDerived().getLength(); }

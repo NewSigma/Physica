@@ -41,8 +41,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<VectorND<T>> forward(const VectorND<T>& x) const;
         void reverse(const This& __restrict obj) const noexcept {}
 
-        template<class Optimizer>
-        void step(Optimizer& opt) {}
+        void step(auto& optimizer) {}
         void zero_grad() {}
 
         void swap(This& __restrict obj) noexcept;

@@ -39,8 +39,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(M& target) const;
+        void assign(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] T calc_value(size_t row, size_t col) const;
@@ -56,8 +55,7 @@ namespace Physica {
             const M1& lhs_, const DiagMatrix<U, Order>& rhs_) : lhs(lhs_), rhs(rhs_) {}
 
     template<Matrix M1, Scalar U, size_t Order>
-    template<Matrix M>
-    void GEMM<M1, DiagMatrix<U, Order>>::assign(M& target) const {
+    void GEMM<M1, DiagMatrix<U, Order>>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = lhs.col(i) * rhs.diag()[i];
     }
@@ -90,8 +88,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(M& target) const;
+        void assign(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] T calc_value(size_t row, size_t col) const;
@@ -107,8 +104,7 @@ namespace Physica {
             const DiagMatrix<U, Order>& lhs_, const M2& rhs_) : lhs(lhs_), rhs(rhs_) {}
 
     template<Scalar U, size_t Order, Matrix M2>
-    template<Matrix M>
-    void GEMM<DiagMatrix<U, Order>, M2>::assign(M& target) const {
+    void GEMM<DiagMatrix<U, Order>, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getRow(); ++i)
             target.row(i) = lhs.diag()[i] * rhs.row(i);
     }

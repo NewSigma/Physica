@@ -44,8 +44,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<DNN Net>
-        [[nodiscard]] CoDiff<T> forward(Net& nn, VectorND<Tv>& x) const;
+        [[nodiscard]] CoDiff<T> forward(DNN auto& nn, VectorND<Tv>& x) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -68,8 +67,7 @@ namespace Physica {
     LinearCoupler<T>::LinearCoupler(const LinearCoupler<U>& other) : LinearCoupler(other.getDim(), other.getNumBin()) {}
 
     template<Scalar T>
-    template<DNN Net>
-    auto LinearCoupler<T>::forward(Net& nn, VectorND<Tv>& x) const -> CoDiff<T> {
+    auto LinearCoupler<T>::forward(DNN auto& nn, VectorND<Tv>& x) const -> CoDiff<T> {
         assert(getDim() == x.getLength() && "[Error]: Dimensions do not match");
         VectorND<Tv> xA(getDim());
         xA.zeros();

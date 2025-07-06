@@ -22,8 +22,9 @@
 #include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
-    template<Scalar T, class Functor>
-    [[nodiscard]] T bisection(Functor func, const T& target, const T& x1, const T& x2, const T& y1, const T& y2) noexcept(std::is_nothrow_invocable_v<Functor, T>) {
+    template<Scalar T>
+    [[nodiscard]] T bisection(std::invocable<T> auto fn, const T& target, const T& x1, const T& x2, const T& y1, const T& y2)
+            noexcept(std::is_nothrow_invocable_v<decltype(fn), T>) {
         const T epsilon = std::numeric_limits<T>::epsilon();
         assert(T(target - y1).isPositive() ^ T(target - y2).isPositive() && "[Error]: (target - y1) and (target - y2) must have different sign");
         if (target == y1)
@@ -42,7 +43,7 @@ namespace Physica {
         bool delta_left_sign = target > y_left;
         bool delta_right_sign;
         do {
-            y_result = func(result);
+            y_result = fn(result);
             delta_right_sign = target > y_result;
 
             if (delta_left_sign == delta_right_sign) {
@@ -58,8 +59,9 @@ namespace Physica {
         return result;
     }
 
-    template<Scalar T, class Functor>
-    [[nodiscard]] T bisection(Functor func, const T& target, const T& x1, const T& x2) noexcept(std::is_nothrow_invocable_v<Functor, T>) {
-        return bisection(func, target, x1, x2, func(x1), func(x2));
+    template<Scalar T>
+    [[nodiscard]] T bisection(std::invocable<T> auto fn, const T& target, const T& x1, const T& x2)
+            noexcept(std::is_nothrow_invocable_v<decltype(fn), T>) {
+        return bisection(fn, target, x1, x2, fn(x1), fn(x2));
     }
 }

@@ -21,34 +21,33 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LUSolver.h"
-#include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
 namespace Physica {
     /**
      * References:
-     * [1] R.N. Euwema, D.J. Stukel, T.C. Collins, J.S. DeWitt, D.G. Shankland, Phys. Rev. 178 (1969) 1419–1423. http://dx.doi.org/10.1103/PhysRev.178.1419.
+     * [1] Phys. Rev. 178 (1969) 1419–1423; http://dx.doi.org/10.1103/PhysRev.178.1419.
      */
     template<Scalar T>
     class BrillouInterpolate {
         constexpr static unsigned int Dim = 3;
         constexpr static bool isComplex = T::isComplex;
-        using RealType = T::RealType;
-        using ComplexType = T::ComplexType;
-        using LatticeMatrix = PeriodicCell<RealType, Dim>::LatticeMatrix;
-        using CoeffMatrixM = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
-        using Vec3D = Vector3D<RealType>;
+        using Tr = T::RealType;
+        using Tc = T::ComplexType;
+        using LatticeMatrix = PeriodicCell<Tr, Dim>::LatticeMatrix;
+        using CoeffMatrixM = DenseMatrix<Tc, MatrixOption::Row | MatrixOption::Vector>;
+        using Vec3D = Vector3D<Tr>;
 
-        DenseTensor<ComplexType, 3> baseCoeff;
+        DenseTensor<Tc, 3> baseCoeff;
         LatticeMatrix lattice;
-        LUSolver<ComplexType, CoeffMatrixM::Option> solver;
-        VectorND<ComplexType> solverBuffer;
-        RealType smoothFactor1;
-        RealType smoothFactor2;
+        LUSolver<Tc, CoeffMatrixM::Option> solver;
+        VectorND<Tc> solverBuffer;
+        Tr smoothFactor1;
+        Tr smoothFactor2;
         Index3D dataDim;
     public:
-        BrillouInterpolate(Index3D baseDim, LatticeMatrix unitcell, RealType smoothFactor1_, RealType smoothFactor2_);
+        BrillouInterpolate(Index3D baseDim, LatticeMatrix unitcell, Tr smoothFactor1_, Tr smoothFactor2_);
         BrillouInterpolate(const BrillouInterpolate& obj) = default;
         BrillouInterpolate(BrillouInterpolate&& obj) noexcept = default;
         ~BrillouInterpolate() = default;
@@ -56,7 +55,7 @@ namespace Physica {
         BrillouInterpolate& operator=(BrillouInterpolate obj) noexcept;
         [[nodiscard]] T operator()(Vec3D kPoint) const;
         /* Operations */
-        RealType calcRoughness() const;
+        Tr calcRoughness() const;
         void interpolate(const DenseTensor<T, 3>& data);
         T interpolateFEM(Vec3D kPoint, const DenseTensor<T, 3>& data) const;
         template<Matrix M>
@@ -70,13 +69,13 @@ namespace Physica {
     };
 
     template<Scalar T>
-    BrillouInterpolate<T>::BrillouInterpolate(Index3D baseDim, LatticeMatrix unitcell, RealType smoothFactor1_, RealType smoothFactor2_)
+    BrillouInterpolate<T>::BrillouInterpolate(Index3D baseDim, LatticeMatrix unitcell, Tr smoothFactor1_, Tr smoothFactor2_)
             : baseCoeff(baseDim)
             , lattice(unitcell)
             , smoothFactor1(smoothFactor1_)
             , smoothFactor2(smoothFactor2_)
             , dataDim({0, 0, 0}) {
-        RealType minSquaredNorm = std::numeric_limits<RealType>::max();
+        Tr minSquaredNorm = std::numeric_limits<Tr>::max();
         for (int i = 0; i < 3; ++i)
             minSquaredNorm = std::min(minSquaredNorm, lattice.row(i).squaredNorm());
         smoothFactor1 /= minSquaredNorm;
@@ -87,10 +86,10 @@ namespace Physica {
     T BrillouInterpolate<T>::operator()(Vec3D kPoint) const {
         T result(0);
         baseCoeff.forND([this, kPoint, &result](const auto& coeff, Index3D index) {
-            RealType phase(0);
+            Tr phase(0);
             for (size_t dim = 0; dim < Dim; ++dim)
-                phase += RealType(index[dim]) * kPoint[dim];
-            phase *= RealType(2 * M_PI);
+                phase += Tr(index[dim]) * kPoint[dim];
+            phase *= Tr(2 * M_PI);
             const auto factor = cos(phase);
 
             if constexpr (!isComplex) {
@@ -109,15 +108,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    BrillouInterpolate<T>::RealType BrillouInterpolate<T>::calcRoughness() const {
-        RealType result = 0;
+    auto BrillouInterpolate<T>::calcRoughness() const -> Tr {
+        Tr result = 0;
         const auto kernel = [this, &result](Vec3D r, Index3D index) {
-            const RealType r2 = r.squaredNorm();
-            const bool isGammaPoint = r2 < std::numeric_limits<RealType>::epsilon();
+            const Tr r2 = r.squaredNorm();
+            const bool isGammaPoint = r2 < std::numeric_limits<Tr>::epsilon();
             if (isGammaPoint)
                 return;
-            const RealType r4 = square(r2);
-            result += baseCoeff(index).squaredNorm() * (RealType(1) + smoothFactor1 * r2 + smoothFactor2 * r4);
+            const Tr r4 = square(r2);
+            result += baseCoeff(index).squaredNorm() * (Tr(1) + smoothFactor1 * r2 + smoothFactor2 * r4);
         };
         TensorBase::forPointIndexInTensor<true, decltype(kernel)>(getBaseDim(), lattice, kernel);
         return result;
@@ -131,7 +130,7 @@ namespace Physica {
         const bool useNormalFFT = dataDim[0] == getBaseDim()[0] && dataDim[1] == getBaseDim()[1] && dataDim[2] == getBaseDim()[2];
         if (useNormalFFT) {
             dataDim = data.getShape();
-            FFT<ComplexType, 3> fft(dataDim, PlanFlag::Estimate);
+            FFT<Tc, 3> fft(dataDim, PlanFlag::Estimate);
             fft.getKSpace() = data;
             fft.invTransform();
             baseCoeff = fft.getRSpace();
@@ -141,19 +140,19 @@ namespace Physica {
             if (dataDim != data.getShape()) {
                 dataDim = data.getShape();
                 solver.decomp(makeMatrixM());
-                const VectorND<ComplexType> ones(solver.getOrder(), ComplexType(1));
+                const VectorND<Tc> ones(solver.getOrder(), Tc(1));
                 solverBuffer = solver.solve(ones);
             }
             const auto v1 = solver.solve(data.flatten());
-            const ComplexType average = v1.sum() / solverBuffer.sum();
+            const Tc average = v1.sum() / solverBuffer.sum();
 
-            FFT<ComplexType, 3> fft(dataDim, PlanFlag::Estimate);
+            FFT<Tc, 3> fft(dataDim, PlanFlag::Estimate);
             auto lambdas = fft.getKSpace().flatten();
             lambdas = v1 - solverBuffer * average;
             fft.rawInvTransform();
 
             const Index3D baseDim = getBaseDim();
-            baseCoeff.forND([this, &fft](auto& coeff, Index3D index) {
+            baseCoeff.forND([this, &fft](Tc& coeff, Index3D index) {
                 PeriodIndex3D pIndex(index, dataDim);
                 pIndex.normalize();
                 coeff *= fft.getRSpace()(pIndex);
@@ -164,7 +163,7 @@ namespace Physica {
 
     template<Scalar T>
     T BrillouInterpolate<T>::interpolateFEM(Vec3D kPoint, const DenseTensor<T, 3>& data) const {
-        using ElementType = CuboidLinear<RealType>;
+        using ElementType = CuboidLinear<Tr>;
         using IndexArray = ElementType::IndexArray;
         for (size_t i = 0; i < Dim; ++i) {
             kPoint[i] -= floor(kPoint[i]);
@@ -174,10 +173,10 @@ namespace Physica {
         const Index3D shape = data.getShape();
         Vec3D globalPos{};
         for (int i = 0; i < 3; ++i)
-            globalPos[i] = kPoint[i] * RealType(shape[i]);
+            globalPos[i] = kPoint[i] * Tr(shape[i]);
         const Index3D index0{size_t(double(globalPos[0])), size_t(double(globalPos[1])), size_t(double(globalPos[2]))};
-        const Vec3D point1{RealType(index0[0]), RealType(index0[1]), RealType(index0[2])};
-        const Vec3D point2{RealType(index0[0] + 1), RealType(index0[1] + 1), RealType(index0[2] + 1)};
+        const Vec3D point1{Tr(index0[0]), Tr(index0[1]), Tr(index0[2])};
+        const Vec3D point2{Tr(index0[0] + 1), Tr(index0[1] + 1), Tr(index0[2] + 1)};
         const IndexArray nodeArr{
             ElementType::LeftFrontBottom,
             ElementType::LeftFrontTop,
@@ -197,7 +196,7 @@ namespace Physica {
             for (int y = 0; y < 2; ++y) {
                 for (int z = 0; z < 2; ++z) {
                     Index3D index{(index0[0] + x) % shape[0], (index0[1] + y) % shape[1], index0[2] + z};
-                    const RealType factor = ElementType::baseFunc(nodeArr[localNodeIndex], localPos);
+                    const Tr factor = ElementType::baseFunc(nodeArr[localNodeIndex], localPos);
                     result += factor * data(index);
                     localNodeIndex += 1;
                 }
@@ -211,7 +210,7 @@ namespace Physica {
     M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const ArrayND<M, 3>& matrixGrid) {
         const size_t order = matrixGrid(0, 0, 0).getRow();
         M result(order, order, T(0));
-        DenseTensor<ComplexType, 3> buffer(matrixGrid.getShape());
+        DenseTensor<Tc, 3> buffer(matrixGrid.getShape());
         for (size_t c = 0; c < order; ++c) {
             for (size_t r = 0; r < order; ++r) {
                 buffer.forND([r, c, &matrixGrid](auto& elem, Index3D index) {
@@ -240,20 +239,20 @@ namespace Physica {
     template<Scalar T>
     void BrillouInterpolate<T>::initBaseCoeff() {
         const auto kernel = [this](Vec3D r, Index3D index) {
-            const RealType r2 = r.squaredNorm();
-            const bool isGammaPoint = r2 < std::numeric_limits<RealType>::epsilon();
+            const Tr r2 = r.squaredNorm();
+            const bool isGammaPoint = r2 < std::numeric_limits<Tr>::epsilon();
             if (isGammaPoint)
-                baseCoeff(index) = RealType(0);
+                baseCoeff(index) = Tr(0);
             else
-                baseCoeff(index) = reciprocal(RealType(1) + (smoothFactor1 + smoothFactor2 * r2) * r2);
+                baseCoeff(index) = reciprocal(Tr(1) + (smoothFactor1 + smoothFactor2 * r2) * r2);
         };
-        TensorBase::forPointIndexInTensor<RealType, true, decltype(kernel)>(getBaseDim(), lattice, kernel);
+        TensorBase::forPointIndexInTensor<Tr, true, decltype(kernel)>(getBaseDim(), lattice, kernel);
     }
     /**
      * Matrix M as defined in [1]
      */
     template<Scalar T>
-    BrillouInterpolate<T>::CoeffMatrixM BrillouInterpolate<T>::makeMatrixM() const {
+    auto BrillouInterpolate<T>::makeMatrixM() const -> CoeffMatrixM {
         const size_t numDataPoint = dataDim[0] * dataDim[1] * dataDim[2];
         CoeffMatrixM matrixM(numDataPoint, numDataPoint);
         for (size_t r = 0; r < numDataPoint; ++r) {
@@ -261,12 +260,12 @@ namespace Physica {
             for (size_t c = r; c < numDataPoint; ++c) {
                 const PeriodIndex3D period_c(c, dataDim);
                 const auto kIndex = Index3D(period_r + period_c);
-                ComplexType elem(0);
+                Tc elem(0);
                 baseCoeff.forND([this, kIndex, &elem](const auto& coeff, Index3D index) {
-                    RealType phase(0);
+                    Tr phase(0);
                     for (size_t i = 0; i < Dim; ++i)
-                        phase += RealType(index[i] * kIndex[i]) / RealType(dataDim[i]);
-                    phase *= RealType(2 * M_PI);
+                        phase += Tr(index[i] * kIndex[i]) / Tr(dataDim[i]);
+                    phase *= Tr(2 * M_PI);
                     const auto factor = cos(phase);
                     elem += coeff * factor;
                 });

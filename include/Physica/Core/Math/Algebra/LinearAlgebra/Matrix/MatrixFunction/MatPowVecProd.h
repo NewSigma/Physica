@@ -41,8 +41,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign(V1& target) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign(Vector auto& target) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
@@ -58,14 +58,15 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    template<Vector V1, ExecutePolicy P>
-    inline void MatPowVecProd<M, V>::assign(V1& target) const {
+    template<ExecutePolicy P>
+    inline void MatPowVecProd<M, V>::assign(Vector auto& target) const {
         const int power = mpow.getPower();
         if (power == 0) {
             target = v;
             return;
         }
 
+        using V1 = std::remove_cvref_t<decltype(target)>;
         V1 buffer = mpow.getMatrix() * v;
         for (int i = 1; i < power; ++i) {
             buffer.swap(target);

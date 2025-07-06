@@ -48,15 +48,14 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Matrix M>
-        __host__ __device__ void assign(M& target) const {
+        __host__ __device__ void assign(Matrix auto& target) const {
             constexpr bool FastAssign = Traits<std::remove_cvref_t<T>>::FastAssign;
             if constexpr (FastAssign) {
-                Base::getLHS().template assign<M>(target);
+                Base::getLHS().assign(target);
                 target += Base::getRHS();
             }
             else
-                Base::template assign<M>(target);
+                Base::assign(target);
         }
 
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
@@ -71,8 +70,7 @@ namespace Physica {
         }
 
         using Base::reverse;
-        template<Matrix M1>
-        void reverse(const M1& grad) const noexcept requires(isReverseDiff) {
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
             if constexpr (ReverseDiff<T>)
                 Base::getLHS().reverse(grad);
             if constexpr (ReverseDiff<U>)

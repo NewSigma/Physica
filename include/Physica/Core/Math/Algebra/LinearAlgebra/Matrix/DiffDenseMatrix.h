@@ -77,8 +77,8 @@ namespace Physica {
         inline void random_uniform();
         template<RNG R>
         inline void random_normal();
-        template<RNG R, class Distribution>
-        inline void random_any(Distribution& dist);
+        template<RNG R>
+        inline void random_any(auto& distribution);
 
         void swap(This& __restrict obj) noexcept;
         void swap_row(size_t r1, size_t r2) noexcept;
@@ -100,8 +100,8 @@ namespace Physica {
         [[nodiscard]] inline static auto random_uniform(size_t row, size_t col);
         template<RNG R>
         [[nodiscard]] inline static auto random_normal(size_t row, size_t col);
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static auto random_any(size_t row, size_t col, Distribution& dist);
+        template<RNG R>
+        [[nodiscard]] inline static auto random_any(size_t row, size_t col, auto& distribution);
     private:
         friend class device_obj<This>;
     };

@@ -101,15 +101,12 @@ namespace Physica {
         __host__ __device__ inline bool operator>(double s) const noexcept;
         __host__ __device__ inline bool operator<(double s) const noexcept;
         template<Scalar T>
-        __host__ __device__ inline bool operator>(const T& s) const noexcept;
+        __host__ __device__ bool operator>(const T& x) const noexcept;
         template<Scalar T>
-        __host__ __device__ inline bool operator<(const T& s) const noexcept;
-        template<Scalar T>
-        __host__ __device__ inline bool operator>=(const T& x) const noexcept;
-        template<Scalar T>
-        __host__ __device__ inline bool operator<=(const T& x) const noexcept;
-        template<Scalar T>
-        __host__ __device__ inline bool operator!=(const T& x) const noexcept;
+        __host__ __device__ bool operator<(const T& x) const noexcept;
+        __host__ __device__ bool operator>=(const Scalar auto& x) const noexcept;
+        __host__ __device__ bool operator<=(const Scalar auto& x) const noexcept;
+        __host__ __device__ bool operator!=(const Scalar auto& x) const noexcept;
         /* Operations */
         [[nodiscard]] ScalarType calc() const;
 
@@ -249,33 +246,30 @@ namespace Physica {
      */
     template<class Derived>
     template<Scalar T>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator>(const T& s) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator>(const T& x) const noexcept {
         static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
-        return value() > s.value();
+        return value() > x.value();
     }
 
     template<class Derived>
     template<Scalar T>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator<(const T& s) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator<(const T& x) const noexcept {
         static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
-        return value() < s.value();
+        return value() < x.value();
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator>=(const T& x) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator>=(const Scalar auto& x) const noexcept {
         return !operator<(x);
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator<=(const T& x) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator<=(const Scalar auto& x) const noexcept {
         return !operator>(x);
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator!=(const T& x) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator!=(const Scalar auto& x) const noexcept {
         return !operator==(x);
     }
 

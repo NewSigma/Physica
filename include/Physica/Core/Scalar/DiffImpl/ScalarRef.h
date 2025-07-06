@@ -44,8 +44,7 @@ namespace Physica {
         /* Operators */
         __host__ __device__ inline This& operator=(const This& other);
         __host__ __device__ inline This& operator=(This&& other) noexcept;
-        template<Scalar U>
-        __host__ __device__ inline This& operator=(const U& other);
+        __host__ __device__ inline This& operator=(const Scalar auto& other);
         __host__ __device__ inline This& operator=(int x) { return operator=(T(x)); }
         __host__ __device__ inline This& operator=(double x) { return operator=(T(x)); }
         [[nodiscard]] __host__ __device__ operator ScalarType() const requires(!ReverseDiff<T>);
@@ -56,10 +55,8 @@ namespace Physica {
         using Base::operator!=;
         __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
-        template<Scalar U>
-        __host__ __device__ bool operator>(const U& s) const noexcept { return ScalarType(*this) > s; }
-        template<Scalar U>
-        __host__ __device__ bool operator<(const U& s) const noexcept { return ScalarType(*this) < s; }
+        __host__ __device__ bool operator>(const Scalar auto& s) const noexcept { return ScalarType(*this) > s; }
+        __host__ __device__ bool operator<(const Scalar auto& s) const noexcept { return ScalarType(*this) < s; }
         template<Scalar U>
         __host__ __device__ bool operator>(const ScalarRef<U>& s) const noexcept { return operator>(U(s)); }
         template<Scalar U>
@@ -95,10 +92,9 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    template<Scalar U>
-    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(const U& other) -> This& {
+    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(const Scalar auto& other) -> This& {
         value() = other.value();
-        if constexpr (Diffable<U>)
+        if constexpr (Diffable<decltype(other)>)
             grad() = other.grad();
         else
             zero_grad();

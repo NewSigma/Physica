@@ -43,10 +43,10 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] auto operator-() const noexcept;
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign(V1& target) const;
-        template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign_add(V1& target) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign(Vector auto& target) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign_add(Vector auto& target) const;
 
         [[nodiscard]] inline T calc(size_t index) const;
         [[nodiscard]] inline Tv calc_value(size_t index) const;
@@ -70,30 +70,24 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    template<Vector V1, ExecutePolicy P>
-    inline void MatExprVecProd<M, V>::assign(V1& target) const {
+    template<ExecutePolicy P>
+    inline void MatExprVecProd<M, V>::assign(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
             if constexpr (Type == ExprType::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
                 if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
-                    ((-lhs) * rhs).template assign<V1, P>(target);
+                    ((-lhs) * rhs).template assign<P>(target);
                 else
-                    (lhs * (-rhs)).template assign<V1, P>(target);
+                    (lhs * (-rhs)).template assign<P>(target);
             }
-            else if constexpr (Type == ExprType::Add) {
-                auto expr1 = expr.getLHS() * vec + expr.getRHS() * vec;
-                target.template operator=<decltype(expr1), P>(expr1);
-            }
-            else if constexpr (Type == ExprType::Sub) {
-                auto expr1 = expr.getLHS() * vec - expr.getRHS() * vec;
-                target.template operator=<decltype(expr1), P>(expr1);
-            }
-            else if constexpr (Type == ExprType::Mul) {
-                auto expr1 = (expr.getLHS() * vec) * expr.getRHS();
-                target.template operator=<decltype(expr1), P>(expr1);
-            }
+            else if constexpr (Type == ExprType::Add)
+                target.template operator=<P>(expr.getLHS() * vec + expr.getRHS() * vec);
+            else if constexpr (Type == ExprType::Sub)
+                target.template operator=<P>(expr.getLHS() * vec - expr.getRHS() * vec);
+            else if constexpr (Type == ExprType::Mul)
+                target.template operator=<P>((expr.getLHS() * vec) * expr.getRHS());
             else
                 static_assert(!FastAssign, "[Error]: assign is not implemented");
         }
@@ -102,29 +96,29 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    template<Vector V1, ExecutePolicy P>
-    inline void MatExprVecProd<M, V>::assign_add(V1& target) const {
+    template<ExecutePolicy P>
+    inline void MatExprVecProd<M, V>::assign_add(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
             if constexpr (Type == ExprType::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
                 if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
-                    ((-lhs) * rhs).template assign_add<V1, P>(target);
+                    ((-lhs) * rhs).template assign_add<P>(target);
                 else
-                    (lhs * (-rhs)).template assign_add<V1, P>(target);
+                    (lhs * (-rhs)).template assign_add<P>(target);
             }
             else if constexpr (Type == ExprType::Add) {
                 auto expr1 = expr.getLHS() * vec + expr.getRHS() * vec;
-                expr1.template assign_add<V1, P>(target);
+                expr1.template assign_add<P>(target);
             }
             else if constexpr (Type == ExprType::Sub) {
                 auto expr1 = expr.getLHS() * vec - expr.getRHS() * vec;
-                expr1.template assign_add<V1, P>(target);
+                expr1.template assign_add<P>(target);
             }
             else if constexpr (Type == ExprType::Mul) {
                 auto expr1 = (expr.getLHS() * vec) * expr.getRHS();
-                expr1.template assign_add<V1, P>(target);
+                expr1.template assign_add<P>(target);
             }
             else
                 static_assert(!FastAssign, "[Error]: assign is not implemented");

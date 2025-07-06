@@ -33,8 +33,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    void RValueMatrix<Derived>::assign(M& target) const {
+    void RValueMatrix<Derived>::assign(Matrix auto& target) const {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
         assign_check(target);
@@ -47,8 +46,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    void RValueMatrix<Derived>::assign_add(M& target) const {
+    void RValueMatrix<Derived>::assign_add(Matrix auto& target) const {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
         assign_check(target);
@@ -246,8 +244,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M1, Matrix M2>
-    void RValueMatrix<Derived>::reverse(const M1&, const M2& grad) const noexcept requires(isReverseDiff) {
+    void RValueMatrix<Derived>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept requires(isReverseDiff) {
         Base::getDerived().reverse(grad);
     }
 
@@ -481,26 +478,12 @@ namespace Physica {
         return ((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>;
     }
 
-    template<Matrix T1, Matrix T2>
-    bool matrixNear(const T1& m1, const T2& m2, double precision) {
+    bool matrixNear(const Matrix auto& m1, const Matrix auto& m2, double precision) {
         assert(m1.getRow() == m2.getRow());
         assert(m1.getCol() == m2.getCol());
         for (size_t i = 0; i < m1.getCol(); ++i)
             for (size_t j = 0; j < m1.getRow(); ++j)
                 if (!scalarNear(m1.calc(j, i), m2.calc(j, i), precision))
-                    return false;
-        return true;
-    }
-
-    template<Matrix T>
-    bool operator==(const T& m1, const T& m2) {
-        if (m1.getRow() != m2.getRow())
-            return false;
-        if (m1.getCol() != m2.getCol())
-            return false;
-        for (size_t major = 0; major < m1.getMaxMajor(); ++major)
-            for (size_t minor = 0; minor < m1.getMaxMinor(); ++minor)
-                if (m1.calcFromMajorMinor(major, minor) != m2.calcFromMajorMinor(major, minor))
                     return false;
         return true;
     }

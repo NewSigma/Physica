@@ -37,8 +37,7 @@ namespace Physica {
         WorkingMatrix working;
     public:
         explicit LinearSystem(WorkingMatrix&& working_);
-        template<Matrix M>
-        explicit LinearSystem(const M& working_);
+        explicit LinearSystem(const Matrix auto& working_);
         LinearSystem(const This& l) = default;
         LinearSystem(This&& l) noexcept = default;
         ~LinearSystem() = default;

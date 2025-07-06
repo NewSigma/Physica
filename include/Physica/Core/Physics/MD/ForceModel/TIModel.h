@@ -57,8 +57,8 @@ namespace Physica {
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -105,8 +105,8 @@ namespace Physica {
     }
 
     template<class ForceModel>
-    template<Vector V, ExecutePolicy P>
-    void TIModel<ForceModel>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
+    template<ExecutePolicy P>
+    void TIModel<ForceModel>::forceAsync(const MDCellType& cell, Vector auto& result) {
         if (!lambda.isZero())
             original.template forceAsync<V, P>(cell, result);
         const VectorND<ScalarType> hamonicF = hamonic.template force<P>(cell);

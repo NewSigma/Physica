@@ -66,18 +66,14 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
-        template<Matrix M>
-        void assign_base(LValueMatrix<M>& target) const;
-        template<Matrix M>
-        void assign_mkl(LValueMatrix<M>& target) const;
+        void assign(Matrix auto& target) const;
+        void assign_base(Matrix auto& target) const;
+        void assign_mkl(Matrix auto& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
-        template<Matrix M>
-        void reverse(const M& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
@@ -93,8 +89,8 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    template<Matrix M>
-    void GEMM<M1, M2>::assign(LValueMatrix<M>& target) const {
+    void GEMM<M1, M2>::assign(Matrix auto& target) const {
+        using M = std::remove_cvref_t<decltype(target)>;
         constexpr bool GoodScalar = T::Prec == Float32 || T::Prec == Float64;
         constexpr bool SameScalar = std::same_as<typename M1::ScalarType, typename M2::ScalarType> && std::same_as<T, typename M::ScalarType>;
         constexpr bool SameMajor = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M2>();
@@ -112,16 +108,14 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    template<Matrix M>
-    void GEMM<M1, M2>::assign_base(LValueMatrix<M>& target) const {
+    void GEMM<M1, M2>::assign_base(Matrix auto& target) const {
         constexpr static int defaultMajor = Internal::ProductOption<M1, M2>::Major;
         constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
-        using TargetType = LValueMatrix<M>;
         if constexpr (isAnyMajor) {
             for (size_t i = 0; i < target.getMaxMajor(); ++i) {
                 for (size_t j = 0; j < target.getMaxMinor(); ++j) {
-                    const size_t r = MatrixOption::rowFromMajorMinor<TargetType>(i, j);
-                    const size_t c = MatrixOption::colFromMajorMinor<TargetType>(i, j);
+                    const size_t r = target.rowFromMajorMinor(i, j);
+                    const size_t c = target.colFromMajorMinor(i, j);
                     target.refFromMajorMinor(i, j) = calc(r, c);
                 }
             }
@@ -146,8 +140,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    template<Matrix M>
-    void GEMM<M1, M2>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+    void GEMM<M1, M2>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
         if constexpr (ReverseDiff<M1>)
             mat1.reverse(grad * mat2.transpose());
         if constexpr (ReverseDiff<M2>)

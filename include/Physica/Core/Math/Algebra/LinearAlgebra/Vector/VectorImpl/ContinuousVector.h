@@ -64,20 +64,18 @@ namespace Physica {
             }
             return Base::template operator=<T>(x);
         }
-        template<Vector V, ExecutePolicy P = Sequential>
-        Derived& operator=(const V& v_) requires(!CUDA<V>);
+        template<ExecutePolicy P = Sequential>
+        Derived& operator=(const Vector auto& v);
         using Base::operator+=;
         /* Operations */
         template<Packet Pack> [[nodiscard]] inline Pack packet(size_t index) const;
         template<Packet Pack> [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
-        template<Packet Pack> inline void writePacket(size_t index, const Pack packet);
-        template<Packet Pack> inline void writePacketPartial(size_t index, size_t count, const Pack packet);
+        void writePacket(size_t index, const Packet auto packet);
+        void writePacketPartial(size_t index, size_t count, const Packet auto packet);
 
-        template<class U>
-        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
-        template<Vector V>
-        void resize(const V& x) { resize(x.getLength()); }
+        void resize(const Vector auto& x) { resize(x.getLength()); }
         auto resize(size_t length) { return Base::getDerived().resize(length); }
         template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
@@ -101,8 +99,8 @@ namespace Physica {
         inline void random_uniform();
         template<RNG R>
         inline void random_normal();
-        template<RNG R, class Distribution>
-        inline void random_any(Distribution& dist);
+        template<RNG R>
+        inline void random_any(auto& distribution);
 
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;

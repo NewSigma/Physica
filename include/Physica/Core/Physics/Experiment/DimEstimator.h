@@ -37,24 +37,23 @@ namespace Physica {
         VectorND<ScalarType> intrinsicDim;
         VectorND<ScalarType> correlateDim;
     public:
-        template<Vector T, RNG R>
-        DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const T& radius);
+        template<RNG R>
+        DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const Vector auto& radius);
         /* Operations */
-        template<Vector T, Matrix U>
-        ScalarType intrinDim(const U& data, const T& radius) const;
-        template<Vector T, Matrix U>
-        static ScalarType corrDimen(const U& data, const T& radius);
+        ScalarType intrinDim(const Matrix auto& data, const Vector auto& radius) const;
+        /* Static members */
         template<Vector T>
-        static DataMatrix toHighDimForm(const T& data, size_t step, size_t dim);
+        static ScalarType corrDimen(const Matrix auto& data, const T& radius);
+        static DataMatrix toHighDimForm(const Vector auto& data, size_t step, size_t dim);
     private:
-        template<Vector T, Matrix U>
-        static inline T corrIntegral(const U& data, const T& radius);
+        template<Vector T>
+        static inline T corrIntegral(const Matrix auto& data, const T& radius);
     };
 
-    template<Vector T, RNG R>
+    template<RNG R>
     DimEstimator::DimEstimator(size_t sampleNum,
                                const Array<size_t>& intrinsicDim_,
-                               const T& radius)
+                               const Vector auto& radius)
             : intrinsicDim(intrinsicDim_.getLength()) {
         const size_t length = intrinsicDim.getLength();
         correlateDim.resize(length);
@@ -66,18 +65,15 @@ namespace Physica {
         }
     }
 
-    template<Vector T, Matrix U>
-    DimEstimator::ScalarType
-    DimEstimator::intrinDim(const U& data, const T& radius) const {
+    auto DimEstimator::intrinDim(const Matrix auto& data, const Vector auto& radius) const -> ScalarType {
         return lagrange(intrinsicDim, correlateDim, corrDimen(data, radius));
     }
     /**
      * \param data
      * Each row represents a piece of data
      */
-    template<Vector T, Matrix U>
-    DimEstimator::ScalarType
-    DimEstimator::corrDimen(const U& data, const T& radius) {
+    template<Vector T>
+    auto DimEstimator::corrDimen(const Matrix auto& data, const T& radius) -> ScalarType {
         const T logCorrIntegral = ln(corrIntegral(data, radius));
         const T logR = ln(radius);
         return LinearFit<ScalarType>::fit(logR, logCorrIntegral).first;
@@ -85,11 +81,7 @@ namespace Physica {
     /**
      * Helper function for distinguishing chaos and random noise, refer to [2]
      */
-    template<Vector T>
-    DimEstimator::DataMatrix DimEstimator::toHighDimForm(
-            const T& data,
-            size_t step,
-            size_t dim) {
+    auto DimEstimator::toHighDimForm(const Vector auto& data, size_t step, size_t dim) -> DataMatrix {
         assert(step > 0);
         assert(dim > 1);
         const size_t newNumData = (data.getLength() - (dim - 1) * step) / step;
@@ -102,8 +94,8 @@ namespace Physica {
         return result;
     }
 
-    template<Vector T, Matrix U>
-    inline T DimEstimator::corrIntegral(const U& data, const T& radius) {
+    template<Vector T>
+    T DimEstimator::corrIntegral(const Matrix auto& data, const T& radius) {
         const size_t numData = data.getRow();
         const T squaredR = square(radius);
         T count(radius.getLength(), 0);

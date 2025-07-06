@@ -39,18 +39,18 @@ namespace Physica {
         SimpleDataset(SampleArray samples_, LabelArray labels_);
         template<class OtherSample, class OtherLabel>
         SimpleDataset(const SimpleDataset<OtherSample, OtherLabel>& other);
-        SimpleDataset(const SimpleDataset&) = default;
-        SimpleDataset(SimpleDataset&&) noexcept = default;
+        SimpleDataset(const This&) = default;
+        SimpleDataset(This&&) noexcept = default;
         ~SimpleDataset() = default;
         /* Operators */
-        SimpleDataset& operator=(SimpleDataset obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] inline DataType operator[](size_t index) const;
         /* Operations */
         inline void reserve(size_t size);
         inline void append(DataType data);
         template<RNG R>
         SplitResultType randomSplit(size_t firstSize) const;
-        void swap(SimpleDataset& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
         [[nodiscard]] const SampleArray& getSamples() const noexcept { return samples; }
@@ -130,7 +130,7 @@ namespace Physica {
     }
 
     template<class SampleType, class LabelType>
-    void SimpleDataset<SampleType, LabelType>::swap(SimpleDataset& __restrict obj) noexcept {
+    void SimpleDataset<SampleType, LabelType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         samples.swap(obj.samples);
         labels.swap(obj.labels);

@@ -33,9 +33,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    Derived& LValueMatrix<Derived>::operator=(const M& m) {
-        if constexpr (std::is_same<Derived, M>::value)
+    Derived& LValueMatrix<Derived>::operator=(const Matrix auto& m) {
+        if constexpr (std::is_same<const Derived&, decltype(m)>::value)
             assert(this != &m && "[Error]: Self assign is likely a bug");
         Base::assign_check(m);
         Base::getDerived().resize(m.getRow(), m.getCol());
@@ -89,8 +88,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    void LValueMatrix<Derived>::reverse(const M& grad) const noexcept requires(isReverseDiff) {
+    void LValueMatrix<Derived>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+        using M = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
         assert(Base::getRow() == grad.getRow());
         assert(Base::getCol() == grad.getCol());
@@ -365,13 +364,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RNG R, class Distribution>
-    void LValueMatrix<Derived>::random_any(Distribution& dist) {
+    template<RNG R>
+    void LValueMatrix<Derived>::random_any(auto& distribution) {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         for (size_t major = 0; major < maxMajor; ++major)
             for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::template random_any<R, Distribution>(dist);
+                refFromMajorMinor(major, minor) = ScalarType::template random_any<R>(distribution);
     }
 
     template<class Derived>

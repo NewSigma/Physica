@@ -51,8 +51,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        void assign(V1& target) const;
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& target) const;
 
         [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -61,8 +61,8 @@ namespace Physica {
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     private:
-        template<Vector V1> void sumHopping(V1& target, FFTType& fft, T factor, StateType psi) const;
-        template<Vector V1> void dotImpl(V1& target, T factor, size_t index) const;
+        void sumHopping(Vector auto& target, FFTType& fft, T factor, StateType psi) const;
+        void dotImpl(Vector auto& target, T factor, size_t index) const;
         /* Getters */
         [[nodiscard]] T getHoppingT() const noexcept { return mat.getHoppingT(); }
         [[nodiscard]] T getRepelU() const noexcept { return mat.getRepelU(); }
@@ -75,8 +75,8 @@ namespace Physica {
     }
 
     template<Scalar T0, Representation U, Vector V>
-    template<Vector V1, ExecutePolicy P>
-    void HubbardVecProd<T0, U, V>::assign(V1& target) const {
+    template<ExecutePolicy P>
+    void HubbardVecProd<T0, U, V>::assign(Vector auto& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         if constexpr (P == Thread) {
             parallel_for<Thread>([&](size_t i) {
@@ -87,7 +87,7 @@ namespace Physica {
             target = Tr(0);
             const size_t length = getLength();
             for (size_t i = 0; i < length; ++i)
-                dotImpl<V1>(target, vec.calc(i), i);
+                dotImpl(target, vec.calc(i), i);
         }
     }
 
@@ -128,8 +128,7 @@ namespace Physica {
     }
 
     template<Scalar T0, Representation U, Vector V>
-    template<Vector V1>
-    void HubbardVecProd<T0, U, V>::sumHopping(V1& target, FFTType& fft, T factor, StateType psi) const {
+    void HubbardVecProd<T0, U, V>::sumHopping(Vector auto& target, FFTType& fft, T factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -147,8 +146,7 @@ namespace Physica {
     }
 
     template<Scalar T0, Representation U, Vector V>
-    template<Vector V1>
-    void HubbardVecProd<T0, U, V>::dotImpl(V1& target, T factor, size_t index) const {
+    void HubbardVecProd<T0, U, V>::dotImpl(Vector auto& target, T factor, size_t index) const {
         const auto state = getRepr()[index];
         /* On site contribution */ {
             int numRepel = 0;

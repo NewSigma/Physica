@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "MatrixImpl/LValueMatrix.h"
 
 namespace Physica {
     /**
@@ -52,8 +53,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix U>
-        void assign(LValueMatrix<U>& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
@@ -71,8 +71,7 @@ namespace Physica {
             , shift(0) {}
 
     template<Matrix T, bool ColWiseRead>
-    template<Matrix U>
-    void HouseholderSequence<T, ColWiseRead>::assign(LValueMatrix<U>& target) const {
+    void HouseholderSequence<T, ColWiseRead>::assign(Matrix auto& target) const {
         const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getCol());
         assert(shift1 < target.getRow());
 

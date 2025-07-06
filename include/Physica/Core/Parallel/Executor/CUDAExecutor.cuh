@@ -25,9 +25,9 @@
 
 namespace Physica {
     namespace Internal {
-        template<class Functor, int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
-        __global__ void __launch_bounds__(MaxThreadsPerBlock, MinBlocksPerMultiprocessor) kernel(Functor func) {
-            return func();
+        template<int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
+        __global__ void __launch_bounds__(MaxThreadsPerBlock, MinBlocksPerMultiprocessor) kernel(std::invocable auto fn) {
+            return fn();
         }
     }
 
@@ -47,19 +47,19 @@ namespace Physica {
             void wait() { check(cudaStreamSynchronize(stream)); }
         };
     public:
-        template<class Functor, int MaxThreadsPerBlock = Dynamic, int MinBlocksPerMultiprocessor = Dynamic>
-        __host__ __device__ static KernelFuture launch(Functor func, KernelConfig config, size_t sharedMem = 0);
+        template<int MaxThreadsPerBlock = Dynamic, int MinBlocksPerMultiprocessor = Dynamic>
+        __host__ __device__ static KernelFuture launch(std::invocable auto fn, KernelConfig config, size_t sharedMem = 0);
         static inline void wait();
     };
 
-    template<class Functor, int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
-    __host__ __device__ auto CUDAExecutor::launch(Functor func, KernelConfig config, size_t sharedMem) -> KernelFuture {
+    template<int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
+    __host__ __device__ auto CUDAExecutor::launch(std::invocable auto fn, KernelConfig config, size_t sharedMem) -> KernelFuture {
         cudaStream_t stream = nullptr;
         if constexpr (IsHost())
             stream = cudaStream_t(CUDAContext::getInstance().getStream());
         else
             noImpl("No dynamic parallel support");
-        Internal::kernel<Functor, MaxThreadsPerBlock, MinBlocksPerMultiprocessor><<<config.blocks, config.threads, sharedMem, stream>>>(func);
+        Internal::kernel<MaxThreadsPerBlock, MinBlocksPerMultiprocessor><<<config.blocks, config.threads, sharedMem, stream>>>(fn);
         check(cudaGetLastError());
         return KernelFuture(stream);
     }

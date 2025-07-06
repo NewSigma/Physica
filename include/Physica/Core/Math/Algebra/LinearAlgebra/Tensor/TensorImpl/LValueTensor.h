@@ -31,6 +31,7 @@ namespace Physica {
         using typename Base::IndexArray;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
@@ -38,18 +39,17 @@ namespace Physica {
     public:
         ~LValueTensor() = default;
         /* Operators */
-        template<Tensor T>
-        Derived& operator=(const T& other);
+        Derived& operator=(const Tensor auto& other);
 
         template<Scalar U>
         Derived& operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
-        template<Scalar U> void operator+=(const U& x) { Base::getDerived() = Base::getDerived() + x; }
-        template<Scalar U> void operator-=(const U& x) { Base::getDerived() = Base::getDerived() - x; }
-        template<Scalar U> void operator*=(const U& x) { Base::getDerived() = Base::getDerived() * x; }
-        template<Scalar U> void operator/=(const U& x) { Base::getDerived() = Base::getDerived() / x; }
+        void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
+        void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
+        void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
+        void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Tensor X> inline void operator+=(const X& x);
-        template<Tensor X> inline void operator-=(const X& x);
+        void operator+=(const Tensor auto& x);
+        void operator-=(const Tensor auto& x);
 
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
@@ -58,10 +58,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
 
-        template<class Functor>
-        void forND(Functor func);
-        template<class Functor>
-        void forND(Functor func) const;
+        void forND(std::invocable<T&, IndexArray> auto fn);
+        void forND(std::invocable<const T&, IndexArray> auto fn) const;
 
         [[nodiscard]] inline LTensorBlock<Derived> block(Index3D from, Index3D count);
         [[nodiscard]] inline const LTensorBlock<Derived> block(Index3D from, Index3D count) const;

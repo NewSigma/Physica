@@ -86,8 +86,8 @@ namespace Physica {
 
         template<RNG R> inline void random_uniform();
         template<RNG R> inline void random_normal();
-        template<RNG R, class Distribution>
-        inline void random_any(Distribution& dist);
+        template<RNG R>
+        inline void random_any(auto& distribution);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::data;
@@ -104,8 +104,8 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t len);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
+        template<RNG R>
+        [[nodiscard]] inline static This random_any(size_t len, auto& distribution);
         [[nodiscard]] static auto linspace(T from, T to, size_t count);
         /* Friends */
         friend class device_obj<This>;

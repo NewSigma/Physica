@@ -115,7 +115,7 @@ namespace Physica {
                         const VectorType globalPos = elem.toGlobalPos(p);
                         return abs(elem.jacobi(p).det()) * elem.baseFunc(i, p) * initial(globalPos);
                     };
-                    Base::b[row] += ElementType::template gauss_integral<decltype(func), 0>(func);
+                    Base::b[row] += ElementType::template gauss_integral<0>(func);
                 }
             }
         }
@@ -162,7 +162,7 @@ namespace Physica {
                             const ScalarType result3 = -diffuseD * (global_grad_i[1] * global_grad_j[1]);
                             return (result1 + result2 + result3) * abs(elem.jacobi(p).det());
                         };
-                        const ScalarType integral = ElementType::template gauss_integral<decltype(func), 0>(func);
+                        const ScalarType integral = ElementType::template gauss_integral<0>(func);
                         const size_t col = Base::nodeToVar(baseNode);
                         const ScalarType value = stiff.calc(row, col) + integral;
                         stiff.insert(value, row, col);

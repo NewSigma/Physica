@@ -85,8 +85,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
+        void assign(Matrix auto& target) const;
 
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         [[nodiscard]] Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
@@ -96,11 +95,9 @@ namespace Physica {
     };
 
     template<Vector T>
-    template<Matrix M>
-    void TransposeVector<T>::assign(LValueMatrix<M>& target) const {
-        using TargetType = LValueMatrix<M>;
+    void TransposeVector<T>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
-            target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i), TargetType::colFromMajorMinor(0, i));
+            target.refFromMajorMinor(0, i) = calc(target.rowFromMajorMinor(0, i), target.colFromMajorMinor(0, i));
     }
 }
 

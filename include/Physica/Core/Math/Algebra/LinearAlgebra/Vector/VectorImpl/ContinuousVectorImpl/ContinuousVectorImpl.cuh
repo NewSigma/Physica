@@ -33,8 +33,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class U>
-    void device_obj<ContinuousVector<Derived>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<ContinuousVector<Derived>>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+        using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
         if constexpr (Scalar<U>)
             Base::getConstCastDerived().grads() += grad;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,8 +36,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ operator cudaTextureObject_t() const { return texObj; }
         /* Operations */
-        template<Matrix M>
-        void fromMatrix(const M& m);
+        void fromMatrix(const Matrix auto& m);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] cudaResourceDesc getResourceDesc() const noexcept;
@@ -90,8 +89,7 @@ namespace Physica {
     }
 
     template<class T>
-    template<Matrix M>
-    void TextureObject<T>::fromMatrix(const M& m) {
+    void TextureObject<T>::fromMatrix(const Matrix auto& m) {
         const size_t major = m.getMaxMajor();
         const size_t minor = m.getMaxMinor();
         const size_t spitch = minor * sizeof(T);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "Physica/Core/Utils/Container/Array.cuh"
 #include "CellList.h"
 
 namespace Physica {
@@ -44,22 +44,22 @@ namespace Physica {
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Functor> __device__ void forCellInList(Functor func) const;
-        template<class Functor> __device__ void forNeighInRange(Index3D centerCell, Functor func) const;
-        template<class Functor> __device__ void forReducedNeighInRange(Index3D centerCell, Functor func) const;
-        template<class Functor> __device__ inline void forAtomInCell(Index3D cellIndex, Functor func) const;
+        __device__ void forCellInList(std::invocable<Index3D> auto fn) const;
+        __device__ void forNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const;
+        __device__ void forReducedNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const;
+        __device__ void forAtomInCell(Index3D cellIndex, std::invocable<size_t> auto fn) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __device__ const LatticeMatrix& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] __device__ const auto& getLattice() const noexcept { return lattice; }
         [[nodiscard]] __host__ __device__ Index3D getCellGridDim() const noexcept { return cellGridDim; }
         [[nodiscard]] __host__ __device__ size_t getCellGridDimX() const noexcept { return cellGridDim[0]; }
         [[nodiscard]] __host__ __device__ size_t getCellGridDimY() const noexcept { return cellGridDim[1]; }
         [[nodiscard]] __host__ __device__ size_t getCellGridDimZ() const noexcept { return cellGridDim[2]; }
-        [[nodiscard]] __device__ const DeviceIndexArray& getCellAtomMap() const noexcept { return cellAtomMap; }
-        [[nodiscard]] __device__ const DeviceIndexArray& getCellStartOffset() const noexcept { return cellStartOffset; }
+        [[nodiscard]] __device__ const auto& getCellAtomMap() const noexcept { return cellAtomMap; }
+        [[nodiscard]] __device__ const auto& getCellStartOffset() const noexcept { return cellStartOffset; }
         [[nodiscard]] __device__ size_t getNumAtomInCell(size_t cell) const { return cellStartOffset[cell + 1] - cellStartOffset[cell]; }
         [[nodiscard]] __host__ __device__ size_t getNumCell() const noexcept { return cellGridDim[0] * cellGridDim[1] * cellGridDim[2]; }
-        [[nodiscard]] __device__ const DeviceNeighShift& getNeighShifts() const noexcept { return neighShifts; }
+        [[nodiscard]] __device__ const auto& getNeighShifts() const noexcept { return neighShifts; }
         /* Setters */
         void setCellGridDim(Index3D cellGridDim_) { cellGridDim = std::move(cellGridDim_); }
     private:
@@ -72,17 +72,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class Functor>
-    __device__ void device_obj<CellList<T>>::forCellInList(Functor func) const {
+    __device__ void device_obj<CellList<T>>::forCellInList(std::invocable<Index3D> auto fn) const {
         for (size_t x = 0; x < getCellGridDimX(); ++x)
             for (size_t y = 0; y < getCellGridDimY(); ++y)
                 for (size_t z = 0; z < getCellGridDimZ(); ++z)
-                    func(Index3D{x, y, z});
+                    fn(Index3D{x, y, z});
     }
 
     template<Scalar T>
-    template<class Functor>
-    __device__ void device_obj<CellList<T>>::forNeighInRange(Index3D centerCell, Functor func) const {
+    __device__ void device_obj<CellList<T>>::forNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
@@ -102,15 +100,14 @@ namespace Physica {
                         continue;
                     const int indexShiftZ = host_obj::template findNeighbor<2>(cellGridDim, centerZ, deltaZ, index);
                     const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
-                    func(neighShifts[indexShift], index);
+                    fn(neighShifts[indexShift], index);
                 }
             }
         }
     }
 
     template<Scalar T>
-    template<class Functor>
-    __device__ void device_obj<CellList<T>>::forReducedNeighInRange(Index3D centerCell, Functor func) const {
+    __device__ void device_obj<CellList<T>>::forReducedNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
@@ -128,20 +125,19 @@ namespace Physica {
                 for (int deltaZ = ((deltaX == 0 && deltaY == 0) ? 1 : -1); deltaZ <= 1; ++deltaZ) {
                     const int indexShiftZ = host_obj::template findNeighbor<2>(cellGridDim, centerZ, deltaZ, index);
                     const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
-                    func(neighShifts[indexShift], index);
+                    fn(neighShifts[indexShift], index);
                 }
             }
         }
     }
 
     template<Scalar T>
-    template<class Functor>
-    __device__ inline void device_obj<CellList<T>>::forAtomInCell(Index3D cellIndex, Functor func) const {
+    __device__ inline void device_obj<CellList<T>>::forAtomInCell(Index3D cellIndex, std::invocable<size_t> auto fn) const {
         const auto index1D = PeriodIndex3D(cellIndex, cellGridDim).toIndex1D();
         const size_t cellBegin = cellStartOffset[index1D];
         const size_t cellEnd = cellStartOffset[index1D + 1];
         for (size_t i = cellBegin; i < cellEnd; ++i)
-            func(cellAtomMap[i]);
+            fn(cellAtomMap[i]);
     }
 
     template<Scalar T>

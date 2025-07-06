@@ -36,14 +36,12 @@ namespace Physica {
     DenseVector<T, Length, Allocator>::DenseVector(Storage array) noexcept : Storage(std::move(array)) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    template<Vector V>
-    DenseVector<T, Length, Allocator>::DenseVector(const V& v) requires(!CUDA<V>) : Storage(v.getLength()) {
+    DenseVector<T, Length, Allocator>::DenseVector(const Vector auto& v) : Storage(v.getLength()) {
         v.assign(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<Vector V>
-    void DenseVector<T, Length, Allocator>::resize(const V& x) {
+    void DenseVector<T, Length, Allocator>::resize(const Vector auto& x) {
         resize(x.getLength());
     }
 
@@ -80,10 +78,10 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<RNG R, class Distribution>
-    auto DenseVector<T, Length, Allocator>::random_any(size_t len, Distribution& dist) -> This {
+    template<RNG R>
+    auto DenseVector<T, Length, Allocator>::random_any(size_t len, auto& distribution) -> This {
         This result(len);
-        result.random_any<R, decltype(dist)>(dist);
+        result.random_any<R>(distribution);
         return result;
     }
     /**

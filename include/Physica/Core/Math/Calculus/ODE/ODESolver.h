@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,20 +33,16 @@ namespace Physica {
     public:
         ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial);
         /* Operations */
-        template<class Function>
-        void rungeKutta4(Function func);
-        template<class Function>
-        void verlet(Function func, const T& initial1);
-        template<class Function>
-        void degenerate_numerov(Function func, const T& tangent);
+        void rungeKutta4(std::invocable<T, VectorType> auto fn);
+        void verlet(std::invocable<T, T> auto fn, const T& initial1);
+        void degenerate_numerov(std::invocable<T> auto fn, const T& tangent);
         /* Getters */
         [[nodiscard]] const VectorND<T>& getX() const noexcept { return x; }
         [[nodiscard]] const SolutionType& getSolution() const noexcept { return solution; }
         [[nodiscard]] size_t getNumStep() const noexcept { return x.getLength(); }
         /* Static members */
         [[nodiscard]] static size_t getNumStep(T start, T end, T stepSize);
-        template<class Function>
-        static VectorType rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func);
+        static VectorType rungeKutta4_step(T stepSize, T x, const VectorType& sol, std::invocable<T, VectorType> auto fn);
     };
 
     template<Scalar T, size_t Dim>
@@ -61,20 +57,15 @@ namespace Physica {
         auto col = solution.col(0);
         col = initial;
     }
-    /**
-     * \tparam Function
-     * A function object like this
-     * VectorType func(const T& x, const VectorType& y)
-     */
+
     template<Scalar T, size_t Dim>
-    template<class Function>
-    void ODESolver<T, Dim>::rungeKutta4(Function func) {
-        using FunctionResult = std::invoke_result<Function, T, VectorType>::type;
+    void ODESolver<T, Dim>::rungeKutta4(std::invocable<T, VectorType> auto fn) {
+        using FunctionResult = std::invoke_result<decltype(fn), T, VectorType>::type;
         static_assert(FunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         const size_t col_1 = solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             const T& x_i = x[i];
-            solution.asArray()[i + 1] = rungeKutta4_step(stepSize, x_i, solution.asArray()[i], func);
+            solution.asArray()[i + 1] = rungeKutta4_step(stepSize, x_i, solution.asArray()[i], fn);
             x[i + 1] = x_i + stepSize;
         }
     }
@@ -83,23 +74,18 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:524
      */
     template<Scalar T, size_t Dim>
-    template<class Function>
-    ODESolver<T, Dim>::VectorType
-    ODESolver<T, Dim>::rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func) {
-        const VectorType k1 = T(0.5) * stepSize * func(x, sol);
+    auto ODESolver<T, Dim>::rungeKutta4_step(T stepSize, T x, const VectorType& sol, std::invocable<T, VectorType> auto fn) -> VectorType {
+        const VectorType k1 = T(0.5) * stepSize * fn(x, sol);
         const T temp = x + stepSize * T(0.5);
-        const VectorType k2 = stepSize * func(temp, sol + k1);
-        const VectorType k3 = stepSize * func(temp, sol + k2 * T(0.5));
-        const VectorType k4 = T(0.5) * stepSize * func(x + stepSize, sol + k3);
+        const VectorType k2 = stepSize * fn(temp, sol + k1);
+        const VectorType k3 = stepSize * fn(temp, sol + k2 * T(0.5));
+        const VectorType k4 = T(0.5) * stepSize * fn(x + stepSize, sol + k3);
         return sol + (k1 + k2 + k3 + k4) / T(3);
     }
     /**
      * Solve the second order ODE that has form: y''(x) = f(x, y(x)).
      * 
      * A simple and stable method
-     * 
-     * \param func
-     * Function object of f(x, y)
      * 
      * \param initial1
      * Value of y(h)
@@ -108,8 +94,7 @@ namespace Physica {
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:572
      */
     template<Scalar T, size_t Dim>
-    template<class Function>
-    void ODESolver<T, Dim>::verlet(Function func, const T& initial1) {
+    void ODESolver<T, Dim>::verlet(std::invocable<T, T> auto fn, const T& initial1) {
         x[1] = x[0] + stepSize;
         solution(0, 1) = initial1;
         const T stepSize_2 = square(stepSize);
@@ -117,7 +102,7 @@ namespace Physica {
         for (size_t i = 1; i < col_1; ++i) {
             const T& x_i = x[i];
             const T& y_i = solution(0, i);
-            solution(0, i + 1) = -solution(0, i - 1) + y_i * T(2) + func(x_i, y_i) * stepSize_2;
+            solution(0, i + 1) = -solution(0, i - 1) + y_i * T(2) + fn(x_i, y_i) * stepSize_2;
             x[i + 1] = x_i + stepSize;
         }
     }
@@ -136,34 +121,33 @@ namespace Physica {
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:573
      */
     template<Scalar T, size_t Dim>
-    template<class Function>
-    void ODESolver<T, Dim>::degenerate_numerov(Function func, const T& tangent) {
+    void ODESolver<T, Dim>::degenerate_numerov(std::invocable<T> auto fn, const T& tangent) {
         const T x0 = x[0];
         x[1] = x0 + stepSize;
         const T stepSize_2 = square(stepSize);
         const T stepSize_2_12 = stepSize_2 * T(1.0 / 12);
         /* Get y(stepSize) */ {
             const T stepSize_2_6 = stepSize_2 * T(1.0 / 6);
-            const T f_minus_step = func(x0 - stepSize);
+            const T f_minus_step = fn(x0 - stepSize);
             const T temp1 = T(1) - stepSize_2_12 * f_minus_step;
             const T temp2 = T(1) - stepSize_2_6 * f_minus_step;
-            const T numerator = (T(2) + T(5.0 / 6) * stepSize_2 * func(x0)) * temp1 * solution(0, 0) + T(2) * stepSize * tangent * temp2;
-            const T f_step = func(x[1]);
+            const T numerator = (T(2) + T(5.0 / 6) * stepSize_2 * fn(x0)) * temp1 * solution(0, 0) + T(2) * stepSize * tangent * temp2;
+            const T f_step = fn(x[1]);
             const T denominator = (T(1) - stepSize_2_12 * f_step) * temp2 + (T(1) - stepSize_2_6 * f_step) * temp1;
             solution(0, 1) = numerator / denominator;
         }
 
         const size_t col_1 = solution.getCol() - 1;
-        T w_i_minus1 = solution(0, 0) * (T(1) - stepSize_2_12 * func(x[0]));
-        T w_i = solution(0, 1) * (T(1) - stepSize_2_12 * func(x[1]));
+        T w_i_minus1 = solution(0, 0) * (T(1) - stepSize_2_12 * fn(x[0]));
+        T w_i = solution(0, 1) * (T(1) - stepSize_2_12 * fn(x[1]));
         T x_i = x[1];
         for (size_t i = 1; i < col_1; ++i) {
-            const T w_i_plus1 = T(2) * w_i + stepSize_2 * func(x_i) * solution(0, i) - w_i_minus1;
+            const T w_i_plus1 = T(2) * w_i + stepSize_2 * fn(x_i) * solution(0, i) - w_i_minus1;
             w_i_minus1 = w_i;
             w_i = w_i_plus1;
             
             x_i += stepSize;
-            const T factor = T(1) - stepSize_2_12 * func(x_i);
+            const T factor = T(1) - stepSize_2_12 * fn(x_i);
             solution(0, i + 1) = w_i / factor;
             x[i + 1] = x_i;
         }

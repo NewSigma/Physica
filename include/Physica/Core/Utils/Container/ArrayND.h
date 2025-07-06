@@ -73,10 +73,8 @@ namespace Physica {
         [[nodiscard]] size_t toIndex1D(const IndexArray& indices) const noexcept;
         [[nodiscard]] IndexArray toIndexND(size_t index) const noexcept;
 
-        template<class Functor>
-        void forND(Functor func);
-        template<class Functor>
-        void forND(Functor func) const;
+        void forND(std::invocable<T&, IndexArray> auto func);
+        void forND(std::invocable<const T&, IndexArray> auto func) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */

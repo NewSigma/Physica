@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,13 +34,13 @@ namespace Physica {
     }
 
     template<typename T>
-    inline T check(llvm::Expected<T>&& E) {
+    T check(llvm::Expected<T>&& E) {
         check(E.takeError());
         return T(std::move(*E));
     }
 
     template<typename T>
-    inline T& check(llvm::Expected<T&>&& E) {
+    T& check(llvm::Expected<T&>&& E) {
         check(E.takeError());
         return *E;
     }

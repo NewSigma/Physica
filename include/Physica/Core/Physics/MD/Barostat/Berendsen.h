@@ -51,8 +51,8 @@ namespace Physica {
         Berendsen& operator=(Berendsen obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] LatticeMatrix makeDecayMatrix(const LatticeMatrix& stress, T pressPerDOF);
-        template<class MDType, class ForceModel>
-        void npt_step(MDType& rpmd, const LatticeMatrix& stress, T deltaT);
+        template<class ForceModel>
+        void npt_step(auto& rpmd, const LatticeMatrix& stress, T deltaT);
         void swap(Berendsen& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLastStress() const noexcept { return lastStress; }
@@ -60,10 +60,8 @@ namespace Physica {
         void setTemperature(T tempT_) { tempT = std::move(tempT_); }
         /* Static members */
         [[nodiscard]] static LatticeMatrix makeScaleMatrix(const InvLatticeMatrix& invLatt, const LatticeMatrix& deltaLattice);
-        template<class MDType>
-        static void scaleRPMD(MDType& rpmd, const LatticeMatrix& deltaLattice);
-        template<class Integrator>
-        [[nodiscard]] static LatticeMatrix makeDeltaLattice(Integrator kernel);
+        static void scaleRPMD(auto& rpmd, const LatticeMatrix& deltaLattice);
+        [[nodiscard]] static LatticeMatrix makeDeltaLattice(std::invocable<size_t, size_t> auto kernel);
     };
 
     template<Scalar T, size_t NumReplica, BaroType Type>
@@ -103,8 +101,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumReplica, BaroType Type>
-    template<class MDType, class ForceModel>
-    void Berendsen<T, NumReplica, Type>::npt_step(MDType& rpmd, const LatticeMatrix& stress, T deltaT) {
+    template<class ForceModel>
+    void Berendsen<T, NumReplica, Type>::npt_step(auto& rpmd, const LatticeMatrix& stress, T deltaT) {
         const T pressPerDOF = (tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
         const auto decayMatrix = makeDecayMatrix(stress, pressPerDOF);
         scaleRPMD(rpmd, makeDeltaLattice([&, deltaT](size_t r, size_t c) -> T {
@@ -144,8 +142,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumReplica, BaroType Type>
-    template<class MDType>
-    void Berendsen<T, NumReplica, Type>::scaleRPMD(MDType& rpmd, const LatticeMatrix& deltaLattice) {
+    void Berendsen<T, NumReplica, Type>::scaleRPMD(auto& rpmd, const LatticeMatrix& deltaLattice) {
         const size_t numReplica = rpmd.getNumReplica();
         const size_t numParticle = rpmd.getNumParticle();
         const size_t dof = rpmd.getDOF();
@@ -170,10 +167,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumReplica, BaroType Type>
-    template<class Integrator>
-    auto Berendsen<T, NumReplica, Type>::makeDeltaLattice(Integrator kernel) -> LatticeMatrix {
-        using ResultType = std::invoke_result<Integrator, size_t, size_t>::type;
-        static_assert(std::is_same<T, ResultType>::value, "[Error]: Invalid integrator");
+    auto Berendsen<T, NumReplica, Type>::makeDeltaLattice(std::invocable<size_t, size_t> auto kernel) -> LatticeMatrix {
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (Type == BaroType::Anisotropic) {
             for (size_t r = 0; r < Dim; ++r)

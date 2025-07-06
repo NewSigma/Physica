@@ -38,10 +38,8 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void decomp(MatrixType A);
-        template<Vector V>
-        DenseVector<T, Order> solve(const V& b) const;
-        template<Matrix M>
-        MatrixB solve(const M& b);
+        DenseVector<T, Order> solve(const Vector auto& b) const;
+        MatrixB solve(const Matrix auto& b);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return lu.getOrder(); }
@@ -56,8 +54,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Order>
-    template<Vector V>
-    DenseVector<T, Order> LUSolver<T, Option, Order>::solve(const V& b) const {
+    DenseVector<T, Order> LUSolver<T, Option, Order>::solve(const Vector auto& b) const {
         const size_t order = getOrder();
         assert(b.getLength() == order);
         DenseVector<T, Order> result(order);
@@ -80,8 +77,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Order>
-    template<Matrix M>
-    auto LUSolver<T, Option, Order>::solve(const M& b) -> MatrixB {
+    auto LUSolver<T, Option, Order>::solve(const Matrix auto& b) -> MatrixB {
         assert(b.getRow() == getOrder());
         MatrixB result(getOrder(), b.getCol());
         for (size_t i = 0; i < b.getCol(); ++i)

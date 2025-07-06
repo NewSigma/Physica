@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,10 +25,10 @@
 using namespace Physica;
 using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
-template<Matrix T>
-bool eigenTest(const T& mat, double precision) {
-    using ScalarType = T::ScalarType;
-    using VectorType = DenseVector<ScalarType, T::RowAtCompile>;
+template<Matrix M>
+bool eigenTest(const M& mat, double precision) {
+    using ScalarType = M::ScalarType;
+    using VectorType = DenseVector<ScalarType, M::RowAtCompile>;
     using EigenvectorMatrix = SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
     auto solver = SymmEigenSolver<ScalarType>(mat, true);

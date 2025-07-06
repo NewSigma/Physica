@@ -43,8 +43,7 @@ namespace Physica {
         using VectorBase::operator=;
         using VectorBase::operator[];
         /* Operations */
-        template<Vector T>
-        inline void transform(const T& data);
+        void transform(const Vector auto& data);
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
@@ -65,8 +64,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector T>
-    inline void FFTRSpace<Derived, 1>::transform(const T& data) {
+    void FFTRSpace<Derived, 1>::transform(const Vector auto& data) {
         assert(data.getLength() == getLength());
         *this = data;
         Base::getDerived().transform();
@@ -106,8 +104,7 @@ namespace Physica {
         using MatrixBase::operator=;
         using MatrixBase::operator();
         /* Operations */
-        template<Matrix T>
-        inline void transform(const T& data);
+        void transform(const Matrix auto& data);
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
@@ -128,8 +125,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix T>
-    inline void FFTRSpace<Derived, 2>::transform(const T& data) {
+    void FFTRSpace<Derived, 2>::transform(const Matrix auto& data) {
         assert(data.getRow() == getRow());
         assert(data.getCol() == getCol());
         *this = data;
@@ -174,7 +170,7 @@ namespace Physica {
         using TensorBase::operator=;
         using TensorBase::operator();
         /* Operations */
-        template<Tensor T> inline void transform(const LValueTensor<T>& data);
+        void transform(const Tensor auto& data);
         inline void resize([[maybe_unused]] Index3D size);
         /* Getters */
         [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getRSpaceSize(); }
@@ -199,8 +195,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Tensor T>
-    inline void FFTRSpace<Derived, 3>::transform(const LValueTensor<T>& data) {
+    void FFTRSpace<Derived, 3>::transform(const Tensor auto& data) {
         assert(data.getDimX() == getDimX());
         assert(data.getDimY() == getDimY());
         assert(data.getDimZ() == getDimZ());

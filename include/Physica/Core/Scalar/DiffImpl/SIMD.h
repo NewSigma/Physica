@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -65,8 +65,7 @@ namespace Physica {
         SIMD() = default;
         explicit SIMD(int x);
         explicit SIMD(double x);
-        template<Scalar U>
-        explicit SIMD(U x);
+        explicit SIMD(Scalar auto x);
         SIMD(ScalarType x, int count);
         explicit SIMD(ValueType values_);
         SIMD(ValueType values_, GradType grads_);
@@ -85,8 +84,7 @@ namespace Physica {
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator*(const SIMD& x) const;
         [[nodiscard]] inline SIMD operator*(const ScalarType& x) const;
-        template<Scalar U>
-        [[nodiscard]] inline SIMD operator*(const U& x) const;
+        [[nodiscard]] inline SIMD operator*(const Scalar auto& x) const;
         [[nodiscard]] inline SIMD operator/(const SIMD& x) const;
         [[nodiscard]] inline SIMD operator-() const;
         void operator+=(const SIMD& x) { *this = *this + x; }

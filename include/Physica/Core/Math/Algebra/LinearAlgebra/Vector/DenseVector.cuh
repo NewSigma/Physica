@@ -51,8 +51,7 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        template<Vector V>
-        void resize(const V& x);
+        void resize(const Vector auto& x);
         using Storage::resize;
 
         [[nodiscard]] inline host_obj toHost() const;
@@ -66,8 +65,8 @@ namespace Physica {
         inline void random_uniform();
         template<RNG R>
         inline void random_normal();
-        template<RNG R, class Distribution>
-        inline void random_any(Distribution& dist);
+        template<RNG R>
+        inline void random_any(auto& distribution);
 
         using Base::read;
         using Base::write;
@@ -82,8 +81,8 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t len);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t len);
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
+        template<RNG R>
+        [[nodiscard]] static This random_any(size_t len, auto& distribution);
     };
 
     template<Scalar T, size_t Length, class Allocator>

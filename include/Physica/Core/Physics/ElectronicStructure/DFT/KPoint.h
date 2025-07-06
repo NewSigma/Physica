@@ -47,8 +47,7 @@ namespace Physica {
         [[nodiscard]] const T& getWeight() const noexcept { return weight; }
         [[nodiscard]] inline const BandEnergy& getBandEnergy(SpinState spin) const noexcept;
         /* Setters */
-        template<Vector V>
-        void setBandEnergy(SpinState spin, const V& v);
+        void setBandEnergy(SpinState spin, const Vector auto& v);
     };
 
     template<Scalar T, size_t NumBand, bool isSpinPolarized>
@@ -76,8 +75,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumBand, bool isSpinPolarized>
-    template<Vector V>
-    void KPoint<T, NumBand, isSpinPolarized>::setBandEnergy(SpinState spin, const V& v) {
+    void KPoint<T, NumBand, isSpinPolarized>::setBandEnergy(SpinState spin, const Vector auto& v) {
         BandEnergy& energy = bandE[isSpinPolarized ? int(spin) : 0];
         const size_t length = energy.getLength();
         for (size_t i = 0; i < length; ++i)

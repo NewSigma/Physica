@@ -45,8 +45,8 @@ namespace Physica {
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result) const;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         using Base::force_long;
@@ -86,8 +86,8 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<Vector V, ExecutePolicy P>
-    void Hamonic<T, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
+    template<ExecutePolicy P>
+    void Hamonic<T, Dim>::forceAsync(const MDCellType& cell, Vector auto& result) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         result = T(0);
         for (size_t i = 0; i < getNumParticle(); ++i) {

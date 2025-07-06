@@ -36,16 +36,13 @@ namespace Physica {
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(initializer_list list) : Storage(std::move(list)) {}
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<Matrix M>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const M& mat)
+    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const Matrix auto& mat)
             : DenseMatrix(mat.getRow(), mat.getCol()) {
         mat.assign(*this);
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<Vector V>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const V& vec)
-            : DenseMatrix(vec.getLength(), 1) {
+    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const Vector auto& vec) : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
         vec.assign(col);
     }
@@ -140,16 +137,15 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<RNG R, class Distribution>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(size_t row, size_t col, Distribution& dist) -> This {
+    template<RNG R>
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(size_t row, size_t col, auto& distribution) -> This {
         This result(row, col);
-        result.template random_any<R, Distribution>(dist);
+        result.template random_any<R>(distribution);
         return result;
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<Vector V>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::meshgrid(const V& vecX, const V& vecY) -> std::pair<This, This> {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This> {
         using MatrixType = DenseMatrix<T, Option, Row, Col, Allocator>;
         const size_t row = vecY.getLength();
         const size_t col = vecX.getLength();

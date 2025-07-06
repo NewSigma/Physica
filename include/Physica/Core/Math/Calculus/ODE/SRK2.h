@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,8 +23,6 @@
 namespace Physica {
     /**
      * Apply to wight noise only
-     * Defination of RandomFunc:
-     * VectorType RandomFunc(T x, VectorType y);
      * 
      * Reference:
      * [1] Phys. Rev. A 45, 600 (1992); https://doi.org/10.1103/PhysRevA.45.600
@@ -37,37 +35,38 @@ namespace Physica {
     public:
         using Base::Base;
         ~SRK2() = default;
-
-        template<class Function, class RandomFunc>
-        void solve(Function func, RandomFunc random);
-
-        template<class Function, class RandomFunc>
-        static inline void step(T stepSize, T& x, VectorType& sol, Function func, RandomFunc random);
+        /* Operations */
+        void solve(std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto  random);
+        /* Static members */
+        static inline void step(T stepSize, T& x, VectorType& sol, std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto random);
     };
 
     template<Scalar T, size_t Dim>
-    template<class Function, class RandomFunc>
-    void SRK2<T, Dim>::solve(Function func, RandomFunc random) {
+    void SRK2<T, Dim>::solve(std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto  random) {
         const size_t col_1 = Base::solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             T temp = Base::x[i];
             Base::solution.asArray()[i + 1] = Base::solution.col(i);
-            step(Base::stepSize, temp, Base::solution.asArray()[i + 1], func, random);
+            step(Base::stepSize, temp, Base::solution.asArray()[i + 1], fn, random);
             Base::x[i + 1] = temp;
         }
     }
 
     template<Scalar T, size_t Dim>
-    template<class Function, class RandomFunc>
-    inline void SRK2<T, Dim>::step(T stepSize, T& x, VectorType& sol, Function func, RandomFunc random) {
-        using FunctionResult = std::invoke_result<Function, T, VectorType>::type;
-        using RandFunctionResult = std::invoke_result<RandomFunc, T, VectorType>::type;
+    inline void SRK2<T, Dim>::step(
+            T stepSize,
+            T& x,
+            VectorType& sol,
+            std::invocable<T, VectorType> auto fn,
+            std::invocable<T, VectorType> auto random) {
+        using FunctionResult = std::invoke_result<decltype(fn), T, VectorType>::type;
+        using RandFunctionResult = std::invoke_result<decltype(random), T, VectorType>::type;
         static_assert(FunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         static_assert(RandFunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         const VectorType randVec = random(x, sol);
-        VectorType term1 = func(x, sol);
+        VectorType term1 = fn(x, sol);
         x += stepSize;
-        VectorType term2 = func(x, sol + stepSize * term1 + randVec);
+        VectorType term2 = fn(x, sol + stepSize * term1 + randVec);
         sol += (term1 + term2) * (stepSize * T(0.5)) + randVec;
     }
 }

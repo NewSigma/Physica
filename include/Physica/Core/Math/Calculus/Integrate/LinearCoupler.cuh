@@ -47,8 +47,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<DNN Net>
-        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(Net& nn, device_obj<MatrixND<Tv>>& x) const;
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(DNN auto& nn, device_obj<MatrixND<Tv>>& x) const;
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& x2) const;
 
         template<RNG R>
@@ -76,8 +75,7 @@ namespace Physica {
             : device_obj(other.getDim(), other.getNumBin()) {}
 
     template<Scalar T>
-    template<DNN Net>
-    auto device_obj<LinearCoupler<T>>::forward(Net& nn, device_obj<MatrixND<Tv>>& x) const -> CoDiff<device_obj<VectorND<T>>> {
+    auto device_obj<LinearCoupler<T>>::forward(DNN auto& nn, device_obj<MatrixND<Tv>>& x) const -> CoDiff<device_obj<VectorND<T>>> {
         assert(getDim() == x.getRow() && "[Error]: Dimensions do not match");
         device_obj<MatrixND<Tv>> xA = hadamard(x, mask);
         device_obj<MatrixND<Tv>> xB = x - xA;
@@ -144,7 +142,7 @@ namespace Physica {
         };
         auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
         config.blocks.y = getDim();
-        CUDAExecutor::launch<decltype(fwd), device_obj<VectorND<T>>::MaxThreadPerBlock>(fwd, config);
+        CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadPerBlock>(fwd, config);
 
         auto expr = ln_elem(deltas);
         CoDiff<device_obj<VectorND<T>>> lnJs = expr.sum_cols();
@@ -177,7 +175,7 @@ namespace Physica {
                 row.reverse(-g / Tv(numBin));
                 row[index].reverse(g);
             };
-            CUDAExecutor::launch<decltype(func), device_obj<VectorND<T>>::MaxThreadPerBlock>(func, config);
+            CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadPerBlock>(func, config);
         }
         else
             co_return std::move(lnJs);

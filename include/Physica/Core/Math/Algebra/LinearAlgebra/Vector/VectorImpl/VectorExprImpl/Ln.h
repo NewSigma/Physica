@@ -47,18 +47,16 @@ namespace Physica {
             return ln(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
         }
 
-        template<class U>
-        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
-    template<class U>
-    void VectorExpr<ExprType::Ln, V>::reverse(const U& grad_) const noexcept requires(isReverseDiff){
+    void VectorExpr<ExprType::Ln, V>::reverse(const auto& grad_) const noexcept requires(isReverseDiff){
         const auto& expr = Base::getExpr();
-        if constexpr (Scalar<U>)
+        if constexpr (Scalar<decltype(grad_)>)
             expr.reverse(grad_.value() / expr.values());
         else {
-            static_assert(Vector<U>, "[Error]: Unexpected type");
+            static_assert(Vector<decltype(grad_)>, "[Error]: Unexpected type");
             expr.reverse(divide(grad_.values(), expr.values()));
         }
     }

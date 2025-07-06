@@ -36,7 +36,7 @@ namespace Physica {
         const device_obj<TrigUpper<M1>>& mat1;
         const device_obj<M2>& mat2;
     public:
-        device_obj(const device_obj<TrigUpper<M1>>& inv, const device_obj<M2>& mat2_);
+        device_obj(const device_obj<TrigUpper<M1>>& mat1_, const device_obj<M2>& mat2_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -44,8 +44,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(M& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat2.getCol(); }
@@ -57,8 +56,8 @@ namespace Physica {
     device_obj<GEMM<TrigUpper<M1>, M2>>::device_obj(const device_obj<TrigUpper<M1>>& mat1_, const device_obj<M2>& mat2_) : mat1(mat1_), mat2(mat2_) {}
 
     template<Matrix M1, Matrix M2>
-    template<Matrix M>
-    void device_obj<GEMM<TrigUpper<M1>, M2>>::assign(M& target) const {
+    void device_obj<GEMM<TrigUpper<M1>, M2>>::assign(Matrix auto& target) const {
+        using M = std::remove_cvref_t<decltype(target)>;
         constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = CUBLAS_SIDE_LEFT;
         constexpr auto Uplo = CUBLAS_FILL_MODE_UPPER;

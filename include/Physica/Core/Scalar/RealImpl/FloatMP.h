@@ -74,8 +74,7 @@ namespace Physica {
         Real(int length_, int power_);
         Real(std::initializer_list<MPUnit> bytes_, int length_, int power_);
         Real(SignedMPUnit unit);
-        template<std::integral T>
-        Real(T x);
+        Real(std::integral auto x);
         Real(double d) noexcept;
         Real(const Integer& i);
         Real(const Rational& r);
@@ -148,8 +147,7 @@ namespace Physica {
         static bool cutLength(Real<FloatMP>& s);
     };
 
-    template<std::integral T>
-    Real<FloatMP>::Real(T x) : Real(SignedMPUnit(x)) {
+    Real<FloatMP>::Real(std::integral auto x) : Real(SignedMPUnit(x)) {
         assert(x <= std::numeric_limits<SignedMPUnit>::max());
     }
 

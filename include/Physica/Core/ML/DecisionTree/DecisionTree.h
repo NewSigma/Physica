@@ -78,13 +78,12 @@ namespace Physica {
         static T checkStopRecursion(const Dataset& dataset,
                                              const std::forward_list<size_t>& availableSample,
                                              const std::forward_list<size_t>& availableFeature);
-        template<class TrainFunctor>
         static DecisionTree doRecursion(const Dataset& dataset,
                                         const std::forward_list<size_t>& availableSample,
                                         const std::forward_list<size_t>& availableFeature,
                                         size_t featureId,
                                         T splitPoint,
-                                        TrainFunctor functor);
+                                        std::invocable<const Dataset&, std::forward_list<size_t>, std::forward_list<size_t>&> auto functor);
         static DecisionTree train(const Dataset& dataset,
                                   std::forward_list<size_t> availableSample,
                                   std::forward_list<size_t> availableFeature);

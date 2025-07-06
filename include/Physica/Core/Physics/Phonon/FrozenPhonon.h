@@ -49,8 +49,7 @@ namespace Physica {
         /* Operators */
         FrozenPhonon& operator=(FrozenPhonon obj) noexcept;
         /* Operations */
-        template<class ForceModel>
-        [[nodiscard]] RSpaceFCGrid makeForceConstants(ForceModel& model) const;
+        [[nodiscard]] RSpaceFCGrid makeForceConstants(auto& forceModel) const;
         template<class ForceModel>
         void optimize(const ForceModel& unitCellModel,
                       const ForceModel& superCellModel,
@@ -84,8 +83,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class ForceModel>
-    auto FrozenPhonon<T>::makeForceConstants(ForceModel& model) const -> RSpaceFCGrid {
+    auto FrozenPhonon<T>::makeForceConstants(auto& forceModel) const -> RSpaceFCGrid {
         const size_t unitCellDOF = getUnitCellDOF();
         const T factor = -reciprocal(displace);
         const Index3D superSize = Base::getSuperSize();
@@ -98,7 +96,7 @@ namespace Physica {
             const T copy = toDisplace;
             toDisplace += displace;
             VectorND<T> forceConst =
-                    model.template force<Sequential>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
+                    forceModel.template force<Sequential>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
             toDisplace = copy;
 
             for (size_t cell = 0; cell < getNumCell(); ++cell) {

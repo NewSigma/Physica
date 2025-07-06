@@ -42,7 +42,7 @@ namespace Physica {
                     target(r, c) = source.calc(r, c);
                 }
             };
-            CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, target.makeKernelConfig());
+            CUDAExecutor::launch<MaxThreadPerBlock>(func, target.makeKernelConfig());
         }
         else {
             const size_t maxMajor = target.getMaxMajor();
@@ -58,8 +58,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(M& target) const requires(CUDA<M>) {
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>) {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
         host_obj::assign_check(target);
@@ -242,8 +241,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M1, Matrix M2>
-    void device_obj<RValueMatrix<Derived>>::reverse(const M1&, const M2& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<RValueMatrix<Derived>>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept requires(isReverseDiff) {
         Base::getDerived().reverse(grad);
     }
 

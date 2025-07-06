@@ -24,8 +24,7 @@
 
 namespace Physica {
     template<class Derived>
-    template<Vector V>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const requires(CUDA<V>) {
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto& target) const requires(CUDA<decltype(target)>) {
         assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
         host_obj::assign_check(target);
         if (IsHost()) {
@@ -37,10 +36,10 @@ namespace Physica {
                 if (index < length)
                     target[index] = source.calc(index);
             };
-            CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, makeKernelConfig());
+            CUDAExecutor::launch<MaxThreadPerBlock>(func, makeKernelConfig());
         }
         else
-            assign_impl<V>(target);
+            assign_impl(target);
     }
 
     template<class Derived>
@@ -65,8 +64,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V1, Vector V2>
-    void device_obj<RValueVector<Derived>>::reverse(const V1&, const V2& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<RValueVector<Derived>>::reverse(const Vector auto&, const Vector auto& grad) const noexcept requires(isReverseDiff) {
         Base::getDerived().reverse(grad);
     }
 
@@ -130,7 +128,7 @@ namespace Physica {
                 }
                 buffer[threadIdx.x] = local;
             };
-            CUDAExecutor::launch<decltype(func), MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
+            CUDAExecutor::launch<MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
 
             if constexpr (IsHost()) { // To silence warnings
                 CUDAExecutor::wait();
@@ -214,8 +212,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V>
-    __device__ inline auto device_obj<RValueVector<Derived>>::crossProduct(const device_obj<V>& v) const noexcept {
+    __device__ auto device_obj<RValueVector<Derived>>::crossProduct(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>) {
         return device_obj<CrossProduct<Derived, V>>(*this, v);
     }
 

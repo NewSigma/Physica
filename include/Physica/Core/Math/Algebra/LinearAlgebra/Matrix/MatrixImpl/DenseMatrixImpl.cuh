@@ -103,9 +103,9 @@ namespace Physica {
     }
 
     template<tparams>
-    template<RNG R, class Distribution>
-    void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(Distribution& dist) {
-        host_obj::template random_any<R, Distribution>(getRow(), getCol(), dist).toDeviceAsync(*this);
+    template<RNG R>
+    void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(auto& distribution) {
+        host_obj::template random_any<R>(getRow(), getCol(), distribution).toDeviceAsync(*this);
     }
 
     template<tparams>
@@ -130,10 +130,10 @@ namespace Physica {
     }
 
     template<tparams>
-    template<RNG R, class Distribution>
-    inline auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(size_t row, size_t col, Distribution& dist) -> This {
+    template<RNG R>
+    inline auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(size_t row, size_t col, auto& distribution) -> This {
         This result(row, col);
-        result.template random_any<R, Distribution>(dist);
+        result.template random_any<R>(distribution);
         return result;
     }
 

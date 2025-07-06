@@ -33,8 +33,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign(V1& v) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign(Vector auto& v) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -44,13 +44,12 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
-        template<class U>
-        void reverse(const U& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
-    template<Vector V1, ExecutePolicy P>
-    inline void VectorExpr<ExprType::Minus, V>::assign(V1& v) const {
+    template<ExecutePolicy P>
+    inline void VectorExpr<ExprType::Minus, V>::assign(Vector auto& v) const {
         const auto& expr = Base::getExpr();
         constexpr bool IsBinaryExpr = requires { expr.getLHS() * expr.getRHS(); };
 
@@ -60,15 +59,15 @@ namespace Physica {
             constexpr bool IsMatVecProd = Matrix<decltype(lhs)> && Vector<decltype(rhs)>;
             if constexpr (IsMatVecProd) {
                 if constexpr (Traits<std::remove_cvref_t<decltype(lhs)>>::FastAssign)
-                    ((-lhs) * rhs).template assign<V1, P>(v);
+                    ((-lhs) * rhs).template assign<P>(v);
                 else
-                    (lhs * (-rhs)).template assign<V1, P>(v);
+                    (lhs * (-rhs)).template assign<P>(v);
             }
             else
-                Base::template assign<V1, P>(v);
+                Base::template assign<P>(v);
         }
         else
-            Base::template assign<V1, P>(v);
+            Base::template assign<P>(v);
     }
 
     template<Vector V>
@@ -94,8 +93,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    template<class U>
-    void VectorExpr<ExprType::Minus, V>::reverse(const U& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Minus, V>::reverse(const auto& grad_) const noexcept requires(isReverseDiff) {
         Base::getExpr().reverse(-grad_);
     }
 

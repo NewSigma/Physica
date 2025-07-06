@@ -33,16 +33,15 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        inline void assign(V1& v) const;
+        template<ExecutePolicy P = Sequential>
+        inline void assign(Vector auto& v) const;
 
         [[nodiscard]] T calc(size_t i) const { return Base::getExpr().softmax(i); }
         [[nodiscard]] Tv calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
         [[nodiscard]] T calc(size_t i, T lnsumexp) const;
         [[nodiscard]] Tv calc_value(size_t i, Tv lnsumexp) const;
 
-        template<Vector V1, Vector V2>
-        void reverse(const V1& y, const V2& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& y, const Vector auto& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
@@ -56,16 +55,15 @@ namespace Physica {
     }
 
     template<Vector V>
-    template<Vector V1, ExecutePolicy P>
-    inline void VectorExpr<ExprType::Softmax, V>::assign(V1& v) const {
+    template<ExecutePolicy P>
+    inline void VectorExpr<ExprType::Softmax, V>::assign(Vector auto& v) const {
         const auto& expr = Base::getExpr();
         const T factor = expr.lnSumExp();
         v = exp(expr - factor);
     }
 
     template<Vector V>
-    template<Vector V1, Vector V2>
-    void VectorExpr<ExprType::Softmax, V>::reverse(const V1& y, const V2& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Softmax, V>::reverse(const Vector auto& y, const Vector auto& grad_) const noexcept requires(isReverseDiff) {
         const auto& grad = grad_.values();
         Base::getExpr().reverse(hadamard(y, grad) - (y * grad) * y);
     }

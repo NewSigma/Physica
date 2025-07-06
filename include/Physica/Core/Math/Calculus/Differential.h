@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,37 +28,29 @@ namespace Physica {
     template<Scalar T>
     class Differential {
     public:
-        template<class Function>
-        [[nodiscard]] static T forward(Function func, T x, T step);
-        template<class Function>
-        [[nodiscard]] static T backward(Function func, T x, T step);
-        template<class Function>
-        [[nodiscard]] static T doublePoint(Function func, T x, T step);
-        template<class Function>
-        [[nodiscard]] static T ridders(Function func, T x, T step);
+        [[nodiscard]] static T forward(std::invocable<T> auto fn, T x, T step);
+        [[nodiscard]] static T backward(std::invocable<T> auto fn, T x, T step);
+        [[nodiscard]] static T doublePoint(std::invocable<T> auto fn, T x, T step);
+        [[nodiscard]] static T ridders(std::invocable<T> auto fn, T x, T step);
     };
 
     template<Scalar T>
-    template<class Function>
-    T Differential<T>::forward(Function func, T x, T step) {
-        return (func(x + step) - func(x)) / step;
+    T Differential<T>::forward(std::invocable<T> auto fn, T x, T step) {
+        return (fn(x + step) - fn(x)) / step;
     }
 
     template<Scalar T>
-    template<class Function>
-    T Differential<T>::backward(Function func, T x, T step) {
-        return (func(x) - func(x - step)) / step;
+    T Differential<T>::backward(std::invocable<T> auto fn, T x, T step) {
+        return (fn(x) - fn(x - step)) / step;
     }
 
     template<Scalar T>
-    template<class Function>
-    T Differential<T>::doublePoint(Function func, T x, T step) {
-        return (func(x + step) - func(x - step)) / (step  * T(2));
+    T Differential<T>::doublePoint(std::invocable<T> auto fn, T x, T step) {
+        return (fn(x + step) - fn(x - step)) / (step  * T(2));
     }
 
     template<Scalar T>
-    template<class Function>
-    T Differential<T>::ridders(Function func, T x, T step) {
+    T Differential<T>::ridders(std::invocable<T> auto fn, T x, T step) {
         constexpr static size_t TableSize = 10;
         constexpr static double Factor = 1.4;
         constexpr static double RepFactor = 1 / Factor;
@@ -67,14 +59,14 @@ namespace Physica {
 
         assert(step.isPositive());
         DenseSymmMatrix<T, TableSize> table(TableSize);
-        table(0, 0) = doublePoint(func, x, step);
+        table(0, 0) = doublePoint(fn, x, step);
         T step_now = step;
         T error = std::numeric_limits<T>::max();
         T result{};
         
         for (size_t i = 1; i < TableSize; ++i) {
             step_now *= T(RepFactor);
-            table(0, i) = doublePoint(func, x, step_now);
+            table(0, i) = doublePoint(fn, x, step_now);
 
             T factor2 = Factor2;
             for (size_t j = 1; j <= i; ++j) {

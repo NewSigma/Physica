@@ -84,10 +84,8 @@ namespace Physica {
         template<Matrix M>
         [[nodiscard]] auto operator*(const M& mat) const noexcept requires(((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>);
         /* Operations */
-        template<Matrix M>
-        void assign(M& target) const;
-        template<Matrix M>
-        void assign_add(M& target) const;
+        void assign(Matrix auto& target) const;
+        void assign_add(Matrix auto& target) const;
 
         [[nodiscard]] inline auto row(size_t r) noexcept;
         [[nodiscard]] inline const auto row(size_t r) const noexcept;
@@ -129,8 +127,7 @@ namespace Physica {
         [[nodiscard]] auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
         [[nodiscard]] inline auto calcFromMajorMinor(size_t major, size_t minor) const;
-        template<Matrix M1, Matrix M2>
-        void reverse(const M1& y, const M2& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] Tr norm1() const;
         template<ExecutePolicy P = Sequential>
@@ -191,14 +188,23 @@ namespace Physica {
         auto grads_impl() const noexcept;
     };
 
-    template<Matrix T1, Matrix T2>
-    bool matrixNear(const T1& m1, const T2& m2, double precision);
+    bool matrixNear(const Matrix auto& m1, const Matrix auto& m2, double precision);
 
     template<Matrix T>
-    bool operator==(const T& m1, const T& m2);
+    bool operator==(const T& m1, const T& m2) {
+        if (m1.getRow() != m2.getRow())
+            return false;
+        if (m1.getCol() != m2.getCol())
+            return false;
+        for (size_t major = 0; major < m1.getMaxMajor(); ++major)
+            for (size_t minor = 0; minor < m1.getMaxMinor(); ++minor)
+                if (m1.calcFromMajorMinor(major, minor) != m2.calcFromMajorMinor(major, minor))
+                    return false;
+        return true;
+    }
 
     template<Matrix T>
-    inline bool operator!=(const T& m1, const T& m2) { return !(m1 == m2); }
+    bool operator!=(const T& m1, const T& m2) { return !(m1 == m2); }
 }
 
 namespace Physica {

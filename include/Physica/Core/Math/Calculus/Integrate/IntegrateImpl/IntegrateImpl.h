@@ -30,12 +30,11 @@ namespace Physica {
             : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<Scalar T>
-    template<class Function>
-    T Integrate<IntegrateMethod::Rectangular, T, 1>::solve(Function func) const {
+    T Integrate<IntegrateMethod::Rectangular, T, 1>::solve(std::invocable<T> auto fn) const {
         T result = 0;
         T start(Base::from()[0]);
         while(start < Base::to()[0]) {
-            result += func(start);
+            result += fn(start);
             start += stepSize;
         }
         result *= stepSize;
@@ -47,14 +46,13 @@ namespace Physica {
             : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<Scalar T>
-    template<class Function>
-    T Integrate<IntegrateMethod::Ladder, T, 1>::solve(Function func) const {
+    T Integrate<IntegrateMethod::Ladder, T, 1>::solve(std::invocable<T> auto fn) const {
         const T& from = Base::from()[0];
         const T& to = Base::to()[0];
-        T result = ((func(from) + func(to)) >> 1);
+        T result = ((fn(from) + fn(to)) >> 1);
         T start(from + stepSize);
         while(start < to) {
-            result += func(start);
+            result += fn(start);
             start += stepSize;
         }
         result *= stepSize;
@@ -66,11 +64,10 @@ namespace Physica {
             : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<Scalar T>
-    template<class Function>
-    T Integrate<IntegrateMethod::Simpson, T, 1>::solve(Function func) const {
+    T Integrate<IntegrateMethod::Simpson, T, 1>::solve(std::invocable<T> auto fn) const {
         const T& from = Base::from()[0];
         const T& to = Base::to()[0];
-        T result = func(from) + func(to);
+        T result = fn(from) + fn(to);
 
         T odd = T(0);
         T even = T(0);
@@ -79,7 +76,7 @@ namespace Physica {
         while(start < to) {
             T& toChange = b ? odd : even;
             b = !b;
-            toChange += func(start);
+            toChange += fn(start);
             start += stepSize;
         }
         odd <<= 2;
@@ -98,8 +95,7 @@ namespace Physica {
             : Base(std::move(range)), stepSize(std::move(stepSize_)), pointCount(pointCount_) {}
 
     template<Scalar T>
-    template<class Function>
-    T Integrate<IntegrateMethod::Tanh_Sinh, T, 1>::solve(Function func) const {
+    T Integrate<IntegrateMethod::Tanh_Sinh, T, 1>::solve(std::invocable<T> auto fn) const {
         const T& from = Base::from()[0];
         const T& to = Base::to()[0];
 
@@ -107,7 +103,7 @@ namespace Physica {
         const T constant2 = constant1 + from;
         const auto& PI_2 = T(M_PI_2);
 
-        T result = PI_2 * func(constant2); //Integral value at t = 0
+        T result = PI_2 * fn(constant2); //Integral value at t = 0
         T t = 0;
         for(uint64_t i = 0; i < pointCount; ++i) {
             t += stepSize;
@@ -115,7 +111,7 @@ namespace Physica {
             const T cosh_PI_2_sinh = cosh(PI_2_sinh);
             const T phi = sinh(PI_2_sinh) / cosh_PI_2_sinh;
             const T phi_derivative = PI_2 * cosh(t) / square(cosh_PI_2_sinh);
-            result += phi_derivative * (func(constant2 + constant1 * phi) + func(constant2 - constant1 * phi));
+            result += phi_derivative * (fn(constant2 + constant1 * phi) + fn(constant2 - constant1 * phi));
         }
         result *= constant1 * stepSize;
         return result;
@@ -126,12 +122,12 @@ namespace Physica {
             : Base(std::move(range)), sampleCount(sampleCount_) {}
 
     template<Scalar T, size_t dim>
-    template<class Function, RNG R>
-    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(Function func) const {
+    template<RNG R>
+    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(std::invocable<VectorType> auto fn) const {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             VectorType x = VectorType::template random_uniform<R>(Base::from(), Base::to());
-            toNextMean(result, i, func(x));
+            toNextMean(result, i, fn(x));
         }
 
         T factor = 1;
@@ -142,44 +138,44 @@ namespace Physica {
     }
 
     template<Scalar T, size_t dim>
-    template<class Function, RNG R>
-    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(unsigned int numSequence, Function func, T& deviation) const {
+    template<RNG R>
+    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(unsigned int numSequence, std::invocable<VectorType> auto fn, T& deviation) const {
         assert(numSequence > 0);
         T mean = 0;
         T variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
-            toNextVariance(variance, mean, i, solve<Function, R>(func));
+            toNextVariance(variance, mean, i, solve<R>(fn));
         deviation = sqrt(variance);
         return mean;
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, RNG R, class Distribution>
+    template<RNG R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(
-            Functor1 func,
-            Functor2 importance,
-            Distribution& dist) const {
+            std::invocable<VectorType> auto fn,
+            std::invocable<VectorType> auto importance,
+            auto& distribution) const {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
-            const VectorType x = VectorType::template random_any<R, Distribution>(dim);
-            toNextMean(result, i, func(x) / importance(x));
+            const VectorType x = VectorType::template random_any<R>(dim, distribution);
+            toNextMean(result, i, fn(x) / importance(x));
         }
         return result;
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, RNG R, class Distribution>
+    template<RNG R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(
             unsigned int numSequence,
-            Functor1 func,
-            Functor2 importance,
-            Distribution& dist,
+            std::invocable<VectorType> auto fn,
+            std::invocable<VectorType> auto importance,
+            auto&,
             T& deviation) const {
         assert(numSequence > 0);
         T mean = 0;
         T variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
-            toNextVariance(variance, mean, i, solve(func, importance));
+            toNextVariance(variance, mean, i, solve(fn, importance));
         deviation = sqrt(variance);
         return mean;
     }

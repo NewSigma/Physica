@@ -47,15 +47,11 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        inline void cg(const M& A, VectorType& b);
-        template<Matrix M>
-        inline void cgnr(const M& A, VectorType& b);
+        inline void cg(const Matrix auto& A, VectorType& b);
+        inline void cgnr(const Matrix auto& A, VectorType& b);
 
-        template<class Functor, Vector V>
-        void cg_functor(Functor dotFunc, V& b);
-        template<class Functor1, class Functor2, Vector V>
-        void cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, V& b);
+        void cg_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, Vector auto& b);
+        void cgnr_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, std::invocable<const VectorType&, VectorType&> auto dotTransFunc, Vector auto& b);
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -73,16 +69,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Matrix M>
-    inline void IterateSolver<T>::cg(const M& A, VectorType& b) {
+    inline void IterateSolver<T>::cg(const Matrix auto& A, VectorType& b) {
         assert(A.getRow() == A.getCol());
         assert(A.getRow() == b.getLength());
         cg_functor([&A](const VectorType& v, VectorType& dot) { dot = A * v; }, b);
     }
 
     template<Scalar T>
-    template<Matrix M>
-    inline void IterateSolver<T>::cgnr(const M& A, VectorType& b) {
+    inline void IterateSolver<T>::cgnr(const Matrix auto& A, VectorType& b) {
         assert(A.getRow() == A.getCol());
         assert(A.getRow() == b.getLength());
         auto dotFunc = [&A](const VectorType& v, VectorType& dot) { dot = A * v; };
@@ -97,13 +91,12 @@ namespace Physica {
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006:112
      */
     template<Scalar T>
-    template<class Functor, Vector V>
-    void IterateSolver<T>::cg_functor(Functor dotFunc, V& b) {
+    void IterateSolver<T>::cg_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, Vector auto& b) {
         if (dot.getLength() != b.getLength())
             resize(b.getLength());
         residual = -b;
         searchP = b;
-        V& x = b;
+        auto& x = b;
         x.zeros();
 
         squaredRes0 = squaredRes = residual.squaredNorm();
@@ -132,13 +125,15 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:636-637
      */
     template<Scalar T>
-    template<class Functor1, class Functor2, Vector V>
-    void IterateSolver<T>::cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, V& b) {
+    void IterateSolver<T>::cgnr_functor(
+            std::invocable<const VectorType&, VectorType&> auto dotFunc,
+            std::invocable<const VectorType&, VectorType&> auto dotTransFunc,
+            Vector auto& b) {
         if (dot.getLength() != b.getLength())
             resize(b.getLength());
         residual = -b;
         dotTransFunc(b, searchP);
-        V& x = b;
+        auto& x = b;
         x.zeros();
 
         squaredRes0 = squaredRes = searchP.squaredNorm();

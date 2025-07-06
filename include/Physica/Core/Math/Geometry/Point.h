@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -35,8 +35,7 @@ namespace Physica {
         VectorType vec;
     public:
         Point() = default;
-        template<Vector V>
-        Point(const V& vec_) : vec(vec_) {}
+        Point(const Vector auto& vec_) : vec(vec_) {}
         Point(std::initializer_list<T> list) : vec(std::move(list)) {}
         Point(const Point& p) = default;
         Point(Point&& p) noexcept = default;

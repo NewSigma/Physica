@@ -67,10 +67,10 @@ namespace Physica {
         [[nodiscard]] VectorND<T> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const;
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
+        template<ExecutePolicy P>
+        void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Vector auto& result) const;
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result) const;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
@@ -95,8 +95,7 @@ namespace Physica {
         /* Operators */
         PairModel& operator=(PairModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Functor>
-        void forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const;
+        void forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, std::invocable<int, int, Vec3D, T, T> auto fn) const;
     private:
         [[nodiscard]] CoDiff<T> forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const;
     };
@@ -161,7 +160,7 @@ namespace Physica {
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
         const size_t DOF = cartesianPos.getRow() * cartesianPos.getCol();
         VectorND<T> result(DOF);
-        forceAsync<VectorND<T>, P>(lattice, cartesianPos, result);
+        forceAsync<P>(lattice, cartesianPos, result);
         return result;
     }
 
@@ -172,9 +171,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
+    template<ExecutePolicy P>
     void PairModel<Derived>::forceAsync(
-            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const {
+            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Vector auto& result) const {
         result = T(0);
         auto kernel = [this, &result](size_t i, size_t j, Vec3D r, const T& norm1, const T& norm2) {
             const T f_norm = force_functor(i, j, norm1, norm2);
@@ -188,9 +187,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
-        forceAsync<V, P>(cell.getLattice(), cell.getPos(), result);
+    template<ExecutePolicy P>
+    void PairModel<Derived>::forceAsync(const MDCellType& cell, Vector auto& result) const {
+        forceAsync<P>(cell.getLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
@@ -315,14 +314,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Functor>
-    void PairModel<Derived>::forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const {
+    void PairModel<Derived>::forPairInCutoff(
+            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, std::invocable<int, int, Vec3D, T, T> auto fn) const {
         const auto& pos = cartesianPos;
         if constexpr (IsSmallCell) {
             const auto range = MDCellType::estimateRange(lattice, cutoff);
             const size_t numParticle = pos.getRow();
             MDCellType::forCellInRange(range, lattice,
-                [this, pos, numParticle, &func](Vec3D delta) {
+                [this, pos, numParticle, &fn](Vec3D delta) {
                     Vec3D r, from;
                     for (size_t i = 0; i < numParticle; ++i) {
                         from = pos.row(i) + delta;
@@ -333,7 +332,7 @@ namespace Physica {
                             const bool isNotSelf = T(std::numeric_limits<T>::min()) < norm2;
                             if (isNotSelf && norm2 < squared_cutoff) {
                                 const T norm1 = sqrt(norm2);
-                                func(i, j, r, norm1, norm2);
+                                fn(i, j, r, norm1, norm2);
                             }
                         }
                     }
@@ -342,7 +341,7 @@ namespace Physica {
         else {
             const CellListType cellList(lattice, pos, cutoff);
             Array<size_t> arr1{};
-            cellList.forCellInList([this, pos, &arr1, &func, &cellList](Index3D center) {
+            cellList.forCellInList([this, pos, &arr1, &fn, &cellList](Index3D center) {
                 cellList.forAtomInCell(center, [&arr1](size_t atom) {
                     arr1.append(atom);
                 });
@@ -358,13 +357,13 @@ namespace Physica {
                             const T norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
                                 const T norm1 = sqrt(norm2);
-                                func(atom1, atom2, r, norm1, norm2);
+                                fn(atom1, atom2, r, norm1, norm2);
                             }
                         }
                     }
                 }
                 Array<size_t> arr2{};
-                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &func, &cellList](Vec3D translate, Index3D neigh) {
+                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &fn, &cellList](Vec3D translate, Index3D neigh) {
                     cellList.forAtomInCell(neigh, [&arr2](size_t atom) {
                         arr2.append(atom);
                     });
@@ -379,7 +378,7 @@ namespace Physica {
                             const T norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
                                 const T norm1 = sqrt(norm2);
-                                func(atom1, atom2, r, norm1, norm2);
+                                fn(atom1, atom2, r, norm1, norm2);
                             }
                         }
                     }

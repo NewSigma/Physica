@@ -34,9 +34,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    Derived& ContinuousVector<Derived>::operator=(const V& v_) requires(!CUDA<V>) {
-        return Base::template operator=<V, P>(v_);
+    template<ExecutePolicy P>
+    Derived& ContinuousVector<Derived>::operator=(const Vector auto& v) {
+        return Base::template operator=<P>(v);
     }
 
     template<class Derived>
@@ -86,8 +86,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class U>
-    void ContinuousVector<Derived>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void ContinuousVector<Derived>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+        using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
         if constexpr (Scalar<U> || Vector<U>) {
             if constexpr (Vector<U>)
@@ -186,9 +186,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<RNG R, class Distribution>
-    inline void ContinuousVector<Derived>::random_any(Distribution& dist) {
-        Base::template random_any<R, decltype(dist)>(dist);
+    template<RNG R>
+    inline void ContinuousVector<Derived>::random_any(auto& distribution) {
+        Base::template random_any<R>(distribution);
     }
 
 #ifdef PHYSICA_HDF5

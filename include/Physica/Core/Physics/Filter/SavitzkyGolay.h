@@ -27,6 +27,7 @@ namespace Physica {
      */
     template<Scalar T>
     class SavitzkyGolay {
+        using This = SavitzkyGolay<T>;
         using MatrixType = DenseMatrix<T>;
 
         unsigned char lRange;
@@ -42,10 +43,8 @@ namespace Physica {
         /* Operators */
         SavitzkyGolay& operator=(SavitzkyGolay filter) noexcept { swap(filter); return *this; }
         /* Operations */
-        template<Vector V>
-        void smooth(V& data) const;
-        template<Vector V>
-        void smooth_zero(V& data) const;
+        void smooth(Vector auto& data) const;
+        void smooth_zero(Vector auto& data) const;
         void swap(SavitzkyGolay& __restrict filter) noexcept;
         /* Getters */
         [[nodiscard]] unsigned char getLRange() const noexcept { return lRange; }
@@ -79,8 +78,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Vector V>
-    void SavitzkyGolay<T>::smooth(V& data) const {
+    void SavitzkyGolay<T>::smooth(Vector auto& data) const {
         const size_t windowSize = getWindowSize();
         VectorND<T> mask(windowSize);
         for (size_t i = 0; i < windowSize; ++i)
@@ -97,8 +95,7 @@ namespace Physica {
      * Append zeros if data is undefined
      */
     template<Scalar T>
-    template<Vector V>
-    void SavitzkyGolay<T>::smooth_zero(V& data) const {
+    void SavitzkyGolay<T>::smooth_zero(Vector auto& data) const {
         const size_t windowSize = getWindowSize();
         VectorND<T> mask(windowSize);
         for (size_t i = 0; i < windowSize; ++i)
@@ -130,7 +127,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void SavitzkyGolay<T>::swap(SavitzkyGolay<T>& __restrict filter) noexcept {
+    void SavitzkyGolay<T>::swap(This& __restrict filter) noexcept {
         assert(this != &filter && "[Error]: Self swap is likely a bug");
         std::swap(lRange, filter.lRange);
         std::swap(rRange, filter.rRange);

@@ -25,9 +25,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Matrix M>
-    LinearSystem<T>::LinearSystem(const M& working_)
-            : working(working_) {
+    LinearSystem<T>::LinearSystem(const Matrix auto& working_) : working(working_) {
         assert(working.getRow() + 1 == working.getCol() && "[Error]: Invalid working matrix");
     }
 

@@ -75,8 +75,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source,
+        void compute(const Matrix auto& source,
                      VectorND<T> initial,
                      T eigenGoal = T(InvalidGoal));
         void sort();
@@ -91,18 +90,14 @@ namespace Physica {
         inline void setError(Tr error_) noexcept;
         inline void setStableThreshold(Tr value) noexcept;
     private:
-        template<Matrix M>
-        void initSearchSpace(const M& source, VectorND<T>& initial);
-        template<Matrix M>
-        void projSearchSpace(const M& source, size_t eigenIndex);
-        template<Matrix M>
-        void assembleProjects(const M& source, size_t dim, bool updateDot);
+        void initSearchSpace(const Matrix auto& source, VectorND<T>& initial);
+        void projSearchSpace(const Matrix auto& source, size_t eigenIndex);
+        void assembleProjects(const Matrix auto& source, size_t dim, bool updateDot);
 
         void extremeSearch();
         void refinedSearch(size_t eigenIndex, T eigenGoal);
 
-        template<Matrix M>
-        void correction(size_t eigenIndex, T eigenGoal, const M& source, VectorND<T>& residule, VectorND<T>& buffer);
+        void correction(size_t eigenIndex, T eigenGoal, const Matrix auto& source, VectorND<T>& residule, VectorND<T>& buffer);
         /* Static member */
         static size_t calcSearchSpaceDim(size_t order);
     };
@@ -121,10 +116,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Matrix M>
-    void JacobiDavidson<T>::compute(const M& source, VectorND<T> initial, T eigenGoal) {
-        constexpr bool isHermite = MatrixOption::isHermiteMatrix<M>();
-        constexpr bool isRealSymm = !T::isComplex && MatrixOption::isSymmMatrix<M>();
+    void JacobiDavidson<T>::compute(const Matrix auto& source, VectorND<T> initial, T eigenGoal) {
+        constexpr bool isHermite = MatrixOption::isHermiteMatrix<decltype(source)>();
+        constexpr bool isRealSymm = !T::isComplex && MatrixOption::isSymmMatrix<decltype(source)>();
         static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigenvalues is not implemented");
         assert(source.getRow() == source.getCol() && "[Error]: Matrix should be square");
         assert(source.getRow() == initial.getLength() && "[Error]: Dimensions do not match");
@@ -137,9 +131,9 @@ namespace Physica {
         for (size_t i = 0; i < getNumRequired(); ++i) {
             const bool isFirstEigen = i == 0;
             if (isFirstEigen)
-                initSearchSpace<M>(source, initial);
+                initSearchSpace(source, initial);
             else
-                projSearchSpace<M>(source, i);
+                projSearchSpace(source, i);
 
             Tr lastDeltaEigen = std::numeric_limits<T>::max();
             T& eigenvalue = eigenvalues[i];
@@ -202,7 +196,7 @@ namespace Physica {
                 residule = source * eigenvector;
                 eigenvalue = eigenvector.conjugate() * residule;
                 eigenGoal = eigenvalue;
-                initSearchSpace<M>(source, initial);
+                initSearchSpace(source, initial);
                 goto restart;
             }
         }
@@ -278,13 +272,12 @@ namespace Physica {
      * Refer to [1]
      */
     template<Scalar T>
-    template<Matrix M>
-    void JacobiDavidson<T>::initSearchSpace(const M& source, VectorND<T>& initial) {
+    void JacobiDavidson<T>::initSearchSpace(const Matrix auto& source, VectorND<T>& initial) {
         /* dim = 0 */ {
             initial.toUnit();
             auto col = searchSpace.col(0);
             col = initial;
-            assembleProjects<M>(source, 0, true);
+            assembleProjects(source, 0, true);
 
             const auto dot = dotSpace.col(0);
             auto buffer = searchSpace.col(1);
@@ -299,7 +292,7 @@ namespace Physica {
             col = source * initial;
             normGramSchmidt(searchSpace.leftCols(dim), col, col.squaredNorm());
             initial = col;
-            assembleProjects<M>(source, dim, true);
+            assembleProjects(source, dim, true);
         }
         numSearchDim = MinSearchDim;
     }
@@ -307,8 +300,7 @@ namespace Physica {
      * Refer to [1]
      */
     template<Scalar T>
-    template<Matrix M>
-    void JacobiDavidson<T>::projSearchSpace(const M& source, size_t eigenIndex) {
+    void JacobiDavidson<T>::projSearchSpace(const Matrix auto& source, size_t eigenIndex) {
         const auto lastEigenvector = eigenvectors.col(eigenIndex - 1);
         for (size_t dim = 0; dim < MinSearchDim; ++dim) {
             auto col = searchSpace.col(dim);
@@ -322,14 +314,13 @@ namespace Physica {
             }
             else
                 gramSchmidt(searchSpace.leftCols(dim), col);
-            assembleProjects<M>(source, dim, true);
+            assembleProjects(source, dim, true);
         }
         numSearchDim = MinSearchDim;
     }
 
     template<Scalar T>
-    template<Matrix M>
-    void JacobiDavidson<T>::assembleProjects(const M& source, size_t numSearchDim, bool updateDot) {
+    void JacobiDavidson<T>::assembleProjects(const Matrix auto& source, size_t numSearchDim, bool updateDot) {
         const size_t i = numSearchDim;
         const auto new_direction = searchSpace.col(i);
         auto new_dot = dotSpace.col(i);
@@ -397,8 +388,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Matrix M>
-    void JacobiDavidson<T>::correction(size_t eigenIndex, T eigenGoal, const M& source, VectorND<T>& residule, VectorND<T>& buffer) {
+    void JacobiDavidson<T>::correction(size_t eigenIndex, T eigenGoal, const Matrix auto& source, VectorND<T>& residule, VectorND<T>& buffer) {
         const auto orthogonalSpace = eigenvectors.leftCols(eigenIndex + 1);
         auto new_direction = searchSpace.col(numSearchDim);
         new_direction = residule;
@@ -417,7 +407,7 @@ namespace Physica {
 
         new_direction.toUnit();
         gramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);
-        assembleProjects<M>(source, numSearchDim, true);
+        assembleProjects(source, numSearchDim, true);
         numSearchDim += 1;
     }
 

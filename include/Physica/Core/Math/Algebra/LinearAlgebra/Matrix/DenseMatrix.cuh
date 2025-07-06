@@ -52,8 +52,7 @@ namespace Physica {
         using Base::operator=;
         using Storage::operator();
         /* Operations */
-        template<Matrix M>
-        __host__ __device__ void resize(const M& m) { resize(m.getRow(), m.getCol()); }
+        __host__ __device__ void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
         using Storage::resize;
 
         [[nodiscard]] host_obj toHost() const;
@@ -66,8 +65,8 @@ namespace Physica {
         void random_uniform();
         template<RNG R>
         void random_normal();
-        template<RNG R, class Distribution>
-        void random_any(Distribution& dist);
+        template<RNG R>
+        void random_any(auto& distribution);
 
         using Storage::swap;
         /* Getters */
@@ -81,8 +80,8 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t row, size_t col);
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
+        template<RNG R>
+        [[nodiscard]] inline static This random_any(size_t row, size_t col, auto& distribution);
     };
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>

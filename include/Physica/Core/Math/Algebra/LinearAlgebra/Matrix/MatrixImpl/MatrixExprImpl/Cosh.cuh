@@ -43,14 +43,12 @@ namespace Physica {
             return cosh(Base::getExpr().calc_value(row, col));
         }
 
-        template<Matrix U>
-        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
         using Base::reverse;
     };
 
     template<Matrix M>
-    template<Matrix U>
-    void device_obj<MatrixExpr<ExprType::Cosh, M>>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<MatrixExpr<ExprType::Cosh, M>>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard(sinh_elem(expr.values()), grad));
     }

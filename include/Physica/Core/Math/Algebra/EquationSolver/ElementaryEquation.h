@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -21,19 +21,15 @@
 #include "Physica/Core/Scalar/Real.h"
 
 namespace Physica {
-    /**
-     * Equations are defined like this:
-     * T func(const T&)
-     */
-    template<class Function, Scalar T>
-    T bisectionMethod(Function func, const T& x1, const T& x2) {
-        const T y1 = func(x1);
-        const T y2 = func(x2);
-        return bisectionMethod<Function, T>(func, x1, x2, y1, y2);
+    template<Scalar T>
+    T bisectionMethod(std::invocable<T> auto fn, const T& x1, const T& x2) {
+        const T y1 = fn(x1);
+        const T y2 = fn(x2);
+        return bisectionMethod<T>(fn, x1, x2, y1, y2);
     }
 
-    template<class Function, Scalar T>
-    T bisectionMethod(Function func, const T& x1, const T& x2, const T& y1, const T& y2) {
+    template<Scalar T>
+    T bisectionMethod(std::invocable<T> auto fn, const T& x1, const T& x2, const T& y1, const T& y2) {
         if (y1.isZero())
             return x1;
         if (y2.isZero())
@@ -52,7 +48,7 @@ namespace Physica {
         bool delta_left_sign = !y_left.isPositive();
         bool delta_right_sign;
         do {
-            y_result = func(result);
+            y_result = fn(result);
             delta_right_sign = !y_result.isPositive();
 
             if (delta_left_sign == delta_right_sign) {
@@ -71,15 +67,15 @@ namespace Physica {
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:559-560
      */
-    template<class Function, Scalar T>
-    T secant(Function func, const T& x1, const T& x2, const T& abs_error) {
-        const T y1 = func(x1);
-        const T y2 = func(x2);
-        return secant<Function, T>(func, x1, x2, y1, y2, abs_error);
+    template<Scalar T>
+    T secant(std::invocable<T> auto fn, const T& x1, const T& x2, const T& abs_error) {
+        const T y1 = fn(x1);
+        const T y2 = fn(x2);
+        return secant<T>(fn, x1, x2, y1, y2, abs_error);
     }
 
-    template<class Function, Scalar T>
-    T secant(Function func, const T& x1, const T& x2, const T& y1, const T& y2, const T& abs_error) {
+    template<Scalar T>
+    T secant(std::invocable<T> auto fn, const T& x1, const T& x2, const T& y1, const T& y2, const T& abs_error) {
         if (y1.isZero())
             return x1;
         if (y2.isZero())
@@ -95,7 +91,7 @@ namespace Physica {
             x_old = std::move(x_now);
             y_old = std::move(y_now);
             x_now = std::move(temp);
-            y_now = func(x_now);
+            y_now = fn(x_now);
         } while (abs(x_now - x_old) > abs_error);
         return x_now;
     }

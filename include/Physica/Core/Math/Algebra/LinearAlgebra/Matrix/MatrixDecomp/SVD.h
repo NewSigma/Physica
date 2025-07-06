@@ -51,16 +51,14 @@ namespace Physica {
     public:
         SVD() = default;
         SVD(size_t row, size_t col);
-        template<Matrix M>
-        SVD(const M& source);
+        SVD(const Matrix auto& source);
         SVD(const SVD&) = default;
         SVD(SVD&&) noexcept = default;
         ~SVD() = default;
         /* Operators */
         SVD& operator=(SVD obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source);
+        void compute(const Matrix auto& source);
         void sort();
         void resize(size_t row, size_t col);
         void resize(size_t order);
@@ -73,10 +71,8 @@ namespace Physica {
     private:
         void stepSVD(size_t lower, size_t sub_order);
         T computeShift(size_t lower, size_t sub_order);
-        template<Matrix M>
-        void leftGivens(LValueMatrix<M>& mat, Vector2D<T>& buffer, size_t i);
-        template<Matrix M>
-        void rightGivens(LValueMatrix<M>& mat, Vector2D<T>& buffer, size_t i);
+        void leftGivens(Matrix auto& mat, Vector2D<T>& buffer, size_t i);
+        void rightGivens(Matrix auto& mat, Vector2D<T>& buffer, size_t i);
     };
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
@@ -85,15 +81,13 @@ namespace Physica {
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    template<Matrix M>
-    SVD<T, RowAtCompile, ColAtCompile>::SVD(const M& source)
+    SVD<T, RowAtCompile, ColAtCompile>::SVD(const Matrix auto& source)
             : SVD(source.getRow(), source.getCol()) {
         compute(source);
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    template<Matrix M>
-    void SVD<T, RowAtCompile, ColAtCompile>::compute(const M& source) {
+    void SVD<T, RowAtCompile, ColAtCompile>::compute(const Matrix auto& source) {
         const size_t row = source.getRow();
         const size_t col = source.getCol();
         assert(row == lSingularMat.getRow());
@@ -237,9 +231,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    template<Matrix M>
     void SVD<T, RowAtCompile, ColAtCompile>::leftGivens(
-            LValueMatrix<M>& mat,
+            Matrix auto& mat,
             Vector2D<T>& buffer,
             size_t i) {
         buffer[0] = mat(i, i);
@@ -252,9 +245,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    template<Matrix M>
     void SVD<T, RowAtCompile, ColAtCompile>::rightGivens(
-            LValueMatrix<M>& mat,
+            Matrix auto& mat,
             Vector2D<T>& buffer,
             size_t i) {
         buffer = givens(buffer, 0, 1);

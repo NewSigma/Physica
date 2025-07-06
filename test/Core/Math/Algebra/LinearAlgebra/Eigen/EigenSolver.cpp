@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,18 +24,18 @@
 
 using namespace Physica;
 
-template<Vector T>
-bool vectorNearZero(const LValueVector<T>& v, double precision) {
-    using ScalarType = T::ScalarType;
+template<Vector V>
+bool vectorNearZero(const LValueVector<V>& v, double precision) {
+    using ScalarType = V::ScalarType;
     for (size_t i = 0; i < v.getLength(); ++i)
         if (!scalarNear(v[i], ScalarType(0), precision))
             return false;
     return true;
 }
 
-template<Matrix T, Backend B>
-bool eigenTestImpl(const T& mat, double precision) {
-    using ScalarType = T::ScalarType;
+template<Matrix M, Backend B>
+bool eigenTestImpl(const M& mat, double precision) {
+    using ScalarType = M::ScalarType;
     using ComplexVector = EigenSolver<ScalarType>::EigenvalueVector;
     auto solver = EigenSolver<ScalarType>(mat.getRow());
     if constexpr (B == Backend::Base)
@@ -63,23 +63,23 @@ bool eigenTestImpl(const T& mat, double precision) {
     return true;
 }
 
-template<Matrix T>
-bool eigenTest(const T& mat, double precision) {
+template<Matrix M>
+bool eigenTest(const M& mat, double precision) {
     using ScalarType = T::ScalarType;
-    if (!eigenTestImpl<T, Backend::Base>(mat, precision))
+    if (!eigenTestImpl<M, Backend::Base>(mat, precision))
         return false;
     if constexpr (HasMKL() && (ScalarType::Prec == Float32 || ScalarType::Prec == Float64)) {
-        if (!eigenTestImpl<T, Backend::MKL>(mat, precision))
+        if (!eigenTestImpl<M, Backend::MKL>(mat, precision))
             return false;
     }
     return true;
 }
 
-template<Matrix T, bool IsHermite>
-bool reconstructTest(const T& mat, double precision) {
-    using ScalarType = T::ScalarType;
+template<Matrix M, bool IsHermite>
+bool reconstructTest(const M& mat, double precision) {
+    using ScalarType = M::ScalarType;
     auto solver = EigenSolver<ScalarType>(mat, true);
-    const T result = IsHermite ? solver.reconstruct_hermite() : solver.reconstruct();
+    const M result = IsHermite ? solver.reconstruct_hermite() : solver.reconstruct();
     if (!matrixNear(result, mat, precision))
         return false;
     return true;

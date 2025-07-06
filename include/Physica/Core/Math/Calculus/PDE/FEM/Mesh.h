@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,8 +45,7 @@ namespace Physica {
         Mesh& operator=(Mesh mesh) noexcept;
         [[nodiscard]] ScalarType operator()(VectorType p) const;
         /* Operations */
-        template<class Detector, class Conditioner>
-        void addDirichletBoundary(Detector detector, Conditioner conditioner);
+        void addDirichletBoundary(std::invocable<VectorType> auto detector, std::invocable<VectorType> auto conditioner);
         void swap(Mesh& __restrict mesh) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumElems() const { return elements.getLength(); }

@@ -49,8 +49,7 @@ namespace Physica {
     public:
         EigenSolver();
         EigenSolver(size_t size);
-        template<Matrix M>
-        EigenSolver(const M& source, bool computeEigenvectors_);
+        EigenSolver(const Matrix auto& source, bool computeEigenvectors_);
         EigenSolver(EigenvalueVector eigenvalues_, RawEigenvectorType rawEigenvectors_);
         EigenSolver(const This&) = default;
         EigenSolver(This&& solver) noexcept = default;
@@ -58,16 +57,12 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source, bool computeEigenvectors_);
-        template<Matrix M>
-        void compute_base(const M& source, bool computeEigenvectors_);
-        template<Matrix M>
-        void compute_mkl(const M& source, bool computeEigenvectors_);
+        void compute(const Matrix auto& source, bool computeEigenvectors_);
+        void compute_base(const Matrix auto& source, bool computeEigenvectors_);
+        void compute_mkl(const Matrix auto& source, bool computeEigenvectors_);
 
         void sort();
-        template<class Compare>
-        void sort(Compare comp);
+        void sort(std::invocable<Tc, Tc> auto comp);
         void resize(size_t size);
         [[nodiscard]] auto reconstruct() const;
         [[nodiscard]] auto reconstruct_hermite() const;
@@ -83,8 +78,7 @@ namespace Physica {
         [[nodiscard]] const RawEigenvectorType& getRawEigenvectors() const noexcept { return rawEigenvectors; }
         /* Static members */
         static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors);
-        template<class Compare>
-        static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, Compare comp);
+        static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto comp);
     private:
         template<Matrix M>
         void pre_compute(const M& source, bool computeEigenvectors_);
@@ -104,8 +98,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    EigenSolver<T, Order>::EigenSolver(const M& source, bool computeEigenvectors_)
+    EigenSolver<T, Order>::EigenSolver(const Matrix auto& source, bool computeEigenvectors_)
             : computeEigenvectors(computeEigenvectors_) {
         resize(source.getRow());
         compute(source, computeEigenvectors);
@@ -120,8 +113,7 @@ namespace Physica {
             , computeEigenvectors(true) {}
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void EigenSolver<T, Order>::compute(const M& source, bool computeEigenvectors_) {
+    void EigenSolver<T, Order>::compute(const Matrix auto& source, bool computeEigenvectors_) {
         if constexpr (HasMKL() && (T::Prec == Float32 || T::Prec == Float64))
             compute_mkl(source, computeEigenvectors_);
         else
@@ -129,8 +121,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void EigenSolver<T, Order>::compute_base(const M& source, bool computeEigenvectors_) {
+    void EigenSolver<T, Order>::compute_base(const Matrix auto& source, bool computeEigenvectors_) {
         pre_compute(source, computeEigenvectors_);
         if (source.getRow() == 1) [[unlikely]] {
             eigenvalues[0] = source.calc(0, 0);
@@ -168,8 +159,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<class Compare>
-    void EigenSolver<T, Order>::sort(Compare comp) {
+    void EigenSolver<T, Order>::sort(std::invocable<Tc, Tc> auto comp) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
@@ -279,8 +269,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<class Compare>
-    void EigenSolver<T, Order>::sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, Compare comp) {
+    void EigenSolver<T, Order>::sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto comp) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;

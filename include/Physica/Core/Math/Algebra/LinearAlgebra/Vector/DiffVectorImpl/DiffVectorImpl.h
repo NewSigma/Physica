@@ -108,9 +108,9 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<RNG R, class Distribution>
-    inline void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(Distribution& dist) {
-        v.template random_any<R, Distribution>(dist);
+    template<RNG R>
+    inline void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(auto& distribution) {
+        v.template random_any<R>(distribution);
         zero_grad();
     }
 
@@ -149,10 +149,10 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<RNG R, class Distribution>
-    inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(size_t len, Distribution& dist) -> This {
+    template<RNG R>
+    inline auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::random_any(size_t len, auto& distribution) -> This {
         This result(len);
-        result.template random_any<R, Distribution>(dist);
+        result.template random_any<R>(distribution);
         return result;
     }
 

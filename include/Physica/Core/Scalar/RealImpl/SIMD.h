@@ -50,8 +50,7 @@ namespace Physica {
     public:
         SIMD() = default;
         explicit SIMD(double x) : pack(x) {}
-        template<Scalar U>
-        explicit SIMD(const U& x);
+        explicit SIMD(const Scalar auto& x);
         SIMD(T x, int count);
         template<Scalar... Args>
         SIMD(Args... args);

@@ -188,7 +188,7 @@ namespace Physica {
     Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept {
         using T = Real<FloatMP>;
         auto func = [&](const T& x) -> T { return cos(x) - s; };
-        return bisectionMethod<decltype(func), T>(
+        return bisectionMethod<T>(
                 func,
                 BasicConst::getInstance()._0,
                 MathConst<T>::getInstance().PI,
@@ -200,7 +200,7 @@ namespace Physica {
     Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept {
         using T = Real<FloatMP>;
         auto func = [&](const T& x) -> T { return sin(x) - s; };
-        return bisectionMethod<decltype(func), T>(
+        return bisectionMethod<T>(
                 func,
                 MathConst<T>::getInstance().Minus_PI_2,
                 MathConst<T>::getInstance().PI_2,

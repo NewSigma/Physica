@@ -54,8 +54,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source);
+        void compute(const Matrix auto& source);
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -78,8 +77,7 @@ namespace Physica {
     }
 
     template<Matrix T>
-    template<Matrix M>
-    void Bidiagonalization<T>::compute(const M& source) {
+    void Bidiagonalization<T>::compute(const Matrix auto& source) {
         assert(source.getRow() >= source.getCol());
         working = source;
 
@@ -163,16 +161,14 @@ namespace Physica {
     public:
         BiDiagMatrixB(const Bidiagonalization<T>& bidiag_) : bidiag(bidiag_) {}
         /* Operations */
-        template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return bidiag.working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return bidiag.working.getCol(); }
     };
 
     template<Matrix T>
-    template<Matrix M>
-    void BiDiagMatrixB<T>::assign(LValueMatrix<M>& target) const {
+    void BiDiagMatrixB<T>::assign(Matrix auto& target) const {
         target = ScalarType(0);
         const size_t col_1 = target.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {

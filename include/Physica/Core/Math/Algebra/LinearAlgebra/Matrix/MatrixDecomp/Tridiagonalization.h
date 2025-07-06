@@ -52,16 +52,14 @@ namespace Physica {
         BufferVector buffer;
     public:
         Tridiagonalization(size_t size);
-        template<Matrix M>
-        Tridiagonalization(const M& source);
+        Tridiagonalization(const Matrix auto& source);
         Tridiagonalization(const This&) = default;
         Tridiagonalization(This&&) noexcept = default;
         ~Tridiagonalization() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source);
+        void compute(const Matrix auto& source);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] MatrixT getMatrixT() const noexcept { return MatrixT(*this); }
@@ -79,15 +77,13 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    Tridiagonalization<T, Order>::Tridiagonalization(const M& source)
+    Tridiagonalization<T, Order>::Tridiagonalization(const Matrix auto& source)
             : Tridiagonalization(source.getRow()) {
         compute(source);
     }
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void Tridiagonalization<T, Order>::compute(const M& source) {
+    void Tridiagonalization<T, Order>::compute(const Matrix auto& source) {
         const size_t order = source.getRow();
         working = source;
         for (size_t i = 0; i < order - 2; ++i) {
@@ -152,8 +148,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return tri.working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return tri.working.getCol(); }
@@ -163,8 +158,7 @@ namespace Physica {
     TridiagonalMatrixT<T, Order>::TridiagonalMatrixT(const Tridiagonalization<T, Order>& tri_) : tri(tri_) {}
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void TridiagonalMatrixT<T, Order>::assign(LValueMatrix<M>& target) const {
+    void TridiagonalMatrixT<T, Order>::assign(Matrix auto& target) const {
         const size_t order = getRow();
         target = RealType(0);
         target(0, 0) = tri.working.calc(0, 0);

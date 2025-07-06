@@ -115,7 +115,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class IndexType>
+    template<std::integral IndexType>
     __host__ __device__ constexpr inline IndexType FFT<T, 1>::rSizeToKSize(IndexType size_data) noexcept {
         if constexpr (isComplex)
             return size_data;
@@ -299,7 +299,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    template<class IndexType>
+    template<std::integral IndexType>
     Array<IndexType, Dim> FFT<T, Dim>::rSizeToKSize(const Array<IndexType, Dim>& rSize) {
         Array<IndexType, Dim> result(rSize.getLength());
         size_t i = 0;

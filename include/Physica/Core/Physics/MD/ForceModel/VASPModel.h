@@ -53,8 +53,8 @@ namespace Physica {
         /* Operations */
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept;
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result) const noexcept;
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
         template<ExecutePolicy P>
@@ -101,8 +101,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Vector V, ExecutePolicy P>
-    void VASPModel<T>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept {
+    template<ExecutePolicy P>
+    void VASPModel<T>::forceAsync(const MDCellType& cell, Vector auto& result) const noexcept {
         try {
             /* Make POSCAR */ {
                 const auto path = makePath("%s/POSCAR", workingDir.getName());

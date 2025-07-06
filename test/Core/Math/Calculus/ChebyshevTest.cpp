@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,19 +23,18 @@
 using namespace Physica;
 using T = float64;
 
-template<class Function>
-void testFit(Function func) {
+void testFit(std::invocable<T> auto fn) {
     const int sample = 30;
     const T from(-1);
     const T to(1);
 
     VectorND<T> coeff(30);
-    chebyshev_fit(from, to, coeff, func);
+    chebyshev_fit(from, to, coeff, fn);
     const T delta = (to - from) / T(sample);
     T x = from;
     for (int i = 0; i < sample; ++i) {
         x += delta;
-        T answer = func(x);
+        T answer = fn(x);
         T result = chebyshev_calc(from, to, coeff, x);
         if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
             std::cout << "testFit failed: " << result << ' ' << answer << std::endl;
@@ -44,19 +43,18 @@ void testFit(Function func) {
     }
 }
 
-template<class Function>
-void testFitEven(Function func) {
+void testFitEven(std::invocable<T> auto fn) {
     const int sample = 30;
     const T from(-1);
     const T to(1);
 
     VectorND<T> coeff(30);
-    chebyshev_fit_even(from, to, coeff, func);
+    chebyshev_fit_even(from, to, coeff, fn);
     const T delta = (to - from) / T(sample);
     T x = from;
     for (int i = 0; i < sample; ++i) {
         x += delta;
-        T answer = func(x);
+        T answer = fn(x);
         T result = chebyshev_calc_even(from, to, coeff, x);
         if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
             std::cout << "testFitEven failed: " << x << result << ' ' << answer << std::endl;
@@ -65,19 +63,18 @@ void testFitEven(Function func) {
     }
 }
 
-template<class Function>
-void testFitOdd(Function func) {
+void testFitOdd(std::invocable<T> auto fn) {
     const int sample = 30;
     const T from(-1);
     const T to(1);
 
     VectorND<T> coeff(30);
-    chebyshev_fit_odd(from, to, coeff, func);
+    chebyshev_fit_odd(from, to, coeff, fn);
     const T delta = (to - from) / T(sample);
     T x = from;
     for (int i = 0; i < sample; ++i) {
         x += delta;
-        T answer = func(x);
+        T answer = fn(x);
         T result = chebyshev_calc_odd(from, to, coeff, x);
         if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
             std::cout << "testFitOdd failed: " << result << ' ' << answer << std::endl;

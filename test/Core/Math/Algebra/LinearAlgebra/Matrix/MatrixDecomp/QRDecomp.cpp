@@ -43,8 +43,7 @@ void testQRP(const QRDecomp<T, true>& qr, const M& m) {
         exit(1);
 }
 
-template<Matrix M>
-void testDecomp(const M& m) {
+void testDecomp(const Matrix auto& m) {
     QRDecomp<T, false> qr(m.getRow(), m.getCol());
     QRDecomp<T, true> qrp(m.getRow(), m.getCol());
     if constexpr (HasMKL()) {

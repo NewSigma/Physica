@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,9 +45,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
-        template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
-        template<class Functor, class GradFunctor> T solve(T epsilon, VectorType initial, Functor func, GradFunctor grad);
+        void init(VectorType initial, std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
+        void step(std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
+         T solve(T epsilon, VectorType initial, std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] inline size_t getDim() const noexcept;
@@ -61,8 +61,7 @@ namespace Physica {
             , iteration(0) {}
 
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
-    void ConjugateGradient<T, Dim>::init(VectorType initial, [[maybe_unused]] Functor func, GradFunctor grad) {
+    void ConjugateGradient<T, Dim>::init(VectorType initial, std::invocable<VectorType> auto, std::invocable<VectorType> auto grad) {
         nowX = std::move(initial);
         gradG = grad(nowX);
         direction = -gradG;
@@ -71,8 +70,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
-    void ConjugateGradient<T, Dim>::step(Functor func, GradFunctor grad) {
+    void ConjugateGradient<T, Dim>::step(std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad) {
         const size_t dim = nowX.getLength();
         const T stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
         nowX += stepSize * direction;
@@ -92,8 +90,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
-    T ConjugateGradient<T, Dim>::solve(T epsilon, VectorType initial, Functor func, GradFunctor grad) {
+    T ConjugateGradient<T, Dim>::solve(T epsilon, VectorType initial, std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad) {
         init(std::move(initial), func, grad);
         while (squaredGradNorm > epsilon) {
             step(func, grad);

@@ -59,8 +59,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const M& x) requires(CUDA<M>);
         void reverse(const This& __restrict other) const noexcept;
 
-        template<class Optimizer>
-        void step(Optimizer& opt);
+        void step(auto& optimizer);
         void zero_grad();
 
         template<RNG R>
@@ -102,7 +101,7 @@ namespace Physica {
             sigma = (Tv(1) - momentum) * sigma + momentum * (x.deviation(mean) + epsilon);
             normal = (x - mean) * reciprocal(sigma);
         };
-        CUDAExecutor::launch<decltype(func), device_obj<VectorND<T>>::MaxThreadPerBlock>(func, gamma.makeKernelConfig());
+        CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadPerBlock>(func, gamma.makeKernelConfig());
 
         auto result = device_obj<MatrixND<T>>(hadamard(normal, gamma.values()) + beta.values());
         if constexpr (ReverseDiff<T>) {
@@ -126,11 +125,10 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class Optimizer>
-    void device_obj<BatchNorm1D<T>>::step(Optimizer& opt) {
+    void device_obj<BatchNorm1D<T>>::step(auto& optimizer) {
         if constexpr (ReverseDiff<T>) {
-            opt.step(gamma);
-            opt.step(beta);
+            optimizer.step(gamma);
+            optimizer.step(beta);
         }
     }
 

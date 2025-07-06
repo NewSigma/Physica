@@ -42,11 +42,10 @@ namespace Physica {
         VectorND<T> x;
         VectorND<T> multipliers;
     public:
-        template<Matrix M1, Vector V1, Matrix M2, Vector V2>
-        EqualityQuadraticProgramming(const M1& objectiveMatG_,
-                                     const V1& objectiveVecC_,
-                                     const M2& constraints_,
-                                     const V2& initial);
+        EqualityQuadraticProgramming(const Matrix auto& objectiveMatG_,
+                                     const Vector auto& objectiveVecC_,
+                                     const Matrix auto& constraints_,
+                                     const Vector auto& initial);
         EqualityQuadraticProgramming(const EqualityQuadraticProgramming&) = delete;
         EqualityQuadraticProgramming(EqualityQuadraticProgramming&&) noexcept = delete;
         ~EqualityQuadraticProgramming() = default;
@@ -61,11 +60,10 @@ namespace Physica {
     };
 
     template<Scalar T>
-    template<Matrix M1, Vector V1, Matrix M2, Vector V2>
-    EqualityQuadraticProgramming<T>::EqualityQuadraticProgramming(const M1& objectiveMatG_,
-                                                                  const V1& objectiveVecC_,
-                                                                  const M2& constraints_,
-                                                                  const V2& initial)
+    EqualityQuadraticProgramming<T>::EqualityQuadraticProgramming(const Matrix auto& objectiveMatG_,
+                                                                  const Vector auto& objectiveVecC_,
+                                                                  const Matrix auto& constraints_,
+                                                                  const Vector auto& initial)
             : objectiveMatG(objectiveMatG_)
             , objectiveVecC(objectiveVecC_)
             , x(initial) {

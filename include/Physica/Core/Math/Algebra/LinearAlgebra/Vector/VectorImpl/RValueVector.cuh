@@ -49,8 +49,7 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operations */
-        template<Vector V>
-        __host__ __device__ void assign(V& target) const requires(CUDA<V>);
+        __host__ __device__ void assign(Vector auto& target) const requires(CUDA<decltype(target)>);
 
         [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
@@ -58,8 +57,7 @@ namespace Physica {
         [[nodiscard]] __device__ inline Pack packet(size_t index) const;
         template<Packet Pack>
         [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
-        template<Vector V1, Vector V2>
-        void reverse(const V1& y, const V2& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] __host__ __device__ inline auto transpose() const noexcept;
 
@@ -77,8 +75,7 @@ namespace Physica {
         [[nodiscard]] __device__ T crossEntropy(size_t index) const;
         [[nodiscard]] __device__ T lnSoftmax(size_t index) const;
         [[nodiscard]] __device__ T softmax(size_t index) const;
-        template<Vector V>
-        [[nodiscard]] __device__ inline auto crossProduct(const device_obj<V>& v) const noexcept;
+        [[nodiscard]] __device__ auto crossProduct(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>);
 
         [[nodiscard]] __device__ T max(int tid, int numThread, T* __restrict shared) const;
         [[nodiscard]] __device__ T sum(int tid, int numThread, T* __restrict shared) const;

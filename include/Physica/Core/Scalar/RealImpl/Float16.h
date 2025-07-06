@@ -56,10 +56,8 @@ namespace Physica {
     public:
         constexpr Real() = default;
         __host__ __device__ Real(half f_) noexcept : h(f_) {}
-        template<std::integral I>
-        __host__ __device__ Real(I i) : h(i) {}
-        template<std::floating_point F>
-        __host__ __device__ Real(F f) : h(f) {}
+        __host__ __device__ Real(std::integral auto i) : h(i) {}
+        __host__ __device__ Real(std::floating_point auto f) : h(f) {}
         template<Scalar T>
         __host__ __device__ explicit(Float16 < T::Prec) Real(const T& x) requires(!T::isComplex && !Diffable<T>);
         constexpr Real(const This&) = default;
@@ -94,8 +92,8 @@ namespace Physica {
         [[nodiscard]] inline static Real random_uniform();
         template<RNG R>
         [[nodiscard]] inline static Real random_normal();
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static Real random_any(Distribution& dist);
+        template<RNG R>
+        [[nodiscard]] static Real random_any(auto& distribution) { return This(float32::random_any<R>(distribution)); }
     #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_INT16; }
     #endif
@@ -117,11 +115,6 @@ namespace Physica {
     template<RNG R>
     inline auto Real<Float16>::random_normal() -> This {
         return This(float32::random_normal<R>());
-    }
-
-    template<RNG R, class Distribution>
-    inline auto Real<Float16>::random_any(Distribution& dist) -> This {
-        return This(float32::random_any<R, Distribution>(dist));
     }
 
     inline std::ostream& operator<<(std::ostream& os, const Real<Float16>& s) {

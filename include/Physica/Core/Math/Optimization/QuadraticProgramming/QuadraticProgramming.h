@@ -46,12 +46,11 @@ namespace Physica {
         VectorND<T> x;
         Array<bool> activeConstraintFlags;
     public:
-        template<Matrix M1, Vector V1, Matrix M2, Matrix M3, Vector V2>
-        QuadraticProgramming(const M1& objectiveMatG_,
-                             const V1& objectiveVecC_,
-                             const M2& equalityConstraint_,
-                             const M3& inequalityConstraint_,
-                             const V2& initial);
+        QuadraticProgramming(const Matrix auto& objectiveMatG_,
+                             const Vector auto& objectiveVecC_,
+                             const Matrix auto& equalityConstraint_,
+                             const Matrix auto& inequalityConstraint_,
+                             const Vector auto& initial);
         QuadraticProgramming(const QuadraticProgramming&) = delete;
         QuadraticProgramming(QuadraticProgramming&&) noexcept = delete;
         ~QuadraticProgramming() = default;
@@ -71,12 +70,11 @@ namespace Physica {
     };
 
     template<Scalar T>
-    template<Matrix M1, Vector V1, Matrix M2, Matrix M3, Vector V2>
-    QuadraticProgramming<T>::QuadraticProgramming(const M1& objectiveMatG_,
-                                                  const V1& objectiveVecC_,
-                                                  const M2& equalityConstraint_,
-                                                  const M3& inequalityConstraint_,
-                                                  const V2& initial)
+    QuadraticProgramming<T>::QuadraticProgramming(const Matrix auto& objectiveMatG_,
+                                                  const Vector auto& objectiveVecC_,
+                                                  const Matrix auto& equalityConstraint_,
+                                                  const Matrix auto& inequalityConstraint_,
+                                                  const Vector auto& initial)
             : objectiveMatG(objectiveMatG_)
             , objectiveVecC(objectiveVecC_)
             , x(initial)

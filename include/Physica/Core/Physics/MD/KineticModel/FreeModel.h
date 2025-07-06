@@ -70,8 +70,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, T deltaT);
-        template<class Barostat>
-        void npt_step(MDType& rpmd, Barostat& barostat, T deltaT);
+        void npt_step(MDType& rpmd, auto& barostat, T deltaT);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T getOmegaW() const noexcept { return omegaW; }
@@ -118,10 +117,9 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    template<class Barostat>
     void FreeModel<T, Dim, NumReplica, Integrator>::npt_step(
             MDType& rpmd,
-            Barostat& barostat,
+            auto& barostat,
             T deltaT) {
         nve_step(rpmd.getRingPolymer(), deltaT);
         LatticeMatrix lattice = rpmd.getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());

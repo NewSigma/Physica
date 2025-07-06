@@ -38,8 +38,7 @@ namespace Physica {
         ~PlainWaveBasis() = default;
         /* Operators */
         PlainWaveBasis& operator=(PlainWaveBasis obj) noexcept;
-        template<Vector V>
-        PlainWaveBasis& operator=(const V& statePsi);
+        PlainWaveBasis& operator=(const Vector auto& statePsi);
         /* Operations */
         [[nodiscard]] inline Vector3D<T> makeWaveVector(size_t x, size_t y, size_t z) const noexcept;
         [[nodiscard]] inline Vector3D<T> makeWaveVector(Index3D index) const noexcept;
@@ -58,10 +57,8 @@ namespace Physica {
         /* Static members */
         static Index3D makeGridDim(T cutEnergy, const LatticeMatrix& repLatt);
         static Vector3D<T> makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept;
-        template<class Functor>
-        inline static void forKInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func);
-        template<class Functor>
-        inline static void forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func);
+        inline static void forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
+        inline static void forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
     };
 
     template<Scalar T>
@@ -78,8 +75,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Vector V>
-    PlainWaveBasis<T>& PlainWaveBasis<T>::operator=(const V& statePsi) {
+    PlainWaveBasis<T>& PlainWaveBasis<T>::operator=(const Vector auto& statePsi) {
         assert(getNumPlainWave() == statePsi.getLength());
         auto flatGrid = coeffGrid.flatten();
         flatGrid = statePsi;
@@ -142,18 +138,16 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<class Functor>
-    inline void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func) {
-        forND(dim, [&repLatt, dim, func](Index3D index) {
-            func(makeWaveVector(repLatt, index, dim));
+    inline void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn) {
+        forND(dim, [&repLatt, dim, fn](Index3D index) {
+            fn(makeWaveVector(repLatt, index, dim));
         });
     }
 
     template<Scalar T>
-    template<class Functor>
-    inline void PlainWaveBasis<T>::forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func) {
-        forND(dim, [&repLatt, dim, func](Index3D index) {
-            func(makeWaveVector(repLatt, index, dim), index);
+    inline void PlainWaveBasis<T>::forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn) {
+        forND(dim, [&repLatt, dim, fn](Index3D index) {
+            fn(makeWaveVector(repLatt, index, dim), index);
         });
     }
 }

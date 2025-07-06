@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,8 +27,7 @@ using namespace Physica;
 using ScalarType = float64;
 using VectorType = Vector3D<ScalarType>;
 
-template<class Functor>
-VectorType grad(Functor func, const VectorType& at, ScalarType diffStep) {
+VectorType grad(std::invocable<VectorType> auto fn, const VectorType& at, ScalarType diffStep) {
     assert(diffStep.isPositive());
     const size_t length = at.getLength();
     VectorType result(length);
@@ -37,7 +36,7 @@ VectorType grad(Functor func, const VectorType& at, ScalarType diffStep) {
         const ScalarType buffer = copy[i];
         result[i] = Differential<ScalarType>::doublePoint([&](ScalarType alpha) {
             copy[i] = alpha;
-            return func(copy);
+            return fn(copy);
         }, buffer, diffStep);
         copy[i] = buffer;
     }

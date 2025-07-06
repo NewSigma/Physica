@@ -32,16 +32,14 @@ namespace Physica {
     public:
         LUDecomp() = default;
         LUDecomp(size_t size);
-        template<Matrix M>
-        LUDecomp(const M& source);
+        LUDecomp(const Matrix auto& source);
         LUDecomp(const This&) = default;
         LUDecomp(This&&) noexcept = default;
         ~LUDecomp() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source);
+        void compute(const Matrix auto& source);
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -61,14 +59,12 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    template<Matrix M>
-    LUDecomp<T, Pivot>::LUDecomp(const M& source) : LUDecomp(source.getRow()) {
+    LUDecomp<T, Pivot>::LUDecomp(const Matrix auto& source) : LUDecomp(source.getRow()) {
         compute(source);
     }
 
     template<Scalar T, bool Pivot>
-    template<Matrix M>
-    void LUDecomp<T, Pivot>::compute(const M& source) {
+    void LUDecomp<T, Pivot>::compute(const Matrix auto& source) {
         assert(source.getRow() == source.getCol());
         const size_t order = source.getRow();
         if (order != getOrder())

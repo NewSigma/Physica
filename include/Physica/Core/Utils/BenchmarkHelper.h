@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,14 +27,13 @@ namespace Physica {
     class Benchmark {
         using ScalarType = float64;
     public:
-        template<class Functor>
-        [[nodiscard]] static std::pair<ScalarType, ScalarType> run(Functor func, unsigned int numTest, unsigned int numSample) {
+        [[nodiscard]] static std::pair<ScalarType, ScalarType> run(std::invocable auto fn, unsigned int numTest, unsigned int numSample) {
             ScalarType mean = 0, var = 0;
             for (size_t i = 0; i < numTest; ++i) {
                 ScalarType temp = 0;
                 for (size_t j = 0; j < numSample; ++j) {
                     const auto from = Cycler::tic();
-                    func();
+                    fn();
                     const auto to = Cycler::toc();
                     toNextMean(temp, j, ScalarType(Cycler::toSeconds(to - from)));
                 }

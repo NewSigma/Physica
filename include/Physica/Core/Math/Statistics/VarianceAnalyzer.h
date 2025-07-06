@@ -40,8 +40,7 @@ namespace Physica {
         [[nodiscard]] T getParamF() const { return getMSA() / getMSE(); }
         [[nodiscard]] T relationCoeff() const noexcept;
         /* Setters */
-        template<Vector V>
-        void setGroup(size_t groupId, const V& group) { data[groupId] = group; }
+        void setGroup(size_t groupId, const Vector auto& group) { data[groupId] = group; }
     private:
         T getSSE() const;
         T getMSE() const;

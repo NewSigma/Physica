@@ -17,14 +17,12 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Schur.h"
 #include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
 
-template<Matrix T>
-bool isUpperQuasiTriangle(const T& m) {
+bool isUpperQuasiTriangle(const Matrix auto& m) {
     if (m.getRow() != m.getCol())
         return false;
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
@@ -44,8 +42,7 @@ bool isUpperQuasiTriangle(const T& m) {
     return true;
 }
 
-template<Matrix T>
-bool isUpperTriangle(const T& m) {
+bool isUpperTriangle(const Matrix auto& m) {
     if (m.getRow() != m.getCol())
         return false;
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
@@ -56,22 +53,22 @@ bool isUpperTriangle(const T& m) {
     return true;
 }
 
-template<Matrix T>
-bool realSchurTest(const T& mat, double precision) {
-    Schur<typename T::ScalarType> schur(mat, true);
+template<Matrix M>
+bool realSchurTest(const M& mat, double precision) {
+    Schur<typename M::ScalarType> schur(mat, true);
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
         return false;
-    T A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
+    M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
     return (A - mat).norm1() <= mat.norm1() * precision;
 }
 
-template<Matrix T>
-bool schurTest(const T& mat, double precision) {
-    static_assert(T::isComplex, "[Error]: Use realSchurTest is prefered");
-    Schur<typename T::ScalarType> schur(mat, true);
+template<Matrix M>
+bool schurTest(const M& mat, double precision) {
+    static_assert(M::isComplex, "[Error]: Use realSchurTest is prefered");
+    Schur<typename M::ScalarType> schur(mat, true);
     if (!isUpperTriangle(schur.getMatrixT()))
         return false;
-    T A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
+    M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
     return (A - mat).norm1() <= mat.norm1() * precision;
 }
 

@@ -22,8 +22,7 @@
 
 namespace Physica {
     template<Matrix T1, Matrix T2>
-    template<Matrix M>
-    void GEMM<T1, T2>::assign_mkl(LValueMatrix<M>& target) const {
+    void GEMM<T1, T2>::assign_mkl(Matrix auto& target) const {
         constexpr int Major = MatrixOption::isRowMatrix<T1>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr auto Layout = Major == MatrixOption::Row ? CblasRowMajor : CblasColMajor;
         using Tc = T::ComplexType;
@@ -36,7 +35,7 @@ namespace Physica {
         const size_t ldc = target.getMaxMinor();
         auto* a = reinterpret_cast<const Tm*>(mat1.data());
         auto* b = reinterpret_cast<const Tm*>(mat2.data());
-        auto* c = reinterpret_cast<Tm*>(target.getDerived().data());
+        auto* c = reinterpret_cast<Tm*>(target.data());
 
         if constexpr (isComplex) {
             const Tm alpha = 1;

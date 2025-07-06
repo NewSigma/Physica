@@ -79,8 +79,8 @@ namespace Physica {
         [[nodiscard]] inline static auto random_uniform();
         template<RNG R>
         [[nodiscard]] inline static auto random_normal();
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static auto random_any(Distribution& dist);
+        template<RNG R>
+        [[nodiscard]] inline static auto random_any(auto& distribution);
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 

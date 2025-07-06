@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,8 +27,7 @@ namespace Physica {
     public:
         ~MatrixMarket() = default;
         /* Static members */
-        template<Matrix T>
-        static void read(const char* path, T& target);
+        static void read(const char* path, Matrix auto& target);
     private:
         MatrixMarket();
         MatrixMarket(const This&) = default;
@@ -38,8 +37,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
     };
 
-    template<Matrix T>
-    void MatrixMarket::read(const char* path, T& target) {
+    void MatrixMarket::read(const char* path, Matrix auto& target) {
         using ScalarType = T::ScalarType;
         std::ifstream fin(path);
         if (!fin)

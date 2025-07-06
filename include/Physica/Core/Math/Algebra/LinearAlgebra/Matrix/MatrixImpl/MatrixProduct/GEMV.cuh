@@ -44,11 +44,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V>
-        __host__ __device__ void assign(device_obj<V>& target) const;
+        __host__ __device__ void assign(Vector auto& target) const requires(CUDA<decltype(target)>);
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
 
         auto values() const noexcept { return mat.getDerived().values() * vec.getDerived().values(); }
         /* Getters */
@@ -69,8 +67,7 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    template<Vector V>
-    __host__ __device__ void device_obj<GEMV<T, U>>::assign(device_obj<V>& target) const {
+    __host__ __device__ void device_obj<GEMV<T, U>>::assign(Vector auto& target) const requires(CUDA<decltype(target)>) {
         if constexpr (IsHost())
             Base::template assign<V>(target);
         else {
@@ -87,8 +84,7 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    template<Vector V>
-    void device_obj<GEMV<T, U>>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+    void device_obj<GEMV<T, U>>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
         assert(grad_.getLength() == getLength());
         const auto& grad = grad_.values();
         const auto& m = mat.getDerived();

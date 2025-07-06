@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,10 +20,10 @@
 
 using namespace Physica;
 
-template<Vector T>
-bool testPolyRoot(const T& coeffs, double precision) {
-    using ScalarType = T::ScalarType;
-    const Polynomial<ScalarType, T::SizeAtCompile> poly(coeffs);
+template<Vector V>
+bool testPolyRoot(const V& coeffs, double precision) {
+    using ScalarType = V::ScalarType;
+    const Polynomial<ScalarType, V::SizeAtCompile> poly(coeffs);
     auto roots = polyRoot(poly);
     for (const auto& root : roots) {
         auto result = poly(root);

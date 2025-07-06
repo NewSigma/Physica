@@ -25,14 +25,12 @@ namespace Physica {
     device_obj<DenseVector<T, Length, Allocator>>::device_obj(const host_obj& obj) : Storage(obj) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    template<Vector V>
-    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const V& v) requires(CUDA<V>) : Storage(v.getLength()) {
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const Vector auto& v) requires(CUDA<decltype(v)>) : Storage(v.getLength()) {
         v.assign(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<Vector V>
-    void device_obj<DenseVector<T, Length, Allocator>>::resize(const V& x) {
+    void device_obj<DenseVector<T, Length, Allocator>>::resize(const Vector auto& x) {
         resize(x.getLength());
     }
 
@@ -69,9 +67,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<RNG R, class Distribution>
-    inline void device_obj<DenseVector<T, Length, Allocator>>::random_any(Distribution& dist) {
-        host_obj::template random_any<R, Distribution>(getLength(), dist).toDevice(*this);
+    template<RNG R>
+    inline void device_obj<DenseVector<T, Length, Allocator>>::random_any(auto& distribution) {
+        host_obj::template random_any<R>(getLength(), distribution).toDevice(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>
@@ -93,8 +91,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<RNG R, class Distribution>
-    inline auto device_obj<DenseVector<T, Length, Allocator>>::random_any(size_t len, Distribution& dist) -> This {
-        return host_obj::template random_any<R, Distribution>(len, dist).toDevice();
+    template<RNG R>
+    inline auto device_obj<DenseVector<T, Length, Allocator>>::random_any(size_t len, auto& distribution) -> This {
+        return host_obj::template random_any<R>(len, distribution).toDevice();
     }
 }

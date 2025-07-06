@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,8 +40,8 @@ namespace Physica {
             assert(mat.getCol() == vec.getLength());
         }
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        void assign(V1& target) const;
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
@@ -50,8 +50,8 @@ namespace Physica {
     };
 
     template<Scalar T, int Option, Vector V>
-    template<Vector V1, ExecutePolicy P>
-    void SpMV<T, Option, V>::assign(V1& target) const {
+    template<ExecutePolicy P>
+    void SpMV<T, Option, V>::assign(Vector auto& target) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();

@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
-    template<Matrix M>
-    void GEMM<Inverse<TrigUpper<M1>>, M2>::assign_mkl(M& target) const {
+    void GEMM<Inverse<TrigUpper<M1>>, M2>::assign_mkl(Matrix auto& target) const {
+        using M = std::remove_cvref_t<decltype(target)>;
         using Tc = T::ComplexType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;

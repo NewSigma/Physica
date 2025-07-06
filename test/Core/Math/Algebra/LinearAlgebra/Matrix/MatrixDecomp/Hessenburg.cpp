@@ -23,8 +23,7 @@
 
 using namespace Physica;
 
-template<Matrix T>
-bool isHessenburgMatrix(const T& m) {
+bool isHessenburgMatrix(const Matrix auto& m) {
     const size_t order = m.getRow();
     if (m.getRow() != m.getCol())
         return false;
@@ -38,14 +37,14 @@ bool isHessenburgMatrix(const T& m) {
     return true;
 }
 
-template<Matrix T>
-bool hessTest(const T& source, double tolerance) {
-    Hessenburg<typename T::ScalarType> hess(source);
-    T H = hess.getMatrixH();
+template<Matrix M>
+bool hessTest(const M& source, double tolerance) {
+    Hessenburg<typename M::ScalarType> hess(source);
+    M H = hess.getMatrixH();
     if (!isHessenburgMatrix(H))
         return false;
-    T Q = hess.getMatrixQ();
-    T A = (Q * H).compute() * Q.hermite();
+    M Q = hess.getMatrixQ();
+    M A = (Q * H).compute() * Q.hermite();
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;

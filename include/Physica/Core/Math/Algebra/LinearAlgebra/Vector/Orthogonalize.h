@@ -26,8 +26,7 @@ namespace Physica {
      * Reference:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:254-255
      */
-    template<Matrix T, Vector U>
-    void gramSchmidt(const T& base, U& v) {
+    void gramSchmidt(const Matrix auto& base, Vector auto& v) {
         assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < base.getCol(); ++i) {
             const auto col = base.col(i);
@@ -59,8 +58,7 @@ namespace Physica {
         v *= reciprocal(sqrt(squaredNorm));
     }
 
-    template<Matrix T>
-    void gramSchmidt(T& m) {
+    void gramSchmidt(Matrix auto& m) {
         assert(m.getRow() >= m.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < m.getCol(); ++i) {
             auto col1 = m.col(i);

@@ -47,13 +47,11 @@ namespace Physica {
             return tanh(Base::getExpr().template packetPartial<Pack>(index, count));
         }
 
-        template<Vector U, Vector V1>
-        void reverse(const U& y, const V1& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& y, const Vector auto& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
-    template<Vector U, Vector V1>
-    void VectorExpr<ExprType::Tanh, V>::reverse(const U& y, const V1& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Tanh, V>::reverse(const Vector auto& y, const Vector auto& grad_) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard((Tv(1) - square(y.values())), grad_));
     }

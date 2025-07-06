@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,14 +29,12 @@ namespace Physica {
     public:
         PolarPlot(QWidget* parent = nullptr);
 
-        template<Vector T1, Vector T2>
-        QSplineSeries& spline(const T1& theta, const T2& rho);
+        QSplineSeries& spline(const Vector auto& theta, const Vector auto& rho);
         /* Getters */
         [[nodiscard]] QPolarChart* chart() { return static_cast<QPolarChart*>(Base::chart()); }
     };
 
-    template<Vector T1, Vector T2>
-    QSplineSeries& PolarPlot::spline(const T1& theta, const T2& rho) {
+    QSplineSeries& PolarPlot::spline(const Vector auto& theta, const Vector auto& rho) {
         assert(rho.getLength() == theta.getLength());
         QSplineSeries* series = new QSplineSeries();
         for (size_t i = 0; i < rho.getLength(); ++i)

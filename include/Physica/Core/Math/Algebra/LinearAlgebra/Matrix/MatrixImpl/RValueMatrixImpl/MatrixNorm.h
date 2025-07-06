@@ -61,10 +61,8 @@ namespace Physica {
         size_t index = 0;
         while (iteration < maxIteration) {
             const Derived& m = Base::getDerived();
-            y.template operator=<decltype(m * x), P>(m * x);
-
-            using MatVecDot = decltype(m.hermite() * unit(y));
-            z.template operator=<MatVecDot, P>(m.hermite() * unit(y));
+            y.template operator=<P>(m * x);
+            z.template operator=<P>(m.hermite() * unit(y));
             const Trv criteria = iteration == 0 ? (z.reals().sum().value() * factor) : z[index].real().value();
             const bool isConverged = z.values().normInf() <= criteria * Trv(std::numeric_limits<T>::epsilon() + 1);
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1

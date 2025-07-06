@@ -45,8 +45,8 @@ namespace Physica {
         /* Operators */
         SCRBaro& operator=(SCRBaro obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class MDType, class ForceModel>
-        inline void npt_step(MDType& rpmd, const LatticeMatrix& stress, T deltaT);
+        template<class ForceModel>
+        inline void npt_step(auto& rpmd, const LatticeMatrix& stress, T deltaT);
         using Base::swap;
         /* Getters */
         using Base::getLastStress;
@@ -61,9 +61,8 @@ namespace Physica {
             T compressRate, T tempT, T targetP) : Base(compressRate, tempT, targetP) {}
 
     template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
-    template<class MDType, class ForceModel>
-    inline void SCRBaro<T, NumReplica, R, Type>::npt_step(
-            MDType& rpmd, const LatticeMatrix& stress, T deltaT) {
+    template<class ForceModel>
+    inline void SCRBaro<T, NumReplica, R, Type>::npt_step(auto& rpmd, const LatticeMatrix& stress, T deltaT) {
         const T pressPerDOF = (Base::tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
         const auto decayMatrix = Base::makeDecayMatrix(stress, pressPerDOF);
         const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);

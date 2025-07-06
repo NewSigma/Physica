@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,8 +38,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         Plot& operator()(int row, int col);
         /* Operations */
-        template<class Functor>
-        void forPlot(Functor func) noexcept;
+        void forPlot(std::invocable<Plot&> auto fn) noexcept;
 
         void toSvg(const char* path, int resolution = 0);
         /* Getters */
@@ -60,11 +59,10 @@ namespace Physica {
         void setFontSize(int size) { forPlot([&](Plot& p) { p.setFontSize(size); }); }
     };
 
-    template<class Functor>
-    void MultiPlot::forPlot(Functor func) noexcept {
+    void MultiPlot::forPlot(std::invocable<Plot&> auto fn) noexcept {
         for (int r = 0; r < getRow(); ++r)
             for (int c = 0; c < getCol(); ++c)
-                func(operator()(r, c));
+                fn(operator()(r, c));
     }
 
     inline void MultiPlot::setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY) {

@@ -35,9 +35,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<typename T> inline void write(T t) noexcept;
-        template<typename T> inline void read(T* __restrict t) noexcept;
-        template<typename T> inline void cread(T* __restrict t, size_t bias) const noexcept;
+        template<typename T> void write(T t) noexcept;
+        template<typename T> void read(T* __restrict t) noexcept;
+        template<typename T> void cread(T* __restrict t, size_t bias) const noexcept;
         void writeBytes(const char* __restrict src, size_t bytes) noexcept;
         void readBytes(char* __restrict dest, size_t bytes) noexcept;
         void creadBytes(char* __restrict dest, size_t bytes, size_t bias) const noexcept;

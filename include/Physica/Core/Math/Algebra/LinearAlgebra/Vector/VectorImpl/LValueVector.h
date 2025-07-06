@@ -49,29 +49,29 @@ namespace Physica {
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
 
-        template<Scalar T> Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
-        template<Scalar T> void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
-        template<Scalar T> void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
-        template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
-        template<Scalar T> void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
+        template<Scalar T>
+        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
+        void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
+        void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
+        void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
+        void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Vector V, ExecutePolicy P = Sequential>
-        inline Derived& operator=(const V& v_) requires(!CUDA<V>);
-        template<Vector V> inline void operator+=(const V& v);
-        template<Vector V> inline void operator-=(const V& v);
+        template<ExecutePolicy P = Sequential>
+        Derived& operator=(const Vector auto& v);
+        void operator+=(const Vector auto& v);
+        void operator-=(const Vector auto& v);
 
         [[nodiscard]] inline RefTy operator[](size_t index);
         [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */
         [[nodiscard]] ConstRefTy calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
-        template<Packet Pack> void writePacket(size_t index, const Pack packet);
-        template<Packet Pack> void writePacketPartial(size_t index, size_t count, const Pack packet);
+        void writePacket(size_t index, const Packet auto packet);
+        void writePacketPartial(size_t index, size_t count, const Packet auto packet);
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 
-        template<class T>
-        void reverse(const T& grad) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
         [[nodiscard]] inline auto head(size_t to) noexcept;
@@ -109,8 +109,8 @@ namespace Physica {
         inline void random_uniform();
         template<RNG R>
         inline void random_normal();
-        template<RNG R, class Distribution>
-        inline void random_any(Distribution& dist);
+        template<RNG R>
+        inline void random_any(auto& distribution);
 
         template<int GradOrder = 1>
         auto grads() const noexcept;

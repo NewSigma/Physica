@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../SteepestDescent.h"
+
 namespace Physica {
     template<Scalar T, size_t Dim>
     SteepestDescent<T, Dim>::SteepestDescent(T maxStepSize, T decreaseCondNum, T curvatureCondNum)
@@ -31,22 +33,20 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
-    void SteepestDescent<T, Dim>::init(VectorType initial, Functor func, GradFunctor grad) {
+    void SteepestDescent<T, Dim>::init(VectorType initial, std::invocable<VectorType> auto fn, std::invocable<VectorType> auto grad) {
         tryX = (std::move(initial));
         nowX = tryX;
-        nowY = func(tryX);
+        nowY = fn(tryX);
         gradG = grad(nowX);
     }
 
     template<Scalar T, size_t Dim>
-    template<class Functor, class GradFunctor>
-    void SteepestDescent<T, Dim>::step(Functor func, GradFunctor grad) {
+    void SteepestDescent<T, Dim>::step(std::invocable<VectorType> auto fn, std::invocable<VectorType> auto grad) {
         VectorType direction = -gradG;
-        const T stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
+        const T stepSize = lineSearch.run(fn, grad, nowX, gradG, direction);
 
         nowX += direction * stepSize;
-        nowY = func(nowX);
+        nowY = fn(nowX);
         gradG = grad(nowX);
     }
 

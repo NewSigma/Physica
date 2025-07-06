@@ -39,8 +39,7 @@ namespace Physica {
         constexpr static bool isComplex = true;
     public:
         using Storage::Storage;
-        template<Matrix M>
-        DenseHermiteMatrix(const M& mat);
+        DenseHermiteMatrix(const Matrix auto& mat);
         DenseHermiteMatrix(const This&) = default;
         DenseHermiteMatrix(This&&) noexcept = default;
         ~DenseHermiteMatrix() = default;
@@ -61,8 +60,8 @@ namespace Physica {
         void random_uniform();
         template<RNG R>
         void random_normal();
-        template<RNG R, class Distribution>
-        void random_any(Distribution& dist);
+        template<RNG R>
+        void random_any(auto& distribution);
 
         inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
         inline H5DataSet<1> write(H5Loc& loc, const char* name) const;
@@ -78,17 +77,15 @@ namespace Physica {
         [[nodiscard]] inline static This random_uniform(size_t order);
         template<RNG R>
         [[nodiscard]] inline static This random_normal(size_t order);
-        template<RNG R, class Distribution>
-        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist);
-        template<Matrix M>
-        [[nodiscard]] bool isHermiteMatrix(const M& mat, double precision);
+        template<RNG R>
+        [[nodiscard]] inline static This random_any(size_t order, auto& distribution);
+        [[nodiscard]] bool isHermiteMatrix(const Matrix auto& mat, double precision);
     };
     /**
      * Save the upper triangle part of \param mat
      */
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    DenseHermiteMatrix<T, Order>::DenseHermiteMatrix(const M& mat)
+    DenseHermiteMatrix<T, Order>::DenseHermiteMatrix(const Matrix auto& mat)
             : DenseHermiteMatrix(mat.getRow()) {
         assert(mat.getRow() == mat.getCol());
         size_t index = 0;
@@ -151,9 +148,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<RNG R, class Distribution>
-    void DenseHermiteMatrix<T, Order>::random_any(Distribution& dist) {
-        asVector().template random_any<R, Distribution>(dist);
+    template<RNG R>
+    void DenseHermiteMatrix<T, Order>::random_any(auto& distribution) {
+        asVector().template random_any<R>(distribution);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).imag() = RealType(0);
     }
@@ -184,11 +181,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<RNG R, class Distribution>
+    template<RNG R>
     [[nodiscard]] inline DenseHermiteMatrix<T, Order>
-    DenseHermiteMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
+    DenseHermiteMatrix<T, Order>::random_any(size_t order, auto& distribution) {
         This result(order);
-        result.template random_any<R, Distribution>(dist);
+        result.template random_any<R>(distribution);
         return result;
     }
 #ifdef PHYSICA_HDF5
@@ -205,8 +202,7 @@ namespace Physica {
     }
 #endif
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    bool DenseHermiteMatrix<T, Order>::isHermiteMatrix(const M& mat, double precision) {
+    bool DenseHermiteMatrix<T, Order>::isHermiteMatrix(const Matrix auto& mat, double precision) {
         if (mat.getRow() != mat.getCol())
             return false;
 

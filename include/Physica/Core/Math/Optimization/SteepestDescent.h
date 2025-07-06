@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -40,8 +40,8 @@ namespace Physica {
         /* Operators */
         SteepestDescent& operator=(SteepestDescent obj) noexcept;
         /* Operations */
-        template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
-        template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
+        void init(VectorType initial, std::invocable<VectorType> auto fn, std::invocable<VectorType> auto grad);
+        void step(std::invocable<VectorType> auto fn, std::invocable<VectorType> auto grad);
         void swap(SteepestDescent& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] inline size_t getDim() const noexcept;

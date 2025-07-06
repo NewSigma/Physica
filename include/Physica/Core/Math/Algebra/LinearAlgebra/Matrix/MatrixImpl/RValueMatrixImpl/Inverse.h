@@ -158,8 +158,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Operations */
-        template<Matrix M1>
-        void assign(M1& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] const M& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
@@ -172,8 +171,8 @@ namespace Physica {
     }
 
     template<Matrix M>
-    template<Matrix M1>
-    void Inverse<M>::assign(M1& target) const {
+    void Inverse<M>::assign(Matrix auto& target) const {
+        using M1 = std::remove_cvref_t<decltype(target)>;
         constexpr size_t Size = M::RowAtCompile == Dynamic ? M1::RowAtCompile : M::RowAtCompile;
         Internal::InverseImpl<M, M1, Size>::run(mat, target);
     }

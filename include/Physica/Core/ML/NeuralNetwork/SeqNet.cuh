@@ -35,15 +35,13 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operations */
-        template<class Dataset, RNG R, ExecutePolicy P>
-        void train_step(int batchSize, const Dataset& dataset);
-        template<class Dataset, RNG R, ExecutePolicy P>
-        void train_step_for(int64_t numStep, int batchSize, const Dataset& dataset);
+        template<RNG R, ExecutePolicy P>
+        void train_step(int batchSize, const auto& dataset);
+        template<RNG R, ExecutePolicy P>
+        void train_step_for(int64_t numStep, int batchSize, const auto& dataset);
 
-        template<class Dataset>
-        [[nodiscard]] auto loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
-        template<class Dataset>
-        [[nodiscard]] ScalarType loss(const Dataset& dataset) const;
+        [[nodiscard]] auto loss(const auto& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
+        [[nodiscard]] ScalarType loss(const auto& dataset) const;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;
@@ -54,27 +52,26 @@ namespace Physica {
     };
 
     template<class Derived>
-    template<class Dataset, RNG R, ExecutePolicy P>
-    void device_obj<SeqNet<Derived>>::train_step(int batchSize, const Dataset& dataset) {
+    template<RNG R, ExecutePolicy P>
+    void device_obj<SeqNet<Derived>>::train_step(int batchSize, const auto& dataset) {
         static_assert(IsTrain, "[Error]: train_step must be called under training mode");
         const auto indices = R::random_int(batchSize, 0, dataset.getSize() - 1);
         const Tv mean_grad = reciprocal(Tv(batchSize));
         for (auto index : indices)
-            loss<Dataset>(dataset, index).reverse(mean_grad);
+            loss(dataset, index).reverse(mean_grad);
         Base::step();
         Base::zero_grad();
     }
 
     template<class Derived>
-    template<class Dataset, RNG R, ExecutePolicy P>
-    void device_obj<SeqNet<Derived>>::train_step_for(int64_t numStep, int batchSize, const Dataset& dataset) {
+    template<RNG R, ExecutePolicy P>
+    void device_obj<SeqNet<Derived>>::train_step_for(int64_t numStep, int batchSize, const auto& dataset) {
         for (int64_t _ = 0; _ < numStep; ++_)
-            train_step<Dataset, R, P>(batchSize, dataset);
+            train_step<R, P>(batchSize, dataset);
     }
 
     template<class Derived>
-    template<class Dataset>
-    auto device_obj<SeqNet<Derived>>::loss(const Dataset& dataset) const -> ScalarType {
+    auto device_obj<SeqNet<Derived>>::loss(const auto& dataset) const -> ScalarType {
         static_assert(!IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
         ScalarType result = 0;

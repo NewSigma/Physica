@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -42,17 +42,15 @@ namespace Physica {
         /* Operators */
         Polynomial& operator=(const Polynomial& p) = default;
         Polynomial& operator=(Polynomial&& p) noexcept { coeffs = std::move(p.coeffs); return *this; }
-        template<Scalar U>
-        Internal::BinaryScalarOpRtnTy<T, U>::Type operator()(const U& x) const;
+        auto operator()(const auto& x) const;
         /* Getters */
         [[nodiscard]] size_t getPower() const noexcept { return coeffs.getLength(); }
         [[nodiscard]] const VectorType& getCoeffVector() const noexcept { return coeffs; }
     };
 
     template<Scalar T, size_t Power>
-    template<Scalar U>
-    Internal::BinaryScalarOpRtnTy<T, U>::Type
-    Polynomial<T, Power>::operator()(const U& x) const {
+    auto Polynomial<T, Power>::operator()(const auto& x) const {
+        using U = std::remove_cvref<decltype(x)>::type;
         using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
         if (coeffs.empty())
             return ResultType(0);

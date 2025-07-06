@@ -32,24 +32,22 @@ namespace Physica {
         PHYSICA_API static int nice_incr;
     public:
         /* Operations */
-        template<class Functor, class... Args>
-        static FutureType schedule(Functor func, Args&&... args);
-        template<class Functor>
-        static Task<Concurrent> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+        template<class... Args>
+        static FutureType schedule(std::invocable<Args...> auto fn, Args&&... args);
+        static Task<Concurrent> parallel_for(std::invocable<unsigned int> auto fn, unsigned int loopCount, unsigned int core);
     };
 
-    template<class Functor, class... Args>
-    auto ProcessExecutor::schedule(Functor func, Args&&... args) -> FutureType {
-        using ResultType = std::invoke_result<Functor, Args&&...>::type;
+    template<class... Args>
+    auto ProcessExecutor::schedule(std::invocable<Args...> auto fn, Args&&... args) -> FutureType {
+        using ResultType = std::invoke_result<decltype(fn), Args&&...>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: ProcessExecutor does not support functors with return value");
 
-        SubProcess process([=]() { func(std::forward<Args>(args)...); }, nice_incr);
+        SubProcess process([=]() { fn(std::forward<Args>(args)...); }, nice_incr);
         return process.execute();
     }
 
-    template<class Functor>
-    Task<Concurrent> ProcessExecutor::parallel_for(Functor func, unsigned int loopCount, unsigned int core) {
-        using ResultType = std::invoke_result<Functor, unsigned int>::type;
+    Task<Concurrent> ProcessExecutor::parallel_for(std::invocable<unsigned int> auto fn, unsigned int loopCount, unsigned int core) {
+        using ResultType = std::invoke_result<decltype(fn), unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount >= core);
         assert(core > 0);
@@ -60,9 +58,9 @@ namespace Physica {
         Array<FutureType> futures(core);
         for (unsigned int _ = 0; _ < core; ++_) {
             SubProcess process([=]() {
-                                   for (unsigned int i = from; i < to; ++i)
-                                       func(i);
-                               }, nice_incr);
+                for (unsigned int i = from; i < to; ++i)
+                    fn(i);
+            }, nice_incr);
             futures.append(process.execute());
             from += maxLoopPerCore;
             const unsigned int next_to = to + maxLoopPerCore;

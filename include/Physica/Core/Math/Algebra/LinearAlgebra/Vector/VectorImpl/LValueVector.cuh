@@ -42,17 +42,17 @@ namespace Physica {
         /* Operators */
         __host__ __device__ inline This& operator=(const This& obj);
         __host__ __device__ inline This& operator=(This&& obj);
-        template<Vector V>
-        __host__ __device__ device_obj<Derived>& operator=(const device_obj<V>& v);
+        __host__ __device__ device_obj<Derived>& operator=(const Vector auto& v) requires(CUDA<decltype(v)>);
 
-        template<Scalar T> inline device_obj<Derived>& operator=(const T& x);
-        template<Scalar T> __host__ __device__ void operator+=(const T& x);
-        template<Scalar T> __host__ __device__ void operator-=(const T& x);
-        template<Scalar T> __host__ __device__ void operator*=(const T& x);
-        template<Scalar T> __host__ __device__ void operator/=(const T& x);
+        template<Scalar T>
+        device_obj<Derived>& operator=(const T& x);
+        __host__ __device__ void operator+=(const Scalar auto& x);
+        __host__ __device__ void operator-=(const Scalar auto& x);
+        __host__ __device__ void operator*=(const Scalar auto& x);
+        __host__ __device__ void operator/=(const Scalar auto& x);
 
-        template<Vector V> __host__ __device__ inline void operator+=(const V& v) requires(CUDA<V>);
-        template<Vector V> __host__ __device__ inline void operator-=(const V& v) requires(CUDA<V>);
+        __host__ __device__ inline void operator+=(const Vector auto& v) requires(CUDA<decltype(v)>);
+        __host__ __device__ inline void operator-=(const Vector auto& v) requires(CUDA<decltype(v)>);
 
         [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
@@ -60,8 +60,7 @@ namespace Physica {
         [[nodiscard]] __device__ ConstRefTy calc(size_t index) const { return operator[](index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return calc(index).value(); }
 
-        template<class T>
-        __host__ __device__ void reverse(const T& grad) const noexcept requires(isReverseDiff);
+        __host__ __device__ void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline auto head(size_t to) noexcept;

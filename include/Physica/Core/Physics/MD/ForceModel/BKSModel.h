@@ -76,8 +76,8 @@ namespace Physica {
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
 
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const;
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long(const MDCellType& cell);
 
@@ -168,8 +168,8 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    template<Vector V, ExecutePolicy P>
-    void BKSModel<T, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
+    template<ExecutePolicy P>
+    void BKSModel<T, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, Vector auto& result) {
         static_assert(P != GPU, "[Error]: CUDA is not supported");
         assert(cell.getNumParticle() % 3 == 0);
         auto task = schedule<P>([this, &cell, &result]() {

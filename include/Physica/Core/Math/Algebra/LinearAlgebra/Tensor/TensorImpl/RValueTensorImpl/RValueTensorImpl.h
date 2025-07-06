@@ -23,8 +23,7 @@
 
 namespace Physica {
     template<class Derived>
-    template<Tensor X>
-    void RValueTensor<Derived>::assign(X& x) const {
+    void RValueTensor<Derived>::assign(Tensor auto& x) const {
         const auto& derived = Base::getDerived();
         for (size_t i = 0; i < derived.getSize(); ++i) {
             const auto indices = toIndexND(i);
@@ -43,10 +42,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Functor>
-    void RValueTensor<Derived>::forND(Functor func) const {
-        Physica::forND(getShape(), [this, func](const IndexArray& index) {
-            func(calc(index), index);
+    void RValueTensor<Derived>::forND(std::invocable<T, IndexArray> auto fn) const {
+        Physica::forND(getShape(), [this, fn](const IndexArray& index) {
+            fn(calc(index), index);
         });
     }
 
@@ -110,10 +108,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Scalar T, bool IsUnitLattice, class Functor>
-    inline void RValueTensor<Derived>::forPointIndexInTensor(
-            const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
-        forPointIndexInTensor<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
+    template<Scalar T, bool IsUnitLattice>
+    void RValueTensor<Derived>::forPointIndexInTensor(
+            const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn) {
+        forPointIndexInTensor<T, IsUnitLattice>(grid.getDim(), lattice, fn);
     }
 
     template<class Derived>

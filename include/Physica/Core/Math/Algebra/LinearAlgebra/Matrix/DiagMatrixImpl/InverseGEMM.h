@@ -39,8 +39,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(M& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
@@ -53,8 +52,7 @@ namespace Physica {
             const M1& mat1_, const Inverse<DiagMatrix<U, Order>>& inv) : mat1(mat1_), mat2(inv.getExpr()) {}
 
     template<Matrix M1, Scalar U, size_t Order>
-    template<Matrix M>
-    void GEMM<M1, Inverse<DiagMatrix<U, Order>>>::assign(M& target) const {
+    void GEMM<M1, Inverse<DiagMatrix<U, Order>>>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = mat1.col(i) * reciprocal(mat2.diag()[i]);
     }
@@ -77,8 +75,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(M& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
@@ -91,8 +88,7 @@ namespace Physica {
             const Inverse<DiagMatrix<U, Order>>& mat1_, const M2& mat2_) : mat1(mat1_.getExpr()), mat2(mat2_) {}
 
     template<Scalar U, size_t Order, Matrix M2>
-    template<Matrix M>
-    void GEMM<Inverse<DiagMatrix<U, Order>>, M2>::assign(M& target) const {
+    void GEMM<Inverse<DiagMatrix<U, Order>>, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.row(i) = reciprocal(mat1.diag()[i]) * mat2.row(i);
     }

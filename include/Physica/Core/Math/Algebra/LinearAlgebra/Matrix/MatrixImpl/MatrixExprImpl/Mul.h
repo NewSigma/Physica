@@ -91,8 +91,7 @@ namespace Physica {
             return getLHS().calc_value(row, col) * getRHS().calc_value(row, col);
         }
 
-        template<Matrix U>
-        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
         using Base::reverse;
         /* Getters */
         using Base::getLHS;
@@ -100,8 +99,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    template<Matrix U>
-    void MatrixExpr<ExprType::Mul, M1, M2>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void MatrixExpr<ExprType::Mul, M1, M2>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         if constexpr (Diffable<M1>)

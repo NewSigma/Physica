@@ -81,15 +81,13 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    template<class Functor>
-    void ArrayND<T, Dim>::forND(Functor func) {
+    void ArrayND<T, Dim>::forND(std::invocable<T&, IndexArray> auto func) {
         for (size_t i = 0; i < getSize(); ++i)
             func(arr[i], toIndexND(i));
     }
 
     template<class T, int Dim>
-    template<class Functor>
-    void ArrayND<T, Dim>::forND(Functor func) const {
+    void ArrayND<T, Dim>::forND(std::invocable<const T&, IndexArray> auto func) const {
         for (size_t i = 0; i < getSize(); ++i)
             func(arr[i], toIndexND(i));
     }

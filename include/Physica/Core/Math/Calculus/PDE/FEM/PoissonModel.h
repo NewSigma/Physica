@@ -69,7 +69,7 @@ namespace Physica {
                             const VectorType g2 = inv_jacobi.transpose() * elem.grad(j, p);
                             return abs(elem.jacobi(p).det()) * (g1 * g2);
                         };
-                        const ScalarType integral = ElementType::template gauss_integral<decltype(func), -1>(func);
+                        const ScalarType integral = ElementType::template gauss_integral<-1>(func);
 
                         switch (nodeTypes[baseNode]) {
                         case NodeType::Free: {

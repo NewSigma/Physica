@@ -40,7 +40,7 @@ namespace Physica {
         /* Operators */
         LatticeModel& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Functor> void forSiteInLattice(Functor func) const;
+        void forSiteInLattice(std::invocable<IndexType> auto func) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -56,8 +56,7 @@ namespace Physica {
             : superSize(std::move(superSize_)), numUnitCellSite(numUnitCellSite_) {}
 
     template<int Dim>
-    template<class Functor>
-    void LatticeModel<Dim>::forSiteInLattice(Functor func) const {
+    void LatticeModel<Dim>::forSiteInLattice(std::invocable<IndexType> auto func) const {
         if constexpr (Dim == 1) {
             for (size_t x = 0; x < superSize[0]; ++x)
                 for (size_t site = 0; site < numUnitCellSite; ++site)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,7 +36,7 @@ namespace Physica {
         MatrixSequence(This&&) = default;
         ~MatrixSequence() = default;
         /* Operators */
-        This& operator=(This obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         bool step();
         void swap(This& __restrict obj) noexcept;
@@ -50,12 +50,6 @@ namespace Physica {
             : mat(row, col)
             , fin(std::move(fin_))
             , stepNum(0) {}
-
-    template<Scalar T>
-    MatrixSequence<T>& MatrixSequence<T>::operator=(MatrixSequence obj) noexcept {
-        swap(obj);
-        return *this;
-    }
     /**
      * \returns true if read successfully
      */

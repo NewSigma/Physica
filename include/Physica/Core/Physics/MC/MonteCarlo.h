@@ -21,6 +21,7 @@
 namespace Physica {
     template<Scalar T, unsigned int Dim = 3>
     class MonteCarlo {
+        using This = MonteCarlo<T, Dim>;
         using MDCellType = MDCell<T, Dim>;
         using PositionMatrix = MDCellType::PositionMatrix;
         using VectorType = VectorND<T>;
@@ -38,10 +39,8 @@ namespace Physica {
         /* Operators */
         MonteCarlo& operator=(MonteCarlo mc) noexcept;
         /* Operations */
-        template<RNG R,
-                 class ForceModel,
-                 ExecutePolicy P>
-        void nvt_step(const ForceModel& forceModel);
+        template<RNG R, ExecutePolicy P>
+        void nvt_step(const auto& forceModel);
         void normalizePos() { cell.normalize(); }
         void swap(MonteCarlo& __restrict mc) noexcept;
         /* Getters */
@@ -61,8 +60,8 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<RNG R, class ForceModel, ExecutePolicy P>
-    void MonteCarlo<T, Dim>::nvt_step(const ForceModel& forceModel) {
+    template<RNG R, ExecutePolicy P>
+    void MonteCarlo<T, Dim>::nvt_step(const auto& forceModel) {
         for (size_t i = 0; i < cell.getNumParticle(); ++i) {
             for (unsigned int j = 0; j < Dim; ++j)
                 buffer(i, j) = cell.getPos()(i, j) + T::template random_uniform<R>();
@@ -85,7 +84,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    void MonteCarlo<T, Dim>::swap(MonteCarlo& __restrict mc) noexcept {
+    void MonteCarlo<T, Dim>::swap(This& __restrict mc) noexcept {
         assert(this != &mc && "[Error]: Self swap is likely a bug");
         cell.swap(mc.cell);
         buffer.swap(mc.buffer);

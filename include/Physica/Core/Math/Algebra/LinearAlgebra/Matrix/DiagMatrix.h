@@ -43,8 +43,7 @@ namespace Physica {
         [[nodiscard]] V&& operator*(V&& v) const noexcept;
         using Base::operator*;
 
-        template<Scalar U>
-        void operator*=(const U& x);
+        void operator*=(const Scalar auto& x);
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
@@ -76,8 +75,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Scalar U>
-    void DiagMatrix<T, Order>::operator*=(const U& x) {
+    void DiagMatrix<T, Order>::operator*=(const Scalar auto& x) {
         diags *= x;
     }
 

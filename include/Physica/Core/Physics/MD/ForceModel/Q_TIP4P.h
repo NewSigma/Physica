@@ -71,8 +71,8 @@ namespace Physica {
 
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_unsort(const MDCellType& cell);
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short(const MDCellType& cell);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short_unsort(const MDCellType& cell);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long(const MDCellType& cell);
@@ -107,7 +107,7 @@ namespace Physica {
         void force_short_intraMolecule(const MDCellType& cell, VectorND<T>& shortForce) const;
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_short_PartialChargeRepr(const PositionMatrix& chargePos);
         template<ExecutePolicy P> [[nodiscard]] VectorND<T> force_long_PartialChargeRepr(const PositionMatrix& chargePos);
-        template<Vector V> void changeRepr(ContinuousVector<V>& ewaldForce) const;
+        void changeRepr(Vector auto& ewaldForce) const;
 
         [[nodiscard]] static T modifiedMorsePot(T r);
         [[nodiscard]] static T modifiedMorseForce(T r);
@@ -157,8 +157,8 @@ namespace Physica {
     }
 
     template<Scalar T, class EwaldType>
-    template<Vector V, ExecutePolicy P>
-    void Q_TIP4P<T, EwaldType>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
+    template<ExecutePolicy P>
+    void Q_TIP4P<T, EwaldType>::forceAsync(const MDCellType& cell, Vector auto& result) {
         assert(cell.getNumParticle() % 3 == 0);
         VectorND<T> temp(getNumParticle() * 3, 0);
         auto task = schedule<P>([this, &cell, &temp]() {
@@ -566,8 +566,7 @@ namespace Physica {
      * Change representation: from partial charge representation to HOH representation
      */
     template<Scalar T, class EwaldType>
-    template<Vector V>
-    void Q_TIP4P<T, EwaldType>::changeRepr(ContinuousVector<V>& ewaldForce) const {
+    void Q_TIP4P<T, EwaldType>::changeRepr(Vector auto& ewaldForce) const {
         const size_t numMolecule = getNumMolecule();
         const size_t minIndexO = 2 * numMolecule;
         const size_t maxIndexO = minIndexO + numMolecule;

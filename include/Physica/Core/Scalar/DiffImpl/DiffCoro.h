@@ -84,8 +84,7 @@ namespace Physica {
         using Base::operator=;
         /* Operations */
         void reverse_final() noexcept;
-        template<class T>
-        void reverse_final(T&& x) noexcept;
+        void reverse_final(auto&& x) noexcept;
         void swap(This& __restrict obj) noexcept;
     private:
         void reverse_impl() noexcept;

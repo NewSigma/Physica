@@ -47,8 +47,8 @@ namespace Physica {
     public:
         explicit ConjugateVector(const V& vec_) : vec(vec_) {}
         /* Operations */
-        template<Vector V1, ExecutePolicy P = Sequential>
-        void assign(V1& target) const;
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& target) const;
         /* Getters */
         [[nodiscard]] T calc(size_t index) const { return vec.calc(index).conjugate(); }
         [[nodiscard]] Tv calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
@@ -56,8 +56,8 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<Vector V1, ExecutePolicy P>
-    void ConjugateVector<V>::assign(V1& target) const {
+    template<ExecutePolicy P>
+    void ConjugateVector<V>::assign(Vector auto& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target[i] = calc(i);
     }

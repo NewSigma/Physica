@@ -23,8 +23,7 @@
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    template<Matrix M>
-    void QRDecomp<T, Pivot>::compute_mkl(const M& source) {
+    void QRDecomp<T, Pivot>::compute_mkl(const Matrix auto& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());

@@ -44,8 +44,7 @@ namespace Physica {
         WorkingMatrix working;
         HouseholderNorm normVector;
     public:
-        template<Matrix M>
-        Hessenburg(const M& source);
+        Hessenburg(const Matrix auto& source);
         Hessenburg(const This&) = default;
         Hessenburg(This&&) noexcept = default;
         ~Hessenburg() = default;
@@ -59,14 +58,12 @@ namespace Physica {
         [[nodiscard]] MatrixH getMatrixH() const noexcept { return MatrixH(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
     private:
-        template<Matrix M>
-        void compute(const M& source);
+        void compute(const Matrix auto& source);
         friend class HessenburgMatrixH<T, Order>;
     };
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    Hessenburg<T, Order>::Hessenburg(const M& source) {
+    Hessenburg<T, Order>::Hessenburg(const Matrix auto& source) {
         resize(source.getRow());
         compute(source);
     }
@@ -94,8 +91,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void Hessenburg<T, Order>::compute(const M& source) {
+    void Hessenburg<T, Order>::compute(const Matrix auto& source) {
         assert(source.getRow() == source.getCol());
         assert(source.getRow() > 2);
         const size_t order = source.getRow();
@@ -136,16 +132,14 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        void assign(LValueMatrix<M>& target) const;
+        void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return hess.getSize(); }
         [[nodiscard]] size_t getCol() const noexcept { return hess.getSize(); }
     };
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void HessenburgMatrixH<T, Order>::assign(LValueMatrix<M>& target) const {
+    void HessenburgMatrixH<T, Order>::assign(Matrix auto& target) const {
         using RealType = T::RealType;
         const size_t order = getRow();
         size_t i = 0;

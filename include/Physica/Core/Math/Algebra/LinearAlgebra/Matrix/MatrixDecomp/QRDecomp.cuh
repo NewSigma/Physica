@@ -42,16 +42,14 @@ namespace Physica {
     public:
         device_obj() = default;
         device_obj(size_t row, size_t col);
-        template<Matrix M>
-        device_obj(const M& source);
+        device_obj(const Matrix auto& source);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        void compute(const M& source);
+        void compute(const Matrix auto& source);
 
         [[nodiscard]] __device__ T calcDetQ() const;
         void toQDT();
@@ -76,14 +74,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Matrix M>
-    device_obj<QRDecomp<T>>::device_obj(const M& source) : device_obj(source.getRow(), source.getCol()) {
+    device_obj<QRDecomp<T>>::device_obj(const Matrix auto& source) : device_obj(source.getRow(), source.getCol()) {
         compute(source);
     }
 
     template<Scalar T>
-    template<Matrix M>
-    void device_obj<QRDecomp<T>>::compute(const M& source) {
+    void device_obj<QRDecomp<T>>::compute(const Matrix auto& source) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
         working = source;

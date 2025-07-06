@@ -46,8 +46,7 @@ namespace Physica {
         bool computeMatrixU;
         T exshift;
     public:
-        template<Matrix M>
-        Schur(const M& source, bool computeMatrixU_ = false);
+        Schur(const Matrix auto& source, bool computeMatrixU_ = false);
         Schur(const This&) = default;
         Schur(This&&) noexcept = default;
         /* Operators */
@@ -72,8 +71,7 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    Schur<T, Order>::Schur(const M& source, bool computeMatrixU_)
+    Schur<T, Order>::Schur(const Matrix auto& source, bool computeMatrixU_)
             : matrixT(source.getRow(), source.getCol()), matrixU() {
         compute(source, computeMatrixU_);
     }

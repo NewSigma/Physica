@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -52,8 +52,8 @@ namespace Physica {
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const { return Base::getDerived().toLocalPos(localPos); }
         [[nodiscard]] constexpr static size_t getNumNodes() { return DegreeOfFreedom; }
         /* Static members */
-        template<class Functor, int DeltaOrder = 0>
-        [[nodiscard]] static ScalarType gauss_integral(Functor func);
+        template<int DeltaOrder = 0>
+        [[nodiscard]] static ScalarType gauss_integral(std::invocable<VectorType> auto fn);
     protected:
         Element() = default;
         Element(IndexArray globalNodes_);
@@ -64,9 +64,9 @@ namespace Physica {
     Element<Derived>::Element(IndexArray globalNodes_) : globalNodes(std::move(globalNodes_)) {}
 
     template<class Derived>
-    template<class Functor, int DeltaOrder>
-    Element<Derived>::ScalarType Element<Derived>::gauss_integral(Functor func) {
-        return Internal::GaussIntegral<Derived, Functor, DeltaOrder>::run(func);
+    template<int DeltaOrder>
+    auto Element<Derived>::gauss_integral(std::invocable<VectorType> auto fn) -> ScalarType {
+        return Internal::GaussIntegral<Derived, decltype(fn), DeltaOrder>::run(fn);
     }
 
     template<class Derived>

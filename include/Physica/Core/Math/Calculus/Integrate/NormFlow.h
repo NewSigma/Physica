@@ -75,8 +75,8 @@ namespace Physica {
         Trv trial_ln(Net& nn, IntegT& mean, IntegT& var);
 
         Trv calcLoss_normal(IntegT y, const CoDiff<TrainT>& lnJ);
-        template<Vector V, ExecutePolicy P>
-        Trv calcLoss_ln(const V& samples, const VectorND<TrainT>& lnJv);
+        template<ExecutePolicy P>
+        Trv calcLoss_ln(const Vector auto& samples, const VectorND<TrainT>& lnJv);
     };
 
     template<Scalar T, bool TakeLn>
@@ -218,7 +218,7 @@ namespace Physica {
                 else
                     seg = nn(x);
 
-                loss = calcLoss_ln<decltype(seg), P>(seg, lnJv);
+                loss = calcLoss_ln<P>(seg, lnJv);
                 if constexpr (ReverseDiff<T>)
                     lnJs.reverse(lnJv.grads().toDeviceAsync());
                 seg += lnJv.values() + lnVolume;
@@ -286,8 +286,8 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    template<Vector V, ExecutePolicy P>
-    auto NormFlow<T, TakeLn>::calcLoss_ln(const V& samples, const VectorND<TrainT>& lnJv) -> Trv {
+    template<ExecutePolicy P>
+    auto NormFlow<T, TakeLn>::calcLoss_ln(const Vector auto& samples, const VectorND<TrainT>& lnJv) -> Trv {
         const size_t size = samples.getLength();
         const auto mean = (samples + lnJv.values()).lnSumExp() - ln(Trv(size));
         auto l = (Trv(2) * (samples + lnJv - mean)).lnSumExp() + lnJv.squaredNorm() * (decay / Trv(size));

@@ -57,8 +57,7 @@ namespace Physica {
         /* Operators */
         PIPhonon& operator=(PIPhonon obj) noexcept;
         /* Operations */
-        template<Matrix T>
-        void sample(const T& force, const T& momentum);
+        void sample(const Matrix auto& force, const Matrix auto& momentum);
         void compute();
         void swap(PIPhonon& __restrict obj) noexcept;
         /* Getters */
@@ -72,8 +71,7 @@ namespace Physica {
         void applyTranslationInvariance(DenseHermiteMatrix<ComplexType>& target);
     };
 
-    template<Matrix T>
-    void PIPhonon::sample(const T& force, const T& momentum) {
+    void PIPhonon::sample(const Matrix auto& force, const Matrix auto& momentum) {
         assert(force.getRow() == momentum.getRow());
         assert(force.getCol() == momentum.getCol());
         assert(force.getRow() == getSuperCellDOF());

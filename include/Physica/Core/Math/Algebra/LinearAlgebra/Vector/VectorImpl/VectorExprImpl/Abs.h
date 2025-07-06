@@ -54,8 +54,7 @@ namespace Physica {
                 return abs(Base::getExpr().template packetPartial<Pack>(index, count));
         }
 
-        template<class U>
-        void reverse(const U& grad) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
         T max() const {
             if constexpr (isComplexV)
@@ -66,8 +65,8 @@ namespace Physica {
     };
 
     template<Vector V>
-    template<class U>
-    void VectorExpr<ExprType::Abs, V>::reverse(const U& grad) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Abs, V>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+        using U = decltype(grad);
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<U>)
             expr.reverse(unit(expr.values()) * grad);

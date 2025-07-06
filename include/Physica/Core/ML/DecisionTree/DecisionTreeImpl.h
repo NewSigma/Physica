@@ -121,13 +121,13 @@ namespace Physica {
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<class TrainFunctor>
-    DecisionTree<T, Type> DecisionTree<T, Type>::doRecursion(const Dataset& dataset,
-                                                                               const std::forward_list<size_t>& availableSample,
-                                                                               const std::forward_list<size_t>& availableFeature,
-                                                                               size_t featureId,
-                                                                               T splitPoint,
-                                                                               TrainFunctor functor) {
+    DecisionTree<T, Type> DecisionTree<T, Type>::doRecursion(
+            const Dataset& dataset,
+            const std::forward_list<size_t>& availableSample,
+            const std::forward_list<size_t>& availableFeature,
+            size_t featureId,
+            T splitPoint,
+            std::invocable<const Dataset&, std::forward_list<size_t>, std::forward_list<size_t>&> auto fn) {
         std::forward_list<size_t> newAvailableFeature{};
         for (auto feature : availableFeature) {
             if (feature != featureId)
@@ -154,8 +154,8 @@ namespace Physica {
                     list2.push_front(sample);
             }
         }
-        subTrees.append(functor(dataset, std::move(list1), newAvailableFeature));
-        subTrees.append(functor(dataset, std::move(list2), newAvailableFeature));
+        subTrees.append(fn(dataset, std::move(list1), newAvailableFeature));
+        subTrees.append(fn(dataset, std::move(list2), newAvailableFeature));
         return DecisionTree(featureId, splitPoint, std::move(subTrees), isContinuous ? Regression : Classify);
     }
 

@@ -65,16 +65,14 @@ namespace Physica {
                 return Pack(Base::getLHS(), count) - Base::getRHS().template packetPartial<Pack>(index, count);
         }
 
-        template<class V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad_) const noexcept requires(isReverseDiff);
     };
 
     template<class T, class U>
-    template<class V>
-    void VectorExpr<ExprType::Sub, T, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Sub, T, U>::reverse(const auto& grad_) const noexcept requires(isReverseDiff) {
         const auto& lhs = Base::getLHS();
         const auto& rhs = Base::getRHS();
-        if constexpr (Scalar<V>) {
+        if constexpr (Scalar<decltype(grad_)>) {
             const auto& grad = grad_.value();
             if constexpr (Vector<T>) {
                 if constexpr (ReverseDiff<T>)
@@ -90,7 +88,7 @@ namespace Physica {
             }
         }
         else {
-            static_assert(Vector<V>, "[Error]: Unexpected type");
+            static_assert(Vector<decltype(grad_)>, "[Error]: Unexpected type");
             const auto& grad = grad_.values();
             if constexpr (Vector<T>) {
                 if constexpr (ReverseDiff<T>)
@@ -119,8 +117,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        template<Vector V, ExecutePolicy P = Sequential>
-        inline void assign(V& v) const;
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& v) const;
 
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
             return getLHS().calc(s) - getRHS().calc(s);
@@ -140,8 +138,7 @@ namespace Physica {
             return getLHS().template packetPartial<Pack>(index, count) - getRHS().template packetPartial<Pack>(index, count);
         }
 
-        template<Vector V>
-        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
             const auto& grad = grad_.values();
             if constexpr (ReverseDiff<V1>)
                 Base::getLHS().reverse(grad);
@@ -154,21 +151,21 @@ namespace Physica {
     };
 
     template<Vector V1, Vector V2>
-    template<Vector V, ExecutePolicy P>
-    inline void VectorExpr<ExprType::Sub, V1, V2>::assign(V& v) const {
+    template<ExecutePolicy P>
+    void VectorExpr<ExprType::Sub, V1, V2>::assign(Vector auto& v) const {
         constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
         constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {
-            getLHS().template assign<V, P>(v);
+            getLHS().template assign<P>(v);
             v -= getRHS();
         }
         else if constexpr (FastAssign2) {
             static_assert(Traits<decltype(-getRHS())>::FastAssign, "[Debug]: Fast minus implementation is missing");
-            (-getRHS()).template assign<V, P>(v);
+            (-getRHS()).template assign<P>(v);
             v += getLHS();
         }
         else
-            Base::template assign<V, P>(v);
+            Base::template assign<P>(v);
     }
 
     template<Vector T, Scalar U>

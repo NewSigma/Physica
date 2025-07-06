@@ -56,10 +56,8 @@ namespace Physica {
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T value);
         DenseMatrix(initializer_list list);
-        template<Matrix M>
-        DenseMatrix(const M& mat);
-        template<Vector V>
-        DenseMatrix(const V& mat);
+        DenseMatrix(const Matrix auto& mat);
+        DenseMatrix(const Vector auto& mat);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         /* Operators */
@@ -70,8 +68,7 @@ namespace Physica {
         size_t completePivoting(size_t col);
         size_t partialPivoting(size_t col);
 
-        template<Matrix M>
-        void resize(const M& m) { resize(m.getRow(), m.getCol()); }
+        void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
         using Storage::resize;
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
@@ -100,10 +97,9 @@ namespace Physica {
         [[nodiscard]] static This random_uniform(size_t row, size_t col);
         template<RNG R>
         [[nodiscard]] static This random_normal(size_t row, size_t col);
-        template<RNG R, class Distribution>
-        [[nodiscard]] static This random_any(size_t row, size_t col, Distribution& dist);
-        template<Vector V>
-        [[nodiscard]] static std::pair<This, This> meshgrid(const V& vecInCols, const V& vecInRows);
+        template<RNG R>
+        [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
+        [[nodiscard]] static std::pair<This, This> meshgrid(const Vector auto& vecInCols, const Vector auto& vecInRows);
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}

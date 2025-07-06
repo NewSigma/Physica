@@ -77,14 +77,12 @@ namespace Physica {
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& hostCell);
 
+        template<ExecutePolicy P>
+        void forceAsync(const LatticeMatrix& lattice, const InvLatticeMatrix& invLattice, const PositionMatrix& cartesianPos, Vector auto& result);
         template<Vector V, ExecutePolicy P>
-        void forceAsync(
-                const LatticeMatrix& lattice,
-                const InvLatticeMatrix& invLattice,
-                const PositionMatrix& cartesianPos,
-                ContinuousVector<V>& result);
-        template<Vector V, ExecutePolicy P>
-        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
+        void forceAsyncImpl(const LatticeMatrix& lattice, const InvLatticeMatrix& invLattice, const PositionMatrix& cartesianPos, V& result);
+        template<ExecutePolicy P>
+        void forceAsync(const MDCellType& cell, Vector auto& result);
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell);
         template<ExecutePolicy P>
@@ -122,8 +120,7 @@ namespace Physica {
                 const PositionMatrix& cartesianPos,
                 dim3& gridDims,
                 size_t& numThread);
-        template<class Functor>
-        [[nodiscard]] __device__ size_t forPairInCutoff(Functor func) const;
+        [[nodiscard]] __device__ size_t forPairInCutoff(std::invocable<int, int, DeviceVector3D, T, T> auto func) const;
     };
 }
 

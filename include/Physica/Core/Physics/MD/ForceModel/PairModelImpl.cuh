@@ -50,7 +50,7 @@ namespace Physica {
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos) -> VectorND<ScalarType> {
-        forceAsync<PageLockedVector, P>(lattice, invLattice, cartesianPos, swapBuffer);
+        forceAsync<P>(lattice, invLattice, cartesianPos, swapBuffer);
         CUDAContext::getInstance().wait();
         return swapBuffer;
     }
@@ -62,12 +62,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
+    template<ExecutePolicy P>
     void device_obj<PairModel<Derived>>::forceAsync(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos,
-            ContinuousVector<V>& result) {
+            Vector auto& result) {
+        forceAsyncImpl<std::remove_cvref_t<decltype(result)>, P>(lattice, invLattice, cartesianPos, result);
+    }
+    // Explicitly declare V, workaround for nvcc extended lambda
+    template<class Derived>
+    template<Vector V, ExecutePolicy P>
+    void device_obj<PairModel<Derived>>::forceAsyncImpl(
+            const LatticeMatrix& lattice,
+            const InvLatticeMatrix& invLattice,
+            const PositionMatrix& cartesianPos,
+            V& result) {
         static_assert(P == GPU, "[Error]: Incorrect policy");
         dim3 gridDims;
         size_t numThread;
@@ -95,9 +105,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
-        forceAsync<V, P>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
+    template<ExecutePolicy P>
+    void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, Vector auto& result) {
+        forceAsync<P>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
@@ -274,8 +284,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<class Functor>
-    __device__ size_t device_obj<PairModel<Derived>>::forPairInCutoff(Functor func) const {
+    __device__ size_t device_obj<PairModel<Derived>>::forPairInCutoff(std::invocable<int, int, DeviceVector3D, T, T> auto fn) const {
         extern __shared__ DeviceVector3D posBuffer[];
         const auto& pos = cell.getPos();
         if constexpr (IsSmallCell) {
@@ -312,7 +321,7 @@ namespace Physica {
                     const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < norm2;
                     if (isNotSelf && norm2 < squared_cutoff) {
                         const ScalarType norm1 = sqrt(norm2);
-                        func(atom1, atom2, r, norm1, norm2);
+                        fn(atom1, atom2, r, norm1, norm2);
                     }
                 }
             }
@@ -328,7 +337,7 @@ namespace Physica {
             const size_t atom1 = cellList.getCellAtomMap()[cellList.getCellStartOffset()[cell] + threadIdx.x];
             /* Current cell */ {
                 const DeviceVector3D from = pos.row(atom1);
-                cellList.forAtomInCell(centerCell, [this, &pos, &from, &func, atom1](size_t atom2) {
+                cellList.forAtomInCell(centerCell, [this, &pos, &from, &fn, atom1](size_t atom2) {
                     auto to = pos.row(atom2);
                     DeviceVector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
@@ -336,20 +345,20 @@ namespace Physica {
                     if (isNotSelf && norm2 < squared_cutoff) {
                         assert(norm2.isPositive() && "Atom overlap");
                         const ScalarType norm1 = sqrt(norm2);
-                        func(atom1, atom2, r, norm1, norm2);
+                        fn(atom1, atom2, r, norm1, norm2);
                     }
                 });
             }
-            cellList.forNeighInRange(centerCell, [this, &pos, &func, atom1](DeviceVector3D translate, Index3D neigh) {
+            cellList.forNeighInRange(centerCell, [this, &pos, &fn, atom1](DeviceVector3D translate, Index3D neigh) {
                 const DeviceVector3D from = pos.row(atom1) - translate;
-                cellList.forAtomInCell(neigh, [this, &pos, &from, &func, atom1](size_t atom2) {
+                cellList.forAtomInCell(neigh, [this, &pos, &from, &fn, atom1](size_t atom2) {
                     auto to = pos.row(atom2);
                     DeviceVector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
                     assert(norm2.isPositive() && "Atom overlap");
                     if (norm2 < squared_cutoff) {
                         const ScalarType norm1 = sqrt(norm2);
-                        func(atom1, atom2, r, norm1, norm2);
+                        fn(atom1, atom2, r, norm1, norm2);
                     }
                 });
             });

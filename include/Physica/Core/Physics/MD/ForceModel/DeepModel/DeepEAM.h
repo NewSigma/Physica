@@ -45,8 +45,8 @@ namespace Physica {
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<Tv> force(const MDCellType& cell) const;
-        template<Vector V, ExecutePolicy P>
-        void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const;
+        template<ExecutePolicy P>
+        void forceAsync([[maybe_unused]] const MDCellType& cell, Vector auto& result) const { noImpl(__func__); }
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const NetType& getNet() const noexcept { return net; }

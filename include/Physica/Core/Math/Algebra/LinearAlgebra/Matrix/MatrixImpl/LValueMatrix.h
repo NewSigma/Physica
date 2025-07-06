@@ -55,16 +55,17 @@ namespace Physica {
         inline This& operator=(const This& m);
         inline This& operator=(This&& m);
 
-        template<Scalar T> Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
-        template<Scalar T> void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
-        template<Scalar T> void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
-        template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
-        template<Scalar T> void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
+        template<Scalar T>
+        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
+        void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
+        void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
+        void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
+        void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Matrix M> Derived& operator=(const M& m);
-        template<Matrix M> void operator+=(const M& m) { Base::getDerived() = Base::getDerived() + m; }
-        template<Matrix M> void operator-=(const M& m) { Base::getDerived() = Base::getDerived() - m; }
-        template<Matrix M> void operator*=(const M& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
+        Derived& operator=(const Matrix auto& m);
+        void operator+=(const Matrix auto& m) { Base::getDerived() = Base::getDerived() + m; }
+        void operator-=(const Matrix auto& m) { Base::getDerived() = Base::getDerived() - m; }
+        void operator*=(const Matrix auto& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
 
         [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
         [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
@@ -74,8 +75,7 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 
-        template<Matrix M>
-        void reverse(const M& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] inline auto row(size_t r) noexcept;
         [[nodiscard]] inline const auto row(size_t r) const noexcept;
@@ -125,8 +125,8 @@ namespace Physica {
         void random_uniform();
         template<RNG R>
         void random_normal();
-        template<RNG R, class Distribution>
-        void random_any(Distribution& dist);
+        template<RNG R>
+        void random_any(auto& distribution);
 
         template<int GradOrder = 1>
         auto grads() const noexcept;

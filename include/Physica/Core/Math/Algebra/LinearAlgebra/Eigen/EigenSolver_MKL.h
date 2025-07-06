@@ -23,10 +23,9 @@
 
 namespace Physica {
     template<Scalar T, size_t Order>
-    template<Matrix M>
-    void EigenSolver<T, Order>::compute_mkl(const M& source, bool computeEigenvectors_) {
+    void EigenSolver<T, Order>::compute_mkl(const Matrix auto& source, bool computeEigenvectors_) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
-        constexpr int Major = MatrixOption::isRowMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
+        constexpr int Major = MatrixOption::isRowMatrix<decltype(source)>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr int Layout = Major == MatrixOption::Row ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
         using WorkingMatrixMKL = DenseMatrix<T, Major | MatrixOption::Element>;
 

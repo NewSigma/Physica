@@ -71,8 +71,8 @@ namespace Physica {
         [[nodiscard]] const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
         [[nodiscard]] inline static This makeEmptyFFT(size_t rSpaceSize);
-        template<class IndexType>
-        [[nodiscard]] inline static IndexType rSizeToKSize(IndexType rSize) noexcept { return FFTType::rSizeToKSize(rSize); }
+        template<std::integral IndexType>
+        [[nodiscard]] static IndexType rSizeToKSize(IndexType rSize) noexcept { return FFTType::rSizeToKSize(rSize); }
         inline static void transform(const This& planProvider, This& bufferProvider);
         inline static void invTransform(const This& planProvider, This& bufferProvider);
     private:

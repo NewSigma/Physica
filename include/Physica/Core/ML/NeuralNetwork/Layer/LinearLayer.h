@@ -49,12 +49,10 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Vector V>
-        [[nodiscard]] inline CoDiff<VectorND<T>> forward(const V& x) const;
+        [[nodiscard]] CoDiff<VectorND<T>> forward(const Vector auto& x) const;
         void reverse(const This& __restrict other) const noexcept;
 
-        template<class Optimizer>
-        void step(Optimizer& opt);
+        void step(auto& optimizer);
         void zero_grad();
 
         void resize(size_t inputDim, size_t outputDim);
@@ -74,8 +72,8 @@ namespace Physica {
         void random_kaiming_uniform(Tv gain);
         template<RNG R>
         void random_kaiming_normal(Tv gain);
-        template<RNG R, class Distribution>
-        void random_any(Distribution& dist);
+        template<RNG R>
+        void random_any(auto& distribution);
 
         const H5Group read(const H5Loc& loc, const char* name);
         H5Group write(H5Loc& loc, const char* name) const;
@@ -110,8 +108,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<Vector V>
-    inline auto LinearLayer<T, WithBias>::forward(const V& x) const -> CoDiff<VectorND<T>> {
+    inline auto LinearLayer<T, WithBias>::forward(const Vector auto& x) const -> CoDiff<VectorND<T>> {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (ReverseDiff<T>) {
             auto expr1 = weights * x;
@@ -146,12 +143,11 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<class Optimizer>
-    void LinearLayer<T, WithBias>::step(Optimizer& opt) {
+    void LinearLayer<T, WithBias>::step(auto& optimizer) {
         if constexpr (ReverseDiff<T>) {
-            opt.step(weights);
+            optimizer.step(weights);
             if constexpr (WithBias)
-                opt.step(bias);
+                optimizer.step(bias);
         }
     }
 
@@ -227,11 +223,11 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<RNG R, class Distribution>
-    void LinearLayer<T, WithBias>::random_any(Distribution& dist) {
-        weights.template random_any<R, Distribution>(dist);
+    template<RNG R>
+    void LinearLayer<T, WithBias>::random_any(auto& distribution) {
+        weights.template random_any<R>(distribution);
         if constexpr (WithBias)
-            bias.template random_any<R, Distribution>(dist);
+            bias.template random_any<R>(distribution);
     }
 
 #ifdef PHYSICA_HDF5

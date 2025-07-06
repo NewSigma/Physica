@@ -81,10 +81,9 @@ namespace Physica {
     }
 
     template<class Base>
-    template<class T>
-    void DiffCoro<Base>::reverse_final(T&& x) noexcept {
+    void DiffCoro<Base>::reverse_final(auto&& x) noexcept {
         assert(handle != nullptr && "[Error]: Reverse has been finalized");
-        Base::reverse(std::forward<T>(x));
+        Base::reverse(std::forward<decltype(x)>(x));
         reverse_impl();
     }
 

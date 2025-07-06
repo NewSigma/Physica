@@ -26,8 +26,9 @@ namespace Physica {
     __host__ __device__ void toNextMean(T& mean, size_t lastNumSample, T sample) noexcept;
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    inline void RValueVector<Derived>::assign(V& v) const {
+    template<ExecutePolicy P>
+    inline void RValueVector<Derived>::assign(Vector auto& v) const {
+        using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
         assign_check(v);
@@ -42,8 +43,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    inline void RValueVector<Derived>::assign_add(V& v) const {
+    template<ExecutePolicy P>
+    inline void RValueVector<Derived>::assign_add(Vector auto& v) const {
+        using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
         assign_check(v);
@@ -126,8 +128,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V1, Vector V2>
-    void RValueVector<Derived>::reverse(const V1&, const V2& grad) const noexcept requires(isReverseDiff) {
+    void RValueVector<Derived>::reverse(const Vector auto&, const Vector auto& grad) const noexcept requires(isReverseDiff) {
         Base::getDerived().reverse(grad);
     }
 
@@ -540,14 +541,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V>
-    inline auto RValueVector<Derived>::crossProduct(const V& v) const noexcept {
+    auto RValueVector<Derived>::crossProduct(const Vector auto& v) const noexcept {
+        using V = std::remove_cvref_t<decltype(v)>;
         return CrossProduct<Derived, V>(Base::getDerived(), v);
     }
 
     template<class Derived>
-    template<Vector V>
-    auto RValueVector<Derived>::angleTo(const V& v) const noexcept -> T {
+    auto RValueVector<Derived>::angleTo(const Vector auto& v) const noexcept -> T {
         return arccos(Base::getDerived() * v / (norm() * v.norm()));
     }
     /**
@@ -561,8 +561,7 @@ namespace Physica {
      * [2] Eigen; https://eigen.tuxfamily.org
      */
     template<class Derived>
-    template<Vector V>
-    auto RValueVector<Derived>::householder(V& target) const -> Tr {
+    auto RValueVector<Derived>::householder(Vector auto& target) const -> Tr {
         assert(getLength() == target.getLength());
         assert(getLength() > 1 && "[Error]: Unnecessary householder call");
 

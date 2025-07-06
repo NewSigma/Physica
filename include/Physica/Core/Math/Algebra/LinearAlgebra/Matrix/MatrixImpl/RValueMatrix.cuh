@@ -57,8 +57,7 @@ namespace Physica {
         /* Operations */
         template<Matrix M>
         __host__ __device__ void assign(M& target) const requires(CUDA<M>);
-        template<Matrix M>
-        __host__ __device__ void assign_add(M& target) const requires(CUDA<M>);
+        __host__ __device__ void assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>);
 
         [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;
@@ -97,9 +96,8 @@ namespace Physica {
 
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
-        [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
-        template<Matrix M1, Matrix M2>
-        void reverse(const M1& y, const M2& grad) const noexcept requires(isReverseDiff);
+        [[nodiscard]] __device__ ScalarType calcFromMajorMinor(size_t row, size_t col) const;
+        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] __host__ __device__ auto sum_rows() const;
         [[nodiscard]] __host__ __device__ auto sum_cols() const;

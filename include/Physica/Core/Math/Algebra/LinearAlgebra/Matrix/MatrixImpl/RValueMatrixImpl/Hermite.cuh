@@ -48,8 +48,7 @@ namespace Physica {
     public:
         explicit device_obj(const device_obj<T>& vec_) : vec(vec_) {}
         /* Operations */
-        template<Matrix M>
-        __device__ void assign(M& target) const;
+        __device__ void assign(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
@@ -57,10 +56,9 @@ namespace Physica {
     };
 
     template<Vector T>
-    template<Matrix M>
-    __device__ void device_obj<HermiteVector<T>>::assign(M& target) const {
+    __device__ void device_obj<HermiteVector<T>>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
-            target.refFromMajorMinor(0, i) = calc(M::rowFromMajorMinor(0, i), M::colFromMajorMinor(0, i));
+            target.refFromMajorMinor(0, i) = calc(target.rowFromMajorMinor(0, i), target.colFromMajorMinor(0, i));
     }
 }
 

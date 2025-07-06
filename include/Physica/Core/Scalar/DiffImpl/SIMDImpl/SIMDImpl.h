@@ -28,15 +28,14 @@ namespace Physica {
     SIMD<Diff<T, Mode, Order>, Size>::SIMD(double x) : values(x), grads(0) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    template<Scalar U>
-    SIMD<Diff<T, Mode, Order>, Size>::SIMD(U x) {
-        if constexpr (U::isDiffable) {
+    SIMD<Diff<T, Mode, Order>, Size>::SIMD(Scalar auto x) {
+        if constexpr (Diffable<decltype(x)>) {
             values = ValueType(x.value());
             grads = GradType(x.grad());
         }
         else {
             values = ValueType(std::move(x));
-            grads = GradType(U(0));
+            grads = GradType(0);
         }
     }
 
@@ -83,9 +82,8 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    template<Scalar U>
-    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const U& x) const -> This {
-        if constexpr (U::isDiffable)
+    inline auto SIMD<Diff<T, Mode, Order>, Size>::operator*(const Scalar auto& x) const -> This {
+        if constexpr (Diffable<decltype(x)>)
             return *this * ScalarType(x);
         else
             return This(values * x, grads * x);

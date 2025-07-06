@@ -33,8 +33,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<V>& v) {
+    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) requires(CUDA<decltype(v)>) {
+        using V = std::remove_cvref_t<decltype(v)>;
         if constexpr (std::is_same<Derived, V>::value)
             assert(this != &v && "[Error]: Self assign is likely a bug");
         auto& x = Base::getDerived();
@@ -61,58 +61,52 @@ namespace Physica {
                     target[index] = x;
             }
         };
-        CUDAExecutor::launch<decltype(func), WarpSize>(func, KernelConfig(numBlock, numThread));
+        CUDAExecutor::launch<WarpSize>(func, KernelConfig(numBlock, numThread));
         return Base::getDerived();
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const Scalar auto& x) {
         Base::getDerived() = Base::getDerived() + x;
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const Scalar auto& x) {
         Base::getDerived() = Base::getDerived() - x;
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator*=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator*=(const Scalar auto& x) {
         Base::getDerived() = Base::getDerived() * x;
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator/=(const T& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator/=(const Scalar auto& x) {
         Base::getDerived() = Base::getDerived() / x;
     }
 
     template<class Derived>
-    template<Vector V>
-    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator+=(const V& v) requires(CUDA<V>) {
+    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator+=(const Vector auto& v) requires(CUDA<decltype(v)>) {
         assert(Base::getLength() == v.getLength());
         Base::getDerived() = Base::getDerived() + v;
     }
 
     template<class Derived>
-    template<Vector V>
-    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator-=(const V& v) requires(CUDA<V>) {
+    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator-=(const Vector auto& v) requires(CUDA<decltype(v)>) {
         assert(Base::getLength() == v.getLength());
         Base::getDerived() += -v;
     }
 
     template<class Derived>
-    template<class T>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
-        static_assert(std::same_as<typename ScalarType::GradType, typename T::ScalarType>, "[Error]: Inconsistent ScalarType");
-        if constexpr (Scalar<T>) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+        using U = std::remove_cvref_t<decltype(grad)>;
+        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        if constexpr (Scalar<U>) {
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);
         }
         else {
-            static_assert(Vector<T>, "[Error]: Unexpected type");
+            static_assert(Vector<U>, "[Error]: Unexpected type");
             assert(Base::getLength() == grad.getLength());
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad.calc(i));

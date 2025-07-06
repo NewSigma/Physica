@@ -47,8 +47,7 @@ namespace Physica {
     public:
         explicit Integrate(Base range, T stepSize_);
         /* Operations */
-        template<class Function>
-        T solve(Function func) const;
+        T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////Ladder//////////////////////////////////
     template<Scalar T, size_t dim>
@@ -66,8 +65,7 @@ namespace Physica {
     public:
         explicit Integrate(Base range, T stepSize_);
         /* Operations */
-        template<class Function>
-        T solve(Function func) const;
+        T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////Simpson//////////////////////////////////
     template<Scalar T, size_t dim>
@@ -85,8 +83,7 @@ namespace Physica {
     public:
         explicit Integrate(Base range, T stepSize_);
         /* Operations */
-        template<class Function>
-        T solve(Function func) const;
+        T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////Tanh_Sinh//////////////////////////////////
     /**
@@ -109,8 +106,7 @@ namespace Physica {
     public:
         Integrate(Base range, T stepSize_, uint64_t pointCount_);
         /* Operations */
-        template<class Function>
-        T solve(Function func) const;
+        T solve(std::invocable<T> auto fn) const;
     };
     //////////////////////////////////MonteCarlo//////////////////////////////////
     template<Scalar T, size_t dim>
@@ -123,19 +119,19 @@ namespace Physica {
     public:
         Integrate(Base range, uint64_t sampleCount_);
         /* Operations */
-        template<class Function, RNG R>
-        T solve(Function func) const;
-        template<class Function, RNG R>
-        T solve_e(unsigned int numSequence, Function func, T& deviation) const;
+        template<RNG R>
+        T solve(std::invocable<VectorType> auto fn) const;
+        template<RNG R>
+        T solve_e(unsigned int numSequence, std::invocable<VectorType> auto fn, T& deviation) const;
 
-        template<class Functor1, class Functor2, RNG R, class Distribution>
-        T solve(Functor1 func, Functor2 importance, Distribution& disterator) const;
-        template<class Functor1, class Functor2, RNG R, class Distribution>
+        template<RNG R>
+        T solve(std::invocable<VectorType> auto fn, std::invocable<VectorType> auto importance, auto& distribution) const;
+        template<RNG R>
         T solve_e(unsigned int numSequence,
-                           Functor1 func,
-                           Functor2 importance,
-                           Distribution& dist,
-                           T& deviation) const;
+                  std::invocable<VectorType> auto fn,
+                  std::invocable<VectorType> auto importance,
+                  auto& distribution,
+                  T& deviation) const;
     };
 }
 

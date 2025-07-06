@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -56,10 +56,9 @@ int main() {
         ScalarType result, deviation;
         {
             using RandomSource = Random<MT19937, std::mt19937::default_seed>;
-            auto functor = [](Vector2D<ScalarType> x) -> ScalarType {
+            result = mc.solve_e<RandomSource>(6, [](Vector2D<ScalarType> x) -> ScalarType {
                 return reciprocal(sqrt(square(x[0]) + sin(x[1])));
-            };
-            result = mc.solve_e<decltype(functor), RandomSource>(6, functor, deviation);
+            }, deviation);
         }
         const bool isGoodResult = std::isfinite(double(answer)) && std::isfinite(double(deviation));
         if (!isGoodResult || abs(answer - result) > deviation)

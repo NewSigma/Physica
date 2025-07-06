@@ -121,10 +121,8 @@ namespace Physica {
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
         [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, Tv cutoff);
-        template<class Functor>
-        static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
-        template<class Functor>
-        static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
+        static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto func);
+        static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto func);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice);
@@ -651,15 +649,14 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class Functor>
-    void PeriodicCell<T, Dim>::forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
+    void PeriodicCell<T, Dim>::forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn) {
         if constexpr (Dim == 1) {
             auto a1 = lattice.row(0);
 
             VectorType v1;
             for (ssize_t x = -range[0]; x <= range[0]; ++x) {
                 v1 = T(x) * a1;
-                func(v1);
+                fn(v1);
             }
         }
         else if constexpr (Dim == 2) {
@@ -671,7 +668,7 @@ namespace Physica {
                 v1 = T(x) * a1;
                 for (ssize_t y = -range[1]; y <= range[1]; ++y) {
                     v2 = v1 + T(y) * a2;
-                    func(v2);
+                    fn(v2);
                 }
             }
         }
@@ -687,7 +684,7 @@ namespace Physica {
                     v2 = v1 + T(y) * a2;
                     for (ssize_t z = -range[2]; z <= range[2]; ++z) {
                         v3 = v2 + T(z) * a3;
-                        func(v3);
+                        fn(v3);
                     }
                 }
             }
@@ -695,15 +692,14 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class Functor>
-    void PeriodicCell<T, Dim>::forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
+    void PeriodicCell<T, Dim>::forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn) {
         if constexpr (Dim == 1) {
             auto a1 = lattice.row(0);
 
             VectorType v1;
             for (ssize_t x = 0; x <= range[0]; ++x) {
                 v1 = T(x) * a1;
-                func(v1);
+                fn(v1);
             }
         }
         else if constexpr (Dim == 2) {
@@ -716,7 +712,7 @@ namespace Physica {
                 const ssize_t minY = x == 0 ? 0 : -range[1];
                 for (ssize_t y = minY; y <= range[1]; ++y) {
                     v2 = v1 + T(y) * a2;
-                    func(v2);
+                    fn(v2);
                 }
             }
         }
@@ -734,7 +730,7 @@ namespace Physica {
                     const ssize_t minZ = (x == 0 && y == 0) ? 0 : -range[2];
                     for (ssize_t z = minZ; z <= range[2]; ++z) {
                         v3 = v2 + T(z) * a3;
-                        func(v3);
+                        fn(v3);
                     }
                 }
             }
