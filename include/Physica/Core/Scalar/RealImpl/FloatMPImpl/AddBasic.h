@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,17 +18,18 @@
  */
 #pragma once
 
+#include "Physica/Core/Scalar/Scalar.h"
+
 namespace Physica {
     /*!
      * \len is the length of \from. Length of \to should not less than \len. length of \result should be \len at least.
      */
-    inline MPUnit addArrWithArr(MPUnit* __restrict result
-            , const MPUnit* __restrict from, const MPUnit* __restrict to, size_t len) {
-        MPUnit carry = 0, from_i, temp;
-        for(size_t i = 0; i < len; ++i) {
-            from_i = from[i];
-            temp = from_i + to[i];
-            result[i] = temp + carry;
+    inline MPUnit addArrWithArr(MPUnit* __restrict result, const MPUnit* __restrict from, const MPUnit* __restrict to, size_t len) noexcept {
+        MPUnit carry = 0;
+        for (size_t i = 0; i < len; ++i) {
+            MPUnit from_i = from[i];
+            MPUnit temp = from_i + to[i] + carry;
+            result[i] = temp;
             carry = temp < from_i;
         }
         return carry;
@@ -36,13 +37,13 @@ namespace Physica {
     /*!
      * \len is the length of \from. Length of \to should not less than \len.
      */
-    inline MPUnit addArrWithArrEq(const MPUnit* __restrict from, MPUnit* __restrict to, size_t len) {
-        MPUnit carry = 0, from_i, temp;
-        for(size_t i = 0; i < len; ++i) {
-            from_i = from[i];
-            temp = from_i + to[i];
-            to[i] = temp + carry;
-            carry = temp < from_i;
+    inline MPUnit addArrWithArrEq(const MPUnit* __restrict from, MPUnit* __restrict to, size_t len) noexcept {
+        MPUnit carry = 0;
+        for (size_t i = 0; i < len; ++i) {
+            MPUnit from_i = from[i];
+            MPUnit add = from_i + to[i] + carry;
+            to[i] = add;
+            carry = add < from_i;
         }
         return carry;
     }

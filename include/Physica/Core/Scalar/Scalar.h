@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <exception>
 #include <limits>
 #include <concepts>
 #include <coroutine>

@@ -145,8 +145,10 @@ namespace Physica {
             Base::getDerived().values().zeros();
             Base::getDerived().grads().zeros();
         }
-        else
+        else if constexpr (T::Prec != FloatMP)
             std::memset(data(), 0, Base::getLength() * sizeof(T));
+        else
+            Base::template operator=<T>(T(0));
     }
 
     template<class Derived>

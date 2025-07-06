@@ -58,7 +58,7 @@ namespace Physica {
          * Length of byte = abs(length).
          * sign of length and sign of Real are same. (when Real != 0)
          *
-         * Warning: length can not equal to INT_MIN, or length will not return the correct answer.
+         * Warning: length can not equal to INT_MIN, or it will lead the incorrect result.
          *
          * Optimize: use the end position of byte instead of length may improve performance.
          */
@@ -72,10 +72,11 @@ namespace Physica {
     public:
         Real();
         Real(int length_, int power_);
+        Real(std::initializer_list<MPUnit> bytes_, int length_, int power_);
         Real(SignedMPUnit unit);
         template<std::integral T>
         Real(T x);
-        Real(double d);
+        Real(double d) noexcept;
         Real(const Integer& i);
         Real(const Rational& r);
         template<Scalar T>
@@ -103,6 +104,7 @@ namespace Physica {
         Real& toOpposite() noexcept { length = -length; return *this; }
         Real& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Real& __restrict obj) noexcept;
+        void dump() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ int getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ int getPower() const noexcept { return power; }
@@ -116,6 +118,10 @@ namespace Physica {
         void setPower(int i) noexcept { power = i; }
         void setByte(unsigned int index, MPUnit value) noexcept;
         /* Static members */
+        template<RNG R>
+        [[nodiscard]] inline static Real random_uniform();
+        template<RNG R>
+        [[nodiscard]] inline static Real random_normal();
         [[nodiscard]] static bool matchSign(const Real& s1, const Real& s2) noexcept;
         [[nodiscard]] static double toDouble(MPUnit* __restrict byte, int length, int power) noexcept;
     private:
@@ -135,10 +141,10 @@ namespace Physica {
         template<FloatPrec Prec> __host__ __device__ friend Real<Prec> sqrt(const Real<Prec>& s) noexcept;
         template<FloatPrec Prec> __host__ __device__ friend Real<Prec> ln(const Real<Prec>& s) noexcept;
         /* Static members */
-        static Real<FloatMP> add(const Real& s1, const Real& s2);
-        static Real<FloatMP> sub(const Real& s1, const Real& s2);
-        static Real<FloatMP> mul(const Real& s1, const Real& s2);
-        static Real<FloatMP> div(const Real& s1, const Real& s2);
+        static Real<FloatMP> add(const Real& s1, const Real& s2) noexcept;
+        static Real<FloatMP> sub(const Real& s1, const Real& s2) noexcept;
+        static Real<FloatMP> mul(const Real& s1, const Real& s2) noexcept;
+        static Real<FloatMP> div(const Real& s1, const Real& s2) noexcept;
         static bool cutLength(Real<FloatMP>& s);
     };
 
@@ -150,9 +156,23 @@ namespace Physica {
     template<Scalar T>
     Real<FloatMP>::Real(const T& x) requires(!Diffable<T>) : Real(double(x)) {}
 
+    template<RNG R>
+    Real<FloatMP> Real<FloatMP>::random_uniform() {
+        return Real<Float64>::random_uniform<R>();
+    }
+
+    template<RNG R>
+    Real<FloatMP> Real<FloatMP>::random_normal() {
+        return Real<Float64>::random_normal<R>();
+    }
+
     inline void Real<FloatMP>::setByte(unsigned int index, MPUnit value) noexcept {
         assert(index < static_cast<unsigned int>(getSize()));
         byte[index] = value;
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, const Real<FloatMP>& x) {
+        return os << std::format("{}", x.toMachine());
     }
 
     PHYSICA_API Real<FloatMP>& operator++(Real<FloatMP>& s);
@@ -166,15 +186,7 @@ namespace Physica {
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Real<Physica::FloatMP>> {
-        using T = Physica::Real<Physica::FloatMP>;
-    public:
-        static T epsilon() noexcept {
-            auto result = T(static_cast<Physica::SignedMPUnit>(1));
-            result.setPower(1 - Physica::GlobalPrecision);
-            return result;
-        }
-    };
+    struct numeric_limits<Physica::Real<Physica::FloatMP>> : public numeric_limits<double> {};
 
     template<>
     struct formatter<Physica::Real<Physica::FloatMP>, char> {
@@ -186,12 +198,12 @@ namespace std {
             const auto& basicConst = Physica::BasicConst::getInstance();
             const int power = obj.getPower();
             int exp = int(power * basicConst.ln_2_10);
-            double coefficient = std::exp(power * basicConst.ln_2 - exp * basicConst.ln_10) * obj[obj.getSize() - 1];
-            while (coefficient > 10) {
+            double coeff = std::exp(power * basicConst.ln_2 - exp * basicConst.ln_10) * obj[obj.getSize() - 1];
+            while (coeff > 10) {
                 ++exp;
-                coefficient /= 10;
+                coeff /= 10;
             }
-            return std::format_to(ctx.out(), "{} * 10 ^ {}", coefficient, exp);
+            return std::format_to(ctx.out(), "{}e{}", coeff, exp);
         }
     };
 }

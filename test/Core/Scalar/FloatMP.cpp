@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 Weibo He.
+ * Copyright 2019-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,24 @@
  */
 #include <random>
 #include <iostream>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Scalar/Real.h"
 
 using namespace Physica;
-using ScalarType = Real<FloatMP>;
+using T = Real<FloatMP>;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 
-bool numericalAddTest(unsigned int loop) {
+static bool numericalAddTest(unsigned int loop) {
     double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        ScalarType a(d_a);
+        T a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
-        ScalarType b(d_b);
+        T b(d_b);
 
         double_extract expect{d_a + d_b};
         double_extract result{double(a + b)};
@@ -53,19 +54,17 @@ bool numericalAddTest(unsigned int loop) {
     }
     return true;
 }
-/*!
- * Test operator-(), return true if passed.
- */
-bool numericalSubTest(unsigned int loop) {
+
+static bool numericalSubTest(unsigned int loop) {
     double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        ScalarType a(d_a);
+        T a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
-        ScalarType b(d_b);
+        T b(d_b);
 
         double_extract expect{d_a - d_b};
         double_extract result{double(a - b)};
@@ -84,19 +83,17 @@ bool numericalSubTest(unsigned int loop) {
     }
     return true;
 }
-/*!
- * Test operator*(), return true if passed.
- */
-bool numericalMulTest(unsigned int loop) {
+
+static bool numericalMulTest(unsigned int loop) {
     double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        ScalarType a(d_a);
+        T a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
-        ScalarType b(d_b);
+        T b(d_b);
 
         double_extract expect{d_a * d_b};
         double_extract result{double(a * b)};
@@ -115,15 +112,13 @@ bool numericalMulTest(unsigned int loop) {
     }
     return true;
 }
-/*!
- * Test operator/(), return true if passed.
- */
-bool numericalDivTest(unsigned int loop) {
+
+static bool numericalDivTest(unsigned int loop) {
     double d{};
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        ScalarType a(d_a);
+        T a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
@@ -131,7 +126,7 @@ bool numericalDivTest(unsigned int loop) {
             d = 1 - 1.4 * d * d;
             d_b = d * engine();
         }
-        ScalarType b(d_b);
+        T b(d_b);
 
         double_extract expect{d_a / d_b};
         double_extract result{double(a / b)};
@@ -152,9 +147,28 @@ bool numericalDivTest(unsigned int loop) {
 }
 
 int main() {
-    bool result = numericalAddTest(iterateCount)
+    bool passed = numericalAddTest(iterateCount)
                && numericalSubTest(iterateCount)
                && numericalMulTest(iterateCount)
                && numericalDivTest(iterateCount);
-    return !result;
+    if (!passed)
+        return 1;
+
+    if (float64(Real<FloatMP>(0.5)) != 0.5)
+        return 1;
+    {
+        // Test that addArrWithArr and addArrWithArrEq round correctlly
+        T a({3563280027363695401, 17475862807287258288UL, 9708812670373448218UL, 536}, 4, 0);
+        T b({9410232262925970914UL, 16029360673564519792UL, 970881267037344821, 8737931403336103397}, 4, -1);
+        if ((a + b)[3] != 537)
+            return 1;
+    }
+    {
+        // Test that correctly round if length overflow
+        const T a = T({10531239283933347840UL}, -1, -1);
+        const T b = T({0, 16275461880519395517UL, 17224891941645282124UL, 11134621108104132433UL}, -4, -1);
+        if ((a + b)[3] != 1)
+            return 1;
+    }
+    return 0;
 }

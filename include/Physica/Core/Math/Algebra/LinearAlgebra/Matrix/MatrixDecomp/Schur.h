@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include "Hessenburg.h"
 #include "Decouplable.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
+#include "Hessenburg.h"
 #include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 
 namespace Physica {
     /**
      * A = UTU^H
-     * 
+     *
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      * [2] Eigen; https://eigen.tuxfamily.org
@@ -57,10 +57,10 @@ namespace Physica {
         void compute(const M& source, bool computeMatrixU_ = false);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
-        [[nodiscard]] WorkingMatrix& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
-        [[nodiscard]] const WorkingMatrix& getMatrixT() const noexcept { return matrixT; }
-        [[nodiscard]] const WorkingMatrix& getMatrixU() const noexcept { assert(computeMatrixU); return matrixU; }
+        [[nodiscard]] auto& getMatrixT() noexcept { return matrixT; }
+        [[nodiscard]] auto& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
+        [[nodiscard]] const auto& getMatrixT() const noexcept { return matrixT; }
+        [[nodiscard]] const auto& getMatrixU() const noexcept { assert(computeMatrixU); return matrixU; }
     private:
         void splitOffTwoRows(size_t index);
         Vector3D<T> realShift(size_t upper, size_t iter);
@@ -93,7 +93,7 @@ namespace Physica {
             return;
         }
         const RealType inv_factor = reciprocal(factor);
-        const auto normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
+        const auto normalized = source * inv_factor; // Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
 
         const size_t order = source.getRow();
         size_t iter = 0;
@@ -187,7 +187,7 @@ namespace Physica {
         if (haveTwoRealEigenvalues) {
             const T z = sqrt(q);
             Vector2D<T> target;
-            target[0] = p + (p.isPositive() ? z : -z); //Select the root that ensure numerical stable
+            target[0] = p + (p.isPositive() ? z : -z); // Select the root that ensure numerical stable
             target[1] = matrixT(index_1, index);
             auto givensVector = givens(target, 0, 1);
             auto block1 = matrixT.rightCols(index);
@@ -348,28 +348,28 @@ namespace Physica {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
             return abs(matrixT(upper, upper - 1).real()) + abs(matrixT(upper - 1, upper - 2).real());
         }
-        //compute the shift as one of the eigenvalues of t, the 2x2
-        //diagonal block on the bottom of the active submatrix
+        // compute the shift as one of the eigenvalues of t, the 2x2
+        // diagonal block on the bottom of the active submatrix
         const auto activeBlock = matrixT.block(upper - 1, 2, upper - 1, 2);
         const RealType t_norm = abs(activeBlock(0, 0)) + abs(activeBlock(0, 1)) + abs(activeBlock(1, 0)) + abs(activeBlock(1, 1));
-        const Matrix2D t = activeBlock * reciprocal(t_norm); //Normalization to avoid under/overflow
+        const Matrix2D t = activeBlock * reciprocal(t_norm); // Normalization to avoid under/overflow
 
-        const ComplexType b = t(0,1) * t(1,0);
-        const ComplexType c = t(0,0) - t(1,1);
+        const ComplexType b = t(0, 1) * t(1, 0);
+        const ComplexType c = t(0, 0) - t(1, 1);
         const ComplexType disc = sqrt(square(c) + RealType(4) * b);
-        const ComplexType det = t(0,0) * t(1,1) - b;
-        const ComplexType trace = t(0,0) + t(1,1);
+        const ComplexType det = t(0, 0) * t(1, 1) - b;
+        const ComplexType trace = t(0, 0) + t(1, 1);
         ComplexType eival1 = (trace + disc) * RealType(0.5);
         ComplexType eival2 = (trace - disc) * RealType(0.5);
         const RealType eival1_norm = eival1.norm();
         const RealType eival2_norm = eival2.norm();
 
-        if(eival1_norm > eival2_norm)
+        if (eival1_norm > eival2_norm)
             eival2 = det / eival1;
-        else if(!eival2_norm.isZero())
+        else if (!eival2_norm.isZero())
             eival1 = det / eival2;
 
-        const bool firstEigenValueCloserToDiagonal = (eival1 - t(1,1)).norm() < (eival2 - t(1,1)).norm();
+        const bool firstEigenValueCloserToDiagonal = (eival1 - t(1, 1)).norm() < (eival2 - t(1, 1)).norm();
         return t_norm * (firstEigenValueCloserToDiagonal ? eival1 : eival2);
     }
 
@@ -386,7 +386,7 @@ namespace Physica {
                 applyGivens(matrixU, givensVec, lower, lower + 1);
         }
 
-        for(size_t i = lower + 1; i < upper; ++i) {
+        for (size_t i = lower + 1; i < upper; ++i) {
             auto givensVec = givens(Vector2D<T>{matrixT(i, i - 1), matrixT(i + 1, i - 1)}, 0, 1);
             auto rightCols = matrixT.rightCols(i - 1);
             applyGivens(givensVec, rightCols, i, i + 1);

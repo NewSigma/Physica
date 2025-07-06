@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/AddBasic.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/DivBasic.h"
@@ -23,14 +24,22 @@
 
 using namespace Physica;
 
-Real<FloatMP>::Real()
-        : byte(nullptr), length(0), power(0) {}
+Real<FloatMP>::Real() : Real(GlobalPrecision, 0) {}
 
 Real<FloatMP>::Real(int length_, int power_)
         : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
         , length(length_)
         , power(power_) {
     assert(length != INT_MIN && "Length of scalar must not equal to INT_MIN or -length will make no sense");
+}
+
+Real<FloatMP>::Real(std::initializer_list<MPUnit> bytes_, int length_, int power_) : Real(length_, power_) {
+    assert(bytes_.size() == std::abs(length_));
+    auto *p = byte;
+    for (auto elem : bytes_){
+        *p = elem;
+        p += 1;
+    }
 }
 
 Real<FloatMP>::Real(SignedMPUnit unit)
@@ -40,19 +49,17 @@ Real<FloatMP>::Real(SignedMPUnit unit)
     byte[0] = unit > 0 ? unit : -unit;
 }
 
-Real<FloatMP>::Real(double d) {
+Real<FloatMP>::Real(double d) noexcept {
     if (d == 0) {
         byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
         length = 1;
         byte[0] = power = 0;
         return;
     }
-    double_extract extract{d};
-    auto quotient = static_cast<int>(extract.exp) - 1023;
-    power = quotient / MPUnitWidth;
-    // Have power * MPUnitWidth < extract.exp, so that remainder > 0.
-    if (quotient < 0)
-        --power;
+    const double_extract extract{d};
+    const int quotient = static_cast<int>(extract.exp) - 1023;
+    power = quotient / int(MPUnitWidth);
+    power -= quotient < 0; // Have power * MPUnitWidth < extract.exp, so that remainder > 0.
     unsigned int remainder = quotient - power * MPUnitWidth;
     if constexpr (PhysicaWordSize == 64) {
         if (remainder < 52) {
@@ -120,19 +127,13 @@ Real<FloatMP>::Real(const Integer& i)
 }
 
 Real<FloatMP>::Real(const Rational& r) {
-    Real<FloatMP> numerator(r.getNumerator());
-    Real<FloatMP> denominator(r.getDenominator());
-    Real<FloatMP> result = numerator / denominator;
-    byte = result.byte;
-    result.byte = nullptr;
-    length = result.length;
-    power = result.power;
+    Real<FloatMP> result = Real<FloatMP>(r.getNumerator()) / Real<FloatMP>(r.getDenominator());
+    swap(result);
 }
 /**
  * Not accurate.
  */
-Real<FloatMP>::Real(const char* s)
-        : Real(strtod(s, nullptr)) {}
+Real<FloatMP>::Real(const char* s) : Real(strtod(s, nullptr)) {}
 /**
  * Not accurate.
  */
@@ -339,6 +340,11 @@ void Real<FloatMP>::swap(This& __restrict s) noexcept {
     std::swap(power, s.power);
 }
 
+void Real<FloatMP>::dump() const noexcept {
+    for (int i = 0; i < std::abs(length); ++i)
+        std::cout << byte[i] << ' ';
+    std::cout << std::format("\n{} {}\n", length, power);
+}
 /**
  * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
  * This function provide a quick sign check compare to using isPositive() and isNegative().
@@ -423,12 +429,13 @@ void Real<FloatMP>::cutZero() {
     }
 }
 
-Real<FloatMP> Real<FloatMP>::add(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
-    if (s1.isZero())
-        return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s2));
-    else if (s2.isZero())
-        return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s1));
-    else if (!matchSign(s1, s2)) {
+Real<FloatMP> Real<FloatMP>::add(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept {
+    if (s1.isZero()) [[unlikely]]
+        return s2;
+    if (s2.isZero()) [[unlikely]]
+        return s1;
+
+    if (!matchSign(s1, s2)) {
         if (s1.length > 0) {
             Real shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
             auto result = sub(s1, shallow_copy);
@@ -442,67 +449,57 @@ Real<FloatMP> Real<FloatMP>::add(const Real<FloatMP>& s1, const Real<FloatMP>& s
             return result;
         }
     }
-    else {
-        const Real* big;
-        const Real* small;
-        if (s1.power > s2.power) {
-            big = &s1;
-            small = &s2;
-        }
-        else {
-            big = &s2;
-            small = &s1;
-        }
-        const int bigSize = big->getSize();
-        const int smallSize = small->getSize();
-        // Estimate the ed of result first, will calculate it accurately later.
-        int length = (big->power + std::max(bigSize - big->power, smallSize - small->power));
-        length = length > GlobalPrecision
-                       ? GlobalPrecision
-                       : length;
-        auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
-        /* Init byte */ {
-            const auto copySize = bigSize > length ? length : bigSize;
-            const auto clearSize = length - copySize;
-            memset(byte, 0, clearSize * sizeof(MPUnit));
-            memcpy(byte + clearSize, big->byte + bigSize - copySize, copySize * sizeof(MPUnit));
-        }
-        bool carry;
-        /* Add and carry */ {
-            // usableSmall is the part whose add result will fall in GlobalPrecision.
-            int usableSmall = small->power - (big->power - GlobalPrecision);
-            MPUnit a = usableSmall < 0;
-            usableSmall = usableSmall > smallSize
-                                ? smallSize
-                                : (a ? 0 : usableSmall);
-            carry = addArrWithArrEq(small->byte + smallSize - usableSmall, byte + length + small->power - big->power - usableSmall, usableSmall);
-            // usableSmall is also the index which we should carry to.
-            while (carry != 0 && usableSmall < length) {
-                MPUnit temp = byte[usableSmall] + 1;
-                byte[usableSmall] = temp;
-                carry = temp < MPUnit(carry);
-                ++usableSmall;
-            }
-        }
-        ///////////////////////////////////////Get byte, length and power//////////////////////////
-        int power = big->power;
-        if (carry) {
-            ++length;
-            ++power;
-            byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
-            byte[length - 1] = 1;
-        }
-        ////////////////////////////////////Out put////////////////////////////////////////
-        return Real<FloatMP>(byte, big->length < 0 ? -length : length, power);
+
+    const bool flag = s1.power > s2.power;
+    const Real& big = flag ? s1 : s2;
+    const Real& small = flag ? s2 : s1;
+    const int bigSize = big.getSize();
+    const int smallSize = small.getSize();
+    // Estimate the ed of result first, will calculate it accurately later.
+    int length = (big.power + std::max(bigSize - big.power, smallSize - small.power));
+    length = length > GlobalPrecision
+                    ? GlobalPrecision
+                    : length;
+    auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+    /* Init byte */ {
+        const auto copySize = bigSize > length ? length : bigSize;
+        const auto clearSize = length - copySize;
+        memset(byte, 0, clearSize * sizeof(MPUnit));
+        memcpy(byte + clearSize, big.byte + bigSize - copySize, copySize * sizeof(MPUnit));
     }
+    bool carry;
+    /* Add and carry */ {
+        const int dist = small.power - (big.power - GlobalPrecision);
+        const int overlap = dist > smallSize ? smallSize
+                                             : ((dist < 0) ? 0 : dist);
+        carry = addArrWithArrEq(small.byte + smallSize - overlap, byte + length + small.power - big.power - overlap, overlap);
+
+        int index = dist;
+        while (carry != 0 && index < length) {
+            MPUnit temp = byte[index] + 1;
+            byte[index] = temp;
+            carry = temp == 0;
+            ++index;
+        }
+    }
+    ///////////////////////////////////////Get byte, length and power//////////////////////////
+    int power = big.power;
+    if (carry) {
+        ++length;
+        ++power;
+        byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
+        byte[length - 1] = 1;
+    }
+    return Real<FloatMP>(byte, big.length < 0 ? -length : length, power);
 }
 
-Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
-    if (s1.isZero())
-        return Real<FloatMP>(static_cast<Real<FloatMP>&&>(-s2));
-    else if (s2.isZero())
-        return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s1));
-    else if (s1.length > 0) {
+Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept {
+    if (s1.isZero()) [[unlikely]]
+        return -s2;
+    if (s2.isZero()) [[unlikely]]
+        return s1;
+
+    if (s1.length > 0) {
         if (s2.length < 0) {
             Real shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
             Real result = add(s1, shallow_copy);
@@ -589,13 +586,13 @@ Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s
     }
 }
 // Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
-Real<FloatMP> Real<FloatMP>::mul(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
-    if (s1.isZero() || s2.isZero())
+Real<FloatMP> Real<FloatMP>::mul(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept {
+    if (s1.isZero() || s2.isZero()) [[unlikely]]
         return Real<FloatMP>(0);
-    if (s1 == BasicConst::getInstance()._1)
-        return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s2));
-    if (s2 == BasicConst::getInstance()._1)
-        return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s1));
+    if (s1 == BasicConst::getInstance()._1) [[unlikely]]
+        return s2;
+    if (s2 == BasicConst::getInstance()._1) [[unlikely]]
+        return s1;
     const int size1 = s1.getSize();
     const int size2 = s2.getSize();
     // Estimate the ed of result first. we will calculate it accurately later.
@@ -614,9 +611,9 @@ Real<FloatMP> Real<FloatMP>::mul(const Real<FloatMP>& s1, const Real<FloatMP>& s
     return Real<FloatMP>(byte, matchSign(s1, s2) ? length : -length, power);
 }
 
-Real<FloatMP> Real<FloatMP>::div(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
+Real<FloatMP> Real<FloatMP>::div(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept {
     assert(!s2.isZero() && "[Error]: Divide by zero");
-    if (!s1.isZero()) {
+    if (!s1.isZero()) [[likely]] {
         if (s2 != BasicConst::getInstance()._1) {
             const auto s1_size = s1.getSize(), s2_size = s2.getSize();
             // Add one to arr1_length to avoid precision loss during right shift.

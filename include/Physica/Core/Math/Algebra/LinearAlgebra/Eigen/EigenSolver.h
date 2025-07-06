@@ -122,7 +122,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     template<Matrix M>
     void EigenSolver<T, Order>::compute(const M& source, bool computeEigenvectors_) {
-        if constexpr (HasMKL())
+        if constexpr (HasMKL() && (T::Prec == Float32 || T::Prec == Float64))
             compute_mkl(source, computeEigenvectors_);
         else
             compute_base(source, computeEigenvectors_);

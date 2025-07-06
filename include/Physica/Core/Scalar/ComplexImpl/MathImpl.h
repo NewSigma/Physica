@@ -50,10 +50,10 @@ namespace Physica {
         using ResultType = Complex<T>;
         if (c.isZero())
             return ResultType(0);
-        using RealType = T::RealType;
-        const RealType abs_real = abs(c.real());
-        const RealType w = sqrt((abs_real + c.norm()) * T(0.5));
-        const RealType v = c.imag() / w * T(0.5);
+        using Tr = T::RealType;
+        const Tr abs_real = abs(c.real());
+        const Tr w = sqrt((abs_real + c.norm()) * T(0.5));
+        const Tr v = c.imag() / w * T(0.5);
         if (!c.real().isNegative())
             return ResultType(w, v);
         return ResultType(abs(v), c.imag().isNegative() ? -w : w);

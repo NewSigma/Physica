@@ -65,9 +65,10 @@ bool eigenTestImpl(const T& mat, double precision) {
 
 template<Matrix T>
 bool eigenTest(const T& mat, double precision) {
+    using ScalarType = T::ScalarType;
     if (!eigenTestImpl<T, Backend::Base>(mat, precision))
         return false;
-    if constexpr (HasMKL()) {
+    if constexpr (HasMKL() && (ScalarType::Prec == Float32 || ScalarType::Prec == Float64)) {
         if (!eigenTestImpl<T, Backend::MKL>(mat, precision))
             return false;
     }
