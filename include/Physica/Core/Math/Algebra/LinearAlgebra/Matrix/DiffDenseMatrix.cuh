@@ -67,23 +67,23 @@ namespace Physica {
         __host__ __device__ void resize(size_t row, size_t col);
 
         void zeros();
-        [[nodiscard]] inline host_obj toHost() const;
-        [[nodiscard]] inline host_obj toHostAsync() const;
-        inline void toHost(host_obj& obj) const;
-        inline void toHostAsync(host_obj& obj) const;
+        [[nodiscard]] host_obj toHost() const;
+        [[nodiscard]] host_obj toHostAsync() const;
+        void toHost(host_obj& obj) const;
+        void toHostAsync(host_obj& obj) const;
 
         template<RNG R>
-        inline void random_uniform();
+        void random_uniform();
         template<RNG R>
-        inline void random_normal();
+        void random_normal();
         template<RNG R>
-        inline void random_any(auto& distribution);
+        void random_any(auto& distribution);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::data;
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return v.getRow(); }
 
@@ -93,11 +93,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto& grads() noexcept { return g; }
         /* Static members */
         template<RNG R>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
+        [[nodiscard]] static This random_uniform(size_t row, size_t col);
         template<RNG R>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t col);
+        [[nodiscard]] static This random_normal(size_t row, size_t col);
         template<RNG R>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, auto& distribution);
+        [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
     };
 }
 

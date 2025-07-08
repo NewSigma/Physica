@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] __host__ __device__ inline auto unit(V&& v) noexcept requires(CUDA<V>) {
+    [[nodiscard]] __host__ __device__ auto unit(V&& v) noexcept requires(CUDA<V>) {
         return device_obj<VectorExpr<ExprType::Unit, V&&>>(std::forward<V>(v));
     }
 }

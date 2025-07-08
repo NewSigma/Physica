@@ -39,7 +39,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const H5::DataSpace& asH5Type() const noexcept { return space.asH5Type(); }
         [[nodiscard]] H5::DataSpace& asH5Type() noexcept { return space.asH5Type(); }
-        [[nodiscard]] inline size_t getDim() const noexcept;
+        [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] size_t getSize(size_t dim) const noexcept { return space.getSize(fromDim + dim); }
     };
 
@@ -65,7 +65,7 @@ namespace Physica {
     }
 
     template<class SpaceType, size_t Dim>
-    inline size_t SubDataSpace<SpaceType, Dim>::getDim() const noexcept {
+    size_t SubDataSpace<SpaceType, Dim>::getDim() const noexcept {
         if constexpr (Dim == Dynamic)
             return toDim - fromDim;
         else

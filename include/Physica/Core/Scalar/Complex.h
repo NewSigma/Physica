@@ -77,25 +77,25 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto operator/(const U& x) const requires(!Diffable<U>);
         [[nodiscard]] __host__ __device__ This operator-() const;
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline T squaredNorm() const;
-        [[nodiscard]] __host__ __device__ inline T norm() const;
-        [[nodiscard]] __host__ __device__ inline T phase() const;
+        [[nodiscard]] __host__ __device__ T squaredNorm() const;
+        [[nodiscard]] __host__ __device__ T norm() const;
+        [[nodiscard]] __host__ __device__ T phase() const;
         [[nodiscard]] __host__ __device__ Complex unit() const;
 
-        [[nodiscard]] inline PacketType packet() const;
-        inline void writePacket(const PacketType packet);
+        [[nodiscard]] PacketType packet() const;
+        void writePacket(const PacketType packet);
         __host__ __device__ void swap(Complex& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ T& real() noexcept { return re; }
         [[nodiscard]] __host__ __device__ const T& real() const noexcept { return re; }
         [[nodiscard]] __host__ __device__ T& imag() noexcept { return im; }
         [[nodiscard]] __host__ __device__ const T& imag() const noexcept { return im; }
-        [[nodiscard]] __host__ __device__ inline std::complex<Tm> toMachine() const noexcept;
+        [[nodiscard]] __host__ __device__ std::complex<Tm> toMachine() const noexcept;
         [[nodiscard]] __host__ __device__ auto toMachineThrust() const noexcept;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */
-        [[nodiscard]] inline static Complex fromPhase(T phase);
+        [[nodiscard]] static Complex fromPhase(T phase);
         template<RNG R>
         [[nodiscard]] static Complex random_uniform();
         template<RNG R>

@@ -108,13 +108,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Scalar T, bool IsUnitLattice>
-    void RValueTensor<Derived>::forPointIndexInTensor(
-            const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn) {
-        forPointIndexInTensor<T, IsUnitLattice>(grid.getDim(), lattice, fn);
-    }
-
-    template<class Derived>
     size_t RValueTensor<Derived>::toSize(const IndexArray& shape) {
         return ArrayND<ScalarType, Dim>::toSize(shape);;
     }

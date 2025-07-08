@@ -23,11 +23,11 @@
 
 namespace Physica {
     template<int Dim, int NumSite>
-    inline FermiState<Dim, NumSite>::FermiState(Spin spinUp_, Spin spinDown_)
+    FermiState<Dim, NumSite>::FermiState(Spin spinUp_, Spin spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
     template<int Dim, int NumSite>
-    inline bool FermiState<Dim, NumSite>::operator>(const This& other) const noexcept {
+    bool FermiState<Dim, NumSite>::operator>(const This& other) const noexcept {
         if (spinUp > other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -36,7 +36,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline bool FermiState<Dim, NumSite>::operator<(const This& other) const noexcept {
+    bool FermiState<Dim, NumSite>::operator<(const This& other) const noexcept {
         if (spinUp < other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -63,12 +63,12 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline int FermiState<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const noexcept {
+    int FermiState<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const noexcept {
         return spinUp.hopSign(from, to);
     }
 
     template<int Dim, int NumSite>
-    inline int FermiState<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const noexcept {
+    int FermiState<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const noexcept {
         return spinDown.hopSign(from, to);
     }
 
@@ -87,12 +87,12 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline int FermiState<Dim, NumSite>::lShiftSign() const {
+    int FermiState<Dim, NumSite>::lShiftSign() const {
         return spinUp.lShiftSign() * spinDown.lShiftSign();
     }
 
     template<int Dim, int NumSite>
-    inline int FermiState<Dim, NumSite>::calcPeriod() const noexcept {
+    int FermiState<Dim, NumSite>::calcPeriod() const noexcept {
         if constexpr (Dim != 1)
             noImpl(__func__);
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
@@ -101,14 +101,14 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline void FermiState<Dim, NumSite>::swap(FermiState& __restrict obj) noexcept {
+    void FermiState<Dim, NumSite>::swap(FermiState& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         spinUp.swap(obj.spinUp);
         spinDown.swap(obj.spinDown);
     }
 
     template<int Dim, int NumSite>
-    inline int FermiState<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
+    int FermiState<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
         return std::popcount(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
 

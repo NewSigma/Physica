@@ -48,8 +48,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ size_t getRSpaceSize() const noexcept { return Base::getDerived().getRSpaceSize(); }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -79,14 +79,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTKSpace<Derived, 1>::PtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) {
+    __host__ __device__ auto FFTKSpace<Derived, 1>::data_ptr(size_t index) -> PtrTy {
         assert(index < getLength());
         return Base::getDerived().asComplexBuffer() + index;
 
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTKSpace<Derived, 1>::ConstPtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) const {
+    __host__ __device__ auto FFTKSpace<Derived, 1>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
     //////////////////////////////////////////////////////////////////////
@@ -130,7 +130,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void FFTKSpace<Derived, 2>::invTransform(const Matrix auto& data) {
+    void FFTKSpace<Derived, 2>::invTransform(const Matrix auto& data) {
         assert(data.getRow() == getRow());
         assert(data.getCol() == getCol());
         *this = data;
@@ -138,14 +138,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline FFTKSpace<Derived, 2>::PtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
+    __host__ __device__ auto FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) -> PtrTy {
         assert(row < getRow());
         assert(col < getCol());
         return Base::getDerived().asComplexBuffer() + row * getCol() + col;
     }
 
     template<class Derived>
-    inline FFTKSpace<Derived, 2>::ConstPtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+    __host__ __device__ auto FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
     //////////////////////////////////////////////////////////////////////
@@ -177,8 +177,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
         [[nodiscard]] size_t getSize() const noexcept { return TensorBase::toSize(Base::getDerived().getKSpaceSize()); }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(Index3D index);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(Index3D index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(Index3D index);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(Index3D index) const;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -209,8 +209,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTKSpace<Derived, 3>::PtrTy
-    FFTKSpace<Derived, 3>::data_ptr(Index3D index) {
+    __host__ __device__ auto FFTKSpace<Derived, 3>::data_ptr(Index3D index) -> PtrTy {
         assert(index[0] < getDimX());
         assert(index[1] < getDimY());
         assert(index[2] < getDimZ());
@@ -218,8 +217,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTKSpace<Derived, 3>::ConstPtrTy
-    FFTKSpace<Derived, 3>::data_ptr(Index3D index) const {
+    __host__ __device__ auto FFTKSpace<Derived, 3>::data_ptr(Index3D index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

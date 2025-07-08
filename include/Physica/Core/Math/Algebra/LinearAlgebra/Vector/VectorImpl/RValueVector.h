@@ -112,44 +112,44 @@ namespace Physica {
         ~RValueVector() = default;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& v) const;
+        void assign(Vector auto& v) const;
         template<ExecutePolicy P = Sequential>
-        inline void assign_add(Vector auto& v) const;
+        void assign_add(Vector auto& v) const;
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] auto calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
         template<Packet Pack>
-        [[nodiscard]] inline Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto head(size_t to) & noexcept;
+        [[nodiscard]] auto head(size_t to) & noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto head(size_t to) const& noexcept;
+        [[nodiscard]] const auto head(size_t to) const& noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto tail(size_t from) & noexcept;
+        [[nodiscard]] auto tail(size_t from) & noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto tail(size_t from) const& noexcept;
+        [[nodiscard]] const auto tail(size_t from) const& noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto segment(size_t from, size_t to) & noexcept;
+        [[nodiscard]] auto segment(size_t from, size_t to) & noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto segment(size_t from, size_t to) const& noexcept;
-        [[nodiscard]] inline auto reversal() noexcept;
-        [[nodiscard]] inline const auto reversal() const noexcept;
+        [[nodiscard]] const auto segment(size_t from, size_t to) const& noexcept;
+        [[nodiscard]] auto reversal() noexcept;
+        [[nodiscard]] const auto reversal() const noexcept;
 
-        [[nodiscard]] inline auto format() const;
+        [[nodiscard]] auto format() const;
         [[nodiscard]] auto transpose() const noexcept;
         [[nodiscard]] auto conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
 
-        [[nodiscard]] inline CoDiff<Tr> norm1() const;
-        [[nodiscard]] inline CoDiff<Tr> norm2() const;
-        [[nodiscard]] inline CoDiff<Tr> norm() const;
-        [[nodiscard]] inline CoDiff<Tr> squaredNorm() const;
-        [[nodiscard]] inline Tr lnSquaredNorm() const;
-        [[nodiscard]] inline Tr normInf() const;
+        [[nodiscard]] CoDiff<Tr> norm1() const;
+        [[nodiscard]] CoDiff<Tr> norm2() const;
+        [[nodiscard]] CoDiff<Tr> norm() const;
+        [[nodiscard]] CoDiff<Tr> squaredNorm() const;
+        [[nodiscard]] Tr lnSquaredNorm() const;
+        [[nodiscard]] Tr normInf() const;
 
         [[nodiscard]] CoDiff<T> max() const noexcept;
         [[nodiscard]] CoDiff<T> min() const noexcept;
@@ -203,14 +203,14 @@ namespace Physica {
         auto grads_impl() const noexcept;
     private:
         template<Vector V, ExecutePolicy P>
-        inline void assign_for(V& v) const;
+        void assign_for(V& v) const;
         template<Vector V, ExecutePolicy P, size_t Size>
-        inline void assign_simd(V& v) const;
+        void assign_simd(V& v) const;
 
         template<Vector V, ExecutePolicy P>
-        inline void assign_add_for(V& v) const;
+        void assign_add_for(V& v) const;
         template<Vector V, size_t Size>
-        inline void assign_add_simd(V& v) const;
+        void assign_add_simd(V& v) const;
     };
 
     template<Vector T1, Vector T2>

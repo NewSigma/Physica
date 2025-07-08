@@ -46,8 +46,8 @@ namespace Physica {
     public:
         ~LValueVector() = default;
         /* Operators */
-        inline This& operator=(const This& v);
-        inline This& operator=(This&& v);
+        This& operator=(const This& v);
+        This& operator=(This&& v);
 
         template<Scalar T>
         Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
@@ -61,8 +61,8 @@ namespace Physica {
         void operator+=(const Vector auto& v);
         void operator-=(const Vector auto& v);
 
-        [[nodiscard]] inline RefTy operator[](size_t index);
-        [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
+        [[nodiscard]] RefTy operator[](size_t index);
+        [[nodiscard]] ConstRefTy operator[](size_t index) const;
         /* Operations */
         [[nodiscard]] ConstRefTy calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -74,17 +74,17 @@ namespace Physica {
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto head(size_t to) noexcept;
+        [[nodiscard]] auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto head(size_t to) const noexcept;
+        [[nodiscard]] const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto tail(size_t from) noexcept;
+        [[nodiscard]] auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto tail(size_t from) const noexcept;
+        [[nodiscard]] const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto segment(size_t from, size_t to) noexcept;
+        [[nodiscard]] auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] const auto segment(size_t from, size_t to) const noexcept;
 
         template<Matrix M>
         [[nodiscard]] auto reshape(const M& mat) noexcept;
@@ -106,17 +106,17 @@ namespace Physica {
         Tr householder();
 
         template<RNG R>
-        inline void random_uniform();
+        void random_uniform();
         template<RNG R>
-        inline void random_normal();
+        void random_normal();
         template<RNG R>
-        inline void random_any(auto& distribution);
+        void random_any(auto& distribution);
 
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] inline PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
     protected:
         LValueVector() = default;
         LValueVector(const This&) = default;

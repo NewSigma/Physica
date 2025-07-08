@@ -46,10 +46,6 @@ namespace Physica {
         assert(!i1.isZero() && !i2.isZero());
         return (i1.length ^ i2.length) >= 0;
     }
-
-    inline void swap(Integer& __restrict i1, Integer& __restrict i2) noexcept {
-        i1.swap(i2);
-    }
 }
 
 #include "Math.h"

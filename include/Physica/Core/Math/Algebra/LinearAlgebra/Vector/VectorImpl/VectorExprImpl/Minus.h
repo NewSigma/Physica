@@ -34,7 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& v) const;
+        void assign(Vector auto& v) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -49,7 +49,7 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    inline void VectorExpr<ExprType::Minus, V>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Minus, V>::assign(Vector auto& v) const {
         const auto& expr = Base::getExpr();
         constexpr bool IsBinaryExpr = requires { expr.getLHS() * expr.getRHS(); };
 
@@ -98,7 +98,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] inline auto operator-(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto operator-(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Minus, V&&>(std::forward<V>(v));
     }
 }

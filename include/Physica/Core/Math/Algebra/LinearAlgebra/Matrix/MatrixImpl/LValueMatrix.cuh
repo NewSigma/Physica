@@ -71,38 +71,38 @@ namespace Physica {
         [[nodiscard]] __device__ ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
-        void reverse(const Scalar auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
-        [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto col(size_t c) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto col(size_t c) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto rows(size_t fromRow, size_t rowCount) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto rows(size_t fromRow, size_t rowCount) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto topRows(size_t to) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto topRows(size_t to) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto bottomRows(size_t from) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto bottomRows(size_t from) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto cols(size_t fromCol, size_t colCount) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto cols(size_t fromCol, size_t colCount) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto leftCols(size_t to) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto leftCols(size_t to) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto rightCols(size_t from) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto rightCols(size_t from) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto topLeftCorner(size_t to) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto topLeftCorner(size_t to) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto bottomRightCorner(size_t from) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto bottomRightCorner(size_t from) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
+        [[nodiscard]] __host__ __device__ const auto row(size_t r) const noexcept;
+        [[nodiscard]] __host__ __device__ auto col(size_t c) noexcept;
+        [[nodiscard]] __host__ __device__ const auto col(size_t c) const noexcept;
+        [[nodiscard]] __host__ __device__ auto rows(size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] __host__ __device__ const auto rows(size_t fromRow, size_t rowCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto topRows(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ const auto topRows(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRows(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomRows(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ auto cols(size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] __host__ __device__ const auto cols(size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto leftCols(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ const auto leftCols(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto rightCols(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ const auto rightCols(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] __host__ __device__ const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ const auto topLeftCorner(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] __host__ __device__ const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] __host__ __device__ const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto flatten();
         [[nodiscard]] __host__ __device__ const auto flatten() const;
@@ -111,8 +111,8 @@ namespace Physica {
         using Base::getCol;
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
-        [[nodiscard]] __device__ inline RefTy refFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] __device__ inline ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] __device__ RefTy refFromMajorMinor(size_t major, size_t minor);
+        [[nodiscard]] __device__ ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

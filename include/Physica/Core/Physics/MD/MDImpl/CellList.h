@@ -60,7 +60,7 @@ namespace Physica {
 
         [[nodiscard]] size_t calcMaxNumAtomInCell() const noexcept;
 
-        [[nodiscard]] inline device_obj<This> toDevice() const;
+        [[nodiscard]] device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
         void swap(CellList& __restrict obj) noexcept;
         /* Getters */
@@ -73,7 +73,7 @@ namespace Physica {
         [[nodiscard]] size_t getCellGridDimZ() const noexcept { return cellGridDim[2]; }
         [[nodiscard]] const Array<size_t>& getCellAtomMap() const noexcept { return cellAtomMap; }
         [[nodiscard]] const Array<size_t>& getCellStartOffset() const noexcept { return cellStartOffset; }
-        [[nodiscard]] inline size_t getNumAtomInCell(size_t cell) const;
+        [[nodiscard]] size_t getNumAtomInCell(size_t cell) const;
         [[nodiscard]] size_t getNumCell() const noexcept { return cellStartOffset.getLength() - 1; }
         [[nodiscard]] const Array<Index3D>& getAtomCellMap() const noexcept { return atomCellMap; }
     private:
@@ -81,7 +81,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static Array<Vector3D<T>> makeNeighShifts(const LatticeMatrix& lattice);
         template<size_t DimID>
-        [[nodiscard]] __host__ __device__ inline static int findNeighbor(
+        [[nodiscard]] __host__ __device__ static int findNeighbor(
                 const Index3D& cellGridDim, size_t centerIndex, int deltaIndex, Index3D& neighborIndex);
         [[nodiscard]] static Index3D makeGridDim(const LatticeMatrix& lattice, T cutoff);
         /* Friends */
@@ -157,7 +157,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void CellList<T>::update(const MDCellType& mdCell) {
+    void CellList<T>::update(const MDCellType& mdCell) {
         update(mdCell.getPos());
     }
 
@@ -250,7 +250,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline size_t CellList<T>::getNumAtomInCell(size_t cell) const {
+    size_t CellList<T>::getNumAtomInCell(size_t cell) const {
         assert(cell < getNumCell() && "[Error]: The cell is not exist");
         return cellStartOffset[cell + 1] - cellStartOffset[cell];
     }
@@ -288,7 +288,7 @@ namespace Physica {
 
     template<Scalar T>
     template<size_t DimID>
-    __host__ __device__ inline int CellList<T>::findNeighbor(
+    __host__ __device__ int CellList<T>::findNeighbor(
             const Index3D& cellGridDim,
             size_t centerIndex,
             int deltaIndex,

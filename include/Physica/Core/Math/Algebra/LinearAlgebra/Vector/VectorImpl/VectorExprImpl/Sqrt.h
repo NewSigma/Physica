@@ -43,7 +43,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto sqrt(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto sqrt(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Sqrt, V&&>(std::forward<V>(v));
     }
 }

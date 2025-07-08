@@ -42,7 +42,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& target) const;
+        void assign(Vector auto& target) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
@@ -59,7 +59,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
-    inline void MatPowVecProd<M, V>::assign(Vector auto& target) const {
+    void MatPowVecProd<M, V>::assign(Vector auto& target) const {
         const int power = mpow.getPower();
         if (power == 0) {
             target = v;

@@ -27,19 +27,19 @@ namespace Physica {
 
     template<Scalar T, int Dim>
     template<class... Args>
-    inline void DenseTensor<T, Dim>::resize(IndexArray shape, Args&&... args) {
+    void DenseTensor<T, Dim>::resize(IndexArray shape, Args&&... args) {
         Storage::resize(std::move(shape), std::forward<Args>(args)...);
     }
 
     template<Scalar T, int Dim>
-    inline void DenseTensor<T, Dim>::swap(This& __restrict obj) noexcept {
+    void DenseTensor<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Storage::swap(obj);
     }
 
     template<Scalar T, int Dim>
     template<RNG R>
-    inline auto DenseTensor<T, Dim>::random_uniform(IndexArray shape) -> This {
+    auto DenseTensor<T, Dim>::random_uniform(IndexArray shape) -> This {
         auto result = This(std::move(shape));
         result.asArray().template random_uniform<R>();
         return result;
@@ -47,7 +47,7 @@ namespace Physica {
 
     template<Scalar T, int Dim>
     template<RNG R>
-    inline auto DenseTensor<T, Dim>::random_normal(IndexArray shape) -> This {
+    auto DenseTensor<T, Dim>::random_normal(IndexArray shape) -> This {
         auto result = This(std::move(shape));
         result.asArray().template random_normal<R>();
         return result;

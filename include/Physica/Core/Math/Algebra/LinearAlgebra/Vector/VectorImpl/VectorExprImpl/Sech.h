@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto sech(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto sech(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Sech, V&&>(std::forward<V>(v));
     }
 }

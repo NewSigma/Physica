@@ -41,7 +41,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    inline Pack ContinuousVector<Derived>::packet(size_t index) const {
+    Pack ContinuousVector<Derived>::packet(size_t index) const {
         assert(index + Pack::size() <= Base::getLength());
         if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
             Pack packet{};
@@ -54,7 +54,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    inline Pack ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
+    Pack ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
         assert(index + count <= Base::getLength());
         if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
             Pack packet{};
@@ -67,7 +67,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    inline void ContinuousVector<Derived>::writePacket(size_t index, const Pack packet) {
+    void ContinuousVector<Derived>::writePacket(size_t index, const Pack packet) {
         constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
@@ -77,7 +77,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+    void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
         constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store_partial(Base::data_ptr(index), count);
@@ -103,37 +103,37 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    inline auto ContinuousVector<Derived>::head(size_t to) noexcept {
+    auto ContinuousVector<Derived>::head(size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto ContinuousVector<Derived>::head(size_t to) const noexcept {
+    const auto ContinuousVector<Derived>::head(size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline auto ContinuousVector<Derived>::tail(size_t from) noexcept {
+    auto ContinuousVector<Derived>::tail(size_t from) noexcept {
         return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto ContinuousVector<Derived>::tail(size_t from) const noexcept {
+    const auto ContinuousVector<Derived>::tail(size_t from) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline auto ContinuousVector<Derived>::segment(size_t from, size_t to) noexcept {
+    auto ContinuousVector<Derived>::segment(size_t from, size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto ContinuousVector<Derived>::segment(size_t from, size_t to) const noexcept {
+    const auto ContinuousVector<Derived>::segment(size_t from, size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
     /**
@@ -153,7 +153,7 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    inline void ContinuousVector<Derived>::random_uniform() {
+    void ContinuousVector<Derived>::random_uniform() {
         if constexpr (HasMKL()) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
@@ -170,7 +170,7 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    inline void ContinuousVector<Derived>::random_normal() {
+    void ContinuousVector<Derived>::random_normal() {
         if constexpr (HasMKL() && !isForwardDiff) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
@@ -187,7 +187,7 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    inline void ContinuousVector<Derived>::random_any(auto& distribution) {
+    void ContinuousVector<Derived>::random_any(auto& distribution) {
         Base::template random_any<R>(distribution);
     }
 

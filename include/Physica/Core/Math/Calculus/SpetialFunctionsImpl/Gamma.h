@@ -129,12 +129,12 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    inline Real<Prec> gamma(const Real<Prec>& s) {
+    Real<Prec> gamma(const Real<Prec>& s) {
         return exp(lnGamma(s));
     }
 
     template<FloatPrec Prec>
-    inline Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2) {
+    Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2) {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 

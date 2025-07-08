@@ -34,7 +34,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline Complex<T> reciprocal(const Complex<T>& c) {
+    Complex<T> reciprocal(const Complex<T>& c) {
         assert(!c.isZero() && "[Error]: Divide by zero");
         const auto& real = c.real();
         const auto& imag = c.imag();
@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ inline Complex<T> ln(const Complex<T>& c) {
+    __host__ __device__ Complex<T> ln(const Complex<T>& c) {
         assert(!c.isZero());
         if constexpr (IsHost())
             return Complex<T>(std::log(c.toMachine()));
@@ -72,12 +72,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ inline Complex<T> ln1p(const Complex<T>& c) {
+    __host__ __device__ Complex<T> ln1p(const Complex<T>& c) {
         return ln(T(1) + c);
     }
 
     template<Scalar T>
-    inline Complex<T> ln1pexp(const Complex<T>& c) {
+    Complex<T> ln1pexp(const Complex<T>& c) {
         if (c.real().isPositive()) {
             T norm = c.norm();
             return norm + ln(exp(-norm) + exp(c - norm));
@@ -87,22 +87,22 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline Complex<T> exp(const Complex<T>& c) {
+    Complex<T> exp(const Complex<T>& c) {
         return Complex<T>(std::exp(c.toMachine()));
     }
 
     template<Scalar T>
-    inline Complex<T> cos(const Complex<T>& c) {
+    Complex<T> cos(const Complex<T>& c) {
         return Complex<T>(std::cos(c.toMachine()));
     }
 
     template<Scalar T>
-    inline Complex<T> sin(const Complex<T>& c) {
+    Complex<T> sin(const Complex<T>& c) {
         return Complex<T>(std::sin(c.toMachine()));
     }
 
     template<Scalar T>
-    inline Complex<T> tan(const Complex<T>& c) {
+    Complex<T> tan(const Complex<T>& c) {
         return Complex<T>(std::tan(c.toMachine()));
     }
 

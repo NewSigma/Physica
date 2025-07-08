@@ -84,16 +84,16 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const ComplexTypeFFTW* getBuffer() const { return buffer; }
         [[nodiscard]] __host__ __device__ size_t getRSpaceSize() const noexcept { return rSpaceSize; }
         [[nodiscard]] __host__ __device__ size_t getKSpaceSize() const noexcept { return getKSpace().getSize(); }
-        [[nodiscard]] inline RealType getRSpaceDelta(RealType kSpaceDelta) const noexcept;
-        [[nodiscard]] inline RealType getKSpaceDelta(RealType rSpaceDelta) const noexcept;
+        [[nodiscard]] RealType getRSpaceDelta(RealType kSpaceDelta) const noexcept;
+        [[nodiscard]] RealType getKSpaceDelta(RealType rSpaceDelta) const noexcept;
         [[nodiscard]] __host__ __device__ RSpaceType& getRSpace() { return *this; }
         [[nodiscard]] __host__ __device__ KSpaceType& getKSpace() { return *this; }
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
-        [[nodiscard]] inline static FFT<T, 1> makeEmptyFFT(size_t rSpaceSize);
+        [[nodiscard]] static FFT<T, 1> makeEmptyFFT(size_t rSpaceSize);
         template<std::integral IndexType>
-        [[nodiscard]] __host__ __device__ constexpr inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr static IndexType rSizeToKSize(IndexType rSize) noexcept;
         static void transform(const This& planProvider, This& bufferProvider);
         static void rawInvTransform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
@@ -157,14 +157,14 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const ComplexTypeFFTW* getBuffer() const { return buffer; }
         [[nodiscard]] const auto& getRSpaceSize() const noexcept { return rSpaceSize; }
         [[nodiscard]] const auto& getKSpaceSize() const noexcept { return kSpaceSize; }
-        [[nodiscard]] inline RealType getRSpaceDelta(RealType kSpaceDelta, unsigned int dim) const noexcept;
-        [[nodiscard]] inline RealType getKSpaceDelta(RealType rSpaceDelta, unsigned int dim) const noexcept;
+        [[nodiscard]] RealType getRSpaceDelta(RealType kSpaceDelta, unsigned int dim) const noexcept;
+        [[nodiscard]] RealType getKSpaceDelta(RealType rSpaceDelta, unsigned int dim) const noexcept;
         [[nodiscard]] __host__ __device__ RSpaceType& getRSpace() { return *this; }
         [[nodiscard]] __host__ __device__ KSpaceType& getKSpace() { return *this; }
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
-        [[nodiscard]] inline static FFT<T, Dim> makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize);
+        [[nodiscard]] static FFT<T, Dim> makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize);
         template<std::integral IndexType>
         [[nodiscard]] static Array<IndexType, Dim> rSizeToKSize(const Array<IndexType, Dim>& rSize);
         static void transform(const This& planProvider, This& bufferProvider);

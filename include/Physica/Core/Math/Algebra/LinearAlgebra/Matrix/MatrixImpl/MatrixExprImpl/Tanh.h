@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] inline auto tanh_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto tanh_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Tanh, M&&>(std::forward<M>(m));
     }
 }

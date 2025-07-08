@@ -61,7 +61,7 @@ namespace Physica {
     };
 
     template<class T>
-    inline void swap(Mesh<T>& __restrict mesh1, Mesh<T>& __restrict mesh2) noexcept {
+    void swap(Mesh<T>& __restrict mesh1, Mesh<T>& __restrict mesh2) noexcept {
         mesh1.swap(mesh2);
     }
 }

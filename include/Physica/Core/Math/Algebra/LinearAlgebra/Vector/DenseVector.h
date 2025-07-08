@@ -59,8 +59,8 @@ namespace Physica {
         void resize(const Vector auto& x);
         using Storage::resize;
 
-        [[nodiscard]] inline auto toDevice() const;
-        [[nodiscard]] inline auto toDeviceAsync() const;
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
         using Base::toDevice;
         using Base::toDeviceAsync;
 
@@ -119,7 +119,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Length>
-    inline void swap(Physica::DenseVector<T, Length>& __restrict v1, Physica::DenseVector<T, Length>& __restrict v2) noexcept {
+    void swap(Physica::DenseVector<T, Length>& __restrict v1, Physica::DenseVector<T, Length>& __restrict v2) noexcept {
         v1.swap(v2);
     }
 }

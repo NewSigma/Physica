@@ -47,8 +47,8 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        inline void cg(const Matrix auto& A, VectorType& b);
-        inline void cgnr(const Matrix auto& A, VectorType& b);
+        void cg(const Matrix auto& A, VectorType& b);
+        void cgnr(const Matrix auto& A, VectorType& b);
 
         void cg_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, Vector auto& b);
         void cgnr_functor(std::invocable<const VectorType&, VectorType&> auto dotFunc, std::invocable<const VectorType&, VectorType&> auto dotTransFunc, Vector auto& b);
@@ -69,14 +69,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void IterateSolver<T>::cg(const Matrix auto& A, VectorType& b) {
+    void IterateSolver<T>::cg(const Matrix auto& A, VectorType& b) {
         assert(A.getRow() == A.getCol());
         assert(A.getRow() == b.getLength());
         cg_functor([&A](const VectorType& v, VectorType& dot) { dot = A * v; }, b);
     }
 
     template<Scalar T>
-    inline void IterateSolver<T>::cgnr(const Matrix auto& A, VectorType& b) {
+    void IterateSolver<T>::cgnr(const Matrix auto& A, VectorType& b) {
         assert(A.getRow() == A.getCol());
         assert(A.getRow() == b.getLength());
         auto dotFunc = [&A](const VectorType& v, VectorType& dot) { dot = A * v; };
@@ -180,7 +180,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T>
-    inline void swap(Physica::IterateSolver<T>& __restrict solver1,
+    void swap(Physica::IterateSolver<T>& __restrict solver1,
                      Physica::IterateSolver<T>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }

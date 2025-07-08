@@ -56,9 +56,9 @@ namespace Physica {
         using Storage::resize;
 
         [[nodiscard]] host_obj toHost() const;
-        [[nodiscard]] inline host_obj toHostAsync() const;
-        inline void toHost(host_obj& obj) const;
-        inline void toHostAsync(host_obj& obj) const;
+        [[nodiscard]] host_obj toHostAsync() const;
+        void toHost(host_obj& obj) const;
+        void toHostAsync(host_obj& obj) const;
 
         void zeros();
         template<RNG R>
@@ -75,22 +75,22 @@ namespace Physica {
         using Storage::getRow;
         using Storage::getCol;
         /* Static members */
-        [[nodiscard]] static inline device_obj unitMatrix(size_t order);
+        [[nodiscard]] static device_obj unitMatrix(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
+        [[nodiscard]] static This random_uniform(size_t row, size_t col);
         template<RNG R>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t col);
+        [[nodiscard]] static This random_normal(size_t row, size_t col);
         template<RNG R>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, auto& distribution);
+        [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
     };
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::toDevice() const {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::toDevice() const {
         return device_obj<This>(*this);
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::toDeviceAsync() const {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::toDeviceAsync() const {
         device_obj<This> result(getRow(), getCol());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));

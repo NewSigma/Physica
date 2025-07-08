@@ -38,7 +38,7 @@ namespace Physica {
         /* Operations */
         void solve(std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto  random);
         /* Static members */
-        static inline void step(T stepSize, T& x, VectorType& sol, std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto random);
+        static void step(T stepSize, T& x, VectorType& sol, std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto random);
     };
 
     template<Scalar T, size_t Dim>
@@ -53,7 +53,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    inline void SRK2<T, Dim>::step(
+    void SRK2<T, Dim>::step(
             T stepSize,
             T& x,
             VectorType& sol,

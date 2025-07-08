@@ -50,8 +50,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
@@ -85,7 +85,7 @@ namespace Physica {
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ inline auto device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
+    __host__ __device__ auto device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < getRow() && col < getCol());
         if constexpr (MatrixOption::isColMatrix<This>())
             return v.data_ptr(col * getRow() + row);
@@ -94,7 +94,7 @@ namespace Physica {
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ inline auto device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
+    __host__ __device__ auto device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 

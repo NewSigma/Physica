@@ -38,7 +38,7 @@ namespace Physica {
         void operator+=(const This& pdf);
         /* Operations */
         void sample(T data);
-        inline void sample(VectorND<T> datas);
+        void sample(VectorND<T> datas);
         void clear();
         [[nodiscard]] VectorND<T> makePosition() const;
         [[nodiscard]] VectorND<T> makeDistribution() const;
@@ -68,7 +68,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void ProbDistribution<T>::sample(VectorND<T> datas) {
+    void ProbDistribution<T>::sample(VectorND<T> datas) {
         for (auto data : datas)
             sample(data);
     }

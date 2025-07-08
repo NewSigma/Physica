@@ -44,7 +44,7 @@ namespace Physica {
         void step(std::invocable<VectorType> auto fn, std::invocable<VectorType> auto grad);
         void swap(SteepestDescent& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] inline size_t getDim() const noexcept;
+        [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
         [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
         [[nodiscard]] T getObjectiveValue() const noexcept { return nowY; }

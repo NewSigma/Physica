@@ -88,14 +88,14 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    inline Real<Prec> studentT(size_t n, const Real<Prec>& x) {
+    Real<Prec> studentT(size_t n, const Real<Prec>& x) {
         using ScalarType = Real<Prec>;
         const auto n1 = ScalarType(n);
         return ScalarType(1) - incompBeta(n1 * ScalarType(0.5), ScalarType(0.5), n1 / (n1 + square(x)));
     }
 
     template<FloatPrec Prec>
-    inline Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x) {
+    Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x) {
         using ScalarType = Real<Prec>;
         return ScalarType(1) - incompBeta(v1 * ScalarType(0.5), v2 * ScalarType(0.5), v2 / (v2 + v1 * x));
     }

@@ -272,12 +272,12 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    inline T floor(const Diff<T, DiffMode::Forward, Order>& x) {
+    T floor(const Diff<T, DiffMode::Forward, Order>& x) {
         return floor(x.value());
     }
     
     template<Scalar T, int Order>
-    inline T ceil(const Diff<T, DiffMode::Forward, Order>& x) {
+    T ceil(const Diff<T, DiffMode::Forward, Order>& x) {
         return ceil(x.value());
     }
 }

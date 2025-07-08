@@ -44,10 +44,10 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& target) const;
+        void assign(Vector auto& target) const;
 
-        [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
-        [[nodiscard]] inline Tv calc_value(size_t index) const;
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
@@ -61,7 +61,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order, Vector V>
     template<ExecutePolicy P>
-    inline void SyMV<T, Order, V>::assign(Vector auto& target) const {
+    void SyMV<T, Order, V>::assign(Vector auto& target) const {
         const size_t length = getLength();
         assert(length == target.getLength());
         if (length >= 16) {
@@ -83,12 +83,12 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order, Vector V>
-    inline auto SyMV<T, Order, V>::calc(size_t index) const -> CoDiff<ScalarType> {
+    auto SyMV<T, Order, V>::calc(size_t index) const -> CoDiff<ScalarType> {
         return mat.row(index) * vec;
     }
 
     template<Scalar T, size_t Order, Vector V>
-    inline auto SyMV<T, Order, V>::calc_value(size_t index) const -> Tv {
+    auto SyMV<T, Order, V>::calc_value(size_t index) const -> Tv {
         return mat.values().row(index) * vec.values();
     }
 }

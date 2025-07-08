@@ -44,10 +44,10 @@ namespace Physica {
         ~SimpleDataset() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] inline DataType operator[](size_t index) const;
+        [[nodiscard]] DataType operator[](size_t index) const;
         /* Operations */
-        inline void reserve(size_t size);
-        inline void append(DataType data);
+        void reserve(size_t size);
+        void append(DataType data);
         template<RNG R>
         SplitResultType randomSplit(size_t firstSize) const;
         void swap(This& __restrict obj) noexcept;
@@ -79,20 +79,20 @@ namespace Physica {
     }
 
     template<class SampleType, class LabelType>
-    inline SimpleDataset<SampleType, LabelType>::DataType
+    SimpleDataset<SampleType, LabelType>::DataType
     SimpleDataset<SampleType, LabelType>::operator[](size_t index) const {
         assert(index < getSize() && "[Error]: Index overflow");
         return std::make_pair(samples[index], labels[index]);
     }
 
     template<class SampleType, class LabelType>
-    inline void SimpleDataset<SampleType, LabelType>::reserve(size_t size) {
+    void SimpleDataset<SampleType, LabelType>::reserve(size_t size) {
         samples.reserve(size);
         labels.reserve(size);
     }
 
     template<class SampleType, class LabelType>
-    inline void SimpleDataset<SampleType, LabelType>::append(DataType data) {
+    void SimpleDataset<SampleType, LabelType>::append(DataType data) {
         samples.append(std::move(data.first));
         labels.append(std::move(data.second));
     }

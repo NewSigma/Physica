@@ -60,8 +60,8 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] size_t getShift() const noexcept { return shift; }
         /* Setters */
-        inline void setSize(size_t size_);
-        inline void setShift(size_t shift_);
+        void setSize(size_t size_);
+        void setShift(size_t shift_);
     };
 
     template<Matrix T, bool ColWiseRead>
@@ -90,13 +90,13 @@ namespace Physica {
     }
 
     template<Matrix T, bool ColWiseRead>
-    inline void HouseholderSequence<T, ColWiseRead>::setSize(size_t size_) {
+    void HouseholderSequence<T, ColWiseRead>::setSize(size_t size_) {
         assert(size_ <= source.getCol());
         size = size_;
     }
 
     template<Matrix T, bool ColWiseRead>
-    inline void HouseholderSequence<T, ColWiseRead>::setShift(size_t shift_) {
+    void HouseholderSequence<T, ColWiseRead>::setShift(size_t shift_) {
         shift = shift_;
     }
 }

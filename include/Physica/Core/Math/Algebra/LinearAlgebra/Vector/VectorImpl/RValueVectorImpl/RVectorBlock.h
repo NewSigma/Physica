@@ -47,7 +47,7 @@ namespace Physica {
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index + from); }
         [[nodiscard]] auto calc_value(size_t index) const { return vec.calc_value(index + from); }
         /* Getters */
-        [[nodiscard]] inline size_t getLength() const noexcept;
+        [[nodiscard]] size_t getLength() const noexcept;
     };
 
     template<Vector T, size_t Length>
@@ -61,7 +61,7 @@ namespace Physica {
     RVectorBlock<T, Length>::RVectorBlock(T& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    inline size_t RVectorBlock<T, Length>::getLength() const noexcept {
+    size_t RVectorBlock<T, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else

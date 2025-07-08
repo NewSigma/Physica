@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,31 +25,32 @@ namespace Physica {
      * Provide a algebra for Index1D and Index3D in periodic boundary condition
      */
     class PHYSICA_API PeriodIndex3D {
+        using This = PeriodIndex3D;
         using Index1D = Index3D::ElemType;
 
         Index3D index;
         Index3D shape;
     public:
-        __host__ __device__ inline PeriodIndex3D(Index3D index_, Index3D shape_);
-        __host__ __device__ inline PeriodIndex3D(Index1D index_, Index3D shape_);
-        PeriodIndex3D(const PeriodIndex3D&) = default;
-        PeriodIndex3D(PeriodIndex3D&&) noexcept = default;
+        __host__ __device__ PeriodIndex3D(Index3D index_, Index3D shape_);
+        __host__ __device__ PeriodIndex3D(Index1D index_, Index3D shape_);
+        PeriodIndex3D(const This&) = default;
+        PeriodIndex3D(This&&) noexcept = default;
         ~PeriodIndex3D() = default;
         /* Operators */
-        __host__ __device__ inline PeriodIndex3D& operator=(PeriodIndex3D obj) noexcept;
+        __host__ __device__ This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __host__ __device__ operator Index3D() { return index; }
         [[nodiscard]] __host__ __device__ Index1D operator[](int i) { return index[i]; }
-        [[nodiscard]] __host__ __device__ inline PeriodIndex3D operator+(const PeriodIndex3D& other) const;
+        [[nodiscard]] __host__ __device__ This operator+(const This& other) const;
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline Index1D toIndex1D() const;
-        [[nodiscard]] __host__ __device__ inline bool isInReducedK() const;
-        [[nodiscard]] __host__ __device__ inline Index3D toReducedK() const;
-        __host__ __device__ inline void normalize();
-        __host__ __device__ inline void swap(PeriodIndex3D& __restrict obj) noexcept;
+        [[nodiscard]] __host__ __device__ Index1D toIndex1D() const;
+        [[nodiscard]] __host__ __device__ bool isInReducedK() const;
+        [[nodiscard]] __host__ __device__ Index3D toReducedK() const;
+        __host__ __device__ void normalize();
+        __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Index3D getShape() const noexcept { return shape; }
     private:
-        __host__ __device__ inline static Index3D toIndex3D(Index1D index, Index3D shape);
+        __host__ __device__ static Index3D toIndex3D(Index1D index, Index3D shape);
     };
 
     __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index3D index_, Index3D shape_) : index(index_), shape(shape_) {
@@ -59,12 +60,7 @@ namespace Physica {
 
     __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index1D index_, Index3D shape_) : PeriodIndex3D(toIndex3D(index_, shape_), shape_) {}
 
-    __host__ __device__ inline PeriodIndex3D& PeriodIndex3D::operator=(PeriodIndex3D obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    __host__ __device__ inline PeriodIndex3D PeriodIndex3D::operator+(const PeriodIndex3D& other) const {
+    __host__ __device__ inline auto PeriodIndex3D::operator+(const This& other) const -> This {
         assert(shape == other.shape && "[Error]: Inconsistent dimention");
         Index3D result{};
         for (int i = 0; i < 3; ++i)
@@ -72,7 +68,7 @@ namespace Physica {
         return PeriodIndex3D(result, shape);
     }
 
-    __host__ __device__ inline PeriodIndex3D::Index1D PeriodIndex3D::toIndex1D() const {
+    __host__ __device__ inline auto PeriodIndex3D::toIndex1D() const -> Index1D {
         return (index[0] * shape[1] + index[1]) * shape[2] + index[2];
     }
 
@@ -96,7 +92,7 @@ namespace Physica {
             index[i] %= shape[i];
     }
 
-    __host__ __device__ inline void PeriodIndex3D::swap(PeriodIndex3D& __restrict obj) noexcept {
+    __host__ __device__ inline void PeriodIndex3D::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         index.swap(obj.index);
         shape.swap(obj.shape);

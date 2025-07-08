@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] inline auto sin_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto sin_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Sin, M&&>(std::forward<M>(m));
     }
 }

@@ -36,7 +36,7 @@ namespace Physica {
     private:
         ArrayType arr;
         [[no_unique_address]] IndexType r = 0;
-        SizeType size = 0; // Double [[no_unique_address]] makes NVCC 12.8, arch 75 miscompilation
+        SizeType size = 0; // FIXME: Double [[no_unique_address]] makes NVCC 12.8, arch 75 miscompilation
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t col);

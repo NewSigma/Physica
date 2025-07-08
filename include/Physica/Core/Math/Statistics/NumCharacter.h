@@ -138,7 +138,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    inline T::ScalarType kurt(const T& x) {
+    T::ScalarType kurt(const T& x) {
         return excess_kurt(x) + 3.0;
     }
 }

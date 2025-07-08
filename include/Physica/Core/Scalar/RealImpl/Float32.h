@@ -95,9 +95,9 @@ namespace Physica {
         /* Static Members */
         [[nodiscard]] inline static Real nan() noexcept;
         template<RNG R>
-        [[nodiscard]] inline static Real random_uniform();
+        [[nodiscard]] static Real random_uniform();
         template<RNG R>
-        [[nodiscard]] inline static Real random_normal();
+        [[nodiscard]] static Real random_normal();
         template<RNG R>
         [[nodiscard]] static Real random_normal(GaussRandomPool<This, R>& pool) { return pool(); }
         template<RNG R>
@@ -130,12 +130,12 @@ namespace Physica {
     }
 
     template<RNG R>
-    inline Real<Float32> Real<Float32>::random_uniform() {
+    Real<Float32> Real<Float32>::random_uniform() {
         return Real(std::generate_canonical<float, std::numeric_limits<float>::digits>(R::getInstance()));
     }
 
     template<RNG R>
-    inline Real<Float32> Real<Float32>::random_normal() {
+    Real<Float32> Real<Float32>::random_normal() {
         std::normal_distribution<float> dist{};
         return Real(dist(R::getInstance()));
     }

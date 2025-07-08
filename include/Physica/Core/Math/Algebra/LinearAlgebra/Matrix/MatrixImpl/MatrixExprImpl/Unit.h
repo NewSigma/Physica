@@ -41,7 +41,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] inline auto unit_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto unit_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Unit, M&&>(std::forward<M>(m));
     }
 }

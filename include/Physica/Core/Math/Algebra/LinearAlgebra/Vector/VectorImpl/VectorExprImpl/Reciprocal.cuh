@@ -46,7 +46,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    [[nodiscard]] __host__ __device__ inline auto reciprocal(T&& v) noexcept requires(CUDA<T>) {
+    [[nodiscard]] __host__ __device__ auto reciprocal(T&& v) noexcept requires(CUDA<T>) {
         return device_obj<VectorExpr<ExprType::Reciprocal, T&&>>(std::forward<T>(v));
     }
 }

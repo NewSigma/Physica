@@ -68,14 +68,14 @@ namespace Physica {
         /* Operator */
         RSpaceEwald& operator=(RSpaceEwald obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] inline T potentialV(const PositionMatrix& pos) const;
+        [[nodiscard]] T potentialV(const PositionMatrix& pos) const;
 
         template<ExecutePolicy P>
-        [[nodiscard]] inline VectorND<T> force_short(const PositionMatrix& pos) const;
+        [[nodiscard]] VectorND<T> force_short(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const;
 
-        [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos) const;
+        [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos) const;
         [[nodiscard]] BornChargeArray calcBornCharge() const { return makeBornCharge(charges); }
         void swap(RSpaceEwald& __restrict obj) noexcept;
         /* Getters */
@@ -94,15 +94,15 @@ namespace Physica {
         void setLattice(LatticeMatrix lattice_);
         void setIntegralLimit(Tv integralLimit_);
     protected:
-        [[nodiscard]] inline T calcSelfE() const;
-        [[nodiscard]] inline T calcGammaPointE() const;
-        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T calcSelfE() const;
+        [[nodiscard]] T calcGammaPointE() const;
+        [[nodiscard]] T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T force_functor(size_t i, size_t j, T r, T r2) const;
     private:
         /* Operations */
         void makeTables();
-        [[nodiscard]] inline T pot_functor_slow(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] inline T force_functor_slow(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T pot_functor_slow(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T force_functor_slow(size_t i, size_t j, T r, T r2) const;
         [[nodiscard]] T rSpaceForceConstImpl1(T r) const;
         [[nodiscard]] T rSpaceForceConstImpl2(T r) const;
         using Base::potentialV;
@@ -127,13 +127,13 @@ namespace Physica {
      * \param pos must be in cartesian convension
      */
     template<Scalar T, bool IsSmallCell>
-    inline T RSpaceEwald<T, IsSmallCell>::potentialV(const PositionMatrix& pos) const {
+    T RSpaceEwald<T, IsSmallCell>::potentialV(const PositionMatrix& pos) const {
         return Base::potentialV(lattice, pos);
     }
 
     template<Scalar T, bool IsSmallCell>
     template<ExecutePolicy P> 
-    inline VectorND<T> RSpaceEwald<T, IsSmallCell>::force_short(const PositionMatrix& pos) const {
+    VectorND<T> RSpaceEwald<T, IsSmallCell>::force_short(const PositionMatrix& pos) const {
         const VectorND<T> rSpaceSum = Base::template force<Sequential>(lattice, pos);
         return rSpaceSum;
     }
@@ -191,7 +191,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline RSpaceEwald<T, IsSmallCell>::LatticeMatrix
+    RSpaceEwald<T, IsSmallCell>::LatticeMatrix
     RSpaceEwald<T, IsSmallCell>::virial(const PositionMatrix& pos) const {
         return Base::virial(lattice, pos);
     }
@@ -246,19 +246,19 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T RSpaceEwald<T, IsSmallCell>::calcSelfE() const {
+    T RSpaceEwald<T, IsSmallCell>::calcSelfE() const {
         return square(charges).sum() * (integralLimit / sqrt(Tv(M_PI)));
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T RSpaceEwald<T, IsSmallCell>::calcGammaPointE() const {
+    T RSpaceEwald<T, IsSmallCell>::calcGammaPointE() const {
         return square(charges.sum()) * Tv(-M_PI) / (Tv(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
      */
     template<Scalar T, bool IsSmallCell>
-    inline T RSpaceEwald<T, IsSmallCell>::pot_functor(
+    T RSpaceEwald<T, IsSmallCell>::pot_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
         const Tv temp = r.value() * repErfcStep + Tv(0.5);
         const int index = double(temp);
@@ -269,7 +269,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T RSpaceEwald<T, IsSmallCell>::force_functor(
+    T RSpaceEwald<T, IsSmallCell>::force_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
         const Tv temp = r.value() * repErfcStep + Tv(0.5);
         const int index = double(temp);

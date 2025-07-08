@@ -67,7 +67,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
 
         template<RNG R>
-        inline void random_normal(Tr norm = 0);
+        void random_normal(Tr norm = 0);
         /* Getters */
         [[nodiscard]] Tr getBeta() const noexcept { return beta; }
         [[nodiscard]] Tr getTraceMu() const noexcept;
@@ -168,7 +168,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    inline void TPQ<T>::random_normal(Tr norm) {
+    void TPQ<T>::random_normal(Tr norm) {
         const bool useDefault = norm.isZero();
         if (useDefault) // Default norm is the smallest positive float number while keep all effective digits
             norm = Tr(std::numeric_limits<Tr>::min() / std::numeric_limits<Tr>::epsilon());

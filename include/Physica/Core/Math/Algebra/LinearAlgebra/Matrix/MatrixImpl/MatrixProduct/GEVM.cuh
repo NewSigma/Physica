@@ -61,7 +61,7 @@ namespace Physica {
     }
 
     template<Vector T, Matrix U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(const device_obj<T>& vec, const device_obj<U>& mat) noexcept requires(U::RowAtCompile == 1) {
+    [[nodiscard]] __host__ __device__ auto operator*(const device_obj<T>& vec, const device_obj<U>& mat) noexcept requires(U::RowAtCompile == 1) {
         assert(mat.getRow() == 1);
         return device_obj<VectorMatrixProduct<T, U>>(vec, mat);
     }

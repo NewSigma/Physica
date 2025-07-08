@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto sin(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto sin(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Sin, V&&>(std::forward<V>(v));
     }
 }

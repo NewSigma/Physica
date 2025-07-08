@@ -77,9 +77,9 @@ namespace Physica {
         using Base::calcBornCharge;
         void swap(Ewald& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] inline LatticeReturnType getLattice() const noexcept;
-        [[nodiscard]] inline LatticeReturnType getRepLattice() const noexcept;
-        [[nodiscard]] inline const VectorND<T>& getCharges() const noexcept;
+        [[nodiscard]] LatticeReturnType getLattice() const noexcept;
+        [[nodiscard]] LatticeReturnType getRepLattice() const noexcept;
+        [[nodiscard]] const VectorND<T>& getCharges() const noexcept;
         using Base::getNumParticle;
         using Base::getVolume;
         using Base::getIntegralLimit;
@@ -91,7 +91,7 @@ namespace Physica {
     private:
         /* Operations */
         [[nodiscard]] ComplexType kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const;
-        [[nodiscard]] inline ComplexType rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const;
         /* Friends */
         friend class ::Physica::Test;
     };
@@ -262,7 +262,7 @@ namespace Physica {
     }
 
     template<Scalar T, class REwaldType>
-    inline Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getLattice() const noexcept {
+    Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getLattice() const noexcept {
         if constexpr (IsDeviceREwald)
             return Base::getLattice().toHost();
         else
@@ -270,7 +270,7 @@ namespace Physica {
     }
 
     template<Scalar T, class REwaldType>
-    inline Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getRepLattice() const noexcept {
+    Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getRepLattice() const noexcept {
         if constexpr (IsDeviceREwald)
             return Base::getRepLattice().toHost();
         else
@@ -278,7 +278,7 @@ namespace Physica {
     }
 
     template<Scalar T, class REwaldType>
-    inline const VectorND<T>& Ewald<T, REwaldType>::getCharges() const noexcept {
+    const VectorND<T>& Ewald<T, REwaldType>::getCharges() const noexcept {
         if constexpr (IsDeviceREwald)
             return hostCharges;
         else
@@ -347,7 +347,7 @@ namespace Physica {
     }
 
     template<Scalar T, class REwaldType>
-    inline Ewald<T, REwaldType>::ComplexType
+    Ewald<T, REwaldType>::ComplexType
     Ewald<T, REwaldType>::rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const {
         return Base::forceConst(pos, waveQ, dof1, dof2);
     }

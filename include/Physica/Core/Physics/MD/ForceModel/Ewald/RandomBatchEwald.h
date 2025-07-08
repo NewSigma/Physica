@@ -71,7 +71,7 @@ namespace Physica {
     private:
         void updateSumGauss();
         void updateSamplePool();
-        inline void monteCarloStep(int& sample, T& prop_last, T deviation, T factor, T propAtZero) const;
+        void monteCarloStep(int& sample, T& prop_last, T deviation, T factor, T propAtZero) const;
         [[nodiscard]] Vector3D<T> randWaveG() const;
         [[nodiscard]] static bool checkParam(const LatticeMatrix& lattice);
     };
@@ -211,7 +211,7 @@ namespace Physica {
     }
 
     template<Scalar T, RNG R>
-    inline void RandomBatchEwald<T, R>::monteCarloStep(
+    void RandomBatchEwald<T, R>::monteCarloStep(
             int& sample,
             T& prop_last,
             T deviation,

@@ -49,11 +49,11 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        inline void swap(This& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
     };
 
     template<class Derived>
-    inline void ConservedFieldNet<Derived>::swap(This& __restrict obj) noexcept {
+    void ConservedFieldNet<Derived>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         if constexpr (IsTrain)
             diffGuard.swap(obj.diffGuard);

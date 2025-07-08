@@ -42,13 +42,13 @@ namespace Physica {
         /* Operations */
         void sample(const MDCellType& sample);
         template<size_t NumReplica, class ForceMatrixAllocator>
-        inline void sample(const RPMD<T, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
+        void sample(const RPMD<T, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
 
         [[nodiscard]] T calcMSD() const { return calcAtomMSD().mean(); }
         [[nodiscard]] T calcMSD2D() const { return calcAtomMSD2D().mean(); }
         [[nodiscard]] VectorND<T> calcAtomMSD() const;
         [[nodiscard]] VectorND<T> calcAtomMSD2D() const;
-        [[nodiscard]] inline T calcFiniteSizeLimit(size_t atomId) const noexcept;
+        [[nodiscard]] T calcFiniteSizeLimit(size_t atomId) const noexcept;
         void clear();
         void swap(MSD& __restrict obj) noexcept;
         /* Getters */
@@ -77,7 +77,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     template<size_t NumReplica, class ForceMatrixAllocator>
-    inline void MSD<T, Dim>::sample(const RPMD<T, Dim, NumReplica, ForceMatrixAllocator>& rpmd) {
+    void MSD<T, Dim>::sample(const RPMD<T, Dim, NumReplica, ForceMatrixAllocator>& rpmd) {
         for (size_t i = 0; i < rpmd.getNumReplica(); ++i)
             sample(rpmd.phaseToCell(i));
     }
@@ -105,7 +105,7 @@ namespace Physica {
      * \returns MSD cannot larger than this value because of finite size effect
      */
     template<Scalar T, unsigned int Dim>
-    inline T MSD<T, Dim>::calcFiniteSizeLimit(size_t atomId) const noexcept {
+    T MSD<T, Dim>::calcFiniteSizeLimit(size_t atomId) const noexcept {
         return initCell.minDistVector(atomId, atomId).squaredNorm();
     }
 

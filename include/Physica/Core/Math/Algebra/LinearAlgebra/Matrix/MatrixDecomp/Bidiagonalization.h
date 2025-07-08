@@ -190,7 +190,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Matrix T>
-    inline void swap(Physica::Bidiagonalization<T>& __restrict obj1, Physica::Bidiagonalization<T>& __restrict obj2) noexcept {
+    void swap(Physica::Bidiagonalization<T>& __restrict obj1, Physica::Bidiagonalization<T>& __restrict obj2) noexcept {
         obj1.swap(obj2);
     }
 }

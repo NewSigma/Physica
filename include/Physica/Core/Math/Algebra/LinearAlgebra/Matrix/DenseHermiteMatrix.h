@@ -45,7 +45,7 @@ namespace Physica {
         ~DenseHermiteMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        inline This& operator=(RealType value);
+        This& operator=(RealType value);
         [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         /* Operations */
@@ -63,8 +63,8 @@ namespace Physica {
         template<RNG R>
         void random_any(auto& distribution);
 
-        inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
-        inline H5DataSet<1> write(H5Loc& loc, const char* name) const;
+        const H5DataSet<1> read(const H5Loc& loc, const char* name);
+        H5DataSet<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         using Base::getDerived;
         using Storage::getCol;
@@ -74,11 +74,11 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static This random_uniform(size_t order);
+        [[nodiscard]] static This random_uniform(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static This random_normal(size_t order);
+        [[nodiscard]] static This random_normal(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static This random_any(size_t order, auto& distribution);
+        [[nodiscard]] static This random_any(size_t order, auto& distribution);
         [[nodiscard]] bool isHermiteMatrix(const Matrix auto& mat, double precision);
     };
     /**
@@ -98,7 +98,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    inline DenseHermiteMatrix<T, Order>& DenseHermiteMatrix<T, Order>::operator=(RealType value) {
+    DenseHermiteMatrix<T, Order>& DenseHermiteMatrix<T, Order>::operator=(RealType value) {
         asVector() = value;
         return *this;
     }
@@ -164,8 +164,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    [[nodiscard]] inline DenseHermiteMatrix<T, Order>
-    DenseHermiteMatrix<T, Order>::random_uniform(size_t order) {
+    auto DenseHermiteMatrix<T, Order>::random_uniform(size_t order) -> This {
         This result(order);
         result.template random_uniform<R>();
         return result;
@@ -173,8 +172,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    [[nodiscard]] inline DenseHermiteMatrix<T, Order>
-    DenseHermiteMatrix<T, Order>::random_normal(size_t order) {
+    auto DenseHermiteMatrix<T, Order>::random_normal(size_t order) -> This {
         This result(order);
         result.template random_normal<R>();
         return result;
@@ -182,21 +180,20 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    [[nodiscard]] inline DenseHermiteMatrix<T, Order>
-    DenseHermiteMatrix<T, Order>::random_any(size_t order, auto& distribution) {
+    auto DenseHermiteMatrix<T, Order>::random_any(size_t order, auto& distribution) -> This {
         This result(order);
         result.template random_any<R>(distribution);
         return result;
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T, size_t Order>
-    inline const H5DataSet<1> DenseHermiteMatrix<T, Order>::read(
+    const H5DataSet<1> DenseHermiteMatrix<T, Order>::read(
             const H5Loc& loc, const char* name) {
         return asVector().read(loc, name);
     }
 
     template<Scalar T, size_t Order>
-    inline H5DataSet<1> DenseHermiteMatrix<T, Order>::write(
+    H5DataSet<1> DenseHermiteMatrix<T, Order>::write(
             H5Loc& loc, const char* name) const {
         return asVector().write(loc, name);
     }
@@ -229,7 +226,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Order>
-    inline void swap(
+    void swap(
             Physica::DenseHermiteMatrix<T, Order>& __restrict m1,
             Physica::DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
         m1.swap(m2);

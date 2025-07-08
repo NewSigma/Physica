@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> abs(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> abs(const Real<Prec>& x) noexcept {
         if constexpr (Prec == Float32)
             return Real<Prec>(::fabsf(x.toMachine()));
         else
@@ -30,52 +30,52 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> relu(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> relu(const Real<Prec>& x) noexcept {
         return x.isPositive() ? x : Real<Prec>(0);
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> square(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> square(const Real<Prec>& x) noexcept {
         return x * x;
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> reciprocal(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> reciprocal(const Real<Prec>& x) noexcept {
         assert(!x.isZero() && "[Error]: Divide by zero");
         return Real<Prec>(1) / x;
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> sqrt(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> sqrt(const Real<Prec>& x) noexcept {
         assert(!x.isNegative());
         return Real<Prec>(std::sqrt(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> cbrt(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> cbrt(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::cbrt(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> ln(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> ln(const Real<Prec>& x) noexcept {
         assert(x.isPositive() && "[Error]: Invalid param");
         return Real<Prec>(std::log(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> ln1p(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> ln1p(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::log1p(x.toMachine()));
     }
     /**
      * \return log_a n
      */
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> log(const Real<Prec>& x, const Real<Prec>& a) noexcept {
+    __host__ __device__ Real<Prec> log(const Real<Prec>& x, const Real<Prec>& a) noexcept {
         return ln(x) / ln(a);
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> exp(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> exp(const Real<Prec>& x) noexcept {
         if constexpr (Prec == Float32)
             return Real<Prec>(::expf(x.toMachine()));
         else {
@@ -113,7 +113,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> cos(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> cos(const Real<Prec>& x) noexcept {
         if constexpr (Prec == Float32)
             return Real<Prec>(::cosf(x.toMachine()));
         else
@@ -121,7 +121,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> cospi(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> cospi(const Real<Prec>& x) noexcept {
     #ifdef __CUDA_ARCH__
         if constexpr (Prec == Float32)
             return Real<Prec>(::cospif(x.toMachine()));
@@ -133,7 +133,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> sin(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> sin(const Real<Prec>& x) noexcept {
         if constexpr (Prec == Float32)
             return Real<Prec>(::sinf(x.toMachine()));
         else
@@ -141,7 +141,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> sinpi(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> sinpi(const Real<Prec>& x) noexcept {
     #ifdef __CUDA_ARCH__
         if constexpr (Prec == Float32)
             return Real<Prec>(::sinpif(x.toMachine()));
@@ -153,7 +153,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline void sincos(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
+    __host__ __device__ void sincos(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
         using MachineType = Real<Prec>::MachineType;
         MachineType sin_temp, cos_temp;
         if constexpr (Prec == Float32)
@@ -165,7 +165,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline void sincospi(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
+    __host__ __device__ void sincospi(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
     #ifdef __CUDA_ARCH__
         using MachineType = Real<Prec>::MachineType;
         MachineType sin_temp, cos_temp;
@@ -181,7 +181,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> tan(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> tan(const Real<Prec>& x) noexcept {
         if constexpr (Prec == Float32)
             return Real<Prec>(::tanf(x.toMachine()));
         else
@@ -189,7 +189,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> tanpi(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> tanpi(const Real<Prec>& x) noexcept {
         Real<Prec> sinpi_, cospi_;
         sincospi(x, sinpi_, cospi_);
         return sinpi_ / cospi_;
@@ -230,17 +230,17 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    Real<Prec> arccos(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> arccos(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::acos(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> arcsin(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> arcsin(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::asin(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> arctan(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> arctan(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::atan(x.toMachine()));
     }
 
@@ -281,27 +281,27 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    Real<Prec> csch(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> csch(const Real<Prec>& x) noexcept {
         return Real<Prec>(1 / std::sinh(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> coth(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> coth(const Real<Prec>& x) noexcept {
         return Real<Prec>(1 / std::tanh(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> arccosh(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> arccosh(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::acosh(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> arcsinh(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> arcsinh(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::asinh(x.toMachine()));
     }
 
     template<FloatPrec Prec>
-    Real<Prec> arctanh(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> arctanh(const Real<Prec>& x) noexcept {
         return Real<Prec>(std::atanh(x.toMachine()));
     }
 
@@ -316,7 +316,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    Real<Prec> arccoth(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> arccoth(const Real<Prec>& x) noexcept {
         auto trivial = x.toMachine();
         return Real<Prec>(std::log((trivial + 1) / (trivial - 1)) / 2);
     }
@@ -342,7 +342,7 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ inline Real<Prec> ceil(const Real<Prec>& x) noexcept {
+    __host__ __device__ Real<Prec> ceil(const Real<Prec>& x) noexcept {
         if constexpr (Prec == Float32)
             return Real<Prec>(::ceilf(x.toMachine()));
         else

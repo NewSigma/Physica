@@ -65,33 +65,33 @@ namespace Physica {
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] inline ScalarType operator[](int index) const;
-        [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const ScalarType& x) const;
-        [[nodiscard]] inline SIMD operator*(const T& x) const;
-        [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-() const;
+        [[nodiscard]] ScalarType operator[](int index) const;
+        [[nodiscard]] SIMD operator+(const SIMD& other) const;
+        [[nodiscard]] SIMD operator-(const SIMD& other) const;
+        [[nodiscard]] SIMD operator*(const SIMD& other) const;
+        [[nodiscard]] SIMD operator*(const ScalarType& x) const;
+        [[nodiscard]] SIMD operator*(const T& x) const;
+        [[nodiscard]] SIMD operator/(const SIMD& other) const;
+        [[nodiscard]] SIMD operator-() const;
         void operator+=(const SIMD& other) { *this = *this + other; }
         void operator-=(const SIMD& other) { *this = *this - other; }
         void operator*=(const SIMD& other) { *this = *this * other; }
         void operator/=(const SIMD& other) { *this = *this / other; }
         /* Operations */
-        inline void load(const ScalarType* p);
-        inline void load_partial(const ScalarType* p, int n);
-        inline void store(ScalarType* p) const;
-        inline void store_partial(ScalarType* p, int n) const;
+        void load(const ScalarType* p);
+        void load_partial(const ScalarType* p, int n);
+        void store(ScalarType* p) const;
+        void store_partial(ScalarType* p, int n) const;
 
-        inline This& cutoff(int count);
+        This& cutoff(int count);
 
-        inline FullRealPair makeFullRealImag() const noexcept;
+        FullRealPair makeFullRealImag() const noexcept;
         using Base::swapRealImag;
         using Base::permRealImag;
         using Base::squaredNorm;
 
-        //inline void insert(int index, const ScalarType& value);
-        [[nodiscard]] inline ScalarType sum() const;
+        //void insert(int index, const ScalarType& value);
+        [[nodiscard]] ScalarType sum() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         using Base::size;
@@ -100,8 +100,8 @@ namespace Physica {
         [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(FullRealType::getHigh()); }
-        [[nodiscard]] inline RealType real() const noexcept;
-        [[nodiscard]] inline RealType imag() const noexcept;
+        [[nodiscard]] RealType real() const noexcept;
+        [[nodiscard]] RealType imag() const noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
@@ -109,7 +109,7 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Size>
-    [[nodiscard]] inline SIMD<Complex<T>, Size> mul_add(
+    [[nodiscard]] SIMD<Complex<T>, Size> mul_add(
             const SIMD<Complex<T>, Size>& a,
             const SIMD<Complex<T>, Size>& b,
             const SIMD<Complex<T>, Size>& c) noexcept;

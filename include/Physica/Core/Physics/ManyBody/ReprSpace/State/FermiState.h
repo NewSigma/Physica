@@ -33,7 +33,7 @@ namespace Physica {
         Spin spinDown;
     public:
         FermiState() = default;
-        inline FermiState(Spin spinUp_, Spin spinDown_);
+        FermiState(Spin spinUp_, Spin spinDown_);
         FermiState(const This&) = default;
         FermiState(This&&) noexcept = default;
         ~FermiState() = default;
@@ -41,8 +41,8 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] bool operator==(const This& other) const noexcept { return (spinUp == other.spinUp) && (spinDown == other.spinDown); }
         [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
-        [[nodiscard]] inline bool operator>(const This& other) const noexcept;
-        [[nodiscard]] inline bool operator<(const This& other) const noexcept;
+        [[nodiscard]] bool operator>(const This& other) const noexcept;
+        [[nodiscard]] bool operator<(const This& other) const noexcept;
         [[nodiscard]] bool operator>=(const This& other) const noexcept { return !((*this) < other); }
         [[nodiscard]] bool operator<=(const This& other) const noexcept { return !((*this) > other); }
         [[nodiscard]] This operator<<(int shift) const noexcept { return This(spinUp << shift, spinDown << shift); }
@@ -55,9 +55,9 @@ namespace Physica {
         [[nodiscard]] int hopUpSign(uint8_t from, uint8_t to) const noexcept;
         [[nodiscard]] int hopDownSign(uint8_t from, uint8_t to) const noexcept;
         [[nodiscard]] This transReduce() const;
-        [[nodiscard]] inline int lShiftSign() const;
-        [[nodiscard]] inline int calcPeriod() const noexcept;
-        inline void swap(This& __restrict obj) noexcept;
+        [[nodiscard]] int lShiftSign() const;
+        [[nodiscard]] int calcPeriod() const noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Spin getSpinUp() const noexcept { return spinUp; }
         [[nodiscard]] Spin getSpinDown() const noexcept { return spinDown; }
@@ -68,7 +68,7 @@ namespace Physica {
         [[nodiscard]] int getNumParticle() const noexcept { return getNumSpinUpParticle() + getNumSpinDownParticle(); }
         [[nodiscard]] int getNumSpinUpParticle() const noexcept { return spinUp.getNumParticle(); }
         [[nodiscard]] int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
-        [[nodiscard]] inline int getNumDoubleOccupy() const noexcept;
+        [[nodiscard]] int getNumDoubleOccupy() const noexcept;
         /* Static member */
         template<RNG R>
         [[nodiscard]] static This random_state();
@@ -77,7 +77,7 @@ namespace Physica {
     };
 
     template<int Dim, int NumSite>
-    inline std::ostream& operator<<(std::ostream& os, FermiState<Dim, NumSite> e) {
+    std::ostream& operator<<(std::ostream& os, FermiState<Dim, NumSite> e) {
         return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
 }

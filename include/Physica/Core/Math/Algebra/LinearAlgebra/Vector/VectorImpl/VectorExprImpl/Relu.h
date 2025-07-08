@@ -55,7 +55,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] inline auto relu(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto relu(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Relu, V&&>(std::forward<V>(v));
     }
 }

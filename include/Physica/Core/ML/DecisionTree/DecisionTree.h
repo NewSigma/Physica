@@ -95,13 +95,13 @@ namespace Physica {
                                                                   const std::forward_list<size_t>& availableSample,
                                                                   const std::forward_list<size_t>& availableFeature,
                                                                   LossFunctor functor);
-        static inline LossFunctor getLossFunctor();
+        static LossFunctor getLossFunctor();
         /* Friends */
         friend class RandomForest<T, Type>;
     };
 
     template<Scalar T, DecisionTreeType Type>
-    inline DecisionTree<T, Type>::LossFunctor DecisionTree<T, Type>::getLossFunctor() {
+    DecisionTree<T, Type>::LossFunctor DecisionTree<T, Type>::getLossFunctor() {
         constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
         return isClassifyTree ? giniIndex : mse;
     }

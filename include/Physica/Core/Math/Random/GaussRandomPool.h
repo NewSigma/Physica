@@ -35,11 +35,11 @@ namespace Physica {
         ~GaussRandomPool() = default;
         /* Operators */
         GaussRandomPool& operator=(GaussRandomPool obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] inline T operator()() const noexcept;
+        [[nodiscard]] T operator()() const noexcept;
         /* Operations */
         template<RNG R>
-        inline void init();
-        inline void swap(GaussRandomPool& __restrict obj) noexcept;
+        void init();
+        void swap(GaussRandomPool& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return rands.getLength(); }
         /* Static member */
@@ -53,18 +53,18 @@ namespace Physica {
 
     template<Scalar T, class RandomPoolType>
     template<RNG R>
-    inline void GaussRandomPool<T, RandomPoolType>::init() {
+    void GaussRandomPool<T, RandomPoolType>::init() {
         rands.template random_normal<R>();
     }
 
     template<Scalar T, class RandomPoolType>
-    inline T GaussRandomPool<T, RandomPoolType>::operator()() const noexcept {
+    T GaussRandomPool<T, RandomPoolType>::operator()() const noexcept {
         std::uniform_int_distribution<size_t> dist(0, getSize() - 1);
         return rands[dist(RandomPoolType::getInstance().getGen())];
     }
 
     template<Scalar T, class RandomPoolType>
-    inline void GaussRandomPool<T, RandomPoolType>::swap(GaussRandomPool& __restrict obj) noexcept {
+    void GaussRandomPool<T, RandomPoolType>::swap(GaussRandomPool& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         rands.swap(obj.rands);
     }

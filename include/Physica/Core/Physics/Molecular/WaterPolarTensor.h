@@ -66,12 +66,12 @@ namespace Physica {
         void swap(WaterPolarTensor& __restrict model) noexcept;
     private:
         static Matrix3D makePolarTensor(T curvePos1, T curvePos2, T curvePos3);
-        inline static DiagBaseVector makeDiagBases(T curvePos1, T curvePos2, T curvePos3);
-        inline static OffDiagBaseVector makeOffDiagBases(T curvePos1, T curvePos2, T curvePos3);
-        inline static DiagBaseVector makeFactorXX();
-        inline static DiagBaseVector makeFactorYY();
-        inline static DiagBaseVector makeFactorZZ();
-        inline static OffDiagBaseVector makeFactorXZ();
+        static DiagBaseVector makeDiagBases(T curvePos1, T curvePos2, T curvePos3);
+        static OffDiagBaseVector makeOffDiagBases(T curvePos1, T curvePos2, T curvePos3);
+        static DiagBaseVector makeFactorXX();
+        static DiagBaseVector makeFactorYY();
+        static DiagBaseVector makeFactorZZ();
+        static OffDiagBaseVector makeFactorXZ();
     };
 
     template<Scalar T, bool UseDynamicPolar>
@@ -133,7 +133,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool UseDynamicPolar>
-    inline WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
     WaterPolarTensor<T, UseDynamicPolar>::makeDiagBases(T curvePos1, T curvePos2, T curvePos3) {
         DiagBaseVector bases(NumDiagBase);
         bases[0] = 1;
@@ -162,7 +162,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool UseDynamicPolar>
-    inline WaterPolarTensor<T, UseDynamicPolar>::OffDiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::OffDiagBaseVector
     WaterPolarTensor<T, UseDynamicPolar>::makeOffDiagBases(T curvePos1, T curvePos2, T curvePos3) {
         OffDiagBaseVector bases(NumOffDiagBase);
         bases[0] = curvePos3;
@@ -182,7 +182,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool UseDynamicPolar>
-    inline WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
     WaterPolarTensor<T, UseDynamicPolar>::makeFactorXX() {
         if constexpr (UseDynamicPolar) {
             DiagBaseVector result{
@@ -239,7 +239,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool UseDynamicPolar>
-    inline WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
     WaterPolarTensor<T, UseDynamicPolar>::makeFactorYY() {
         if constexpr (UseDynamicPolar) {
             DiagBaseVector result{
@@ -296,7 +296,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool UseDynamicPolar>
-    inline WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
     WaterPolarTensor<T, UseDynamicPolar>::makeFactorZZ() {
         if constexpr (UseDynamicPolar) {
             DiagBaseVector result{
@@ -353,7 +353,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool UseDynamicPolar>
-    inline WaterPolarTensor<T, UseDynamicPolar>::OffDiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::OffDiagBaseVector
     WaterPolarTensor<T, UseDynamicPolar>::makeFactorXZ() {
         if constexpr (UseDynamicPolar) {
             OffDiagBaseVector result{

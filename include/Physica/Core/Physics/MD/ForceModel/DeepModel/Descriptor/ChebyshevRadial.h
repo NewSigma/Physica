@@ -56,10 +56,10 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] unsigned int getMaxOrder() const noexcept { return maxOrder; }
     private:
-        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T force_functor(size_t i, size_t j, T r, T r2) const;
         /* Static members */
-        [[nodiscard]] inline static T cutoff_functor(T r) noexcept;
+        [[nodiscard]] static T cutoff_functor(T r) noexcept;
         /* Friends */
         friend class PairModel<ChebyshevRadial<T, IsSmallCell>>;
     };
@@ -119,17 +119,17 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T ChebyshevRadial<T, IsSmallCell>::pot_functor(size_t, size_t, T, T) const {
+    T ChebyshevRadial<T, IsSmallCell>::pot_functor(size_t, size_t, T, T) const {
         noImpl("[Error]: This function is disabled");
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T ChebyshevRadial<T, IsSmallCell>::force_functor(size_t, size_t, T, T) const {
+    T ChebyshevRadial<T, IsSmallCell>::force_functor(size_t, size_t, T, T) const {
         noImpl("[Error]: This function is disabled");
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T ChebyshevRadial<T, IsSmallCell>::cutoff_functor(T normalR) noexcept {
+    T ChebyshevRadial<T, IsSmallCell>::cutoff_functor(T normalR) noexcept {
         assert(normalR.isPositive() && (normalR <= T(1)) && "[Error]: Distance out of cutoff");
         return square(cos(normalR * T(M_PI_2)));
     }

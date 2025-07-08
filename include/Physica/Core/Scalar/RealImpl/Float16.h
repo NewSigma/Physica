@@ -89,9 +89,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }
         /* Static members */
         template<RNG R>
-        [[nodiscard]] inline static Real random_uniform();
+        [[nodiscard]] static Real random_uniform();
         template<RNG R>
-        [[nodiscard]] inline static Real random_normal();
+        [[nodiscard]] static Real random_normal();
         template<RNG R>
         [[nodiscard]] static Real random_any(auto& distribution) { return This(float32::random_any<R>(distribution)); }
     #ifdef PHYSICA_HDF5
@@ -108,12 +108,12 @@ namespace Physica {
     }
 
     template<RNG R>
-    inline auto Real<Float16>::random_uniform() -> This {
+    auto Real<Float16>::random_uniform() -> This {
         return This(float32::random_uniform<R>());
     }
 
     template<RNG R>
-    inline auto Real<Float16>::random_normal() -> This {
+    auto Real<Float16>::random_normal() -> This {
         return This(float32::random_normal<R>());
     }
 

@@ -63,7 +63,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] inline auto exp(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto exp(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Exp, V&&>(std::forward<V>(v));
     }
 }

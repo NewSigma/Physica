@@ -60,7 +60,7 @@ namespace Physica {
         [[nodiscard]] size_t getNumDOF() const noexcept { return numDOF; }
         [[nodiscard]] size_t getNumUnitCellAtom() const noexcept { return numDOF / Dim; }
         [[nodiscard]] size_t getNumSuperCellAtom() const noexcept { return getNumUnitCellAtom() * getNumCell(); }
-        [[nodiscard]] inline size_t getNumForceConsts() const noexcept;
+        [[nodiscard]] size_t getNumForceConsts() const noexcept;
     protected:
         VectorType makeTransBase(size_t dof, unsigned int direction) const;
     };
@@ -144,7 +144,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline size_t FCProjector<T>::getNumForceConsts() const noexcept {
+    size_t FCProjector<T>::getNumForceConsts() const noexcept {
         return numDOF * numDOF * superSize[0] * superSize[1] * superSize[2];
     }
 

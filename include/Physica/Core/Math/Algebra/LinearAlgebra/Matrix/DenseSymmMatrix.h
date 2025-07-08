@@ -66,7 +66,7 @@ namespace Physica {
         [[nodiscard]] ScalarType max() const { return asVector().max(); }
         [[nodiscard]] ScalarType min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
-        [[nodiscard]] inline HermiteRtnTy hermite() const noexcept { return *this; }
+        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return *this; }
         void swap(This& __restrict m) noexcept;
 
         template<RNG R>
@@ -89,11 +89,11 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static This random_uniform(size_t order);
+        [[nodiscard]] static This random_uniform(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static This random_normal(size_t order);
+        [[nodiscard]] static This random_normal(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static This random_any(size_t order, auto& distribution);
+        [[nodiscard]] static This random_any(size_t order, auto& distribution);
     };
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
@@ -153,8 +153,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_uniform(size_t order) {
+    auto DenseSymmMatrix<T, Order>::random_uniform(size_t order) -> This {
         This result(order);
         result.template random_uniform<R>();
         return result;
@@ -162,8 +161,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_normal(size_t order) {
+    auto DenseSymmMatrix<T, Order>::random_normal(size_t order) -> This {
         This result(order);
         result.template random_normal<R>();
         return result;
@@ -171,8 +169,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<RNG R>
-    [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_any(size_t order, auto& distribution) {
+    auto DenseSymmMatrix<T, Order>::random_any(size_t order, auto& distribution) -> This {
         This result(order);
         result.template random_any<R>(distribution);
         return result;
@@ -193,7 +190,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Order>
-    inline void swap(Physica::DenseSymmMatrix<T, Order>& __restrict m1,
+    void swap(Physica::DenseSymmMatrix<T, Order>& __restrict m1,
                      Physica::DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
         m1.swap(m2);
     }

@@ -22,13 +22,13 @@
 
 namespace Physica {
     template<class Derived>
-    inline auto device_obj<ContinuousVector<Derived>>::operator=(const This& obj) -> This& {
+    auto device_obj<ContinuousVector<Derived>>::operator=(const This& obj) -> This& {
         Base::operator=(obj);
         return *this;
     }
     
     template<class Derived>
-    inline auto device_obj<ContinuousVector<Derived>>::operator=(This&& obj) -> This& {
+    auto device_obj<ContinuousVector<Derived>>::operator=(This&& obj) -> This& {
         return *this = obj;
     }
 
@@ -74,7 +74,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ inline Pack device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
+    __device__ Pack device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
         Pack packet{};
         if constexpr (isReverseDiff)
             packet.load(Base::data_ptr(index).value_ptr());
@@ -85,7 +85,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ inline Pack device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
+    __device__ Pack device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
         Pack packet{};
         if constexpr (isReverseDiff)
             packet.load_partial(Base::data_ptr(index).value_ptr(), count);
@@ -96,7 +96,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const Pack packet) {
+    __device__ void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const Pack packet) {
         using T1 = std::conditional<isReverseDiff, Tv, T>::type;
         using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
         if constexpr (isReverseDiff)
@@ -107,7 +107,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+    __device__ void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const Pack packet) {
         using T1 = std::conditional<isReverseDiff, Tv, T>::type;
         using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
         if constexpr (isReverseDiff)
@@ -118,37 +118,37 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline auto device_obj<ContinuousVector<Derived>>::head(size_t to) noexcept {
+    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::head(size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const auto device_obj<ContinuousVector<Derived>>::head(size_t to) const noexcept {
+    __host__ __device__ const auto device_obj<ContinuousVector<Derived>>::head(size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline auto device_obj<ContinuousVector<Derived>>::tail(size_t from) noexcept {
+    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::tail(size_t from) noexcept {
         return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const auto device_obj<ContinuousVector<Derived>>::tail(size_t from) const noexcept {
+    __host__ __device__ const auto device_obj<ContinuousVector<Derived>>::tail(size_t from) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline auto device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) noexcept {
+    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const auto device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) const noexcept {
+    __host__ __device__ const auto device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 

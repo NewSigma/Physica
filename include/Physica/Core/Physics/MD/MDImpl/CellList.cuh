@@ -81,10 +81,6 @@ namespace Physica {
 
     template<Scalar T>
     __device__ void device_obj<CellList<T>>::forNeighInRange(Index3D centerCell, std::invocable<const Vector3D<T>&, Index3D> auto fn) const {
-        auto a1 = lattice.row(0);
-        auto a2 = lattice.row(1);
-        auto a3 = lattice.row(2);
-
         Index3D index{};
         const size_t centerX = centerCell[0];
         for (int deltaX = -1; deltaX <= 1; ++deltaX) {
@@ -132,7 +128,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __device__ inline void device_obj<CellList<T>>::forAtomInCell(Index3D cellIndex, std::invocable<size_t> auto fn) const {
+    __device__ void device_obj<CellList<T>>::forAtomInCell(Index3D cellIndex, std::invocable<size_t> auto fn) const {
         const auto index1D = PeriodIndex3D(cellIndex, cellGridDim).toIndex1D();
         const size_t cellBegin = cellStartOffset[index1D];
         const size_t cellEnd = cellStartOffset[index1D + 1];
@@ -151,7 +147,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline device_obj<CellList<T>> CellList<T>::toDevice() const {
+    device_obj<CellList<T>> CellList<T>::toDevice() const {
         return device_obj<CellList<T>>(*this);
     }
 

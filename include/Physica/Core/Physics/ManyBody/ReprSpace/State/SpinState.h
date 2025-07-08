@@ -34,25 +34,25 @@ namespace Physica {
         IntType occupyBits;
     public:
         SpinState() = default;
-        inline SpinState(IntType occupyBits_);
+        SpinState(IntType occupyBits_);
         SpinState(const This&) = default;
         SpinState(This&&) noexcept = default;
         ~SpinState() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] bool operator[](int8_t site) const noexcept { return isOccupy(site); }
-        [[nodiscard]] inline bool operator==(const This& other) const noexcept;
+        [[nodiscard]] bool operator==(const This& other) const noexcept;
         [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
         [[nodiscard]] bool operator>(const This& other) const noexcept { return occupyBits > other.occupyBits; }
         [[nodiscard]] bool operator<(const This& other) const noexcept { return occupyBits < other.occupyBits; }
         [[nodiscard]] bool operator>=(const This& other) const noexcept { return occupyBits >= other.occupyBits; }
         [[nodiscard]] bool operator<=(const This& other) const noexcept { return occupyBits <= other.occupyBits; }
-        [[nodiscard]] inline This operator<<(int shift) const noexcept;
-        [[nodiscard]] inline This operator>>(int shift) const noexcept;
-        [[nodiscard]] inline This operator&(const This& psi) const noexcept;
-        [[nodiscard]] inline This operator|(const This& psi) const noexcept;
-        [[nodiscard]] inline This operator^(const This& psi) const noexcept;
-        [[nodiscard]] inline This operator~() const noexcept;
+        [[nodiscard]] This operator<<(int shift) const noexcept;
+        [[nodiscard]] This operator>>(int shift) const noexcept;
+        [[nodiscard]] This operator&(const This& psi) const noexcept;
+        [[nodiscard]] This operator|(const This& psi) const noexcept;
+        [[nodiscard]] This operator^(const This& psi) const noexcept;
+        [[nodiscard]] This operator~() const noexcept;
         void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         void operator&=(const This& psi) noexcept { (*this) = (*this) & psi; }
@@ -65,16 +65,16 @@ namespace Physica {
         [[nodiscard]] This transReduce(int period = 1) const;
         [[nodiscard]] int lShiftSign() const;
         [[nodiscard]] int calcPeriod() const;
-        inline void swap(This& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] IntType getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
-        [[nodiscard]] inline bool isOccupy(int8_t site) const noexcept;
+        [[nodiscard]] bool isOccupy(int8_t site) const noexcept;
         [[nodiscard]] int getNumParticle() const noexcept { return std::popcount(occupyBits); }
-        [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
+        [[nodiscard]] bool isTransReducible(int period = 1) const noexcept;
 
-        [[nodiscard]] inline bool isSpinUp(int8_t site) const noexcept;
-        [[nodiscard]] inline bool isSpinDown(int8_t site) const noexcept;
+        [[nodiscard]] bool isSpinUp(int8_t site) const noexcept;
+        [[nodiscard]] bool isSpinDown(int8_t site) const noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_state();

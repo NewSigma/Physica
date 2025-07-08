@@ -47,7 +47,7 @@ namespace Physica {
         static DataMatrix toHighDimForm(const Vector auto& data, size_t step, size_t dim);
     private:
         template<Vector T>
-        static inline T corrIntegral(const Matrix auto& data, const T& radius);
+        static T corrIntegral(const Matrix auto& data, const T& radius);
     };
 
     template<RNG R>

@@ -79,14 +79,14 @@ namespace Physica {
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] explicit operator ValueType() const noexcept { return values; }
-        [[nodiscard]] inline ScalarType operator[](int index) const;
-        [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const SIMD& x) const;
-        [[nodiscard]] inline SIMD operator*(const ScalarType& x) const;
-        [[nodiscard]] inline SIMD operator*(const Scalar auto& x) const;
-        [[nodiscard]] inline SIMD operator/(const SIMD& x) const;
-        [[nodiscard]] inline SIMD operator-() const;
+        [[nodiscard]] ScalarType operator[](int index) const;
+        [[nodiscard]] SIMD operator+(const SIMD& other) const;
+        [[nodiscard]] SIMD operator-(const SIMD& other) const;
+        [[nodiscard]] SIMD operator*(const SIMD& x) const;
+        [[nodiscard]] SIMD operator*(const ScalarType& x) const;
+        [[nodiscard]] SIMD operator*(const Scalar auto& x) const;
+        [[nodiscard]] SIMD operator/(const SIMD& x) const;
+        [[nodiscard]] SIMD operator-() const;
         void operator+=(const SIMD& x) { *this = *this + x; }
         void operator-=(const SIMD& x) { *this = *this - x; }
         void operator*=(const SIMD& x) { *this = *this * x; }
@@ -94,18 +94,18 @@ namespace Physica {
         /* Operations */
         ValueType reverse(GradType grad = 1) const noexcept;
 
-        inline void load(ConstPtrTy p);
-        inline void load_partial(ConstPtrTy p, int n);
-        inline void store(PtrTy p) const;
-        inline void store_partial(PtrTy p, int n) const;
+        void load(ConstPtrTy p);
+        void load_partial(ConstPtrTy p, int n);
+        void store(PtrTy p) const;
+        void store_partial(PtrTy p, int n) const;
 
-        inline This& cutoff(int count);
-        [[nodiscard]] inline FullRealType swapRealImag() const noexcept;
-        [[nodiscard]] inline FullRealType permRealImag() const noexcept;
+        This& cutoff(int count);
+        [[nodiscard]] FullRealType swapRealImag() const noexcept;
+        [[nodiscard]] FullRealType permRealImag() const noexcept;
 
-        [[nodiscard]] inline auto sum() const;
-        [[nodiscard]] inline auto max() const;
-        [[nodiscard]] inline auto min() const;
+        [[nodiscard]] auto sum() const;
+        [[nodiscard]] auto max() const;
+        [[nodiscard]] auto min() const;
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] FullRealType asReal() const noexcept;
@@ -115,15 +115,15 @@ namespace Physica {
         [[nodiscard]] const GradType& grad() const noexcept { return grads; }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType(values.getLow(), grads.getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType(values.getHigh(), grads.getHigh()); }
-        [[nodiscard]] inline RealType real() const noexcept;
-        [[nodiscard]] inline RealType imag() const noexcept;
+        [[nodiscard]] RealType real() const noexcept;
+        [[nodiscard]] RealType imag() const noexcept;
         /* Static members */
         [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
         [[nodiscard]] static SIMD asComplex(const FullRealType& reals);
     };
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto mul_add(
+    [[nodiscard]] auto mul_add(
             const SIMD<Diff<T, Mode, Order>, Size>& a,
             const SIMD<Diff<T, Mode, Order>, Size>& b,
             const SIMD<Diff<T, Mode, Order>, Size>& c);

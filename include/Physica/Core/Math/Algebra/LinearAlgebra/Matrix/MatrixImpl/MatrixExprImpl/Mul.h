@@ -109,17 +109,17 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] inline auto operator*(M&& m, U&& x) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto operator*(M&& m, U&& x) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Mul, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] inline auto operator*(U&& x, M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto operator*(U&& x, M&& m) noexcept requires(!CUDA<M>) {
         return m * x;
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] inline auto hadamard(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
+    [[nodiscard]] auto hadamard(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
         return MatrixExpr<ExprType::Mul, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

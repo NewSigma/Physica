@@ -63,26 +63,26 @@ namespace Physica {
         void zero_grad();
 
         using Base::resize;
-        inline void resize(size_t size);
+        void resize(size_t size);
 
-        [[nodiscard]] inline host_obj toHost() const;
-        [[nodiscard]] inline host_obj toHostAsync() const;
-        inline void toHost(host_obj& obj) const;
-        inline void toHostAsync(host_obj& obj) const;
+        [[nodiscard]] host_obj toHost() const;
+        [[nodiscard]] host_obj toHostAsync() const;
+        void toHost(host_obj& obj) const;
+        void toHostAsync(host_obj& obj) const;
         using Base::toHost;
         using Base::toHostAsync;
 
         template<RNG R>
-        inline void random_uniform();
+        void random_uniform();
         template<RNG R>
-        inline void random_normal();
+        void random_normal();
         template<RNG R>
-        inline void random_any(auto& distribution);
+        void random_any(auto& distribution);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
 
         [[nodiscard]] __host__ __device__ const auto& values() const noexcept { return v; }
         [[nodiscard]] __host__ __device__ auto& values() noexcept { return v; }
@@ -90,11 +90,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto& grads() noexcept { return g; }
         /* Static members */
         template<RNG R>
-        [[nodiscard]] inline static This random_uniform(size_t len);
+        [[nodiscard]] static This random_uniform(size_t len);
         template<RNG R>
-        [[nodiscard]] inline static This random_normal(size_t len);
+        [[nodiscard]] static This random_normal(size_t len);
         template<RNG R>
-        [[nodiscard]] inline static This random_any(size_t len, auto& distribution);
+        [[nodiscard]] static This random_any(size_t len, auto& distribution);
     };
 }
 

@@ -152,7 +152,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool isSpinPolarized>
-    inline void swap(Physica::BandGrid<T, isSpinPolarized>& __restrict band1,
+    void swap(Physica::BandGrid<T, isSpinPolarized>& __restrict band1,
                      Physica::BandGrid<T, isSpinPolarized>& __restrict band2) noexcept {
         band1.swap(band2);
     }

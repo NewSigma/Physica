@@ -258,7 +258,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    inline void swap(Physica::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd1,
+    void swap(Physica::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd1,
                      Physica::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd2) noexcept {
         svd1.swap(svd2);
     }

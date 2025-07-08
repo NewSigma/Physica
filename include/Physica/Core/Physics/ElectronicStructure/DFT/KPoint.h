@@ -45,7 +45,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const Vector3D<T>& getPos() const noexcept { return pos; }
         [[nodiscard]] const T& getWeight() const noexcept { return weight; }
-        [[nodiscard]] inline const BandEnergy& getBandEnergy(SpinState spin) const noexcept;
+        [[nodiscard]] const BandEnergy& getBandEnergy(SpinState spin) const noexcept;
         /* Setters */
         void setBandEnergy(SpinState spin, const Vector auto& v);
     };
@@ -69,7 +69,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t NumBand, bool isSpinPolarized>
-    inline const KPoint<T, NumBand, isSpinPolarized>::BandEnergy&
+    const KPoint<T, NumBand, isSpinPolarized>::BandEnergy&
     KPoint<T, NumBand, isSpinPolarized>::getBandEnergy(SpinState spin) const noexcept {
         return bandE[isSpinPolarized ? int(spin) : 0];
     }

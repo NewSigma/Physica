@@ -62,7 +62,7 @@ namespace Physica {
         void swap(This& __restrict solver) noexcept;
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
-        [[nodiscard]] inline EigenvectorMatrix getEigenvectors() const noexcept;
+        [[nodiscard]] EigenvectorMatrix getEigenvectors() const noexcept;
     private:
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
         /* Static members */
@@ -170,7 +170,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    inline SymmEigenSolver<T, Order>::EigenvectorMatrix SymmEigenSolver<T, Order>::getEigenvectors() const noexcept {
+    SymmEigenSolver<T, Order>::EigenvectorMatrix SymmEigenSolver<T, Order>::getEigenvectors() const noexcept {
         assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
         return eigenvectors;
     }
@@ -224,7 +224,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Order>
-    inline void swap(Physica::SymmEigenSolver<T, Order>& __restrict solver1,
+    void swap(Physica::SymmEigenSolver<T, Order>& __restrict solver1,
                      Physica::SymmEigenSolver<T, Order>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }

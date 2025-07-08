@@ -27,7 +27,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    inline void RValueVector<Derived>::assign(Vector auto& v) const {
+    void RValueVector<Derived>::assign(Vector auto& v) const {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
@@ -44,7 +44,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    inline void RValueVector<Derived>::assign_add(Vector auto& v) const {
+    void RValueVector<Derived>::assign_add(Vector auto& v) const {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
@@ -61,7 +61,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    inline Pack RValueVector<Derived>::packet(size_t index) const {
+    Pack RValueVector<Derived>::packet(size_t index) const {
         using U = Traits<Pack>::ScalarType;
         assert(index + Pack::size() <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
@@ -95,7 +95,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    inline Pack RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
+    Pack RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
         using U = Traits<Pack>::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
@@ -134,77 +134,77 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    inline auto RValueVector<Derived>::head(size_t to) & noexcept {
+    auto RValueVector<Derived>::head(size_t to) & noexcept {
         return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto RValueVector<Derived>::head(size_t to) const& noexcept {
+    const auto RValueVector<Derived>::head(size_t to) const& noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline auto RValueVector<Derived>::tail(size_t from) & noexcept {
+    auto RValueVector<Derived>::tail(size_t from) & noexcept {
         return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto RValueVector<Derived>::tail(size_t from) const& noexcept {
+    const auto RValueVector<Derived>::tail(size_t from) const& noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline auto RValueVector<Derived>::segment(size_t from, size_t to) & noexcept {
+    auto RValueVector<Derived>::segment(size_t from, size_t to) & noexcept {
         return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto RValueVector<Derived>::segment(size_t from, size_t to) const& noexcept {
+    const auto RValueVector<Derived>::segment(size_t from, size_t to) const& noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::format() const {
+    auto RValueVector<Derived>::format() const {
         return FormatedVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::transpose() const noexcept {
+    auto RValueVector<Derived>::transpose() const noexcept {
         return TransposeVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::conjugate() const noexcept {
+    auto RValueVector<Derived>::conjugate() const noexcept {
         return ConjugateVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::hermite() const noexcept {
+    auto RValueVector<Derived>::hermite() const noexcept {
         return HermiteVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::norm1() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::norm1() const -> CoDiff<Tr> {
         return abs(Base::getDerived()).sum();
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::norm2() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::norm2() const -> CoDiff<Tr> {
         return norm();
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::norm() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::norm() const -> CoDiff<Tr> {
         return sqrt(squaredNorm());
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::squaredNorm() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::squaredNorm() const -> CoDiff<Tr> {
         return squaredNorms().sum();
     }
 
@@ -219,7 +219,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto RValueVector<Derived>::normInf() const -> Tr {
+    auto RValueVector<Derived>::normInf() const -> Tr {
         return abs(Base::getDerived()).max();
     }
 
@@ -642,7 +642,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P>
-    inline void RValueVector<Derived>::assign_for(V& v) const {
+    void RValueVector<Derived>::assign_for(V& v) const {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] = calc_value(i);
@@ -653,7 +653,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P, size_t Size>
-    inline void RValueVector<Derived>::assign_simd(V& v) const {
+    void RValueVector<Derived>::assign_simd(V& v) const {
         using Pack = BestPacket<typename V::ScalarType, Size>::Type;
         constexpr static size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();
@@ -702,7 +702,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P>
-    inline void RValueVector<Derived>::assign_add_for(V& v) const {
+    void RValueVector<Derived>::assign_add_for(V& v) const {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] += calc_value(i);
@@ -713,7 +713,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, size_t Size>
-    inline void RValueVector<Derived>::assign_add_simd(V& v) const {
+    void RValueVector<Derived>::assign_add_simd(V& v) const {
         using Pack = BestPacket<typename V::ScalarType, Size>::Type;
         constexpr static size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();

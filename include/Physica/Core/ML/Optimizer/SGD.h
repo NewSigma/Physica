@@ -31,7 +31,7 @@ namespace Physica {
 
         T lr;
     public:
-        inline SGD(T lr_);
+        SGD(T lr_);
         SGD(const SGD&) = default;
         SGD(SGD&&) noexcept = default;
         ~SGD() = default;
@@ -40,14 +40,14 @@ namespace Physica {
         /* Operations */
         template<Diffable U>
         void step(U& target) const;
-        inline void swap(SGD& __restrict obj) noexcept;
+        void swap(SGD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T& getLearnRate() noexcept { return lr; }
         [[nodiscard]] const T& getLearnRate() const noexcept { return lr; }
     };
 
     template<Scalar T>
-    inline SGD<T>::SGD(T lr_) : lr(lr_) {}
+    SGD<T>::SGD(T lr_) : lr(lr_) {}
 
     template<Scalar T>
     template<Diffable U>
@@ -61,7 +61,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void SGD<T>::swap(SGD& __restrict obj) noexcept {
+    void SGD<T>::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lr.swap(obj.lr);
     }

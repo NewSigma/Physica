@@ -78,7 +78,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] inline auto pow(M&& m, int power) noexcept {
+    [[nodiscard]] auto pow(M&& m, int power) noexcept {
         return MatrixPow<M&&>(std::forward<M>(m), power);
     }
 }

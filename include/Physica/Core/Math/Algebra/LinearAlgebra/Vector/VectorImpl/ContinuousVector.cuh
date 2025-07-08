@@ -47,15 +47,15 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         using Base::operator+=;
-        inline This& operator=(const This& obj);
-        inline This& operator=(This&& obj);
+        This& operator=(const This& obj);
+        This& operator=(This&& obj);
         /* Operations */
         template<Packet Pack>
-        [[nodiscard]] __device__ inline Pack packet(size_t index) const;
+        [[nodiscard]] __device__ Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
-        __device__ inline void writePacket(size_t index, const Packet auto packet);
-        __device__ inline void writePacketPartial(size_t index, size_t count, const Packet auto packet);
+        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const;
+        __device__ void writePacket(size_t index, const Packet auto packet);
+        __device__ void writePacketPartial(size_t index, size_t count, const Packet auto packet);
 
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
@@ -65,17 +65,17 @@ namespace Physica {
         template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto head(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto head(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto tail(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto tail(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto segment(size_t from, size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto segment(size_t from, size_t to) const noexcept;
 
         void zeros();
 

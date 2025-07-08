@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] inline auto reciprocal_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto reciprocal_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Reciprocal, M&&>(std::forward<M>(m));
     }
 }

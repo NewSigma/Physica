@@ -87,19 +87,19 @@ namespace Physica {
         constexpr ~ScalarBase() = default;
         /* Operators */
         template<Scalar U>
-        __host__ __device__ inline Derived& operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ Derived& operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ void operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ void operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ void operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
-        __host__ __device__ inline bool operator>(float s) const noexcept;
-        __host__ __device__ inline bool operator<(float s) const noexcept;
-        __host__ __device__ inline bool operator>(double s) const noexcept;
-        __host__ __device__ inline bool operator<(double s) const noexcept;
+        __host__ __device__ void operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>);
+        __host__ __device__ bool operator>(float s) const noexcept;
+        __host__ __device__ bool operator<(float s) const noexcept;
+        __host__ __device__ bool operator>(double s) const noexcept;
+        __host__ __device__ bool operator<(double s) const noexcept;
         template<Scalar T>
         __host__ __device__ bool operator>(const T& x) const noexcept;
         template<Scalar T>
@@ -113,18 +113,18 @@ namespace Physica {
         template<int MaskOrder>
         [[nodiscard]] __host__ __device__ auto mask() const noexcept;
 
-        __host__ __device__ inline Derived& load(ConstPtrTy p);
-        __host__ __device__ inline void store(PtrTy p) const;
-        __host__ __device__ inline Derived& load_partial(ConstPtrTy p, int n);
-        __host__ __device__ inline void store_partial(PtrTy p, int n) const;
+        __host__ __device__ Derived& load(ConstPtrTy p);
+        __host__ __device__ void store(PtrTy p) const;
+        __host__ __device__ Derived& load_partial(ConstPtrTy p, int n);
+        __host__ __device__ void store_partial(PtrTy p, int n) const;
         void insert(int index, ScalarType value);
 
-        [[nodiscard]] __host__ __device__ inline RealType real() const;
-        [[nodiscard]] __host__ __device__ inline RealType imag() const;
-        [[nodiscard]] __host__ __device__ inline ScalarType conjugate() const;
-        [[nodiscard]] __host__ __device__ inline ScalarType unit() const;
-        [[nodiscard]] __host__ __device__ inline RealType norm() const;
-        [[nodiscard]] __host__ __device__ inline auto squaredNorm() const;
+        [[nodiscard]] __host__ __device__ RealType real() const;
+        [[nodiscard]] __host__ __device__ RealType imag() const;
+        [[nodiscard]] __host__ __device__ ScalarType conjugate() const;
+        [[nodiscard]] __host__ __device__ ScalarType unit() const;
+        [[nodiscard]] __host__ __device__ RealType norm() const;
+        [[nodiscard]] __host__ __device__ auto squaredNorm() const;
         [[nodiscard]] ScalarType sum() const { return this->getDerived(); }
         /* Getters */
         __host__ __device__ constexpr static size_t size() { return 1; }
@@ -145,7 +145,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto isPositive() const noexcept;
         [[nodiscard]] __host__ __device__ auto isNegative() const noexcept;
         /* Static Members */
-        static inline bool matchSign(const ScalarType& s1, const ScalarType& s2);
+        static bool matchSign(const ScalarType& s1, const ScalarType& s2);
     protected:
         constexpr ScalarBase() = default;
         constexpr ScalarBase(const This&) = default;
@@ -161,14 +161,14 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline Derived& ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ Derived& ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         checkAssign<U>();
         return Base::getDerived() = ScalarType(x);
     }
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ void ScalarBase<Derived>::operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
@@ -181,7 +181,7 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ void ScalarBase<Derived>::operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
@@ -194,7 +194,7 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ void ScalarBase<Derived>::operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
@@ -207,7 +207,7 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
+    __host__ __device__ void ScalarBase<Derived>::operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
         checkAssign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
@@ -219,25 +219,25 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator>(float s) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator>(float s) const noexcept {
         checkComplexCompare();
         return float(value()) > s;
     }
 
     template<class Derived>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator<(float s) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator<(float s) const noexcept {
         checkComplexCompare();
         return float(value()) < s;
     }
 
     template<class Derived>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator>(double s) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator>(double s) const noexcept {
         checkComplexCompare();
         return double(value()) > s;
     }
 
     template<class Derived>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator<(double s) const noexcept {
+    __host__ __device__ bool ScalarBase<Derived>::operator<(double s) const noexcept {
         checkComplexCompare();
         return double(value()) < s;
     }
@@ -288,25 +288,25 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline Derived& ScalarBase<Derived>::load(ConstPtrTy p) {
+    __host__ __device__ Derived& ScalarBase<Derived>::load(ConstPtrTy p) {
         this->getDerived() = (*p).value();
         return this->getDerived();
     }
 
     template<class Derived>
-    __host__ __device__ inline void ScalarBase<Derived>::store(PtrTy p) const {
+    __host__ __device__ void ScalarBase<Derived>::store(PtrTy p) const {
         *p = this->getDerived().value();
     }
 
     template<class Derived>
-    __host__ __device__ inline Derived& ScalarBase<Derived>::load_partial(ConstPtrTy p, int n) {
+    __host__ __device__ Derived& ScalarBase<Derived>::load_partial(ConstPtrTy p, int n) {
         if (n)
             load(p);
         return this->getDerived();
     }
 
     template<class Derived>
-    __host__ __device__ inline void ScalarBase<Derived>::store_partial(PtrTy p, int n) const {
+    __host__ __device__ void ScalarBase<Derived>::store_partial(PtrTy p, int n) const {
         if (n)
             store(p);
     }
@@ -318,7 +318,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
+    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
         const auto& x = this->getDerived();
         if constexpr (isDiffable)
             return RealType(x.value().real(), x.grad().real());
@@ -329,7 +329,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
+    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
         const auto& x = this->getDerived();
         if constexpr (isDiffable)
             return RealType(x.value().imag(), x.grad().imag());
@@ -340,7 +340,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline ScalarBase<Derived>::ScalarType ScalarBase<Derived>::conjugate() const {
+    __host__ __device__ ScalarBase<Derived>::ScalarType ScalarBase<Derived>::conjugate() const {
         const auto& x = this->getDerived();
         if constexpr (isDiffable)
             return ScalarType(x.value().conjugate(), x.grad().conjugate());
@@ -351,7 +351,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline ScalarBase<Derived>::ScalarType ScalarBase<Derived>::unit() const {
+    __host__ __device__ ScalarBase<Derived>::ScalarType ScalarBase<Derived>::unit() const {
         if constexpr (isComplex)
             return this->getDerived().unit();
         else
@@ -359,12 +359,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::norm() const {
+    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::norm() const {
         return sqrt(squaredNorm());
     }
 
     template<class Derived>
-    __host__ __device__ inline auto ScalarBase<Derived>::squaredNorm() const {
+    __host__ __device__ auto ScalarBase<Derived>::squaredNorm() const {
         if constexpr (isComplex || isReverseDiff)
             return this->getDerived().squaredNorm();
         else
@@ -398,12 +398,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline auto ScalarBase<Derived>::value() noexcept -> ValueType& {
+    __host__ __device__ auto ScalarBase<Derived>::value() noexcept -> ValueType& {
         return *value_ptr();
     }
 
     template<class Derived>
-    __host__ __device__ inline auto ScalarBase<Derived>::value() const noexcept -> const ValueType& {
+    __host__ __device__ auto ScalarBase<Derived>::value() const noexcept -> const ValueType& {
         return *value_ptr();
     }
 
@@ -446,7 +446,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline bool ScalarBase<Derived>::matchSign(const ScalarType& s1, const ScalarType& s2) {
+    bool ScalarBase<Derived>::matchSign(const ScalarType& s1, const ScalarType& s2) {
         return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
     }
 
@@ -496,18 +496,18 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline T&& operator+(T&& x) noexcept {
+    T&& operator+(T&& x) noexcept {
         return std::forward<T>(x);
     }
 
     template<Scalar T>
-    inline void operator^=(T& x, const T& y) { x = x ^ y; }
+    void operator^=(T& x, const T& y) { x = x ^ y; }
 
     template<Scalar T>
-    inline void operator<<=(T& x, int bits) { x = x << bits; }
+    void operator<<=(T& x, int bits) { x = x << bits; }
 
     template<Scalar T>
-    inline void operator>>=(T& x, int bits) { x = x >> bits; }
+    void operator>>=(T& x, int bits) { x = x >> bits; }
 
 
     template<Scalar T>
@@ -532,7 +532,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T>
-    inline void swap(T& __restrict x, T& __restrict y) noexcept {
+    void swap(T& __restrict x, T& __restrict y) noexcept {
         x.swap(y);
     }
 }

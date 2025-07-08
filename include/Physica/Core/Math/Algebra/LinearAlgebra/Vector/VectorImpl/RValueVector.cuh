@@ -49,20 +49,21 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operations */
-        __host__ __device__ void assign(Vector auto& target) const requires(CUDA<decltype(target)>);
+        template<Vector V>
+        __host__ __device__ void assign(V& target) const requires(CUDA<V>);
 
         [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
         template<Packet Pack>
-        [[nodiscard]] __device__ inline Pack packet(size_t index) const;
+        [[nodiscard]] __device__ Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] __device__ inline Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
 
-        [[nodiscard]] __host__ __device__ inline auto transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
 
-        [[nodiscard]] __device__ inline Tr norm() const;
-        [[nodiscard]] __device__ inline Tr squaredNorm() const;
+        [[nodiscard]] __device__ Tr norm() const;
+        [[nodiscard]] __device__ Tr squaredNorm() const;
         [[nodiscard]] __device__ T max() const;
         [[nodiscard]] __device__ T min() const;
         [[nodiscard]] __host__ __device__ T sum() const;

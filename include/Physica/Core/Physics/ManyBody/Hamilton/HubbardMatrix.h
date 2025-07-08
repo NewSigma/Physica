@@ -80,7 +80,7 @@ namespace Physica {
         [[nodiscard]] const ModelBase& getModel() const noexcept { return *this; }
         [[nodiscard]] const U& getRepr() const noexcept { return repr; }
     protected:
-        inline RealType repelElem(StateType psi) const;
+        RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
     private:
         template<Scalar, Representation, Vector>

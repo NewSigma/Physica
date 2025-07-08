@@ -51,7 +51,7 @@ namespace Physica {
         [[nodiscard]] size_t getNumState() const noexcept { return states.getLength(); }
         [[nodiscard]] const PeriodArray& getPeriods() const noexcept { return periods; }
         [[nodiscard]] unsigned int getKIndex() const noexcept { return kIndex; }
-        [[nodiscard]] inline unsigned int getReducedK() const noexcept;
+        [[nodiscard]] unsigned int getReducedK() const noexcept;
     };
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
@@ -103,7 +103,7 @@ namespace Physica {
     }
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    inline unsigned int KFermiRepr<Dim, NumSite, UseInversionSymm>::getReducedK() const noexcept {
+    unsigned int KFermiRepr<Dim, NumSite, UseInversionSymm>::getReducedK() const noexcept {
         const auto kSize = FFT<Real<>, 1>::rSizeToKSize(NumSite);
         if (kIndex < kSize)
             return kIndex;

@@ -61,7 +61,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    inline size_t SteepestDescent<T, Dim>::getDim() const noexcept {
+    size_t SteepestDescent<T, Dim>::getDim() const noexcept {
         if constexpr (Dim == Dynamic)
             return gradG.getLength();
         return Dim;

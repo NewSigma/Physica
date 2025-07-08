@@ -47,7 +47,7 @@ namespace Physica {
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] const This& conjugate() const noexcept { return *this; }
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
-        inline void swap(This& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
@@ -66,7 +66,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    inline void UnitMatrix<T, Order>::swap(This& __restrict obj) noexcept {
+    void UnitMatrix<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(order, obj.order);
     }

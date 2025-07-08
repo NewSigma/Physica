@@ -44,19 +44,19 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        inline void step(int i);
+        void step(int i);
         template<Vector T>
-        inline void fill(T& x);
-        inline void reset();
+        void fill(T& x);
+        void reset();
 
-        inline void swap(This& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
     public:
-        inline int pre_step();
+        int pre_step();
     };
 
-    inline void Sobol::step(int i) {
+    void Sobol::step(int i) {
         for (int _ = 0; _ < i; ++_) {
             const int m = pre_step();
             for (int j = 0; j < MaxDim; ++j)
@@ -65,7 +65,7 @@ namespace Physica {
     }
 
     template<Vector T>
-    inline void Sobol::fill(T& x) {
+    void Sobol::fill(T& x) {
         static_assert(T::SizeAtCompile <= MaxDim, "[Error]: Vector is too long");
         constexpr static typename T::ScalarType factor = 1.0 / (1UL << MaxBit);
         assert(x.getLength() <= MaxDim && "[Error]: Vector is too long");
@@ -77,20 +77,20 @@ namespace Physica {
         x *= factor;
     }
 
-    inline void Sobol::reset() {
+    void Sobol::reset() {
         numStep = 0;
         for (auto& x : buffer)
             x = 0;
     }
 
-    inline void Sobol::swap(This& __restrict obj) noexcept {
+    void Sobol::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(numStep, obj.numStep);
         mask.swap(obj.mask);
         buffer.swap(obj.buffer);
     }
 
-    inline int Sobol::pre_step() {
+    int Sobol::pre_step() {
         unsigned int im = numStep++;
         int j = 0;
         for (; j < MaxBit; ++j) {

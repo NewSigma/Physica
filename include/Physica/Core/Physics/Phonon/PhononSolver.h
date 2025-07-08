@@ -67,7 +67,7 @@ namespace Physica {
         void toDynamicMatrix(KSpaceFCMat& forceConstant) const;
         void toDynamicMatrix(KSpaceFCGrid& forceConstants) const;
         [[nodiscard]] DenseMatrix<T> makeEigenVectors(const EigenSolverType& eigen) const;
-        [[nodiscard]] inline DenseMatrix<T> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
+        [[nodiscard]] DenseMatrix<T> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
         [[nodiscard]] MDCellType shiftAtom(const VectorND<T>& eigenVector, T distance);
         void swap(PhononSolver& __restrict obj) noexcept;
         /* Getters */
@@ -86,7 +86,7 @@ namespace Physica {
         [[nodiscard]] static EigenSolverType diagonalize(const KSpaceFCMat& dynamicMatrix);
         [[nodiscard]] static QPointGrid diagonalize(const KSpaceFCGrid& dynamicMatrixes);
         [[nodiscard]] static VectorND<T> makeFreq(const EigenSolverType& eigen);
-        [[nodiscard]] static inline VectorND<T> makeFreq(const QPointGrid& qPoints, Index3D qIndex);
+        [[nodiscard]] static VectorND<T> makeFreq(const QPointGrid& qPoints, Index3D qIndex);
     private:
         T removeDriftForce(VectorND<T>& force) const;
     };
@@ -365,7 +365,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline DenseMatrix<T> PhononSolver<T>::makeEigenVectors(
+    DenseMatrix<T> PhononSolver<T>::makeEigenVectors(
             const QPointGrid& qPoints, Index3D qIndex) const {
         return makeEigenVectors(qPoints(qIndex));
     }
@@ -422,7 +422,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline VectorND<T> PhononSolver<T>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) {
+    VectorND<T> PhononSolver<T>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) {
         return makeFreq(qPoints(qIndex));
     }
 

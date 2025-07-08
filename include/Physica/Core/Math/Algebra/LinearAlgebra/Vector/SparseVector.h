@@ -51,7 +51,7 @@ namespace Physica {
 
         void resize(size_t newLength);
         void reserve(size_t numNonZero);
-        inline void clear();
+        void clear();
         void swap(SparseVector& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t index) const;
@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void SparseVector<T>::clear() {
+    void SparseVector<T>::clear() {
         indexes.clear();
         elems.clear();
     }

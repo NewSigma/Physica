@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] inline auto sech_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto sech_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Sech, M&&>(std::forward<M>(m));
     }
 }

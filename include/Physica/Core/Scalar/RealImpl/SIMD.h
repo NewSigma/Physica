@@ -64,17 +64,17 @@ namespace Physica {
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] operator MachineType() const noexcept { return toMachine(); }
-        [[nodiscard]] inline T operator[](int index) const;
-        [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const T& x) const;
-        [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-() const;
-        [[nodiscard]] inline SIMD operator&(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator|(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator^(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator!() const;
+        [[nodiscard]] T operator[](int index) const;
+        [[nodiscard]] SIMD operator+(const SIMD& other) const;
+        [[nodiscard]] SIMD operator-(const SIMD& other) const;
+        [[nodiscard]] SIMD operator*(const SIMD& other) const;
+        [[nodiscard]] SIMD operator*(const T& x) const;
+        [[nodiscard]] SIMD operator/(const SIMD& other) const;
+        [[nodiscard]] SIMD operator-() const;
+        [[nodiscard]] SIMD operator&(const SIMD& other) const;
+        [[nodiscard]] SIMD operator|(const SIMD& other) const;
+        [[nodiscard]] SIMD operator^(const SIMD& other) const;
+        [[nodiscard]] SIMD operator!() const;
         void operator+=(const SIMD& other) { *this = *this + other; }
         void operator-=(const SIMD& other) { *this = *this - other; }
         void operator*=(const SIMD& other) { *this = *this * other; }
@@ -83,27 +83,27 @@ namespace Physica {
         void operator&=(const SIMD& other) { *this = *this & other; }
         void operator|=(const SIMD& other) { *this = *this | other; }
         void operator^=(const SIMD& other) { *this = *this ^ other; }
-        [[nodiscard]] inline auto operator==(const SIMD& other) const;
-        [[nodiscard]] inline auto operator>(const SIMD& other) const;
-        [[nodiscard]] inline auto operator<(const SIMD& other) const;
+        [[nodiscard]] auto operator==(const SIMD& other) const;
+        [[nodiscard]] auto operator>(const SIMD& other) const;
+        [[nodiscard]] auto operator<(const SIMD& other) const;
         [[nodiscard]] auto operator!=(const SIMD& other) const { return !(*this == other); }
         [[nodiscard]] auto operator>=(const SIMD& other) const { return !(*this < other); }
         [[nodiscard]] auto operator<=(const SIMD& other) const { return !(*this > other); }
         /* Operations */
-        inline void load(const T* p);
-        inline void load_partial(const T* p, int n);
-        inline void store(T* p) const;
-        inline void store_partial(T* p, int n) const;
-        inline void insert(int index, const T& value);
-        template<int... Order> inline SIMD shuffle() const;
-        template<int... Order> inline SIMD permute() const;
-        template<int... Flags> inline SIMD change_sign() const;
+        void load(const T* p);
+        void load_partial(const T* p, int n);
+        void store(T* p) const;
+        void store_partial(T* p, int n) const;
+        void insert(int index, const T& value);
+        template<int... Order> SIMD shuffle() const;
+        template<int... Order> SIMD permute() const;
+        template<int... Flags> SIMD change_sign() const;
 
-        inline This& cutoff(int count);
+        This& cutoff(int count);
 
-        [[nodiscard]] inline T sum() const;
-        [[nodiscard]] inline T max() const;
-        [[nodiscard]] inline T min() const;
+        [[nodiscard]] T sum() const;
+        [[nodiscard]] T max() const;
+        [[nodiscard]] T min() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] Pack& toMachine() noexcept { return pack; }
@@ -116,7 +116,7 @@ namespace Physica {
         [[nodiscard]] BoolSIMDType isFinite() const noexcept;
         /* Static members */
         template<int... Order>
-        inline static SIMD blend(const SIMD& x, const SIMD& y);
+        static SIMD blend(const SIMD& x, const SIMD& y);
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits();
         template<RNG R>
@@ -128,30 +128,30 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Size>
-    [[nodiscard]] inline SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size>& packet) {
+    [[nodiscard]] SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size>& packet) {
         return packet * scalar;
     }
 
     template<Scalar T, size_t Size>
-    [[nodiscard]] inline SIMD<T, Size> mul_add(
+    [[nodiscard]] SIMD<T, Size> mul_add(
             const SIMD<T, Size>& a,
             const SIMD<T, Size>& b,
             const SIMD<T, Size>& c) noexcept;
 
     template<Scalar T, size_t Size>
-    [[nodiscard]] inline SIMD<T, Size> nmul_add(
+    [[nodiscard]] SIMD<T, Size> nmul_add(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept;
 
     template<Scalar T, size_t Size>
-    [[nodiscard]] inline SIMD<T, Size> mul_sub(
+    [[nodiscard]] SIMD<T, Size> mul_sub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept;
 
     template<Scalar T, size_t Size>
-    [[nodiscard]] inline SIMD<T, Size> mul_addsub(
+    [[nodiscard]] SIMD<T, Size> mul_addsub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept;
@@ -203,7 +203,7 @@ namespace std {
 #define PacketType Physica::SIMD<T, Size>
 
     template<Physica::Scalar T, size_t Size>
-    inline PacketType max(PacketType a, PacketType b) {
+    PacketType max(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
             using GradPacket = PacketType::GradType;
@@ -215,7 +215,7 @@ namespace std {
     }
 
     template<Physica::Scalar T, size_t Size>
-    inline PacketType min(PacketType a, PacketType b) {
+    PacketType min(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
             using GradPacket = PacketType::GradType;

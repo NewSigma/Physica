@@ -54,7 +54,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] __host__ __device__ inline auto cosh_elem(M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] __host__ __device__ auto cosh_elem(M&& m) noexcept requires(CUDA<M>) {
         return device_obj<MatrixExpr<ExprType::Cosh, M&&>>(std::forward<M>(m));
     }
 }

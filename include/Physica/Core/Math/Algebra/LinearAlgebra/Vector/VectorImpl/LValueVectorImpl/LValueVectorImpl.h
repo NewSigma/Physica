@@ -22,18 +22,18 @@
 
 namespace Physica {
     template<class Derived>
-    inline LValueVector<Derived>& LValueVector<Derived>::operator=(const This& v) {
+    LValueVector<Derived>& LValueVector<Derived>::operator=(const This& v) {
         return operator=<Derived>(v);
     }
 
     template<class Derived>
-    inline LValueVector<Derived>& LValueVector<Derived>::operator=(This&& v) {
+    LValueVector<Derived>& LValueVector<Derived>::operator=(This&& v) {
         return operator=<Derived>(v);
     }
 
     template<class Derived>
     template<ExecutePolicy P>
-    inline Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
+    Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
         if constexpr (std::is_same<const Derived&, decltype(v)>::value)
             assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
@@ -55,22 +55,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void LValueVector<Derived>::operator+=(const Vector auto& v) {
+    void LValueVector<Derived>::operator+=(const Vector auto& v) {
         v.assign_add(Base::getDerived());
     }
 
     template<class Derived>
-    inline void LValueVector<Derived>::operator-=(const Vector auto& v) {
+    void LValueVector<Derived>::operator-=(const Vector auto& v) {
         Base::getDerived() += -v; // To avoid alias
     }
 
     template<class Derived>
-    inline auto LValueVector<Derived>::operator[](size_t index) -> RefTy {
+    auto LValueVector<Derived>::operator[](size_t index) -> RefTy {
         return *data_ptr(index);
     }
 
     template<class Derived>
-    inline auto LValueVector<Derived>::operator[](size_t index) const -> ConstRefTy {
+    auto LValueVector<Derived>::operator[](size_t index) const -> ConstRefTy {
         return *data_ptr(index);
     }
 
@@ -146,37 +146,37 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    inline auto LValueVector<Derived>::head(size_t to) noexcept {
+    auto LValueVector<Derived>::head(size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto LValueVector<Derived>::head(size_t to) const noexcept {
+    const auto LValueVector<Derived>::head(size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline auto LValueVector<Derived>::tail(size_t from) noexcept {
+    auto LValueVector<Derived>::tail(size_t from) noexcept {
         return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto LValueVector<Derived>::tail(size_t from) const noexcept {
+    const auto LValueVector<Derived>::tail(size_t from) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline auto LValueVector<Derived>::segment(size_t from, size_t to) noexcept {
+    auto LValueVector<Derived>::segment(size_t from, size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const auto LValueVector<Derived>::segment(size_t from, size_t to) const noexcept {
+    const auto LValueVector<Derived>::segment(size_t from, size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
@@ -205,21 +205,21 @@ namespace Physica {
 
     template<class Derived>
     template<RNG R>
-    inline void LValueVector<Derived>::random_uniform() {
+    void LValueVector<Derived>::random_uniform() {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::template random_uniform<R>();
     }
 
     template<class Derived>
     template<RNG R>
-    inline void LValueVector<Derived>::random_normal() {
+    void LValueVector<Derived>::random_normal() {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::template random_normal<R>();
     }
 
     template<class Derived>
     template<RNG R>
-    inline void LValueVector<Derived>::random_any(auto& distribution) {
+    void LValueVector<Derived>::random_any(auto& distribution) {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::template random_any<R>(distribution);
     }
@@ -233,13 +233,13 @@ namespace Physica {
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */
     template<class Derived>
-    inline auto LValueVector<Derived>::data_ptr(size_t index) noexcept -> PtrTy {
+    auto LValueVector<Derived>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < Base::getLength() && "[Error]: Index out of range");
         return Base::getDerived().data_ptr(index);
     }
 
     template<class Derived>
-    inline auto LValueVector<Derived>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
+    auto LValueVector<Derived>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

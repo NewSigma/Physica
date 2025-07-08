@@ -52,8 +52,8 @@ namespace Physica {
     public:
         ~LValueMatrix() = default;
         /* Operators */
-        inline This& operator=(const This& m);
-        inline This& operator=(This&& m);
+        This& operator=(const This& m);
+        This& operator=(This&& m);
 
         template<Scalar T>
         Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
@@ -67,8 +67,8 @@ namespace Physica {
         void operator-=(const Matrix auto& m) { Base::getDerived() = Base::getDerived() - m; }
         void operator*=(const Matrix auto& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
 
-        [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
-        [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
+        [[nodiscard]] RefTy operator()(size_t row, size_t col);
+        [[nodiscard]] ConstRefTy operator()(size_t row, size_t col) const;
         /* Operations */
         [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
@@ -77,45 +77,45 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
-        [[nodiscard]] inline auto row(size_t r) noexcept;
-        [[nodiscard]] inline const auto row(size_t r) const noexcept;
-        [[nodiscard]] inline auto col(size_t c) noexcept;
-        [[nodiscard]] inline const auto col(size_t c) const noexcept;
-        [[nodiscard]] inline auto rows(size_t fromRow, size_t rowCount) noexcept;
-        [[nodiscard]] inline const auto rows(size_t fromRow, size_t rowCount) const noexcept;
-        [[nodiscard]] inline auto topRows(size_t to) noexcept;
-        [[nodiscard]] inline const auto topRows(size_t to) const noexcept;
-        [[nodiscard]] inline auto bottomRows(size_t from) noexcept;
-        [[nodiscard]] inline const auto bottomRows(size_t from) const noexcept;
-        [[nodiscard]] inline auto cols(size_t fromCol, size_t colCount) noexcept;
-        [[nodiscard]] inline const auto cols(size_t fromCol, size_t colCount) const noexcept;
-        [[nodiscard]] inline auto leftCols(size_t to) noexcept;
-        [[nodiscard]] inline const auto leftCols(size_t to) const noexcept;
-        [[nodiscard]] inline auto rightCols(size_t from) noexcept;
-        [[nodiscard]] inline const auto rightCols(size_t from) const noexcept;
-        [[nodiscard]] inline auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
-        [[nodiscard]] inline const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
-        [[nodiscard]] inline auto topLeftCorner(size_t to) noexcept;
-        [[nodiscard]] inline const auto topLeftCorner(size_t to) const noexcept;
-        [[nodiscard]] inline auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
-        [[nodiscard]] inline const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
-        [[nodiscard]] inline auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
-        [[nodiscard]] inline const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
-        [[nodiscard]] inline auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
-        [[nodiscard]] inline const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
-        [[nodiscard]] inline auto bottomRightCorner(size_t from) noexcept;
-        [[nodiscard]] inline const auto bottomRightCorner(size_t from) const noexcept;
-        [[nodiscard]] inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
-        [[nodiscard]] inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
-        [[nodiscard]] inline auto diag() noexcept;
-        [[nodiscard]] inline const auto diag() const noexcept;
+        [[nodiscard]] auto row(size_t r) noexcept;
+        [[nodiscard]] const auto row(size_t r) const noexcept;
+        [[nodiscard]] auto col(size_t c) noexcept;
+        [[nodiscard]] const auto col(size_t c) const noexcept;
+        [[nodiscard]] auto rows(size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] const auto rows(size_t fromRow, size_t rowCount) const noexcept;
+        [[nodiscard]] auto topRows(size_t to) noexcept;
+        [[nodiscard]] const auto topRows(size_t to) const noexcept;
+        [[nodiscard]] auto bottomRows(size_t from) noexcept;
+        [[nodiscard]] const auto bottomRows(size_t from) const noexcept;
+        [[nodiscard]] auto cols(size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] const auto cols(size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] auto leftCols(size_t to) noexcept;
+        [[nodiscard]] const auto leftCols(size_t to) const noexcept;
+        [[nodiscard]] auto rightCols(size_t from) noexcept;
+        [[nodiscard]] const auto rightCols(size_t from) const noexcept;
+        [[nodiscard]] auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
+        [[nodiscard]] auto topLeftCorner(size_t to) noexcept;
+        [[nodiscard]] const auto topLeftCorner(size_t to) const noexcept;
+        [[nodiscard]] auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
+        [[nodiscard]] auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
+        [[nodiscard]] auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
+        [[nodiscard]] auto bottomRightCorner(size_t from) noexcept;
+        [[nodiscard]] const auto bottomRightCorner(size_t from) const noexcept;
+        [[nodiscard]] auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] auto diag() noexcept;
+        [[nodiscard]] const auto diag() const noexcept;
 
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void colReduce(size_t c1, size_t c2, size_t elementIndex);
-        inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
-        inline void majorReduce(size_t v1, size_t v2, const ScalarType& factor);
-        inline void majorMulScalar(size_t v, const ScalarType& factor);
-        inline void majorSwap(size_t v1, size_t v2);
+        void majorReduce(size_t v1, size_t v2, size_t elementIndex);
+        void majorReduce(size_t v1, size_t v2, const ScalarType& factor);
+        void majorMulScalar(size_t v, const ScalarType& factor);
+        void majorSwap(size_t v1, size_t v2);
 
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;
@@ -131,10 +131,10 @@ namespace Physica {
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] inline PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
-        [[nodiscard]] inline RefTy refFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] inline ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] RefTy refFromMajorMinor(size_t major, size_t minor);
+        [[nodiscard]] ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
     protected:
         LValueMatrix() = default;
         LValueMatrix(const This&) = default;

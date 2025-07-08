@@ -25,7 +25,7 @@ namespace Physica {
     SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size>& x);
 
     template<Scalar T, size_t Size>
-    inline SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x);
+    SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x);
 
     template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size> exp(const SIMD<Complex<T>, Size>& x);

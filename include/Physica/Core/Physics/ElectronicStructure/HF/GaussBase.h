@@ -65,13 +65,13 @@ namespace Physica {
                                                          const T& element_pb,
                                                          const T& element_cp,
                                                          const T& alpha_sum);
-        [[nodiscard]] static inline T attractionHelperG(size_t L,
+        [[nodiscard]] static T attractionHelperG(size_t L,
                                                                  size_t index1,
                                                                  size_t index2,
                                                                  const T& element_pa,
                                                                  const T& element_pb,
                                                                  const T& epsilon);
-        [[nodiscard]] static inline T attractionHelperH(size_t i,
+        [[nodiscard]] static T attractionHelperH(size_t i,
                                                                  size_t lambda,
                                                                  size_t index1,
                                                                  size_t index2,
@@ -91,7 +91,7 @@ namespace Physica {
                                                         const T& epsilon1,
                                                         const T& epsilon2,
                                                         const T& delta);
-        [[nodiscard]] static inline T repulsionHelperH(size_t L,
+        [[nodiscard]] static T repulsionHelperH(size_t L,
                                                                 size_t index1,
                                                                 size_t index2,
                                                                 const T& element1,
@@ -305,7 +305,7 @@ namespace Physica {
      * Implemented function $G_L$ in reference [2]
      */
     template<Scalar T>
-    inline T GaussBase<T>::attractionHelperG(size_t L,
+    T GaussBase<T>::attractionHelperG(size_t L,
                                                                size_t index1,
                                                                size_t index2,
                                                                const T& element_pa,
@@ -325,7 +325,7 @@ namespace Physica {
      * Implemented function $H$ in reference [2]
      */
     template<Scalar T>
-    inline T GaussBase<T>::attractionHelperH(size_t i,
+    T GaussBase<T>::attractionHelperH(size_t i,
                                                                size_t lambda,
                                                                size_t index1,
                                                                size_t index2,
@@ -379,7 +379,7 @@ namespace Physica {
      * Implemented function $H$ in reference [2]
      */
     template<Scalar T>
-    inline T GaussBase<T>::repulsionHelperH(size_t L,
+    T GaussBase<T>::repulsionHelperH(size_t L,
                                                               size_t index1,
                                                               size_t index2,
                                                               const T& element1,

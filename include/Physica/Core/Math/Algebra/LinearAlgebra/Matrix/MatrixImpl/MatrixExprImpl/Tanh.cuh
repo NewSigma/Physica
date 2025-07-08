@@ -53,7 +53,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] __host__ __device__ inline auto tanh_elem(M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] __host__ __device__ auto tanh_elem(M&& m) noexcept requires(CUDA<M>) {
         return device_obj<MatrixExpr<ExprType::Tanh, M&&>>(std::forward<M>(m));
     }
 }

@@ -44,7 +44,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return vec.calc(index + from); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
     };
 
     template<Vector T, size_t Length>
@@ -60,7 +60,7 @@ namespace Physica {
             const device_obj<T>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline size_t device_obj<RVectorBlock<T, Length>>::getLength() const noexcept {
+    __host__ __device__ size_t device_obj<RVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;

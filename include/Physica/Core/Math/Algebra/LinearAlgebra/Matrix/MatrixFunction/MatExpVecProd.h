@@ -60,10 +60,10 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& target) const;
+        void assign(Vector auto& target) const;
 
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& target, Tr traceMu) const;
+        void assign(Vector auto& target, Tr traceMu) const;
 
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
         void assign(Vector auto& target, Tr traceMu, ParamPair params) const;
@@ -88,13 +88,13 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<bool NoFactor, ExecutePolicy P>
-    inline void MatExpVecProd<M, V>::assign(Vector auto& target) const {
+    void MatExpVecProd<M, V>::assign(Vector auto& target) const {
         assign<NoFactor, P>(target, calcTraceMu());
     }
 
     template<Matrix M, Vector V>
     template<bool NoFactor, ExecutePolicy P>
-    inline void MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu) const {
+    void MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu) const {
         assign<NoFactor, P>(target, traceMu, calcParam<P>(traceMu));
     }
 

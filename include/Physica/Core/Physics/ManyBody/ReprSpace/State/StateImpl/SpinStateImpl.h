@@ -23,15 +23,15 @@
 
 namespace Physica {
     template<int Dim, int NumSite>
-    inline SpinState<Dim, NumSite>::SpinState(IntType occupyBits_) : occupyBits(occupyBits_) {}
+    SpinState<Dim, NumSite>::SpinState(IntType occupyBits_) : occupyBits(occupyBits_) {}
 
     template<int Dim, int NumSite>
-    inline bool SpinState<Dim, NumSite>::operator==(const This& other) const noexcept {
+    bool SpinState<Dim, NumSite>::operator==(const This& other) const noexcept {
         return occupyBits == other.occupyBits;
     }
 
     template<int Dim, int NumSite>
-    inline SpinState<Dim, NumSite> SpinState<Dim, NumSite>::operator<<(int shift) const noexcept {
+    SpinState<Dim, NumSite> SpinState<Dim, NumSite>::operator<<(int shift) const noexcept {
         assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << shift;
         const auto lowBits = occupyBits >> (NumSite - shift);
@@ -39,7 +39,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline SpinState<Dim, NumSite> SpinState<Dim, NumSite>::operator>>(int shift) const noexcept {
+    SpinState<Dim, NumSite> SpinState<Dim, NumSite>::operator>>(int shift) const noexcept {
         assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << (NumSite - shift);
         const auto lowBits = occupyBits >> shift;
@@ -47,22 +47,22 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline auto SpinState<Dim, NumSite>::operator&(const This& psi) const noexcept -> This {
+    auto SpinState<Dim, NumSite>::operator&(const This& psi) const noexcept -> This {
         return This(occupyBits & psi.occupyBits);
     }
 
     template<int Dim, int NumSite>
-    inline auto SpinState<Dim, NumSite>::operator|(const This& psi) const noexcept -> This {
+    auto SpinState<Dim, NumSite>::operator|(const This& psi) const noexcept -> This {
         return This(occupyBits | psi.occupyBits);
     }
 
     template<int Dim, int NumSite>
-    inline auto SpinState<Dim, NumSite>::operator^(const This& psi) const noexcept -> This {
+    auto SpinState<Dim, NumSite>::operator^(const This& psi) const noexcept -> This {
         return This(occupyBits ^ psi.occupyBits);
     }
 
     template<int Dim, int NumSite>
-    inline auto SpinState<Dim, NumSite>::operator~() const noexcept -> This {
+    auto SpinState<Dim, NumSite>::operator~() const noexcept -> This {
         return This(~occupyBits);
     }
 
@@ -73,7 +73,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline auto SpinState<Dim, NumSite>::hop(int8_t from, int8_t to) const noexcept -> This {
+    auto SpinState<Dim, NumSite>::hop(int8_t from, int8_t to) const noexcept -> This {
         assert(from != to && "[Error]: Assuming different sites");
         const bool canHop = isOccupy(from) && !isOccupy(to);
         if (!canHop)
@@ -134,30 +134,30 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    inline void SpinState<Dim, NumSite>::swap(SpinState& __restrict obj) noexcept {
+    void SpinState<Dim, NumSite>::swap(SpinState& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(occupyBits, obj.occupyBits);
     }
 
     template<int Dim, int NumSite>
-    inline bool SpinState<Dim, NumSite>::isOccupy(int8_t site) const noexcept {
+    bool SpinState<Dim, NumSite>::isOccupy(int8_t site) const noexcept {
         assert((0 <= site) && (static_cast<uint8_t>(site) < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid site");
         const IntType mask = 1UL << site;
         return (occupyBits & mask) != 0;
     }
 
     template<int Dim, int NumSite>
-    inline bool SpinState<Dim, NumSite>::isTransReducible(int period) const noexcept {
+    bool SpinState<Dim, NumSite>::isTransReducible(int period) const noexcept {
         return transReduce(period) != (*this);
     }
 
     template<int Dim, int NumSite>
-    inline bool SpinState<Dim, NumSite>::isSpinUp(int8_t site) const noexcept {
+    bool SpinState<Dim, NumSite>::isSpinUp(int8_t site) const noexcept {
         return isOccupy(site);
     }
 
     template<int Dim, int NumSite>
-    inline bool SpinState<Dim, NumSite>::isSpinDown(int8_t site) const noexcept {
+    bool SpinState<Dim, NumSite>::isSpinDown(int8_t site) const noexcept {
         return !isSpinUp(site);
     }
 

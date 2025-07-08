@@ -75,7 +75,7 @@ namespace Physica {
         void scale(const T& factor);
         void niggliReduce(double precision, unsigned int maxIteration);
         void niggliReduce2D(unsigned int maxIteration);
-        [[nodiscard]] inline LatticeMatrix makeRepLattice() const;
+        [[nodiscard]] LatticeMatrix makeRepLattice() const;
 
         void toDirect() { toDirect(makeInvLattice()); }
         void toCartesian();
@@ -334,7 +334,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    inline PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice() const {
+    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice() const {
         return makeRepLattice(lattice);
     }
 

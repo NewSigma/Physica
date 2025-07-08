@@ -54,19 +54,19 @@ namespace Physica {
         void resize(const Vector auto& x);
         using Storage::resize;
 
-        [[nodiscard]] inline host_obj toHost() const;
-        [[nodiscard]] inline host_obj toHostAsync() const;
-        inline void toHost(host_obj& obj) const;
-        inline void toHostAsync(host_obj& obj) const;
+        [[nodiscard]] host_obj toHost() const;
+        [[nodiscard]] host_obj toHostAsync() const;
+        void toHost(host_obj& obj) const;
+        void toHostAsync(host_obj& obj) const;
         using Base::toHost;
         using Base::toHostAsync;
 
         template<RNG R>
-        inline void random_uniform();
+        void random_uniform();
         template<RNG R>
-        inline void random_normal();
+        void random_normal();
         template<RNG R>
-        inline void random_any(auto& distribution);
+        void random_any(auto& distribution);
 
         using Base::read;
         using Base::write;
@@ -78,20 +78,20 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
         /* Static members */
         template<RNG R>
-        [[nodiscard]] inline static This random_uniform(size_t len);
+        [[nodiscard]] static This random_uniform(size_t len);
         template<RNG R>
-        [[nodiscard]] inline static This random_normal(size_t len);
+        [[nodiscard]] static This random_normal(size_t len);
         template<RNG R>
         [[nodiscard]] static This random_any(size_t len, auto& distribution);
     };
 
     template<Scalar T, size_t Length, class Allocator>
-    inline auto DenseVector<T, Length, Allocator>::toDevice() const {
+    auto DenseVector<T, Length, Allocator>::toDevice() const {
         return device_obj<DenseVector<T, Length, Allocator>>(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    inline auto DenseVector<T, Length, Allocator>::toDeviceAsync() const {
+    auto DenseVector<T, Length, Allocator>::toDeviceAsync() const {
         device_obj<DenseVector<T, Length, Allocator>> result{};
         toDeviceAsync(result);
         return result;

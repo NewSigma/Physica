@@ -82,18 +82,18 @@ namespace Physica {
         void zero_grad();
 
         using Base::resize;
-        inline void resize(size_t size);
+        void resize(size_t size);
 
-        template<RNG R> inline void random_uniform();
-        template<RNG R> inline void random_normal();
+        template<RNG R> void random_uniform();
+        template<RNG R> void random_normal();
         template<RNG R>
-        inline void random_any(auto& distribution);
+        void random_any(auto& distribution);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::data;
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] inline PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
 
         [[nodiscard]] const ValueVector& values() const noexcept { return v; }
         [[nodiscard]] ValueVector& values() noexcept { return v; }
@@ -101,11 +101,11 @@ namespace Physica {
         [[nodiscard]] GradVector& grads() noexcept { return g; }
         /* Static members */
         template<RNG R>
-        [[nodiscard]] inline static This random_uniform(size_t len);
+        [[nodiscard]] static This random_uniform(size_t len);
         template<RNG R>
-        [[nodiscard]] inline static This random_normal(size_t len);
+        [[nodiscard]] static This random_normal(size_t len);
         template<RNG R>
-        [[nodiscard]] inline static This random_any(size_t len, auto& distribution);
+        [[nodiscard]] static This random_any(size_t len, auto& distribution);
         [[nodiscard]] static auto linspace(T from, T to, size_t count);
         /* Friends */
         friend class device_obj<This>;

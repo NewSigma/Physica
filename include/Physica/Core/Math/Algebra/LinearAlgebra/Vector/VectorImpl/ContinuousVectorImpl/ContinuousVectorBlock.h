@@ -46,20 +46,20 @@ namespace Physica {
         ~ContinuousVectorBlock() = default;
         /* Operators */
         using Base::operator=;
-        inline This& operator=(const This& v);
-        inline This& operator=(This&& v) noexcept;
+        This& operator=(const This& v);
+        This& operator=(This&& v) noexcept;
         [[nodiscard]] RefTy operator[](size_t index);
         [[nodiscard]] ConstRefTy operator[](size_t index) const;
         /* Operations */
-        template<Packet Pack> [[nodiscard]] inline Pack packet(size_t index) const;
-        template<Packet Pack> [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
-        template<Packet Pack> inline void writePacket(size_t index, const Pack packet);
-        template<Packet Pack> inline void writePacketPartial(size_t index, size_t count, const Pack packet);
+        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;
+        template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        template<Packet Pack> void writePacket(size_t index, const Pack packet);
+        template<Packet Pack> void writePacketPartial(size_t index, size_t count, const Pack packet);
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] inline size_t getLength() const noexcept;
-        [[nodiscard]] inline PtrTy data_ptr(size_t index) { return vec.data() + from + index; }
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const { return vec.data() + from + index; }
+        [[nodiscard]] size_t getLength() const noexcept;
+        [[nodiscard]] PtrTy data_ptr(size_t index) { return vec.data() + from + index; }
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const { return vec.data() + from + index; }
     };
 
     template<Vector T, size_t Length>
@@ -75,55 +75,55 @@ namespace Physica {
             : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    inline auto ContinuousVectorBlock<T, Length>::operator=(const This& v) -> This& {
+    auto ContinuousVectorBlock<T, Length>::operator=(const This& v) -> This& {
         v.assign(*this);
         return *this;
     }
     
     template<Vector T, size_t Length>
-    inline auto ContinuousVectorBlock<T, Length>::operator=(This&& v) noexcept -> This& {
+    auto ContinuousVectorBlock<T, Length>::operator=(This&& v) noexcept -> This& {
         v.assign(*this);
         return *this;
     }
 
     template<Vector T, size_t Length>
-    inline auto ContinuousVectorBlock<T, Length>::operator[](size_t index) -> RefTy {
+    auto ContinuousVectorBlock<T, Length>::operator[](size_t index) -> RefTy {
         assert((index + from) < to);
         return vec[index + from];
     }
 
     template<Vector T, size_t Length>
-    inline auto ContinuousVectorBlock<T, Length>::operator[](size_t index) const -> ConstRefTy {
+    auto ContinuousVectorBlock<T, Length>::operator[](size_t index) const -> ConstRefTy {
         assert((index + from) < to);
         return vec[index + from];
     }
 
     template<Vector T, size_t Length>
     template<Packet Pack>
-    inline Pack ContinuousVectorBlock<T, Length>::packet(size_t index) const {
+    Pack ContinuousVectorBlock<T, Length>::packet(size_t index) const {
         return vec.template packet<Pack>(from + index);
     }
 
     template<Vector T, size_t Length>
     template<Packet Pack>
-    inline Pack ContinuousVectorBlock<T, Length>::packetPartial(size_t index, size_t count) const {
+    Pack ContinuousVectorBlock<T, Length>::packetPartial(size_t index, size_t count) const {
         return vec.template packetPartial<Pack>(from + index, count);
     }
 
     template<Vector T, size_t Length>
     template<Packet Pack>
-    inline void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const Pack packet) {
+    void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const Pack packet) {
         return vec.template writePacket<Pack>(from + index, packet);
     }
 
     template<Vector T, size_t Length>
     template<Packet Pack>
-    inline void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+    void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const Pack packet) {
         return vec.template writePacketPartial<Pack>(from + index, count, packet);
     }
 
     template<Vector T, size_t Length>
-    inline size_t ContinuousVectorBlock<T, Length>::getLength() const noexcept {
+    size_t ContinuousVectorBlock<T, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else

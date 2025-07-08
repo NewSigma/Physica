@@ -47,9 +47,9 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept { return to - from; }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return to - from; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<Vector T, size_t Length>
@@ -65,20 +65,20 @@ namespace Physica {
             device_obj<LValueVector<T>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
     
     template<Vector T, size_t Length>
-    __host__ __device__ inline size_t device_obj<LVectorBlock<T, Length>>::getLength() const noexcept {
+    __host__ __device__ size_t device_obj<LVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) -> PtrTy {
+    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) -> PtrTy {
         assert((index + from) < to);
         return vec.getDerived().data_ptr(index);
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const -> ConstPtrTy {
+    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

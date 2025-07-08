@@ -76,13 +76,13 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    inline auto LVectorBlock<T, Length>::data_ptr(size_t index) -> PtrTy {
+    auto LVectorBlock<T, Length>::data_ptr(size_t index) -> PtrTy {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 
     template<Vector T, size_t Length>
-    inline auto LVectorBlock<T, Length>::data_ptr(size_t index) const -> ConstPtrTy {
+    auto LVectorBlock<T, Length>::data_ptr(size_t index) const -> ConstPtrTy {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }

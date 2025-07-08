@@ -76,17 +76,17 @@ namespace Physica {
     };
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator-(T&& m, U&& x) noexcept requires(CUDA<T>) {
+    [[nodiscard]] __host__ __device__ auto operator-(T&& m, U&& x) noexcept requires(CUDA<T>) {
         return device_obj<MatrixExpr<ExprType::Sub, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
     }
 
     template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator-(U&& x, T&& m) noexcept requires(CUDA<T>) {
+    [[nodiscard]] __host__ __device__ auto operator-(U&& x, T&& m) noexcept requires(CUDA<T>) {
         return device_obj<MatrixExpr<ExprType::Sub, U&&, T&&>>(std::forward<U>(x), std::forward<T>(m));
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] __host__ __device__ inline auto operator-(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>){
+    [[nodiscard]] __host__ __device__ auto operator-(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>){
         return device_obj<MatrixExpr<ExprType::Sub, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

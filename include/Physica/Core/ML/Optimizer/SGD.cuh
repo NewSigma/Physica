@@ -32,7 +32,7 @@ namespace Physica {
 
         T lr;
     public:
-        inline device_obj(T lr_);
+        device_obj(T lr_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -42,14 +42,14 @@ namespace Physica {
         template<Diffable U>
         void step(U& target) const;
 
-        inline void swap(This& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T& getLearnRate() noexcept { return lr; }
         [[nodiscard]] const T& getLearnRate() const noexcept { return lr; }
     };
 
     template<Scalar T>
-    inline device_obj<SGD<T>>::device_obj(T lr_) : lr(lr_) {}
+    device_obj<SGD<T>>::device_obj(T lr_) : lr(lr_) {}
 
     template<Scalar T>
     template<Diffable U>
@@ -63,7 +63,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void device_obj<SGD<T>>::swap(This& __restrict obj) noexcept {
+    void device_obj<SGD<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lr.swap(obj.lr);
     }

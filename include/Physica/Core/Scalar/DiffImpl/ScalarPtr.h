@@ -47,20 +47,20 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator==(const This& other) const noexcept;
         [[nodiscard]] __host__ __device__ bool operator!=(const This& other) const noexcept { return !(*this == other); }
         template<Scalar U>
         [[nodiscard]] __host__ __device__ explicit operator ScalarPtr<Diff<U, Mode, Order>>() noexcept;
         [[nodiscard]] __host__ __device__ ScalarRef<ScalarType> operator*() const;
         [[nodiscard]] __host__ __device__ ScalarRef<ScalarType> operator->() const;
         [[nodiscard]] __host__ __device__ This operator+(size_t n);
-        __host__ __device__ inline This& operator++();
-        __host__ __device__ inline This& operator--();
-        __host__ __device__ inline const This operator++(int);
-        __host__ __device__ inline const This operator--(int);
+        __host__ __device__ This& operator++();
+        __host__ __device__ This& operator--();
+        __host__ __device__ const This operator++(int);
+        __host__ __device__ const This operator--(int);
         [[nodiscard]] __host__ __device__ T* operator[](size_t i) const noexcept;
         /* Operations */
-        __host__ __device__ inline void swap(This& __restrict obj) noexcept;
+        __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ T* value_ptr() const noexcept { return pValue; }
         template<int GradOrder = 1>
@@ -77,7 +77,7 @@ namespace Physica {
     __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarRef<ScalarType>& x) : ScalarPtr(&x.value(), &x.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline bool ScalarPtr<Diff<T, Mode, Order>>::operator==(const This& other) const noexcept {
+    __host__ __device__ bool ScalarPtr<Diff<T, Mode, Order>>::operator==(const This& other) const noexcept {
         bool flag = pValue == other.pValue;
         assert(flag == (pGrad == other.pGrad) && "[Error]: Bad ScalarPtr");
         return flag;
@@ -107,26 +107,26 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline ScalarPtr<Diff<T, Mode, Order>>& ScalarPtr<Diff<T, Mode, Order>>::operator++() {
+    __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>& ScalarPtr<Diff<T, Mode, Order>>::operator++() {
         for (auto& p : arr)
             p++;
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline ScalarPtr<Diff<T, Mode, Order>>& ScalarPtr<Diff<T, Mode, Order>>::operator--() {
+    __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>& ScalarPtr<Diff<T, Mode, Order>>::operator--() {
         for (auto& p : arr)
             p--;
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline const ScalarPtr<Diff<T, Mode, Order>> ScalarPtr<Diff<T, Mode, Order>>::operator++(int) {
+    __host__ __device__ const ScalarPtr<Diff<T, Mode, Order>> ScalarPtr<Diff<T, Mode, Order>>::operator++(int) {
         return This(pValue++, pGrad++);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline const ScalarPtr<Diff<T, Mode, Order>> ScalarPtr<Diff<T, Mode, Order>>::operator--(int) {
+    __host__ __device__ const ScalarPtr<Diff<T, Mode, Order>> ScalarPtr<Diff<T, Mode, Order>>::operator--(int) {
         return This(pValue--, pGrad--);
     }
 
@@ -137,7 +137,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline void ScalarPtr<Diff<T, Mode, Order>>::swap(This& __restrict obj) noexcept {
+    __host__ __device__ void ScalarPtr<Diff<T, Mode, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(arr, obj.arr);
     }

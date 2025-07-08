@@ -43,7 +43,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto tan(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto tan(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Tan, V&&>(std::forward<V>(v));
     }
 }

@@ -44,14 +44,14 @@ namespace Physica {
     public:
         constexpr ~SIMDBase() = default;
         /* Operations */
-        [[nodiscard]] inline FullRealType squaredNorm() const;
-        [[nodiscard]] inline FullRealType swapRealImag() const;
-        [[nodiscard]] inline FullRealType permRealImag() const noexcept;
-        [[nodiscard]] inline FullRealType scatterRealImag() const noexcept;
+        [[nodiscard]] FullRealType squaredNorm() const;
+        [[nodiscard]] FullRealType swapRealImag() const;
+        [[nodiscard]] FullRealType permRealImag() const noexcept;
+        [[nodiscard]] FullRealType scatterRealImag() const noexcept;
         /* Getters */
         [[nodiscard]] constexpr static int size() { return Size; }
-        [[nodiscard]] inline ValueType value() const;
-        [[nodiscard]] inline FullRealType asReal() const;
+        [[nodiscard]] ValueType value() const;
+        [[nodiscard]] FullRealType asReal() const;
     protected:
         constexpr SIMDBase() = default;
         constexpr SIMDBase(const This&) = default;
@@ -62,7 +62,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    inline auto SIMDBase<Derived>::squaredNorm() const -> FullRealType {
+    auto SIMDBase<Derived>::squaredNorm() const -> FullRealType {
         const FullRealType x2 = square(asReal());
         if constexpr (isComplex)
             return x2 + x2.swapRealImag();
@@ -71,7 +71,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto SIMDBase<Derived>::swapRealImag() const -> FullRealType {
+    auto SIMDBase<Derived>::swapRealImag() const -> FullRealType {
         const auto x = asReal();
         if constexpr (ScalarType::Prec == Float32)
             return x.template shuffle<1, 0, 3, 2>();
@@ -89,7 +89,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto SIMDBase<Derived>::permRealImag() const noexcept -> FullRealType {
+    auto SIMDBase<Derived>::permRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
         constexpr int Size1 = isComplex ? Size * 2 : Size;
         if constexpr (Size1 == 2)
@@ -105,7 +105,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto SIMDBase<Derived>::scatterRealImag() const noexcept -> FullRealType {
+    auto SIMDBase<Derived>::scatterRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
         constexpr int Size1 = isComplex ? Size * 2 : Size;
         if constexpr (Size1 == 2)
@@ -121,7 +121,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto SIMDBase<Derived>::value() const -> ValueType {
+    auto SIMDBase<Derived>::value() const -> ValueType {
         if constexpr (isDiffable)
             return Base::getDerived_host().value();
         else
@@ -129,7 +129,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto SIMDBase<Derived>::asReal() const -> FullRealType {
+    auto SIMDBase<Derived>::asReal() const -> FullRealType {
         if constexpr (isComplex)
             return Base::getDerived_host().asReal();
         else

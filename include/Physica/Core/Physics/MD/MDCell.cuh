@@ -57,8 +57,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] __host__ __device__ constexpr static Type getType() noexcept { return Type::Cartesian; }
         /* Setters */
-        inline void setLattice(const host_obj& cell);
-        inline void setLattice(const HostLatticeMatrix& lattice_, const HostInvLatticeMatrix& invLattice_);
+        void setLattice(const host_obj& cell);
+        void setLattice(const HostLatticeMatrix& lattice_, const HostInvLatticeMatrix& invLattice_);
     private:
         using Base::getType;
         using Base::setLattice;
@@ -84,12 +84,12 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    inline void device_obj<MDCell<T, Dim>>::setLattice(const host_obj& cell) {
+    void device_obj<MDCell<T, Dim>>::setLattice(const host_obj& cell) {
         setLattice(cell.getLattice(), cell.getInvLattice());
     }
 
     template<Scalar T, unsigned int Dim>
-    inline void device_obj<MDCell<T, Dim>>::setLattice(
+    void device_obj<MDCell<T, Dim>>::setLattice(
             const HostLatticeMatrix& lattice_, const HostInvLatticeMatrix& invLattice_) {
         Base::setLattice(lattice_);
         invLattice = invLattice_;

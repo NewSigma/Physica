@@ -50,8 +50,8 @@ namespace Physica {
         [[nodiscard]] static Index5D index1DTo5D(size_t numDOF, const Index3D& superSize, size_t index1D);
         [[nodiscard]] static size_t index5DTo1D(size_t numDOF, const Index3D& superSize, const Index5D& index5D);
     private:
-        [[nodiscard]] inline static size_t calcLength(size_t numDOF, const Index3D& superSize);
-        inline static void checkParam(size_t numDOF, const Index3D& superSize, const Index5D& index);
+        [[nodiscard]] static size_t calcLength(size_t numDOF, const Index3D& superSize);
+        static void checkParam(size_t numDOF, const Index3D& superSize, const Index5D& index);
     };
 
     template<Scalar T>
@@ -114,7 +114,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline size_t FCSwapVector<T>::calcLength(size_t numDOF, const Index3D& superSize) {
+    size_t FCSwapVector<T>::calcLength(size_t numDOF, const Index3D& superSize) {
         return numDOF * numDOF * superSize[0] * superSize[1] * superSize[2];
     }
 

@@ -76,46 +76,46 @@ namespace Physica {
     }
 
     template<tparams>
-    inline auto device_obj<DenseMatrix>::toHost() const -> host_obj {
+    auto device_obj<DenseMatrix>::toHost() const -> host_obj {
         host_obj result = toHostAsync();
         CUDAContext::getInstance().wait();
         return result;
     }
 
     template<tparams>
-    inline auto device_obj<DenseMatrix>::toHostAsync() const -> host_obj {
+    auto device_obj<DenseMatrix>::toHostAsync() const -> host_obj {
         host_obj result(getRow(), getCol());
         toHostAsync(result);
         return result;
     }
 
     template<tparams>
-    inline void device_obj<DenseMatrix>::toHost(host_obj& obj) const {
+    void device_obj<DenseMatrix>::toHost(host_obj& obj) const {
         toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
 
     template<tparams>
-    inline void device_obj<DenseMatrix>::toHostAsync(host_obj& obj) const {
+    void device_obj<DenseMatrix>::toHostAsync(host_obj& obj) const {
         v.toHostAsync(obj.v);
         g.toHostAsync(obj.g);
     }
 
     template<tparams>
     template<RNG R>
-    inline void device_obj<DenseMatrix>::random_uniform() {
+    void device_obj<DenseMatrix>::random_uniform() {
         *this = random_uniform<R>(getRow(), getCol());
     }
 
     template<tparams>
     template<RNG R>
-    inline void device_obj<DenseMatrix>::random_normal() {
+    void device_obj<DenseMatrix>::random_normal() {
         *this = random_normal<R>(getRow(), getCol());
     }
 
     template<tparams>
     template<RNG R>
-    inline void device_obj<DenseMatrix>::random_any(auto& distribution) {
+    void device_obj<DenseMatrix>::random_any(auto& distribution) {
         *this = random_any<R>(getRow(), getCol(), distribution);
     }
 
@@ -127,32 +127,32 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ inline auto device_obj<DenseMatrix>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
+    __host__ __device__ auto device_obj<DenseMatrix>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < getRow() && "[Error]: Index out of range");
         assert(col < getCol() && "[Error]: Index out of range");
         return PtrTy(v.data_ptr(row, col), g.data_ptr(row, col));
     }
 
     template<tparams>
-    __host__ __device__ inline auto device_obj<DenseMatrix>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
+    __host__ __device__ auto device_obj<DenseMatrix>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 
     template<tparams>
     template<RNG R>
-    inline auto device_obj<DenseMatrix>::random_uniform(size_t row, size_t col) -> This {
+    auto device_obj<DenseMatrix>::random_uniform(size_t row, size_t col) -> This {
         return This(ValueMatrix::template random_uniform<R>(row, col));
     }
 
     template<tparams>
     template<RNG R>
-    inline auto device_obj<DenseMatrix>::random_normal(size_t row, size_t col) -> This {
+    auto device_obj<DenseMatrix>::random_normal(size_t row, size_t col) -> This {
         return This(ValueMatrix::template random_normal<R>(row, col));
     }
 
     template<tparams>
     template<RNG R>
-    inline auto device_obj<DenseMatrix>::random_any(size_t row, size_t col, auto& distribution) -> This {
+    auto device_obj<DenseMatrix>::random_any(size_t row, size_t col, auto& distribution) -> This {
         return This(ValueMatrix::template random_any<R>(row, col, distribution));
     }
 

@@ -40,13 +40,13 @@ namespace Physica {
         void clear();
         /* Getters */
         [[nodiscard]] T calc(size_t row, size_t col) const;
-        [[nodiscard]] inline size_t getRow() const noexcept;
-        [[nodiscard]] inline size_t getCol() const noexcept;
+        [[nodiscard]] size_t getRow() const noexcept;
+        [[nodiscard]] size_t getCol() const noexcept;
         [[nodiscard]] const Array<T>& getElements() const { return elements; }
         [[nodiscard]] const Array<size_t>& getMinorIndexes() const { return minorIndexes; }
         [[nodiscard]] const Array<size_t>& getMajorStarts() const { return majorStarts; }
-        [[nodiscard]] inline size_t getMaxMajor() const noexcept;
-        [[nodiscard]] inline size_t getMaxMinor() const noexcept;
+        [[nodiscard]] size_t getMaxMajor() const noexcept;
+        [[nodiscard]] size_t getMaxMinor() const noexcept;
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elements.getLength(); }
     };
 
@@ -131,22 +131,22 @@ namespace Physica {
     }
 
     template<Scalar T, int Option>
-    inline size_t SparseMatrix<T, Option>::getRow() const noexcept {
+    size_t SparseMatrix<T, Option>::getRow() const noexcept {
         return MatrixOption::isColMatrix<This>() ? getMaxMinor() : getMaxMajor();
     }
 
     template<Scalar T, int Option>
-    inline size_t SparseMatrix<T, Option>::getCol() const noexcept {
+    size_t SparseMatrix<T, Option>::getCol() const noexcept {
         return MatrixOption::isColMatrix<This>() ? getMaxMajor() : getMaxMinor();
     }
 
     template<Scalar T, int Option>
-    inline size_t SparseMatrix<T, Option>::getMaxMajor() const noexcept {
+    size_t SparseMatrix<T, Option>::getMaxMajor() const noexcept {
         return majorStarts.getLength() - 1;
     }
 
     template<Scalar T, int Option>
-    inline size_t SparseMatrix<T, Option>::getMaxMinor() const noexcept {
+    size_t SparseMatrix<T, Option>::getMaxMinor() const noexcept {
         return maxMinor;
     }
 }

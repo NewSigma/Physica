@@ -40,13 +40,13 @@ namespace Physica {
         PlainWaveBasis& operator=(PlainWaveBasis obj) noexcept;
         PlainWaveBasis& operator=(const Vector auto& statePsi);
         /* Operations */
-        [[nodiscard]] inline Vector3D<T> makeWaveVector(size_t x, size_t y, size_t z) const noexcept;
-        [[nodiscard]] inline Vector3D<T> makeWaveVector(Index3D index) const noexcept;
-        inline void normalize();
+        [[nodiscard]] Vector3D<T> makeWaveVector(size_t x, size_t y, size_t z) const noexcept;
+        [[nodiscard]] Vector3D<T> makeWaveVector(Index3D index) const noexcept;
+        void normalize();
         T calcNumElectron() const;
 
         template<RNG R>
-        inline void random_normal();
+        void random_normal();
         void swap(PlainWaveBasis& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const GridType& getCoeffGrid() const noexcept { return coeffGrid; }
@@ -57,8 +57,8 @@ namespace Physica {
         /* Static members */
         static Index3D makeGridDim(T cutEnergy, const LatticeMatrix& repLatt);
         static Vector3D<T> makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept;
-        inline static void forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
-        inline static void forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
+        static void forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
+        static void forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn);
     };
 
     template<Scalar T>
@@ -83,17 +83,17 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline Vector3D<T> PlainWaveBasis<T>::makeWaveVector(size_t x, size_t y, size_t z) const noexcept {
+    Vector3D<T> PlainWaveBasis<T>::makeWaveVector(size_t x, size_t y, size_t z) const noexcept {
         return makeWaveVector({x, y, z});
     }
 
     template<Scalar T>
-    inline Vector3D<T> PlainWaveBasis<T>::makeWaveVector(Index3D index) const noexcept {
+    Vector3D<T> PlainWaveBasis<T>::makeWaveVector(Index3D index) const noexcept {
         return makeWaveVector(repLatt, index, getShape());
     }
 
     template<Scalar T>
-    inline void PlainWaveBasis<T>::normalize() {
+    void PlainWaveBasis<T>::normalize() {
         auto vec = coeffGrid.flatten();
         vec *= sqrt(T(getNumPlainWave())) / vec.norm();
     }
@@ -105,7 +105,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    inline void PlainWaveBasis<T>::random_normal() {
+    void PlainWaveBasis<T>::random_normal() {
         coeffGrid.template random_normal<R>();
     }
 
@@ -138,14 +138,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn) {
+    void PlainWaveBasis<T>::forKInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn) {
         forND(dim, [&repLatt, dim, fn](Index3D index) {
             fn(makeWaveVector(repLatt, index, dim));
         });
     }
 
     template<Scalar T>
-    inline void PlainWaveBasis<T>::forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn) {
+    void PlainWaveBasis<T>::forKIndexInBasis(const LatticeMatrix& repLatt, Index3D dim, std::invocable<Vector3D<T>, Index3D> auto fn) {
         forND(dim, [&repLatt, dim, fn](Index3D index) {
             fn(makeWaveVector(repLatt, index, dim), index);
         });

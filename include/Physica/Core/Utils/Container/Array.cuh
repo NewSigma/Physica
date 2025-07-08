@@ -50,22 +50,22 @@ namespace Physica {
     };
 
     template<class T, size_t Length, class Allocator>
-    inline auto Array<T, Length, Allocator>::toDevice() const {
+    auto Array<T, Length, Allocator>::toDevice() const {
         return device_obj<This>(*this);
     }
 
     template<class T, size_t Length, class Allocator>
-    inline auto Array<T, Length, Allocator>::toDeviceAsync() const {
+    auto Array<T, Length, Allocator>::toDeviceAsync() const {
         return toDevice();
     }
 
     template<class T, size_t Length, class Allocator>
-    inline void Array<T, Length, Allocator>::toDevice(device_obj<This>& obj) const {
+    void Array<T, Length, Allocator>::toDevice(device_obj<This>& obj) const {
         obj = *this;
     }
 
     template<class T, size_t Length, class Allocator>
-    inline void Array<T, Length, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
+    void Array<T, Length, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
         toDevice(obj);
     }
 
@@ -128,7 +128,7 @@ namespace Physica {
         [[nodiscard]] PlainHostObj toPlainHost() const;
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
-        inline void toHost(host_obj& obj) const;
+        void toHost(host_obj& obj) const;
         void toHostAsync(host_obj& obj) const;
 
         void reserve(size_t size);
@@ -226,7 +226,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    inline void device_obj<Array<T, Dynamic, Allocator>>::toHost(host_obj& obj) const {
+    void device_obj<Array<T, Dynamic, Allocator>>::toHost(host_obj& obj) const {
         toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
@@ -311,12 +311,12 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    inline auto Array<T, Dynamic, Allocator>::toDevice() const {
+    auto Array<T, Dynamic, Allocator>::toDevice() const {
         return device_obj<This>(*this);
     }
 
     template<class T, class Allocator>
-    inline auto Array<T, Dynamic, Allocator>::toDeviceAsync() const {
+    auto Array<T, Dynamic, Allocator>::toDeviceAsync() const {
         device_obj<This> result{};
         result.reserve(getCapacity());
         toDeviceAsync(result);

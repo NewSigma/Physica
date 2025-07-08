@@ -34,7 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& v) const;
+        void assign(Vector auto& v) const;
 
         [[nodiscard]] T calc(size_t i) const { return Base::getExpr().softmax(i); }
         [[nodiscard]] Tv calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
@@ -56,7 +56,7 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    inline void VectorExpr<ExprType::Softmax, V>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Softmax, V>::assign(Vector auto& v) const {
         const auto& expr = Base::getExpr();
         const T factor = expr.lnSumExp();
         v = exp(expr - factor);
@@ -69,7 +69,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] inline auto softmax(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto softmax(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Softmax, V&&>(std::forward<V>(v));
     }
 }

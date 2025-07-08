@@ -48,7 +48,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& target) const;
+        void assign(Vector auto& target) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const { noImpl(__func__); }
         /* Getters */

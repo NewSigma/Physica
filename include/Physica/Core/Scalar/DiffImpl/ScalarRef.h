@@ -42,19 +42,19 @@ namespace Physica {
         ScalarRef(This&&) noexcept = default;
         ~ScalarRef() = default;
         /* Operators */
-        __host__ __device__ inline This& operator=(const This& other);
-        __host__ __device__ inline This& operator=(This&& other) noexcept;
-        __host__ __device__ inline This& operator=(const Scalar auto& other);
-        __host__ __device__ inline This& operator=(int x) { return operator=(T(x)); }
-        __host__ __device__ inline This& operator=(double x) { return operator=(T(x)); }
+        __host__ __device__ This& operator=(const This& other);
+        __host__ __device__ This& operator=(This&& other) noexcept;
+        __host__ __device__ This& operator=(const Scalar auto& other);
+        __host__ __device__ This& operator=(int x) { return operator=(T(x)); }
+        __host__ __device__ This& operator=(double x) { return operator=(T(x)); }
         [[nodiscard]] __host__ __device__ operator ScalarType() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
 
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
         using Base::operator!=;
-        __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
-        __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
+        __host__ __device__ bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
+        __host__ __device__ bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
         __host__ __device__ bool operator>(const Scalar auto& s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ bool operator<(const Scalar auto& s) const noexcept { return ScalarType(*this) < s; }
         template<Scalar U>
@@ -63,7 +63,7 @@ namespace Physica {
         __host__ __device__ bool operator<(const ScalarRef<U>& s) const noexcept { return operator<(U(s)); }
         /* Operations */
         __host__ __device__ T reverse(GradType grad_ = 1) const noexcept;
-        __host__ __device__ inline void zero_grad();
+        __host__ __device__ void zero_grad();
 
         __host__ __device__ void swap(This&& obj) noexcept;
         __host__ __device__ void swap(ScalarType& obj) noexcept;
@@ -78,21 +78,21 @@ namespace Physica {
     };
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(const This& other) -> This& {
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::operator=(const This& other) -> This& {
         value() = other.value();
         grad() = other.grad();
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(This&& other) noexcept -> This& {
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::operator=(This&& other) noexcept -> This& {
         value() = other.value();
         grad() = other.grad();
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline auto ScalarRef<Diff<T, Mode, Order>>::operator=(const Scalar auto& other) -> This& {
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::operator=(const Scalar auto& other) -> This& {
         value() = other.value();
         if constexpr (Diffable<decltype(other)>)
             grad() = other.grad();
@@ -122,7 +122,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline void ScalarRef<Diff<T, Mode, Order>>::zero_grad() {
+    __host__ __device__ void ScalarRef<Diff<T, Mode, Order>>::zero_grad() {
         grad() = 0;
     }
 
@@ -150,7 +150,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline std::ostream& operator<<(std::ostream& os, const ScalarRef<Diff<T, Mode, Order>>& obj) {
+    std::ostream& operator<<(std::ostream& os, const ScalarRef<Diff<T, Mode, Order>>& obj) {
         return os << obj.value();
     }
 }

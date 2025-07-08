@@ -92,7 +92,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] inline auto exp(M&& m) noexcept {
+    [[nodiscard]] auto exp(M&& m) noexcept {
         return MatrixExp<M&&>(std::forward<M>(m));
     }
 }

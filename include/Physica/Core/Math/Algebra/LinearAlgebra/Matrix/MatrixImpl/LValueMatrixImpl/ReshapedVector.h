@@ -51,8 +51,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] inline PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
@@ -86,7 +86,7 @@ namespace Physica {
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    inline auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
+    auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < getRow() && col < getCol());
         if constexpr (MatrixOption::isColMatrix<This>())
             return v.data_ptr(col * getRow() + row);
@@ -95,7 +95,7 @@ namespace Physica {
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    inline auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
+    auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 

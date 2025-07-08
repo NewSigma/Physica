@@ -172,8 +172,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getCol() const noexcept { return colCount; }
-        [[nodiscard]] inline PtrTy data_ptr(size_t row, size_t col);
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const;
     };
 
     template<Matrix T>
@@ -188,7 +188,7 @@ namespace Physica {
     }
 
     template<Matrix T>
-    inline auto LMatrixBlock<T, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) -> PtrTy {
+    auto LMatrixBlock<T, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) -> PtrTy {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);

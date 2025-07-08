@@ -60,7 +60,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T>
-    inline void swap(Physica::LinearSystem<T>& __restrict equ1,
+    void swap(Physica::LinearSystem<T>& __restrict equ1,
                      Physica::LinearSystem<T>& __restrict equ2) noexcept {
         equ1.swap(equ2);
     }

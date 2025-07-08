@@ -38,10 +38,10 @@ namespace Physica {
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& v) const;
+        void assign(Vector auto& v) const;
 
         template<ExecutePolicy P = Sequential>
-        inline void assign_add(Vector auto& v) const;
+        void assign_add(Vector auto& v) const;
         void assign_add_base(Vector auto& v) const noexcept;
         void assign_add_mkl(void* y) const noexcept;
 
@@ -73,7 +73,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
-    inline void VectorExpr<ExprType::Mul, V, U>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Mul, V, U>::assign(Vector auto& v) const {
         constexpr bool FastAssign = Traits<std::remove_cvref_t<V>>::FastAssign;
         if constexpr (FastAssign) {
             getLHS().template assign<P>(v);
@@ -85,7 +85,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
-    inline void VectorExpr<ExprType::Mul, V, U>::assign_add(Vector auto& v) const {
+    void VectorExpr<ExprType::Mul, V, U>::assign_add(Vector auto& v) const {
         using V1 = std::remove_cvref_t<decltype(v)>;
         constexpr size_t Size = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
         constexpr bool SmallVector = 0 < Size && Size <= 128;
@@ -189,17 +189,17 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    [[nodiscard]] inline auto operator*(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto operator*(V&& v, U&& x) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Mul, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector V>
-    [[nodiscard]] inline auto operator*(U&& x, V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto operator*(U&& x, V&& v) noexcept requires(!CUDA<V>) {
         return std::forward<V>(v) * std::forward<U>(x);
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] inline auto hadamard(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+    [[nodiscard]] auto hadamard(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
         return VectorExpr<ExprType::Mul, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

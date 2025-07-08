@@ -52,17 +52,17 @@ namespace Physica {
     };
 
     template<Tensor T, Scalar U>
-    [[nodiscard]] inline auto operator*(const T& x, const U& y) noexcept {
+    [[nodiscard]] auto operator*(const T& x, const U& y) noexcept {
         return TensorExpr<ExprType::Mul, T, U>(x, y);
     }
 
     template<Tensor T, Scalar U>
-    [[nodiscard]] inline auto operator*(const U& y, const T& x) noexcept {
+    [[nodiscard]] auto operator*(const U& y, const T& x) noexcept {
         return x * y;
     }
 
     template<Tensor T1, Tensor T2>
-    [[nodiscard]] inline auto hadamard(const T1& x, const T2& y) noexcept {
+    [[nodiscard]] auto hadamard(const T1& x, const T2& y) noexcept {
         return TensorExpr<ExprType::Mul, T1, T2>(x, y);
     }
 }

@@ -28,31 +28,31 @@ namespace Physica {
     Complex<T> square(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> reciprocal(const Complex<T>& c);
+    Complex<T> reciprocal(const Complex<T>& c);
 
     template<Scalar T>
     Complex<T> sqrt(const Complex<T>& c);
 
     template<Scalar T>
-    __host__ __device__ inline Complex<T> ln(const Complex<T>& c);
+    __host__ __device__ Complex<T> ln(const Complex<T>& c);
 
     template<Scalar T>
-    __host__ __device__ inline Complex<T> ln1p(const Complex<T>& c);
+    __host__ __device__ Complex<T> ln1p(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> ln1pexp(const Complex<T>& c);
+    Complex<T> ln1pexp(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> exp(const Complex<T>& c);
+    Complex<T> exp(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> cos(const Complex<T>& c);
+    Complex<T> cos(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> sin(const Complex<T>& c);
+    Complex<T> sin(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> tan(const Complex<T>& c);
+    Complex<T> tan(const Complex<T>& c);
 
     template<Scalar T>
     Complex<T> sec(const Complex<T>& c);
@@ -64,13 +64,13 @@ namespace Physica {
     Complex<T> cot(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> cosh(const Complex<T>& c);
+    Complex<T> cosh(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> sinh(const Complex<T>& c);
+    Complex<T> sinh(const Complex<T>& c);
 
     template<Scalar T>
-    inline Complex<T> tanh(const Complex<T>& c);
+    Complex<T> tanh(const Complex<T>& c);
 
     template<Scalar T>
     Complex<T> sech(const Complex<T>& c);

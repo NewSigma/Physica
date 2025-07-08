@@ -24,7 +24,8 @@
 
 namespace Physica {
     template<class Derived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto& target) const requires(CUDA<decltype(target)>) {
+    template<Vector V>
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const requires(CUDA<V>) {
         assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
         host_obj::assign_check(target);
         if (IsHost()) {
@@ -44,7 +45,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ inline Pack device_obj<RValueVector<Derived>>::packet(size_t index) const {
+    __device__ Pack device_obj<RValueVector<Derived>>::packet(size_t index) const {
         assert(index + Pack::size() <= getLength());
         if constexpr (Scalar<Pack>)
             return calc(index);
@@ -54,7 +55,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ inline Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
+    __device__ Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
         assert(index + Pack::size() <= getLength());
         assert(count == 1 && "[Error]: No need to call partial version");
         if constexpr (Scalar<Pack>)
@@ -69,17 +70,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline auto device_obj<RValueVector<Derived>>::transpose() const noexcept {
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::transpose() const noexcept {
         return device_obj<TransposeVector<Derived>>(Base::getDerived());
     }
 
     template<class Derived>
-    __device__ inline auto device_obj<RValueVector<Derived>>::norm() const -> Tr {
+    __device__ auto device_obj<RValueVector<Derived>>::norm() const -> Tr {
         return sqrt(Base::getDerived().squaredNorm());
     }
 
     template<class Derived>
-    __device__ inline auto device_obj<RValueVector<Derived>>::squaredNorm() const -> Tr {
+    __device__ auto device_obj<RValueVector<Derived>>::squaredNorm() const -> Tr {
         auto result = Tr(0);
         for (size_t i = 0; i < getLength(); ++i)
             result += calc(i).squaredNorm();
@@ -213,7 +214,7 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::crossProduct(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>) {
-        return device_obj<CrossProduct<Derived, V>>(*this, v);
+        return device_obj<CrossProduct<Derived, decltype(v)>>(*this, v);
     }
 
     template<class Derived>

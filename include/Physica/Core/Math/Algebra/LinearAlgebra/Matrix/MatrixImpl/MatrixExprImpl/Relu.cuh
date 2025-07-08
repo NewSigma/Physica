@@ -54,7 +54,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] __host__ __device__ inline auto relu_elem(M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] __host__ __device__ auto relu_elem(M&& m) noexcept requires(CUDA<M>) {
         return device_obj<MatrixExpr<ExprType::Relu, M&&>>(std::forward<M>(m));
     }
 }

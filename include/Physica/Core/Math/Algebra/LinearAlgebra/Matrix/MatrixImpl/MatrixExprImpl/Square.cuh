@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] __host__ __device__ inline auto square_elem(M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] __host__ __device__ auto square_elem(M&& m) noexcept requires(CUDA<M>) {
         return device_obj<MatrixExpr<ExprType::Square, M&&>>(std::forward<M>(m));
     }
 }

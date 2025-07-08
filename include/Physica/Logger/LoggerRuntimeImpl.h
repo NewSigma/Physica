@@ -24,7 +24,7 @@ namespace Physica {
     inline void writeArgs(const ArgType*) noexcept {}
 
     template<typename T1, typename... Ts>
-    inline void writeArgs(const ArgType* p_args, T1 head, Ts... args) {
+    void writeArgs(const ArgType* p_args, T1 head, Ts... args) {
         constexpr bool isString = std::same_as<T1, char*> || std::same_as<T1, const char*>;
         RingBuffer& buffer = LoggerRuntime::getInstance().getBuffer();
         if constexpr (isString) {

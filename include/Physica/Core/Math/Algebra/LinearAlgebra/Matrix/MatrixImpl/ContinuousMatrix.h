@@ -55,67 +55,67 @@ namespace Physica {
         ~ContinuousMatrix() = default;
         /* Operators */
         using Base::operator=;
-        inline This& operator=(const This& obj);
+        This& operator=(const This& obj);
         This& operator=(This&& obj) noexcept = delete;
         /* Operations */
         [[nodiscard]] auto toNumpy() const;
 
-        [[nodiscard]] inline auto row(size_t r) noexcept;
-        [[nodiscard]] inline const auto row(size_t r) const noexcept;
-        [[nodiscard]] inline auto col(size_t c) noexcept;
-        [[nodiscard]] inline const auto col(size_t c) const noexcept;
+        [[nodiscard]] auto row(size_t r) noexcept;
+        [[nodiscard]] const auto row(size_t r) const noexcept;
+        [[nodiscard]] auto col(size_t c) noexcept;
+        [[nodiscard]] const auto col(size_t c) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline auto rows(size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] auto rows(size_t fromRow, size_t rowCount) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const auto rows(size_t fromRow, size_t rowCount) const noexcept;
+        [[nodiscard]] const auto rows(size_t fromRow, size_t rowCount) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline auto topRows(size_t to) noexcept;
+        [[nodiscard]] auto topRows(size_t to) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const auto topRows(size_t to) const noexcept;
+        [[nodiscard]] const auto topRows(size_t to) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline auto bottomRows(size_t from) noexcept;
+        [[nodiscard]] auto bottomRows(size_t from) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const auto bottomRows(size_t from) const noexcept;
+        [[nodiscard]] const auto bottomRows(size_t from) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline auto cols(size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] auto cols(size_t fromCol, size_t colCount) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline const auto cols(size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] const auto cols(size_t fromCol, size_t colCount) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline auto leftCols(size_t to) noexcept;
+        [[nodiscard]] auto leftCols(size_t to) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline const auto leftCols(size_t to) const noexcept;
+        [[nodiscard]] const auto leftCols(size_t to) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline auto rightCols(size_t from) noexcept;
+        [[nodiscard]] auto rightCols(size_t from) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] inline const auto rightCols(size_t from) const noexcept;
+        [[nodiscard]] const auto rightCols(size_t from) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
+        [[nodiscard]] const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline auto topLeftCorner(size_t to) noexcept;
+        [[nodiscard]] auto topLeftCorner(size_t to) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const auto topLeftCorner(size_t to) const noexcept;
+        [[nodiscard]] const auto topLeftCorner(size_t to) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
+        [[nodiscard]] const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
+        [[nodiscard]] const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
+        [[nodiscard]] const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline auto bottomRightCorner(size_t from) noexcept;
+        [[nodiscard]] auto bottomRightCorner(size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const auto bottomRightCorner(size_t from) const noexcept;
+        [[nodiscard]] const auto bottomRightCorner(size_t from) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
 
         void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
         auto resize(size_t r, size_t c) { return Base::getDerived().resize(r, c); }

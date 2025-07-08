@@ -448,7 +448,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Order>
-    inline void swap(Physica::EigenSolver<T, Order>& __restrict solver1,
+    void swap(Physica::EigenSolver<T, Order>& __restrict solver1,
                      Physica::EigenSolver<T, Order>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }

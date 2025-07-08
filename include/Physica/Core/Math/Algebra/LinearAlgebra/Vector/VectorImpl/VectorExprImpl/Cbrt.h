@@ -53,7 +53,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto cbrt(V&& v) noexcept {
+    [[nodiscard]] auto cbrt(V&& v) noexcept {
         return VectorExpr<ExprType::Cbrt, V&&>(std::forward<V>(v));
     }
 }

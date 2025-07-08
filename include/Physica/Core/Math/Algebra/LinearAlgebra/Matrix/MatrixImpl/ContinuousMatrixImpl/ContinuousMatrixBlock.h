@@ -216,8 +216,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] inline PtrTy data_ptr(size_t row, size_t col);
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const;
     };
 
     template<Matrix T, size_t Row, size_t Col>

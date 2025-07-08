@@ -63,12 +63,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) {
+    LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) {
         return {Base::getDerived(), from, count};
     }
 
     template<class Derived>
-    inline const LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) const {
+    const LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) const {
         return {Base::getDerived(), from, count};
     }
 

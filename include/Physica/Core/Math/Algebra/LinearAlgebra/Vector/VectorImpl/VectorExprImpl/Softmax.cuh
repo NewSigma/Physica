@@ -34,7 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        __host__ __device__ inline void assign(Vector auto& v) const;
+        __host__ __device__ void assign(Vector auto& v) const;
 
         [[nodiscard]] __device__ T calc(size_t i) const { return Base::getExpr().softmax(i); }
         [[nodiscard]] __device__ Tv calc_value(size_t i) const { return Base::getExpr().values().softmax(i); }
@@ -54,7 +54,7 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    __host__ __device__ inline void device_obj<VectorExpr<ExprType::Softmax, V>>::assign(Vector auto& v) const {
+    __host__ __device__ void device_obj<VectorExpr<ExprType::Softmax, V>>::assign(Vector auto& v) const {
         if constexpr (IsHost())
             Base::assign(v);
         else {
@@ -65,7 +65,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] __host__ __device__ inline auto softmax(V&& v) noexcept requires(CUDA<V>) {
+    [[nodiscard]] __host__ __device__ auto softmax(V&& v) noexcept requires(CUDA<V>) {
         return device_obj<VectorExpr<ExprType::Softmax, V&&>>(std::forward<V>(v));
     }
 }

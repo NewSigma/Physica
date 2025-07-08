@@ -43,7 +43,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] __host__ __device__ inline auto ln(V&& v) noexcept requires(CUDA<V>) {
+    [[nodiscard]] __host__ __device__ auto ln(V&& v) noexcept requires(CUDA<V>) {
         return device_obj<VectorExpr<ExprType::Ln, V&&>>(std::forward<V>(v));
     }
 }

@@ -63,11 +63,7 @@ namespace Physica {
         [[nodiscard]] size_t getHandleNum() { return handleNum; }
         /* Static members */
         static void checkParam(Tv collideFactor, size_t numReplica);
-        [[nodiscard]] __host__ __device__ static bool checkStepSize(
-            T latticeSize,
-            T temperatureT,
-            T collideStep,
-            T maxMass);
+        [[nodiscard]] __host__ __device__ static bool checkStepSize(T latticeSize, T temperatureT, T collideStep, T maxMass);
     private:
         bool checkCollision([[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const;
         void handleCollision(const RingPolymerType& ringPolymer);
@@ -209,11 +205,8 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, ExecutePolicy P>
-    bool HardCore<T, IsFixedBoundary, NumReplica, Integrator, P>::checkStepSize(
-            T latticeSize,
-            T temperatureT,
-            T collideStep,
-            T maxMass) {
+    __host__ __device__ bool HardCore<T, IsFixedBoundary, NumReplica, Integrator, P>::checkStepSize(
+            T latticeSize, T temperatureT, T collideStep, T maxMass) {
         const Tv epsilonStep = latticeSize * std::numeric_limits<Tv>::epsilon();
         const Tv meanVelocity = sqrt(Tv(PhyConst<AU>::boltzmannK) * temperatureT / maxMass);
         return collideStep * meanVelocity > epsilonStep;

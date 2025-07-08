@@ -50,7 +50,7 @@ namespace Physica {
          T solve(T epsilon, VectorType initial, std::invocable<VectorType> auto func, std::invocable<VectorType> auto grad);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] inline size_t getDim() const noexcept;
+        [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
         [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
     };
@@ -110,7 +110,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    inline size_t ConjugateGradient<T, Dim>::getDim() const noexcept {
+    size_t ConjugateGradient<T, Dim>::getDim() const noexcept {
         if constexpr (Dim != Dynamic)
             return Dim;
         return gradG.getLength();

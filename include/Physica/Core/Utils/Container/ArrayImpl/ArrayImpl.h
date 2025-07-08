@@ -56,7 +56,7 @@ namespace Physica {
      */
     template<class T, size_t Length, class Allocator>
     template<class... Args>
-    __host__ __device__ inline void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, Args&&...) {
+    __host__ __device__ void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, Args&&...) {
         assert(length == Length);
     }
 
@@ -144,14 +144,14 @@ namespace Physica {
 
     template<class T, class Allocator>
     template<class... Args>
-    inline void Array<T, Dynamic, Allocator>::grow(Args&&... args) {
+    void Array<T, Dynamic, Allocator>::grow(Args&&... args) {
         assert(length < getCapacity() && "[Error]: You must make sure capacity is enough before calling grow()");
         alloc.construct(arr + length++, std::forward<Args>(args)...);
     }
 
     template<class T, class Allocator>
     template<class... Args>
-    inline void Array<T, Dynamic, Allocator>::append(Args&&... args) {
+    void Array<T, Dynamic, Allocator>::append(Args&&... args) {
         if (length == capacity) [[unlikely]]
             doubleSpace();
         grow(std::forward<Args>(args)...);
@@ -180,7 +180,7 @@ namespace Physica {
      */
     template<class T, class Allocator>
     template<class... Args>
-    inline void Array<T, Dynamic, Allocator>::resize(size_t size, Args&&... args) {
+    void Array<T, Dynamic, Allocator>::resize(size_t size, Args&&... args) {
         if (length != size)
             resizeImpl<Args...>(size, std::forward<Args>(args)...);
     }
@@ -227,7 +227,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    inline auto Array<T, Dynamic, Allocator>::release() noexcept -> pointer {
+    auto Array<T, Dynamic, Allocator>::release() noexcept -> pointer {
         pointer p = arr;
         arr = nullptr;
         length = capacity = 0;
@@ -258,7 +258,7 @@ namespace Physica {
      * Low level api. Designed for performance. Elements between old length and \param size have not allocated. DO NOT try to visit them.
      */
     template<class T, class Allocator>
-    inline void Array<T, Dynamic, Allocator>::setLength(size_t size) {
+    void Array<T, Dynamic, Allocator>::setLength(size_t size) {
         assert(size <= getCapacity() && "[Error]: Requiring more elements than the array have");
         if constexpr (!std::is_trivially_copyable<ElemType>::value) {
             assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");

@@ -40,8 +40,8 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operators */
-        __host__ __device__ inline This& operator=(const This& obj);
-        __host__ __device__ inline This& operator=(This&& obj);
+        __host__ __device__ This& operator=(const This& obj);
+        __host__ __device__ This& operator=(This&& obj);
         __host__ __device__ device_obj<Derived>& operator=(const Vector auto& v) requires(CUDA<decltype(v)>);
 
         template<Scalar T>
@@ -51,8 +51,8 @@ namespace Physica {
         __host__ __device__ void operator*=(const Scalar auto& x);
         __host__ __device__ void operator/=(const Scalar auto& x);
 
-        __host__ __device__ inline void operator+=(const Vector auto& v) requires(CUDA<decltype(v)>);
-        __host__ __device__ inline void operator-=(const Vector auto& v) requires(CUDA<decltype(v)>);
+        __host__ __device__ void operator+=(const Vector auto& v) requires(CUDA<decltype(v)>);
+        __host__ __device__ void operator-=(const Vector auto& v) requires(CUDA<decltype(v)>);
 
         [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
@@ -63,17 +63,17 @@ namespace Physica {
         __host__ __device__ void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto head(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto head(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto tail(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto tail(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto segment(size_t from, size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto segment(size_t from, size_t to) const noexcept;
 
         template<Matrix M>
         [[nodiscard]] __host__ __device__ auto reshape(const M& mat) noexcept;
@@ -88,8 +88,8 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ const auto reshape_row(size_t row, size_t col) const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

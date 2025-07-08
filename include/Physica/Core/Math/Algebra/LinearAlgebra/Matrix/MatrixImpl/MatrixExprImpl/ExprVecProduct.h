@@ -44,12 +44,12 @@ namespace Physica {
         [[nodiscard]] auto operator-() const noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& target) const;
+        void assign(Vector auto& target) const;
         template<ExecutePolicy P = Sequential>
-        inline void assign_add(Vector auto& target) const;
+        void assign_add(Vector auto& target) const;
 
-        [[nodiscard]] inline T calc(size_t index) const;
-        [[nodiscard]] inline Tv calc_value(size_t index) const;
+        [[nodiscard]] T calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return expr.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return expr; }
@@ -71,7 +71,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
-    inline void MatExprVecProd<M, V>::assign(Vector auto& target) const {
+    void MatExprVecProd<M, V>::assign(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
             if constexpr (Type == ExprType::Minus) {
@@ -97,7 +97,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
-    inline void MatExprVecProd<M, V>::assign_add(Vector auto& target) const {
+    void MatExprVecProd<M, V>::assign_add(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
             if constexpr (Type == ExprType::Minus) {
@@ -128,12 +128,12 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    inline auto MatExprVecProd<M, V>::calc(size_t index) const -> T {
+    auto MatExprVecProd<M, V>::calc(size_t index) const -> T {
         return expr.row(index) * vec;
     }
 
     template<Matrix M, Vector V>
-    inline auto MatExprVecProd<M, V>::calc_value(size_t index) const -> Tv {
+    auto MatExprVecProd<M, V>::calc_value(size_t index) const -> Tv {
         return expr.row(index).values() * vec.values();
     }
 }

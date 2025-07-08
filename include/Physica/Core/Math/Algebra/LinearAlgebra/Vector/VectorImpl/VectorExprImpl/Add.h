@@ -73,7 +73,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        inline void assign(Vector auto& v) const;
+        void assign(Vector auto& v) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const {
             return getLHS().calc(s) + getRHS().calc(s);
@@ -103,7 +103,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>
-    inline void VectorExpr<ExprType::Add, V1, V2>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Add, V1, V2>::assign(Vector auto& v) const {
         constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
         constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {
@@ -139,17 +139,17 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    [[nodiscard]] inline auto operator+(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto operator+(V&& v, U&& x) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Add, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector V>
-    [[nodiscard]] inline auto operator+(U&& x, V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto operator+(U&& x, V&& v) noexcept requires(!CUDA<V>) {
         return std::forward<V>(v) + std::forward<U>(x);
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] inline auto operator+(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+    [[nodiscard]] auto operator+(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
         return VectorExpr<ExprType::Add, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

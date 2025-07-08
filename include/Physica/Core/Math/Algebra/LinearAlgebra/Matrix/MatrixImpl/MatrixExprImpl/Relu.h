@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] inline auto relu_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto relu_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Relu, M&&>(std::forward<M>(m));
     }
 }

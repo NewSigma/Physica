@@ -48,7 +48,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] inline auto ln_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto ln_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Ln, M&&>(std::forward<M>(m));
     }
 }

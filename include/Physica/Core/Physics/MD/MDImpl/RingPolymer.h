@@ -54,8 +54,8 @@ namespace Physica {
         template<class KineticModel> void scaleVelocity(T temperatureT);
         [[nodiscard]] DenseVector<T, Dim> makeDriftMomentum() const;
         void removeDrift();
-        inline void toNormalRepr(size_t posID);
-        inline void toBeadRepr(size_t posID);
+        void toNormalRepr(size_t posID);
+        void toBeadRepr(size_t posID);
         void toNormalRepr(size_t posID, const PhaseMatrix& outer_phase);
         void toBeadRepr(size_t posID, PhaseMatrix& outer_phase);
         void toNormalRepr(size_t posID, const PhaseMatrix& outer_phase, BufferType& outer_buffer, FFTType& outer_fft) const;
@@ -192,12 +192,12 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    inline void RingPolymer<T, Dim, NumReplica>::toNormalRepr(size_t posID) {
+    void RingPolymer<T, Dim, NumReplica>::toNormalRepr(size_t posID) {
         toNormalRepr(posID, phase);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    inline void RingPolymer<T, Dim, NumReplica>::toBeadRepr(size_t posID) {
+    void RingPolymer<T, Dim, NumReplica>::toBeadRepr(size_t posID) {
         toBeadRepr(posID, phase);
     }
 

@@ -62,7 +62,7 @@ namespace Physica {
      * To compute row vector * matrix, users should converted it to matrix^T * col vector.
      */
     template<Vector T, Matrix U>
-    [[nodiscard]] inline auto operator*(const T& vec, const U& mat) noexcept requires(U::RowAtCompile == 1) {
+    [[nodiscard]] auto operator*(const T& vec, const U& mat) noexcept requires(U::RowAtCompile == 1) {
         return VectorMatrixProduct<T, U>(vec, mat);
     }
 }

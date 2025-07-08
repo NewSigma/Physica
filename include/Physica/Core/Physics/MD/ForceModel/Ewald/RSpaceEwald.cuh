@@ -65,9 +65,9 @@ namespace Physica {
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<ExecutePolicy P>
-        [[nodiscard]] inline VectorND<T> force_short(const PositionMatrix& pos);
+        [[nodiscard]] VectorND<T> force_short(const PositionMatrix& pos);
 
-        [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos);
+        [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos);
         [[nodiscard]] BornChargeArray calcBornCharge() const { return host_obj::makeBornCharge(charges); }
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -86,10 +86,10 @@ namespace Physica {
         void setLattice(const LatticeMatrix& lattice_);
         void setIntegralLimit(T integralLimit_);
     protected:
-        [[nodiscard]] inline T calcSelfE() const;
-        [[nodiscard]] inline T calcGammaPointE() const;
-        [[nodiscard]] __device__ inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] __device__ inline T force_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T calcSelfE() const;
+        [[nodiscard]] T calcGammaPointE() const;
+        [[nodiscard]] __device__ T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] __device__ T force_functor(size_t i, size_t j, T r, T r2) const;
     private:
         /* Operations */
         void makeTables();
@@ -110,7 +110,7 @@ namespace Physica {
 
     template<Scalar T, bool IsSmallCell>
     template<ExecutePolicy P>
-    inline VectorND<T> device_obj<RSpaceEwald<T, IsSmallCell>>::force_short(const PositionMatrix& pos) {
+    VectorND<T> device_obj<RSpaceEwald<T, IsSmallCell>>::force_short(const PositionMatrix& pos) {
         static_assert(P == GPU, "[Error]: Incorrect policy");
         static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");
         const VectorND<T> rSpaceSum = Base::template force<GPU>(lattice.toHost(), invLatt, pos);
@@ -118,7 +118,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline device_obj<RSpaceEwald<T, IsSmallCell>>::LatticeMatrix
+    device_obj<RSpaceEwald<T, IsSmallCell>>::LatticeMatrix
     device_obj<RSpaceEwald<T, IsSmallCell>>::virial(const PositionMatrix& pos) {
         return Base::virial(lattice.toHost(), invLatt, pos);
     }
@@ -175,19 +175,19 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T device_obj<RSpaceEwald<T, IsSmallCell>>::calcSelfE() const {
+    T device_obj<RSpaceEwald<T, IsSmallCell>>::calcSelfE() const {
         return square(charges.toHost()).sum() * integralLimit / sqrt(Tv(M_PI));
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T device_obj<RSpaceEwald<T, IsSmallCell>>::calcGammaPointE() const {
+    T device_obj<RSpaceEwald<T, IsSmallCell>>::calcGammaPointE() const {
         return square(charges.toHost().sum()) * Tv(-M_PI) / (Tv(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
      */
     template<Scalar T, bool IsSmallCell>
-    __device__ inline T device_obj<RSpaceEwald<T, IsSmallCell>>::pot_functor(
+    __device__ T device_obj<RSpaceEwald<T, IsSmallCell>>::pot_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
         const T temp = r * repErfcStep + Tv(0.5);
         const int index = temp.toMachine();
@@ -198,7 +198,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    __device__ inline T device_obj<RSpaceEwald<T, IsSmallCell>>::force_functor(
+    __device__ T device_obj<RSpaceEwald<T, IsSmallCell>>::force_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
         const T temp = r * repErfcStep + Tv(0.5);
         const int index = temp.toMachine();

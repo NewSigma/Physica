@@ -70,8 +70,8 @@ namespace Physica {
 
         void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
         using Storage::resize;
-        [[nodiscard]] inline auto toDevice() const;
-        [[nodiscard]] inline auto toDeviceAsync() const;
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
@@ -125,7 +125,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    inline void swap(
+    void swap(
             Physica::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
             Physica::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {
         m1.swap(m2);

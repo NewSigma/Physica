@@ -47,12 +47,12 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
-        [[nodiscard]] inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] PtrTy data_ptr(size_t index);
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<Matrix T>
-    inline auto FlattenC<T>::data_ptr(size_t index) -> PtrTy {
+    auto FlattenC<T>::data_ptr(size_t index) -> PtrTy {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
@@ -61,7 +61,7 @@ namespace Physica {
     }
 
     template<Matrix T>
-    inline auto FlattenC<T>::data_ptr(size_t index) const -> ConstPtrTy {
+    auto FlattenC<T>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

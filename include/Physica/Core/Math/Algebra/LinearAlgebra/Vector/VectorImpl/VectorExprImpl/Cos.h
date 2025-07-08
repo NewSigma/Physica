@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto cos(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto cos(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Cos, V&&>(std::forward<V>(v));
     }
 }

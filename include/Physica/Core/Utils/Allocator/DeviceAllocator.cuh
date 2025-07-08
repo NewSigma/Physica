@@ -55,15 +55,15 @@ namespace Physica {
         DeviceAllocator& operator=(const DeviceAllocator&) noexcept = default;
         DeviceAllocator& operator=(DeviceAllocator&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline pointer allocate(size_t n) noexcept;
-        __host__ __device__ inline void deallocate(pointer p, size_t n) noexcept;
+        [[nodiscard]] __host__ __device__ pointer allocate(size_t n) noexcept;
+        __host__ __device__ void deallocate(pointer p, size_t n) noexcept;
         template<class... Args>
         __host__ __device__ void construct(pointer p, Args&&... args);
         __host__ __device__ void destroy(pointer p) noexcept;
     };
 
     template<class T>
-    __host__ __device__ inline DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
+    __host__ __device__ DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
         pointer p;
         if constexpr (IsDevice())
             p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
@@ -77,9 +77,9 @@ namespace Physica {
     }
 
     template<class T>
-    __host__ __device__ inline void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
+    __host__ __device__ void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
         if constexpr (IsDevice())
-            free(p);
+            std::free(p);
         else {
             if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
                 if constexpr (CUDADevAttr::MemoryPoolsSupported)

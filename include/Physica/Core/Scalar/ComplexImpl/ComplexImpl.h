@@ -59,7 +59,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ inline bool Complex<T>::operator==(const This& other) const {
+    __host__ __device__ bool Complex<T>::operator==(const This& other) const {
         return re == other.re && im == other.im;
     }
 
@@ -138,17 +138,17 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ inline T Complex<T>::squaredNorm() const {
+    __host__ __device__ T Complex<T>::squaredNorm() const {
         return square(re) + square(im);
     }
 
     template<Scalar T>
-    __host__ __device__ inline T Complex<T>::norm() const {
+    __host__ __device__ T Complex<T>::norm() const {
         return sqrt(squaredNorm());
     }
 
     template<Scalar T>
-    __host__ __device__ inline T Complex<T>::phase() const {
+    __host__ __device__ T Complex<T>::phase() const {
         return std::arg(toMachine());
     }
 
@@ -161,14 +161,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline Complex<T>::PacketType Complex<T>::packet() const {
+    Complex<T>::PacketType Complex<T>::packet() const {
         PacketType packet{};
         packet.load(&re);
         return packet;
     }
 
     template<Scalar T>
-    inline void Complex<T>::writePacket(const PacketType packet) {
+    void Complex<T>::writePacket(const PacketType packet) {
         packet.store(&re);
     }
 
@@ -180,7 +180,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ inline auto Complex<T>::toMachine() const noexcept -> std::complex<Tm> {
+    __host__ __device__ auto Complex<T>::toMachine() const noexcept -> std::complex<Tm> {
         return {re.toMachine(), im.toMachine()};
     }
 
@@ -194,7 +194,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline Complex<T> Complex<T>::fromPhase(T phase) {
+    Complex<T> Complex<T>::fromPhase(T phase) {
         T s, c;
         sincos(phase, s, c);
         return Complex(c, s);

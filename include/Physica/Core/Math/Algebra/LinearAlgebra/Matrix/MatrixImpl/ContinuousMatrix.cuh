@@ -47,66 +47,66 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operators */
-        inline This& operator=(const This& obj);
-        inline This& operator=(This&& obj) noexcept;
+        This& operator=(const This& obj);
+        This& operator=(This&& obj) noexcept;
         using Base::operator=;
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline auto row(size_t r) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto row(size_t r) const noexcept;
-        [[nodiscard]] __host__ __device__ inline auto col(size_t c) noexcept;
-        [[nodiscard]] __host__ __device__ inline const auto col(size_t c) const noexcept;
+        [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
+        [[nodiscard]] __host__ __device__ const auto row(size_t r) const noexcept;
+        [[nodiscard]] __host__ __device__ auto col(size_t c) noexcept;
+        [[nodiscard]] __host__ __device__ const auto col(size_t c) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto rows(size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] __host__ __device__ auto rows(size_t fromRow, size_t rowCount) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto rows(size_t fromRow, size_t rowCount) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto rows(size_t fromRow, size_t rowCount) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto topRows(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto topRows(size_t to) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto topRows(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto topRows(size_t to) const noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto bottomRows(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRows(size_t from) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto bottomRows(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomRows(size_t from) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto cols(size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] __host__ __device__ auto cols(size_t fromCol, size_t colCount) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto cols(size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto cols(size_t fromCol, size_t colCount) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto leftCols(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto leftCols(size_t to) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto leftCols(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto leftCols(size_t to) const noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto rightCols(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto rightCols(size_t from) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto rightCols(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto rightCols(size_t from) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto topLeftCorner(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(size_t to) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto topLeftCorner(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto topLeftCorner(size_t to) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto bottomRightCorner(size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto bottomRightCorner(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t from) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] __host__ __device__ auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
 
         void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
         auto resize(size_t r, size_t c) { return Base::getDerived().resize(r, c); }

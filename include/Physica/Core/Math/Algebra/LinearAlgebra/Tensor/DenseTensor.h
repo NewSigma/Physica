@@ -42,13 +42,13 @@ namespace Physica {
         /* Operations */
         using Base::random_normal;
         template<class... Args>
-        inline void resize(IndexArray shape, Args&&... args);
+        void resize(IndexArray shape, Args&&... args);
 
         using Storage::toIndex1D;
         using Storage::toIndexND;
         using Storage::forND;
 
-        inline void swap(This& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Storage::asArray;
         using Storage::data_ptr;
@@ -78,7 +78,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Dim>
-    inline void swap(Physica::DenseTensor<T, Dim>& __restrict x, Physica::DenseTensor<T, Dim>& __restrict y) noexcept {
+    void swap(Physica::DenseTensor<T, Dim>& __restrict x, Physica::DenseTensor<T, Dim>& __restrict y) noexcept {
         x.swap(y);
     }
 }

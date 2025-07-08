@@ -47,19 +47,19 @@ namespace Physica {
         H5DataSpace(H5DataSpace&& obj) noexcept;
         virtual ~H5DataSpace() = default;
         /* Operators */
-        inline H5DataSpace& operator=(const H5DataSpace& obj);
+        H5DataSpace& operator=(const H5DataSpace& obj);
         H5DataSpace& operator=(H5DataSpace&&) noexcept;
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
         template<size_t SubDim>
-        [[nodiscard]] inline SubDataSpace<This, SubDim> tail(size_t from);
+        [[nodiscard]] SubDataSpace<This, SubDim> tail(size_t from);
         template<size_t SubDim>
-        [[nodiscard]] inline const SubDataSpace<This, SubDim> tail(size_t from) const;
+        [[nodiscard]] const SubDataSpace<This, SubDim> tail(size_t from) const;
         /* Getters */
         [[nodiscard]] const ImplType& asH5Type() const noexcept { return *this; }
         [[nodiscard]] ImplType& asH5Type() noexcept { return *this; }
-        [[nodiscard]] inline size_t getDim() const noexcept;
-        [[nodiscard]] inline size_t getSize(size_t dim) const noexcept;
+        [[nodiscard]] size_t getDim() const noexcept;
+        [[nodiscard]] size_t getSize(size_t dim) const noexcept;
         [[nodiscard]] const SizeArray& getSelectedCount() const noexcept { return selectedCount; }
         [[nodiscard]] const SizeArray& getSelectedStart() const noexcept { return selectedStart; }
         [[nodiscard]] bool isValid() const noexcept { return ImplType::isValid(ImplType::getId()); }
@@ -106,24 +106,24 @@ namespace Physica {
 
     template<size_t Dim>
     template<size_t SubDim>
-    inline SubDataSpace<H5DataSpace<Dim>, SubDim> H5DataSpace<Dim>::tail(size_t from) {
+    SubDataSpace<H5DataSpace<Dim>, SubDim> H5DataSpace<Dim>::tail(size_t from) {
         return SubDataSpace<H5DataSpace<Dim>, SubDim>(*this, from, getDim());
     }
 
     template<size_t Dim>
     template<size_t SubDim>
-    inline const SubDataSpace<H5DataSpace<Dim>, SubDim> H5DataSpace<Dim>::tail(size_t from) const {
+    const SubDataSpace<H5DataSpace<Dim>, SubDim> H5DataSpace<Dim>::tail(size_t from) const {
         return SubDataSpace<H5DataSpace<Dim>, SubDim>(const_cast<This&>(*this), from, getDim());
     }
 
     template<size_t Dim>
-    inline H5DataSpace<Dim>& H5DataSpace<Dim>::operator=(const H5DataSpace& obj) {
+    H5DataSpace<Dim>& H5DataSpace<Dim>::operator=(const H5DataSpace& obj) {
         ImplType::operator=(obj);
         return *this;
     }
 
     template<size_t Dim>
-    inline size_t H5DataSpace<Dim>::getDim() const noexcept {
+    size_t H5DataSpace<Dim>::getDim() const noexcept {
         if constexpr (Dim == Dynamic)
             return getSimpleExtentNdims();
         else
@@ -131,7 +131,7 @@ namespace Physica {
     }
 
     template<size_t Dim>
-    inline size_t H5DataSpace<Dim>::getSize(size_t dim) const noexcept {
+    size_t H5DataSpace<Dim>::getSize(size_t dim) const noexcept {
         SizeArray sizes(getDim());
         [[maybe_unused]] size_t d = getSimpleExtentDims(sizes.data());
         assert(d == getDim());

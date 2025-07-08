@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto unit(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto unit(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Unit, V&&>(std::forward<V>(v));
     }
 }

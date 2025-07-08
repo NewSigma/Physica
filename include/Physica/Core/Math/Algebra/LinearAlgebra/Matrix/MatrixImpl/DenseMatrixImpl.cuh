@@ -109,13 +109,13 @@ namespace Physica {
     }
 
     template<tparams>
-    inline auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::unitMatrix(size_t order) -> This {
+    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::unitMatrix(size_t order) -> This {
         return host_obj::unitMatrix(order).toDevice();
     }
 
     template<tparams>
     template<RNG R>
-    inline auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform(size_t row, size_t col) -> This {
+    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_uniform<R>();
         return result;
@@ -123,7 +123,7 @@ namespace Physica {
 
     template<tparams>
     template<RNG R>
-    inline auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal(size_t row, size_t col) -> This {
+    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_normal<R>();
         return result;
@@ -131,7 +131,7 @@ namespace Physica {
 
     template<tparams>
     template<RNG R>
-    inline auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(size_t row, size_t col, auto& distribution) -> This {
+    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(size_t row, size_t col, auto& distribution) -> This {
         This result(row, col);
         result.template random_any<R>(distribution);
         return result;

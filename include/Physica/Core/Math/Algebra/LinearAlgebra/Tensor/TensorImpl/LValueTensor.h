@@ -61,8 +61,8 @@ namespace Physica {
         void forND(std::invocable<T&, IndexArray> auto fn);
         void forND(std::invocable<const T&, IndexArray> auto fn) const;
 
-        [[nodiscard]] inline LTensorBlock<Derived> block(Index3D from, Index3D count);
-        [[nodiscard]] inline const LTensorBlock<Derived> block(Index3D from, Index3D count) const;
+        [[nodiscard]] LTensorBlock<Derived> block(Index3D from, Index3D count);
+        [[nodiscard]] const LTensorBlock<Derived> block(Index3D from, Index3D count) const;
 
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,11 @@
  */
 #pragma once
 
-#include <iostream>
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Core/Physics/MD/RPMD.h"
 
 namespace Physica {
-    namespace Internal {
-        template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-        __global__ void __launch_bounds__(512, 1)
-        HardCore_stepKernel(
-                Physica::PlainStruct<HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>> obj,
-                T deltaT,
-                size_t numStep) {
-            obj.getDerived().stepKernelImpl(deltaT, numStep);
-        }
-    }
-
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
     HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>::HardCore(
             T latticeSize_, T collideFactor_, T temperatureT_, size_t numParticle, size_t maxHandleNum_)
@@ -68,7 +56,6 @@ namespace Physica {
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
     void HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>::pre_nve_step(RingPolymerType& ringPolymer) {
-        const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         lockedBuffer = phase;
         lockedBuffer.toDeviceAsync(d_phase);
@@ -80,9 +67,9 @@ namespace Physica {
         const size_t numParticle = getNumParticle();
         const size_t maxThread = CUDADevAttr::MaxThreadsPerBlock;
         const unsigned int numThread = numParticle > maxThread ? maxThread : numParticle;
-        Internal::HardCore_stepKernel<T, IsFixedBoundary, NumReplica>
-            <<<1, numThread, numThread * sizeof(T), CUDAContext::getInstance()>>>(asStruct(*this), deltaT, numStep);
-        check(cudaGetLastError());
+        CUDAExecutor::template launch<512, 1>([obj = asStruct(*this), deltaT, numStep] __device__() mutable {
+            obj.getDerived().stepKernelImpl(deltaT, numStep);
+        }, {1, numThread}, numThread * sizeof(T));
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
@@ -94,7 +81,6 @@ namespace Physica {
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
     void HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>::post_nve_step(RingPolymerType& ringPolymer) {
-        const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         d_phase.toHostAsync(lockedBuffer);
         CUDAContext::getInstance().wait();
@@ -138,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    __device__ inline void HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>::stepKernelImpl(
+    __device__ void HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>::stepKernelImpl(
             T deltaT, size_t numStep) {
         const unsigned int threadId = threadIdx.x;
         const size_t numParticle = buffer.getLength();
@@ -212,7 +198,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    __device__ inline void HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>::handleCollision(T* __restrict sharedBuffer) {
+    __device__ void HardCore<T, IsFixedBoundary, NumReplica, Integrator, GPU>::handleCollision(T* __restrict sharedBuffer) {
         const unsigned int threadId = threadIdx.x;
         const size_t numParticle = mass.getLength();
         auto momentum = d_phase.head(numParticle);

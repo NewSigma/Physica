@@ -44,7 +44,7 @@ namespace Physica {
         [[nodiscard]] T operator()(SpinState spin, Vector3D<T> pos) const;
         /* Operations */
         void initDensity(T averageRho);
-        inline void initDensity(const DensityGrid& rho);
+        void initDensity(const DensityGrid& rho);
 
         void resize(size_t x, size_t y, size_t z) { resize({x, y, z}); }
         void resize(Index3D index);
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    inline void DensityGrid<T, IsSpinPolarized>::initDensity(const DensityGrid& rho) {
+    void DensityGrid<T, IsSpinPolarized>::initDensity(const DensityGrid& rho) {
         fit(rho);
     }
 

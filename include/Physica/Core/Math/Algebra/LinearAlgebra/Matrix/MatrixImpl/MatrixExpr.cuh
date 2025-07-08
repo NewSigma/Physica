@@ -90,7 +90,7 @@ namespace Physica {
     };
 
     template<ExprType Type, class LHS, class RHS>
-    __host__ __device__ inline device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
+    __host__ __device__ device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
         if constexpr (Matrix<LHS> && Matrix<RHS>) {
             assert(getLHS().getRow() == getRHS().getRow());
             assert(getLHS().getCol() == getRHS().getCol());

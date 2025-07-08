@@ -34,8 +34,8 @@ namespace Physica {
         BoolSIMD& operator=(const BoolSIMD&) = default;
         BoolSIMD& operator=(BoolSIMD&&) noexcept = default;
         /* Operations */
-        [[nodiscard]] inline bool horizontal_and() const;
-        [[nodiscard]] inline bool horizontal_or() const;
+        [[nodiscard]] bool horizontal_and() const;
+        [[nodiscard]] bool horizontal_or() const;
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] constexpr static size_t getSize() { return Size; }
@@ -49,7 +49,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Size>
-    inline bool BoolSIMD<T, Size>::horizontal_or() const {
+    bool BoolSIMD<T, Size>::horizontal_or() const {
         return Physica::horizontal_or(toMachine());
     }
 
@@ -69,7 +69,7 @@ namespace Physica {
         BoolSIMD& operator=(const BoolSIMD&) = default;
         BoolSIMD& operator=(BoolSIMD&&) noexcept = default;
         /* Operations */
-        [[nodiscard]] inline bool horizontal_or() const { return b; }
+        [[nodiscard]] bool horizontal_or() const { return b; }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return 1; }
         [[nodiscard]] constexpr static size_t getSize() { return 1; }

@@ -30,7 +30,7 @@ namespace Physica {
      * [1] add-on; https://github.com/vectorclass/add-on
      */
     template<Scalar T, size_t Size>
-    inline SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x) {
+    SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x) {
         using RealPack = SIMD<T, Size * 2>;
         const RealPack x1 = x.asReal();
         const RealPack t1 = x1 * x1;

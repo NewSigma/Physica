@@ -179,8 +179,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
     };
 
     template<Matrix T, size_t Row, size_t Col>

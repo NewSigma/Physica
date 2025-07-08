@@ -249,7 +249,7 @@ namespace Physica {
     };
 
     template<Vector V, int MaskOrder>
-    [[nodiscard]] inline std::conditional<std::less<int>{}(MaskOrder, V::ScalarType::Order), DiffMaskVector<V, MaskOrder>, const V&>::type
+    [[nodiscard]] std::conditional<std::less<int>{}(MaskOrder, V::ScalarType::Order), DiffMaskVector<V, MaskOrder>, const V&>::type
     toDiffMaskVector(const RValueVector<V>& v) noexcept {
         return v.getDerived();
     }

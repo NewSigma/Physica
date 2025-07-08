@@ -47,7 +47,7 @@ namespace Physica {
         void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(This& __restrict obj) noexcept;
         /* Setters */
-        void setTemperature(T temperatureT_) { temperatureT = temperatureT_; }
+        void setTemperature(T temperatureT_) noexcept { temperatureT = temperatureT_; }
     };
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
@@ -63,27 +63,25 @@ namespace Physica {
         const T repBeta = ringPolymer.calcRepBeta(temperatureT);
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
-            parallel_for<P>(
-                [repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
-                    const size_t numReplica = ringPolymer.getNumReplica();
-                    const auto& massVec = ringPolymer.getMassVec();
+            parallel_for<P>([repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
+                const size_t numReplica = ringPolymer.getNumReplica();
+                const auto& massVec = ringPolymer.getMassVec();
 
-                    const auto mass = massVec[i / Dim];
-                    const T factor = sqrt(repBeta * mass);
-                    auto fft = FFT<T, 1>::makeEmptyFFT(numReplica);
-                    BufferType buffer(2, ringPolymer.getKSpaceSize());
+                const auto mass = massVec[i / Dim];
+                const T factor = sqrt(repBeta * mass);
+                auto fft = FFT<T, 1>::makeEmptyFFT(numReplica);
+                BufferType buffer(2, ringPolymer.getKSpaceSize());
 
-                    ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                    fft.getRSpace().template random_normal<R>();
-                    FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
-                    for (size_t j = 1; j < buffer.getCol(); ++j) {
-                        const T phase = M_PI * j / numReplica;
-                        const T viscosityY = sin(phase) * omegaW;
-                        Langevin<T, Dim>::langevinImpl(
-                                buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
-                    }
-                    ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                }, dof, 0).wait();
+                ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
+                fft.getRSpace().template random_normal<R>();
+                FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
+                for (size_t j = 1; j < buffer.getCol(); ++j) {
+                    const T phase = M_PI * j / numReplica;
+                    const T viscosityY = sin(phase) * omegaW;
+                    Langevin<T, Dim>::langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
+                }
+                ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
+            }, dof, 0).wait();
         }
     }
 

@@ -51,7 +51,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] __host__ __device__ inline auto operator-(V&& v) noexcept requires(CUDA<V>) {
+    [[nodiscard]] __host__ __device__ auto operator-(V&& v) noexcept requires(CUDA<V>) {
         return device_obj<VectorExpr<ExprType::Minus, V&&>>(std::forward<V>(v));
     }
 }

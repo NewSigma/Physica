@@ -53,13 +53,13 @@ namespace Physica {
         __host__ __device__ This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __host__ __device__ explicit operator float() const { return float(v); }
         [[nodiscard]] __host__ __device__ explicit operator double() const { return double(v); }
-        [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const;
+        [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
         /* Operations */
         template<int MaskOrder>
         __host__ __device__ auto mask() const noexcept;
 
         __host__ __device__ T reverse(GradType grad_ = 1) const noexcept;
-        __host__ __device__ inline void zero_grad();
+        __host__ __device__ void zero_grad();
 
         [[nodiscard]] auto conjugate() const;
         __host__ __device__ void swap(This& __restrict obj) noexcept;
@@ -70,22 +70,22 @@ namespace Physica {
 
         using Base::value;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ inline auto& grad() noexcept;
+        [[nodiscard]] __host__ __device__ auto& grad() noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__ inline const auto& grad() const noexcept;
-        [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
+        [[nodiscard]] __host__ __device__ const auto& grad() const noexcept;
+        [[nodiscard]] __host__ __device__ bool isFinite() const noexcept;
         /* Static members */
         template<RNG R>
-        [[nodiscard]] inline static auto random_uniform();
+        [[nodiscard]] static auto random_uniform();
         template<RNG R>
-        [[nodiscard]] inline static auto random_normal();
+        [[nodiscard]] static auto random_normal();
         template<RNG R>
-        [[nodiscard]] inline static auto random_any(auto& distribution);
+        [[nodiscard]] static auto random_any(auto& distribution);
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 
     template<Scalar T>
-    inline std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable) {
+    std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable) {
         return os << obj.value();
     }
 }

@@ -51,22 +51,22 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] inline CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
-        [[nodiscard]] inline CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
-        [[nodiscard]] inline CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
-        inline void swap(This& __restrict obj) noexcept;
+        [[nodiscard]] CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
+        void swap(This& __restrict obj) noexcept;
     };
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
     SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::SilveraGoldman(Tv cutoff_) : Base(std::move(cutoff_)) {}
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline void SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::swap(This& __restrict obj) noexcept {
+    void SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::swap(This& __restrict obj) noexcept {
         Base::swap(obj);
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::pot_functor(size_t, size_t, const T& r, const T& r2) const {
+    CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::pot_functor(size_t, size_t, const T& r, const T& r2) const {
         const auto result0 = exp(-r2 * Tv(gamma) - r * Tv(beta) + Tv(alpha));
         const auto rep_r = reciprocal(r);
         const auto rep_r2 = square(rep_r);
@@ -88,7 +88,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::force_functor(size_t, size_t, const T& r, const T& r2) const {
+    CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::force_functor(size_t, size_t, const T& r, const T& r2) const {
         const auto factor = r * Tv(gamma * 2) + Tv(beta);
         const auto result0 = exp(-r2 * Tv(gamma) - (r * Tv(beta) - Tv(alpha))) * factor;
         const auto rep_r = reciprocal(r);
@@ -121,7 +121,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::forceConst_functor(const T& r, const T& r2) const {
+    CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::forceConst_functor(const T& r, const T& r2) const {
         const auto factor = square(r * Tv(2 * gamma) + Tv(beta)) - Tv(2 * gamma);
         const auto result0 = exp(-r2 * Tv(gamma) - (r * Tv(beta) - Tv(alpha))) * factor;
         const auto rep_r = reciprocal(r);

@@ -22,13 +22,13 @@
 
 namespace Physica {
     template<class Derived>
-    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::operator=(const This& obj) -> This& {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::operator=(const This& obj) -> This& {
         obj.assign(*this);
         return *this;
     }
 
     template<class Derived>
-    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::operator=(This&& obj) -> This& {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::operator=(This&& obj) -> This& {
         return *this = obj;
     }
 
@@ -46,7 +46,7 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar T>
-    inline device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const T& x) {
+    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const T& x) {
         constexpr int WarpSize = Physica::CUDADevAttr::WarpSize;
         const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;
@@ -86,13 +86,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator+=(const Vector auto& v) requires(CUDA<decltype(v)>) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const Vector auto& v) requires(CUDA<decltype(v)>) {
         assert(Base::getLength() == v.getLength());
         Base::getDerived() = Base::getDerived() + v;
     }
 
     template<class Derived>
-    __host__ __device__ inline void device_obj<LValueVector<Derived>>::operator-=(const Vector auto& v) requires(CUDA<decltype(v)>) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const Vector auto& v) requires(CUDA<decltype(v)>) {
         assert(Base::getLength() == v.getLength());
         Base::getDerived() += -v;
     }
@@ -115,48 +115,48 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::head(size_t to) noexcept {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::head(size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const auto device_obj<LValueVector<Derived>>::head(size_t to) const noexcept {
+    __host__ __device__ const auto device_obj<LValueVector<Derived>>::head(size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::tail(size_t from) noexcept {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::tail(size_t from) noexcept {
         return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const auto device_obj<LValueVector<Derived>>::tail(size_t from) const noexcept {
+    __host__ __device__ const auto device_obj<LValueVector<Derived>>::tail(size_t from) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) noexcept {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const auto device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) const noexcept {
+    __host__ __device__ const auto device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>
-    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) -> PtrTy {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) -> PtrTy {
         assert(index < Base::getLength());
         return Base::getDerived().data_ptr(index);
     }
 
     template<class Derived>
-    __host__ __device__ inline auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) const -> ConstPtrTy {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

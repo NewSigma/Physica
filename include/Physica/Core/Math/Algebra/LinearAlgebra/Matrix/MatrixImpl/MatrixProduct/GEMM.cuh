@@ -65,8 +65,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return mat1.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return mat2.getDerived(); }
     private:
-        template<Matrix M, bool AssignAdd>
-        void assign_impl_cublas(M& target) const requires(CUDA<M>);
+        template<bool AssignAdd>
+        void assign_impl_cublas(Matrix auto& target) const;
     };
 
     template<Matrix T1, Matrix T2>
@@ -77,7 +77,7 @@ namespace Physica {
     template<Matrix T1, Matrix T2>
     __host__ __device__ void device_obj<GEMM<T1, T2>>::assign(Matrix auto& target) const requires(CUDA<decltype(target)>) {
         if constexpr (IsHost())
-            assign_impl_cublas<M, false>(target);
+            assign_impl_cublas<false>(target);
         else
             noImpl("No device GEMM support");
     }
@@ -85,7 +85,7 @@ namespace Physica {
     template<Matrix T1, Matrix T2>
     __host__ __device__ void device_obj<GEMM<T1, T2>>::assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>) {
         if constexpr (IsHost())
-            assign_impl_cublas<M, true>(target);
+            assign_impl_cublas<true>(target);
         else
             noImpl("No device GEMM support");
     }
@@ -99,8 +99,8 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    template<Matrix M, bool AssignAdd>
-    void device_obj<GEMM<T1, T2>>::assign_impl_cublas(M& target) const requires(CUDA<M>) {
+    template<bool AssignAdd>
+    void device_obj<GEMM<T1, T2>>::assign_impl_cublas(Matrix auto& target) const {
         using U1 = remove_transpose<T1>::Type;
         using U2 = remove_transpose<T2>::Type;
         constexpr bool IsDeviceMatrix = Traits<T1>::SizeAtCompile == Dynamic && Traits<T2>::SizeAtCompile == Dynamic;
@@ -144,7 +144,7 @@ namespace Physica {
             B = (Tm*)getRHS().data();
 
         Tm* C;
-        if constexpr (Diffable<M>)
+        if constexpr (Diffable<decltype(target)>)
             C = (Tm*)target.data().value_ptr();
         else
             C = (Tm*)target.data();
@@ -162,7 +162,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] __host__ __device__ inline auto operator*(const T1& mat1, const T2& mat2) noexcept
+    [[nodiscard]] __host__ __device__ auto operator*(const T1& mat1, const T2& mat2) noexcept
             requires(((T1::ColAtCompile != 1 && T2::ColAtCompile != 1) || (T1::ColAtCompile == 1 && T2::ColAtCompile == 1)) && CUDA<T1> && CUDA<T2>) {
         return device_obj<GEMM<T1, T2>>(mat1, mat2);
     }

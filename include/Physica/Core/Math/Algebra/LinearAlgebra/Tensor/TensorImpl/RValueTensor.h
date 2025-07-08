@@ -71,9 +71,10 @@ namespace Physica {
         /* Static members */
         using TensorBase::forPointIndexInTensor;
         template<Scalar T, bool IsUnitLattice>
-        inline static void forPointIndexInTensor(
-                const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn);
-        
+        static void forPointIndexInTensor(const RValueTensor& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, std::invocable<Vector3D<T>, Index3D> auto fn) {
+            forPointIndexInTensor<T, IsUnitLattice>(grid.getDim(), lattice, fn); // FIXME: NVCC 12.8 rejects valid if we put it in impl file
+        }
+
         [[nodiscard]] static size_t toSize(const IndexArray& shape);
     protected:
         template<int GradOrder>

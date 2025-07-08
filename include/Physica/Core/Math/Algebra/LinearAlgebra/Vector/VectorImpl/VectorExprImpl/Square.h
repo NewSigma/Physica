@@ -57,7 +57,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] inline auto square(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto square(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Square, V&&>(std::forward<V>(v));
     }
 }

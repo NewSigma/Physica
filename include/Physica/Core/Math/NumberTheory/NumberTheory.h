@@ -83,7 +83,7 @@ namespace Physica {
     }
 
     template<class IntType, bool IsBigInt>
-    inline IntType lcm(IntType i1, IntType i2) noexcept {
+    IntType lcm(IntType i1, IntType i2) noexcept {
         IntType result = i1 * i2;
         result /= gcd<IntType, IsBigInt>(std::move(i1), std::move(i2));
         return result;

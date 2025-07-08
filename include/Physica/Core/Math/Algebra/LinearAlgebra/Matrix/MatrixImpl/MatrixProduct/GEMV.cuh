@@ -50,7 +50,7 @@ namespace Physica {
 
         auto values() const noexcept { return mat.getDerived().values() * vec.getDerived().values(); }
         /* Getters */
-        [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getRow(); }
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return mat.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return vec.getDerived(); }
@@ -62,14 +62,14 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    __device__ inline auto device_obj<GEMV<T, U>>::calc(size_t index) const -> ScalarType {
+    __device__ auto device_obj<GEMV<T, U>>::calc(size_t index) const -> ScalarType {
         return getLHS().row(index) * getRHS();
     }
 
     template<Matrix T, Vector U>
     __host__ __device__ void device_obj<GEMV<T, U>>::assign(Vector auto& target) const requires(CUDA<decltype(target)>) {
         if constexpr (IsHost())
-            Base::template assign<V>(target);
+            Base::assign(target);
         else {
             if constexpr (MatrixOption::isColMatrix<T>()) {
                 const auto& m = getLHS();
@@ -79,7 +79,7 @@ namespace Physica {
                     target += m.col(i) * v.calc(i);
             }
             else
-                Base::template assign<V>(target);
+                Base::assign(target);
         }
     }
 
@@ -96,7 +96,7 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(T&& m, U&& v) noexcept requires(std::remove_cvref_t<T>::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
+    [[nodiscard]] __host__ __device__ auto operator*(T&& m, U&& v) noexcept requires(std::remove_cvref_t<T>::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
         return device_obj<GEMV<T&&, U&&>>(std::forward<T>(m), std::forward<U>(v));
     }
 }

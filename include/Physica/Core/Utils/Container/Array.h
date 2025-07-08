@@ -68,13 +68,13 @@ namespace Physica {
         __host__ __device__ void insert(const T&, size_t) { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Length); }
         template<class... Args>
-        __host__ __device__ inline void resize(size_t length, Args&&... args);
+        __host__ __device__ void resize(size_t length, Args&&... args);
         __host__ __device__ void swap(Array& __restrict array) noexcept;
 
-        [[nodiscard]] inline auto toDevice() const;
-        [[nodiscard]] inline auto toDeviceAsync() const;
-        inline void toDevice(device_obj<This>& obj) const;
-        inline void toDeviceAsync(device_obj<This>& obj) const;
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
+        void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
@@ -124,21 +124,21 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class... Args>
-        inline void grow(Args&&... args);
-        template<class... Args> inline void append(Args&&... args);
+        void grow(Args&&... args);
+        template<class... Args> void append(Args&&... args);
         template<class... Args> void insert(size_t index, Args&&... args);
         void reserve(size_t size);
-        template<class... Args> inline void resize(size_t size, Args&&... args);
+        template<class... Args> void resize(size_t size, Args&&... args);
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
         void clear() noexcept;
-        [[nodiscard]] inline pointer release() noexcept;
+        [[nodiscard]] pointer release() noexcept;
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
         void swap(This& __restrict obj) noexcept;
 
-        [[nodiscard]] inline auto toDevice() const;
-        [[nodiscard]] inline auto toDeviceAsync() const;
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
         /* Getters */
@@ -149,7 +149,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
-        inline void setLength(size_t size);
+        void setLength(size_t size);
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
     private:
@@ -170,7 +170,7 @@ namespace Physica {
 
 namespace std {
     template<class T, size_t Length, class Allocator>
-    inline void swap(Physica::Array<T, Length, Allocator>& __restrict array1,
+    void swap(Physica::Array<T, Length, Allocator>& __restrict array1,
                      Physica::Array<T, Length, Allocator>& __restrict array2) noexcept {
         array1.swap(array2);
     }

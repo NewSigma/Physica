@@ -51,7 +51,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    [[nodiscard]] inline auto lncosh(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto lncosh(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::LnCosh, V&&>(std::forward<V>(v));
     }
 }

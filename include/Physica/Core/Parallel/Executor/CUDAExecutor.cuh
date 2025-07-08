@@ -26,7 +26,7 @@
 namespace Physica {
     namespace Internal {
         template<int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
-        __global__ void __launch_bounds__(MaxThreadsPerBlock, MinBlocksPerMultiprocessor) kernel(std::invocable auto fn) {
+        __global__ void __launch_bounds__(MaxThreadsPerBlock, MinBlocksPerMultiprocessor) kernel(auto fn) {
             return fn();
         }
     }
@@ -48,12 +48,12 @@ namespace Physica {
         };
     public:
         template<int MaxThreadsPerBlock = Dynamic, int MinBlocksPerMultiprocessor = Dynamic>
-        __host__ __device__ static KernelFuture launch(std::invocable auto fn, KernelConfig config, size_t sharedMem = 0);
+        __host__ __device__ static KernelFuture launch(auto&& fn, KernelConfig config, size_t sharedMem = 0);
         static inline void wait();
     };
 
     template<int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
-    __host__ __device__ auto CUDAExecutor::launch(std::invocable auto fn, KernelConfig config, size_t sharedMem) -> KernelFuture {
+    __host__ __device__ auto CUDAExecutor::launch(auto&& fn, KernelConfig config, size_t sharedMem) -> KernelFuture {
         cudaStream_t stream = nullptr;
         if constexpr (IsHost())
             stream = cudaStream_t(CUDAContext::getInstance().getStream());

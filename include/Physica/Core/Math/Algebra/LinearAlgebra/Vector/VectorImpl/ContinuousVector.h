@@ -56,7 +56,7 @@ namespace Physica {
         Derived& operator=(This&& v);
         template<Scalar T>
         Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
-             // We have to put it here because Clang 18 rejects valid.
+             // FIXME: We have to put it here because Clang 18 rejects valid.
              // Move it to Impl file once we dump to Clang 21 (while 19, 20 not tested)
             if constexpr (SizeAtCompile == Dynamic) {
                 if (x.isZero())
@@ -68,10 +68,10 @@ namespace Physica {
         Derived& operator=(const Vector auto& v);
         using Base::operator+=;
         /* Operations */
-        template<Packet Pack> [[nodiscard]] inline Pack packet(size_t index) const;
-        template<Packet Pack> [[nodiscard]] inline Pack packetPartial(size_t index, size_t count) const;
-        void writePacket(size_t index, const Packet auto packet);
-        void writePacketPartial(size_t index, size_t count, const Packet auto packet);
+        template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;
+        template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        template<Packet Pack> void writePacket(size_t index, const Pack packet);
+        template<Packet Pack> void writePacketPartial(size_t index, size_t count, const Pack packet);
 
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
@@ -82,25 +82,25 @@ namespace Physica {
         [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto head(size_t to) noexcept;
+        [[nodiscard]] auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto head(size_t to) const noexcept;
+        [[nodiscard]] const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto tail(size_t from) noexcept;
+        [[nodiscard]] auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto tail(size_t from) const noexcept;
+        [[nodiscard]] const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline auto segment(size_t from, size_t to) noexcept;
+        [[nodiscard]] auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] const auto segment(size_t from, size_t to) const noexcept;
 
         void zeros();
         template<RNG R>
-        inline void random_uniform();
+        void random_uniform();
         template<RNG R>
-        inline void random_normal();
+        void random_normal();
         template<RNG R>
-        inline void random_any(auto& distribution);
+        void random_any(auto& distribution);
 
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;

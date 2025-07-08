@@ -110,27 +110,27 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(M&& m, U&& x) noexcept requires(CUDA<M>) {
+    [[nodiscard]] __host__ __device__ auto operator*(M&& m, U&& x) noexcept requires(CUDA<M>) {
         return device_obj<MatrixExpr<ExprType::Mul, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] __host__ __device__ inline auto operator*(U&& x, M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] __host__ __device__ auto operator*(U&& x, M&& m) noexcept requires(CUDA<M>) {
         return m * x;
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] __host__ __device__ inline auto hadamard(M&& m, V&& x) noexcept requires(CUDA<M> && CUDA<V>) {
+    [[nodiscard]] __host__ __device__ auto hadamard(M&& m, V&& x) noexcept requires(CUDA<M> && CUDA<V>) {
         return device_obj<MatrixExpr<ExprType::Mul, M&&, V&&>>(std::forward<M>(m), std::forward<V>(x));
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] __host__ __device__ inline auto hadamard(V&& x, M&& m) noexcept requires(CUDA<M> && CUDA<V>) {
+    [[nodiscard]] __host__ __device__ auto hadamard(V&& x, M&& m) noexcept requires(CUDA<M> && CUDA<V>) {
         return hadamard(m, x);
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto hadamard(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
+    [[nodiscard]] auto hadamard(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
         return device_obj<MatrixExpr<ExprType::Mul, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

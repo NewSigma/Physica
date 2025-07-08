@@ -52,16 +52,16 @@ namespace Physica {
         This& operator=(const This&) noexcept = default;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] inline T* allocate(size_t n) noexcept;
-        inline void deallocate(T* p, size_t n) noexcept;
+        [[nodiscard]] T* allocate(size_t n) noexcept;
+        void deallocate(T* p, size_t n) noexcept;
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
         template<class... Args>
-        inline void construct(T* p, Args&&... args);
-        inline void destroy(T* p) noexcept;
+        void construct(T* p, Args&&... args);
+        void destroy(T* p) noexcept;
     };
 
     template<class T, size_t Align>
-    [[nodiscard]] inline T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
+    [[nodiscard]] T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
         assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = n * sizeof(T);
         void* p;
@@ -79,7 +79,7 @@ namespace Physica {
     }
 
     template<class T, size_t Align>
-    inline void HostAllocator<T, Align>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
+    void HostAllocator<T, Align>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
         if constexpr (OverAlign) {
         #ifdef _MSC_VER
             _aligned_free(p);
@@ -111,12 +111,12 @@ namespace Physica {
 
     template<class T, size_t Align>
     template<class... Args>
-    inline void HostAllocator<T, Align>::construct(T* p, Args&&... args) {
+    void HostAllocator<T, Align>::construct(T* p, Args&&... args) {
         ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
     }
 
     template<class T, size_t Align>
-    inline void HostAllocator<T, Align>::destroy(T* p) noexcept {
+    void HostAllocator<T, Align>::destroy(T* p) noexcept {
         p->~T();
     }
 }

@@ -77,8 +77,8 @@ namespace Physica {
         /* Setters */
         void setTemperature(T temperatureT);
     protected:
-        inline void pre_nve_step_impl([[maybe_unused]] RingPolymerType& ringPolymer, T deltaT);
-        inline void do_nve_step_impl(
+        void pre_nve_step_impl([[maybe_unused]] RingPolymerType& ringPolymer, T deltaT);
+        void do_nve_step_impl(
                 size_t id_dof,
                 RingPolymerType& ringPolymer,
                 const PhaseMatrix& input,
@@ -144,7 +144,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    inline void FreeModel<T, Dim, NumReplica, Integrator>::pre_nve_step_impl(
+    void FreeModel<T, Dim, NumReplica, Integrator>::pre_nve_step_impl(
             [[maybe_unused]] RingPolymerType& ringPolymer, T deltaT) {
         assert(NumReplica != 1);
         assert(omegaK.getLength() == ringPolymer.getBuffer().getCol());
@@ -153,7 +153,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    inline void FreeModel<T, Dim, NumReplica, Integrator>::do_nve_step_impl(
+    void FreeModel<T, Dim, NumReplica, Integrator>::do_nve_step_impl(
             size_t id_dof,
             RingPolymerType& ringPolymer,
             const PhaseMatrix& input,

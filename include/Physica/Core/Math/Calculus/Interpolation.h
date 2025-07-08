@@ -28,7 +28,7 @@ namespace Physica {
          * Critical to performance of \class Ewald, refactor with care
          */
         template<Scalar T>
-        __host__ __device__ inline T quadraticInterpolate(
+        __host__ __device__ T quadraticInterpolate(
                 T x1, T x2, T x3, T y1, T y2, T y3, T x) {
             const T x_x1 = x - x1;
             const T x_x2 = x - x2;
@@ -41,7 +41,7 @@ namespace Physica {
         }
 
         template<Scalar T>
-        __host__ __device__ inline T quadraticInterpolate_diff(
+        __host__ __device__ T quadraticInterpolate_diff(
                 T x1, T x2, T x3, T y1, T y2, T y3, T x) {
             const T xx = x * 2.0;
             const T x1_xx = x1 - xx;
@@ -61,7 +61,7 @@ namespace Physica {
          * Equals to reciprocal((x1 - x2) * (x2 - x3) * (x3 - x1))
          */
         template<Scalar T>
-        __host__ __device__ inline T quadraticInterpolate_diff1(
+        __host__ __device__ T quadraticInterpolate_diff1(
                 T factor, T step, T x2, T y1, T y2, T y3, T x) {
             const T y1_y2 = y1 - y2;
             const T y2_y3 = y2 - y3;

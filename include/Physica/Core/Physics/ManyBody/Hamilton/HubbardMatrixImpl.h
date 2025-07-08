@@ -101,7 +101,7 @@ namespace Physica {
     }
 
     template<Scalar T, Representation U>
-    inline HubbardMatrix<T, U>::RealType HubbardMatrix<T, U>::repelElem(StateType psi) const {
+    HubbardMatrix<T, U>::RealType HubbardMatrix<T, U>::repelElem(StateType psi) const {
         return getRepelU() * RealType(psi.getNumDoubleOccupy());
     }
 

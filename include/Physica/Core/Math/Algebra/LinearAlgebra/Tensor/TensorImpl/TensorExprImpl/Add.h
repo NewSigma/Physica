@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Tensor T1, Tensor T2>
-    [[nodiscard]] inline auto operator+(const T1& x, const T2& y) noexcept {
+    [[nodiscard]] auto operator+(const T1& x, const T2& y) noexcept {
         return TensorExpr<ExprType::Add, T1, T2>(x, y);
     }
 }

@@ -30,7 +30,7 @@ namespace Physica {
         inline bool exists(const char *name, const H5::LinkAccPropList& lapl = H5::LinkAccPropList::DEFAULT) const;
 
         template<size_t Dim>
-        inline H5DataSet<Dim> createDataSet(
+        H5DataSet<Dim> createDataSet(
                 const char *name,
                 const H5::DataType& data_type,
                 const H5::DataSpace& data_space,
@@ -62,7 +62,7 @@ namespace Physica {
     }
 
     template<size_t Dim>
-    inline H5DataSet<Dim> H5Loc::createDataSet(
+    H5DataSet<Dim> H5Loc::createDataSet(
             const char *name,
             const H5::DataType& data_type,
             const H5::DataSpace& data_space,

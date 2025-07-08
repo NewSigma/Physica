@@ -87,8 +87,8 @@ namespace Physica {
         [[nodiscard]] const auto& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] const auto& getEigenvectors() const noexcept { return eigenvectors; }
         /* Setters */
-        inline void setError(Tr error_) noexcept;
-        inline void setStableThreshold(Tr value) noexcept;
+        void setError(Tr error_) noexcept;
+        void setStableThreshold(Tr value) noexcept;
     private:
         void initSearchSpace(const Matrix auto& source, VectorND<T>& initial);
         void projSearchSpace(const Matrix auto& source, size_t eigenIndex);
@@ -258,13 +258,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void JacobiDavidson<T>::setError(Tr error_) noexcept {
+    void JacobiDavidson<T>::setError(Tr error_) noexcept {
         assert(error_.isPositive() && "[Error]: Invalid argument");
         error = std::move(error_);
     }
 
     template<Scalar T>
-    inline void JacobiDavidson<T>::setStableThreshold(Tr value) noexcept {
+    void JacobiDavidson<T>::setStableThreshold(Tr value) noexcept {
         assert(value.isPositive() && "[Error]: Invalid argument");
         stableThreshold = std::move(value);
     }
@@ -424,7 +424,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T>
-    inline void swap(
+    void swap(
             Physica::JacobiDavidson<T>& __restrict obj1,
             Physica::JacobiDavidson<T>& __restrict obj2) noexcept {
         obj1.swap(obj2);

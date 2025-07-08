@@ -87,27 +87,27 @@ namespace Physica {
     };
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] inline auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] inline auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M>) {
         return m + x;
     }
 
     template<Matrix M, Vector U>
-    [[nodiscard]] inline auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M> && !CUDA<U>) {
+    [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M> && !CUDA<U>) {
         return MatrixExpr<ExprType::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Vector U>
-    [[nodiscard]] inline auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<U>) {
+    [[nodiscard]] auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<U>) {
         return m + x;
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline auto operator+(T1&& m1, T2&& m2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
+    [[nodiscard]] auto operator+(T1&& m1, T2&& m2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
         return MatrixExpr<ExprType::Add, T1&&, T2&&>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

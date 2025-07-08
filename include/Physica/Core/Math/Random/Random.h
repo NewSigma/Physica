@@ -96,7 +96,7 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Getters */
-        [[nodiscard]] inline SeedType getThreadSeed() const noexcept;
+        [[nodiscard]] SeedType getThreadSeed() const noexcept;
         /* Static members */
         constexpr static int getMKLRngID();
         constexpr static curandRngType_t curandRngID();
@@ -167,7 +167,7 @@ namespace Physica {
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    inline auto Random<Option, FixedSeed>::getThreadSeed() const noexcept -> SeedType {
+    auto Random<Option, FixedSeed>::getThreadSeed() const noexcept -> SeedType {
         if constexpr (IsSeedFixed)
             return ThreadPool::isMainThread() ? seed : (seed + ThreadPool::getThreadID() + 1);
         else

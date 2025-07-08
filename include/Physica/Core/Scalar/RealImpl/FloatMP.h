@@ -118,9 +118,9 @@ namespace Physica {
         void setByte(unsigned int index, MPUnit value) noexcept;
         /* Static members */
         template<RNG R>
-        [[nodiscard]] inline static Real random_uniform();
+        [[nodiscard]] static Real random_uniform();
         template<RNG R>
-        [[nodiscard]] inline static Real random_normal();
+        [[nodiscard]] static Real random_normal();
         [[nodiscard]] static bool matchSign(const Real& s1, const Real& s2) noexcept;
         [[nodiscard]] static double toDouble(MPUnit* __restrict byte, int length, int power) noexcept;
     private:

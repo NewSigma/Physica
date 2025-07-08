@@ -48,8 +48,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -71,7 +71,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTRSpace<Derived, 1>::PtrTy FFTRSpace<Derived, 1>::data_ptr(size_t index) {
+    __host__ __device__ FFTRSpace<Derived, 1>::PtrTy FFTRSpace<Derived, 1>::data_ptr(size_t index) {
         assert(index < getLength());
         if constexpr (isComplex)
             return Base::getDerived().asComplexBuffer() + index;
@@ -80,7 +80,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTRSpace<Derived, 1>::ConstPtrTy FFTRSpace<Derived, 1>::data_ptr(size_t index) const {
+    __host__ __device__ FFTRSpace<Derived, 1>::ConstPtrTy FFTRSpace<Derived, 1>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
     //////////////////////////////////////////////////////////////////////
@@ -133,7 +133,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTRSpace<Derived, 2>::PtrTy FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
+    __host__ __device__ FFTRSpace<Derived, 2>::PtrTy FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
         assert(row < getRow());
         assert(col < getCol());
         const size_t numColumn = getCol();
@@ -146,7 +146,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTRSpace<Derived, 2>::ConstPtrTy FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+    __host__ __device__ FFTRSpace<Derived, 2>::ConstPtrTy FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
     //////////////////////////////////////////////////////////////////////
@@ -171,7 +171,7 @@ namespace Physica {
         using TensorBase::operator();
         /* Operations */
         void transform(const Tensor auto& data);
-        inline void resize([[maybe_unused]] Index3D size);
+        void resize([[maybe_unused]] Index3D size);
         /* Getters */
         [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] size_t getShape(int dim) const noexcept { return getShape()[dim]; }
@@ -179,8 +179,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
         [[nodiscard]] size_t getSize() const noexcept { return TensorBase::toSize(Base::getDerived().getRSpaceSize()); }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(Index3D index);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(Index3D index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(Index3D index);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(Index3D index) const;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -204,14 +204,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void FFTRSpace<Derived, 3>::resize([[maybe_unused]] Index3D size) {
+    void FFTRSpace<Derived, 3>::resize([[maybe_unused]] Index3D size) {
         assert(getDimX() == size[0]);
         assert(getDimY() == size[1]);
         assert(getDimZ() == size[2]);
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTRSpace<Derived, 3>::PtrTy
+    __host__ __device__ FFTRSpace<Derived, 3>::PtrTy
     FFTRSpace<Derived, 3>::data_ptr(Index3D index) {
         assert(index[0] < getDimX());
         assert(index[1] < getDimY());
@@ -225,7 +225,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ inline FFTRSpace<Derived, 3>::ConstPtrTy
+    __host__ __device__ FFTRSpace<Derived, 3>::ConstPtrTy
     FFTRSpace<Derived, 3>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }

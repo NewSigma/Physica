@@ -39,7 +39,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    [[nodiscard]] inline auto sqrt_elem(M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto sqrt_elem(M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Sqrt, M&&>(std::forward<M>(m));
     }
 }

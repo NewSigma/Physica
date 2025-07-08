@@ -23,7 +23,7 @@
 
 namespace Physica {
     /**
-     * Use std::unreachable once we dump to C++23
+     * FIXME: Use std::unreachable once we dump to C++23
      */
     [[noreturn]] __host__ __device__ inline void unreachable() noexcept {
         assert(false && "[Error]: Trigger unreachable");

@@ -175,8 +175,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
     };
 
     template<Matrix T>
@@ -192,7 +192,7 @@ namespace Physica {
     }
 
     template<Matrix T>
-    __host__ __device__ inline auto device_obj<LMatrixBlock<T, Dynamic, Dynamic>>::data_ptr(size_t row, size_t col) -> PtrTy {
+    __host__ __device__ auto device_obj<LMatrixBlock<T, Dynamic, Dynamic>>::data_ptr(size_t row, size_t col) -> PtrTy {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.getDerived().data_ptr(row + fromRow, col + fromCol);

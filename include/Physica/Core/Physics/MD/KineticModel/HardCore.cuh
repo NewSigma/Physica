@@ -66,11 +66,11 @@ namespace Physica {
         void updateMass(RingPolymerType& ringPolymer);
         void swap(This& __restrict obj) noexcept;
 
-        __device__ inline void stepKernelImpl(T deltaT, size_t numStep);
+        __device__ void stepKernelImpl(T deltaT, size_t numStep);
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return repMass.getLength(); }
     private:
-        __device__ inline void handleCollision(T* __restrict sharedBuffer);
+        __device__ void handleCollision(T* __restrict sharedBuffer);
     };
 }
 

@@ -68,25 +68,25 @@ namespace Physica {
         using Base::operator();
         /* Operations */
         void resize(size_t row, size_t col);
-        [[nodiscard]] inline auto toDevice() const;
-        [[nodiscard]] inline auto toDeviceAsync() const;
+        [[nodiscard]] auto toDevice() const;
+        [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
         template<RNG R>
-        inline void random_uniform();
+        void random_uniform();
         template<RNG R>
-        inline void random_normal();
+        void random_normal();
         template<RNG R>
-        inline void random_any(auto& distribution);
+        void random_any(auto& distribution);
 
         void swap(This& __restrict obj) noexcept;
         void swap_row(size_t r1, size_t r2) noexcept;
         void swap_col(size_t c1, size_t c2) noexcept;
         /* Getters */
         using Base::data;
-        [[nodiscard]] inline PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
 
@@ -97,11 +97,11 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
         template<RNG R>
-        [[nodiscard]] inline static auto random_uniform(size_t row, size_t col);
+        [[nodiscard]] static auto random_uniform(size_t row, size_t col);
         template<RNG R>
-        [[nodiscard]] inline static auto random_normal(size_t row, size_t col);
+        [[nodiscard]] static auto random_normal(size_t row, size_t col);
         template<RNG R>
-        [[nodiscard]] inline static auto random_any(size_t row, size_t col, auto& distribution);
+        [[nodiscard]] static auto random_any(size_t row, size_t col, auto& distribution);
     private:
         friend class device_obj<This>;
     };

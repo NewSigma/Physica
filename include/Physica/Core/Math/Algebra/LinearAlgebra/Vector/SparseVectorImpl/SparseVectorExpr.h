@@ -53,12 +53,12 @@ namespace Physica {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Mul//////////////////////////////////////
     template<Vector T, Scalar U>
-    [[nodiscard]] inline auto operator*(const RSparseVector<T>& v, const U& x) noexcept {
+    [[nodiscard]] auto operator*(const RSparseVector<T>& v, const U& x) noexcept {
         return SparseVectorExpr<ExprType::Mul, T, U>(v.getDerived(), x);
     }
 
     template<Vector T, Scalar U>
-    [[nodiscard]] inline auto operator*(const U& x, const RSparseVector<T>& v) noexcept {
+    [[nodiscard]] auto operator*(const U& x, const RSparseVector<T>& v) noexcept {
         return SparseVectorExpr<ExprType::Mul, T, U>(v * x);
     }
 }

@@ -62,7 +62,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    [[nodiscard]] inline auto reciprocal(V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto reciprocal(V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprType::Reciprocal, V&&>(std::forward<V>(v));
     }
 }

@@ -51,7 +51,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(size_t size) {
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(size_t size) {
         if (size != getLength()) {
             v.resize(size);
             g.resize(size);
@@ -59,48 +59,48 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline auto device_obj<DenseVector<Diff<T, Mode, Order>>>::toHost() const -> host_obj {
+    auto device_obj<DenseVector<Diff<T, Mode, Order>>>::toHost() const -> host_obj {
         host_obj result = toHostAsync();
         CUDAContext::getInstance().wait();
         return result;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline auto device_obj<DenseVector<Diff<T, Mode, Order>>>::toHostAsync() const -> host_obj {
+    auto device_obj<DenseVector<Diff<T, Mode, Order>>>::toHostAsync() const -> host_obj {
         host_obj result(getLength());
         toHostAsync(result);
         return result;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline void device_obj<DenseVector<Diff<T, Mode, Order>>>::toHost(host_obj& obj) const {
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::toHost(host_obj& obj) const {
         toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    inline void device_obj<DenseVector<Diff<T, Mode, Order>>>::toHostAsync(host_obj& obj) const {
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::toHostAsync(host_obj& obj) const {
         v.toHostAsync(obj.v);
         g.toHostAsync(obj.g);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    inline void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform() {
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform() {
         v.template random_uniform<R>();
         zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    inline void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_normal() {
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_normal() {
         v.template random_normal<R>();
         zero_grad();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    inline void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_any(auto& distribution) {
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::random_any(auto& distribution) {
         v.template random_any<R>(distribution);
         zero_grad();
     }
@@ -113,19 +113,19 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline auto device_obj<DenseVector<Diff<T, Mode, Order>>>::data_ptr(size_t index) noexcept -> PtrTy {
+    __host__ __device__ auto device_obj<DenseVector<Diff<T, Mode, Order>>>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < getLength() && "[Error]: Index out of range");
         return PtrTy(v.data_ptr(index), g.data_ptr(index));
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline auto device_obj<DenseVector<Diff<T, Mode, Order>>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
+    __host__ __device__ auto device_obj<DenseVector<Diff<T, Mode, Order>>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    inline auto device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform(size_t len) -> This {
+    auto device_obj<DenseVector<Diff<T, Mode, Order>>>::random_uniform(size_t len) -> This {
         This result(len);
         result.template random_uniform<R>();
         return result;
@@ -133,7 +133,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    inline auto device_obj<DenseVector<Diff<T, Mode, Order>>>::random_normal(size_t len) -> This {
+    auto device_obj<DenseVector<Diff<T, Mode, Order>>>::random_normal(size_t len) -> This {
         This result(len);
         result.template random_normal<R>();
         return result;
@@ -141,7 +141,7 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
-    inline auto device_obj<DenseVector<Diff<T, Mode, Order>>>::random_any(size_t len, auto& distribution) -> This {
+    auto device_obj<DenseVector<Diff<T, Mode, Order>>>::random_any(size_t len, auto& distribution) -> This {
         This result(len);
         result.template random_any<R>(distribution);
         return result;

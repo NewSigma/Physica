@@ -100,23 +100,23 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline FFT<T, 1>::RealType FFT<T, 1>::getRSpaceDelta(RealType kSpaceDelta) const noexcept {
+    FFT<T, 1>::RealType FFT<T, 1>::getRSpaceDelta(RealType kSpaceDelta) const noexcept {
         return RealType(2 * M_PI) / (kSpaceDelta * getRSpaceSize());
     }
 
     template<Scalar T>
-    inline FFT<T, 1>::RealType FFT<T, 1>::getKSpaceDelta(RealType rSpaceDelta) const noexcept {
+    FFT<T, 1>::RealType FFT<T, 1>::getKSpaceDelta(RealType rSpaceDelta) const noexcept {
         return RealType(2 * M_PI) / (rSpaceDelta * getRSpaceSize());
     }
 
     template<Scalar T>
-    inline FFT<T, 1> FFT<T, 1>::makeEmptyFFT(size_t rSpaceSize) {
+    FFT<T, 1> FFT<T, 1>::makeEmptyFFT(size_t rSpaceSize) {
         return FFT<T, 1>(rSpaceSize);
     }
 
     template<Scalar T>
     template<std::integral IndexType>
-    __host__ __device__ constexpr inline IndexType FFT<T, 1>::rSizeToKSize(IndexType size_data) noexcept {
+    __host__ __device__ constexpr IndexType FFT<T, 1>::rSizeToKSize(IndexType size_data) noexcept {
         if constexpr (isComplex)
             return size_data;
         else
@@ -173,7 +173,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    inline void FFT<T, 1>::initializePlan() {
+    void FFT<T, 1>::initializePlan() {
         assert(forward_plan == nullptr);
         assert(backward_plan == nullptr);
         Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
@@ -282,19 +282,19 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    inline FFT<T, Dim>::RealType FFT<T, Dim>::getRSpaceDelta(
+    FFT<T, Dim>::RealType FFT<T, Dim>::getRSpaceDelta(
             RealType kSpaceDelta, unsigned int dim) const noexcept{
         return RealType(2 * M_PI) / (kSpaceDelta * getRSpaceSize()[dim]);
     }
 
     template<Scalar T, size_t Dim>
-    inline FFT<T, Dim>::RealType FFT<T, Dim>::getKSpaceDelta(
+    FFT<T, Dim>::RealType FFT<T, Dim>::getKSpaceDelta(
             RealType rSpaceDelta, unsigned int dim) const noexcept {
         return RealType(2 * M_PI) / (rSpaceDelta * getRSpaceSize()[dim]);
     }
 
     template<Scalar T, size_t Dim>
-    inline FFT<T, Dim> FFT<T, Dim>::makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize) {
+    FFT<T, Dim> FFT<T, Dim>::makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize) {
         return FFT(rSpaceSize);
     }
 
@@ -310,7 +310,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    inline void FFT<T, Dim>::transform(const This& planProvider, This& bufferProvider) {
+    void FFT<T, Dim>::transform(const This& planProvider, This& bufferProvider) {
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
         assert(forward_plan != nullptr && "[Error]: Bad plan provider or working on a empry fft");
@@ -353,7 +353,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    inline void FFT<T, Dim>::invTransform(const This& planProvider, This& bufferProvider) {
+    void FFT<T, Dim>::invTransform(const This& planProvider, This& bufferProvider) {
         rawInvTransform(planProvider, bufferProvider);
         const ScalarType factor = RealType(1.0 / planProvider.sumRSpaceSize(0));
         bufferProvider.getRSpace() *= factor;

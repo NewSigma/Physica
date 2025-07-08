@@ -44,14 +44,14 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
-        inline This& operator=(const This& obj);
-        inline This& operator=(This&& obj) noexcept;
-        [[nodiscard]] __device__ inline RefTy operator[](size_t index);
-        [[nodiscard]] __device__ inline ConstRefTy operator[](size_t index) const;
+        This& operator=(const This& obj);
+        This& operator=(This&& obj) noexcept;
+        [[nodiscard]] __device__ RefTy operator[](size_t index);
+        [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const;
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
     };
@@ -71,35 +71,35 @@ namespace Physica {
             device_obj<ContinuousVector<T>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    inline device_obj<ContinuousVectorBlock<T, Length>>&
+    device_obj<ContinuousVectorBlock<T, Length>>&
     device_obj<ContinuousVectorBlock<T, Length>>::operator=(const device_obj<ContinuousVectorBlock<T, Length>>& obj) {
         Base::operator=(obj);
         return *this;
     }
     
     template<Vector T, size_t Length>
-    inline device_obj<ContinuousVectorBlock<T, Length>>&
+    device_obj<ContinuousVectorBlock<T, Length>>&
     device_obj<ContinuousVectorBlock<T, Length>>::operator=(device_obj<ContinuousVectorBlock<T, Length>>&& obj) noexcept {
         Base::operator=(std::move(obj));
         return *this;
     }
 
     template<Vector T, size_t Length>
-    __device__ inline device_obj<ContinuousVectorBlock<T, Length>>::RefTy
+    __device__ device_obj<ContinuousVectorBlock<T, Length>>::RefTy
     device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }
 
     template<Vector T, size_t Length>
-    __device__ inline device_obj<ContinuousVectorBlock<T, Length>>::ConstRefTy
+    __device__ device_obj<ContinuousVectorBlock<T, Length>>::ConstRefTy
     device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) const {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline size_t device_obj<ContinuousVectorBlock<T, Length>>::getLength() const noexcept {
+    __host__ __device__ size_t device_obj<ContinuousVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;

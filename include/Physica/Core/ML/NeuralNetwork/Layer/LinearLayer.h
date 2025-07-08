@@ -108,7 +108,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    inline auto LinearLayer<T, WithBias>::forward(const Vector auto& x) const -> CoDiff<VectorND<T>> {
+    auto LinearLayer<T, WithBias>::forward(const Vector auto& x) const -> CoDiff<VectorND<T>> {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (ReverseDiff<T>) {
             auto expr1 = weights * x;

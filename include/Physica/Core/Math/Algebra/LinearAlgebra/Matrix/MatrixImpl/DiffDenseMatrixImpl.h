@@ -78,21 +78,21 @@ namespace Physica {
 
     template<tparams>
     template<RNG R>
-    inline void DiffDenseMatrix::random_uniform() {
+    void DiffDenseMatrix::random_uniform() {
         v.template random_uniform<R>();
         g.zeros();
     }
 
     template<tparams>
     template<RNG R>
-    inline void DiffDenseMatrix::random_normal() {
+    void DiffDenseMatrix::random_normal() {
         v.template random_uniform<R>();
         g.zeros();
     }
 
     template<tparams>
     template<RNG R>
-    inline void DiffDenseMatrix::random_any(auto& distribution) {
+    void DiffDenseMatrix::random_any(auto& distribution) {
         v.template random_any<R>(distribution);
         g.zeros();
     }
@@ -117,14 +117,14 @@ namespace Physica {
     }
 
     template<tparams>
-    inline auto DiffDenseMatrix::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
+    auto DiffDenseMatrix::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < getRow() && "[Error]: Index out of range");
         assert(col < getCol() && "[Error]: Index out of range");
         return PtrTy(v.data_ptr(row, col), g.data_ptr(row, col));
     }
 
     template<tparams>
-    inline auto DiffDenseMatrix::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
+    auto DiffDenseMatrix::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 
@@ -137,19 +137,19 @@ namespace Physica {
 
     template<tparams>
     template<RNG R>
-    inline auto DiffDenseMatrix::random_uniform(size_t row, size_t col) {
+    auto DiffDenseMatrix::random_uniform(size_t row, size_t col) {
         return This(ValueMatrix::template random_uniform<R>(row, col));
     }
 
     template<tparams>
     template<RNG R>
-    inline auto DiffDenseMatrix::random_normal(size_t row, size_t col) {
+    auto DiffDenseMatrix::random_normal(size_t row, size_t col) {
         return This(ValueMatrix::template random_normal<R>(row, col));
     }
 
     template<tparams>
     template<RNG R>
-    inline auto DiffDenseMatrix::random_any(size_t row, size_t col, auto& distribution) {
+    auto DiffDenseMatrix::random_any(size_t row, size_t col, auto& distribution) {
         return This(ValueMatrix::template random_any<R>(row, col, distribution));
     }
 

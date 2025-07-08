@@ -47,16 +47,16 @@ namespace Physica {
         ~SymmArray() = default;
         /* Operators */
         SymmArray& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __host__ __device__ inline lvalue_reference operator()(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ lvalue_reference operator()(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
         void resize(size_t row) { resize(row, row); }
         void swap(This& __restrict storage) noexcept;
 
-        inline const H5DataSet<1> read(const H5Loc& loc, const char* name);
-        inline H5DataSet<1> write(H5Loc& loc, const char* name) const;
+        const H5DataSet<1> read(const H5Loc& loc, const char* name);
+        H5DataSet<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
@@ -68,8 +68,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
         [[nodiscard]] __host__ __device__ auto data() noexcept { return arr.data(); }
         [[nodiscard]] __host__ __device__ auto data() const noexcept { return arr.data(); }
-        [[nodiscard]] __host__ __device__ inline auto data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ inline auto data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
 
@@ -97,13 +97,13 @@ namespace Physica {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline SymmArray<T, Order>::lvalue_reference
+    __host__ __device__ SymmArray<T, Order>::lvalue_reference
     SymmArray<T, Order>::operator()(size_t row, size_t col) {
         return (*this)[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline SymmArray<T, Order>::const_lvalue_reference
+    __host__ __device__ SymmArray<T, Order>::const_lvalue_reference
     SymmArray<T, Order>::operator()(size_t row, size_t col) const {
         return (*this)[toIndex1D(row, col)];
     }
@@ -125,25 +125,25 @@ namespace Physica {
 
 #ifdef PHYSICA_HDF5
     template<class T, size_t Order>
-    inline const H5DataSet<1> SymmArray<T, Order>::read(const H5Loc& loc, const char* name) {
+    const H5DataSet<1> SymmArray<T, Order>::read(const H5Loc& loc, const char* name) {
         auto group = arr.read(loc, name);
         assert(order * (order + 1) / 2 == size() && "[Error]: Order is not well initialized");
         return group;
     }
 
     template<class T, size_t Order>
-    inline H5DataSet<1> SymmArray<T, Order>::write(H5Loc& loc, const char* name) const {
+    H5DataSet<1> SymmArray<T, Order>::write(H5Loc& loc, const char* name) const {
         return arr.write(loc, name);
     }
 #endif
 
     template<class T, size_t Order>
-    __host__ __device__ inline auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) noexcept {
+    __host__ __device__ auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) noexcept {
         return arr.data() + toIndex1D(row, col);
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
+    __host__ __device__ auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
         return arr.data() + toIndex1D(row, col);
     }
 
@@ -180,7 +180,7 @@ namespace Physica {
 
 namespace std {
     template<class T, size_t Order>
-    inline void swap(Physica::SymmArray<T, Order>& __restrict mat1,
+    void swap(Physica::SymmArray<T, Order>& __restrict mat1,
                      Physica::SymmArray<T, Order>& __restrict mat2) noexcept {
         mat1.swap(mat2);
     }

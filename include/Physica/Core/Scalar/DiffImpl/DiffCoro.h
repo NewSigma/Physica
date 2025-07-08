@@ -37,7 +37,7 @@ namespace Physica {
                     handle = std::move(handle_);
                 }
 
-                [[nodiscard]] Base await_resume() const noexcept { // NVCC 12.8 rejects valid if we return const Base
+                [[nodiscard]] Base await_resume() const noexcept { // FIXME: NVCC 12.8 rejects valid if we return const Base
                     return Base(std::move(handle.promise().obj));
                 }
             };

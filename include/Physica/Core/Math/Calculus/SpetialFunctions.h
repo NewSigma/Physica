@@ -63,10 +63,10 @@ namespace Physica {
     template<Scalar T> T lnGamma(const T& s_);
 
     template<FloatPrec Prec>
-    inline Real<Prec> gamma(const Real<Prec>& s);
+    Real<Prec> gamma(const Real<Prec>& s);
 
     template<FloatPrec Prec>
-    inline Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2);
+    Real<Prec> beta(const Real<Prec>& s1, const Real<Prec>& s2);
 
     template<Scalar T> T gammaP(const T& a_, const T& x_);
 
@@ -191,10 +191,10 @@ namespace Physica {
     Real<Prec> incompBeta(const Real<Prec>& a, const Real<Prec>& b, const Real<Prec>& x);
 
     template<FloatPrec Prec>
-    inline Real<Prec> studentT(size_t n, const Real<Prec>& x);
+    Real<Prec> studentT(size_t n, const Real<Prec>& x);
 
     template<FloatPrec Prec>
-    inline Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x);
+    Real<Prec> distributionF(const Real<Prec>& v1, const Real<Prec>& v2, const Real<Prec>& x);
 }
 
 #include "SpetialFunctionsImpl/Bessel.h"

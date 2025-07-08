@@ -45,13 +45,13 @@ namespace Physica {
 
     template<class T, int Dim>
     template<class... Dims>
-    inline T& ArrayND<T, Dim>::operator()(size_t dim0, Dims... dims) {
+    T& ArrayND<T, Dim>::operator()(size_t dim0, Dims... dims) {
         return operator()(toIndexArray(dim0, dims...));
     }
 
     template<class T, int Dim>
     template<class... Dims>
-    inline const T& ArrayND<T, Dim>::operator()(size_t dim0, Dims... dims) const {
+    const T& ArrayND<T, Dim>::operator()(size_t dim0, Dims... dims) const {
         return const_cast<This&>(*this)(dim0, dims...);
     }
 
@@ -100,12 +100,12 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    inline T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) {
+    T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) {
         return arr.data() + toIndex1D(indices);
     }
 
     template<class T, int Dim>
-    inline const T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) const {
+    const T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) const {
         return const_cast<This&>(*this).data_ptr(indices);
     }
 

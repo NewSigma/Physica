@@ -55,16 +55,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] bool isRemoveDriftEnabled() const noexcept { return removeDrift; }
         /* Setters */
-        void setTemperature(T temperatureT_) { temperatureT = temperatureT_; }
-        void setThermostatTime(T time) { thermostatTime = time; }
+        void setTemperature(T temperatureT_) noexcept { temperatureT = temperatureT_; }
+        void setThermostatTime(T time) noexcept { thermostatTime = time; }
         /* Static members */
         template<Scalar U>
-        static inline void langevinImpl(
-            U& momentum,
-            T deltaT,
-            T viscosityY,
-            T factor,
-            U random);
+        static void langevinImpl(U& momentum, T deltaT, T viscosityY, T factor, U random) noexcept;
     };
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
@@ -82,27 +77,26 @@ namespace Physica {
         const auto& massVec = ringPolymer.getMassVec();
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
-            parallel_for<P>(
-                [deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec](unsigned int i) {
-                    const size_t numReplica = ringPolymer.getNumReplica();
-                    const auto mass = massVec[i / Dim];
-                    const T factor = sqrt(repBeta * mass);
-                    auto fft = FFT<T, 1>::makeEmptyFFT(numReplica);
-                    BufferType buffer(2, ringPolymer.getKSpaceSize());
+            parallel_for<P>([deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec](unsigned int i) {
+                const size_t numReplica = ringPolymer.getNumReplica();
+                const auto mass = massVec[i / Dim];
+                const T factor = sqrt(repBeta * mass);
+                auto fft = FFT<T, 1>::makeEmptyFFT(numReplica);
+                BufferType buffer(2, ringPolymer.getKSpaceSize());
 
-                    ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                    fft.getRSpace().template random_normal<R>();
-                    FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
-                    /* Translational mode */ {
-                        langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
-                    }
-                    for (size_t j = 1; j < buffer.getCol(); ++j) {
-                        const T phase = M_PI * j / numReplica;
-                        const T viscosityY = sin(phase) * omegaW;
-                        langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
-                    }
-                    ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                }, dof, 0).wait();
+                ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
+                fft.getRSpace().template random_normal<R>();
+                FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
+                /* Translational mode */ {
+                    langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
+                }
+                for (size_t j = 1; j < buffer.getCol(); ++j) {
+                    const T phase = M_PI * j / numReplica;
+                    const T viscosityY = sin(phase) * omegaW;
+                    langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
+                }
+                ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
+            }, dof, 0).wait();
         }
         else {
             for (size_t i = 0; i < dof; ++i) {
@@ -118,12 +112,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     template<Scalar U>
-    void Langevin<T, Dim, NumReplica>::langevinImpl(
-            U& momentum,
-            T deltaT,
-            T viscosityY,
-            T factor,
-            U random) {
+    void Langevin<T, Dim, NumReplica>::langevinImpl(U& momentum, T deltaT, T viscosityY, T factor, U random) noexcept {
         const T c1 = exp(-viscosityY * deltaT);
         const T c2 = sqrt(T(1) - square(c1));
         momentum = c1 * momentum + factor * c2 * random;

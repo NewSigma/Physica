@@ -47,8 +47,8 @@ namespace Physica {
         [[nodiscard]] size_t getDimX() const noexcept { return count[0]; }
         [[nodiscard]] size_t getDimY() const noexcept { return count[1]; }
         [[nodiscard]] size_t getDimZ() const noexcept { return count[2]; }
-        [[nodiscard]] inline ScalarType* data_ptr(Index3D index);
-        [[nodiscard]] inline const ScalarType* data_ptr(Index3D index) const;
+        [[nodiscard]] ScalarType* data_ptr(Index3D index);
+        [[nodiscard]] const ScalarType* data_ptr(Index3D index) const;
     };
 
     template<Tensor T>
@@ -63,12 +63,12 @@ namespace Physica {
     }
 
     template<Tensor T>
-    inline LTensorBlock<T>::ScalarType* LTensorBlock<T>::data_ptr(Index3D index) {
+    LTensorBlock<T>::ScalarType* LTensorBlock<T>::data_ptr(Index3D index) {
         return grid.data_ptr({from[0] + index[0], from[1] + index[1], from[2] + index[2]});
     }
 
     template<Tensor T>
-    inline const LTensorBlock<T>::ScalarType* LTensorBlock<T>::data_ptr(Index3D index) const {
+    const LTensorBlock<T>::ScalarType* LTensorBlock<T>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

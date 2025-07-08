@@ -59,7 +59,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    [[nodiscard]] inline auto operator-(M&& m) noexcept requires(CUDA<M>) {
+    [[nodiscard]] auto operator-(M&& m) noexcept requires(CUDA<M>) {
         return device_obj<MatrixExpr<ExprType::Minus, M&&>>(std::forward<M>(m));
     }
 }

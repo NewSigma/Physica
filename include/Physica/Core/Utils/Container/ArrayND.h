@@ -61,9 +61,9 @@ namespace Physica {
         [[nodiscard]] T& operator()(const IndexArray& indices);
         [[nodiscard]] const T& operator()(const IndexArray& indices) const;
         template<class... Dims>
-        [[nodiscard]] inline T& operator()(size_t dim0, Dims... dims);
+        [[nodiscard]] T& operator()(size_t dim0, Dims... dims);
         template<class... Dims>
-        [[nodiscard]] inline const T& operator()(size_t dim0, Dims... dims) const;
+        [[nodiscard]] const T& operator()(size_t dim0, Dims... dims) const;
         /* Operations */
         template<class... Args>
         void resize(IndexArray shape_, Args&&... args);
@@ -80,8 +80,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto& asArray() noexcept { return arr; }
         [[nodiscard]] const auto& asArray() const noexcept { return arr; }
-        [[nodiscard]] inline T* data_ptr(const IndexArray& indices);
-        [[nodiscard]] inline const T* data_ptr(const IndexArray& indices) const;
+        [[nodiscard]] T* data_ptr(const IndexArray& indices);
+        [[nodiscard]] const T* data_ptr(const IndexArray& indices) const;
         [[nodiscard]] const IndexArray& getShape() const noexcept { return shape; }
         [[nodiscard]] size_t getShape(int dim) const noexcept { return shape[dim]; }
         [[nodiscard]] int getDim() const noexcept { return shape.getLength(); }

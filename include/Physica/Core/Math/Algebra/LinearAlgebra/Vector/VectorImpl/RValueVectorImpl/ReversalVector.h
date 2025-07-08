@@ -43,12 +43,12 @@ namespace Physica {
     };
 
     template<class Derived>
-    inline auto RValueVector<Derived>::reversal() noexcept {
+    auto RValueVector<Derived>::reversal() noexcept {
         return ReversalVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline const auto RValueVector<Derived>::reversal() const noexcept {
+    const auto RValueVector<Derived>::reversal() const noexcept {
         return ReversalVector<Derived>(Base::getDerived());
     }
 }

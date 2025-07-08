@@ -36,7 +36,7 @@ namespace Physica {
         H5DataSet(H5DataSet&&) noexcept = default;
         virtual ~H5DataSet() = default;
         /* Operators */
-        inline H5DataSet& operator=(const H5DataSet& obj);
+        H5DataSet& operator=(const H5DataSet& obj);
         H5DataSet& operator=(H5DataSet&&);
         using Base::operator=;
         /* Operations */
@@ -56,13 +56,13 @@ namespace Physica {
     H5DataSet<Dim>::H5DataSet(const H5::DataSet& obj) : Base(obj) {}
 
     template<size_t Dim>
-    inline H5DataSet<Dim>& H5DataSet<Dim>::operator=(const H5DataSet& obj) {
+    H5DataSet<Dim>& H5DataSet<Dim>::operator=(const H5DataSet& obj) {
         Base::operator=(obj);
         return *this;
     }
 
     template<size_t Dim>
-    inline H5DataSet<Dim>& H5DataSet<Dim>::operator=(H5DataSet&& obj) {
+    H5DataSet<Dim>& H5DataSet<Dim>::operator=(H5DataSet&& obj) {
         Base::operator=(obj);
         return *this;
     }

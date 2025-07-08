@@ -59,12 +59,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::operator()(size_t row, size_t col) -> RefTy {
+    auto LValueMatrix<Derived>::operator()(size_t row, size_t col) -> RefTy {
         return *data_ptr(row, col);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::operator()(size_t row, size_t col) const -> ConstRefTy {
+    auto LValueMatrix<Derived>::operator()(size_t row, size_t col) const -> ConstRefTy {
         return *data_ptr(row, col);
     }
 
@@ -97,162 +97,162 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::row(size_t r) noexcept {
+    auto LValueMatrix<Derived>::row(size_t r) noexcept {
         return RowVector(Base::getDerived(), r, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::row(size_t r) const noexcept {
+    const auto LValueMatrix<Derived>::row(size_t r) const noexcept {
         return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::col(size_t c) noexcept {
+    auto LValueMatrix<Derived>::col(size_t c) noexcept {
         return ColVector(Base::getDerived(), 0, Base::getRow(), c);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::col(size_t c) const noexcept {
+    const auto LValueMatrix<Derived>::col(size_t c) const noexcept {
         return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) noexcept {
+    auto LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) noexcept {
         return BlockType(Base::getDerived(), fromRow, rowCount, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const noexcept {
+    const auto LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const noexcept {
         return BlockType(Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::topRows(size_t to) noexcept {
+    auto LValueMatrix<Derived>::topRows(size_t to) noexcept {
         return BlockType(Base::getDerived(), 0, to, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::topRows(size_t to) const noexcept {
+    const auto LValueMatrix<Derived>::topRows(size_t to) const noexcept {
         return BlockType(Base::getConstCastDerived(), 0, to, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::bottomRows(size_t from) noexcept {
+    auto LValueMatrix<Derived>::bottomRows(size_t from) noexcept {
         return BlockType(Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::bottomRows(size_t from) const noexcept {
+    const auto LValueMatrix<Derived>::bottomRows(size_t from) const noexcept {
         return BlockType(Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol());
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) noexcept {
+    auto LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) noexcept {
         return BlockType(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) const noexcept {
+    const auto LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) const noexcept {
         return BlockType(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::leftCols(size_t to) noexcept {
+    auto LValueMatrix<Derived>::leftCols(size_t to) noexcept {
         return BlockType(Base::getDerived(), 0, Base::getRow(), 0, to);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::leftCols(size_t to) const noexcept {
+    const auto LValueMatrix<Derived>::leftCols(size_t to) const noexcept {
         return BlockType(Base::getConstCastDerived(), 0, Base::getRow(), 0, to);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::rightCols(size_t from) noexcept {
+    auto LValueMatrix<Derived>::rightCols(size_t from) noexcept {
         return BlockType(Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::rightCols(size_t from) const noexcept {
+    const auto LValueMatrix<Derived>::rightCols(size_t from) const noexcept {
         return BlockType(Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) noexcept {
+    auto LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) noexcept {
         return BlockType(Base::getDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const noexcept {
+    const auto LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const noexcept {
         return BlockType(Base::getConstCastDerived(), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::topLeftCorner(size_t to) noexcept {
+    auto LValueMatrix<Derived>::topLeftCorner(size_t to) noexcept {
         return BlockType(Base::getDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::topLeftCorner(size_t to) const noexcept {
+    const auto LValueMatrix<Derived>::topLeftCorner(size_t to) const noexcept {
         return BlockType(Base::getConstCastDerived(), 0, to, 0, to);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) noexcept {
+    auto LValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) noexcept {
         return BlockType(Base::getDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) const noexcept {
+    const auto LValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) const noexcept {
         return BlockType(Base::getConstCastDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) noexcept {
+    auto LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) noexcept {
         return BlockType(Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept {
+    const auto LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept {
         return BlockType(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) noexcept {
+    auto LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) noexcept {
         return BlockType(Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept {
+    const auto LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept {
         return BlockType(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::bottomRightCorner(size_t from) noexcept {
+    auto LValueMatrix<Derived>::bottomRightCorner(size_t from) noexcept {
         return BlockType(Base::getDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::bottomRightCorner(size_t from) const noexcept {
+    const auto LValueMatrix<Derived>::bottomRightCorner(size_t from) const noexcept {
         return BlockType(Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+    auto LValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         return BlockType(Base::getDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
+    const auto LValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
         return BlockType(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::diag() noexcept {
+    auto LValueMatrix<Derived>::diag() noexcept {
         return DiagVector<Derived, true>(Base::getDerived());
     }
 
     template<class Derived>
-    inline const auto LValueMatrix<Derived>::diag() const noexcept {
+    const auto LValueMatrix<Derived>::diag() const noexcept {
         return DiagVector<Derived, true>(Base::getConstCastDerived());
     }
     /**
@@ -285,7 +285,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, size_t elementIndex) {
+    void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, size_t elementIndex) {
         if constexpr (MatrixOption::isColMatrix<Derived>())
             colReduce(v1, v2, elementIndex);
         else
@@ -293,7 +293,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
+    void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
         if constexpr (MatrixOption::isColMatrix<Derived>()) {
             auto col1 = col(v1);
             col1 -= col(v2) * factor;
@@ -305,7 +305,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
+    void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
         if constexpr (MatrixOption::isColMatrix<Derived>()) {
             auto c = col(v);
             c *= factor;
@@ -317,7 +317,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline void LValueMatrix<Derived>::majorSwap(size_t v1, size_t v2) {
+    void LValueMatrix<Derived>::majorSwap(size_t v1, size_t v2) {
         if constexpr (MatrixOption::isColMatrix<Derived>())
             Base::getDerived().swap_col(v1, v2);
         else
@@ -380,18 +380,18 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
+    auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < Base::getRow() && col < Base::getCol());
         return Base::getDerived().data_ptr(row, col);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
+    auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) -> RefTy {
+    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) -> RefTy {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
@@ -399,7 +399,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    inline auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const -> ConstRefTy {
+    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const -> ConstRefTy {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());

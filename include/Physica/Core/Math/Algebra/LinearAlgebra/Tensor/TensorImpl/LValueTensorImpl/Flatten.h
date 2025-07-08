@@ -46,8 +46,8 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.getSize(); }
-        [[nodiscard]] inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] PtrTy data_ptr(size_t index);
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<Tensor T>

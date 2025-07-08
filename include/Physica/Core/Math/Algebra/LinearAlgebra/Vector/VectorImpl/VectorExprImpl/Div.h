@@ -103,17 +103,17 @@ namespace Physica {
     };
 
     template<Vector T, Scalar U>
-    [[nodiscard]] inline auto operator/(T&& v, U&& x) noexcept requires(!CUDA<T>) {
+    [[nodiscard]] auto operator/(T&& v, U&& x) noexcept requires(!CUDA<T>) {
         return VectorExpr<ExprType::Div, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector T>
-    [[nodiscard]] inline auto operator/(U&& x, T&& v) noexcept requires(!CUDA<T>) {
+    [[nodiscard]] auto operator/(U&& x, T&& v) noexcept requires(!CUDA<T>) {
         return VectorExpr<ExprType::Div, U&&, T&&>(std::forward<U>(x), std::forward<T>(v));
     }
 
     template<Vector V1, Vector V2>
-    [[nodiscard]] inline auto divide(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+    [[nodiscard]] auto divide(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
         return VectorExpr<ExprType::Div, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

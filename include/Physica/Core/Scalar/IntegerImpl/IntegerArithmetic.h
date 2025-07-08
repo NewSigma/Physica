@@ -27,7 +27,7 @@ namespace Physica {
     /**
      * Both i1 and i2 must be positive integers.
      */
-    inline Integer Integer::integerAddImpl(const Integer& i1, const Integer& i2) {
+    Integer Integer::integerAddImpl(const Integer& i1, const Integer& i2) {
         assert(i1.isPositive() && i2.isPositive());
         const Integer* __restrict largeInt = i1.length > i2.length ? &i1 : &i2;
         const Integer* __restrict smallInt = i1.length > i2.length ? &i2 : &i1;
@@ -54,7 +54,7 @@ namespace Physica {
     /**
      * Both i1 and i2 must be positive integers.
      */
-    inline Integer Integer::integerSubImpl(const Integer& i1, const Integer& i2) {
+    Integer Integer::integerSubImpl(const Integer& i1, const Integer& i2) {
         assert(i1.isPositive() && i2.isPositive());
         bool changeSign = i1.length <= i2.length;
         const bool i1_larger = !changeSign;
