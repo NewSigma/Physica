@@ -129,32 +129,22 @@ namespace Physica {
 
         constexpr bool IsPeriodBoundary = Traits<KineticModel>::IsPeriodBoundary;
         const T repBeta = calcRepBeta(temperatureT);
+        phase.topRows(dof).template random_normal<R>();
         if constexpr (IsPeriodBoundary) {
             DenseVector<T, Dim> driftMomentum(Dim, 0);
-            for (size_t i = 0; i < dof; ++i) {
-                const auto mass = massVec[i / Dim];
-                const size_t direction = i % Dim;
-                const T factor = sqrt(repBeta * mass);
-                for (size_t j = 0; j < getNumReplica(); ++j) {
-                    const T temp = factor * Tv::template random_normal<R>();
-                    phase(i, j) = temp;
-                    driftMomentum[direction] += temp;
-                }
+            for (size_t i = 0; i < getNumParticle(); ++i) {
+                phase.rows(i * Dim, Dim) *= sqrt(repBeta * massVec[i]);
+                for (int dim = 0; dim < Dim; ++dim)
+                    driftMomentum[dim] += phase.row(i * Dim + dim).sum();
             }
             driftMomentum *= reciprocal(T(getNumParticle() * getNumReplica()));
 
-            for (size_t i = 0; i < dof; ++i) {
-                auto row = phase.row(i);
-                row -= driftMomentum[i % Dim];
-            }
+            for (size_t i = 0; i < dof; ++i)
+                phase.row(i) -= driftMomentum[i % Dim];
         }
         else {
-            for (size_t i = 0; i < dof; ++i) {
-                const auto mass = massVec[i / Dim];
-                const T factor = sqrt(repBeta * mass);
-                for (size_t j = 0; j < getNumReplica(); ++j)
-                    phase(i, j) = factor * Tv::template random_normal<R>();
-            }
+            for (size_t i = 0; i < getNumParticle(); ++i)
+                phase.rows(i * Dim, Dim) *= sqrt(repBeta * massVec[i]);
         }
         scaleVelocity<KineticModel>(temperatureT);
     }
@@ -162,12 +152,9 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     template<class KineticModel>
     void RingPolymer<T, Dim, NumReplica>::scaleVelocity(T temperatureT) {
-        const T temperatureNow = calcTemperature<KineticModel>();
-        assert(temperatureNow.isPositive() && "[Error]: Invalid temperature");
-        const size_t dof = getDOF();
-        const T factor = sqrt(temperatureT / temperatureNow);
-        auto momentum = phase.topRows(dof);
-        momentum *= factor;
+        const T temperatureT0 = calcTemperature<KineticModel>();
+        assert(temperatureT0.isPositive() && "[Error]: Invalid temperature");
+        phase.topRows(getDOF()) *= sqrt(temperatureT / temperatureT0);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
