@@ -22,20 +22,20 @@
 
 namespace Physica {
     template<Scalar T>
-    __host__ __device__ auto abs(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto abs(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         return ResultType(abs(x.value()), x.value().isPositive() ? x.grad() : -x.grad());
     }
 
     template<Scalar T>
-    __host__ __device__ auto relu(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto relu(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using GradType = T::GradType;
         return ResultType(relu(x.value()), x.value().isPositive() ? x.grad() : GradType(0));
     }
 
     template<Scalar T>
-    __host__ __device__ auto square(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto square(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
@@ -43,7 +43,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto reciprocal(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto reciprocal(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         const auto v = reciprocal(x.template mask<GradOrder>());
@@ -51,7 +51,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto sqrt(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto sqrt(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
@@ -61,7 +61,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto cbrt(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto cbrt(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
@@ -70,7 +70,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto ln(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto ln(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         if constexpr (!T::isComplex)
@@ -79,7 +79,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto ln1p(const T& x) requires(ForwardDiff<T>) {
+    auto ln1p(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
@@ -87,7 +87,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    auto ln1pexp(const Diff<T, DiffMode::Forward, Order>& x) {
+    auto ln1pexp(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
         constexpr int GradOrder = GradType::Order;
@@ -103,10 +103,10 @@ namespace Physica {
     }
 
     //template<Scalar T, int Order>
-    //auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a);
+    //auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a) noexcept;
 
     template<Scalar T>
-    __host__ __device__ auto exp(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto exp(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         const auto v = exp(x.template mask<GradOrder>());
@@ -114,7 +114,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    __host__ __device__ auto pow(T&& x, U&& a) requires(ForwardDiff<T> && !Diffable<U>) {
+    __host__ __device__ auto pow(T&& x, U&& a) noexcept requires(ForwardDiff<T> && !Diffable<U>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         const auto y = pow(x.template mask<GradOrder>(), a);
@@ -122,10 +122,10 @@ namespace Physica {
     }
 
     //template<Scalar T, int Order>
-    //auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n);
+    //auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n) noexcept;
 
     template<Scalar T>
-    __host__ __device__ auto cos(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto cos(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using GradType = T::GradType;
         constexpr int GradOrder = GradType::Order;
@@ -135,7 +135,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto sin(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto sin(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using GradType = T::GradType;
         constexpr int GradOrder = GradType::Order;
@@ -145,7 +145,7 @@ namespace Physica {
     }
 
     template<Scalar T, Scalar U>
-    __host__ __device__ void sincos(const T& x, U& sin_result, U& cos_result) requires(ForwardDiff<T> && ForwardDiff<U>) {
+    __host__ __device__ void sincos(const T& x, U& sin_result, U& cos_result) noexcept requires(ForwardDiff<T> && ForwardDiff<U>) {
         using ResultType = U::ScalarType;
         using GradType = T::GradType;
         constexpr int GradOrder = GradType::Order;
@@ -156,14 +156,14 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    auto tan(const Diff<T, DiffMode::Forward, Order>& x) {
+    auto tan(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         constexpr int GradOrder = T::GradType::Order;
         return ResultType(tan(x.value()), x.grad() * square(sec(x.template mask<GradOrder>())));
     }
 
     template<Scalar T, int Order>
-    auto sec(const Diff<T, DiffMode::Forward, Order>& x) {
+    auto sec(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         constexpr int GradOrder = T::GradType::Order;
         const auto x1 = x.template mask<GradOrder>();
@@ -172,7 +172,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    auto csc(const Diff<T, DiffMode::Forward, Order>& x) {
+    auto csc(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         constexpr int GradOrder = T::GradType::Order;
         const auto x1 = x.template mask<GradOrder>();
@@ -181,14 +181,14 @@ namespace Physica {
     }
 
     template<Scalar T, int Order>
-    auto cot(const Diff<T, DiffMode::Forward, Order>& x) {
+    auto cot(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         constexpr int GradOrder = T::GradType::Order;
         return ResultType(cot(x.value()), -x.grad() * square(csc(x.template mask<GradOrder>())));
     }
 
     template<Scalar T, int Order>
-    auto arccos(const Diff<T, DiffMode::Forward, Order>& x) {
+    auto arccos(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         constexpr int GradOrder = T::GradType::Order;
         return ResultType(arccos(x.value()), -x.grad() / sqrt(T(1) - square(x.template mask<GradOrder>())));
@@ -197,37 +197,37 @@ namespace Physica {
     /*
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T, int Order>
-    auto arcsin(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsin(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T, int Order>
-    auto arctan(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arctan(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arcsec(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsec(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccsc(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccsc(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccot(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccot(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     */
 
     template<Scalar T>
-    __host__ __device__ auto cosh(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto cosh(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         return ResultType(cosh(x.value()), x.grad() * sinh(x.template mask<GradOrder>()));
     }
 
     template<Scalar T>
-    __host__ __device__ auto sinh(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto sinh(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         return ResultType(sinh(x.value()), x.grad() * cosh(x.template mask<GradOrder>()));
     }
 
     template<Scalar T>
-    __host__ __device__ auto tanh(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto tanh(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
@@ -237,47 +237,47 @@ namespace Physica {
 
     /*
     template<Scalar T, int Order>
-    auto sech(const Diff<T, DiffMode::Forward, Order>& x);
+    auto sech(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto csch(const Diff<T, DiffMode::Forward, Order>& x);
+    auto csch(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto coth(const Diff<T, DiffMode::Forward, Order>& x);
+    auto coth(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccosh(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccosh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arcsinh(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsinh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arctanh(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arctanh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arcsech(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsech(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccsch(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccsch(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccoth(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccoth(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     */
 
     template<Scalar T>
-    __host__ __device__ auto lncosh(const T& x) requires(ForwardDiff<T>) {
+    __host__ __device__ auto lncosh(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
         constexpr int GradOrder = T::GradType::Order;
         return ResultType(lncosh(x.value()), x.grad() * tanh(x.template mask<GradOrder>()));
     }
 
     template<Scalar T, int Order>
-    T floor(const Diff<T, DiffMode::Forward, Order>& x) {
+    T floor(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         return floor(x.value());
     }
     
     template<Scalar T, int Order>
-    T ceil(const Diff<T, DiffMode::Forward, Order>& x) {
+    T ceil(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         return ceil(x.value());
     }
 }

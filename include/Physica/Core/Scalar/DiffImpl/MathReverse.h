@@ -83,7 +83,7 @@ namespace Physica {
     // ln1pexp
 
     //template<Scalar T, int Order>
-    //auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a);
+    //auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a) noexcept;
     
     template<Scalar T>
     CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -101,7 +101,7 @@ namespace Physica {
     }
 
     //template<Scalar T, int Order>
-    //auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n);
+    //auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n) noexcept;
 
     template<Scalar T>
     CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -136,35 +136,35 @@ namespace Physica {
     }
     /*
     template<Scalar T, int Order>
-    auto tan(const Diff<T, DiffMode::Forward, Order>& x);
+    auto tan(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto sec(const Diff<T, DiffMode::Forward, Order>& x);
+    auto sec(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto csc(const Diff<T, DiffMode::Forward, Order>& x);
+    auto csc(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto cot(const Diff<T, DiffMode::Forward, Order>& x);
+    auto cot(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccos(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccos(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T, int Order>
-    auto arcsin(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsin(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<Scalar T, int Order>
-    auto arctan(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arctan(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arcsec(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsec(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccsc(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccsc(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccot(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccot(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     */
 
     template<Scalar T>
@@ -191,31 +191,31 @@ namespace Physica {
 
     /*
     template<Scalar T, int Order>
-    auto sech(const Diff<T, DiffMode::Forward, Order>& x);
+    auto sech(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto csch(const Diff<T, DiffMode::Forward, Order>& x);
+    auto csch(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto coth(const Diff<T, DiffMode::Forward, Order>& x);
+    auto coth(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccosh(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccosh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arcsinh(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsinh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arctanh(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arctanh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arcsech(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arcsech(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccsch(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccsch(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
     template<Scalar T, int Order>
-    auto arccoth(const Diff<T, DiffMode::Forward, Order>& x);
+    auto arccoth(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     */
 
     template<Scalar T>
@@ -227,9 +227,9 @@ namespace Physica {
 
     /*
     template<Scalar T, int Order>
-    T floor(const Diff<T, DiffMode::Forward, Order>& x);
+    T floor(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     
     template<Scalar T, int Order>
-    T ceil(const Diff<T, DiffMode::Forward, Order>& x);
+    T ceil(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
     */
 }
