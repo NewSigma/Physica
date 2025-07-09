@@ -46,7 +46,7 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void assign(Vector auto& target) const requires(CUDA<decltype(target)>);
 
-        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
 
         auto values() const noexcept { return mat.getDerived().values() * vec.getDerived().values(); }
         /* Getters */
@@ -84,15 +84,15 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    void device_obj<GEMV<T, U>>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
-        assert(grad_.getLength() == getLength());
-        const auto& grad = grad_.values();
+    void device_obj<GEMV<T, U>>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+        assert(grad.getLength() == getLength());
+        const auto& g = grad.values();
         const auto& m = mat.getDerived();
         const auto& v = vec.getDerived();
         if constexpr (ReverseDiff<T>)
-            m.reverse(grad * v.values().transpose());
+            m.reverse(g * v.values().transpose());
         if constexpr (ReverseDiff<U>)
-            v.reverse(m.values().transpose() * grad);
+            v.reverse(m.values().transpose() * g);
     }
 
     template<Matrix T, Vector U>

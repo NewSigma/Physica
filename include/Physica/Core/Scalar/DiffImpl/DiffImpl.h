@@ -55,12 +55,12 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ T Diff<T, Mode, Order>::reverse(GradType grad_) const noexcept {
+    __host__ __device__ T Diff<T, Mode, Order>::reverse(GradType grad) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
-        auto& g1 = const_cast<GradType&>(grad());
-        g1.value() += grad_.value();
+        auto& g1 = const_cast<GradType&>(this->grad());
+        g1.value() += grad.value();
         if constexpr (Order != 1)
-            g1.reverse(grad_.grad());
+            g1.reverse(grad.grad());
         return v;
     }
 

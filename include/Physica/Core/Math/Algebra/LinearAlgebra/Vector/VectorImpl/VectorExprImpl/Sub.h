@@ -65,42 +65,42 @@ namespace Physica {
                 return Pack(Base::getLHS(), count) - Base::getRHS().template packetPartial<Pack>(index, count);
         }
 
-        void reverse(const auto& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
     };
 
     template<class T, class U>
-    void VectorExpr<ExprType::Sub, T, U>::reverse(const auto& grad_) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Sub, T, U>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
         const auto& lhs = Base::getLHS();
         const auto& rhs = Base::getRHS();
-        if constexpr (Scalar<decltype(grad_)>) {
-            const auto& grad = grad_.value();
+        if constexpr (Scalar<decltype(grad)>) {
+            const auto& g = grad.value();
             if constexpr (Vector<T>) {
                 if constexpr (ReverseDiff<T>)
-                    lhs.reverse(grad);
+                    lhs.reverse(g);
                 if constexpr (ReverseDiff<U>)
-                    rhs.reverse(-grad * Tv(Base::getLength()));
+                    rhs.reverse(-g * Tv(Base::getLength()));
             }
             else {
                 if constexpr (ReverseDiff<T>)
-                    lhs.reverse(grad * Tv(Base::getLength()));
+                    lhs.reverse(g * Tv(Base::getLength()));
                 if constexpr (ReverseDiff<U>)
-                    rhs.reverse(-grad);
+                    rhs.reverse(-g);
             }
         }
         else {
-            static_assert(Vector<decltype(grad_)>, "[Error]: Unexpected type");
-            const auto& grad = grad_.values();
+            static_assert(Vector<decltype(grad)>, "[Error]: Unexpected type");
+            const auto& g = grad.values();
             if constexpr (Vector<T>) {
                 if constexpr (ReverseDiff<T>)
-                    lhs.reverse(grad);
+                    lhs.reverse(g);
                 if constexpr (ReverseDiff<U>)
-                    rhs.reverse(-grad.sum());
+                    rhs.reverse(-g.sum());
             }
             else {
                 if constexpr (ReverseDiff<T>)
-                    lhs.reverse(grad.sum());
+                    lhs.reverse(g.sum());
                 if constexpr (ReverseDiff<U>)
-                    rhs.reverse(-grad);
+                    rhs.reverse(-g);
             }
         }
     }
@@ -138,12 +138,12 @@ namespace Physica {
             return getLHS().template packetPartial<Pack>(index, count) - getRHS().template packetPartial<Pack>(index, count);
         }
 
-        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
-            const auto& grad = grad_.values();
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+            const auto& g = grad.values();
             if constexpr (ReverseDiff<V1>)
-                Base::getLHS().reverse(grad);
+                Base::getLHS().reverse(g);
             if constexpr (ReverseDiff<V2>)
-                Base::getRHS().reverse(grad);
+                Base::getRHS().reverse(g);
         }
         /* Getters */
         using Base::getLHS;

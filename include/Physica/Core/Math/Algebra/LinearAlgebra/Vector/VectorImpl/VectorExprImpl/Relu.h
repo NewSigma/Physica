@@ -42,15 +42,15 @@ namespace Physica {
         }
 
         using Base::reverse;
-        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
-    void VectorExpr<ExprType::Relu, V>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
-        const auto& grad = grad_.values();
+    void VectorExpr<ExprType::Relu, V>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+        const auto& g = grad.values();
         for (size_t i = 0; i < Base::getLength(); ++i) {
             auto v = Base::getExpr().calc(i);
-            v.reverse(v.isPositive() ? grad.calc(i) : Tv(0));
+            v.reverse(v.isPositive() ? g.calc(i) : Tv(0));
         }
     }
 

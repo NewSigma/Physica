@@ -52,7 +52,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
 
         using Base::reverse;
-        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
 
         auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
@@ -104,27 +104,27 @@ namespace Physica {
     }
 
     template<Matrix M, Vector U>
-    void GEMV<M, U>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
-        assert(grad_.getLength() == getLength());
-        const auto& grad = grad_.values();
+    void GEMV<M, U>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+        assert(grad.getLength() == getLength());
+        const auto& g = grad.values();
         if constexpr (ReverseDiff<M>) {
             if constexpr (MatrixOption::isRowMatrix<M>()) {
                 for (size_t i = 0; i < mat.getRow(); ++i)
-                    mat.row(i).reverse(grad[i] * vec.values());
+                    mat.row(i).reverse(g[i] * vec.values());
             }
             else {
                 for (size_t i = 0; i < mat.getCol(); ++i)
-                    mat.col(i).reverse(grad * vec.calc_value(i));
+                    mat.col(i).reverse(g * vec.calc_value(i));
             }
         }
 
         if constexpr (ReverseDiff<U>) {
             if constexpr (MatrixOption::isRowMatrix<M>()) {
                 for (size_t i = 0; i < getLength(); ++i)
-                    vec.reverse(mat.values().row(i) * grad.calc(i));
+                    vec.reverse(mat.values().row(i) * g.calc(i));
             }
             else
-                vec.reverse(mat.values().transpose() * grad);
+                vec.reverse(mat.values().transpose() * g);
         }
     }
 

@@ -43,7 +43,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
-        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
         /* Getters */
         [[nodiscard]] size_t getLength() const;
     };
@@ -65,11 +65,11 @@ namespace Physica {
     }
 
     template<class M, bool ReduceCol>
-    void MatrixSum<M, ReduceCol>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
+    void MatrixSum<M, ReduceCol>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
         if constexpr (ReduceCol)
-            mat.reverse(grad_);
+            mat.reverse(grad);
         else
-            mat.transpose().reverse(grad_);
+            mat.transpose().reverse(grad);
     }
 
     template<class M, bool ReduceCol>

@@ -62,7 +62,7 @@ namespace Physica {
         template<Scalar U>
         __host__ __device__ bool operator<(const ScalarRef<U>& s) const noexcept { return operator<(U(s)); }
         /* Operations */
-        __host__ __device__ T reverse(GradType grad_ = 1) const noexcept;
+        __host__ __device__ T reverse(GradType grad = 1) const noexcept;
         __host__ __device__ void zero_grad();
 
         __host__ __device__ void swap(This&& obj) noexcept;
@@ -112,12 +112,12 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ T ScalarRef<Diff<T, Mode, Order>>::reverse(GradType grad_) const noexcept {
+    __host__ __device__ T ScalarRef<Diff<T, Mode, Order>>::reverse(GradType grad) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
-        auto& g = const_cast<GradType&>(grad());
-        g.value() += grad_.value();
+        auto& g = const_cast<GradType&>(this->grad());
+        g.value() += grad.value();
         if constexpr (Order != 1)
-            g.reverse(grad_.grad());
+            g.reverse(grad.grad());
         return value();
     }
 

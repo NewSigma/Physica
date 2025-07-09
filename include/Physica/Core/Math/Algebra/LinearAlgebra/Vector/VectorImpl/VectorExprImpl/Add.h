@@ -51,12 +51,12 @@ namespace Physica {
             return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS(), count);
         }
 
-        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
-            const auto& grad = grad_.values();
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+            const auto& g = grad.values();
             if constexpr (ReverseDiff<V>)
-                Base::getLHS().reverse(grad);
+                Base::getLHS().reverse(g);
             if constexpr (ReverseDiff<U>)
-                Base::getRHS().reverse(grad.sum());
+                Base::getRHS().reverse(g.sum());
         }
     };
 
@@ -93,7 +93,7 @@ namespace Physica {
             return getLHS().template packetPartial<Pack>(index, count) + getRHS().template packetPartial<Pack>(index, count);
         }
 
-        void reverse(const auto& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
         auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
         /* Getters */
@@ -119,22 +119,22 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    void VectorExpr<ExprType::Add, V1, V2>::reverse(const auto& grad_) const noexcept requires(isReverseDiff) {
-        using U = decltype(grad_);
+    void VectorExpr<ExprType::Add, V1, V2>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+        using U = decltype(grad);
         if constexpr (Scalar<U>) {
-            if constexpr (ReverseDiff<V1>)
-                Base::getLHS().reverse(grad_);
-            if constexpr (ReverseDiff<V2>)
-                Base::getRHS().reverse(grad_);
-        }
-        else {
-            static_assert(Vector<U>);
-            const auto& grad = grad_.values();
-            assert(grad.getLength() == Base::getLength());
             if constexpr (ReverseDiff<V1>)
                 Base::getLHS().reverse(grad);
             if constexpr (ReverseDiff<V2>)
                 Base::getRHS().reverse(grad);
+        }
+        else {
+            static_assert(Vector<U>);
+            const auto& g = grad.values();
+            assert(g.getLength() == Base::getLength());
+            if constexpr (ReverseDiff<V1>)
+                Base::getLHS().reverse(g);
+            if constexpr (ReverseDiff<V2>)
+                Base::getRHS().reverse(g);
         }
     }
 

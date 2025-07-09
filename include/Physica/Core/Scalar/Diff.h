@@ -58,7 +58,7 @@ namespace Physica {
         template<int MaskOrder>
         __host__ __device__ auto mask() const noexcept;
 
-        __host__ __device__ T reverse(GradType grad_ = 1) const noexcept;
+        __host__ __device__ T reverse(GradType grad = 1) const noexcept;
         __host__ __device__ void zero_grad();
 
         [[nodiscard]] auto conjugate() const;

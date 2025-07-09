@@ -47,7 +47,7 @@ namespace Physica {
         [[nodiscard]] __device__ Tv calc_value(size_t index) const;
 
         using Base::reverse;
-        void reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const;
         [[nodiscard]] __host__ __device__ const device_obj<M>& getExpr() const noexcept { return mat.getDerived(); }
@@ -70,11 +70,11 @@ namespace Physica {
     }
 
     template<class M, bool ReduceCol>
-    void device_obj<MatrixSum<M, ReduceCol>>::reverse(const Vector auto& grad_) const noexcept requires(isReverseDiff) {
+    void device_obj<MatrixSum<M, ReduceCol>>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
         if constexpr (ReduceCol)
-            mat.getDerived().reverse(grad_);
+            mat.getDerived().reverse(grad);
         else
-            mat.getDerived().transpose().reverse(grad_);
+            mat.getDerived().transpose().reverse(grad);
     }
 
     template<class M, bool ReduceCol>
