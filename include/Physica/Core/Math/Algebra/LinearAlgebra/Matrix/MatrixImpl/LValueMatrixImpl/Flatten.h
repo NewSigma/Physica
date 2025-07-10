@@ -25,7 +25,7 @@ namespace Physica {
     class FlattenL<T> : public LValueVector<FlattenL<T>> {
         using This = FlattenL<T>;
 
-        const T& mat;
+        T& mat;
     public:
         using Base = LValueVector<This>;
         using typename Base::ScalarType;
@@ -33,7 +33,7 @@ namespace Physica {
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
-        FlattenL(const LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
+        FlattenL(LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         FlattenL(const This&) = default;
         FlattenL(This&&) noexcept = default;
         ~FlattenL() = default;
@@ -42,12 +42,12 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
-        [[nodiscard]] inline PtrTy data_ptr(size_t index);
-        [[nodiscard]] inline ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
     };
 
     template<Matrix T>
-    inline auto FlattenL<T>::data_ptr(size_t index) -> PtrTy {
+    auto FlattenL<T>::data_ptr(size_t index) noexcept -> PtrTy {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
@@ -56,7 +56,7 @@ namespace Physica {
     }
 
     template<Matrix T>
-    inline auto FlattenL<T>::data_ptr(size_t index) const -> ConstPtrTy {
+    auto FlattenL<T>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

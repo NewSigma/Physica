@@ -110,7 +110,8 @@ namespace Physica {
         template<class KineticModel> [[nodiscard]] T calcKineticPrim(size_t dofIndex) const;
         [[nodiscard]] T calcKineticClassical() const;
 
-        template<ExecutePolicy P> [[nodiscard]] T calcPotential(const auto& model) const;
+        template<ExecutePolicy P = Sequential>
+        [[nodiscard]] T calcPotential(const auto& model) const;
         [[nodiscard]] T calcPotentialClassical(const auto& model) const;
 
         [[nodiscard]] T calcClassicalElastic() const;

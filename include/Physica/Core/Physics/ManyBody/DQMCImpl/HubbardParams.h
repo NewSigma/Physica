@@ -69,6 +69,9 @@ namespace Physica {
         [[nodiscard]] T getLnCoshShift() const noexcept { return lnCoshShift; }
         /* Setters */
         void setChemMu(T chemMu_);
+        /* Static members */
+        [[nodiscard]] static T calcAlpha(T beta, T repelU, int numSplit) noexcept;
+        [[nodiscard]] static T calcShift(T beta, T repelU, T chemMu) noexcept;
     private:
         template<int Dim>
         void makeHoppingMatrix(const Hubbard<T, Dim>& hubbard);
@@ -88,18 +91,14 @@ namespace Physica {
         assert(!beta.isNegative() && "[Error]: Negative temperature is invalid");
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
         makeHoppingMatrix(hubbard);
-
-        const T betaM = beta / T(numSplit);
-        const T x = betaM * repelU;
-        alpha = x * T(0.5) + ln1p(sqrt(T(1) - exp(-x)));
-
-        DenseSymmMatrix<T> hoppingMatrixB = -betaM * hoppingMatrix;
+        DenseSymmMatrix<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
         expB = exp(hoppingMatrixB);
+        alpha = calcAlpha(beta, repelU, numSplit);
     }
 
     template<Scalar T>
     T HubbardParams<T>::calcShift() const noexcept {
-        return beta * (chemMu - repelU * T(0.5));
+        return calcShift(beta, repelU, chemMu);
     }
 
     template<Scalar T>
@@ -120,6 +119,18 @@ namespace Physica {
     void HubbardParams<T>::setChemMu(T chemMu_) {
         chemMu = std::move(chemMu_);
         lnCoshShift = lncosh(calcShift());
+    }
+
+    template<Scalar T>
+    T HubbardParams<T>::calcAlpha(T beta, T repelU, int numSplit) noexcept {
+        const T betaM = beta / T(numSplit);
+        const T x = betaM * repelU;
+        return x * T(0.5) + ln1p(sqrt(T(1) - exp(-x)));
+    }
+
+    template<Scalar T>
+    T HubbardParams<T>::calcShift(T beta, T repelU, T chemMu) noexcept {
+        return beta * (chemMu - repelU * T(0.5));
     }
 
     template<Scalar T>

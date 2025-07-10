@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -85,10 +85,11 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
-    template<Scalar T>
-    T lnGamma(const T& s) {
+    template<FloatPrec Prec>
+    Real<Prec> lnGamma(const Real<Prec>& x) noexcept {
         assert(s.isPositive());
-        if constexpr (T::Prec == Double) {
+        using T = Real<Prec>;
+        if constexpr (Prec == Double) {
             /**
              * Double version is implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
              * 
@@ -98,33 +99,30 @@ namespace Physica {
              * The implementation use different number of series term for float and double, while STL provided only one implementation,
              * this version should run faster.
              */
-            constexpr static int count = 9;
-            constexpr static double coeffcients[count]{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
-            T temp = s + T(6.5);
-            temp -= (s + T(0.5)) * ln(temp);
+            constexpr static std::array<float64, 9> Coeffs{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
+            T temp = x + T(6.5);
+            temp -= (x + T(0.5)) * ln(temp);
             T ser(1.000000000000123);
-            T copy(s);
-            for (int j = 0; j < count; ++j) {
+            T copy(x);
+            for (int j = 0; j < Coeffs.size(); ++j) {
                 copy += T(1);
-                ser += T(coeffcients[j]) / copy;
+                ser += Coeffs[j] / copy;
             }
-            return -temp + T(0.91893853320467274178) + ln(ser / s);
+            return -temp + T(0.91893853320467274178) + ln(ser / x);
         }
         else {
-            /**
-             * float version is implemented with gamma = 3 and N = 4 [1] to make full use of precision of float
-             */
-            constexpr static int count = 4;
-            constexpr static float coeffcients[count]{7.6845130, -3.284681, 0.05832037, 0.0001856071};
-            T temp = s + T(3.5);
-            temp -= (s + T(0.5)) * ln(temp);
+            static_assert(Prec == Float, "[Error]: Not implemented");
+            // float version is implemented with gamma = 3 and N = 4 [1] to make full use of precision of float
+            constexpr static std::array<float32, 4> Coeffs{7.6845130, -3.284681, 0.05832037, 0.0001856071};
+            T temp = x + T(3.5);
+            temp -= (x + T(0.5)) * ln(temp);
             T ser(0.9999998);
-            T copy(s);
-            for (int j = 0; j < count; ++j) {
+            T copy(x);
+            for (int j = 0; j < Coeffs.size(); ++j) {
                 copy += T(1);
-                ser += T(coeffcients[j]) / copy;
+                ser += Coeffs[j] / copy;
             }
-            return -temp + T(0.91893853320467274178) + ln(ser / s);
+            return -temp + T(0.91893853320467274178) + ln(ser / x);
         }
     }
 
