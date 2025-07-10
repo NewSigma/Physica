@@ -24,12 +24,12 @@
 #include "Physica/Macro.h"
 
 namespace Physica {
-    class PHYSICA_API MPIExecutor {
-        using This = MPIExecutor;
+    class PHYSICA_API MPIContext {
+        using This = MPIContext;
     public:
-        MPIExecutor(const This&) = delete;
-        MPIExecutor(This&&) noexcept = delete;
-        ~MPIExecutor();
+        MPIContext(const This&) = delete;
+        MPIContext(This&&) noexcept = delete;
+        ~MPIContext();
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -37,22 +37,22 @@ namespace Physica {
         [[nodiscard]] inline int getNumProcess() const noexcept;
         [[nodiscard]] inline int getProcessID() const noexcept; 
         /* Static memebers */
-        [[nodiscard]] static MPIExecutor& getInstance() noexcept;
+        [[nodiscard]] static MPIContext& getInstance() noexcept;
     private:
-        MPIExecutor();
+        MPIContext();
         /* Getters */
         static MPI_Comm getWorld() noexcept { return MPI_COMM_WORLD; }
         /* Static memebers */
         static void world_handler(MPI_Comm* pComm, int* pErr, ...);
     };
 
-    inline int MPIExecutor::getNumProcess() const noexcept {
+    inline int MPIContext::getNumProcess() const noexcept {
         int result;
         MPI_Comm_size(getWorld(), &result);
         return result;
     }
 
-    inline int MPIExecutor::getProcessID() const noexcept {
+    inline int MPIContext::getProcessID() const noexcept {
         int result;
         MPI_Comm_rank(getWorld(), &result);
         return result;

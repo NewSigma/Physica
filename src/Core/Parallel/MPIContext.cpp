@@ -18,12 +18,12 @@
  */
 #ifdef PHYSICA_MPI
 
-#include "Physica/Core/Parallel/Executor/MPIExecutor.h"
+#include "Physica/Core/Parallel/MPIContext.h"
 #include "Physica/Core/Exception/MPIException.h"
 
 using namespace Physica;
 
-MPIExecutor::MPIExecutor() {
+MPIContext::MPIContext() {
     int mode;
     check_mpi(MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode));
     if (mode != MPI_THREAD_SERIALIZED)
@@ -34,16 +34,16 @@ MPIExecutor::MPIExecutor() {
     check_mpi(MPI_Comm_set_errhandler(getWorld(), handler));
 }
 
-MPIExecutor::~MPIExecutor() {
+MPIContext::~MPIContext() {
     MPI_Finalize();
 }
 
-MPIExecutor& MPIExecutor::getInstance() noexcept {
-    static MPIExecutor mpi{};
+MPIContext& MPIContext::getInstance() noexcept {
+    static MPIContext mpi{};
     return mpi;
 }
 
-void MPIExecutor::world_handler(MPI_Comm*, int* pErr, ...) {
+void MPIContext::world_handler(MPI_Comm*, int* pErr, ...) {
     throw MPIException(*pErr);
 }
 
