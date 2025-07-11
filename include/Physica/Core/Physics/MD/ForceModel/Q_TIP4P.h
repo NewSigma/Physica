@@ -142,7 +142,7 @@ namespace Physica {
     template<ExecutePolicy P>
     VectorND<T> Q_TIP4P<T, EwaldType>::force(const MDCellType& cell) {
         VectorND<T> result;
-        forceAsync<VectorND<T>, P>(cell, result);
+        forceAsync<P>(cell, result);
         return result;
     }
 

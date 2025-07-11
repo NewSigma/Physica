@@ -35,8 +35,9 @@ namespace Physica {
         using MatrixND = DenseMatrix<T>;
     public:
         enum Observable {
-            AFM, // Antiferromagnetic Structure Factor
-            CDW  // Charge Density Wave
+            AFM,  // Antiferromagnetic Structure Factor
+            CDW,  // Charge Density Wave
+            DOW   // Double Occupancy Wave
         };
     private:
         Array<MatrixND> observes;
@@ -70,27 +71,25 @@ namespace Physica {
     void SystemSampler<T>::sample(const DQMC<T>& dqmc, Observable type) {
         const int numSite = getNumSite();
         assert(numSite == dqmc.getNumSite() && "[Error]: Inconsistent site numbers");
-        size_t cursor = Base::getCursor();
+        auto flatten = fft.getRSpace().flatten();
         switch (type) {
-        case AFM: {
-            auto flatten = fft.getRSpace().flatten();
+        case AFM:
             for (int i = 0; i < numSite; ++i)
                 flatten[i] = dqmc.getGreenU().diag()[i] - dqmc.getGreenD().diag()[i];
-            fft.transform();
-            observes[cursor] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
             break;
-        }
-        case CDW: {
-            auto flatten = fft.getRSpace().flatten();
+        case CDW:
             for (int i = 0; i < numSite; ++i)
                 flatten[i] = T(2) - dqmc.getGreenU().diag()[i] - dqmc.getGreenD().diag()[i];
-            fft.transform();
-            observes[cursor] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
             break;
-        }
+        case DOW:
+            for (int i = 0; i < numSite; ++i)
+                flatten[i] = (T(1) - dqmc.getGreenU().diag()[i]) * (T(1) - dqmc.getGreenD().diag()[i]);
+            break;
         default:
             unreachable();
         }
+        fft.transform();
+        observes[Base::getCursor()] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
         Base::sample(dqmc);
     }
 

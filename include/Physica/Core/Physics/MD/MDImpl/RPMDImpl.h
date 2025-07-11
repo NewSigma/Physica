@@ -214,12 +214,12 @@ namespace Physica {
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
         }
         else {
-            const LatticeMatrix stress = makeStressPrim<ForceModel, P>(forceModel);
+            const LatticeMatrix stress = makeStressPrim<P>(forceModel);
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
+            barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
             thermostat.template step<R, NoRandPolicy>(ringPolymer, timeStep);
-            barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
+            barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             if constexpr (Traits<ForceModel>::IsLatticeDependent)
                 forceModel.setLattice(getLattice());

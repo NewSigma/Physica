@@ -24,17 +24,18 @@ namespace Physica {
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
     class FPUModel {
         static_assert(Dim == 1, "[Error]: FPUModel must be 1-dimensional");
+        using This = FPUModel<T, IsPeriodBoundary, Dim>;
         using MDCellType = MDCell<T, Dim>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
 
         T springLength;
     public:
         FPUModel(T springLength_) : springLength(std::move(springLength_)) {}
-        FPUModel(const FPUModel&) = default;
-        FPUModel(FPUModel&&) noexcept = default;
+        FPUModel(const This&) = default;
+        FPUModel(This&&) noexcept = default;
         ~FPUModel() = default;
         /* Operators */
-        FPUModel& operator=(FPUModel obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
@@ -46,14 +47,14 @@ namespace Physica {
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         [[nodiscard]] T potentialV(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
-        void swap(FPUModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
     };
 
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
     template<ExecutePolicy P>
     VectorND<T> FPUModel<T, IsPeriodBoundary, Dim>::force(const MDCellType& cell) const {
         VectorND<T> result(cell.getNumParticle());
-        forceAsync<VectorND<T>, P>(cell, result);
+        forceAsync<P>(cell, result);
         return result;
     }
 
@@ -171,7 +172,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
-    void FPUModel<T, IsPeriodBoundary, Dim>::swap(FPUModel& __restrict obj) noexcept {
+    void FPUModel<T, IsPeriodBoundary, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }

@@ -73,7 +73,8 @@ namespace Physica {
 
     template<Scalar T> T gammaQ(const T& a_, const T& x_);
 
-    template<Scalar T> T bigamma(const T& x, const T& step);
+    template<FloatPrec Prec>
+    Real<Prec> bigamma(const Real<Prec>& x, const Real<Prec>& step) noexcept;
 
     template<FloatPrec Prec>
     Real<Prec> erf(const Real<Prec>& x);

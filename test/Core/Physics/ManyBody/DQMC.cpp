@@ -23,7 +23,7 @@
 
 using namespace Physica;
 using T = float64;
-using RandomType = Random<MT19937>;
+using RandomSource = Random<MT19937>;
 constexpr int Dim = 2;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     const HubbardParams<T> params(hubbard, Beta, RepelU * 0.5, NumSplit);
     auto dqmc = DQMC<T>(params);
     for (int _ = 0; _ < NumSample; ++_) {
-        dqmc.step<RandomType, dqmc.Uniform>();
+        dqmc.step_random<RandomSource>();
         if (dqmc.getSign().isNegative())
             return 1;
     }

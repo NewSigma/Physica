@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -66,7 +66,7 @@ namespace Physica {
     PhononDOS<T>::PhononDOS(
             MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim)
             : PhononDOS(std::move(unitCell), std::move(superSize), std::move(gridDim)) {
-        eigenvalues.forND([this, &forceConstants](auto& eig, Index3D index) {
+        eigenvalues.forND([this, &forceConstants](VectorND<T>& eig, Index3D index) {
             const Index3D gridDim = eigenvalues.getShape();
             Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)

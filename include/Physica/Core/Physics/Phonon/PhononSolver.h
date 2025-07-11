@@ -29,15 +29,15 @@ namespace Physica {
     class PhononSolver {
         using This = PhononSolver<T>;
     public:
-        using ComplexType = Complex<T>;
+        using Tc = Complex<T>;
         using FFT3D = FFT<T, 3>;
         using MDCellType = MDCell<T>;
         using PositionMatrix = MDCellType::PositionMatrix;
         using RSpaceFCMat = FCProjector<T>::RSpaceFCMat;
         using RSpaceFCGrid = FCProjector<T>::RSpaceFCGrid;
-        using KSpaceFCMat = DenseMatrix<ComplexType>;
+        using KSpaceFCMat = DenseMatrix<Tc>;
         using KSpaceFCGrid = ArrayND<KSpaceFCMat, 3>;
-        using EigenSolverType = EigenSolver<ComplexType>;
+        using EigenSolverType = EigenSolver<Tc>;
         using QPointGrid = ArrayND<EigenSolverType, 3>;
         using BornChargeArray = RSpaceEwald<T, true>::BornChargeArray;
         constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
@@ -48,11 +48,11 @@ namespace Physica {
         Index3D superSize;
     public:
         PhononSolver(MDCellType unitCell_, Index3D superSize_);
-        PhononSolver(const PhononSolver&) = default;
-        PhononSolver(PhononSolver&&) noexcept = default;
+        PhononSolver(const This&) = default;
+        PhononSolver(This&&) noexcept = default;
         ~PhononSolver() = default;
         /* Operators */
-        PhononSolver& operator=(PhononSolver obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void removeTrans(KSpaceFCGrid& forceConstants, T translationPrec, size_t maxIteration) const;
         void projectTrans(RSpaceFCGrid& fcGrid, T maxAbsDot, size_t maxIteration) const;
@@ -69,7 +69,7 @@ namespace Physica {
         [[nodiscard]] DenseMatrix<T> makeEigenVectors(const EigenSolverType& eigen) const;
         [[nodiscard]] DenseMatrix<T> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
         [[nodiscard]] MDCellType shiftAtom(const VectorND<T>& eigenVector, T distance);
-        void swap(PhononSolver& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getUnitCell() const noexcept { return unitCell; }
         [[nodiscard]] size_t getNumUnitCellAtom() const noexcept { return unitCell.getNumParticle(); }
@@ -216,7 +216,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononSolver<T>::KSpaceFCGrid PhononSolver<T>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const {
+    auto PhononSolver<T>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const -> KSpaceFCGrid {
         assert(superSize == rSpaceGrid.getShape() && "[Error]: Super sizes do not match");
         assert(getUnitCellDOF() == rSpaceGrid(0, 0, 0).getRow() && "[Error]: DOF do not match");
         const size_t unitCellDOF = getUnitCellDOF();
@@ -224,12 +224,12 @@ namespace Physica {
         FFT3D fft(superSize, PlanFlag::Estimate);
         for (size_t major = 0; major < unitCellDOF; ++major) {
             for (size_t minor = 0; minor < unitCellDOF; ++minor) {
-                fft.getRSpace().forND([major, minor, &rSpaceGrid](auto& elem, Index3D index) {
+                fft.getRSpace().forND([major, minor, &rSpaceGrid](T& elem, Index3D index) {
                     elem = rSpaceGrid(index).calcFromMajorMinor(major, minor);
                 });
                 fft.transform();
 
-                fft.getKSpace().forND([major, minor, &kSpaceGrid](auto& elem, Index3D index) {
+                fft.getKSpace().forND([major, minor, &kSpaceGrid](const Tc& elem, Index3D index) {
                     kSpaceGrid(index).refFromMajorMinor(major, minor) = elem;
                 });
             }
@@ -238,8 +238,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononSolver<T>::KSpaceFCMat PhononSolver<T>::interpolatePoint(
-            Vector3D<T> qPoint, const KSpaceFCGrid& forceConstants) const {
+    auto PhononSolver<T>::interpolatePoint(Vector3D<T> qPoint, const KSpaceFCGrid& forceConstants) const -> KSpaceFCMat {
         const Vector3D<T> qVector = unitCell.makeRepLattice().transpose() * qPoint;
         const size_t unitCellDOF = getUnitCellDOF();
         FFT3D fft(superSize, PlanFlag::Estimate);
@@ -247,13 +246,13 @@ namespace Physica {
         for (size_t major = 0; major < unitCellDOF; ++major) {
             for (size_t minor = major; minor < unitCellDOF; ++minor) {
                 auto& kSpace = fft.getKSpace();
-                kSpace.forND([major, minor, &forceConstants](auto& elem, Index3D index) {
+                kSpace.forND([major, minor, &forceConstants](Tc& elem, Index3D index) {
                     elem = forceConstants(index).calcFromMajorMinor(major, minor);
                 });
                 fft.invTransform();
 
-                ComplexType elem = 0;
-                fft.getRSpace().forND([this, qVector, &elem](auto& x, Index3D index) {
+                Tc elem = 0;
+                fft.getRSpace().forND([this, qVector, &elem](T& x, Index3D index) {
                     const auto& lattice = unitCell.getLattice();
                     T phase = 0;
                     T coeff = 1;
@@ -268,7 +267,7 @@ namespace Physica {
                         else
                             phase += phase_i;
                     }
-                    const auto factor = ComplexType::fromPhase(phase);
+                    const auto factor = Tc::fromPhase(phase);
                     elem += x * coeff * factor;
                 });
                 result.refFromMajorMinor(major, minor) = elem;
@@ -283,7 +282,7 @@ namespace Physica {
     void PhononSolver<T>::applyNAC(RSpaceFCGrid& rSpaceGrid, const BornChargeArray& born) const {
         const T factor = reciprocal(unitCell.getVolume() * T(getNumCell() * PhyConst<AU>::vacuumDielectric));
         const auto repLatt = unitCell.makeRepLattice();
-        rSpaceGrid.forND([this, factor, &repLatt, &born](auto& rSpaceFC, Index3D index) {
+        rSpaceGrid.forND([this, factor, &repLatt, &born](T& rSpaceFC, Index3D index) {
             const bool isGammaPoint = index[0] == 0 && index[1] == 0 && index[2] == 0;
             Vector3D<T> qVector{};
             if (isGammaPoint)
@@ -371,23 +370,21 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononSolver<T>::MDCellType
-    PhononSolver<T>::shiftAtom(const VectorND<T>& eigenVector, T distance) {
+    auto PhononSolver<T>::shiftAtom(const VectorND<T>& eigenVector, T distance) -> MDCellType {
         assert(eigenVector.getLength() == getUnitCellDOF() && "[Error]: This is not a eigenVector of current cell");
         PositionMatrix shiftPos = unitCell.getPos() + eigenVector.reshape_row(getNumUnitCellAtom(), 3) * distance;
         return MDCellType(unitCell.getLattice(), std::move(shiftPos), unitCell.getMassVec());
     }
 
     template<Scalar T>
-    void PhononSolver<T>::swap(PhononSolver& __restrict obj) noexcept {
+    void PhononSolver<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         unitCell.swap(obj.unitCell);
         superSize.swap(obj.superSize);
     }
 
     template<Scalar T>
-    PhononSolver<T>::EigenSolverType
-    PhononSolver<T>::diagonalize(const KSpaceFCMat& dynamicMatrix) {
+    auto PhononSolver<T>::diagonalize(const KSpaceFCMat& dynamicMatrix) -> EigenSolverType {
         const size_t unitCellDOF = dynamicMatrix.getRow();
         auto eigen = EigenSolverType(unitCellDOF);
         eigen.compute(dynamicMatrix, true);
@@ -396,8 +393,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononSolver<T>::QPointGrid PhononSolver<T>::diagonalize(
-            const KSpaceFCGrid& dynamicMatrixes) {
+    auto PhononSolver<T>::diagonalize(const KSpaceFCGrid& dynamicMatrixes) -> QPointGrid {
         const auto& matrixes = dynamicMatrixes.flatten();
         const size_t unitCellDOF = matrixes[0].getRow();
         QPointGrid qPoints(dynamicMatrixes.getShape(), unitCellDOF);

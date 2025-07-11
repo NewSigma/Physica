@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,6 +24,7 @@ namespace Physica {
     template<Scalar T>
     class PhononPDOS : public PhononDOS<T> {
         using Base = PhononDOS<T>;
+        using This = PhononPDOS<T>;
         using typename Base::SolverType;
         using typename Base::MDCellType;
         using typename Base::CoeffVector;
@@ -31,26 +32,25 @@ namespace Physica {
         using typename Base::EigenValueGrid;
         using Base::Dim;
         using Base::ElementVolume;
-        using VectorType = VectorND<T>;
 
         using Base::solver;
         using Base::eigenvalues;
-        VectorType direction;
+        VectorND<T> direction;
         EigenValueGrid projections;
     public:
-        PhononPDOS(MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim, VectorType direction_);
-        PhononPDOS(const PhononPDOS&) = default;
-        PhononPDOS(PhononPDOS&&) noexcept = default;
+        PhononPDOS(MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim, VectorND<T> direction_);
+        PhononPDOS(const This&) = default;
+        PhononPDOS(This&&) noexcept = default;
         ~PhononPDOS() = default;
         /* Operators */
-        PhononPDOS& operator=(PhononPDOS obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] T calcPDOS(T freq) const;
         [[nodiscard]] T calcPDOS(T freq, size_t band) const;
-        void swap(PhononPDOS& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::getUnitCellDOF;
-        [[nodiscard]] const VectorType& getDirection() const noexcept { return direction; }
+        [[nodiscard]] const auto& getDirection() const noexcept { return direction; }
     };
 
     template<Scalar T>
@@ -58,12 +58,12 @@ namespace Physica {
                                        Index3D superSize,
                                        const KSpaceFCGrid& forceConstants,
                                        Index3D gridDim,
-                                       VectorType direction_)
+                                       VectorND<T> direction_)
             : Base(std::move(unitCell), std::move(superSize), gridDim)
             , direction(std::move(direction_))
             , projections(gridDim) {
         assert(direction.getLength() == getUnitCellDOF() && "[Error]: DOF of direction and unit cell do not match");
-        eigenvalues.forND([this, &forceConstants](auto& eig, Index3D index) {
+        eigenvalues.forND([this, &forceConstants](VectorND<T>& eig, Index3D index) {
             const Index3D shape = eigenvalues.getShape();
             Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
@@ -75,7 +75,7 @@ namespace Physica {
 
             const size_t unitCellDOF = getUnitCellDOF();
             const auto eigenvectors = solver.makeEigenVectors(eigen);
-            VectorType project(unitCellDOF);
+            VectorND<T> project(unitCellDOF);
             for (size_t i = 0; i < unitCellDOF; ++i)
                 project[i] = hadamard(eigenvectors.col(i), direction).squaredNorm();
             projections(index) = project;
@@ -115,7 +115,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void PhononPDOS<T>::swap(PhononPDOS& __restrict obj) noexcept {
+    void PhononPDOS<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         direction.swap(obj.direction);

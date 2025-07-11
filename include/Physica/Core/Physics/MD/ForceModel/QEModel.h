@@ -80,7 +80,7 @@ namespace Physica {
     template<ExecutePolicy P>
     VectorND<T> QEModel<T>::force(const MDCellType& cell) const {
         VectorND<T> result(cell.getNumParticle());
-        forceAsync<VectorND<T>, P>(cell, result);
+        forceAsync<P>(cell, result);
         return result;
     }
 

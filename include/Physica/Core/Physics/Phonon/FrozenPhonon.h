@@ -33,21 +33,21 @@ namespace Physica {
         using This = FrozenPhonon<T>;
         using Base = PhononSolver<T>;
     public:
-        using typename Base::ComplexType;
         using typename Base::FFT3D;
         using typename Base::MDCellType;
         using typename Base::PositionMatrix;
+        using typename Base::RSpaceFCMat;
         using typename Base::RSpaceFCGrid;
         constexpr static unsigned int Dim = Base::Dim;
 
         T displace;
     public:
         FrozenPhonon(MDCellType unitCell, Index3D superSize, T displace_);
-        FrozenPhonon(const FrozenPhonon&) = default;
-        FrozenPhonon(FrozenPhonon&&) noexcept = default;
+        FrozenPhonon(const This&) = default;
+        FrozenPhonon(This&&) noexcept = default;
         ~FrozenPhonon() = default;
         /* Operators */
-        FrozenPhonon& operator=(FrozenPhonon obj) noexcept;
+        This& operator=(This obj) noexcept;
         /* Operations */
         [[nodiscard]] RSpaceFCGrid makeForceConstants(auto& forceModel) const;
         template<class ForceModel>
@@ -56,7 +56,7 @@ namespace Physica {
                       T minFreq,
                       unsigned int numInterpolateStep,
                       unsigned int maxNumStep);
-        void swap(FrozenPhonon& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::getUnitCell;
         using Base::getNumUnitCellAtom;
@@ -181,7 +181,7 @@ namespace Physica {
         const auto gridDim = Index3D{superSize[0], superSize[1], superSize[2]};
         rSpaceFC.resize(gridDim);
 
-        rSpaceFC.forND([&group](auto& fc, Index3D index) {
+        rSpaceFC.forND([&group](RSpaceFCMat& fc, Index3D index) {
             fc.read(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
         });
     }
@@ -199,7 +199,7 @@ namespace Physica {
             group.writeAttr("SuperSize", superSize);
         }
 
-        rSpaceFC.forND([&group, &rSpaceFC](const auto& fc, Index3D index) {
+        rSpaceFC.forND([&group, &rSpaceFC](const RSpaceFCMat& fc, Index3D index) {
             fc.write(group, std::format("{}_{}_{}", index[0], index[1], index[2]).c_str());
         });
     }

@@ -108,7 +108,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void TIModel<ForceModel>::forceAsync(const MDCellType& cell, Vector auto& result) {
         if (!lambda.isZero())
-            original.template forceAsync<V, P>(cell, result);
+            original.template forceAsync<P>(cell, result);
         const VectorND<ScalarType> hamonicF = hamonic.template force<P>(cell);
         if constexpr (P == GPU)
             Task<GPU>::wait();

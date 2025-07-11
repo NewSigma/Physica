@@ -163,7 +163,7 @@ namespace Physica {
     template<ExecutePolicy P>
     VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force(const MDCellType& cell) {
         VectorND<T> result;
-        forceAsync<VectorND<T>, P>(cell, result);
+        forceAsync<P>(cell, result);
         return result;
     }
 

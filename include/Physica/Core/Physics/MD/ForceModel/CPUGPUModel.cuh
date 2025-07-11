@@ -63,7 +63,7 @@ namespace Physica {
     template<ExecutePolicy P>
     auto CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) -> DenseVector<T> {
         VectorND<T> result(cell.getDOF());
-        forceAsync<VectorND<T>, P>(cell, result);
+        forceAsync<P>(cell, result);
         CUDAContext::getInstance().wait();
         return result;
     }
@@ -77,7 +77,7 @@ namespace Physica {
         if (useCPU)
             result = hostModel.template force<Thread>(cell);
         else
-            deviceModels[threadId].template forceAsync<V, GPU>(cell, result);
+            deviceModels[threadId].template forceAsync<GPU>(cell, result);
     }
 }
 

@@ -75,6 +75,9 @@ namespace Physica {
         [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
+
+        using Base::read;
+        using Base::write;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
@@ -141,6 +144,9 @@ namespace Physica {
         [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
+
+        using Base::read;
+        using Base::write;
         /* Getters */
         [[nodiscard]] __host__ __device__ pointer data() noexcept;
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept;

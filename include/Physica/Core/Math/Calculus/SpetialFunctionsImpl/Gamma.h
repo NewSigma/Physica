@@ -148,9 +148,9 @@ namespace Physica {
         return (x < a + T(1)) ? (T(1) - Internal::incompGammaImpl1(a, x)) : Internal::incompGammaImpl2(a, x);
     }
 
-    template<Scalar T>
-    T bigamma(const T& x, const T& step) {
-        return Differential<T>::ridders(lnGamma<T>, x, step);
+    template<FloatPrec Prec>
+    Real<Prec> bigamma(const Real<Prec>& x, const Real<Prec>& step) noexcept {
+        return Differential<Real<Prec>>::ridders(lnGamma<Prec>, x, step);
     }
 
     template<FloatPrec Prec>

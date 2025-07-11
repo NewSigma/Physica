@@ -93,7 +93,7 @@ namespace Physica {
     VectorND<T> TodaModel<T, IsPeriodBoundary>::force(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         VectorND<T> result(numParticle);
-        forceAsync<VectorND<T>, P>(cell, result);
+        forceAsync<P>(cell, result);
         return result;
     }
 

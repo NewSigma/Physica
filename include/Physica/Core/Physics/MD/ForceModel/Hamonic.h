@@ -81,7 +81,7 @@ namespace Physica {
     template<ExecutePolicy P>
     VectorND<T> Hamonic<T, Dim>::force(const MDCellType& cell) const {
         VectorND<T> result(cell.getDOF());
-        forceAsync<VectorND<T>, P>(cell, result);
+        forceAsync<P>(cell, result);
         return result;
     }
 
