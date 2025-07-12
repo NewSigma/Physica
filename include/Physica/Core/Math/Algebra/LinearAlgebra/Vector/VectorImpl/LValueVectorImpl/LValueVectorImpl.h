@@ -43,10 +43,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Scalar T>
-    Derived& LValueVector<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
+    Derived& LValueVector<Derived>::operator=(const Scalar auto& x) {
+        constexpr bool isReverseDiffX = ReverseDiff<decltype(x)>;
+        static_assert(!isReverseDiff || !isReverseDiffX, "[Error]: Assign a diffable scalar to diffable vector discards grads");
         for (size_t i = 0; i < Base::getLength(); ++i) {
-            if constexpr (ReverseDiff<T>)
+            if constexpr (isReverseDiffX)
                 (*this)[i] = x.value();
             else
                 (*this)[i] = x;
@@ -196,6 +197,14 @@ namespace Physica {
     void LValueVector<Derived>::toUnit() {
         auto& x = Base::getDerived();
         x *= reciprocal(x.norm());
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::normalize() {
+        auto& x = Base::getDerived();
+        const T mean = Base::mean();
+        const T factor = reciprocal(Base::deviation());
+        x = (x - mean) * factor;
     }
 
     template<class Derived>

@@ -34,6 +34,15 @@ namespace Physica {
     }
 
     template<class Derived>
+    Derived& ContinuousVector<Derived>::operator=(const Scalar auto& x) {
+        if constexpr (SizeAtCompile == Dynamic) {
+            if (x.isZero())
+                zeros();
+        }
+        return Base::template operator=<T>(x);
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     Derived& ContinuousVector<Derived>::operator=(const Vector auto& v) {
         return Base::template operator=<P>(v);

@@ -95,15 +95,6 @@ namespace Physica {
     }
 
     template<Vector T>
-    DenseVector<typename T::ScalarType, T::SizeAtCompile>
-    normalize(const T& x) {
-        using ScalarType = T::ScalarType;
-        const ScalarType x_mean = x.mean();
-        const ScalarType factor = reciprocal(deviation(x));
-        return (x - x_mean) * factor;
-    }
-
-    template<Vector T>
     T::ScalarType covariance(const T& x, const T& y) {
         assert(x.getLength() == y.getLength());
         using ScalarType = T::ScalarType;

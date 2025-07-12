@@ -54,16 +54,7 @@ namespace Physica {
         /* Operators */
         Derived& operator=(const This& v);
         Derived& operator=(This&& v);
-        template<Scalar T>
-        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
-             // FIXME: We have to put it here because Clang 18 rejects valid.
-             // Move it to Impl file once we dump to Clang 21 (while 19, 20 not tested)
-            if constexpr (SizeAtCompile == Dynamic) {
-                if (x.isZero())
-                    zeros();
-            }
-            return Base::template operator=<T>(x);
-        }
+        Derived& operator=(const Scalar auto& x);
         template<ExecutePolicy P = Sequential>
         Derived& operator=(const Vector auto& v);
         using Base::operator+=;

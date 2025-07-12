@@ -37,6 +37,7 @@ namespace Physica {
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
         using typename Base::Tr;
         using PtrTy = ScalarType::PtrTy;
@@ -49,8 +50,7 @@ namespace Physica {
         This& operator=(const This& v);
         This& operator=(This&& v);
 
-        template<Scalar T>
-        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
+        Derived& operator=(const Scalar auto& x);
         void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
         void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
         void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
@@ -102,6 +102,7 @@ namespace Physica {
         void clamp_min(const Tv& minimum);
         void clamp_max(const Tv& maximum);
         void toUnit();
+        void normalize();
         using Base::householder;
         Tr householder();
 
