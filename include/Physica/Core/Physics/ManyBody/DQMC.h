@@ -72,6 +72,7 @@ namespace Physica {
         template<RNG R>
         void step_spin_for(int numStep);
 
+        void update();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
@@ -92,12 +93,12 @@ namespace Physica {
         void random_uniform();
 
         void initChain();
-        void single_flip(int site, int split);
+        void single_flip(int site, int split) noexcept;
         void makeWeightMatrix(const MatrixChain& chain);
         std::pair<T, T> lnPartition(const MatrixChain& chain);
         std::pair<T, T> lnPartition();
         std::pair<T, T> calcGreen(const MatrixChain& chain, MatrixType& green);
-        void update();
+        void calcGreens();
 
         T calcLnSpinWaveWeight(int site) const noexcept;
         T calcLnSpinWaveWeight(T sumSpin) const noexcept;
@@ -119,7 +120,7 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step_random() {
         random_uniform<R>();
-        update();
+        calcGreens();
     }
 
     template<Scalar T>
@@ -136,7 +137,7 @@ namespace Physica {
             return;
         }
 
-        update();
+        calcGreens();
         lnZ0 = lnPartitionZ;
         lnPartitionZ = 0;
     }
@@ -145,13 +146,11 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step_mh_for(int numStep) {
         assert(numStep >= 0 && "[Error]: Invalid step num");
-        auto splits = Array<int>(getNumSite());
+        assert(numStep % getNumSplit() == 0 && "[Warn]: Suggest divisable step num");
         auto props = VectorND<T>(getNumSite());
-        for (int step = 0; step < numStep; ++step) {
-            R::random_int(splits, 0, getNumSplit() - 1);
+        for (int step = 0, split = 0; step < numStep; ++step) {
             props.template random_uniform<R>();
             for (int site = 0; site < getNumSite(); ++site) {
-                const int split = splits[site];
                 single_flip(site, split);
 
                 const T lnZ1 = lnPartition().first;
@@ -161,8 +160,9 @@ namespace Physica {
                 }
                 lnPartitionZ = lnZ1;
             }
+            split = (split + 1) % getNumSplit();
         }
-        update();
+        calcGreens();
         lnZ0 = lnPartitionZ;
         lnPartitionZ = 0;
     }
@@ -193,7 +193,7 @@ namespace Physica {
         if (noFlip)
             return;
     
-        update();
+        calcGreens();
         for (int i = 0; i < getNumSite(); ++i)
             lnPartitionZ -= calcLnSpinWaveWeight(i);
     }
@@ -202,13 +202,11 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step_spin_for(int numStep)  {
         assert(numStep >= 0 && "[Error]: Invalid step num");
-        auto splits = Array<int>(getNumSite());
+        assert(numStep % getNumSplit() == 0 && "[Warn]: Suggest divisable step num");
         auto props = VectorND<T>(getNumSite());
-        for (int step = 0; step < numStep; ++step) {
-            R::random_int(splits, 0, getNumSplit() - 1);
+        for (int step = 0, split = 0; step < numStep; ++step) {
             props.template random_uniform<R>();
             for (int site = 0; site < getNumSite(); ++site) {
-                const int split = splits[site];
                 auto field = getAuxField();
                 auto spins = field.row(site);
                 const T sumSpin0 = spins.sum();
@@ -217,6 +215,7 @@ namespace Physica {
                 if (accept(deltaW, props[site]))
                     spins[split] = -spins[split];
             }
+            split = (split + 1) % getNumSplit();
         }
 
         for (int site = 0; site < getNumSite(); ++site) {
@@ -227,10 +226,15 @@ namespace Physica {
                 spins = -spins;
         }
         initChain();
-
-        update();
+        calcGreens();
         for (int i = 0; i < getNumSite(); ++i)
             lnPartitionZ -= calcLnSpinWaveWeight(i);
+    }
+
+    template<Scalar T>
+    void DQMC<T>::update() {
+        initChain();
+        calcGreens();
     }
 
     template<Scalar T>
@@ -257,8 +261,8 @@ namespace Physica {
     template<Scalar T>
     void DQMC<T>::resize(int numSite, int numSplit) {
         assert(numSite > 0 && "[Error]: Invalid NumSite");
-        assert(numSplit > 0 && "[Error]: Invalid NumSplit");
         const int numQR = (numSplit + 1) / 2;
+        assert(numQR >= 2 && "[Error]: Invalid NumSplit");
         aux.resize(numSite * numSplit);
         chainU.resize(numSplit);
         chainD.resize(numSplit);
@@ -300,7 +304,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::single_flip(int site, int split) {
+    void DQMC<T>::single_flip(int site, int split) noexcept {
         auto field = getAuxField();
         auto spins = field.row(site);
         spins[split] = -spins[split];
@@ -396,7 +400,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::update() {
+    void DQMC<T>::calcGreens() {
         auto [lnZ1, sign1] = calcGreen(chainU, greenU);
         auto [lnZ2, sign2] = calcGreen(chainD, greenD);
         lnPartitionZ = lnZ1 + lnZ2;

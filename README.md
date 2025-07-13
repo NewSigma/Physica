@@ -25,11 +25,9 @@ Optimal performance and scalability: Balancing between performance, scalability 
 - Operator fusion using template expressions for both CPU and GPU  
 - Coroutine based auto differentiation implementation  
 - Basic math library: Provides commonly used functions such as ODE, PDE, special functions, optimization, statistics, etc.
-- Classical molecular dynamics(MD), path integral molecular dynamics(PIMD) simulations using NVE, NVT and NPT ensembles
+- Template meta algorithm: optimal algorithm and parallelism strategy selection at compiling time
 - Multithreads and CUDA parallel support
 - 2D and 3D plotting support
-- Template meta algorithm: optimal algorithm and parallelism strategy selection at compiling time
-- Useful components that facilitate the construction of efficient computational physics programs
 
 ## Usage
 
