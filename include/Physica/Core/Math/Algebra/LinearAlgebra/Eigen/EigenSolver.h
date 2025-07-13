@@ -81,7 +81,7 @@ namespace Physica {
         static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto comp);
     private:
         template<Matrix M>
-        void pre_compute(const M& source, bool computeEigenvectors_);
+        void pre_compute(const M& source, bool computeEigenvectors_) noexcept;
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
         void computeComplexMatEigenvectors(WorkingMatrix& matrixT);
@@ -289,7 +289,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<Matrix M>
-    void EigenSolver<T, Order>::pre_compute([[maybe_unused]] const M& source, bool computeEigenvectors_) {
+    void EigenSolver<T, Order>::pre_compute([[maybe_unused]] const M& source, bool computeEigenvectors_) noexcept {
         static_assert(std::is_same<T, typename M::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         assert(source.getRow() > 0);
         assert(source.getRow() == source.getCol());
