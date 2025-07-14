@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     const LatticeModel<Dim> lattice({NumSiteX, NumSiteY}, 1);
     const Hubbard<T, Dim> hubbard(lattice, HoppingT, RepelU);
     const HubbardParams<T> params(hubbard, Beta, RepelU * 0.5, NumSplit);
-    auto dqmc = DQMC<T>(params);
+    auto dqmc = DQMC<T>(params, NumSplit);
     for (int _ = 0; _ < NumSample; ++_) {
         dqmc.step_random<RandomSource>();
         if (dqmc.getSign().isNegative())

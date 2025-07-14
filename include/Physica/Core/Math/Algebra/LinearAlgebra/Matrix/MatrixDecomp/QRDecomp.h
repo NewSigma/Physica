@@ -62,6 +62,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto& getWorking() noexcept { return working; }
         [[nodiscard]] const auto& getWorking() const noexcept { return working; }
+        [[nodiscard]] auto& getTaus() noexcept { return taus; }
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }

@@ -26,7 +26,7 @@ namespace Physica {
      * \class MatrixChain calculates the product of matrices efficiently and stably.
      *
      * Reference:
-     * [1] Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein . 算法导论(第三版)[M]. 北京: 机械工业出版社, 2013:210-215
+     * [1] Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, Clifford Stein. 算法导论(第三版)[M]. 北京: 机械工业出版社, 2013:210-215
      */
     template<Scalar T>
     class MatrixChain {

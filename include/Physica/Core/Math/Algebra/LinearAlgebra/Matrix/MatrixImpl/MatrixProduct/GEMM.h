@@ -85,6 +85,9 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     GEMM<M1, M2>::GEMM(const M1& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {
+        assert(mat1.getRow() > 0);
+        assert(mat1.getCol() > 0);
+        assert(mat2.getCol() > 0);
         assert(mat1.getCol() == mat2.getRow());
     }
 
@@ -101,6 +104,7 @@ namespace Physica {
         constexpr bool SmallMatrix1 = 0 < M1::SizeAtCompile && M1::SizeAtCompile <= 64;
         constexpr bool SmallMatrix2 = 0 < M2::SizeAtCompile && M2::SizeAtCompile <= 64;
         constexpr bool SmallMatrix = SmallMatrix1 && SmallMatrix2;
+        assert(target.getRow() == getRow() && target.getCol() == getCol());
         if constexpr (UseMKL && !SmallMatrix)
             assign_mkl(target);
         else

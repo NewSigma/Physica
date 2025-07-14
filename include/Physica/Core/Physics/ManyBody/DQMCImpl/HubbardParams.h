@@ -49,7 +49,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] T calcShift() const noexcept;
+        [[nodiscard]] T calcBetaMu() const noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -71,7 +71,7 @@ namespace Physica {
         void setChemMu(T chemMu_);
         /* Static members */
         [[nodiscard]] static T calcAlpha(T beta, T repelU, int numSplit) noexcept;
-        [[nodiscard]] static T calcShift(T beta, T repelU, T chemMu) noexcept;
+        [[nodiscard]] static T calcBetaMu(T beta, T repelU, T chemMu) noexcept;
     private:
         template<int Dim>
         void makeHoppingMatrix(const Hubbard<T, Dim>& hubbard);
@@ -97,8 +97,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T HubbardParams<T>::calcShift() const noexcept {
-        return calcShift(beta, repelU, chemMu);
+    T HubbardParams<T>::calcBetaMu() const noexcept {
+        return calcBetaMu(beta, repelU, chemMu);
     }
 
     template<Scalar T>
@@ -118,7 +118,7 @@ namespace Physica {
     template<Scalar T>
     void HubbardParams<T>::setChemMu(T chemMu_) {
         chemMu = std::move(chemMu_);
-        lnCoshShift = lncosh(calcShift());
+        lnCoshShift = lncosh(calcBetaMu());
     }
 
     template<Scalar T>
@@ -129,7 +129,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T HubbardParams<T>::calcShift(T beta, T repelU, T chemMu) noexcept {
+    T HubbardParams<T>::calcBetaMu(T beta, T repelU, T chemMu) noexcept {
         return beta * (chemMu - repelU * T(0.5));
     }
 
