@@ -213,8 +213,15 @@ namespace Physica {
         void assign_add_simd(V& v) const;
     };
 
-    template<Vector T1, Vector T2>
-    bool vectorNear(const T1& v1, const T2& v2, double precision);
+    template<Vector V1, Vector V2>
+    bool vectorNear(const V1& v1, const V2& v2, double precision) noexcept {
+        using T = Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
+        assert(v1.getLength() == v2.getLength());
+        for (size_t i = 0; i < v1.getLength(); ++i)
+            if (!scalarNear(T(v1.calc(i)), T(v2.calc(i)), precision))
+                return false;
+        return true;
+    }
 }
 
 namespace Physica {

@@ -463,7 +463,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T relativeError(const T& x, const T& y) {
+    T relativeError(const T& x, const T& y) noexcept {
         static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid template param");
         const T min = std::numeric_limits<T>::min();
         const bool useAbsCompare = (abs(x) < min) || (abs(y) < min);
@@ -473,7 +473,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    bool scalarNear(const T& x, const T& y, double precision) {
+    bool scalarNear(const T& x, const T& y, double precision) noexcept {
         assert(precision > 0);
         constexpr bool isDiffable = T::isDiffable;
         if constexpr (T::isComplex) {
