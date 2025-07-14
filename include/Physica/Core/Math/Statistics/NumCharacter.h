@@ -106,7 +106,8 @@ namespace Physica {
     template<Vector T>
     T::ScalarType skew(const T& x) {
         using ScalarType = T::ScalarType;
-        T temp = normalize(x);
+        T temp = x;
+        temp.normalize();
         temp = hadamard(square(temp), temp);
         const size_t length = x.getLength();
         const ScalarType factor = ScalarType(length * length) / ScalarType((length - 1) * (length - 2));
@@ -116,7 +117,8 @@ namespace Physica {
     template<Vector T>
     T::ScalarType excess_kurt(const T& x) {
         using ScalarType = T::ScalarType;
-        T temp = normalize(x);
+        T temp = x;
+        temp.normalize();
         temp = square(temp);
         const ScalarType mean2 = temp.mean();
         temp = square(temp);

@@ -28,10 +28,10 @@ namespace Physica {
     class HubbardParams {
         using This = HubbardParams<T>;
     public:
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
     private:
         DenseSymmMatrix<T> hoppingMatrix;
-        MatrixType expB;
+        MatrixND expB;
         T alpha;
         T beta;
         T repelU;
