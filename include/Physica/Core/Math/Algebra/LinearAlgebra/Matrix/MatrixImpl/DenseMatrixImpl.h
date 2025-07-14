@@ -97,6 +97,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Option, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
+        Base::resize(m, std::forward<decltype(args)>(args)...);
+    }
+
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     void DenseMatrix<T, Option, Row, Col, Allocator>::zeros() {
         if constexpr (MatrixOption::isElementMatrix<This>())
             Storage::asArray().zeros();

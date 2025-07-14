@@ -22,9 +22,8 @@
 
 namespace Physica {
     template<class T, int Dim>
-    template<class... Args>
-    ArrayND<T, Dim>::ArrayND(IndexArray shape_, Args&&... args) {
-        resize(std::move(shape_), std::forward<Args>(args)...);
+    ArrayND<T, Dim>::ArrayND(IndexArray shape_, auto&&... args) {
+        resize(std::move(shape_), std::forward<decltype(args)>(args)...);
     }
 
     template<class T, int Dim>
@@ -56,11 +55,10 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    template<class... Args>
-    void ArrayND<T, Dim>::resize(IndexArray shape_, Args&&... args) {
+    void ArrayND<T, Dim>::resize(IndexArray shape_, auto&&... args) {
         assert(shape_.getLength() < std::numeric_limits<int>::max() && "[Error]: Does not support");
         shape = std::move(shape_);
-        arr.resize(toSize(shape), std::forward<Args>(args)...);
+        arr.resize(toSize(shape), std::forward<decltype(args)>(args)...);
     }
 
     template<class T, int Dim>

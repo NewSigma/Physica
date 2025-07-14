@@ -50,8 +50,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ lvalue_reference operator()(size_t row, size_t col);
         [[nodiscard]] __host__ __device__ const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
-        template<class... Args>
-        void resize(size_t row, size_t col, Args&&... args);
+        void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t row) { resize(row, row); }
         void swap(This& __restrict storage) noexcept;
 
@@ -109,10 +108,9 @@ namespace Physica {
     }
 
     template<class T, size_t Order>
-    template<class... Args>
-    void SymmArray<T, Order>::resize(size_t row, [[maybe_unused]] size_t col, Args&&... args) {
+    void SymmArray<T, Order>::resize(size_t row, [[maybe_unused]] size_t col, auto&&... args) {
         assert(row == col);
-        arr.resize(row * (row + 1) / 2, std::forward<Args>(args)...);
+        arr.resize(row * (row + 1) / 2, std::forward<decltype(args)>(args)...);
         order = row;
     }
 

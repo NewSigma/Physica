@@ -87,7 +87,7 @@ namespace Physica {
      */
     template<FloatPrec Prec>
     Real<Prec> lnGamma(const Real<Prec>& x) noexcept {
-        assert(s.isPositive());
+        assert(x.isPositive());
         using T = Real<Prec>;
         if constexpr (Prec == Double) {
             /**

@@ -212,6 +212,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    void ContinuousMatrix<Derived>::resize(const Matrix auto& m, auto&&... args) {
+        resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
+    }
+
+    template<class Derived>
+    auto ContinuousMatrix<Derived>::resize(size_t r, size_t c, auto&&... args) {
+        return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
+    }
+
+    template<class Derived>
     auto ContinuousMatrix<Derived>::flatten() {
         return FlattenC<Derived>(Base::getDerived());
     }

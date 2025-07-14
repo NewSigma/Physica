@@ -30,8 +30,7 @@ namespace Physica {
         using typename Base::IndexArray;
     public:
         DenseTensor() = default;
-        template<class... Args>
-        DenseTensor(IndexArray shape, Args&&... args);
+        DenseTensor(IndexArray shape, auto&&... args);
         DenseTensor(const This&) = default;
         DenseTensor(This&&) noexcept = default;
         ~DenseTensor() = default;
@@ -41,8 +40,7 @@ namespace Physica {
         using Storage::operator();
         /* Operations */
         using Base::random_normal;
-        template<class... Args>
-        void resize(IndexArray shape, Args&&... args);
+        void resize(IndexArray shape, auto&&... args);
 
         using Storage::toIndex1D;
         using Storage::toIndexND;

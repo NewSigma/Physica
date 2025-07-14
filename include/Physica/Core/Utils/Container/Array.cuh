@@ -101,8 +101,7 @@ namespace Physica {
         [[no_unique_address]] allocator_type alloc;
     public:
         device_obj() = default;
-        template<class... Args>
-        explicit device_obj(size_t length_, Args&&... args);
+        explicit device_obj(size_t length_, auto&&... args);
         explicit device_obj(const host_obj& array);
         device_obj(const This& obj);
         device_obj(This&& obj) noexcept;
@@ -132,7 +131,7 @@ namespace Physica {
         void toHostAsync(host_obj& obj) const;
 
         void reserve(size_t size);
-        template<class... Args> void resize(size_t size, Args&&... args);
+        void resize(size_t size, auto&&... args);
         void swap(This& __restrict obj) noexcept;
         [[nodiscard]] pointer release() noexcept;
         /* Getters */
@@ -155,9 +154,8 @@ namespace Physica {
     };
 
     template<class T, class Allocator>
-    template<class... Args>
-    device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args) {
-        host_obj(length_, std::forward<Args>(args)...).toDevice(*this);
+    device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, auto&&... args) {
+        host_obj(length_, std::forward<decltype(args)>(args)...).toDevice(*this);
     }
 
     template<class T, class Allocator>
@@ -266,8 +264,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    template<class... Args>
-    void device_obj<Array<T, Dynamic, Allocator>>::resize(size_t size, Args&&... args) {
+    void device_obj<Array<T, Dynamic, Allocator>>::resize(size_t size, auto&&... args) {
         if (size == length)
             return;
         if (capacity < size)
@@ -283,11 +280,11 @@ namespace Physica {
                 buffer.setLength(delta);
             }
         }
-        else if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+        else if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             const size_t delta = size - length;
             Array<ElemType, Dynamic> buffer(delta);
             for (size_t i = 0; i < delta; ++i)
-                buffer.get_allocator().construct(buffer.data() + i, std::forward<Args>(args)...);
+                buffer.get_allocator().construct(buffer.data() + i, std::forward<decltype(args)>(args)...);
             check(cudaMemcpyAsync(d_data + length, buffer.data(), delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx));
             buffer.get_allocator().deallocate(buffer.release(), delta);
         }

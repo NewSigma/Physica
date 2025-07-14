@@ -22,13 +22,11 @@
 
 namespace Physica {
     template<Scalar T, int Dim>
-    template<class... Args>
-    DenseTensor<T, Dim>::DenseTensor(IndexArray shape, Args&&... args) : Storage(std::move(shape), std::forward<Args>(args)...) {}
+    DenseTensor<T, Dim>::DenseTensor(IndexArray shape, auto&&... args) : Storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
 
     template<Scalar T, int Dim>
-    template<class... Args>
-    void DenseTensor<T, Dim>::resize(IndexArray shape, Args&&... args) {
-        Storage::resize(std::move(shape), std::forward<Args>(args)...);
+    void DenseTensor<T, Dim>::resize(IndexArray shape, auto&&... args) {
+        Storage::resize(std::move(shape), std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, int Dim>

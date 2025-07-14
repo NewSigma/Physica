@@ -55,8 +55,7 @@ namespace Physica {
         [[nodiscard]] T* allocate(size_t n) noexcept;
         void deallocate(T* p, size_t n) noexcept;
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
-        template<class... Args>
-        void construct(T* p, Args&&... args);
+        void construct(T* p, auto&&... args);
         void destroy(T* p) noexcept;
     };
 
@@ -110,9 +109,8 @@ namespace Physica {
     }
 
     template<class T, size_t Align>
-    template<class... Args>
-    void HostAllocator<T, Align>::construct(T* p, Args&&... args) {
-        ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
+    void HostAllocator<T, Align>::construct(T* p, auto&&... args) {
+        ::new (static_cast<void*>(p)) T(std::forward<decltype(args)>(args)...);
     }
 
     template<class T, size_t Align>
@@ -160,9 +158,8 @@ namespace std {
             return a.reallocate(p, n);
         }
 
-        template<class... Args>
-        static void construct(allocator_type& a, T* p, Args&&... args) {
-            a.construct(p, std::forward<Args>(args)...);
+        static void construct(allocator_type& a, T* p, auto&&... args) {
+            a.construct(p, std::forward<decltype(args)>(args)...);
         }
 
         static void destroy(allocator_type& a, T* p) {

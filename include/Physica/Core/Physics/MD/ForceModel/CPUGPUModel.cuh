@@ -35,8 +35,7 @@ namespace Physica {
         HostModel hostModel;
         Array<device_obj<DeviceModel>> deviceModels;
     public:
-        template<class... Args>
-        CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs);
+        CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, auto&&... deviceArgs);
 
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell);
@@ -52,11 +51,10 @@ namespace Physica {
     };
 
     template<class HostModel, class DeviceModel>
-    template<class... Args>
-    CPUGPUModel<HostModel, DeviceModel>::CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs)
+    CPUGPUModel<HostModel, DeviceModel>::CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, auto&&... deviceArgs)
             : hostModel(std::move(hostModel_)) {
         assert(numCUDAThread < ThreadPool::getInstance().getNumThreads());
-        deviceModels.resize(numCUDAThread, std::forward<Args>(deviceArgs)...);
+        deviceModels.resize(numCUDAThread, std::forward<decltype(deviceArgs)>(deviceArgs)...);
     }
 
     template<class HostModel, class DeviceModel>

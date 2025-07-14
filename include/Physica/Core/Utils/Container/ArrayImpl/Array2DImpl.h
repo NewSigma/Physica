@@ -37,16 +37,15 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class... Args>
-    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col, Args&&... args) : r(row) {
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args) : r(row) {
         if constexpr (isVectorStorage) {
             if constexpr (isColMajor)
-                arr = ArrayType(col, row, std::forward<Args>(args)...);
+                arr = ArrayType(col, row, std::forward<decltype(args)>(args)...);
             else
-                arr = ArrayType(row, col, std::forward<Args>(args)...);
+                arr = ArrayType(row, col, std::forward<decltype(args)>(args)...);
         }
         else
-            arr = ArrayType(row * col, std::forward<Args>(args)...);
+            arr = ArrayType(row * col, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -81,17 +80,16 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class... Args>
-    void Array2D<T, Option, Row, Col, Allocator>::resize(size_t row, size_t col, Args&&... args) {
+    void Array2D<T, Option, Row, Col, Allocator>::resize(size_t row, size_t col, auto&&... args) {
         assert((Row == row || Row == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert((Col == col || Col == Dynamic) && "[Error]: Cannot resize a fixed array");
         if constexpr (isVectorStorage) {
             arr.resize(isColMajor ? col : row);
             for (auto& elem : arr)
-                elem.resize(isColMajor ? row : col, std::forward<Args>(args)...);
+                elem.resize(isColMajor ? row : col, std::forward<decltype(args)>(args)...);
         }
         else
-            arr.resize(row * col, std::forward<Args>(args)...);
+            arr.resize(row * col, std::forward<decltype(args)>(args)...);
         r = row;
     }
 

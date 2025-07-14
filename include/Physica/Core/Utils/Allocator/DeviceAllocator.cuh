@@ -57,8 +57,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] __host__ __device__ pointer allocate(size_t n) noexcept;
         __host__ __device__ void deallocate(pointer p, size_t n) noexcept;
-        template<class... Args>
-        __host__ __device__ void construct(pointer p, Args&&... args);
+        __host__ __device__ void construct(pointer p, auto&&... args);
         __host__ __device__ void destroy(pointer p) noexcept;
     };
 
@@ -91,12 +90,11 @@ namespace Physica {
     }
 
     template<class T>
-    template<class... Args>
-    __host__ __device__ void DeviceAllocator<T>::construct(pointer p, Args&&... args) {
+    __host__ __device__ void DeviceAllocator<T>::construct(pointer p, auto&&... args) {
         if constexpr (IsDevice())
-            ::new (static_cast<void*>(p)) value_type(std::forward<Args>(args)...);
+            ::new (static_cast<void*>(p)) value_type(std::forward<decltype(args)>(args)...);
         else {
-            value_type temp(std::forward<Args>(args)...);
+            value_type temp(std::forward<decltype(args)>(args)...);
             check(cudaMemcpyAsync(p, &temp, sizeof(value_type), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
             if constexpr (!std::is_trivially_copyable<value_type>::value)
                 temp.release(); //Ownership has been given to device
@@ -151,9 +149,8 @@ namespace std {
             a.deallocate(p, n);
         }
 
-        template<class... Args>
-        __host__ __device__ static void construct(allocator_type& a, pointer p, Args&&... args) {
-            a.construct(p, std::forward<Args>(args)...);
+        __host__ __device__ static void construct(allocator_type& a, pointer p, auto&&... args) {
+            a.construct(p, std::forward<decltype(args)>(args)...);
         }
 
         __host__ __device__ static void destroy(allocator_type& a, pointer p) {

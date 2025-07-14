@@ -28,12 +28,11 @@
 namespace Physica {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, class Allocator>
-    template<class... Args>
-    __host__ __device__ Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length, Args&&... args) {
+    __host__ __device__ Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length, auto&&... args) {
         assert(length == Length);
-        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+        if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             for (size_t i = 0; i < Length; ++i)
-                *(arr + i) = T(std::forward<Args>(args)...);
+                *(arr + i) = T(std::forward<decltype(args)>(args)...);
         }
     }
 
@@ -55,8 +54,7 @@ namespace Physica {
      * Initializing new elements will not work. A fixed array is assumed to be initialized upon construction.
      */
     template<class T, size_t Length, class Allocator>
-    template<class... Args>
-    __host__ __device__ void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, Args&&...) {
+    __host__ __device__ void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, auto&&...) {
         assert(length == Length);
     }
 
@@ -85,15 +83,14 @@ namespace Physica {
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
-    template<class... Args>
-    Array<T, Dynamic, Allocator>::Array(size_t length_, Args&&... args) : length(length_), capacity(length_), alloc() {
+    Array<T, Dynamic, Allocator>::Array(size_t length_, auto&&... args) : length(length_), capacity(length_), alloc() {
         if (capacity == 0)
             return;
 
         arr = alloc.allocate(capacity);
-        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+        if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             for (size_t i = 0; i < length_; ++i)
-                alloc.construct(arr + i, std::forward<Args>(args)...);
+                alloc.construct(arr + i, std::forward<decltype(args)>(args)...);
         }
     }
 
@@ -143,28 +140,25 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    template<class... Args>
-    void Array<T, Dynamic, Allocator>::grow(Args&&... args) {
+    void Array<T, Dynamic, Allocator>::grow(auto&&... args) {
         assert(length < getCapacity() && "[Error]: You must make sure capacity is enough before calling grow()");
-        alloc.construct(arr + length++, std::forward<Args>(args)...);
+        alloc.construct(arr + length++, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
-    template<class... Args>
-    void Array<T, Dynamic, Allocator>::append(Args&&... args) {
+    void Array<T, Dynamic, Allocator>::append(auto&&... args) {
         if (length == capacity) [[unlikely]]
             doubleSpace();
-        grow(std::forward<Args>(args)...);
+        grow(std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
-    template<class... Args>
-    void Array<T, Dynamic, Allocator>::insert(size_t index, Args&&... args) {
+    void Array<T, Dynamic, Allocator>::insert(size_t index, auto&&... args) {
         assert(index <= length);
         if (length == capacity)
             doubleSpace();
         memmove(arr + index + 1, arr + index, (length - index) * sizeof(T));
-        alloc.construct(arr + index, std::forward<Args>(args)...);
+        alloc.construct(arr + index, std::forward<decltype(args)>(args)...);
         setLength(length + 1);
     }
 
@@ -179,10 +173,9 @@ namespace Physica {
      * resize() is inlined, if there is no need to resize, we avoid the overhead of slow resizeImpl() call
      */
     template<class T, class Allocator>
-    template<class... Args>
-    void Array<T, Dynamic, Allocator>::resize(size_t size, Args&&... args) {
+    void Array<T, Dynamic, Allocator>::resize(size_t size, auto&&... args) {
         if (length != size)
-            resizeImpl<Args...>(size, std::forward<Args>(args)...);
+            resizeImpl(size, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
@@ -282,8 +275,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    template<class... Args>
-    void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, Args&&... args) {
+    void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, auto&&... args) {
         if (capacity < size)
             reserve(size);
 
@@ -294,11 +286,11 @@ namespace Physica {
             length = size;
         }
         else {
-            if constexpr (Base::template isTrivialDefaultConstruct<Args...>())
+            if constexpr (Base::template isTrivialDefaultConstruct<decltype(args)...>())
                 length = size;
             else {
                 for (; length < size; ++length)
-                    alloc.construct(arr + length, std::forward<Args>(args)...);
+                    alloc.construct(arr + length, std::forward<decltype(args)>(args)...);
             }
         }
     }

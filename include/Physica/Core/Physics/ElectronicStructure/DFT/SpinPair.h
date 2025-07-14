@@ -33,8 +33,7 @@ namespace Physica {
     public:
         using ElemType = T;
     public:
-        template<class... Args>
-        explicit SpinPair(Args... args); //TODO: Use Args&&... may lead to incorrect overload
+        explicit SpinPair(auto... args); //TODO: Use auto&&... may lead to incorrect overload
         SpinPair(const SpinPair&) = default;
         SpinPair(SpinPair&&) noexcept = default;
         ~SpinPair() = default;
@@ -49,8 +48,7 @@ namespace Physica {
     };
 
     template<class T, bool IsSpinPolarized>
-    template<class... Args>
-    SpinPair<T, IsSpinPolarized>::SpinPair(Args... args) : Base(NumSpin, std::forward<Args>(args)...) {}
+    SpinPair<T, IsSpinPolarized>::SpinPair(auto... args) : Base(NumSpin, std::forward<decltype(args)>(args)...) {}
 }
 
 namespace Physica {

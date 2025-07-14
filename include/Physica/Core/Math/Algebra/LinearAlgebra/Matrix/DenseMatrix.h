@@ -68,8 +68,8 @@ namespace Physica {
         size_t completePivoting(size_t col);
         size_t partialPivoting(size_t col);
 
-        void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
         using Storage::resize;
+        void resize(const Matrix auto& m, auto&&... args);
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;

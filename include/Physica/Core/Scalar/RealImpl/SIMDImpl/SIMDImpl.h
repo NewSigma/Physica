@@ -67,9 +67,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Size>
-    template<Scalar... Args>
-    SIMD<T, Size>::SIMD(Args... args) : pack(args.toMachine()...) {
-        static_assert(sizeof...(Args) == Size, "[Error]: Number of elements does not match");
+    SIMD<T, Size>::SIMD(Scalar auto... args) : pack(args.toMachine()...) {
+        static_assert(sizeof...(args) == Size, "[Error]: Number of elements does not match");
     }
 
     template<Scalar T, size_t Size>

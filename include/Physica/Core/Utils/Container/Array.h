@@ -54,8 +54,7 @@ namespace Physica {
         [[no_unique_address]] allocator_type alloc;
     public:
         Array() = default;
-        template<class... Args>
-        __host__ __device__ explicit Array(size_t length, Args&&... args);
+        __host__ __device__ explicit Array(size_t length, auto&&... args);
         __host__ __device__ Array(std::initializer_list<T> list);
         template<size_t OtherLength, class OtherAlloc>
         Array(const Array<T, OtherLength, OtherAlloc>& other);
@@ -67,8 +66,7 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void insert(const T&, size_t) { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Length); }
-        template<class... Args>
-        __host__ __device__ void resize(size_t length, Args&&... args);
+        __host__ __device__ void resize(size_t length, auto&&... args);
         __host__ __device__ void swap(Array& __restrict array) noexcept;
 
         [[nodiscard]] auto toDevice() const;
@@ -115,8 +113,7 @@ namespace Physica {
         [[no_unique_address]] allocator_type alloc;
     public:
         Array() = default;
-        template<class... Args>
-        explicit Array(size_t length_, Args&&... args);
+        explicit Array(size_t length_, auto&&... args);
         Array(std::initializer_list<T> list);
         template<size_t Length, class OtherAlloc>
         Array(const Array<T, Length, OtherAlloc>& other);
@@ -126,12 +123,11 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class... Args>
-        void grow(Args&&... args);
-        template<class... Args> void append(Args&&... args);
-        template<class... Args> void insert(size_t index, Args&&... args);
+        void grow(auto&&... args);
+        void append(auto&&... args);
+        void insert(size_t index, auto&&... args);
         void reserve(size_t size);
-        template<class... Args> void resize(size_t size, Args&&... args);
+        void resize(size_t size, auto&&... args);
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
@@ -159,8 +155,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
     private:
-        template<class... Args>
-        void resizeImpl(size_t size, Args&&... args);
+        void resizeImpl(size_t size, auto&&... args);
     };
 }
 

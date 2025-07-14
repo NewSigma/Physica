@@ -50,8 +50,7 @@ namespace Physica {
     }
 
     template<tparams>
-    template<class... Args>
-    __host__ __device__ void device_obj<Array2D>::resize(size_t row, size_t col, Args&&... args) {
+    __host__ __device__ void device_obj<Array2D>::resize(size_t row, size_t col, auto&&... args) {
         assert((Row == row || Row == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert((Col == col || Col == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert(row > 0 && col > 0);
@@ -64,7 +63,7 @@ namespace Physica {
                 arr.resize(major);
                 auto host_arr = arr.toHost();
                 for (auto& elem : host_arr)
-                    elem.resize(minor, std::forward<Args>(args)...);
+                    elem.resize(minor, std::forward<decltype(args)>(args)...);
                 host_arr.toDevice(arr);
                 size = row * col;
             }
@@ -73,7 +72,7 @@ namespace Physica {
             if constexpr (IsDevice())
                 assert(Row * Col != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
             else
-                arr.resize(row * col, std::forward<Args>(args)...);
+                arr.resize(row * col, std::forward<decltype(args)>(args)...);
         }
         r = row;
     }

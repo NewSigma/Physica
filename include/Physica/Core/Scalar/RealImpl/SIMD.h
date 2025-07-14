@@ -52,8 +52,7 @@ namespace Physica {
         explicit SIMD(double x) : pack(x) {}
         explicit SIMD(const Scalar auto& x);
         SIMD(T x, int count);
-        template<Scalar... Args>
-        SIMD(Args... args);
+        SIMD(Scalar auto... args);
         SIMD(MachineType x) : pack(x) {}
         SIMD(Pack value) : pack(value) {}
         SIMD(HalfType a, HalfType b);

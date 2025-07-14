@@ -49,8 +49,7 @@ namespace Physica {
         IndexArray shape;
     public:
         ArrayND() = default;
-        template<class... Args>
-        explicit ArrayND(IndexArray shape_, Args&&... args);
+        explicit ArrayND(IndexArray shape_, auto&&... args);
         template<class... Dims>
         explicit ArrayND(size_t dim0, Dims... dims);
         ArrayND(const This&) = default;
@@ -65,8 +64,7 @@ namespace Physica {
         template<class... Dims>
         [[nodiscard]] const T& operator()(size_t dim0, Dims... dims) const;
         /* Operations */
-        template<class... Args>
-        void resize(IndexArray shape_, Args&&... args);
+        void resize(IndexArray shape_, auto&&... args);
         template<class... Dims>
         void resize(size_t dim0, Dims... dims);
 

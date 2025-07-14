@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,8 +43,7 @@ namespace Physica {
         [[nodiscard]] static pointer allocate(size_t n);
         static void deallocate(pointer p, size_t n) noexcept;
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
-        template<class... Args>
-        void construct(pointer p, Args&&... args);
+        void construct(pointer p, auto&&... args);
         void destroy(pointer p);
     };
 
@@ -74,10 +73,9 @@ namespace Physica {
     }
 
     template<class T>
-    template<class... Args>
-    void PageLockedAllocator<T>::construct(pointer p, Args&&... args) {
+    void PageLockedAllocator<T>::construct(pointer p, auto&&... args) {
         HostAllocator<T> alloc{};
-        alloc.construct(p, std::forward<Args>(args)...);
+        alloc.construct(p, std::forward<decltype(args)>(args)...);
     }
 
     template<class T>
@@ -126,9 +124,8 @@ namespace std {
             return a.reallocate(p, n);
         }
 
-        template<class... Args>
-        static void construct(allocator_type& a, pointer p, Args&&... args) {
-            a.construct(p, std::forward<Args>(args)...);
+        static void construct(allocator_type& a, pointer p, auto&&... args) {
+            a.construct(p, std::forward<decltype(args)>(args)...);
         }
 
         static void destroy(allocator_type& a, pointer p) {
