@@ -72,24 +72,28 @@ namespace Physica {
         const int numSite = getNumSite();
         assert(numSite == dqmc.getNumSite() && "[Error]: Inconsistent site numbers");
         auto flatten = fft.getRSpace().flatten();
-        switch (type) {
-        case AFM:
-            for (int i = 0; i < numSite; ++i)
-                flatten[i] = dqmc.getGreenU().diag()[i] - dqmc.getGreenD().diag()[i];
-            break;
-        case CDW:
-            for (int i = 0; i < numSite; ++i)
-                flatten[i] = T(2) - dqmc.getGreenU().diag()[i] - dqmc.getGreenD().diag()[i];
-            break;
-        case DOW:
-            for (int i = 0; i < numSite; ++i)
-                flatten[i] = (T(1) - dqmc.getGreenU().diag()[i]) * (T(1) - dqmc.getGreenD().diag()[i]);
-            break;
-        default:
-            unreachable();
+        for (int i = 0; i < dqmc.getNumEqualGreen(); ++i) {
+            const auto& greenU = dqmc.getGreenUs()[i];
+            const auto& greenD = dqmc.getGreenDs()[i];
+            switch (type) {
+            case AFM:
+                for (int i = 0; i < numSite; ++i)
+                    flatten[i] = greenU.diag()[i] - greenD.diag()[i];
+                break;
+            case CDW:
+                for (int i = 0; i < numSite; ++i)
+                    flatten[i] = T(2) - greenU.diag()[i] - greenD.diag()[i];
+                break;
+            case DOW:
+                for (int i = 0; i < numSite; ++i)
+                    flatten[i] = (T(1) - greenU.diag()[i]) * (T(1) - greenD.diag()[i]);
+                break;
+            default:
+                unreachable();
+            }
+            fft.transform();
+            toNextMean(observes[Base::getCursor()], i, fft.getKSpace().squaredNorms() * reciprocal(T(numSite)));
         }
-        fft.transform();
-        observes[Base::getCursor()] = fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
         Base::sample(dqmc);
     }
 

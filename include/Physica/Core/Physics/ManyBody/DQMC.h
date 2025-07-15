@@ -31,15 +31,12 @@ namespace Physica {
         using This = DQMC<T>;
         using Params = HubbardParams<T>;
         using MatrixND = Params::MatrixND;
-        using MatrixChain = Array<MatrixND>;
     private:
         const Params& params;
-        int period;
-        VectorND<T> aux;
-        MatrixChain chainU;
-        MatrixChain chainD;
+        MatrixND aux;
+        CyclicChainQDT<T> chainU;
+        CyclicChainQDT<T> chainD;
 
-        CyclicChainQDT<T> cychain;
         QRDecomp<T> qr;
         DiagMatrix<T> diagB;
         DiagMatrix<T> diagS;
@@ -49,11 +46,11 @@ namespace Physica {
         T lnPartitionZ;
         T signU = 1;
         T signD = 1;
-        MatrixND greenU;
-        MatrixND greenD;
+        Array<MatrixND> greenUs;
+        Array<MatrixND> greenDs;
     public:
         DQMC() = delete;
-        DQMC(const Params& params_, int period_);
+        DQMC(const Params& params_, int period);
         DQMC(const This&) = default;
         DQMC(This&&) noexcept = default;
         ~DQMC() = default;
@@ -78,25 +75,25 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params.getNumSplit(); }
-        [[nodiscard]] const auto getAuxField() const noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
-        [[nodiscard]] auto getAuxField() noexcept { return aux.reshape_col(getNumSite(), getNumSplit()); }
 
         [[nodiscard]] T getLnPartitionZ() const noexcept { return lnPartitionZ; }
         [[nodiscard]] T getSignU() const noexcept { return signU; }
         [[nodiscard]] T getSignD() const noexcept { return signD; }
         [[nodiscard]] T getSign() const noexcept { return signU * signD; }
-        [[nodiscard]] const auto& getGreenU() const noexcept { return greenU; }
-        [[nodiscard]] const auto& getGreenD() const noexcept { return greenD; }
+        [[nodiscard]] int getNumEqualGreen() const noexcept { return greenUs.getLength(); }
+        [[nodiscard]] int getPeriod() const noexcept { return getNumSplit() / getNumEqualGreen(); }
+        [[nodiscard]] const auto& getGreenUs() const noexcept { return greenUs; }
+        [[nodiscard]] const auto& getGreenDs() const noexcept { return greenDs; }
     private:
         /* Operations */
-        void resize(int numSite, int numSplit);
+        void resize(int numSite, int numSplit, int period);
 
         void initChain();
         void single_flip(int site, int split) noexcept;
-        const QDTDecomp<T>& makeWeightMatrix(const MatrixChain& chain, int shift);
-        std::pair<T, T> lnPartition(const MatrixChain& chain, int shift);
+        const QDTDecomp<T>& makeWeightMatrix(CyclicChainQDT<T>& chain, int shift);
+        std::pair<T, T> lnPartition(CyclicChainQDT<T>& chain, int shift);
         std::pair<T, T> lnPartition(int shift);
-        std::pair<T, T> calcGreen(const MatrixChain& chain, MatrixND& green, int shift);
+        std::pair<T, T> calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift);
         void calcGreens();
 
         T calcLnSpinWaveWeight(int site) const noexcept;
@@ -108,16 +105,15 @@ namespace Physica {
     };
 
     template<Scalar T>
-    DQMC<T>::DQMC(const Params& params_, int period_) : params(params_), period(period_) {
-        assert((period > 0 && getNumSplit() % period == 0) && "[Error]: Invalid period");
-        resize(params.getNumSite(), params.getNumSplit());
+    DQMC<T>::DQMC(const Params& params_, int period) : params(params_) {
+        resize(params.getNumSite(), params.getNumSplit(), period);
     }
 
     template<Scalar T>
     template<RNG R>
     void DQMC<T>::step_random() {
         aux.template random_uniform<R>();
-        aux = unit(aux - T(0.5));
+        aux = unit_elem(aux - T(0.5));
         initChain();
         calcGreens();
     }
@@ -172,8 +168,7 @@ namespace Physica {
         auto& rng = R::getInstance();
         const int site = std::uniform_int_distribution<>(0, getNumSite() - 1)(rng);
         const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(rng);
-        auto field = getAuxField();
-        auto spins = field.row(site);
+        auto spins = aux.row(site);
         const T sumSpin0 = spins.sum();
         const T sumSpin1 = sumSpin0 - T(2) * spins[split];
         const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
@@ -206,8 +201,7 @@ namespace Physica {
         for (int step = 0, split = 0; step < numStep; ++step) {
             props.template random_uniform<R>();
             for (int site = 0; site < getNumSite(); ++site) {
-                auto field = getAuxField();
-                auto spins = field.row(site);
+                auto spins = aux.row(site);
                 const T sumSpin0 = spins.sum();
                 const T sumSpin1 = sumSpin0 - T(2) * spins[split];
                 const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
@@ -219,8 +213,7 @@ namespace Physica {
 
         for (int site = 0; site < getNumSite(); ++site) {
             const T p = T::template random_uniform<R>();
-            auto field = getAuxField();
-            auto spins = field.row(site);
+            auto spins = aux.row(site);
             if (p < 0.5)
                 spins = -spins;
         }
@@ -240,13 +233,11 @@ namespace Physica {
     void DQMC<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(params, obj.params);
-        std::swap(period, obj.period);
         aux.swap(obj.aux);
 
         chainU.swap(obj.chainU);
         chainD.swap(obj.chainD);
 
-        cychain.swap(obj.cychain);
         qr.swap(obj.qr);
         diagB.swap(obj.diagB);
         diagS.swap(obj.diagS);
@@ -256,62 +247,57 @@ namespace Physica {
         lnPartitionZ.swap(obj.lnPartitionZ);
         signU.swap(obj.signU);
         signD.swap(obj.signD);
-        greenU.swap(obj.greenU);
-        greenD.swap(obj.greenD);
+        greenUs.swap(obj.greenUs);
+        greenDs.swap(obj.greenDs);
     }
 
     template<Scalar T>
-    void DQMC<T>::resize(int numSite, int numSplit) {
+    void DQMC<T>::resize(int numSite, int numSplit, int period) {
         assert(numSite > 0 && "[Error]: Invalid NumSite");
-        aux.resize(numSite * numSplit);
+        assert(numSplit > 0);
+        assert((period > 0 && getNumSplit() % period == 0) && "[Error]: Invalid period");
+        aux.resize(numSite, numSplit);
         chainU.resize(numSplit);
         chainD.resize(numSplit);
-        for (int i = 0; i < numSplit; ++i) {
-            chainU[i].resize(numSite);
-            chainD[i].resize(numSite);
-        }
 
-        cychain.resize(numSplit);
         qr.resize(numSite, numSite);
         diagB.resize(numSite);
         diagS.resize(numSite);
         buffer.resize(numSite, numSite);
-        greenU.resize(numSite, numSite);
-        greenD.resize(numSite, numSite);
+
+        int numEqualGreen = numSplit / period;
+        greenUs.resize(numEqualGreen, numSite, numSite);
+        greenDs.resize(numEqualGreen, numSite, numSite);
     }
 
     template<Scalar T>
     void DQMC<T>::initChain() {
         const int numSplit = getNumSplit();
-        const auto field = getAuxField();
         const auto& expB = params.getExpB();
         for (int split = 0; split < numSplit; ++split) {
-            auto& mU = chainU[split];
-            auto& mD = chainD[split];
-            for (int site = 0; site < getNumSite(); ++site) {
-                const T factor = params.getAlpha() * field(site, split);
-                mU.col(site) = expB.col(site) * exp(factor);
-                mD.col(site) = expB.col(site) * exp(-factor);
-            }
+            chainU[split].compute(expB * DiagMatrix<T>(exp(params.getAlpha() * aux.col(split))));
+            chainD[split].compute(expB * DiagMatrix<T>(exp(-params.getAlpha() * aux.col(split))));
         }
+        chainU.invalidates();
+        chainD.invalidates();
     }
 
     template<Scalar T>
     void DQMC<T>::single_flip(int site, int split) noexcept {
-        auto field = getAuxField();
-        auto spins = field.row(site);
+        auto spins = aux.row(site);
         spins[split] = -spins[split];
 
-        const T factor = T(2) * params.getAlpha() * spins[split];
-        chainU[split].col(site) *= exp(factor);
-        chainD[split].col(site) *= exp(-factor);
+        const auto& expB = params.getExpB();
+        chainU[split].compute(expB * DiagMatrix<T>(exp(params.getAlpha() * aux.col(split))));
+        chainD[split].compute(expB * DiagMatrix<T>(exp(-params.getAlpha() * aux.col(split))));
+        chainU.invalidate(split);
+        chainD.invalidate(split);
     }
 
     template<Scalar T>
-    const QDTDecomp<T>& DQMC<T>::makeWeightMatrix(const MatrixChain& chain, int shift) {
-        cychain.reset(chain);
+    const QDTDecomp<T>& DQMC<T>::makeWeightMatrix(CyclicChainQDT<T>& chain, int shift) {
         const int numSplit = getNumSplit();
-        const auto& decomp = cychain.multiply(shift, (numSplit + shift - 1) % numSplit);
+        const auto& decomp = chain.multiply(shift, (numSplit + shift - 1) % numSplit);
         const auto& matrixD = decomp.getMatrixD();
         const T betaMu = params.calcBetaMu();
         for (int i = 0; i < getNumSite(); ++i) {
@@ -325,7 +311,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    std::pair<T, T> DQMC<T>::lnPartition(const MatrixChain& chain, int shift) {
+    std::pair<T, T> DQMC<T>::lnPartition(CyclicChainQDT<T>& chain, int shift) {
         const auto& qdt = makeWeightMatrix(chain, shift);
         buffer = qdt.getMatrixQ() * diagB;
         qr.compute(buffer.transpose() + diagS * qdt.getMatrixT());
@@ -346,7 +332,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    std::pair<T, T> DQMC<T>::calcGreen(const MatrixChain& chain, MatrixND& green, int shift) {
+    std::pair<T, T> DQMC<T>::calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift) {
         const auto pair = lnPartition(chain, shift);
         MatrixND temp = buffer * qr.getMatrixQ();
         green = qr.getMatrixR().inverse() * temp.transpose();
@@ -355,26 +341,24 @@ namespace Physica {
 
     template<Scalar T>
     void DQMC<T>::calcGreens() {
-        for (int shift = 0, sample = 0; shift < getNumSplit(); shift += period) {
-            auto [lnZ1, sign1] = calcGreen(chainU, buffer, shift);
-            toNextMean(greenU, sample, buffer);
+        const int period = getPeriod();
+        for (int shift = 0, i = 0; shift < getNumSplit(); shift += period, ++i) {
+            auto [lnZ1, sign1] = calcGreen(chainU, greenUs[i], shift);
             assert((shift == 0 || signU == sign1) && "[Error]: Unexpected sign mismatch");
             signU = sign1;
 
-            auto [lnZ2, sign2] = calcGreen(chainD, buffer, shift);
-            toNextMean(greenD, sample, buffer);
+            auto [lnZ2, sign2] = calcGreen(chainD, greenDs[i], shift);
             assert((shift == 0 || signD == sign2) && "[Error]: Unexpected sign mismatch");
             signD = sign2;
 
-            toNextMean(lnPartitionZ, sample, lnZ1 + lnZ2);
+            toNextMean(lnPartitionZ, i, lnZ1 + lnZ2);
         }
     }
 
     template<Scalar T>
     T DQMC<T>::calcLnSpinWaveWeight(int site) const noexcept {
         assert(0 <= site && site < getNumSite());
-        const auto field = getAuxField();
-        const auto spins = field.row(site);
+        const auto spins = aux.row(site);
         return calcLnSpinWaveWeight(spins.sum());
     }
 

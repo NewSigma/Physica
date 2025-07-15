@@ -54,18 +54,23 @@ namespace Physica {
 
     template<Scalar T>
     void SiteSampler<T>::sample(const DQMC<T>& dqmc, Observable type) {
-        T observe;
-        switch (type) {
-        case Density:
-            observe = T(2) - dqmc.getGreenU().diag().mean() - dqmc.getGreenD().diag().mean();
-            break;
-        case DoubleOccupy:
-            observe = (T(1) - dqmc.getGreenU().diag()) * (T(1) - dqmc.getGreenD().diag()) / T(dqmc.getNumSite());
-            break;
-        default:
-            unreachable();
+        for (int i = 0; i < dqmc.getNumEqualGreen(); ++i) {
+            const auto& greenU = dqmc.getGreenUs()[i];
+            const auto& greenD = dqmc.getGreenDs()[i];
+
+            T observe = 0;
+            switch (type) {
+            case Density:
+                observe = T(2) - greenU.diag().mean() - greenD.diag().mean();
+                break;
+            case DoubleOccupy:
+                observe = (T(1) - greenU.diag()) * (T(1) - greenD.diag()) / T(dqmc.getNumSite());
+                break;
+            default:
+                unreachable();
+            }
+            toNextMean(observes[Base::getCursor()], i, observe);
         }
-        observes[Base::getCursor()] = observe;
         Base::sample(dqmc);
     }
 

@@ -43,9 +43,11 @@ namespace Physica {
         ~CyclicChainQDT() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] QDTDecomp<T>& operator[](size_t i) { return decomps(i, i); }
         /* Operations */
-        const QDTDecomp<T>& multiply(size_t from, size_t to);
-        void reset(const Array<MatrixND>& chain);
+        [[nodiscard]] const QDTDecomp<T>& multiply(size_t from, size_t to) noexcept;
+        void invalidate(size_t i) noexcept;
+        void invalidates() noexcept;
 
         void resize(size_t length);
         void swap(This& __restrict obj) noexcept;
@@ -61,12 +63,13 @@ namespace Physica {
      * Closed interval: [from, to]
      */
     template<Scalar T>
-    auto CyclicChainQDT<T>::multiply(size_t from, size_t to) -> const QDTDecomp<T>& {
+    auto CyclicChainQDT<T>::multiply(size_t from, size_t to) noexcept -> const QDTDecomp<T>& {
         assert(from < getLength() && to < getLength());
         auto& result = decomps(from, to);
         if (from == to || readys(from, to))
             return result;
 
+        readys(from, to) = true;
         if (from < to) {
             for (size_t i = from; i < to; ++i) {
                 if (readys(from, i) && readys(i + 1, to)) {
@@ -76,7 +79,6 @@ namespace Physica {
             }
             const size_t p = (from + to) / 2;
             result = multiply(from, p) * multiply(p + 1, to);
-            readys(from, to) = true;
             return result;
         }
 
@@ -97,17 +99,30 @@ namespace Physica {
         }
 
         result = multiply(from, getLength() - 1) * multiply(0, to);
-        readys(from, to) = true;
         return result;
     }
 
     template<Scalar T>
-    void CyclicChainQDT<T>::reset(const Array<MatrixND>& chain) {
-        memset(readys.asArray().data(), 0, readys.getSize() * sizeof(bool));
-        for (size_t i = 0; i < getLength(); ++i) {
-            decomps(i, i).compute(chain[i]);
-            readys(i, i) = true;
+    void CyclicChainQDT<T>::invalidate(size_t i) noexcept {
+        assert(i < getLength());
+        for (size_t from = 0; from < getLength(); ++from) {
+            for (size_t to = 0; to < getLength(); ++to) {
+                if (from == to)
+                    continue;
+
+                bool cond1 = from <= i;
+                bool cond2 = i <= to;
+                if (from < to)
+                    readys(from, to) &= !(cond1 && cond2);
+                else
+                    readys(from, to) &= !(cond1 || cond2);
+            }
         }
+    }
+
+    template<Scalar T>
+    void CyclicChainQDT<T>::invalidates() noexcept {
+        memset(readys.asArray().data(), 0, readys.getSize() * sizeof(bool));
     }
 
     template<Scalar T>
