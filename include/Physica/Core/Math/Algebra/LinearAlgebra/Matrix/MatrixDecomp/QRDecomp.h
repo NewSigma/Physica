@@ -102,11 +102,11 @@ namespace Physica {
         for (; i < taus.getLength() - 1; ++i) {
             auto col = working.col(i);
             auto buffer = col.tail(i);
-            const auto unit = buffer[0].unit();
+            const auto sign = unit(buffer[0]);
             const auto norm = buffer.householder();
             auto corner = working.bottomRightCorner(i, i + 1);
             applyHouseholder(buffer, corner);
-            taus[i] = std::exchange(col[i], -norm * unit);
+            taus[i] = std::exchange(col[i], -norm * sign);
         }
     }
 

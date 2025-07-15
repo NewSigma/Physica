@@ -73,7 +73,7 @@ namespace Physica {
         Real();
         Real(int length_, int power_);
         Real(std::initializer_list<MPUnit> bytes_, int length_, int power_);
-        Real(SignedMPUnit unit);
+        Real(SignedMPUnit x);
         Real(std::integral auto x);
         Real(double d) noexcept;
         Real(const Integer& i);

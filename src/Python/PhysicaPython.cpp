@@ -44,9 +44,9 @@ PhysicaPython::PhysicaPython(std::filesystem::path root_)
 }
 
 void PhysicaPython::compile(const char* moduleName) {
-    auto& unit = clang.compile(moduleName);
+    auto& ptu = clang.compile(moduleName);
     auto& jit = getJIT();
-    check(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), llvm.getThreadSafeContext())));
+    check(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(ptu.unitModule), llvm.getThreadSafeContext())));
 }
 
 PhysicaPython& PhysicaPython::getInstance() noexcept {

@@ -509,10 +509,10 @@ namespace Physica {
                 const bool cond3 = scalarNear(dot1, -squaredNormB, precision) && dot3.isNegative();
                 if (cond1 || cond2 || cond3) {
                     assert(!dot1.isZero() && "[Error]: Condition 1~3 shall ensure dot1 is not zero");
-                    const T unit = dot1.unit();
+                    const T sign = unit(dot1);
                     squaredNormC += squaredNormB - abs(dot1);
-                    dot2 -= dot3 * unit;
-                    dot1 -= T(2) * squaredNormB * unit;
+                    dot2 -= dot3 * sign;
+                    dot1 -= T(2) * squaredNormB * sign;
                     continue;
                 }
             }
@@ -522,10 +522,10 @@ namespace Physica {
                 const bool cond3 = scalarNear(dot2, -squaredNormA, precision) && dot3.isNegative();
                 if (cond1 || cond2 || cond3) {
                     assert(!dot2.isZero() && "[Error]: Condition 1~3 shall ensure dot2 is not zero");
-                    const T unit = dot2.unit();
+                    const T sign = unit(dot2);
                     squaredNormC += squaredNormA - abs(dot2);
-                    dot1 -= dot3 * unit;
-                    dot2 -= T(2) * squaredNormA * unit;
+                    dot1 -= dot3 * sign;
+                    dot2 -= T(2) * squaredNormA * sign;
                     continue;
                 }
             }
@@ -535,10 +535,10 @@ namespace Physica {
                 const bool cond3 = scalarNear(dot3, -squaredNormA, precision) && dot2.isNegative();
                 if (cond1 || cond2 || cond3) {
                     assert(!dot3.isZero() && "[Error]: Condition 1~3 shall ensure dot3 is not zero");
-                    const T unit = dot3.unit();
+                    const T sign = unit(dot3);
                     squaredNormB += squaredNormA - abs(dot3);
-                    dot1 -= dot2 * unit;
-                    dot3 -= T(2) * squaredNormA * unit;
+                    dot1 -= dot2 * sign;
+                    dot3 -= T(2) * squaredNormA * sign;
                     continue;
                 }
             }
@@ -584,9 +584,8 @@ namespace Physica {
 
             if (abs(dot) > squaredNormA) {
                 assert(!dot.isZero() && "[Error]: Condition 1~3 shall ensure dot is not zero");
-                const T unit = dot.unit();
                 squaredNormB += squaredNormA - abs(dot);
-                dot -= T(2) * squaredNormA * unit;
+                dot -= T(2) * squaredNormA * unit(dot);
                 continue;
             }
         } while (false);

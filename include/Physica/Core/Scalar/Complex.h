@@ -80,7 +80,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ T squaredNorm() const;
         [[nodiscard]] __host__ __device__ T norm() const;
         [[nodiscard]] __host__ __device__ T phase() const;
-        [[nodiscard]] __host__ __device__ Complex unit() const;
 
         [[nodiscard]] PacketType packet() const;
         void writePacket(const PacketType packet);

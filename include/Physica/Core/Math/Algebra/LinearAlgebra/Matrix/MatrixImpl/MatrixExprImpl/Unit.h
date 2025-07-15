@@ -32,11 +32,11 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const {
-            return Base::getExpr().calc(row, col).unit();
+            return unit(Base::getExpr().calc(row, col));
         }
 
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return Base::getExpr().calc_value(row, col).unit();
+            return unit(Base::getExpr().calc_value(row, col));
         }
     };
 

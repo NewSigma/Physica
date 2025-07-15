@@ -90,8 +90,6 @@ namespace Physica {
     private:
         /* Operations */
         void resize(int numSite, int numSplit);
-        template<RNG R>
-        void random_uniform();
 
         void initChain();
         void single_flip(int site, int split) noexcept;
@@ -118,7 +116,9 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void DQMC<T>::step_random() {
-        random_uniform<R>();
+        aux.template random_uniform<R>();
+        aux = unit(aux - T(0.5));
+        initChain();
         calcGreens();
     }
 
@@ -281,14 +281,6 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
-    void DQMC<T>::random_uniform() {
-        aux.template random_uniform<R>();
-        aux = unit(aux - T(0.5));
-        initChain();
-    }
-
-    template<Scalar T>
     void DQMC<T>::initChain() {
         const int numSplit = getNumSplit();
         const auto field = getAuxField();
@@ -327,7 +319,7 @@ namespace Physica {
             const T absD = abs(originD);
             const bool sep = absD > T(1);
             diagB.diag()[i] = sep ? reciprocal(absD) : T(1);
-            diagS.diag()[i] = sep ? originD.unit() : originD;
+            diagS.diag()[i] = sep ? unit(originD) : originD;
         }
         return decomp;
     }
@@ -374,9 +366,7 @@ namespace Physica {
             assert((shift == 0 || signD == sign2) && "[Error]: Unexpected sign mismatch");
             signD = sign2;
 
-            [[maybe_unused]] bool near = scalarNear(lnZ1 + lnZ2, lnPartitionZ, std::numeric_limits<T>::epsilon() * 10);
-            assert((shift == 0 || near) && "[Error]: Unexpected deviation");
-            lnPartitionZ = lnZ1 + lnZ2;
+            toNextMean(lnPartitionZ, sample, lnZ1 + lnZ2);
         }
     }
 

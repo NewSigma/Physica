@@ -31,9 +31,9 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] T calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
+        [[nodiscard]] T calc(size_t i) const { return unit(Base::getExpr().calc(i)); }
 
-        [[nodiscard]] Tv calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
+        [[nodiscard]] Tv calc_value(size_t i) const { return unit(Base::getExpr().calc_value(i)); }
     };
 
     template<Vector V>

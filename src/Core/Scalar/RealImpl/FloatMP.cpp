@@ -42,11 +42,11 @@ Real<FloatMP>::Real(std::initializer_list<MPUnit> bytes_, int length_, int power
     }
 }
 
-Real<FloatMP>::Real(SignedMPUnit unit)
+Real<FloatMP>::Real(SignedMPUnit x)
         : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
-        , length(unit > 0 ? 1 : -1)
+        , length(x > 0 ? 1 : -1)
         , power(0) {
-    byte[0] = unit > 0 ? unit : -unit;
+    byte[0] = x > 0 ? x : -x;
 }
 
 Real<FloatMP>::Real(double d) noexcept {

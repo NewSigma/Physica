@@ -100,14 +100,14 @@ namespace Physica {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
 
-            T unit;
+            T factor;
             if (temp[0].squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
-                unit = RealType(1);
+                factor = RealType(1);
             else
-                unit = temp[0].unit();
+                factor = unit(temp[0]);
 
             const RealType norm = temp.householder();
-            normVector[i] = -norm * unit;
+            normVector[i] = -norm * factor;
 
             if (!norm.isZero()) {
                 auto target_right = working.rightCols(i + 1);

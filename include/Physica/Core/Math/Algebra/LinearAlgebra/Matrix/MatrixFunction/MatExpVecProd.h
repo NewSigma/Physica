@@ -137,8 +137,8 @@ namespace Physica {
     template<ExecutePolicy P>
     auto MatExpVecProd<M, V>::calcParam(Tr traceMu) const -> ParamPair {
         constexpr static Tm NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
-        const auto unit = UnitMatrix<ScalarType>(getLength());
-        const ScalarType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<P>(MaxNormIteration);
+        const auto matI = UnitMatrix<ScalarType>(getLength());
+        const ScalarType norm1 = (mexp.getMatrix() - matI * traceMu).template norm1_power<P>(MaxNormIteration);
         const bool isSmallNorm = Tm(norm1) <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;
@@ -159,7 +159,7 @@ namespace Physica {
         Trv powerNorms[MaxNormOrder];
         const Tr normalizer = reciprocal(norm1); // pow() has the risk of overflow
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
-            const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<P>(MaxNormIteration);
+            const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * matI, order).template norm1_power<P>(MaxNormIteration);
             powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * norm1.value();
         }
 

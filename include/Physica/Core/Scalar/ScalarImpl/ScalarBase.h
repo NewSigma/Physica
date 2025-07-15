@@ -122,7 +122,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ RealType real() const;
         [[nodiscard]] __host__ __device__ RealType imag() const;
         [[nodiscard]] __host__ __device__ ScalarType conjugate() const;
-        [[nodiscard]] __host__ __device__ ScalarType unit() const;
         [[nodiscard]] __host__ __device__ RealType norm() const;
         [[nodiscard]] __host__ __device__ auto squaredNorm() const;
         [[nodiscard]] ScalarType sum() const { return this->getDerived(); }
@@ -348,14 +347,6 @@ namespace Physica {
             return ScalarType(real(), -imag());
         else
             return real();
-    }
-
-    template<class Derived>
-    __host__ __device__ ScalarBase<Derived>::ScalarType ScalarBase<Derived>::unit() const {
-        if constexpr (isComplex)
-            return this->getDerived().unit();
-        else
-            return ScalarType(real().isNegative() ? -1 : 1);
     }
 
     template<class Derived>

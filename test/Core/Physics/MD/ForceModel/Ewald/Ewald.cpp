@@ -58,7 +58,7 @@ void madelungTest() {
         NaCl.toCartesian();
         EwaldType ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
         const auto energy = ewald.potentialV(NaCl.getPos());
-        const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
+        const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x  cell so energy is divided by 4
         constexpr double prec = isFloat32 ? 1E-6 : 1E-7;
         if (!scalarNear(madelung, T(1.7475645946331822), prec))
             exit(EXIT_FAILURE);

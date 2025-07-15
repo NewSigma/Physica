@@ -570,8 +570,8 @@ namespace Physica {
         const Tr squaredTailNorm = tail(1).squaredNorm();
         if (squaredTailNorm > std::numeric_limits<T>::min()) [[likely]] {
             const Tr norm = sqrt(squaredTailNorm + sourceNorm0);
-            const T factor = v0.unit() * norm;
-            const T factor1 = v0 + factor;
+            const T factor = norm * unit(v0.value());
+            const T factor1 = factor + v0;
             const T factor2 = reciprocal(factor1);
 
             target.tail(1) = tail(1) * factor2;

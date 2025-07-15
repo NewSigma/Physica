@@ -21,25 +21,25 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
 
 namespace Physica {
-    template<Matrix T> class BiDiagMatrixB;
+    template<Matrix M> class BiDiagMatrixB;
     /**
      * Decomposite matrix A like A = UBV^T
      *
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:284-285
      */
-    template<Matrix T>
+    template<Matrix M>
     class Bidiagonalization {
-        using This = Bidiagonalization<T>;
-        using ScalarType = T::ScalarType;
-        using WorkingMatrix = T::ColMatrix;
-        constexpr static size_t NumSingularValue = T::RowAtCompile > T::ColAtCompile
-                                                                            ? T::ColAtCompile
-                                                                            : T::RowAtCompile;
-        using MainDiagVector = DenseVector<ScalarType, NumSingularValue>;
-        using SubDiagVector = DenseVector<ScalarType, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
+        using This = Bidiagonalization<M>;
+        using T = M::ScalarType;
+        using WorkingMatrix = M::ColMatrix;
+        constexpr static size_t NumSingularValue = M::RowAtCompile > M::ColAtCompile
+                                                                            ? M::ColAtCompile
+                                                                            : M::RowAtCompile;
+        using MainDiagVector = DenseVector<T, NumSingularValue>;
+        using SubDiagVector = DenseVector<T, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
 
-        static_assert(!ScalarType::isComplex, "[Error]: Bidiagonalization do not support complex matrixes");
+        static_assert(!T::isComplex, "[Error]: Bidiagonalization do not support complex matrixes");
     private:
         WorkingMatrix working;
         MainDiagVector mainDiag;
@@ -47,7 +47,7 @@ namespace Physica {
     public:
         Bidiagonalization() = default;
         Bidiagonalization(size_t row, size_t col);
-        Bidiagonalization(const T& source);
+        Bidiagonalization(const M& source);
         Bidiagonalization(const This&) = default;
         Bidiagonalization(This&&) noexcept = default;
         ~Bidiagonalization() = default;
@@ -58,26 +58,26 @@ namespace Physica {
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] BiDiagMatrixB<T> getMatrixB() const noexcept { return BiDiagMatrixB(*this); }
+        [[nodiscard]] BiDiagMatrixB<M> getMatrixB() const noexcept { return BiDiagMatrixB(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixU() const;
         [[nodiscard]] HouseholderSequence<WorkingMatrix, false> getMatrixV() const;
     private:
         void householderOnCol(size_t colIndex);
-        friend class BiDiagMatrixB<T>;
+        friend class BiDiagMatrixB<M>;
     };
 
-    template<Matrix T>
-    Bidiagonalization<T>::Bidiagonalization(size_t row, size_t col) {
+    template<Matrix M>
+    Bidiagonalization<M>::Bidiagonalization(size_t row, size_t col) {
         resize(row, col);
     }
 
-    template<Matrix T>
-    Bidiagonalization<T>::Bidiagonalization(const T& source) : Bidiagonalization(source.getRow(), source.getCol()) {
+    template<Matrix M>
+    Bidiagonalization<M>::Bidiagonalization(const M& source) : Bidiagonalization(source.getRow(), source.getCol()) {
         compute(source);
     }
 
-    template<Matrix T>
-    void Bidiagonalization<T>::compute(const Matrix auto& source) {
+    template<Matrix M>
+    void Bidiagonalization<M>::compute(const Matrix auto& source) {
         assert(source.getRow() >= source.getCol());
         working = source;
 
@@ -88,8 +88,8 @@ namespace Physica {
 
             auto row = working.row(i);
             auto sub_row = row.tail(i + 1);
-            auto unit = sub_row[0].unit();
-            subDiag[i] = -sub_row.householder() * unit;
+            auto factor = unit(sub_row[0]);
+            subDiag[i] = -sub_row.householder() * factor;
             auto corner2 = working.bottomRightCorner(i + 1);
             applyHouseholder(corner2, sub_row);
         }
@@ -101,8 +101,8 @@ namespace Physica {
         if (working.getRow() != numCol) {
             auto col = working.col(i);
             auto sub_col = col.tail(i);
-            auto unit = sub_col[0].unit();
-            mainDiag[i] = -sub_col.householder() * unit;
+            auto factor = unit(sub_col[0]);
+            mainDiag[i] = -sub_col.householder() * factor;
         }
         else {
             mainDiag[i] = -working(i, i);
@@ -110,56 +110,55 @@ namespace Physica {
         }
     }
 
-    template<Matrix T>
-    void Bidiagonalization<T>::resize(size_t row, size_t col) {
+    template<Matrix M>
+    void Bidiagonalization<M>::resize(size_t row, size_t col) {
         assert(row >= col && col > 1 && "[Error]: Invalid size");
         working.resize(row, col);
         mainDiag.resize(col);
         subDiag.resize(col - 1);
     }
 
-    template<Matrix T>
-    void Bidiagonalization<T>::swap(This& __restrict obj) noexcept {
+    template<Matrix M>
+    void Bidiagonalization<M>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         mainDiag.swap(obj.mainDiag);
         subDiag.swap(obj.subDiag);
     }
 
-    template<Matrix T>
-    HouseholderSequence<typename Bidiagonalization<T>::WorkingMatrix>
-    Bidiagonalization<T>::getMatrixU() const {
+    template<Matrix M>
+    auto Bidiagonalization<M>::getMatrixU() const -> HouseholderSequence<WorkingMatrix> {
         HouseholderSequence result(working);
         result.setSize(working.getCol());
         return result;
     }
 
-    template<Matrix T>
-    HouseholderSequence<typename Bidiagonalization<T>::WorkingMatrix, false>
-    Bidiagonalization<T>::getMatrixV() const {
+    template<Matrix M>
+    auto Bidiagonalization<M>::getMatrixV() const -> HouseholderSequence<WorkingMatrix, false> {
         HouseholderSequence<WorkingMatrix, false> result(working);
         result.setSize(working.getCol() - 2);
         result.setShift(1);
         return result;
     }
 
-    template<Matrix T>
-    void Bidiagonalization<T>::householderOnCol(size_t colIndex) {
+    template<Matrix M>
+    void Bidiagonalization<M>::householderOnCol(size_t colIndex) {
         auto col = working.col(colIndex);
         auto sub_col = col.tail(colIndex);
-        const ScalarType unit = sub_col[0].unit();
-        mainDiag[colIndex] = -sub_col.householder() * unit;
+        const T factor = unit(sub_col[0]);
+        mainDiag[colIndex] = -sub_col.householder() * factor;
         auto corner = working.bottomRightCorner(colIndex, colIndex + 1);
         applyHouseholder(sub_col, corner);
     }
 
-    template<Matrix T>
-    class BiDiagMatrixB : public RValueMatrix<BiDiagMatrixB<T>> {
-        using Base = RValueMatrix<BiDiagMatrixB<T>>;
-        using typename Base::ScalarType;
-        const Bidiagonalization<T>& bidiag;
+    template<Matrix M>
+    class BiDiagMatrixB : public RValueMatrix<BiDiagMatrixB<M>> {
+        using Base = RValueMatrix<BiDiagMatrixB<M>>;
+        using typename Base::T;
+
+        const Bidiagonalization<M>& bidiag;
     public:
-        BiDiagMatrixB(const Bidiagonalization<T>& bidiag_) : bidiag(bidiag_) {}
+        BiDiagMatrixB(const Bidiagonalization<M>& bidiag_) : bidiag(bidiag_) {}
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
@@ -167,9 +166,9 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const noexcept { return bidiag.working.getCol(); }
     };
 
-    template<Matrix T>
-    void BiDiagMatrixB<T>::assign(Matrix auto& target) const {
-        target = ScalarType(0);
+    template<Matrix M>
+    void BiDiagMatrixB<M>::assign(Matrix auto& target) const {
+        target = T(0);
         const size_t col_1 = target.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             target(i, i) = bidiag.mainDiag[i];
@@ -180,17 +179,17 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<BiDiagMatrixB<T>> : public Traits<T> {
+    template<Matrix M>
+    class Traits<BiDiagMatrixB<M>> : public Traits<M> {
     private:
-        using Base = Traits<T>;
+        using Base = Traits<M>;
         using Base::Option;
     };
 }
 
 namespace std {
-    template<Physica::Matrix T>
-    void swap(Physica::Bidiagonalization<T>& __restrict obj1, Physica::Bidiagonalization<T>& __restrict obj2) noexcept {
+    template<Physica::Matrix M>
+    void swap(Physica::Bidiagonalization<M>& __restrict obj1, Physica::Bidiagonalization<M>& __restrict obj2) noexcept {
         obj1.swap(obj2);
     }
 }

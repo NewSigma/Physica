@@ -36,11 +36,11 @@ namespace Physica {
             if constexpr (isReverseDiff)
                 return calc_value(row, col);
             else
-                return Base::getExpr().calc(row, col).unit();
+                return unit(Base::getExpr().calc(row, col));
         }
 
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const {
-            return Base::getExpr().calc_value(row, col).unit();
+            return unit(Base::getExpr().calc_value(row, col));
         }
     };
 

@@ -22,6 +22,14 @@
 
 namespace Physica {
     template<Scalar T>
+    __host__ __device__ Complex<T> unit(const Complex<T>& x) noexcept {
+        const T temp = x.norm();
+        if (temp.isZero())
+            return T(1);
+        return x * reciprocal(temp);
+    }
+
+    template<Scalar T>
     __host__ __device__ T abs(const Complex<T>& c) noexcept {
         return c.norm();
     }

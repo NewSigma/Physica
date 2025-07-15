@@ -153,14 +153,6 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ Complex<T> Complex<T>::unit() const {
-        const T temp = norm();
-        if (temp.isZero())
-            return T(1);
-        return *this * reciprocal(temp);
-    }
-
-    template<Scalar T>
     Complex<T>::PacketType Complex<T>::packet() const {
         PacketType packet{};
         packet.load(&re);

@@ -90,17 +90,17 @@ namespace Physica {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
 
-            T unit;
+            T factor;
             if (temp.calc(0).squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
-                unit = T(1);
+                factor = T(1);
             else
-                unit = temp.calc(0).unit();
+                factor = unit(temp.values().calc(0));
 
             auto p = buffer.head(order - i - 1);
             const RealType norm = temp.householder(p);
             for (size_t j = 0; j < p.getLength(); ++j)
                 working(i, i + j + 1) = p[j].conjugate();
-            normBuffer[i] = -norm * unit;
+            normBuffer[i] = -norm * factor;
 
             if (!norm.isZero()) {
                 const T factor = working(i, i + 1);

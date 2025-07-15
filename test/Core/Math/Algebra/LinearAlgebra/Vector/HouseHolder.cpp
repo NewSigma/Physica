@@ -33,7 +33,7 @@ void reflectTest(const V& x, double prec) {
     V v(rank);
     const T norm = x.householder(v);
     const T tau = v[0];
-    const T beta = -norm * x[0].unit();
+    const T beta = -norm * unit(x[0]);
     v[0] = 1;
 
     V result = x - tau * (v.hermite() * x) * v;
@@ -60,7 +60,7 @@ void emptyComplexVectorTest() {
     ComplexVector v(4);
     const T norm = x.householder(v);
     const ComplexType tau = v[0];
-    const ComplexType beta = -norm * x[0].unit();
+    const ComplexType beta = -norm * unit(x[0]);
     v[0] = ComplexType(1);
 
     const ComplexVector result = x - tau * (v * x) * v;

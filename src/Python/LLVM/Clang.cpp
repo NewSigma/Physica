@@ -92,16 +92,16 @@ Clang::PartialTranslationUnit& Clang::compile(const char* moduleName) {
     ctx.addTranslationUnitDecl();
     parse();
 
-    PartialTranslationUnit unit{};
-    unit.unitDecl = ctx.getTranslationUnitDecl();
+    PartialTranslationUnit ptu{};
+    ptu.unitDecl = ctx.getTranslationUnitDecl();
     /* Make module */ {
         CodeGenerator& codeGen = getCodeGen();
         auto* unitModule = codeGen.ReleaseModule();
         unitModule->setModuleIdentifier(moduleName);
-        unit.unitModule.reset(unitModule);
+        ptu.unitModule.reset(unitModule);
         codeGen.StartModule(DummyFile, unitModule->getContext());
     }
-    partialUnitList.push_front(std::move(unit));
+    partialUnitList.push_front(std::move(ptu));
     return partialUnitList.front();
 }
 
