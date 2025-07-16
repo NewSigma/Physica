@@ -99,6 +99,15 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    void Array2D<T, Option, Row, Col, Allocator>::zeros() noexcept {
+        if constexpr (isVectorStorage)
+            for (auto& v : asArray())
+                v.zeros();
+        else
+            asArray().zeros();
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);

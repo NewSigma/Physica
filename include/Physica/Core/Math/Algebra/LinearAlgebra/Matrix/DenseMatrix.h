@@ -75,10 +75,10 @@ namespace Physica {
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
-        void zeros();
         using Base::random_any;
         using Base::random_normal;
         using Base::random_uniform;
+        using Storage::zeros;
         using Storage::swap;
 
         using Base::read;

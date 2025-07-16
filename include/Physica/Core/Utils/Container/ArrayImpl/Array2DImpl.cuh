@@ -78,6 +78,12 @@ namespace Physica {
     }
 
     template<tparams>
+    void device_obj<Array2D>::zeros() {
+        static_assert(!isVectorStorage, "[Error]: Not implemented");
+        check(cudaMemsetAsync(asArray().data(), 0, getRow() * getCol() * sizeof(T), CUDAContext::getInstance()));
+    }
+
+    template<tparams>
     auto device_obj<Array2D>::toHost() const -> host_obj {
         return host_obj(arr.toHost(), r);
     }

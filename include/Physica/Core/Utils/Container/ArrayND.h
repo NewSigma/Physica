@@ -50,8 +50,7 @@ namespace Physica {
     public:
         ArrayND() = default;
         explicit ArrayND(IndexArray shape_, auto&&... args);
-        template<class... Dims>
-        explicit ArrayND(size_t dim0, Dims... dims);
+        explicit ArrayND(size_t dim0, auto... dims);
         ArrayND(const This&) = default;
         ArrayND(This&&) noexcept = default;
         ~ArrayND() = default;
@@ -59,14 +58,12 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] T& operator()(const IndexArray& indices);
         [[nodiscard]] const T& operator()(const IndexArray& indices) const;
-        template<class... Dims>
-        [[nodiscard]] T& operator()(size_t dim0, Dims... dims);
-        template<class... Dims>
-        [[nodiscard]] const T& operator()(size_t dim0, Dims... dims) const;
+        [[nodiscard]] T& operator()(size_t dim0, auto... dims);
+        [[nodiscard]] const T& operator()(size_t dim0, auto... dims) const;
         /* Operations */
         void resize(IndexArray shape_, auto&&... args);
-        template<class... Dims>
-        void resize(size_t dim0, Dims... dims);
+        void resize(size_t dim0, auto... dims);
+        void zeros() noexcept;
 
         [[nodiscard]] size_t toIndex1D(const IndexArray& indices) const noexcept;
         [[nodiscard]] IndexArray toIndexND(size_t index) const noexcept;
@@ -78,8 +75,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto& asArray() noexcept { return arr; }
         [[nodiscard]] const auto& asArray() const noexcept { return arr; }
-        [[nodiscard]] T* data_ptr(const IndexArray& indices);
-        [[nodiscard]] const T* data_ptr(const IndexArray& indices) const;
+        [[nodiscard]] T* data_ptr(const IndexArray& indices) noexcept;
+        [[nodiscard]] const T* data_ptr(const IndexArray& indices) const noexcept;
         [[nodiscard]] const IndexArray& getShape() const noexcept { return shape; }
         [[nodiscard]] size_t getShape(int dim) const noexcept { return shape[dim]; }
         [[nodiscard]] int getDim() const noexcept { return shape.getLength(); }
@@ -89,10 +86,8 @@ namespace Physica {
         [[nodiscard]] static size_t toIndex1D(const IndexArray& shape, const IndexArray& indices) noexcept;
         [[nodiscard]] static IndexArray toIndexND(const IndexArray& shape, size_t index) noexcept;
     private:
-        template<class... Dims>
-        static IndexArray toIndexArray(Dims... dims) noexcept;
-        template<class... Dims>
-        static void toIndexArrayImpl(IndexArray& arr, int i, size_t dim0, Dims... dims) noexcept;
+        static IndexArray toIndexArray(auto... dims) noexcept;
+        static void toIndexArrayImpl(IndexArray& arr, int i, size_t dim0, auto... dims) noexcept;
         static void toIndexArrayImpl(IndexArray&, int) noexcept {}
     };
 

@@ -27,8 +27,7 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    template<class... Dims>
-    ArrayND<T, Dim>::ArrayND(size_t dim0, Dims... dims) {
+    ArrayND<T, Dim>::ArrayND(size_t dim0, auto... dims) {
         resize(dim0, dims...);
     }
 
@@ -43,14 +42,12 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    template<class... Dims>
-    T& ArrayND<T, Dim>::operator()(size_t dim0, Dims... dims) {
+    T& ArrayND<T, Dim>::operator()(size_t dim0, auto... dims) {
         return operator()(toIndexArray(dim0, dims...));
     }
 
     template<class T, int Dim>
-    template<class... Dims>
-    const T& ArrayND<T, Dim>::operator()(size_t dim0, Dims... dims) const {
+    const T& ArrayND<T, Dim>::operator()(size_t dim0, auto... dims) const {
         return const_cast<This&>(*this)(dim0, dims...);
     }
 
@@ -62,9 +59,13 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    template<class... Dims>
-    void ArrayND<T, Dim>::resize(size_t dim0, Dims... dims) {
+    void ArrayND<T, Dim>::resize(size_t dim0, auto... dims) {
         resize(toIndexArray(dim0, dims...));
+    }
+
+    template<class T, int Dim>
+    void ArrayND<T, Dim>::zeros() noexcept {
+        arr.zeros();
     }
 
     template<class T, int Dim>
@@ -98,12 +99,12 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) {
+    T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) noexcept {
         return arr.data() + toIndex1D(indices);
     }
 
     template<class T, int Dim>
-    const T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) const {
+    const T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) const noexcept {
         return const_cast<This&>(*this).data_ptr(indices);
     }
 
@@ -145,9 +146,8 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    template<class... Dims>
-    auto ArrayND<T, Dim>::toIndexArray(Dims... dims) noexcept -> IndexArray {
-        constexpr int Dim1 = sizeof...(Dims);
+    auto ArrayND<T, Dim>::toIndexArray(auto... dims) noexcept -> IndexArray {
+        constexpr int Dim1 = sizeof...(dims);
         static_assert(Dim == Dim1 || Dim == Dynamic, "[Error]: Dim is not self consistent");
         IndexArray indices(Dim1);
         toIndexArrayImpl(indices, 0, dims...);
@@ -155,8 +155,7 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    template<class... Dims>
-    void ArrayND<T, Dim>::toIndexArrayImpl(IndexArray& arr, int count, size_t dim0, Dims... dims) noexcept {
+    void ArrayND<T, Dim>::toIndexArrayImpl(IndexArray& arr, int count, size_t dim0, auto... dims) noexcept {
         arr[count] = dim0;
         toIndexArrayImpl(arr, count + 1, dims...);
     }

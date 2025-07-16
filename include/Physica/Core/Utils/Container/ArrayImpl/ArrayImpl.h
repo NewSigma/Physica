@@ -59,15 +59,9 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ void Array<T, Length, Allocator>::swap(Array& __restrict array) noexcept {
-        assert(this != &array && "[Error]: Self swap is likely a bug");
-        for (size_t i = 0; i < Length; ++i) {
-        #ifdef __CUDA_ARCH__
-            thrust::swap(arr[i], array[i]);
-        #else
-            std::swap(arr[i], array[i]);
-        #endif
-        }
+    void Array<T, Length, Allocator>::zeros() noexcept {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
+        memset(arr, 0, Length * sizeof(T));
     }
     /**
      * Helper function that communicates with C libraries.
@@ -80,6 +74,18 @@ namespace Physica {
         for (size_t i = 0; i < Length; ++i)
             result[i] = p[i];
         return result;
+    }
+
+    template<class T, size_t Length, class Allocator>
+    __host__ __device__ void Array<T, Length, Allocator>::swap(This& __restrict array) noexcept {
+        assert(this != &array && "[Error]: Self swap is likely a bug");
+        for (size_t i = 0; i < Length; ++i) {
+        #ifdef __CUDA_ARCH__
+            thrust::swap(arr[i], array[i]);
+        #else
+            std::swap(arr[i], array[i]);
+        #endif
+        }
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
@@ -225,6 +231,17 @@ namespace Physica {
         arr = nullptr;
         length = capacity = 0;
         return p;
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::doubleSpace() {
+        increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T));
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::zeros() noexcept {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
+        memset(arr, 0, length * sizeof(T));
     }
 
     template<class T, class Allocator>

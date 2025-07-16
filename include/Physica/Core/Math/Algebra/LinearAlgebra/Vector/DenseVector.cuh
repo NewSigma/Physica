@@ -53,6 +53,7 @@ namespace Physica {
         /* Operations */
         void resize(const Vector auto& x);
         using Storage::resize;
+        using Storage::zeros;
 
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;

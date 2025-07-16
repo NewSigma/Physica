@@ -75,6 +75,7 @@ namespace Physica {
         /* Operations */
         void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t order);
+        void zeros() noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;

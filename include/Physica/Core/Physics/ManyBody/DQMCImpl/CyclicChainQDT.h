@@ -122,7 +122,7 @@ namespace Physica {
 
     template<Scalar T>
     void CyclicChainQDT<T>::invalidates() noexcept {
-        memset(readys.asArray().data(), 0, readys.getSize() * sizeof(bool));
+        readys.zeros();
     }
 
     template<Scalar T>

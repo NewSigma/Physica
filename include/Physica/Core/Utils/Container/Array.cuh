@@ -130,10 +130,11 @@ namespace Physica {
         void toHost(host_obj& obj) const;
         void toHostAsync(host_obj& obj) const;
 
+        void zeros();
         void reserve(size_t size);
         void resize(size_t size, auto&&... args);
-        void swap(This& __restrict obj) noexcept;
         [[nodiscard]] pointer release() noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
@@ -292,11 +293,8 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void device_obj<Array<T, Dynamic, Allocator>>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(d_data, obj.d_data);
-        std::swap(length, obj.length);
-        std::swap(capacity, obj.capacity);
+    void device_obj<Array<T, Dynamic, Allocator>>::zeros() {
+        check(cudaMemsetAsync(data(), 0, length * sizeof(T), CUDAContext::getInstance()));
     }
 
     template<class T, class Allocator>
@@ -305,6 +303,14 @@ namespace Physica {
         d_data = nullptr;
         length = capacity = 0;
         return copy;
+    }
+
+    template<class T, class Allocator>
+    void device_obj<Array<T, Dynamic, Allocator>>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        std::swap(d_data, obj.d_data);
+        std::swap(length, obj.length);
+        std::swap(capacity, obj.capacity);
     }
 
     template<class T, class Allocator>

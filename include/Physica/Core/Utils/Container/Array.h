@@ -67,7 +67,7 @@ namespace Physica {
         __host__ __device__ void insert(const T&, size_t) { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Length); }
         __host__ __device__ void resize(size_t length, auto&&... args);
-        __host__ __device__ void swap(Array& __restrict array) noexcept;
+        __host__ __device__ void zeros() noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -76,6 +76,7 @@ namespace Physica {
 
         using Base::read;
         using Base::write;
+        __host__ __device__ void swap(Array& __restrict array) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
@@ -133,8 +134,8 @@ namespace Physica {
         void decrease(size_t size);
         void clear() noexcept;
         [[nodiscard]] pointer release() noexcept;
-        void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
-        void swap(This& __restrict obj) noexcept;
+        void doubleSpace();
+        void zeros() noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -143,6 +144,7 @@ namespace Physica {
 
         using Base::read;
         using Base::write;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ pointer data() noexcept;
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept;
