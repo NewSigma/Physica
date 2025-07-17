@@ -65,16 +65,22 @@ namespace Physica {
 
     template<Scalar T>
     SystemSampler<T>::SystemSampler(const LatticeModel<2>& lattice, size_t numSample)
-            : Base(numSample), observes(numSample), fft(lattice.getSuperSize(), PlanFlag::Estimate) {}
+            : Base(numSample)
+            , observes(numSample)
+            , fft(lattice.getSuperSize(), PlanFlag::Estimate) {
+        for (auto& elem : observes)
+            elem.resize(fft.getKSpace());
+    }
 
     template<Scalar T>
     void SystemSampler<T>::sample(const DQMC<T>& dqmc, Observable type) {
         const int numSite = getNumSite();
         assert(numSite == dqmc.getNumSite() && "[Error]: Inconsistent site numbers");
-        auto flatten = fft.getRSpace().flatten();
+        observes[Base::getCursor()].zeros();
         for (int i = 0; i < dqmc.getNumEqualGreen(); ++i) {
             const auto& greenU = dqmc.getGreenUs()[i];
             const auto& greenD = dqmc.getGreenDs()[i];
+            auto flatten = fft.getRSpace().flatten();
             switch (type) {
             case AFM:
                 for (int i = 0; i < numSite; ++i)

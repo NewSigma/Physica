@@ -77,9 +77,9 @@ namespace Physica {
 
         using GradType = Internal::GradTypeHelper<ScalarType, isDiffable ? 1 : 0>::Type;
     private:
-        constexpr static bool isScalarRef = IsScalarRef<Derived>::value;
+        constexpr static bool isScalarRef = Internal::IsScalarRef<Derived>::value;
         static_assert(isDiffable == (Order > 0), "[Error]: DiffMode is not self consistent");
-        static_assert(std::is_same<Derived, ScalarType>::value || isScalarRef, "[Error]: Inconsistence type between traits and inherit class");
+        static_assert(std::is_same<Derived, ScalarType>::value || isScalarRef, "[Error]: Inconsistent type between traits and inherit class");
 
         template<int GradOrder>
         using GradRtnTy = std::conditional<!isDiffable || Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
@@ -516,9 +516,6 @@ namespace Physica {
     public:
         using Derived = T;
     };
-
-    template<class T>
-    class Traits<ScalarRef<T>> : public Traits<T> {};
 }
 
 namespace std {

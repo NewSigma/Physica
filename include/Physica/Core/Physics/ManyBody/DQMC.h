@@ -274,9 +274,12 @@ namespace Physica {
     void DQMC<T>::initChain() {
         const int numSplit = getNumSplit();
         const auto& expB = params.getExpB();
+        DiagMatrix<T> expU(getNumSite());
         for (int split = 0; split < numSplit; ++split) {
-            chainU[split].compute(expB * DiagMatrix<T>(exp(params.getAlpha() * aux.col(split))));
-            chainD[split].compute(expB * DiagMatrix<T>(exp(-params.getAlpha() * aux.col(split))));
+            expU.diag() = exp(params.getAlpha() * aux.col(split));
+            chainU[split].compute(expB * expU);
+            expU.diag() = exp(-params.getAlpha() * aux.col(split));
+            chainD[split].compute(expB * expU);
         }
         chainU.invalidates();
         chainD.invalidates();
@@ -287,9 +290,12 @@ namespace Physica {
         auto spins = aux.row(site);
         spins[split] = -spins[split];
 
+        DiagMatrix<T> expU(getNumSite());
         const auto& expB = params.getExpB();
-        chainU[split].compute(expB * DiagMatrix<T>(exp(params.getAlpha() * aux.col(split))));
-        chainD[split].compute(expB * DiagMatrix<T>(exp(-params.getAlpha() * aux.col(split))));
+        expU.diag() = exp(params.getAlpha() * aux.col(split));
+        chainU[split].compute(expB * expU);
+        expU.diag() = exp(-params.getAlpha() * aux.col(split));
+        chainD[split].compute(expB * expU);
         chainU.invalidate(split);
         chainD.invalidate(split);
     }

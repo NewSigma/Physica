@@ -155,6 +155,11 @@ namespace Physica {
     }
 }
 
+namespace Physica {
+    template<class T>
+    class Traits<ScalarRef<T>> : public Traits<T> {};
+}
+
 namespace std {
     template<class T>
     struct formatter<Physica::ScalarRef<T>, char> {

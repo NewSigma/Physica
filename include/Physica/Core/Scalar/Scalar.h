@@ -28,27 +28,17 @@
 #include "Physica/Core/Utils/Type.h"
 
 namespace Physica {
-    template<class ScalarType> class ScalarPtr;
-    template<class Derived> class ScalarBase;
-    template<class Derived> class SIMDBase;
+    namespace Internal {
+        template<class T>
+        struct IsScalarRef {
+            constexpr static bool value = false;
+        };
 
-    template<class T>
-    struct IsScalarRef {
-        constexpr static bool value = false;
-    };
-
-    template<class T>
-    struct IsScalarRef<ScalarRef<T>> {
-        constexpr static bool value = true;
-    };
-
-    template<class T>
-    concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
-                  || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>
-                  || IsScalarRef<std::remove_cvref_t<T>>::value;
-
-    template<class T>
-    concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
+        template<class T>
+        struct IsScalarRef<ScalarRef<T>> {
+            constexpr static bool value = true;
+        };
+    }
 
     enum FloatPrec {
         Float16 = 0,
@@ -73,11 +63,30 @@ namespace Physica {
     constexpr static MPUnit MPUnitMax = std::numeric_limits<MPUnit>::max();
     constexpr static MPUnit MPUnitHighestBitMask = static_cast<MPUnit>(1) << (MPUnitWidth - 1);
     constexpr static MPUnit MPUnitLowerMask = MPUnitMax >> (MPUnitWidth / 2);
+
+    template<class ScalarType>
+    class ScalarPtr;
+    template<class Derived>
+    class ScalarBase;
+    template<class Derived>
+    class SIMDBase;
     /**
      * \class Real is a advanced float type that supports multiple precision
      */
-    template<FloatPrec Prec = Float64> class Real;
-    template<class T> class Complex;
+    template<FloatPrec Prec = Float64>
+    class Real;
+    template<class T>
+    class Complex;
+    template<class ScalarType, DiffMode Mode, int Order = 1>
+    class Diff;
+
+    template<class T>
+    concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
+                  || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>
+                  || Internal::IsScalarRef<std::remove_cvref_t<T>>::value;
+
+    template<class T>
+    concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
 
     template<class T>
     concept ForwardDiff = std::remove_cvref_t<T>::ScalarType::isForwardDiff;
@@ -87,51 +96,9 @@ namespace Physica {
 
     template<class T>
     concept Diffable = std::remove_cvref_t<T>::ScalarType::isDiffable;
-    /**
-     * \class Diff provides auto differential support for scalars
-     */
-    template<class ScalarType, DiffMode Mode, int Order = 1>
-    class Diff;
 
     template<class T>
     class DiffCoro;
-
-    template<>
-    class DiffCoro<void> {
-        using This = DiffCoro<void>;
-        class Promise {
-        public:
-            auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
-            std::suspend_never initial_suspend() noexcept { return {}; }
-            std::suspend_always final_suspend() noexcept { return {}; }
-            void return_void() noexcept {}
-            [[noreturn]] void unhandled_exception() { throw; }
-        };
-    public:
-        using promise_type = Promise;
-    private:
-        std::coroutine_handle<Promise> handle = nullptr;
-    public:
-        DiffCoro() = default;
-        DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : handle(handle_) {}
-        DiffCoro(const This&) = delete;
-        DiffCoro(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
-        ~DiffCoro() {
-            if (!handle.done()) {
-                handle.resume();
-                assert(handle.done() && "[Error]: Invalid reverse diff");
-                handle.destroy();
-                handle = nullptr;
-            }
-        }
-        /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
-        /* Operations */
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            std::swap(handle, obj.handle);
-        }
-    };
 
     template<class T>
     class IsCoDiff {
@@ -198,4 +165,41 @@ namespace Physica {
             using Type = Type2;
         };
     }
+
+    template<>
+    class DiffCoro<void> {
+        using This = DiffCoro<void>;
+        class Promise {
+        public:
+            auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
+            std::suspend_never initial_suspend() noexcept { return {}; }
+            std::suspend_always final_suspend() noexcept { return {}; }
+            void return_void() noexcept {}
+            [[noreturn]] void unhandled_exception() { throw; }
+        };
+    public:
+        using promise_type = Promise;
+    private:
+        std::coroutine_handle<Promise> handle = nullptr;
+    public:
+        DiffCoro() = default;
+        DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : handle(handle_) {}
+        DiffCoro(const This&) = delete;
+        DiffCoro(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+        ~DiffCoro() {
+            if (!handle.done()) {
+                handle.resume();
+                assert(handle.done() && "[Error]: Invalid reverse diff");
+                handle.destroy();
+                handle = nullptr;
+            }
+        }
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        void swap(This& __restrict obj) noexcept {
+            assert(this != &obj && "[Error]: Self swap is likely a bug");
+            std::swap(handle, obj.handle);
+        }
+    };
 }

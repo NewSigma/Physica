@@ -31,6 +31,7 @@ namespace Physica {
 
     template<Vector T1, Vector T2>
     void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) noexcept {
+        assert(mean.getLength() == sample.getLength());
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
@@ -39,6 +40,8 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) noexcept {
+        assert(mean.getRow() == sample.getRow());
+        assert(mean.getCol() == sample.getCol());
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));

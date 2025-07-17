@@ -24,6 +24,9 @@
 #include "DiffImpl/DiffCoro.h"
 
 namespace Physica {
+    /**
+     * \class Diff provides auto differential support for scalars
+     */
     template<Scalar T, DiffMode Mode, int Order>
     class Diff<T, Mode, Order> : public ScalarBase<Diff<T, Mode, Order>>
                                , public std::conditional<Mode == DiffMode::Forward, CRCoro<Diff<T, Mode, Order>>, PlainStruct<void>>::type {
