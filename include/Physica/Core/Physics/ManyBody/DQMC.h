@@ -75,6 +75,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params.getNumSplit(); }
+        [[nodiscard]] auto& getAuxField() noexcept { return aux; }
 
         [[nodiscard]] T getLnPartitionZ() const noexcept { return lnPartitionZ; }
         [[nodiscard]] T getSignU() const noexcept { return signU; }
@@ -197,23 +198,34 @@ namespace Physica {
     void DQMC<T>::step_spin_for(int numStep)  {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         assert(numStep % getNumSplit() == 0 && "[Warn]: Suggest divisable step num");
-        auto props = VectorND<T>(getNumSite());
-        for (int step = 0, split = 0; step < numStep; ++step) {
-            props.template random_uniform<R>();
-            for (int site = 0; site < getNumSite(); ++site) {
-                auto spins = aux.row(site);
-                const T sumSpin0 = spins.sum();
-                const T sumSpin1 = sumSpin0 - T(2) * spins[split];
-                const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
-                if (accept(deltaW, props[site]))
-                    spins[split] = -spins[split];
-            }
-            split = (split + 1) % getNumSplit();
-        }
+        auto props = VectorND<T>(getNumSplit());
+        auto splits = Array<int>(getNumSplit());
+        for (int i = 0; i < getNumSplit(); ++i)
+            splits[i] = i;
 
         for (int site = 0; site < getNumSite(); ++site) {
-            const T p = T::template random_uniform<R>();
             auto spins = aux.row(site);
+            T sumSpin0 = spins.sum();
+            T weight0 = calcLnSpinWaveWeight(sumSpin0);
+            for (int step = 0; step < numStep; ++step) {
+                const int i = step % getNumSplit();
+                if (i == 0) {
+                    props.template random_uniform<R>();
+                    std::shuffle(splits.begin(), splits.end(), R::getInstance());
+                }
+
+                const int split = splits[i];
+                const T sumSpin1 = sumSpin0 - T(2) * spins[split];
+                const T weight1 = calcLnSpinWaveWeight(sumSpin1);
+                const T deltaW = weight1 - weight0;
+                if (accept(deltaW, props[i])) {
+                    spins[split] = -spins[split];
+                    sumSpin0 = sumSpin1;
+                    weight0 = weight1;
+                }
+            }
+
+            const T p = T::template random_uniform<R>();
             if (p < 0.5)
                 spins = -spins;
         }

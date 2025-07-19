@@ -54,7 +54,7 @@ namespace Physica {
      * Initializing new elements will not work. A fixed array is assumed to be initialized upon construction.
      */
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, auto&&...) {
+    __host__ __device__ void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, auto&&...) noexcept {
         assert(length == Length);
     }
 

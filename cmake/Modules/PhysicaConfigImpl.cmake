@@ -26,7 +26,7 @@ else()
         # Workaround for P2014R0
         #
         # Reference:
-        # [1] https://github.com/llvm/llvm-project/issues/56671
+        # [1] GH56671; https://github.com/llvm/llvm-project/issues/56671
         add_compile_options(-fcoro-aligned-allocation)
         add_link_options(-lstdc++) # Add this if you prefer libstdc++
 
@@ -92,8 +92,12 @@ if(${PHYSICA_CUDA})
     set(CMAKE_BUILD_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
     set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
 endif()
-
-if(CMAKE_BUILD_TYPE MATCHES Release)
+# clang miscompiles at LTO and does not restrict to -O3, seems blame to [1]?
+# FIXME: Possibly remove it once we dump to clang 20
+#
+# Reference:
+# [1] GH80494; https://github.com/llvm/llvm-project/issues/80494
+if(OFF AND CMAKE_BUILD_TYPE MATCHES Release)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT Result OUTPUT Output)
     if(${Result})

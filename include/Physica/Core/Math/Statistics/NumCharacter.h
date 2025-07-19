@@ -24,6 +24,7 @@
 namespace Physica {
     template<Scalar T>
     __host__ __device__ void toNextMean(T& mean, size_t lastNumSample, T sample) noexcept {
+        assert(mean.isFinite() && "[Error]: Propagating NAN");
         const T factor1 = T(lastNumSample);
         const T factor2 = reciprocal(T(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
@@ -31,6 +32,7 @@ namespace Physica {
 
     template<Vector T1, Vector T2>
     void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) noexcept {
+        assert(mean.isFinite() && "[Error]: Propagating NAN");
         assert(mean.getLength() == sample.getLength());
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
@@ -40,6 +42,7 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) noexcept {
+        assert(mean.isFinite() && "[Error]: Propagating NAN");
         assert(mean.getRow() == sample.getRow());
         assert(mean.getCol() == sample.getCol());
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
@@ -50,6 +53,7 @@ namespace Physica {
 
     template<Scalar T>
     void toNextVariance(T& var, T& mean, size_t lastNumSample, T sample) noexcept {
+        assert(var.isFinite() && "[Error]: Propagating NAN");
         const T factor1 = T(lastNumSample);
         const T factor2 = reciprocal(T(lastNumSample + 1));
         var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
@@ -58,6 +62,7 @@ namespace Physica {
 
     template<Vector T1, Vector T2>
     void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) noexcept {
+        assert(var.isFinite() && "[Error]: Propagating NAN");
         sample.assign_check(mean);
         sample.assign_check(var);
 
@@ -70,6 +75,7 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) noexcept {
+        assert(var.isFinite() && "[Error]: Propagating NAN");
         sample.assign_check(mean);
         sample.assign_check(var);
 

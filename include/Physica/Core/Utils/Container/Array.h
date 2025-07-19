@@ -66,7 +66,7 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void insert(const T&, size_t) { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Length); }
-        __host__ __device__ void resize(size_t length, auto&&... args);
+        __host__ __device__ void resize(size_t length, auto&&... args) noexcept;
         __host__ __device__ void zeros() noexcept;
 
         [[nodiscard]] auto toDevice() const;
