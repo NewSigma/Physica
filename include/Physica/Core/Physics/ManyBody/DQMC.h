@@ -25,6 +25,7 @@ namespace Physica {
     /**
      * Reference:
      * [1] Phys. Rev. B 40, 506; https://doi.org/10.1103/PhysRevB.40.506
+     * [2] Gubernatis J, Kawashima N, Werner P. Quantum Monte Carlo Methods: Algorithms for Lattice Models. Cambridge University Press; 2016
      */
     template<Scalar T>
     class DQMC {
@@ -41,7 +42,6 @@ namespace Physica {
         DiagMatrix<T> diagB;
         DiagMatrix<T> diagS;
         MatrixND buffer;
-        T lnZ0;
 
         T lnPartitionZ;
         T signU = 1;
@@ -93,10 +93,10 @@ namespace Physica {
         void single_flip(int site, int split) noexcept;
         const QDTDecomp<T>& makeWeightMatrix(CyclicChainQDT<T>& chain, int shift);
         std::pair<T, T> lnPartition(CyclicChainQDT<T>& chain, int shift);
-        std::pair<T, T> lnPartition(int shift);
         std::pair<T, T> calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift);
         void calcGreens();
 
+        Vector2D<T> calcRatio(int site, int split) const noexcept;
         T calcLnSpinWaveWeight(int site) const noexcept;
         T calcLnSpinWaveWeight(T sumSpin) const noexcept;
         /* Static members */
@@ -123,19 +123,20 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step_mh() {
         auto& rng = R::getInstance();
-        const int site = std::uniform_int_distribution<>(0, getNumSite() - 1)(rng);
+        auto props = VectorND<T>(getNumSite());
+        auto sites = Array<int>(getNumSite());
+        for (int i = 0; i < getNumSite(); ++i)
+            sites[i] = i;
+
         const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(rng);
-        single_flip(site, split);
-
-        const T lnZ1 = lnPartition().first;
-        if (!accept<R>(lnZ1 - lnZ0)) {
-            single_flip(site, split);
-            return;
+        std::shuffle(sites.begin(), sites.end(), rng);
+        props.template random_uniform<R>();
+        for (int i = 0; i < getNumSite(); ++i) {
+            int site = sites[i];
+            if (props[i] < abs(calcRatio(site, split).prod()))
+                single_flip(site, split);
         }
-
         calcGreens();
-        lnZ0 = lnPartitionZ;
-        lnPartitionZ = 0;
     }
 
     template<Scalar T>
@@ -144,23 +145,21 @@ namespace Physica {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         assert(numStep % getNumSplit() == 0 && "[Warn]: Suggest divisable step num");
         auto props = VectorND<T>(getNumSite());
-        for (int step = 0, split = 0; step < numStep; ++step) {
-            props.template random_uniform<R>();
-            for (int site = 0; site < getNumSite(); ++site) {
-                single_flip(site, split);
+        auto sites = Array<int>(getNumSite());
+        for (int i = 0; i < getNumSite(); ++i)
+            sites[i] = i;
 
-                const T lnZ1 = lnPartition().first;
-                if (!accept(lnZ1 - lnZ0, props[site])) {
+        for (int step = 0; step < numStep; ++step) {
+            std::shuffle(sites.begin(), sites.end(), R::getInstance());
+            props.template random_uniform<R>();
+            int split = step % getNumSplit();
+            for (int i = 0; i < getNumSite(); ++i) {
+                int site = sites[i];
+                if (props[i] < abs(calcRatio(site, split).prod()))
                     single_flip(site, split);
-                    continue;
-                }
-                lnPartitionZ = lnZ1;
             }
-            split = (split + 1) % getNumSplit();
+            calcGreens();
         }
-        calcGreens();
-        lnZ0 = lnPartitionZ;
-        lnPartitionZ = 0;
     }
 
     template<Scalar T>
@@ -246,7 +245,6 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(params, obj.params);
         aux.swap(obj.aux);
-
         chainU.swap(obj.chainU);
         chainD.swap(obj.chainD);
 
@@ -255,7 +253,6 @@ namespace Physica {
         diagS.swap(obj.diagS);
         buffer.swap(obj.buffer);
 
-        lnZ0.swap(obj.lnZ0);
         lnPartitionZ.swap(obj.lnPartitionZ);
         signU.swap(obj.signU);
         signD.swap(obj.signD);
@@ -343,13 +340,6 @@ namespace Physica {
     }
 
     template<Scalar T>
-    std::pair<T, T> DQMC<T>::lnPartition(int shift) {
-        auto [lnZ1, sign1] = lnPartition(chainU, shift);
-        auto [lnZ2, sign2] = lnPartition(chainD, shift);
-        return std::make_pair(lnZ1 + lnZ2, sign1 * sign2);
-    }
-
-    template<Scalar T>
     std::pair<T, T> DQMC<T>::calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift) {
         const auto pair = lnPartition(chain, shift);
         MatrixND temp = buffer * qr.getMatrixQ();
@@ -371,6 +361,19 @@ namespace Physica {
 
             toNextMean(lnPartitionZ, i, lnZ1 + lnZ2);
         }
+    }
+
+    template<Scalar T>
+    Vector2D<T> DQMC<T>::calcRatio(int site, int split) const noexcept {
+        assert(site < getNumSite() && split < getNumSplit());
+        assert(getNumEqualGreen() == getNumSplit() && "[Error]: Cannot use rank-1 update if equal-time greens are not complete");
+        const T delta = T(2) * params.getAlpha() * aux(site, split);
+        Vector2D<T> result{-delta, delta};
+        result = exp(result) - T(1);
+        result[0] *= T(1) - greenUs[split](site, site);
+        result[1] *= T(1) - greenDs[split](site, site);
+        result += T(1);
+        return result; // Eq.(7.36) in [2]
     }
 
     template<Scalar T>
