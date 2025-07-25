@@ -127,7 +127,6 @@ namespace Physica {
 
     template<Scalar T>
     void CyclicChainQDT<T>::resize(size_t length) {
-        assert(length >= 2 && "[Error]: Invalid length");
         decomps.resize(length, length);
         readys.resize(length, length);
     }

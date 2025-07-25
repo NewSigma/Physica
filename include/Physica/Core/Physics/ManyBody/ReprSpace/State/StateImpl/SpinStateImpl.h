@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<int Dim, int NumSite>
-    SpinState<Dim, NumSite>::SpinState(IntType occupyBits_) : occupyBits(occupyBits_) {}
+    SpinState<Dim, NumSite>::SpinState(IntType occupyBits_) noexcept : occupyBits(occupyBits_) {}
 
     template<int Dim, int NumSite>
     bool SpinState<Dim, NumSite>::operator==(const This& other) const noexcept {
@@ -31,7 +31,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    SpinState<Dim, NumSite> SpinState<Dim, NumSite>::operator<<(int shift) const noexcept {
+    auto SpinState<Dim, NumSite>::operator<<(int shift) const noexcept -> This {
         assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << shift;
         const auto lowBits = occupyBits >> (NumSite - shift);
@@ -39,7 +39,7 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
-    SpinState<Dim, NumSite> SpinState<Dim, NumSite>::operator>>(int shift) const noexcept {
+    auto SpinState<Dim, NumSite>::operator>>(int shift) const noexcept -> This {
         assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << (NumSite - shift);
         const auto lowBits = occupyBits >> shift;
@@ -75,6 +75,7 @@ namespace Physica {
     template<int Dim, int NumSite>
     auto SpinState<Dim, NumSite>::hop(int8_t from, int8_t to) const noexcept -> This {
         assert(from != to && "[Error]: Assuming different sites");
+        assert(from < NumSite && to < NumSite);
         const bool canHop = isOccupy(from) && !isOccupy(to);
         if (!canHop)
             return SpinState();
@@ -85,6 +86,7 @@ namespace Physica {
 
     template<int Dim, int NumSite>
     int SpinState<Dim, NumSite>::hopSign(int8_t from, int8_t to) const noexcept {
+        assert(from < NumSite && to < NumSite);
         const int numElectron = std::popcount(occupyBits >> (from + 1)) - std::popcount(occupyBits >> (to + 1));
         const bool flag1 = from < to;
         const bool flag2 = numElectron % 2 == 0;
@@ -163,7 +165,7 @@ namespace Physica {
 
     template<int Dim, int NumSite>
     template<RNG R>
-    SpinState<Dim, NumSite> SpinState<Dim, NumSite>::random_state() {
+    auto SpinState<Dim, NumSite>::random_state() -> This {
         constexpr bool flag = NumSite < sizeof(typename R::result_type) * CHAR_BIT;
         static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
         return R::getInstance()() & makeFullMask();
@@ -171,7 +173,7 @@ namespace Physica {
 
     template<int Dim, int NumSite>
     template<RNG R>
-    SpinState<Dim, NumSite> SpinState<Dim, NumSite>::random_state(size_t numParticle) {
+    auto SpinState<Dim, NumSite>::random_state(size_t numParticle) -> This {
         constexpr bool flag = NumSite < sizeof(typename R::result_type) * CHAR_BIT;
         static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
         assert(numParticle <= NumSite);

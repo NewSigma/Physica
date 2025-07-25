@@ -21,7 +21,9 @@
 #include <climits>
 #include <cstddef>
 #include "Physica/Config.h" // IWYU pragma: export
-
+/**
+ * \file Macro.h: Non-Proliferation of Macros
+ */
 #ifdef PHYSICA_MKL
     #include <mkl_types.h>
 #else

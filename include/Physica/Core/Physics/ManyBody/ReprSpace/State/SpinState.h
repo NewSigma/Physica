@@ -34,7 +34,7 @@ namespace Physica {
         IntType occupyBits;
     public:
         SpinState() = default;
-        SpinState(IntType occupyBits_);
+        SpinState(IntType occupyBits_) noexcept;
         SpinState(const This&) = default;
         SpinState(This&&) noexcept = default;
         ~SpinState() = default;
@@ -121,7 +121,7 @@ namespace std {
          * [1] Comput. Phys. Commun. 92(1), 11-15 (1995); https://doi.org/10.1016/0010-4655(95)00108-R
          * [2] Comput. Phys. Commun. 224, 81-89 (2018); https://doi.org/10.1016/j.cpc.2017.11.011
          */
-        std::size_t perfect_hash(const T& psi) const noexcept {
+        static std::size_t perfect_hash(const T& psi) noexcept {
             auto bits = psi.getOccupyBits();
             int i = 0;
             size_t result = 0;
