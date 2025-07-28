@@ -27,28 +27,12 @@
 namespace Physica {
     class PHYSICA_API VSLException : public std::system_error {
         using Base = std::system_error;
-
-        class Impl final : public std::error_category {
-        public:
-            Impl() = default;
-            Impl(const Impl&) = delete;
-            Impl(Impl&&) noexcept = delete;
-            ~Impl() = default;
-            /* Operators */
-            Impl& operator=(const Impl&) = delete;
-            Impl& operator=(Impl&&) noexcept = delete;
-            /* Getters */
-            [[nodiscard]] const char* name() const noexcept override final { return "Intel MKL VSL"; }
-            [[nodiscard]] std::string message(int) const override final;
-        };
     public:
-        VSLException(int code) noexcept : std::system_error(code, Impl()) {}
+        VSLException(int code) noexcept;
         /* Getters */
         [[nodiscard]] int code() const noexcept { return Base::code().value(); }
     };
-}
 
-namespace Physica {
     inline void check_vsl_impl(int err) {
         if (err != 0) [[unlikely]]
             throw VSLException(err);

@@ -24,28 +24,12 @@
 namespace Physica {
     class PHYSICA_API CUDAException : public std::system_error {
         using Base = std::system_error;
-
-        class Impl final : public std::error_category {
-        public:
-            Impl() = default;
-            Impl(const Impl&) = delete;
-            Impl(Impl&&) noexcept = delete;
-            ~Impl() = default;
-            /* Operators */
-            Impl& operator=(const Impl&) = delete;
-            Impl& operator=(Impl&&) noexcept = delete;
-            /* Getters */
-            [[nodiscard]] const char* name() const noexcept override final { return "CUDA Runtime"; }
-            [[nodiscard]] std::string message(int code) const override final { return cudaGetErrorString(cudaError_t(code)); }
-        };
     public:
-        CUDAException(cudaError_t code) noexcept : std::system_error(code, Impl()) {}
+        CUDAException(cudaError_t code) noexcept;
         /* Getters */
         [[nodiscard]] cudaError_t code() const noexcept { return cudaError_t(Base::code().value()); }
     };
-}
 
-namespace Physica {
     __host__ __device__ inline void check(cudaError_t err) {
         if (err != cudaSuccess) [[unlikely]] {
         #ifdef __CUDA_ARCH__

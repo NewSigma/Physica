@@ -24,25 +24,10 @@
 
 namespace Physica {
     class PHYSICA_API cuRANDException : public std::system_error {
-        class Impl final : public std::error_category {
-        public:
-            Impl() = default;
-            Impl(const Impl&) = delete;
-            Impl(Impl&&) noexcept = delete;
-            ~Impl() = default;
-            /* Operators */
-            Impl& operator=(const Impl&) = delete;
-            Impl& operator=(Impl&&) noexcept = delete;
-            /* Getters */
-            [[nodiscard]] const char* name() const noexcept override final { return "cuRAND"; }
-            [[nodiscard]] std::string message(int code) const override final;
-        };
     public:
-        cuRANDException(curandStatus_t code) noexcept : std::system_error(code, Impl()) {}
+        cuRANDException(curandStatus_t code) noexcept;
     };
-}
 
-namespace Physica {
     inline void check(curandStatus_t err) {
         if (err != CURAND_STATUS_SUCCESS) [[unlikely]]
             throw cuRANDException(err);

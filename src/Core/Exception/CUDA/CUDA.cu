@@ -16,20 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
-#include <system_error>
-#include <cusolverDn.h>
-#include "Physica/Macro.h"
+using namespace Physica;
 
-namespace Physica {
-    class PHYSICA_API cuSolverException : public std::system_error {
+namespace {
+    class Impl final : public std::error_category {
     public:
-        cuSolverException(cusolverStatus_t code) noexcept;
+        Impl() = default;
+        Impl(const Impl&) = delete;
+        Impl(Impl&&) noexcept = delete;
+        ~Impl() = default;
+        /* Operators */
+        Impl& operator=(const Impl&) = delete;
+        Impl& operator=(Impl&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] const char* name() const noexcept override final { return "CUDA Runtime"; }
+        [[nodiscard]] std::string message(int code) const override final { return cudaGetErrorString(cudaError_t(code)); }
     };
-
-    inline void check(cusolverStatus_t err) {
-        if (err != CUSOLVER_STATUS_SUCCESS) [[unlikely]]
-            throw cuSolverException(err);
-    }
 }
+
+CUDAException::CUDAException(cudaError_t code) noexcept : std::system_error(code, Impl()) {}

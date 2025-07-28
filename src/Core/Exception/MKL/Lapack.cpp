@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Exception/MPIException.h"
-#include <mpi/mpi.h>
+#include <format>
+#include "Physica/Core/Exception/MKL/Lapack.h"
 
 using namespace Physica;
 
@@ -32,16 +32,9 @@ namespace {
         Impl& operator=(const Impl&) = delete;
         Impl& operator=(Impl&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] const char* name() const noexcept override final { return "MPI"; }
-        [[nodiscard]] std::string message(int) const override final;
+        [[nodiscard]] const char* name() const noexcept override final { return "Intel MKL Lapack"; }
+        [[nodiscard]] std::string message(int code) const override final { return std::format("error code: {}", code); }
     };
-
-    std::string Impl::message(int err) const {
-        char buffer[MPI_MAX_ERROR_STRING];
-        int resultlen;
-        MPI_Error_string(err, buffer, &resultlen);
-        return buffer;
-    }
 }
 
-MPIException::MPIException(int code) noexcept : std::system_error(code, Impl()) {}
+LapackException::LapackException(int code) noexcept : std::system_error(code, Impl()) {}

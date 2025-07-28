@@ -16,32 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Exception/MPIException.h"
-#include <mpi/mpi.h>
+#include "Physica/Core/Exception/FFIException.h"
 
 using namespace Physica;
 
 namespace {
     class Impl final : public std::error_category {
     public:
-        Impl() = default;
-        Impl(const Impl&) = delete;
-        Impl(Impl&&) noexcept = delete;
-        ~Impl() = default;
-        /* Operators */
-        Impl& operator=(const Impl&) = delete;
-        Impl& operator=(Impl&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] const char* name() const noexcept override final { return "MPI"; }
-        [[nodiscard]] std::string message(int) const override final;
+        [[nodiscard]] const char* name() const noexcept override final { return "FFI"; }
+        [[nodiscard]] std::string message(int code) const override final {
+            // using enum ffi_status; // FIXME: clang 16 ~ 18 ICE, refactor once nvcc supports clang 19
+            switch (code) {
+            case ffi_status::FFI_OK:
+                return "No error";
+            case ffi_status::FFI_BAD_ABI:
+                return "Bad ABI";
+            case ffi_status::FFI_BAD_TYPEDEF:
+                return "Bad typedef";
+            default:
+                return "Unknown";
+            }
+        }
     };
-
-    std::string Impl::message(int err) const {
-        char buffer[MPI_MAX_ERROR_STRING];
-        int resultlen;
-        MPI_Error_string(err, buffer, &resultlen);
-        return buffer;
-    }
 }
 
-MPIException::MPIException(int code) noexcept : std::system_error(code, Impl()) {}
+FFIException::FFIException(ffi_status code) : std::system_error(code, Impl()) {}

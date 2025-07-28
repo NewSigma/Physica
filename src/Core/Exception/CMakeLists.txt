@@ -1,12 +1,19 @@
 if (${PHYSICA_CUDA})
+    target_sources(PhysicaCore PRIVATE CUDA/cuBLAS.cu)
+    target_sources(PhysicaCore PRIVATE CUDA/CUDA.cu)
     target_sources(PhysicaCore PRIVATE CUDA/cuRAND.cu)
     target_sources(PhysicaCore PRIVATE CUDA/cuSolver.cu)
 endif()
 
 if (${PHYSICA_MKL})
+    target_sources(PhysicaCore PRIVATE MKL/Lapack.cpp)
     target_sources(PhysicaCore PRIVATE MKL/VSL.cpp)
 endif()
 
 if (${PHYSICA_MPI})
     target_sources(PhysicaCore PRIVATE MPIException.cpp)
+endif()
+
+if (${PHYSICA_PYTHON})
+    target_sources(PhysicaCore PRIVATE FFIException.cpp)
 endif()

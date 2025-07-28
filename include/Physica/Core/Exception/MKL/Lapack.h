@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <format>
 #include <system_error>
 #include "Physica/Macro.h"
 #ifdef PHYSICA_MKL
@@ -28,28 +27,12 @@
 namespace Physica {
     class PHYSICA_API LapackException : public std::system_error {
         using Base = std::system_error;
-
-        class Impl final : public std::error_category {
-        public:
-            Impl() = default;
-            Impl(const Impl&) = delete;
-            Impl(Impl&&) noexcept = delete;
-            ~Impl() = default;
-            /* Operators */
-            Impl& operator=(const Impl&) = delete;
-            Impl& operator=(Impl&&) noexcept = delete;
-            /* Getters */
-            [[nodiscard]] const char* name() const noexcept override final { return "Intel MKL Lapack"; }
-            [[nodiscard]] std::string message(int code) const override final { return std::format("error code: {}", code); }
-        };
     public:
-        LapackException(int code) noexcept : std::system_error(code, Impl()) {}
+        LapackException(int code) noexcept;
         /* Getters */
         [[nodiscard]] int code() const noexcept { return Base::code().value(); }
     };
-}
 
-namespace Physica {
     inline void check_lapack(int err) {
         if (err != 0) [[unlikely]]
             throw LapackException(err);
