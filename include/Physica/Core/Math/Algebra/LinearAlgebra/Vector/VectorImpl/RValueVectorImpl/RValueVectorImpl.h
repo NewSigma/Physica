@@ -27,7 +27,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign(Vector auto& v) const {
+    void RValueVector<Derived>::assign(Vector auto& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
@@ -44,7 +44,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_add(Vector auto& v) const {
+    void RValueVector<Derived>::assign_add(Vector auto& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Size1 = SizeAtCompile;
         constexpr static size_t Size2 = V::SizeAtCompile;
@@ -60,8 +60,18 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueVector<Derived>::calc(size_t index) const noexcept {
+        return Base::getDerived().calc(index);
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::calc_value(size_t index) const noexcept {
+        return Base::getDerived().calc_value(index);
+    }
+
+    template<class Derived>
     template<Packet Pack>
-    Pack RValueVector<Derived>::packet(size_t index) const {
+    Pack RValueVector<Derived>::packet(size_t index) const noexcept {
         using U = Traits<Pack>::ScalarType;
         assert(index + Pack::size() <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
@@ -95,7 +105,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    Pack RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
+    Pack RValueVector<Derived>::packetPartial(size_t index, size_t count) const noexcept {
         using U = Traits<Pack>::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (Diffable<U>) {
@@ -189,22 +199,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::norm1() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
         return abs(Base::getDerived()).sum();
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::norm2() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
         return norm();
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::norm() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::norm() const noexcept -> CoDiff<Tr> {
         return sqrt(squaredNorm());
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::squaredNorm() const -> CoDiff<Tr> {
+    auto RValueVector<Derived>::squaredNorm() const noexcept -> CoDiff<Tr> {
         return squaredNorms().sum();
     }
 
@@ -446,7 +456,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::lnSumExp() const -> CoDiff<T> {
+    auto RValueVector<Derived>::lnSumExp() const noexcept -> CoDiff<T> {
         const Derived& v = Base::getDerived();
         Tv m;
         if constexpr (isComplex)
@@ -466,7 +476,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::crossEntropy(size_t index) const -> CoDiff<T> {
+    auto RValueVector<Derived>::crossEntropy(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         const auto& v = Base::getDerived();
         const auto vi = calc(index);
@@ -481,7 +491,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::lnSoftmax(size_t index) const -> CoDiff<T> {
+    auto RValueVector<Derived>::lnSoftmax(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = -crossEntropy(index);
         if constexpr (isReverseDiff) {
@@ -493,7 +503,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::softmax(size_t index) const -> CoDiff<T> {
+    auto RValueVector<Derived>::softmax(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = exp(lnSoftmax(index));
         if constexpr (isReverseDiff) {
@@ -505,7 +515,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::prod() const -> CoDiff<T> {
+    auto RValueVector<Derived>::prod() const noexcept -> CoDiff<T> {
         assert(getLength() != 0);
         if constexpr (isReverseDiff) {
             Tv result = calc_value(0);
@@ -642,7 +652,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P>
-    void RValueVector<Derived>::assign_for(V& v) const {
+    void RValueVector<Derived>::assign_for(V& v) const noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] = calc_value(i);
@@ -653,7 +663,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P, size_t Size>
-    void RValueVector<Derived>::assign_simd(V& v) const {
+    void RValueVector<Derived>::assign_simd(V& v) const noexcept {
         using Pack = BestPacket<typename V::ScalarType, Size>::Type;
         constexpr static size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();
@@ -702,7 +712,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P>
-    void RValueVector<Derived>::assign_add_for(V& v) const {
+    void RValueVector<Derived>::assign_add_for(V& v) const noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] += calc_value(i);
@@ -713,7 +723,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, size_t Size>
-    void RValueVector<Derived>::assign_add_simd(V& v) const {
+    void RValueVector<Derived>::assign_add_simd(V& v) const noexcept {
         using Pack = BestPacket<typename V::ScalarType, Size>::Type;
         constexpr static size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();

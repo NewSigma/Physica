@@ -89,7 +89,7 @@ namespace Physica {
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
         static void random_int(Array<int>& arr, int from, int to);
     private:
-        Random();
+        Random() noexcept;
         Random(const This&) = default;
         Random(This&&) noexcept = default;
         /* Operators */
@@ -103,8 +103,14 @@ namespace Physica {
     };
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::Random() {
-        std::ignore = reseed();
+    Random<Option, FixedSeed>::Random() noexcept {
+        try {
+            std::ignore = reseed();
+        }
+        catch (...) {
+            fprintf(stderr, "RNG init failed");
+            std::abort();
+        }
     }
 
     template<RandomOption Option, uint64_t FixedSeed>

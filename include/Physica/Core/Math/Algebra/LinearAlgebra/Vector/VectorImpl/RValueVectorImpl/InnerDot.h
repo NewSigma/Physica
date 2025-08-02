@@ -46,9 +46,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        auto calc() const;
-        CoDiff<ScalarType> calc_base() const;
-        ScalarType calc_mkl() const;
+        auto calc() const noexcept;
+        CoDiff<ScalarType> calc_base() const noexcept;
+        ScalarType calc_mkl() const noexcept;
     };
 
     template<Vector T1, Vector T2>
@@ -57,7 +57,7 @@ namespace Physica {
     }
 
     template<Vector T1, Vector T2>
-    auto InnerDot<T1, T2>::calc() const {
+    auto InnerDot<T1, T2>::calc() const noexcept {
         if constexpr (isForwardDiff) {
             if constexpr (!T1::isForwardDiff)
                 return ScalarType(v2.values() * v1, v2.grads() * v1);
@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<Vector T1, Vector T2>
-    auto InnerDot<T1, T2>::calc_base() const -> CoDiff<ScalarType> {
+    auto InnerDot<T1, T2>::calc_base() const noexcept -> CoDiff<ScalarType> {
         if constexpr (isReverseDiff) {
             auto result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<T1>)

@@ -28,7 +28,7 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:240-244
      */
     template<Vector V>
-    Vector2D<typename V::ScalarType> givens(const V& vector, size_t i, size_t j) {
+    Vector2D<typename V::ScalarType> givens(const V& vector, size_t i, size_t j) noexcept {
         static_assert(!ReverseDiff<V>, "[Error]: Not implemented, wait for P2014Rx");
         using T = V::ScalarType;
         using Tr = T::RealType;
@@ -60,7 +60,7 @@ namespace Physica {
      * Apply givens on left
      */
     template<Matrix M>
-    void applyGivens(const Vector2D<typename M::ScalarType>& givens, LValueMatrix<M>& mat, size_t i, size_t j) {
+    void applyGivens(const Vector2D<typename M::ScalarType>& givens, M& mat, size_t i, size_t j) noexcept {
         using T = M::ScalarType;
         auto row_i = mat.row(i);
         auto row_j = mat.row(j);
@@ -78,7 +78,7 @@ namespace Physica {
      * Apply givens on right
      */
     template<Matrix M>
-    void applyGivens(LValueMatrix<M>& mat, const Vector2D<typename M::ScalarType>& givens, size_t i, size_t j) {
+    void applyGivens(M& mat, const Vector2D<typename M::ScalarType>& givens, size_t i, size_t j) noexcept {
         using T = M::ScalarType;
         auto col_i = mat.col(i);
         auto col_j = mat.col(j);

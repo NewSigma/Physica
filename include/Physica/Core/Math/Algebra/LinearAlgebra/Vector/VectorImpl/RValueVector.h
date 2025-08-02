@@ -112,16 +112,16 @@ namespace Physica {
         ~RValueVector() = default;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const;
+        void assign(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
-        void assign_add(Vector auto& v) const;
+        void assign_add(Vector auto& v) const noexcept;
 
-        [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
-        [[nodiscard]] auto calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
+        [[nodiscard]] auto calc(size_t index) const noexcept;
+        [[nodiscard]] auto calc_value(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const;
+        [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const noexcept;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
@@ -144,10 +144,10 @@ namespace Physica {
         [[nodiscard]] auto conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
 
-        [[nodiscard]] CoDiff<Tr> norm1() const;
-        [[nodiscard]] CoDiff<Tr> norm2() const;
-        [[nodiscard]] CoDiff<Tr> norm() const;
-        [[nodiscard]] CoDiff<Tr> squaredNorm() const;
+        [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm2() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm() const noexcept;
+        [[nodiscard]] CoDiff<Tr> squaredNorm() const noexcept;
         [[nodiscard]] Tr lnSquaredNorm() const;
         [[nodiscard]] Tr normInf() const;
 
@@ -160,11 +160,11 @@ namespace Physica {
         [[nodiscard]] T variance(const T& prior_mean) const;
         [[nodiscard]] T deviation() const;
         [[nodiscard]] T deviation(const T& prior_mean) const;
-        [[nodiscard]] CoDiff<T> lnSumExp() const;
-        [[nodiscard]] CoDiff<T> crossEntropy(size_t index) const;
-        [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const;
-        [[nodiscard]] CoDiff<T> softmax(size_t index) const;
-        [[nodiscard]] CoDiff<T> prod() const;
+        [[nodiscard]] CoDiff<T> lnSumExp() const noexcept;
+        [[nodiscard]] CoDiff<T> crossEntropy(size_t index) const noexcept;
+        [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const noexcept;
+        [[nodiscard]] CoDiff<T> softmax(size_t index) const noexcept;
+        [[nodiscard]] CoDiff<T> prod() const noexcept;
         [[nodiscard]] bool isZeros() const;
         [[nodiscard]] bool isFinite() const;
         [[nodiscard]] auto crossProduct(const Vector auto& v) const noexcept;
@@ -203,14 +203,14 @@ namespace Physica {
         auto grads_impl() const noexcept;
     private:
         template<Vector V, ExecutePolicy P>
-        void assign_for(V& v) const;
+        void assign_for(V& v) const noexcept;
         template<Vector V, ExecutePolicy P, size_t Size>
-        void assign_simd(V& v) const;
+        void assign_simd(V& v) const noexcept;
 
         template<Vector V, ExecutePolicy P>
-        void assign_add_for(V& v) const;
+        void assign_add_for(V& v) const noexcept;
         template<Vector V, size_t Size>
-        void assign_add_simd(V& v) const;
+        void assign_add_simd(V& v) const noexcept;
     };
 
     template<Vector V1, Vector V2>

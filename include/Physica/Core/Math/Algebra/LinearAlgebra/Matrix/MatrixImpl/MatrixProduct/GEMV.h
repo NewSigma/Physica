@@ -46,7 +46,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& target) const;
+        void assign(Vector auto& target) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -68,7 +68,7 @@ namespace Physica {
 
     template<Matrix M, Vector U>
     template<ExecutePolicy P>
-    void GEMV<M, U>::assign(Vector auto& target) const {
+    void GEMV<M, U>::assign(Vector auto& target) const noexcept {
         if constexpr (isReverseDiff) {
             if constexpr (MatrixOption::isColMatrix<M>()) {
                 target = mat.values().col(0) * vec.values().calc(0);
