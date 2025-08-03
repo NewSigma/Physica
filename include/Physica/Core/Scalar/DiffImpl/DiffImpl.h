@@ -232,7 +232,7 @@ namespace Physica {
         const auto factor = reciprocal(y_.value()) * result.grad();
         x_.reverse(factor);
         if constexpr (Diffable<U>)
-            y_.reverse(-factor * x_.value());
+            y_.reverse(-factor * result.value());
     }
 
     template<Scalar T, Scalar U>
