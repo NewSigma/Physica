@@ -64,7 +64,8 @@ namespace Physica {
         __host__ __device__ T reverse(GradType grad = 1) const noexcept;
         __host__ __device__ void zero_grad();
 
-        [[nodiscard]] auto conjugate() const;
+        [[nodiscard]] This conjugate() const noexcept;
+        [[nodiscard]] CoDiff<This> squaredNorm() const noexcept;
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         __host__ __device__ void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */

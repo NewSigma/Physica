@@ -40,6 +40,9 @@ namespace Physica {
         using This = Hessenburg<T, Order>;
     public:
         using WorkingMatrix = DenseMatrix<T, Traits<MatrixH>::Option, Order, Order>;
+    protected:
+        using Tr = T::RealType;
+        using Trv = Tr::ValueType;
     private:
         WorkingMatrix working;
         HouseholderNorm normVector;
@@ -102,7 +105,7 @@ namespace Physica {
 
             T factor;
             if (temp[0].squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
-                factor = RealType(1);
+                factor = Trv(1);
             else
                 factor = unit(temp[0]);
 

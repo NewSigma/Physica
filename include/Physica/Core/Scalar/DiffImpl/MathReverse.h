@@ -79,11 +79,14 @@ namespace Physica {
         x_.reverse(y.grad() / x_.value());
     }
 
-    // ln1p
-    // ln1pexp
+    template<Scalar T>
+    auto ln1p(const T& x) noexcept requires(ReverseDiff<T>);
 
-    //template<Scalar T, int Order>
-    //auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a) noexcept;
+    template<Scalar T>
+    auto ln1pexp(const T& x) noexcept requires(ReverseDiff<T>);
+
+    template<Scalar T>
+    auto log(const T& x, const T& a) noexcept requires(ReverseDiff<T>);
     
     template<Scalar T>
     CoDiff<T> exp(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -100,8 +103,8 @@ namespace Physica {
         x_.reverse(y.value() * y.grad() * a_ / x_.value());
     }
 
-    //template<Scalar T, int Order>
-    //auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n) noexcept;
+    template<Scalar T>
+    auto pow(const T& x, const T& n) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
     CoDiff<T> cos(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -134,38 +137,37 @@ namespace Physica {
         cos_ = c;
         co_await std::suspend_always{};
     }
-    /*
-    template<Scalar T, int Order>
-    auto tan(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
-    template<Scalar T, int Order>
-    auto sec(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto tan(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto csc(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto sec(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto cot(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto csc(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arccos(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto cot(const T& x) noexcept requires(ReverseDiff<T>);
+
+    template<Scalar T>
+    auto arccos(const T& x) noexcept requires(ReverseDiff<T>);
 
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<Scalar T, int Order>
-    auto arcsin(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arcsin(const T& x) noexcept requires(ReverseDiff<T>);
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<Scalar T, int Order>
-    auto arctan(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arctan(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arcsec(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arcsec(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arccsc(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arccsc(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arccot(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
-    */
+    template<Scalar T>
+    auto arccot(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
     CoDiff<T> cosh(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -189,34 +191,32 @@ namespace Physica {
         x_.reverse((Tv(1) - square(y.value())) * y.grad());
     }
 
-    /*
-    template<Scalar T, int Order>
-    auto sech(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto sech(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto csch(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto csch(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto coth(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto coth(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arccosh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arccosh(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arcsinh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arcsinh(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arctanh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arctanh(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arcsech(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arcsech(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arccsch(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    auto arccsch(const T& x) noexcept requires(ReverseDiff<T>);
 
-    template<Scalar T, int Order>
-    auto arccoth(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
-    */
+    template<Scalar T>
+    auto arccoth(const T& x) noexcept requires(ReverseDiff<T>);
 
     template<Scalar T>
     CoDiff<T> lncosh(T&& x) noexcept requires(ReverseDiff<T>) {
@@ -225,11 +225,9 @@ namespace Physica {
         x_.reverse(tanh(x_.value()) * y.grad());
     }
 
-    /*
-    template<Scalar T, int Order>
-    T floor(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
+    template<Scalar T>
+    T floor(const T& x) noexcept requires(ReverseDiff<T>);
     
-    template<Scalar T, int Order>
-    T ceil(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
-    */
+    template<Scalar T>
+    T ceil(const T& x) noexcept requires(ReverseDiff<T>);
 }

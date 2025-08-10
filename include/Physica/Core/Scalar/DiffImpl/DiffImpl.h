@@ -70,8 +70,18 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    auto Diff<T, Mode, Order>::conjugate() const {
+    auto Diff<T, Mode, Order>::conjugate() const noexcept -> This {
         return This(v.conjugate(), g.conjugate());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    auto Diff<T, Mode, Order>::squaredNorm() const noexcept -> CoDiff<This> {
+        if constexpr (isReverseDiff) {
+            auto y = co_yield value().squaredNorm();
+            reverse(T(2) * v * y.grad());
+        }
+        else
+            co_return This(v.squaredNorm(), T(2) * v * g);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
