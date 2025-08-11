@@ -34,25 +34,24 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] inline int getNumProcess() const noexcept;
-        [[nodiscard]] inline int getProcessID() const noexcept; 
+        [[nodiscard]] inline static int getNumProcess() noexcept;
+        [[nodiscard]] inline static int getProcessID() noexcept; 
         /* Static memebers */
+        [[nodiscard]] static MPI_Comm getWorld() noexcept { return MPI_COMM_WORLD; }
         [[nodiscard]] static MPIContext& getInstance() noexcept;
     private:
         MPIContext();
-        /* Getters */
-        static MPI_Comm getWorld() noexcept { return MPI_COMM_WORLD; }
         /* Static memebers */
         static void world_handler(MPI_Comm* pComm, int* pErr, ...);
     };
 
-    inline int MPIContext::getNumProcess() const noexcept {
+    inline int MPIContext::getNumProcess() noexcept {
         int result;
         MPI_Comm_size(getWorld(), &result);
         return result;
     }
 
-    inline int MPIContext::getProcessID() const noexcept {
+    inline int MPIContext::getProcessID() noexcept {
         int result;
         MPI_Comm_rank(getWorld(), &result);
         return result;

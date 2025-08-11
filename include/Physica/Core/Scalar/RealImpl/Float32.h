@@ -105,6 +105,9 @@ namespace Physica {
     #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_FLOAT; }
     #endif
+    #ifdef PHYSICA_MPI
+        [[nodiscard]] static MPI_Datatype dtype_mpi() noexcept { return MPI_FLOAT; }
+    #endif
     };
 
     template<Scalar T>

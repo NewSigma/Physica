@@ -102,7 +102,10 @@ namespace Physica {
         template<RNG R>
         [[nodiscard]] static Real random_any(auto& distribution) { return Real(distribution(R::getInstance())); }
     #ifdef PHYSICA_HDF5
-        [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_DOUBLE; }
+        [[nodiscard]] static const H5::DataType& getH5DataType() noexcept { return H5::PredType::NATIVE_DOUBLE; }
+    #endif
+    #ifdef PHYSICA_MPI
+        [[nodiscard]] static MPI_Datatype dtype_mpi() noexcept { return MPI_DOUBLE; }
     #endif
     };
 
