@@ -46,6 +46,8 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        void forNeighSites(std::invocable<int, int> auto fn, int site) const;
+
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T getHoppingT() const noexcept { return hoppingT; }
@@ -60,6 +62,17 @@ namespace Physica {
             : Base(std::move(lattice)), hoppingT(hoppingT_), repelU(repelU_) {
         if constexpr (UntrivialNearestNeighbor)
             hopIndexArr = makeHopIndexArray();
+    }
+
+    template<Scalar T, int Dim>
+    void Hubbard<T, Dim>::forNeighSites(std::invocable<int, int> auto fn, int site) const {
+        if constexpr (Dim == 1)
+            fn(site, (site + 1) % Base::getNumSuperCellSite());
+        else {
+            const auto& hopTargets = getHopIndexArray()[site];
+            for (int site1 : hopTargets)
+                fn(site, site1);
+        }
     }
 
     template<Scalar T, int Dim>

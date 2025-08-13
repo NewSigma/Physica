@@ -36,25 +36,13 @@ namespace Physica {
     }
 
     template<Scalar T, Representation U>
-    template<class Functor>
-    void HubbardMatrix<T, U>::forNeighSites(Functor func, int site) const noexcept(std::is_nothrow_invocable_v<Functor, int, int>) {
-        if constexpr (Dim == 1)
-            func(site, (site + 1) % NumSite);
-        else {
-            const auto& hopTargets = ModelBase::getHopIndexArray()[site];
-            for (int site1 : hopTargets)
-                func(site, site1);
-        }
-    }
-
-    template<Scalar T, Representation U>
     T HubbardMatrix<T, U>::calc(size_t row, size_t col) const {
-        if constexpr (IsTransInvariant) {
+        if constexpr (Base::IsTransInvariant) {
             const auto& periods = repr.getPeriods();
             const auto psi1 = repr[row];
             if (row == col) {
                 const bool flag = (repr.getKIndex() == 0) || (periods[row] == NumSite);
-                return flag ? repelElem(psi1) : RealType(0);
+                return flag ? repelElem(psi1) : Tr(0);
             }
 
             auto fft = FFTType::makeEmptyFFT(NumSite);
@@ -63,9 +51,9 @@ namespace Physica {
                 auto psi2 = repr[col];
                 int sign = 1;
                 for (int i = 0; i < int(NumSite); ++i) {
-                    RealType elem = 0;
+                    Tr elem = 0;
                     if (psi1 != psi2)
-                        elem = hoppingElem(psi1, psi2) * RealType(sign);
+                        elem = hoppingElem(psi1, psi2) * Tr(sign);
                     rSpace[i] = elem;
 
                     sign *= psi2.lShiftSign();
@@ -73,7 +61,7 @@ namespace Physica {
                 }
             }
             FFTType::transform(planProvider, fft);
-            const RealType normalizer = sqrt(RealType(periods[row] * periods[col])) / RealType(NumSite);
+            const Tr normalizer = sqrt(Tr(periods[row] * periods[col])) / Tr(NumSite);
             return fft.getKSpace()[repr.getReducedK()] * normalizer;
         }
         else {
@@ -101,15 +89,15 @@ namespace Physica {
     }
 
     template<Scalar T, Representation U>
-    HubbardMatrix<T, U>::RealType HubbardMatrix<T, U>::repelElem(StateType psi) const {
-        return getRepelU() * RealType(psi.getNumDoubleOccupy());
+    auto HubbardMatrix<T, U>::repelElem(StateType psi) const -> Tr {
+        return getRepelU() * Tr(psi.getNumDoubleOccupy());
     }
 
     template<Scalar T, Representation U>
-    auto HubbardMatrix<T, U>::hoppingElem(StateType rowPsi, StateType colPsi) const -> RealType {
+    auto HubbardMatrix<T, U>::hoppingElem(StateType rowPsi, StateType colPsi) const -> Tr {
         int count = 0;
         for (int site = 0; site < int(NumSite); ++site) {
-            forNeighSites([&count, rowPsi, colPsi](int site, int site1) {
+            ModelBase::forNeighSites([&count, rowPsi, colPsi](int site, int site1) {
                 const int signUp = colPsi.hopUpSign(site, site1);
                 const int signDown = colPsi.hopDownSign(site, site1);
                 int n1 = 0;
@@ -121,6 +109,6 @@ namespace Physica {
                 count += n1 * signUp + n2 * signDown;
             }, site);
         }
-        return RealType(-count) * getHoppingT();
+        return Tr(-count) * getHoppingT();
     }
 }

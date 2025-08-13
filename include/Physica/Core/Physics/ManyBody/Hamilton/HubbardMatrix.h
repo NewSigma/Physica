@@ -26,7 +26,6 @@
 namespace Physica {
     template<Scalar, Representation, Vector>
     class HubbardVecProd;
-    class Thread;
     /**
      * Refer to [1] for applied symmetries
      * 
@@ -37,21 +36,16 @@ namespace Physica {
     class HubbardMatrix
             : public HamiltonMatrix<HubbardMatrix<T, U>>
             , public Hubbard<typename T::RealType, U::Dim> {
-        using RealType = T::RealType;
         using This = HubbardMatrix<T, U>;
         using Base = HamiltonMatrix<This>;
-        using ModelBase = Hubbard<RealType, U::Dim>;
+        using Tr = T::RealType;
+        using ModelBase = Hubbard<Tr, U::Dim>;
         
-        using StateType = U::StateType;
+        using typename Base::StateType;
         using typename ModelBase::IndexType;
     public:
-        using FFTType = FFT<RealType, 1>;
-        constexpr static unsigned int Dim = U::Dim;
-        constexpr static unsigned int NumSite = StateType::NumSite;
-        constexpr static unsigned int SiteDOF = StateType::SiteDOF;
-        constexpr static bool IsTransInvariant = Traits<U>::IsTransInvariant;
-        static_assert((IsTransInvariant && T::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
-        static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
+        using FFTType = FFT<Tr, 1>;
+        using Base::NumSite;
     private:
         U repr;
         FFTType planProvider;
@@ -67,9 +61,6 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept;
         /* Operations */
-        template<class Functor>
-        void forNeighSites(Functor func, int site) const noexcept(std::is_nothrow_invocable_v<Functor, int, int>);
-
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] T trace() const;
         void swap(This& __restrict obj) noexcept;
@@ -80,8 +71,8 @@ namespace Physica {
         [[nodiscard]] const ModelBase& getModel() const noexcept { return *this; }
         [[nodiscard]] const U& getRepr() const noexcept { return repr; }
     protected:
-        RealType repelElem(StateType psi) const;
-        RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
+        Tr repelElem(StateType psi) const;
+        Tr hoppingElem(StateType rowPsi, StateType colPsi) const;
     private:
         template<Scalar, Representation, Vector>
         friend class HubbardVecProd;

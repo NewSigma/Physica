@@ -25,8 +25,19 @@ namespace Physica {
     class HamiltonMatrix : public RValueMatrix<Derived> {
         using This = HamiltonMatrix<Derived>;
         using Base = RValueMatrix<Derived>;
+
+        using T = Traits<Derived>::ScalarType;
         using ReprType = Traits<Derived>::ReprType;
-        constexpr static unsigned int NumSite = ReprType::StateType::NumSite;
+    protected:
+        using StateType = ReprType::StateType;
+    public:
+        constexpr static unsigned int Dim = ReprType::Dim;
+        constexpr static unsigned int NumSite = StateType::NumSite;
+        constexpr static unsigned int SiteDOF = StateType::SiteDOF;
+        constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
+
+        static_assert((IsTransInvariant && T::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
+        static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     public:
         ~HamiltonMatrix() = default;
         /* Operations */
