@@ -89,7 +89,8 @@ namespace Physica {
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(size_t length_, auto&&... args) : length(length_), capacity(length_), alloc() {
+    Array<T, Dynamic, Allocator>::Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value)
+            : length(length_), capacity(length_), alloc() {
         if (capacity == 0)
             return;
 
@@ -101,22 +102,24 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(std::initializer_list<T> list) : Array(list.size()) {
+    Array<T, Dynamic, Allocator>::Array(std::initializer_list<T> list) noexcept : Array(list.size()) {
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            alloc.construct(arr + i, *ite);
+            alloc.construct(arr + i, std::move(*ite));
     }
 
     template<class T, class Allocator>
     template<size_t Length, class OtherAlloc>
-    Array<T, Dynamic, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) : Array(other.getLength()) {
+    Array<T, Dynamic, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value)
+            : Array(other.getLength()) {
         for (size_t i = 0; i < getLength(); ++i)
             arr[i] = other[i];
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(const This& obj) : length(obj.length), capacity(obj.capacity), alloc() {
+    Array<T, Dynamic, Allocator>::Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value)
+            : length(obj.length), capacity(obj.capacity), alloc() {
         if (capacity == 0)
             return;
 
@@ -146,20 +149,20 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::grow(auto&&... args) {
+    void Array<T, Dynamic, Allocator>::grow(auto&&... args) noexcept {
         assert(length < getCapacity() && "[Error]: You must make sure capacity is enough before calling grow()");
         alloc.construct(arr + length++, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::append(auto&&... args) {
+    void Array<T, Dynamic, Allocator>::append(auto&&... args) noexcept {
         if (length == capacity) [[unlikely]]
             doubleSpace();
         grow(std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::insert(size_t index, auto&&... args) {
+    void Array<T, Dynamic, Allocator>::insert(size_t index, auto&&... args) noexcept {
         assert(index <= length);
         if (length == capacity)
             doubleSpace();
@@ -169,7 +172,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::reserve(size_t size) {
+    void Array<T, Dynamic, Allocator>::reserve(size_t size) noexcept {
         if (size > getCapacity()) {
             arr = alloc.reallocate(arr, size, capacity);
             capacity = size;
@@ -179,13 +182,13 @@ namespace Physica {
      * resize() is inlined, if there is no need to resize, we avoid the overhead of slow resizeImpl() call
      */
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::resize(size_t size, auto&&... args) {
+    void Array<T, Dynamic, Allocator>::resize(size_t size, auto&&... args) noexcept {
         if (length != size)
             resizeImpl(size, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::squeeze() {
+    void Array<T, Dynamic, Allocator>::squeeze() noexcept {
         if (length == 0)
             *this = Array();
         else {
@@ -198,7 +201,7 @@ namespace Physica {
      * This function can be used when you are sure the new \param size is larger than the old capacity.
      */
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::increase(size_t size) {
+    void Array<T, Dynamic, Allocator>::increase(size_t size) noexcept {
         assert(size >= capacity);
         arr = alloc.reallocate(arr, size, capacity);
         capacity = size;
@@ -208,7 +211,7 @@ namespace Physica {
      * This function can be used when you are sure the new \param size is shorter than the old capacity.
      */
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::decrease(size_t size) {
+    void Array<T, Dynamic, Allocator>::decrease(size_t size) noexcept {
         assert(size <= capacity);
         if(!std::is_trivially_copyable<T>::value) {
             for(size_t i = size; i < length; ++i)
@@ -234,7 +237,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::doubleSpace() {
+    void Array<T, Dynamic, Allocator>::doubleSpace() noexcept {
         increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T));
     }
 
@@ -268,7 +271,7 @@ namespace Physica {
      * Low level api. Designed for performance. Elements between old length and \param size have not allocated. DO NOT try to visit them.
      */
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::setLength(size_t size) {
+    void Array<T, Dynamic, Allocator>::setLength(size_t size) noexcept {
         assert(size <= getCapacity() && "[Error]: Requiring more elements than the array have");
         if constexpr (!std::is_trivially_copyable<ElemType>::value) {
             assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");
@@ -292,7 +295,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, auto&&... args) {
+    void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, auto&&... args) noexcept {
         if (capacity < size)
             reserve(size);
 

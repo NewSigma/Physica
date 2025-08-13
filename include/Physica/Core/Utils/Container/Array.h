@@ -114,27 +114,27 @@ namespace Physica {
         [[no_unique_address]] allocator_type alloc;
     public:
         Array() = default;
-        explicit Array(size_t length_, auto&&... args);
-        Array(std::initializer_list<T> list);
+        explicit Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
+        Array(std::initializer_list<T> list) noexcept;
         template<size_t Length, class OtherAlloc>
-        Array(const Array<T, Length, OtherAlloc>& other);
-        Array(const This& obj);
+        Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value);
+        Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value);
         Array(This&& array) noexcept;
         ~Array();
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void grow(auto&&... args);
-        void append(auto&&... args);
-        void insert(size_t index, auto&&... args);
-        void reserve(size_t size);
-        void resize(size_t size, auto&&... args);
-        void squeeze();
-        void increase(size_t size);
-        void decrease(size_t size);
+        void grow(auto&&... args) noexcept;
+        void append(auto&&... args) noexcept;
+        void insert(size_t index, auto&&... args) noexcept;
+        void reserve(size_t size) noexcept;
+        void resize(size_t size, auto&&... args) noexcept;
+        void squeeze() noexcept;
+        void increase(size_t size) noexcept;
+        void decrease(size_t size) noexcept;
         void clear() noexcept;
         [[nodiscard]] pointer release() noexcept;
-        void doubleSpace();
+        void doubleSpace() noexcept;
         void zeros() noexcept;
 
         [[nodiscard]] auto toDevice() const;
@@ -156,11 +156,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
-        void setLength(size_t size);
+        void setLength(size_t size) noexcept;
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
     private:
-        void resizeImpl(size_t size, auto&&... args);
+        void resizeImpl(size_t size, auto&&... args) noexcept;
     };
 }
 

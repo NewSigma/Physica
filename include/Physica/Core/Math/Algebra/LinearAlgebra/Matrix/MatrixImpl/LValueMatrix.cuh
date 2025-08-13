@@ -109,10 +109,10 @@ namespace Physica {
         /* Getters */
         using Base::getRow;
         using Base::getCol;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
-        [[nodiscard]] __device__ RefTy refFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] __device__ ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __device__ RefTy refFromMajorMinor(size_t major, size_t minor) noexcept;
+        [[nodiscard]] __device__ ConstRefTy refFromMajorMinor(size_t major, size_t minor) const noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

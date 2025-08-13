@@ -68,7 +68,7 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         void assign_base(Matrix auto& target) const;
-        void assign_mkl(Matrix auto& target) const;
+        void assign_mkl(Matrix auto& target) const noexcept;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
 
         [[nodiscard]] T calc(size_t row, size_t col) const;

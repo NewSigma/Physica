@@ -234,19 +234,19 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::data_ptr(size_t row, size_t col) -> PtrTy {
+    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < Base::getRow());
         assert(col < Base::getCol());
         return Base::getDerived().data_ptr(row, col);
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
+    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 
     template<class Derived>
-    __device__ auto device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) -> RefTy {
+    __device__ auto device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) noexcept -> RefTy {
         assert(major < Base::getDerived().getMaxMajor());
         assert(minor < Base::getDerived().getMaxMinor());
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
@@ -255,7 +255,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) const -> ConstRefTy {
+    __device__ auto device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) const noexcept -> ConstRefTy {
         return const_cast<This&>(*this).refFromMajorMinor(major, minor);
     }
 }

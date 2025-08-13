@@ -18,11 +18,11 @@
  */
 #pragma once
 
+#include <exception>
+#include <cstdint>
 #ifdef __linux__
     #include <x86intrin.h>
 #endif
-#include <cstdint>
-#include "Physica/Core/Exception/RdrandException.h"
 
 namespace Physica {
     /**
@@ -31,6 +31,8 @@ namespace Physica {
      */
     class RandomSeed {
         constexpr static int RetryLimit = 8;
+
+        class RdrandException : public std::exception {};
     public:
     #ifdef __linux__
         static void rdrand(uint16_t& __restrict integer) {

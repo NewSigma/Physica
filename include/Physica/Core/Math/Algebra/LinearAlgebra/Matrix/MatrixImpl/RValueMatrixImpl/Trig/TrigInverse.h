@@ -42,7 +42,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
-        void assign_mkl(Matrix auto& target) const;
+        void assign_mkl(Matrix auto& target) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }

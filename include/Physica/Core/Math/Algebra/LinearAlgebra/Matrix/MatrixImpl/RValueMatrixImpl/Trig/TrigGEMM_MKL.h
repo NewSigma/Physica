@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
-    void GEMM<TrigUpper<M1>, M2>::assign_mkl(Matrix auto& target) const {
+    void GEMM<TrigUpper<M1>, M2>::assign_mkl(Matrix auto& target) const noexcept {
         using M = std::remove_cvref_t<decltype(target)>;
         using Tc = T::ComplexType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;

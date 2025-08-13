@@ -133,8 +133,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
         [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
-        [[nodiscard]] RefTy refFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] RefTy refFromMajorMinor(size_t major, size_t minor) noexcept;
+        [[nodiscard]] ConstRefTy refFromMajorMinor(size_t major, size_t minor) const noexcept;
     protected:
         LValueMatrix() = default;
         LValueMatrix(const This&) = default;

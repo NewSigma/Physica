@@ -391,7 +391,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) -> RefTy {
+    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) noexcept -> RefTy {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
@@ -399,7 +399,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const -> ConstRefTy {
+    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const noexcept -> ConstRefTy {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());

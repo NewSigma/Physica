@@ -24,7 +24,7 @@
 namespace Physica {
     class PHYSICA_API NoImplException : public std::runtime_error {
     public:
-        NoImplException(const char* msg) : std::runtime_error(msg) {}
+        NoImplException(const char* msg) noexcept : std::runtime_error(msg) {}
     };
 
     [[noreturn]] __host__ __device__ inline void noImpl(const char* msg) {

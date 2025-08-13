@@ -52,7 +52,7 @@ namespace Physica {
         [[nodiscard]] T getRepelU() const noexcept { return repelU; }
         [[nodiscard]] const auto& getHopIndexArray() const noexcept { return hopIndexArr; }
     private:
-        HopIndexArray makeHopIndexArray();
+        HopIndexArray makeHopIndexArray() noexcept;
     };
 
     template<Scalar T, int Dim>
@@ -72,10 +72,10 @@ namespace Physica {
     }
 
     template<Scalar T, int Dim>
-    auto Hubbard<T, Dim>::makeHopIndexArray() -> HopIndexArray {
+    auto Hubbard<T, Dim>::makeHopIndexArray() noexcept -> HopIndexArray {
         const auto numSite = Base::getNumSuperCellSite();
         HopIndexArray result(numSite);
-        Base::forSiteInLattice([this, numSite, &result](const IndexType index) {
+        Base::forSiteInLattice([this, numSite, &result](const IndexType index) noexcept {
             const auto& dims = Base::getDims();
             Array<size_t> hopTargets{};
             hopTargets.reserve(numSite * Dim * 2);
