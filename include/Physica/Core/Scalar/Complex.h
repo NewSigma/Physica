@@ -94,11 +94,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */
-        [[nodiscard]] static Complex fromPhase(T phase);
+        [[nodiscard]] static This fromPhase(T phase) noexcept;
         template<RNG R>
-        [[nodiscard]] static Complex random_uniform();
+        [[nodiscard]] static This random_uniform();
         template<RNG R>
-        [[nodiscard]] static Complex random_normal();
+        [[nodiscard]] static This random_normal();
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 

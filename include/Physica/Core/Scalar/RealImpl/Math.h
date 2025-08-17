@@ -158,28 +158,20 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ void sincos(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
-        using MachineType = Real<Prec>::MachineType;
-        MachineType sin_temp, cos_temp;
+    __host__ __device__ void sincos(Real<Prec> x, Real<Prec>& __restrict sin_result, Real<Prec>& __restrict cos_result) noexcept {
         if constexpr (Prec == Float32)
-            ::sincosf(x.toMachine(), &sin_temp, &cos_temp);
+            ::sincosf(x.toMachine(), (float*)&sin_result, (float*)&cos_result);
         else
-            ::sincos(x.toMachine(), &sin_temp, &cos_temp);
-        sin_result = sin_temp;
-        cos_result = cos_temp;
+            ::sincos(x.toMachine(), (double*)&sin_result, (double*)&cos_result);
     }
 
     template<FloatPrec Prec>
-    __host__ __device__ void sincospi(Real<Prec> x, Real<Prec>& sin_result, Real<Prec>& cos_result) noexcept {
+    __host__ __device__ void sincospi(Real<Prec> x, Real<Prec>& __restrict sin_result, Real<Prec>& __restrict cos_result) noexcept {
     #ifdef __CUDA_ARCH__
-        using MachineType = Real<Prec>::MachineType;
-        MachineType sin_temp, cos_temp;
         if constexpr (Prec == Float32)
-            ::sincospif(x.toMachine(), &sin_temp, &cos_temp);
+            ::sincospif(x.toMachine(), (float*)&sin_result, (float*)&cos_result);
         else
-            ::sincospi(x.toMachine(), &sin_temp, &cos_temp);
-        sin_result = sin_temp;
-        cos_result = cos_temp;
+            ::sincospi(x.toMachine(), (double*)&sin_result, (double*)&cos_result);
     #else
         return sincos(MathConst<Real<Prec>>::pi * x, sin_result, cos_result);
     #endif
