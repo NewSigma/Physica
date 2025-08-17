@@ -212,11 +212,11 @@ namespace Physica {
             auto fileSpace = DataSpaceType({length, DiffOrder + 1});
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
-                dataset.read(data()[i], Tv::getH5DataType(), memSpace, fileSpace);
+                dataset.read(data()[i], Tv::dtype_hdf5(), memSpace, fileSpace);
             }
         }
         else
-            dataset.read(data(), Tv::getH5DataType(), memSpace, memSpace);
+            dataset.read(data(), Tv::dtype_hdf5(), memSpace, memSpace);
         return dataset;
     }
 
@@ -234,16 +234,16 @@ namespace Physica {
         if (loc.exists(name))
             dataset = loc.openDataSet<DataDim>(name);
         else
-            dataset = loc.createDataSet<DataDim>(name, Tv::getH5DataType(), fileSpace);
+            dataset = loc.createDataSet<DataDim>(name, Tv::dtype_hdf5(), fileSpace);
 
         if constexpr (isDiffable) {
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
-                dataset.write(data()[i], Tv::getH5DataType(), memSpace, fileSpace);
+                dataset.write(data()[i], Tv::dtype_hdf5(), memSpace, fileSpace);
             }
         }
         else
-            dataset.write(data(), Tv::getH5DataType(), memSpace, fileSpace);
+            dataset.write(data(), Tv::dtype_hdf5(), memSpace, fileSpace);
         return std::cref(dataset);
     }
 #endif

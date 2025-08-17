@@ -38,6 +38,7 @@
         template<class Derived> class DataSpaceBase {};
         template<size_t Dim> class H5DataSpace {};
         template<size_t Dim> class H5DataSet {};
+        class H5DataType;
         class H5File;
         class H5Group {};
         class H5Loc {};

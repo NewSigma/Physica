@@ -94,9 +94,7 @@ namespace Physica {
         [[nodiscard]] static Real random_normal();
         template<RNG R>
         [[nodiscard]] static Real random_any(auto& distribution) { return This(float32::random_any<R>(distribution)); }
-    #ifdef PHYSICA_HDF5
-        [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_INT16; }
-    #endif
+        [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept { return H5::PredType::NATIVE_INT16; }
     };
 
     template<Scalar T>

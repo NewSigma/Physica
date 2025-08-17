@@ -244,9 +244,9 @@ namespace Physica {
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (isColMatrix)
-                dataset.read(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
+                dataset.read(col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
             else
-                dataset.read(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
+                dataset.read(row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
         }
         return dataset;
     }
@@ -260,16 +260,16 @@ namespace Physica {
         if (loc.exists(name))
             dataset = loc.openDataSet<2>(name);
         else
-            dataset = loc.createDataSet<2>(name, ScalarType::getH5DataType(), space);
+            dataset = loc.createDataSet<2>(name, ScalarType::dtype_hdf5(), space);
 
         const auto memSpace = H5DataSpace<1>({maxMinor});
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (isColMatrix)
-                dataset.write(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
+                dataset.write(col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
             else
-                dataset.write(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
+                dataset.write(row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
         }
         return std::cref(dataset);
     }
