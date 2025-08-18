@@ -42,7 +42,7 @@ else()
     endif()
 
     if(CMAKE_LINKER_TYPE MATCHES LLD)
-        add_link_options(-Wl,--icf=all)
+        add_link_options(-Wl,--icf=all,-z,pack-relative-relocs)
     endif()
 
     if(FALSE)
