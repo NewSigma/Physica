@@ -104,7 +104,7 @@ namespace Physica {
             temp -= (x + T(0.5)) * ln(temp);
             T ser(1.000000000000123);
             T copy(x);
-            for (int j = 0; j < Coeffs.size(); ++j) {
+            for (int j = 0; j < static_cast<int>(Coeffs.size()); ++j) {
                 copy += T(1);
                 ser += Coeffs[j] / copy;
             }
@@ -118,7 +118,7 @@ namespace Physica {
             temp -= (x + T(0.5)) * ln(temp);
             T ser(0.9999998);
             T copy(x);
-            for (int j = 0; j < Coeffs.size(); ++j) {
+            for (int j = 0; j < static_cast<int>(Coeffs.size()); ++j) {
                 copy += T(1);
                 ser += Coeffs[j] / copy;
             }

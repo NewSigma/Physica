@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
+#include "Physica/Core/Physics/ManyBody/Model/LatticeModel.h"
 
 namespace Physica {
     template<class Derived>
@@ -28,6 +29,7 @@ namespace Physica {
 
         using T = Traits<Derived>::ScalarType;
         using ReprType = Traits<Derived>::ReprType;
+        constexpr static BoundaryCond Boundary = Traits<Derived>::Boundary;
     protected:
         using StateType = ReprType::StateType;
     public:
@@ -37,7 +39,10 @@ namespace Physica {
         constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
 
         static_assert((IsTransInvariant && T::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
-        static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
+        static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Translational invariance is not implemented in high dimension");
+        static_assert((Boundary == BoundaryCond::PBC) || !IsTransInvariant, "[Error]: Translational invariance is not implemented for other boundary conditions");
+        static_assert((Boundary != BoundaryCond::OBC) || !IsTransInvariant, "[Error]: Translational invariance does not support OBC");
+        static_assert((Boundary != BoundaryCond::TBC) || T::isComplex, "[Error]: Twisted boundary condition gives complex hamilton");
     public:
         ~HamiltonMatrix() = default;
         /* Operations */

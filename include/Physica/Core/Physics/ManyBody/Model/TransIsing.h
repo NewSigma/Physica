@@ -22,10 +22,10 @@
 #include "LatticeModel.h"
 
 namespace Physica {
-    template<Scalar T, int Dim>
+    template<Scalar T, int Dim, BoundaryCond BC = BoundaryCond::PBC>
     class TransIsing : public LatticeModel<Dim> {
         static_assert(Dim == 1, "Not implemented");
-        using This = TransIsing<T, Dim>;
+        using This = TransIsing<T, Dim, BC>;
         using Base = LatticeModel<Dim>;
     public:
         using ScalarType = T;
@@ -33,7 +33,7 @@ namespace Physica {
         T couplingJ;
         T transG;
     public:
-        TransIsing(Base base, T couplingJ_, T transG_);
+        TransIsing(Base base, T couplingJ_, T transG_) noexcept;
         TransIsing(const This&) = default;
         TransIsing(This&&) noexcept = default;
         ~TransIsing() = default;
@@ -46,11 +46,12 @@ namespace Physica {
         [[nodiscard]] T getTransG() const noexcept { return transG; }
     };
 
-    template<Scalar T, int Dim>
-    TransIsing<T, Dim>::TransIsing(Base base, T couplingJ_, T transG_) : Base(std::move(base)), couplingJ(couplingJ_), transG(transG_) {}
+    template<Scalar T, int Dim, BoundaryCond BC>
+    TransIsing<T, Dim, BC>::TransIsing(Base base, T couplingJ_, T transG_) noexcept
+            : Base(std::move(base)), couplingJ(couplingJ_), transG(transG_) {}
 
-    template<Scalar T, int Dim>
-    void TransIsing<T, Dim>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, int Dim, BoundaryCond BC>
+    void TransIsing<T, Dim, BC>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         couplingJ.swap(obj.couplingJ);
@@ -59,10 +60,10 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, int Dim_>
-    class Traits<TransIsing<T, Dim_>> {
+    template<Scalar T, int D, BoundaryCond BC>
+    class Traits<TransIsing<T, D, BC>> {
     public:
-        constexpr static int Dim = Dim_;
+        constexpr static int Dim = D;
         constexpr static int SiteDOF = 2;
     };
 }

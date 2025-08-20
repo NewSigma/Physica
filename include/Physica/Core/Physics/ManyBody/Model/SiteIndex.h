@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
-    template<unsigned int Dim>
+    template<int Dim>
     class SiteIndex : public Array<size_t, Dim + 1> {
         using This = SiteIndex<Dim>;
         using Base = Array<size_t, Dim + 1>;
@@ -45,10 +45,10 @@ namespace Physica {
         [[nodiscard]] static size_t toIndex1D(This dims, This index) noexcept { return index.toIndex1D(dims); }
     };
 
-    template<unsigned int Dim>
-    size_t SiteIndex<Dim>::toIndex1D(SiteIndex<Dim> dims) const noexcept {
+    template<int Dim>
+    size_t SiteIndex<Dim>::toIndex1D(This dims) const noexcept {
         size_t result = (*this)[0];
-        for (unsigned int dim = 1; dim <= Dim; ++dim)
+        for (int dim = 1; dim <= Dim; ++dim)
             result = result * dims[dim] + (*this)[dim];
         return result;
     }

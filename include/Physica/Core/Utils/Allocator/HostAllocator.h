@@ -74,11 +74,12 @@ namespace Physica {
         }
         else
             p = std::malloc(size);
+        assert(p != nullptr);
         return reinterpret_cast<T*>(p);
     }
 
     template<class T, size_t Align>
-    void HostAllocator<T, Align>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
+    void HostAllocator<T, Align>::deallocate(T* p, size_t) noexcept {
         if constexpr (OverAlign) {
         #ifdef _MSC_VER
             _aligned_free(p);
@@ -91,7 +92,7 @@ namespace Physica {
     }
 
     template<class T, size_t Align>
-    T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) noexcept {
+    T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
         assert(new_size > 0 && "[Error]: Allocate nothing");
         T* new_p = allocate(new_size);
         if (p == nullptr)
@@ -166,7 +167,7 @@ namespace std {
             a.destroy(p);
         }
 
-        static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {
+        constexpr static size_type max_size(const allocator_type&) noexcept {
             return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
 

@@ -21,6 +21,12 @@
 #include "SiteIndex.h"
 
 namespace Physica {
+    enum class BoundaryCond {
+        PBC,
+        TBC,
+        OBC
+    };
+
     template<int Dim>
     class LatticeModel {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
@@ -40,7 +46,7 @@ namespace Physica {
         /* Operators */
         LatticeModel& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void forSiteInLattice(std::invocable<IndexType> auto func) const;
+        void forSiteInLattice(std::invocable<IndexType> auto func) const noexcept(std::is_nothrow_invocable<decltype(func), IndexType>::value);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -56,7 +62,8 @@ namespace Physica {
             : superSize(std::move(superSize_)), numUnitCellSite(numUnitCellSite_) {}
 
     template<int Dim>
-    void LatticeModel<Dim>::forSiteInLattice(std::invocable<IndexType> auto func) const {
+    void LatticeModel<Dim>::forSiteInLattice(std::invocable<IndexType> auto func) const
+            noexcept(std::is_nothrow_invocable<decltype(func), IndexType>::value) {
         if constexpr (Dim == 1) {
             for (size_t x = 0; x < superSize[0]; ++x)
                 for (size_t site = 0; site < numUnitCellSite; ++site)

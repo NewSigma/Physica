@@ -22,10 +22,10 @@
 #include "TransIsingMatrix.h"
 
 namespace Physica {
-    template<Scalar T, Representation U, Vector V>
-    class TransIsingVecProd : public RValueVector<TransIsingVecProd<T, U, V>> {
-        using MatrixType = TransIsingMatrix<T, U>;
-        using This = TransIsingVecProd<T, U, V>;
+    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
+    class TransIsingVecProd : public RValueVector<TransIsingVecProd<T, U, BC, V>> {
+        using MatrixType = TransIsingMatrix<T, U, BC>;
+        using This = TransIsingVecProd<T, U, BC, V>;
         using Base = RValueVector<This>;
 
         using StateType = U::StateType;
@@ -62,14 +62,14 @@ namespace Physica {
         [[nodiscard]] T getTransG() const noexcept { return mat.getTransG(); }
     };
 
-    template<Scalar T, Representation U, Vector V>
-    TransIsingVecProd<T, U, V>::TransIsingVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
+    TransIsingVecProd<T, U, BC, V>::TransIsingVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Scalar T, Representation U, Vector V>
+    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
     template<ExecutePolicy P>
-    void TransIsingVecProd<T, U, V>::assign(Vector auto& target) const {
+    void TransIsingVecProd<T, U, BC, V>::assign(Vector auto& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = RealType(0);
 
@@ -94,9 +94,9 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, Representation U, Vector V>
-    class Traits<TransIsingVecProd<T, U, V>> {
-        using MatrixType = TransIsingMatrix<T, U>;
+    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
+    class Traits<TransIsingVecProd<T, U, BC, V>> {
+        using MatrixType = TransIsingMatrix<T, U, BC>;
         using T1 = V::ScalarType;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T, T1>::Type;

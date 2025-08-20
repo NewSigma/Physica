@@ -24,7 +24,7 @@
 #include "HamiltonMatrix.h"
 
 namespace Physica {
-    template<Scalar, Representation, Vector>
+    template<Scalar, Representation, BoundaryCond, Vector>
     class HubbardVecProd;
     /**
      * Refer to [1] for applied symmetries
@@ -32,34 +32,36 @@ namespace Physica {
      * Reference:
      * [1] J. Korean Phys. Soc. 76, 670–683 (2020); https://doi.org/10.3938/jkps.76.670
      */
-    template<Scalar T, Representation U>
+    template<Scalar T, Representation U, BoundaryCond BC = BoundaryCond::PBC>
     class HubbardMatrix
-            : public HamiltonMatrix<HubbardMatrix<T, U>>
-            , public Hubbard<typename T::RealType, U::Dim> {
-        using This = HubbardMatrix<T, U>;
+            : public HamiltonMatrix<HubbardMatrix<T, U, BC>>
+            , public Hubbard<typename T::RealType, U::Dim, BC> {
+        using This = HubbardMatrix<T, U, BC>;
         using Base = HamiltonMatrix<This>;
         using Tr = T::RealType;
-        using ModelBase = Hubbard<Tr, U::Dim>;
-        
+        using FFT1D = FFT<Tr, 1>;
+        using ModelBase = Hubbard<Tr, U::Dim, BC>;
+
         using typename Base::StateType;
         using typename ModelBase::IndexType;
     public:
-        using FFTType = FFT<Tr, 1>;
+        using Base::Dim;
         using Base::NumSite;
     private:
         U repr;
-        FFTType planProvider;
+        FFT1D planProvider;
+        DenseVector<Tr, Dim> phaseArgs;
     public:
         HubbardMatrix() = default;
         HubbardMatrix(ModelBase hubbard, U repr_);
+        HubbardMatrix(ModelBase hubbard, U repr_, DenseVector<Tr, Dim> phaseArgs_) requires(BC == BoundaryCond::TBC);
         HubbardMatrix(const This&) = default;
         HubbardMatrix(This&&) noexcept = default;
         ~HubbardMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
-        template<Vector V>
-        [[nodiscard]] auto operator*(const V& v) const noexcept;
+        [[nodiscard]] auto operator*(const Vector auto& v) const noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] T trace() const;
@@ -71,20 +73,22 @@ namespace Physica {
         [[nodiscard]] const ModelBase& getModel() const noexcept { return *this; }
         [[nodiscard]] const U& getRepr() const noexcept { return repr; }
     protected:
-        Tr repelElem(StateType psi) const;
-        Tr hoppingElem(StateType rowPsi, StateType colPsi) const;
+        Tr repelElem(StateType psi) const noexcept;
+        T hoppingElem(StateType rowPsi, StateType colPsi) const noexcept;
     private:
-        template<Scalar, Representation, Vector>
+        Vector2D<T> calcBoundaryPhase(int site, int site1) const noexcept;
+        template<Scalar, Representation, BoundaryCond, Vector>
         friend class HubbardVecProd;
     };
 }
 
 namespace Physica {
-    template<Scalar T, Representation U>
-    class Traits<HubbardMatrix<T, U>> : public Traits<HamiltonMatrix<HubbardMatrix<T, U>>> {
+    template<Scalar T, Representation U, BoundaryCond BC>
+    class Traits<HubbardMatrix<T, U, BC>> : public Traits<HamiltonMatrix<HubbardMatrix<T, U, BC>>> {
     public:
         using ScalarType = T;
         using ReprType = U;
+        constexpr static BoundaryCond Boundary = BC;
     };
 }
 
