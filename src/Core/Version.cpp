@@ -24,9 +24,6 @@
 #ifdef PHYSICA_CUDA
     #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #endif
-#ifdef PHYSICA_MIMALLOC
-    #include <mimalloc-new-delete.h>
-#endif
 #include "Physica/Macro.h"
 #include "Physica/Core/Version.h"
 

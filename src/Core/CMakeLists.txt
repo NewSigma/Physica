@@ -12,6 +12,7 @@ if(${PHYSICA_CUDA})
 endif()
 
 target_sources(PhysicaCore PRIVATE Version.cpp)
+target_sources(PhysicaCore PUBLIC Malloc.cpp) # Declared as PUBLIC, other targets will automatically overload operator new/delete
 target_link_libraries(PhysicaCore PUBLIC Physica::Core)
 
 install(TARGETS PhysicaCore DESTINATION lib)
