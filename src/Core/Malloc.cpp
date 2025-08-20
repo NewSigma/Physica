@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+// Global overloads of operator new/delete, compile it with downstream project if necessary
 #ifdef PHYSICA_MIMALLOC
     #include <mimalloc-new-delete.h>
 #endif

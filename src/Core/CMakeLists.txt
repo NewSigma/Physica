@@ -17,3 +17,4 @@ target_link_libraries(PhysicaCore PUBLIC Physica::Core)
 
 install(TARGETS PhysicaCore DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Core DESTINATION include/Physica)
+install(FILES Malloc.cpp DESTINATION share)
