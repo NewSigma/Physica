@@ -26,13 +26,13 @@
 using namespace Physica;
 
 Integer::Integer(int i)
-        : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
+        : byte(new MPUnit[1])
         , length(i >= 0 ? 1 : -1) {
     byte[0] = i >= 0 ? i : -i;
 }
 
 Integer::Integer(const Integer& toCopy)
-        : byte(reinterpret_cast<MPUnit*>(malloc(toCopy.getSize() * sizeof(MPUnit))))
+        : byte(reinterpret_cast<MPUnit*>(new MPUnit[toCopy.getSize()]))
         , length(toCopy.length) {
     memcpy(byte, toCopy.byte, getSize() * sizeof(MPUnit));
 }
@@ -44,7 +44,7 @@ Integer::Integer(Integer&& toMove) noexcept
 }
 
 Integer::~Integer() {
-    free(byte);
+    delete[] byte;
 }
 
 Integer& Integer::operator=(const Integer& toCopy) {
@@ -52,7 +52,7 @@ Integer& Integer::operator=(const Integer& toCopy) {
         this->~Integer();
         length = toCopy.length;
         int size = getSize();
-        byte = reinterpret_cast<MPUnit*>(malloc(size * sizeof(MPUnit)));
+        byte = new MPUnit[size];
         memcpy(byte, toCopy.byte, size * sizeof(MPUnit));
     }
     return *this;
@@ -125,7 +125,9 @@ Integer Integer::operator*(const Integer& i) const {
     const int size2 = i.getSize();
     // Estimate the ed of result first. we will calculate it accurately later.
     auto resultLength = size1 + size2;
-    auto* __restrict resultByte = reinterpret_cast<MPUnit*>(calloc(resultLength, sizeof(MPUnit)));
+    auto* __restrict resultByte = new MPUnit[resultLength];
+    for (int j = 0; j < size2; ++j)
+        resultByte[j] = 0;
     for (int j = 0; j < size1; ++j)
         resultByte[j + size2] = mulAddArrByWord(resultByte + j, i.byte, size2, byte[j]);
     if (resultByte[resultLength - 1] == 0) {
@@ -169,7 +171,7 @@ Integer Integer::operator/(const Integer& i) const {
     ////////////////////////////////Calculate cursory first//////////////////////////////////////
     // Estimate the length of result.
     int resultLength = arr2_len;
-    auto* __restrict resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+    auto* __restrict resultByte = new MPUnit[resultLength];
     for (int j = resultLength - 1; j >= 0; --j) {
         resultByte[j] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
         arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[j]);
@@ -198,14 +200,14 @@ Integer Integer::operator<<(int bits) const {
     MPUnit* __restrict resultByte;
     int resultLength = size + quotient;
     if (remainder == 0) {
-        resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+        resultByte = new MPUnit[resultLength];
         memset(resultByte, 0, quotient * sizeof(MPUnit));
         memcpy(resultByte + quotient, byte, resultLength * sizeof(MPUnit));
         return Integer(resultByte, resultLength);
     }
     const bool carry = std::countl_zero(byte[size - 1]) < remainder;
     resultLength += carry;
-    resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+    resultByte = new MPUnit[resultLength];
     memset(resultByte, 0, quotient * sizeof(MPUnit));
     resultByte[quotient] = 0;
     const int size_1 = quotient + size - 1;
@@ -231,14 +233,14 @@ Integer Integer::operator>>(int bits) const {
     MPUnit* __restrict resultByte;
     int resultLength = size > quotient ? size - quotient : 1;
     if (remainder == 0) {
-        resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+        resultByte = new MPUnit[resultLength];
         memcpy(resultByte, byte + quotient, resultLength * sizeof(MPUnit));
         resultByte[0] = size > quotient ? resultByte[0] : 0;
         return Integer(resultByte, resultLength);
     }
     const bool carry = (std::countl_zero(byte[size - 1]) + remainder) >= MPUnitWidth;
     resultLength -= carry;
-    resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
+    resultByte = new MPUnit[resultLength];
     if (!carry)
         resultByte[size - 1] = byte[size - 1] >> remainder;
 

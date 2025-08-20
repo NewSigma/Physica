@@ -26,13 +26,12 @@ namespace Physica {
         if constexpr (Prec == FloatMP) {
             const auto power = s.getPower();
             if (power < 0) {
-                byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+                byte = new MPUnit[1];
                 byte[0] = 0;
                 length = 1;
             }
             length = power + 1;
-            const size_t size = length * sizeof(MPUnit);
-            byte = reinterpret_cast<MPUnit*>(malloc(size));
+            byte = new MPUnit[length];
             memcpy(byte, s.byte, length * sizeof(MPUnit));
         }
         else

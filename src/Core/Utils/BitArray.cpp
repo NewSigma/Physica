@@ -59,7 +59,7 @@ BitArray& BitArray::operator=(const BitArray& array) {
         this->~BitArray();
         bitCount = array.bitCount;
         const size_t length = getLength();
-        arr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+        arr = new unsigned char[length];
         for (unsigned int i = 0; i < length; ++i)
             arr[i] = array.arr[i];
     }
@@ -89,7 +89,7 @@ bool BitArray::operator[](size_t s) const {
 BitArray BitArray::operator&(const BitArray& array) const {
     assert(bitCount == array.bitCount);
     const size_t length = getLength();
-    auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+    auto newArr = new unsigned char[length];
     for (size_t s = 0; s < length; ++s)
         newArr[s] = arr[s] & array.arr[s];
     return BitArray(newArr, length);
@@ -98,7 +98,7 @@ BitArray BitArray::operator&(const BitArray& array) const {
 BitArray BitArray::operator|(const BitArray& array) const {
     assert(bitCount == array.bitCount);
     const size_t length = getLength();
-    auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+    auto newArr = new unsigned char[length];
     for (size_t s = 0; s < length; ++s)
         newArr[s] = arr[s] | array.arr[s];
     return BitArray(newArr, length);
@@ -106,7 +106,7 @@ BitArray BitArray::operator|(const BitArray& array) const {
 
 BitArray BitArray::operator~() const {
     const size_t length = getLength();
-    auto newArr = reinterpret_cast<unsigned char*>(malloc(length * sizeof(unsigned char)));
+    auto newArr = new unsigned char[length];
     for (size_t s = 0; s < length; ++s)
         newArr[s] = ~arr[s];
     return BitArray(newArr, length);

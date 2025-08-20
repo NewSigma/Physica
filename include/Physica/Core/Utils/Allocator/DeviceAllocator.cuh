@@ -22,6 +22,7 @@
 #include <memory>
 #include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "HostAllocator.h"
 
 namespace Physica {
     namespace Internal {
@@ -65,7 +66,7 @@ namespace Physica {
     __host__ __device__ DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
         pointer p;
         if constexpr (IsDevice())
-            p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
+            p = HostAllocator<T>{}.allocate(n);
         else {
             if constexpr (CUDADevAttr::MemoryPoolsSupported)
                 cudaMallocAsync(&p, n * sizeof(value_type), CUDAContext::getInstance());
@@ -78,7 +79,7 @@ namespace Physica {
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
         if constexpr (IsDevice())
-            std::free(p);
+            HostAllocator<T>{}.deallocate(p, n);
         else {
             if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
                 if constexpr (CUDADevAttr::MemoryPoolsSupported)

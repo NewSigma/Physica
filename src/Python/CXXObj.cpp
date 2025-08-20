@@ -58,7 +58,7 @@ CXXObj::~CXXObj() {
     const auto pFunc = lookupFunc(clang::GlobalDecl(pDecl->getDestructor(), clang::CXXDtorType::Dtor_Base));
     auto* pDtor = reinterpret_cast<DtorType>(pFunc);
     pDtor(pObj);
-    std::free(pObj);
+    ::operator delete(pObj);
     pObj = nullptr;
 }
 
@@ -102,21 +102,17 @@ nanobind::object CXXObj::call(const char* rtnTyName, const char* name, nanobind:
 
     const size_t numArgs = args.size();
     Array<const ffi_type*> argTypes(numArgs + 1);
-    Array<void*> pArgs(numArgs + 1);
+    Array<typename CXXType::Ptr> pArgs(numArgs + 1);
     argTypes[0] = &ffi_type_pointer;
     pArgs[0] = &pObj;
     for (size_t i = 1; i <= numArgs; ++i) {
         const auto argType = pp.toCXXType(args[i]);
         argTypes[i] = argType.toFFI();
-        pArgs[i] = argType.allocate().release();
+        pArgs[i] = argType.allocate();
     }
     FuncInfo info(numArgs + 1, rtnType.toFFI(), argTypes.data());
     ffi_call(const_cast<ffi_cif*>(info.cif()), fn, pRtn.get(), reinterpret_cast<void**>(pArgs.data()));
-
-    auto result = rtnType.toPython(pRtn.get());
-    for (size_t i = 1; i <= numArgs; ++i)
-        std::free(pArgs[i]);
-    return result;
+    return rtnType.toPython(pRtn.get());
 }
 
 void* CXXObj::allocateObj(const CXXRecordDecl* pDecl) {
@@ -124,7 +120,7 @@ void* CXXObj::allocateObj(const CXXRecordDecl* pDecl) {
     auto& pp = PhysicaPython::getInstance();
     const auto& ctx = pp.getClang().getASTContext();
     const auto type = ctx.getRecordType(pDecl);
-    return std::aligned_alloc(ctx.getTypeAlign(type), ctx.getTypeSize(type));
+    return ::operator new(ctx.getTypeAlign(type), ctx.getTypeSize(type));
 }
 
 const CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams) {

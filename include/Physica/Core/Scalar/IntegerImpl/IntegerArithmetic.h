@@ -32,7 +32,7 @@ namespace Physica {
         const Integer* __restrict largeInt = i1.length > i2.length ? &i1 : &i2;
         const Integer* __restrict smallInt = i1.length > i2.length ? &i2 : &i1;
         int length = largeInt->length;
-        auto* __restrict byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+        auto* __restrict byte = new MPUnit[length];
         memcpy(byte, largeInt->byte, length * sizeof(MPUnit));
 
         bool carry = addArrWithArrEq(smallInt->byte, byte, smallInt->length);
@@ -65,7 +65,7 @@ namespace Physica {
             std::swap(largeInt, smallInt);
         }
         int length = largeInt->length;
-        auto* __restrict byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+        auto* __restrict byte = new MPUnit[length];
         memcpy(byte, largeInt->byte, length * sizeof(MPUnit));
 
         bool carry = subArrByArrEq(byte, smallInt->byte, smallInt->length);

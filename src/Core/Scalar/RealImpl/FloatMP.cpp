@@ -27,7 +27,7 @@ using namespace Physica;
 Real<FloatMP>::Real() : Real(GlobalPrecision, 0) {}
 
 Real<FloatMP>::Real(int length_, int power_)
-        : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
+        : byte(new MPUnit[std::abs(length_)])
         , length(length_)
         , power(power_) {
     assert(length != INT_MIN && "Length of scalar must not equal to INT_MIN or -length will make no sense");
@@ -43,7 +43,7 @@ Real<FloatMP>::Real(std::initializer_list<MPUnit> bytes_, int length_, int power
 }
 
 Real<FloatMP>::Real(SignedMPUnit x)
-        : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
+        : byte(new MPUnit[1])
         , length(x > 0 ? 1 : -1)
         , power(0) {
     byte[0] = x > 0 ? x : -x;
@@ -51,7 +51,7 @@ Real<FloatMP>::Real(SignedMPUnit x)
 
 Real<FloatMP>::Real(double d) noexcept {
     if (d == 0) {
-        byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+        byte = new MPUnit[1];
         length = 1;
         byte[0] = power = 0;
         return;
@@ -64,7 +64,7 @@ Real<FloatMP>::Real(double d) noexcept {
     if constexpr (PhysicaWordSize == 64) {
         if (remainder < 52) {
             length = 2;
-            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            byte = new MPUnit[length];
             // Hidden bit
             byte[1] = 1;
             byte[1] <<= remainder;
@@ -81,7 +81,7 @@ Real<FloatMP>::Real(double d) noexcept {
         }
         else {
             length = 1;
-            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+            byte = new MPUnit[1];
             // Hidden bit
             byte[0] = 1;
             byte[0] <<= 20U;
@@ -94,7 +94,7 @@ Real<FloatMP>::Real(double d) noexcept {
     else {
         if (remainder < 20) {
             length = 3;
-            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            byte = new MPUnit[length];
             // Hidden bit
             byte[2] = 1;
             byte[2] <<= remainder;
@@ -105,7 +105,7 @@ Real<FloatMP>::Real(double d) noexcept {
         }
         else {
             length = 2;
-            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            byte = new MPUnit[length];
             // Hidden bit
             byte[1] = 1;
             byte[1] <<= remainder;
@@ -120,7 +120,7 @@ Real<FloatMP>::Real(double d) noexcept {
 }
 
 Real<FloatMP>::Real(const Integer& i)
-        : byte(reinterpret_cast<MPUnit*>(malloc(i.getSize() * sizeof(MPUnit))))
+        : byte(new MPUnit[i.getSize()])
         , length(i.getLength())
         , power(i.getSize() - 1) {
     memcpy(byte, i.getByte(), getSize() * sizeof(MPUnit));
@@ -152,7 +152,7 @@ Real<FloatMP>::Real(const wchar_t* s) {
 }
 
 Real<FloatMP>::Real(const Real<FloatMP>& s)
-        : byte(reinterpret_cast<MPUnit*>(malloc(s.getSize() * sizeof(MPUnit))))
+        : byte(new MPUnit[s.getSize()])
         , length(s.length)
         , power(s.power) {
     memcpy(byte, s.byte, getSize() * sizeof(MPUnit));
@@ -164,7 +164,7 @@ Real<FloatMP>::Real(Real<FloatMP>&& s) noexcept
 }
 
 Real<FloatMP>::~Real() {
-    free(byte);
+    delete[] byte;
 }
 
 MPUnit Real<FloatMP>::operator[](unsigned int index) const {
@@ -460,7 +460,7 @@ Real<FloatMP> Real<FloatMP>::add(const Real<FloatMP>& s1, const Real<FloatMP>& s
     length = length > GlobalPrecision
                     ? GlobalPrecision
                     : length;
-    auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+    auto byte = new MPUnit[length];
     /* Init byte */ {
         const auto copySize = bigSize > length ? length : bigSize;
         const auto clearSize = length - copySize;
@@ -527,7 +527,7 @@ Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s
             length = length > GlobalPrecision
                            ? GlobalPrecision
                            : length;
-            auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            auto byte = new MPUnit[length];
             /* Init byte */ {
                 const auto copySize = bigSize > length ? length : bigSize;
                 const auto clearSize = length - copySize;
@@ -561,7 +561,7 @@ Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s
                 big = small;
                 small = temp;
                 changeSign = !changeSign;
-                free(byte);
+                delete[] byte;
                 goto redo;
             }
             Real<FloatMP> result(byte, changeSign ? -length : length, big->power);
@@ -597,7 +597,9 @@ Real<FloatMP> Real<FloatMP>::mul(const Real<FloatMP>& s1, const Real<FloatMP>& s
     const int size2 = s2.getSize();
     // Estimate the ed of result first. we will calculate it accurately later.
     auto length = size1 + size2;
-    auto byte = reinterpret_cast<MPUnit*>(calloc(length, sizeof(MPUnit)));
+    auto* byte = new MPUnit[length];
+    for (int i = 0; i < size2; ++i)
+        byte[i] = 0;
     for (int i = 0; i < size1; ++i)
         byte[i + size2] = mulAddArrByWord(byte + i, s2.byte, size2, s1.byte[i]);
     ///////////////////////////////////////Get byte, length and power//////////////////////////;
@@ -642,7 +644,7 @@ Real<FloatMP> Real<FloatMP>::div(const Real<FloatMP>& s1, const Real<FloatMP>& s
             ////////////////////////////////Calculate cursory first//////////////////////////////////////
             // Estimate the length of result.
             int length = GlobalPrecision;
-            auto byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+            auto byte = new MPUnit[length];
 
             for (int i = length - 1; i >= 0; --i) {
                 byte[i] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
@@ -671,9 +673,9 @@ bool Real<FloatMP>::cutLength(Real<FloatMP>& s) {
     if (size > GlobalPrecision) {
         result = true;
         int cutFrom = size - GlobalPrecision;
-        auto new_byte = reinterpret_cast<MPUnit*>(malloc(GlobalPrecision * sizeof(MPUnit)));
+        auto new_byte = new MPUnit[GlobalPrecision];
         memcpy(new_byte, s.byte + cutFrom, GlobalPrecision * sizeof(MPUnit));
-        free(s.byte);
+        delete[] s.byte;
         s.byte = new_byte;
         s.length = s.length > 0 ? GlobalPrecision : -GlobalPrecision;
     }

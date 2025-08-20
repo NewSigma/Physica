@@ -57,38 +57,29 @@ namespace Physica {
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
         void construct(T* p, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
         void destroy(T* p) noexcept;
+    private:
+        [[nodiscard]] static size_t calcSize(size_t n) noexcept;
     };
 
     template<class T, size_t Align>
     [[nodiscard]] T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
         assert(n > 0 && "[Error]: Allocate nothing");
-        size_t size = n * sizeof(T);
+        size_t size = calcSize(n);
         void* p;
-        if constexpr (OverAlign) {
-            size = (size + Align - 1) / Align * Align;
-        #ifdef _MSC_VER
-            p = _aligned_malloc(Align, size);
-        #else
-            p = std::aligned_alloc(Align, size);
-        #endif
-        }
+        if constexpr (OverAlign)
+            p = ::operator new(size, std::align_val_t(Align), std::nothrow_t{});
         else
-            p = std::malloc(size);
+            p = ::operator new(size);
         assert(p != nullptr);
         return reinterpret_cast<T*>(p);
     }
 
     template<class T, size_t Align>
-    void HostAllocator<T, Align>::deallocate(T* p, size_t) noexcept {
-        if constexpr (OverAlign) {
-        #ifdef _MSC_VER
-            _aligned_free(p);
-        #else
-            std::free(p);
-        #endif
-        }
+    void HostAllocator<T, Align>::deallocate(T* p, size_t n) noexcept {
+        if constexpr (OverAlign)
+            ::operator delete(p, std::align_val_t(Align));
         else
-            std::free(p);
+            ::operator delete(p);
     }
 
     template<class T, size_t Align>
@@ -117,6 +108,15 @@ namespace Physica {
     template<class T, size_t Align>
     void HostAllocator<T, Align>::destroy(T* p) noexcept {
         p->~T();
+    }
+
+    template<class T, size_t Align>
+    size_t HostAllocator<T, Align>::calcSize(size_t n) noexcept {
+        assert(n > 0 && "[Error]: Allocate nothing");
+        size_t size = n * sizeof(T);
+        if constexpr (OverAlign)
+            size = (size + Align - 1) / Align * Align;
+        return size;
     }
 }
 

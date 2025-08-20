@@ -28,9 +28,9 @@ namespace Physica {
         ffi_type ffiType;
 
         struct deleter {
-            void operator()(void* ptr) { std::free(ptr); }
+            void operator()(void* ptr) { ::operator delete(ptr); }
         };
-
+    public:
         using Ptr = std::unique_ptr<void, deleter>;
     public:
         CXXType() = default;
