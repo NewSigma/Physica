@@ -69,7 +69,7 @@ namespace Physica {
         if constexpr (OverAlign)
             p = ::operator new(size, std::align_val_t(Align), std::nothrow_t{});
         else
-            p = ::operator new(size);
+            p = ::operator new(size, std::nothrow_t{});
         assert(p != nullptr);
         return reinterpret_cast<T*>(p);
     }
