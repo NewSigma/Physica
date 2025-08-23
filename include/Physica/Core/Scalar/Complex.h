@@ -37,7 +37,6 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using typename Base::MachineType;
-        using MKL_Complex = std::conditional<T::Prec == Float32, MKL_Complex8, MKL_Complex16>::type;
 
         constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
     private:

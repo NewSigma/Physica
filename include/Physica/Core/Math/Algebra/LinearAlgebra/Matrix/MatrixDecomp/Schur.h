@@ -43,9 +43,10 @@ namespace Physica {
     private:
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
-        bool computeMatrixU;
+        bool computeMatrixU = false;
         T exshift;
     public:
+        Schur() = default;
         Schur(const Matrix auto& source, bool computeMatrixU_ = false);
         Schur(const This&) = default;
         Schur(This&&) noexcept = default;

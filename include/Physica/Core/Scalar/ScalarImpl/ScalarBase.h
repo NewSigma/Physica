@@ -76,6 +76,8 @@ namespace Physica {
         using device_obj_type = Derived;
 
         using GradType = Internal::GradTypeHelper<ScalarType, isDiffable ? 1 : 0>::Type;
+        using MKL_Complex = std::conditional<Prec == Float32, MKL_Complex8,
+                                                              typename std::conditional<Prec == Float64, MKL_Complex16, void>::type>::type;
     private:
         constexpr static bool isScalarRef = Internal::IsScalarRef<Derived>::value;
         static_assert(isDiffable == (Order > 0), "[Error]: DiffMode is not self consistent");
@@ -145,6 +147,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto isNegative() const noexcept;
         /* Static Members */
         static bool matchSign(const ScalarType& s1, const ScalarType& s2);
+        template<Scalar U>
+        consteval static void checkAssign();
+        consteval static void checkComplexCompare();
     protected:
         constexpr ScalarBase() = default;
         constexpr ScalarBase(const This&) = default;
@@ -152,10 +157,6 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        /* Static members */
-        template<Scalar U>
-        consteval static void checkAssign();
-        consteval static void checkComplexCompare();
     };
 
     template<class Derived>
