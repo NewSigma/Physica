@@ -47,7 +47,7 @@ nanobind::object CXXType::toPython(void* data) const {
 }
 
 auto CXXType::allocate() const noexcept -> Ptr {
-    return Ptr(::operator new(getAlign(), getSize()));
+    return Ptr(::operator new(getSize(), std::align_val_t(getAlign())));
 }
 
 void CXXType::swap(CXXType& __restrict obj) noexcept {

@@ -103,15 +103,17 @@ nanobind::object CXXObj::call(const char* rtnTyName, const char* name, nanobind:
     const size_t numArgs = args.size();
     Array<const ffi_type*> argTypes(numArgs + 1);
     Array<typename CXXType::Ptr> pArgs(numArgs + 1);
+    Array<void*> pRawArgs(numArgs + 1);
     argTypes[0] = &ffi_type_pointer;
-    pArgs[0] = &pObj;
+    pRawArgs[0] = pObj;
     for (size_t i = 1; i <= numArgs; ++i) {
         const auto argType = pp.toCXXType(args[i]);
         argTypes[i] = argType.toFFI();
         pArgs[i] = argType.allocate();
+        pRawArgs[i] = pArgs[i].get();
     }
     FuncInfo info(numArgs + 1, rtnType.toFFI(), argTypes.data());
-    ffi_call(const_cast<ffi_cif*>(info.cif()), fn, pRtn.get(), reinterpret_cast<void**>(pArgs.data()));
+    ffi_call(const_cast<ffi_cif*>(info.cif()), fn, pRtn.get(), pRawArgs.data());
     return rtnType.toPython(pRtn.get());
 }
 
@@ -120,7 +122,7 @@ void* CXXObj::allocateObj(const CXXRecordDecl* pDecl) {
     auto& pp = PhysicaPython::getInstance();
     const auto& ctx = pp.getClang().getASTContext();
     const auto type = ctx.getRecordType(pDecl);
-    return ::operator new(ctx.getTypeAlign(type), ctx.getTypeSize(type));
+    return ::operator new(ctx.getTypeSize(type), std::align_val_t(ctx.getTypeAlign(type)));
 }
 
 const CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams) {
