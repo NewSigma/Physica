@@ -23,7 +23,7 @@
 using namespace Physica;
 
 H5File::H5File(
-        const char* name,
+        const std::string& name,
         unsigned int openflag_,
         const H5::FileCreatPropList& create_plist,
         const H5::FileAccPropList& access_plist)
@@ -32,7 +32,7 @@ H5File::H5File(
 H5File::H5File(const H5File& obj)
         : Base(obj), openflag(obj.openflag) {}
 
-H5DataSet<1> H5File::createDataSet(const char* filepath, const char* name) {
+H5DataSet<1> H5File::createDataSet(const std::string& filepath, const std::string& name) {
     std::ifstream fin(filepath);
     if (!fin)
         throw IOException("[Error]: File not found");
@@ -48,7 +48,7 @@ H5DataSet<1> H5File::createDataSet(const char* filepath, const char* name) {
     return dataset;
 }
 
-H5Group H5File::openGroup(const char* name) {
+H5Group H5File::openGroup(const std::string& name) {
     if (Base::exists(name))
         return Base::openGroup(name);
     if (isReadOnly())
@@ -56,7 +56,7 @@ H5Group H5File::openGroup(const char* name) {
     return Base::createGroup(name, 0);
 }
 
-H5File H5File::open(const char* name) {
+H5File H5File::open(const std::string& name) {
     if (std::filesystem::exists(name))
         return H5File(name, ReadWrite);
     return create(name);

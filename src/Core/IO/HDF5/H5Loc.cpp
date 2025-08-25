@@ -20,11 +20,11 @@
 
 using namespace Physica;
 
-const H5Group H5Loc::openGroup(const char* name) const {
+const H5Group H5Loc::openGroup(const std::string& name) const {
     return getDerived().openGroup(name);
 }
 
-H5Group H5Loc::openGroup(const char* name) {
+H5Group H5Loc::openGroup(const std::string& name) {
     auto& loc = getDerived();
     if (loc.exists(name))
         return loc.openGroup(name);

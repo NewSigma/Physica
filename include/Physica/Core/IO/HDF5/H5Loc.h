@@ -27,11 +27,11 @@ namespace Physica {
     public:
         ~H5Loc() = default;
         /* Operations */
-        inline bool exists(const char *name, const H5::LinkAccPropList& lapl = H5::LinkAccPropList::DEFAULT) const;
+        inline bool exists(const std::string&name, const H5::LinkAccPropList& lapl = H5::LinkAccPropList::DEFAULT) const;
 
         template<size_t Dim>
         H5DataSet<Dim> createDataSet(
-                const char *name,
+                const std::string&name,
                 const H5::DataType& data_type,
                 const H5::DataSpace& data_space,
                 const H5::DSetCreatPropList& create_plist = H5::DSetCreatPropList::DEFAULT,
@@ -39,12 +39,12 @@ namespace Physica {
                 const H5::LinkCreatPropList& lcpl = H5::LinkCreatPropList::DEFAULT) const;
 
         template<size_t Dim>
-        [[nodiscard]] H5DataSet<Dim> openDataSet(const char* name);
+        [[nodiscard]] H5DataSet<Dim> openDataSet(const std::string& name);
         template<size_t Dim>
-        [[nodiscard]] const H5DataSet<Dim> openDataSet(const char* name) const;
+        [[nodiscard]] const H5DataSet<Dim> openDataSet(const std::string& name) const;
 
-        [[nodiscard]] const H5Group openGroup(const char* name) const;
-        [[nodiscard]] H5Group openGroup(const char* name);
+        [[nodiscard]] const H5Group openGroup(const std::string& name) const;
+        [[nodiscard]] H5Group openGroup(const std::string& name);
     protected:
         H5Loc() = default;
         H5Loc(const H5Loc&) = default;
@@ -57,13 +57,13 @@ namespace Physica {
         const auto& getDerived() const { return *reinterpret_cast<const H5::H5Location*>(this); }
     };
 
-    inline bool H5Loc::exists(const char *name, const H5::LinkAccPropList& lapl) const {
+    inline bool H5Loc::exists(const std::string&name, const H5::LinkAccPropList& lapl) const {
         return getDerived().exists(name, lapl);
     }
 
     template<size_t Dim>
     H5DataSet<Dim> H5Loc::createDataSet(
-            const char *name,
+            const std::string&name,
             const H5::DataType& data_type,
             const H5::DataSpace& data_space,
             const H5::DSetCreatPropList& create_plist,
@@ -73,14 +73,14 @@ namespace Physica {
     }
 
     template<size_t Dim>
-    H5DataSet<Dim> H5Loc::openDataSet(const char* name) {
+    H5DataSet<Dim> H5Loc::openDataSet(const std::string& name) {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
         return getDerived().openDataSet(name);
     }
 
     template<size_t Dim>
-    const H5DataSet<Dim> H5Loc::openDataSet(const char* name) const {
+    const H5DataSet<Dim> H5Loc::openDataSet(const std::string& name) const {
         if (!exists(name))
             throw IOException("[Error]: Dataset not found");
         return getDerived().openDataSet(name);

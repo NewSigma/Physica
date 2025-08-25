@@ -38,7 +38,7 @@ namespace Physica {
         unsigned int openflag;
     public:
         H5File() = default;
-        H5File(const char* name,
+        H5File(const std::string& name,
                unsigned int openflag_ = OpenFlag::ReadOnly,
                const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
                const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
@@ -53,13 +53,13 @@ namespace Physica {
         using Loc::createDataSet;
         using Loc::openDataSet;
         using Loc::openGroup;
-        [[nodiscard]] H5DataSet<1> createDataSet(const char* filepath, const char* name);
-        [[nodiscard]] H5Group openGroup(const char* name);
+        [[nodiscard]] H5DataSet<1> createDataSet(const std::string& filepath, const std::string& name);
+        [[nodiscard]] H5Group openGroup(const std::string& name);
         /* Getters */
         [[nodiscard]] unsigned int getOpenflag() const noexcept { return openflag; }
         [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
         /* Static members */
-        [[nodiscard]] static H5File create(const char* name) { return H5File(name, H5File::Creat | H5File::ReadWrite); }
-        [[nodiscard]] static H5File open(const char* name);
+        [[nodiscard]] static H5File create(const std::string& name) { return H5File(name, H5File::Creat | H5File::ReadWrite); }
+        [[nodiscard]] static H5File open(const std::string& name);
     };
 }

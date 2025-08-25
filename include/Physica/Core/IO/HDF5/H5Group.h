@@ -38,9 +38,9 @@ namespace Physica {
         using Location::openGroup;
 
         template<class T>
-        const H5::Attribute readAttr(const char* name, T& value) const;
+        const H5::Attribute readAttr(const std::string& name, T& value) const;
         template<class T>
-        H5::Attribute writeAttr(const char* name, T value);
+        H5::Attribute writeAttr(const std::string& name, T value);
     private:
         using Base::createDataSet;
         using Base::openDataSet;
@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<class T>
-    const H5::Attribute H5Group::readAttr(const char* name, T& value) const {
+    const H5::Attribute H5Group::readAttr(const std::string& name, T& value) const {
         constexpr bool IsArray = std::is_array<T>::value;
         constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
         static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
@@ -58,16 +58,16 @@ namespace Physica {
         const auto type = getPredType<T>();
         const auto space = H5DataSpace<1>(NumElem);
         H5::Attribute attr;
-        if (Base::attrExists(name))
-            attr = Base::openAttribute(name);
+        if (Base::attrExists(name.c_str()))
+            attr = Base::openAttribute(name.c_str());
         else
-            attr = Base::createAttribute(name, type, space);
+            attr = Base::createAttribute(name.c_str(), type, space);
         attr.read(type, &value);
         return attr;
     }
 
     template<class T>
-    H5::Attribute H5Group::writeAttr(const char* name, T value) {
+    H5::Attribute H5Group::writeAttr(const std::string& name, T value) {
         constexpr bool IsArray = std::is_array<T>::value;
         constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
         static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
@@ -76,10 +76,10 @@ namespace Physica {
         const auto type = getPredType<T>();
         const auto space = H5DataSpace<1>(NumElem);
         H5::Attribute attr;
-        if (Base::attrExists(name))
-            attr = Base::openAttribute(name);
+        if (Base::attrExists(name.c_str()))
+            attr = Base::openAttribute(name.c_str());
         else
-            attr = Base::createAttribute(name, type, space);
+            attr = Base::createAttribute(name.c_str(), type, space);
         attr.write(type, &value);
         return attr;
     }

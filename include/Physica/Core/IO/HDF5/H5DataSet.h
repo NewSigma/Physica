@@ -41,7 +41,7 @@ namespace Physica {
         using Base::operator=;
         /* Operations */
         void readStr(char* buffer) const;
-        void toFile(const char* path) const;
+        void toFile(const std::string& path) const;
         /* Getters */
         [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept { return H5DataSpace<Dim>(Base::getSpace()); }
         [[nodiscard]] size_t getDim() const noexcept;
@@ -74,7 +74,7 @@ namespace Physica {
     }
 
     template<size_t Dim>
-    void H5DataSet<Dim>::toFile(const char* path) const {
+    void H5DataSet<Dim>::toFile(const std::string& path) const {
         std::ofstream fout(path);
         const auto size = getDataSpace().getSize(0);
         auto buffer = Array<char>(size);
