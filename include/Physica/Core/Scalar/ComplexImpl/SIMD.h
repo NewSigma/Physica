@@ -26,18 +26,18 @@ namespace Physica {
         using RealPacket = BestPacket<T, Length * 2>;
         using ScalarType = Complex<T>;
     public:
-        constexpr static size_t Size = RealPacket::Size / 2;
+        constexpr static int Size = RealPacket::Size / 2;
         using Type = std::conditional<Size <= 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
     template<Scalar T, size_t Length>
     class device_obj<BestPacket<Complex<T>, Length>> {
     public:
-        constexpr static size_t Size = 1;
+        constexpr static int Size = 1;
         using Type = Complex<T>;
     };
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     class SIMD<Complex<T>, Size> : public SIMDBase<SIMD<Complex<T>, Size>>, private SIMD<T, Size * 2> {
         using ScalarType = Complex<T>;
         using This = SIMD<ScalarType, Size>;
@@ -108,7 +108,7 @@ namespace Physica {
         [[nodiscard]] static SIMD asComplex(FullRealType reals);
     };
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> mul_add(
             const SIMD<Complex<T>, Size>& a,
             const SIMD<Complex<T>, Size>& b,
@@ -116,7 +116,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, size_t S>
+    template<Scalar T, int S>
     class Traits<SIMD<Complex<T>, S>> {
     public:
         constexpr static int Size = S;

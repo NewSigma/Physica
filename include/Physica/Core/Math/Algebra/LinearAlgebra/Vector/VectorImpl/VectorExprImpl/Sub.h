@@ -21,29 +21,29 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<class T, class U>
-    class VectorExpr<ExprType::Sub, T, U>
-            : public BinaryVectorExpr<ExprType::Sub, T, U> {
-        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either type should be Scalar");
+    template<class T1, class T2>
+    class VectorExpr<ExprType::Sub, T1, T2>
+            : public BinaryVectorExpr<ExprType::Sub, T1, T2> {
+        static_assert(Scalar<T1> || Scalar<T2>, "[Error]: Either type should be Scalar");
 
-        using Base = BinaryVectorExpr<ExprType::Sub, T, U>;
+        using Base = BinaryVectorExpr<ExprType::Sub, T1, T2>;
     public:
-        using typename Base::ScalarType;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
-            if constexpr (Vector<T>)
+        [[nodiscard]] CoDiff<T> calc(size_t s) const {
+            if constexpr (Vector<T1>)
                 return Base::getLHS().calc(s) - Base::getRHS();
             else
                 return Base::getLHS() - Base::getRHS().calc(s);
         }
 
         [[nodiscard]] Tv calc_value(size_t s) const {
-            if constexpr (Vector<T>)
+            if constexpr (Vector<T1>)
                 return Base::getLHS().calc_value(s) - Base::getRHS().value();
             else
                 return Base::getLHS().value() - Base::getRHS().calc_value(s);
@@ -51,7 +51,7 @@ namespace Physica {
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
-            if constexpr (Vector<T>)
+            if constexpr (Vector<T1>)
                 return Base::getLHS().template packet<Pack>(index) - Pack(Base::getRHS());
             else
                 return Pack(Base::getLHS()) - Base::getRHS().template packet<Pack>(index);
@@ -59,7 +59,7 @@ namespace Physica {
 
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            if constexpr (Vector<T>)
+            if constexpr (Vector<T1>)
                 return Base::getLHS().template packetPartial<Pack>(index, count) - Pack(Base::getRHS(), count);
             else
                 return Pack(Base::getLHS(), count) - Base::getRHS().template packetPartial<Pack>(index, count);
@@ -68,38 +68,38 @@ namespace Physica {
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
     };
 
-    template<class T, class U>
-    void VectorExpr<ExprType::Sub, T, U>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+    template<class T1, class T2>
+    void VectorExpr<ExprType::Sub, T1, T2>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
         const auto& lhs = Base::getLHS();
         const auto& rhs = Base::getRHS();
         if constexpr (Scalar<decltype(grad)>) {
             const auto& g = grad.value();
-            if constexpr (Vector<T>) {
-                if constexpr (ReverseDiff<T>)
+            if constexpr (Vector<T1>) {
+                if constexpr (ReverseDiff<T1>)
                     lhs.reverse(g);
-                if constexpr (ReverseDiff<U>)
+                if constexpr (ReverseDiff<T2>)
                     rhs.reverse(-g * Tv(Base::getLength()));
             }
             else {
-                if constexpr (ReverseDiff<T>)
+                if constexpr (ReverseDiff<T1>)
                     lhs.reverse(g * Tv(Base::getLength()));
-                if constexpr (ReverseDiff<U>)
+                if constexpr (ReverseDiff<T2>)
                     rhs.reverse(-g);
             }
         }
         else {
             static_assert(Vector<decltype(grad)>, "[Error]: Unexpected type");
             const auto& g = grad.values();
-            if constexpr (Vector<T>) {
-                if constexpr (ReverseDiff<T>)
+            if constexpr (Vector<T1>) {
+                if constexpr (ReverseDiff<T1>)
                     lhs.reverse(g);
-                if constexpr (ReverseDiff<U>)
+                if constexpr (ReverseDiff<T2>)
                     rhs.reverse(-g.sum());
             }
             else {
-                if constexpr (ReverseDiff<T>)
+                if constexpr (ReverseDiff<T1>)
                     lhs.reverse(g.sum());
-                if constexpr (ReverseDiff<U>)
+                if constexpr (ReverseDiff<T2>)
                     rhs.reverse(-g);
             }
         }
@@ -110,9 +110,9 @@ namespace Physica {
             : public BinaryVectorExpr<ExprType::Sub, V1, V2> {
         using Base = BinaryVectorExpr<ExprType::Sub, V1, V2>;
     public:
-        using typename Base::ScalarType;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
     public:
         using Base::Base;
@@ -120,7 +120,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& v) const;
 
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
+        [[nodiscard]] CoDiff<T> calc(size_t s) const {
             return getLHS().calc(s) - getRHS().calc(s);
         }
 

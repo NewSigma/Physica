@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/Diff.h"
 
 namespace Physica {
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto abs(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
@@ -29,7 +29,7 @@ namespace Physica {
         return ResultType(abs(x.value()), GradPacket::select(x.value().isPositive(), x.grad(), -x.grad()));
     }
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto square(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
@@ -37,7 +37,7 @@ namespace Physica {
         return ResultType(square(x.value()), GradPacket(x) * x.grad() * T(2));
     }
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto reciprocal(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
@@ -46,7 +46,7 @@ namespace Physica {
         return ResultType(y.value(), -x.grad() * square(y));
     }
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto ln(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
@@ -54,7 +54,7 @@ namespace Physica {
         return ResultType(ln(x.value()), x.grad() / GradPacket(x));
     }
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto ln1p(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
@@ -62,7 +62,7 @@ namespace Physica {
         return ResultType(ln1p(x.value()), x.grad() / (GradPacket(1) + GradPacket(x)));
     }
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto exp(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
@@ -71,7 +71,7 @@ namespace Physica {
         return ResultType(y.value(), y * x.grad());
     }
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto tanh(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
@@ -80,7 +80,7 @@ namespace Physica {
         return ResultType(y.value(), (GradPacket(1) - square(y)) * x.grad());
     }
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto lncosh(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;

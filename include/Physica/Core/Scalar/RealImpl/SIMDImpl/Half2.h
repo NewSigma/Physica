@@ -42,7 +42,7 @@ namespace Physica {
     template<size_t Length>
     class BestPacket<float16, Length> {
     public:
-        constexpr static size_t Size = Length == 1 ? 1 : 2;
+        constexpr static int Size = Length == 1 ? 1 : 2;
         using Type = std::conditional<Length == 1, float16, SIMD<float16, 2>>::type;
     };
 
@@ -51,7 +51,7 @@ namespace Physica {
 
     template<>
     class SIMD<Real<Float16>, 2> : public SIMDBase<SIMD<Real<Float16>, 2>>, private __half2 {
-        constexpr static size_t Size = 2;
+        constexpr static int Size = 2;
         using This = SIMD<float16, Size>;
         using Base = __half2;
     public:

@@ -29,14 +29,14 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        constexpr static size_t Size1 = SizeAtCompile;
-        constexpr static size_t Size2 = V::SizeAtCompile;
+        constexpr static size_t Length1 = SizeAtCompile;
+        constexpr static size_t Length2 = V::SizeAtCompile;
         assign_check(v);
 
-        assert(getLength() == v.getLength() && "[Error]: Size mismatch between two vector");
+        assert(getLength() == v.getLength() && "[Error]: Length mismatch between two vector");
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
-            constexpr static size_t Size = Size1 > Size2 ? Size1 : Size2;
-            assign_simd<V, P, Size>(v);
+            constexpr static size_t Length = Length1 > Length2 ? Length1 : Length2;
+            assign_simd<V, P, Length>(v);
         }
         else
             assign_for<V, P>(v);
@@ -46,14 +46,14 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_add(Vector auto& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        constexpr static size_t Size1 = SizeAtCompile;
-        constexpr static size_t Size2 = V::SizeAtCompile;
+        constexpr static size_t Length1 = SizeAtCompile;
+        constexpr static size_t Length2 = V::SizeAtCompile;
         assign_check(v);
 
-        assert(getLength() == v.getLength() && "[Error]: Size mismatch between two vector");
+        assert(getLength() == v.getLength() && "[Error]: Length mismatch between two vector");
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
-            constexpr static size_t Size = Size1 > Size2 ? Size1 : Size2;
-            assign_add_simd<V, Size>(v);
+            constexpr static size_t Length = Length1 > Length2 ? Length1 : Length2;
+            assign_add_simd<V, Length>(v);
         }
         else
             assign_add_for<V, P>(v);
@@ -662,19 +662,19 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P, size_t Size>
+    template<Vector V, ExecutePolicy P, size_t Length>
     void RValueVector<Derived>::assign_simd(V& v) const noexcept {
-        using Pack = BestPacket<typename V::ScalarType, Size>::Type;
+        using Pack = BestPacket<typename V::ScalarType, Length>::Type;
         constexpr static size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();
-        if constexpr (Size != Dynamic) {
-            constexpr size_t to = Size / PacketSize * PacketSize;
+        if constexpr (Length != Dynamic) {
+            constexpr size_t to = Length / PacketSize * PacketSize;
             for (size_t i = 0; i < to; i += PacketSize)
                 v.writePacket(i, v0.template packet<Pack>(i));
             
-            constexpr size_t i = Size - Size % PacketSize;
-            if constexpr (i != Size) {
-                constexpr size_t count = Size - i;
+            constexpr size_t i = Length - Length % PacketSize;
+            if constexpr (i != Length) {
+                constexpr size_t count = Length - i;
                 v.writePacketPartial(i, count, v0.template packetPartial<Pack>(i, count));
             }
         }
@@ -722,21 +722,21 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, size_t Size>
+    template<Vector V, size_t Length>
     void RValueVector<Derived>::assign_add_simd(V& v) const noexcept {
-        using Pack = BestPacket<typename V::ScalarType, Size>::Type;
+        using Pack = BestPacket<typename V::ScalarType, Length>::Type;
         constexpr static size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();
-        if constexpr (Size != Dynamic) {
-            constexpr size_t to = Size / PacketSize * PacketSize;
+        if constexpr (Length != Dynamic) {
+            constexpr size_t to = Length / PacketSize * PacketSize;
             for (size_t i = 0; i < to; i += PacketSize) {
                 const Pack sum = v.template packet<Pack>(i) + v0.template packet<Pack>(i);
                 v.writePacket(i, sum);
             }
 
-            constexpr size_t i = Size - Size % PacketSize;
-            if constexpr (i != Size) {
-                constexpr size_t count = Size - i;
+            constexpr size_t i = Length - Length % PacketSize;
+            if constexpr (i != Length) {
+                constexpr size_t count = Length - i;
                 const Pack sum = v.template packetPartial<Pack>(i, count) + v0.template packetPartial<Pack>(i, count);
                 v.writePacketPartial(i, count, sum);
             }

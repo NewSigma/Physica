@@ -22,7 +22,7 @@
 
 namespace Physica {
     namespace Internal {
-        template<Matrix SourceType, Matrix TargetType, size_t Size>
+        template<Matrix SourceType, Matrix TargetType, size_t Order>
         struct InverseImpl {
             static void run(const SourceType& source, TargetType& target) {
                 const ssize_t order = source.getRow();
@@ -173,8 +173,8 @@ namespace Physica {
     template<Matrix M>
     void Inverse<M>::assign(Matrix auto& target) const {
         using M1 = std::remove_cvref_t<decltype(target)>;
-        constexpr size_t Size = M::RowAtCompile == Dynamic ? M1::RowAtCompile : M::RowAtCompile;
-        Internal::InverseImpl<M, M1, Size>::run(mat, target);
+        constexpr size_t Order = M::RowAtCompile == Dynamic ? M1::RowAtCompile : M::RowAtCompile;
+        Internal::InverseImpl<M, M1, Order>::run(mat, target);
     }
 }
 

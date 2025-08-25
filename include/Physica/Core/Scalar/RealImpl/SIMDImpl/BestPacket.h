@@ -47,14 +47,14 @@ namespace Physica {
         constexpr static size_t BiggestSize2 = support256 ? size256 : BiggestSize1;
         constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
     public:
-        constexpr static size_t Size = isFloatMP ? 1 : (isDynamic ? BiggestSize : Size3);
+        constexpr static int Size = isFloatMP ? 1 : (isDynamic ? BiggestSize : Size3);
         using Type = std::conditional<Size == 1, T, SIMD<T, Size>>::type;
     };
 
     template<Scalar T, size_t Length>
     class device_obj<BestPacket<T, Length>> {
     public:
-        constexpr static size_t Size = 1;
+        constexpr static int Size = 1;
         using Type = T;
     };
 }

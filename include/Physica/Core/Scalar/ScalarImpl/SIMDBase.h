@@ -28,7 +28,6 @@ namespace Physica {
         using Base = CRTPBase<This>;
         using TraitsType = Traits<Derived>;
     public:
-        constexpr static int Size = TraitsType::Size;
         constexpr static bool isSeparatable = TraitsType::isSeparatable;
 
         using ScalarType = TraitsType::ScalarType;
@@ -49,7 +48,7 @@ namespace Physica {
         [[nodiscard]] FullRealType permRealImag() const noexcept;
         [[nodiscard]] FullRealType scatterRealImag() const noexcept;
         /* Getters */
-        [[nodiscard]] constexpr static int size() { return Size; }
+        [[nodiscard]] constexpr static int size() noexcept { return TraitsType::Size; }
         [[nodiscard]] ValueType value() const;
         [[nodiscard]] FullRealType asReal() const;
     protected:
@@ -76,7 +75,7 @@ namespace Physica {
         if constexpr (ScalarType::Prec == Float32)
             return x.template shuffle<1, 0, 3, 2>();
         else {
-            constexpr int Size1 = isComplex ? Size * 2 : Size;
+            constexpr int Size1 = isComplex ? size() * 2 : size();
             if constexpr (Size1 == 2)
                 return x.template shuffle<1, 0>();
             else if constexpr (Size1 == 4)
@@ -91,7 +90,7 @@ namespace Physica {
     template<class Derived>
     auto SIMDBase<Derived>::permRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
-        constexpr int Size1 = isComplex ? Size * 2 : Size;
+        constexpr int Size1 = isComplex ? size() * 2 : size();
         if constexpr (Size1 == 2)
             return x;
         if constexpr (Size1 == 4)
@@ -99,7 +98,7 @@ namespace Physica {
         else if constexpr (Size1 == 8)
             return x.template permute<0, 2, 4, 6, 1, 3, 5, 7>();
         else {
-            static_assert(Size == 16, "[Error]: Unexpected size");
+            static_assert(size() == 16, "[Error]: Unexpected size");
             return x.template permute<0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15>();
         }
     }
@@ -107,7 +106,7 @@ namespace Physica {
     template<class Derived>
     auto SIMDBase<Derived>::scatterRealImag() const noexcept -> FullRealType {
         const auto x = asReal();
-        constexpr int Size1 = isComplex ? Size * 2 : Size;
+        constexpr int Size1 = isComplex ? size() * 2 : size();
         if constexpr (Size1 == 2)
             return x;
         if constexpr (Size1 == 4)
@@ -115,7 +114,7 @@ namespace Physica {
         else if constexpr (Size1 == 8)
             return x.template permute<0, 4, 1, 5, 2, 6, 3, 7>();
         else {
-            static_assert(Size == 16, "[Error]: Unexpected size");
+            static_assert(size() == 16, "[Error]: Unexpected size");
             return x.template permute<0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15>();
         }
     }

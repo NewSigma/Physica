@@ -25,14 +25,14 @@ namespace Physica {
     class BestPacket<Diff<T, Mode, Order>, Length> {
         using ScalarType = Diff<T, Mode, Order>;
     public:
-        constexpr static size_t Size = BestPacket<T, Length>::Size;
+        constexpr static int Size = BestPacket<T, Length>::Size;
         using Type = std::conditional<Size <= 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length>
     class device_obj<BestPacket<Diff<T, Mode, Order>, Length>> {
     public:
-        constexpr static size_t Size = 1;
+        constexpr static int Size = 1;
         using Type = Diff<T, Mode, Order>;
     };
 
@@ -40,11 +40,11 @@ namespace Physica {
     class device_obj<BestPacket<Diff<float16, Mode, Order>, Length>> {
         using ScalarType = std::conditional<Mode == DiffMode::Forward, Diff<float16, Mode, Order>, float16>::type;
     public:
-        constexpr static size_t Size = Length == 1 ? 1 : 2;
+        constexpr static int Size = Length == 1 ? 1 : 2;
         using Type = SIMD<ScalarType, Size>;
     };
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     class SIMD<Diff<T, Mode, Order>, Size> : public SIMDBase<SIMD<Diff<T, Mode, Order>, Size>> {
         using This = SIMD<Diff<T, Mode, Order>, Size>;
         using Base = SIMDBase<This>;
@@ -122,7 +122,7 @@ namespace Physica {
         [[nodiscard]] static SIMD asComplex(const FullRealType& reals);
     };
 
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto mul_add(
             const SIMD<Diff<T, Mode, Order>, Size>& a,
             const SIMD<Diff<T, Mode, Order>, Size>& b,
@@ -130,7 +130,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     class Traits<SIMD<Diff<T, Mode, Order>, Size>> : public Traits<SIMD<T, Size>> {
     public:
         using ScalarType = Diff<T, Mode, Order>;

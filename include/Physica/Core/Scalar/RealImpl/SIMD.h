@@ -31,9 +31,9 @@
 #include "Physica/PlainStruct.h"
 
 namespace Physica {
-    template<Scalar T, size_t Size> class BoolSIMD;
+    template<Scalar T, int Size> class BoolSIMD;
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     class SIMD : public SIMDBase<SIMD<T, Size>> {
         constexpr static bool isFloat32 = T::Prec == Float32;
         constexpr static bool isForward = T::isForwardDiff;
@@ -126,30 +126,30 @@ namespace Physica {
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);
     };
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size>& packet) {
         return packet * scalar;
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size> mul_add(
             const SIMD<T, Size>& a,
             const SIMD<T, Size>& b,
             const SIMD<T, Size>& c) noexcept;
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size> nmul_add(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept;
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size> mul_sub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept;
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size> mul_addsub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
@@ -157,7 +157,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, size_t S>
+    template<Scalar T, int S>
     class Traits<SIMD<T, S>> {
     public:
         constexpr static int Size = S;
@@ -201,7 +201,7 @@ namespace Physica {
 namespace std {
 #define PacketType Physica::SIMD<T, Size>
 
-    template<Physica::Scalar T, size_t Size>
+    template<Physica::Scalar T, int Size>
     PacketType max(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
@@ -213,7 +213,7 @@ namespace std {
             return Physica::max(a.toMachine(), b.toMachine());
     }
 
-    template<Physica::Scalar T, size_t Size>
+    template<Physica::Scalar T, int Size>
     PacketType min(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
@@ -225,7 +225,7 @@ namespace std {
             return Physica::min(a.toMachine(), b.toMachine());
     }
 
-    template<Physica::Scalar T, size_t Size>
+    template<Physica::Scalar T, int Size>
     struct formatter<PacketType, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
             return ctx.begin();

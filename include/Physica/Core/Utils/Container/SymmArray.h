@@ -158,14 +158,14 @@ namespace Physica {
 namespace Physica {
     template<class T, size_t Order>
     class Traits<SymmArray<T, Order>> {
-        template<bool, size_t Size>
+        template<bool, size_t Length>
         struct Helper {
-            using Type = DenseVector<T, Size>;
+            using Type = DenseVector<T, Length>;
         };
 
-        template<size_t Size>
-        struct Helper<false, Size> {
-            using Type = Array<T, Size>;
+        template<size_t Length>
+        struct Helper<false, Length> {
+            using Type = Array<T, Length>;
         };
 
         constexpr static bool IsScalar = Scalar<T>;

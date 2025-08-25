@@ -25,12 +25,12 @@ namespace Physica {
     class VectorExpr<ExprType::More, T1, T2>
             : public BinaryVectorExpr<ExprType::More, T1, T2> {
         using Base = BinaryVectorExpr<ExprType::More, T1, T2>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(getLHS().calc(s) > getRHS().calc(s)); }
+        [[nodiscard]] T calc(size_t s) const { return T(getLHS().calc(s) > getRHS().calc(s)); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -50,12 +50,12 @@ namespace Physica {
     class VectorExpr<ExprType::More, T, U>
             : public BinaryVectorExpr<ExprType::More, T, U> {
         using Base = BinaryVectorExpr<ExprType::More, T, U>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(getLHS().calc(s) > getRHS()); }
+        [[nodiscard]] T calc(size_t s) const { return T(getLHS().calc(s) > getRHS()); }
 
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const {
@@ -71,9 +71,9 @@ namespace Physica {
         using Base::getRHS;
     };
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] auto operator>(T&& v, U&& x) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::More, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
+    template<Vector V, Scalar U>
+    [[nodiscard]] auto operator>(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::More, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Vector T1, Vector T2>

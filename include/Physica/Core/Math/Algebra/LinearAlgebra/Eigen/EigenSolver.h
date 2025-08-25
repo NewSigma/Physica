@@ -249,8 +249,8 @@ namespace Physica {
                     auto fromCol1 = rawEigenvectors.col(i);
                     auto fromCol2 = rawEigenvectors.col(i + 1);
                     for (size_t j = 0; j < order; ++j) {
-                        toCol1[j] = Tc(fromCol1[j].real(), fromCol2[j].real());
-                        toCol2[j] = Tc(fromCol1[j].real(), -fromCol2[j].real());
+                        toCol1[j] = Tc(fromCol1[j].real().value(), fromCol2[j].real().value());
+                        toCol2[j] = Tc(fromCol1[j].real().value(), -fromCol2[j].real().value());
                     }
                     toCol1.toUnit();
                     toCol2.toUnit();

@@ -21,7 +21,7 @@
 #include "Physica/Core/Scalar/ComplexImpl/SIMD.h"
 
 namespace Physica {
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size>& x) noexcept {
         return sqrt(x.squaredNorm());
     }
@@ -29,7 +29,7 @@ namespace Physica {
      * References:
      * [1] add-on; https://github.com/vectorclass/add-on
      */
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x) noexcept {
         using RealPack = SIMD<T, Size * 2>;
         const RealPack x1 = x.asReal();
@@ -82,7 +82,7 @@ namespace Physica {
         return SIMD<Complex<T>, Size>::asComplex(result);
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> exp(const SIMD<Complex<T>, Size>& x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         using RealType = ResultType::RealType;
@@ -108,7 +108,7 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> ln(const SIMD<Complex<T>, Size>& x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         using RealType = ResultType::RealType;
@@ -146,12 +146,12 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> ln1p(const SIMD<Complex<T>, Size>& x) noexcept {
         return ln(T(1) + x);
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size>& x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         Complex<T> arr[Size];
@@ -162,7 +162,7 @@ namespace Physica {
         return result;
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<Complex<T>, Size> lncosh(const SIMD<Complex<T>, Size>& x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         using RealType = ResultType::RealType;

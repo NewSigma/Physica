@@ -58,12 +58,12 @@ namespace Physica {
     class device_obj<VectorExpr<ExprType::Mul, T1, T2>>
             : public device_obj<BinaryVectorExpr<ExprType::Mul, T1, T2>> {
         using Base = device_obj<BinaryVectorExpr<ExprType::Mul, T1, T2>>;
-    public:
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+        [[nodiscard]] __device__ T calc(size_t index) const {
             return Base::getLHS().calc(index) * Base::getRHS().calc(index);
         }
 

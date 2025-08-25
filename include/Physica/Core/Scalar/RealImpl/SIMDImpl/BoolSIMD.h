@@ -19,7 +19,7 @@
 #pragma once
 
 namespace Physica {
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     class BoolSIMD : private Traits<BoolSIMD<T, Size>>::BaseType {
         using This = BoolSIMD<T, Size>;
     public:
@@ -43,12 +43,12 @@ namespace Physica {
         [[nodiscard]] const Base& toMachine() const noexcept { return *this; }
     };
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     bool BoolSIMD<T, Size>::horizontal_and() const {
         return Physica::horizontal_and(toMachine());
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     bool BoolSIMD<T, Size>::horizontal_or() const {
         return Physica::horizontal_or(toMachine());
     }
@@ -77,7 +77,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     class Traits<BoolSIMD<T, Size>> {
     public:
         using ScalarType = T;

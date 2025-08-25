@@ -21,13 +21,13 @@
 #include "Physica/Core/Scalar/ComplexImpl/SIMD.h"
 
 namespace Physica {
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::SIMD(int x) : SIMD(ScalarType(x)) {}
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::SIMD(double x) : SIMD(ScalarType(x)) {}
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::SIMD(ScalarType x) {
         if constexpr (isSeparatable) {
             using Half = SIMD<Complex<T>, Size / 2>;
@@ -42,22 +42,22 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::SIMD(ScalarType x, int count) : SIMD(x) {
         cutoff(count);
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::operator[](int index) const {
         return ScalarType(FullRealType::operator[](2 * index), FullRealType::operator[](2 * index + 1));
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator+(const SIMD& other) const {
         return asComplex(FullRealType::operator+(other));
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-(const SIMD& other) const {
         return asComplex(FullRealType::operator-(other));
     }
@@ -65,18 +65,18 @@ namespace Physica {
      * Reference:
      * [1] vectorclass add-on; https://github.com/vectorclass/add-on
      */
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const SIMD& other) const {
         const auto pair = makeFullRealImag();
         return asComplex(mul_addsub(pair.first, other.asReal(), pair.second * other.swapRealImag()));
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const ScalarType& x) const {
         return operator*(SIMD(x));
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const T& x) const {
         return asComplex(FullRealType::operator*(x));
     }
@@ -84,7 +84,7 @@ namespace Physica {
      * Reference:
      * [1] vectorclass add-on; https://github.com/vectorclass/add-on
      */
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator/(const SIMD& other) const {
         const auto pair = makeFullRealImag();
         const T factor = reciprocal(abs(other.asReal()).max()); // Avoid underflow
@@ -92,39 +92,39 @@ namespace Physica {
         return asComplex(mul_addsub(pair.second, normed.swapRealImag(), -pair.first * normed.asReal()) / normed.squaredNorm() * factor);
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-() const {
         return asComplex(FullRealType::operator-());
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     void SIMD<Complex<T>, Size>::load(const ScalarType* p) {
         FullRealType::load(reinterpret_cast<const T*>(p));
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     void SIMD<Complex<T>, Size>::load_partial(const ScalarType* p, int n) {
         FullRealType::load_partial(reinterpret_cast<const T*>(p), 2 * n);
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     void SIMD<Complex<T>, Size>::store(ScalarType* p) const {
         FullRealType::store(reinterpret_cast<T*>(p));
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     void SIMD<Complex<T>, Size>::store_partial(ScalarType* p, int n) const {
         FullRealType::store_partial(reinterpret_cast<T*>(p), 2 * n);
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>& SIMD<Complex<T>, Size>::cutoff(int count) {
         assert(0 < count && count < int(Size) && "[Error]: Invalid count");
         RealBase::cutoff(2 * count);
         return *this;
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::FullRealPair SIMD<Complex<T>, Size>::makeFullRealImag() const noexcept {
         FullRealType re, im;
         if constexpr (T::Prec == Float32) {
@@ -149,7 +149,7 @@ namespace Physica {
         return std::make_pair(std::move(re), std::move(im));
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::sum() const {
         if constexpr (isSeparatable)
             return getHigh().sum() + getLow().sum();
@@ -161,7 +161,7 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::real() const noexcept {
         if constexpr (isSeparatable)
             return permRealImag().getLow();
@@ -174,7 +174,7 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::imag() const noexcept {
         if constexpr (isSeparatable)
             return permRealImag().getHigh();
@@ -187,14 +187,14 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::asComplex(FullRealType reals) {
         This result{};
         static_cast<FullRealType&>(result) = std::move(reals);
         return result;
     }
 
-    template<Scalar T, size_t Size>
+    template<Scalar T, int Size>
     SIMD<Complex<T>, Size> mul_add(
             const SIMD<Complex<T>, Size>& a,
             const SIMD<Complex<T>, Size>& b,
