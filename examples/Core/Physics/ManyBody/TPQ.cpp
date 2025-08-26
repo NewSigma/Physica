@@ -123,6 +123,7 @@ void plotAll() {
 
     Plot* plot = new Plot(0, 4, 0.5, 1.05, 1, 0.2);
     plot->getLegend().setAlignment(Qt::AlignRight);
+    plot->getLegend().show();
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     axisX->setTitleText("&beta;");
