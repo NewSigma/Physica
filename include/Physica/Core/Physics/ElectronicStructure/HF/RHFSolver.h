@@ -108,7 +108,7 @@ namespace Physica {
             , baseSet(baseSetSize)
             , selfConsistentEnergy()
             , wave(MatrixND::zeros(baseSetSize, electronConfig.getNumOccupiedOrbit()))
-            , eigenSolver(baseSetSize)
+            , eigenSolver(baseSetSize, true)
             , iteration(0) {
         assert(numOccupiedOrbit <= baseSetSize);
     }
@@ -158,7 +158,7 @@ namespace Physica {
                 fock = *fockMatrices.crbegin();
 
             const MatrixND modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
-            eigenSolver.compute(modifiedFock, true);
+            eigenSolver.compute(modifiedFock);
             eigenSolver.sort();
 
             updateWaves(inv_cholesky);

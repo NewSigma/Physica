@@ -23,17 +23,17 @@
 
 namespace Physica {
     template<Scalar T, size_t Order>
-    void EigenSolver<T, Order>::compute_mkl(const Matrix auto& source, bool computeEigenvectors_) {
+    void EigenSolver<T, Order>::compute_mkl(const Matrix auto& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         constexpr int Major = MatrixOption::isColMatrix<decltype(source)>() ? MatrixOption::Col : MatrixOption::Row;
         constexpr int Layout = Major == MatrixOption::Col ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
-        using WorkingMatrixMKL = DenseMatrix<Tv, Major | MatrixOption::Element>;
+        using WorkingMatrixMKL = DenseMatrix<T, Major | MatrixOption::Element>;
 
-        pre_compute(source, computeEigenvectors_);
+        pre_compute(source);
         const size_t order = source.getRow();
         WorkingMatrixMKL working = source.values();
         auto* a = reinterpret_cast<Tm*>(working.data());
-        if (computeEigenvectors) {
+        if (getNeedEigenvectors()) {
             auto* vl = reinterpret_cast<Tm*>(rawEigenvectors.values().data());
             if constexpr (isComplex) {
                 auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
@@ -43,8 +43,8 @@ namespace Physica {
                     check_lapack(LAPACKE_zgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order));
             }
             else {
-                VectorND<Tv> ereal(order);
-                VectorND<Tv> eimag(order);
+                VectorND<T> ereal(order);
+                VectorND<T> eimag(order);
                 auto* wr = reinterpret_cast<Tm*>(ereal.data());
                 auto* wi = reinterpret_cast<Tm*>(eimag.data());
                 if constexpr (T::Prec == Float32)
@@ -70,8 +70,8 @@ namespace Physica {
                     check_lapack(LAPACKE_zgees_64(Layout, 'N', 'N', nullptr, order, a, order, &sdim, w, nullptr, order));
             }
             else {
-                VectorND<Tv> ereal(order);
-                VectorND<Tv> eimag(order);
+                VectorND<T> ereal(order);
+                VectorND<T> eimag(order);
                 auto* wr = reinterpret_cast<Tm*>(ereal.data());
                 auto* wi = reinterpret_cast<Tm*>(eimag.data());
                 if constexpr (T::Prec == Float32)

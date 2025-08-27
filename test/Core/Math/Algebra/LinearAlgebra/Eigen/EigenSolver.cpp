@@ -37,11 +37,11 @@ template<Matrix M, Backend B>
 bool eigenTestImpl(const M& mat, double precision) {
     using ScalarType = M::ScalarType;
     using ComplexVector = EigenSolver<ScalarType>::EigenvalueVector;
-    auto solver = EigenSolver<ScalarType>(mat.getRow());
+    auto solver = EigenSolver<ScalarType>(mat.getRow(), true);
     if constexpr (B == Backend::Base)
-        solver.compute_base(mat, true);
+        solver.compute_base(mat);
     else
-        solver.compute_mkl(mat, true);
+        solver.compute_mkl(mat);
 
     const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();

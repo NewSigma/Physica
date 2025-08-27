@@ -81,6 +81,7 @@ namespace Physica {
         [[nodiscard]] size_t getShape(int dim) const noexcept { return shape[dim]; }
         [[nodiscard]] int getDim() const noexcept { return shape.getLength(); }
         [[nodiscard]] size_t getSize() const noexcept { return arr.getLength(); }
+        [[nodiscard]] bool empty() const noexcept { return arr.empty(); }
         /* Static members */
         [[nodiscard]] static size_t toSize(const IndexArray& shape) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexArray& shape, const IndexArray& indices) noexcept;

@@ -58,7 +58,7 @@ void PIPhonon::compute() {
 
     DenseMatrix<ComplexType> buffer(getUnitCellDOF(), getUnitCellDOF());
     DenseMatrix<ComplexType> base(getUnitCellDOF(), getUnitCellDOF());
-    EigenSolver<ComplexType> solver(buffer.getRow());
+    EigenSolver<ComplexType> solver(buffer.getRow(), true);
     for (size_t qPointId = 0; qPointId < kSpaceForceCorr.getLength(); ++qPointId) {
         const bool isGammaPoint = qPointId == 0;
         if (isGammaPoint) {
@@ -85,7 +85,7 @@ void PIPhonon::compute() {
         buffer = base.hermite() * kSpaceForceCorr[qPointId];
         buffer *= base;
 
-        solver.compute(buffer, true);
+        solver.compute(buffer);
         solver.sort();
         normalModes[qPointId] = base * solver.getEigenvectors();
         for (size_t i = 0; i < buffer.getCol(); ++i)

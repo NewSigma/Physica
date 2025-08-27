@@ -49,11 +49,11 @@ namespace Physica {
         using This = SIMD<Diff<T, Mode, Order>, Size>;
         using Base = SIMDBase<This>;
         using RealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size>;
-        using FullRealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size * (T::isComplex ? 2 : 1)>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
         using typename Base::GradType;
+        using typename Base::FullRealType;
         using typename Base::BoolSIMDType;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
@@ -135,6 +135,7 @@ namespace Physica {
     public:
         using ScalarType = Diff<T, Mode, Order>;
         using GradType = SIMD<typename ScalarType::GradType, Size>;
+        using FullRealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size * (T::isComplex ? 2 : 1)>;
     };
 }
 

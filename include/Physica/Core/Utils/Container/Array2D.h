@@ -93,6 +93,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ bool empty() const noexcept;
         /* Static members */
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
     private:

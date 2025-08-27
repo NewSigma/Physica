@@ -229,7 +229,7 @@ namespace Physica {
         linearSolver.resize(size);
         eigenvalues.resize(numRequired);
         eigenvectors.resize(size, numRequired);
-        eigenSolver.resize(dim);
+        eigenSolver.resize(dim, true);
         searchSpace.resize(size, dim);
         dotSpace.resize(size, dim);
         searchSpaceProj.resize(dim, dim);
@@ -359,7 +359,7 @@ namespace Physica {
         assert(numSearchDim > 1 && "[Error]: No need to search if dim = 1");
         auto corner = searchSpaceProj.topLeftCorner(numSearchDim);
         eigenSolver.resize(numSearchDim);
-        eigenSolver.compute(corner, true);
+        eigenSolver.compute(corner);
         eigenSolver.sort();
         auto subSearchSpace = searchSpace.leftCols(numSearchDim);
         auto eigenvector = eigenvectors.col(0);
@@ -380,7 +380,7 @@ namespace Physica {
             corner -= T(2) * eigenGoal * corner2;
 
         eigenSolver.resize(numSearchDim);
-        eigenSolver.compute(corner, true);
+        eigenSolver.compute(corner);
         eigenSolver.sort();
         auto subSearchSpace = searchSpace.leftCols(numSearchDim);
         auto eigenvector = eigenvectors.col(eigenIndex);

@@ -224,6 +224,11 @@ namespace Physica {
         else
             return arr.getLength();
     }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    __host__ __device__ bool Array2D<T, Option, Row, Col, Allocator>::empty() const noexcept {
+        return arr.empty();
+    }
     /**
      * Helper function that communicates with C libraries.
      */
