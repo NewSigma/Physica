@@ -140,7 +140,7 @@ namespace Physica {
             sign *= psi.lShiftSign();
             psi <<= 1;
         }
-        FFT1D::transform(mat.planProvider, fft);
+        fft.transform();
         const auto& repr = getRepr();
         const size_t index = repr[reducedPsi];
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(Tr(repr.getPeriods()[index])) * factor;
@@ -162,7 +162,7 @@ namespace Physica {
             const Tr normalizer = sqrt(Tr(getRepr().getPeriods()[index])) / Tr(NumSite);
             const T hop = -factor * normalizer * getHoppingT();
 
-            auto fft = FFT1D::makeEmptyFFT(NumSite);
+            auto fft = FFT1D(NumSite, PlanFlag::Estimate);
             for (int site = 0; site < int(NumSite); ++site) {
                 const auto site1 = (site + 1) % NumSite;
                 const T hopUp = hop * Tr(state.hopUpSign(site, site1));

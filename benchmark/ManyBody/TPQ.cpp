@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,9 +38,8 @@ namespace {
     static void main(benchmark::State& state) {
         using ReprType = FermiRepr<2, NumSite, true>;
         using Hamilton = HubbardMatrix<ScalarType, ReprType>;
-        const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
-        const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
-        const Hamilton hamilton(hubbard, ReprType(4, 4));
+        const SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
+        const Hamilton hamilton(HoppingT, RepelU, lattice, ReprType(4, 4));
         auto psi = TPQ<ScalarType>::random_normal<RandomSource>(hamilton.getNumState(), 0);
         psi.pre_nvt_step(hamilton, Beta);
         psi.random_normal<RandomSource>();

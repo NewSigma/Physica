@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
@@ -32,10 +31,8 @@ void testRSpinMatrix1D() {
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = FermiRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 
-    ReprType repr(NumSpinUp, NumSpinDown);
-    LatticeModel<1> lattice({NumSite}, 1);
-    Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
-    const HubbardMatrix<ScalarType, ReprType> hamilton(hubbard, std::move(repr));
+    SquareLattice<1> lattice({NumSite}, 1);
+    const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
     const size_t numState = hamilton.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
@@ -56,10 +53,8 @@ void testRSpinMatrix2D() {
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = FermiRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
 
-    ReprType repr(NumSpinUp, NumSpinDown);
-    LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
-    Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
-    const HubbardMatrix<ScalarType, ReprType> hamilton(hubbard, std::move(repr));
+    SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
+    const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
     const size_t numState = hamilton.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
@@ -82,11 +77,8 @@ void testKSpinMatrix() {
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = KFermiRepr<1, NumSite, true>;
 
-    ReprType repr({NumParticle, NumParticle}, 0);
-
-    LatticeModel<1> lattice({NumSite}, 1);
-    Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
-    const HubbardMatrix<ScalarType, ReprType> hamilton(hubbard, std::move(repr));
+    SquareLattice<1> lattice({NumSite}, 1);
+    const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
     const size_t numState = hamilton.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
@@ -107,10 +99,8 @@ void testVecProduct() {
     using Hamilton = HubbardMatrix<float64, ReprType>;
     using RandomSource = Random<MT19937, 10000>;
 
-    LatticeModel<Dim> lattice({NumSite}, 1);
-    Hubbard<float64, Dim> hubbard(lattice, HoppingT, RepelU);
-    const auto repr = ReprType(2, 1);
-    const Hamilton hamiltonH(hubbard, repr);
+    SquareLattice<Dim> lattice({NumSite}, 1);
+    const Hamilton hamiltonH(HoppingT, RepelU, lattice, ReprType(2, 1));
 
     const auto v = VectorND<float64>::random_uniform<RandomSource>(hamiltonH.getNumState());
     const VectorND<float64> v1 = hamiltonH * v;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,28 +21,29 @@
 #include "HubbardMatrix.h"
 
 namespace Physica {
-    template<Scalar T, Representation U, BoundaryCond BC>
-    HubbardMatrix<T, U, BC>::HubbardMatrix(ModelBase hubbard, U repr_)
-            : ModelBase(std::move(hubbard))
-            , repr(std::move(repr_))
-            , planProvider(NumSite, PlanFlag::Estimate) {
-        assert(ModelBase::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    HubbardMatrix<T, Repr, BC>::HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_)
+            : Lattice(std::move(lattice))
+            , hoppingT(hoppingT_)
+            , repelU(repelU_)
+            , repr(std::move(repr_)) {
+        assert(Lattice::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    HubbardMatrix<T, U, BC>::HubbardMatrix(ModelBase hubbard, U repr_, DenseVector<Tr, Dim> phaseArgs_) requires(BC == BoundaryCond::TBC)
-            : HubbardMatrix(std::move(hubbard), std::move(repr_)) {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    HubbardMatrix<T, Repr, BC>::HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, DenseVector<Tr, Dim> phaseArgs_) requires(BC == BoundaryCond::TBC)
+            : HubbardMatrix(hoppingT_, repelU_, std::move(lattice), std::move(repr_)) {
         phaseArgs = std::move(phaseArgs_);
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    auto HubbardMatrix<T, U, BC>::operator*(const Vector auto& v) const noexcept {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    auto HubbardMatrix<T, Repr, BC>::operator*(const Vector auto& v) const noexcept {
         using V = std::remove_cvref_t<decltype(v)>;
-        return HubbardVecProd<T, U, BC, V>(*this, v);
+        return HubbardVecProd<T, Repr, BC, V>(*this, v);
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    T HubbardMatrix<T, U, BC>::calc(size_t row, size_t col) const {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    T HubbardMatrix<T, Repr, BC>::calc(size_t row, size_t col) const {
         if constexpr (Base::IsTransInvariant) {
             const auto& periods = repr.getPeriods();
             const auto psi1 = repr[row];
@@ -51,7 +52,7 @@ namespace Physica {
                 return flag ? repelElem(psi1) : Tr(0);
             }
 
-            auto fft = FFT1D::makeEmptyFFT(NumSite);
+            auto fft = FFT1D(NumSite, PlanFlag::Estimate);
             {
                 auto& rSpace = fft.getRSpace();
                 auto psi2 = repr[col];
@@ -66,7 +67,7 @@ namespace Physica {
                     psi2 <<= 1;
                 }
             }
-            FFT1D::transform(planProvider, fft);
+            fft.transform();
             const Tr normalizer = sqrt(Tr(periods[row] * periods[col])) / Tr(NumSite);
             return fft.getKSpace()[repr.getReducedK()] * normalizer;
         }
@@ -78,33 +79,40 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    T HubbardMatrix<T, U, BC>::trace() const {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    auto HubbardMatrix<T, Repr, BC>::calc_value(size_t row, size_t col) const -> Tv {
+        return calc(row, col).value();
+    }
+
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    T HubbardMatrix<T, Repr, BC>::trace() const {
         size_t numDoubleOccupy = 0;
         for (size_t i = 0; i < Base::getNumState(); ++i)
             numDoubleOccupy += repr[i].getNumDoubleOccupy();
         return getRepelU() * T(numDoubleOccupy);
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    void HubbardMatrix<T, U, BC>::swap(HubbardMatrix& __restrict obj) noexcept {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    void HubbardMatrix<T, Repr, BC>::swap(HubbardMatrix& __restrict obj) noexcept {
         Base::swap(obj);
-        ModelBase::swap(obj);
+        Lattice::swap(obj);
+        hoppingT.swap(obj.hoppingT);
+        repelU.swap(obj.repelU);
         repr.swap(obj.repr);
-        planProvider.swap(obj.planProvider);
+        phaseArgs.swap(obj.phaseArgs);
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    auto HubbardMatrix<T, U, BC>::repelElem(StateType psi) const noexcept -> Tr {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    auto HubbardMatrix<T, Repr, BC>::repelElem(StateType psi) const noexcept -> Tr {
         return getRepelU() * Tr(psi.getNumDoubleOccupy());
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    auto HubbardMatrix<T, U, BC>::hoppingElem(StateType rowPsi, StateType colPsi) const noexcept -> T {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    auto HubbardMatrix<T, Repr, BC>::hoppingElem(StateType rowPsi, StateType colPsi) const noexcept -> T {
         if constexpr (BC == BoundaryCond::TBC) {
             T result = 0;
             for (int site = 0; site < int(NumSite); ++site) {
-                ModelBase::forNeighSites([this, &result, rowPsi, colPsi](int site, int site1) noexcept {
+                Lattice::forNeighSites([this, &result, rowPsi, colPsi](int site, int site1) noexcept {
                     const int signUp = colPsi.hopUpSign(site, site1);
                     const int signDown = colPsi.hopDownSign(site, site1);
                     Vector2D<T> phases = calcBoundaryPhase(site, site1);
@@ -121,7 +129,7 @@ namespace Physica {
         else {
             int count = 0;
             for (int site = 0; site < int(NumSite); ++site) {
-                ModelBase::forNeighSites([&count, rowPsi, colPsi](int site, int site1) noexcept {
+                Lattice::forNeighSites([&count, rowPsi, colPsi](int site, int site1) noexcept {
                     const int signUp = colPsi.hopUpSign(site, site1);
                     const int signDown = colPsi.hopDownSign(site, site1);
                     int n1 = (rowPsi == colPsi.hopUp(site, site1))
@@ -135,11 +143,11 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    Vector2D<T> HubbardMatrix<T, U, BC>::calcBoundaryPhase(int site, int site1) const noexcept {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    Vector2D<T> HubbardMatrix<T, Repr, BC>::calcBoundaryPhase(int site, int site1) const noexcept {
         Vector2D<T> result;
         if constexpr (BC == BoundaryCond::TBC) {
-            const auto& map = ModelBase::getSiteBoundaryMap();
+            const auto& map = Lattice::getSiteBoundaryMap();
             if (map.contains(std::make_pair(site, site1))) {
                 int dim = map.find(std::make_pair(site, site1))->second;
                 result[0] = T::fromPhase(phaseArgs[dim]);

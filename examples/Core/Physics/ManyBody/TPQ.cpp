@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <QApplication>
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Random/Random.h"
@@ -39,9 +38,8 @@ constexpr unsigned int NumBeta = 41;
 template<class ReprType>
 VectorType calcPartition(ReprType repr_, const VectorType& betas) {
     using Hamilton = HubbardMatrix<ScalarType, ReprType>;
-    LatticeModel<1> lattice({NumSite}, 1);
-    Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
-    const Hamilton hamilton(hubbard, std::move(repr_));
+    SquareLattice<1> lattice({NumSite}, 1);
+    const Hamilton hamilton(HoppingT, RepelU, lattice, std::move(repr_));
     VectorType result(NumBeta);
     const ScalarType deltaBeta = betas[1] - betas[0];
     auto psi = TPQ<ScalarType>(hamilton.getNumState());

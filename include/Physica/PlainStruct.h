@@ -41,7 +41,7 @@ namespace Physica {
         constexpr This& operator=(This&&) { return *this; }
         constexpr void operator=(auto&&) {}
         /* Operations */
-        void swap(PlainStruct<void>&) {}
+        void swap(This&) {}
     };
 
     template<class T>

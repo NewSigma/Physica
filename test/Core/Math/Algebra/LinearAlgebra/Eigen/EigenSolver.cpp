@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/ForwardEigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
@@ -177,7 +176,7 @@ int main() {
             return 1;
     }
     /* Test degeneracy */ {
-        DenseMatrix<float64> m = TransIsingMatrix(TransIsing<float64, 1>({{8}, 1}, 1, 0.01), SpinRepr<1, 8>(8));
+        DenseMatrix<float64> m = TransIsingMatrix<float64, SpinRepr<1, 8>>(1, 0.01, SquareLattice<1>({{8}, 1}), SpinRepr<1, 8>(8));
         if (!eigenTest(m, 1E-13))
             return 1;
     }

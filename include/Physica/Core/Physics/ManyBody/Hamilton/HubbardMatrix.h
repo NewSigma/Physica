@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/ReprBasis.h"
-#include "Physica/Core/Physics/ManyBody/Model/Hubbard.h"
+#include "Physica/Core/Physics/ManyBody/Model/SquareLattice.h"
 #include "HamiltonMatrix.h"
 
 namespace Physica {
@@ -32,29 +32,31 @@ namespace Physica {
      * Reference:
      * [1] J. Korean Phys. Soc. 76, 670–683 (2020); https://doi.org/10.3938/jkps.76.670
      */
-    template<Scalar T, Representation U, BoundaryCond BC = BoundaryCond::PBC>
-    class HubbardMatrix
-            : public HamiltonMatrix<HubbardMatrix<T, U, BC>>
-            , public Hubbard<typename T::RealType, U::Dim, BC> {
-        using This = HubbardMatrix<T, U, BC>;
+    template<Scalar T, Representation Repr, BoundaryCond BC = BoundaryCond::PBC>
+    class HubbardMatrix : public HamiltonMatrix<HubbardMatrix<T, Repr, BC>>
+                        , public SquareLattice<Repr::Dim, BC> {
+        using This = HubbardMatrix<T, Repr, BC>;
         using Base = HamiltonMatrix<This>;
-        using Tr = T::RealType;
-        using FFT1D = FFT<Tr, 1>;
-        using ModelBase = Hubbard<Tr, U::Dim, BC>;
+        using Lattice = SquareLattice<Repr::Dim, BC>;
 
         using typename Base::StateType;
-        using typename ModelBase::IndexType;
+        using typename Lattice::IndexType;
+
+        using Tr = T::RealType;
+        using Tv = T::ValueType;
     public:
         using Base::Dim;
         using Base::NumSite;
+        using FFT1D = FFT<Tr, 1>;
     private:
-        U repr;
-        FFT1D planProvider;
+        T hoppingT;
+        Tr repelU;
+        Repr repr;
         DenseVector<Tr, Dim> phaseArgs;
     public:
         HubbardMatrix() = default;
-        HubbardMatrix(ModelBase hubbard, U repr_);
-        HubbardMatrix(ModelBase hubbard, U repr_, DenseVector<Tr, Dim> phaseArgs_) requires(BC == BoundaryCond::TBC);
+        HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_);
+        HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, DenseVector<Tr, Dim> phaseArgs_) requires(BC == BoundaryCond::TBC);
         HubbardMatrix(const This&) = default;
         HubbardMatrix(This&&) noexcept = default;
         ~HubbardMatrix() = default;
@@ -64,14 +66,15 @@ namespace Physica {
         [[nodiscard]] auto operator*(const Vector auto& v) const noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
         [[nodiscard]] T trace() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using ModelBase::getHoppingT;
-        using ModelBase::getRepelU;
-        using ModelBase::getHopIndexArray;
-        [[nodiscard]] const ModelBase& getModel() const noexcept { return *this; }
-        [[nodiscard]] const U& getRepr() const noexcept { return repr; }
+        using Lattice::getHopIndexArray;
+        [[nodiscard]] T getHoppingT() const noexcept { return hoppingT; }
+        [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
+        [[nodiscard]] const Lattice& getLattice() const noexcept { return *this; }
+        [[nodiscard]] const auto& getRepr() const noexcept { return repr; }
     protected:
         Tr repelElem(StateType psi) const noexcept;
         T hoppingElem(StateType rowPsi, StateType colPsi) const noexcept;
@@ -83,11 +86,11 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, Representation U, BoundaryCond BC>
-    class Traits<HubbardMatrix<T, U, BC>> : public Traits<HamiltonMatrix<HubbardMatrix<T, U, BC>>> {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    class Traits<HubbardMatrix<T, Repr, BC>> : public Traits<HamiltonMatrix<HubbardMatrix<T, Repr, BC>>> {
     public:
         using ScalarType = T;
-        using ReprType = U;
+        using ReprType = Repr;
         constexpr static BoundaryCond Boundary = BC;
     };
 }

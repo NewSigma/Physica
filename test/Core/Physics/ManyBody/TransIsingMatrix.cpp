@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
@@ -25,8 +24,7 @@ using namespace Physica;
 using T = float32;
 
 int main() {
-    auto ising = TransIsing<T, 1>({{3}, 1}, 1, 2);
-    TransIsingMatrix hamilton(ising, SpinRepr<1, 3>(3));
+    TransIsingMatrix<T, SpinRepr<1, 3>> hamilton(1, 2, SquareLattice<1>{{3}, 1}, SpinRepr<1, 3>(3));
 
     const auto size = hamilton.getRow();
     DenseMatrix<T> mat(size, size);

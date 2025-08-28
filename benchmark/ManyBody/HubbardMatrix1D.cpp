@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,9 +35,8 @@ static void func(benchmark::State& state) {
     using RandomSource = Random<MT19937>;
     using ReprType = KFermiRepr<1, NumSite, true>;
 
-    const LatticeModel<1> lattice({NumSite}, 1);
-    const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
-    const HubbardMatrix<ScalarType, ReprType> model(hubbard, ReprType({NumParticle, NumParticle}, 0));
+    const SquareLattice<1> lattice({NumSite}, 1);
+    const HubbardMatrix<ScalarType, ReprType> model(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
     auto v = VectorND<ScalarType>::random_uniform<RandomSource>(model.getRow());
     VectorND<ScalarType> v1(model.getRow());
 

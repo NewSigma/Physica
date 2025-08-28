@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/DQMC.h"
@@ -36,9 +35,8 @@ constexpr int NumSample = 1024;
  * Test that half filling is free of sign problem
  */
 int main(int argc, char** argv) {
-    const LatticeModel<Dim> lattice({NumSiteX, NumSiteY}, 1);
-    const Hubbard<T, Dim> hubbard(lattice, HoppingT, RepelU);
-    const HubbardParams<T> params(hubbard, Beta, RepelU * 0.5, NumSplit);
+    const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+    const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
     auto dqmc = DQMC<T>(params, NumSplit);
     for (int _ = 0; _ < NumSample; ++_) {
         dqmc.step_random<RandomSource>();

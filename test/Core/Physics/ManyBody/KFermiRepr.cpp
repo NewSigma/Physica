@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
@@ -46,12 +45,11 @@ void testComplete() {
 
 void testEigen() {
     RealType answer;
-    LatticeModel<1> lattice({NumSite}, 1);
-    Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
+    SquareLattice<1> lattice({NumSite}, 1);
     {
         using ReprType = FermiRepr<1, NumSite, true>;
         ReprType repr(NumParticle, NumParticle);
-        HubbardMatrix<RealType, ReprType> model(hubbard, std::move(repr));
+        HubbardMatrix<RealType, ReprType> model(HoppingT, RepelU, lattice, std::move(repr));
 
         const size_t numState = model.getNumState();
         JacobiDavidson<RealType> jd(numState, 4);
@@ -63,7 +61,7 @@ void testEigen() {
     {
         using ReprType = KFermiRepr<1, NumSite, true>;
         ReprType repr({NumParticle, NumParticle}, 0);
-        HubbardMatrix<ScalarType, ReprType> model(hubbard, std::move(repr));
+        HubbardMatrix<ScalarType, ReprType> model(HoppingT, RepelU, lattice, std::move(repr));
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);

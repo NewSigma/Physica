@@ -21,12 +21,14 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Physics/ManyBody/Model/Hubbard.h"
+#include "Physica/Core/Physics/ManyBody/Model/SquareLattice.h"
 
 namespace Physica {
     template<Scalar T>
     class HubbardParams {
         using This = HubbardParams<T>;
+
+        using Tr = T::RealType;
     public:
         using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
     private:
@@ -42,7 +44,7 @@ namespace Physica {
     public:
         HubbardParams() = default;
         template<int Dim>
-        HubbardParams(const Hubbard<T, Dim>& hubbard, T beta_, T chemMu_, int numSplit_);
+        HubbardParams(T hoppingT, Tr repelU, const SquareLattice<Dim>& lattice, T beta_, T chemMu_, int numSplit_);
         HubbardParams(const This&) = default;
         HubbardParams(This&&) noexcept = default;
         ~HubbardParams() = default;
@@ -74,23 +76,23 @@ namespace Physica {
         [[nodiscard]] static T calcBetaMu(T beta, T repelU, T chemMu) noexcept;
     private:
         template<int Dim>
-        void makeHoppingMatrix(const Hubbard<T, Dim>& hubbard);
+        void makeHoppingMatrix(T hoppingT, const SquareLattice<Dim>& lattice);
         /* Friends */
         friend class device_obj<This>;
     };
 
     template<Scalar T>
     template<int Dim>
-    HubbardParams<T>::HubbardParams(const Hubbard<T, Dim>& hubbard, T beta_, T chemMu_, int numSplit_)
+    HubbardParams<T>::HubbardParams(T hoppingT, Tr repelU_, const SquareLattice<Dim>& lattice, T beta_, T chemMu_, int numSplit_)
             : beta(beta_)
-            , repelU(hubbard.getRepelU())
+            , repelU(repelU_)
             , chemMu(chemMu_) 
             , numSplit(numSplit_) {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
         assert(!repelU.isNegative() && "[Error]: It is assumed U >= 0");
         assert(!beta.isNegative() && "[Error]: Negative temperature is invalid");
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
-        makeHoppingMatrix(hubbard);
+        makeHoppingMatrix(hoppingT, lattice);
         DenseSymmMatrix<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
         expB = exp(hoppingMatrixB);
         alpha = calcAlpha(beta, repelU, numSplit);
@@ -135,15 +137,14 @@ namespace Physica {
 
     template<Scalar T>
     template<int Dim>
-    void HubbardParams<T>::makeHoppingMatrix(const Hubbard<T, Dim>& hubbard) {
-        const size_t numSite = hubbard.getNumSuperCellSite();
+    void HubbardParams<T>::makeHoppingMatrix(T hoppingT, const SquareLattice<Dim>& lattice) {
+        const size_t numSite = lattice.getNumSuperCellSite();
         hoppingMatrix.resize(numSite);
         hoppingMatrix = T(0);
 
-        const T hoppingT = hubbard.getHoppingT();
         for (size_t from = 0; from < numSite; ++from) {
-            if constexpr (Hubbard<T, Dim>::UntrivialNearestNeighbor) {
-                const auto& targets = hubbard.getHopIndexArray()[from];
+            if constexpr (SquareLattice<Dim>::UntrivialNearestNeighbor) {
+                const auto& targets = lattice.getHopIndexArray()[from];
                 for (size_t to : targets)
                     hoppingMatrix(from, to) = -hoppingT;
             }

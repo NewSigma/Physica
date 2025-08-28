@@ -19,30 +19,33 @@
 #pragma once
 
 #include "Physica/Core/Physics/ManyBody/ReprSpace/ReprBasis.h"
-#include "Physica/Core/Physics/ManyBody/Model/TransIsing.h"
+#include "Physica/Core/Physics/ManyBody/Model/SquareLattice.h"
 #include "HamiltonMatrix.h"
 
 namespace Physica {
     template<Scalar, Representation, BoundaryCond, Vector>
     class TransIsingVecProd;
 
-    template<Scalar T, Representation U, BoundaryCond BC = BoundaryCond::PBC>
-    class TransIsingMatrix : public HamiltonMatrix<TransIsingMatrix<T, U, BC>>, public TransIsing<T, U::Dim, BC> {
-        using This = TransIsingMatrix<T, U, BC>;
+    template<Scalar T, Representation Repr, BoundaryCond BC = BoundaryCond::PBC>
+    class TransIsingMatrix : public HamiltonMatrix<TransIsingMatrix<T, Repr, BC>>
+                           , public SquareLattice<Repr::Dim, BC> {
+        using This = TransIsingMatrix<T, Repr, BC>;
         using Base = HamiltonMatrix<This>;
-        using ModelBase = TransIsing<T, U::Dim, BC>;
+        using Lattice = SquareLattice<Repr::Dim, BC>;
 
-        using StateType = U::StateType;
+        using StateType = Repr::StateType;
     public:
         using typename Base::ScalarType;
-        constexpr static int Dim = U::Dim;
+        constexpr static int Dim = Repr::Dim;
         constexpr static int NumSite = StateType::NumSite;
         constexpr static int SiteDOF = StateType::SiteDOF;
     private:
-        U repr;
+        T couplingJ;
+        T transG;
+        Repr repr;
     public:
         TransIsingMatrix() = default;
-        TransIsingMatrix(ModelBase model, U repr_);
+        TransIsingMatrix(T couplingJ_, T transG_, Lattice lattice, Repr repr_);
         TransIsingMatrix(const This&) = default;
         TransIsingMatrix(This&&) noexcept = default;
         ~TransIsingMatrix() = default;
@@ -54,23 +57,24 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const ModelBase& getModel() const noexcept { return *this; }
-        [[nodiscard]] const U& getRepr() const noexcept { return repr; }
-        using ModelBase::getCouplingJ;
-        using ModelBase::getTransG;
+        [[nodiscard]] T getCouplingJ() const noexcept { return couplingJ; }
+        [[nodiscard]] T getTransG() const noexcept { return transG; }
+        [[nodiscard]] const Lattice& getModel() const noexcept { return *this; }
+        [[nodiscard]] const Repr& getRepr() const noexcept { return repr; }
     };
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    TransIsingMatrix<T, U, BC>::TransIsingMatrix(ModelBase model, U repr_) : ModelBase(std::move(model)), repr(std::move(repr_)) {}
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    TransIsingMatrix<T, Repr, BC>::TransIsingMatrix(T couplingJ_, T transG_, Lattice lattice, Repr repr_)
+            : Lattice(std::move(lattice)), couplingJ(couplingJ_), transG(transG_), repr(std::move(repr_)) {}
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    auto TransIsingMatrix<T, U, BC>::operator*(const Vector auto& v) const noexcept {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    auto TransIsingMatrix<T, Repr, BC>::operator*(const Vector auto& v) const noexcept {
         using V = std::remove_cvref_t<decltype(v)>;
-        return TransIsingVecProd<T, U, BC, V>(*this, v);
+        return TransIsingVecProd<T, Repr, BC, V>(*this, v);
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    T TransIsingMatrix<T, U, BC>::calc(size_t row, size_t col) const {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    T TransIsingMatrix<T, Repr, BC>::calc(size_t row, size_t col) const {
         const auto psi1 = repr[row];
         const auto mask = StateType::makeFullMask() >> 1;
         if (row == col) {
@@ -86,19 +90,21 @@ namespace Physica {
         return 0;
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC>
-    void TransIsingMatrix<T, U, BC>::swap(This& __restrict obj) noexcept {
-        ModelBase::swap(obj);
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    void TransIsingMatrix<T, Repr, BC>::swap(This& __restrict obj) noexcept {
+        Lattice::swap(obj);
+        couplingJ.swap(obj.couplingJ);
+        transG.swap(obj.transG);
         repr.swap(obj.repr);
     }
 }
 
 namespace Physica {
-    template<Scalar T, Representation U, BoundaryCond BC>
-    class Traits<TransIsingMatrix<T, U, BC>> : public Traits<HamiltonMatrix<TransIsingMatrix<T, U, BC>>> {
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    class Traits<TransIsingMatrix<T, Repr, BC>> : public Traits<HamiltonMatrix<TransIsingMatrix<T, Repr, BC>>> {
     public:
         using ScalarType = T;
-        using ReprType = U;
+        using ReprType = Repr;
         constexpr static BoundaryCond Boundary = BC;
     };
 }

@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <QApplication>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
@@ -38,9 +37,8 @@ constexpr double RepelU = 8;
 template<class ReprType>
 VectorPair calcPair(ReprType repr_) {
     using Hamilton = HubbardMatrix<ScalarType, ReprType>;
-    const LatticeModel<1> lattice({NumSite}, 1);
-    const Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
-    const Hamilton hamilton(hubbard, std::move(repr_));
+    const SquareLattice<1> lattice({NumSite}, 1);
+    const Hamilton hamilton(HoppingT, RepelU, lattice, std::move(repr_));
     const size_t numState = hamilton.getNumState();
     SymmEigenSolver<ScalarType> solver(numState);
     solver.compute(DenseSymmMatrix<ScalarType>(hamilton), true);
