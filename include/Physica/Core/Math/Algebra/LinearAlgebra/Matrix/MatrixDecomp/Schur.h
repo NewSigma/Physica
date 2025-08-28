@@ -273,7 +273,7 @@ namespace Physica {
         }
         else {
             Vector2D<T> householderVector{};
-            col_1_M.head(2).householder(householderVector);
+            col_1_M.template head<2>().householder(householderVector);
             {
                 auto block = matrixT.rightCols(lower);
                 auto rows = block.rows(lower, 2);

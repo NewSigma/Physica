@@ -572,6 +572,9 @@ namespace Physica {
      */
     template<class Derived>
     auto RValueVector<Derived>::householder(Vector auto& target) const -> Tr {
+        using V = std::remove_cvref<decltype(target)>::type;
+        constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
+        constexpr size_t TailLength = Length > 0 ? (Length - 1) : Dynamic;
         assert(getLength() == target.getLength());
         assert(getLength() > 1 && "[Error]: Unnecessary householder call");
 
@@ -584,7 +587,7 @@ namespace Physica {
             const T factor1 = factor + v0;
             const T factor2 = reciprocal(factor1);
 
-            target.tail(1) = tail(1) * factor2;
+            target.template tail<TailLength>(1) = tail<TailLength>(1) * factor2;
             target[0] = (factor1 / factor).real();
             return norm;
         }
@@ -595,7 +598,7 @@ namespace Physica {
                 return Trv(0);
             }
             target[0] = Trv(2);
-            target.tail(1) = Trv(0);
+            target.template tail<TailLength>(1) = Trv(0);
             return sqrt(sourceNorm0);
         }
     }

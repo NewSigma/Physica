@@ -129,7 +129,6 @@ namespace Physica {
                     index1[dim] = 0;
                     const auto site1 = IndexType::toIndex1D(dims, index1);
                     map[std::make_pair(site, site1)] = dim;
-                    return;
                 }
             }
         });

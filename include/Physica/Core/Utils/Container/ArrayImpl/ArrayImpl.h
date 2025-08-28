@@ -38,7 +38,7 @@ namespace Physica {
 
     template<class T, size_t Length, class Allocator>
     __host__ __device__ Array<T, Length, Allocator>::Array(std::initializer_list<T> list) {
-        assert(list.size() <= Length);
+        assert(list.size() == Length);
         unsigned int i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)

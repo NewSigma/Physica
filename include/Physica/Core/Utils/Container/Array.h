@@ -47,10 +47,8 @@ namespace Physica {
     private:
         constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wattributes"
-        alignas(Align) T arr[Length];
-    #pragma GCC diagnostic pop
+        // FIXME: We have to use such a verbose alignment since GCC 14.2 complains Align maybe 0.
+        alignas(Align == Dynamic ? alignof(T) : Align) T arr[Length];
         [[no_unique_address]] allocator_type alloc;
     public:
         Array() = default;

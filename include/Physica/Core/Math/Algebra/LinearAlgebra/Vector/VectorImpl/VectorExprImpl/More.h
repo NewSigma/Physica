@@ -46,10 +46,10 @@ namespace Physica {
         using Base::getRHS;
     };
 
-    template<Vector T, Scalar U>
-    class VectorExpr<ExprType::More, T, U>
-            : public BinaryVectorExpr<ExprType::More, T, U> {
-        using Base = BinaryVectorExpr<ExprType::More, T, U>;
+    template<Vector V, Scalar U>
+    class VectorExpr<ExprType::More, V, U>
+            : public BinaryVectorExpr<ExprType::More, V, U> {
+        using Base = BinaryVectorExpr<ExprType::More, V, U>;
     protected:
         using typename Base::T;
     public:

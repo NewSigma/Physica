@@ -121,6 +121,13 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
+    auto Diff<T, Mode, Order>::fromPhase(RealType phase) noexcept -> This requires(isComplex) {
+        static_assert(isForwardDiff && (Order == 1), "[Error]: Not implemented");
+        T y = T::fromPhase(phase.value());
+        return This(y, T(-y.imag(), y.real()) * phase.grad());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
     template<RNG R>
     auto Diff<T, Mode, Order>::random_uniform() {
         return Diff(T::template random_uniform<R>());

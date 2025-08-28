@@ -73,9 +73,9 @@ namespace Physica {
         [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] auto head(size_t to) noexcept;
+        [[nodiscard]] auto head(size_t to = Length) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] const auto head(size_t to) const noexcept;
+        [[nodiscard]] const auto head(size_t to = Length) const noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>

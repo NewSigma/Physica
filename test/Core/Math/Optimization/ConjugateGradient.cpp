@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Functions.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
@@ -25,13 +24,13 @@
 using namespace Physica;
 
 using ScalarType = float64;
-using VectorType = Vector3D<ScalarType>;
 
-VectorType grad(std::invocable<VectorType> auto fn, const VectorType& at, ScalarType diffStep) {
+template<Vector V>
+V grad(std::invocable<V> auto fn, const V& at, ScalarType diffStep) {
     assert(diffStep.isPositive());
     const size_t length = at.getLength();
-    VectorType result(length);
-    VectorType copy = at;
+    V result(length);
+    V copy = at;
     for (size_t i = 0; i < length; ++i) {
         const ScalarType buffer = copy[i];
         result[i] = Differential<ScalarType>::doublePoint([&](ScalarType alpha) {
@@ -47,21 +46,21 @@ int main() {
     {
         auto func = func1<ScalarType>;
         ConjugateGradient<ScalarType, 3> cg(1);
-        const ScalarType result = cg.solve(10, {-1, -2, -5}, func, [=](VectorType x) { return grad(func, x, 1E-5); });
+        const ScalarType result = cg.solve(10, {-1, -2, -5}, func, [=](Vector3D<ScalarType> x) { return grad(func, x, 1E-5); });
         if (!scalarNear(result, ScalarType(0), 1E-14))
             return 1;
     }
     {
         auto func = func2<ScalarType>;
         ConjugateGradient<ScalarType, 3> cg(1);
-        const ScalarType result = cg.solve(1E-15, {1, 3, 2}, func, [=](VectorType x) { return grad(func, x, 1E-6); });
+        const ScalarType result = cg.solve(1E-15, {1, 3, 2}, func, [=](Vector3D<ScalarType> x) { return grad(func, x, 1E-6); });
         if (!scalarNear(result, ScalarType(2.25), 1E-14))
             return 1;
     }
     {
         auto func = rosenbrock<ScalarType>;
-        ConjugateGradient<ScalarType, 3> cg(1);
-        const ScalarType result = cg.solve(1E-13, {-1.2, 1}, func, [=](VectorType x) { return grad(func, x, 3E-6); });
+        ConjugateGradient<ScalarType, 2> cg(1);
+        const ScalarType result = cg.solve(1E-13, {-1.2, 1}, func, [=](Vector2D<ScalarType> x) { return grad(func, x, 3E-6); });
         if (!scalarNear(result, ScalarType(0), 1E-18))
             return 1;
     }

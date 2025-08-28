@@ -34,8 +34,10 @@ namespace Physica {
         using Base = ScalarBase<This>;
     public:
         using device_obj_type = This;
+        using typename Base::RealType;
         using typename Base::GradType;
         using typename Base::MachineType;
+        using Base::isComplex;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     private:
@@ -79,6 +81,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto& grad() const noexcept;
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept;
         /* Static members */
+        [[nodiscard]] static This fromPhase(RealType phase) noexcept requires(isComplex);
         template<RNG R>
         [[nodiscard]] static auto random_uniform();
         template<RNG R>

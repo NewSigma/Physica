@@ -134,7 +134,7 @@ namespace Physica {
             DenseVector<T, Dim> driftMomentum(Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 phase.rows(i * Dim, Dim) *= sqrt(repBeta * massVec[i]);
-                for (int dim = 0; dim < Dim; ++dim)
+                for (int dim = 0; dim < int(Dim); ++dim)
                     driftMomentum[dim] += phase.row(i * Dim + dim).sum();
             }
             driftMomentum *= reciprocal(T(getNumParticle() * getNumReplica()));
