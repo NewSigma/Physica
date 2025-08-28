@@ -153,11 +153,6 @@ namespace Physica {
                 result[0] = T::fromPhase(phaseArgs[dim]);
                 result[1] = T::fromPhase(-phaseArgs[dim]);
             }
-            else if (map.contains(std::make_pair(site1, site))) {
-                int dim = map.find(std::make_pair(site1, site))->second;
-                result[0] = T::fromPhase(-phaseArgs[dim]);
-                result[1] = T::fromPhase(phaseArgs[dim]);
-            }
             else
                 result = Tr(1);
         }

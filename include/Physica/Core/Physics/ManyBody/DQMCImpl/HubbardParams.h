@@ -146,7 +146,7 @@ namespace Physica {
             if constexpr (SquareLattice<Dim>::UntrivialNearestNeighbor) {
                 const auto& targets = lattice.getHopIndexArray()[from];
                 for (size_t to : targets)
-                    hoppingMatrix(from, to) = -hoppingT;
+                    hoppingMatrix(from, to) -= hoppingT;
             }
             else
                 hoppingMatrix(from, (from + 1) % numSite) = -hoppingT;

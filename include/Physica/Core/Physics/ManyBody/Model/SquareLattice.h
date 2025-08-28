@@ -101,10 +101,6 @@ namespace Physica {
             Array<size_t> hopTargets{};
             hopTargets.reserve(numSite * Dim * 2);
             for (int dim = 0; dim < Dim; ++dim) {
-                const bool isMultiCount = dims[dim] == 2 && index[dim] == 1;
-                if (isMultiCount)
-                    continue;
-
                 IndexType index1 = index;
                 index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
                 hopTargets.append(IndexType::toIndex1D(dims, index1));
