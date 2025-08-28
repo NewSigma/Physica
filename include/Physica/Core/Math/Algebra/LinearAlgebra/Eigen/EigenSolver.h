@@ -78,14 +78,13 @@ namespace Physica {
         /* Static members */
         static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors);
         static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto comp);
+        static bool defaultComp(Tc a, Tc b) noexcept;
     private:
         template<Matrix M>
         void pre_compute(const M& source) noexcept;
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
         void computeComplexMatEigenvectors(WorkingMatrix& matrixT);
-        /* Static members */
-        static bool defaultComp(Tc a, Tc b) noexcept;
     };
 
     template<Scalar T, size_t Order>
@@ -300,6 +299,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    bool EigenSolver<T, Order>::defaultComp(Tc a, Tc b) noexcept {
+        return a.real() < b.real();
+    }
+
+    template<Scalar T, size_t Order>
     template<Matrix M>
     void EigenSolver<T, Order>::pre_compute([[maybe_unused]] const M& source) noexcept {
         static_assert(std::is_same<T, typename M::ScalarType>::value, "[Error]: Inconsistent ScalarType");
@@ -451,11 +455,6 @@ namespace Physica {
                 col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]);
             }
         }
-    }
-
-    template<Scalar T, size_t Order>
-    bool EigenSolver<T, Order>::defaultComp(Tc a, Tc b) noexcept {
-        return a.real() < b.real();
     }
 }
 

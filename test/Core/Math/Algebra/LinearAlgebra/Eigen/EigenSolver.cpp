@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/ForwardEigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
 
@@ -83,6 +83,32 @@ bool reconstructTest(const M& mat, double precision) {
     if (!matrixNear(result, mat, precision))
         return false;
     return true;
+}
+
+template<Scalar T>
+using Matrix2D = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, 2, 2>;
+
+template<Scalar T>
+Matrix2D<T> rotation(T theta) noexcept {
+    Matrix2D<T> result{};
+    result(0, 0) = cos(theta);
+    result(0, 1) = sin(theta);
+    result(1, 0) = -sin(theta);
+    result(1, 1) = cos(theta);
+    return result;
+}
+
+void testForwardDiff() {
+    using dfloat = Diff<float64, DiffMode::Forward>;
+    auto result = EigenSolver<dfloat, 2>(rotation(dfloat(1, 1)), true);
+    auto answer = EigenSolver<float64, 2>(rotation(float64(1) + MathConst<float64>::pi * 0.5), true);
+    if (result.getEigenvalues().grads() != answer.getEigenvalues())
+        exit(EXIT_FAILURE);
+
+    for (int i = 0; i < 2; ++i)
+        for (int j = 0; j < 2; ++j)
+            if (!result.getEigenvectors().grads()(i, j).isZero())
+                exit(EXIT_FAILURE);
 }
 
 int main() {
@@ -155,5 +181,6 @@ int main() {
         if (!eigenTest(m, 1E-13))
             return 1;
     }
+    testForwardDiff();
     return 0;
 }

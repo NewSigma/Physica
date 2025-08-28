@@ -89,6 +89,7 @@ namespace Physica {
         [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
+        [[nodiscard]] bool empty() const noexcept { return v.empty(); }
 
         [[nodiscard]] const ValueMatrix& values() const noexcept { return v; }
         [[nodiscard]] ValueMatrix& values() noexcept { return v; }

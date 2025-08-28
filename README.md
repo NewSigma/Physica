@@ -23,10 +23,10 @@ Optimal performance and scalability: Balancing between performance, scalability 
 ## Features
 
 - Operator fusion using template expressions for both CPU and GPU  
-- Coroutine based auto differentiation implementation  
+- Coroutine based automatic differentiation implementation  
 - Basic math library: Provides commonly used functions such as ODE, PDE, special functions, optimization, statistics, etc.
 - Template meta algorithm: optimal algorithm and parallelism strategy selection at compiling time
-- Multithreads and CUDA parallel support
+- Multi-threads, MPI and CUDA parallel support
 - 2D and 3D plotting support
 
 ## Usage

@@ -11,18 +11,19 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# How to solve upper quasi-triangular linear system
+# EigenSolver - Stardard Eigenvalue Problem
 
-If we want to compute the eigenvectors from real schur decomposition, we have to solve a upper quasi-triangular equation.
+## Solving eigenvectors
 
-The algorithm solving this equation is clarified as following:
+If we were to solve eigenvectors from real Schur decomposition, we have to solve an upper quasi-triangular equation. Solution of this equation is verbose, refer to [1] for a neat numerical implementation.
 
-## $\lambda$ is real
-The equation to solve[1] is:
+### $\lambda \in \mathbb{R}$
 
-$$(T_{11} - \lambda I)w = -u$$
+The equation to solve$^{[2]}$ is:
 
-The equation can be written as
+$$(T_{11} - \lambda I)w = -u$$,
+
+which can be rewritten as
 
 $$\left[ \begin{matrix} T & u \end{matrix} \right] \left[ \begin{matrix} w \\ 1 \end{matrix} \right] = 0$$
 
@@ -55,10 +56,11 @@ $$det(C) = \left| \begin{matrix} T_{i - 1\ i - 1} & T_{i - 1\ i} \\ T_{i\ i - 1}
 
 where $\lambda_C$ is one of eigenvalues of $C$.
 
-## $\lambda$ is complex
+### $\lambda \in \mathbb{C}$
+
 The equation to solve is
 
-$$ \left[ \begin{matrix} T_{11} & u_1 & u_2 & T_{14} \\ 0 & a & b & v^T_1 \\ 0 & c & d & v^T_2 \\ 0 & 0 & 0 & T_{41} \end{matrix} \right] \left[ \begin{matrix} w \\ w' \\ w'' \\ 0 \end{matrix} \right] = \lambda \left[ \begin{matrix} w \\ w' \\ w'' \\ 0 \end{matrix} \right] $$
+$$ \left[ \begin{matrix} T_{11} & u_1 & u_2 & T_{14} \\ 0 & a & b & v^T_1 \\ 0 & c & d & v^T_2 \\ 0 & 0 & 0 & T_{41} \end{matrix} \right] \left[ \begin{matrix} w \\ w' \\ w'' \\ 0 \end{matrix} \right] = \lambda \left[ \begin{matrix} w \\ w' \\ w'' \\ 0 \end{matrix} \right] $$,
 
 where value of $w'$ and $w''$ can be fetched by computing the eigenvectors of $\left[ \begin{matrix} a & b \\ c & d \end{matrix} \right]$, we have
 
@@ -128,8 +130,32 @@ The equation can be written as
 
 $$\left[ \begin{matrix} A_{i i - 1} & 0 & A_{ii} & -B_{ii} \\ 0 & A_{i i - 1} & B_{ii} & A_{ii} \\ A_{i - 1 i - 1} & -B_{i - 1 i - 1} & A_{i - 1 i} & 0 \\ B_{i - 1 i - 1} & A_{i - 1 i - 1} & 0 & A_{i - 1 i} \end{matrix} \right] \left[ \begin{matrix} r_{i - 1} \\ c_{i - 1} \\ r_i \\ c_i \end{matrix} \right] = \left[ \begin{matrix} \xi_1 \\ \xi_2 \\ \xi_3 \\ \xi_4 \end{matrix} \right]$$
 
-Solution of this equation is complex, refer to [2] for a neat numerical algorithm.
+## 前向自动微分
 
-## References:
-[1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
-[2] Eigen; https://eigen.tuxfamily.org  
+沿用[3]的符号, 对与特征值分解$\mathbf{AU = UD}$有
+
+$$\mathbf{E} \circ \text{d}\mathbf{C} + \text{d}\mathbf{D} = \mathbf{U}^{-1} \text{d}\mathbf{AU}$$
+
+特征值的导数:
+
+$$\text{d}\mathbf{D} = \mathbf{I} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})$$
+
+特征向量的导数:
+
+$$\text{d}\mathbf{U} = \mathbf{U}[\mathbf{F} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})] + \mathbf{UD'}$$
+
+其中$\mathbf{D'}$为任意对角矩阵。对于归一化的特征向量$|\mathbf{u}|^2 = 1$, 两边微分有
+
+$$\mathbf{u} \cdot \text{d}\mathbf{u} = 0$$
+
+即特征向量的梯度正交于特征向量自身, 可作如下正交化消除任意性
+
+$$\text{d}\mathbf{U} \to \text{d}\mathbf{U} \cdot [\mathbf{I} - \mathbf{I} \circ \mathbf{U}^\dagger \text{d}\mathbf{U}]$$
+
+若特征向量的模对计算没有影响, 可以简单地取$\mathbf{D'} = 0 ^{[3]}$。
+
+## References
+
+[1] Eigen; https://eigen.tuxfamily.org  
+[2] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013  
+[3] Giles, M. An extended collection of matrix derivative results for forward and reverse mode algorithmic differentiation (2008); https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf.

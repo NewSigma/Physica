@@ -86,6 +86,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return v.getRow(); }
+        [[nodiscard]] __host__ __device__ bool empty() const noexcept { return v.empty(); }
 
         [[nodiscard]] __host__ __device__ const auto& values() const noexcept { return v; }
         [[nodiscard]] __host__ __device__ auto& values() noexcept { return v; }
