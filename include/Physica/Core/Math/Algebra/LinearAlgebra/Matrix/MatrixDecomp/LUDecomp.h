@@ -24,8 +24,12 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     class LUDecomp {
         using This = LUDecomp;
-        using WorkingMatrix = DenseMatrix<T>;
-        using BiasArray = std::conditional<Pivot, Array<size_t>, PlainStruct<void>>::type; //TODO: use permutation matrix instead
+        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using BiasArray = std::conditional<Pivot, Array<size_t>, PlainStruct<void>>::type; // TODO: use permutation matrix instead
+
+        constexpr static bool isComplex = T::isComplex;
+        using Tc = T::ComplexType;
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
         WorkingMatrix working;
         [[no_unique_address]] BiasArray biasOrder;
@@ -40,6 +44,8 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void compute(const Matrix auto& source);
+        void compute_mkl(const Matrix auto& source);
+        void compute_base(const Matrix auto& source);
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -48,8 +54,10 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] const WorkingMatrix& getMatrixLU() const noexcept { return working; }
+        [[nodiscard]] auto getMatrixU() const noexcept { return working.triu(); }
         [[nodiscard]] const Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
     private:
+        void pre_compute(const Matrix auto& source) const noexcept;
         void decomp_col(size_t col);
     };
 
@@ -65,11 +73,17 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void LUDecomp<T, Pivot>::compute(const Matrix auto& source) {
-        assert(source.getRow() == source.getCol());
-        const size_t order = source.getRow();
-        if (order != getOrder())
-            resize(order);
+        if constexpr (HasMKL())
+            compute_mkl(source);
+        else
+            compute_base(source);
+    }
 
+    template<Scalar T, bool Pivot>
+    void LUDecomp<T, Pivot>::compute_base(const Matrix auto& source) {
+        pre_compute(source);
+
+        const size_t order = source.getRow();
         if constexpr (Pivot) {
             for(size_t i = 0; i < order; ++i)
                 biasOrder[i] = i;
@@ -99,6 +113,12 @@ namespace Physica {
         if constexpr (Pivot)
             biasOrder.swap(biasOrder);
     }
+
+    template<Scalar T, bool Pivot>
+    void LUDecomp<T, Pivot>::pre_compute(const Matrix auto& source) const noexcept {
+        assert(source.getRow() == source.getCol());
+        assert(source.getRow() == getOrder());
+    }
     /**
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
@@ -119,3 +139,7 @@ namespace Physica {
         }
     }
 }
+
+#ifdef PHYSICA_MKL
+    #include "LUDecomp_MKL.h"
+#endif
