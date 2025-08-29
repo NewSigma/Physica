@@ -34,7 +34,7 @@ constexpr int NumSample = 1024;
 /**
  * Test that half filling is free of sign problem
  */
-int main(int argc, char** argv) {
+int main() {
     const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
     const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
     auto dqmc = DQMC<T>(params, NumSplit);

@@ -39,19 +39,19 @@ namespace Physica {
     public:
         using typename Base::BornChargeArray;
     private:
-        T sumGauss;
+        T sumGauss = 0;
         SamplePool samplePool;
         size_t batchSize;
     public:
         RandomBatchEwald() = default;
         RandomBatchEwald(size_t samplePoolSize, size_t batchSize_);
         RandomBatchEwald(size_t samplePoolSize, size_t batchSize_, LatticeMatrix lattice, VectorND<T> charges);
-        RandomBatchEwald(const RandomBatchEwald&) = default;
-        RandomBatchEwald(RandomBatchEwald&&) noexcept = default;
+        RandomBatchEwald(const This&) = default;
+        RandomBatchEwald(This&&) noexcept = default;
         ~RandomBatchEwald() = default;
         /* Operators */
-        RandomBatchEwald& operator=(RandomBatchEwald obj) noexcept { swap(obj); return *this; }
-        RandomBatchEwald& operator=(Base base);
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(Base base);
         /* Operations */
         template<ExecutePolicy P>
         [[nodiscard]] VectorND<T> force(const PositionMatrix& pos) const;
@@ -60,7 +60,7 @@ namespace Physica {
         [[nodiscard]] VectorND<T> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] T calcDefaultIntegralLimit() const;
-        void swap(RandomBatchEwald& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::getNumParticle;
         using Base::getLattice;
@@ -157,7 +157,7 @@ namespace Physica {
     }
 
     template<Scalar T, RNG R>
-    void RandomBatchEwald<T, R>::swap(RandomBatchEwald& __restrict obj) noexcept {
+    void RandomBatchEwald<T, R>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sumGauss.swap(obj.sumGauss);

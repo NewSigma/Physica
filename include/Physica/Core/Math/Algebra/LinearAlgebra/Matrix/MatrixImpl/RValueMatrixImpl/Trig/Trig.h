@@ -104,7 +104,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     public:
-        TrigLower(const M& mat_);
+        TrigLower(M& mat_);
         TrigLower(const This&) = default;
         TrigLower(This&&) noexcept = default;
         ~TrigLower() = default;
@@ -124,7 +124,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    TrigLower<M>::TrigLower(const M& mat_) : mat(mat_) {
+    TrigLower<M>::TrigLower(M& mat_) : mat(mat_) {
         assert(mat.isSquare());
     }
 

@@ -111,12 +111,11 @@ namespace Physica {
     void Poscar<T>::standrizeLattice() {
         using MatrixType = LatticeMatrix::ColMatrix;
         MatrixType temp = lattice.transpose();
-        using VectorType = Vector3D<T>;
-        VectorType buffer{};
+        Vector3D<T> buffer{};
         temp.col(0).householder(buffer);
         applyHouseholder(buffer, temp);
 
-        auto buffer1 = buffer.head(2);
+        auto buffer1 = buffer.template head<2>();
         temp.col(1).tail(1).householder(buffer1);
         auto corner = temp.bottomRightCorner(1);
         applyHouseholder(buffer1, corner);

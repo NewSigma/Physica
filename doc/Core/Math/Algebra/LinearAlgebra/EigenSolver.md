@@ -144,15 +144,9 @@ $$\text{d}\mathbf{D} = \mathbf{I} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})$$
 
 $$\text{d}\mathbf{U} = \mathbf{U}[\mathbf{F} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})] + \mathbf{UD'}$$
 
-其中$\mathbf{D'}$为任意对角矩阵。对于归一化的特征向量$|\mathbf{u}|^2 = 1$, 两边微分有
+其中$\mathbf{D'}$为任意对角矩阵。第一项中$\mathbf{F}$对角元为0, 特征向量自身对其梯度没有贡献。第二项, 若特征向量是归一化的$|\mathbf{u}|^2 = 1$, 两边微分有$\mathbf{u} \cdot \text{d}\mathbf{u} = 0$, 代入上式可知
 
-$$\mathbf{u} \cdot \text{d}\mathbf{u} = 0$$
-
-即特征向量的梯度正交于特征向量自身, 可作如下正交化消除任意性
-
-$$\text{d}\mathbf{U} \to \text{d}\mathbf{U} \cdot [\mathbf{I} - \mathbf{I} \circ \mathbf{U}^\dagger \text{d}\mathbf{U}]$$
-
-若特征向量的模对计算没有影响, 可以简单地取$\mathbf{D'} = 0 ^{[3]}$。
+$$\mathbf{D'} = 0$$
 
 ## References
 
