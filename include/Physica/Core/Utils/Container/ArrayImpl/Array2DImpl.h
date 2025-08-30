@@ -163,7 +163,7 @@ namespace Physica {
             else {
                 const size_t row = getRow();
                 const size_t col = getCol();
-                for (size_t i = 0, temp = 0; i < col; ++i, temp += row)
+                for (size_t i = 0, temp = 0; i < row; ++i, temp += col)
                     arr[temp + c1].swap(arr[temp + c2]);
             }
         }

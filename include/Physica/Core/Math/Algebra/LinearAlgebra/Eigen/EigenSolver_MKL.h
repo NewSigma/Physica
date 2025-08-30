@@ -34,13 +34,13 @@ namespace Physica {
         WorkingMatrixMKL working = source.values();
         auto* a = reinterpret_cast<Tm*>(working.data());
         if (getNeedEigenvectors()) {
-            auto* vl = reinterpret_cast<Tm*>(rawEigenvectors.values().data());
+            auto* vr = reinterpret_cast<Tm*>(rawEigenvectors.values().data());
             if constexpr (isComplex) {
                 auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_cgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order));
+                    check_lapack(LAPACKE_cgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vr, order));
                 else
-                    check_lapack(LAPACKE_zgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vl, order));
+                    check_lapack(LAPACKE_zgeev_64(Layout, 'N', 'V', order, a, order, w, nullptr, order, vr, order));
             }
             else {
                 VectorND<T> ereal(order);
@@ -48,9 +48,9 @@ namespace Physica {
                 auto* wr = reinterpret_cast<Tm*>(ereal.data());
                 auto* wi = reinterpret_cast<Tm*>(eimag.data());
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_sgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order));
+                    check_lapack(LAPACKE_sgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vr, order));
                 else
-                    check_lapack(LAPACKE_dgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vl, order));
+                    check_lapack(LAPACKE_dgeev_64(Layout, 'N', 'V', order, a, order, wr, wi, nullptr, order, vr, order));
                 for (size_t i = 0; i < order; ++i)
                     eigenvalues[i] = Tc(ereal[i], eimag[i]);
             }

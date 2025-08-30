@@ -29,6 +29,7 @@ namespace Physica {
         using This = EigenSolver<T, Order>;
 
         using Tr = T::RealType;
+        using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
         using Tcv = Tc::ValueType;
     public:
@@ -83,10 +84,12 @@ namespace Physica {
         eigenvalues.grads() = transGrads.diag();
 
         if (getNeedEigenvectors()) {
+            const double threshold = std::sqrt(std::numeric_limits<T>::epsilon());
             size_t size = getSize();
             for (size_t i = 0; i < size; ++i) {
                 for (size_t j = 0; j < size; ++j) {
-                    if (i == j)
+                    bool isDegenerate = scalarNear(eigenvalues.calc_value(i), eigenvalues.calc_value(j), threshold);
+                    if (isDegenerate)
                         transGrads(i, j) = 0;
                     else
                         transGrads(i, j) /= (eigenvalues.calc_value(j) - eigenvalues.calc_value(i));

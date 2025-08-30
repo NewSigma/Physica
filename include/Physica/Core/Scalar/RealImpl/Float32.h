@@ -72,10 +72,10 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = default;
         __host__ __device__ explicit operator float() const noexcept { return f; }
         __host__ __device__ explicit operator double() const noexcept { return f; }
-        __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(f + s.f); }
-        __host__ __device__ Real operator-(const Real& s) const noexcept { return Real(f - s.f); }
-        __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(f * s.f); }
-        __host__ __device__ Real operator/(const Real& s) const noexcept;
+        __host__ __device__ constexpr Real operator+(const Real& s) const noexcept;
+        __host__ __device__ constexpr Real operator-(const Real& s) const noexcept;
+        __host__ __device__ constexpr Real operator*(const Real& s) const noexcept;
+        __host__ __device__ constexpr Real operator/(const Real& s) const noexcept;
         __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(f, i)); }
         __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(f, -i)); }
         __host__ __device__ Real operator-() const noexcept { return Real(-f); }
@@ -111,7 +111,19 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ Real<Float32>::Real(const T& x) requires(!T::isComplex && !Diffable<T>) : f(float(x)) {}
 
-    __host__ __device__ inline Real<Float32> Real<Float32>::operator/(const This& s) const noexcept {
+    __host__ __device__ constexpr auto Real<Float32>::operator+(const Real& s) const noexcept -> Real {
+        return Real(f + s.f);
+    }
+
+    __host__ __device__ constexpr auto Real<Float32>::operator-(const Real& s) const noexcept -> Real {
+        return Real(f - s.f);
+    }
+
+    __host__ __device__ constexpr auto Real<Float32>::operator*(const Real& s) const noexcept -> Real {
+        return Real(f * s.f);
+    }
+
+    __host__ __device__ constexpr auto Real<Float32>::operator/(const This& s) const noexcept -> Real {
         assert(!s.isZero() && "[Error]: Divide by zero");
         return Real(f / s.f);
     }

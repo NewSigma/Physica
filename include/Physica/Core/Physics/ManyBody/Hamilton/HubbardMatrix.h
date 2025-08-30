@@ -75,6 +75,7 @@ namespace Physica {
         [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
         [[nodiscard]] const Lattice& getLattice() const noexcept { return *this; }
         [[nodiscard]] const auto& getRepr() const noexcept { return repr; }
+        [[nodiscard]] auto& getPhaseArgs() noexcept { return phaseArgs; }
     protected:
         Tr repelElem(StateType psi) const noexcept;
         T hoppingElem(StateType rowPsi, StateType colPsi) const noexcept;

@@ -66,7 +66,14 @@ namespace Physica {
             , rowPrefix("")
             , rowSuffix("")
             , rowSeparator("")
-            , separator(" ") {}
+            , separator(" ") {
+        bool isVectorLike = (getRow() == 1) || (getCol() == 1);
+        if (isVectorLike) {
+            setMatPrefix("(");
+            setMatSuffix(")");
+            setSeparator(", ");
+        }
+    }
 
     template<Matrix T>
     FormatedMatrix<T>& FormatedMatrix<T>::toFormatMMA() {

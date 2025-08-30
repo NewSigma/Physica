@@ -62,7 +62,7 @@ namespace Physica {
         void compute_mkl(const Matrix auto& source);
 
         void sort();
-        void sort(std::invocable<Tc, Tc> auto comp);
+        void sort(std::invocable<Tc, Tc> auto less);
         void resize(size_t size);
         void resize(size_t size, bool needEigenvector);
         [[nodiscard]] auto reconstruct() const;
@@ -77,7 +77,7 @@ namespace Physica {
         [[nodiscard]] bool getNeedEigenvectors() const noexcept;
         /* Static members */
         static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors);
-        static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto comp);
+        static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto less);
         static bool defaultComp(Tc a, Tc b) noexcept;
     private:
         template<Matrix M>
@@ -152,12 +152,12 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void EigenSolver<T, Order>::sort(std::invocable<Tc, Tc> auto comp) {
+    void EigenSolver<T, Order>::sort(std::invocable<Tc, Tc> auto less) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
             for (size_t j = i + 1; j < order; ++j) {
-                if (comp(eigenvalues[j], eigenvalues[index_min]))
+                if (less(eigenvalues[j], eigenvalues[index_min]))
                     index_min = j;
             }
 
@@ -280,12 +280,12 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void EigenSolver<T, Order>::sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto comp) {
+    void EigenSolver<T, Order>::sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, std::invocable<Tc, Tc> auto less) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
             for (size_t j = i + 1; j < order; ++j) {
-                if (comp(eigenvalues[j], eigenvalues[index_min]))
+                if (less(eigenvalues[j], eigenvalues[index_min]))
                     index_min = j;
             }
 
