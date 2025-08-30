@@ -40,6 +40,8 @@ namespace Physica {
         void decomp(MatrixType A);
         DenseVector<T, Order> solve(const Vector auto& b) const;
         MatrixB solve(const Matrix auto& b);
+
+        void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return lu.getOrder(); }
@@ -50,6 +52,9 @@ namespace Physica {
 
     template<Scalar T, int Option, size_t Order>
     void LUSolver<T, Option, Order>::decomp(MatrixType A) {
+        assert(A.isSquare());
+        if (A.getRow() != getOrder())
+            resize(A.getRow());
         lu.compute(std::move(A));
     }
 
@@ -57,10 +62,7 @@ namespace Physica {
     DenseVector<T, Order> LUSolver<T, Option, Order>::solve(const Vector auto& b) const {
         const size_t order = getOrder();
         assert(b.getLength() == order);
-        DenseVector<T, Order> result(order);
-        for (size_t i = 0; i < order; ++i)
-            result[i] = b.calc(lu.getBiasOrder()[i]);
-
+        DenseVector<T, Order> result = lu.getPerm() * b;
         MatrixType working = lu.getMatrixLU();
         for (size_t i = 0; i < order - 1; ++i) {
             auto bottom = working.bottomRows(i + 1);
@@ -83,6 +85,11 @@ namespace Physica {
         for (size_t i = 0; i < b.getCol(); ++i)
             result.asArray() = solve(result.col(i));
         return result;
+    }
+
+    template<Scalar T, int Option, size_t Order>
+    void LUSolver<T, Option, Order>::resize(size_t size) {
+        lu.resize(size);
     }
 
     template<Scalar T, int Option, size_t Order>

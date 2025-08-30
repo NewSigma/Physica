@@ -19,20 +19,21 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
     class LUDecomp {
         using This = LUDecomp;
         using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
-        using BiasArray = std::conditional<Pivot, Array<size_t>, PlainStruct<void>>::type; // TODO: use permutation matrix instead
+        using BiasArray = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
 
         constexpr static bool isComplex = T::isComplex;
         using Tc = T::ComplexType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
         WorkingMatrix working;
-        [[no_unique_address]] BiasArray biasOrder;
+        [[no_unique_address]] PermMatrix<T> perm;
     public:
         LUDecomp() = default;
         LUDecomp(size_t size);
@@ -53,9 +54,9 @@ namespace Physica {
         [[nodiscard]] size_t getOrder() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
-        [[nodiscard]] const WorkingMatrix& getMatrixLU() const noexcept { return working; }
+        [[nodiscard]] const auto& getMatrixLU() const noexcept { return working; }
         [[nodiscard]] auto getMatrixU() const noexcept { return working.triu(); }
-        [[nodiscard]] const Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
+        [[nodiscard]] const auto& getPerm() const noexcept { return perm; }
     private:
         void pre_compute(const Matrix auto& source) const noexcept;
         void decomp_col(size_t col);
@@ -84,16 +85,14 @@ namespace Physica {
         pre_compute(source);
 
         const size_t order = source.getRow();
-        if constexpr (Pivot) {
-            for(size_t i = 0; i < order; ++i)
-                biasOrder[i] = i;
-        }
+        if constexpr (Pivot)
+            perm = PermMatrix<T>(order);
 
         working = source;
         for (size_t i = 0; i < order; ++i) {
             if constexpr (Pivot) {
                 size_t j = working.partialPivoting(i);
-                std::swap(biasOrder[i], biasOrder[j]);
+                perm.swapRows(i, j);
             }
             decomp_col(i);
         }
@@ -103,7 +102,7 @@ namespace Physica {
     void LUDecomp<T, Pivot>::resize(size_t size) {
         working.resize(size, size);
         if constexpr (Pivot)
-            biasOrder.resize(size);
+            perm.resize(size);
     }
 
     template<Scalar T, bool Pivot>
@@ -111,12 +110,12 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj);
         if constexpr (Pivot)
-            biasOrder.swap(biasOrder);
+            perm.swap(perm);
     }
 
     template<Scalar T, bool Pivot>
     void LUDecomp<T, Pivot>::pre_compute(const Matrix auto& source) const noexcept {
-        assert(source.getRow() == source.getCol());
+        assert(source.isSquare());
         assert(source.getRow() == getOrder());
     }
     /**

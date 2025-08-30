@@ -21,12 +21,16 @@
 using namespace Physica;
 using Matrix3D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
 
+template<bool Pivot>
 void test(const Matrix auto& answer) {
-    LUDecomp<float64, false> lu(answer.getRow());
+    LUDecomp<float64, Pivot> lu(answer.getRow());
     auto product = [&]() {
         Matrix3D matrixL = lu.getMatrixLU().tril();
         matrixL.diag() = float64(1);
         Matrix3D result = matrixL * lu.getMatrixU();
+        if constexpr (Pivot)
+            result = Matrix3D(lu.getPerm() * result);
+
         if (!matrixNear(result, answer, 1E-15))
             exit(1);
     };
@@ -42,6 +46,7 @@ void test(const Matrix auto& answer) {
 
 int main() {
     const Matrix3D mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
-    test(mat1);
+    test<false>(mat1);
+    test<true>(mat1);
     return 0;
 }

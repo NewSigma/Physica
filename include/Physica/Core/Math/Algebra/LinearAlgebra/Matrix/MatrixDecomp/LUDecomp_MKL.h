@@ -33,19 +33,23 @@ namespace Physica {
         const size_t lda = m;
         auto* a = reinterpret_cast<Tm*>(working.data());
         if constexpr (Pivot) {
-            auto* ipiv = reinterpret_cast<MKL_INT64*>(biasOrder.data());
+            Array<MKL_INT64> ipiv(m);
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_cgetrf_64(Layout, m, n, a, lda, ipiv));
+                    check_lapack(LAPACKE_cgetrf_64(Layout, m, n, a, lda, ipiv.data()));
                 else
-                    check_lapack(LAPACKE_zgetrf_64(Layout, m, n, a, lda, ipiv));
+                    check_lapack(LAPACKE_zgetrf_64(Layout, m, n, a, lda, ipiv.data()));
             }
             else {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_sgetrf_64(Layout, m, n, a, lda, ipiv));
+                    check_lapack(LAPACKE_sgetrf_64(Layout, m, n, a, lda, ipiv.data()));
                 else
-                    check_lapack(LAPACKE_dgetrf_64(Layout, m, n, a, lda, ipiv));
+                    check_lapack(LAPACKE_dgetrf_64(Layout, m, n, a, lda, ipiv.data()));
             }
+
+            perm = PermMatrix<T>(m);
+            for (size_t i = 0; i < m; ++i)
+                perm.swapRows(i, ipiv[i] - 1);
         }
         else {
             if constexpr (isComplex) {

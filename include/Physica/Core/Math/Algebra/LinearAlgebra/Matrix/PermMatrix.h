@@ -41,9 +41,10 @@ namespace Physica {
 
         [[nodiscard]] T det() const;
         [[nodiscard]] constexpr static T lnAbsDet() noexcept { return T(0); }
-
-        void swapRows(size_t row1, size_t row2);
         [[nodiscard]] PermMatrix inverse() const noexcept;
+
+        void resize(size_t order);
+        void swapRows(size_t row1, size_t row2);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getIndices() const noexcept { return indices; }
@@ -87,16 +88,21 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void PermMatrix<T>::swapRows(size_t row1, size_t row2) {
-        std::swap(indices[row1], indices[row2]);
-    }
-
-    template<Scalar T>
     PermMatrix<T> PermMatrix<T>::inverse() const noexcept {
         Array<size_t> result(indices.getLength());
         for (size_t i = 0; i < result.getLength(); ++i)
             result[indices[i]] = i;
         return PermMatrix<T>(std::move(result));
+    }
+
+    template<Scalar T>
+    void PermMatrix<T>::resize(size_t order) {
+        indices.resize(order);
+    }
+
+    template<Scalar T>
+    void PermMatrix<T>::swapRows(size_t row1, size_t row2) {
+        std::swap(indices[row1], indices[row2]);
     }
 
     template<Scalar T>
