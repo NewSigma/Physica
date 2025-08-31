@@ -34,7 +34,7 @@ namespace Physica {
     template<class T, size_t Align = Dynamic>
     class HostAllocator {
         using This = HostAllocator<T, Align>;
-
+    protected:
         constexpr static bool OverAlign = Align > alignof(std::max_align_t);
     public:
         using value_type = T;
@@ -57,7 +57,7 @@ namespace Physica {
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
         void construct(T* p, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
         void destroy(T* p) noexcept;
-    private:
+    protected:
         [[nodiscard]] static size_t calcSize(size_t n) noexcept;
     };
 

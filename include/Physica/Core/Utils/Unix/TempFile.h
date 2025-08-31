@@ -35,6 +35,7 @@ namespace Physica {
         /* Operators */
         TempFile& operator=(TempFile obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        void reserve(size_t size);
         void release() noexcept { fd = -1; }
         void swap(TempFile& __restrict obj) noexcept;
         /* Getters */
@@ -65,6 +66,12 @@ namespace Physica {
             unlink(name);
             fd = -1;
         }
+    }
+
+    template<size_t N>
+    void TempFile<N>::reserve(size_t size) {
+        if (ftruncate64(fd, size))
+            throw SystemException();
     }
 
     template<size_t N>
