@@ -318,7 +318,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::real() const noexcept -> RealType {
         const auto& x = this->getDerived();
         if constexpr (isDiffable)
             return RealType(x.value().real(), x.grad().real());
@@ -329,7 +329,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::imag() const noexcept -> RealType {
         const auto& x = this->getDerived();
         if constexpr (isDiffable)
             return RealType(x.value().imag(), x.grad().imag());
@@ -340,7 +340,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ ScalarBase<Derived>::ScalarType ScalarBase<Derived>::conjugate() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::conjugate() const noexcept -> ScalarType {
         const auto& x = this->getDerived();
         if constexpr (isDiffable)
             return ScalarType(x.value().conjugate(), x.grad().conjugate());
@@ -351,7 +351,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::norm() const noexcept {
+    __host__ __device__ auto ScalarBase<Derived>::norm() const noexcept -> RealType {
         return sqrt(squaredNorm());
     }
 

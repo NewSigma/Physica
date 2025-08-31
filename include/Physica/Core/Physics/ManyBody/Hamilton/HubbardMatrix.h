@@ -44,6 +44,7 @@ namespace Physica {
 
         using Tr = T::RealType;
         using Tv = T::ValueType;
+        using Tc = T::ComplexType;
     public:
         using Base::Dim;
         using Base::NumSite;
@@ -52,11 +53,11 @@ namespace Physica {
         T hoppingT;
         Tr repelU;
         Repr repr;
-        DenseVector<Tr, Dim> phaseArgs;
+        DenseVector<Tc, Dim> phases;
     public:
         HubbardMatrix() = default;
         HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_);
-        HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, DenseVector<Tr, Dim> phaseArgs_) requires(BC == BoundaryCond::TBC);
+        HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, const DenseVector<Tr, Dim>& phaseArgs) requires(BC == BoundaryCond::TBC);
         HubbardMatrix(const This&) = default;
         HubbardMatrix(This&&) noexcept = default;
         ~HubbardMatrix() = default;
@@ -75,7 +76,8 @@ namespace Physica {
         [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
         [[nodiscard]] const Lattice& getLattice() const noexcept { return *this; }
         [[nodiscard]] const auto& getRepr() const noexcept { return repr; }
-        [[nodiscard]] auto& getPhaseArgs() noexcept { return phaseArgs; }
+        /* Setters */
+        void setPhaseArgs(const DenseVector<Tr, Dim>& phaseArgs) noexcept;
     protected:
         Tr repelElem(StateType psi) const noexcept;
         T hoppingElem(StateType rowPsi, StateType colPsi) const noexcept;

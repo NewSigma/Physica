@@ -75,14 +75,17 @@ namespace Physica {
 
     template<Scalar Tv, size_t Order>
     void EigenSolver<Diff<Tv, DiffMode::Forward, 1>, Order>::compute(const Matrix auto& source) {
-        constexpr bool isHermite = MatrixOption::isHermiteMatrix<decltype(source)>();
-        constexpr bool isRealSymm = !T::isComplex && MatrixOption::isSymmMatrix<decltype(source)>();
-        static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigenvalues is not implemented");
-
         using GradMatrix = EigenSolver<Tv, Order>::EigenvectorMatrix;
         EigenSolver<Tv, Order> solver(source.values(), true);
         const auto basis = solver.getEigenvectors();
-        GradMatrix transGrads = basis.hermite() * GradMatrix(source.grads() * basis);
+
+        GradMatrix transGrads;
+        constexpr bool isHermite = MatrixOption::isHermiteMatrix<decltype(source)>();
+        constexpr bool isRealSymm = !T::isComplex && MatrixOption::isSymmMatrix<decltype(source)>();
+        if constexpr (isHermite || isRealSymm)
+            transGrads = basis.hermite() * GradMatrix(source.grads() * basis);
+        else
+            transGrads = GradMatrix(basis.inverse()) * GradMatrix(source.grads() * basis);
 
         eigenvalues.values() = std::move(solver.getEigenvalues());
         eigenvalues.grads() = transGrads.diag();

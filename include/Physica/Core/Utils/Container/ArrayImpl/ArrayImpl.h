@@ -59,7 +59,7 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
-    void Array<T, Length, Allocator>::zeros() noexcept {
+    __host__ __device__ void Array<T, Length, Allocator>::zeros() noexcept {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
         memset(arr, 0, Length * sizeof(T));
     }

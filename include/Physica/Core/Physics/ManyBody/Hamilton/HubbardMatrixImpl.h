@@ -31,9 +31,9 @@ namespace Physica {
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
-    HubbardMatrix<T, Repr, BC>::HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, DenseVector<Tr, Dim> phaseArgs_) requires(BC == BoundaryCond::TBC)
+    HubbardMatrix<T, Repr, BC>::HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, const DenseVector<Tr, Dim>& phaseArgs) requires(BC == BoundaryCond::TBC)
             : HubbardMatrix(hoppingT_, repelU_, std::move(lattice), std::move(repr_)) {
-        phaseArgs = std::move(phaseArgs_);
+        setPhaseArgs(phaseArgs);
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
@@ -99,7 +99,13 @@ namespace Physica {
         hoppingT.swap(obj.hoppingT);
         repelU.swap(obj.repelU);
         repr.swap(obj.repr);
-        phaseArgs.swap(obj.phaseArgs);
+        phases.swap(obj.phases);
+    }
+
+    template<Scalar T, Representation Repr, BoundaryCond BC>
+    void HubbardMatrix<T, Repr, BC>::setPhaseArgs(const DenseVector<Tr, Dim>& phaseArgs) noexcept {
+        for (int i = 0; i < Dim; ++i)
+            phases[i] = Tc::fromPhase(phaseArgs[i]);
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
@@ -150,8 +156,8 @@ namespace Physica {
             const auto& map = Lattice::getSiteBoundaryMap();
             if (map.contains(std::make_pair(site, site1))) {
                 int dim = map.find(std::make_pair(site, site1))->second;
-                result[0] = T::fromPhase(phaseArgs[dim]);
-                result[1] = T::fromPhase(-phaseArgs[dim]);
+                result[0] = phases[dim];
+                result[1] = phases[dim].conjugate();
             }
             else
                 result = Tr(1);
