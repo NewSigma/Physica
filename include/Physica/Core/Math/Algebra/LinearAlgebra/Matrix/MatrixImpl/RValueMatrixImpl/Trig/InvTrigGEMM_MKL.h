@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "TrigInverse.h"
+#include "InvTrigGEMM.h"
 
 namespace Physica {
     template<Matrix M1, Matrix M2>

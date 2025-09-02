@@ -21,19 +21,21 @@
 #include "Trig.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2>
-    class GEMM<TrigUpper<M1>, M2> : public RValueMatrix<GEMM<TrigUpper<M1>, M2>> {
-        using This = GEMM<TrigUpper<M1>, M2>;
+    template<Scalar T, size_t Order> class DiagMatrix;
+
+    template<Matrix M, Scalar U, size_t Order>
+    class GEMM<TrigUpper<M>, DiagMatrix<U, Order>> : public RValueMatrix<GEMM<TrigUpper<M>, DiagMatrix<U, Order>>> {
+        using This = GEMM<TrigUpper<M>, DiagMatrix<U, Order>>;
         using Base = RValueMatrix<This>;
     public:
         using Base::isComplex;
     protected:
         using typename Base::T;
     private:
-        const TrigUpper<M1>& mat1;
-        const M2& mat2;
+        const TrigUpper<M>& mat1;
+        const DiagMatrix<U, Order>& mat2;
     public:
-        GEMM(const TrigUpper<M1>& mat1_, const M2& mat2_);
+        GEMM(const TrigUpper<M>& mat1_, const DiagMatrix<U, Order>& mat2_);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -42,7 +44,6 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
-        void assign_mkl(Matrix auto& target) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
@@ -50,15 +51,14 @@ namespace Physica {
         [[nodiscard]] const auto& getRHS() const noexcept { return mat2; }
     };
 
-    template<Matrix M1, Matrix M2>
-    GEMM<TrigUpper<M1>, M2>::GEMM(const TrigUpper<M1>& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {}
+    template<Matrix M, Scalar U, size_t Order>
+    GEMM<TrigUpper<M>, DiagMatrix<U, Order>>::GEMM(const TrigUpper<M>& mat1_, const DiagMatrix<U, Order>& mat2_) : mat1(mat1_), mat2(mat2_) {}
 
-    template<Matrix M1, Matrix M2>
-    void GEMM<TrigUpper<M1>, M2>::assign(Matrix auto& target) const {
-        if constexpr (HasMKL())
-            assign_mkl(target);
-        else
-            noImpl(__func__);
+    template<Matrix M, Scalar U, size_t Order>
+    void GEMM<TrigUpper<M>, DiagMatrix<U, Order>>::assign(Matrix auto& target) const {
+        target.zeros();
+        for (size_t i = 0; i < getCol(); ++i)
+            target.col(i).head(i + 1) = mat1.col(i).head(i + 1) * mat2.diag()[i];
     }
 }
 

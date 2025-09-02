@@ -53,6 +53,8 @@ namespace Physica {
         [[nodiscard]] const auto& getMatrixT() const noexcept { return qr.getWorking(); }
         [[nodiscard]] const auto& getQR() const noexcept { return qr; }
         [[nodiscard]] size_t getSize() const noexcept { return matrixQ.getRow(); }
+        /* Setters */
+        void setMatrixR(const Matrix auto& matrixR);
     };
 
     template<Scalar T>
@@ -94,8 +96,7 @@ namespace Physica {
 
         qr.compute(source);
         matrixQ = qr.getMatrixQ();
-        qr.toQDT(matrixD.diag());
-        qr.getWorking() = qr.getMatrixR(); // Clear lower diagonal
+        setMatrixR(qr.getMatrixR());
     }
 
     template<Scalar T>
@@ -116,5 +117,11 @@ namespace Physica {
         matrixQ.swap(obj.matrixQ);
         matrixD.swap(obj.matrixD);
         qr.swap(obj.qr);
+    }
+
+    template<Scalar T>
+    void QDTDecomp<T>::setMatrixR(const Matrix auto& matrixR) {
+        qr.getWorking() = matrixR; // Clear lower diagonal
+        qr.toQDT(matrixD.diag());
     }
 }

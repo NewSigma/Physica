@@ -169,4 +169,5 @@ namespace Physica {
 }
 
 #include "TrigGEMM.h"
-#include "TrigInverse.h"
+#include "InvTrigGEMM.h"
+#include "TrigDiagMM.h"

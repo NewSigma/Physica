@@ -63,5 +63,5 @@ namespace Physica {
 }
 
 #ifdef PHYSICA_MKL
-    #include "TrigInverse_MKL.h"
+    #include "InvTrigGEMM_MKL.h"
 #endif
