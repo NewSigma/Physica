@@ -37,6 +37,7 @@ namespace Physica {
         MatrixND aux;
         CyclicChainQDT<T> chainU;
         CyclicChainQDT<T> chainD;
+        QRDecomp<T> kinetic;
 
         QRDecomp<T> qr;
         DiagMatrix<T> diagB;
@@ -108,6 +109,12 @@ namespace Physica {
     template<Scalar T>
     DQMC<T>::DQMC(const Params& params_, int period) : params(params_) {
         resize(params.getNumSite(), params.getNumSplit(), period);
+
+        kinetic.compute(params.getExpB());
+        for (int split = 0; split < getNumSplit(); ++split) {
+            chainU[split] = QDTDecomp<T>(kinetic);
+            chainD[split] = QDTDecomp<T>(kinetic);
+        }
     }
 
     template<Scalar T>
@@ -247,6 +254,7 @@ namespace Physica {
         aux.swap(obj.aux);
         chainU.swap(obj.chainU);
         chainD.swap(obj.chainD);
+        kinetic.swap(obj.kinetic);
 
         qr.swap(obj.qr);
         diagB.swap(obj.diagB);
@@ -268,6 +276,7 @@ namespace Physica {
         aux.resize(numSite, numSplit);
         chainU.resize(numSplit);
         chainD.resize(numSplit);
+        kinetic.resize(numSite, numSite);
 
         qr.resize(numSite, numSite);
         diagB.resize(numSite);
@@ -282,13 +291,12 @@ namespace Physica {
     template<Scalar T>
     void DQMC<T>::initChain() {
         const int numSplit = getNumSplit();
-        const auto& expB = params.getExpB();
         DiagMatrix<T> expU(getNumSite());
         for (int split = 0; split < numSplit; ++split) {
             expU.diag() = exp(params.getAlpha() * aux.col(split));
-            chainU[split].compute(expB * expU);
+            chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
             expU.diag() = exp(-params.getAlpha() * aux.col(split));
-            chainD[split].compute(expB * expU);
+            chainD[split].setMatrixR(kinetic.getMatrixR() * expU);
         }
         chainU.invalidates();
         chainD.invalidates();

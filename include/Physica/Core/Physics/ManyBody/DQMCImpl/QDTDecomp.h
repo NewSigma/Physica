@@ -34,6 +34,7 @@ namespace Physica {
     public:
         QDTDecomp() = default;
         QDTDecomp(size_t size);
+        QDTDecomp(QRDecomp<T> qr_);
         QDTDecomp(const Matrix auto& source);
         QDTDecomp(const This&) = default;
         QDTDecomp(This&&) noexcept = default;
@@ -55,11 +56,20 @@ namespace Physica {
         [[nodiscard]] size_t getSize() const noexcept { return matrixQ.getRow(); }
         /* Setters */
         void setMatrixR(const Matrix auto& matrixR);
+    private:
+        void toQDT();
     };
 
     template<Scalar T>
     QDTDecomp<T>::QDTDecomp(size_t size) {
         resize(size);
+    }
+
+    template<Scalar T>
+    QDTDecomp<T>::QDTDecomp(QRDecomp<T> qr_) : QDTDecomp(qr_.getRow()) {
+        assert(qr_.getWorking().isSquare());
+        qr = std::move(qr_);
+        toQDT();
     }
 
     template<Scalar T>
@@ -95,8 +105,7 @@ namespace Physica {
             resize(source.getRow());
 
         qr.compute(source);
-        matrixQ = qr.getMatrixQ();
-        setMatrixR(qr.getMatrixR());
+        toQDT();
     }
 
     template<Scalar T>
@@ -123,5 +132,11 @@ namespace Physica {
     void QDTDecomp<T>::setMatrixR(const Matrix auto& matrixR) {
         qr.getWorking() = matrixR; // Clear lower diagonal
         qr.toQDT(matrixD.diag());
+    }
+
+    template<Scalar T>
+    void QDTDecomp<T>::toQDT() {
+        matrixQ = qr.getMatrixQ();
+        setMatrixR(qr.getMatrixR());
     }
 }
