@@ -76,16 +76,26 @@ namespace Physica {
     template<Scalar T, Representation Repr, BoundaryCond BC>
     T TransIsingMatrix<T, Repr, BC>::calc(size_t row, size_t col) const {
         const auto psi1 = repr[row];
-        const auto mask = StateType::makeFullMask() >> 1;
         if (row == col) {
+            using enum BoundaryCond;
             const auto bits = psi1.getOccupyBits();
-            const int numAntiSpin = std::popcount((bits >> 1) ^ (bits & mask));
-            assert(numAntiSpin < NumSite);
-            return -getCouplingJ() * T((int(NumSite - 1) - numAntiSpin * 2));
+            if constexpr (BC == OBC) {
+                constexpr auto Mask = StateType::makeFullMask() >> 1;
+                const int numAntiSpin = std::popcount((bits >> 1) ^ (bits & Mask));
+                assert(numAntiSpin < NumSite);
+                return -getCouplingJ() * T(NumSite - 1 - numAntiSpin * 2);
+            }
+            else {
+                static_assert(BC == PBC, "[Error]: Unsupported boundary condition");
+                constexpr auto Mask = StateType::makeHighMask();
+                const int numAntiSpin = std::popcount(((bits >> 1) | ((bits & 1) ? Mask : 0)) ^ bits);
+                return -getCouplingJ() * T(NumSite - numAntiSpin * 2);
+            }
         }
 
         const auto psi2 = repr[col];
-        if ((psi1 ^ psi2).getNumParticle() == 1)
+        bool OneFlip = (psi1 ^ psi2).getNumParticle() == 1;
+        if (OneFlip)
             return -getTransG();
         return 0;
     }

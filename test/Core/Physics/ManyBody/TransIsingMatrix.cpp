@@ -23,8 +23,9 @@
 using namespace Physica;
 using T = float32;
 
-int main() {
-    TransIsingMatrix<T, SpinRepr<1, 3>> hamilton(1, 2, SquareLattice<1>{{3}, 1}, SpinRepr<1, 3>(3));
+template<BoundaryCond BC>
+void test() {
+    TransIsingMatrix<T, SpinRepr<1, 3>, BC> hamilton(1, 2, SquareLattice<1, BC>{{3}, 1}, SpinRepr<1, 3>(3));
 
     const auto size = hamilton.getRow();
     DenseMatrix<T> mat(size, size);
@@ -35,6 +36,12 @@ int main() {
     }
 
     if (!matrixNear(hamilton, mat, 1E-7))
-        return 1;
+        exit(EXIT_FAILURE);
+}
+
+int main() {
+    using enum BoundaryCond;
+    test<OBC>();
+    test<PBC>();
     return 0;
 }

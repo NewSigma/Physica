@@ -84,10 +84,20 @@ namespace Physica {
             }
 
             const T couplingJ = getCouplingJ() * vec[i];
-            for (unsigned int site = 0; site < NumSite - 1; ++site) {
-                auto coeff = PauliMatrix<T, Z>(site).apply(psi0);
-                coeff *= PauliMatrix<T, Z>(site + 1).apply(psi0);
-                target[i] -= couplingJ * coeff;
+            if constexpr (BC == BoundaryCond::OBC) {
+                for (unsigned int site = 0; site < NumSite - 1; ++site) {
+                    auto coeff = PauliMatrix<T, Z>(site).apply(psi0);
+                    coeff *= PauliMatrix<T, Z>(site + 1).apply(psi0);
+                    target[i] -= couplingJ * coeff;
+                }
+            }
+            else {
+                static_assert(BC == BoundaryCond::PBC, "[Error]: Unsupported BoundaryCond");
+                for (unsigned int site = 0; site < NumSite; ++site) {
+                    auto coeff = PauliMatrix<T, Z>(site).apply(psi0);
+                    coeff *= PauliMatrix<T, Z>((site + 1) % NumSite).apply(psi0);
+                    target[i] -= couplingJ * coeff;
+                }
             }
         }
     }
