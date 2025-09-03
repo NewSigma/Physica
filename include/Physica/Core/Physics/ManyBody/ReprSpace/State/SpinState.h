@@ -75,6 +75,8 @@ namespace Physica {
 
         [[nodiscard]] bool isSpinUp(int8_t site) const noexcept;
         [[nodiscard]] bool isSpinDown(int8_t site) const noexcept;
+        [[nodiscard]] int getNumSpinUp() const noexcept;
+        [[nodiscard]] int getNumSpinDown() const noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_state();

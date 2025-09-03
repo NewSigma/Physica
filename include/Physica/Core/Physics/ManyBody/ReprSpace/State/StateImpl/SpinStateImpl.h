@@ -164,6 +164,16 @@ namespace Physica {
     }
 
     template<int Dim, int NumSite>
+    int SpinState<Dim, NumSite>::getNumSpinUp() const noexcept {
+        return std::popcount(occupyBits);
+    }
+
+    template<int Dim, int NumSite>
+    int SpinState<Dim, NumSite>::getNumSpinDown() const noexcept {
+        return NumSite - getNumSpinUp();
+    }
+
+    template<int Dim, int NumSite>
     template<RNG R>
     auto SpinState<Dim, NumSite>::random_state() -> This {
         constexpr bool flag = NumSite < sizeof(typename R::result_type) * CHAR_BIT;

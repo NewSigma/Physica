@@ -80,7 +80,7 @@ namespace Physica {
             }
 
             if (iteration == 0)
-                x = Tr(0);
+                x.zeros();
             else
                 x[index] = Tr(0);
 

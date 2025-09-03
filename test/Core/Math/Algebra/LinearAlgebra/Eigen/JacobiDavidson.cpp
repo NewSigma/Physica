@@ -16,28 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using ScalarType = float64;
-using ComplexType = Complex<ScalarType>;
 using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
-int main() {
-    using MatrixType = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
+void test1() {
+    using MatrixType = DenseMatrix<cfloat64, MatrixOption::Row | MatrixOption::Vector>;
     const MatrixType data = MatrixType::random_uniform<RandomSource>(64);
-    const DenseHermiteMatrix<ComplexType> hermite = data + data.hermite();
+    const DenseHermiteMatrix<cfloat64> hermite = data + data.hermite();
 
-    EigenSolver<ComplexType> eig(hermite, false);
+    EigenSolver<cfloat64> eig(hermite, false);
     eig.sort();
-    JacobiDavidson<ComplexType> jd(hermite.getRow(), 48);
-    jd.compute(hermite, VectorND<ComplexType>::random_uniform<RandomSource>(data.getRow()));
+    JacobiDavidson<cfloat64> jd(hermite.getRow(), 48);
+    jd.compute(hermite, VectorND<cfloat64>::random_uniform<RandomSource>(data.getRow()));
     jd.sort();
 
     if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-13))
-        return 1;
+        exit(1);
+}
+
+int main() {
+    test1();
     return 0;
 }

@@ -71,7 +71,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void TransIsingVecProd<T, U, BC, V>::assign(Vector auto& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
-        target = RealType(0);
+        target.zeros();
 
         const auto& repr = getRepr();
         for (size_t i = 0; i < getLength(); ++i) {

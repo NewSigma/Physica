@@ -83,7 +83,7 @@ namespace Physica {
             }, getLength(), 0).wait();
         }
         else {
-            target = Tr(0);
+            target.zeros();
             const size_t length = getLength();
             for (size_t i = 0; i < length; ++i)
                 dotImpl(target, vec.calc(i), i);

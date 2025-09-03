@@ -77,6 +77,7 @@ namespace Physica {
         [[nodiscard]] operator curandGenerator_t() noexcept { return curand; }
         /* Operations */
         [[nodiscard("[Info]: Record the new seed for reproducible result")]] SeedType reseed();
+        void reseed(SeedType seed_);
         /* Getters */
         [[nodiscard]] GenType& getGen() noexcept { return gen; }
         [[nodiscard]] VSLStreamStatePtr getStream() noexcept { return pStream; }
@@ -124,9 +125,22 @@ namespace Physica {
     template<RandomOption Option, uint64_t FixedSeed>
     auto Random<Option, FixedSeed>::reseed() -> SeedType {
         if constexpr (IsSeedFixed)
-            seed = FixedSeed;
-        else
+            reseed(FixedSeed);
+        else {
             RandomSeed::rdrand(seed);
+            reseed(seed);
+        }
+        return seed;
+    }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    void Random<Option, FixedSeed>::reseed(SeedType seed_) {
+        if constexpr (IsSeedFixed) {
+            assert(seed_ == FixedSeed);
+            seed = FixedSeed;
+        }
+        else
+            seed = seed_;
 
         auto tseed = getThreadSeed();
         gen.seed(tseed);
@@ -142,7 +156,6 @@ namespace Physica {
             check(curandSetPseudoRandomGeneratorSeed(curand, tseed));
         #endif
         }
-        return seed;
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
