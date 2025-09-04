@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -48,6 +48,7 @@ namespace Physica {
     public:
         FermiRepr() = default;
         FermiRepr(int numSpinUp_, int numSpinDown_);
+        FermiRepr(std::pair<int, int> numSpin);
         FermiRepr(const This&) = default;
         FermiRepr(This&&) noexcept = default;
         ~FermiRepr() = default;
@@ -87,6 +88,9 @@ namespace Physica {
             downIndexMap = std::move(pair.second);
         }
     }
+
+    template<int Dim, int NumSite, bool UseInversionSymm>
+    FermiRepr<Dim, NumSite, UseInversionSymm>::FermiRepr(std::pair<int, int> numSpin) : FermiRepr(numSpin.first, numSpin.second) {}
 
     template<int Dim, int NumSite, bool UseInversionSymm>
     auto FermiRepr<Dim, NumSite, UseInversionSymm>::operator[](size_t index) const noexcept -> StateType {

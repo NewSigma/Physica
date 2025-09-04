@@ -101,7 +101,10 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<bool NoFactor, ExecutePolicy P>
     auto MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type {
-        using BufferType = DenseVector<ScalarType, std::remove_cvref_t<V>::SizeAtCompile>;
+        constexpr size_t SizeAtCompile1 = std::remove_cvref_t<decltype(target)>::SizeAtCompile;
+        constexpr size_t SizeAtCompile2 = std::max(SizeAtCompile1, Base::SizeAtCompile);
+        using BufferType = DenseVector<ScalarType, SizeAtCompile2>;
+
         assert(getLength() == target.getLength());
         const Tr epsilon = std::numeric_limits<Tr>::epsilon();
         const auto& mat = mexp.getMatrix();
@@ -146,8 +149,8 @@ namespace Physica {
     template<ExecutePolicy P>
     auto MatExpVecProd<M, V>::calcParam(Tr traceMu) const -> ParamPair {
         constexpr static Tm NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
-        const auto matI = UnitMatrix<ScalarType>(getLength());
-        const ScalarType norm1 = (mexp.getMatrix() - matI * traceMu).template norm1_power<P>(MaxNormIteration);
+        const auto matI = UnitMatrix<Trv>(getLength());
+        const Tr norm1 = (mexp.getMatrix() - matI * traceMu).template norm1_power<P>(MaxNormIteration);
         const bool isSmallNorm = Tm(norm1) <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;

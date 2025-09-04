@@ -93,6 +93,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */
+        [[nodiscard]] static This nan() noexcept;
         [[nodiscard]] static This fromPhase(T phase) noexcept;
         template<RNG R>
         [[nodiscard]] static This random_uniform();

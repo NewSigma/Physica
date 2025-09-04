@@ -39,6 +39,7 @@ namespace Physica {
         using Base::SizeAtCompile;
         using Base::isReverseDiff;
     protected:
+        using typename Base::Trv;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     public:

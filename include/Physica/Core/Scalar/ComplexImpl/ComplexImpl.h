@@ -153,7 +153,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Complex<T>::PacketType Complex<T>::packet() const {
+    auto Complex<T>::packet() const -> PacketType {
         PacketType packet{};
         packet.load(&re);
         return packet;
@@ -186,7 +186,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Complex<T> Complex<T>::fromPhase(T phase) noexcept {
+    auto Complex<T>::nan() noexcept -> Complex<T> {
+        return {T::nan(), T::nan()};
+    }
+
+    template<Scalar T>
+    auto Complex<T>::fromPhase(T phase) noexcept -> Complex<T> {
         This result{};
         sincos(phase, result.im, result.re);
         return result;
@@ -194,7 +199,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    Complex<T> Complex<T>::random_uniform() {
+    auto Complex<T>::random_uniform() -> Complex<T> {
         T re = T::template random_uniform<R>();
         T im = T::template random_uniform<R>();
         return Complex(std::move(re), std::move(im));
@@ -202,7 +207,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    Complex<T> Complex<T>::random_normal() {
+    auto Complex<T>::random_normal() -> Complex<T> {
         T re = T::template random_normal<R>();
         T im = T::template random_normal<R>();
         return Complex(std::move(re), std::move(im));

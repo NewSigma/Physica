@@ -33,13 +33,13 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ### namespace
 
-源文件中使用using namespace以避免缩进
+源文件中使用using namespace以避免缩进和避免潜在Bug$^{[2]}$
 
 ## Class
 
 ### swap函数原型
 
-参考[2]中的swap函数原型，进一步规定swap不可与自身发生交换，即任意对象T的swap函数的一般实现为
+参考[3]中的swap函数原型，进一步规定swap不可与自身发生交换，即任意对象T的swap函数的一般实现为
 
 ``` C++
 void T::swap(T& __restrict obj) noexcept {  
@@ -60,6 +60,10 @@ void T::swap(T& __restrict obj) noexcept {
 
 不得使用
 
+### auto
+
+函数定义中, 多于4字符的返回类型应后置声明
+
 ## 命名
 
 Namespace: 大驼峰式
@@ -72,4 +76,5 @@ Namespace: 大驼峰式
 ## Reference
 
 [1] Google C++ Style Guide; https://google.github.io/styleguide/cppguide.html  
-[2] Scott Meyers 著，侯捷 译. Effective C++：改善程序与设计的55个具体做法[M]. 北京: 电子工业出版社, 2011  
+[2] LLVM Coding Standards; https://llvm.org/docs/CodingStandards.html  
+[3] Scott Meyers 著，侯捷 译. Effective C++：改善程序与设计的55个具体做法[M]. 北京: 电子工业出版社, 2011  

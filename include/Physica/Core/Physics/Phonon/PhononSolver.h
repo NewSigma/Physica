@@ -386,8 +386,8 @@ namespace Physica {
     template<Scalar T>
     auto PhononSolver<T>::diagonalize(const KSpaceFCMat& dynamicMatrix) -> EigenSolverType {
         const size_t unitCellDOF = dynamicMatrix.getRow();
-        auto eigen = EigenSolverType(unitCellDOF);
-        eigen.compute(dynamicMatrix, true);
+        auto eigen = EigenSolverType(unitCellDOF, true);
+        eigen.compute(dynamicMatrix);
         eigen.sort();
         return eigen;
     }

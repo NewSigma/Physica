@@ -44,7 +44,7 @@ namespace Physica {
         Tr beta = 0;
         Tr lnZ0 = 0; // Collect constant contribution, improve numerical stability
 
-        Tr traceMu = T::nan();
+        Tr traceMu = Tr::nan();
         int numMinCostTerm = 0;
         int numSplit = 0;
     public:
@@ -83,6 +83,8 @@ namespace Physica {
         using Base::random_uniform;
         using Base::random_any;
         [[nodiscard]] bool isPrepared() const noexcept;
+        /* Static members */
+        constexpr static void checkH(const Matrix auto& hamiltonH) noexcept;
     };
 
     template<Scalar T>
@@ -101,7 +103,7 @@ namespace Physica {
     template<Scalar T>
     template<ExecutePolicy P>
     void TPQ<T>::pre_nvt_step(const Matrix auto& hamiltonH, Tr deltaBeta) {
-        static_assert(MatrixOption::isHermiteMatrix<decltype(hamiltonH)>(), "[Error]: Do not support non-hermite hamiltionian");
+        checkH(hamiltonH);
         const Tr factor = deltaBeta * Trv(-0.5);
         const auto expr = exp(factor * hamiltonH) * asVector();
         traceMu = expr.calcTraceMu();
@@ -114,7 +116,7 @@ namespace Physica {
     template<Scalar T>
     template<ExecutePolicy P>
     void TPQ<T>::nvt_step(const Matrix auto& hamiltonH, Tr deltaBeta) {
-        static_assert(MatrixOption::isHermiteMatrix<decltype(hamiltonH)>(), "[Error]: Do not support non-hermite hamiltionian");
+        checkH(hamiltonH);
         if (deltaBeta.isZero())
             return;
 
@@ -223,5 +225,12 @@ namespace Physica {
     template<Scalar T>
     bool TPQ<T>::isPrepared() const noexcept {
         return traceMu.isFinite() && numMinCostTerm > 0 && numSplit > 0;
+    }
+
+    template<Scalar T>
+    constexpr void TPQ<T>::checkH(const Matrix auto& hamiltonH) noexcept {
+        using M = std::remove_cvref<decltype(hamiltonH)>::type;
+        static_assert(std::same_as<T, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
+        static_assert(MatrixOption::isHermiteMatrix<M>(), "[Error]: Do not support non-hermite hamiltionian");
     }
 }

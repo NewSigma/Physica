@@ -91,11 +91,11 @@ namespace Physica {
     auto DenseVector<T, Length, Allocator>::linspace(T from, T to, size_t count) -> This {
         assert(from < to);
         assert(count > 1);
-        const T step = (to - from) / T(count - 1);
+        Trv n = Trv(count - 1);
         This result = This(count);
         for (size_t i = 0; i < count; ++i) {
-            result[i] = from;
-            from += step;
+            Trv factor = Trv(i) / n;
+            result[i] = from * (Trv(1) - factor) + to * factor;
         }
         return result;
     }
