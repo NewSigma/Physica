@@ -122,10 +122,10 @@ namespace Physica {
         const auto expr = exp(factor * hamiltonH) * asVector();
         VectorND<T> dot(Base::getLength());
         if (isPrepared())
-            expr.template assign<true, P>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
+            lnZ0 += expr.template assign<true, P>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
         else {
             traceMu = expr.calcTraceMu();
-            expr.template assign<true, P>(dot, traceMu);
+            lnZ0 += expr.template assign<true, P>(dot, traceMu);
         }
         Base::swap(dot);
         beta += deltaBeta;

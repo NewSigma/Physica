@@ -60,13 +60,13 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
-        void assign(Vector auto& target) const;
+        auto assign(Vector auto& target) const;
 
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
-        void assign(Vector auto& target, Tr traceMu) const;
+        auto assign(Vector auto& target, Tr traceMu) const;
 
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
-        void assign(Vector auto& target, Tr traceMu, ParamPair params) const;
+        auto assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
@@ -88,19 +88,19 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<bool NoFactor, ExecutePolicy P>
-    void MatExpVecProd<M, V>::assign(Vector auto& target) const {
-        assign<NoFactor, P>(target, calcTraceMu());
+    auto MatExpVecProd<M, V>::assign(Vector auto& target) const {
+        return assign<NoFactor, P>(target, calcTraceMu());
     }
 
     template<Matrix M, Vector V>
     template<bool NoFactor, ExecutePolicy P>
-    void MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu) const {
-        assign<NoFactor, P>(target, traceMu, calcParam<P>(traceMu));
+    auto MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu) const {
+        return assign<NoFactor, P>(target, traceMu, calcParam<P>(traceMu));
     }
 
     template<Matrix M, Vector V>
     template<bool NoFactor, ExecutePolicy P>
-    void MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu, ParamPair params) const {
+    auto MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type {
         using BufferType = DenseVector<ScalarType, std::remove_cvref_t<V>::SizeAtCompile>;
         assert(getLength() == target.getLength());
         const Tr epsilon = std::numeric_limits<Tr>::epsilon();
@@ -110,10 +110,16 @@ namespace Physica {
         const Tr factor = exp(traceMu / Tr(numSplit));
 
         BufferType buffer(getLength()), term;
+        Tr lnNorm1 = 0;
         target = v;
         for (int i = 0; i < numSplit; ++i) {
+            Tr norm1 = target.normInf();
+            if constexpr (NoFactor) {
+                target *= reciprocal(norm1); // Avoid overflow
+                lnNorm1 += ln(norm1);
+            }
+
             term = target;
-            Tr norm1 = term.normInf();
             for (int n = 1; n <= numTaylorTerm; ++n) {
                 term *= reciprocal(Tr(numSplit * n));
                 {
@@ -131,6 +137,9 @@ namespace Physica {
             if constexpr (!NoFactor)
                 target *= factor;
         }
+
+        if constexpr (NoFactor)
+            return lnNorm1;
     }
 
     template<Matrix M, Vector V>
