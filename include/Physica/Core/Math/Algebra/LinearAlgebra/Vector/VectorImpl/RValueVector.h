@@ -222,6 +222,10 @@ namespace Physica {
                 return false;
         return true;
     }
+
+    std::ostream& operator<<(std::ostream& os, const Vector auto& v) noexcept {
+        return os << std::format("{}", v.format());
+    }
 }
 
 namespace Physica {

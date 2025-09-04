@@ -215,6 +215,10 @@ namespace Physica {
 
     template<Matrix T>
     bool operator!=(const T& m1, const T& m2) { return !(m1 == m2); }
+
+    std::ostream& operator<<(std::ostream& os, const Matrix auto& m) noexcept {
+        return os << std::format("{}", m.format());
+    }
 }
 
 namespace Physica {
