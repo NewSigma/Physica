@@ -185,14 +185,14 @@ namespace Physica {
                     const Vector2D<T> phases = mat.calcBoundaryPhase(site, site1);
                     if (upOccupy1 != upOccupy2) {
                         const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
-                        const bool sign = state.hopUpSign(site, site1) == 1;
-                        target[index] += ((upOccupy1 == sign) ? hop : -hop) * phases[!upOccupy1];
+                        const bool sign = upOccupy1 == (state.hopUpSign(site, site1) == 1);
+                        target[index] += (sign ? hop : -hop) * phases[!upOccupy1];
                     }
 
                     if (downOccupy1 != downOccupy2) {
                         const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
-                        const bool sign = state.hopDownSign(site, site1) == 1;
-                        target[index] += (downOccupy1 == sign) ? hop : -hop * phases[!downOccupy1];
+                        const bool sign = downOccupy1 == (state.hopDownSign(site, site1) == 1);
+                        target[index] += (sign ? hop : -hop) * phases[!downOccupy1];
                     }
                 }, site);
             }

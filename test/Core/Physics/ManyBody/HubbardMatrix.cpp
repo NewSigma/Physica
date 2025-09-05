@@ -92,19 +92,21 @@ void testKSpinMatrix() {
         exit(EXIT_FAILURE);
 }
 
+template<BoundaryCond BC>
 void testVecProduct() {
     constexpr int Dim = 1;
     constexpr int NumSite = 4;
+    using T = std::conditional<BC == BoundaryCond::TBC, cfloat64, float64>::type;
     using ReprType = FermiRepr<1, NumSite, false>;
-    using Hamilton = HubbardMatrix<float64, ReprType>;
+    using Hamilton = HubbardMatrix<T, ReprType, BC>;
     using RandomSource = Random<MT19937, 10000>;
 
-    SquareLattice<Dim> lattice({NumSite}, 1);
+    SquareLattice<Dim, BC> lattice({NumSite}, 1);
     const Hamilton hamiltonH(HoppingT, RepelU, lattice, ReprType(2, 1));
 
     const auto v = VectorND<float64>::random_uniform<RandomSource>(hamiltonH.getNumState());
-    const VectorND<float64> v1 = hamiltonH * v;
-    VectorND<float64> v2(v.getLength());
+    const VectorND<T> v1 = hamiltonH * v;
+    VectorND<T> v2(v.getLength());
     for (size_t i = 0; i < v.getLength(); ++i)
         v2[i] = (hamiltonH * v).calc(i);
 
@@ -117,6 +119,7 @@ int main() {
     testRSpinMatrix1D<2, 1, 1>();
     testRSpinMatrix2D<2, 3, 2, 3>();
     testKSpinMatrix();
-    testVecProduct();
+    testVecProduct<BoundaryCond::PBC>();
+    testVecProduct<BoundaryCond::TBC>();
     return 0;
 }

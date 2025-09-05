@@ -463,9 +463,12 @@ namespace Physica {
     T relativeError(const T& x, const T& y) noexcept {
         static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid template param");
         const T min = std::numeric_limits<T>::min();
-        const bool useAbsCompare = (abs(x) < min) || (abs(y) < min);
-        const T delta = x - y;
-        const T error = useAbsCompare ? abs(delta) : abs(delta / (x + y) * T(2));
+        T absX = abs(x);
+        T absY = abs(y);
+        T error = abs(x - y);
+        bool useAbsCompare = (absX < min) || (absY < min);
+        if (!useAbsCompare)
+            error *= T(2) / (absX + absY);
         return error;
     }
 

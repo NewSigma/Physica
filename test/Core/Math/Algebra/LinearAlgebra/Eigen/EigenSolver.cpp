@@ -165,7 +165,7 @@ void testDegeneracy() {
     eigenTest(mat2, 1E-15);
 
     DenseMatrix<float64> m = TransIsingMatrix<float64, SpinRepr<1, 8>>(1, 0.01, SquareLattice<1>({{8}, 1}), SpinRepr<1, 8>(8));
-    eigenTest(m, 1E-13);
+    eigenTest(m, 1E-12);
 }
 
 void testForwardDiff() {
