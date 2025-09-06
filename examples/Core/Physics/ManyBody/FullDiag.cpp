@@ -40,8 +40,8 @@ VectorPair calcPair(ReprType repr_) {
     const SquareLattice<1> lattice({NumSite}, 1);
     const Hamilton hamilton(HoppingT, RepelU, lattice, std::move(repr_));
     const size_t numState = hamilton.getNumState();
-    SymmEigenSolver<ScalarType> solver(numState);
-    solver.compute(DenseSymmMatrix<ScalarType>(hamilton), true);
+    SymmEigenSolver<ScalarType> solver(numState, true);
+    solver.compute(DenseSymmMatrix<ScalarType>(hamilton));
 
     const auto eigenvectors = solver.getEigenvectors();
     const auto& repr = hamilton.getRepr();

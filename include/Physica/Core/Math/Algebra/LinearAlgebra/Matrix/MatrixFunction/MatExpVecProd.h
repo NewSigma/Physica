@@ -118,6 +118,10 @@ namespace Physica {
         for (int i = 0; i < numSplit; ++i) {
             Tr norm1 = target.normInf();
             if constexpr (NoFactor) {
+                if (norm1.isZero()) [[unlikely]] {
+                    target.zeros();
+                    break;
+                }
                 target *= reciprocal(norm1); // Avoid overflow
                 lnNorm1 += ln(norm1);
             }

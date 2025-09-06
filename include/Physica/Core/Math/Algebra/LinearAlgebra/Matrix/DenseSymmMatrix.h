@@ -62,6 +62,7 @@ namespace Physica {
         using Base::assign;
         using Base::calc;
         using Base::format;
+        using Storage::zeros;
         using Storage::resize;
         [[nodiscard]] ScalarType max() const { return asVector().max(); }
         [[nodiscard]] ScalarType min() const { return asVector().min(); }

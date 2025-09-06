@@ -74,8 +74,7 @@ namespace Physica {
                     for (size_t i = 0; i < length; i += 2)
                         v[i] = -v[i];
                     x = m * v;
-                    const Tr pick = x.norm1() / v.norm1();
-                    return std::max(y.norm1(), pick);
+                    return std::max(y.norm1(), x.norm1() / v.norm1());
                 }
             }
 
@@ -84,15 +83,19 @@ namespace Physica {
             else
                 x[index] = Tr(0);
 
-            size_t nextIndex = 0;
-            Tr maxAbs = 0;
-            for (size_t i = 0; i < length; ++i) {
-                const Tr temp = abs(z.calc(i).real());
-                if (temp > maxAbs) {
-                    nextIndex = i;
-                    maxAbs = temp;
+            const size_t nextIndex = [&z, length]() noexcept {
+                size_t result;
+                Tr maxAbs = 0;
+                for (size_t i = 0; i < length; ++i) {
+                    const Tr temp = abs(z.calc(i).real());
+                    if (temp > maxAbs) {
+                        result = i;
+                        maxAbs = temp;
+                    }
                 }
-            }
+                return result;
+            }();
+
             if (lastIndex != nextIndex)
                 lastIndex = index;
             index = nextIndex;

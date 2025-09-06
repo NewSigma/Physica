@@ -48,8 +48,8 @@ namespace Physica {
         RawEigenvectorType rawEigenvectors;
     public:
         EigenSolver() = default;
-        explicit EigenSolver(size_t size, bool needEigenvector);
-        EigenSolver(const Matrix auto& source, bool needEigenvector);
+        explicit EigenSolver(size_t size, bool needEigenvectors);
+        EigenSolver(const Matrix auto& source, bool needEigenvectors);
         EigenSolver(EigenvalueVector eigenvalues_, RawEigenvectorType rawEigenvectors_);
         EigenSolver(const This&) = default;
         EigenSolver(This&&) noexcept = default;
@@ -64,7 +64,7 @@ namespace Physica {
         void sort();
         void sort(std::invocable<Tc, Tc> auto less);
         void resize(size_t size);
-        void resize(size_t size, bool needEigenvector);
+        void resize(size_t size, bool needEigenvectors);
         [[nodiscard]] auto reconstruct() const;
         [[nodiscard]] auto reconstruct_hermite() const;
         void swap(This& __restrict solver) noexcept;
@@ -88,13 +88,13 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Order>
-    EigenSolver<T, Order>::EigenSolver(size_t size, bool needEigenvector) {
-        resize(size, needEigenvector);
+    EigenSolver<T, Order>::EigenSolver(size_t size, bool needEigenvectors) {
+        resize(size, needEigenvectors);
     }
 
     template<Scalar T, size_t Order>
-    EigenSolver<T, Order>::EigenSolver(const Matrix auto& source, bool needEigenvector)
-            : EigenSolver(source.getRow(), needEigenvector) {
+    EigenSolver<T, Order>::EigenSolver(const Matrix auto& source, bool needEigenvectors)
+            : EigenSolver(source.getRow(), needEigenvectors) {
         compute(source);
     }
     /**
@@ -177,10 +177,10 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void EigenSolver<T, Order>::resize(size_t size, bool needEigenvector) {
+    void EigenSolver<T, Order>::resize(size_t size, bool needEigenvectors) {
         assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
         eigenvalues.resize(size);
-        if (needEigenvector)
+        if (needEigenvectors)
             rawEigenvectors.resize(size, size);
     }
 

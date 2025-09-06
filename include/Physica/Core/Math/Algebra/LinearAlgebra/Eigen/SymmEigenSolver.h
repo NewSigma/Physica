@@ -34,35 +34,42 @@ namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
     class SymmEigenSolver : public Decouplable {
         using This = SymmEigenSolver<T, Order>;
-        using RealType = T::RealType;
         constexpr static bool isComplex = T::isComplex;
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
+
+        using Tr = T::RealType;
+        using Tc = T::ComplexType;
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     public:
-        using EigenvalueVector = DenseVector<RealType, Order>;
+        using EigenvalueVector = DenseVector<Tr, Order>;
         using EigenvectorMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
         using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>; // Optimize: Use tridiagonal matrix is better
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;
-        bool computeEigenvectors;
     public:
         SymmEigenSolver();
-        SymmEigenSolver(size_t size);
-        SymmEigenSolver(const Matrix auto& source, bool computeEigenvectors_);
+        SymmEigenSolver(size_t size, bool needEigenvectors);
+        SymmEigenSolver(const Matrix auto& source, bool needEigenvectors);
         SymmEigenSolver(const This&) = default;
         SymmEigenSolver(This&& solver) noexcept = default;
         ~SymmEigenSolver() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void compute(const Matrix auto& source, bool computeEigenvectors_);
+        void compute(const Matrix auto& source);
+        void compute_mkl(const Matrix auto& source);
+        void compute_base(const Matrix auto& source);
+
         void sort();
-        void sort(std::invocable<RealType, RealType> auto comp);
+        void sort(std::invocable<Tr, Tr> auto comp);
         void resize(size_t size);
+        void resize(size_t size, bool needEigenvectors);
         void swap(This& __restrict solver) noexcept;
         /* Getters */
-        [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
-        [[nodiscard]] EigenvectorMatrix getEigenvectors() const noexcept;
+        [[nodiscard]] const auto& getEigenvalues() const noexcept { return eigenvalues; }
+        [[nodiscard]] const EigenvectorMatrix& getEigenvectors() const noexcept;
+        [[nodiscard]] bool getNeedEigenvectors() const noexcept;
     private:
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
         /* Static members */
@@ -70,40 +77,44 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Order>
-    SymmEigenSolver<T, Order>::SymmEigenSolver() : eigenvalues(), eigenvectors(), computeEigenvectors(false) {}
+    SymmEigenSolver<T, Order>::SymmEigenSolver() : eigenvalues(), eigenvectors() {}
 
     template<Scalar T, size_t Order>
-    SymmEigenSolver<T, Order>::SymmEigenSolver(size_t size) : SymmEigenSolver() {
-        resize(size);
+    SymmEigenSolver<T, Order>::SymmEigenSolver(size_t size, bool needEigenvectors) : SymmEigenSolver() {
+        resize(size, needEigenvectors);
     }
 
     template<Scalar T, size_t Order>
-    SymmEigenSolver<T, Order>::SymmEigenSolver(const Matrix auto& source, bool computeEigenvectors_)
-            : SymmEigenSolver(source.getRow()) {
-        compute(source, computeEigenvectors_);
+    SymmEigenSolver<T, Order>::SymmEigenSolver(const Matrix auto& source, bool needEigenvectors)
+            : SymmEigenSolver(source.getRow(), needEigenvectors) {
+        compute(source);
     }
 
     template<Scalar T, size_t Order>
-    void SymmEigenSolver<T, Order>::compute(const Matrix auto& source, bool computeEigenvectors_) {
+    void SymmEigenSolver<T, Order>::compute(const Matrix auto& source) {
+        compute_base(source);
+    }
+
+    template<Scalar T, size_t Order>
+    void SymmEigenSolver<T, Order>::compute_base(const Matrix auto& source) {
         assert(source.isSymm() && "[Error]: Bad symm matrix");
         assert(source.getRow() == eigenvalues.getLength() && "[Error]: Dimensions do not match");
-        computeEigenvectors = computeEigenvectors_;
         if (source.getRow() == 1) [[unlikely]] {
             eigenvalues[0] = source.calc(0, 0);
             eigenvectors(0, 0) = T(1);
             return;
         }
 
-        const RealType factor = abs_elem(source).max();
+        const Tr factor = abs_elem(source).max();
         if (factor < std::numeric_limits<T>::min()) {
-            eigenvalues = RealType(0);
+            eigenvalues = Tr(0);
             return;
         }
-        const RealType inv_factor = reciprocal(factor);
+        const Tr inv_factor = reciprocal(factor);
         const WorkingMatrix normalized = source * inv_factor; // Referenced from eigen, to avoid under/overflow in householder
         auto tridiagonal = Tridiagonalization<T, Order>(normalized);
         WorkingMatrix working = tridiagonal.getMatrixT();
-        if (computeEigenvectors)
+        if (getNeedEigenvectors())
             eigenvectors = tridiagonal.getMatrixQ();
 
         const size_t order = working.getRow();
@@ -135,7 +146,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void SymmEigenSolver<T, Order>::sort(std::invocable<RealType, RealType> auto comp) {
+    void SymmEigenSolver<T, Order>::sort(std::invocable<Tr, Tr> auto comp) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
@@ -149,16 +160,22 @@ namespace Physica {
                 continue;
 
             eigenvalues[i].swap(eigenvalues[index_min]);
-            if (computeEigenvectors)
+            if (getNeedEigenvectors())
                 eigenvectors.swap_col(i, index_min);
         }
     }
 
     template<Scalar T, size_t Order>
     void SymmEigenSolver<T, Order>::resize(size_t size) {
+        resize(size, getNeedEigenvectors());
+    }
+
+    template<Scalar T, size_t Order>
+    void SymmEigenSolver<T, Order>::resize(size_t size, bool needEigenvectors) {
         assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
         eigenvalues.resize(size);
-        eigenvectors.resize(size, size);
+        if (needEigenvectors)
+            eigenvectors.resize(size, size);
     }
 
     template<Scalar T, size_t Order>
@@ -166,13 +183,17 @@ namespace Physica {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         std::swap(eigenvectors, solver.eigenvectors);
-        std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
 
     template<Scalar T, size_t Order>
-    SymmEigenSolver<T, Order>::EigenvectorMatrix SymmEigenSolver<T, Order>::getEigenvectors() const noexcept {
-        assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
+    auto SymmEigenSolver<T, Order>::getEigenvectors() const noexcept -> const EigenvectorMatrix& {
+        assert(getNeedEigenvectors() && "[Error]: Eigenvectors are not ready");
         return eigenvectors;
+    }
+
+    template<Scalar T, size_t Order>
+    bool SymmEigenSolver<T, Order>::getNeedEigenvectors() const noexcept {
+        return !eigenvectors.empty();
     }
     /**
      * Use wilkinson shift
@@ -182,9 +203,9 @@ namespace Physica {
         Vector2D<T> buffer{};
         /* Init buffer */ {
             const auto subBlock = working.block(lower, sub_order, lower, sub_order);
-            const RealType factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * T(0.5);
-            const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
-            const RealType factor3 = sqrt(square(factor) + factor2);
+            const Tr factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * T(0.5);
+            const Tr factor2 = square(subBlock(sub_order - 1, sub_order - 2));
+            const Tr factor3 = sqrt(square(factor) + factor2);
             const T shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); // TODO: why we introduce a divide operation
             buffer[0] = subBlock(0, 0) - shift;
             buffer[1] = subBlock(1, 0);
@@ -209,7 +230,7 @@ namespace Physica {
             const T mean = (subBlock(1, index + index) + subBlock(index + 1, index)) * T(0.5);
             subBlock(index, index + 1) = subBlock(index + 1, index) = mean;
 
-            if (computeEigenvectors)
+            if (getNeedEigenvectors())
                 applyGivens(eigenvectors, givens_vec, lower + i, lower + i + 1);
             if (!isShiftStep)
                 subBlock(2, 0) = subBlock(0, 2) = T(0);

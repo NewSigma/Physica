@@ -52,6 +52,7 @@ namespace Physica {
         /* Operations */
         void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t row) { resize(row, row); }
+        void zeros() noexcept { arr.zeros(); }
         void swap(This& __restrict storage) noexcept;
 
         const H5DataSet<1> read(const H5Loc& loc, const char* name);
