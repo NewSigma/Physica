@@ -40,7 +40,7 @@ namespace {
         using Hamilton = HubbardMatrix<ScalarType, ReprType>;
         const SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
         const Hamilton hamilton(HoppingT, RepelU, lattice, ReprType(4, 4));
-        auto psi = TPQ<ScalarType>::random_normal<RandomSource>(hamilton.getNumState(), 0);
+        auto psi = TPQ<ScalarType>::random_normal<RandomSource>(hamilton.getNumState());
         psi.pre_nvt_step(hamilton, Beta);
         psi.random_normal<RandomSource>();
         for (auto _ : state)

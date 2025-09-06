@@ -38,7 +38,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
         using MatrixND = DenseMatrix<T>;
-        // The lowest minus float number, keep enough digits for later algebra
+        // The lowest minus float number, keeping enough digits for later algebra
         constexpr static Tr Smallest = -std::numeric_limits<T>::max() * std::numeric_limits<Tr>::epsilon();
 
         Tr beta = 0;
@@ -67,7 +67,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
 
         template<RNG R>
-        void random_normal(Tr norm = 0);
+        void random_normal();
         /* Getters */
         [[nodiscard]] Tr getBeta() const noexcept { return beta; }
         [[nodiscard]] Tr getTraceMu() const noexcept;
@@ -77,7 +77,7 @@ namespace Physica {
         [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
         template<RNG R>
-        [[nodiscard]] static This random_normal(size_t len, Tr norm);
+        [[nodiscard]] static This random_normal(size_t len);
         [[nodiscard]] static Tr calcObserveUVT(Tr beta, Tr mu, const MatrixND& lnPartitionNVT, const MatrixND& observeNVT);
     private:
         using Base::random_uniform;
@@ -170,22 +170,17 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void TPQ<T>::random_normal(Tr norm) {
-        const bool useDefault = norm.isZero();
-        if (useDefault) // Default norm is the smallest positive float number while keep all effective digits
-            norm = Tr(std::numeric_limits<Tr>::min() / std::numeric_limits<Tr>::epsilon());
+    void TPQ<T>::random_normal() {
         Base::template random_normal<R>();
-        asVector() *= norm;
-
         beta = 0;
         lnZ0 = 0;
     }
 
     template<Scalar T>
     template<RNG R>
-    TPQ<T> TPQ<T>::random_normal(size_t len, Tr norm) {
+    TPQ<T> TPQ<T>::random_normal(size_t len) {
         This result(len);
-        result.random_normal<R>(norm);
+        result.random_normal<R>();
         return result;
     }
 
