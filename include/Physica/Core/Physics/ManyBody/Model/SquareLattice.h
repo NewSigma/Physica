@@ -19,6 +19,7 @@
 #pragma once
 
 #include <unordered_map>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/PlainStruct.h"
 #include "LatticeModel.h"
 
@@ -28,9 +29,9 @@ namespace Physica {
         using This = SquareLattice<Dim, BC>;
         using Base = LatticeModel<Dim>;
     public:
-        constexpr static bool UntrivialNearestNeighbor = Dim > 1;
         using typename Base::DimArray;
         using typename Base::IndexType;
+        using ArgVector = std::conditional<BC == BoundaryCond::TBC, DenseVector<float64, Dim>, PlainStruct<void>>::type;
     private:
         struct Hash {
             std::size_t operator()(const std::pair<int32_t, int32_t>& pair) const noexcept {
@@ -38,16 +39,18 @@ namespace Physica {
             }
         };
 
-        using HopIndexArray = std::conditional<UntrivialNearestNeighbor, Array<Array<size_t>>, PlainStruct<void>>::type;
+        using HopIndexArray = std::conditional<(Dim > 1), Array<Array<size_t>>, PlainStruct<void>>::type;
         using SiteBoundaryMap = std::conditional<BC == BoundaryCond::TBC,
                                                  std::unordered_map<std::pair<int, int>, int, Hash>,
                                                  PlainStruct<void>>::type;
 
         [[no_unique_address]] HopIndexArray hopIndexArr;
         [[no_unique_address]] SiteBoundaryMap siteBoundaryMap;
+        [[no_unique_address]] ArgVector phaseArgs;
     public:
         SquareLattice() = default;
-        SquareLattice(DimArray superSize, size_t numUnitCellSite);
+        SquareLattice(DimArray superSize, size_t numUnitCellSite) requires(BC != BoundaryCond::TBC);
+        SquareLattice(DimArray superSize, size_t numUnitCellSite, ArgVector phaseArgs_) requires(BC == BoundaryCond::TBC);
         SquareLattice(const This&) = default;
         SquareLattice(This&&) noexcept = default;
         ~SquareLattice() = default;
@@ -55,22 +58,35 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void forNeighSites(std::invocable<int, int> auto fn, int site) const;
+        template<Scalar T>
+        DenseVector<T, Dim> calcPhase() const noexcept;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const auto& getHopIndexArray() const noexcept { return hopIndexArr; }
-        [[nodiscard]] const auto& getSiteBoundaryMap() const noexcept { return siteBoundaryMap; }
+        [[nodiscard]] const auto& getHopIndexArray() const noexcept;
+        [[nodiscard]] const auto& getSiteBoundaryMap() const noexcept;
+        [[nodiscard]] const auto& getPhaseArgs() const noexcept;
+        /* Setters */
+        void setPhaseArgs(ArgVector phaseArgs_) noexcept requires(BC == BoundaryCond::TBC);
     private:
         HopIndexArray makeHopIndexArray() const noexcept;
         SiteBoundaryMap makeSiteBoundaryMap() const noexcept;
     };
 
     template<int Dim, BoundaryCond BC>
-    SquareLattice<Dim, BC>::SquareLattice(DimArray superSize, size_t numUnitCellSite) : Base(superSize, numUnitCellSite) {
-        if constexpr (UntrivialNearestNeighbor)
+    SquareLattice<Dim, BC>::SquareLattice(DimArray superSize, size_t numUnitCellSite) requires(BC != BoundaryCond::TBC)
+            : Base(superSize, numUnitCellSite) {
+        if constexpr (Dim > 1)
             hopIndexArr = makeHopIndexArray();
-        if constexpr (BC == BoundaryCond::TBC)
-            siteBoundaryMap = makeSiteBoundaryMap();
+    }
+
+    template<int Dim, BoundaryCond BC>
+    SquareLattice<Dim, BC>::SquareLattice(DimArray superSize, size_t numUnitCellSite, ArgVector phaseArgs_) requires(BC == BoundaryCond::TBC)
+            : Base(std::move(superSize), numUnitCellSite) {
+        if constexpr (Dim > 1)
+            hopIndexArr = makeHopIndexArray();
+        siteBoundaryMap = makeSiteBoundaryMap();
+        setPhaseArgs(std::move(phaseArgs_));
     }
 
     template<int Dim, BoundaryCond BC>
@@ -85,11 +101,45 @@ namespace Physica {
     }
 
     template<int Dim, BoundaryCond BC>
+    template<Scalar T>
+    DenseVector<T, Dim> SquareLattice<Dim, BC>::calcPhase() const noexcept {
+        static_assert(T::isComplex, "[Error]: Phase is complex");
+        DenseVector<T, Dim> result{};
+        for (int i = 0; i < Dim; ++i)
+            result[i] = T::fromPhase(phaseArgs[i]);
+        return result;
+    }
+
+    template<int Dim, BoundaryCond BC>
     void SquareLattice<Dim, BC>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         hopIndexArr.swap(obj.hopIndexArr);
         siteBoundaryMap.swap(obj.siteBoundaryMap);
+        phaseArgs.swap(obj.phaseArgs);
+    }
+
+    template<int Dim, BoundaryCond BC>
+    const auto& SquareLattice<Dim, BC>::getHopIndexArray() const noexcept {
+        static_assert(Dim > 1, "[Error]: Not available");
+        return hopIndexArr;
+    }
+
+    template<int Dim, BoundaryCond BC>
+    const auto& SquareLattice<Dim, BC>::getSiteBoundaryMap() const noexcept {
+        static_assert(BC == BoundaryCond::TBC, "[Error]: Not available");
+        return siteBoundaryMap;
+    }
+
+    template<int Dim, BoundaryCond BC>
+    const auto& SquareLattice<Dim, BC>::getPhaseArgs() const noexcept {
+        static_assert(BC == BoundaryCond::TBC, "[Error]: Not available");
+        return phaseArgs;
+    }
+
+    template<int Dim, BoundaryCond BC>
+    void SquareLattice<Dim, BC>::setPhaseArgs(ArgVector phaseArgs_) noexcept requires(BC == BoundaryCond::TBC) {
+        phaseArgs = std::move(phaseArgs_);
     }
 
     template<int Dim, BoundaryCond BC>

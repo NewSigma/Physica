@@ -99,9 +99,13 @@ void testVecProduct() {
     using T = std::conditional<BC == BoundaryCond::TBC, cfloat64, float64>::type;
     using ReprType = FermiRepr<1, NumSite, false>;
     using Hamilton = HubbardMatrix<T, ReprType, BC>;
-    using RandomSource = Random<MT19937, 10000>;
+    using RandomSource = Random<MT19937>;
 
-    SquareLattice<Dim, BC> lattice({NumSite}, 1);
+    SquareLattice<Dim, BC> lattice;
+    if constexpr (BC == Physica::BoundaryCond::TBC)
+        lattice = SquareLattice<Dim, BC>({NumSite}, 1, {float64::template random_uniform<RandomSource>() * MathConst<float64>::pi});
+    else
+        lattice = SquareLattice<Dim, BC>({NumSite}, 1);
     const Hamilton hamiltonH(HoppingT, RepelU, lattice, ReprType(2, 1));
 
     const auto v = VectorND<float64>::random_uniform<RandomSource>(hamiltonH.getNumState());

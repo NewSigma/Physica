@@ -30,7 +30,7 @@ namespace Physica {
         constexpr static int SiteDOF = Traits<Derived>::SiteDOF;
 
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
-        static_assert(NumSite > 0);
+        static_assert(NumSite >= 0);
         static_assert(SiteDOF > 0);
     public:
         constexpr static size_t calcFullNumState() noexcept;

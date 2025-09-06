@@ -50,7 +50,7 @@ namespace Physica {
     template<int MaskOrder>
     __host__ __device__ auto Diff<T, Mode, Order>::mask() const noexcept {
         using MaskedType = std::conditional<MaskOrder == 0, T, Diff<typename Base::ValueType, Mode, MaskOrder>>::type;
-        using ResultType = std::conditional<std::less<int>{}(MaskOrder, Order), MaskedType, This>::type;
+        using ResultType = std::conditional<(MaskOrder < Order), MaskedType, This>::type;
         return reinterpret_cast<const ResultType&>(*this);
     }
 

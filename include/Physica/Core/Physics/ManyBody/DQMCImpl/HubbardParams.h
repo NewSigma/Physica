@@ -18,10 +18,11 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Physics/ManyBody/Model/SquareLattice.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
+#include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 
 namespace Physica {
     template<Scalar T>
@@ -29,10 +30,11 @@ namespace Physica {
         using This = HubbardParams<T>;
 
         using Tr = T::RealType;
+        using Tc = T::ComplexType;
     public:
         using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
     private:
-        DenseSymmMatrix<T> hoppingMatrix;
+        DenseMatrix<T> hoppingMatrix;
         MatrixND expB;
         T alpha;
         T beta;
@@ -43,13 +45,16 @@ namespace Physica {
         T lnCoshShift;
     public:
         HubbardParams() = default;
-        template<int Dim>
-        HubbardParams(T hoppingT, Tr repelU, const SquareLattice<Dim>& lattice, T beta_, T chemMu_, int numSplit_);
+        template<int Dim, BoundaryCond BC>
+        HubbardParams(T hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, T beta_, T chemMu_, int numSplit_);
         HubbardParams(const This&) = default;
         HubbardParams(This&&) noexcept = default;
         ~HubbardParams() = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept {
+            swap(obj);
+            return *this;
+        }
         /* Operations */
         [[nodiscard]] T calcBetaMu() const noexcept;
 
@@ -75,25 +80,25 @@ namespace Physica {
         [[nodiscard]] static T calcAlpha(T beta, T repelU, int numSplit) noexcept;
         [[nodiscard]] static T calcBetaMu(T beta, T repelU, T chemMu) noexcept;
     private:
-        template<int Dim>
-        void makeHoppingMatrix(T hoppingT, const SquareLattice<Dim>& lattice);
+        template<int Dim, BoundaryCond BC>
+        void makeHoppingMatrix(T hoppingT, const SquareLattice<Dim, BC>& lattice);
         /* Friends */
         friend class device_obj<This>;
     };
 
     template<Scalar T>
-    template<int Dim>
-    HubbardParams<T>::HubbardParams(T hoppingT, Tr repelU_, const SquareLattice<Dim>& lattice, T beta_, T chemMu_, int numSplit_)
+    template<int Dim, BoundaryCond BC>
+    HubbardParams<T>::HubbardParams(T hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, T beta_, T chemMu_, int numSplit_)
             : beta(beta_)
             , repelU(repelU_)
-            , chemMu(chemMu_) 
+            , chemMu(chemMu_)
             , numSplit(numSplit_) {
-        static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
         assert(!repelU.isNegative() && "[Error]: It is assumed U >= 0");
         assert(!beta.isNegative() && "[Error]: Negative temperature is invalid");
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
-        makeHoppingMatrix(hoppingT, lattice);
-        DenseSymmMatrix<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
+        makeHoppingMatrix<Dim, BC>(hoppingT, lattice);
+
+        DenseMatrix<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
         expB = exp(hoppingMatrixB);
         alpha = calcAlpha(beta, repelU, numSplit);
     }
@@ -136,20 +141,61 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<int Dim>
-    void HubbardParams<T>::makeHoppingMatrix(T hoppingT, const SquareLattice<Dim>& lattice) {
+    template<int Dim, BoundaryCond BC>
+    void HubbardParams<T>::makeHoppingMatrix(T hoppingT, const SquareLattice<Dim, BC>& lattice) {
+        const auto CheckTemplateParam = HubbardMatrix<T, FermiRepr<Dim, Dynamic, false>, BC>{};
+
         const size_t numSite = lattice.getNumSuperCellSite();
         hoppingMatrix.resize(numSite);
-        hoppingMatrix = T(0);
+        hoppingMatrix.zeros();
 
-        for (size_t from = 0; from < numSite; ++from) {
-            if constexpr (SquareLattice<Dim>::UntrivialNearestNeighbor) {
-                const auto& targets = lattice.getHopIndexArray()[from];
-                for (size_t to : targets)
-                    hoppingMatrix(from, to) -= hoppingT;
+        using enum BoundaryCond;
+        if constexpr (BC == PBC) {
+            for (size_t from = 0; from < numSite; ++from) {
+                if constexpr (Dim > 1) {
+                    const auto& targets = lattice.getHopIndexArray()[from];
+                    for (size_t to : targets) {
+                        hoppingMatrix(from, to) -= hoppingT;
+                        hoppingMatrix(to, from) -= hoppingT;
+                    }
+                }
+                else {
+                    size_t next = (from + 1) % numSite;
+                    hoppingMatrix(from, next) = -hoppingT;
+                    hoppingMatrix(next, from) = -hoppingT;
+                }
+
             }
-            else
-                hoppingMatrix(from, (from + 1) % numSite) = -hoppingT;
+        }
+        else {
+            static_assert(BC == TBC, "[Error]: Not implemented");
+            const auto phases = lattice.template calcPhase<Tc>();
+            const auto& boundary = lattice.getSiteBoundaryMap();
+            for (size_t from = 0; from < numSite; ++from) {
+                if constexpr (Dim > 1) {
+                    const auto& targets = lattice.getHopIndexArray()[from];
+                    for (size_t to : targets) {
+                        Tc phase = 1;
+                        auto pair = std::make_pair(from, to);
+                        if (boundary.contains(pair)) {
+                            int dim = boundary.find(pair)->second;
+                            phase = phases[dim];
+                        }
+                        hoppingMatrix(from, to) -= hoppingT * phase;
+                        hoppingMatrix(to, from) -= hoppingT * phase.conjugate();
+                    }
+                }
+                else {
+                    size_t next = (from + 1) % numSite;
+                    Tc phase = 1;
+                    auto pair = std::make_pair(from, next);
+                    if (boundary.contains(pair)) {
+                        int dim = boundary.find(pair)->second;
+                        phase = phases[dim];
+                    }
+                    hoppingMatrix(from, next) = -hoppingT * phase;
+                }
+            }
         }
     }
 }

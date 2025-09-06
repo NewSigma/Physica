@@ -41,6 +41,7 @@ namespace Physica {
 
         using typename Base::StateType;
         using typename Lattice::IndexType;
+        using typename Lattice::ArgVector;
 
         using Tr = T::RealType;
         using Tv = T::ValueType;
@@ -57,7 +58,6 @@ namespace Physica {
     public:
         HubbardMatrix() = default;
         HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_);
-        HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, const DenseVector<Tr, Dim>& phaseArgs) requires(BC == BoundaryCond::TBC);
         HubbardMatrix(const This&) = default;
         HubbardMatrix(This&&) noexcept = default;
         ~HubbardMatrix() = default;
@@ -77,7 +77,7 @@ namespace Physica {
         [[nodiscard]] const Lattice& getLattice() const noexcept { return *this; }
         [[nodiscard]] const auto& getRepr() const noexcept { return repr; }
         /* Setters */
-        void setPhaseArgs(const DenseVector<Tr, Dim>& phaseArgs) noexcept;
+        void setPhaseArgs(ArgVector phaseArgs) noexcept requires(BC == BoundaryCond::TBC);
     protected:
         Tr repelElem(StateType psi) const noexcept;
         T hoppingElem(StateType rowPsi, StateType colPsi) const noexcept;

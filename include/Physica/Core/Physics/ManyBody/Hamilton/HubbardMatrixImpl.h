@@ -28,12 +28,8 @@ namespace Physica {
             , repelU(repelU_)
             , repr(std::move(repr_)) {
         assert(Lattice::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
-    }
-
-    template<Scalar T, Representation Repr, BoundaryCond BC>
-    HubbardMatrix<T, Repr, BC>::HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_, const DenseVector<Tr, Dim>& phaseArgs) requires(BC == BoundaryCond::TBC)
-            : HubbardMatrix(hoppingT_, repelU_, std::move(lattice), std::move(repr_)) {
-        setPhaseArgs(phaseArgs);
+        if constexpr (BC == BoundaryCond::TBC)
+            phases = Lattice::template calcPhase<Tc>();
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
@@ -103,9 +99,9 @@ namespace Physica {
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
-    void HubbardMatrix<T, Repr, BC>::setPhaseArgs(const DenseVector<Tr, Dim>& phaseArgs) noexcept {
-        for (int i = 0; i < Dim; ++i)
-            phases[i] = Tc::fromPhase(phaseArgs[i]);
+    void HubbardMatrix<T, Repr, BC>::setPhaseArgs(ArgVector phaseArgs) noexcept requires(BC == BoundaryCond::TBC) {
+        Lattice::setPhaseArgs(phaseArgs);
+        phases = Lattice::template calcPhase<Tc>();
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
@@ -153,9 +149,10 @@ namespace Physica {
     Vector2D<T> HubbardMatrix<T, Repr, BC>::calcBoundaryPhase(int site, int site1) const noexcept {
         Vector2D<T> result;
         if constexpr (BC == BoundaryCond::TBC) {
-            const auto& map = Lattice::getSiteBoundaryMap();
-            if (map.contains(std::make_pair(site, site1))) {
-                int dim = map.find(std::make_pair(site, site1))->second;
+            const auto& boundary = Lattice::getSiteBoundaryMap();
+            auto pair = std::make_pair(site, site1);
+            if (boundary.contains(pair)) {
+                int dim = boundary.find(pair)->second;
                 result[0] = phases[dim];
                 result[1] = phases[dim].conjugate();
             }

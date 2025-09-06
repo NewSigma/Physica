@@ -109,13 +109,13 @@ namespace Physica {
                 if (upOccupy1 != upOccupy2) {
                     const T hopUp = hop * Tr(state.hopUpSign(site, site1));
                     const size_t index1 = getRepr()[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
-                    result += vec.calc(index1) * phases[!upOccupy1] * (upOccupy1 ? hopUp : -hopUp);
+                    result += vec.calc(index1) * phases[upOccupy1] * (upOccupy1 ? hopUp : -hopUp);
                 }
 
                 if (downOccupy1 != downOccupy2) {
                     const T hopDown = hop * Tr(state.hopDownSign(site, site1));
                     const size_t index1 = getRepr()[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
-                    result += vec.calc(index1) * phases[!downOccupy1] * (downOccupy1 ? hopDown : -hopDown);
+                    result += vec.calc(index1) * phases[downOccupy1] * (downOccupy1 ? hopDown : -hopDown);
                 }
             }, site);
         }
@@ -186,13 +186,13 @@ namespace Physica {
                     if (upOccupy1 != upOccupy2) {
                         const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
                         const bool sign = upOccupy1 == (state.hopUpSign(site, site1) == 1);
-                        target[index] += (sign ? hop : -hop) * phases[!upOccupy1];
+                        target[index] += (sign ? hop : -hop) * phases[upOccupy2];
                     }
 
                     if (downOccupy1 != downOccupy2) {
                         const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
                         const bool sign = downOccupy1 == (state.hopDownSign(site, site1) == 1);
-                        target[index] += (sign ? hop : -hop) * phases[!downOccupy1];
+                        target[index] += (sign ? hop : -hop) * phases[downOccupy2];
                     }
                 }, site);
             }
