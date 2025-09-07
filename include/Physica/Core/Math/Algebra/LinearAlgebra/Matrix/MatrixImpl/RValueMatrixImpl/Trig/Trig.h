@@ -54,9 +54,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    TrigUpper<M>::TrigUpper(M& mat_) : mat(mat_) {
-        assert(mat.isSquare());
-    }
+    TrigUpper<M>::TrigUpper(M& mat_) : mat(mat_) {}
 
     template<Matrix M>
     auto TrigUpper<M>::calc(size_t row, size_t col) const -> T {

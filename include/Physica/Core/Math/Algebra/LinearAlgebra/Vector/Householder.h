@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Matrix M, Vector V>
-    void applyHouseholder(const V& householder, M& mat) {
-        using T = M::ScalarType;
+    void applyHouseholder(const V& householder, M&& mat) {
+        using T = std::remove_cvref<M>::type::ScalarType;
         using BufferType = DenseVector<T, V::SizeAtCompile>;
         assert(householder.getLength() == mat.getRow());
         BufferType copy = householder;
@@ -35,8 +35,8 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    void applyHouseholder(M& mat, const V& householder) {
-        using T = M::ScalarType;
+    void applyHouseholder(M&& mat, const V& householder) {
+        using T = std::remove_cvref<M>::type::ScalarType;
         using BufferType = DenseVector<T, V::SizeAtCompile>;
         assert(householder.getLength() == mat.getCol());
         BufferType copy = householder;

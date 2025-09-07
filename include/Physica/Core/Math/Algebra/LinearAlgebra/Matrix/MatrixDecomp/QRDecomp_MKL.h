@@ -73,9 +73,6 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     auto QRDecomp<T, Pivot>::getMatrixQ_mkl() const -> MatrixND {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
-        static_assert(!isComplex);
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
-
         constexpr int Layout = LAPACK_COL_MAJOR;
         const size_t m = getRow();
         const size_t n = m;
@@ -86,10 +83,18 @@ namespace Physica {
         auto* a = reinterpret_cast<Tm*>(result.data());
         auto* tau = reinterpret_cast<const Tm*>(taus.data());
 
-        if constexpr (T::Prec == Float32)
-            check_lapack(LAPACKE_sorgqr_64(Layout, m, n, k, a, lda, tau));
-        else
-            check_lapack(LAPACKE_dorgqr_64(Layout, m, n, k, a, lda, tau));
+        if constexpr (isComplex) {
+            if constexpr (T::Prec == Float32)
+                check_lapack(LAPACKE_cungqr_64(Layout, m, n, k, a, lda, tau));
+            else
+                check_lapack(LAPACKE_zungqr_64(Layout, m, n, k, a, lda, tau));
+        }
+        else {
+            if constexpr (T::Prec == Float32)
+                check_lapack(LAPACKE_sorgqr_64(Layout, m, n, k, a, lda, tau));
+            else
+                check_lapack(LAPACKE_dorgqr_64(Layout, m, n, k, a, lda, tau));
+        }
         return result;
     }
 }

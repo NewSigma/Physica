@@ -438,6 +438,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    bool RValueMatrix<Derived>::isOverdetermined() const noexcept {
+        return getRow() > getCol();
+    }
+
+    template<class Derived>
+    bool RValueMatrix<Derived>::isUnderdetermined() const noexcept {
+        return getRow() < getCol();
+    }
+
+    template<class Derived>
     bool RValueMatrix<Derived>::isSquare() const noexcept {
         return getRow() == getCol();
     }

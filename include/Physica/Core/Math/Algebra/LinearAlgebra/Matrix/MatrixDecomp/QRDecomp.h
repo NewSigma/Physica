@@ -25,15 +25,20 @@
 namespace Physica {
     /**
      * Decompose matrix like A = QR(no pivoting), or A = QRP(poviting)
+     *
+     * References:
+     * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:249
      */
     template<Scalar T, bool Pivot = false>
     class QRDecomp {
         constexpr static bool isComplex = T::isComplex;
         using This = QRDecomp<T, Pivot>;
         using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using Perm = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
+
+        using Tr = T::RealType;
         using Tc = T::ComplexType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
-        using Perm = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
     private:
         MatrixND working;
         VectorND<T> taus;
@@ -95,17 +100,16 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void QRDecomp<T, Pivot>::compute_base(const Matrix auto& source) {
-        assert(!Pivot && "Not implemented");
+        static_assert(!Pivot && "Not implemented");
         working = source;
-
-        size_t i = 0;
-        for (; i < taus.getLength() - 1; ++i) {
+        for (size_t i = 0; i < taus.getLength() - !working.isOverdetermined(); ++i) {
             auto col = working.col(i);
             auto buffer = col.tail(i);
-            const auto sign = unit(buffer[0]);
-            const auto norm = buffer.householder();
-            auto corner = working.bottomRightCorner(i, i + 1);
-            applyHouseholder(buffer, corner);
+            const T sign = unit(buffer[0]);
+            const Tr norm = buffer.householder();
+            bool isFinalColumn = i + 1 >= getCol();
+            if (!isFinalColumn)
+                applyHouseholder(buffer, working.bottomRightCorner(i, i + 1));
             taus[i] = std::exchange(col[i], -norm * sign);
         }
     }
