@@ -454,12 +454,30 @@ namespace Physica {
 
     template<class Derived>
     bool RValueMatrix<Derived>::isSymm() const noexcept {
+        if constexpr (MatrixOption::isSymmMatrix<Derived>())
+            return true;
         if (!isSquare())
             return false;
+
         const size_t order = getRow();
         for (size_t r = 0; r < order; ++r)
             for (size_t c = r + 1; c < order; ++c)
                 if (calc(r, c) != calc(c, r))
+                    return false;
+        return true;
+    }
+
+    template<class Derived>
+    bool RValueMatrix<Derived>::isHermite() const noexcept {
+        if constexpr (MatrixOption::isHermiteMatrix<Derived>())
+            return true;
+        if (!isSquare())
+            return false;
+
+        const size_t order = getRow();
+        for (size_t r = 0; r < order; ++r)
+            for (size_t c = r + 1; c < order; ++c)
+                if (calc(r, c) != calc(c, r).conjugate())
                     return false;
         return true;
     }

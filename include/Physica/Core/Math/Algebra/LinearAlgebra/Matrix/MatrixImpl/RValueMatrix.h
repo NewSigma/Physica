@@ -170,6 +170,7 @@ namespace Physica {
         [[nodiscard]] bool isUnderdetermined() const noexcept;
         [[nodiscard]] bool isSquare() const noexcept;
         [[nodiscard]] bool isSymm() const noexcept;
+        [[nodiscard]] bool isHermite() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
