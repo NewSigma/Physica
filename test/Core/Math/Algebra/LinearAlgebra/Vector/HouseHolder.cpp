@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
@@ -27,7 +26,7 @@ using T = float64;
 using RandomSource = Random<MT19937, 10000>;
 
 template<Vector V>
-void reflectTest(const V& x, double prec) {
+static void reflectTest(const V& x, double prec) noexcept {
     using T = V::ScalarType;
     const size_t rank = x.getLength();
     V v(rank);
@@ -44,7 +43,7 @@ void reflectTest(const V& x, double prec) {
             exit(EXIT_FAILURE);
 }
 
-void emptyVectorTest() {
+static void emptyVectorTest() noexcept {
     using VectorType = Vector4D<T>;
     VectorType x{0, 0, 0, 0};
     x.householder();
@@ -53,7 +52,7 @@ void emptyVectorTest() {
             exit(EXIT_FAILURE);
 }
 
-void emptyComplexVectorTest() {
+static void emptyComplexVectorTest() noexcept {
     using ComplexType = Complex<T>;
     using ComplexVector = Vector4D<ComplexType>;
     const ComplexVector x = Vector4D<T>{0, 0, 1, 0};
@@ -63,7 +62,7 @@ void emptyComplexVectorTest() {
     const ComplexType beta = -norm * unit(x[0]);
     v[0] = ComplexType(1);
 
-    const ComplexVector result = x - tau * (v * x) * v;
+    const ComplexVector result = x - tau * (v.hermite() * x) * v;
     if (!scalarNear(result[0], beta, 1E-15))
         exit(EXIT_FAILURE);
     for (size_t i = 1; i < result.getLength(); ++i)
@@ -71,7 +70,7 @@ void emptyComplexVectorTest() {
             exit(EXIT_FAILURE);
 }
 
-void realApplyTest() {
+static void realApplyTest() noexcept {
     using VectorType = Vector4D<T>;
     const VectorType x{2, 3, 4, 5};
     const size_t rank = x.getLength();
@@ -94,7 +93,7 @@ void realApplyTest() {
         exit(EXIT_FAILURE);
 }
 
-void complexApplyTest() {
+static void complexApplyTest() noexcept {
     using ScalarType = Complex<T>;
     using VectorType = Vector2D<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, 2, 2>;

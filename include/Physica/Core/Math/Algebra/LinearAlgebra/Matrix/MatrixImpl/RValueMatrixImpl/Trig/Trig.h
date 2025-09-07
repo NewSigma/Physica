@@ -28,8 +28,9 @@ namespace Physica {
         using Base = RValueMatrix<This>;
 
         M& mat;
-    public:
+    protected:
         using typename Base::T;
+        using typename Base::Tr;
         using typename Base::Tv;
     public:
         TrigUpper(M& mat_);
@@ -44,7 +45,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] T det() const;
-        [[nodiscard]] T lnAbsDet() const;
+        [[nodiscard]] Tr lnAbsDet() const;
 
         [[nodiscard]] VectorND<T> toDT();
         /* Getters */
@@ -76,7 +77,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto TrigUpper<M>::lnAbsDet() const -> T {
+    auto TrigUpper<M>::lnAbsDet() const -> Tr {
         assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
         return ln(abs(Base::diag())).sum();
     }
@@ -100,6 +101,7 @@ namespace Physica {
         M& mat;
     public:
         using typename Base::T;
+        using typename Base::Tr;
         using typename Base::Tv;
     public:
         TrigLower(M& mat_);
@@ -114,7 +116,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] T det() const;
-        [[nodiscard]] T lnAbsDet() const;
+        [[nodiscard]] Tr lnAbsDet() const;
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
@@ -146,7 +148,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto TrigLower<M>::lnAbsDet() const -> T {
+    auto TrigLower<M>::lnAbsDet() const -> Tr {
         assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
         return ln(abs(Base::diag())).sum();
     }

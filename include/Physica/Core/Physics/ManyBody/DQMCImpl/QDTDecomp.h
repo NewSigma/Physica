@@ -28,8 +28,11 @@ namespace Physica {
         using This = QDTDecomp<T>;
         using MatrixND = HubbardParams<T>::MatrixND;
 
+        using Tr = T::RealType;
+        using Trv = Tr::ValueType;
+
         MatrixND matrixQ;
-        DiagMatrix<T> matrixD;
+        DiagMatrix<Tr> matrixD;
         QRDecomp<T> qr;
     public:
         QDTDecomp() = default;
@@ -44,7 +47,7 @@ namespace Physica {
         [[nodiscard]] This operator*(const This& other) const;
         /* Operations */
         void compute(const Matrix auto& source);
-        [[nodiscard]] T calcDetQ() const;
+        [[nodiscard]] Trv calcDetQ() const;
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -109,7 +112,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T QDTDecomp<T>::calcDetQ() const {
+    auto QDTDecomp<T>::calcDetQ() const -> Trv {
         return qr.calcDetQ();
     }
 

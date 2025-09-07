@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -11,45 +11,54 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# Prove of algorithm of HouseHolder
+# Algorithm of HouseHolder
 
-## Theory:
-Suppose we have a n-dementional vector $\vec{x} = [x_1, x_2, ..., x_n]^T$ and $\beta = -sgn(x_1) |\vec{x}|$. Define $\vec{a} = \frac{1}{x_1 - \beta} [x_2, x_3, ..., x_n]^T \qquad \tau = 1 - \frac{x_1}{\beta}$.
-So we have
+We are following a slightly different conversion from that of textbook algorithm$^{[1]}$.
 
-$$ (I - \tau \vec{v} \vec{v}^T) \vec{x} = -\beta \hat{e}_1 $$
+## Theory
 
-where $\vec{v}^T = [1, \vec{a}]^T$
+Let n-dementional vector $\mathbf{x} = [x_1, x_2, ..., x_n]^T$. We have
 
-Here $sgn(x): \R \rightarrow \R$ is defined as:
+$$(I - \tau \mathbf{v} \mathbf{v}^T) \mathbf{x} = -\text{sgn}(x_1) |\mathbf{\mathbf{x}}| \hat{e}_1,$$
 
-$$sgn(x) = \left \{ \begin{matrix} 1 \quad (x \geq 0) \\ -1 \quad (x < 0) \end{matrix} \right.$$
+where $\mathbf{v}^T = [1, \mathbf{a}]^T$, $\mathbf{\mathbf{a}} = \frac{1}{x_1 + \text{sgn}(x_1) |\mathbf{\mathbf{x}}|} [x_2, x_3, ..., x_n]^T$, $\tau = 1 + |x_1|/|\mathbf{x}|$. Sign function is defined as
 
-## Prove:
+$$\text{sgn}(x) = \left\{ \begin{matrix} 1 \quad (x \geq 0) \\ -1 \quad (x < 0) \end{matrix} \right.$$
 
-$$ (I - \tau \vec{v} \vec{v}^T) \vec{x} = -\beta \hat{e}_1 $$
+Complex version is obtained simply by replacing $\text{sgn}(x)$ with phase $x/|x|$.
 
-$$\Leftrightarrow \vec{x} - \tau \vec{v} \vec{v}^T \vec{x} = -\beta \hat{e}_1$$
+## Prove
 
-Where
-$$ \vec{v} \vec{v}^T = \left[ \begin{matrix} 1 & \vec{a}^T \\ \vec{a} & \vec{a} \vec{a}^T \end{matrix} \right]$$
+$$(I - \tau \mathbf{v} \mathbf{v}^T) \mathbf{x} = -\text{sgn}(x_1) |\mathbf{\mathbf{x}}| \hat{e}_1$$
 
-$$ \vec{x} = \left[ \begin{matrix} x_1 \\ (x_1 - \beta) \vec{a} \end{matrix} \right] = \left[ \begin{matrix} x_1 \\ (x_1 + sgn(x_1) |\vec{x}|) \vec{a} \end{matrix} \right] = \left[ \begin{matrix} x_1 \\ sgn(x_1)(|x_1| + |\vec{x}|) \vec{a} \end{matrix} \right] $$
-
-So we have
-
-$$ \vec{v} \vec{v}^T \vec{x} = \left[ \begin{matrix} x_1 + sgn(x_1)(|x_1| + |\vec{x}|) \vec{a}^T \vec{a} \\ (x_1 + sgn(x_1)(|x_1| + |\vec{x}|) \vec{a}^T \vec{a}) \vec{a} \end{matrix} \right] = (x_1 + sgn(x_1)(|x_1| + |\vec{x}|) \vec{a}^T \vec{a}) \vec{v} $$
+$$\Rightarrow \mathbf{x} - \tau \mathbf{v} \mathbf{v}^T \mathbf{x} = -\text{sgn}(x_1) |\mathbf{\mathbf{x}}| \hat{e}_1,$$
 
 where
 
-$$ \vec{a}^T \vec{a} = \frac{{x_2}^2 + {x_3}^2 + ... + {x_n}^2}{(x_1 - \beta)^2} = \frac{|\vec{x}|^2 - {x_1}^2}{(|\vec{x}| + |x_1|)^2} = \frac{|\vec{x}| - |x_1|}{|\vec{x}| + |x_1|} $$
+$$\mathbf{v} \mathbf{v}^T = \left[ \begin{matrix} 1 & \mathbf{a}^T \\ \mathbf{a} & \mathbf{a} \mathbf{a}^T \end{matrix} \right],$$
 
-$$ \vec{v} \vec{v}^T \vec{x} = (x_1 + sgn(x_1)(|\vec{x}| - |x_1|)) \vec{v} = sgn(x_1) |\vec{x}| \vec{v} $$
+$$\mathbf{x} = \left[ \begin{matrix} x_1 \\ (x_1 + \text{sgn}(x_1) |\mathbf{\mathbf{x}}|) \mathbf{a} \end{matrix} \right] = \left[ \begin{matrix} x_1 \\ (x_1 + \text{sgn}(x_1) |\mathbf{x}|) \mathbf{a} \end{matrix} \right] = \left[ \begin{matrix} x_1 \\ \text{sgn}(x_1)(|x_1| + |\mathbf{x}|) \mathbf{a} \end{matrix} \right].$$
 
-$$ \tau = \tau = 1 - \frac{x_1}{\beta} = \frac{|x_1| + |\vec{x}|}{|\vec{x}|} $$
+Substitude into the above formula
 
-$$ \tau \vec{v} \vec{v}^T \vec{x} = \left[ \begin{matrix} sgn(x_1)(|x_1| + |\vec{x}|) \\ x_2 \\ x_3 \\ ... \\ x_n \end{matrix} \right] $$
+$$\mathbf{v} \mathbf{v}^T \mathbf{x} = \left[ \begin{matrix} x_1 + \text{sgn}(x_1)(|x_1| + |\mathbf{x}|) \mathbf{a}^T \mathbf{a} \\ (x_1 + \text{sgn}(x_1)(|x_1| + |\mathbf{x}|) \mathbf{a}^T \mathbf{a}) \mathbf{a} \end{matrix} \right] = (x_1 + \text{sgn}(x_1)(|x_1| + |\mathbf{x}|) \mathbf{a}^T \mathbf{a}) \mathbf{v},$$
 
-So
+where
 
-$$ \vec{x} -  \tau \vec{v} \vec{v}^T \vec{x} = -sgn(x_1)|\vec{x}| \hat{e}_1$$
+$$\mathbf{a}^T \mathbf{a} = \frac{{x_2}^2 + {x_3}^2 + ... + {x_n}^2}{(x_1 \text{sgn}(x_1) |\mathbf{\mathbf{x}}|)^2} = \frac{|\mathbf{x}|^2 - {x_1}^2}{(|\mathbf{x}| + |x_1|)^2} = \frac{|\mathbf{x}| - |x_1|}{|\mathbf{x}| + |x_1|}.$$
+
+As a result
+
+$$\mathbf{v} \mathbf{v}^T \mathbf{x} = (x_1 + \text{sgn}(x_1)(|\mathbf{x}| - |x_1|)) \mathbf{v} = \text{sgn}(x_1) |\mathbf{x}| \mathbf{v},$$
+
+and
+
+$$\tau \mathbf{v} \mathbf{v}^T \mathbf{x} = \left[ \begin{matrix} x_1 + \text{sgn}(x_1)|\mathbf{x}| \\ x_2 \\ x_3 \\ ... \\ x_n \end{matrix} \right].$$
+
+Finally
+
+$$\mathbf{x} -  \tau \mathbf{v} \mathbf{v}^T \mathbf{x} = -\text{sgn}(x_1)|\mathbf{x}| \hat{e}_1$$
+
+## References
+
+[1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236

@@ -32,21 +32,24 @@ namespace Physica {
         using This = DQMC<T>;
         using Params = HubbardParams<T>;
         using MatrixND = Params::MatrixND;
+
+        using Tr = T::RealType;
+        using Trv = Tr::ValueType;
     private:
         const Params& params;
-        MatrixND aux;
+        DenseMatrix<Trv> aux;
         CyclicChainQDT<T> chainU;
         CyclicChainQDT<T> chainD;
         QRDecomp<T> kinetic;
 
         QRDecomp<T> qr;
-        DiagMatrix<T> diagB;
-        DiagMatrix<T> diagS;
+        DiagMatrix<Tr> diagB;
+        DiagMatrix<Tr> diagS;
         MatrixND buffer;
 
-        T lnPartitionZ;
-        T signU = 1;
-        T signD = 1;
+        Tr lnPartitionZ;
+        Tr signU = 1;
+        Tr signD = 1;
         Array<MatrixND> greenUs;
         Array<MatrixND> greenDs;
     public:
@@ -78,10 +81,10 @@ namespace Physica {
         [[nodiscard]] int getNumSplit() const noexcept { return params.getNumSplit(); }
         [[nodiscard]] auto& getAuxField() noexcept { return aux; }
 
-        [[nodiscard]] T getLnPartitionZ() const noexcept { return lnPartitionZ; }
-        [[nodiscard]] T getSignU() const noexcept { return signU; }
-        [[nodiscard]] T getSignD() const noexcept { return signD; }
-        [[nodiscard]] T getSign() const noexcept { return signU * signD; }
+        [[nodiscard]] Tr getLnPartitionZ() const noexcept { return lnPartitionZ; }
+        [[nodiscard]] Tr getSignU() const noexcept { return signU; }
+        [[nodiscard]] Tr getSignD() const noexcept { return signD; }
+        [[nodiscard]] Tr getSign() const noexcept { return signU * signD; }
         [[nodiscard]] int getNumEqualGreen() const noexcept { return greenUs.getLength(); }
         [[nodiscard]] int getPeriod() const noexcept { return getNumSplit() / getNumEqualGreen(); }
         [[nodiscard]] const auto& getGreenUs() const noexcept { return greenUs; }
@@ -93,17 +96,17 @@ namespace Physica {
         void initChain();
         void single_flip(int site, int split) noexcept;
         const QDTDecomp<T>& makeWeightMatrix(CyclicChainQDT<T>& chain, int shift);
-        std::pair<T, T> lnPartition(CyclicChainQDT<T>& chain, int shift);
-        std::pair<T, T> calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift);
+        std::pair<Tr, Tr> lnPartition(CyclicChainQDT<T>& chain, int shift);
+        std::pair<Tr, Tr> calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift);
         void calcGreens();
 
-        Vector2D<T> calcRatio(int site, int split) const noexcept;
-        T calcLnSpinWaveWeight(int site) const noexcept;
-        T calcLnSpinWaveWeight(T sumSpin) const noexcept;
+        Vector2D<Tr> calcRatio(int site, int split) const noexcept;
+        Tr calcLnSpinWaveWeight(int site) const noexcept;
+        Tr calcLnSpinWaveWeight(Tr sumSpin) const noexcept;
         /* Static members */
         template<RNG R>
-        static bool accept(T deltaW) noexcept;
-        static bool accept(T deltaW, T prop) noexcept;
+        static bool accept(Tr deltaW) noexcept;
+        static bool accept(Tr deltaW, Tr prop) noexcept;
     };
 
     template<Scalar T>
@@ -121,7 +124,7 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step_random() {
         aux.template random_uniform<R>();
-        aux = unit_elem(aux - T(0.5));
+        aux = unit_elem(aux - Tr(0.5));
         initChain();
         calcGreens();
     }
@@ -130,7 +133,7 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step_mh() {
         auto& rng = R::getInstance();
-        auto props = VectorND<T>(getNumSite());
+        auto props = VectorND<Tr>(getNumSite());
         auto sites = Array<int>(getNumSite());
         for (int i = 0; i < getNumSite(); ++i)
             sites[i] = i;
@@ -151,7 +154,7 @@ namespace Physica {
     void DQMC<T>::step_mh_for(int numStep) {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         assert(numStep % getNumSplit() == 0 && "[Warn]: Suggest divisable step num");
-        auto props = VectorND<T>(getNumSite());
+        auto props = VectorND<Tr>(getNumSite());
         auto sites = Array<int>(getNumSite());
         for (int i = 0; i < getNumSite(); ++i)
             sites[i] = i;
@@ -176,14 +179,14 @@ namespace Physica {
         const int site = std::uniform_int_distribution<>(0, getNumSite() - 1)(rng);
         const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(rng);
         auto spins = aux.row(site);
-        const T sumSpin0 = spins.sum();
-        const T sumSpin1 = sumSpin0 - T(2) * spins[split];
-        const T deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
+        const Tr sumSpin0 = spins.sum();
+        const Tr sumSpin1 = sumSpin0 - Tr(2) * spins[split];
+        const Tr deltaW = calcLnSpinWaveWeight(sumSpin1) - calcLnSpinWaveWeight(sumSpin0);
         const bool flip1 = accept<R>(deltaW);
         if (flip1)
             single_flip(site, split);
 
-        const T p = T::template random_uniform<R>();
+        const auto p = Tr::template random_uniform<R>();
         const bool flip2 = p < 0.5;
         if (flip2) {
             for (int i = 0; i < getNumSplit(); ++i)
@@ -204,15 +207,15 @@ namespace Physica {
     void DQMC<T>::step_spin_for(int numStep)  {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         assert(numStep % getNumSplit() == 0 && "[Warn]: Suggest divisable step num");
-        auto props = VectorND<T>(getNumSplit());
+        auto props = VectorND<Tr>(getNumSplit());
         auto splits = Array<int>(getNumSplit());
         for (int i = 0; i < getNumSplit(); ++i)
             splits[i] = i;
 
         for (int site = 0; site < getNumSite(); ++site) {
             auto spins = aux.row(site);
-            T sumSpin0 = spins.sum();
-            T weight0 = calcLnSpinWaveWeight(sumSpin0);
+            Tr sumSpin0 = spins.sum();
+            Tr weight0 = calcLnSpinWaveWeight(sumSpin0);
             for (int step = 0; step < numStep; ++step) {
                 const int i = step % getNumSplit();
                 if (i == 0) {
@@ -221,9 +224,9 @@ namespace Physica {
                 }
 
                 const int split = splits[i];
-                const T sumSpin1 = sumSpin0 - T(2) * spins[split];
-                const T weight1 = calcLnSpinWaveWeight(sumSpin1);
-                const T deltaW = weight1 - weight0;
+                const Tr sumSpin1 = sumSpin0 - Tr(2) * spins[split];
+                const Tr weight1 = calcLnSpinWaveWeight(sumSpin1);
+                const Tr deltaW = weight1 - weight0;
                 if (accept(deltaW, props[i])) {
                     spins[split] = -spins[split];
                     sumSpin0 = sumSpin1;
@@ -231,7 +234,7 @@ namespace Physica {
                 }
             }
 
-            const T p = T::template random_uniform<R>();
+            const auto p = Tr::template random_uniform<R>();
             if (p < 0.5)
                 spins = -spins;
         }
@@ -291,7 +294,7 @@ namespace Physica {
     template<Scalar T>
     void DQMC<T>::initChain() {
         const int numSplit = getNumSplit();
-        DiagMatrix<T> expU(getNumSite());
+        DiagMatrix<Tr> expU(getNumSite());
         for (int split = 0; split < numSplit; ++split) {
             expU.diag() = exp(params.getAlpha() * aux.col(split));
             chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
@@ -307,7 +310,7 @@ namespace Physica {
         auto spins = aux.row(site);
         spins[split] = -spins[split];
 
-        DiagMatrix<T> expU(getNumSite());
+        DiagMatrix<Tr> expU(getNumSite());
         const auto& expB = params.getExpB();
         expU.diag() = exp(params.getAlpha() * aux.col(split));
         chainU[split].compute(expB * expU);
@@ -322,33 +325,33 @@ namespace Physica {
         const int numSplit = getNumSplit();
         const auto& decomp = chain.multiply(shift, (numSplit + shift - 1) % numSplit);
         const auto& matrixD = decomp.getMatrixD();
-        const T betaMu = params.calcBetaMu();
+        const Tr betaMu = params.calcBetaMu();
         for (int i = 0; i < getNumSite(); ++i) {
-            const T originD = matrixD.diag()[i] * exp(betaMu);
-            const T absD = abs(originD);
-            const bool sep = absD > T(1);
-            diagB.diag()[i] = sep ? reciprocal(absD) : T(1);
+            const Tr originD = matrixD.diag()[i] * exp(betaMu);
+            const Tr absD = abs(originD);
+            const bool sep = absD > Tr(1);
+            diagB.diag()[i] = sep ? reciprocal(absD) : Tr(1);
             diagS.diag()[i] = sep ? unit(originD) : originD;
         }
         return decomp;
     }
 
     template<Scalar T>
-    std::pair<T, T> DQMC<T>::lnPartition(CyclicChainQDT<T>& chain, int shift) {
+    auto DQMC<T>::lnPartition(CyclicChainQDT<T>& chain, int shift) -> std::pair<Tr, Tr> {
         const auto& qdt = makeWeightMatrix(chain, shift);
         buffer = qdt.getMatrixQ() * diagB;
         qr.compute(buffer.transpose() + diagS * qdt.getMatrixT());
         // Handle potential underflow
-        diagB.diag() += T(std::numeric_limits<T>::min());
-        qr.getWorking().diag() += T(std::numeric_limits<T>::min());
+        diagB.diag() += Tr(std::numeric_limits<T>::min());
+        qr.getWorking().diag() += Tr(std::numeric_limits<T>::min());
 
-        T lnZ = -diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        T sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag()).prod();
+        Tr lnZ = -diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
+        Tr sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
         return std::make_pair(lnZ, sign);
     }
 
     template<Scalar T>
-    std::pair<T, T> DQMC<T>::calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift) {
+    auto DQMC<T>::calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift) -> std::pair<Tr, Tr> {
         const auto pair = lnPartition(chain, shift);
         MatrixND temp = buffer * qr.getMatrixQ();
         green = qr.getMatrixR().inverse() * temp.transpose();
@@ -372,31 +375,31 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Vector2D<T> DQMC<T>::calcRatio(int site, int split) const noexcept {
+    auto DQMC<T>::calcRatio(int site, int split) const noexcept -> Vector2D<Tr> {
         assert(site < getNumSite() && split < getNumSplit());
         assert(getNumEqualGreen() == getNumSplit() && "[Error]: Cannot use rank-1 update if equal-time greens are not complete");
-        const T delta = T(2) * params.getAlpha() * aux(site, split);
-        Vector2D<T> result{-delta, delta};
-        result = exp(result) - T(1);
-        result[0] *= T(1) - greenUs[split](site, site);
-        result[1] *= T(1) - greenDs[split](site, site);
-        result += T(1);
+        const Tr delta = Tr(2) * params.getAlpha() * aux(site, split);
+        Vector2D<Tr> result{-delta, delta};
+        result = exp(result) - Tr(1);
+        result[0] *= Tr(1) - greenUs[split](site, site).real();
+        result[1] *= Tr(1) - greenDs[split](site, site).real();
+        result += Tr(1);
         return result; // Eq.(7.36) in [2]
     }
 
     template<Scalar T>
-    T DQMC<T>::calcLnSpinWaveWeight(int site) const noexcept {
+    auto DQMC<T>::calcLnSpinWaveWeight(int site) const noexcept -> Tr {
         assert(0 <= site && site < getNumSite());
         const auto spins = aux.row(site);
         return calcLnSpinWaveWeight(spins.sum());
     }
 
     template<Scalar T>
-    T DQMC<T>::calcLnSpinWaveWeight(T sumSpin) const noexcept {
-        T split = getNumSplit();
-        T a = (split + sumSpin) * 0.5;
-        T b = (split - sumSpin) * 0.5;
-        T combine;
+    auto DQMC<T>::calcLnSpinWaveWeight(Tr sumSpin) const noexcept -> Tr {
+        Tr split = getNumSplit();
+        Tr a = (split + sumSpin) * 0.5;
+        Tr b = (split - sumSpin) * 0.5;
+        Tr combine;
         if (a.isPositive() && b.isPositive())
             combine = (a + 0.5) * ln(a) + (b + 0.5) * ln(b);
         else
@@ -406,16 +409,16 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    bool DQMC<T>::accept(T deltaW) noexcept {
+    bool DQMC<T>::accept(Tr deltaW) noexcept {
         if (deltaW.isPositive())
             return true;
 
-        const T p = T::template random_uniform<R>();
+        const auto p = Tr::template random_uniform<R>();
         return p < exp(deltaW);
     }
 
     template<Scalar T>
-    bool DQMC<T>::accept(T deltaW, T prop) noexcept {
+    bool DQMC<T>::accept(Tr deltaW, Tr prop) noexcept {
         if (deltaW.isPositive())
             return true;
         return prop < exp(deltaW);

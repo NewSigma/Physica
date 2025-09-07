@@ -362,7 +362,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::lnAbsDet() const -> T {
+    auto RValueMatrix<Derived>::lnAbsDet() const -> Tr {
         QRDecomp<T, false> qr(Base::getDerived());
         return ln(abs(qr.getMatrixR().diag())).sum();
     }

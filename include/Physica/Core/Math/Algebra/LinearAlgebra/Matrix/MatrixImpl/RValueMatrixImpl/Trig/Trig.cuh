@@ -29,8 +29,9 @@ namespace Physica {
         using Base = device_obj<RValueMatrix<host_obj>>;
 
         device_obj<M>& mat;
-    public:
+    protected:
         using typename Base::T;
+        using typename Base::Tr;
         using typename Base::Tv;
     public:
         __host__ __device__ device_obj(device_obj<M>& mat_);
@@ -44,7 +45,7 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
 
-        [[nodiscard]] T lnAbsDet() const;
+        [[nodiscard]] Tr lnAbsDet() const;
         /* Getters */
         [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getRow(); }
@@ -71,7 +72,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto device_obj<TrigUpper<M>>::lnAbsDet() const -> T {
+    auto device_obj<TrigUpper<M>>::lnAbsDet() const -> Tr {
         assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
         return ln(abs(Base::diag())).sum();
     }
@@ -83,8 +84,9 @@ namespace Physica {
         using Base = device_obj<RValueMatrix<host_obj>>;
 
         device_obj<M>& mat;
-    public:
+    protected:
         using typename Base::T;
+        using typename Base::Tr;
         using typename Base::Tv;
     public:
         __host__ __device__ device_obj(device_obj<M>& mat_);
@@ -98,7 +100,7 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
 
-        [[nodiscard]] T lnAbsDet() const;
+        [[nodiscard]] Tr lnAbsDet() const;
         /* Getters */
         [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getRow(); }
@@ -125,7 +127,7 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto device_obj<TrigLower<M>>::lnAbsDet() const -> T {
+    auto device_obj<TrigLower<M>>::lnAbsDet() const -> Tr {
         assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
         return ln(abs(Base::diags())).sum();
     }

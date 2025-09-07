@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
@@ -34,19 +33,19 @@ namespace Physica {
     public:
         using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
     private:
-        DenseMatrix<T> hoppingMatrix;
+        MatrixND hoppingMatrix;
         MatrixND expB;
-        T alpha;
-        T beta;
-        T repelU;
-        T chemMu;
+        Tr alpha;
+        Tr beta;
+        Tr repelU;
+        Tr chemMu;
         int numSplit;
 
-        T lnCoshShift;
+        Tr lnCoshShift;
     public:
         HubbardParams() = default;
         template<int Dim, BoundaryCond BC>
-        HubbardParams(T hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, T beta_, T chemMu_, int numSplit_);
+        HubbardParams(Tr hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, Tr beta_, Tr chemMu_, int numSplit_);
         HubbardParams(const This&) = default;
         HubbardParams(This&&) noexcept = default;
         ~HubbardParams() = default;
@@ -56,7 +55,7 @@ namespace Physica {
             return *this;
         }
         /* Operations */
-        [[nodiscard]] T calcBetaMu() const noexcept;
+        [[nodiscard]] Tr calcBetaMu() const noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -69,26 +68,26 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return expB.getRow(); }
         [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
         [[nodiscard]] const auto& getExpB() const noexcept { return expB; }
-        [[nodiscard]] T getAlpha() const noexcept { return alpha; }
-        [[nodiscard]] T getBeta() const noexcept { return beta; }
-        [[nodiscard]] T getRepelU() const noexcept { return repelU; }
-        [[nodiscard]] T getChemMu() const noexcept { return chemMu; }
-        [[nodiscard]] T getLnCoshShift() const noexcept { return lnCoshShift; }
+        [[nodiscard]] Tr getAlpha() const noexcept { return alpha; }
+        [[nodiscard]] Tr getBeta() const noexcept { return beta; }
+        [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
+        [[nodiscard]] Tr getChemMu() const noexcept { return chemMu; }
+        [[nodiscard]] Tr getLnCoshShift() const noexcept { return lnCoshShift; }
         /* Setters */
-        void setChemMu(T chemMu_);
+        void setChemMu(Tr chemMu_);
         /* Static members */
-        [[nodiscard]] static T calcAlpha(T beta, T repelU, int numSplit) noexcept;
-        [[nodiscard]] static T calcBetaMu(T beta, T repelU, T chemMu) noexcept;
+        [[nodiscard]] static Tr calcAlpha(Tr beta, Tr repelU, int numSplit) noexcept;
+        [[nodiscard]] static Tr calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept;
     private:
         template<int Dim, BoundaryCond BC>
-        void makeHoppingMatrix(T hoppingT, const SquareLattice<Dim, BC>& lattice);
+        void makeHoppingMatrix(Tr hoppingT, const SquareLattice<Dim, BC>& lattice);
         /* Friends */
         friend class device_obj<This>;
     };
 
     template<Scalar T>
     template<int Dim, BoundaryCond BC>
-    HubbardParams<T>::HubbardParams(T hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, T beta_, T chemMu_, int numSplit_)
+    HubbardParams<T>::HubbardParams(Tr hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, Tr beta_, Tr chemMu_, int numSplit_)
             : beta(beta_)
             , repelU(repelU_)
             , chemMu(chemMu_)
@@ -104,7 +103,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T HubbardParams<T>::calcBetaMu() const noexcept {
+    auto HubbardParams<T>::calcBetaMu() const noexcept -> Tr {
         return calcBetaMu(beta, repelU, chemMu);
     }
 
@@ -123,26 +122,26 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void HubbardParams<T>::setChemMu(T chemMu_) {
+    void HubbardParams<T>::setChemMu(Tr chemMu_) {
         chemMu = std::move(chemMu_);
         lnCoshShift = lncosh(calcBetaMu());
     }
 
     template<Scalar T>
-    T HubbardParams<T>::calcAlpha(T beta, T repelU, int numSplit) noexcept {
-        const T betaM = beta / T(numSplit);
-        const T x = betaM * repelU;
-        return x * T(0.5) + ln1p(sqrt(T(1) - exp(-x)));
+    auto HubbardParams<T>::calcAlpha(Tr beta, Tr repelU, int numSplit) noexcept -> Tr {
+        const Tr betaM = beta / Tr(numSplit);
+        const Tr x = betaM * repelU;
+        return x * Tr(0.5) + ln1p(sqrt(Tr(1) - exp(-x)));
     }
 
     template<Scalar T>
-    T HubbardParams<T>::calcBetaMu(T beta, T repelU, T chemMu) noexcept {
-        return beta * (chemMu - repelU * T(0.5));
+    auto HubbardParams<T>::calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept -> Tr {
+        return beta * (chemMu - repelU * Tr(0.5));
     }
 
     template<Scalar T>
     template<int Dim, BoundaryCond BC>
-    void HubbardParams<T>::makeHoppingMatrix(T hoppingT, const SquareLattice<Dim, BC>& lattice) {
+    void HubbardParams<T>::makeHoppingMatrix(Tr hoppingT, const SquareLattice<Dim, BC>& lattice) {
         const auto CheckTemplateParam = HubbardMatrix<T, FermiRepr<Dim, Dynamic, false>, BC>{};
 
         const size_t numSite = lattice.getNumSuperCellSite();

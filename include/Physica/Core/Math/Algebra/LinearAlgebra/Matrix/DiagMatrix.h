@@ -27,6 +27,7 @@ namespace Physica {
         using Base = RValueMatrix<This>;
         using VectorType = DenseVector<T, Order>;
     protected:
+        using typename Base::Tr;
         using typename Base::Tv;
     private:
         VectorType diags;
@@ -48,7 +49,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
-        [[nodiscard]] T lnAbsDet() const;
+        [[nodiscard]] Tr lnAbsDet() const;
 
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
 
@@ -92,7 +93,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    T DiagMatrix<T, Order>::lnAbsDet() const {
+    auto DiagMatrix<T, Order>::lnAbsDet() const -> Tr {
         return ln(abs(diags)).sum();
     }
 

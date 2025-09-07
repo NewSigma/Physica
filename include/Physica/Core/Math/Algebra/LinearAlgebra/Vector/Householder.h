@@ -21,6 +21,10 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
+    /**
+     * References:
+     * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236
+     */
     template<Matrix M, Vector V>
     void applyHouseholder(const V& householder, M&& mat) {
         using T = std::remove_cvref<M>::type::ScalarType;

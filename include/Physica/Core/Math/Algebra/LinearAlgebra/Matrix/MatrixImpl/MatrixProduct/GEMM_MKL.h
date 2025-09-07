@@ -38,12 +38,12 @@ namespace Physica {
         auto* c = reinterpret_cast<Tm*>(target.data());
 
         if constexpr (isComplex) {
-            const Tm alpha = 1;
-            const Tm beta = 0;
+            const Tc alpha = 1;
+            const Tc beta = 0;
             if constexpr (T::Prec == Float32)
-                cblas_cgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
+                cblas_cgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, (Tm*)&alpha, a, lda, b, ldb, (Tm*)&beta, c, ldc);
             else
-                cblas_zgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
+                cblas_zgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, (Tm*)&alpha, a, lda, b, ldb, (Tm*)&beta, c, ldc);
         }
         else {
             if constexpr (T::Prec == Float32)

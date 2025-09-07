@@ -567,7 +567,7 @@ namespace Physica {
      * \return The norm of \param source
      * 
      * References:
-     * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
+     * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236-244
      * [2] Eigen; https://eigen.tuxfamily.org
      */
     template<class Derived>
@@ -580,25 +580,21 @@ namespace Physica {
 
         const T v0 = calc(0);
         const Tr sourceNorm0 = v0.squaredNorm();
-        const Tr squaredTailNorm = tail(1).squaredNorm();
+        const Tr squaredTailNorm = tail<TailLength>(1).squaredNorm();
         if (squaredTailNorm > std::numeric_limits<T>::min()) [[likely]] {
             const Tr norm = sqrt(squaredTailNorm + sourceNorm0);
-            const T factor = norm * unit(v0.value());
-            const T factor1 = factor + v0;
-            const T factor2 = reciprocal(factor1);
-
-            target.template tail<TailLength>(1) = tail<TailLength>(1) * factor2;
-            target[0] = (factor1 / factor).real();
+            target[0] = Tr(1) + abs(v0) / norm;
+            target.template tail<TailLength>(1) = tail<TailLength>(1) * reciprocal(v0 + unit(v0.value()) * norm);
             return norm;
         }
         else {
             const bool isZeroVector = sourceNorm0 < std::numeric_limits<T>::min();
             if (isZeroVector) {
-                target = Trv(0);
+                target.zeros();
                 return Trv(0);
             }
             target[0] = Trv(2);
-            target.template tail<TailLength>(1) = Trv(0);
+            target.template tail<TailLength>(1).zeros();
             return sqrt(sourceNorm0);
         }
     }

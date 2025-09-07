@@ -213,6 +213,12 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueVector<Derived>::zeros() noexcept {
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            (*this)[i] = Trv(0);
+    }
+
+    template<class Derived>
     template<RNG R>
     void LValueVector<Derived>::random_uniform() {
         for (size_t i = 0; i < this->getLength(); ++i)

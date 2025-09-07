@@ -62,10 +62,10 @@ namespace Physica {
             T observe;
             switch (type) {
             case Density:
-                observe = T(2) - greenU.diag().mean() - greenD.diag().mean();
+                observe = T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();
                 break;
             case DoubleOccupy:
-                observe = (T(1) - greenU.diag()) * (T(1) - greenD.diag()) / T(dqmc.getNumSite());
+                observe = (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(dqmc.getNumSite());
                 break;
             default:
                 unreachable();

@@ -40,6 +40,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
         using typename Base::Tr;
+        using typename Base::Trv;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using RefTy = ScalarType::RefTy;
@@ -106,6 +107,7 @@ namespace Physica {
         using Base::householder;
         Tr householder();
 
+        void zeros() noexcept;
         template<RNG R>
         void random_uniform();
         template<RNG R>

@@ -25,7 +25,10 @@ namespace Physica {
     template<Scalar T>
     class PermMatrix : public RValueMatrix<PermMatrix<T>> {
         using This = PermMatrix<T>;
+        using Base = RValueMatrix<This>;
 
+        using typename Base::Trv;
+    private:
         Array<size_t> indices;
     public:
         PermMatrix() = default;
@@ -40,7 +43,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
         [[nodiscard]] T det() const;
-        [[nodiscard]] constexpr static T lnAbsDet() noexcept { return T(0); }
+        [[nodiscard]] constexpr static Trv lnAbsDet() noexcept { return Trv(0); }
         [[nodiscard]] PermMatrix inverse() const noexcept;
 
         void resize(size_t order);

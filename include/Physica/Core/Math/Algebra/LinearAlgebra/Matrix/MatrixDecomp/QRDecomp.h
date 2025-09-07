@@ -37,6 +37,7 @@ namespace Physica {
         using Perm = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
 
         using Tr = T::RealType;
+        using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
@@ -58,9 +59,9 @@ namespace Physica {
         void compute_base(const Matrix auto& source);
         void compute_mkl(const Matrix auto& source);
 
-        [[nodiscard]] T calcDetQ() const;
-        void toQDT(VectorND<T>& diagD);
-        [[nodiscard]] VectorND<T> toQDT();
+        [[nodiscard]] Trv calcDetQ() const noexcept;
+        void toQDT(VectorND<Tr>& diagD) noexcept;
+        [[nodiscard]] VectorND<Tr> toQDT();
 
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
@@ -115,17 +116,14 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    T QRDecomp<T, Pivot>::calcDetQ() const {
-        int sign = 0;
-        for (auto tau : taus)
-            sign += tau.isPositive();
-        return T(sign % 2 == 0 ? 1.0 : -1.0);
+    auto QRDecomp<T, Pivot>::calcDetQ() const noexcept -> Trv {
+        return (taus.getLength() % 2 != 0) ? 1.0 : -1.0;
     }
     /**
      * Decompose matrix like A = QDT(no pivoting), or A = QDTP(poviting), where D is diagonal
      */
     template<Scalar T, bool Pivot>
-    void QRDecomp<T, Pivot>::toQDT(VectorND<T>& diagD) {
+    void QRDecomp<T, Pivot>::toQDT(VectorND<Tr>& diagD) noexcept {
         const size_t length = taus.getLength();
         assert(diagD.getLength() == length);
         for (size_t i = 0; i < length; ++i) {
@@ -133,14 +131,16 @@ namespace Physica {
                 diagD[i] = 1;
                 continue;
             }
-            diagD[i] = working(i, i);
+            if constexpr (isComplex)
+                assert(working(i, i).imag().isZero() && "[Error]: Householder QR should have real diagonals");
+            diagD[i] = working(i, i).real();
             working.row(i).tail(i) *= reciprocal(diagD[i]);
         }
     }
 
     template<Scalar T, bool Pivot>
-    VectorND<T> QRDecomp<T, Pivot>::toQDT() {
-        VectorND<T> vecD(taus.getLength());
+    auto QRDecomp<T, Pivot>::toQDT() -> VectorND<Tr> {
+        VectorND<Tr> vecD(taus.getLength());
         toQDT(vecD);
         return vecD;
     }
