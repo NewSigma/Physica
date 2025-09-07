@@ -32,6 +32,9 @@ option(PHYSICA_MIMALLOC "Use mimalloc" OFF)
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_CCACHE ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+# Dev options
+option(PHYSICA_LLVMIR "Collect LLVM IR for benchmark" OFF)
+option(PHYSICA_SANITIZE "Check memory error" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include(PhysicaConfigImpl)
@@ -41,7 +44,7 @@ if(${RUN_CHECKS})
 endif()
 add_subdirectory(cmake/Modules)
 ##############################################Project################################################
-if (${PHYSICA_CCACHE})
+if (${PHYSICA_CCACHE} AND NOT ${PHYSICA_LLVMIR})
     find_program(CCACHE_PROGRAM ccache)
     if(CCACHE_PROGRAM)
         set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
