@@ -167,8 +167,8 @@ namespace Physica {
             }
         }
         else {
-            static_assert(BC == TBC, "[Error]: Not implemented");
-            const auto phases = lattice.template calcPhase<Tc>();
+            static_assert(BC == APBC || BC == TBC, "[Error]: Not implemented");
+            const auto phases = lattice.template calcPhase<Tr>();
             const auto& boundary = lattice.getSiteBoundaryMap();
             for (size_t from = 0; from < numSite; ++from) {
                 if constexpr (Dim > 1) {

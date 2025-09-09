@@ -40,7 +40,7 @@ namespace Physica {
         };
 
         using HopIndexArray = std::conditional<(Dim > 1), Array<Array<size_t>>, PlainStruct<void>>::type;
-        using SiteBoundaryMap = std::conditional<BC == BoundaryCond::TBC,
+        using SiteBoundaryMap = std::conditional<BC == BoundaryCond::APBC || BC == BoundaryCond::TBC,
                                                  std::unordered_map<std::pair<int, int>, int, Hash>,
                                                  PlainStruct<void>>::type;
 
@@ -59,7 +59,7 @@ namespace Physica {
         /* Operations */
         void forNeighSites(std::invocable<int, int> auto fn, int site) const;
         template<Scalar T>
-        DenseVector<T, Dim> calcPhase() const noexcept;
+        auto calcPhase() const noexcept;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -78,6 +78,8 @@ namespace Physica {
             : Base(superSize, numUnitCellSite) {
         if constexpr (Dim > 1)
             hopIndexArr = makeHopIndexArray();
+        if constexpr (BC != BoundaryCond::PBC)
+            siteBoundaryMap = makeSiteBoundaryMap();
     }
 
     template<int Dim, BoundaryCond BC>
@@ -102,12 +104,19 @@ namespace Physica {
 
     template<int Dim, BoundaryCond BC>
     template<Scalar T>
-    DenseVector<T, Dim> SquareLattice<Dim, BC>::calcPhase() const noexcept {
-        static_assert(T::isComplex, "[Error]: Phase is complex");
-        DenseVector<T, Dim> result{};
-        for (int i = 0; i < Dim; ++i)
-            result[i] = T::fromPhase(phaseArgs[i]);
-        return result;
+    auto SquareLattice<Dim, BC>::calcPhase() const noexcept {
+        static_assert(!T::isComplex, "[Error]: Phase arg is real");
+        if constexpr (BC == BoundaryCond::TBC) {
+            using Tc = T::ComplexType;
+            DenseVector<Tc, Dim> result{};
+            for (int i = 0; i < Dim; ++i)
+                result[i] = Tc::fromPhase(phaseArgs[i]);
+            return result;
+        }
+        else {
+            static_assert(BC == BoundaryCond::APBC, "[Error]: Unexpected boundary condition");
+            return DenseVector<T, Dim>(Dim, -1);
+        }
     }
 
     template<int Dim, BoundaryCond BC>
@@ -127,13 +136,14 @@ namespace Physica {
 
     template<int Dim, BoundaryCond BC>
     const auto& SquareLattice<Dim, BC>::getSiteBoundaryMap() const noexcept {
-        static_assert(BC == BoundaryCond::TBC, "[Error]: Not available");
+        static_assert(sizeof(siteBoundaryMap) > 1, "[Error]: Not available");
+        assert(!siteBoundaryMap.empty());
         return siteBoundaryMap;
     }
 
     template<int Dim, BoundaryCond BC>
     const auto& SquareLattice<Dim, BC>::getPhaseArgs() const noexcept {
-        static_assert(BC == BoundaryCond::TBC, "[Error]: Not available");
+        static_assert(sizeof(phaseArgs) > 1, "[Error]: Not available");
         return phaseArgs;
     }
 

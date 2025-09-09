@@ -23,6 +23,7 @@
 namespace Physica {
     enum class BoundaryCond {
         PBC,
+        APBC,
         TBC,
         OBC
     };
