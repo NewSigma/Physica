@@ -15,7 +15,20 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Introduction
 
-受Eigen、Armadillo等C++线性代数库的启发，Physica线性代数模块广泛使用模板表达式技术以减少中间对象和进行编译期表达式优化。
+LinearAlgebra模块提供有SIMD和GPU加速的可微线性代数功能。  
+
+可微分科学计算: 将自动微分广泛而深入的结合现代科学计算, 降低自动微分技术使用成本, 与底层模块结合持续享受算法红利, 首先要有可微分线性代数库。  
+
+受Eigen、Armadillo等C++线性代数库的启发，LinearAlgebra广泛使用模板表达式技术以减少中间对象和进行编译期表达式优化。
+
+## 左值/右值线性空间
+
+历史上, C语言的左值和右值的定义非常简单：
+
+    左值(lvalue)：可以出现在赋值语句左边的表达式。它代表一个有名字、有固定地址的内存位置。
+    右值(rvalue)：只能出现在赋值语句右边的表达式。它代表一个临时的、即将消亡的值。
+
+数值计算的线性空间不是抽象的线性空间, 可将赋值运算引入线性空间, 构造一个广义线性空间, 这种构造有助于清晰简洁地用模板表达式实现数学操作。
 
 线性代数对象的基类一般有三种:
 
@@ -29,8 +42,6 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 进一步规定连续对象是元素在内存上连续分布的
 
-## 右值对象
-
 **右值对象**的核心操作为
 
 1. calc() 计算元素的值, 按值返回
@@ -39,7 +50,6 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 另外
 
 calc_value() 返回元素的value, 用于反向传播等不需要梯度的情况
-
 
 ## 转换函数
 
@@ -54,7 +64,7 @@ grads: 梯度, 对反向传播的纯右值向量调用grads()是不合理的，�
 
 ## 模板参数
 
-**FastAssign**
+**FastAssign**:
 
 考虑线性代数对象的赋值，如将向量$\mathbf x$赋给向量$\mathbf y$
 
@@ -70,11 +80,11 @@ assign具有整体性，因此FastAssign具有传播性。
 
 该选项用于实现启发性表达式变换。
 
-**FastPacket**
+**FastPacket**:
 
 FastPacket = true表示可以快速构造SIMD对象. 对于右值表达式, 需要逐个计算元素并保存在栈上, 此时FastPacket = false
 
 ## Reference
 
-[1] Eigen; https://eigen.tuxfamily.org
-[2] Armadillo; https://arma.sourceforge.net/
+[1] Eigen; https://eigen.tuxfamily.org  
+[2] Armadillo; https://arma.sourceforge.net  

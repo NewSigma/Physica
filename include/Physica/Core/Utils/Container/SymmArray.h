@@ -97,14 +97,12 @@ namespace Physica {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ SymmArray<T, Order>::lvalue_reference
-    SymmArray<T, Order>::operator()(size_t row, size_t col) {
+    __host__ __device__ auto SymmArray<T, Order>::operator()(size_t row, size_t col) -> lvalue_reference {
         return (*this)[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
-    __host__ __device__ SymmArray<T, Order>::const_lvalue_reference
-    SymmArray<T, Order>::operator()(size_t row, size_t col) const {
+    __host__ __device__ auto SymmArray<T, Order>::operator()(size_t row, size_t col) const -> const_lvalue_reference {
         return (*this)[toIndex1D(row, col)];
     }
 

@@ -62,7 +62,6 @@ namespace Physica {
     public:
         Array2D() = default;
         explicit Array2D(size_t order);
-        Array2D(size_t row, size_t col);
         Array2D(size_t row, size_t col, auto&&... args);
         Array2D(std::initializer_list<InitializerType> list);
         Array2D(const This&) = default;

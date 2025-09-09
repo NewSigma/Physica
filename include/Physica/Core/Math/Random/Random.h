@@ -108,8 +108,8 @@ namespace Physica {
         try {
             std::ignore = reseed();
         }
-        catch (...) {
-            fprintf(stderr, "RNG init failed");
+        catch (std::exception& e) {
+            fprintf(stderr, "RNG init failed: %s\n", e.what());
             std::abort();
         }
     }

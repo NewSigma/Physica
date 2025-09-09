@@ -25,27 +25,15 @@ namespace Physica {
     Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t order) : Array2D(order, order) {}
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col) : r(row) {
-        if constexpr (isVectorStorage) {
-            if constexpr (isColMajor)
-                arr = ArrayType(col, row);
-            else
-                arr = ArrayType(row, col);
-        }
-        else
-            arr = ArrayType(row * col);
-    }
-
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
     Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args) : r(row) {
         if constexpr (isVectorStorage) {
             if constexpr (isColMajor)
-                arr = ArrayType(col, row, std::forward<decltype(args)>(args)...);
+                new (&arr) ArrayType(col, row, std::forward<decltype(args)>(args)...);
             else
-                arr = ArrayType(row, col, std::forward<decltype(args)>(args)...);
+                new (&arr) ArrayType(row, col, std::forward<decltype(args)>(args)...);
         }
         else
-            arr = ArrayType(row * col, std::forward<decltype(args)>(args)...);
+            new (&arr) ArrayType(row * col, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -235,7 +223,7 @@ namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     auto Array2D<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This requires(MatrixOption::isElementMatrix<This>()) {
         This result{};
-        result.arr = ArrayType::read(row * col, p);
+        new (&result.arr) ArrayType::read(row * col, p);
         result.r = row;
         return result;
     }
