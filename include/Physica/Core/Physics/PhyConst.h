@@ -18,11 +18,13 @@
  */
 #pragma once
 
+#include <array>
+#include <cassert>
 #include <cmath>
 #include <numbers>
 
 namespace Physica {
-    enum UnitSystem {
+    enum UnitSystem : char {
         SI,
         AU,
         ESU,
@@ -66,18 +68,21 @@ namespace Physica {
         /**
          * The first element is a space holder
          */
-        constexpr static double relativeAtomMass[37]{0, 1.00798, 4.002602,
+        constexpr static std::array<double, 37> relativeAtomMass{0, 1.00798, 4.002602,
                 6.968, 9.0121831, 10.814, 12.0106, 14.00686, 15.99940, 18.998403162, 20.1797,
                 22.98976928, 24.306, 26.9815384, 28.085, 30.973761998, 32.068, 35.452, 39.878,
                 39.0983, 40.078, 44.955907, 47.867, 50.9415, 51.9961, 54.938043, 55.845, 58.933194, 58.6934, 63.546, 65.38, 69.723, 72.630, 74.921595, 78.971, 79.904, 83.798};
-        constexpr static const char* elementSymbol[37]{"-", "H", "He",
+        constexpr static std::array<const char*, 37> elementSymbol{"-", "H", "He",
                 "Li", "Be", "B", "C", "N", "O", "F", "Ne",
                 "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar",
                 "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr"};
     
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
         [[nodiscard]] constexpr static double radianToDegree(double radian) { return radian / M_PI * 180; }
-        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return relativeAtomMass[atomicNum] * atomicMassConst; }
+        [[nodiscard]] constexpr static double atomMass(int atomicNum) {
+            assert(0 <= atomicNum && atomicNum < relativeAtomMass.size());
+            return relativeAtomMass[atomicNum] * atomicMassConst;
+        }
         [[nodiscard]] constexpr static double calorieToJoule(double calorie) { return calorie * calorieInJoule; }
         [[nodiscard]] constexpr static double waveNumToTHz(double waveNum) { return waveNum * speedOfLight * 1E-10; }
     };
@@ -124,7 +129,7 @@ namespace Physica {
         [[nodiscard]] constexpr static double kToTemperature(double kelvin) { return kelvin / temperatureInK; }
         [[nodiscard]] constexpr static double pressToGPa(double atomic_press) { return atomic_press * pressInGPa; }
         [[nodiscard]] constexpr static double pressToKBar(double atomic_press) { return pressToGPa(atomic_press) * 10; }
-        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electronMass; }
+        [[nodiscard]] constexpr static double atomMass(int atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electronMass; }
         [[nodiscard]] constexpr static double freqToTHz(double atomic_freq) { return atomic_freq * 1E-12 / timeToSecond(1); }
         [[nodiscard]] constexpr static double THzToFreq(double thz) { return thz * timeToSecond(1) * 1E12; }
     };

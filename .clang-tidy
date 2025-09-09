@@ -1,0 +1,36 @@
+Checks: >
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  clang-analyzer-*,
+  concurrency-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-special-member-functions,
+  misc-*,
+  -misc-non-private-member-variables-in-classes,
+  modernize-*,
+  -modernize-return-braced-init-list,
+  -modernize-use-trailing-return-type,
+  mpi-*,
+  performance-*,
+  portability-std-allocator-const,
+  portability-template-virtual-member-function,
+  readability-*,
+  -readability-braces-around-statements,
+  -readability-identifier-length,
+  -readability-identifier-naming,
+  -readability-implicit-bool-conversion,
+  -readability-magic-numbers,
+  -readability-named-parameter,
+  -readability-redundant-access-specifiers,
+  -readability-static-accessed-through-instance
+#portability-simd-intrinsics,
+
+CheckOptions:
+  - key:             modernize-use-default-member-init.UseAssignment
+    value:           1
+  - key:             readability-redundant-member-init.IgnoreBaseInCopyConstructors
+    value:           1
+  - key:             readability-uniqueptr-delete-release.PreferResetCall
+    value:           1

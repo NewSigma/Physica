@@ -57,7 +57,7 @@ namespace Physica {
         DenseMatrix(size_t row, size_t col, T value);
         DenseMatrix(initializer_list list);
         DenseMatrix(const Matrix auto& mat);
-        DenseMatrix(const Vector auto& mat);
+        DenseMatrix(const Vector auto& vec);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         /* Operators */
@@ -99,7 +99,7 @@ namespace Physica {
         [[nodiscard]] static This random_normal(size_t row, size_t col);
         template<RNG R>
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
-        [[nodiscard]] static std::pair<This, This> meshgrid(const Vector auto& vecInCols, const Vector auto& vecInRows);
+        [[nodiscard]] static auto meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This>;
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}

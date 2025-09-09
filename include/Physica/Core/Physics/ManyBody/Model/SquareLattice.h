@@ -40,7 +40,7 @@ namespace Physica {
         };
 
         using HopIndexArray = std::conditional<(Dim > 1), Array<Array<size_t>>, PlainStruct<void>>::type;
-        using SiteBoundaryMap = std::conditional<BC == BoundaryCond::APBC || BC == BoundaryCond::TBC,
+        using SiteBoundaryMap = std::conditional<BC != BoundaryCond::PBC,
                                                  std::unordered_map<std::pair<int, int>, int, Hash>,
                                                  PlainStruct<void>>::type;
 

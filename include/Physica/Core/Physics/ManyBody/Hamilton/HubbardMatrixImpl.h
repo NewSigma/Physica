@@ -29,7 +29,7 @@ namespace Physica {
             , repr(std::move(repr_)) {
         assert(Lattice::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
         if constexpr (BC == BoundaryCond::TBC)
-            phases = Lattice::template calcPhase<Tc>();
+            phases = Lattice::template calcPhase<Tr>();
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>

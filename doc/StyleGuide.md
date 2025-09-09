@@ -66,8 +66,7 @@ void T::swap(T& __restrict obj) noexcept {
 
 ## 命名
 
-Namespace: 大驼峰式
-模板参数: 大驼峰式, 鼓励使用缩写函数模板(Abbreviated Function Templates)消除占位符
+模板参数: 鼓励使用缩写函数模板(Abbreviated Function Templates)消除占位符
 
 ## 单元测试
 

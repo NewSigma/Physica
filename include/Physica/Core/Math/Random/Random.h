@@ -33,7 +33,7 @@ namespace Physica {
         class QRandomBase : public RandomBase {};
     }
 
-    enum RandomOption {
+    enum RandomOption : char {
         MT19937
     };
     /**
@@ -65,10 +65,10 @@ namespace Physica {
         using GenType = std::mt19937;
 
         GenType gen;
-        VSLStreamStatePtr pStream;
-        [[no_unique_address]] curandGenerator_t curand;
+        VSLStreamStatePtr pStream = nullptr;
+        [[no_unique_address]] curandGenerator_t curand = nullptr;
 
-        SeedType seed;
+        SeedType seed{};
     public:
         ~Random();
         /* Operators */

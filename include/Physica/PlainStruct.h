@@ -37,9 +37,7 @@ namespace Physica {
         constexpr PlainStruct(This&&) noexcept = default;
         constexpr ~PlainStruct() = default;
         /* Operators */
-        constexpr This& operator=(const This&) { return *this; }
-        constexpr This& operator=(This&&) { return *this; }
-        constexpr void operator=(auto&&) {}
+        constexpr This& operator=(auto&&) { return *this; }
         /* Operations */
         void swap(This&) {}
     };

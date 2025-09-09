@@ -43,7 +43,7 @@ namespace Physica {
         constexpr static size_t MaxIterationPerEigen = 4;
         constexpr static size_t MaxSearchDim = 32; //Refer to [1]
         constexpr static size_t MinSearchDim = 5; //Refer to [1]
-        constexpr static size_t MaxBufferSize = 1024 * 1024 * 1024 / sizeof(T);
+        constexpr static size_t MaxBufferSize = 1024UL * 1024UL * 1024UL / sizeof(T);
         constexpr static size_t MaxLinearSolverIteration = 64;
         constexpr static double LinearSolverPrecision = 1E-4;
         constexpr static double DefaultStableThreshold = 1E-5;
