@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Utils/Allocator/HostAllocator.h"
 #include "SubBasic.h"
 #include "MulBasic.h"
 
@@ -158,7 +159,7 @@ namespace Physica {
         if(temp[1] == 0 && (temp[0] < q_divisor_high || (temp[0] == q_divisor_high && q_divisor_low == 0)))
             --q;
 
-        MPUnit* __restrict n = new MPUnit[len + 1];
+        auto* n = HostAllocator<MPUnit>{}.allocate(len + 1);
         n[len] = mulArrByWord(n, divisor, len, q);
         //Judge dividend < n or not. If dividend < n, we have to do carry.
         bool carry = true;

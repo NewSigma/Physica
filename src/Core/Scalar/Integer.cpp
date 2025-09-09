@@ -26,13 +26,13 @@
 using namespace Physica;
 
 Integer::Integer(int i)
-        : byte(new MPUnit[1])
+        : byte(HostAllocator<MPUnit>{}.allocate(1))
         , length(i >= 0 ? 1 : -1) {
     byte[0] = i >= 0 ? i : -i;
 }
 
 Integer::Integer(const Integer& toCopy)
-        : byte(reinterpret_cast<MPUnit*>(new MPUnit[toCopy.getSize()]))
+        : byte(reinterpret_cast<MPUnit*>(HostAllocator<MPUnit>{}.allocate(toCopy.getSize())))
         , length(toCopy.length) {
     memcpy(byte, toCopy.byte, getSize() * sizeof(MPUnit));
 }
@@ -52,7 +52,7 @@ Integer& Integer::operator=(const Integer& toCopy) {
         this->~Integer();
         length = toCopy.length;
         int size = getSize();
-        byte = new MPUnit[size];
+        byte = HostAllocator<MPUnit>{}.allocate(size);
         memcpy(byte, toCopy.byte, size * sizeof(MPUnit));
     }
     return *this;
@@ -125,7 +125,7 @@ Integer Integer::operator*(const Integer& i) const {
     const int size2 = i.getSize();
     // Estimate the ed of result first. we will calculate it accurately later.
     auto resultLength = size1 + size2;
-    auto* __restrict resultByte = new MPUnit[resultLength];
+    auto* resultByte = HostAllocator<MPUnit>{}.allocate(resultLength);
     for (int j = 0; j < size2; ++j)
         resultByte[j] = 0;
     for (int j = 0; j < size1; ++j)
@@ -148,13 +148,13 @@ Integer Integer::operator/(const Integer& i) const {
 
     auto arr1_len = std::max(i1_size, i2_size) + 1;
     auto i1_blank = arr1_len - i1_size;
-    auto arr1 = new MPUnit[arr1_len];
+    auto arr1 = HostAllocator<MPUnit>{}.allocate(arr1_len);
     memcpy(arr1 + i1_blank, byte, i1_size * sizeof(MPUnit));
     memset(arr1, 0, i1_blank * sizeof(MPUnit));
     // Size of arr2 is arranged 1 less than arr1.
     auto arr2_len = arr1_len - 1;
     auto i2_blank = arr2_len - i2_size;
-    auto arr2 = new MPUnit[arr2_len];
+    auto arr2 = HostAllocator<MPUnit>{}.allocate(arr2_len);
     memcpy(arr2 + i2_blank, i.byte, i2_size * sizeof(MPUnit));
     memset(arr2, 0, i2_blank * sizeof(MPUnit));
     /*
@@ -171,7 +171,7 @@ Integer Integer::operator/(const Integer& i) const {
     ////////////////////////////////Calculate cursory first//////////////////////////////////////
     // Estimate the length of result.
     int resultLength = arr2_len;
-    auto* __restrict resultByte = new MPUnit[resultLength];
+    auto* resultByte = HostAllocator<MPUnit>{}.allocate(resultLength);
     for (int j = resultLength - 1; j >= 0; --j) {
         resultByte[j] = divArrByFullArrWith1Word(arr1, arr2, arr2_len);
         arr1[arr2_len] -= mulSubArrByWord(arr1, arr2, arr2_len, byte[j]);
@@ -200,14 +200,14 @@ Integer Integer::operator<<(int bits) const {
     MPUnit* __restrict resultByte;
     int resultLength = size + quotient;
     if (remainder == 0) {
-        resultByte = new MPUnit[resultLength];
+        resultByte = HostAllocator<MPUnit>{}.allocate(resultLength);
         memset(resultByte, 0, quotient * sizeof(MPUnit));
         memcpy(resultByte + quotient, byte, resultLength * sizeof(MPUnit));
         return Integer(resultByte, resultLength);
     }
     const bool carry = std::countl_zero(byte[size - 1]) < remainder;
     resultLength += carry;
-    resultByte = new MPUnit[resultLength];
+    resultByte = HostAllocator<MPUnit>{}.allocate(resultLength);
     memset(resultByte, 0, quotient * sizeof(MPUnit));
     resultByte[quotient] = 0;
     const int size_1 = quotient + size - 1;
@@ -233,14 +233,14 @@ Integer Integer::operator>>(int bits) const {
     MPUnit* __restrict resultByte;
     int resultLength = size > quotient ? size - quotient : 1;
     if (remainder == 0) {
-        resultByte = new MPUnit[resultLength];
+        resultByte = HostAllocator<MPUnit>{}.allocate(resultLength);
         memcpy(resultByte, byte + quotient, resultLength * sizeof(MPUnit));
         resultByte[0] = size > quotient ? resultByte[0] : 0;
         return Integer(resultByte, resultLength);
     }
     const bool carry = (std::countl_zero(byte[size - 1]) + remainder) >= MPUnitWidth;
     resultLength -= carry;
-    resultByte = new MPUnit[resultLength];
+    resultByte = HostAllocator<MPUnit>{}.allocate(resultLength);
     if (!carry)
         resultByte[size - 1] = byte[size - 1] >> remainder;
 

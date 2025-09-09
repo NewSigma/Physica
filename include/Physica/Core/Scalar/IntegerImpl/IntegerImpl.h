@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,12 +26,12 @@ namespace Physica {
         if constexpr (Prec == FloatMP) {
             const auto power = s.getPower();
             if (power < 0) {
-                byte = new MPUnit[1];
+                byte = HostAllocator<MPUnit>{}.allocate(1);
                 byte[0] = 0;
                 length = 1;
             }
             length = power + 1;
-            byte = new MPUnit[length];
+            byte = HostAllocator<MPUnit>{}.allocate(length);
             memcpy(byte, s.byte, length * sizeof(MPUnit));
         }
         else

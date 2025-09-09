@@ -21,13 +21,14 @@
 #include <cstring>
 #include <memory>
 #include "Physica/Core/Scalar/Scalar.h"
+#include "Physica/Core/Utils/Allocator/HostAllocator.h"
 
 namespace Physica {
     // operator<<
     [[nodiscard]] inline std::unique_ptr<MPUnit[]> byteLeftShift(
                         const MPUnit* __restrict byte, unsigned int length, unsigned int shift) {
         const unsigned int quotient = shift / MPUnitWidth;
-        auto result = std::unique_ptr<MPUnit[]>(new MPUnit[length]);
+        auto result = std::unique_ptr<MPUnit[]>(HostAllocator<MPUnit>{}.allocate(length));
         if(quotient < length) {
             if(quotient != 0) {
                 memcpy(result.get() + quotient, byte, (length - quotient) * sizeof(MPUnit));
@@ -52,7 +53,7 @@ namespace Physica {
     [[nodiscard]] inline std::unique_ptr<MPUnit[]> byteRightShift(
                             const MPUnit* __restrict byte, size_t length, size_t shift) {
         const size_t quotient = shift / MPUnitWidth;
-        auto result = std::unique_ptr<MPUnit[]>(new MPUnit[length]);
+        auto result = std::unique_ptr<MPUnit[]>(HostAllocator<MPUnit>{}.allocate(length));
         if(quotient < length) {
             auto bufferSize = length - quotient;
             if(quotient != 0) {
