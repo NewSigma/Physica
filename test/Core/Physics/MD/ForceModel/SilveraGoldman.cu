@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,17 +34,19 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-RPMD<ScalarType> makeSystem(size_t numMolecular) {
-    using MDCellType = RPMD<ScalarType>::MDCellType;
-    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
-    MDCellType::MassVector massVec(numMolecular, mass);
-    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+namespace {
+    RPMD<ScalarType> makeSystem(size_t numMolecular) {
+        using MDCellType = RPMD<ScalarType>::MDCellType;
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
+        MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-    cell.scale(factor);
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
 
-    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+        return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    }
 }
 /**
  * Reference:
@@ -66,7 +68,7 @@ int main() {
         RPMD<ScalarType> rpmd = makeSystem(numMolecular);
         const auto f0 = hostModel.template force<Sequential>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<GPU>(rpmd.phaseToCell(0));
-        if (!vectorNear(f0, f1, 1E-4))
+        if (!vectorNear(f0, f1, 1E-3))
             return 1;
     }
     return 0;

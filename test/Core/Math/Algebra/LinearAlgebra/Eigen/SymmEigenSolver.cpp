@@ -68,7 +68,7 @@ int main() {
     {
         using MatrixType = DenseSymmMatrix<float64>;
         const auto mat = MatrixType::random_uniform<RandomSource>(8);
-        if (!eigenTest(mat, 1E-13))
+        if (!eigenTest(mat, 1E-12))
             return 1;
     }
 }

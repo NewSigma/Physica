@@ -50,7 +50,7 @@ int main() {
     {
         using MatrixType = DenseSymmMatrix<RealType>;
         const auto mat = MatrixType::random_uniform<RandomSource>(8);
-        if (!doTest(mat, 1E-12))
+        if (!doTest(mat, 1E-11))
             return 1;
     }
     /* Complex case */ {

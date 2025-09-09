@@ -19,23 +19,45 @@
 #pragma once
 
 #include <random>
+#include "Physica/Core/Utils/Container/Array.h"
 #ifdef PHYSICA_CUDA
     #include "Physica/Core/Exception/CUDA/cuRAND.cuh"
 #endif
 #include "Physica/Core/Exception/MKL/VSL.h"
-#include "Physica/Core/Parallel/ThreadPool.h"
 #include "RandomSeed.h"
 
 namespace Physica {
-    namespace Internal {
-        class RandomBase {};
-
-        class QRandomBase : public RandomBase {};
-    }
-
     enum RandomOption : char {
         MT19937
     };
+
+    namespace Internal {
+        class PHYSICA_API RandomBase {
+        public:
+            using SeedType = uint64_t;
+        private:
+            VSLStreamStatePtr pStream = nullptr;
+            [[no_unique_address]] curandGenerator_t curand{};
+
+            SeedType seed{};
+            SeedType tseed{};
+        public:
+            RandomBase() = delete;
+            ~RandomBase();
+            /* Operators */
+            [[nodiscard]] operator VSLStreamStatePtr() noexcept { return pStream; }
+            [[nodiscard]] operator curandGenerator_t() noexcept { return curand; }
+            /* Getters */
+            [[nodiscard]] SeedType getSeed() const noexcept { return seed; }
+            [[nodiscard]] SeedType getTSeed() const noexcept { return tseed; }
+        protected:
+            RandomBase(SeedType seed_, RandomOption option, bool fixed) noexcept;
+            /* Operations */
+            void reseed(SeedType seed_, RandomOption option, bool fixed);
+        };
+
+        class QRandomBase {};
+    }
     /**
      * Random Number Generator
      */
@@ -57,31 +79,23 @@ namespace Physica {
     template<RandomOption Option, uint64_t FixedSeed = Physica::Dynamic>
     class PHYSICA_API Random : public Internal::RandomBase {
         using This = Random<Option, FixedSeed>;
+        using Base = Internal::RandomBase;
     public:
         using result_type = uint64_t;
-        using SeedType = result_type;
         constexpr static bool IsSeedFixed = Traits<This>::IsSeedFixed;
     private:
         using GenType = std::mt19937;
 
         GenType gen;
-        VSLStreamStatePtr pStream = nullptr;
-        [[no_unique_address]] curandGenerator_t curand = nullptr;
-
-        SeedType seed{};
     public:
-        ~Random();
+        ~Random() = default;
         /* Operators */
         [[nodiscard]] result_type operator()() { return gen(); }
-        [[nodiscard]] operator VSLStreamStatePtr() noexcept { return pStream; }
-        [[nodiscard]] operator curandGenerator_t() noexcept { return curand; }
         /* Operations */
-        [[nodiscard("[Info]: Record the new seed for reproducible result")]] SeedType reseed();
+        void reseed();
         void reseed(SeedType seed_);
         /* Getters */
         [[nodiscard]] GenType& getGen() noexcept { return gen; }
-        [[nodiscard]] VSLStreamStatePtr getStream() noexcept { return pStream; }
-        [[nodiscard]] SeedType getSeed() const noexcept { return seed; }
         /* Static members */
         [[nodiscard]] constexpr static result_type min() { return GenType::min(); }
         [[nodiscard]] constexpr static result_type max() { return GenType::max(); }
@@ -96,66 +110,26 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
-        /* Getters */
-        [[nodiscard]] SeedType getThreadSeed() const noexcept;
         /* Static members */
-        constexpr static int getMKLRngID();
-        constexpr static curandRngType_t curandRngID();
+        static SeedType genSeed() noexcept;
     };
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::Random() noexcept {
-        try {
-            std::ignore = reseed();
-        }
-        catch (std::exception& e) {
-            fprintf(stderr, "RNG init failed: %s\n", e.what());
-            std::abort();
-        }
+    Random<Option, FixedSeed>::Random() noexcept : Base(genSeed(), Option, FixedSeed) {
+        gen.seed(getTSeed());
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::~Random() {
-        check_vsl(vslDeleteStream(&pStream));
-    #ifdef PHYSICA_CUDA
-        check(curandDestroyGenerator(curand));
-    #endif
+    void Random<Option, FixedSeed>::reseed() {
+        reseed(genSeed());
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    auto Random<Option, FixedSeed>::reseed() -> SeedType {
+    void Random<Option, FixedSeed>::reseed(SeedType seed) {
         if constexpr (IsSeedFixed)
-            reseed(FixedSeed);
-        else {
-            RandomSeed::rdrand(seed);
-            reseed(seed);
-        }
-        return seed;
-    }
-
-    template<RandomOption Option, uint64_t FixedSeed>
-    void Random<Option, FixedSeed>::reseed(SeedType seed_) {
-        if constexpr (IsSeedFixed) {
-            assert(seed_ == FixedSeed);
-            seed = FixedSeed;
-        }
-        else
-            seed = seed_;
-
-        auto tseed = getThreadSeed();
-        gen.seed(tseed);
-        if constexpr (HasMKL()) {
-            RandomSeed::toNextSeed(tseed);
-            check_vsl(vslNewStream(&pStream, getMKLRngID(), tseed));
-        }
-        if constexpr (HasCUDA()) {
-        #ifdef PHYSICA_CUDA
-            RandomSeed::toNextSeed(tseed);
-            check(curandCreateGenerator(&curand, curandRngID()));
-            check(curandSetGeneratorOrdering(curand, CURAND_ORDERING_PSEUDO_DYNAMIC));
-            check(curandSetPseudoRandomGeneratorSeed(curand, tseed));
-        #endif
-        }
+            assert(seed == FixedSeed);
+        Base::reseed(seed, Option, FixedSeed);
+        gen.seed(getTSeed());
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
@@ -186,29 +160,13 @@ namespace Physica {
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    auto Random<Option, FixedSeed>::getThreadSeed() const noexcept -> SeedType {
+    auto Random<Option, FixedSeed>::genSeed() noexcept -> SeedType {
+        SeedType seed{};
         if constexpr (IsSeedFixed)
-            return ThreadPool::isMainThread() ? seed : (seed + ThreadPool::getThreadID() + 1);
+            seed = FixedSeed;
         else
-            return seed;
-    }
-
-    template<RandomOption Option, uint64_t FixedSeed>
-    constexpr int Random<Option, FixedSeed>::getMKLRngID() {
-    #ifdef PHYSICA_MKL
-        return VSL_BRNG_MT19937;
-    #else
-        return 0;
-    #endif
-    }
-
-    template<RandomOption Option, uint64_t FixedSeed>
-    constexpr curandRngType_t Random<Option, FixedSeed>::curandRngID() {
-    #ifdef PHYSICA_CUDA
-        return CURAND_RNG_PSEUDO_MTGP32;
-    #else
-        return 0;
-    #endif
+            RandomSeed::rdrand(seed);
+        return seed;
     }
 }
 

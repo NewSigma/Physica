@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,12 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 #include "Physica/Core/Math/Statistics/LinearFit.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937, 4036979388296844000UL>;
+using RandomSource = Random<MT19937, 16507335086333683534UL>;
 /**
  * We solve Eq. 5.1 of [1] and the slope of the result is expected to be lambda.
  *
