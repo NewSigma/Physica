@@ -37,11 +37,31 @@ constexpr int NumSample = 1024;
 int main() {
     const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
     const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
-    auto dqmc = DQMC<T>(params, NumSplit);
-    for (int _ = 0; _ < NumSample; ++_) {
+    /* Random */ {
+        auto dqmc = DQMC<T>(params, NumSplit);
+        for (int _ = 0; _ < NumSample; ++_) {
+            dqmc.step_random<RandomSource>();
+            if (dqmc.getSign().isNegative())
+                return 1;
+        }
+    }
+    /* MH */ {
+        auto dqmc = DQMC<T>(params, 1);
         dqmc.step_random<RandomSource>();
-        if (dqmc.getSign().isNegative())
-            return 1;
+        for (int _ = 0; _ < NumSample; ++_) {
+            dqmc.step_mh<RandomSource>();
+            if (dqmc.getSign().isNegative())
+                return 1;
+        }
+    }
+    /* Spin */ {
+        auto dqmc = DQMC<T>(params, NumSplit);
+        dqmc.step_random<RandomSource>();
+        for (int _ = 0; _ < NumSample; ++_) {
+            dqmc.step_spin<RandomSource>();
+            if (dqmc.getSign().isNegative())
+                return 1;
+        }
     }
     return 0;
 }

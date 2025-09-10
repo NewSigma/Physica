@@ -95,10 +95,10 @@ namespace Physica {
 
         void initChain();
         void single_flip(int site, int split) noexcept;
-        const QDTDecomp<T>& makeWeightMatrix(CyclicChainQDT<T>& chain, int shift);
-        std::pair<Tr, Tr> lnPartition(CyclicChainQDT<T>& chain, int shift);
-        std::pair<Tr, Tr> calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift);
-        void calcGreens();
+        void splitDiag(const QDTDecomp<T>& qdt) noexcept;
+        [[nodiscard]] std::pair<Tr, Tr> lnPartition(const QDTDecomp<T>& qdt);
+        [[nodiscard]] std::pair<Tr, Tr> calcGreen(const QDTDecomp<T>& qdt, MatrixND& green);
+        [[nodiscard]] Tr calcGreens();
 
         Vector2D<Tr> calcRatio(int site, int split) const noexcept;
         Tr calcLnSpinWaveWeight(int site) const noexcept;
@@ -126,7 +126,7 @@ namespace Physica {
         aux.template random_uniform<R>();
         aux = unit_elem(aux - Tr(0.5));
         initChain();
-        calcGreens();
+        lnPartitionZ = calcGreens();
     }
 
     template<Scalar T>
@@ -146,7 +146,7 @@ namespace Physica {
             if (props[i] < abs(calcRatio(site, split).prod()))
                 single_flip(site, split);
         }
-        calcGreens();
+        lnPartitionZ = calcGreens();
     }
 
     template<Scalar T>
@@ -168,7 +168,7 @@ namespace Physica {
                 if (props[i] < abs(calcRatio(site, split).prod()))
                     single_flip(site, split);
             }
-            calcGreens();
+            lnPartitionZ = calcGreens();
         }
     }
 
@@ -197,7 +197,7 @@ namespace Physica {
         if (noFlip)
             return;
     
-        calcGreens();
+        lnPartitionZ = calcGreens();
         for (int i = 0; i < getNumSite(); ++i)
             lnPartitionZ -= calcLnSpinWaveWeight(i);
     }
@@ -239,7 +239,8 @@ namespace Physica {
                 spins = -spins;
         }
         initChain();
-        calcGreens();
+
+        lnPartitionZ = calcGreens();
         for (int i = 0; i < getNumSite(); ++i)
             lnPartitionZ -= calcLnSpinWaveWeight(i);
     }
@@ -247,7 +248,7 @@ namespace Physica {
     template<Scalar T>
     void DQMC<T>::update() {
         initChain();
-        calcGreens();
+        lnPartitionZ = calcGreens();
     }
 
     template<Scalar T>
@@ -309,69 +310,73 @@ namespace Physica {
     void DQMC<T>::single_flip(int site, int split) noexcept {
         auto spins = aux.row(site);
         spins[split] = -spins[split];
-
-        DiagMatrix<Tr> expU(getNumSite());
-        const auto& expB = params.getExpB();
-        expU.diag() = exp(params.getAlpha() * aux.col(split));
-        chainU[split].compute(expB * expU);
-        expU.diag() = exp(-params.getAlpha() * aux.col(split));
-        chainD[split].compute(expB * expU);
-        chainU.invalidate(split);
-        chainD.invalidate(split);
+        // TODO: Make it a data member
+        std::array<T, 2> arr{exp(Trv(2) * params.getAlpha() * spins[split]), exp(Trv(-2) * params.getAlpha() * spins[split])};
+        chainU.single_flip(site, split, arr[0], arr[1]);
+        chainD.single_flip(site, split, arr[1], arr[0]);
     }
 
     template<Scalar T>
-    const QDTDecomp<T>& DQMC<T>::makeWeightMatrix(CyclicChainQDT<T>& chain, int shift) {
-        const int numSplit = getNumSplit();
-        const auto& decomp = chain.multiply(shift, (numSplit + shift - 1) % numSplit);
-        const auto& matrixD = decomp.getMatrixD();
-        const Tr betaMu = params.calcBetaMu();
+    void DQMC<T>::splitDiag(const QDTDecomp<T>& qdt) noexcept {
+        const auto& diagD = qdt.getMatrixD().diag();
+        const Tr expBetaMu = exp(params.calcBetaMu());
         for (int i = 0; i < getNumSite(); ++i) {
-            const Tr originD = matrixD.diag()[i] * exp(betaMu);
-            const Tr absD = abs(originD);
-            const bool sep = absD > Tr(1);
-            diagB.diag()[i] = sep ? reciprocal(absD) : Tr(1);
-            diagS.diag()[i] = sep ? unit(originD) : originD;
+            const Tr originD = diagD[i];
+            const Tr expBetaMuD = expBetaMu * originD;
+            const Tr absBetaMuD = abs(expBetaMuD);
+            const bool sep = absBetaMuD > Tr(1);
+            diagB.diag()[i] = sep ? absBetaMuD : Tr(1);
+            diagS.diag()[i] = sep ? unit(originD) : expBetaMuD; // Use originD to avoid underflow
         }
-        return decomp;
     }
 
     template<Scalar T>
-    auto DQMC<T>::lnPartition(CyclicChainQDT<T>& chain, int shift) -> std::pair<Tr, Tr> {
-        const auto& qdt = makeWeightMatrix(chain, shift);
-        buffer = qdt.getMatrixQ() * diagB;
+    auto DQMC<T>::lnPartition(const QDTDecomp<T>& qdt) -> std::pair<Tr, Tr> {
+        splitDiag(qdt);
+
+        buffer = qdt.getMatrixQ() * diagB.inverse();
         qr.compute(buffer.transpose() + diagS * qdt.getMatrixT());
-        // Handle potential underflow
-        diagB.diag() += Tr(std::numeric_limits<T>::min());
-        qr.getWorking().diag() += Tr(std::numeric_limits<T>::min());
+        qr.getWorking().diag() += Tr(std::numeric_limits<T>::min()); // Handle potential underflow
 
-        Tr lnZ = -diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
+        Tr lnZ = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
         Tr sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
-        return std::make_pair(lnZ, sign);
+        return {lnZ, sign};
     }
 
     template<Scalar T>
-    auto DQMC<T>::calcGreen(CyclicChainQDT<T>& chain, MatrixND& green, int shift) -> std::pair<Tr, Tr> {
-        const auto pair = lnPartition(chain, shift);
+    auto DQMC<T>::calcGreen(const QDTDecomp<T>& qdt, MatrixND& green) -> std::pair<Tr, Tr> {
+        const auto pair = lnPartition(qdt);
         MatrixND temp = buffer * qr.getMatrixQ();
         green = qr.getMatrixR().inverse() * temp.transpose();
         return pair;
     }
 
     template<Scalar T>
-    void DQMC<T>::calcGreens() {
+    auto DQMC<T>::calcGreens() -> Tr {
+        const int numSplit = getNumSplit();
         const int period = getPeriod();
-        for (int shift = 0, i = 0; shift < getNumSplit(); shift += period, ++i) {
-            auto [lnZ1, sign1] = calcGreen(chainU, greenUs[i], shift);
-            assert((shift == 0 || signU == sign1) && "[Error]: Unexpected sign mismatch");
-            signU = sign1;
+        Tr lnZU = 0;
+        for (size_t i = 0; i < greenUs.getLength(); ++i) {
+            const int shift = period * i;
+            const int to = (numSplit + shift - 1) % numSplit;
+            auto [lnZ, sign] = calcGreen(chainU.multiply(shift, to), greenUs[i]);
 
-            auto [lnZ2, sign2] = calcGreen(chainD, greenDs[i], shift);
-            assert((shift == 0 || signD == sign2) && "[Error]: Unexpected sign mismatch");
-            signD = sign2;
-
-            toNextMean(lnPartitionZ, i, lnZ1 + lnZ2);
+            assert((shift == 0 || signU == sign) && "[Error]: Unexpected sign mismatch");
+            toNextMean(lnZU, i, lnZ);
+            signU = sign;
         }
+
+        Tr lnZD = 0;
+        for (size_t i = 0; i < greenDs.getLength(); ++i) {
+            const int shift = period * i;
+            const int to = (numSplit + shift - 1) % numSplit;
+            auto [lnZ, sign] = calcGreen(chainD.multiply(shift, to), greenDs[i]);
+
+            assert((shift == 0 || signD == sign) && "[Error]: Unexpected sign mismatch");
+            toNextMean(lnPartitionZ, i, lnZ);
+            signD = sign;
+        }
+        return lnZU + lnZD;
     }
 
     template<Scalar T>

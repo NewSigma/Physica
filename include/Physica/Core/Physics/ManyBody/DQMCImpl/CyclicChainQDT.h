@@ -46,6 +46,7 @@ namespace Physica {
         [[nodiscard]] QDTDecomp<T>& operator[](size_t i) { return decomps(i, i); }
         /* Operations */
         [[nodiscard]] const QDTDecomp<T>& multiply(size_t from, size_t to) noexcept;
+        void single_flip(int site, int split, T factor, T invfac) noexcept;
         void invalidate(size_t i) noexcept;
         void invalidates() noexcept;
 
@@ -100,6 +101,32 @@ namespace Physica {
 
         result = multiply(from, getLength() - 1) * multiply(0, to);
         return result;
+    }
+
+    template<Scalar T>
+    void CyclicChainQDT<T>::single_flip(int site, int split, T factor, T invfac) noexcept {
+        assert(split < getLength());
+        for (size_t from = 0; from < getLength(); ++from) {
+            for (size_t to = 0; to < getLength(); ++to) {
+                bool diag = from == to;
+                bool ready = readys(from, to);
+                bool canFastUpdate = to == split;
+                if (canFastUpdate && (ready || diag)) {
+                    decomps(from, to).single_flip(site, factor, invfac);
+                    continue;
+                }
+
+                if (diag)
+                    continue;
+
+                bool cond1 = from <= split;
+                bool cond2 = split <= to;
+                if (from < to)
+                    readys(from, to) = ready && !(cond1 && cond2);
+                else
+                    readys(from, to) = ready && !(cond1 || cond2);
+            }
+        }
     }
 
     template<Scalar T>

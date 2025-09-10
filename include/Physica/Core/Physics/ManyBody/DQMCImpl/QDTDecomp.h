@@ -49,12 +49,15 @@ namespace Physica {
         void compute(const Matrix auto& source);
         [[nodiscard]] Trv calcDetQ() const;
 
+        void single_flip(int site, Tr factor, Tr invfac) noexcept;
+
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getMatrixQ() const noexcept { return matrixQ; }
         [[nodiscard]] const auto& getMatrixD() const noexcept { return matrixD; }
         [[nodiscard]] const auto& getMatrixT() const noexcept { return qr.getWorking(); }
+        [[nodiscard]] auto& getMatrixT() noexcept { return qr.getWorking(); }
         [[nodiscard]] const auto& getQR() const noexcept { return qr; }
         [[nodiscard]] size_t getSize() const noexcept { return matrixQ.getRow(); }
         /* Setters */
@@ -114,6 +117,16 @@ namespace Physica {
     template<Scalar T>
     auto QDTDecomp<T>::calcDetQ() const -> Trv {
         return qr.calcDetQ();
+    }
+
+    template<Scalar T>
+    void QDTDecomp<T>::single_flip(int site, Tr factor, Tr invfac) noexcept {
+        assert(scalarNear(factor * invfac, T(1), std::numeric_limits<T>::epsilon() * 10) && "[Error]: Invalid argument");
+        if (site > 0) [[likely]]
+            getMatrixT().col(site).head(site) *= factor;
+        if (site + 1 < getSize()) [[likely]]
+            getMatrixT().row(site).tail(site + 1) *= invfac;
+        matrixD.diag()[site] *= factor;
     }
 
     template<Scalar T>

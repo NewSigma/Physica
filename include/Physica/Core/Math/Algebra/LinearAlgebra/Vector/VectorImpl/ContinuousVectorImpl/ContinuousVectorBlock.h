@@ -53,8 +53,8 @@ namespace Physica {
         /* Operations */
         template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
-        template<Packet Pack> void writePacket(size_t index, const Pack packet);
-        template<Packet Pack> void writePacketPartial(size_t index, size_t count, const Pack packet);
+        void writePacket(size_t index, Packet auto packet);
+        void writePacketPartial(size_t index, size_t count, Packet auto packet);
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
@@ -111,15 +111,13 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    template<Packet Pack>
-    void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const Pack packet) {
-        return vec.template writePacket<Pack>(from + index, packet);
+    void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const Packet auto packet) {
+        return vec.writePacket(from + index, packet);
     }
 
     template<Vector T, size_t Length>
-    template<Packet Pack>
-    void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const Pack packet) {
-        return vec.template writePacketPartial<Pack>(from + index, count, packet);
+    void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const Packet auto packet) {
+        return vec.writePacketPartial(from + index, count, packet);
     }
 
     template<Vector T, size_t Length>

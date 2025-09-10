@@ -169,12 +169,14 @@ namespace Physica {
         else {
             static_assert(BC == APBC || BC == TBC, "[Error]: Not implemented");
             const auto phases = lattice.template calcPhase<Tr>();
+            using PhaseScalar = decltype(phases)::ScalarType;
+
             const auto& boundary = lattice.getSiteBoundaryMap();
             for (size_t from = 0; from < numSite; ++from) {
                 if constexpr (Dim > 1) {
                     const auto& targets = lattice.getHopIndexArray()[from];
                     for (size_t to : targets) {
-                        Tc phase = 1;
+                        PhaseScalar phase = 1;
                         auto pair = std::make_pair(from, to);
                         if (boundary.contains(pair)) {
                             int dim = boundary.find(pair)->second;
@@ -186,7 +188,7 @@ namespace Physica {
                 }
                 else {
                     size_t next = (from + 1) % numSite;
-                    Tc phase = 1;
+                    PhaseScalar phase = 1;
                     auto pair = std::make_pair(from, next);
                     if (boundary.contains(pair)) {
                         int dim = boundary.find(pair)->second;

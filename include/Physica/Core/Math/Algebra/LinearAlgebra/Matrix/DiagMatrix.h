@@ -51,6 +51,7 @@ namespace Physica {
 
         [[nodiscard]] Tr lnAbsDet() const;
 
+        [[nodiscard]] This inverse() const;
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
 
         void resize(size_t order);
@@ -60,6 +61,8 @@ namespace Physica {
         [[nodiscard]] const auto& diag() const noexcept { return diags; }
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        /* Static members */
+        [[nodiscard]] static This unitMatrix(size_t order);
     };
 
     template<Scalar T, size_t Order>
@@ -98,6 +101,11 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    auto DiagMatrix<T, Order>::inverse() const -> This {
+        return This(VectorType(reciprocal(diags)));
+    }
+
+    template<Scalar T, size_t Order>
     void DiagMatrix<T, Order>::resize(size_t order) {
         diags.resize(order);
     }
@@ -118,6 +126,11 @@ namespace Physica {
     template<Scalar T, size_t Order>
     size_t DiagMatrix<T, Order>::getCol() const noexcept {
         return getRow();
+    }
+
+    template<Scalar T, size_t Order>
+    auto DiagMatrix<T, Order>::unitMatrix(size_t order) -> This {
+        return This(VectorType(order, 1));
     }
 }
 
