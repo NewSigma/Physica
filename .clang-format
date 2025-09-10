@@ -1,4 +1,4 @@
-# clang-format version: 19
+# clang-format version: 20
 ---
 Language:        Cpp
 # BasedOnStyle:  WebKit
@@ -53,7 +53,7 @@ AllowShortFunctionsOnASingleLine: Inline
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: All
 AllowShortLoopsOnASingleLine: false
-#AllowShortNamespacesOnASingleLine: false
+AllowShortNamespacesOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
@@ -74,7 +74,7 @@ BraceWrapping:
   AfterObjCDeclaration: false
   AfterStruct:     false
   AfterUnion:      false
-  BeforeCatch:     false
+  BeforeCatch:     true
   BeforeElse:      true
   BeforeLambdaBody: false
   BeforeWhile:     false
@@ -92,7 +92,7 @@ BreakBeforeBraces: Custom
 BreakBeforeConceptDeclarations: Always
 BreakBeforeInlineASMColon: Always
 BreakBeforeTernaryOperators: true
-#BreakBinaryOperations: Never
+BreakBinaryOperations: Never
 BreakConstructorInitializers: BeforeComma
 BreakFunctionDefinitionParameters: false
 BreakInheritanceList: BeforeComma
@@ -135,7 +135,7 @@ IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
 IndentCaseBlocks: false
 IndentCaseLabels: false
-#IndentExportBlock: true
+IndentExportBlock: true
 IndentExternBlock: Indent
 IndentGotoLabels: true
 IndentPPDirectives: BeforeHash
@@ -184,7 +184,7 @@ QualifierAlignment: Leave
 ReferenceAlignment: Pointer
 ReflowComments:  true
 RemoveBracesLLVM: false
-#RemoveEmptyLinesInUnwrappedLines: true
+RemoveEmptyLinesInUnwrappedLines: true
 RemoveParentheses: Leave
 RemoveSemicolon: false
 RequiresClausePosition: WithPreceding
@@ -247,6 +247,6 @@ WhitespaceSensitiveMacros:
   - NS_SWIFT_NAME
   - PP_STRINGIZE
   - STRINGIZE
-#WrapNamespaceBodyWithEmptyLines: Never
+WrapNamespaceBodyWithEmptyLines: Never
 ...
 
