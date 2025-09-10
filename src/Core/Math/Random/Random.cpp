@@ -24,7 +24,7 @@ using namespace Physica;
 using namespace Physica::Internal;
 
 namespace {
-    int rngID_MKL(RandomOption) noexcept {
+    [[maybe_unused]] int rngID_MKL(RandomOption) noexcept {
     #ifdef PHYSICA_MKL
         return VSL_BRNG_MT19937;
     #else
@@ -32,7 +32,7 @@ namespace {
     #endif
     }
 
-    curandRngType_t rngID_cuRAND(RandomOption) noexcept {
+    [[maybe_unused]] curandRngType_t rngID_cuRAND(RandomOption) noexcept {
     #ifdef PHYSICA_CUDA
         return CURAND_RNG_PSEUDO_MTGP32;
     #else

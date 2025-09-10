@@ -87,8 +87,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ auto& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const auto& asArray() const noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
@@ -98,7 +98,7 @@ namespace Physica {
     private:
         Array2D(ArrayType arr_, IndexType r_);
 
-        __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
+        [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
         /* Friends */
         friend class device_obj<This>;
     };

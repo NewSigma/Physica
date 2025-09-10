@@ -6,6 +6,7 @@ Checks: >
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-type-const-cast,
   -cppcoreguidelines-special-member-functions,
   misc-*,
   -misc-non-private-member-variables-in-classes,

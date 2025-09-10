@@ -158,7 +158,7 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) {
+    __host__ __device__ T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) noexcept {
         if constexpr (isVectorStorage) {
             const size_t major = isColMajor ? col : row;
             const size_t minor = isColMajor ? row : col;
@@ -169,7 +169,7 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ const T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) const {
+    __host__ __device__ const T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) const noexcept {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
 
@@ -229,7 +229,7 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::toIndex1D(size_t r, size_t c) const {
+    __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::toIndex1D(size_t r, size_t c) const noexcept {
         if constexpr (isColMajor)
             return getRow() * c + r;
         else
