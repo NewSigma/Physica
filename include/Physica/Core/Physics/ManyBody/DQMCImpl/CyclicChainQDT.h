@@ -31,6 +31,9 @@ namespace Physica {
     class CyclicChainQDT {
         using This = CyclicChainQDT<T>;
         using MatrixND = HubbardParams<T>::MatrixND;
+
+        using Tr = T::RealType;
+    private:
         constexpr static int Option = MatrixOption::Col | MatrixOption::Element;
 
         Array2D<QDTDecomp<T>, Option> decomps;
@@ -46,7 +49,7 @@ namespace Physica {
         [[nodiscard]] QDTDecomp<T>& operator[](size_t i) { return decomps(i, i); }
         /* Operations */
         [[nodiscard]] const QDTDecomp<T>& multiply(size_t from, size_t to) noexcept;
-        void single_flip(int site, int split, T factor, T invfac) noexcept;
+        void single_flip(int site, int split, Tr factor, Tr invfac) noexcept;
         void invalidate(size_t i) noexcept;
         void invalidates() noexcept;
 
@@ -104,7 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void CyclicChainQDT<T>::single_flip(int site, int split, T factor, T invfac) noexcept {
+    void CyclicChainQDT<T>::single_flip(int site, int split, Tr factor, Tr invfac) noexcept {
         assert(split < getLength());
         for (size_t from = 0; from < getLength(); ++from) {
             for (size_t to = 0; to < getLength(); ++to) {

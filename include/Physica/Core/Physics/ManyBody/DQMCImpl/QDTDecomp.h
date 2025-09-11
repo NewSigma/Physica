@@ -34,6 +34,7 @@ namespace Physica {
         MatrixND matrixQ;
         DiagMatrix<Tr> matrixD;
         QRDecomp<T> qr;
+        Trv detQ;
     public:
         QDTDecomp() = default;
         QDTDecomp(size_t size);
@@ -47,7 +48,7 @@ namespace Physica {
         [[nodiscard]] This operator*(const This& other) const;
         /* Operations */
         void compute(const Matrix auto& source);
-        [[nodiscard]] Trv calcDetQ() const;
+        [[nodiscard]] Trv calcDetQ() const noexcept;
 
         void single_flip(int site, Tr factor, Tr invfac) noexcept;
 
@@ -67,9 +68,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    QDTDecomp<T>::QDTDecomp(size_t size) {
-        resize(size);
-    }
+    QDTDecomp<T>::QDTDecomp(size_t size) : matrixQ(size, size), matrixD(size), qr(size, size), detQ(QRDecomp<T>::calcDetQ(size)) {}
 
     template<Scalar T>
     QDTDecomp<T>::QDTDecomp(QRDecomp<T> qr_) : QDTDecomp(qr_.getRow()) {
@@ -87,20 +86,19 @@ namespace Physica {
      * [1] Linear Algebra and its Applications 435(3), 659-673 (2011); https://doi.org/10.1016/j.laa.2010.06.023
      */
     template<Scalar T>
-    QDTDecomp<T> QDTDecomp<T>::operator*(const This& other) const {
+    auto QDTDecomp<T>::operator*(const This& other) const -> This {
         MatrixND buffer = getMatrixT() * other.getMatrixQ();
         buffer = getMatrixD() * buffer;
         buffer = buffer * other.getMatrixD();
 
-        auto result = QDTDecomp<T>(buffer);
+        auto result = This(buffer);
         buffer = getMatrixQ() * result.getMatrixQ();
         buffer.swap(result.matrixQ);
 
         buffer = result.getMatrixT() * other.getMatrixT();
         buffer.swap(result.qr.getWorking());
-        // Update determinate
-        for (size_t i = 0; i < getSize() - 1; ++i)
-            result.qr.getTaus()[i] *= -qr.getTaus()[i];
+
+        result.detQ = detQ * result.qr.calcDetQ();
         return result;
     }
 
@@ -115,8 +113,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto QDTDecomp<T>::calcDetQ() const -> Trv {
-        return qr.calcDetQ();
+    auto QDTDecomp<T>::calcDetQ() const noexcept -> Trv {
+        return detQ;
     }
 
     template<Scalar T>
@@ -142,6 +140,7 @@ namespace Physica {
         matrixQ.swap(obj.matrixQ);
         matrixD.swap(obj.matrixD);
         qr.swap(obj.qr);
+        detQ.swap(obj.detQ);
     }
 
     template<Scalar T>

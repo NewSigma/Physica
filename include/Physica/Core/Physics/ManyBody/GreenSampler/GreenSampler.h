@@ -39,7 +39,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         void sample(const DQMC<T>& dqmc);
-        [[nodiscard]] T calc(const VectorND<T>& observes) const;
+        [[nodiscard]] T calcMeanWeighted(const VectorND<T>& observes) const;
         [[nodiscard]] T calcSign() const;
         [[nodiscard]] T lnPartitionZ() const;
 
@@ -65,7 +65,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T GreenSampler<T>::calc(const VectorND<T>& observes) const {
+    T GreenSampler<T>::calcMeanWeighted(const VectorND<T>& observes) const {
         const T factor = getLnPartitionZs().max();
         VectorND<Tf> buffer(getLnPartitionZs() - factor, observes);
         const Tf sum = exp(buffer) * getSigns();

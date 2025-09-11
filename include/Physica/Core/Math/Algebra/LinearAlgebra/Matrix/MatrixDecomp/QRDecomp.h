@@ -68,7 +68,6 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto& getWorking() noexcept { return working; }
         [[nodiscard]] const auto& getWorking() const noexcept { return working; }
-        [[nodiscard]] auto& getTaus() noexcept { return taus; }
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
@@ -76,6 +75,8 @@ namespace Physica {
         [[nodiscard]] auto getMatrixR() const noexcept;
         [[nodiscard]] MatrixND getMatrixQ_mkl() const;
         [[nodiscard]] const auto& getMatrixP() const noexcept requires(Pivot) { return perm; }
+        /* Static members */
+        [[nodiscard]] static Trv calcDetQ(size_t size) noexcept;
     };
 
     template<Scalar T, bool Pivot>
@@ -117,7 +118,7 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     auto QRDecomp<T, Pivot>::calcDetQ() const noexcept -> Trv {
-        return (taus.getLength() % 2 != 0) ? 1.0 : -1.0;
+        return calcDetQ(taus.getLength());
     }
     /**
      * Decompose matrix like A = QDT(no pivoting), or A = QDTP(poviting), where D is diagonal
@@ -174,6 +175,11 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     auto QRDecomp<T, Pivot>::getMatrixR() const noexcept {
         return working.triu();
+    }
+
+    template<Scalar T, bool Pivot>
+    auto QRDecomp<T, Pivot>::calcDetQ(size_t size) noexcept -> Trv {
+        return (size % 2 != 0) ? 1.0 : -1.0;
     }
 }
 

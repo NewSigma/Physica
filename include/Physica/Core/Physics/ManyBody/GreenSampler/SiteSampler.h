@@ -42,7 +42,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         void sample(const DQMC<T>& dqmc, Observable type);
-        [[nodiscard]] T calc() const;
+        [[nodiscard]] T calcMeanWeighted() const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -77,8 +77,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T SiteSampler<T>::calc() const {
-        return Base::calc(observes);
+    T SiteSampler<T>::calcMeanWeighted() const {
+        return Base::calcMeanWeighted(observes);
     }
 
     template<Scalar T>

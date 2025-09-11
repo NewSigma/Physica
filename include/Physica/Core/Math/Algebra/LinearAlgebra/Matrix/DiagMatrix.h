@@ -28,6 +28,7 @@ namespace Physica {
         using VectorType = DenseVector<T, Order>;
     protected:
         using typename Base::Tr;
+        using typename Base::Trv;
         using typename Base::Tv;
     private:
         VectorType diags;
@@ -50,6 +51,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] Tr lnAbsDet() const;
+        [[nodiscard]] Trv sgndet() const;
 
         [[nodiscard]] This inverse() const;
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
@@ -98,6 +100,11 @@ namespace Physica {
     template<Scalar T, size_t Order>
     auto DiagMatrix<T, Order>::lnAbsDet() const -> Tr {
         return ln(abs(diags)).sum();
+    }
+
+    template<Scalar T, size_t Order>
+    auto DiagMatrix<T, Order>::sgndet() const -> Trv {
+        return unit(diags).prod();
     }
 
     template<Scalar T, size_t Order>

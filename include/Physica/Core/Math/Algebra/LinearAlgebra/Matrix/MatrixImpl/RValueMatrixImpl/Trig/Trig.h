@@ -31,6 +31,7 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tr;
+        using typename Base::Trv;
         using typename Base::Tv;
     public:
         TrigUpper(M& mat_);
@@ -46,6 +47,7 @@ namespace Physica {
 
         [[nodiscard]] T det() const;
         [[nodiscard]] Tr lnAbsDet() const;
+        [[nodiscard]] Trv sgndet() const;
 
         [[nodiscard]] VectorND<T> toDT();
         /* Getters */
@@ -83,6 +85,11 @@ namespace Physica {
     }
 
     template<Matrix M>
+    auto TrigUpper<M>::sgndet() const -> Trv {
+        return unit(mat.diag()).prod();
+    }
+
+    template<Matrix M>
     auto TrigUpper<M>::toDT() -> VectorND<T> {
         const size_t length = getRow();
         VectorND<T> diag(length);
@@ -102,6 +109,7 @@ namespace Physica {
     public:
         using typename Base::T;
         using typename Base::Tr;
+        using typename Base::Trv;
         using typename Base::Tv;
     public:
         TrigLower(M& mat_);
@@ -114,6 +122,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+        [[nodiscard]] Trv sgndet() const;
 
         [[nodiscard]] T det() const;
         [[nodiscard]] Tr lnAbsDet() const;
@@ -140,6 +149,11 @@ namespace Physica {
         if (row < col)
             return Tv(0);
         return mat.calc_value(row, col);
+    }
+
+    template<Matrix M>
+    auto TrigLower<M>::sgndet() const -> Trv {
+        return unit(mat.diag()).prod();
     }
 
     template<Matrix M>

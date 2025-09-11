@@ -74,7 +74,7 @@ namespace Physica {
         template<RNG R>
         void step_spin_for(int numStep);
 
-        void update();
+        void invalidates();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
@@ -93,7 +93,6 @@ namespace Physica {
         /* Operations */
         void resize(int numSite, int numSplit, int period);
 
-        void initChain();
         void single_flip(int site, int split) noexcept;
         void splitDiag(const QDTDecomp<T>& qdt) noexcept;
         [[nodiscard]] std::pair<Tr, Tr> lnPartition(const QDTDecomp<T>& qdt);
@@ -125,8 +124,7 @@ namespace Physica {
     void DQMC<T>::step_random() {
         aux.template random_uniform<R>();
         aux = unit_elem(aux - Tr(0.5));
-        initChain();
-        lnPartitionZ = calcGreens();
+        invalidates();
     }
 
     template<Scalar T>
@@ -238,16 +236,25 @@ namespace Physica {
             if (p < 0.5)
                 spins = -spins;
         }
-        initChain();
 
-        lnPartitionZ = calcGreens();
+        invalidates();
         for (int i = 0; i < getNumSite(); ++i)
             lnPartitionZ -= calcLnSpinWaveWeight(i);
     }
 
     template<Scalar T>
-    void DQMC<T>::update() {
-        initChain();
+    void DQMC<T>::invalidates() {
+        const int numSplit = getNumSplit();
+        DiagMatrix<Tr> expU(getNumSite());
+        for (int split = 0; split < numSplit; ++split) {
+            expU.diag() = exp(params.getAlpha() * aux.col(split));
+            chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
+            expU.diag() = exp(-params.getAlpha() * aux.col(split));
+            chainD[split].setMatrixR(kinetic.getMatrixR() * expU);
+        }
+        chainU.invalidates();
+        chainD.invalidates();
+
         lnPartitionZ = calcGreens();
     }
 
@@ -293,25 +300,11 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::initChain() {
-        const int numSplit = getNumSplit();
-        DiagMatrix<Tr> expU(getNumSite());
-        for (int split = 0; split < numSplit; ++split) {
-            expU.diag() = exp(params.getAlpha() * aux.col(split));
-            chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
-            expU.diag() = exp(-params.getAlpha() * aux.col(split));
-            chainD[split].setMatrixR(kinetic.getMatrixR() * expU);
-        }
-        chainU.invalidates();
-        chainD.invalidates();
-    }
-
-    template<Scalar T>
     void DQMC<T>::single_flip(int site, int split) noexcept {
         auto spins = aux.row(site);
         spins[split] = -spins[split];
         // TODO: Make it a data member
-        std::array<T, 2> arr{exp(Trv(2) * params.getAlpha() * spins[split]), exp(Trv(-2) * params.getAlpha() * spins[split])};
+        std::array<Tr, 2> arr{exp(Trv(2) * params.getAlpha() * spins[split]), exp(Trv(-2) * params.getAlpha() * spins[split])};
         chainU.single_flip(site, split, arr[0], arr[1]);
         chainD.single_flip(site, split, arr[1], arr[0]);
     }
@@ -339,7 +332,8 @@ namespace Physica {
         qr.getWorking().diag() += Tr(std::numeric_limits<T>::min()); // Handle potential underflow
 
         Tr lnZ = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        Tr sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
+        Tr sign = qdt.calcDetQ() * qr.calcDetQ() * qr.getMatrixR().sgndet();
+        assert(abs(sign) == Trv(1) && "[Error]: Bad sign");
         return {lnZ, sign};
     }
 

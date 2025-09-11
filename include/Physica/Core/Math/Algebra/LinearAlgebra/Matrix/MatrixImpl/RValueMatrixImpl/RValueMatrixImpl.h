@@ -368,6 +368,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::sgndet() const -> Trv {
+        return Base::getDerived().sgndet();
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::format() const noexcept {
         return FormatedMatrix<Derived>(Base::getDerived());
     }
