@@ -368,7 +368,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::sgndet() const -> Trv {
+    auto RValueMatrix<Derived>::sgndet() const {
+        static_assert(!T::isComplex, "[Error]: sgndet() is not well defined for complex matrix");
         return Base::getDerived().sgndet();
     }
 

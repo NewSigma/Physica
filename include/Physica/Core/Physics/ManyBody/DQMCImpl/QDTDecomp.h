@@ -119,7 +119,7 @@ namespace Physica {
 
     template<Scalar T>
     void QDTDecomp<T>::single_flip(int site, Tr factor, Tr invfac) noexcept {
-        assert(scalarNear(factor * invfac, T(1), std::numeric_limits<T>::epsilon() * 10) && "[Error]: Invalid argument");
+        assert(scalarNear(factor * invfac, Tr(1), std::numeric_limits<T>::epsilon() * 10) && "[Error]: Invalid argument");
         if (site > 0) [[likely]]
             getMatrixT().col(site).head(site) *= factor;
         if (site + 1 < getSize()) [[likely]]

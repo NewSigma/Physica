@@ -24,7 +24,10 @@ namespace Physica {
     template<Scalar T>
     class GreenSampler {
         using This = GreenSampler<T>;
+
+        static_assert(!T::isComplex, "[Error]: Observables are real");
     protected:
+        using Tv = T::ValueType;
         using Tf = Diff<T, DiffMode::Forward, 1>;
     private:
         VectorND<Tf> samples;
@@ -38,9 +41,9 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        void sample(const DQMC<T>& dqmc);
         [[nodiscard]] T calcMeanWeighted(const VectorND<T>& observes) const;
-        [[nodiscard]] T calcSign() const;
+        [[nodiscard]] Tv calcSign() const noexcept;
+        [[nodiscard]] Tv calcSignWeighted() const;
         [[nodiscard]] T lnPartitionZ() const;
 
         void reset() { cursor = 0; }
@@ -50,18 +53,13 @@ namespace Physica {
         [[nodiscard]] const auto& getSigns() const noexcept { return samples.grads(); }
         [[nodiscard]] size_t getNumSample() const noexcept { return samples.getLength(); }
         [[nodiscard]] size_t getCursor() const noexcept { return cursor; }
+    protected:
+        void sample(T lnZ, T sign) noexcept;
     };
 
     template<Scalar T>
     GreenSampler<T>::GreenSampler(size_t numSample) : samples(numSample) {
         assert(numSample > 0);
-    }
-
-    template<Scalar T>
-    void GreenSampler<T>::sample(const DQMC<T>& dqmc) {
-        samples.values()[cursor] = dqmc.getLnPartitionZ();
-        samples.grads()[cursor] = dqmc.getSign();
-        cursor = (cursor + 1) % getNumSample();
     }
 
     template<Scalar T>
@@ -73,7 +71,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T GreenSampler<T>::calcSign() const {
+    auto GreenSampler<T>::calcSign() const noexcept -> Tv {
+        return samples.grads().mean();
+    }
+
+    template<Scalar T>
+    auto GreenSampler<T>::calcSignWeighted() const -> Tv {
         return samples.lnSumExp().grad();
     }
 
@@ -88,5 +91,12 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         samples.swap(obj.samples);
         std::swap(cursor, obj.cursor);
+    }
+
+    template<Scalar T>
+    void GreenSampler<T>::sample(T lnZ, T sign) noexcept {
+        samples.values()[cursor] = lnZ;
+        samples.grads()[cursor] = sign;
+        cursor = (cursor + 1) % getNumSample();
     }
 }

@@ -145,7 +145,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> lnSumExp() const;
         [[nodiscard]] CoDiff<T> det() const;
         [[nodiscard]] Tr lnAbsDet() const;
-        [[nodiscard]] Trv sgndet() const;
+        [[nodiscard]] auto sgndet() const;
 
         [[nodiscard]] auto format() const noexcept;
         [[nodiscard]] auto inverse() const noexcept;

@@ -332,7 +332,7 @@ namespace Physica {
         qr.getWorking().diag() += Tr(std::numeric_limits<T>::min()); // Handle potential underflow
 
         Tr lnZ = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        Tr sign = qdt.calcDetQ() * qr.calcDetQ() * qr.getMatrixR().sgndet();
+        Tr sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
         assert(abs(sign) == Trv(1) && "[Error]: Bad sign");
         return {lnZ, sign};
     }

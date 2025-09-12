@@ -51,7 +51,8 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        void sample(const DQMC<T>& dqmc, Observable type);
+        template<Scalar U>
+        void sample(const DQMC<U>& dqmc, Observable type);
         [[nodiscard]] MatrixND calc() const;
 
         void swap(This& __restrict obj) noexcept;
@@ -73,7 +74,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void SystemSampler<T>::sample(const DQMC<T>& dqmc, Observable type) {
+    template<Scalar U>
+    void SystemSampler<T>::sample(const DQMC<U>& dqmc, Observable type) {
         const int numSite = getNumSite();
         assert(numSite == dqmc.getNumSite() && "[Error]: Inconsistent site numbers");
         observes[Base::getCursor()].zeros();
@@ -100,7 +102,7 @@ namespace Physica {
             fft.transform();
             toNextMean(observes[Base::getCursor()], i, fft.getKSpace().squaredNorms() * reciprocal(T(numSite)));
         }
-        Base::sample(dqmc);
+        Base::sample(dqmc.getLnPartitionZ(), dqmc.getSign());
     }
 
     template<Scalar T>

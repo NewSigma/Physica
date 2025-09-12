@@ -41,7 +41,8 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        void sample(const DQMC<T>& dqmc, Observable type);
+        template<Scalar U>
+        void sample(const DQMC<U>& dqmc, Observable type);
         [[nodiscard]] T calcMeanWeighted() const;
 
         void swap(This& __restrict obj) noexcept;
@@ -53,7 +54,8 @@ namespace Physica {
     SiteSampler<T>::SiteSampler(size_t numSample) : Base(numSample), observes(numSample) {}
 
     template<Scalar T>
-    void SiteSampler<T>::sample(const DQMC<T>& dqmc, Observable type) {
+    template<Scalar U>
+    void SiteSampler<T>::sample(const DQMC<U>& dqmc, Observable type) {
         T mean = 0;
         for (int i = 0; i < dqmc.getNumEqualGreen(); ++i) {
             const auto& greenU = dqmc.getGreenUs()[i];
@@ -73,7 +75,7 @@ namespace Physica {
             toNextMean(mean, i, observe);
         }
         observes[Base::getCursor()] = mean;
-        Base::sample(dqmc);
+        Base::sample(dqmc.getLnPartitionZ(), dqmc.getSign());
     }
 
     template<Scalar T>

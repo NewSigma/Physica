@@ -104,6 +104,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     auto DiagMatrix<T, Order>::sgndet() const -> Trv {
+        static_assert(!T::isComplex, "[Error]: sgndet() is not well defined for complex matrix");
         return unit(diags).prod();
     }
 

@@ -148,20 +148,27 @@ namespace Physica {
     template<Scalar T, Representation Repr, BoundaryCond BC>
     Vector2D<T> HubbardMatrix<T, Repr, BC>::calcBoundaryPhase(int site, int site1) const noexcept {
         Vector2D<T> result;
-        if constexpr (BC == BoundaryCond::TBC) {
+        using enum BoundaryCond;
+        if constexpr (BC == PBC)
+            result = Tr(1);
+        else {
             const auto& boundary = Lattice::getSiteBoundaryMap();
             auto pair = std::make_pair(site, site1);
             if (boundary.contains(pair)) {
-                int dim = boundary.find(pair)->second;
-                result[0] = phases[dim];
-                result[1] = phases[dim].conjugate();
+                if constexpr (BC == TBC) {
+                    int dim = boundary.find(pair)->second;
+                    result[0] = phases[dim];
+                    result[1] = phases[dim].conjugate();
+                }
+                else if constexpr (BC == APBC)
+                    result = Tr(-1);
+                else {
+                    static_assert(BC == OBC, "[Error]: Unsupported boundary condition");
+                    result = Tr(0);
+                }
             }
             else
                 result = Tr(1);
-        }
-        else {
-            static_assert(BC == BoundaryCond::PBC, "[Error]: Unsupported boundary condition");
-            result = Tr(1);
         }
         return result;
     }
