@@ -84,15 +84,16 @@ namespace Physica {
                 x[index] = Tr(0);
 
             const size_t nextIndex = [&z, length]() noexcept {
-                size_t result;
-                Tr maxAbs = 0;
+                size_t result{};
+                Tr zmax = 0;
                 for (size_t i = 0; i < length; ++i) {
-                    const Tr temp = abs(z.calc(i).real());
-                    if (temp > maxAbs) {
+                    const Tr temp = isComplex ? z.calc(i).squaredNorm() : abs(z.calc(i));
+                    if (temp > zmax) {
                         result = i;
-                        maxAbs = temp;
+                        zmax = temp;
                     }
                 }
+                assert(zmax.isPositive() && "[Error]: Unexpected empty vector");
                 return result;
             }();
 
