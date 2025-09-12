@@ -39,6 +39,7 @@ namespace Physica {
         using Base::isDiffable;
     protected:
         using typename Base::T;
+        using typename Base::Tr;
         using typename Base::Tv;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -53,7 +54,7 @@ namespace Physica {
         ~ContinuousVector() = default;
         /* Operators */
         Derived& operator=(const This& v);
-        Derived& operator=(This&& v);
+        Derived& operator=(This&& v) noexcept;
         Derived& operator=(const Scalar auto& x);
         template<ExecutePolicy P = Sequential>
         Derived& operator=(const Vector auto& v);
@@ -61,8 +62,8 @@ namespace Physica {
         /* Operations */
         template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
-        template<Packet Pack> void writePacket(size_t index, const Pack packet);
-        template<Packet Pack> void writePacketPartial(size_t index, size_t count, const Pack packet);
+        template<Packet Pack> void writePacket(size_t index, Pack packet);
+        template<Packet Pack> void writePacketPartial(size_t index, size_t count, Pack packet);
 
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
@@ -84,6 +85,10 @@ namespace Physica {
         [[nodiscard]] auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] const auto segment(size_t from, size_t to) const noexcept;
+
+        [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm1_base() const noexcept;
+        [[nodiscard]] Tr norm1_mkl() const noexcept;
 
         void zeros();
         template<RNG R>
@@ -113,4 +118,7 @@ namespace Physica {
 }
 
 #include "ContinuousVectorImpl/ContinuousVectorImpl.h"
+#ifdef PHYSICA_MKL
+    #include "ContinuousVectorImpl/ContinuousVector_MKL.h"
+#endif
 #include "ContinuousVectorImpl/VectorConvert.h"

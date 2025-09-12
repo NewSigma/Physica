@@ -35,34 +35,34 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
-
         [[nodiscard]] Tv calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            if constexpr (isComplexV)
-                return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index));
-            else
-                return abs(Base::getExpr().template packet<Pack>(index));
-        }
-
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            if constexpr (isComplexV)
-                return sqrt(Base::getExpr().squaredNorms().template packetPartial<Pack>(index, count));
-            else
-                return abs(Base::getExpr().template packetPartial<Pack>(index, count));
-        }
-
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
-        T max() const {
-            if constexpr (isComplexV)
-                return sqrt(Base::getExpr().squaredNorms().max());
-            else
-                return Base::max();
-        }
+        [[nodiscard]] T max() const;
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Abs, V>::packet(size_t index) const {
+        if constexpr (isComplexV)
+            return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index));
+        else
+            return abs(Base::getExpr().template packet<Pack>(index));
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Abs, V>::packetPartial(size_t index, size_t count) const {
+        if constexpr (isComplexV)
+            return sqrt(Base::getExpr().squaredNorms().template packetPartial<Pack>(index, count));
+        else
+            return abs(Base::getExpr().template packetPartial<Pack>(index, count));
+    }
 
     template<Vector V>
     void VectorExpr<ExprType::Abs, V>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
@@ -74,6 +74,14 @@ namespace Physica {
             static_assert(Vector<U>, "[Error]: Unexpected type");
             expr.reverse(hadamard(unit(expr.values()), grad));
         }
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Abs, V>::max() const -> T {
+        if constexpr (isComplexV)
+            return sqrt(Base::getExpr().squaredNorms().max());
+        else
+            return Base::max();
     }
 
     template<Vector V>

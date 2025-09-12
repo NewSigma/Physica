@@ -29,8 +29,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    Derived& ContinuousVector<Derived>::operator=(This&& v) {
-        return *this = v;
+    Derived& ContinuousVector<Derived>::operator=(This&& v) noexcept {
+        return *this = std::move(v);
     }
 
     template<class Derived>
@@ -144,6 +144,22 @@ namespace Physica {
     template<size_t Length>
     const auto ContinuousVector<Derived>::segment(size_t from, size_t to) const noexcept {
         return BlockType<Length>(Base::getConstCastDerived(), from, to);
+    }
+
+    template<class Derived>
+    auto ContinuousVector<Derived>::norm1() const noexcept -> CoDiff<Tr> {
+        constexpr bool SmallVector = 0 < SizeAtCompile && SizeAtCompile <= 128;
+        if constexpr (Internal::EnableMKL<Derived>::value && !SmallVector) {
+            bool isSmallVector = Base::getLength() <= 128;
+            return isSmallVector ? norm1_base() : norm1_mkl();
+        }
+        else
+            return norm1_base();
+    }
+
+    template<class Derived>
+    auto ContinuousVector<Derived>::norm1_base() const noexcept -> CoDiff<Tr> {
+        return Base::norm1();
     }
     /**
      * Prefer zeros() over simply assigning zeros for better performance.

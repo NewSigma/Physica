@@ -136,9 +136,9 @@ namespace Physica {
         void cutZero();
         /* Friends */
         friend class Integer;
-        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> square(const Real<Prec>& s) noexcept;
-        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> sqrt(const Real<Prec>& s) noexcept;
-        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> ln(const Real<Prec>& s) noexcept;
+        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> square(const Real<Prec>& x) noexcept;
+        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> sqrt(const Real<Prec>& x) noexcept;
+        template<FloatPrec Prec> __host__ __device__ friend Real<Prec> ln(const Real<Prec>& x) noexcept;
         /* Static members */
         static Real<FloatMP> add(const Real& s1, const Real& s2) noexcept;
         static Real<FloatMP> sub(const Real& s1, const Real& s2) noexcept;

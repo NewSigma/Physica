@@ -18,28 +18,27 @@
  */
 #pragma once
 
-#include "../Mul.h"
+#include "../ContinuousVector.h"
 
 namespace Physica {
-    template<Vector V, Scalar U>
-    void VectorExpr<ExprType::Mul, V, U>::assign_add_mkl(void* y) const noexcept {
+    template<class Derived>
+    auto ContinuousVector<Derived>::norm1_mkl() const noexcept -> Tr {
         const size_t n = Base::getLength();
-        const auto alpha = Base::getRHS().toMachine();
-        const void* x = Base::getLHS().data();
-        if constexpr (isComplex) {
+        const void* x = data();
+        if constexpr (T::isComplex) {
             if constexpr (T::Prec == Float32)
-                cblas_caxpy(n, &alpha, x, 1, y, 1);
+                return cblas_scasum_64(n, x, 1);
             else {
                 static_assert(T::Prec == Float64, "[Error]: Unexpected type");
-                cblas_zaxpy(n, &alpha, x, 1, y, 1);
+                return cblas_dzasum_64(n, x, 1);
             }
         }
         else {
             if constexpr (T::Prec == Float32)
-                cblas_saxpy(n, alpha, static_cast<const float*>(x), 1, static_cast<float*>(y), 1);
+                return cblas_sasum_64(n, static_cast<const float*>(x), 1);
             else {
                 static_assert(T::Prec == Float64, "[Error]: Unexpected type");
-                cblas_daxpy(n, alpha, static_cast<const double*>(x), 1, static_cast<double*>(y), 1);
+                return cblas_dasum_64(n, static_cast<const double*>(x), 1);
             }
         }
     }

@@ -22,12 +22,14 @@
 
 using namespace benchmark;
 
+namespace {
+    const char* const Executable = "Benchmark";
+}
+
 int main(int argc, char** argv) {
-    char arg0_default[] = "benchmark";
-    char* args_default = arg0_default;
     if (!argv) {
         argc = 1;
-        argv = &args_default;
+        argv = const_cast<char**>(&Executable);
     }
     Initialize(&argc, argv);
     if (ReportUnrecognizedArguments(argc, argv))

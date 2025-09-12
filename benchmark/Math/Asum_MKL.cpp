@@ -23,24 +23,24 @@ using namespace Physica;
 using RandomSource = Random<MT19937>;
 
 namespace {
-    void axpy_mkl(benchmark::State& state) {
+    void asum_mkl(benchmark::State& state) {
         using T = float64;
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            (x * T(2)).assign_add_mkl(buffer.data());
             benchmark::DoNotOptimize(x);
+            benchmark::DoNotOptimize(x.norm1_mkl());
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(2);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(4);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(8);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(16);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(64);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(256);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(1024);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(16384);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(2);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(4);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(8);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(16);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(64);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(256);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(1024);
+BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(16384);

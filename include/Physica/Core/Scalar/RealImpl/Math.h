@@ -187,7 +187,8 @@ namespace Physica {
 
     template<FloatPrec Prec>
     __host__ __device__ Real<Prec> tanpi(const Real<Prec>& x) noexcept {
-        Real<Prec> sinpi_, cospi_;
+        Real<Prec> sinpi_;
+        Real<Prec> cospi_;
         sincospi(x, sinpi_, cospi_);
         return sinpi_ / cospi_;
     }
@@ -214,14 +215,16 @@ namespace Physica {
 
     template<FloatPrec Prec>
     Real<Prec> cot(const Real<Prec>& x) noexcept {
-        Real<Prec> sin_, cos_;
+        Real<Prec> sin_;
+        Real<Prec> cos_;
         sincos(x, sin_, cos_);
         return cos_ / sin_;
     }
 
     template<FloatPrec Prec>
     Real<Prec> cotpi(const Real<Prec>& x) noexcept {
-        Real<Prec> sinpi_, cospi_;
+        Real<Prec> sinpi_;
+        Real<Prec> cospi_;
         sincospi(x, sinpi_, cospi_);
         return cospi_ / sinpi_;
     }

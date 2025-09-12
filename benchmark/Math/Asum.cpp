@@ -23,45 +23,43 @@ using namespace Physica;
 using RandomSource = Random<MT19937>;
 
 namespace {
-    void axpy(benchmark::State& state) {
+    void asum(benchmark::State& state) {
         using T = float64;
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
-        VectorND<T> buffer(size);
         for (auto _ : state) {
-            buffer += x * T(2);
-            benchmark::DoNotOptimize(buffer);
+            benchmark::DoNotOptimize(x);
+            benchmark::DoNotOptimize(x.norm1());
             benchmark::ClobberMemory();
         }
     }
 
-    void axpy_base(benchmark::State& state) {
+    void asum_base(benchmark::State& state) {
         using T = float64;
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
-        VectorND<T> buffer(size);
         for (auto _ : state) {
-            (x * T(2)).assign_add_base(buffer);
             benchmark::DoNotOptimize(x);
+            benchmark::DoNotOptimize(x.norm1_base());
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(axpy)->Name("axpy")->Arg(2);
-BENCHMARK(axpy)->Name("axpy")->Arg(4);
-BENCHMARK(axpy)->Name("axpy")->Arg(8);
-BENCHMARK(axpy)->Name("axpy")->Arg(16);
-BENCHMARK(axpy)->Name("axpy")->Arg(64);
-BENCHMARK(axpy)->Name("axpy")->Arg(256);
-BENCHMARK(axpy)->Name("axpy")->Arg(1024);
-BENCHMARK(axpy)->Name("axpy")->Arg(16384);
+BENCHMARK(asum)->Name("asum")->Arg(2);
+BENCHMARK(asum)->Name("asum")->Arg(4);
+BENCHMARK(asum)->Name("asum")->Arg(8);
+BENCHMARK(asum)->Name("asum")->Arg(16);
+BENCHMARK(asum)->Name("asum")->Arg(64);
+BENCHMARK(asum)->Name("asum")->Arg(256);
+BENCHMARK(asum)->Name("asum")->Arg(1024);
+BENCHMARK(asum)->Name("asum")->Arg(16384);
 
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(2);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(4);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(8);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(16);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(64);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(256);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(1024);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(16384);
+BENCHMARK(asum_base)->Name("asum base")->Arg(2);
+BENCHMARK(asum_base)->Name("asum base")->Arg(4);
+BENCHMARK(asum_base)->Name("asum base")->Arg(8);
+BENCHMARK(asum_base)->Name("asum base")->Arg(16);
+BENCHMARK(asum_base)->Name("asum base")->Arg(64);
+BENCHMARK(asum_base)->Name("asum base")->Arg(256);
+BENCHMARK(asum_base)->Name("asum base")->Arg(1024);
+BENCHMARK(asum_base)->Name("asum base")->Arg(16384);
