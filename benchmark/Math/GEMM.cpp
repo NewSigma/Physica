@@ -22,35 +22,37 @@
 using namespace Physica;
 using RandomSource = Random<MT19937>;
 
-template<int Order = 0>
-static void gemm(benchmark::State& state) {
-    static_assert(Order >= 0);
-    using T = float64;
-    using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
-    const size_t order = state.range(0);
-    const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
-    const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
-    MatrixType m(order, order);
-    for (auto _ : state) {
-        m = m1 * m2;
-        benchmark::DoNotOptimize(m);
-        benchmark::ClobberMemory();
+namespace {
+    template<int Order = 0>
+    void gemm(benchmark::State& state) {
+        static_assert(Order >= 0);
+        using T = float64;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
+        const size_t order = state.range(0);
+        const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
+        const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
+        MatrixType m(order, order);
+        for (auto _ : state) {
+            m = m1 * m2;
+            benchmark::DoNotOptimize(m);
+            benchmark::ClobberMemory();
+        }
     }
-}
 
-template<int Order = 0>
-static void gemm_base(benchmark::State& state) {
-    static_assert(Order >= 0);
-    using T = float64;
-    using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
-    const size_t order = state.range(0);
-    const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
-    const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
-    MatrixType m(order, order);
-    for (auto _ : state) {
-        (m1 * m2).assign_base(m);
-        benchmark::DoNotOptimize(m);
-        benchmark::ClobberMemory();
+    template<int Order = 0>
+    void gemm_base(benchmark::State& state) {
+        static_assert(Order >= 0);
+        using T = float64;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
+        const size_t order = state.range(0);
+        const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
+        const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
+        MatrixType m(order, order);
+        for (auto _ : state) {
+            (m1 * m2).assign_base(m);
+            benchmark::DoNotOptimize(m);
+            benchmark::ClobberMemory();
+        }
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,30 +38,32 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-static MDType makeSystem(size_t numMolecular) {
-    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
-    MDCellType::MassVector massVec(numMolecular, mass);
-    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+namespace {
+    MDType makeSystem(size_t numMolecular) {
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
+        MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-    cell.scale(factor);
-    return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-}
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
+        return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    }
 
-static void bench(benchmark::State& state) {
-    ThreadPool::numThreadRequired = 8;
-    KineticModel kineticModel(temperatureT, numReplica);
-    using HostModel = SilveraGoldman<ScalarType, true, false>;
+    void bench(benchmark::State& state) {
+        ThreadPool::numThreadRequired = 8;
+        KineticModel kineticModel(temperatureT, numReplica);
+        using HostModel = SilveraGoldman<ScalarType, true, false>;
 
-    using DeviceModel = SilveraGoldman<ScalarType, true, true>;
-    using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
-    const size_t numMolecular = state.range();
-    MDType rpmd = makeSystem(numMolecular);
-    rpmd.initMomentum<KineticModel, RandomSource>();
-    ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
-    for (auto _ : state)
-        rpmd.nve_step<KineticModel, ForceModel, AutoExecutor>(kineticModel, forceModel);
+        using DeviceModel = SilveraGoldman<ScalarType, true, true>;
+        using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
+        const size_t numMolecular = state.range();
+        MDType rpmd = makeSystem(numMolecular);
+        rpmd.initMomentum<KineticModel, RandomSource>();
+        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
+        for (auto _ : state)
+            rpmd.nve_step<KineticModel, ForceModel, AutoExecutor>(kineticModel, forceModel);
+    }
 }
 
 BENCHMARK(bench)->Name("ParaH auto")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);

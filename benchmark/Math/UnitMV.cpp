@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,41 +22,43 @@
 using namespace Physica;
 using RandomSource = Random<MT19937>;
 
-static void kernel1(benchmark::State& state) {
-    using T = float64;
-    const int size = state.range(0);
-    const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
-    const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
-    VectorND<T> buffer(size);
-    for (auto _ : state) {
-        buffer = v1 - v2 * T(2.0);
-        benchmark::DoNotOptimize(buffer);
-        benchmark::ClobberMemory();
+namespace {
+    void kernel1(benchmark::State& state) {
+        using T = float64;
+        const int64_t size = state.range(0);
+        const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
+        const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            buffer = v1 - v2 * T(2.0);
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
     }
-}
 
-static void kernel2(benchmark::State& state) {
-    using T = float64;
-    const int size = state.range(0);
-    const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
-    const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
-    VectorND<T> buffer(size);
-    for (auto _ : state) {
-        buffer = v1 - (UnitMatrix<T>(size) * T(2.0)) * v2;
-        benchmark::DoNotOptimize(buffer);
-        benchmark::ClobberMemory();
+    void kernel2(benchmark::State& state) {
+        using T = float64;
+        const int64_t size = state.range(0);
+        const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
+        const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            buffer = v1 - (UnitMatrix<T>(size) * T(2.0)) * v2;
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
     }
-}
 
-static void kernel3(benchmark::State& state) {
-    using T = float64;
-    const int size = state.range(0);
-    const auto v = VectorND<T>::random_uniform<RandomSource>(size);
-    VectorND<T> buffer(size);
-    for (auto _ : state) {
-        buffer += (UnitMatrix<T>(size) * T(2.0)) * v;
-        benchmark::DoNotOptimize(buffer);
-        benchmark::ClobberMemory();
+    void kernel3(benchmark::State& state) {
+        using T = float64;
+        const int64_t size = state.range(0);
+        const auto v = VectorND<T>::random_uniform<RandomSource>(size);
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            buffer += (UnitMatrix<T>(size) * T(2.0)) * v;
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
     }
 }
 

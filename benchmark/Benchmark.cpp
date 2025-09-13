@@ -42,7 +42,7 @@ namespace {
 
     Reporter::Reporter() : ConsoleReporter(OutputOptions::OO_None) {
         std::ofstream fout("Version", std::ios_base::trunc);
-        fout << Physica::version() << '\n';
+        fout << Physica::version();
     }
 
     void Reporter::ReportRuns(const std::vector<Run>& reports) {

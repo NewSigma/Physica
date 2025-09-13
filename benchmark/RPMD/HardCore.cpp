@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,30 +42,32 @@ using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exact>;
 
-static MDCellType makeSystem() {
-    MDCellType::LatticeMatrix lattice{latticeSize};
+namespace {
+    MDCellType makeSystem() {
+        MDCellType::LatticeMatrix lattice{latticeSize};
 
-    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
-    std::sort(posVec.begin(), posVec.end());
-    MDCellType::PositionMatrix pos(numMolecular, 1);
-    pos.col(0) = posVec;
+        auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
+        std::sort(posVec.begin(), posVec.end());
+        MDCellType::PositionMatrix pos(numMolecular, 1);
+        pos.col(0) = posVec;
 
-    MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i)
-        massVec[i] = unitMassM;
-    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
-}
+        MDCellType::MassVector massVec(numMolecular);
+        for (size_t i = 0; i < numMolecular; ++i)
+            massVec[i] = unitMassM;
+        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
+    }
 
-static void func(benchmark::State& state) {
-    const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomSource>();
-    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
-    ForceModel forceModel{};
-    kineticModel.updateMass(rpmd.getRingPolymer());
+    void func(benchmark::State& state) {
+        const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
+        MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
+        rpmd.initMomentum<KineticModel, RandomSource>();
+        KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
+        ForceModel forceModel{};
+        kineticModel.updateMass(rpmd.getRingPolymer());
 
-    for (auto _ : state)
-        rpmd.nve_step<Sequential>(kineticModel, forceModel);
+        for (auto _ : state)
+            rpmd.nve_step<Sequential>(kineticModel, forceModel);
+    }
 }
 
 BENCHMARK(func)->Name("HardCore")->Unit(benchmark::kMicrosecond);

@@ -24,25 +24,27 @@
 
 using namespace Physica;
 
-static void func(benchmark::State& state) {
-    constexpr unsigned int NumSite = 10;
-    constexpr unsigned int NumParticle = NumSite / 2;
-    constexpr double HoppingT = 1.0;
-    constexpr double RepelU = 4;
+namespace {
+    void func(benchmark::State& state) {
+        constexpr unsigned int NumSite = 10;
+        constexpr unsigned int NumParticle = NumSite / 2;
+        constexpr double HoppingT = 1.0;
+        constexpr double RepelU = 4;
 
-    using RealType = float64;
-    using ScalarType = Complex<RealType>;
-    using RandomSource = Random<MT19937>;
-    using ReprType = KFermiRepr<1, NumSite, true>;
+        using RealType = float64;
+        using ScalarType = Complex<RealType>;
+        using RandomSource = Random<MT19937>;
+        using ReprType = KFermiRepr<1, NumSite, true>;
 
-    const SquareLattice<1> lattice({NumSite}, 1);
-    const HubbardMatrix<ScalarType, ReprType> model(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
-    auto v = VectorND<ScalarType>::random_uniform<RandomSource>(model.getRow());
-    VectorND<ScalarType> v1(model.getRow());
+        const SquareLattice<1> lattice({NumSite}, 1);
+        const HubbardMatrix<ScalarType, ReprType> model(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
+        auto v = VectorND<ScalarType>::random_uniform<RandomSource>(model.getRow());
+        VectorND<ScalarType> v1(model.getRow());
 
-    for (auto _ : state) {
-        v1 = model * v;
-        v1.swap(v);
+        for (auto _ : state) {
+            v1 = model * v;
+            v1.swap(v);
+        }
     }
 }
 

@@ -19,39 +19,41 @@
 #include <benchmark/benchmark.h>
 #include "Physica/CRCoro.h"
 
-struct Int : public Physica::CRCoro<Int> {
-    int i;
+namespace {
+    struct Int : public Physica::CRCoro<Int> {
+        int i;
 
-    Int(int i_) : i(i_) {}
-};
+        Int(int i_) : i(i_) {}
+    };
 
-int sum1(int n) {
-    if (n == 0)
-        return 0;
-    return n + sum1(n - 1);
-}
-
-Int sum2(int n) {
-    if (n == 0)
-        co_return 0;
-    co_return n + sum2(n - 1).i;
-}
-
-void bench1(benchmark::State &state) {
-    int n = state.range(0);
-    int a;
-    for (auto _ : state) {
-        a = sum1(n);
-        benchmark::DoNotOptimize(a);
+    int sum1(int n) {
+        if (n == 0)
+            return 0;
+        return n + sum1(n - 1);
     }
-}
 
-void bench2(benchmark::State &state) {
-    int n = state.range(0);
-    int a;
-    for (auto _ : state) {
-        a = sum2(n).i;
-        benchmark::DoNotOptimize(a);
+    Int sum2(int n) {
+        if (n == 0)
+            co_return 0;
+        co_return n + sum2(n - 1).i;
+    }
+
+    void bench1(benchmark::State &state) {
+        int64_t n = state.range(0);
+        int a{};
+        for (auto _ : state) {
+            a = sum1(n);
+            benchmark::DoNotOptimize(a);
+        }
+    }
+
+    void bench2(benchmark::State &state) {
+        int64_t n = state.range(0);
+        int a{};
+        for (auto _ : state) {
+            a = sum2(n).i;
+            benchmark::DoNotOptimize(a);
+        }
     }
 }
 

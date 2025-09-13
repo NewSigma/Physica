@@ -99,7 +99,7 @@ namespace Physica {
 
         [[nodiscard]] T loss(const auto& dataset) const { return Base::loss(dataset); }
 
-        size_t classify(const VectorND<Tv>& input) const {
+        [[nodiscard]] size_t classify(const VectorND<Tv>& input) const {
             static_assert(!Base::IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
             const auto output = Base::forward(input);
             Tv max = output[0];
@@ -150,7 +150,7 @@ namespace {
         return dataset;
     }
 
-    static void main(benchmark::State& state) {
+    void bench(benchmark::State& state) {
         Dataset dataset;
         try {
             dataset = makeDataset();
@@ -166,4 +166,4 @@ namespace {
     }
 }
 
-BENCHMARK(main)->Name("Mnist")->Unit(benchmark::kMillisecond);
+BENCHMARK(bench)->Name("Mnist")->Unit(benchmark::kMillisecond);

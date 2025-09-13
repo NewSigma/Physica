@@ -41,39 +41,36 @@ constexpr double compressRate = 10;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 
-static MDCell<ScalarType> makeSystem(unsigned int cellSize) {
-    using CrystalCellType = CrystalCell<ScalarType>;
-    using LatticeMatrix = CrystalCellType::LatticeMatrix;
-    using PositionMatrix = CrystalCellType::PositionMatrix;
-    const LatticeMatrix lattice{
-            -4.6635062604325164, -0.2499522611778955, 0.0000000000000000, -2.1629745970109657, -4.1943944839773311, 0.0000000000000000, -0.2750800827878018, -0.4169789280520980, 18.0000000000000000};
-    const PositionMatrix pos{
-            0.4553508091084409, 0.3980437584135783, 0.1240303800896787, 0.4937103263031835, 0.4030549988960055, 0.9488679230950712, 0.5596918259357793, 0.8517822319914985, 0.1226285591691945, 0.3686253245184842, 0.6403194088783717, 0.0163388989450929, 0.5980496296529945, 0.8452761470000689, 0.9474667297556534, 0.1076134753395919, 0.7454143691003363, 0.1235631952109221, 0.6847635746074375, 0.9781822048654215, 0.0551553884196571, 0.9457728898525665, 0.8447981726837335, 0.9479330783198919, 0.6786065180112657, 0.9738018598142685, 0.1107906720462844, 0.3747794285285615, 0.6414996922536187, 0.9607035572233092, 0.7021261874138659, 0.9803177844871507, 0.9573706719037773, 0.3512600170478342, 0.6392493670479714, 0.1141244566914832};
+namespace {
+    MDCell<ScalarType> makeSystem(unsigned int cellSize) {
+        using CrystalCellType = CrystalCell<ScalarType>;
+        using LatticeMatrix = CrystalCellType::LatticeMatrix;
+        using PositionMatrix = CrystalCellType::PositionMatrix;
+        const LatticeMatrix lattice{
+                -4.6635062604325164, -0.2499522611778955, 0.0000000000000000, -2.1629745970109657, -4.1943944839773311, 0.0000000000000000, -0.2750800827878018, -0.4169789280520980, 18.0000000000000000};
+        const PositionMatrix pos{
+                0.4553508091084409, 0.3980437584135783, 0.1240303800896787, 0.4937103263031835, 0.4030549988960055, 0.9488679230950712, 0.5596918259357793, 0.8517822319914985, 0.1226285591691945, 0.3686253245184842, 0.6403194088783717, 0.0163388989450929, 0.5980496296529945, 0.8452761470000689, 0.9474667297556534, 0.1076134753395919, 0.7454143691003363, 0.1235631952109221, 0.6847635746074375, 0.9781822048654215, 0.0551553884196571, 0.9457728898525665, 0.8447981726837335, 0.9479330783198919, 0.6786065180112657, 0.9738018598142685, 0.1107906720462844, 0.3747794285285615, 0.6414996922536187, 0.9607035572233092, 0.7021261874138659, 0.9803177844871507, 0.9573706719037773, 0.3512600170478342, 0.6392493670479714, 0.1141244566914832};
 
-    CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
-    cell.scale(PhyConst<AU>::angstormToBohr(1));
-    cell.toSuperCell(cellSize, cellSize, 1);
-    cell.toCartesian();
-    return MDCell<ScalarType>(std::move(cell));
-}
+        CrystalCellType cell({lattice, pos, CrystalCellType::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
+        cell.scale(PhyConst<AU>::angstormToBohr(1));
+        cell.toSuperCell(cellSize, cellSize, 1);
+        cell.toCartesian();
+        return MDCell<ScalarType>(std::move(cell));
+    }
 
-static void bench(benchmark::State& state) {
-    auto& pool = RandomSource::getInstance();
-    auto cell = makeSystem(5);
-    ForceModel::sortPosition(cell);
-    MDType rpmd(std::move(cell), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomSource>();
+    void bench(benchmark::State& state) {
+        auto cell = makeSystem(5);
+        ForceModel::sortPosition(cell);
+        MDType rpmd(std::move(cell), 1, 1, temperatureT, timeStep);
+        rpmd.initMomentum<KineticModel, RandomSource>();
 
-    KineticModel kineticModel(temperatureT, 1);
-    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType{});
-    ThermoType thermo(temperatureT, thermostatTime);
-    BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
-    for (auto _ : state)
-        rpmd.npt_step<ThermoType, RandomSource, BarostatType, KineticModel, decltype(forceModel), GPU>(
-                thermo,
-                barostat,
-                kineticModel,
-                forceModel);
+        KineticModel kineticModel(temperatureT, 1);
+        ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType{});
+        ThermoType thermo(temperatureT, thermostatTime);
+        BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
+        for (auto _ : state)
+            rpmd.npt_step<RandomSource, GPU>(thermo, barostat, kineticModel, forceModel);
+    }
 }
 
 BENCHMARK(bench)->Name("Q_TIP4P cuda")->Unit(benchmark::kMillisecond);

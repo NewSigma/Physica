@@ -22,18 +22,20 @@
 using namespace Physica;
 using RandomSource = Random<MT19937>;
 
-template<int Order = 0>
-static void qr_mkl(benchmark::State& state) {
-    static_assert(Order >= 0);
-    using T = float64;
-    using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
-    const size_t order = state.range(0);
-    const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
-    QRDecomp<float64> qr(order, order);
-    for (auto _ : state) {
-        qr.compute_mkl(m);
-        benchmark::DoNotOptimize(qr);
-        benchmark::ClobberMemory();
+namespace {
+    template<int Order = 0>
+    void qr_mkl(benchmark::State& state) {
+        static_assert(Order >= 0);
+        using T = float64;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
+        const size_t order = state.range(0);
+        const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
+        QRDecomp<float64> qr(order, order);
+        for (auto _ : state) {
+            qr.compute_mkl(m);
+            benchmark::DoNotOptimize(qr);
+            benchmark::ClobberMemory();
+        }
     }
 }
 

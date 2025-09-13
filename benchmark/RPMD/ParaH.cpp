@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,28 +34,30 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-static RPMD<ScalarType> makeSystem(size_t numMolecular) {
-    using MDCellType = RPMD<ScalarType>::MDCellType;
-    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
-    MDCellType::MassVector massVec(numMolecular, mass);
-    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+namespace {
+    RPMD<ScalarType> makeSystem(size_t numMolecular) {
+        using MDCellType = RPMD<ScalarType>::MDCellType;
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
+        MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-    cell.scale(factor);
-    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-}
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
+        return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    }
 
-static void bench(benchmark::State& state) {
-    ThreadPool::numThreadRequired = 4;
-    KineticModel kineticModel(temperatureT, numReplica);
-    ForceModel forceModel(pair_cutoff);
+    void bench(benchmark::State& state) {
+        ThreadPool::numThreadRequired = 4;
+        KineticModel kineticModel(temperatureT, numReplica);
+        ForceModel forceModel(pair_cutoff);
 
-    const int numMolecular = state.range(0);
-    auto rpmd = makeSystem(numMolecular);
-    rpmd.initMomentum<KineticModel, RandomSource>();
-    for (auto _ : state)
-        rpmd.nve_step<Thread>(kineticModel, forceModel);
+        const int numMolecular = state.range(0);
+        auto rpmd = makeSystem(numMolecular);
+        rpmd.initMomentum<KineticModel, RandomSource>();
+        for (auto _ : state)
+            rpmd.nve_step<Thread>(kineticModel, forceModel);
+    }
 }
 
 BENCHMARK(bench)->Name("ParaH")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);

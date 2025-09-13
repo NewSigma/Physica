@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,16 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
-#include <iostream>
+#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -41,76 +39,78 @@ constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.1;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
-static Vector3D<ScalarType> randomVector() {
-    const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
-    const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
-    Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-    result *= ScalarType(ForceModel::equalR);
-    return result;
-}
-
-static MDCell<ScalarType> makeSystem(unsigned int cellSize) {
-    using CrystalCellType = CrystalCell<ScalarType>;
-    constexpr size_t MoleculePerCell = 4;
-    constexpr size_t maxIndexH = MoleculePerCell * 2;
-    constexpr size_t maxIndexO = MoleculePerCell * 3;
-    constexpr size_t numAtom = MoleculePerCell * 3;
-
-    ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
-    const ScalarType latticeFactor(cbrt(cellVolume));
-    CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
-    lattice *= latticeFactor;
-
-    CrystalCellType::PositionMatrix pos(numAtom, 3);
-    for (size_t i = 0; i < MoleculePerCell; ++i) {
-        auto posO = pos.row(i + maxIndexH);
-        if (i == 0) {
-            posO[0] = 0;
-            posO[1] = 0;
-            posO[2] = 0;
-        }
-        if (i == 1) {
-            posO[0] = latticeFactor * 0.5;
-            posO[1] = latticeFactor * 0.5;
-            posO[2] = 0;
-        }
-        if (i == 2) {
-            posO[0] = latticeFactor * 0.5;
-            posO[1] = 0;
-            posO[2] = latticeFactor * 0.5;
-        }
-        if (i == 3) {
-            posO[0] = 0;
-            posO[1] = latticeFactor * 0.5;
-            posO[2] = latticeFactor * 0.5;
-        }
-        auto posH1 = pos.row(2 * i);
-        auto posH2 = pos.row(2 * i + 1);
-        posH1 = posO + randomVector();
-        posH2 = posO + randomVector();
+namespace {
+    Vector3D<ScalarType> randomVector() {
+        const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
+        const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
+        Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+        result *= ScalarType(ForceModel::equalR);
+        return result;
     }
 
-    CrystalCellType::AtomicArray atomicNumbers(numAtom);
-    for (size_t i = 0; i < maxIndexH; ++i)
-        atomicNumbers[i] = 1;
-    for (size_t i = maxIndexH; i < maxIndexO; ++i)
-        atomicNumbers[i] = 8;
+    MDCell<ScalarType> makeSystem(unsigned int cellSize) {
+        using CrystalCellType = CrystalCell<ScalarType>;
+        constexpr size_t MoleculePerCell = 4;
+        constexpr size_t maxIndexH = MoleculePerCell * 2;
+        constexpr size_t maxIndexO = MoleculePerCell * 3;
+        constexpr size_t numAtom = MoleculePerCell * 3;
 
-    CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
-    cell.toSuperCell(cellSize, cellSize, cellSize);
-    return MDCell<ScalarType>(std::move(cell));
-}
+        ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+        const ScalarType latticeFactor(cbrt(cellVolume));
+        CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+        lattice *= latticeFactor;
 
-static void bench(benchmark::State& state) {
-    auto cell = makeSystem(2);
-    ForceModel::sortPosition(cell);
-    ForceModel forceModel(cell, pair_cutoff, {});
-    KineticModel kineticModel(temperatureT, numReplica);
-    const ThermoType thermo(temperatureT, thermostatTime);
-    RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomSource>();
-    for (auto _ : state)
-        rpmd.nve_step<Sequential>(kineticModel, forceModel);
+        CrystalCellType::PositionMatrix pos(numAtom, 3);
+        for (size_t i = 0; i < MoleculePerCell; ++i) {
+            auto posO = pos.row(i + maxIndexH);
+            if (i == 0) {
+                posO[0] = 0;
+                posO[1] = 0;
+                posO[2] = 0;
+            }
+            if (i == 1) {
+                posO[0] = latticeFactor * 0.5;
+                posO[1] = latticeFactor * 0.5;
+                posO[2] = 0;
+            }
+            if (i == 2) {
+                posO[0] = latticeFactor * 0.5;
+                posO[1] = 0;
+                posO[2] = latticeFactor * 0.5;
+            }
+            if (i == 3) {
+                posO[0] = 0;
+                posO[1] = latticeFactor * 0.5;
+                posO[2] = latticeFactor * 0.5;
+            }
+            auto posH1 = pos.row(2 * i);
+            auto posH2 = pos.row(2 * i + 1);
+            posH1 = posO + randomVector();
+            posH2 = posO + randomVector();
+        }
+
+        CrystalCellType::AtomicArray atomicNumbers(numAtom);
+        for (size_t i = 0; i < maxIndexH; ++i)
+            atomicNumbers[i] = 1;
+        for (size_t i = maxIndexH; i < maxIndexO; ++i)
+            atomicNumbers[i] = 8;
+
+        CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
+        cell.toSuperCell(cellSize, cellSize, cellSize);
+        return MDCell<ScalarType>(std::move(cell));
+    }
+
+    void bench(benchmark::State& state) {
+        auto cell = makeSystem(2);
+        ForceModel::sortPosition(cell);
+        ForceModel forceModel(cell, pair_cutoff, {});
+        KineticModel kineticModel(temperatureT, numReplica);
+        const ThermoType thermo(temperatureT, thermostatTime);
+        RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
+        rpmd.initMomentum<KineticModel, RandomSource>();
+        for (auto _ : state)
+            rpmd.nve_step<Sequential>(kineticModel, forceModel);
+    }
 }
 
 BENCHMARK(bench)->Name("Q_TIP4P")->Unit(benchmark::kMillisecond);
