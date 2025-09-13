@@ -158,6 +158,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto ContinuousVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
+        return norm2_base();
+    }
+
+    template<class Derived>
+    auto ContinuousVector<Derived>::norm2_base() const noexcept -> CoDiff<Tr> {
+        return Base::norm2();
+    }
+
+    template<class Derived>
     auto ContinuousVector<Derived>::norm1_base() const noexcept -> CoDiff<Tr> {
         return Base::norm1();
     }

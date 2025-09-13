@@ -89,6 +89,9 @@ namespace Physica {
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm1_base() const noexcept;
         [[nodiscard]] Tr norm1_mkl() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm2() const noexcept;
+        [[nodiscard]] CoDiff<Tr> norm2_base() const noexcept;
+        [[nodiscard]] Tr norm2_mkl() const noexcept;
 
         void zeros();
         template<RNG R>

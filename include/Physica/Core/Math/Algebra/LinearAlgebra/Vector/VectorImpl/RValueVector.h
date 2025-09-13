@@ -146,7 +146,7 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm2() const noexcept;
-        [[nodiscard]] CoDiff<Tr> norm() const noexcept;
+        [[nodiscard]] auto norm() const noexcept;
         [[nodiscard]] CoDiff<Tr> squaredNorm() const noexcept;
         [[nodiscard]] Tr lnSquaredNorm() const;
         [[nodiscard]] Tr normInf() const;

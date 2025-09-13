@@ -42,4 +42,26 @@ namespace Physica {
             }
         }
     }
+
+    template<class Derived>
+    auto ContinuousVector<Derived>::norm2_mkl() const noexcept -> Tr {
+        const size_t n = Base::getLength();
+        const void* x = data();
+        if constexpr (T::isComplex) {
+            if constexpr (T::Prec == Float32)
+                return cblas_scnrm2_64(n, x, 1);
+            else {
+                static_assert(T::Prec == Float64, "[Error]: Unexpected type");
+                return cblas_dznrm2_64(n, x, 1);
+            }
+        }
+        else {
+            if constexpr (T::Prec == Float32)
+                return cblas_snrm2_64(n, static_cast<const float*>(x), 1);
+            else {
+                static_assert(T::Prec == Float64, "[Error]: Unexpected type");
+                return cblas_dnrm2_64(n, static_cast<const double*>(x), 1);
+            }
+        }
+    }
 }

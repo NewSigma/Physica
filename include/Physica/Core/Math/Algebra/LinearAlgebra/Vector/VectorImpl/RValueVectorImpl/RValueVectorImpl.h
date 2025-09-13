@@ -205,12 +205,12 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
-        return norm();
+        return sqrt(squaredNorm());
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::norm() const noexcept -> CoDiff<Tr> {
-        return sqrt(squaredNorm());
+    auto RValueVector<Derived>::norm() const noexcept {
+        return Base::getDerived().norm2();
     }
 
     template<class Derived>
