@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
+#include <iostream>
+#include <unordered_map>
 #include <benchmark/benchmark.h>
 #include "Physica/Core/Version.h"
 
@@ -28,47 +30,44 @@ namespace {
     class Reporter : public ConsoleReporter {
         using Base = ConsoleReporter;
     private:
-        std::vector<Run> reports;
+        std::unordered_map<std::string, std::vector<Run>> subReportMap;
     public:
-        Reporter() : ConsoleReporter(OutputOptions::OO_None) {}
+        Reporter();
         ~Reporter() = default;
-
+        /* Operations */
         bool ReportContext(const Context&) override { return true; }
-        void ReportRuns(const std::vector<Run>& group) override {
-            reports.insert(reports.end(), group.begin(), group.end());
-        }
-        void Finalize() override {
-            std::vector<Run> subReports{};
-            std::string header{};
-            for (const auto& r : reports) {
-                const std::string_view name = r.run_name.function_name;
-                const size_t pos = name.find_first_not_of(' ');
-                const size_t n = name.find_first_of(' ', pos) - pos;
-                const auto first_word = name.substr(pos, n);
-                
-                if (first_word == header) {
-                    subReports.push_back(r);
-                    continue;
-                }
-                
-                ReportSubRuns(header, subReports);
-
-                header = std::string(first_word);
-                subReports.push_back(r);
-            }
-            ReportSubRuns(header, subReports);
-        }
-    private:
-        void ReportSubRuns(const std::string& header, std::vector<Run>& subReports) {
-            if (header.empty())
-                return;
-
-            std::ofstream fout(header, std::ios_base::trunc);
-            Base::SetOutputStream(&fout);
-            Base::ReportRuns(subReports);
-            subReports.clear();
-        }
+        void ReportRuns(const std::vector<Run>& reports) override;
+        void Finalize() override;
     };
+
+    Reporter::Reporter() : ConsoleReporter(OutputOptions::OO_None) {
+        std::ofstream fout("Version", std::ios_base::trunc);
+        fout << Physica::version() << '\n';
+    }
+
+    void Reporter::ReportRuns(const std::vector<Run>& reports) {
+        for (const auto& r : reports) {
+            const std::string_view name = r.run_name.function_name;
+            const size_t pos = name.find_first_not_of(' ');
+            const size_t n = name.find_first_of(' ', pos) - pos;
+            const auto first_word = std::string(name.substr(pos, n));
+
+            subReportMap[first_word].push_back(r);
+        }
+    }
+
+    void Reporter::Finalize() {
+        for (const auto& pair : subReportMap) {
+            std::ofstream fout(pair.first, std::ios_base::trunc);
+            Base::SetOutputStream(&fout);
+
+            const auto& subReports = pair.second;
+            Base::PrintHeader(subReports[0]);
+            for (const auto& r : subReports)
+                Base::PrintRunData(r);
+        }
+        Base::SetOutputStream(&std::cout);
+    }
 }
 
 int main(int argc, char** argv) {
@@ -80,10 +79,6 @@ int main(int argc, char** argv) {
     if (ReportUnrecognizedArguments(argc, argv))
         return 1;
 
-    {
-        std::ofstream fout("Version", std::ios_base::trunc);
-        fout << Physica::version() << '\n';
-    }
     Reporter reporter{};
     RunSpecifiedBenchmarks(&reporter);
     Shutdown();

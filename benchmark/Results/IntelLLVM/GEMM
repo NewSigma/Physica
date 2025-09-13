@@ -1,0 +1,29 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+GEMM/2      0.180 ns        0.180 ns   3878410501
+GEMM/4      0.358 ns        0.358 ns   1953462594
+GEMM/8       2.87 ns         2.87 ns    244145540
+GEMM/16        140 ns          140 ns      5017016
+GEMM/32        841 ns          840 ns       834051
+GEMM/64       6.36 us         6.36 us       110415
+GEMM/256      0.404 ms        0.404 ms         1725
+GEMM/1024       25.4 ms         25.4 ms           28
+GEMM/4096       1681 ms         1680 ms            1
+GEMM base/2      0.181 ns        0.181 ns   3851466012
+GEMM base/4      0.368 ns        0.368 ns   1937572590
+GEMM base/8       2.87 ns         2.87 ns    242057341
+GEMM base/16        169 ns          169 ns      4138164
+GEMM base/32       5082 ns         5081 ns       138104
+GEMM base/64       58.8 us         58.8 us        12155
+GEMM base/256       6.93 ms         6.93 ms          101
+GEMM base/1024       2223 ms         2222 ms            1
+GEMM mkl/2       42.8 ns         42.8 ns     16338772
+GEMM mkl/4       47.4 ns         47.4 ns     14784646
+GEMM mkl/8       53.8 ns         53.8 ns     13039777
+GEMM mkl/16        140 ns          140 ns      5018620
+GEMM mkl/32        839 ns          839 ns       828173
+GEMM mkl/64       6.26 us         6.25 us       113176
+GEMM mkl/256      0.404 ms        0.403 ms         1738
+GEMM mkl/1024       25.4 ms         25.4 ms           28
+GEMM mkl/4096       1655 ms         1655 ms            1

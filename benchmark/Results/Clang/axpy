@@ -1,0 +1,27 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+axpy/2       1.62 ns         1.62 ns    432935244
+axpy/4       1.62 ns         1.62 ns    433020219
+axpy/8       1.61 ns         1.61 ns    430561038
+axpy/16       1.62 ns         1.62 ns    433414247
+axpy/64       4.13 ns         4.13 ns    165306857
+axpy/256       16.5 ns         16.5 ns     42454219
+axpy/1024       56.6 ns         56.6 ns     12481956
+axpy/16384       1665 ns         1665 ns       419997
+axpy base/2       1.61 ns         1.61 ns    434253464
+axpy base/4       1.61 ns         1.61 ns    434018001
+axpy base/8       1.65 ns         1.65 ns    427637898
+axpy base/16       1.64 ns         1.64 ns    433552392
+axpy base/64       4.28 ns         4.28 ns    163052769
+axpy base/256       16.9 ns         16.9 ns     41623924
+axpy base/1024       68.7 ns         68.7 ns     10193022
+axpy base/16384       1708 ns         1708 ns       405540
+axpy mkl/2       5.08 ns         5.08 ns    137535326
+axpy mkl/4       5.42 ns         5.42 ns    129090448
+axpy mkl/8       5.60 ns         5.60 ns    120284250
+axpy mkl/16       5.90 ns         5.90 ns    120717487
+axpy mkl/64       7.03 ns         7.03 ns     98927043
+axpy mkl/256       16.6 ns         16.5 ns     42210632
+axpy mkl/1024       56.5 ns         56.4 ns     12356834
+axpy mkl/16384       1669 ns         1669 ns       413201

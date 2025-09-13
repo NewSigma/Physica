@@ -1,0 +1,9 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+EigenSolver s direct        231 ms          231 ms            3
+EigenSolver sv direct        339 ms          339 ms            2
+EigenSolver s base       2746 ms         2745 ms            1
+EigenSolver sv base       5703 ms         5702 ms            1
+EigenSolver s mkl        232 ms          232 ms            3
+EigenSolver sv mkl        339 ms          339 ms            2

@@ -23,16 +23,18 @@
 using namespace Physica;
 using RandomSource = Random<MT19937>;
 
-template<Scalar T>
-static void innerDot_mkl(benchmark::State& state) {
-    const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
-    const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
-    const auto dot = InnerDot(v1, v2);
-    for (auto _ : state)
-        dot.calc_mkl();
+namespace {
+    template<Scalar T>
+    void innerDot_mkl(benchmark::State& state) {
+        const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
+        const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
+        const auto dot = InnerDot(v1, v2);
+        for (auto _ : state)
+            dot.calc_mkl();
+    }
 }
 
-BENCHMARK(innerDot_mkl<float32>)->Name("innerDot_mkl float32")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_mkl<float64>)->Name("innerDot_mkl float64")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot_mkl cfloat32")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot_mkl cfloat64")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond);

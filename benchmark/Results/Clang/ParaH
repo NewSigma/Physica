@@ -1,0 +1,11 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+ParaH/108      0.351 ms        0.351 ms         2038
+ParaH/256       1.03 ms         1.03 ms          685
+ParaH/500       1.71 ms         1.71 ms          421
+ParaH/864       2.77 ms         2.77 ms          254
+ParaH cuda/108       1.11 ms         1.11 ms          627
+ParaH cuda/256       1.80 ms         1.80 ms          390
+ParaH cuda/500       2.78 ms         2.78 ms          251
+ParaH cuda/864       4.72 ms         4.72 ms          146

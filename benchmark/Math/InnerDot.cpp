@@ -23,22 +23,24 @@
 using namespace Physica;
 using RandomSource = Random<MT19937>;
 
-template<Scalar T>
-static void innerDot(benchmark::State& state) {
-    const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
-    const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
-    const auto dot = InnerDot(v1, v2);
-    for (auto _ : state)
-        benchmark::DoNotOptimize(dot.calc());
-}
+namespace {
+    template<Scalar T>
+    void innerDot(benchmark::State& state) {
+        const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
+        const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
+        const auto dot = InnerDot(v1, v2);
+        for (auto _ : state)
+            benchmark::DoNotOptimize(dot.calc());
+    }
 
-template<Scalar T>
-static void innerDot_base(benchmark::State& state) {
-    const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
-    const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
-    const auto dot = InnerDot(v1, v2);
-    for (auto _ : state)
-        benchmark::DoNotOptimize(dot.calc_base());
+    template<Scalar T>
+    void innerDot_base(benchmark::State& state) {
+        const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
+        const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
+        const auto dot = InnerDot(v1, v2);
+        for (auto _ : state)
+            benchmark::DoNotOptimize(dot.calc_base());
+    }
 }
 
 BENCHMARK(innerDot<float32>)->Name("innerDot float32")->Unit(benchmark::kNanosecond);
@@ -46,7 +48,7 @@ BENCHMARK(innerDot<float64>)->Name("innerDot float64")->Unit(benchmark::kNanosec
 BENCHMARK(innerDot<cfloat32>)->Name("innerDot cfloat32")->Unit(benchmark::kNanosecond);
 BENCHMARK(innerDot<cfloat64>)->Name("innerDot cfloat64")->Unit(benchmark::kNanosecond);
 
-BENCHMARK(innerDot_base<float32>)->Name("innerDot_base float32")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_base<float64>)->Name("innerDot_base float64")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_base<cfloat32>)->Name("innerDot_base cfloat32")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot_base cfloat64")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_base<float32>)->Name("innerDot base float32")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_base<float64>)->Name("innerDot base float64")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_base<cfloat32>)->Name("innerDot base cfloat32")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot base cfloat64")->Unit(benchmark::kNanosecond);

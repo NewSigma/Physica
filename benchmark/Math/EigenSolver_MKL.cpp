@@ -23,16 +23,18 @@
 
 using namespace Physica;
 
-template<bool NeedEigenVec>
-static void kernel(benchmark::State& state) {
-    using T = float64;
-    using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
-    const SquareLattice<1> lattice({10}, 1);
-    const MatrixType data = TransIsingMatrix<T, SpinRepr<1, 10>>(1, 0.01, lattice, SpinRepr<1, 10>(10));
-    EigenSolver<T> solver(data.getRow(), NeedEigenVec);
-    for (auto _ : state)
-        solver.compute_mkl(data);
+namespace {
+    template<bool NeedEigenVec>
+    void kernel(benchmark::State& state) {
+        using T = float64;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        const SquareLattice<1> lattice({10}, 1);
+        const MatrixType data = TransIsingMatrix<T, SpinRepr<1, 10>>(1, 0.01, lattice, SpinRepr<1, 10>(10));
+        EigenSolver<T> solver(data.getRow(), NeedEigenVec);
+        for (auto _ : state)
+            solver.compute_mkl(data);
+    }
 }
 
-BENCHMARK(kernel<false>)->Name("EigenSolver_s_mkl")->Unit(benchmark::kMillisecond);
-BENCHMARK(kernel<true>)->Name("EigenSolver_sv_mkl")->Unit(benchmark::kMillisecond);
+BENCHMARK(kernel<false>)->Name("EigenSolver s mkl")->Unit(benchmark::kMillisecond);
+BENCHMARK(kernel<true>)->Name("EigenSolver sv mkl")->Unit(benchmark::kMillisecond);

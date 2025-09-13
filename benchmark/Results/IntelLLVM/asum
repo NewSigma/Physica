@@ -1,0 +1,27 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+asum/2       4.57 ns         4.57 ns    146429587
+asum/4       5.32 ns         5.32 ns    133744211
+asum/8       5.12 ns         5.12 ns    100000000
+asum/16       6.31 ns         6.31 ns    110304780
+asum/64       5.78 ns         5.78 ns    117245034
+asum/256       11.0 ns         11.0 ns     63065320
+asum/1024       39.7 ns         39.7 ns     17177081
+asum/16384        798 ns          797 ns       884354
+asum base/2       4.40 ns         4.40 ns    158750199
+asum base/4       4.69 ns         4.69 ns    151945743
+asum base/8       4.61 ns         4.61 ns    150366300
+asum base/16       5.99 ns         5.99 ns    118313036
+asum base/64       5.31 ns         5.31 ns    131111635
+asum base/256       12.8 ns         12.8 ns     54218469
+asum base/1024       68.1 ns         68.1 ns     10342090
+asum base/16384       1466 ns         1466 ns       479979
+asum mkl/2       4.60 ns         4.59 ns    152329203
+asum mkl/4       4.57 ns         4.57 ns    152773152
+asum mkl/8       4.95 ns         4.95 ns    142240396
+asum mkl/16       4.46 ns         4.46 ns    157333796
+asum mkl/64       5.53 ns         5.53 ns    126761787
+asum mkl/256       10.8 ns         10.8 ns     64602406
+asum mkl/1024       40.4 ns         40.4 ns     18548496
+asum mkl/16384        787 ns          787 ns       888785

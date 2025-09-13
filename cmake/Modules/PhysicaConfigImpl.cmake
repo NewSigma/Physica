@@ -45,7 +45,7 @@ else()
             add_compile_options(-Xclang -disable-llvm-passes -S -emit-llvm)
             add_link_options(--version)
             add_custom_target(LLVMIR
-                              COMMAND "find .. -name "*.o" -exec mv {} . \; && rename 's/\.cpp.o$/\.ll/' *"
+                              COMMAND "find .. -name \"*.o\" -exec mv {} . \; && rename 's/\.cpp.o$/\.ll/' *"
                               WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/llvm
                               COMMENT "Generating LLVM IR")
         endif()
