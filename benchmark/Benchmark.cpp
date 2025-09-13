@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
+#include <fstream>
 #include <benchmark/benchmark.h>
 #include "Physica/Core/Version.h"
 
@@ -24,6 +24,51 @@ using namespace benchmark;
 
 namespace {
     const char* const Executable = "Benchmark";
+
+    class Reporter : public ConsoleReporter {
+        using Base = ConsoleReporter;
+    private:
+        std::vector<Run> reports;
+    public:
+        Reporter() : ConsoleReporter(OutputOptions::OO_None) {}
+        ~Reporter() = default;
+
+        bool ReportContext(const Context&) override { return true; }
+        void ReportRuns(const std::vector<Run>& group) override {
+            reports.insert(reports.end(), group.begin(), group.end());
+        }
+        void Finalize() override {
+            std::vector<Run> subReports{};
+            std::string header{};
+            for (const auto& r : reports) {
+                const std::string_view name = r.run_name.function_name;
+                const size_t pos = name.find_first_not_of(' ');
+                const size_t n = name.find_first_of(' ', pos) - pos;
+                const auto first_word = name.substr(pos, n);
+                
+                if (first_word == header) {
+                    subReports.push_back(r);
+                    continue;
+                }
+                
+                ReportSubRuns(header, subReports);
+
+                header = std::string(first_word);
+                subReports.push_back(r);
+            }
+            ReportSubRuns(header, subReports);
+        }
+    private:
+        void ReportSubRuns(const std::string& header, std::vector<Run>& subReports) {
+            if (header.empty())
+                return;
+
+            std::ofstream fout(header, std::ios_base::trunc);
+            Base::SetOutputStream(&fout);
+            Base::ReportRuns(subReports);
+            subReports.clear();
+        }
+    };
 }
 
 int main(int argc, char** argv) {
@@ -35,8 +80,12 @@ int main(int argc, char** argv) {
     if (ReportUnrecognizedArguments(argc, argv))
         return 1;
 
-    std::cout << Physica::version() << '\n';
-    RunSpecifiedBenchmarks();
+    {
+        std::ofstream fout("Version", std::ios_base::trunc);
+        fout << Physica::version() << '\n';
+    }
+    Reporter reporter{};
+    RunSpecifiedBenchmarks(&reporter);
     Shutdown();
     return 0;
 }

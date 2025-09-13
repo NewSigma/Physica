@@ -19,6 +19,7 @@
 #pragma once
 
 #include "ThreadGuardFFTW.h"
+#include "../FFT.h"
 
 namespace Physica {
     template<Scalar T>
@@ -76,7 +77,7 @@ namespace Physica {
 
     template<Scalar T>
     FFT<T, 1>::~FFT() {
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
+        std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
         if constexpr (isSinglePrec) {
             fftwf_destroy_plan(forward_plan);
             fftwf_destroy_plan(backward_plan);
@@ -86,7 +87,6 @@ namespace Physica {
             fftw_destroy_plan(backward_plan);
         }
         fftw_free(buffer);
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
     template<Scalar T>
@@ -176,7 +176,7 @@ namespace Physica {
     void FFT<T, 1>::initializePlan() {
         assert(forward_plan == nullptr);
         assert(backward_plan == nullptr);
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
+        std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
         const int flag = static_cast<int>(planFlag);
         if constexpr (isComplex) {
             if constexpr (isSinglePrec) {
@@ -198,7 +198,6 @@ namespace Physica {
                 backward_plan = fftw_plan_dft_c2r_1d(rSpaceSize, buffer, (double*)buffer, flag);
             }
         }
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
     template<Scalar T, size_t Dim>
@@ -257,7 +256,7 @@ namespace Physica {
 
     template<Scalar T, size_t Dim>
     FFT<T, Dim>::~FFT() {
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
+        std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
         if constexpr (isSinglePrec) {
             fftwf_destroy_plan(forward_plan);
             fftwf_destroy_plan(backward_plan);
@@ -267,7 +266,6 @@ namespace Physica {
             fftw_destroy_plan(backward_plan);
         }
         fftw_free(buffer);
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
     template<Scalar T, size_t Dim>
@@ -363,10 +361,9 @@ namespace Physica {
     void FFT<T, Dim>::initializePlan() {
         assert(forward_plan == nullptr);
         assert(backward_plan == nullptr);
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
+        std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
         forward_plan = makeForwardPlan();
         backward_plan = makeBackwardPlan();
-        Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
     template<Scalar T, size_t Dim>

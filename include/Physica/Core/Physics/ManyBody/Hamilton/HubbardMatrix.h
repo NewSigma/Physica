@@ -55,6 +55,7 @@ namespace Physica {
         Tr repelU;
         Repr repr;
         DenseVector<Tc, Dim> phases;
+        FFT1D planProvider;
     public:
         HubbardMatrix() = default;
         HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_);

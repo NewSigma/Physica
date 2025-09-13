@@ -26,7 +26,8 @@ namespace Physica {
             : Lattice(std::move(lattice))
             , hoppingT(hoppingT_)
             , repelU(repelU_)
-            , repr(std::move(repr_)) {
+            , repr(std::move(repr_))
+            , planProvider(NumSite, PlanFlag::Estimate) {
         assert(Lattice::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
         if constexpr (BC == BoundaryCond::TBC)
             phases = Lattice::template calcPhase<Tr>();
@@ -48,7 +49,7 @@ namespace Physica {
                 return flag ? repelElem(psi1) : Tr(0);
             }
 
-            auto fft = FFT1D(NumSite, PlanFlag::Estimate);
+            auto fft = FFT1D::makeEmptyFFT(NumSite);
             {
                 auto& rSpace = fft.getRSpace();
                 auto psi2 = repr[col];
@@ -63,7 +64,7 @@ namespace Physica {
                     psi2 <<= 1;
                 }
             }
-            fft.transform();
+            FFT1D::transform(planProvider, fft);
             const Tr normalizer = sqrt(Tr(periods[row] * periods[col])) / Tr(NumSite);
             return fft.getKSpace()[repr.getReducedK()] * normalizer;
         }
@@ -96,6 +97,7 @@ namespace Physica {
         repelU.swap(obj.repelU);
         repr.swap(obj.repr);
         phases.swap(obj.phases);
+        planProvider.swap(obj.planProvider);
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
