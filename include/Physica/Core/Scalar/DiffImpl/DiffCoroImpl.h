@@ -27,13 +27,12 @@ namespace Physica {
     template<class Base>
     DiffCoro<Base>::DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {
         /**
-         * FIXME: Workaround for [1]
-         * Remove it once we dump to clang 21
-         *
          * Reference:
-         * [1] https://github.com/llvm/llvm-project/issues/123347
+         * [1] GH123347; https://github.com/llvm/llvm-project/issues/123347
          */
+    #if defined(__clang__) && (__clang_major__ <= 20)
         asm volatile("" : : "r,m"(handle) : "memory");
+    #endif
     }
 
     template<class Base>

@@ -26,6 +26,7 @@ Checks: >
   -readability-identifier-naming,
   -readability-implicit-bool-conversion,
   -readability-magic-numbers,
+  -readability-math-missing-parentheses,
   -readability-named-parameter,
   -readability-redundant-access-specifiers,
   -readability-static-accessed-through-instance

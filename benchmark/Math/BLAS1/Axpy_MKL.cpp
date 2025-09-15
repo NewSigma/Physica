@@ -29,7 +29,7 @@ namespace {
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            (x * T(2)).assign_add_mkl(buffer.data());
+            (x * T(2)).assign_add_mkl(buffer);
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();
         }
