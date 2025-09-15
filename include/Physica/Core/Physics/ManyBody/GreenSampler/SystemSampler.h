@@ -53,7 +53,7 @@ namespace Physica {
         /* Operations */
         template<Scalar U>
         void sample(const DQMC<U>& dqmc, Observable type);
-        [[nodiscard]] MatrixND calc() const;
+        [[nodiscard]] MatrixND calc(bool weighted) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -106,7 +106,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calc() const -> MatrixND {
+    auto SystemSampler<T>::calc(bool weighted) const -> MatrixND {
         const int kX = getNumSiteX();
         const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
         MatrixND result(kX, kY);
@@ -115,7 +115,7 @@ namespace Physica {
             for (int y = 0; y < kY; ++y) {
                 for (size_t i = 0; i < observes.getLength(); ++i)
                     buffer[i] = observes[i](x, y);
-                result(x, y) = Base::calc(buffer);
+                result(x, y) = weighted ? Base::calcMeanWeighted(buffer) : buffer.mean();
             }
         }
         return result;

@@ -41,7 +41,7 @@ which installs the required dependencies to build Physica. Refer to [Install.md]
 
 ## Maintainers
 
-Weibo He (NewSigma@163.com)  
+Weibo He (<NewSigma@163.com>)  
 
 ## Contributing
 

@@ -35,7 +35,6 @@ namespace Physica {
     public:
         using ComplexType = Complex<T>;
         using Base::Dim;
-        using typename Base::Tv;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Vec3D;
@@ -46,17 +45,19 @@ namespace Physica {
         constexpr static size_t ErfcTableSize = 4096 + 512 + 2;
         constexpr static double ErfcTableStep = 0.001;
         constexpr static double SumPrec = (ErfcTableSize - 2) * ErfcTableStep; // Referenced from [1], minus 2 to avoid overflow
+    protected:
+        using typename Base::Tv;
     private:
         LatticeMatrix lattice;
         LatticeMatrix repLatt;
         VectorND<T> charges;
         VectorND<T> erfc_table;
-        T volume;
-        T inv_volume;
+        CoDiff<T> volume;
+        CoDiff<T> inv_volume;
         Tv integralLimit;
-        T erfcStep;
+        Tv erfcStep;
         Tv repErfcStep;
-        T repDoubleSquareStep;
+        Tv repDoubleSquareStep;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
     public:
@@ -94,10 +95,10 @@ namespace Physica {
         void setLattice(LatticeMatrix lattice_);
         void setIntegralLimit(Tv integralLimit_);
     protected:
-        [[nodiscard]] T calcSelfE() const;
-        [[nodiscard]] T calcGammaPointE() const;
-        [[nodiscard]] T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] T force_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] CoDiff<T> calcSelfE() const;
+        [[nodiscard]] CoDiff<T> calcGammaPointE() const;
+        [[nodiscard]] CoDiff<T> pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] CoDiff<T> force_functor(size_t i, size_t j, T r, T r2) const;
     private:
         /* Operations */
         void makeTables();
@@ -246,34 +247,32 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    T RSpaceEwald<T, IsSmallCell>::calcSelfE() const {
+    auto RSpaceEwald<T, IsSmallCell>::calcSelfE() const -> CoDiff<T> {
         return square(charges).sum() * (integralLimit / sqrt(Tv(M_PI)));
     }
 
     template<Scalar T, bool IsSmallCell>
-    T RSpaceEwald<T, IsSmallCell>::calcGammaPointE() const {
+    auto RSpaceEwald<T, IsSmallCell>::calcGammaPointE() const -> CoDiff<T> {
         return square(charges.sum()) * Tv(-M_PI) / (Tv(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
      */
     template<Scalar T, bool IsSmallCell>
-    T RSpaceEwald<T, IsSmallCell>::pot_functor(
-            size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
+    auto RSpaceEwald<T, IsSmallCell>::pot_functor(size_t i, size_t j, T r, T) const -> CoDiff<T> {
         const Tv temp = r.value() * repErfcStep + Tv(0.5);
         const int index = double(temp);
-        const T x1 = erfcStep * floor(temp);
+        const Tv x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
         const T interp = Internal::quadraticInterpolate<T>(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
         return charges[i] * charges[j] * interp;
     }
 
     template<Scalar T, bool IsSmallCell>
-    T RSpaceEwald<T, IsSmallCell>::force_functor(
-            size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
+    auto RSpaceEwald<T, IsSmallCell>::force_functor(size_t i, size_t j, T r, T) const -> CoDiff<T> {
         const Tv temp = r.value() * repErfcStep + Tv(0.5);
         const int index = double(temp);
-        const T x1 = erfcStep * floor(temp);
+        const Tv x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
         return -charges[i] * charges[j] * Internal::quadraticInterpolate_diff1<T>(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
     }
@@ -281,12 +280,12 @@ namespace Physica {
     template<Scalar T, bool IsSmallCell>
     void RSpaceEwald<T, IsSmallCell>::makeTables() {
         for (size_t i = 2; i < erfc_table.getLength(); ++i) {
-            const auto x = Tv((i - 1) * ErfcTableStep);
+            const auto x = Tv(ErfcTableStep * double(i - 1));
             erfc_table[i] = erfc(x) / x * integralLimit;
         }
         erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
         erfcStep = Tv(ErfcTableStep) / integralLimit;
-        repErfcStep = reciprocal(erfcStep.value());
+        repErfcStep = reciprocal(erfcStep);
         repDoubleSquareStep = reciprocal(square(erfcStep) * Tv(2));
     }
     /**

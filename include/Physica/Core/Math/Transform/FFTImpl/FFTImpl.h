@@ -76,7 +76,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    FFT<T, 1>::~FFT() {
+    FFT<T, 1>::~FFT() noexcept {
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
         if constexpr (isSinglePrec) {
             fftwf_destroy_plan(forward_plan);
@@ -116,11 +116,11 @@ namespace Physica {
 
     template<Scalar T>
     template<std::integral IndexType>
-    __host__ __device__ constexpr IndexType FFT<T, 1>::rSizeToKSize(IndexType size_data) noexcept {
+    __host__ __device__ constexpr IndexType FFT<T, 1>::rSizeToKSize(IndexType rSize) noexcept {
         if constexpr (isComplex)
-            return size_data;
+            return rSize;
         else
-            return size_data / 2 + 1;
+            return rSize / 2 + 1;
     }
 
     template<Scalar T>
@@ -173,7 +173,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void FFT<T, 1>::initializePlan() {
+    void FFT<T, 1>::initializePlan() noexcept {
         assert(forward_plan == nullptr);
         assert(backward_plan == nullptr);
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
@@ -255,7 +255,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    FFT<T, Dim>::~FFT() {
+    FFT<T, Dim>::~FFT() noexcept {
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
         if constexpr (isSinglePrec) {
             fftwf_destroy_plan(forward_plan);
@@ -358,7 +358,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Dim>
-    void FFT<T, Dim>::initializePlan() {
+    void FFT<T, Dim>::initializePlan() noexcept {
         assert(forward_plan == nullptr);
         assert(backward_plan == nullptr);
         std::unique_lock<std::mutex> locker(Internal::ThreadGuardFFTW::getInstance().globalMutex);
@@ -529,9 +529,8 @@ namespace Physica {
 
     template<Scalar T, size_t Dim>
     bool FFT<T, Dim>::checkSize(const Array<size_t, Dim>& rSpaceSize) {
-        for (size_t elem : rSpaceSize)
-            if (elem > static_cast<size_t>(std::numeric_limits<int>::max()))
-                return false;
-        return true;
+        return std::all_of(rSpaceSize.begin(), rSpaceSize.end(), [](size_t elem) {
+            return elem <= static_cast<size_t>(std::numeric_limits<int>::max());
+        });
     }
 }

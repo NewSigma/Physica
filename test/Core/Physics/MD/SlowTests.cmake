@@ -1,6 +1,6 @@
-#physica_add_test(Ewald ForceModel/Ewald/Ewald.cpp)
+physica_add_test(Ewald ForceModel/Ewald/Ewald.cpp)
 physica_add_test(RandomBatchEwald ForceModel/Ewald/RandomBatchEwald.cpp)
-#physica_add_test(Q_TIP4P ForceModel/Q_TIP4P.cpp)
+physica_add_test(Q_TIP4P ForceModel/Q_TIP4P.cpp)
 physica_add_test(Q_TIP4P_MD ForceModel/Q_TIP4P_MD.cpp)
 physica_add_test(Langevin Thermostat/Langevin.cpp)
 physica_add_test(RPMD_NVE RPMD_NVE.cpp)

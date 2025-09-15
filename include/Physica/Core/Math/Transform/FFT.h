@@ -68,7 +68,7 @@ namespace Physica {
         FFT(const VectorND<ScalarType>& data, PlanFlag planFlag);
         FFT(const FFT& fft);
         FFT(FFT&& fft) noexcept;
-        ~FFT();
+        ~FFT() noexcept;
         /* Operators */
         FFT& operator=(FFT obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -100,7 +100,7 @@ namespace Physica {
     private:
         FFT(size_t rSpaceSize_);
         /* Operations */
-        void initializePlan();
+        void initializePlan() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
         [[nodiscard]] __host__ __device__ ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
@@ -141,7 +141,7 @@ namespace Physica {
         FFT(const Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_);
         FFT(const FFT&);
         FFT(FFT&&) noexcept;
-        ~FFT();
+        ~FFT() noexcept;
         /* Operators */
         FFT& operator=(FFT obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -173,7 +173,7 @@ namespace Physica {
     private:
         FFT(const Array<size_t, Dim>& rSpaceSize_);
         /* Operations */
-        void initializePlan();
+        void initializePlan() noexcept;
         PlanType makeForwardPlan();
         PlanType makeBackwardPlan();
         size_t sumRSpaceSize(size_t from_dim) const;

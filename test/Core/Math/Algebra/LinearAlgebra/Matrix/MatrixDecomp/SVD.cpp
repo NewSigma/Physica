@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/SVD.h"
 
@@ -24,17 +23,19 @@ using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
-template<Matrix T>
-bool doTest(const T& source, double tolerance) {
-    SVD<ScalarType> svd(source);
-    const auto& U = svd.getMatrixU();
-    const auto& V = svd.getMatrixV();
-    const auto& v = svd.getSingulars();
+namespace {
+    template<Matrix T>
+    bool doTest(const T& source, double tolerance) {
+        SVD<ScalarType> svd(source);
+        const auto& U = svd.getMatrixU();
+        const auto& V = svd.getMatrixV();
+        const auto& v = svd.getSingulars();
 
-    T A(source.getRow(), source.getCol(), 0);
-    for (size_t i = 0; i < v.getLength(); ++i)
-        A += U.col(i) * V.col(i).transpose() * v[i];
-    return matrixNear(A, source, tolerance);
+        T A(source.getRow(), source.getCol(), 0);
+        for (size_t i = 0; i < v.getLength(); ++i)
+            A += U.col(i) * V.col(i).transpose() * v[i];
+        return matrixNear(A, source, tolerance);
+    }
 }
 
 int main() {

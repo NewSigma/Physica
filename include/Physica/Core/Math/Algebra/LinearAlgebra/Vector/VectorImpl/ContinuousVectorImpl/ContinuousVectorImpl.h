@@ -39,13 +39,13 @@ namespace Physica {
             if (x.isZero())
                 zeros();
         }
-        return Base::template operator=<T>(x);
+        return Base::operator=(x);
     }
 
     template<class Derived>
     template<ExecutePolicy P>
     Derived& ContinuousVector<Derived>::operator=(const Vector auto& v) {
-        return Base::template operator=<P>(v);
+        return Base::operator=(v);
     }
 
     template<class Derived>

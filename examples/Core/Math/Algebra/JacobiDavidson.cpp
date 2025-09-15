@@ -32,6 +32,6 @@ int main() {
     jd.compute(mat, VectorND<cfloat64>::random_uniform<RandomSource>(mat.getRow()));
     jd.sort();
 
-    std::cout << jd.getEigenvalues().reals().format() << std::endl;
+    std::cout << jd.getEigenvalues().reals().format() << '\n';
     return 0;
 }

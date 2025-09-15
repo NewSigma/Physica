@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"

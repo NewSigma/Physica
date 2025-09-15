@@ -16,20 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/ML/Clustering/AP.h"
 
 using namespace Physica;
 
-bool testCluster(const std::forward_list<size_t>& cluster) {
-    const size_t first = cluster.front();
-    for (auto ite = cluster.cbegin(); ite != cluster.cend(); ++ite) {
-        if (first < 3 && *ite >= 3)
-            return false;
-        if (first >= 3 && *ite < 3)
-            return false;
+namespace {
+    bool testCluster(const std::forward_list<size_t>& cluster) {
+        const size_t first = cluster.front();
+        for (auto ite = cluster.cbegin(); ite != cluster.cend(); ++ite) {
+            if (first < 3 && *ite >= 3)
+                return false;
+            if (first >= 3 && *ite < 3)
+                return false;
+        }
+        return true;
     }
-    return true;
 }
 
 int main() {

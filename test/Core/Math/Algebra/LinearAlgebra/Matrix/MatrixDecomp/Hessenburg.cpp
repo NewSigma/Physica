@@ -16,38 +16,39 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Hessenburg.h"
 #include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
 
-bool isHessenburgMatrix(const Matrix auto& m) {
-    const size_t order = m.getRow();
-    if (m.getRow() != m.getCol())
-        return false;
-    if (order <= 2)
+namespace {
+    bool isHessenburgMatrix(const Matrix auto& m) {
+        const size_t order = m.getRow();
+        if (m.getRow() != m.getCol())
+            return false;
+        if (order <= 2)
+            return true;
+        for (size_t i = 0; i < order - 2; ++i) {
+            for (size_t j = i + 2; j < order; ++j)
+                if (!m(j, i).isZero())
+                    return false;
+        }
         return true;
-    for (size_t i = 0; i < order - 2; ++i) {
-        for (size_t j = i + 2; j < order; ++j)
-            if (!m(j, i).isZero())
-                return false;
     }
-    return true;
-}
 
-template<Matrix M>
-bool hessTest(const M& source, double tolerance) {
-    Hessenburg<typename M::ScalarType> hess(source);
-    M H = hess.getMatrixH();
-    if (!isHessenburgMatrix(H))
-        return false;
-    M Q = hess.getMatrixQ();
-    M A = (Q * H).compute() * Q.hermite();
-    if (!matrixNear(A, source, tolerance))
-        return false;
-    return true;
+    template<Matrix M>
+    bool hessTest(const M& source, double tolerance) {
+        Hessenburg<typename M::ScalarType> hess(source);
+        M H = hess.getMatrixH();
+        if (!isHessenburgMatrix(H))
+            return false;
+        M Q = hess.getMatrixQ();
+        M A = (Q * H).compute() * Q.hermite();
+        if (!matrixNear(A, source, tolerance))
+            return false;
+        return true;
+    }
 }
 
 int main() {

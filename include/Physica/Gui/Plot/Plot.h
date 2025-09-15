@@ -109,7 +109,7 @@ namespace Physica {
 
     QLineSeries& Plot::line(const Vector auto& x, const Vector auto& y) {
         assert(x.getLength() == y.getLength());
-        QLineSeries* series = new QLineSeries();
+        auto* series = new QLineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x.calc(i)), double(y.calc(i)));
         getChart()->addSeries(series);
@@ -126,7 +126,7 @@ namespace Physica {
 
     QSplineSeries& Plot::spline(const Vector auto& x, const Vector auto& y) {
         assert(x.getLength() == y.getLength());
-        QSplineSeries* series = new QSplineSeries();
+        auto* series = new QSplineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x.calc(i)), double(y.calc(i)));
         getChart()->addSeries(series);
@@ -143,7 +143,7 @@ namespace Physica {
 
     QScatterSeries& Plot::scatter(const Vector auto& x, const Vector auto& y) {
         assert(x.getLength() == y.getLength());
-        QScatterSeries* series = new QScatterSeries();
+        auto* series = new QScatterSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x.calc(i)), double(y.calc(i)));
         getChart()->addSeries(series);
@@ -155,7 +155,8 @@ namespace Physica {
     }
 
     QAreaSeries& Plot::hist(const Vector auto& data, size_t binCount, bool density) {
-        double binWidth, min;
+        double binWidth{};
+        double min{};
         const size_t length = data.getLength();
         /* Get binWidth and min */ {
             auto minimum = data.calc(0);
@@ -169,7 +170,7 @@ namespace Physica {
             }
             assert(maximum >= minimum);
             min = double(minimum);
-            binWidth = double(maximum - minimum + (binCount - 1)) / binCount;
+            binWidth = double(maximum - minimum + (binCount - 1)) / double(binCount);
             if (binWidth == 0)
                 binWidth = 1;
         }
@@ -177,11 +178,11 @@ namespace Physica {
         Array<unsigned int> arr(binCount + 1, 0);
         const double binCountPerUnit = 1 / binWidth;
         for (size_t i = 0; i < length; ++i) {
-            const size_t binIndex = size_t((double(data.calc(i)) - min) * binCountPerUnit);
+            const auto binIndex = size_t((double(data.calc(i)) - min) * binCountPerUnit);
             arr[binIndex]++;
         }
 
-        QLineSeries* upper_series = new QLineSeries();
+        auto* upper_series = new QLineSeries();
         const double initial_x = min;
         double current_x = initial_x;
         if (density) {
@@ -201,10 +202,10 @@ namespace Physica {
                 *upper_series << QPointF(current_x, y);
             }
         }
-        QLineSeries* lower_series = new QLineSeries();
+        auto* lower_series = new QLineSeries();
         *lower_series << QPointF(initial_x, 0) << QPointF(current_x, 0);
 
-        QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
+        auto* series = new QAreaSeries(upper_series, lower_series);
 
         getChart()->addSeries(series);
         series->attachAxis(axisX);
@@ -217,14 +218,14 @@ namespace Physica {
     QAreaSeries& Plot::area_boundary(const Vector auto& x, const Vector auto& lower, const Vector auto& upper) {
         assert(x.getLength() == lower.getLength() && x.getLength() == upper.getLength());
 
-        QLineSeries* upper_series = new QLineSeries();
-        QLineSeries* lower_series = new QLineSeries();
+        auto* upper_series = new QLineSeries();
+        auto* lower_series = new QLineSeries();
         for (size_t i = 0; i < x.getLength(); ++i) {
             const double x_i = double(x.calc(i));
             *lower_series << QPointF(x_i, double(lower.calc(i)));
             *upper_series << QPointF(x_i, double(upper.calc(i)));
         }
-        QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
+        auto* series = new QAreaSeries(upper_series, lower_series);
         getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
@@ -249,7 +250,7 @@ namespace Physica {
     template<Vector V>
     QBoxPlotSeries& Plot::boxWhisker(const V& x, const Array<V>& data) {
         assert(x.getLength() == data.getLength());
-        QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
+        auto* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {
             auto* set = setFromVector(data[i]);
             set->setX(double(std::move(x.calc(i))));
@@ -271,7 +272,7 @@ namespace Physica {
 
     QBoxPlotSeries& Plot::errorBar(const Vector auto& x, const Vector auto& mean, const Vector auto& deviation) {
         assert(x.getLength() == mean.getLength() && x.getLength() == deviation.getLength());
-        QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
+        auto* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {
             if (deviation.calc(i).isNegative() || !deviation.calc(i).isFinite())
                 continue;
@@ -302,20 +303,19 @@ namespace Physica {
         result->setValue(QBoxSet::UpperExtreme, double(*buffer.rbegin()));
         result->setValue(QBoxSet::Median, findMedian(buffer, 0, count));
         result->setValue(QBoxSet::LowerQuartile, findMedian(buffer, 0, count / 2));
-        result->setValue(QBoxSet::UpperQuartile, findMedian(buffer, count / 2 + (count % 2), count));
+        result->setValue(QBoxSet::UpperQuartile, findMedian(buffer, (count / 2) + (count % 2), count));
         return result;
     }
 
     double Plot::findMedian(const Vector auto& sorted_v, size_t from, size_t to) {
         size_t count = to - from;
-        if (count % 2) {
-            return double(sorted_v[count / 2 + from]);
-        }
-        else {
-            auto right = sorted_v[count / 2 + from];
-            auto left = sorted_v[count / 2 - 1 + from];
-            return double((right + left) * 0.5);
-        }
+        size_t count2 = count / 2;
+        if (count % 2)
+            return double(sorted_v[count2 + from]);
+
+        auto right = sorted_v[count2 + from];
+        auto left = sorted_v[count2 - 1 + from];
+        return double((right + left) * 0.5);
     }
 
     inline void Plot::setAxisX(QValueAxis* axis) {

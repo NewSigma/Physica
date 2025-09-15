@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include <format>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Parallel/ThreadPool.h"

@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Transform/FFT.h"
 #include "Physica/Core/Math/Transform/DiffFFT.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
@@ -26,55 +25,57 @@ using namespace Physica;
 using RealType = float64;
 using ComplexType = Complex<RealType>;
 
-void test_differentiable() {
-    using ValueType = float64;
-    using ComplexPlainScalar = Complex<ValueType>;
-    using ScalarType = Diff<ValueType, DiffMode::Forward, 1>;
-    using ComplexType = Diff<ComplexPlainScalar, DiffMode::Forward, 1>;
-    const size_t N = 100;
-    constexpr double freq1 = 3;
-    constexpr double freq2 = 4;
+namespace {
+    void test_differentiable() {
+        using ValueType = float64;
+        using ComplexPlainScalar = Complex<ValueType>;
+        using ScalarType = Diff<ValueType, DiffMode::Forward, 1>;
+        using ComplexType = Diff<ComplexPlainScalar, DiffMode::Forward, 1>;
+        const size_t N = 100;
+        constexpr double freq1 = 3;
+        constexpr double freq2 = 4;
 
-    VectorND<ValueType> values(N);
-    VectorND<ValueType> grads(N);
-    VectorND<ScalarType> data(N);
-    for (size_t i = 0; i < N; ++i) {
-        const ValueType x = ValueType(i) * 0.01;
-        values[i] = sin(ValueType(2 * M_PI * freq1) * x) + sin(ValueType(2 * M_PI * freq2) * x) * 2;
-        grads[i] = cos(ValueType(2 * M_PI * freq1) * x) * 2 + cos(ValueType(2 * M_PI * freq2) * x);
-        data[i] = ScalarType(values[i], grads[i]);
-    }
-    VectorND<ComplexType> answer{};
-    /* Make answer */ {
-        FFT<ValueType> fft(N, PlanFlag::Estimate);
-        fft.getRSpace() = values;
-        fft.transform();
-        VectorND<ComplexPlainScalar> k_values = fft.getKSpace();
-        fft.getRSpace() = grads;
-        fft.transform();
-        VectorND<ComplexPlainScalar> k_grads = fft.getKSpace();
-        if (k_values.getLength() != k_grads.getLength()) [[unlikely]]
-            exit(EXIT_FAILURE);
-
-        answer.resize(k_values.getLength());
-        for (size_t i = 0; i < answer.getLength(); ++i)
-            answer[i] = ComplexType(k_values[i], k_grads[i]);
-    }
-    FFT<ScalarType> fft(N, PlanFlag::Estimate);
-    /* Test transform */ {
-        fft.getRSpace() = data;
-        fft.transform();
-        if (!vectorNear(fft.getKSpace(), answer, 1E-15))
-            exit(EXIT_FAILURE);
-    }
-    /* Test invTransform */ {
-        constexpr double precision = 1E-13;
-        fft.invTransform();
-        for (size_t i = 0; i < data.getLength(); ++i) {
-            const bool isNear = scalarNear(ScalarType(data[i]), ScalarType(fft.getRSpace()[i]), precision);
-            const bool isSmall = abs(data[i].value()) < ValueType(precision) && abs(fft.getRSpace()[i].value()) < ValueType(precision);
-            if(!isNear && !isSmall)
+        VectorND<ValueType> values(N);
+        VectorND<ValueType> grads(N);
+        VectorND<ScalarType> data(N);
+        for (size_t i = 0; i < N; ++i) {
+            const ValueType x = ValueType(i) * 0.01;
+            values[i] = sin(ValueType(2 * M_PI * freq1) * x) + sin(ValueType(2 * M_PI * freq2) * x) * 2;
+            grads[i] = cos(ValueType(2 * M_PI * freq1) * x) * 2 + cos(ValueType(2 * M_PI * freq2) * x);
+            data[i] = ScalarType(values[i], grads[i]);
+        }
+        VectorND<ComplexType> answer{};
+        /* Make answer */ {
+            FFT<ValueType> fft(N, PlanFlag::Estimate);
+            fft.getRSpace() = values;
+            fft.transform();
+            VectorND<ComplexPlainScalar> k_values = fft.getKSpace();
+            fft.getRSpace() = grads;
+            fft.transform();
+            VectorND<ComplexPlainScalar> k_grads = fft.getKSpace();
+            if (k_values.getLength() != k_grads.getLength()) [[unlikely]]
                 exit(EXIT_FAILURE);
+
+            answer.resize(k_values.getLength());
+            for (size_t i = 0; i < answer.getLength(); ++i)
+                answer[i] = ComplexType(k_values[i], k_grads[i]);
+        }
+        FFT<ScalarType> fft(N, PlanFlag::Estimate);
+        /* Test transform */ {
+            fft.getRSpace() = data;
+            fft.transform();
+            if (!vectorNear(fft.getKSpace(), answer, 1E-15))
+                exit(EXIT_FAILURE);
+        }
+        /* Test invTransform */ {
+            constexpr double precision = 1E-13;
+            fft.invTransform();
+            for (size_t i = 0; i < data.getLength(); ++i) {
+                const bool isNear = scalarNear(ScalarType(data[i]), ScalarType(fft.getRSpace()[i]), precision);
+                const bool isSmall = abs(data[i].value()) < ValueType(precision) && abs(fft.getRSpace()[i].value()) < ValueType(precision);
+                if(!isNear && !isSmall)
+                    exit(EXIT_FAILURE);
+            }
         }
     }
 }

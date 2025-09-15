@@ -89,7 +89,7 @@ namespace Physica {
 
         H5Group read(const H5Loc& loc, const char* name);
         H5Group write(H5Loc& loc, const char* name) const;
-        void swap(This& __restrict cell) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getDim() { return Dim; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -117,12 +117,12 @@ namespace Physica {
         [[nodiscard]] static LatticeMatrix makeNiggliLattice(const LatticeMatrix& lattice, double precision, unsigned int maxIteration);
         [[nodiscard]] static LatticeMatrix makeNiggliLattice2D(const LatticeMatrix& lattice, unsigned int maxIteration);
         [[nodiscard]] static LatticeMatrix makeRepLattice(const LatticeMatrix& lattice);
-        [[nodiscard]] static T getVolume(const LatticeMatrix& lattice);
+        [[nodiscard]] static CoDiff<T> getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
-        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, Tv cutoff);
-        static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto func);
-        static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto func);
+        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& lattice, Tv cutoff);
+        static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn);
+        static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice);
@@ -174,8 +174,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::VectorType
-    PeriodicCell<T, Dim>::minDistVector(size_t id_from, size_t id_to) const {
+    auto PeriodicCell<T, Dim>::minDistVector(size_t id_from, size_t id_to) const -> VectorType {
         T record_dist = std::numeric_limits<T>::max();
         VectorType result{};
         VectorType delta = pos.row(id_to) - pos.row(id_from);
@@ -236,8 +235,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::VectorType
-    PeriodicCell<T, Dim>::minDistVector(VectorType from, size_t id_to) const {
+    auto PeriodicCell<T, Dim>::minDistVector(VectorType from, size_t id_to) const -> VectorType {
         T record_dist = std::numeric_limits<T>::max();
         VectorType result{};
         VectorType delta;
@@ -469,7 +467,7 @@ namespace Physica {
         T dot2 = T(2) * (lattice.row(0) * lattice.row(2));
         T dot3 = T(2) * (lattice.row(0) * lattice.row(1));
         unsigned int iteration = 0;
-        do {
+        while (true) {
             if (iteration == maxIteration) [[unlikely]]
                 throw BadConvergenceException("[Error]: Cannot reduce to niggli cell within required iterations");
             iteration += 1;
@@ -553,7 +551,8 @@ namespace Physica {
                     continue;
                 }
             }
-        } while (false);
+            break;
+        }
         const T normA = sqrt(squaredNormA);
         const T normB = sqrt(squaredNormB);
         const T normC = sqrt(squaredNormC);
@@ -573,7 +572,7 @@ namespace Physica {
         T squaredNormB = lattice.row(1).squaredNorm();
         T dot = T(2) * (lattice.row(0) * lattice.row(1));
         unsigned int iteration = 0;
-        do {
+        while (true) {
             if (iteration == maxIteration) [[unlikely]]
                 throw BadConvergenceException("[Error]: Cannot reduce to niggli cell within required iterations");
             iteration += 1;
@@ -588,7 +587,8 @@ namespace Physica {
                 dot -= T(2) * squaredNormA * unit(dot);
                 continue;
             }
-        } while (false);
+            break;
+        }
         const T normA = sqrt(squaredNormA);
         const T normB = sqrt(squaredNormB);
         const T gamma = arccos(dot / (T(2) * normA * normB));
@@ -596,24 +596,19 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) {
+    auto PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) -> LatticeMatrix {
         LatticeMatrix result{};
         result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
         result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
         result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
-        const T factor = T(2 * M_PI) / (lattice.row(0) * result.row(0));
+        const auto factor = T(2 * M_PI) / (lattice.row(0) * result.row(0));
         result *= factor;
         return result;
     }
 
     template<Scalar T, unsigned int Dim>
-    T PeriodicCell<T, Dim>::getVolume(const LatticeMatrix& lattice) {
-        if constexpr (Dim == 1)
-            return abs(lattice(0, 0));
-        else if constexpr (Dim == 2)
-            return (lattice.row(0).crossProduct(lattice.row(1))).norm();
-        else
-            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2));
+    auto PeriodicCell<T, Dim>::getVolume(const LatticeMatrix& lattice) -> CoDiff<T> {
+        return abs(lattice.det());
     }
 
     template<Scalar T, unsigned int Dim>

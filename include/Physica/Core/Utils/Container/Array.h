@@ -18,9 +18,7 @@
  */
 #pragma once
 
-#include <cassert>
-#include <cstdlib>
-#include <initializer_list>
+#include <array>
 #include "Physica/CRCoro.h"
 #include "Physica/Core/Utils/Allocator/HostAllocator.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
@@ -48,7 +46,7 @@ namespace Physica {
         constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
 
         // FIXME: We have to use such a verbose alignment since GCC 14.2 complains Align maybe 0.
-        alignas(Align == Dynamic ? alignof(T) : Align) T arr[Length];
+        alignas(Align == Dynamic ? alignof(T) : Align) std::array<T, Length> arr;
         [[no_unique_address]] allocator_type alloc;
     public:
         Array() = default;
@@ -74,13 +72,13 @@ namespace Physica {
 
         using Base::read;
         using Base::write;
-        __host__ __device__ void swap(Array& __restrict array) noexcept;
+        __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Length; }
-        [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr.data(); }
+        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr.data(); }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
         void setLength([[maybe_unused]] size_t size) { assert(size == Length); }

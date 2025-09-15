@@ -32,7 +32,7 @@ namespace Physica {
         assert(length == Length);
         if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             for (size_t i = 0; i < Length; ++i)
-                *(arr + i) = T(std::forward<decltype(args)>(args)...);
+                arr[i] = T(std::forward<decltype(args)>(args)...);
         }
     }
 
@@ -42,7 +42,7 @@ namespace Physica {
         unsigned int i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            *(arr + i) = *ite;
+            arr[i] = *ite;
     }
 
     template<class T, size_t Length, class Allocator>
@@ -61,31 +61,29 @@ namespace Physica {
     template<class T, size_t Length, class Allocator>
     __host__ __device__ void Array<T, Length, Allocator>::zeros() noexcept {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
-        memset(arr, 0, Length * sizeof(T));
+        memset(arr.data(), 0, Length * sizeof(T));
     }
     /**
      * Helper function that communicates with C libraries.
      */
     template<class T, size_t Length, class Allocator>
     __host__ __device__ auto Array<T, Length, Allocator>::read([[maybe_unused]] size_t length, const T* __restrict p) -> This {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: C type must be trivial");
         assert(length == Length && "[Error]: Length do not match");
         assert(p != nullptr);
-        This result(length);
-        for (size_t i = 0; i < Length; ++i)
-            result[i] = p[i];
+        This result(Length);
+        std::memcpy(result.arr.data(), p, Length * sizeof(ElemType));
         return result;
     }
 
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ void Array<T, Length, Allocator>::swap(This& __restrict array) noexcept {
-        assert(this != &array && "[Error]: Self swap is likely a bug");
-        for (size_t i = 0; i < Length; ++i) {
+    __host__ __device__ void Array<T, Length, Allocator>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         #ifdef __CUDA_ARCH__
-            thrust::swap(arr[i], array[i]);
+            thrust::swap(arr, obj.arr);
         #else
-            std::swap(arr[i], array[i]);
+            arr.swap(obj.arr);
         #endif
-        }
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
@@ -238,7 +236,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::doubleSpace() noexcept {
-        increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T));
+        increase((capacity * 2) + ((MinDeltaSpace + sizeof(T) - 1) / sizeof(T)));
     }
 
     template<class T, class Allocator>
@@ -283,14 +281,10 @@ namespace Physica {
      */
     template<class T, class Allocator>
     auto Array<T, Dynamic, Allocator>::read(size_t length, const T* __restrict p) -> This {
+        static_assert(std::is_trivially_copyable<T>::value, "[Error]: C type must be trivial");
         assert(p != nullptr);
         This result(length);
-        if constexpr (!std::is_trivially_copyable<ElemType>::value) {
-            for (size_t i = 0; i < length; ++i)
-                result[i] = p[i];
-        }
-        else
-            memcpy(result.arr, p, length * sizeof(ElemType));
+        memcpy(result.arr, p, length * sizeof(ElemType));
         return result;
     }
 

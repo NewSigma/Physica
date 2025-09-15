@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
 
@@ -26,8 +25,10 @@ using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = VectorND<ScalarType>;
 using RandomSource = Random<MT19937>;
 
-void func(size_t) {
-    printf("Thread ID: %d\n", ThreadPool::getThreadID());
+namespace {
+    void func(size_t) {
+        printf("Thread ID: %d\n", ThreadPool::getThreadID());
+    }
 }
 
 int main() {

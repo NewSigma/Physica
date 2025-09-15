@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
@@ -40,52 +39,54 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-MDType makeSystem() {
-    using MDCellType = MDType::MDCellType;
-    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
-    MDCellType::MassVector massVec(numMolecular, mass);
-    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+namespace {
+    MDType makeSystem() {
+        using MDCellType = MDType::MDCellType;
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
+        MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-    cell.scale(factor);
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
 
-    return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-}
-/**
- * Reference:
- * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
- */
-void testMDRun() {
-    ScalarType mean = 0;
-    ScalarType var = 0;
-    {
-        const ThermoType thermo(temperatureT, thermostatTime);
-        KineticModel kineticModel(temperatureT, numReplica);
-        ForceModel forceModel(numMolecular, pair_cutoff);
-        auto rpmd = makeSystem();
-        rpmd.initMomentum<KineticModel, RandomSource>();
-
-        for (unsigned int i = 0; i < 6; ++i) {
-            ScalarType temp = 0;
-            rpmd.nvt_step_for<RandomSource, GPU>(
-                PhyConst<AU>::secondToTime(2 * 1E-12),
-                thermo,
-                kineticModel,
-                forceModel);
-
-            for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<RandomSource, GPU>(thermo, kineticModel, forceModel);
-                toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
-            }
-            toNextVariance(var, mean, i, temp);
-        }
+        return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     }
-    constexpr double answer = 61.8;
-    const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
-    const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
-    if (abs(energyPerMol - answer) > deviation * 2.0)
-        exit(EXIT_FAILURE);
+    /**
+    * Reference:
+    * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
+    */
+    void testMDRun() {
+        ScalarType mean = 0;
+        ScalarType var = 0;
+        {
+            const ThermoType thermo(temperatureT, thermostatTime);
+            KineticModel kineticModel(temperatureT, numReplica);
+            ForceModel forceModel(numMolecular, pair_cutoff);
+            auto rpmd = makeSystem();
+            rpmd.initMomentum<KineticModel, RandomSource>();
+
+            for (unsigned int i = 0; i < 6; ++i) {
+                ScalarType temp = 0;
+                rpmd.nvt_step_for<RandomSource, GPU>(
+                    PhyConst<AU>::secondToTime(2 * 1E-12),
+                    thermo,
+                    kineticModel,
+                    forceModel);
+
+                for (unsigned int j = 0; j < 100; ++j) {
+                    rpmd.nvt_step<RandomSource, GPU>(thermo, kineticModel, forceModel);
+                    toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
+                }
+                toNextVariance(var, mean, i, temp);
+            }
+        }
+        constexpr double answer = 61.8;
+        const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
+        const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
+        if (abs(energyPerMol - answer) > deviation * 2.0)
+            exit(EXIT_FAILURE);
+    }
 }
 
 int main() {

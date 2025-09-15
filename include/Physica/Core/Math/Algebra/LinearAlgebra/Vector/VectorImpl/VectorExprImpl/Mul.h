@@ -55,6 +55,7 @@ namespace Physica {
 
         [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
 
+        using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
         /* Getters */
         using Base::getLHS;
@@ -167,6 +168,7 @@ namespace Physica {
             return Base::getLHS().template packetPartial<Pack>(index, count) * Base::getRHS().template packetPartial<Pack>(index, count);
         }
 
+        using Base::reverse;
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
     };
 

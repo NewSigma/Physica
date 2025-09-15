@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
@@ -25,21 +24,23 @@ using namespace Physica;
 using RealType = float64;
 using ComplexType = Complex<RealType>;
 
-template<Scalar T>
-void test1() {
-    Vector2D<T> v{T(2), T(1)};
-    auto givens_vector = givens(v, 0, 1);
-    DenseMatrix<T> v_mat = v;
-    applyGivens(givens_vector, v_mat, 0, 1);
-    if (abs(v_mat(1, 0).value()) > RealType(1E-15))
-        exit(EXIT_FAILURE);
-}
+namespace {
+    template<Scalar T>
+    void test1() {
+        Vector2D<T> v{T(2), T(1)};
+        auto givens_vector = givens(v, 0, 1);
+        DenseMatrix<T> v_mat = v;
+        applyGivens(givens_vector, v_mat, 0, 1);
+        if (abs(v_mat(1, 0).value()) > RealType(1E-15))
+            exit(EXIT_FAILURE);
+    }
 
-void emptyTest() {
-    Vector2D<float64> v{1, 0};
-    auto g = givens(v, 0, 1);
-    if ((g[0] != float64(1)) || (g[1] != float64(0)))
-        exit(EXIT_FAILURE);
+    void emptyTest() {
+        Vector2D<float64> v{1, 0};
+        auto g = givens(v, 0, 1);
+        if ((g[0] != float64(1)) || (g[1] != float64(0)))
+            exit(EXIT_FAILURE);
+    }
 }
 
 int main() {

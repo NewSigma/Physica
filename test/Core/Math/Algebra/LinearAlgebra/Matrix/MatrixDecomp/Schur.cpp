@@ -16,60 +16,61 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Schur.h"
 #include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;
 
-bool isUpperQuasiTriangle(const Matrix auto& m) {
-    if (m.getRow() != m.getCol())
-        return false;
-    for (size_t i = 0; i < m.getRow() - 1; ++i) {
-        if (m(i + 1, i).isZero()) {
+namespace {
+    bool isUpperQuasiTriangle(const Matrix auto& m) {
+        if (m.getRow() != m.getCol())
+            return false;
+        for (size_t i = 0; i < m.getRow() - 1; ++i) {
+            if (m(i + 1, i).isZero()) {
+                auto col = m.col(i);
+                if (!col.tail(i + 1).isZeros())
+                    return false;
+            }
+            else if(i < m.getRow() - 2) {
+                auto col1 = m.col(i);
+                auto col2 = m.col(i + 1);
+                if (!col1.tail(i + 2).isZeros() || !col2.tail(i + 2).isZeros())
+                    return false;
+                ++i;
+            }
+        }
+        return true;
+    }
+
+    bool isUpperTriangle(const Matrix auto& m) {
+        if (m.getRow() != m.getCol())
+            return false;
+        for (size_t i = 0; i < m.getRow() - 1; ++i) {
             auto col = m.col(i);
             if (!col.tail(i + 1).isZeros())
                 return false;
         }
-        else if(i < m.getRow() - 2) {
-            auto col1 = m.col(i);
-            auto col2 = m.col(i + 1);
-            if (!col1.tail(i + 2).isZeros() || !col2.tail(i + 2).isZeros())
-                return false;
-            ++i;
-        }
+        return true;
     }
-    return true;
-}
 
-bool isUpperTriangle(const Matrix auto& m) {
-    if (m.getRow() != m.getCol())
-        return false;
-    for (size_t i = 0; i < m.getRow() - 1; ++i) {
-        auto col = m.col(i);
-        if (!col.tail(i + 1).isZeros())
+    template<Matrix M>
+    bool realSchurTest(const M& mat, double precision) {
+        Schur<typename M::ScalarType> schur(mat, true);
+        if (!isUpperQuasiTriangle(schur.getMatrixT()))
             return false;
+        M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
+        return (A - mat).norm1() <= mat.norm1() * precision;
     }
-    return true;
-}
 
-template<Matrix M>
-bool realSchurTest(const M& mat, double precision) {
-    Schur<typename M::ScalarType> schur(mat, true);
-    if (!isUpperQuasiTriangle(schur.getMatrixT()))
-        return false;
-    M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
-    return (A - mat).norm1() <= mat.norm1() * precision;
-}
-
-template<Matrix M>
-bool schurTest(const M& mat, double precision) {
-    static_assert(M::isComplex, "[Error]: Use realSchurTest is prefered");
-    Schur<typename M::ScalarType> schur(mat, true);
-    if (!isUpperTriangle(schur.getMatrixT()))
-        return false;
-    M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
-    return (A - mat).norm1() <= mat.norm1() * precision;
+    template<Matrix M>
+    bool schurTest(const M& mat, double precision) {
+        static_assert(M::isComplex, "[Error]: Use realSchurTest is prefered");
+        Schur<typename M::ScalarType> schur(mat, true);
+        if (!isUpperTriangle(schur.getMatrixT()))
+            return false;
+        M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
+        return (A - mat).norm1() <= mat.norm1() * precision;
+    }
 }
 
 int main() {

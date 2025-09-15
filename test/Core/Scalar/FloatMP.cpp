@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <random>
 #include <iostream>
+#include <random>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Scalar/Real.h"
 
@@ -26,124 +26,128 @@ using T = Real<FloatMP>;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 
-static bool numericalAddTest(unsigned int loop) {
-    double d{};
-    for(unsigned int i = 0; i < loop; ++i) {
-        d = 1 - 1.4 * d * d;
-        double d_a = d * engine();
-        T a(d_a);
-
-        d = 1 - 1.4 * d * d;
-        double d_b = d * engine();
-        T b(d_b);
-
-        double_extract expect{d_a + d_b};
-        double_extract result{double(a + b)};
-        if((expect.sign != static_cast<unsigned int>(result.sign))
-           || (expect.exp != static_cast<unsigned int>(result.exp))
-           || (expect.high != static_cast<unsigned int>(result.high))
-           || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
-            std::cout << "Performing add test " << d_a << " + " << d_b << '\n';
-            std::cout << "Performing add test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                      << "low:\t" << expect.low << '\t' << result.low << '\n'
-                      << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
-                      << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
-                      << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
-            return false;
-        }
-    }
-    return true;
-}
-
-static bool numericalSubTest(unsigned int loop) {
-    double d{};
-    for(unsigned int i = 0; i < loop; ++i) {
-        d = 1 - 1.4 * d * d;
-        double d_a = d * engine();
-        T a(d_a);
-
-        d = 1 - 1.4 * d * d;
-        double d_b = d * engine();
-        T b(d_b);
-
-        double_extract expect{d_a - d_b};
-        double_extract result{double(a - b)};
-        if((expect.sign != static_cast<unsigned int>(result.sign))
-           || (expect.exp != static_cast<unsigned int>(result.exp))
-           || (expect.high != static_cast<unsigned int>(result.high))
-           || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
-            std::cout << "Performing sub test " << d_a << " - " << d_b << '\n';
-            std::cout << "Performing sub test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                      << "low:\t" << expect.low << '\t' << result.low << '\n'
-                      << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
-                      << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
-                      << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
-            return false;
-        }
-    }
-    return true;
-}
-
-static bool numericalMulTest(unsigned int loop) {
-    double d{};
-    for(unsigned int i = 0; i < loop; ++i) {
-        d = 1 - 1.4 * d * d;
-        double d_a = d * engine();
-        T a(d_a);
-
-        d = 1 - 1.4 * d * d;
-        double d_b = d * engine();
-        T b(d_b);
-
-        double_extract expect{d_a * d_b};
-        double_extract result{double(a * b)};
-        if((expect.sign != static_cast<unsigned int>(result.sign))
-           || (expect.exp != static_cast<unsigned int>(result.exp))
-           || (expect.high != static_cast<unsigned int>(result.high))
-           || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
-            std::cout << "Performing mul test " << d_a << " * " << d_b << '\n';
-            std::cout << "Performing mul test " "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                      << "low:\t" << expect.low << '\t' << result.low << '\n'
-                      << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
-                      << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
-                      << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
-            return false;
-        }
-    }
-    return true;
-}
-
-static bool numericalDivTest(unsigned int loop) {
-    double d{};
-    for(unsigned int i = 0; i < loop; ++i) {
-        d = 1 - 1.4 * d * d;
-        double d_a = d * engine();
-        T a(d_a);
-
-        d = 1 - 1.4 * d * d;
-        double d_b = d * engine();
-        while(d_b == 0) {
+namespace {
+    bool numericalAddTest(unsigned int loop) {
+        double d{};
+        for (unsigned int i = 0; i < loop; ++i) {
             d = 1 - 1.4 * d * d;
-            d_b = d * engine();
-        }
-        T b(d_b);
+            double d_a = d * engine();
+            T a(d_a);
 
-        double_extract expect{d_a / d_b};
-        double_extract result{double(a / b)};
-        if((expect.sign != static_cast<unsigned int>(result.sign))
-           || (expect.exp != static_cast<unsigned int>(result.exp))
-           || (expect.high != static_cast<unsigned int>(result.high))
-           || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
-            std::cout << "Performing div test " << d_a << " / " << d_b << '\n';
-            std::cout << "Performing div test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                      << "low:\t" << expect.low << '\t' << result.low << '\n'
-                      << "high:\t" << expect.high << '\t' << result.high << '\n'
-                      << "exp:\t" << expect.exp << '\t' << result.exp << '\n'
-                      << "sign:\t" << expect.sign << '\t' << result.sign << '\n';
-            return false;
+            d = 1 - 1.4 * d * d;
+            double d_b = d * engine();
+            T b(d_b);
+
+            double_extract expect{d_a + d_b};
+            double_extract result{double(a + b)};
+            if ((expect.sign != static_cast<unsigned int>(result.sign))
+                || (expect.exp != static_cast<unsigned int>(result.exp))
+                || (expect.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+                std::cout << "Performing add test " << d_a << " + " << d_b << '\n';
+                std::cout << "Performing add test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
+                          << "low:\t" << expect.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
+                return false;
+            }
         }
+        return true;
     }
-    return true;
+
+    bool numericalSubTest(unsigned int loop) {
+        double d{};
+        for (unsigned int i = 0; i < loop; ++i) {
+            d = 1 - 1.4 * d * d;
+            double d_a = d * engine();
+            T a(d_a);
+
+            d = 1 - 1.4 * d * d;
+            double d_b = d * engine();
+            T b(d_b);
+
+            double_extract expect{d_a - d_b};
+            double_extract result{double(a - b)};
+            if ((expect.sign != static_cast<unsigned int>(result.sign))
+                || (expect.exp != static_cast<unsigned int>(result.exp))
+                || (expect.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+                std::cout << "Performing sub test " << d_a << " - " << d_b << '\n';
+                std::cout << "Performing sub test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
+                          << "low:\t" << expect.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool numericalMulTest(unsigned int loop) {
+        double d{};
+        for (unsigned int i = 0; i < loop; ++i) {
+            d = 1 - 1.4 * d * d;
+            double d_a = d * engine();
+            T a(d_a);
+
+            d = 1 - 1.4 * d * d;
+            double d_b = d * engine();
+            T b(d_b);
+
+            double_extract expect{d_a * d_b};
+            double_extract result{double(a * b)};
+            if ((expect.sign != static_cast<unsigned int>(result.sign))
+                || (expect.exp != static_cast<unsigned int>(result.exp))
+                || (expect.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+                std::cout << "Performing mul test " << d_a << " * " << d_b << '\n';
+                std::cout << "Performing mul test "
+                             "--Failed ("
+                          << (i + 1) << '/' << loop << ")\n"
+                          << "low:\t" << expect.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool numericalDivTest(unsigned int loop) {
+        double d{};
+        for (unsigned int i = 0; i < loop; ++i) {
+            d = 1 - 1.4 * d * d;
+            double d_a = d * engine();
+            T a(d_a);
+
+            d = 1 - 1.4 * d * d;
+            double d_b = d * engine();
+            while (d_b == 0) {
+                d = 1 - 1.4 * d * d;
+                d_b = d * engine();
+            }
+            T b(d_b);
+
+            double_extract expect{d_a / d_b};
+            double_extract result{double(a / b)};
+            if ((expect.sign != static_cast<unsigned int>(result.sign))
+                || (expect.exp != static_cast<unsigned int>(result.exp))
+                || (expect.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+                std::cout << "Performing div test " << d_a << " / " << d_b << '\n';
+                std::cout << "Performing div test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
+                          << "low:\t" << expect.low << '\t' << result.low << '\n'
+                          << "high:\t" << expect.high << '\t' << result.high << '\n'
+                          << "exp:\t" << expect.exp << '\t' << result.exp << '\n'
+                          << "sign:\t" << expect.sign << '\t' << result.sign << '\n';
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 int main() {

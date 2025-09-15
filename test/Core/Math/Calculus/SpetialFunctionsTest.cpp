@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,224 +16,225 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica;
 
-void testLnGamma() {
-    constexpr static int count = 2;
-    constexpr static double value[count]{13.7, 0.3};
-    constexpr static float floatResult[count]{21.77465, 1.095798};
-    constexpr static double doubleResult[count]{21.77464517303463, 1.09579799481807552};
-    
-    for (int i = 0; i < count; ++i) {
-        using T = float32;
-        T s(value[i]);
-        auto temp = lnGamma(s);
-        if (!scalarNear(temp, T(floatResult[i]), 1E-6))
-            exit(EXIT_FAILURE);
+namespace {
+    void testLnGamma() {
+        constexpr static int count = 2;
+        constexpr static double value[count]{13.7, 0.3};
+        constexpr static float floatResult[count]{21.77465, 1.095798};
+        constexpr static double doubleResult[count]{21.77464517303463, 1.09579799481807552};
+        
+        for (int i = 0; i < count; ++i) {
+            using T = float32;
+            T s(value[i]);
+            auto temp = lnGamma(s);
+            if (!scalarNear(temp, T(floatResult[i]), 1E-6))
+                exit(EXIT_FAILURE);
+        }
+
+        for (int i = 0; i < count; ++i) {
+            using T = float64;
+            T s(value[i]);
+            auto temp = lnGamma(s);
+            if (!scalarNear(temp, T(doubleResult[i]), 1E-15))
+                exit(EXIT_FAILURE);
+        }
     }
 
-    for (int i = 0; i < count; ++i) {
+    void testGammaPQ() {
         using T = float64;
-        T s(value[i]);
-        auto temp = lnGamma(s);
-        if (!scalarNear(temp, T(doubleResult[i]), 1E-15))
-            exit(EXIT_FAILURE);
+        constexpr static int count = 2;
+        constexpr static double a[count]{13.7, 0.3};
+        constexpr static double x[count]{2, 8};
+        constexpr static double result[count]{5.309424005280372E-8, 0.99997576072630326};
+
+        for (int i = 0; i < count; ++i) {
+            auto temp = gammaP(T(a[i]), T(x[i]));
+            if (!scalarNear(temp, T(result[i]), 1E-14))
+                exit(EXIT_FAILURE);
+            temp = gammaQ(T(a[i]), T(x[i]));
+            if (!scalarNear(temp, T(1 - result[i]), 1E-11))
+                exit(EXIT_FAILURE);
+        }
     }
-}
 
-void testGammaPQ() {
-    using T = float64;
-    constexpr static int count = 2;
-    constexpr static double a[count]{13.7, 0.3};
-    constexpr static double x[count]{2, 8};
-    constexpr static double result[count]{5.309424005280372E-8, 0.99997576072630326};
+    void testBiGamma() {
+        using T = float64;
+        constexpr static int count = 2;
+        constexpr static double x[count]{13.7, 0.3};
+        constexpr static double step[count]{1E-1, 1E-1};
+        constexpr static double result[count]{2.5804557238996526, -3.5025242222001330};
 
-    for (int i = 0; i < count; ++i) {
-        auto temp = gammaP(T(a[i]), T(x[i]));
-        if (!scalarNear(temp, T(result[i]), 1E-14))
-            exit(EXIT_FAILURE);
-        temp = gammaQ(T(a[i]), T(x[i]));
-        if (!scalarNear(temp, T(1 - result[i]), 1E-11))
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < count; ++i) {
+            auto temp = bigamma(T(x[i]), T(step[i]));
+            if (!scalarNear(temp, T(result[i]), 1E-13))
+                exit(EXIT_FAILURE);
+        }
     }
-}
 
-void testBiGamma() {
-    using T = float64;
-    constexpr static int count = 2;
-    constexpr static double x[count]{13.7, 0.3};
-    constexpr static double step[count]{1E-1, 1E-1};
-    constexpr static double result[count]{2.5804557238996526, -3.5025242222001330};
+    void testBesselJ() {
+        using T = float64;
+        constexpr static int count = 2;
+        constexpr static int n[count]{2, 5};
+        constexpr static double x[count]{3, 3};
+        constexpr static double result[count]{0.48609126058589107691, 0.043028434877047583925};
 
-    for (int i = 0; i < count; ++i) {
-        auto temp = bigamma(T(x[i]), T(step[i]));
-        if (!scalarNear(temp, T(result[i]), 1E-13))
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < count; ++i) {
+            auto temp = besselJn(n[i], T(x[i]));
+            if (!scalarNear(temp, T(result[i]), 1E-8))
+                exit(EXIT_FAILURE);
+        }
     }
-}
 
-void testBesselJ() {
-    using T = float64;
-    constexpr static int count = 2;
-    constexpr static int n[count]{2, 5};
-    constexpr static double x[count]{3, 3};
-    constexpr static double result[count]{0.48609126058589107691, 0.043028434877047583925};
+    void testBesselY() {
+        using T = float64;
+        constexpr static int count = 2;
+        constexpr static int n[count]{2, 5};
+        constexpr static double x[count]{3, 3};
+        constexpr static double result[count]{-0.16040039348492372968, -1.9059459538286737322};
 
-    for (int i = 0; i < count; ++i) {
-        auto temp = besselJn(n[i], T(x[i]));
-        if (!scalarNear(temp, T(result[i]), 1E-8))
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < count; ++i) {
+            auto temp = besselYn(n[i], T(x[i]));
+            if (!scalarNear(temp, T(result[i]), 1E-7))
+                exit(EXIT_FAILURE);
+        }
     }
-}
 
-void testBesselY() {
-    using T = float64;
-    constexpr static int count = 2;
-    constexpr static int n[count]{2, 5};
-    constexpr static double x[count]{3, 3};
-    constexpr static double result[count]{-0.16040039348492372968, -1.9059459538286737322};
+    void testBesselJn_Yn_dJn_dYn() {
+        using T = float64;
+        constexpr static int count = 5;
+        constexpr static double n[count]{2, 2, 5, 4, 0.5};
+        constexpr static double x[count]{1, 3, 3, 2000, 1};
+        constexpr static double result_Jn[count]{0.11490348493190048047, 0.48609126058589107691, 0.043028434877047583925, 0.0070328187752780498324, 0.67139670714180309042};
+        constexpr static double result_dJn[count]{0.21024361588113255502, 0.014998118135342407654, 0.060320125796199570454, -0.016398371103788126336, 0.095400514447474534312};
+        constexpr static double result_Yn[count]{-1.6506826068162543911, -0.16040039348492372968, -1.9059459538286737322, 0.016396645173086209425, -0.43109886801837607952};
+        constexpr static double result_dYn[count]{2.5201523923322200656, 0.43160802044841579822, 2.2598937509893167140, 0.0070287057519738781036, 0.88694614115099113018};
 
-    for (int i = 0; i < count; ++i) {
-        auto temp = besselYn(n[i], T(x[i]));
-        if (!scalarNear(temp, T(result[i]), 1E-7))
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < count; ++i) {
+            T Jn, dJn, Yn, dYn;
+            besselJn_Yn_dJn_dYn(T(n[i]), T(x[i]), Jn, Yn, dJn, dYn);
+            if (!scalarNear(Jn, T(result_Jn[i]), 1E-9))
+                exit(EXIT_FAILURE);
+            if (!scalarNear(dJn, T(result_dJn[i]), 1E-10))
+                exit(EXIT_FAILURE);
+            if (!scalarNear(Yn, T(result_Yn[i]), 1E-10))
+                exit(EXIT_FAILURE);
+            if (!scalarNear(dYn, T(result_dYn[i]), 1E-9))
+                exit(EXIT_FAILURE);
+        }
     }
-}
 
-void testBesselJn_Yn_dJn_dYn() {
-    using T = float64;
-    constexpr static int count = 5;
-    constexpr static double n[count]{2, 2, 5, 4, 0.5};
-    constexpr static double x[count]{1, 3, 3, 2000, 1};
-    constexpr static double result_Jn[count]{0.11490348493190048047, 0.48609126058589107691, 0.043028434877047583925, 0.0070328187752780498324, 0.67139670714180309042};
-    constexpr static double result_dJn[count]{0.21024361588113255502, 0.014998118135342407654, 0.060320125796199570454, -0.016398371103788126336, 0.095400514447474534312};
-    constexpr static double result_Yn[count]{-1.6506826068162543911, -0.16040039348492372968, -1.9059459538286737322, 0.016396645173086209425, -0.43109886801837607952};
-    constexpr static double result_dYn[count]{2.5201523923322200656, 0.43160802044841579822, 2.2598937509893167140, 0.0070287057519738781036, 0.88694614115099113018};
+    void testLegendreP() {
+        using T = float64;
+        constexpr static int count = 2;
+        constexpr static unsigned l[count]{5, 4};
+        constexpr static unsigned m[count]{2, 3};
+        constexpr static double theta[count]{0.37, 0.28};
+        constexpr static double answer1[count]{0.30514461613750000, 0.1078912000000};
+        constexpr static double answer2[count]{-9.880037322750000, -26.0112384000000};
 
-    for (int i = 0; i < count; ++i) {
-        T Jn, dJn, Yn, dYn;
-        besselJn_Yn_dJn_dYn(T(n[i]), T(x[i]), Jn, Yn, dJn, dYn);
-        if (!scalarNear(Jn, T(result_Jn[i]), 1E-9))
-            exit(EXIT_FAILURE);
-        if (!scalarNear(dJn, T(result_dJn[i]), 1E-10))
-            exit(EXIT_FAILURE);
-        if (!scalarNear(Yn, T(result_Yn[i]), 1E-10))
-            exit(EXIT_FAILURE);
-        if (!scalarNear(dYn, T(result_dYn[i]), 1E-9))
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < count; ++i) {
+            auto result1 = legendreP(l[i], T(theta[i]));
+            auto result2 = legendreP(l[i], m[i], T(theta[i]));
+            if (!scalarNear(result1, T(answer1[i]), 1E-15))
+                exit(EXIT_FAILURE);
+            if (!scalarNear(result2, T(answer2[i]), 1E-15))
+                exit(EXIT_FAILURE);
+        }
     }
-}
 
-void testLegendreP() {
-    using T = float64;
-    constexpr static int count = 2;
-    constexpr static unsigned l[count]{5, 4};
-    constexpr static unsigned m[count]{2, 3};
-    constexpr static double theta[count]{0.37, 0.28};
-    constexpr static double answer1[count]{0.30514461613750000, 0.1078912000000};
-    constexpr static double answer2[count]{-9.880037322750000, -26.0112384000000};
+    void testSphericalHarmomicY() {
+        using T = float64;
+        constexpr static int count = 2;
+        constexpr static unsigned l[count]{5, 4};
+        constexpr static unsigned m[count]{2, 3};
+        constexpr static double theta[count]{0.37, 0.28};
+        constexpr static double phi[count]{0.05, 0.74};
+        constexpr static double result_real[count]{0.33052482360605048497, 0.015348915260127907403};
+        constexpr static double result_imag[count]{0.03316309979261445896, -0.020223918621792591451};
 
-    for (int i = 0; i < count; ++i) {
-        auto result1 = legendreP(l[i], T(theta[i]));
-        auto result2 = legendreP(l[i], m[i], T(theta[i]));
-        if (!scalarNear(result1, T(answer1[i]), 1E-15))
-            exit(EXIT_FAILURE);
-        if (!scalarNear(result2, T(answer2[i]), 1E-15))
-            exit(EXIT_FAILURE);
+        for (int i = 0; i < count; ++i) {
+            auto result = sphericalHarmomicY(l[i], m[i], T(theta[i]), T(phi[i]));
+            if (!scalarNear(result, Complex<T>(T(result_real[i]), T(result_imag[i])), 1E-14))
+                exit(EXIT_FAILURE);
+        }
     }
-}
+    /**
+    * Reference:
+    * [1] https://github.com/google/spherical-harmonics.git
+    */
+    void testHamonicRotator() {
+        constexpr double epsilon = 1E-9;
+        using T = float64;
+        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>;
+        using Matrix3D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 3, 3>;
+        const Matrix3D rotation({0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
+        HamonicRotator<MatrixType> rotator(rotation);
 
-void testSphericalHarmomicY() {
-    using T = float64;
-    constexpr static int count = 2;
-    constexpr static unsigned l[count]{5, 4};
-    constexpr static unsigned m[count]{2, 3};
-    constexpr static double theta[count]{0.37, 0.28};
-    constexpr static double phi[count]{0.05, 0.74};
-    constexpr static double result_real[count]{0.33052482360605048497, 0.015348915260127907403};
-    constexpr static double result_imag[count]{0.03316309979261445896, -0.020223918621792591451};
-
-    for (int i = 0; i < count; ++i) {
-        auto result = sphericalHarmomicY(l[i], m[i], T(theta[i]), T(phi[i]));
-        if (!scalarNear(result, Complex<T>(T(result_real[i]), T(result_imag[i])), 1E-14))
-            exit(EXIT_FAILURE);
+        double alpha = M_PI / 4.0;
+        /* order 1 */ {
+            const Matrix3D answer({cos(alpha), 0, sin(alpha),
+                                0, 1, 0,
+                                -sin(alpha), 0, cos(alpha)});
+            if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
+                exit(EXIT_FAILURE);
+        }
+        /* order 2 */ {
+            using Matrix5D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 5, 5>;
+            rotator.nextHamonicRotation();
+            const Matrix5D answer({cos(2 * alpha), 0, 0, 0, sin(2 * alpha),
+                                0, cos(alpha), 0, sin(alpha), 0,
+                                0, 0, 1, 0, 0,
+                                0, -sin(alpha), 0, cos(alpha), 0,
+                                -sin(2 * alpha), 0, 0, 0, cos(2 * alpha)});
+            if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
+                exit(EXIT_FAILURE);
+        }
+        /* order 3 */ {
+            using Matrix7D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 7, 7>;
+            rotator.nextHamonicRotation();
+            const Matrix7D answer({cos(3 * alpha), 0, 0, 0, 0, 0, sin(3 * alpha),
+                                0, cos(2 * alpha), 0, 0, 0, sin(2 * alpha), 0,
+                                0, 0, cos(alpha), 0, sin(alpha), 0, 0,
+                                0, 0, 0, 1, 0, 0, 0,
+                                0, 0, -sin(alpha), 0, cos(alpha), 0, 0,
+                                0, -sin(2 * alpha), 0, 0, 0, cos(2 * alpha), 0,
+                                -sin(3 * alpha), 0, 0, 0, 0, 0, cos(3 * alpha)});
+            if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
+                exit(EXIT_FAILURE);
+        }
     }
-}
-/**
- * Reference:
- * [1] https://github.com/google/spherical-harmonics.git
- */
-void testHamonicRotator() {
-    constexpr double epsilon = 1E-9;
-    using T = float64;
-    using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>;
-    using Matrix3D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 3, 3>;
-    const Matrix3D rotation({0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
-    HamonicRotator<MatrixType> rotator(rotation);
 
-    double alpha = M_PI / 4.0;
-    /* order 1 */ {
-        const Matrix3D answer({cos(alpha), 0, sin(alpha),
-                               0, 1, 0,
-                              -sin(alpha), 0, cos(alpha)});
-        if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
-            exit(EXIT_FAILURE);
+    void testHermiteH() {
+        using T = float64;
+        constexpr static size_t count = 3;
+        constexpr static unsigned int n[count]{2, 5, 3};
+        constexpr static double x[count]{3, 3, 18};
+        constexpr static double result[count]{34, 3816, 46440};
+
+        for (size_t i = 0; i < count; ++i) {
+            auto temp = hermiteH(n[i], T(x[i]));
+            if (!scalarNear(temp, T(result[i]), 1E-14))
+                exit(EXIT_FAILURE);
+        }
     }
-    /* order 2 */ {
-        using Matrix5D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 5, 5>;
-        rotator.nextHamonicRotation();
-        const Matrix5D answer({cos(2 * alpha), 0, 0, 0, sin(2 * alpha),
-                               0, cos(alpha), 0, sin(alpha), 0,
-                               0, 0, 1, 0, 0,
-                               0, -sin(alpha), 0, cos(alpha), 0,
-                              -sin(2 * alpha), 0, 0, 0, cos(2 * alpha)});
-        if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
-            exit(EXIT_FAILURE);
-    }
-    /* order 3 */ {
-        using Matrix7D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 7, 7>;
-        rotator.nextHamonicRotation();
-        const Matrix7D answer({cos(3 * alpha), 0, 0, 0, 0, 0, sin(3 * alpha),
-                               0, cos(2 * alpha), 0, 0, 0, sin(2 * alpha), 0,
-                               0, 0, cos(alpha), 0, sin(alpha), 0, 0,
-                               0, 0, 0, 1, 0, 0, 0,
-                               0, 0, -sin(alpha), 0, cos(alpha), 0, 0,
-                               0, -sin(2 * alpha), 0, 0, 0, cos(2 * alpha), 0,
-                              -sin(3 * alpha), 0, 0, 0, 0, 0, cos(3 * alpha)});
-        if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
-            exit(EXIT_FAILURE);
-    }
-}
 
-void testHermiteH() {
-    using T = float64;
-    constexpr static size_t count = 3;
-    constexpr static unsigned int n[count]{2, 5, 3};
-    constexpr static double x[count]{3, 3, 18};
-    constexpr static double result[count]{34, 3816, 46440};
+    void testIncompBeta() {
+        using T = float64;
+        constexpr static size_t count = 3;
+        constexpr static unsigned int n[count]{5, 10, 12};
+        constexpr static double x[count]{1.2, 0.2, 2.1};
+        constexpr static double result[count]{0.7161089432938979, 0.1545108086196544, 0.94245506126504887};
 
-    for (size_t i = 0; i < count; ++i) {
-        auto temp = hermiteH(n[i], T(x[i]));
-        if (!scalarNear(temp, T(result[i]), 1E-14))
-            exit(EXIT_FAILURE);
-    }
-}
-
-void testIncompBeta() {
-    using T = float64;
-    constexpr static size_t count = 3;
-    constexpr static unsigned int n[count]{5, 10, 12};
-    constexpr static double x[count]{1.2, 0.2, 2.1};
-    constexpr static double result[count]{0.7161089432938979, 0.1545108086196544, 0.94245506126504887};
-
-    for (size_t i = 0; i < count; ++i) {
-        auto temp = studentT(n[i], T(x[i]));
-        if (!scalarNear(temp, T(result[i]), 1E-13))
-            exit(EXIT_FAILURE);
+        for (size_t i = 0; i < count; ++i) {
+            auto temp = studentT(n[i], T(x[i]));
+            if (!scalarNear(temp, T(result[i]), 1E-13))
+                exit(EXIT_FAILURE);
+        }
     }
 }
 

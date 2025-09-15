@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
 
@@ -29,38 +28,40 @@ constexpr double latticeSize = 20;
 constexpr size_t numMolecular = 20;
 constexpr double unitMassM = 1;
 
-MDCellType makeSystem() {
-    MDCellType::LatticeMatrix lattice{latticeSize};
+namespace {
+    MDCellType makeSystem() {
+        MDCellType::LatticeMatrix lattice{latticeSize};
 
-    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
-    posVec *= ScalarType(latticeSize);
-    std::sort(posVec.begin(), posVec.end());
-    MDCellType::PositionMatrix pos(numMolecular, 1);
-    pos.col(0) = posVec;
+        auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
+        posVec *= ScalarType(latticeSize);
+        std::sort(posVec.begin(), posVec.end());
+        MDCellType::PositionMatrix pos(numMolecular, 1);
+        pos.col(0) = posVec;
 
-    MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
-    }
-    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
-}
-
-template<bool IsPeriodBoundary>
-void forceConstTest() {
-    using ForceModel = TodaModel<ScalarType, IsPeriodBoundary>;
-    ForceModel model(1.0);
-    const auto cell = makeSystem();
-    const auto fc = model.forceConst(cell);
-    if constexpr (IsPeriodBoundary) {
-        for (size_t i = 0; i < fc.getRow(); ++i)
-            if (!scalarNear(fc.row(i).sum(), ScalarType(0), 1E-15))
-                exit(EXIT_FAILURE);
+        MDCellType::MassVector massVec(numMolecular);
+        for (size_t i = 0; i < numMolecular; ++i) {
+            massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
+        }
+        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
     }
 
-    for (size_t i = 0; i < fc.getRow(); ++i) {
-        for (size_t j = 0; j < fc.getCol(); ++j) {
-            if (!scalarNear(fc(i, j), model.forceConst(cell, i, j), 1E-15))
-                exit(EXIT_FAILURE);
+    template<bool IsPeriodBoundary>
+    void forceConstTest() {
+        using ForceModel = TodaModel<ScalarType, IsPeriodBoundary>;
+        ForceModel model(1.0);
+        const auto cell = makeSystem();
+        const auto fc = model.forceConst(cell);
+        if constexpr (IsPeriodBoundary) {
+            for (size_t i = 0; i < fc.getRow(); ++i)
+                if (!scalarNear(fc.row(i).sum(), ScalarType(0), 1E-15))
+                    exit(EXIT_FAILURE);
+        }
+
+        for (size_t i = 0; i < fc.getRow(); ++i) {
+            for (size_t j = 0; j < fc.getCol(); ++j) {
+                if (!scalarNear(fc(i, j), model.forceConst(cell, i, j), 1E-15))
+                    exit(EXIT_FAILURE);
+            }
         }
     }
 }

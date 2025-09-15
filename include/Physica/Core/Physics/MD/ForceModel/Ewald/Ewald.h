@@ -47,8 +47,8 @@ namespace Physica {
     public:
         using typename Base::BornChargeArray;
     private:
-        T selfE;
-        T gammaPointE;
+        CoDiff<T> selfE;
+        CoDiff<T> gammaPointE;
         [[no_unique_address]] HostChargeVector hostCharges;
     public:
         Ewald() = default;
@@ -98,9 +98,9 @@ namespace Physica {
 
     template<Scalar T, class REwaldType>
     Ewald<T, REwaldType>::Ewald(LatticeMatrix lattice, VectorND<T> charges)
-            : Base(std::move(lattice), std::move(charges)) {
-        selfE = Base::calcSelfE();
-        gammaPointE = Base::calcGammaPointE();
+            : Base(std::move(lattice), std::move(charges))
+            , selfE(Base::calcSelfE())
+            , gammaPointE(Base::calcGammaPointE()) {
         if constexpr (IsDeviceREwald)
             hostCharges = std::move(charges);
     }

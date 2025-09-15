@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Discrete/Combination.h"
 
 using namespace Physica;
 
-int64_t combination1(int m, int n) {
-    if (n == 0 || m == n)
-        return 1;
-    return combination1(m - 1, n) + combination1(m - 1, n - 1);
+namespace {
+    int64_t combination1(int m, int n) {
+        if (n == 0 || m == n)
+            return 1;
+        return combination1(m - 1, n) + combination1(m - 1, n - 1);
+    }
 }
 
 int main() {
