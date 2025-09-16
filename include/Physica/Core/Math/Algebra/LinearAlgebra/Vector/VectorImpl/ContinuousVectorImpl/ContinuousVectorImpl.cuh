@@ -52,13 +52,17 @@ namespace Physica {
     template<Vector V>
     void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<V>& obj) const {
         static_assert(std::same_as<ScalarType, typename V::ScalarType>, "[Error]: Incompatible ScalarType");
-        obj.resize(Base::getLength());
-        if constexpr (Diffable<T>) {
+        const size_t length = Base::getLength();
+        const size_t size = length * sizeof(T);
+        obj.resize(length);
+        if constexpr (V::SizeAtCompile != Dynamic)
+            memcpy(obj.data(), data(), size);
+        else if constexpr (Diffable<T>) {
             Base::getDerived().values().toHostAsync(obj.getDerived().values());
             Base::getDerived().grads().toHostAsync(obj.getDerived().grads());
         }
         else
-            check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
+            check(cudaMemcpyAsync(obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
     }
 
     template<class Derived>

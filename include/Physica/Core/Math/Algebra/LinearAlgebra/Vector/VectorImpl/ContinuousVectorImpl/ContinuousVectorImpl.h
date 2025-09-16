@@ -38,6 +38,38 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<ExecutePolicy P>
+    void ContinuousVector<Derived>::assign(Vector auto& v) const noexcept {
+        using V = std::remove_cvref<decltype(v)>::type;
+        constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
+        constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
+        constexpr bool Beneficial = Length == Dynamic || (Length * sizeof(T) > Critical);
+        constexpr bool isContinuous = is_continuous<V>::value;
+        constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
+        constexpr bool Copyable = std::is_trivially_copyable<T>::value;
+        if constexpr (Beneficial && isContinuous && SameScalar && Copyable) {
+            if (Base::getLength() * sizeof(T) > Critical) {
+                if constexpr (isDiffable) {
+                    Base::getDerived().values().template assign<P>(v.values());
+                    Base::getDerived().grads().template assign<P>(v.grads());
+                }
+                else
+                    memcpy(v.data(), data(), Base::getLength() * sizeof(T));
+            }
+            else
+                assign_base<P>(v);
+        }
+        else
+            assign_base<P>(v);
+    }
+
+    template<class Derived>
+    template<ExecutePolicy P>
+    void ContinuousVector<Derived>::assign_base(Vector auto& v) const noexcept {
+        Base::template assign<P>(v);
+    }
+
+    template<class Derived>
     template<Packet Pack>
     Pack ContinuousVector<Derived>::packet(size_t index) const {
         assert(index + Pack::size() <= Base::getLength());

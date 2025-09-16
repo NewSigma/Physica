@@ -22,6 +22,26 @@
 
 namespace Physica {
     template<class Derived>
+    void ContinuousVector<Derived>::assign_mkl(Vector auto& v) const noexcept {
+        Base::assign_check_mkl(v);
+        const size_t n = Base::getLength();
+        const void* x = data();
+        void* y = v.data();
+        if constexpr (T::isComplex) {
+            if constexpr (T::Prec == Float32)
+                cblas_ccopy_64(n, x, 1, y, 1);
+            else
+                cblas_zcopy_64(n, x, 1, y, 1);
+        }
+        else {
+            if constexpr (T::Prec == Float32)
+                cblas_scopy_64(n, static_cast<const float*>(x), 1, static_cast<float*>(y), 1);
+            else
+                cblas_dcopy_64(n, static_cast<const double*>(x), 1, static_cast<double*>(y), 1);
+        }
+    }
+
+    template<class Derived>
     auto ContinuousVector<Derived>::norm1_mkl() const noexcept -> Tr {
         const size_t n = Base::getLength();
         const void* x = data();
