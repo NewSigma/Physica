@@ -22,17 +22,6 @@
 
 namespace Physica {
     template<class Derived>
-    auto device_obj<ContinuousVector<Derived>>::operator=(const This& obj) -> This& {
-        Base::operator=(obj);
-        return *this;
-    }
-    
-    template<class Derived>
-    auto device_obj<ContinuousVector<Derived>>::operator=(This&& obj) -> This& {
-        return *this = obj;
-    }
-
-    template<class Derived>
     void device_obj<ContinuousVector<Derived>>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");

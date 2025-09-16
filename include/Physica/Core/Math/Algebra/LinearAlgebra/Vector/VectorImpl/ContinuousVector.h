@@ -53,8 +53,8 @@ namespace Physica {
     public:
         ~ContinuousVector() = default;
         /* Operators */
-        Derived& operator=(const This& v);
-        Derived& operator=(This&& v) noexcept;
+        This& operator=(const This& v) = delete;
+        This& operator=(This&& v) noexcept = delete;
         Derived& operator=(const Scalar auto& x);
         template<ExecutePolicy P = Sequential>
         Derived& operator=(const Vector auto& v);

@@ -54,9 +54,9 @@ namespace Physica {
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
-        using Base::operator=;
-        This& operator=(const This& obj);
+        This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) noexcept = delete;
+        using Base::operator=;
         /* Operations */
         [[nodiscard]] auto toNumpy() const;
 

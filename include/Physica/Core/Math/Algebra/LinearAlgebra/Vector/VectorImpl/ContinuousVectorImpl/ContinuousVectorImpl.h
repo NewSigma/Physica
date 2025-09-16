@@ -23,17 +23,6 @@
 
 namespace Physica {
     template<class Derived>
-    Derived& ContinuousVector<Derived>::operator=(const This& v) {
-        Base::operator=(v);
-        return Base::getDerived();
-    }
-
-    template<class Derived>
-    Derived& ContinuousVector<Derived>::operator=(This&& v) noexcept {
-        return *this = std::move(v);
-    }
-
-    template<class Derived>
     Derived& ContinuousVector<Derived>::operator=(const Scalar auto& x) {
         if constexpr (SizeAtCompile == Dynamic) {
             if (x.isZero())

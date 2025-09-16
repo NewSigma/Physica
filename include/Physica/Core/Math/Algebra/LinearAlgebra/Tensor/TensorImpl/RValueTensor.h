@@ -46,6 +46,10 @@ namespace Physica {
         using T = ScalarType;
         using IndexArray = Array<size_t, Dim>;
     public:
+        ~RValueTensor() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Tensor auto& x) const;
 
@@ -77,6 +81,10 @@ namespace Physica {
 
         [[nodiscard]] static size_t toSize(const IndexArray& shape);
     protected:
+        RValueTensor() = default;
+        RValueTensor(const This&) = default;
+        RValueTensor(This&&) noexcept = default;
+
         template<int GradOrder>
         auto grads_impl() const noexcept;
     };

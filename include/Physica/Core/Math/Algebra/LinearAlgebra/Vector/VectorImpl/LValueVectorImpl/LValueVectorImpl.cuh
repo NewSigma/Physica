@@ -22,17 +22,6 @@
 
 namespace Physica {
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::operator=(const This& obj) -> This& {
-        obj.assign(*this);
-        return *this;
-    }
-
-    template<class Derived>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::operator=(This&& obj) -> This& {
-        return *this = obj;
-    }
-
-    template<class Derived>
     __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) requires(CUDA<decltype(v)>) {
         using V = std::remove_cvref_t<decltype(v)>;
         if constexpr (std::is_same<Derived, V>::value)

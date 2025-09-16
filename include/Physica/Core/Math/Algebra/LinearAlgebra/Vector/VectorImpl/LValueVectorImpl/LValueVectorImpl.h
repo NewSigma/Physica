@@ -22,16 +22,6 @@
 
 namespace Physica {
     template<class Derived>
-    LValueVector<Derived>& LValueVector<Derived>::operator=(const This& v) {
-        return operator=<Derived>(v);
-    }
-
-    template<class Derived>
-    LValueVector<Derived>& LValueVector<Derived>::operator=(This&& v) {
-        return operator=<Derived>(v);
-    }
-
-    template<class Derived>
     template<ExecutePolicy P>
     Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
         if constexpr (std::is_same<const Derived&, decltype(v)>::value)

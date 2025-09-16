@@ -75,6 +75,8 @@ namespace Physica {
     public:
         ~RValueMatrix() = default;
         /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         template<Vector V>
         [[nodiscard]] auto operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>);
         template<Vector V>
@@ -184,9 +186,6 @@ namespace Physica {
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;
         RValueMatrix(This&&) noexcept = default;
-        /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
         /* Operations */
         template<int GradOrder>
         auto grads_impl() const noexcept;

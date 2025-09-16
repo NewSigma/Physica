@@ -110,6 +110,9 @@ namespace Physica {
         using ValuesRtnTy = std::conditional<isDiffable, ValueVector<Derived>, Derived&>::type;
     public:
         ~RValueVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& v) const noexcept;
@@ -195,11 +198,8 @@ namespace Physica {
         constexpr static void assign_check_mkl(const V& target) noexcept;
     protected:
         RValueVector() = default;
-        RValueVector(const RValueVector&) = default;
-        RValueVector(RValueVector&&) noexcept = default;
-        /* Operators */
-        RValueVector& operator=(const RValueVector&) = default;
-        RValueVector& operator=(RValueVector&&) noexcept = default;
+        RValueVector(const This&) = default;
+        RValueVector(This&&) noexcept = default;
         /* Operations */
         template<int GradOrder>
         auto grads_impl() const noexcept;

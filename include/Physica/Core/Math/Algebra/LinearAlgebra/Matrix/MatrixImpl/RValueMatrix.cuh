@@ -54,6 +54,9 @@ namespace Physica {
         using ValuesRtnTy = std::conditional<isDiffable, device_obj<ValueMatrix<Derived>>, device_obj<Derived>&>::type;
     public:
         ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
         __host__ __device__ void assign(M& target) const requires(CUDA<M>);
@@ -129,9 +132,6 @@ namespace Physica {
         device_obj() = default;
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
-        /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
     };
 }
 

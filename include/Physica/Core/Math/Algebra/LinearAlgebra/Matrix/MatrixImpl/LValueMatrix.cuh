@@ -44,7 +44,7 @@ namespace Physica {
     public:
         /* Operators */
         This& operator=(const This& m) = delete;
-        This& operator=(This&& m) = delete;
+        This& operator=(This&& m) noexcept = delete;
 
         template<Scalar T>
         __host__ __device__ device_obj<Derived>& operator=(const T& x);

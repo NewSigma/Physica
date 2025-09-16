@@ -34,10 +34,16 @@ namespace Physica {
     public:
         SparseMatrix();
         SparseMatrix(size_t row, size_t col);
+        SparseMatrix(const This&) = default;
+        SparseMatrix(This&&) noexcept = default;
+        ~SparseMatrix() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void insert(T x, size_t row, size_t col);
         void resize(size_t row, size_t col);
         void clear();
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] size_t getRow() const noexcept;
@@ -54,15 +60,12 @@ namespace Physica {
     SparseMatrix<T, Option>::SparseMatrix()
             : Base()
             , elements()
-            , minorIndexes()
-            , majorStarts()
             , maxMinor(0) {}
 
     template<Scalar T, int Option>
     SparseMatrix<T, Option>::SparseMatrix(size_t row, size_t col)
             : Base()
             , elements()
-            , minorIndexes()
             , majorStarts(MatrixOption::selectMajor<This>(row, col) + 1, 0)
             , maxMinor(MatrixOption::selectMinor<This>(row, col)) {}
 
@@ -111,6 +114,15 @@ namespace Physica {
         minorIndexes.resize(0);
         for (auto& i : majorStarts)
             i = 0;
+    }
+
+    template<Scalar T, int Option>
+    void SparseMatrix<T, Option>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        elements.swap(obj.elements);
+        minorIndexes.swap(obj.minorIndexes);
+        majorStarts.swap(obj.majorStarts);
+        std::swap(maxMinor, obj.maxMinor);
     }
 
     template<Scalar T, int Option>

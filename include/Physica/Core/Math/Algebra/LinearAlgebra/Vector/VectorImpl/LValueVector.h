@@ -48,8 +48,8 @@ namespace Physica {
     public:
         ~LValueVector() = default;
         /* Operators */
-        This& operator=(const This& v);
-        This& operator=(This&& v);
+        This& operator=(const This& v) = delete;
+        This& operator=(This&& v) = delete;
 
         Derived& operator=(const Scalar auto& x);
         void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }

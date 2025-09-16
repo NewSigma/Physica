@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../LValueVector.cuh"
+
 namespace Physica {
     template<Vector T, size_t Length>
     class device_obj<LVectorBlock<T, Length>> : public device_obj<LValueVector<LVectorBlock<T, Length>>> {
@@ -37,17 +39,17 @@ namespace Physica {
     public:
         __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_, size_t to_);
         __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_);
-        LVectorBlock(const This& block) = default;
-        LVectorBlock(This&&) noexcept = default;
-        ~LVectorBlock() = default;
+        device_obj(const This& block) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
         using Base::operator=;
-        This& operator=(const This& v) { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
-        This& operator=(This&& v) noexcept { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
+        This& operator=(const This& v);
+        This& operator=(This&& v) noexcept;
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return to - from; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     };
@@ -63,7 +65,19 @@ namespace Physica {
     template<Vector T, size_t Length>
     __host__ __device__ device_obj<LVectorBlock<T, Length>>::device_obj(
             device_obj<LValueVector<T>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
-    
+
+    template<Vector T, size_t Length>
+    auto device_obj<LVectorBlock<T, Length>>::operator=(const This& v) -> This& {
+        Base::operator=(static_cast<const RValueVector<This>&>(v));
+        return *this;
+    }
+
+    template<Vector T, size_t Length>
+    auto device_obj<LVectorBlock<T, Length>>::operator=(This&& v) noexcept -> This& {
+        Base::operator=(static_cast<const RValueVector<This>&>(v));
+        return *this;
+    }
+
     template<Vector T, size_t Length>
     __host__ __device__ size_t device_obj<LVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)

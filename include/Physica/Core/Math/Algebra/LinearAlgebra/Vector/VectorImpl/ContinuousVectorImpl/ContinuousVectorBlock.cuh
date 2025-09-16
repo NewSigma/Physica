@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../ContinuousVector.cuh"
+
 namespace Physica {
     template<Vector T, size_t Length>
     class device_obj<ContinuousVectorBlock<T, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<T, Length>>> {
@@ -71,29 +73,25 @@ namespace Physica {
             device_obj<ContinuousVector<T>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
     template<Vector T, size_t Length>
-    device_obj<ContinuousVectorBlock<T, Length>>&
-    device_obj<ContinuousVectorBlock<T, Length>>::operator=(const device_obj<ContinuousVectorBlock<T, Length>>& obj) {
-        Base::operator=(obj);
-        return *this;
-    }
-    
-    template<Vector T, size_t Length>
-    device_obj<ContinuousVectorBlock<T, Length>>&
-    device_obj<ContinuousVectorBlock<T, Length>>::operator=(device_obj<ContinuousVectorBlock<T, Length>>&& obj) noexcept {
-        Base::operator=(std::move(obj));
+    auto device_obj<ContinuousVectorBlock<T, Length>>::operator=(const This& obj) -> This& {
+        Base::template operator=<This>(obj);
         return *this;
     }
 
     template<Vector T, size_t Length>
-    __device__ device_obj<ContinuousVectorBlock<T, Length>>::RefTy
-    device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) {
+    auto device_obj<ContinuousVectorBlock<T, Length>>::operator=(This&& obj) noexcept -> This& {
+        Base::template operator=<This>(std::move(obj));
+        return *this;
+    }
+
+    template<Vector T, size_t Length>
+    __device__ auto device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) -> RefTy {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }
 
     template<Vector T, size_t Length>
-    __device__ device_obj<ContinuousVectorBlock<T, Length>>::ConstRefTy
-    device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) const {
+    __device__ auto device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) const -> ConstRefTy {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }

@@ -23,16 +23,6 @@
 
 namespace Physica {
     template<class Derived>
-    auto LValueMatrix<Derived>::operator=(const This& m) -> This& {
-        return operator=<Derived>(m);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::operator=(This&& m) -> This& {
-        return operator=<Derived>(m);
-    }
-
-    template<class Derived>
     Derived& LValueMatrix<Derived>::operator=(const Matrix auto& m) {
         if constexpr (std::is_same<const Derived&, decltype(m)>::value)
             assert(this != &m && "[Error]: Self assign is likely a bug");

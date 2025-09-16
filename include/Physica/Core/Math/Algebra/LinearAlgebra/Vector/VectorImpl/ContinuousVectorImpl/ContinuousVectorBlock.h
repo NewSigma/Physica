@@ -76,13 +76,13 @@ namespace Physica {
 
     template<Vector T, size_t Length>
     auto ContinuousVectorBlock<T, Length>::operator=(const This& v) -> This& {
-        v.assign(*this);
+        Base::operator=(v);
         return *this;
     }
-    
+
     template<Vector T, size_t Length>
     auto ContinuousVectorBlock<T, Length>::operator=(This&& v) noexcept -> This& {
-        v.assign(*this);
+        Base::operator=(v);
         return *this;
     }
 

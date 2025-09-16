@@ -52,8 +52,8 @@ namespace Physica {
     public:
         ~LValueMatrix() = default;
         /* Operators */
-        This& operator=(const This& m);
-        This& operator=(This&& m);
+        This& operator=(const This& m) = delete;
+        This& operator=(This&& m) noexcept = delete;
 
         template<Scalar T>
         Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);

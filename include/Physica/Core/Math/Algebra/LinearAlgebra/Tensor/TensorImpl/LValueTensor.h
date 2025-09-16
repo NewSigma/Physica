@@ -39,7 +39,8 @@ namespace Physica {
     public:
         ~LValueTensor() = default;
         /* Operators */
-        Derived& operator=(const Tensor auto& other);
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
 
         template<Scalar U>
         Derived& operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
@@ -48,6 +49,7 @@ namespace Physica {
         void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
         void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
 
+        Derived& operator=(const Tensor auto& other);
         void operator+=(const Tensor auto& x);
         void operator-=(const Tensor auto& x);
 

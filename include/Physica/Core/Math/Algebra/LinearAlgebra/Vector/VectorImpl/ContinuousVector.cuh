@@ -45,10 +45,10 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operators */
+        This& operator=(const This& obj) = delete;
+        This& operator=(This&& obj) = delete;
         using Base::operator=;
         using Base::operator+=;
-        This& operator=(const This& obj);
-        This& operator=(This&& obj);
         /* Operations */
         template<Packet Pack>
         [[nodiscard]] __device__ Pack packet(size_t index) const;
@@ -92,3 +92,4 @@ namespace Physica {
 }
 
 #include "ContinuousVectorImpl/ContinuousVectorImpl.cuh"
+#include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"

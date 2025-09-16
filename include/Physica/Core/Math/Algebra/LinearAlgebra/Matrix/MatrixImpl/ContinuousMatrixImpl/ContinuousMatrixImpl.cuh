@@ -22,18 +22,6 @@
 
 namespace Physica {
     template<class Derived>
-    auto device_obj<ContinuousMatrix<Derived>>::operator=(const This& obj) -> This& {
-        Base::operator=(obj);
-        return *this;
-    }
-
-    template<class Derived>
-    auto device_obj<ContinuousMatrix<Derived>>::operator=(This&& obj) noexcept -> This& {
-        Base::operator=(std::forward<Base>(obj));
-        return *this;
-    }
-
-    template<class Derived>
     __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::row(size_t r) noexcept {
         const bool useSpecialization = device_obj<ContinuousMatrix<Derived>>::ColAtCompile == 1;
         if constexpr (useSpecialization)

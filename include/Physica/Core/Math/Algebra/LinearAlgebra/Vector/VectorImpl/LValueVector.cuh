@@ -40,8 +40,8 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operators */
-        __host__ __device__ This& operator=(const This& obj);
-        __host__ __device__ This& operator=(This&& obj);
+        This& operator=(const This& obj) = delete;
+        This& operator=(This&& obj) = delete;
         __host__ __device__ device_obj<Derived>& operator=(const Vector auto& v) requires(CUDA<decltype(v)>);
 
         template<Scalar T>
@@ -98,4 +98,4 @@ namespace Physica {
 }
 
 #include "LValueVectorImpl/LValueVectorImpl.cuh"
-#include "LValueVectorImpl/LVectorBlock.h"
+#include "LValueVectorImpl/LVectorBlock.cuh"

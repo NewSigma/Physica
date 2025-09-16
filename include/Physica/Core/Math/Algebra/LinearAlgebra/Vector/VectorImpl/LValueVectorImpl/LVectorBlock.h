@@ -46,8 +46,8 @@ namespace Physica {
         ~LVectorBlock() = default;
         /* Operators */
         using Base::operator=;
-        LVectorBlock& operator=(const This& v) { return Base::operator=(v); }
-        LVectorBlock& operator=(This&& v) noexcept { return Base::operator=(v); }
+        This& operator=(const This& v);
+        This& operator=(This&& v) noexcept;
         /* Operations */
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
@@ -66,6 +66,18 @@ namespace Physica {
 
     template<Vector T, size_t Length>
     LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
+
+    template<Vector T, size_t Length>
+    auto LVectorBlock<T, Length>::operator=(const This& v) -> This& {
+        Base::operator=(v);
+        return *this;
+    }
+
+    template<Vector T, size_t Length>
+    auto LVectorBlock<T, Length>::operator=(This&& v) noexcept -> This& {
+        Base::operator=(v);
+        return *this;
+    }
 
     template<Vector T, size_t Length>
     size_t LVectorBlock<T, Length>::getLength() const noexcept {

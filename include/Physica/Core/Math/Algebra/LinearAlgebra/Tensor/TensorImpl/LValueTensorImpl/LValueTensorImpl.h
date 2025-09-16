@@ -22,6 +22,13 @@
 
 namespace Physica {
     template<class Derived>
+    template<Scalar U>
+    Derived& LValueTensor<Derived>::operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+        flatten() = x;
+        return Base::getDerived();
+    }
+
+    template<class Derived>
     Derived& LValueTensor<Derived>::operator=(const Tensor auto& other) {
         if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(other)>>::value)
             assert(this != &other && "[Error]: Self assign is likely a bug");
@@ -29,13 +36,6 @@ namespace Physica {
         x.resize(other.getShape());
         other.assign(x);
         return x;
-    }
-
-    template<class Derived>
-    template<Scalar U>
-    Derived& LValueTensor<Derived>::operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
-        flatten() = x;
-        return Base::getDerived();
     }
 
     template<class Derived>

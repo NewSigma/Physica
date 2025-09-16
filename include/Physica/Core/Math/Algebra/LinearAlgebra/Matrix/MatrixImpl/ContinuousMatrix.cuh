@@ -47,8 +47,8 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operators */
-        This& operator=(const This& obj);
-        This& operator=(This&& obj) noexcept;
+        This& operator=(const This& obj) = delete;
+        This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
         /* Operations */
         [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
