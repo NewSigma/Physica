@@ -1,4 +1,4 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-HubbardMatrix1D       5.83 ms         5.83 ms          119
+HubbardMatrix1D       5.83 ms         5.83 ms          120

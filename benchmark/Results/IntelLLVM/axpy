@@ -1,27 +1,27 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-axpy/2       1.64 ns         1.64 ns    426047357
-axpy/4       1.72 ns         1.72 ns    409920351
-axpy/8       1.75 ns         1.75 ns    401804195
-axpy/16       1.83 ns         1.82 ns    381493878
-axpy/64       3.85 ns         3.85 ns    179335538
-axpy/256       16.5 ns         16.5 ns     42444821
-axpy/1024       57.2 ns         57.2 ns     12326829
-axpy/16384       1692 ns         1692 ns       411779
-axpy base/2       7.21 ns         7.21 ns     95857193
-axpy base/4       1.63 ns         1.63 ns    429449181
-axpy base/8       1.62 ns         1.62 ns    433438374
-axpy base/16       1.63 ns         1.63 ns    425700674
-axpy base/64       4.42 ns         4.42 ns    157459939
-axpy base/256       14.9 ns         14.9 ns     47011817
-axpy base/1024       59.4 ns         59.3 ns     11928781
-axpy base/16384       1668 ns         1668 ns       419446
-axpy mkl/2       4.79 ns         4.79 ns    145604641
-axpy mkl/4       5.17 ns         5.17 ns    135950827
-axpy mkl/8       5.45 ns         5.45 ns    132034023
-axpy mkl/16       5.54 ns         5.54 ns    126442739
-axpy mkl/64       6.82 ns         6.82 ns    103343516
-axpy mkl/256       16.3 ns         16.3 ns     43032757
-axpy mkl/1024       56.6 ns         56.6 ns     12384352
-axpy mkl/16384       1667 ns         1667 ns       419524
+axpy/2       1.64 ns         1.64 ns    428681993
+axpy/4       1.69 ns         1.69 ns    411791904
+axpy/8       1.74 ns         1.74 ns    400131316
+axpy/16       1.92 ns         1.92 ns    363774857
+axpy/64       3.97 ns         3.97 ns    159584374
+axpy/256       16.7 ns         16.7 ns     41709740
+axpy/1024       57.2 ns         57.2 ns     12311364
+axpy/16384       1688 ns         1688 ns       413968
+axpy base/2       7.30 ns         7.30 ns     95861228
+axpy base/4       1.63 ns         1.63 ns    431800242
+axpy base/8       1.64 ns         1.64 ns    426261332
+axpy base/16       1.65 ns         1.65 ns    418406068
+axpy base/64       4.50 ns         4.50 ns    155984613
+axpy base/256       15.0 ns         15.0 ns     46562854
+axpy base/1024       59.5 ns         59.5 ns     11781879
+axpy base/16384       1697 ns         1697 ns       411000
+axpy mkl/2       4.88 ns         4.88 ns    143629966
+axpy mkl/4       5.20 ns         5.20 ns    133006735
+axpy mkl/8       5.51 ns         5.51 ns    127462092
+axpy mkl/16       5.66 ns         5.65 ns    125928600
+axpy mkl/64       6.99 ns         6.99 ns    101190511
+axpy mkl/256       16.5 ns         16.5 ns     42310679
+axpy mkl/1024       57.2 ns         57.2 ns     12264438
+axpy mkl/16384       1691 ns         1691 ns       417460

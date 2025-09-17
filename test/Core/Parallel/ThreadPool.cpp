@@ -25,12 +25,6 @@ using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = VectorND<ScalarType>;
 using RandomSource = Random<MT19937>;
 
-namespace {
-    void func(size_t) {
-        printf("Thread ID: %d\n", ThreadPool::getThreadID());
-    }
-}
-
 int main() {
     const MatrixType A = MatrixType::random_uniform<RandomSource>(4);
     ThreadPool::numThreadRequired = 4;

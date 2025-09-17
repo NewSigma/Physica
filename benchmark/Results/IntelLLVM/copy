@@ -1,0 +1,21 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+copy/16       1.47 ns         1.47 ns    477920562
+copy/256       8.18 ns         8.17 ns     85757764
+copy/1024       31.9 ns         31.9 ns     21928214
+copy/2048       66.1 ns         66.1 ns     10605097
+copy/4096        430 ns          430 ns      1616719
+copy/65536       6817 ns         6815 ns       103221
+copy base/16       1.37 ns         1.37 ns    508317117
+copy base/256       8.06 ns         8.05 ns     76585833
+copy base/1024       31.6 ns         31.6 ns     22148739
+copy base/2048       62.9 ns         62.9 ns     11089945
+copy base/4096        446 ns          446 ns      1577202
+copy base/65536       7242 ns         7241 ns        97305
+copy mkl/16       5.78 ns         5.78 ns    122088944
+copy mkl/256       12.2 ns         12.2 ns     58234268
+copy mkl/1024       36.1 ns         36.1 ns     19217699
+copy mkl/2048        103 ns          103 ns      6909648
+copy mkl/4096        452 ns          452 ns      1547200
+copy mkl/65536       7200 ns         7198 ns        95066

@@ -1,27 +1,27 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-asum/2      0.821 ns        0.820 ns    851425238
-asum/4      0.930 ns        0.930 ns    749303303
-asum/8       1.09 ns         1.09 ns    648298704
-asum/16       1.44 ns         1.44 ns    479291262
-asum/64       2.60 ns         2.60 ns    267657545
-asum/256       11.1 ns         11.1 ns     62993002
-asum/1024       42.3 ns         42.3 ns     17149597
-asum/16384        785 ns          785 ns       901511
-asum base/2      0.732 ns        0.732 ns    951373480
-asum base/4      0.868 ns        0.868 ns    805876859
-asum base/8      0.996 ns        0.996 ns    703678253
-asum base/16       1.29 ns         1.29 ns    541567771
-asum base/64       2.59 ns         2.59 ns    266584331
-asum base/256       12.7 ns         12.7 ns     55743613
-asum base/1024       67.4 ns         67.4 ns     10397859
-asum base/16384       1469 ns         1469 ns       474738
-asum mkl/2       4.70 ns         4.70 ns    147428649
-asum mkl/4       4.59 ns         4.59 ns    153977907
-asum mkl/8       4.97 ns         4.97 ns    140433409
-asum mkl/16       4.50 ns         4.49 ns    157517013
-asum mkl/64       5.52 ns         5.52 ns    129346514
-asum mkl/256       10.9 ns         10.9 ns     64578803
-asum mkl/1024       39.6 ns         39.5 ns     18441674
-asum mkl/16384        801 ns          801 ns       871804
+asum/2      0.820 ns        0.820 ns    860278030
+asum/4      0.932 ns        0.932 ns    749888556
+asum/8       1.10 ns         1.10 ns    644945124
+asum/16       1.46 ns         1.46 ns    481304235
+asum/64       2.61 ns         2.61 ns    268008690
+asum/256       11.2 ns         11.2 ns     62707251
+asum/1024       42.4 ns         42.4 ns     16677386
+asum/16384        801 ns          801 ns       872605
+asum base/2      0.733 ns        0.733 ns    955514533
+asum base/4      0.877 ns        0.877 ns    805477431
+asum base/8       1.01 ns         1.01 ns    694122862
+asum base/16       1.32 ns         1.32 ns    544765239
+asum base/64       2.63 ns         2.63 ns    265103539
+asum base/256       12.8 ns         12.8 ns     52076188
+asum base/1024       67.4 ns         67.4 ns     10385431
+asum base/16384       1478 ns         1478 ns       473715
+asum mkl/2       5.09 ns         5.09 ns    138630577
+asum mkl/4       5.16 ns         5.16 ns    137660360
+asum mkl/8       5.60 ns         5.60 ns    123834205
+asum mkl/16       4.82 ns         4.82 ns    144614986
+asum mkl/64       5.95 ns         5.95 ns    115688249
+asum mkl/256       11.0 ns         11.0 ns     63362994
+asum mkl/1024       39.0 ns         39.0 ns     16431486
+asum mkl/16384        795 ns          795 ns       878283

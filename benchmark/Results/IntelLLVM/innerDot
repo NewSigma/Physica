@@ -1,15 +1,15 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-innerDot float32       31.0 ns         31.0 ns     28718866
-innerDot float64       45.8 ns         45.8 ns     15306610
-innerDot cfloat32       90.5 ns         90.5 ns      7722952
-innerDot cfloat64        182 ns          182 ns      3854168
-innerDot base float32       93.2 ns         93.2 ns     10918015
-innerDot base float64        136 ns          136 ns      5148427
-innerDot base cfloat32        102 ns          102 ns      6836977
-innerDot base cfloat64        208 ns          208 ns      3363478
-innerDot mkl float32       24.3 ns         24.3 ns     28819576
-innerDot mkl float64       45.5 ns         45.5 ns     15375087
-innerDot mkl cfloat32       90.4 ns         90.4 ns      7749870
-innerDot mkl cfloat64        182 ns          182 ns      3842698
+innerDot float32       24.8 ns         24.8 ns     28272227
+innerDot float64       46.8 ns         46.8 ns     15016308
+innerDot cfloat32       92.0 ns         92.0 ns      7569644
+innerDot cfloat64        183 ns          183 ns      3824176
+innerDot base float32       58.8 ns         58.8 ns     12093619
+innerDot base float64        136 ns          136 ns      5120592
+innerDot base cfloat32        106 ns          106 ns      6597264
+innerDot base cfloat64        207 ns          207 ns      3381938
+innerDot mkl float32       24.4 ns         24.4 ns     28797274
+innerDot mkl float64       46.6 ns         46.6 ns     14984315
+innerDot mkl cfloat32       92.1 ns         92.1 ns      7622874
+innerDot mkl cfloat64        184 ns          184 ns      3830589

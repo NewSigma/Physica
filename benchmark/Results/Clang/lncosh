@@ -1,7 +1,7 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-lncosh float32        908 ns          908 ns       729381
-lncosh float64       2081 ns         2081 ns       336687
-lncosh cfloat32       8049 ns         8048 ns        85332
-lncosh cfloat64      17514 ns        17509 ns        40154
+lncosh float32        906 ns          906 ns       773054
+lncosh float64       2133 ns         2133 ns       332847
+lncosh cfloat32       8330 ns         8329 ns        87230
+lncosh cfloat64      17653 ns        17652 ns        39661

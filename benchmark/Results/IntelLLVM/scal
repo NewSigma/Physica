@@ -1,0 +1,27 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+scal/2       2.08 ns         2.08 ns    338987168
+scal/4       1.83 ns         1.83 ns    383223758
+scal/8       1.83 ns         1.83 ns    382147739
+scal/16       1.91 ns         1.91 ns    367343537
+scal/64       3.73 ns         3.73 ns    188415242
+scal/256       9.47 ns         9.47 ns     73676070
+scal/1024       37.2 ns         37.2 ns     18706488
+scal/16384       1461 ns         1461 ns       478685
+scal base/2       4.94 ns         4.94 ns    141828229
+scal base/4       1.83 ns         1.83 ns    383156063
+scal base/8       1.84 ns         1.84 ns    381110556
+scal base/16       1.90 ns         1.90 ns    366304470
+scal base/64       3.87 ns         3.87 ns    186711891
+scal base/256       10.2 ns         10.2 ns     68905470
+scal base/1024       37.8 ns         37.8 ns     18651683
+scal base/16384       1440 ns         1440 ns       478511
+scal mkl/2       5.48 ns         5.48 ns    126898073
+scal mkl/4       5.11 ns         5.11 ns    139109093
+scal mkl/8       5.63 ns         5.63 ns    123873861
+scal mkl/16       6.07 ns         6.07 ns    117709575
+scal mkl/64       6.66 ns         6.66 ns    105939338
+scal mkl/256       11.3 ns         11.3 ns     61748382
+scal mkl/1024       38.5 ns         38.5 ns     18177144
+scal mkl/16384       1436 ns         1436 ns       487123
