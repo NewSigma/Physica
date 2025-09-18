@@ -367,7 +367,7 @@ namespace Physica {
             auto [lnZ, sign] = calcGreen(chainD.multiply(shift, to), greenDs[i]);
 
             assert((shift == 0 || signD == sign) && "[Error]: Unexpected sign mismatch");
-            toNextMean(lnPartitionZ, i, lnZ);
+            toNextMean(lnZD, i, lnZ);
             signD = sign;
         }
         return lnZU + lnZD;
