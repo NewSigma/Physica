@@ -35,79 +35,81 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-RPMD<ScalarType> makeSystem() {
-    using MDCellType = RPMD<ScalarType>::MDCellType;
-    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
-    MDCellType::MassVector massVec(numMolecular, mass);
-    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+namespace {
+    RPMD<ScalarType> makeSystem() {
+        using MDCellType = RPMD<ScalarType>::MDCellType;
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
+        MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-    cell.scale(factor);
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
 
-    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-}
-
-bool testDriftMomentum(double precision) {
-    auto rpmd = makeSystem();
-    rpmd.initMomentum<KineticModel, RandomSource>();
-    for (int i = 0; i < 3; ++i) {
-        ScalarType sum = 0;
-        for (size_t j = i; j < rpmd.getDOF(); j += 3)
-            sum += rpmd.getPhaseMatrix().row(j).sum();
-        if (!scalarNear(sum, ScalarType(0), precision))
-            return false;
+        return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     }
-    return true;
-}
 
-bool testCalcKinetic(double precision) {
-    using ForceModel = SilveraGoldman<ScalarType, true, false>;
+    bool testDriftMomentum(double precision) {
+        auto rpmd = makeSystem();
+        rpmd.initMomentum<KineticModel, RandomSource>();
+        for (int i = 0; i < 3; ++i) {
+            ScalarType sum = 0;
+            for (size_t j = i; j < rpmd.getDOF(); j += 3)
+                sum += rpmd.getPhaseMatrix().row(j).sum();
+            if (!scalarNear(sum, ScalarType(0), precision))
+                return false;
+        }
+        return true;
+    }
 
-    auto rpmd = makeSystem();
-    rpmd.initMomentum<KineticModel, RandomSource>();
-    ForceModel forceModel(pair_cutoff);
-    rpmd.updateForce<Thread>(forceModel);
-
-    const ScalarType kinetic1 = rpmd.calcKinetic<KineticModel>();
-    ScalarType kinetic2 = 0;
-    for (size_t i = 0; i < rpmd.getDOF(); ++i)
-        kinetic2 += rpmd.calcKinetic<KineticModel>(i);
-    return scalarNear(kinetic1, kinetic2, precision);
-}
-/**
- * Reference:
- * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
- */
-void testMDRun() {
-    using ForceModel = SilveraGoldman<ScalarType, true, false>;
-    using ThermoType = DoubleThermo<KineticModel>;
-    ScalarType mean = 0;
-    ScalarType var = 0;
-    {
-        const ThermoType thermo(temperatureT, thermostatTime);
-        KineticModel kineticModel(temperatureT, numReplica);
-        ForceModel forceModel(pair_cutoff);
+    bool testCalcKinetic(double precision) {
+        using ForceModel = SilveraGoldman<ScalarType, true, false>;
 
         auto rpmd = makeSystem();
         rpmd.initMomentum<KineticModel, RandomSource>();
-        for (unsigned int i = 0; i < 6; ++i) {
-            ScalarType temp = 0;
-            rpmd.nvt_step_for<RandomSource, Thread>(
-                PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
+        ForceModel forceModel(pair_cutoff);
+        rpmd.updateForce<Thread>(forceModel);
 
-            for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
-                toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
-            }
-            toNextVariance(var, mean, i, temp);
-        }
+        const ScalarType kinetic1 = rpmd.calcKinetic<KineticModel>();
+        ScalarType kinetic2 = 0;
+        for (size_t i = 0; i < rpmd.getDOF(); ++i)
+            kinetic2 += rpmd.calcKinetic<KineticModel>(i);
+        return scalarNear(kinetic1, kinetic2, precision);
     }
-    constexpr double answer = 61.8;
-    const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
-    const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
-    if (abs(energyPerMol - answer) > deviation * 2.0)
-        exit(EXIT_FAILURE);
+    /**
+    * Reference:
+    * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
+    */
+    void testMDRun() {
+        using ForceModel = SilveraGoldman<ScalarType, true, false>;
+        using ThermoType = DoubleThermo<KineticModel>;
+        ScalarType mean = 0;
+        ScalarType var = 0;
+        {
+            const ThermoType thermo(temperatureT, thermostatTime);
+            KineticModel kineticModel(temperatureT, numReplica);
+            ForceModel forceModel(pair_cutoff);
+
+            auto rpmd = makeSystem();
+            rpmd.initMomentum<KineticModel, RandomSource>();
+            for (unsigned int i = 0; i < 6; ++i) {
+                ScalarType temp = 0;
+                rpmd.nvt_step_for<RandomSource, Thread>(
+                    PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
+
+                for (unsigned int j = 0; j < 100; ++j) {
+                    rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
+                    toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
+                }
+                toNextVariance(var, mean, i, temp);
+            }
+        }
+        constexpr double answer = 61.8;
+        const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
+        const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
+        if (abs(energyPerMol - answer) > deviation * 2.0)
+            exit(EXIT_FAILURE);
+    }
 }
 
 int main() {

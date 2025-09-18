@@ -17,28 +17,30 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
-#include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
+#include "Physica/Core/Physics/ElectronicStructure/HF/GaussBase.h"
 
 using namespace Physica;
 using ScalarType = float64;
 
 constexpr double precitionGoal = 1E-8;
 
-ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const VectorND<ScalarType>& alphas, size_t maxIte) {
-    Molecular<ScalarType> system = Molecular<ScalarType>(1);
-    auto& atoms = system.getAtoms();
-    const Vector3D<ScalarType> pos_atom{0, 0, 0};
-    atoms[0] = pos_atom;
-    auto& atomicNumbers = system.getAtomicNumbers();
-    atomicNumbers[0] = atomicNumber;
+namespace {
+    ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const VectorND<ScalarType>& alphas, size_t maxIte) {
+        Molecular<ScalarType> system = Molecular<ScalarType>(1);
+        auto& atoms = system.getAtoms();
+        const Vector3D<ScalarType> pos_atom{0, 0, 0};
+        atoms[0] = pos_atom;
+        auto& atomicNumbers = system.getAtomicNumbers();
+        atomicNumbers[0] = atomicNumber;
 
-    RHFSolver<GaussBase<ScalarType>> solver = RHFSolver<GaussBase<ScalarType>>(system, config, alphas.getLength());
-    auto& baseSet = solver.getBaseSet();
-    for (size_t i = 0; i < alphas.getLength(); ++i)
-        baseSet[i] = GaussBase<ScalarType>(pos_atom, abs(alphas[i]), 0, 0, 0);
-    if (!solver.compute(precitionGoal, maxIte))
-        return ScalarType(1E5);
-    return solver.getSelfConsistentEnergy();
+        RHFSolver<GaussBase<ScalarType>> solver = RHFSolver<GaussBase<ScalarType>>(system, config, alphas.getLength());
+        auto& baseSet = solver.getBaseSet();
+        for (size_t i = 0; i < alphas.getLength(); ++i)
+            baseSet[i] = GaussBase<ScalarType>(pos_atom, abs(alphas[i]), 0, 0, 0);
+        if (!solver.compute(precitionGoal, maxIte))
+            return ScalarType(1E5);
+        return solver.getSelfConsistentEnergy();
+    }
 }
 /**
  * Reference:

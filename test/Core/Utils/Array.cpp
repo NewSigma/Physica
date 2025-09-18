@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,29 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/BasicAlgebra/Polynomial.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 using namespace Physica;
+using C = Array<long, 3>;
+using It = FIterator<C>;
 
-namespace {
-    template<Vector V>
-    bool testPolyRoot(const V& coeffs, double precision) {
-        using ScalarType = V::ScalarType;
-        const Polynomial<ScalarType, V::SizeAtCompile> poly(coeffs);
-        auto roots = polyRoot(poly);
-        for (const auto& root : roots) {
-            auto result = poly(root);
-            if (!scalarNear(result, decltype(result)(0), precision))
-                return false;
-        }
-        return true;
-    }
-}
+static_assert(std::indirectly_readable<It>);
+static_assert(std::indirectly_writable<It, long>);
+static_assert(std::incrementable<It>);
+static_assert(std::sized_sentinel_for<It, It>);
+static_assert(std::contiguous_iterator<It>);
+
+static_assert(std::ranges::sized_range<C>);
+static_assert(std::ranges::contiguous_range<C>);
+static_assert(std::ranges::common_range<C>);
+static_assert(std::ranges::viewable_range<C>);
 
 int main() {
-    using ScalarType = float64;
-    VectorND<ScalarType> coeffs{1, 2, 3, 4, 5, 6};
-    if (!testPolyRoot(coeffs, 1E-11))
-        return 1;
     return 0;
 }

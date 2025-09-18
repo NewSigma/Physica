@@ -25,6 +25,12 @@
 
 namespace Physica {
     template<class Base>
+    auto DiffCoro<Base>::Promise::yield_value(auto&& arg) noexcept -> suspend_yield {
+        obj = Base(std::forward<decltype(arg)>(arg));
+        return suspend_yield{};
+    }
+
+    template<class Base>
     DiffCoro<Base>::DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {
         /**
          * Reference:

@@ -55,11 +55,7 @@ namespace Physica {
             std::suspend_never initial_suspend() noexcept { return {}; }
             void await_transform(auto&&) noexcept = delete;
             std::suspend_always final_suspend() noexcept { return {}; }
-            template<class T>
-            auto yield_value(T&& arg) noexcept {
-                obj = Base(std::forward<T>(arg));
-                return suspend_yield{};
-            }
+            suspend_yield yield_value(auto&& arg) noexcept;
             void return_void() noexcept {}
             [[noreturn]] void unhandled_exception() { throw; }
 

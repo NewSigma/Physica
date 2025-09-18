@@ -10,5 +10,7 @@ physica_add_test(SIMD Scalar/SIMD.cpp)
 physica_add_test(AP ML/AP.cpp)
 ## Parallel
 physica_add_test(ThreadPool Parallel/ThreadPool.cpp)
+## Utils
+physica_add_test(Utils Utils/Array.cpp)
 
 add_subdirectory(Physics)

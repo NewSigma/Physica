@@ -37,114 +37,116 @@ constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
-Vector3D<ScalarType> randomVector() {
-    const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
-    const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
-    Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-    result *= ScalarType(ForceModel::equalR);
-    return result;
-}
-
-MDCell<ScalarType> makeSystem(unsigned int cellSize) {
-    using CrystalCellType = CrystalCell<ScalarType>;
-    constexpr size_t MoleculePerCell = 4;
-    constexpr size_t maxIndexH = MoleculePerCell * 2;
-    constexpr size_t maxIndexO = MoleculePerCell * 3;
-    constexpr size_t numAtom = MoleculePerCell * 3;
-
-    ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
-    const ScalarType latticeFactor(cbrt(cellVolume));
-    CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
-    lattice *= latticeFactor;
-
-    CrystalCellType::PositionMatrix pos(numAtom, 3);
-    std::uniform_real_distribution dist{};
-    auto& gen = RandomSource::getInstance();
-    for (size_t i = 0; i < MoleculePerCell; ++i) {
-        auto posO = pos.row(i + maxIndexH);
-        if (i == 0) {
-            posO[0] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
-            posO[1] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
-            posO[2] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
-        }
-        else if (i == 1) {
-            posO[0] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
-            posO[1] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
-            posO[2] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
-        }
-        else if (i == 2) {
-            posO[0] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
-            posO[1] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
-            posO[2] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
-        }
-        else if (i == 3) {
-            posO[0] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
-            posO[1] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
-            posO[2] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
-        }
-        auto posH1 = pos.row(2 * i);
-        auto posH2 = pos.row(2 * i + 1);
-        posH1 = posO + randomVector();
-        posH2 = posO + randomVector();
+namespace {
+    Vector3D<ScalarType> randomVector() {
+        const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
+        const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
+        Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+        result *= ScalarType(ForceModel::equalR);
+        return result;
     }
 
-    CrystalCellType::AtomicArray atomicNumbers(numAtom);
-    for (size_t i = 0; i < maxIndexH; ++i)
-        atomicNumbers[i] = 1;
-    for (size_t i = maxIndexH; i < maxIndexO; ++i)
-        atomicNumbers[i] = 8;
+    MDCell<ScalarType> makeSystem(unsigned int cellSize) {
+        using CrystalCellType = CrystalCell<ScalarType>;
+        constexpr size_t MoleculePerCell = 4;
+        constexpr size_t maxIndexH = MoleculePerCell * 2;
+        constexpr size_t maxIndexO = MoleculePerCell * 3;
+        constexpr size_t numAtom = MoleculePerCell * 3;
 
-    CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
-    cell.toSuperCell(cellSize, cellSize, cellSize);
-    return MDCell<ScalarType>(std::move(cell));
-}
+        ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+        const ScalarType latticeFactor(cbrt(cellVolume));
+        CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+        lattice *= latticeFactor;
 
-void testSort() {
-    using CellType = MDCell<ScalarType>;
-    using PositionMatrix = CellType::PositionMatrix;
-    CellType cell = makeSystem(3);
-    const CellType origin_cell = cell;
-    auto order = ForceModel::sortPosition(cell);
-    PositionMatrix result = order.transpose() * cell.getPos();
-    if (!matrixNear(result, origin_cell.getPos(), 1E-15))
-        exit(EXIT_FAILURE);
-}
-
-void testMD() {
-    auto cell = makeSystem(2);
-    ForceModel::sortPosition(cell);
-    ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
-    RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, RandomSource>();
-
-    constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
-    ScalarType bond = 0;
-
-    ThreadPool::numThreadRequired = 4;
-    {
-        const ThermoType thermo(temperatureT, thermostatTime);
-        KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<RandomSource, Thread>(
-            PhyConst<AU>::secondToTime(1 * 1E-12),
-            thermo,
-            kineticModel,
-            forceModel);
-        for (size_t i = 0; i < 100; ++i) {
-            const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
-            ScalarType temp = 0;
-            const size_t numO = rpmd.getNumParticle() / 3;
-            const size_t numH = numO * 2;
-            for (size_t j = 0; j < numO; ++j) {
-                toNextMean(temp, 2 * j, cell.minDistVector(numH + j, 2 * j).norm());
-                toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
+        CrystalCellType::PositionMatrix pos(numAtom, 3);
+        std::uniform_real_distribution dist{};
+        auto& gen = RandomSource::getInstance();
+        for (size_t i = 0; i < MoleculePerCell; ++i) {
+            auto posO = pos.row(i + maxIndexH);
+            if (i == 0) {
+                posO[0] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+                posO[1] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+                posO[2] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
             }
-            toNextMean(bond, i, temp);
-            rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
+            else if (i == 1) {
+                posO[0] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+                posO[1] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+                posO[2] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+            }
+            else if (i == 2) {
+                posO[0] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+                posO[1] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+                posO[2] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+            }
+            else if (i == 3) {
+                posO[0] = latticeFactor * (0.25 + (dist(gen) - 0.5) / 5);
+                posO[1] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+                posO[2] = latticeFactor * (0.75 + (dist(gen) - 0.5) / 5);
+            }
+            auto posH1 = pos.row(2 * i);
+            auto posH2 = pos.row(2 * i + 1);
+            posH1 = posO + randomVector();
+            posH2 = posO + randomVector();
         }
+
+        CrystalCellType::AtomicArray atomicNumbers(numAtom);
+        for (size_t i = 0; i < maxIndexH; ++i)
+            atomicNumbers[i] = 1;
+        for (size_t i = maxIndexH; i < maxIndexO; ++i)
+            atomicNumbers[i] = 8;
+
+        CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
+        cell.toSuperCell(cellSize, cellSize, cellSize);
+        return MDCell<ScalarType>(std::move(cell));
     }
-    ThreadPool::getInstance().shouldExit();
-    if (!scalarNear(bond, ScalarType(answer), 2E-2))
-        exit(EXIT_FAILURE);
+
+    void testSort() {
+        using CellType = MDCell<ScalarType>;
+        using PositionMatrix = CellType::PositionMatrix;
+        CellType cell = makeSystem(3);
+        const CellType origin_cell = cell;
+        auto order = ForceModel::sortPosition(cell);
+        PositionMatrix result = order.transpose() * cell.getPos();
+        if (!matrixNear(result, origin_cell.getPos(), 1E-15))
+            exit(EXIT_FAILURE);
+    }
+
+    void testMD() {
+        auto cell = makeSystem(2);
+        ForceModel::sortPosition(cell);
+        ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
+        RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
+        rpmd.initMomentum<KineticModel, RandomSource>();
+
+        constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
+        ScalarType bond = 0;
+
+        ThreadPool::numThreadRequired = 4;
+        {
+            const ThermoType thermo(temperatureT, thermostatTime);
+            KineticModel kineticModel(temperatureT, numReplica);
+            rpmd.nvt_step_for<RandomSource, Thread>(
+                PhyConst<AU>::secondToTime(1 * 1E-12),
+                thermo,
+                kineticModel,
+                forceModel);
+            for (size_t i = 0; i < 100; ++i) {
+                const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
+                ScalarType temp = 0;
+                const size_t numO = rpmd.getNumParticle() / 3;
+                const size_t numH = numO * 2;
+                for (size_t j = 0; j < numO; ++j) {
+                    toNextMean(temp, 2 * j, cell.minDistVector(numH + j, 2 * j).norm());
+                    toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
+                }
+                toNextMean(bond, i, temp);
+                rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
+            }
+        }
+        ThreadPool::getInstance().shouldExit();
+        if (!scalarNear(bond, ScalarType(answer), 2E-2))
+            exit(EXIT_FAILURE);
+    }
 }
 /**
  * Reference:

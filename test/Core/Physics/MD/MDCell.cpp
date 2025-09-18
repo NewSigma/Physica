@@ -26,12 +26,14 @@ using CrystalCellType = CrystalCell<ScalarType>;
 using LatticeMatrix = CrystalCellType::LatticeMatrix;
 using PositionMatrix = CrystalCellType::PositionMatrix;
 
-bool isMDCellNear(const MDCellType& cell1, const MDCellType& cell2, double precision) {
-    if (!matrixNear(cell1.getLattice(), cell2.getLattice(), precision))
-        return false;
-    if (!matrixNear(cell1.getPos(), cell2.getPos(), precision))
-        return false;
-    return true;
+namespace {
+    bool isMDCellNear(const MDCellType& cell1, const MDCellType& cell2, double precision) {
+        if (!matrixNear(cell1.getLattice(), cell2.getLattice(), precision))
+            return false;
+        if (!matrixNear(cell1.getPos(), cell2.getPos(), precision))
+            return false;
+        return true;
+    }
 }
 
 int main() {

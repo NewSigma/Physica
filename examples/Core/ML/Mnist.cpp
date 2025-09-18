@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <QApplication>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.h"
@@ -28,7 +27,7 @@
 
 using namespace Physica;
 constexpr size_t NumEpoch = 10;
-constexpr size_t BatchSize = 64;
+constexpr int BatchSize = 64;
 constexpr int HiddenW = 32;
 constexpr double LearnRate = 0.05;
 
@@ -142,23 +141,28 @@ using dfloat = Diff<T, DiffMode::Reverse>;
 using Dataset = Mnist::DatasetType<VectorND<T>>;
 using RandomSource = Random<MT19937>;
 
-static std::pair<Dataset, Dataset> makeDataset() {
-    const Mnist mnist("./data");
-    auto dataset = mnist.makeTrainDataset<VectorND<T>>();
-    for (size_t i = 0; i < dataset.getSize(); ++i) {
-        auto& sample = dataset.getSamples()[i];
-        sample = sample * T(1.0 / 128) - T(1);
+namespace {
+    std::pair<Dataset, Dataset> makeDataset() {
+        const Mnist mnist("./data");
+        auto dataset = mnist.makeTrainDataset<VectorND<T>>();
+        for (size_t i = 0; i < dataset.getSize(); ++i) {
+            auto& sample = dataset.getSamples()[i];
+            sample = sample * T(1.0 / 128) - T(1);
+        }
+        return dataset.randomSplit<RandomSource>(54000);
     }
-    return dataset.randomSplit<RandomSource>(54000);
 }
 
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
 
     const auto dataset = makeDataset();
-    const int64_t stepPerEpoch = (dataset.first.getSize() + BatchSize - 1) / BatchSize;
+    const int64_t stepPerEpoch = int64_t(dataset.first.getSize() + BatchSize - 1) / BatchSize;
     auto nn = MnistNet<dfloat>(RandomSource::getInstance());
-    VectorND<T> loss_train(NumEpoch), loss_valid(NumEpoch), acc_train(NumEpoch), acc_valid(NumEpoch);
+    VectorND<T> loss_train(NumEpoch);
+    VectorND<T> loss_valid(NumEpoch);
+    VectorND<T> acc_train(NumEpoch);
+    VectorND<T> acc_valid(NumEpoch);
     for (size_t epoch = 0; epoch < NumEpoch; ++epoch) {
         const auto nn_infer = MnistNet<T>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);

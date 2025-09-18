@@ -23,20 +23,22 @@
 using namespace Physica;
 using T = float32;
 
-template<BoundaryCond BC>
-void test() {
-    TransIsingMatrix<T, SpinRepr<1, 3>, BC> hamilton(1, 2, SquareLattice<1, BC>{{3}, 1}, SpinRepr<1, 3>(3));
+namespace {
+    template<BoundaryCond BC>
+    void test() {
+        TransIsingMatrix<T, SpinRepr<1, 3>, BC> hamilton(1, 2, SquareLattice<1, BC>{{3}, 1}, SpinRepr<1, 3>(3));
 
-    const auto size = hamilton.getRow();
-    DenseMatrix<T> mat(size, size);
-    for (size_t i = 0; i < size; ++i) {
-        VectorND<T> temp(size, 0);
-        temp[i] = T(1);
-        mat.col(i) = hamilton * temp;
+        const auto size = hamilton.getRow();
+        DenseMatrix<T> mat(size, size);
+        for (size_t i = 0; i < size; ++i) {
+            VectorND<T> temp(size, 0);
+            temp[i] = T(1);
+            mat.col(i) = hamilton * temp;
+        }
+
+        if (!matrixNear(hamilton, mat, 1E-7))
+            exit(EXIT_FAILURE);
     }
-
-    if (!matrixNear(hamilton, mat, 1E-7))
-        exit(EXIT_FAILURE);
 }
 
 int main() {

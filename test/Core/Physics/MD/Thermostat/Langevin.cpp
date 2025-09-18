@@ -46,19 +46,21 @@ constexpr size_t maxHandleNum = 100;
 constexpr size_t numSystem = 8;
 constexpr size_t numStep = 20000;
 
-MDCellType makeSystem() {
-    MDCellType::LatticeMatrix lattice{latticeSize};
+namespace {
+    MDCellType makeSystem() {
+        MDCellType::LatticeMatrix lattice{latticeSize};
 
-    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
-    std::sort(posVec.begin(), posVec.end());
-    MDCellType::PositionMatrix pos(numMolecular, 1);
-    pos.col(0) = posVec;
+        auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
+        std::ranges::sort(posVec.begin(), posVec.end());
+        MDCellType::PositionMatrix pos(numMolecular, 1);
+        pos.col(0) = posVec;
 
-    MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
+        MDCellType::MassVector massVec(numMolecular);
+        for (size_t i = 0; i < numMolecular; ++i) {
+            massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
+        }
+        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
     }
-    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
 int main() {

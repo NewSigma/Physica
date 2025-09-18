@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,19 +23,21 @@
 using namespace Physica;
 using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
-void test1() {
-    using MatrixType = DenseMatrix<cfloat64, MatrixOption::Row | MatrixOption::Vector>;
-    const MatrixType data = MatrixType::random_uniform<RandomSource>(64);
-    const DenseHermiteMatrix<cfloat64> hermite = data + data.hermite();
+namespace {
+    void test1() {
+        using MatrixType = DenseMatrix<cfloat64, MatrixOption::Row | MatrixOption::Vector>;
+        const MatrixType data = MatrixType::random_uniform<RandomSource>(64);
+        const DenseHermiteMatrix<cfloat64> hermite = data + data.hermite();
 
-    EigenSolver<cfloat64> eig(hermite, false);
-    eig.sort();
-    JacobiDavidson<cfloat64> jd(hermite.getRow(), 48);
-    jd.compute(hermite, VectorND<cfloat64>::random_uniform<RandomSource>(data.getRow()));
-    jd.sort();
+        EigenSolver<cfloat64> eig(hermite, false);
+        eig.sort();
+        JacobiDavidson<cfloat64> jd(hermite.getRow(), 48);
+        jd.compute(hermite, VectorND<cfloat64>::random_uniform<RandomSource>(data.getRow()));
+        jd.sort();
 
-    if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-13))
-        exit(1);
+        if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-13))
+            exit(1);
+    }
 }
 
 int main() {

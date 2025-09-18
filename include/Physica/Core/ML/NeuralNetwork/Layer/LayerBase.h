@@ -31,9 +31,11 @@ namespace Physica {
     public:
         template<Scalar U>
         using MatrixND = DenseMatrix<U, MatrixOption::Col | MatrixOption::Element>;
-        using ScalarType = TraitsType::ScalarType;
-        constexpr static bool IsTrain = ScalarType::isDiffable;
+        constexpr static bool IsTrain = TraitsType::ScalarType::isDiffable;
         constexpr static bool IsInfer = !IsTrain;
+    protected:
+        using T = TraitsType::ScalarType;
+        using Tv = T::ValueType;
     public:
         ~LayerBase() = default;
         /* Operations */

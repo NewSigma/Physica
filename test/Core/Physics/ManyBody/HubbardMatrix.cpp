@@ -24,98 +24,100 @@ using namespace Physica;
 constexpr double HoppingT = 1.0;
 constexpr double RepelU = 2;
 
-template<unsigned int NumSite, unsigned int NumSpinUp, unsigned int NumSpinDown>
-void testRSpinMatrix1D() {
-    using ScalarType = float64;
-    using VectorType = VectorND<ScalarType>;
-    using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = FermiRepr<1, NumSite, NumSpinUp == NumSpinDown>;
+namespace {
+    template<unsigned int NumSite, unsigned int NumSpinUp, unsigned int NumSpinDown>
+    void testRSpinMatrix1D() {
+        using ScalarType = float64;
+        using VectorType = VectorND<ScalarType>;
+        using MatrixType = DenseMatrix<ScalarType>;
+        using ReprType = FermiRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 
-    SquareLattice<1> lattice({NumSite}, 1);
-    const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
-    const size_t numState = hamilton.getNumState();
-    MatrixType mat(numState, numState);
-    for (size_t i = 0; i < numState; ++i) {
-        VectorType temp(numState, 0);
-        temp[i] = ScalarType(1);
-        auto col = mat.col(i);
-        col = hamilton * temp;
+        SquareLattice<1> lattice({NumSite}, 1);
+        const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
+        const size_t numState = hamilton.getNumState();
+        MatrixType mat(numState, numState);
+        for (size_t i = 0; i < numState; ++i) {
+            VectorType temp(numState, 0);
+            temp[i] = ScalarType(1);
+            auto col = mat.col(i);
+            col = hamilton * temp;
+        }
+
+        if (!matrixNear(hamilton, mat, 1E-15))
+            exit(EXIT_FAILURE);
     }
 
-    if (!matrixNear(hamilton, mat, 1E-15))
-        exit(EXIT_FAILURE);
-}
+    template<unsigned int NumSiteX, unsigned int NumSiteY, unsigned int NumSpinUp, unsigned int NumSpinDown>
+    void testRSpinMatrix2D() {
+        using ScalarType = float64;
+        using VectorType = VectorND<ScalarType>;
+        using MatrixType = DenseMatrix<ScalarType>;
+        using ReprType = FermiRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
 
-template<unsigned int NumSiteX, unsigned int NumSiteY, unsigned int NumSpinUp, unsigned int NumSpinDown>
-void testRSpinMatrix2D() {
-    using ScalarType = float64;
-    using VectorType = VectorND<ScalarType>;
-    using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = FermiRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
+        SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
+        const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
+        const size_t numState = hamilton.getNumState();
+        MatrixType mat(numState, numState);
+        for (size_t i = 0; i < numState; ++i) {
+            VectorType temp(numState, 0);
+            temp[i] = ScalarType(1);
+            auto col = mat.col(i);
+            col = hamilton * temp;
+        }
 
-    SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
-    const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
-    const size_t numState = hamilton.getNumState();
-    MatrixType mat(numState, numState);
-    for (size_t i = 0; i < numState; ++i) {
-        VectorType temp(numState, 0);
-        temp[i] = ScalarType(1);
-        auto col = mat.col(i);
-        col = hamilton * temp;
+        if (!matrixNear(hamilton, mat, 1E-15))
+            exit(EXIT_FAILURE);
     }
 
-    if (!matrixNear(hamilton, mat, 1E-15))
-        exit(EXIT_FAILURE);
-}
+    void testKSpinMatrix() {
+        constexpr unsigned int NumSite = 4;
+        constexpr unsigned int NumParticle = NumSite / 2;
+        using RealType = float64;
+        using ScalarType = Complex<RealType>;
+        using VectorType = VectorND<ScalarType>;
+        using MatrixType = DenseMatrix<ScalarType>;
+        using ReprType = KFermiRepr<1, NumSite, true>;
 
-void testKSpinMatrix() {
-    constexpr unsigned int NumSite = 4;
-    constexpr unsigned int NumParticle = NumSite / 2;
-    using RealType = float64;
-    using ScalarType = Complex<RealType>;
-    using VectorType = VectorND<ScalarType>;
-    using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = KFermiRepr<1, NumSite, true>;
+        SquareLattice<1> lattice({NumSite}, 1);
+        const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
+        const size_t numState = hamilton.getNumState();
+        MatrixType mat(numState, numState);
+        for (size_t i = 0; i < numState; ++i) {
+            VectorType temp(numState, 0);
+            temp[i] = ScalarType(1);
+            auto col = mat.col(i);
+            col = hamilton * temp;
+        }
 
-    SquareLattice<1> lattice({NumSite}, 1);
-    const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
-    const size_t numState = hamilton.getNumState();
-    MatrixType mat(numState, numState);
-    for (size_t i = 0; i < numState; ++i) {
-        VectorType temp(numState, 0);
-        temp[i] = ScalarType(1);
-        auto col = mat.col(i);
-        col = hamilton * temp;
+        if (!matrixNear(hamilton, mat, 1E-15))
+            exit(EXIT_FAILURE);
     }
 
-    if (!matrixNear(hamilton, mat, 1E-15))
-        exit(EXIT_FAILURE);
-}
+    template<BoundaryCond BC>
+    void testVecProduct() {
+        constexpr int Dim = 1;
+        constexpr int NumSite = 4;
+        using T = std::conditional<BC == BoundaryCond::TBC, cfloat64, float64>::type;
+        using ReprType = FermiRepr<1, NumSite, false>;
+        using Hamilton = HubbardMatrix<T, ReprType, BC>;
+        using RandomSource = Random<MT19937>;
 
-template<BoundaryCond BC>
-void testVecProduct() {
-    constexpr int Dim = 1;
-    constexpr int NumSite = 4;
-    using T = std::conditional<BC == BoundaryCond::TBC, cfloat64, float64>::type;
-    using ReprType = FermiRepr<1, NumSite, false>;
-    using Hamilton = HubbardMatrix<T, ReprType, BC>;
-    using RandomSource = Random<MT19937>;
+        SquareLattice<Dim, BC> lattice;
+        if constexpr (BC == Physica::BoundaryCond::TBC)
+            lattice = SquareLattice<Dim, BC>({NumSite}, 1, {float64::template random_uniform<RandomSource>() * MathConst<float64>::pi});
+        else
+            lattice = SquareLattice<Dim, BC>({NumSite}, 1);
+        const Hamilton hamiltonH(HoppingT, RepelU, lattice, ReprType(2, 1));
 
-    SquareLattice<Dim, BC> lattice;
-    if constexpr (BC == Physica::BoundaryCond::TBC)
-        lattice = SquareLattice<Dim, BC>({NumSite}, 1, {float64::template random_uniform<RandomSource>() * MathConst<float64>::pi});
-    else
-        lattice = SquareLattice<Dim, BC>({NumSite}, 1);
-    const Hamilton hamiltonH(HoppingT, RepelU, lattice, ReprType(2, 1));
+        const auto v = VectorND<float64>::random_uniform<RandomSource>(hamiltonH.getNumState());
+        const VectorND<T> v1 = hamiltonH * v;
+        VectorND<T> v2(v.getLength());
+        for (size_t i = 0; i < v.getLength(); ++i)
+            v2[i] = (hamiltonH * v).calc(i);
 
-    const auto v = VectorND<float64>::random_uniform<RandomSource>(hamiltonH.getNumState());
-    const VectorND<T> v1 = hamiltonH * v;
-    VectorND<T> v2(v.getLength());
-    for (size_t i = 0; i < v.getLength(); ++i)
-        v2[i] = (hamiltonH * v).calc(i);
-
-    if (!vectorNear(v1, v2, 1E-14))
-        exit(EXIT_FAILURE);
+        if (!vectorNear(v1, v2, 1E-14))
+            exit(EXIT_FAILURE);
+    }
 }
 
 int main() {

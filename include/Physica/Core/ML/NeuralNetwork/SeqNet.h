@@ -27,10 +27,10 @@ namespace Physica {
         using This = SeqNet<Derived>;
         using Base = LayerBase<Derived>;
     public:
-        using typename Base::ScalarType;
         using Base::IsTrain;
     protected:
-        using Tv = ScalarType::ValueType;
+        using T = Base::T;
+        using Tv = Base::Tv;
     public:
         ~SeqNet() = default;
         /* Operations */
@@ -40,7 +40,7 @@ namespace Physica {
         void train_step_for(int64_t numStep, int batchSize, const auto& dataset);
 
         [[nodiscard]] auto loss(const auto& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
-        [[nodiscard]] ScalarType loss(const auto& dataset) const;
+        [[nodiscard]] T loss(const auto& dataset) const;
     protected:
         SeqNet() = default;
         SeqNet(const SeqNet&) = default;
@@ -86,10 +86,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    [[nodiscard]] auto SeqNet<Derived>::loss(const auto& dataset) const -> ScalarType {
+    auto SeqNet<Derived>::loss(const auto& dataset) const -> T {
         static_assert(!IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
-        ScalarType result = 0;
+        T result = 0;
         for (size_t i = 0; i < size; ++i)
             toNextMean(result, i, loss(dataset, i));
         return result;

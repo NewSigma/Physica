@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,13 +18,15 @@
  */
 #pragma once
 
+#include "Physica/Macro.h"
+
 namespace Physica {
     template<class Derived, class Allocator> class ArrayBase;
     /**
      * FIterator(Forward)
      */
     template<class Container>
-    class FIterator {
+    class FIterator : public std::contiguous_iterator_tag {
         constexpr static bool isConst = std::is_const<Container>::value;
         using This = FIterator<Container>;
         using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
@@ -33,34 +35,43 @@ namespace Physica {
         using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
         using pointer = std::add_pointer<value_type>::type;
         using reference = std::add_lvalue_reference<value_type>::type;
-        using iterator_category = std::random_access_iterator_tag;
+        using iterator_category = std::contiguous_iterator_tag;
     private:
         pointer p;
     public:
-        __host__ __device__ explicit FIterator(pointer p) : p(p) {}
-        __host__ __device__ FIterator(const This& ite) : p(ite.p) {}
+        FIterator() = default;
+        __host__ __device__ explicit FIterator(pointer p) noexcept;
+        __host__ __device__ FIterator(const This& ite) noexcept;
         ~FIterator() = default;
         /* Operators */
         This& operator=(const This&) = default;
-        [[nodiscard]] __host__ __device__ This operator+(difference_type n) const { return This(p + n); }
-        [[nodiscard]] __host__ __device__ This operator-(difference_type n) const { return This(p - n); }
-        [[nodiscard]] __host__ __device__ bool operator<(const This& ite) const { return p < ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator>(const This& ite) const { return p > ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator<=(const This& ite) const { return !(p > ite.p); }
-        [[nodiscard]] __host__ __device__ bool operator>=(const This& ite) const { return !(p < ite.p); }
-        [[nodiscard]] __host__ __device__ difference_type operator-(const This& ite) const { return p - ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept { return p == ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator!=(const This& ite) const noexcept { return p != ite.p; }
-        __host__ __device__ This& operator++() { ++p; return *this; }
-        __host__ __device__ const This operator++(int) { return This(p++); }
-        __host__ __device__ This& operator--() { --p; return *this; }
-        [[nodiscard]] __host__ __device__ reference operator*() const { return *p; }
+        This& operator=(This&&) noexcept = default;
+        [[nodiscard]] __host__ __device__ This operator+(difference_type n) const noexcept;
+        [[nodiscard]] __host__ __device__ This& operator+=(difference_type n) const noexcept;
+        [[nodiscard]] __host__ __device__ This operator-(difference_type n) const noexcept;
+        [[nodiscard]] __host__ __device__ This& operator-=(difference_type n) const noexcept;
+        [[nodiscard]] __host__ __device__ difference_type operator-(const This& ite) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator<(const This& ite) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator>(const This& ite) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator<=(const This& ite) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator>=(const This& ite) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator!=(const This& ite) const noexcept;
+        __host__ __device__ This& operator++() noexcept;
+        __host__ __device__ This operator++(int) noexcept;
+        __host__ __device__ This& operator--() noexcept;
+        __host__ __device__ This operator--(int) noexcept;
+        [[nodiscard]] __host__ __device__ reference operator*() const noexcept;
+        [[nodiscard]] __host__ __device__ pointer operator->() const noexcept;
+        [[nodiscard]] __host__ __device__ reference operator[](difference_type n) const noexcept;
+        /* Friends */
+        friend __host__ __device__ This operator+(difference_type n, const This& it) noexcept { return it + n; }
     };
     /**
      * RIterator(Reverse)
      */
     template<class Container>
-    class RIterator {
+    class RIterator : public std::contiguous_iterator_tag {
         constexpr static bool isConst = std::is_const<Container>::value;
         using This = RIterator<Container>;
         using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
@@ -69,19 +80,23 @@ namespace Physica {
         using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
         using pointer = std::add_pointer<value_type>::type;
         using reference = std::add_lvalue_reference<value_type>::type;
-        using iterator_category = std::random_access_iterator_tag;
+        using iterator_category = std::contiguous_iterator_tag;
     private:
         pointer p;
     public:
-        __host__ __device__ explicit RIterator(pointer p) : p(p) {}
-        __host__ __device__ RIterator(const This& ite) : p(ite.p) {}
+        RIterator() = default;
+        __host__ __device__ explicit RIterator(pointer p) noexcept;
+        __host__ __device__ RIterator(const This& ite) noexcept;
         ~RIterator() = default;
         /* Operators */
         This& operator=(const This&) = default;
-        [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept { return p == ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator!=(const This& ite) const noexcept { return p != ite.p; }
-        __host__ __device__ This& operator++() { --p; return *this; }
-        __host__ __device__ const This operator++(int)  { return This(p--); }
-        [[nodiscard]] __host__ __device__ reference operator*() const { return *p; }
+        This& operator=(This&&) noexcept = default;
+        [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept;
+        [[nodiscard]] __host__ __device__ bool operator!=(const This& ite) const noexcept;
+        __host__ __device__ This& operator++() noexcept;
+        __host__ __device__ This operator++(int) noexcept;
+        [[nodiscard]] __host__ __device__ reference operator*() const noexcept;
     };
 }
+
+#include "IteratorImpl.h"
