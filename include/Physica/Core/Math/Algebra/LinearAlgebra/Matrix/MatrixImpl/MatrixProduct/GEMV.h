@@ -18,10 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/Scalar.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
-#include "Physica/Core/Parallel/Parallel.h"
+#include "../RValueMatrix.h"
 
 namespace Physica {
     template<Matrix M, Vector U>
@@ -34,10 +31,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const LazyDestroy<M> mat;
-        const LazyDestroy<U> vec;
+        LazyDestroy<M> mat;
+        LazyDestroy<U> vec;
     public:
-        GEMV(M&& mat_, U&& vec_);
+        GEMV(M mat_, U vec_);
         GEMV(const This&) = default;
         GEMV(This&&) noexcept = default;
         ~GEMV() = default;
@@ -62,24 +59,15 @@ namespace Physica {
     };
 
     template<Matrix M, Vector U>
-    GEMV<M, U>::GEMV(M&& mat_, U&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<U>(vec_)) {
+    GEMV<M, U>::GEMV(M mat_, U vec_) : mat(std::forward<M>(mat_)), vec(std::forward<U>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
     template<Matrix M, Vector U>
     template<ExecutePolicy P>
     void GEMV<M, U>::assign(Vector auto& target) const noexcept {
-        if constexpr (isReverseDiff) {
-            if constexpr (MatrixOption::isColMatrix<M>()) {
-                target = mat.values().col(0) * vec.values().calc(0);
-                for (size_t i = 1; i < vec.getLength(); ++i)
-                    target += mat.values().col(i) * vec.values().calc(i);
-            }
-            else {
-                for (size_t i = 0; i < getLength(); ++i)
-                    target[i] = calc_value(i);
-            }
-        }
+        if constexpr (isReverseDiff)
+            values().template assign<P>(target);
         else {
             if constexpr (MatrixOption::isColMatrix<M>()) {
                 target = mat.col(0) * vec.calc(0);
@@ -127,22 +115,22 @@ namespace Physica {
                 vec.reverse(mat.values().transpose() * g);
         }
     }
-
+    // FIXME: Refactor using deducing this once we dump to C++23
     template<class Derived>
     template<Vector V>
-    auto RValueMatrix<Derived>::operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
+    [[nodiscard]] auto RValueMatrix<Derived>::operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
         return GEMV<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
     }
 
     template<class Derived>
     template<Vector V>
-    auto RValueMatrix<Derived>::operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
+    [[nodiscard]] auto RValueMatrix<Derived>::operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
         return GEMV<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
     }
 
     template<class Derived>
     template<Vector V>
-    auto RValueMatrix<Derived>::operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>) {
+    [[nodiscard]] auto RValueMatrix<Derived>::operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>) {
         return row(0) * v;
     }
 }

@@ -31,7 +31,7 @@ namespace Physica {
     }
 
     template<class T>
-    concept Matrix = Internal::MatrixObj<std::remove_cvref_t<T>> || Internal::MatrixObj<typename remove_codiff<std::remove_cvref_t<T>>::Type>;
+    concept Matrix = Internal::MatrixObj<std::remove_cvref_t<T>> || Internal::MatrixObj<remove_codiff_t<std::remove_cvref_t<T>>>;
     /**
      * This enum decides how the data is stored in a matrix.
      * A dense matrix can be stored as elements or vectors in rows or cols.
@@ -40,7 +40,7 @@ namespace Physica {
      */
     class MatrixOption {
     public:
-        enum {
+        enum : char {
             Col = 0b0000,
             Row = 0b0001,
             AnyMajor = 0b0010,
@@ -50,58 +50,64 @@ namespace Physica {
         };
     public:
         template<class MatrixType>
-        consteval static bool isColMatrix() {
+        consteval static bool isColMatrix() noexcept {
             return isAnyMajor<MatrixType>() || !(Traits<std::remove_cvref_t<MatrixType>>::Option & Row);
         }
 
         template<class MatrixType>
-        consteval static bool isRowMatrix() {
+        consteval static bool isRowMatrix() noexcept {
             return isAnyMajor<MatrixType>() || !isColMatrix<MatrixType>();
         }
 
         template<class MatrixType>
-        consteval static bool isAnyMajor() {
+        consteval static bool isAnyMajor() noexcept {
             return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyMajor;
         }
 
         template<class MatrixType>
-        consteval static int getMajor() {
-            return isAnyMajor<MatrixType>() ? AnyMajor : (isColMatrix<MatrixType>() ? Col : Row);
+        consteval static int getMajor() noexcept {
+            constexpr int Major = isColMatrix<MatrixType>() ? Col : Row;
+            return isAnyMajor<MatrixType>() ? AnyMajor : Major;
         }
 
         template<class MatrixType>
-        consteval static bool isElementMatrix() {
+        consteval static bool isElementMatrix() noexcept {
             return isAnyStorage<MatrixType>() || Traits<std::remove_cvref_t<MatrixType>>::Option & Element;
         }
 
         template<class MatrixType>
-        consteval static bool isVectorMatrix() {
+        consteval static bool isVectorMatrix() noexcept {
             return isAnyStorage<MatrixType>() || !isElementMatrix<MatrixType>();
         }
 
         template<class MatrixType>
-        consteval static bool isAnyStorage() {
+        consteval static bool isAnyStorage() noexcept {
             return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyStorage;
         }
 
         template<class MatrixType>
-        consteval static int getStorage() {
-            return isAnyStorage<MatrixType>() ? AnyStorage : (isElementMatrix<MatrixType>() ? Element : Vector);
+        consteval static int getStorage() noexcept {
+            constexpr int Storage = isElementMatrix<MatrixType>() ? Element : Vector;
+            return isAnyStorage<MatrixType>() ? AnyStorage : Storage;
         }
 
         template<class MatrixType1, class MatrixType2>
-        consteval static bool isSameMajor() { return getMajor<MatrixType1>() == getMajor<MatrixType2>(); }
+        consteval static bool isSameMajor() noexcept {
+            return getMajor<MatrixType1>() == getMajor<MatrixType2>();
+        }
 
         template<class MatrixType1, class MatrixType2>
-        consteval static bool isSameStorage() { return getStorage<MatrixType1>() == getStorage<MatrixType2>(); }
+        consteval static bool isSameStorage() noexcept {
+            return getStorage<MatrixType1>() == getStorage<MatrixType2>();
+        }
 
         template<class MatrixType>
-        [[nodiscard]] constexpr static size_t selectMajor(size_t row, size_t col) {
+        [[nodiscard]] constexpr static size_t selectMajor(size_t row, size_t col) noexcept {
             return isColMatrix<MatrixType>() ? col : row;
         }
 
         template<class MatrixType>
-        [[nodiscard]] constexpr static size_t selectMinor(size_t row, size_t col) {
+        [[nodiscard]] constexpr static size_t selectMinor(size_t row, size_t col) noexcept {
             return isColMatrix<MatrixType>() ? row : col;
         }
 

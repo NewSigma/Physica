@@ -94,7 +94,7 @@ namespace Physica {
         if constexpr (ReverseDiff<U>)
             v.reverse(m.values().transpose() * g);
     }
-
+    // FIXME: Turn it into a member function once we dump to C++23
     template<Matrix T, Vector U>
     [[nodiscard]] __host__ __device__ auto operator*(T&& m, U&& v) noexcept requires(std::remove_cvref_t<T>::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
         return device_obj<GEMV<T&&, U&&>>(std::forward<T>(m), std::forward<U>(v));

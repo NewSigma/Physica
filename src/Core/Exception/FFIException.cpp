@@ -23,8 +23,8 @@ using namespace Physica;
 namespace {
     class Impl final : public std::error_category {
     public:
-        [[nodiscard]] const char* name() const noexcept override final { return "FFI"; }
-        [[nodiscard]] std::string message(int code) const override final {
+        [[nodiscard]] const char* name() const noexcept final { return "FFI"; }
+        [[nodiscard]] std::string message(int code) const final {
             // using enum ffi_status; // FIXME: clang 16 ~ 18 ICE, refactor once nvcc supports clang 19
             switch (code) {
             case ffi_status::FFI_OK:

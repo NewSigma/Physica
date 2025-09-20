@@ -43,9 +43,10 @@ else()
                 message(FATAL "Please enable Release mode for optimizations")
             endif()
             add_compile_options(-Xclang -disable-llvm-passes -S -emit-llvm)
+            add_compile_options(-Wno-unused-command-line-argument) # Silent unused '-c'
             add_link_options(--version)
             add_custom_target(LLVMIR
-                              COMMAND "mkdir -p llvm && cd llvm && find .. -name '*.o' -exec mv {} . \; && rename 's/\.cpp.o$/\.ll/' *"
+                              COMMAND mkdir -p llvm && cd llvm && find .. -name '*.o' -exec mv {} . "\\;" && mmv '*.cpp.o' "'#1.ll'"
                               WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                               COMMENT "Generating LLVM IR")
         endif()

@@ -44,7 +44,7 @@ namespace Physica {
     template<class Base>
     template<ReverseDiff T>
     DiffCoro<Base>::DiffCoro(T&& x) noexcept requires(!IsCoDiff<T>::value) {
-        auto fn = [](T&& x) noexcept -> This {
+        auto fn = [](auto&& x) noexcept -> This {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             Base y;
             if constexpr (Scalar<T>) {

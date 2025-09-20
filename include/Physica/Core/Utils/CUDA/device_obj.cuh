@@ -52,7 +52,10 @@ namespace Physica {
     };
 
     template<class T>
-    concept CUDA = is_device_obj<typename remove_codiff<std::remove_cvref_t<T>>::Type>::value;
+    using remove_device_obj_t = remove_device_obj<T>::Type;
+
+    template<class T>
+    concept CUDA = is_device_obj<remove_codiff_t<std::remove_cvref_t<T>>>::value;
 
     template<CUDA T>
     class device_obj<T> {

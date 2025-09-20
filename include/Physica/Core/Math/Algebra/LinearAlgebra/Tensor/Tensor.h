@@ -20,7 +20,6 @@
 
 #include "Physica/Core/Scalar/Scalar.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
-#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica {
     template<class Derived> class RValueTensor;
@@ -32,5 +31,5 @@ namespace Physica {
     }
 
     template<class T>
-    concept Tensor = Internal::TensorObj<std::remove_cvref_t<T>> || Internal::TensorObj<typename remove_codiff<std::remove_cvref_t<T>>::Type>;
+    concept Tensor = Internal::TensorObj<std::remove_cvref_t<T>> || Internal::TensorObj<remove_codiff_t<std::remove_cvref_t<T>>>;
 }

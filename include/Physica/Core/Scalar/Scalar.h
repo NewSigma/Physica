@@ -40,7 +40,7 @@ namespace Physica {
         };
     }
 
-    enum FloatPrec {
+    enum FloatPrec : char {
         Float16 = 0,
         Float32 = 1,
         Float64 = 2,
@@ -51,7 +51,7 @@ namespace Physica {
         Double = Float64
     };
 
-    enum class DiffMode {
+    enum class DiffMode : char {
         Forward,
         Reverse
     };
@@ -121,17 +121,20 @@ namespace Physica {
     };
 
     template<class T>
+    using remove_codiff_t = remove_codiff<T>::Type;
+
+    template<class T>
     struct remove_codiff<DiffCoro<T>> {
         using Type = T;
     };
 
     template<class T>
     using CoDiff = std::conditional<std::is_void<T>::value || ReverseDiff<T>
-                 , DiffCoro<typename remove_codiff<typename remove_cvref<T>::Type>::Type>
+                 , DiffCoro<remove_codiff_t<typename remove_cvref<T>::Type>>
                  , typename remove_cvref<T>::Type>::type;
 
     template<class T> requires(std::is_reference<T>::value)
-    using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T&>::type;
+    using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, std::add_lvalue_reference_t<T>>::type;
 
     namespace Internal {
         /**
@@ -156,7 +159,7 @@ namespace Physica {
             constexpr static int Order2 = T2::Order;
             constexpr static bool UseMixOrder = isDiffable1 && isDiffable2 && (Order1 != Order2);
             constexpr static int Order = UseMixOrder ? std::min(Order1, Order2) : std::max(Order1, Order2);
-            static_assert(!(Mode == DiffMode::Reverse && UseMixOrder), "[Error]: Reverse mode does not support mixed order");
+            static_assert(Mode != DiffMode::Reverse || !UseMixOrder, "[Error]: Reverse mode does not support mixed order");
 
             using Type0 = Real<Prec>;
             using Type1 = std::conditional<isComplex, Complex<Type0>, Type0>::type;
@@ -172,10 +175,10 @@ namespace Physica {
         class Promise {
         public:
             auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
-            std::suspend_never initial_suspend() noexcept { return {}; }
-            std::suspend_always final_suspend() noexcept { return {}; }
+            static std::suspend_never initial_suspend() noexcept { return {}; }
+            static std::suspend_always final_suspend() noexcept { return {}; }
             void return_void() noexcept {}
-            [[noreturn]] void unhandled_exception() { throw; }
+            [[noreturn]] static void unhandled_exception() { throw; }
         };
     public:
         using promise_type = Promise;
