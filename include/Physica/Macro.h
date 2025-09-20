@@ -77,12 +77,12 @@ namespace Physica {
     [[maybe_unused]] constexpr static unsigned int PhysicaWordSize = sizeof(void*) * CHAR_BIT;
     [[maybe_unused]] constexpr size_t Dynamic = 0;
 
-    enum class Backend {
+    enum class Backend : int8_t {
         Base,
         MKL
     };
 
-    __host__ __device__ consteval inline static bool IsHost() {
+    __host__ __device__ consteval static bool IsHost() noexcept {
     #ifdef __CUDA_ARCH__
         return false;
     #else
@@ -90,11 +90,19 @@ namespace Physica {
     #endif
     }
 
-    [[maybe_unused]] __host__ __device__ consteval inline static bool IsDevice() {
+    [[maybe_unused]] __host__ __device__ consteval static bool IsDevice() noexcept {
         return !IsHost();
     }
 
-    [[maybe_unused]] consteval inline static bool IsMSVC() {
+    [[maybe_unused]] consteval static bool IsDebug() noexcept {
+    #ifndef NDEBUG
+        return true;
+    #else
+        return false;
+    #endif
+    }
+
+    [[maybe_unused]] consteval static bool IsMSVC() noexcept {
     #ifdef _MSC_VER
         return true;
     #else
@@ -102,7 +110,7 @@ namespace Physica {
     #endif
     }
 
-    [[maybe_unused]] consteval inline static bool HasHDF5() {
+    [[maybe_unused]] consteval static bool HasHDF5() noexcept {
     #ifdef PHYSICA_HDF5
         return true;
     #else
@@ -110,7 +118,7 @@ namespace Physica {
     #endif
     }
 
-    [[maybe_unused]] consteval inline static bool HasMKL() {
+    [[maybe_unused]] consteval static bool HasMKL() noexcept {
     #ifdef PHYSICA_MKL
         return true;
     #else
@@ -118,7 +126,7 @@ namespace Physica {
     #endif
     }
 
-    [[maybe_unused]] consteval inline static bool HasMPI() {
+    [[maybe_unused]] consteval static bool HasMPI() noexcept {
     #ifdef PHYSICA_MPI
         return true;
     #else
@@ -126,7 +134,7 @@ namespace Physica {
     #endif
     }
 
-    [[maybe_unused]] consteval inline static bool HasCUDA() {
+    [[maybe_unused]] consteval static bool HasCUDA() noexcept {
     #ifdef PHYSICA_CUDA
         return true;
     #else

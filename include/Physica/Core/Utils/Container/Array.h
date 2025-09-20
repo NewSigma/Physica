@@ -138,9 +138,6 @@ namespace Physica {
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
-        void send(int from, int to);
-        void sendrecv(int send_to, int recv_from);
-
         using Base::read;
         using Base::write;
         void swap(This& __restrict obj) noexcept;
@@ -179,6 +176,3 @@ namespace std {
 }
 
 #include "ArrayImpl/ArrayImpl.h"
-#ifdef PHYSICA_MPI
-    #include "ArrayImpl/ArrayMPI.h"
-#endif

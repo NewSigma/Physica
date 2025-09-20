@@ -18,24 +18,46 @@
  */
 #pragma once
 
-#include "../Array.h"
+#include "ArrayBase.h"
 #include "Physica/Core/Parallel/MPIContext.h"
 #include "Physica/Core/Exception/MPIException.h"
 
 namespace Physica {
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::send(int from, int to) {
-        assert(from < MPIContext::getNumProcess() && to < MPIContext::getNumProcess() && from != to);
+    template<class Derived, class Allocator>
+    void ArrayBase<Derived, Allocator>::send(int from, int to) {
+        assert(0 < from && from < MPIContext::getNumProcess());
+        assert(0 < to && to < MPIContext::getNumProcess());
+        assert(from != to);
         const int id = MPIContext::getProcessID();
         if (id == from)
-            check_mpi(MPI_Send(data(), getLength(), T::dtype_mpi(), to, 0, MPIContext::getWorld()));
-        else if (id == to)
-            check_mpi(MPI_Recv(data(), getLength(), T::dtype_mpi(), from, MPI_ANY_TAG, MPIContext::getWorld(), MPI_STATUS_IGNORE));
+            check_mpi(MPI_Send(data(), getLength(), ElemType::dtype_mpi(), to, 0, MPIContext::getWorld()));
+        else if (id == to) {
+            MPI_Status status;
+            check_mpi(MPI_Recv(data(), getLength(), ElemType::dtype_mpi(), from, MPI_ANY_TAG, MPIContext::getWorld(), IsDebug() ? &status : MPI_STATUS_IGNORE));
+            if constexpr (IsDebug()) {
+                int count{};
+                MPI_Get_count(&status, ElemType::dtype_mpi(), &count);
+                assert(count == getLength() && "[Error]: Recv length do not match");
+            }
+        }
     }
 
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::sendrecv(int send_to, int recv_from) {
-        check_mpi(MPI_Sendrecv_replace(
-                data(), getLength(), T::dtype_mpi(), send_to, 0, recv_from, MPI_ANY_TAG, MPIContext::getWorld(), MPI_STATUS_IGNORE));
+    template<class Derived, class Allocator>
+    void ArrayBase<Derived, Allocator>::sendrecv(int send_to, int recv_from) {
+        assert(0 < send_to && send_to < MPIContext::getNumProcess());
+        assert(0 < recv_from && recv_from < MPIContext::getNumProcess());
+        MPI_Status status;
+        check_mpi(MPI_Sendrecv_replace(data(), getLength(), ElemType::dtype_mpi(), send_to, 0, recv_from, MPI_ANY_TAG, MPIContext::getWorld(), IsDebug() ? &status : MPI_STATUS_IGNORE));
+        if constexpr (IsDebug()) {
+            int count{};
+            MPI_Get_count(&status, ElemType::dtype_mpi(), &count);
+            assert(count == getLength() && "[Error]: Recv length do not match");
+        }
+    }
+
+    template<class Derived, class Allocator>
+    void ArrayBase<Derived, Allocator>::bcast(int root) {
+        assert(0 < root && root < MPIContext::getNumProcess());
+        check_mpi(MPI_Bcast(data(), getLength(), ElemType::dtype_mpi(), root, MPIContext::getWorld()));
     }
 }

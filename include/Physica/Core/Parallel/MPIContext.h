@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,7 +24,7 @@
 #include "Physica/Macro.h"
 
 namespace Physica {
-    class PHYSICA_API MPIContext {
+    class PHYSICA_API MPIContext final {
         using This = MPIContext;
     public:
         MPIContext(const This&) = delete;
@@ -39,20 +39,19 @@ namespace Physica {
         /* Static memebers */
         [[nodiscard]] static MPI_Comm getWorld() noexcept { return MPI_COMM_WORLD; }
         [[nodiscard]] static MPIContext& getInstance() noexcept;
+        static void wait();
     private:
-        MPIContext();
-        /* Static memebers */
-        static void world_handler(MPI_Comm* pComm, int* pErr, ...);
+        MPIContext() noexcept;
     };
 
     inline int MPIContext::getNumProcess() noexcept {
-        int result;
+        int result = 0;
         MPI_Comm_size(getWorld(), &result);
         return result;
     }
 
     inline int MPIContext::getProcessID() noexcept {
-        int result;
+        int result = -1;
         MPI_Comm_rank(getWorld(), &result);
         return result;
     }

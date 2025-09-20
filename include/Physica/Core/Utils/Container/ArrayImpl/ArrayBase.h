@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cassert>
 #include <cstddef>
 #include <type_traits>
 #include <memory>
@@ -71,6 +72,10 @@ namespace Physica {
         __host__ __device__ CRIteType rend() const noexcept { return crend(); }
         __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
         /* Operations */
+        void send(int from, int to);
+        void sendrecv(int send_to, int recv_from);
+        void bcast(int root);
+
         void read(const auto& loc, const char* name);
         void write(auto& loc, const char* name) const;
         /* Getters */
@@ -105,3 +110,6 @@ namespace Physica {
 }
 
 #include "ArrayBaseImpl.h"
+#ifdef PHYSICA_MPI
+    #include "ArrayMPI.h"
+#endif

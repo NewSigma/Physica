@@ -18,20 +18,26 @@
  */
 #ifdef PHYSICA_MPI
 
+#include <format>
 #include "Physica/Core/Parallel/MPIContext.h"
 #include "Physica/Core/Exception/MPIException.h"
 
 using namespace Physica;
 
-MPIContext::MPIContext() {
-    int mode;
-    check_mpi(MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode));
-    if (mode != MPI_THREAD_SERIALIZED)
-        throw std::runtime_error("[Error]: Physica do not support the MPI");
-
-    MPI_Errhandler handler;
-    check_mpi(MPI_Comm_create_errhandler(world_handler, &handler));
-    check_mpi(MPI_Comm_set_errhandler(getWorld(), handler));
+MPIContext::MPIContext() noexcept {
+    try {
+        int mode = -1;
+        check_mpi(MPI_Init_thread(nullptr, nullptr, MPI_THREAD_SERIALIZED, &mode));
+        if (mode != MPI_THREAD_SERIALIZED) {
+            std::cerr << "[Error]: Physica do not support the MPI\n";
+            std::abort();
+        }
+        check_mpi(MPI_Comm_set_errhandler(getWorld(), MPI_ERRORS_RETURN));
+    }
+    catch (std::exception& e) {
+        std::cerr << std::format("MPI init failed: {}\n", e.what());
+        MPI_Abort(getWorld(), -1);
+    }
 }
 
 MPIContext::~MPIContext() {
@@ -43,8 +49,8 @@ MPIContext& MPIContext::getInstance() noexcept {
     return mpi;
 }
 
-void MPIContext::world_handler(MPI_Comm*, int* pErr, ...) {
-    throw MPIException(*pErr);
+void MPIContext::wait() {
+    check_mpi(MPI_Barrier(getWorld()));
 }
 
 #endif

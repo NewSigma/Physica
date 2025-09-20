@@ -17,12 +17,16 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Exception/MPIException.h"
+#include "Physica/Core/Parallel/MPIContext.h"
+#include <array>
+#include <format>
 #include <mpi/mpi.h>
 
 using namespace Physica;
 
 namespace {
     class Impl final : public std::error_category {
+        int rank = MPIContext::getProcessID();
     public:
         Impl() = default;
         Impl(const Impl&) = delete;
@@ -32,15 +36,15 @@ namespace {
         Impl& operator=(const Impl&) = delete;
         Impl& operator=(Impl&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] const char* name() const noexcept override final { return "MPI"; }
-        [[nodiscard]] std::string message(int) const override final;
+        [[nodiscard]] const char* name() const noexcept final { return "MPI"; }
+        [[nodiscard]] std::string message(int) const final;
     };
 
     std::string Impl::message(int err) const {
-        char buffer[MPI_MAX_ERROR_STRING];
-        int resultlen;
-        MPI_Error_string(err, buffer, &resultlen);
-        return buffer;
+        std::array<char, MPI_MAX_ERROR_STRING> buffer{};
+        int resultlen{};
+        MPI_Error_string(err, buffer.data(), &resultlen);
+        return std::format("Rank {}: {}", rank, buffer.data());
     }
 }
 
