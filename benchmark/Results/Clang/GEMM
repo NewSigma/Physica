@@ -1,29 +1,27 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-GEMM/2      0.463 ns        0.463 ns   1499970913
-GEMM/4       11.9 ns         11.9 ns     57862971
-GEMM/8       92.6 ns         92.6 ns      7571825
-GEMM/16        141 ns          141 ns      5025616
-GEMM/32        845 ns          845 ns       820255
-GEMM/64       6.41 us         6.41 us       109048
-GEMM/256      0.412 ms        0.412 ms         1697
-GEMM/1024       26.3 ms         26.3 ms           27
-GEMM/4096       1682 ms         1682 ms            1
-GEMM base/2      0.536 ns        0.536 ns   1301747291
-GEMM base/4       12.2 ns         12.2 ns     57538343
-GEMM base/8       94.1 ns         94.1 ns      7431450
-GEMM base/16        728 ns          728 ns       963888
-GEMM base/32       5637 ns         5637 ns       123396
-GEMM base/64       63.3 us         63.3 us        11253
-GEMM base/256       7.13 ms         7.13 ms           97
-GEMM base/1024       2010 ms         2010 ms            1
-GEMM mkl/2       45.0 ns         45.0 ns     15719852
-GEMM mkl/4       44.2 ns         44.2 ns     15871223
-GEMM mkl/8       54.4 ns         54.4 ns     12855334
-GEMM mkl/16        142 ns          142 ns      4928127
-GEMM mkl/32        854 ns          854 ns       820024
-GEMM mkl/64       6.43 us         6.43 us       109156
-GEMM mkl/256      0.423 ms        0.423 ms         1693
-GEMM mkl/1024       26.0 ms         26.0 ms           26
-GEMM mkl/4096       1689 ms         1689 ms            1
+GEMM/2      0.458 ns        0.458 ns   1527220411
+GEMM/4       11.8 ns         11.8 ns     59024416
+GEMM/8       92.4 ns         92.4 ns      7578743
+GEMM/16        139 ns          139 ns      5032342
+GEMM/32        838 ns          837 ns       835856
+GEMM/64       6.21 us         6.21 us       113014
+GEMM/256      0.402 ms        0.402 ms         1738
+GEMM/1024       25.3 ms         25.3 ms           28
+GEMM base/2      0.459 ns        0.459 ns   1506223694
+GEMM base/4       11.9 ns         11.9 ns     59251784
+GEMM base/8       92.4 ns         92.4 ns      7573342
+GEMM base/16        717 ns          717 ns       976457
+GEMM base/32       5563 ns         5563 ns       126849
+GEMM base/64       62.3 us         62.3 us        11390
+GEMM base/256       7.08 ms         7.08 ms           99
+GEMM base/1024       2020 ms         2020 ms            1
+GEMM mkl/2       44.1 ns         44.1 ns     15879470
+GEMM mkl/4       43.2 ns         43.2 ns     16156993
+GEMM mkl/8       53.2 ns         53.2 ns     13167805
+GEMM mkl/16        139 ns          139 ns      5030023
+GEMM mkl/32        838 ns          838 ns       835921
+GEMM mkl/64       6.29 us         6.29 us       111478
+GEMM mkl/256      0.407 ms        0.407 ms         1728
+GEMM mkl/1024       25.7 ms         25.7 ms           27

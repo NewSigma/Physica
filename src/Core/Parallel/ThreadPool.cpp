@@ -39,7 +39,7 @@ namespace {
         }
     };
 
-    const GlobalEnv init{};
+    [[maybe_unused]] const GlobalEnv init{};
 }
 
 int ThreadPool::numThreadRequired = 0;

@@ -1,0 +1,27 @@
+----------------------------------------------------
+Benchmark          Time             CPU   Iterations
+----------------------------------------------------
+exp float32/8       2.52 ns         2.52 ns    214207138
+exp float32/64       45.9 ns         45.9 ns     45188383
+exp float32/512        121 ns          121 ns      4612040
+exp float32/1024        275 ns          274 ns      2891541
+exp float64/8       7.75 ns         7.75 ns     92565046
+exp float64/16       13.7 ns         13.7 ns     56628874
+exp float64/32       25.6 ns         25.6 ns     30992680
+exp float64/64       36.7 ns         36.7 ns     19149698
+exp float32 base/8       3.39 ns         3.39 ns    256832326
+exp float32 base/64       17.0 ns         17.0 ns     38335794
+exp float32 base/512        125 ns          125 ns      5621322
+exp float32 base/1024        344 ns          344 ns      2573409
+exp float64 base/8       6.72 ns         6.72 ns    103967623
+exp float64 base/16       11.5 ns         11.5 ns     54769870
+exp float64 base/32       22.3 ns         22.3 ns     27977857
+exp float64 base/64       45.1 ns         45.1 ns     15564514
+exp float32 mkl/8       13.9 ns         13.9 ns     50145561
+exp float32 mkl/64       18.1 ns         18.1 ns     39296001
+exp float32 mkl/512        250 ns          250 ns      3392078
+exp float32 mkl/1024        506 ns          506 ns      1000000
+exp float64 mkl/8       15.0 ns         15.0 ns     46942212
+exp float64 mkl/16       14.9 ns         14.9 ns     47159827
+exp float64 mkl/32       19.9 ns         19.9 ns     35318551
+exp float64 mkl/64       35.4 ns         35.4 ns     19703409

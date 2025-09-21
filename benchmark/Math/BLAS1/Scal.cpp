@@ -29,8 +29,7 @@ namespace {
         bool flag = true;
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            state.iterations();
-            x *= T(flag ? std::numbers::pi : (1.0 / std::numbers::pi));
+            (x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi))).assign(x);
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();
             flag = !flag;
@@ -43,7 +42,6 @@ namespace {
         bool flag = true;
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            state.iterations();
             (x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi))).assign_base(x);
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();

@@ -64,7 +64,6 @@ BENCHMARK(gemm<32>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(32);
 BENCHMARK(gemm)->Name("GEMM")->Unit(benchmark::kMicrosecond)->Arg(64);
 BENCHMARK(gemm)->Name("GEMM")->Unit(benchmark::kMillisecond)->Arg(256);
 BENCHMARK(gemm)->Name("GEMM")->Unit(benchmark::kMillisecond)->Arg(1024);
-BENCHMARK(gemm)->Name("GEMM")->Unit(benchmark::kMillisecond)->Arg(4096);
 
 BENCHMARK(gemm_base<2>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(2);
 BENCHMARK(gemm_base<4>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(4);
@@ -74,4 +73,3 @@ BENCHMARK(gemm_base<32>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(3
 BENCHMARK(gemm_base)->Name("GEMM base")->Unit(benchmark::kMicrosecond)->Arg(64);
 BENCHMARK(gemm_base)->Name("GEMM base")->Unit(benchmark::kMillisecond)->Arg(256);
 BENCHMARK(gemm_base)->Name("GEMM base")->Unit(benchmark::kMillisecond)->Arg(1024);
-//BENCHMARK(gemm_base)->Name("GEMM base")->Unit(benchmark::kMillisecond)->Arg(4096); // Out of time limit

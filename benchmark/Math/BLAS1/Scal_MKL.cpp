@@ -29,7 +29,6 @@ namespace {
         bool flag = true;
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            state.iterations();
             (x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi))).assign_mkl(x);
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();

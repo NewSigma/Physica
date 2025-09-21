@@ -1,21 +1,21 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-copy/16       1.18 ns         1.18 ns    599506618
-copy/256       8.01 ns         8.01 ns     88071085
-copy/1024       31.8 ns         31.8 ns     22143356
-copy/2048       53.8 ns         53.8 ns     13004658
-copy/4096        435 ns          435 ns      1604287
-copy/65536       6842 ns         6841 ns       101198
-copy base/16       1.08 ns         1.08 ns    646685358
-copy base/256       9.07 ns         9.07 ns     56998069
-copy base/1024       31.3 ns         31.3 ns     22088919
-copy base/2048       62.3 ns         62.3 ns     11330455
-copy base/4096        444 ns          444 ns      1569083
-copy base/65536       7233 ns         7230 ns       101559
-copy mkl/16       5.55 ns         5.55 ns    128830876
-copy mkl/256       11.8 ns         11.8 ns     60780097
-copy mkl/1024       36.2 ns         36.2 ns     19313515
-copy mkl/2048        101 ns          101 ns      7920205
-copy mkl/4096        457 ns          457 ns      1529470
-copy mkl/65536       7271 ns         7269 ns        96519
+copy/16       1.18 ns         1.18 ns    585205518
+copy/256       8.07 ns         8.07 ns     86582152
+copy/1024       31.4 ns         31.4 ns     22321837
+copy/2048       52.9 ns         52.9 ns     13241763
+copy/4096        430 ns          430 ns      1629793
+copy/65536       6777 ns         6775 ns       103534
+copy base/16       1.09 ns         1.09 ns    648990195
+copy base/256       8.02 ns         8.02 ns     86765927
+copy base/1024       31.5 ns         31.5 ns     21939910
+copy base/2048       61.8 ns         61.8 ns     11237746
+copy base/4096        442 ns          442 ns      1577247
+copy base/65536       7133 ns         7133 ns        97438
+copy mkl/16       5.77 ns         5.77 ns    122793943
+copy mkl/256       11.8 ns         11.8 ns     57924649
+copy mkl/1024       36.0 ns         36.0 ns     19455278
+copy mkl/2048        100 ns          100 ns      6820927
+copy mkl/4096        453 ns          453 ns      1543782
+copy mkl/65536       7181 ns         7181 ns        97393

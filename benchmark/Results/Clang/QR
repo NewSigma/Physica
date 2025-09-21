@@ -1,27 +1,27 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-QR/2       32.2 ns         32.2 ns     21967476
-QR/4        107 ns          107 ns      6428365
-QR/8        335 ns          335 ns      2088731
-QR/16       1022 ns         1022 ns       685709
-QR/32       4232 ns         4231 ns       165971
-QR/64       17.0 us         17.0 us        41293
-QR/256      0.493 ms        0.493 ms         1415
-QR/1024       23.6 ms         23.6 ms           30
-QR base/2       32.2 ns         32.2 ns     21733828
-QR base/4        108 ns          108 ns      6309130
-QR base/8        368 ns          368 ns      1897104
-QR base/16       1584 ns         1584 ns       443593
-QR base/32       8717 ns         8715 ns        80917
-QR base/64       65.3 us         65.3 us        10606
-QR base/256       4.52 ms         4.52 ms          156
-QR base/1024        312 ms          312 ms            2
-QR mkl/2       58.7 ns         58.7 ns     11990403
-QR mkl/4        129 ns          129 ns      5415157
-QR mkl/8        340 ns          340 ns      2078810
-QR mkl/16       1035 ns         1034 ns       688040
-QR mkl/32       4256 ns         4255 ns       162923
-QR mkl/64       16.9 us         16.9 us        42093
-QR mkl/256      0.495 ms        0.495 ms         1396
-QR mkl/1024       23.6 ms         23.6 ms           29
+QR/2       29.0 ns         29.0 ns     24112473
+QR/4        104 ns          104 ns      6761275
+QR/8        334 ns          334 ns      2100294
+QR/16       1028 ns         1027 ns       687549
+QR/32       4256 ns         4255 ns       166336
+QR/64       16.6 us         16.6 us        42151
+QR/256      0.483 ms        0.483 ms         1450
+QR/1024       22.7 ms         22.7 ms           30
+QR base/2       28.9 ns         28.9 ns     24190832
+QR base/4        103 ns          103 ns      6739808
+QR base/8        357 ns          357 ns      1962948
+QR base/16       1521 ns         1521 ns       460257
+QR base/32       8693 ns         8693 ns        80625
+QR base/64       69.1 us         69.1 us        10142
+QR base/256       4.85 ms         4.85 ms          144
+QR base/1024        313 ms          313 ms            2
+QR mkl/2       57.1 ns         57.1 ns     12187022
+QR mkl/4        126 ns          126 ns      5533606
+QR mkl/8        336 ns          336 ns      2091297
+QR mkl/16       1013 ns         1013 ns       690498
+QR mkl/32       4206 ns         4205 ns       165178
+QR mkl/64       16.7 us         16.7 us        42009
+QR mkl/256      0.485 ms        0.485 ms         1444
+QR mkl/1024       22.7 ms         22.7 ms           30

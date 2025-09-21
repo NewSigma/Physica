@@ -26,15 +26,27 @@ using RandomSource = Random<MT19937>;
 namespace {
     template<Scalar T>
     void innerDot_mkl(benchmark::State& state) {
-        const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(1024);
-        const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(1024);
+        const int64_t size = state.range(0);
+        const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
+        const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
         const auto dot = InnerDot(v1, v2);
         for (auto _ : state)
             dot.calc_mkl();
     }
 }
 
-BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond);
-BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond);
+BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)->Arg(16);
+BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)->Arg(128);
+BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)->Arg(1024);
+
+BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)->Arg(16);
+BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)->Arg(128);
+BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)->Arg(1024);
+
+BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)->Arg(16);
+BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)->Arg(128);
+BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)->Arg(1024);
+
+BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)->Arg(16);
+BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)->Arg(128);
+BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)->Arg(1024);
