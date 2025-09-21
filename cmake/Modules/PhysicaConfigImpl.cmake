@@ -47,8 +47,10 @@ else()
             add_link_options(--version)
             add_custom_target(LLVMIR
                               COMMAND mkdir -p llvm && cd llvm && find .. -name '*.o' -exec mv {} . "\\;" && mmv '*.cpp.o' "'#1.ll'"
+                              COMMAND rm llvm/*._MKL.ll
                               WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                               COMMENT "Generating LLVM IR")
+            add_dependencies(LLVMIR Benchmark)
         endif()
     else()
         message(FATAL_ERROR "Unknown compiler")

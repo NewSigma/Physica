@@ -18,8 +18,29 @@
  */
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "Physica/Core/Math/Random/RandomSeed.h"
+#include <memory>
+#ifdef PHYSICA_MKL
+    #include <mkl_vml.h>
+#endif
 
 using namespace Physica;
+
+namespace {
+    void setThreadEnv() noexcept {
+    #ifdef PHYSICA_MKL
+        vmlSetMode(VML_HA | VML_FTZDAZ_CURRENT | VML_ERRMODE_NOERR);
+    #endif
+    }
+
+    class GlobalEnv {
+    public:
+        GlobalEnv() noexcept {
+            setThreadEnv();
+        }
+    };
+
+    const GlobalEnv init{};
+}
 
 int ThreadPool::numThreadRequired = 0;
 
@@ -42,6 +63,7 @@ ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");
     for (int i = 0; i < numThreads; ++i) {
         thread_data[i].thread.reset(new std::thread([i]() noexcept {
+            setThreadEnv();
             getInstance().workerMainLoop(i);
         }));
     }
@@ -55,7 +77,7 @@ void ThreadPool::schedule(Handle handle) noexcept {
     assert(handle != nullptr);
     assert(!handle.done());
     const int schedule_to = isMainThread() ? 0 : getThreadInfo().id;
-    thread_data[schedule_to].push(std::move(handle));
+    thread_data[schedule_to].push(handle);
     cond.notify_one();
 }
 
@@ -127,7 +149,7 @@ void ThreadPool::workerMainLoop(int thread_id) noexcept {
 auto ThreadPool::getThreadInfo() noexcept -> ThreadInfo& {
     thread_local static std::unique_ptr<ThreadInfo> info = nullptr;
     if (info == nullptr) {
-        info.reset(new ThreadInfo());
+        info = std::make_unique<ThreadInfo>();
         info->id = MainThreadID;
         info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
     }

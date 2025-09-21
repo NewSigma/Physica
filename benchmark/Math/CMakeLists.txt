@@ -1,8 +1,8 @@
 add_subdirectory(BLAS1)
+add_subdirectory(Vector)
 
 target_sources(Benchmark PRIVATE EigenSolver.cpp)
 target_sources(Benchmark PRIVATE GEMM.cpp)
-target_sources(Benchmark PRIVATE LnCosh.cpp)
 target_sources(Benchmark PRIVATE QRDecomp.cpp)
 target_sources(Benchmark PRIVATE SyMV.cpp)
 target_sources(Benchmark PRIVATE UnitMV.cpp)

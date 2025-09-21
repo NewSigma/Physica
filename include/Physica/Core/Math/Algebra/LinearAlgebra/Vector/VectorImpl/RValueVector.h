@@ -101,6 +101,7 @@ namespace Physica {
     protected:
         using T = ScalarType;
         using Tr = T::RealType;
+        using Tc = T::ComplexType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     private:

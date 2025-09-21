@@ -87,7 +87,7 @@ namespace Physica {
         [[nodiscard]] static inline int getThreadID() noexcept;
         [[nodiscard]] static inline bool isMainThread() noexcept;
     private:
-        ThreadPool(int threadCount);
+        ThreadPool(int numThreads);
         /* Operations */
         void workerMainLoop(int thread_id) noexcept;
         /* Static Members */

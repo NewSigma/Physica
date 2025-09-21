@@ -26,29 +26,75 @@ namespace Physica {
         using This = VectorExpr<ExprType::Exp, V>;
         using Base = UnitaryVectorExpr<ExprType::Exp, V>;
     public:
+        using Base::isComplex;
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tc;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t index) const { return exp(Base::getExpr().calc(index)); }
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& v) const noexcept;
+        void assign_mkl(Vector auto& v) const noexcept;
+        template<ExecutePolicy P = Sequential>
+        void assign_base(Vector auto& v) const noexcept;
 
-        [[nodiscard]] Tv calc_value(size_t index) const { return exp(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            return exp(Base::getExpr().template packet<Pack>(index));
-        }
-
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return exp(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
-        }
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector V>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprType::Exp, V>::assign(Vector auto& v) const noexcept {
+        using V1 = std::remove_cvref_t<decltype(v)>;
+        constexpr size_t Length = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
+        constexpr bool SmallVector = 0 < Length && Length <= 32;
+        if constexpr (Internal::EnableMKL<V, V1>::value && !SmallVector && T::Prec == Float64) {
+            if (Base::getLength() <= 32)
+                assign_base(v);
+            else
+                assign_mkl(v);
+        }
+        else
+            assign_base(v);
+    }
+
+    template<Vector V>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprType::Exp, V>::assign_base(Vector auto& v) const noexcept {
+        Base::template assign<P>(v);
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Exp, V>::calc(size_t index) const -> CoDiff<T> {
+        return exp(Base::getExpr().calc(index));
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Exp, V>::calc_value(size_t index) const -> Tv {
+        return exp(Base::getExpr().calc_value(index));
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Exp, V>::packet(size_t index) const {
+        return exp(Base::getExpr().template packet<Pack>(index));
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Exp, V>::packetPartial(size_t index, size_t count) const {
+        return exp(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
+    }
 
     template<Vector V>
     void VectorExpr<ExprType::Exp, V>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
@@ -67,3 +113,7 @@ namespace Physica {
         return VectorExpr<ExprType::Exp, V&&>(std::forward<V>(v));
     }
 }
+
+#ifdef PHYSICA_MKL
+    #include "MKL/Exp.h"
+#endif
