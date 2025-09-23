@@ -103,7 +103,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    JacobiDavidson<T>::JacobiDavidson() {
+    JacobiDavidson<T>::JacobiDavidson() : numSearchDim() {
         linearSolver.mustConverge = false;
         linearSolver.setError(LinearSolverPrecision);
         linearSolver.setMaxIteration(MaxLinearSolverIteration);
@@ -416,7 +416,7 @@ namespace Physica {
         const size_t result = MaxBufferSize / order;
         if (result > MaxSearchDim)
             return MaxSearchDim;
-        else if (result < MinSearchDim)
+        if (result < MinSearchDim)
             return MinSearchDim;
         return result;
     }

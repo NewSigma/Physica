@@ -32,7 +32,8 @@ namespace Physica {
         [[no_unique_address]] IndexType order;
     public:
         UnitMatrix() = default;
-        UnitMatrix(size_t order_);
+        explicit UnitMatrix(size_t order_);
+        explicit UnitMatrix(const Matrix auto& m);
         UnitMatrix(const This&) = default;
         UnitMatrix(This&&) noexcept = default;
         ~UnitMatrix() = default;
@@ -56,6 +57,11 @@ namespace Physica {
     template<Scalar T, size_t Order>
     UnitMatrix<T, Order>::UnitMatrix(size_t order_) : order(order_) {
         assert((Order == Dynamic || Order == order_) && "[Error]: tparam and param is not consistent");
+    }
+
+    template<Scalar T, size_t Order>
+    UnitMatrix<T, Order>::UnitMatrix(const Matrix auto& m) : UnitMatrix(m.getRow()) {
+        assert(m.isSquare());
     }
 
     template<Scalar T, size_t Order>

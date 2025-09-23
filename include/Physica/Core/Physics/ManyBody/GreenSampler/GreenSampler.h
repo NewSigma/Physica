@@ -41,6 +41,7 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
+        [[nodiscard]] T calcMean(const VectorND<T>& observes) const;
         [[nodiscard]] T calcMeanWeighted(const VectorND<T>& observes) const;
         [[nodiscard]] Tv calcSign() const noexcept;
         [[nodiscard]] Tv calcSignWeighted() const;
@@ -63,6 +64,11 @@ namespace Physica {
     }
 
     template<Scalar T>
+    T GreenSampler<T>::calcMean(const VectorND<T>& observes) const {
+        return hadamard(observes, getSigns()).mean() / calcSign();
+    }
+
+    template<Scalar T>
     T GreenSampler<T>::calcMeanWeighted(const VectorND<T>& observes) const {
         const T factor = getLnPartitionZs().max();
         VectorND<Tf> buffer(getLnPartitionZs() - factor, observes);
@@ -72,7 +78,7 @@ namespace Physica {
 
     template<Scalar T>
     auto GreenSampler<T>::calcSign() const noexcept -> Tv {
-        return samples.grads().mean();
+        return getSigns().mean();
     }
 
     template<Scalar T>

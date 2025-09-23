@@ -61,7 +61,7 @@ namespace Physica {
             }
         }
         else {
-            MKL_INT64 sdim;
+            MKL_INT64 sdim{};
             if constexpr (isComplex) {
                 auto* w = reinterpret_cast<Tm*>(eigenvalues.data());
                 if constexpr (T::Prec == Float32)

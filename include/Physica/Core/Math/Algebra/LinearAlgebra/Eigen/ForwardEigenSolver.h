@@ -53,7 +53,7 @@ namespace Physica {
         void sort();
         void sort(std::invocable<Tcv, Tcv> auto comp);
         void resize(size_t size, bool needEigenvectors);
-        void swap(This& __restrict solver) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
         [[nodiscard]] const auto& getEigenvalues() const noexcept { return eigenvalues; }

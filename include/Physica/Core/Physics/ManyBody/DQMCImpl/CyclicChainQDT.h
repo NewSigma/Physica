@@ -50,12 +50,14 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] const QDTDecomp<T>& multiply(size_t from, size_t to) noexcept;
         void single_flip(int site, int split, Tr factor, Tr invfac) noexcept;
-        void invalidate(size_t i) noexcept;
+        void invalidate(int split) noexcept;
         void invalidates() noexcept;
 
         void resize(size_t length);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] const auto& getDecomps() const noexcept { return decomps; }
+        [[nodiscard]] const auto& getReadys() const noexcept { return readys; }
         [[nodiscard]] size_t getLength() const noexcept { return decomps.getRow(); }
     };
 
@@ -109,6 +111,7 @@ namespace Physica {
     template<Scalar T>
     void CyclicChainQDT<T>::single_flip(int site, int split, Tr factor, Tr invfac) noexcept {
         assert(split < getLength());
+        assert(scalarNear(factor * invfac, Tr(1), std::numeric_limits<T>::epsilon() * 10) && "[Error]: Invalid argument");
         for (size_t from = 0; from < getLength(); ++from) {
             for (size_t to = 0; to < getLength(); ++to) {
                 bool diag = from == to;
@@ -124,28 +127,28 @@ namespace Physica {
 
                 bool cond1 = from <= split;
                 bool cond2 = split <= to;
-                if (from < to)
-                    readys(from, to) = ready && !(cond1 && cond2);
-                else
-                    readys(from, to) = ready && !(cond1 || cond2);
+                bool inRange1 = (from < to) && cond1 && cond2;
+                bool inRange2 = !(from < to) && (cond1 || cond2);
+                if (inRange1 || inRange2)
+                    readys(from, to) = false;
             }
         }
     }
 
     template<Scalar T>
-    void CyclicChainQDT<T>::invalidate(size_t i) noexcept {
-        assert(i < getLength());
+    void CyclicChainQDT<T>::invalidate(int split) noexcept {
+        assert(split < getLength());
         for (size_t from = 0; from < getLength(); ++from) {
             for (size_t to = 0; to < getLength(); ++to) {
                 if (from == to)
                     continue;
 
-                bool cond1 = from <= i;
-                bool cond2 = i <= to;
-                if (from < to)
-                    readys(from, to) &= !(cond1 && cond2);
-                else
-                    readys(from, to) &= !(cond1 || cond2);
+                bool cond1 = from <= split;
+                bool cond2 = split <= to;
+                bool inRange1 = (from < to) && cond1 && cond2;
+                bool inRange2 = !(from < to) && (cond1 || cond2);
+                if (inRange1 || inRange2)
+                    readys(from, to) = false;
             }
         }
     }

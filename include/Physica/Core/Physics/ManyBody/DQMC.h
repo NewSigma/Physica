@@ -93,13 +93,16 @@ namespace Physica {
         /* Operations */
         void resize(int numSite, int numSplit, int period);
 
+        Vector2D<Tr> calcDelta(int site, int split) const noexcept;
+        Vector2D<Tr> calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept;
         void single_flip(int site, int split) noexcept;
+        void flipGreens(int site, int split, Vector2D<Tr> deltaRatios);
+        void flipMH(int site, int split, Tr prop);
+
         void splitDiag(const QDTDecomp<T>& qdt) noexcept;
         [[nodiscard]] std::pair<Tr, Tr> lnPartition(const QDTDecomp<T>& qdt);
-        [[nodiscard]] std::pair<Tr, Tr> calcGreen(const QDTDecomp<T>& qdt, MatrixND& green);
         [[nodiscard]] Tr calcGreens();
 
-        Vector2D<Tr> calcRatio(int site, int split) const noexcept;
         Tr calcLnSpinWaveWeight(int site) const noexcept;
         Tr calcLnSpinWaveWeight(Tr sumSpin) const noexcept;
         /* Static members */
@@ -131,19 +134,16 @@ namespace Physica {
     template<RNG R>
     void DQMC<T>::step_mh() {
         auto& rng = R::getInstance();
-        auto props = VectorND<Tr>(getNumSite());
+        const auto props = VectorND<Tr>::template random_uniform<R>(getNumSite());
         auto sites = Array<int>(getNumSite());
         for (int i = 0; i < getNumSite(); ++i)
             sites[i] = i;
+        std::ranges::shuffle(sites, rng);
 
         const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(rng);
-        std::shuffle(sites.begin(), sites.end(), rng);
-        props.template random_uniform<R>();
-        for (int i = 0; i < getNumSite(); ++i) {
-            int site = sites[i];
-            if (props[i] < abs(calcRatio(site, split).prod()))
-                single_flip(site, split);
-        }
+        for (int i = 0; i < getNumSite(); ++i)
+            flipMH(sites[i], split, props[i]);
+
         lnPartitionZ = calcGreens();
     }
 
@@ -158,14 +158,12 @@ namespace Physica {
             sites[i] = i;
 
         for (int step = 0; step < numStep; ++step) {
-            std::shuffle(sites.begin(), sites.end(), R::getInstance());
+            std::ranges::shuffle(sites, R::getInstance());
             props.template random_uniform<R>();
             int split = step % getNumSplit();
-            for (int i = 0; i < getNumSite(); ++i) {
-                int site = sites[i];
-                if (props[i] < abs(calcRatio(site, split).prod()))
-                    single_flip(site, split);
-            }
+            for (int i = 0; i < getNumSite(); ++i)
+                flipMH(sites[i], split, props[i]);
+
             lnPartitionZ = calcGreens();
         }
     }
@@ -218,7 +216,7 @@ namespace Physica {
                 const int i = step % getNumSplit();
                 if (i == 0) {
                     props.template random_uniform<R>();
-                    std::shuffle(splits.begin(), splits.end(), R::getInstance());
+                    std::ranges::shuffle(splits, R::getInstance());
                 }
 
                 const int split = splits[i];
@@ -300,13 +298,58 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto DQMC<T>::calcDelta(int site, int split) const noexcept -> Vector2D<Tr> {
+        const Tr x = Tr(2) * params.getAlpha() * aux(site, split);
+        return exp(Vector2D<Tr>{-x, x}) - Tr(1); // The Eq. above Eq.(7.33) of [2]
+    }
+
+    template<Scalar T>
+    auto DQMC<T>::calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept -> Vector2D<Tr> {
+        assert(site < getNumSite() && split < getNumSplit());
+        assert(getNumEqualGreen() == getNumSplit() && "[Error]: Cannot use rank-1 update if equal-time greens are not complete");
+        const int split1 = (split + 1) % getNumSplit();
+        Vector2D<Tr> result = deltas;
+        result[0] *= Tr(1) - greenUs[split1](site, site).real();
+        result[1] *= Tr(1) - greenDs[split1](site, site).real();
+        result += Tr(1);
+        return result; // Eq.(7.36) of [2]
+    }
+
+    template<Scalar T>
     void DQMC<T>::single_flip(int site, int split) noexcept {
         auto spins = aux.row(site);
         spins[split] = -spins[split];
-        // TODO: Make it a data member
-        std::array<Tr, 2> arr{exp(Trv(2) * params.getAlpha() * spins[split]), exp(Trv(-2) * params.getAlpha() * spins[split])};
+
+        const Tr x = Tr(2) * params.getAlpha() * spins[split];
+        const Vector2D<Tr> arr = exp(Vector2D<Tr>{x, -x});
         chainU.single_flip(site, split, arr[0], arr[1]);
         chainD.single_flip(site, split, arr[1], arr[0]);
+    }
+
+    template<Scalar T>
+    void DQMC<T>::flipGreens(int site, int split, Vector2D<Tr> deltaRatios) {
+        // Eq. (7.44) of [2]
+        const int numSite = getNumSite();
+        VectorND<T> vc(numSite);
+        VectorND<T> vr(numSite);
+        auto flipGreen = [site, &vc, &vr](MatrixND& green, Tr deltaRatio) {
+            vc = (green - UnitMatrix<T>(green)).col(site);
+            vr = green.row(site);
+            green += deltaRatio * (vc * vr.transpose());
+        };
+        const int split1 = (split + 1) % getNumSplit();
+        flipGreen(greenUs[split1], deltaRatios[0]);
+        flipGreen(greenDs[split1], deltaRatios[1]);
+    }
+
+    template<Scalar T>
+    void DQMC<T>::flipMH(int site, int split, Tr prop) {
+        const auto deltas = calcDelta(site, split);
+        const auto ratios = calcRatio(site, split, deltas);
+        if (prop < abs(ratios.prod())) {
+            single_flip(site, split);
+            flipGreens(site, split, divide(deltas, ratios));
+        }
     }
 
     template<Scalar T>
@@ -338,15 +381,16 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto DQMC<T>::calcGreen(const QDTDecomp<T>& qdt, MatrixND& green) -> std::pair<Tr, Tr> {
-        const auto pair = lnPartition(qdt);
-        MatrixND temp = buffer * qr.getMatrixQ();
-        green = qr.getMatrixR().inverse() * temp.transpose();
-        return pair;
-    }
-
-    template<Scalar T>
     auto DQMC<T>::calcGreens() -> Tr {
+        const int numSite = getNumSite();
+        auto temp = MatrixND(numSite, numSite);
+        auto calcGreen = [this, &temp](const QDTDecomp<T>& qdt, MatrixND& green) -> std::pair<Tr, Tr> {
+            const auto pair = lnPartition(qdt);
+            temp = buffer * qr.getMatrixQ();
+            green = qr.getMatrixR().inverse() * temp.transpose();
+            return pair;
+        };
+
         const int numSplit = getNumSplit();
         const int period = getPeriod();
         Tr lnZU = 0;
@@ -371,19 +415,6 @@ namespace Physica {
             signD = sign;
         }
         return lnZU + lnZD;
-    }
-
-    template<Scalar T>
-    auto DQMC<T>::calcRatio(int site, int split) const noexcept -> Vector2D<Tr> {
-        assert(site < getNumSite() && split < getNumSplit());
-        assert(getNumEqualGreen() == getNumSplit() && "[Error]: Cannot use rank-1 update if equal-time greens are not complete");
-        const Tr delta = Tr(2) * params.getAlpha() * aux(site, split);
-        Vector2D<Tr> result{-delta, delta};
-        result = exp(result) - Tr(1);
-        result[0] *= Tr(1) - greenUs[split](site, site).real();
-        result[1] *= Tr(1) - greenDs[split](site, site).real();
-        result += Tr(1);
-        return result; // Eq.(7.36) in [2]
     }
 
     template<Scalar T>

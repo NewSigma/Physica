@@ -32,7 +32,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
 
         MatrixND matrixQ;
-        DiagMatrix<Tr> matrixD;
+        DiagMatrix<Tr> matrixD; // matrixD suffers from over/underflow
         QRDecomp<T> qr;
         Trv detQ;
     public:

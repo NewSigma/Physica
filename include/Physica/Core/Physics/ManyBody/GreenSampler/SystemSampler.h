@@ -53,7 +53,8 @@ namespace Physica {
         /* Operations */
         template<Scalar U>
         void sample(const DQMC<U>& dqmc, Observable type);
-        [[nodiscard]] MatrixND calc(bool weighted) const;
+        [[nodiscard]] MatrixND calcMean() const;
+        [[nodiscard]] MatrixND calcMeanWeighted() const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -62,6 +63,8 @@ namespace Physica {
         [[nodiscard]] int getNumSiteX() const noexcept { return fft.getRSpaceSize()[0]; }
         [[nodiscard]] int getNumSiteY() const noexcept { return fft.getRSpaceSize()[1]; }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
+    private:
+        MatrixND calcMeanImpl(bool weighted) const;
     };
 
     template<Scalar T>
@@ -106,7 +109,24 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calc(bool weighted) const -> MatrixND {
+    auto SystemSampler<T>::calcMean() const -> MatrixND {
+        return calcMeanImpl(false);
+    }
+
+    template<Scalar T>
+    auto SystemSampler<T>::calcMeanWeighted() const -> MatrixND {
+        return calcMeanImpl(true);
+    }
+
+    template<Scalar T>
+    void SystemSampler<T>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
+        observes.swap(obj.observes);
+    }
+
+    template<Scalar T>
+    auto SystemSampler<T>::calcMeanImpl(bool weighted) const -> MatrixND {
         const int kX = getNumSiteX();
         const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
         MatrixND result(kX, kY);
@@ -115,16 +135,9 @@ namespace Physica {
             for (int y = 0; y < kY; ++y) {
                 for (size_t i = 0; i < observes.getLength(); ++i)
                     buffer[i] = observes[i](x, y);
-                result(x, y) = weighted ? Base::calcMeanWeighted(buffer) : buffer.mean();
+                result(x, y) = weighted ? Base::calcMeanWeighted(buffer) : Base::calcMean(buffer);
             }
         }
         return result;
-    }
-
-    template<Scalar T>
-    void SystemSampler<T>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
-        observes.swap(obj.observes);
     }
 }
