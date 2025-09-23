@@ -31,7 +31,7 @@ int main() {
     auto c = DVector::random_uniform<RandomSource>(8);
     DVector d(8);
 
-    d = hadamard(sin(a) + b, square(c)); // Any combination is OK, operator is fused and only 1 CUDA kernel will be issued
-    std::cout << d.toHost().format() << '\n'; // Sync version, wait for GPU finishing its work
+    d = hadamard(sin(a) + b, square(c)); // For any combination, the operators are fused and only a single CUDA kernel is issued.
+    std::cout << d.toHost().format() << '\n'; // Sync version, wait for the GPU to finish
     return 0;
 }

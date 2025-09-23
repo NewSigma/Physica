@@ -21,22 +21,24 @@
 
 using namespace Physica;
 
-static float64 forward() noexcept {
-    using dfloat = Diff<float64, DiffMode::Forward>;
-    dfloat x(0.5, 1); // x = 0.5, dx/dx = 1
-    dfloat y = sin(x) / x; // Compute value as well as grad
-    return y.grad();
-}
+namespace {
+    float64 forward() noexcept {
+        using dfloat = Diff<float64, DiffMode::Forward>;
+        dfloat x(0.5, 1); // x = 0.5, dx/dx = 1
+        dfloat y = sin(x) / x; // Compute value as well as grad
+        return y.grad();
+    }
 
-static float64 reverse() noexcept {
-    using dfloat = Diff<float64, DiffMode::Reverse>;
-    dfloat x(0.5); // x = 0.5, initial grad is 0
-    {
-        auto y = sin(x) / x; // Compute value, sequence compute graph
-        static_assert(std::same_as<decltype(y), CoDiff<dfloat>>); // return type contains a dfloat and a compute graph
-        y.reverse(1); // We will propagate 1 reversely
-    } // Start reverse propagate and destroy y
-    return x.grad(); // x received grad
+    float64 reverse() noexcept {
+        using dfloat = Diff<float64, DiffMode::Reverse>;
+        dfloat x(0.5); // x = 0.5, initial grad is 0
+        {
+            auto y = sin(x) / x; // Compute value, sequence compute graph
+            static_assert(std::same_as<decltype(y), CoDiff<dfloat>>); // The return type contains a dfloat and a compute graph
+            y.reverse(); // We will propagate 1 in reverse
+        } // Start reverse propagating and destroy y
+        return x.grad(); // x receives grad
+    }
 }
 
 int main() {
