@@ -54,7 +54,7 @@ namespace Physica {
         template<Scalar U>
         void sample(const DQMC<U>& dqmc, Observable type);
         [[nodiscard]] MatrixND calcMean() const;
-        [[nodiscard]] MatrixND calcMeanWeighted() const;
+        [[nodiscard]] MatrixND calcMean(const VectorND<T>& lnWeights) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -64,7 +64,7 @@ namespace Physica {
         [[nodiscard]] int getNumSiteY() const noexcept { return fft.getRSpaceSize()[1]; }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
-        MatrixND calcMeanImpl(bool weighted) const;
+        MatrixND calcMeanImpl(std::optional<const VectorND<T>&> lnWeights) const;
     };
 
     template<Scalar T>
@@ -105,17 +105,17 @@ namespace Physica {
             fft.transform();
             toNextMean(observes[Base::getCursor()], i, fft.getKSpace().squaredNorms() * reciprocal(T(numSite)));
         }
-        Base::sample(dqmc.getLnPartitionZ(), dqmc.getSign());
+        Base::sample(dqmc.getLnAbsDet(), dqmc.getSign());
     }
 
     template<Scalar T>
     auto SystemSampler<T>::calcMean() const -> MatrixND {
-        return calcMeanImpl(false);
+        return calcMeanImpl(nullptr);
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcMeanWeighted() const -> MatrixND {
-        return calcMeanImpl(true);
+    auto SystemSampler<T>::calcMean(const VectorND<T>& lnWeights) const -> MatrixND {
+        return calcMeanImpl(lnWeights);
     }
 
     template<Scalar T>
@@ -126,7 +126,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcMeanImpl(bool weighted) const -> MatrixND {
+    auto SystemSampler<T>::calcMeanImpl(std::optional<const VectorND<T>&> lnWeights) const -> MatrixND {
         const int kX = getNumSiteX();
         const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
         MatrixND result(kX, kY);
@@ -135,7 +135,7 @@ namespace Physica {
             for (int y = 0; y < kY; ++y) {
                 for (size_t i = 0; i < observes.getLength(); ++i)
                     buffer[i] = observes[i](x, y);
-                result(x, y) = weighted ? Base::calcMeanWeighted(buffer) : Base::calcMean(buffer);
+                result(x, y) = lnWeights.has_value() ? Base::calcMean(buffer, lnWeights.value()) : Base::calcMean(buffer);
             }
         }
         return result;

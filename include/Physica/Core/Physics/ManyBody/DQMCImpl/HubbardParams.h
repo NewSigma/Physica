@@ -39,9 +39,9 @@ namespace Physica {
         Tr beta;
         Tr repelU;
         Tr chemMu;
-        int numSplit;
+        int numSplit = 0;
 
-        Tr lnCoshShift;
+        VectorND<Tr> lnSpinWeights;
     public:
         HubbardParams() = default;
         template<int Dim, BoundaryCond BC>
@@ -50,10 +50,7 @@ namespace Physica {
         HubbardParams(This&&) noexcept = default;
         ~HubbardParams() = default;
         /* Operators */
-        This& operator=(This obj) noexcept {
-            swap(obj);
-            return *this;
-        }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] Tr calcBetaMu() const noexcept;
 
@@ -72,15 +69,14 @@ namespace Physica {
         [[nodiscard]] Tr getBeta() const noexcept { return beta; }
         [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
         [[nodiscard]] Tr getChemMu() const noexcept { return chemMu; }
-        [[nodiscard]] Tr getLnCoshShift() const noexcept { return lnCoshShift; }
-        /* Setters */
-        void setChemMu(Tr chemMu_);
+        [[nodiscard]] const auto& getLnSpinWeights() const noexcept { return lnSpinWeights; }
         /* Static members */
         [[nodiscard]] static Tr calcAlpha(Tr beta, Tr repelU, int numSplit) noexcept;
         [[nodiscard]] static Tr calcBetaMu(Tr beta, Tr repelU, Tr chemMu) noexcept;
     private:
         template<int Dim, BoundaryCond BC>
         void makeHoppingMatrix(Tr hoppingT, const SquareLattice<Dim, BC>& lattice);
+        void makeLnSpinWeights();
         /* Friends */
         friend class device_obj<This>;
     };
@@ -91,7 +87,8 @@ namespace Physica {
             : beta(beta_)
             , repelU(repelU_)
             , chemMu(chemMu_)
-            , numSplit(numSplit_) {
+            , numSplit(numSplit_)
+            , lnSpinWeights(lattice.getNumSuperCellSite()) {
         assert(!repelU.isNegative() && "[Error]: It is assumed U >= 0");
         assert(!beta.isNegative() && "[Error]: Negative temperature is invalid");
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
@@ -100,6 +97,7 @@ namespace Physica {
         DenseMatrix<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
         expB = exp(hoppingMatrixB);
         alpha = calcAlpha(beta, repelU, numSplit);
+        makeLnSpinWeights();
     }
 
     template<Scalar T>
@@ -117,14 +115,6 @@ namespace Physica {
         repelU.swap(obj.repelU);
         chemMu.swap(obj.chemMu);
         std::swap(numSplit, obj.numSplit);
-
-        lnCoshShift.swap(obj.lnCoshShift);
-    }
-
-    template<Scalar T>
-    void HubbardParams<T>::setChemMu(Tr chemMu_) {
-        chemMu = std::move(chemMu_);
-        lnCoshShift = lncosh(calcBetaMu());
     }
 
     template<Scalar T>
@@ -197,6 +187,17 @@ namespace Physica {
                     hoppingMatrix(from, next) = -hoppingT * phase;
                 }
             }
+        }
+    }
+
+    template<Scalar T>
+    void HubbardParams<T>::makeLnSpinWeights() {
+        const Tr lncoshBetaMu = lncosh(calcBetaMu());
+        const int numSplit = getNumSplit();
+        lnSpinWeights.resize(numSplit + 1);
+        for (int spinUp = 0; spinUp <= numSplit; ++spinUp) {
+            int sumSpin = 2 * spinUp - numSplit;
+            lnSpinWeights = ln1pexp(lncosh(alpha * sumSpin) - lncoshBetaMu);
         }
     }
 }

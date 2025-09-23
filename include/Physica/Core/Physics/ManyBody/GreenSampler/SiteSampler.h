@@ -44,7 +44,7 @@ namespace Physica {
         template<Scalar U>
         void sample(const DQMC<U>& dqmc, Observable type);
         [[nodiscard]] T calcMean() const;
-        [[nodiscard]] T calcMeanWeighted() const;
+        [[nodiscard]] T calcMean(const VectorND<T>& lnWeights) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -76,7 +76,7 @@ namespace Physica {
             toNextMean(mean, i, observe);
         }
         observes[Base::getCursor()] = mean;
-        Base::sample(dqmc.getLnPartitionZ(), dqmc.getSign());
+        Base::sample(dqmc.getLnAbsDet(), dqmc.getSign());
     }
 
     template<Scalar T>
@@ -85,8 +85,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T SiteSampler<T>::calcMeanWeighted() const {
-        return Base::calcMeanWeighted(observes);
+    T SiteSampler<T>::calcMean(const VectorND<T>& lnWeights) const {
+        return Base::calcMean(observes, lnWeights);
     }
 
     template<Scalar T>

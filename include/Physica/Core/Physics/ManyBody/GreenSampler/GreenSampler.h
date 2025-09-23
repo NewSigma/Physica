@@ -28,9 +28,9 @@ namespace Physica {
         static_assert(!T::isComplex, "[Error]: Observables are real");
     protected:
         using Tv = T::ValueType;
-        using Tf = Diff<T, DiffMode::Forward, 1>;
     private:
-        VectorND<Tf> samples;
+        VectorND<T> lnAbsDets;
+        VectorND<Tv> signs;
         size_t cursor = 0;
     public:
         GreenSampler(size_t numSample);
@@ -42,67 +42,67 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         [[nodiscard]] T calcMean(const VectorND<T>& observes) const;
-        [[nodiscard]] T calcMeanWeighted(const VectorND<T>& observes) const;
+        [[nodiscard]] T calcMean(const VectorND<T>& observes, const VectorND<T>& lnWeights) const;
         [[nodiscard]] Tv calcSign() const noexcept;
-        [[nodiscard]] Tv calcSignWeighted() const;
+        [[nodiscard]] Tv calcSign(const VectorND<T>& lnWeights) const;
         [[nodiscard]] T lnPartitionZ() const;
 
         void reset() { cursor = 0; }
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const auto& getLnPartitionZs() const noexcept { return samples.values(); }
-        [[nodiscard]] const auto& getSigns() const noexcept { return samples.grads(); }
-        [[nodiscard]] size_t getNumSample() const noexcept { return samples.getLength(); }
+        [[nodiscard]] const auto& getLnAbsDets() const noexcept { return lnAbsDets; }
+        [[nodiscard]] const auto& getSigns() const noexcept { return signs; }
+        [[nodiscard]] size_t getNumSample() const noexcept { return signs.getLength(); }
         [[nodiscard]] size_t getCursor() const noexcept { return cursor; }
     protected:
-        void sample(T lnZ, T sign) noexcept;
+        void sample(T lnAbsDet, T sign) noexcept;
     };
 
     template<Scalar T>
-    GreenSampler<T>::GreenSampler(size_t numSample) : samples(numSample) {
+    GreenSampler<T>::GreenSampler(size_t numSample) : lnAbsDets(numSample), signs(numSample) {
         assert(numSample > 0);
     }
 
     template<Scalar T>
     T GreenSampler<T>::calcMean(const VectorND<T>& observes) const {
-        return hadamard(observes, getSigns()).mean() / calcSign();
+        return hadamard(observes, signs).mean() / calcSign();
     }
 
     template<Scalar T>
-    T GreenSampler<T>::calcMeanWeighted(const VectorND<T>& observes) const {
-        const T factor = getLnPartitionZs().max();
-        VectorND<Tf> buffer(getLnPartitionZs() - factor, observes);
-        const Tf sum = exp(buffer) * getSigns();
-        return sum.grad() / sum.value(); // Avoid ln, its grad is well defined but value may give NAN
+    T GreenSampler<T>::calcMean(const VectorND<T>& observes, const VectorND<T>& lnWeights) const {
+        VectorND<T> buffer = hadamard(exp(lnWeights - lnWeights.max()), signs);
+        return hadamard(buffer, observes).mean() / buffer.mean();
     }
 
     template<Scalar T>
     auto GreenSampler<T>::calcSign() const noexcept -> Tv {
-        return getSigns().mean();
+        return signs.mean();
     }
 
     template<Scalar T>
-    auto GreenSampler<T>::calcSignWeighted() const -> Tv {
-        return samples.lnSumExp().grad();
+    auto GreenSampler<T>::calcSign(const VectorND<T>& lnWeights) const -> Tv {
+        VectorND<T> buffer = exp(lnWeights - lnWeights.max());
+        return hadamard(buffer, signs).mean() / buffer.mean();
     }
 
     template<Scalar T>
     T GreenSampler<T>::lnPartitionZ() const {
-        const T factor = getLnPartitionZs().max();
-        return ln(exp(getLnPartitionZs() - factor) * getSigns()) + factor;
+        const T factor = lnAbsDets.max();
+        return ln(exp(lnAbsDets - factor) * getSigns()) + factor;
     }
 
     template<Scalar T>
     void GreenSampler<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        samples.swap(obj.samples);
+        lnAbsDets.swap(obj.lnAbsDets);
+        signs.swap(obj.signs);
         std::swap(cursor, obj.cursor);
     }
 
     template<Scalar T>
-    void GreenSampler<T>::sample(T lnZ, T sign) noexcept {
-        samples.values()[cursor] = lnZ;
-        samples.grads()[cursor] = sign;
+    void GreenSampler<T>::sample(T lnAbsDet, T sign) noexcept {
+        lnAbsDets[cursor] = lnAbsDet;
+        signs[cursor] = sign;
         cursor = (cursor + 1) % getNumSample();
     }
 }
