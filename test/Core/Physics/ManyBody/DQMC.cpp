@@ -38,7 +38,7 @@ int main() {
     const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
     const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
     /* Random */ {
-        auto dqmc = DQMC<T>(params, NumSplit);
+        auto dqmc = DQMC<T>(params);
         for (int _ = 0; _ < NumSample; ++_) {
             dqmc.step_random<RandomSource>();
             if (dqmc.getSign().isNegative())
@@ -46,7 +46,7 @@ int main() {
         }
     }
     /* MH */ {
-        auto dqmc = DQMC<T>(params, 1);
+        auto dqmc = DQMC<T>(params);
         dqmc.step_random<RandomSource>();
         for (int _ = 0; _ < NumSample; ++_) {
             dqmc.step_mh<RandomSource>();
@@ -55,10 +55,10 @@ int main() {
         }
     }
     /* Spin */ {
-        auto dqmc = DQMC<T>(params, NumSplit);
+        auto dqmc = DQMC<T>(params);
         dqmc.step_random<RandomSource>();
         for (int _ = 0; _ < NumSample; ++_) {
-            dqmc.step_spin<RandomSource>();
+            std::ignore = dqmc.step_spin<RandomSource>();
             if (dqmc.getSign().isNegative())
                 return 1;
         }

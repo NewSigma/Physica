@@ -54,7 +54,7 @@ namespace Physica {
         Array<MatrixND> greenDs;
     public:
         DQMC() = delete;
-        DQMC(const Params& params_, int period);
+        DQMC(const Params& params_);
         DQMC(const This&) = default;
         DQMC(This&&) noexcept = default;
         ~DQMC() = default;
@@ -86,12 +86,11 @@ namespace Physica {
         [[nodiscard]] Tr getSignD() const noexcept { return signD; }
         [[nodiscard]] Tr getSign() const noexcept { return signU * signD; }
         [[nodiscard]] int getNumEqualGreen() const noexcept { return greenUs.getLength(); }
-        [[nodiscard]] int getPeriod() const noexcept { return getNumSplit() / getNumEqualGreen(); }
         [[nodiscard]] const auto& getGreenUs() const noexcept { return greenUs; }
         [[nodiscard]] const auto& getGreenDs() const noexcept { return greenDs; }
     private:
         /* Operations */
-        void resize(int numSite, int numSplit, int period);
+        void resize(int numSite, int numSplit);
 
         Vector2D<Tr> calcDelta(int site, int split) const noexcept;
         Vector2D<Tr> calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept;
@@ -102,15 +101,15 @@ namespace Physica {
 
         void splitDiag(const QDTDecomp<T>& qdt) noexcept;
         [[nodiscard]] std::array<Tr, 2> calcDet(const QDTDecomp<T>& qdt);
-        [[nodiscard]] void calcGreens();
+        void calcGreens();
         /* Static members */
         template<RNG R>
         [[nodiscard]] static Array<int> makeRandomSites(int numSite);
     };
 
     template<Scalar T>
-    DQMC<T>::DQMC(const Params& params_, int period) : params(params_) {
-        resize(params.getNumSite(), params.getNumSplit(), period);
+    DQMC<T>::DQMC(const Params& params_) : params(params_) {
+        resize(params.getNumSite(), params.getNumSplit());
 
         kinetic.compute(params.getExpB());
         for (int split = 0; split < getNumSplit(); ++split) {
@@ -231,10 +230,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::resize(int numSite, int numSplit, int period) {
+    void DQMC<T>::resize(int numSite, int numSplit) {
         assert(numSite > 0 && "[Error]: Invalid NumSite");
         assert(numSplit > 0);
-        assert((period > 0 && getNumSplit() % period == 0) && "[Error]: Invalid period");
         aux.resize(numSite, numSplit);
         chainU.resize(numSplit);
         chainD.resize(numSplit);
@@ -245,9 +243,8 @@ namespace Physica {
         diagS.resize(numSite);
         buffer.resize(numSite, numSite);
 
-        int numEqualGreen = numSplit / period;
-        greenUs.resize(numEqualGreen, numSite, numSite);
-        greenDs.resize(numEqualGreen, numSite, numSite);
+        greenUs.resize(numSplit, numSite, numSite);
+        greenDs.resize(numSplit, numSite, numSite);
     }
 
     template<Scalar T>
@@ -366,25 +363,22 @@ namespace Physica {
         };
 
         const int numSplit = getNumSplit();
-        const int period = getPeriod();
         Tr lnAbsDetU = 0;
         for (size_t i = 0; i < greenUs.getLength(); ++i) {
-            const int shift = period * i;
-            const int to = (numSplit + shift - 1) % numSplit;
-            auto [lnAD, sign] = calcGreen(chainU.multiply(shift, to), greenUs[i]);
+            const int to = (numSplit + i - 1) % numSplit;
+            auto [lnAD, sign] = calcGreen(chainU.multiply(i, to), greenUs[i]);
 
-            assert((shift == 0 || signU == sign) && "[Error]: Unexpected sign mismatch");
+            assert((i == 0 || signU == sign) && "[Error]: Unexpected sign mismatch");
             toNextMean(lnAbsDetU, i, lnAD);
             signU = sign;
         }
 
         Tr lnAbsDetD = 0;
         for (size_t i = 0; i < greenDs.getLength(); ++i) {
-            const int shift = period * i;
-            const int to = (numSplit + shift - 1) % numSplit;
-            auto [lnAD, sign] = calcGreen(chainD.multiply(shift, to), greenDs[i]);
+            const int to = (numSplit + i - 1) % numSplit;
+            auto [lnAD, sign] = calcGreen(chainD.multiply(i, to), greenDs[i]);
 
-            assert((shift == 0 || signD == sign) && "[Error]: Unexpected sign mismatch");
+            assert((i == 0 || signD == sign) && "[Error]: Unexpected sign mismatch");
             toNextMean(lnAbsDetD, i, lnAD);
             signD = sign;
         }
