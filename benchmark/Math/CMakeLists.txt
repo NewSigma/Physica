@@ -1,5 +1,5 @@
 add_subdirectory(BLAS1)
-add_subdirectory(Vector)
+add_subdirectory(VectorExpr)
 
 target_sources(Benchmark PRIVATE EigenSolver.cpp)
 target_sources(Benchmark PRIVATE GEMM.cpp)

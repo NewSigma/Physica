@@ -142,6 +142,9 @@ namespace Physica {
     class Traits<VectorExpr<Type, LHS, RHS>> : public Traits<VectorExpr<Type, RHS, LHS>> {};
 }
 
+#ifdef PHYSICA_MKL
+    #include <mkl_vml.h>
+#endif
 #include "VectorExprImpl/Add.h"
 #include "VectorExprImpl/Sub.h"
 #include "VectorExprImpl/Mul.h"

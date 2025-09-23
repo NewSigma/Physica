@@ -76,7 +76,7 @@ namespace Physica {
      * So \tparam FixedSeed is declared as a template param,
      * making it possible for other parts of the program to check whether the seed is fixed at compiling time.
      */
-    template<RandomOption Option, uint64_t FixedSeed = Physica::Dynamic>
+    template<RandomOption Option = MT19937, uint64_t FixedSeed = Physica::Dynamic>
     class PHYSICA_API Random : public Internal::RandomBase {
         using This = Random<Option, FixedSeed>;
         using Base = Internal::RandomBase;

@@ -634,8 +634,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V>
-    __host__ __device__ constexpr void RValueVector<Derived>::assign_check(const V&) noexcept {
+    __host__ __device__ constexpr void RValueVector<Derived>::assign_check(const Vector auto& target) noexcept {
+        using V = std::remove_cvref<decltype(target)>::type;
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = V::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
@@ -644,10 +644,17 @@ namespace Physica {
     }
 
     template<class Derived>
+    constexpr void RValueVector<Derived>::assign_check_mkl(const Vector auto& target) noexcept {
+        assign_check(target);
+        static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
+    }
+    /**
+     * FIXME: We cannot use unknown references in params of constexpr, refactor once we dump to Clang 20.
+     */
+    template<class Derived>
     template<Vector V>
-    constexpr void RValueVector<Derived>::assign_check_mkl(const V& target) noexcept {
-        assign_check<V>(target);
-        static_assert(Internal::EnableMKL<Derived, V>::value, "[Error]: Cannot apply MKL to this expr");
+    consteval size_t RValueVector<Derived>::maxSizeAtCompile() noexcept {
+        return std::max(SizeAtCompile, std::remove_cvref_t<V>::SizeAtCompile);
     }
 
     template<class Derived>
