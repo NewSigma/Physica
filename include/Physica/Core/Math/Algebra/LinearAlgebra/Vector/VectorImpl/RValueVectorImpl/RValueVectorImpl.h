@@ -31,7 +31,7 @@ namespace Physica {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Length1 = SizeAtCompile;
         constexpr static size_t Length2 = V::SizeAtCompile;
-        assign_check(v);
+        assert_assign(v);
 
         assert(getLength() == v.getLength() && "[Error]: Length mismatch between two vector");
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
@@ -48,7 +48,7 @@ namespace Physica {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Length1 = SizeAtCompile;
         constexpr static size_t Length2 = V::SizeAtCompile;
-        assign_check(v);
+        assert_assign(v);
 
         assert(getLength() == v.getLength() && "[Error]: Length mismatch between two vector");
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
@@ -634,7 +634,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ constexpr void RValueVector<Derived>::assign_check(const Vector auto& target) noexcept {
+    __host__ __device__ constexpr void RValueVector<Derived>::assert_assign(const Vector auto& target) noexcept {
         using V = std::remove_cvref<decltype(target)>::type;
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = V::SizeAtCompile;
@@ -644,8 +644,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    constexpr void RValueVector<Derived>::assign_check_mkl(const Vector auto& target) noexcept {
-        assign_check(target);
+    constexpr void RValueVector<Derived>::assert_assign_mkl(const Vector auto& target) noexcept {
+        assert_assign(target);
         static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
     }
     /**

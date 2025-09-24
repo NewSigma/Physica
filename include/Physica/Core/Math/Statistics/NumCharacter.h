@@ -63,8 +63,8 @@ namespace Physica {
     template<Vector T1, Vector T2>
     void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) noexcept {
         assert(var.isFinite() && "[Error]: Propagating NAN");
-        sample.assign_check(mean);
-        sample.assign_check(var);
+        sample.assert_assign(mean);
+        sample.assert_assign(var);
 
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
@@ -76,8 +76,8 @@ namespace Physica {
     template<Matrix T1, Matrix T2>
     void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) noexcept {
         assert(var.isFinite() && "[Error]: Propagating NAN");
-        sample.assign_check(mean);
-        sample.assign_check(var);
+        sample.assert_assign(mean);
+        sample.assert_assign(var);
 
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);

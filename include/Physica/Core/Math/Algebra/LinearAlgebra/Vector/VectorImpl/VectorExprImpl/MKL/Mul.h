@@ -26,7 +26,7 @@ namespace Physica {
         using V1 = std::remove_cvref_t<decltype(v)>;
         assert(Base::getLength() == v.getLength());
 
-        Base::getLHS().assign_check_mkl(v);
+        Base::getLHS().assert_assign_mkl(v);
         if constexpr (std::same_as<std::remove_cvref_t<V>, V1>) {
             if (&Base::getLHS() != &v)
                 getLHS().assign(v);

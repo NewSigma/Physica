@@ -27,7 +27,7 @@ namespace Physica {
     template<Vector V>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const requires(CUDA<V>) {
         assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
-        host_obj::assign_check(target);
+        host_obj::assert_assign(target);
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();

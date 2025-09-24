@@ -179,7 +179,7 @@ namespace Physica {
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
         template<Matrix M>
-        __host__ __device__ static void assign_check(const M& target) noexcept;
+        __host__ __device__ static void assert_assign(const M& target) noexcept;
         template<Matrix M>
         __host__ __device__ constexpr static bool matmul_check() noexcept;
     protected:

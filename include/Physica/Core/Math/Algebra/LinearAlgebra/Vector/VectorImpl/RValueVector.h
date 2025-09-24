@@ -193,8 +193,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
-        __host__ __device__ constexpr static void assign_check(const Vector auto& target) noexcept;
-        constexpr static void assign_check_mkl(const Vector auto& target) noexcept;
+        __host__ __device__ constexpr static void assert_assign(const Vector auto& target) noexcept;
+        constexpr static void assert_assign_mkl(const Vector auto& target) noexcept;
         template<Vector V>
         consteval static size_t maxSizeAtCompile() noexcept;
     protected:

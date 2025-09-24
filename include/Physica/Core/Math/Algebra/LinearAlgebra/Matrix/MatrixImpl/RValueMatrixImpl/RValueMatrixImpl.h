@@ -36,7 +36,7 @@ namespace Physica {
     void RValueMatrix<Derived>::assign(Matrix auto& target) const {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
-        assign_check(target);
+        assert_assign(target);
 
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
@@ -49,7 +49,7 @@ namespace Physica {
     void RValueMatrix<Derived>::assign_add(Matrix auto& target) const {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
-        assign_check(target);
+        assert_assign(target);
 
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
@@ -499,7 +499,7 @@ namespace Physica {
 
     template<class Derived>
     template<Matrix M>
-    __host__ __device__ void RValueMatrix<Derived>::assign_check(const M&) noexcept {
+    __host__ __device__ void RValueMatrix<Derived>::assert_assign(const M&) noexcept {
         static_assert(RowAtCompile == M::RowAtCompile || RowAtCompile == Dynamic || M::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == M::ColAtCompile || ColAtCompile == Dynamic || M::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
         static_assert(!isComplex || M::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");

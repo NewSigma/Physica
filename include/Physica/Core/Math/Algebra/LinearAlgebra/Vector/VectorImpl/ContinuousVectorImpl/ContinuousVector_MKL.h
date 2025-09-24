@@ -23,7 +23,7 @@
 namespace Physica {
     template<class Derived>
     void ContinuousVector<Derived>::assign_mkl(Vector auto& v) const noexcept {
-        Base::assign_check_mkl(v);
+        Base::assert_assign_mkl(v);
         const size_t n = Base::getLength();
         const void* x = data();
         void* y = v.data();
