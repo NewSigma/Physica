@@ -185,6 +185,7 @@ namespace Physica {
                         phase = phases[dim];
                     }
                     hoppingMatrix(from, next) = -hoppingT * phase;
+                    hoppingMatrix(next, from) = -hoppingT * phase.conjugate();
                 }
             }
         }
