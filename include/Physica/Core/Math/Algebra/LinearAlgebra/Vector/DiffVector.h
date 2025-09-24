@@ -36,10 +36,10 @@ namespace Physica {
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
-        using FIteType = FIterator<This>;
-        using RIteType = RIterator<This>;
-        using CFIteType = FIterator<const This>;
-        using CRIteType = RIterator<const This>;
+        using IterF = PtrIteratorF<This>;
+        using IterR = PtrIteratorR<This>;
+        using IterCF = PtrIteratorF<const This>;
+        using IterCR = PtrIteratorR<const This>;
     private:
         using ValueVector = DenseVector<T, Length>;
         using GradType = ScalarType::GradType;
@@ -66,18 +66,14 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Iterators */
-        __host__ __device__ FIteType begin() noexcept { return FIteType(data()); }
-        __host__ __device__ CFIteType begin() const noexcept { return cbegin(); }
-        __host__ __device__ CFIteType cbegin() const noexcept { return CFIteType(data()); }
-        __host__ __device__ FIteType end() noexcept { return FIteType(data() + getLength()); }
-        __host__ __device__ CFIteType end() const noexcept { return cend(); }
-        __host__ __device__ CFIteType cend() const noexcept { return CFIteType(data() + getLength()); }
-        __host__ __device__ RIteType rbegin() noexcept { return RIteType(data() + getLength() - 1); }
-        __host__ __device__ CRIteType rbegin() const noexcept { return crbegin(); }
-        __host__ __device__ CRIteType crbegin() const noexcept { return CRIteType(data() + getLength() - 1); }
-        __host__ __device__ RIteType rend() noexcept { return RIteType(data() - 1); }
-        __host__ __device__ CRIteType rend() const noexcept { return crend(); }
-        __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
+        using Base::begin;
+        using Base::cbegin;
+        using Base::end;
+        using Base::cend;
+        using Base::rbegin;
+        using Base::crbegin;
+        using Base::rend;
+        using Base::crend;
         /* Operations */
         void zero_grad();
 

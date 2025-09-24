@@ -45,10 +45,10 @@ namespace Physica {
 
         using ElemType = Traits<Derived>::ElemType;
     protected:
-        using FIteType = FIterator<Derived>;
-        using RIteType = RIterator<Derived>;
-        using CFIteType = FIterator<const Derived>;
-        using CRIteType = RIterator<const Derived>;
+        using IterF = PtrIteratorF<Derived>;
+        using IterR = PtrIteratorR<Derived>;
+        using IterCF = PtrIteratorF<const Derived>;
+        using IterCR = PtrIteratorR<const Derived>;
 
         static_assert(std::is_same<value_type, ElemType>::value, "[Error]: Declaration is not self consistent");
     public:
@@ -56,21 +56,21 @@ namespace Physica {
         /* Operators */
         [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t index);
         [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t index) const;
-        __host__ __device__ bool operator==(const ArrayBase& array) const;
-        __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
+        [[nodiscard]] __host__ __device__ bool operator==(const ArrayBase& array) const;
+        [[nodiscard]] __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterators */
-        __host__ __device__ FIteType begin() noexcept { return FIteType(data()); }
-        __host__ __device__ CFIteType begin() const noexcept { return cbegin(); }
-        __host__ __device__ CFIteType cbegin() const noexcept { return CFIteType(data()); }
-        __host__ __device__ FIteType end() noexcept { return FIteType(data() + getLength()); }
-        __host__ __device__ CFIteType end() const noexcept { return cend(); }
-        __host__ __device__ CFIteType cend() const noexcept { return CFIteType(data() + getLength()); }
-        __host__ __device__ RIteType rbegin() noexcept { return RIteType(data() + getLength() - 1); }
-        __host__ __device__ CRIteType rbegin() const noexcept { return crbegin(); }
-        __host__ __device__ CRIteType crbegin() const noexcept { return CRIteType(data() + getLength() - 1); }
-        __host__ __device__ RIteType rend() noexcept { return RIteType(data() - 1); }
-        __host__ __device__ CRIteType rend() const noexcept { return crend(); }
-        __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
+        [[nodiscard]] __host__ __device__ auto begin() noexcept { return IterF(data()); }
+        [[nodiscard]] __host__ __device__ auto begin() const noexcept { return cbegin(); }
+        [[nodiscard]] __host__ __device__ auto cbegin() const noexcept { return IterCF(data()); }
+        [[nodiscard]] __host__ __device__ auto end() noexcept { return IterF(data() + getLength()); }
+        [[nodiscard]] __host__ __device__ auto end() const noexcept { return cend(); }
+        [[nodiscard]] __host__ __device__ auto cend() const noexcept { return IterCF(data() + getLength()); }
+        [[nodiscard]] __host__ __device__ auto rbegin() noexcept { return IterR(data() + getLength() - 1); }
+        [[nodiscard]] __host__ __device__ auto rbegin() const noexcept { return crbegin(); }
+        [[nodiscard]] __host__ __device__ auto crbegin() const noexcept { return IterCR(data() + getLength() - 1); }
+        [[nodiscard]] __host__ __device__ auto rend() noexcept { return IterR(data() - 1); }
+        [[nodiscard]] __host__ __device__ auto rend() const noexcept { return crend(); }
+        [[nodiscard]] __host__ __device__ auto crend() const noexcept { return IterCR(data() - 1); }
         /* Operations */
         void send(int from, int to);
         void sendrecv(int send_to, int recv_from);
@@ -90,7 +90,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const_pointer data_ptr(size_t index) const noexcept;
         /* Static members */
         template<class... Args>
-        __host__ __device__ consteval static bool isTrivialDefaultConstruct();
+        [[nodiscard]] __host__ __device__ consteval static bool isTrivialDefaultConstruct();
     protected:
         ArrayBase() = default;
         ArrayBase(const ArrayBase&) = default;

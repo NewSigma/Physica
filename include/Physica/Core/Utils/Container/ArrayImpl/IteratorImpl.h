@@ -22,131 +22,131 @@
 
 namespace Physica {
     template<class Container>
-    __host__ __device__ FIterator<Container>::FIterator(pointer p) noexcept : p(p) {}
+    __host__ __device__ PtrIteratorF<Container>::PtrIteratorF(pointer p) noexcept : p(p) {}
 
     template<class Container>
-    __host__ __device__ FIterator<Container>::FIterator(const This& ite) noexcept : p(ite.p) {}
+    __host__ __device__ PtrIteratorF<Container>::PtrIteratorF(const This& ite) noexcept : p(ite.p) {}
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator+(difference_type n) const noexcept -> This {
+    __host__ __device__ auto PtrIteratorF<Container>::operator+(difference_type n) const noexcept -> This {
         return This(p + n);
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator+=(difference_type n) const noexcept -> This& {
+    __host__ __device__ auto PtrIteratorF<Container>::operator+=(difference_type n) const noexcept -> This& {
         return *this = operator+(n);
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator-(difference_type n) const noexcept -> This {
+    __host__ __device__ auto PtrIteratorF<Container>::operator-(difference_type n) const noexcept -> This {
         return This(p - n);
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator-=(difference_type n) const noexcept -> This& {
+    __host__ __device__ auto PtrIteratorF<Container>::operator-=(difference_type n) const noexcept -> This& {
         return *this = operator-(n);
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator-(const This& ite) const noexcept -> difference_type {
+    __host__ __device__ auto PtrIteratorF<Container>::operator-(const This& ite) const noexcept -> difference_type {
         return p - ite.p;
     }
 
     template<class Container>
-    __host__ __device__ bool FIterator<Container>::operator<(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorF<Container>::operator<(const This& ite) const noexcept {
         return p < ite.p;
     }
 
     template<class Container>
-    __host__ __device__ bool FIterator<Container>::operator>(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorF<Container>::operator>(const This& ite) const noexcept {
         return p > ite.p;
     }
 
     template<class Container>
-    __host__ __device__ bool FIterator<Container>::operator<=(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorF<Container>::operator<=(const This& ite) const noexcept {
         return !(p > ite.p);
     }
 
     template<class Container>
-    __host__ __device__ bool FIterator<Container>::operator>=(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorF<Container>::operator>=(const This& ite) const noexcept {
         return !(p < ite.p);
     }
 
     template<class Container>
-    __host__ __device__ bool FIterator<Container>::operator==(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorF<Container>::operator==(const This& ite) const noexcept {
         return p == ite.p;
     }
 
     template<class Container>
-    __host__ __device__ bool FIterator<Container>::operator!=(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorF<Container>::operator!=(const This& ite) const noexcept {
         return p != ite.p;
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator++() noexcept -> This& {
+    __host__ __device__ auto PtrIteratorF<Container>::operator++() noexcept -> This& {
         ++p;
         return *this;
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator++(int) noexcept -> This {
+    __host__ __device__ auto PtrIteratorF<Container>::operator++(int) noexcept -> This {
         return This(p++);
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator--() noexcept -> This& {
+    __host__ __device__ auto PtrIteratorF<Container>::operator--() noexcept -> This& {
         --p;
         return *this;
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator--(int) noexcept -> This {
+    __host__ __device__ auto PtrIteratorF<Container>::operator--(int) noexcept -> This {
         return This(p--);
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator*() const noexcept -> reference {
+    __host__ __device__ auto PtrIteratorF<Container>::operator*() const noexcept -> reference {
         return *p;
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator->() const noexcept -> pointer {
+    __host__ __device__ auto PtrIteratorF<Container>::operator->() const noexcept -> pointer {
         return p;
     }
 
     template<class Container>
-    __host__ __device__ auto FIterator<Container>::operator[](difference_type n) const noexcept -> reference {
+    __host__ __device__ auto PtrIteratorF<Container>::operator[](difference_type n) const noexcept -> reference {
         return *operator+(n);
     }
 
     template<class Container>
-    __host__ __device__ RIterator<Container>::RIterator(pointer p) noexcept : p(p) {}
+    __host__ __device__ PtrIteratorR<Container>::PtrIteratorR(pointer p) noexcept : p(p) {}
 
     template<class Container>
-    __host__ __device__ RIterator<Container>::RIterator(const This& ite) noexcept : p(ite.p) {}
+    __host__ __device__ PtrIteratorR<Container>::PtrIteratorR(const This& ite) noexcept : p(ite.p) {}
 
     template<class Container>
-    __host__ __device__ bool RIterator<Container>::operator==(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorR<Container>::operator==(const This& ite) const noexcept {
         return p == ite.p;
     }
 
     template<class Container>
-    __host__ __device__ bool RIterator<Container>::operator!=(const This& ite) const noexcept {
+    __host__ __device__ bool PtrIteratorR<Container>::operator!=(const This& ite) const noexcept {
         return p != ite.p;
     }
 
     template<class Container>
-    __host__ __device__ auto RIterator<Container>::operator++() noexcept -> This&{
+    __host__ __device__ auto PtrIteratorR<Container>::operator++() noexcept -> This&{
         --p; return *this;
     }
 
     template<class Container>
-    __host__ __device__ auto RIterator<Container>::operator++(int) noexcept -> This {
+    __host__ __device__ auto PtrIteratorR<Container>::operator++(int) noexcept -> This {
         return This(p--);
     }
 
     template<class Container>
-    __host__ __device__ auto RIterator<Container>::operator*() const noexcept -> reference {
+    __host__ __device__ auto PtrIteratorR<Container>::operator*() const noexcept -> reference {
         return *p;
     }
 }

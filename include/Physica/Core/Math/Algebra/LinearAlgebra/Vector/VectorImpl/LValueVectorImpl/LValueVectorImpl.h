@@ -84,8 +84,8 @@ namespace Physica {
                 (*this)[index] = packet[i];
         }
         else {
-            ScalarType buffer[Pack::size()];
-            packet.store(buffer);
+            Array<T, Pack::size()> buffer{};
+            packet.store(buffer.data());
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 (*this)[index] = buffer[i];
         }
@@ -100,8 +100,8 @@ namespace Physica {
                 (*this)[index] = packet[i];
         }
         else {
-            ScalarType buffer[Pack::size()];
-            packet.store(buffer);
+            Array<T, Pack::size()> buffer{};
+            packet.store(buffer.data());
             for (size_t i = 0; i < count; ++i, ++index)
                 (*this)[index] = buffer[i];
         }

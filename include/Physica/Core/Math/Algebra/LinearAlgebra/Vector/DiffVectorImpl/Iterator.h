@@ -20,13 +20,13 @@
 
 namespace Physica {
     /**
-     * FIterator(Forward)
+     * PtrIteratorF(Forward)
      */
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    class FIterator<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
+    class PtrIteratorF<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
         using ElemType = Diff<T, Mode, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;
-        using This = FIterator<Container>;
+        using This = PtrIteratorF<Container>;
         constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
@@ -37,9 +37,9 @@ namespace Physica {
     private:
         pointer p;
     public:
-        __host__ __device__ explicit FIterator(pointer p) : p(p) {}
-        __host__ __device__ FIterator(const This& ite) : p(ite.p) {}
-        ~FIterator() = default;
+        __host__ __device__ explicit PtrIteratorF(pointer p) : p(p) {}
+        __host__ __device__ PtrIteratorF(const This& ite) : p(ite.p) {}
+        ~PtrIteratorF() = default;
         /* Operators */
         This& operator=(const This&) = default;
         [[nodiscard]] __host__ __device__ This operator+(difference_type n) const { return This(p + n); }
@@ -57,13 +57,13 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ reference operator*() const { return *p; }
     };
     /**
-     * RIterator(Reverse)
+     * PtrIteratorR(Reverse)
      */
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    class RIterator<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
+    class PtrIteratorR<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
         using ElemType = Diff<T, Mode, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;
-        using This = RIterator<Container>;
+        using This = PtrIteratorR<Container>;
         constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
@@ -74,9 +74,9 @@ namespace Physica {
     private:
         pointer p;
     public:
-        __host__ __device__ explicit RIterator(pointer p) : p(p) {}
-        __host__ __device__ RIterator(const This& ite) : p(ite.p) {}
-        ~RIterator() = default;
+        __host__ __device__ explicit PtrIteratorR(pointer p) : p(p) {}
+        __host__ __device__ PtrIteratorR(const This& ite) : p(ite.p) {}
+        ~PtrIteratorR() = default;
         /* Operators */
         This& operator=(const This&) = default;
         [[nodiscard]] __host__ __device__ bool operator==(const This& ite) const noexcept { return p == ite.p; }

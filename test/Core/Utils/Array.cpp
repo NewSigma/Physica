@@ -19,20 +19,24 @@
 #include "Physica/Core/Utils/Container/Array.h"
 
 using namespace Physica;
-using C = Array<long, 3>;
-using It = FIterator<C>;
 
-static_assert(std::indirectly_readable<It>);
-static_assert(std::indirectly_writable<It, long>);
-static_assert(std::incrementable<It>);
-static_assert(std::sized_sentinel_for<It, It>);
-static_assert(std::contiguous_iterator<It>);
+template<class C>
+void rangeTest() {
+    using I = PtrIteratorF<C>;
+    static_assert(std::indirectly_readable<I>);
+    static_assert(std::indirectly_writable<I, long>);
+    static_assert(std::incrementable<I>);
+    static_assert(std::sized_sentinel_for<I, I>);
+    static_assert(std::contiguous_iterator<I>);
 
-static_assert(std::ranges::sized_range<C>);
-static_assert(std::ranges::contiguous_range<C>);
-static_assert(std::ranges::common_range<C>);
-static_assert(std::ranges::viewable_range<C>);
+    static_assert(std::ranges::sized_range<C>);
+    static_assert(std::ranges::contiguous_range<C>);
+    static_assert(std::ranges::common_range<C>);
+    static_assert(std::ranges::viewable_range<C>);
+}
 
 int main() {
+    rangeTest<Array<long, 3>>();
+    rangeTest<Array<long>>();
     return 0;
 }

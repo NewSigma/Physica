@@ -21,9 +21,6 @@
 #include "ContinuousVectorImpl/ContinuousVectorBlock.h"
 
 namespace Physica {
-    /**
-     * \class ContinuousVector has its element on memory continuously
-     */
     template<class Derived>
     class ContinuousVector : public LValueVector<Derived> {
         using Base = LValueVector<Derived>;
@@ -48,6 +45,11 @@ namespace Physica {
         constexpr static int DataDim = 1 + (DiffOrder > 0);
         using DataSetType = H5DataSet<DataDim>;
         using DataSpaceType = H5DataSpace<DataDim>;
+
+        using IterF = PtrIteratorF<Derived>;
+        using IterR = PtrIteratorR<Derived>;
+        using IterCF = PtrIteratorF<const Derived>;
+        using IterCR = PtrIteratorR<const Derived>;
 
         using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueVector<This>, Derived&>::type;
     public:
@@ -91,6 +93,19 @@ namespace Physica {
         [[nodiscard]] auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] const auto segment(size_t from, size_t to) const noexcept;
+
+        [[nodiscard]] auto begin() noexcept { return IterF(data()); }
+        [[nodiscard]] auto begin() const noexcept { return cbegin(); }
+        [[nodiscard]] auto cbegin() const noexcept { return IterCF(data()); }
+        [[nodiscard]] auto end() noexcept { return IterF(data() + Base::getLength()); }
+        [[nodiscard]] auto end() const noexcept { return cend(); }
+        [[nodiscard]] auto cend() const noexcept { return IterCF(data() + Base::getLength()); }
+        [[nodiscard]] auto rbegin() noexcept { return IterR(data() + Base::getLength() - 1); }
+        [[nodiscard]] auto rbegin() const noexcept { return crbegin(); }
+        [[nodiscard]] auto crbegin() const noexcept { return IterCR(data() + Base::getLength() - 1); }
+        [[nodiscard]] auto rend() noexcept { return IterR(data() - 1); }
+        [[nodiscard]] auto rend() const noexcept { return crend(); }
+        [[nodiscard]] auto crend() const noexcept { return IterCR(data() - 1); }
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
         [[nodiscard]] CoDiff<Tr> norm1_base() const noexcept;

@@ -23,12 +23,12 @@
 namespace Physica {
     template<class Derived, class Allocator> class ArrayBase;
     /**
-     * FIterator(Forward)
+     * PtrIteratorF(Forward)
      */
     template<class Container>
-    class FIterator : public std::contiguous_iterator_tag {
+    class PtrIteratorF : public std::contiguous_iterator_tag {
         constexpr static bool isConst = std::is_const<Container>::value;
-        using This = FIterator<Container>;
+        using This = PtrIteratorF<Container>;
         using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
     public:
         using difference_type = std::ptrdiff_t;
@@ -39,10 +39,10 @@ namespace Physica {
     private:
         pointer p;
     public:
-        FIterator() = default;
-        __host__ __device__ explicit FIterator(pointer p) noexcept;
-        __host__ __device__ FIterator(const This& ite) noexcept;
-        ~FIterator() = default;
+        PtrIteratorF() = default;
+        __host__ __device__ explicit PtrIteratorF(pointer p) noexcept;
+        __host__ __device__ PtrIteratorF(const This& ite) noexcept;
+        ~PtrIteratorF() = default;
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
@@ -68,12 +68,12 @@ namespace Physica {
         friend __host__ __device__ This operator+(difference_type n, const This& it) noexcept { return it + n; }
     };
     /**
-     * RIterator(Reverse)
+     * PtrIteratorR(Reverse)
      */
     template<class Container>
-    class RIterator : public std::contiguous_iterator_tag {
+    class PtrIteratorR : public std::contiguous_iterator_tag {
         constexpr static bool isConst = std::is_const<Container>::value;
-        using This = RIterator<Container>;
+        using This = PtrIteratorR<Container>;
         using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
     public:
         using difference_type = std::ptrdiff_t;
@@ -84,10 +84,10 @@ namespace Physica {
     private:
         pointer p;
     public:
-        RIterator() = default;
-        __host__ __device__ explicit RIterator(pointer p) noexcept;
-        __host__ __device__ RIterator(const This& ite) noexcept;
-        ~RIterator() = default;
+        PtrIteratorR() = default;
+        __host__ __device__ explicit PtrIteratorR(pointer p) noexcept;
+        __host__ __device__ PtrIteratorR(const This& ite) noexcept;
+        ~PtrIteratorR() = default;
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;

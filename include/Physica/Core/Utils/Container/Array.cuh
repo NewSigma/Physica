@@ -90,10 +90,10 @@ namespace Physica {
         using PlainElemAllocator = Allocator::template rebind_alloc<PlainElemType>;
         using PlainHostObj = Array<PlainElemType, Dynamic, PlainElemAllocator>;
     protected:
-        using typename Base::FIteType;
-        using typename Base::RIteType;
-        using typename Base::CFIteType;
-        using typename Base::CRIteType;
+        using typename Base::IterF;
+        using typename Base::IterR;
+        using typename Base::IterCF;
+        using typename Base::IterCR;
     private:
         pointer d_data = nullptr;
         size_t length = 0;
@@ -111,18 +111,18 @@ namespace Physica {
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
         [[nodiscard]] __device__ const_lvalue_reference operator[](size_t index) const { return Base::operator[](index); }
         /* Iterators */
-        __device__ FIteType begin() noexcept { return Base::begin(); }
-        __device__ CFIteType begin() const noexcept { return Base::cbegin(); }
-        __device__ CFIteType cbegin() const noexcept { return Base::cbegin(); }
-        __device__ FIteType end() noexcept { return Base::end(); }
-        __device__ CFIteType end() const noexcept { return Base::cend(); }
-        __device__ CFIteType cend() const noexcept { return Base::cend(); }
-        __device__ RIteType rbegin() noexcept { return Base::rbegin(); }
-        __device__ CRIteType rbegin() const noexcept { return Base::crbegin(); }
-        __device__ CRIteType crbegin() const noexcept { return Base::cbegin(); }
-        __device__ RIteType rend() noexcept { return Base::rend(); }
-        __device__ CRIteType rend() const noexcept { return Base::crend(); }
-        __device__ CRIteType crend() const noexcept { return Base::crend(); }
+        __device__ auto begin() noexcept { return Base::begin(); }
+        __device__ auto begin() const noexcept { return Base::cbegin(); }
+        __device__ auto cbegin() const noexcept { return Base::cbegin(); }
+        __device__ auto end() noexcept { return Base::end(); }
+        __device__ auto end() const noexcept { return Base::cend(); }
+        __device__ auto cend() const noexcept { return Base::cend(); }
+        __device__ auto rbegin() noexcept { return Base::rbegin(); }
+        __device__ auto rbegin() const noexcept { return Base::crbegin(); }
+        __device__ auto crbegin() const noexcept { return Base::cbegin(); }
+        __device__ auto rend() noexcept { return Base::rend(); }
+        __device__ auto rend() const noexcept { return Base::crend(); }
+        __device__ auto crend() const noexcept { return Base::crend(); }
         /* Operations */
         [[nodiscard]] PlainHostObj toPlainHost() const;
         [[nodiscard]] host_obj toHost() const;

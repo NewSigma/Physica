@@ -59,11 +59,19 @@ namespace Physica {
         /* Operations */
         void resize(const Vector auto& x);
         using Storage::resize;
-
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
         using Base::toDevice;
         using Base::toDeviceAsync;
+
+        using Base::begin;
+        using Base::cbegin;
+        using Base::end;
+        using Base::cend;
+        using Base::rbegin;
+        using Base::crbegin;
+        using Base::rend;
+        using Base::crend;
 
         using Base::zeros;
         using Base::random_uniform;
@@ -112,9 +120,10 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = Length;
-
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
+
+        using ElemType = T;
     };
 }
 

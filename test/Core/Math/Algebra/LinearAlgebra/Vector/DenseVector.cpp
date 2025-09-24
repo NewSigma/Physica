@@ -24,153 +24,174 @@
 using namespace Physica;
 using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
-static void crossProductTest() {
-    using T = float32;
-    VectorND<T> v1{3.845971, 0.000000, 0.000000};
-    VectorND<T> v2{-0.007733, 3.835502, 0.000000};
-    VectorND<T> v3(v1.crossProduct(v2));
-    if (!scalarNear(v3.norm() / T(2), T(7.375614), 1E-7))
-        exit(EXIT_FAILURE);
-}
+namespace {
+    template<Vector V>
+    void rangeTest() {
+        using It = PtrIteratorF<V>;
+        static_assert(std::indirectly_readable<It>);
+        static_assert(std::indirectly_writable<It, long>);
+        static_assert(std::incrementable<It>);
+        static_assert(std::sized_sentinel_for<It, It>);
+        static_assert(std::contiguous_iterator<It>);
 
-static void innerDotTest() {
-    using T = float32;
-    const auto v1 = VectorND<Complex<T>>::random_uniform<RandomSource>(16);
-    const auto v2 = VectorND<T>::random_uniform<RandomSource>(16);
-    const auto dot1 = v1 * v2;
-    const auto dot2 = hadamard(v1, v2).sum();
-    if (!scalarNear(dot1, dot2, 1E-6))
-        exit(EXIT_FAILURE);
-}
+        static_assert(std::ranges::sized_range<V>);
+        static_assert(std::ranges::contiguous_range<V>);
+        static_assert(std::ranges::common_range<V>);
+        static_assert(std::ranges::viewable_range<V>);
+    }
 
-static void hdfTest() {
-#ifdef PHYSICA_HDF5
-    /* Real */ {
+    void crossProductTest() {
+        using T = float32;
+        VectorND<T> v1{3.845971, 0.000000, 0.000000};
+        VectorND<T> v2{-0.007733, 3.835502, 0.000000};
+        VectorND<T> v3(v1.crossProduct(v2));
+        if (!scalarNear(v3.norm() / T(2), T(7.375614), 1E-7))
+            exit(EXIT_FAILURE);
+    }
+
+    void innerDotTest() {
+        using T = float32;
+        const auto v1 = VectorND<Complex<T>>::random_uniform<RandomSource>(16);
+        const auto v2 = VectorND<T>::random_uniform<RandomSource>(16);
+        const auto dot1 = v1 * v2;
+        const auto dot2 = hadamard(v1, v2).sum();
+        if (!scalarNear(dot1, dot2, 1E-6))
+            exit(EXIT_FAILURE);
+    }
+
+    void hdfTest() {
+    #ifdef PHYSICA_HDF5
+        /* Real */ {
+            using T = float64;
+            const auto data = VectorND<T>::template random_uniform<RandomSource>(64);
+
+            TempFile tmp("/tmp/tmpXXXXXX");
+            {
+                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
+                data.write(h5f, "set");
+            }
+            VectorND<T> buffer(data.getLength());
+            {
+                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
+                buffer.read(h5f, "set");
+            }
+            if (data != buffer)
+                exit(EXIT_FAILURE);
+        }
+        /* Complex */ {
+            using T = Complex<float64>;
+            const auto data = VectorND<T>::template random_uniform<RandomSource>(64);
+
+            TempFile tmp("/tmp/tmpXXXXXX");
+            {
+                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
+                data.write(h5f, "set");
+            }
+            VectorND<T> buffer(data.getLength());
+            {
+                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
+                buffer.read(h5f, "set");
+            }
+            if (data != buffer)
+                exit(EXIT_FAILURE);
+        }
+    #endif
+    }
+
+    void lnSumExpTest() {
+        /* Complex overflow test */ {
+            VectorND<cfloat64> v{-1071, -739};
+            if (!v.lnSumExp().isFinite())
+                exit(EXIT_FAILURE);
+        }
+        /* Diff test */ {
+            using dfloat = Diff<float32, DiffMode::Reverse, 1>;
+            const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
+            x.lnSumExp().reverse();
+
+            for (size_t i = 0; i < x.getLength(); ++i) {
+                if (!scalarNear(x.grads()[i], x.values().softmax(i), 1E-6))
+                    exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+    void crossEntropyTest() {
+        /* Select test */ {
+            const VectorND<float32> result{-3.34036088, -109.5531235, 13.51656151, 11.29175949};
+            const float32 l1 = result.crossEntropy(3);
+            if (!l1.isFinite())
+                exit(EXIT_FAILURE);
+
+            const float32 l2 = result.crossEntropy(1);
+            if (!l2.isFinite())
+                exit(EXIT_FAILURE);
+        }
+        /* Overflow test */ {
+            const VectorND<float32> result{555.321167, 364.9577942, 355.3863831, -594.8062134};
+            for (size_t i = 0; i < result.getLength(); ++i) {
+                const float32 s = result.softmax(i);
+                if (!s.isFinite())
+                    exit(EXIT_FAILURE);
+            }
+        }
+        /* Diff test */ {
+            using dfloat = Diff<float32, DiffMode::Reverse, 1>;
+            constexpr int Label = 0;
+            const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
+            auto loss = [&x](size_t k) -> float32 {
+                float32 result = 0;
+                for (size_t i = 0; i < x.getLength(); ++i)
+                    result += x.values().softmax(i) * (float32(i == k) - float32(Label == k));
+                return result;
+            };
+
+            x.crossEntropy(Label).reverse();
+            for (size_t i = 0; i < x.getLength(); ++i) {
+                if (!scalarNear(x.grads()[i], loss(i), 1E-6))
+                    exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+    void softmaxTest() {
         using T = float64;
-        const auto data = VectorND<T>::template random_uniform<RandomSource>(64);
-
-        TempFile tmp("/tmp/tmpXXXXXX");
-        {
-            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
-            data.write(h5f, "set");
-        }
-        VectorND<T> buffer(data.getLength());
-        {
-            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
-            buffer.read(h5f, "set");
-        }
-        if (data != buffer)
-            exit(EXIT_FAILURE);
-    }
-    /* Complex */ {
-        using T = Complex<float64>;
-        const auto data = VectorND<T>::template random_uniform<RandomSource>(64);
-
-        TempFile tmp("/tmp/tmpXXXXXX");
-        {
-            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
-            data.write(h5f, "set");
-        }
-        VectorND<T> buffer(data.getLength());
-        {
-            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
-            buffer.read(h5f, "set");
-        }
-        if (data != buffer)
-            exit(EXIT_FAILURE);
-    }
-#endif
-}
-
-static void lnSumExpTest() {
-    /* Complex overflow test */ {
-        VectorND<cfloat64> v{-1071, -739};
-        if (!v.lnSumExp().isFinite())
-            exit(EXIT_FAILURE);
-    }
-    /* Diff test */ {
-        using dfloat = Diff<float32, DiffMode::Reverse, 1>;
+        using dfloat = Diff<T, DiffMode::Reverse>;
+        const auto factors = VectorND<T>::random_uniform<RandomSource>(8);
         const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
-        x.lnSumExp().reverse();
+        const auto x1 = x;
+        VectorND<T> y = softmax(x1.values());
+        softmax(x1).reverse(y, factors);
 
-        for (size_t i = 0; i < x.getLength(); ++i) {
-            if (!scalarNear(x.grads()[i], x.values().softmax(i), 1E-6))
-                exit(EXIT_FAILURE);
-        }
-    }
-}
+        for (size_t i = 0; i < x.getLength(); ++i)
+            x.softmax(i).reverse(factors[i]);
 
-static void crossEntropyTest() {
-    /* Select test */ {
-        const VectorND<float32> result{-3.34036088, -109.5531235, 13.51656151, 11.29175949};
-        const float32 l1 = result.crossEntropy(3);
-        if (!l1.isFinite())
-            exit(EXIT_FAILURE);
-
-        const float32 l2 = result.crossEntropy(1);
-        if (!l2.isFinite())
+        if (!vectorNear(x.grads(), x1.grads(), 1E-6))
             exit(EXIT_FAILURE);
     }
-    /* Overflow test */ {
-        const VectorND<float32> result{555.321167, 364.9577942, 355.3863831, -594.8062134};
-        for (size_t i = 0; i < result.getLength(); ++i) {
-            const float32 s = result.softmax(i);
-            if (!s.isFinite())
-                exit(EXIT_FAILURE);
-        }
+
+    void testConverts() {
+        using T = float64;
+        using dfloat = Diff<T, DiffMode::Forward, 1>;
+        const VectorND<T> x{0};
+        VectorND<dfloat> y = x - T(0.5);
+        y[0].grad() = T(0.3);
+
+        VectorND<T> a = y.values();
+        if (a[0] != T(-0.5))
+            exit(EXIT_FAILURE);
+
+        a = y.grads();
+        if (a[0] != T(0.3))
+            exit(EXIT_FAILURE);
     }
-    /* Diff test */ {
-        using dfloat = Diff<float32, DiffMode::Reverse, 1>;
-        constexpr int Label = 0;
-        const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
-        auto loss = [&x](size_t k) -> float32 {
-            float32 result = 0;
-            for (size_t i = 0; i < x.getLength(); ++i)
-                result += x.values().softmax(i) * (float32(i == k) - float32(Label == k));
-            return result;
-        };
-
-        x.crossEntropy(Label).reverse();
-        for (size_t i = 0; i < x.getLength(); ++i) {
-            if (!scalarNear(x.grads()[i], loss(i), 1E-6))
-                exit(EXIT_FAILURE);
-        }
-    }
-}
-
-static void softmaxTest() {
-    using T = float64;
-    using dfloat = Diff<T, DiffMode::Reverse>;
-    const auto factors = VectorND<T>::random_uniform<RandomSource>(8);
-    const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
-    const auto x1 = x;
-    VectorND<T> y = softmax(x1.values());
-    softmax(x1).reverse(y, factors);
-
-    for (size_t i = 0; i < x.getLength(); ++i)
-        x.softmax(i).reverse(factors[i]);
-
-    if (!vectorNear(x.grads(), x1.grads(), 1E-6))
-        exit(EXIT_FAILURE);
-}
-
-void testConverts() {
-    using T = float64;
-    using dfloat = Diff<T, DiffMode::Forward, 1>;
-    const VectorND<T> x{0};
-    VectorND<dfloat> y = x - T(0.5);
-    y[0].grad() = T(0.3);
-
-    VectorND<T> a = y.values();
-    if (a[0] != T(-0.5))
-        exit(EXIT_FAILURE);
-
-    a = y.grads();
-    if (a[0] != T(0.3))
-        exit(EXIT_FAILURE);
 }
 
 int main() {
+    rangeTest<Vector4D<float32>>();
+    rangeTest<VectorND<float64>>();
+    rangeTest<decltype(std::declval<VectorND<float64>>().tail(0))>();
+
     crossProductTest();
     innerDotTest();
     hdfTest();
