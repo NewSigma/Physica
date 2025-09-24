@@ -1,27 +1,27 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-scal/2       2.00 ns         2.00 ns    351996972
-scal/4       1.80 ns         1.80 ns    388343086
-scal/8       1.82 ns         1.82 ns    388995273
-scal/16       1.82 ns         1.82 ns    388699370
-scal/64       3.72 ns         3.72 ns    190750916
-scal/256       10.2 ns         10.2 ns     68804657
-scal/1024       36.6 ns         36.6 ns     18986211
-scal/16384       1437 ns         1436 ns       487383
-scal base/2       1.97 ns         1.97 ns    355174965
-scal base/4       1.79 ns         1.79 ns    390695081
-scal base/8       1.79 ns         1.79 ns    390679536
-scal base/16       1.81 ns         1.81 ns    389362503
-scal base/64       3.66 ns         3.66 ns    189812975
-scal base/256       10.0 ns         10.0 ns     69980535
-scal base/1024       36.6 ns         36.6 ns     19099788
-scal base/16384       1452 ns         1452 ns       487121
-scal mkl/2       5.24 ns         5.24 ns    134008517
-scal mkl/4       4.87 ns         4.87 ns    143271735
-scal mkl/8       5.35 ns         5.35 ns    130238555
-scal mkl/16       5.74 ns         5.74 ns    122998695
-scal mkl/64       6.47 ns         6.47 ns    107409357
-scal mkl/256       11.5 ns         11.5 ns     61596382
-scal mkl/1024       38.9 ns         38.8 ns     18079135
-scal mkl/16384       1437 ns         1436 ns       486443
+scal/2       1.97 ns         1.97 ns    354819472
+scal/4       1.80 ns         1.80 ns    387268969
+scal/8       1.81 ns         1.81 ns    390344446
+scal/16       1.83 ns         1.83 ns    384964492
+scal/64       3.71 ns         3.71 ns    187691138
+scal/256       10.1 ns         10.1 ns     68724352
+scal/1024       36.8 ns         36.8 ns     18869784
+scal/16384       1440 ns         1440 ns       486715
+scal base/2       1.99 ns         1.99 ns    352272045
+scal base/4       1.83 ns         1.83 ns    383139554
+scal base/8       1.82 ns         1.82 ns    383463557
+scal base/16       2.04 ns         2.04 ns    382379847
+scal base/64       3.66 ns         3.66 ns    183433346
+scal base/256       10.0 ns         10.0 ns     69868593
+scal base/1024       36.9 ns         36.9 ns     18970326
+scal base/16384       1459 ns         1458 ns       481965
+scal mkl/2       5.48 ns         5.48 ns    127674628
+scal mkl/4       5.15 ns         5.15 ns    136304613
+scal mkl/8       5.70 ns         5.70 ns    123821494
+scal mkl/16       6.07 ns         6.07 ns    114954789
+scal mkl/64       6.66 ns         6.66 ns    104776160
+scal mkl/256       11.4 ns         11.4 ns     60742913
+scal mkl/1024       38.8 ns         38.8 ns     18067803
+scal mkl/16384       1464 ns         1464 ns       485469

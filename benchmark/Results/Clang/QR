@@ -1,27 +1,27 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-QR/2       29.0 ns         29.0 ns     24112473
-QR/4        104 ns          104 ns      6761275
-QR/8        334 ns          334 ns      2100294
-QR/16       1028 ns         1027 ns       687549
-QR/32       4256 ns         4255 ns       166336
-QR/64       16.6 us         16.6 us        42151
-QR/256      0.483 ms        0.483 ms         1450
-QR/1024       22.7 ms         22.7 ms           30
-QR base/2       28.9 ns         28.9 ns     24190832
-QR base/4        103 ns          103 ns      6739808
-QR base/8        357 ns          357 ns      1962948
-QR base/16       1521 ns         1521 ns       460257
-QR base/32       8693 ns         8693 ns        80625
-QR base/64       69.1 us         69.1 us        10142
-QR base/256       4.85 ms         4.85 ms          144
+QR/2       30.9 ns         30.9 ns     22924553
+QR/4        111 ns          111 ns      6385799
+QR/8        338 ns          338 ns      2069780
+QR/16       1027 ns         1027 ns       681224
+QR/32       4207 ns         4207 ns       164731
+QR/64       19.8 us         19.8 us        35785
+QR/256      0.498 ms        0.498 ms         1407
+QR/1024       24.2 ms         24.2 ms           28
+QR base/2       30.9 ns         30.9 ns     22668892
+QR base/4        110 ns          110 ns      6415963
+QR base/8        365 ns          365 ns      1938231
+QR base/16       1552 ns         1552 ns       446994
+QR base/32       8759 ns         8757 ns        79855
+QR base/64       67.3 us         67.3 us        10500
+QR base/256       4.62 ms         4.62 ms          149
 QR base/1024        313 ms          313 ms            2
-QR mkl/2       57.1 ns         57.1 ns     12187022
-QR mkl/4        126 ns          126 ns      5533606
-QR mkl/8        336 ns          336 ns      2091297
-QR mkl/16       1013 ns         1013 ns       690498
-QR mkl/32       4206 ns         4205 ns       165178
-QR mkl/64       16.7 us         16.7 us        42009
-QR mkl/256      0.485 ms        0.485 ms         1444
-QR mkl/1024       22.7 ms         22.7 ms           30
+QR mkl/2       59.0 ns         59.0 ns     11714599
+QR mkl/4        127 ns          127 ns      5518757
+QR mkl/8        338 ns          338 ns      2107506
+QR mkl/16       1013 ns         1012 ns       688597
+QR mkl/32       4211 ns         4210 ns       166178
+QR mkl/64       16.8 us         16.8 us        41927
+QR mkl/256      0.486 ms        0.486 ms         1440
+QR mkl/1024       23.7 ms         23.7 ms           29

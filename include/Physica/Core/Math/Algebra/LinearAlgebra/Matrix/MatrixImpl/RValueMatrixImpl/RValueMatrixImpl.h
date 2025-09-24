@@ -505,12 +505,6 @@ namespace Physica {
         static_assert(!isComplex || M::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");
         static_assert(!isDiffable || M::isDiffable, "[Error]: Assign a diffable matrix to normal matrix discards grads");
     }
-
-    template<class Derived>
-    template<Matrix M>
-    __host__ __device__ constexpr bool RValueMatrix<Derived>::matmul_check() noexcept {
-        return ((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>;
-    }
 }
 
 #include "Sum.h"

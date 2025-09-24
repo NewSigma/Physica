@@ -55,7 +55,7 @@ namespace {
         }
     }
 }
-
+// Note: IntelLLVM is sensitive to static matrix size
 BENCHMARK(gemm<2>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(2);
 BENCHMARK(gemm<4>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(4);
 BENCHMARK(gemm<8>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(8);

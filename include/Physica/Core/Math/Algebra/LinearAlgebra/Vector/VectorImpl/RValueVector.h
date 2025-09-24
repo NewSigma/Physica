@@ -48,6 +48,8 @@ namespace Physica {
     };
 
     namespace Internal {
+        template<class T1, class T2 = T1> class EnableMKL;
+
         template<Vector T1, Vector T2 = T1>
         class EnableSIMD {
             constexpr static size_t Size1 = T1::SizeAtCompile;
@@ -67,10 +69,10 @@ namespace Physica {
             constexpr static bool value = (isCUDA == isFloat16) && isSameScalar && !isBadPacket;
         };
 
-        template<Vector T1, Vector T2 = T1>
-        class EnableMKL {
-            using U1 = std::remove_cvref<T1>::type;
-            using U2 = std::remove_cvref<T2>::type;
+        template<Vector V1, Vector V2>
+        class EnableMKL<V1, V2> {
+            using U1 = std::remove_cvref<V1>::type;
+            using U2 = std::remove_cvref<V2>::type;
             using ScalarType1 = U1::ScalarType;
             using ScalarType2 = U2::ScalarType;
         public:

@@ -1,39 +1,39 @@
 ----------------------------------------------------
 Benchmark          Time             CPU   Iterations
 ----------------------------------------------------
-innerDot float32/16       5.38 ns         5.38 ns    130442934
-innerDot float32/128       5.75 ns         5.74 ns    122127195
-innerDot float32/1024       24.4 ns         24.4 ns     28688881
-innerDot float64/16       4.46 ns         4.46 ns    156834859
-innerDot float64/128       8.25 ns         8.25 ns     88705231
-innerDot float64/1024       46.8 ns         46.8 ns     14962410
-innerDot cfloat32/16       4.66 ns         4.66 ns    150385280
-innerDot cfloat32/128       11.2 ns         11.2 ns     62473453
-innerDot cfloat32/1024       90.5 ns         90.5 ns      7740852
-innerDot cfloat64/16       4.98 ns         4.98 ns    140299455
-innerDot cfloat64/128       23.2 ns         23.2 ns     30032757
-innerDot cfloat64/1024        181 ns          181 ns      3862877
-innerDot base float32/16       6.28 ns         6.28 ns    110951570
-innerDot base float32/128       6.99 ns         6.99 ns    100005699
-innerDot base float32/1024       57.8 ns         57.8 ns     12102664
-innerDot base float64/16       6.10 ns         6.10 ns    112193114
-innerDot base float64/128       10.7 ns         10.7 ns     65458240
-innerDot base float64/1024        136 ns          136 ns      5153714
-innerDot base cfloat32/16       7.43 ns         7.43 ns     94463256
-innerDot base cfloat32/128       15.4 ns         15.4 ns     42423189
-innerDot base cfloat32/1024        103 ns          103 ns      6775327
-innerDot base cfloat64/16       8.46 ns         8.46 ns     82147480
-innerDot base cfloat64/128       29.0 ns         29.0 ns     24153806
-innerDot base cfloat64/1024        203 ns          203 ns      3449357
-innerDot mkl float32/16       5.30 ns         5.30 ns    132070822
-innerDot mkl float32/128       5.62 ns         5.62 ns    122355342
-innerDot mkl float32/1024       24.4 ns         24.4 ns     28190755
-innerDot mkl float64/16       4.42 ns         4.42 ns    158552639
-innerDot mkl float64/128       8.26 ns         8.26 ns     87030257
-innerDot mkl float64/1024       45.7 ns         45.7 ns     15345061
-innerDot mkl cfloat32/16       4.67 ns         4.66 ns    150966053
-innerDot mkl cfloat32/128       11.6 ns         11.6 ns     63256078
-innerDot mkl cfloat32/1024       92.4 ns         92.4 ns      7584343
-innerDot mkl cfloat64/16       5.07 ns         5.07 ns    137534845
-innerDot mkl cfloat64/128       22.9 ns         22.9 ns     30263420
-innerDot mkl cfloat64/1024        186 ns          186 ns      3765934
+innerDot float32/16       5.28 ns         5.28 ns    132859765
+innerDot float32/128       5.60 ns         5.60 ns    123784726
+innerDot float32/1024       24.6 ns         24.6 ns     28595568
+innerDot float64/16       4.65 ns         4.65 ns    152023264
+innerDot float64/128       8.19 ns         8.19 ns     87025393
+innerDot float64/1024       46.1 ns         46.1 ns     15131498
+innerDot cfloat32/16       4.83 ns         4.83 ns    144772744
+innerDot cfloat32/128       11.2 ns         11.2 ns     62413955
+innerDot cfloat32/1024       90.7 ns         90.6 ns      7723195
+innerDot cfloat64/16       4.98 ns         4.98 ns    140555967
+innerDot cfloat64/128       23.3 ns         23.3 ns     30077855
+innerDot cfloat64/1024        182 ns          182 ns      3860329
+innerDot base float32/16       5.81 ns         5.81 ns    120001971
+innerDot base float32/128       7.13 ns         7.13 ns     97511688
+innerDot base float32/1024       58.9 ns         58.8 ns     12077537
+innerDot base float64/16       6.15 ns         6.15 ns    114336827
+innerDot base float64/128       10.9 ns         10.9 ns     64274396
+innerDot base float64/1024        137 ns          137 ns      5056409
+innerDot base cfloat32/16       7.04 ns         7.04 ns     98611323
+innerDot base cfloat32/128       15.6 ns         15.7 ns     43511573
+innerDot base cfloat32/1024        109 ns          109 ns      6420026
+innerDot base cfloat64/16       8.74 ns         8.74 ns     79516361
+innerDot base cfloat64/128       29.9 ns         29.9 ns     23343326
+innerDot base cfloat64/1024        207 ns          207 ns      3387170
+innerDot mkl float32/16       5.22 ns         5.22 ns    134258350
+innerDot mkl float32/128       5.61 ns         5.61 ns    124589283
+innerDot mkl float32/1024       24.3 ns         24.3 ns     28785792
+innerDot mkl float64/16       4.43 ns         4.43 ns    157857452
+innerDot mkl float64/128       8.25 ns         8.25 ns     85614404
+innerDot mkl float64/1024       47.1 ns         47.0 ns     15023284
+innerDot mkl cfloat32/16       4.69 ns         4.69 ns    150834196
+innerDot mkl cfloat32/128       11.4 ns         11.4 ns     62841935
+innerDot mkl cfloat32/1024       91.5 ns         91.5 ns      7572250
+innerDot mkl cfloat64/16       4.90 ns         4.90 ns    142561612
+innerDot mkl cfloat64/128       23.0 ns         23.0 ns     30247425
+innerDot mkl cfloat64/1024        186 ns          186 ns      3845943

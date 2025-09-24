@@ -41,6 +41,25 @@ namespace Physica {
     template<class, int GradOrder> class GradMatrix;
     template<Scalar, bool Pivot> class QRDecomp;
     template<Matrix, Matrix> class GEMM;
+
+    namespace Internal {
+        template<Matrix M1, Matrix M2>
+        class EnableMKL<M1, M2> {
+            using U1 = std::remove_cvref<M1>::type;
+            using U2 = std::remove_cvref<M2>::type;
+            using ScalarType1 = U1::ScalarType;
+            using ScalarType2 = U2::ScalarType;
+        public:
+            constexpr static bool value = HasMKL()
+                                       && std::same_as<ScalarType1, ScalarType2>
+                                       && (ScalarType1::Prec == Float32 || ScalarType1::Prec == Float64)
+                                       && MatrixOption::isElementMatrix<U1>()
+                                       && MatrixOption::isElementMatrix<U2>()
+                                       && is_continuous<U1>::value
+                                       && is_continuous<U2>::value
+                                       && !Diffable<U1>;
+        };
+    }
     /**
      * \class RValueMatrix: The base class of all matrixes
      */
@@ -180,8 +199,6 @@ namespace Physica {
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
         template<Matrix M>
         __host__ __device__ static void assert_assign(const M& target) noexcept;
-        template<Matrix M>
-        __host__ __device__ constexpr static bool matmul_check() noexcept;
     protected:
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;

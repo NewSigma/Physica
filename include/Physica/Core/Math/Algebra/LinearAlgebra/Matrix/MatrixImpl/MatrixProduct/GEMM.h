@@ -93,20 +93,22 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
-        using M = std::remove_cvref_t<decltype(target)>;
-        constexpr bool GoodScalar = T::Prec == Float32 || T::Prec == Float64;
-        constexpr bool SameScalar = std::same_as<typename M1::ScalarType, typename M2::ScalarType> && std::same_as<T, typename M::ScalarType>;
+        using M = decltype(target);
+        constexpr int Critical = 32;
+        constexpr bool Large1 = M1::SizeAtCompile == Dynamic || M1::SizeAtCompile > Critical;
+        constexpr bool Large2 = M2::SizeAtCompile == Dynamic || M2::SizeAtCompile > Critical;
+        constexpr bool UseMKL1 = Large1 && Large2;
+        constexpr bool UseMKL2 = Internal::EnableMKL<M1, M>::value;
+        constexpr bool UseMKL3 = Internal::EnableMKL<M2, M>::value;
+        constexpr bool UseMKL = UseMKL1 && UseMKL2 && UseMKL3;
         constexpr bool SameMajor = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M2>();
-        constexpr bool isContinuous = is_continuous<M1>::value && is_continuous<M2>::value && is_continuous<M>::value;
-        constexpr bool isElement = MatrixOption::isElementMatrix<M1>() && MatrixOption::isElementMatrix<M2>() && MatrixOption::isElementMatrix<M>();
-        constexpr bool isDiffable = Diffable<T>;
-        constexpr bool UseMKL = HasMKL() && GoodScalar && SameScalar && SameMajor && isContinuous && isElement && !isDiffable;
-        constexpr bool SmallMatrix1 = 0 < M1::SizeAtCompile && M1::SizeAtCompile <= 64;
-        constexpr bool SmallMatrix2 = 0 < M2::SizeAtCompile && M2::SizeAtCompile <= 64;
-        constexpr bool SmallMatrix = SmallMatrix1 && SmallMatrix2;
         assert(target.getRow() == getRow() && target.getCol() == getCol());
-        if constexpr (UseMKL && !SmallMatrix)
-            assign_mkl(target);
+        if constexpr (UseMKL && SameMajor) {
+            if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
+                assign_mkl(target);
+            else
+                assign_base(target);
+        }
         else
             assign_base(target);
     }
