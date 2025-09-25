@@ -36,7 +36,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
     private:
-        const Params& params;
+        const Params* params;
         DenseMatrix<Trv> aux;
         CyclicChainQDT<T> chainU;
         CyclicChainQDT<T> chainD;
@@ -77,8 +77,8 @@ namespace Physica {
         void invalidates();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
-        [[nodiscard]] int getNumSplit() const noexcept { return params.getNumSplit(); }
+        [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
+        [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
         [[nodiscard]] auto& getAuxField() noexcept { return aux; }
 
         [[nodiscard]] Tr getLnAbsDet() const noexcept { return lnAbsDet; }
@@ -108,10 +108,10 @@ namespace Physica {
     };
 
     template<Scalar T>
-    DQMC<T>::DQMC(const Params& params_) : params(params_) {
-        resize(params.getNumSite(), params.getNumSplit());
+    DQMC<T>::DQMC(const Params& params_) : params(&params_) {
+        resize(getNumSite(), getNumSplit());
 
-        kinetic.compute(params.getExpB());
+        kinetic.compute(params->getExpB());
         for (int split = 0; split < getNumSplit(); ++split) {
             chainU[split] = QDTDecomp<T>(kinetic);
             chainD[split] = QDTDecomp<T>(kinetic);
@@ -197,9 +197,9 @@ namespace Physica {
         const int numSplit = getNumSplit();
         DiagMatrix<Tr> expU(getNumSite());
         for (int split = 0; split < numSplit; ++split) {
-            expU.diag() = exp(params.getAlpha() * aux.col(split));
+            expU.diag() = exp(params->getAlpha() * aux.col(split));
             chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
-            expU.diag() = exp(-params.getAlpha() * aux.col(split));
+            expU.diag() = exp(-params->getAlpha() * aux.col(split));
             chainD[split].setMatrixR(kinetic.getMatrixR() * expU);
         }
         chainU.invalidates();
@@ -249,7 +249,7 @@ namespace Physica {
 
     template<Scalar T>
     auto DQMC<T>::calcDelta(int site, int split) const noexcept -> Vector2D<Tr> {
-        const Tr x = Tr(2) * params.getAlpha() * aux(site, split);
+        const Tr x = Tr(2) * params->getAlpha() * aux(site, split);
         return exp(Vector2D<Tr>{-x, x}) - Tr(1); // The Eq. above Eq.(7.33) of [2]
     }
 
@@ -270,7 +270,7 @@ namespace Physica {
         auto spins = aux.row(site);
         spins[split] = -spins[split];
 
-        const Tr x = Tr(2) * params.getAlpha() * spins[split];
+        const Tr x = Tr(2) * params->getAlpha() * spins[split];
         const Vector2D<Tr> arr = exp(Vector2D<Tr>{x, -x});
         chainU.single_flip(site, split, arr[0], arr[1]);
         chainD.single_flip(site, split, arr[1], arr[0]);
@@ -296,7 +296,8 @@ namespace Physica {
     void DQMC<T>::stepMHImpl(int site, int split, Tr prop) {
         const auto deltas = calcDelta(site, split);
         const auto ratios = calcRatio(site, split, deltas);
-        if (prop < abs(ratios.prod())) {
+        const bool accept = prop < abs(ratios.prod());
+        if (accept) {
             single_flip(site, split);
             flipGreens(site, split, divide(deltas, ratios));
         }
@@ -309,13 +310,13 @@ namespace Physica {
         for (int i = 0; i < spins.getLength(); ++i)
             spinUp += spins[i].isPositive();
 
-        const auto& lnSpinWeights = params.getLnSpinWeights();
+        const auto& lnSpinWeights = params->getLnSpinWeights();
         const Trv lnWeight0 = lnSpinWeights[spinUp];
-        const Trv lnWeight1 = lnSpinWeights[spinUp - aux(site, split).isPositive()];
+        const Trv lnWeight1 = lnSpinWeights[spinUp + (aux(site, split).isPositive() ? -1 : 1)];
 
         const auto deltas = calcDelta(site, split);
         const auto ratios = calcRatio(site, split, deltas);
-        bool accept = prop < abs(ratios.prod()) * exp(lnWeight0 - lnWeight1);
+        const bool accept = prop < abs(ratios.prod()) * exp(lnWeight0 - lnWeight1);
         if (accept) {
             single_flip(site, split);
             flipGreens(site, split, divide(deltas, ratios));
@@ -326,7 +327,7 @@ namespace Physica {
     template<Scalar T>
     void DQMC<T>::splitDiag(const QDTDecomp<T>& qdt) noexcept {
         const auto& diagD = qdt.getMatrixD().diag();
-        const Tr expBetaMu = exp(params.calcBetaMu());
+        const Tr expBetaMu = exp(params->calcBetaMu());
         for (int i = 0; i < getNumSite(); ++i) {
             const Tr originD = diagD[i];
             const Tr expBetaMuD = expBetaMu * originD;

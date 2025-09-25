@@ -198,7 +198,7 @@ namespace Physica {
         lnSpinWeights.resize(numSplit + 1);
         for (int spinUp = 0; spinUp <= numSplit; ++spinUp) {
             int sumSpin = 2 * spinUp - numSplit;
-            lnSpinWeights = ln1pexp(lncosh(alpha * sumSpin) - lncoshBetaMu);
+            lnSpinWeights[spinUp] = ln1pexp(lncosh(alpha * sumSpin) - lncoshBetaMu);
         }
     }
 }
