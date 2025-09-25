@@ -237,17 +237,41 @@ namespace Physica {
 
     template<Scalar T, int Size>
     T SIMD<T, Size>::max() const {
-        return Physica::horizontal_max(toMachine());
+        return Physica::horizontal_max1(toMachine());
     }
 
     template<Scalar T, int Size>
     T SIMD<T, Size>::min() const {
-        return Physica::horizontal_min(toMachine());
+        return Physica::horizontal_min1(toMachine());
     }
 
     template<Scalar T, int Size>
     auto SIMD<T, Size>::isFinite() const noexcept -> BoolSIMDType {
         return BoolSIMDType(is_finite(toMachine()));
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<T, Size>::inf() noexcept -> SIMD {
+        if constexpr (T::Prec == Float32) {
+            if constexpr (Size == 4)
+                return reinterpret_f(Vec4i(0x7F800000));
+            else if constexpr (Size == 8)
+                return reinterpret_f(Vec8i(0x7F800000));
+            else {
+                static_assert(Size == 16);
+                return reinterpret_f(Vec16i(0x7F800000));
+            }
+        }
+        else {
+            if constexpr (Size == 2)
+                return reinterpret_d(Vec2q(0x7FF0000000000000));
+            else if constexpr (Size == 4)
+                return reinterpret_d(Vec4q(0x7FF0000000000000));
+            else {
+                static_assert(Size == 8);
+                return reinterpret_d(Vec8q(0x7FF0000000000000));
+            }
+        }
     }
 
     template<Scalar T, int Size>
@@ -311,15 +335,15 @@ namespace Physica {
     template<RNG R>
     SIMD<T, Size> SIMD<T, Size>::random_uniform() {
         SIMD result{};
-        T buffer[Size];
+        std::array<T, Size> buffer{};
         for (auto& elem : buffer)
             elem = T::template random_uniform<R>();
-        result.load(buffer);
+        result.load(buffer.data());
         return result;
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
+    SIMD<T, Size> SIMD<T, Size>::select(BoolSIMDType flags, const SIMD x, const SIMD y) {
         return SIMD(Physica::select(flags.toMachine(), x.toMachine(), y.toMachine()));
     }
 

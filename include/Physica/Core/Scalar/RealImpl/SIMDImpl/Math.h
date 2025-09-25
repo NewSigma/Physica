@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<Scalar T, int Size>
-    [[nodiscard]] __host__ __device__ SIMD<T, Size> abs(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] __host__ __device__ SIMD<T, Size> abs(SIMD<T, Size> x) noexcept {
         if constexpr (T::Prec == Float16)
             return SIMD<T, Size>(__habs2(x.toMachine()));
         else if constexpr (IsHost())
@@ -33,75 +33,77 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> square(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] SIMD<T, Size> square(SIMD<T, Size> x) noexcept {
         return x * x;
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] auto reciprocal(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] auto reciprocal(SIMD<T, Size> x) noexcept {
         using ResultType = SIMD<T, Size>;
         return ResultType(1) / x;
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> sqrt(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] SIMD<T, Size> sqrt(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(sqrt(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> cbrt(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] SIMD<T, Size> cbrt(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(cbrt(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] auto ln(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] auto ln(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(log(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] auto ln1p(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] auto ln1p(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(log1p(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] auto exp(const SIMD<T, Size>& x) noexcept {
-        return SIMD<T, Size>(exp(x.toMachine()));
-    }
-
-    template<Scalar T, int Size>
-    auto cos(const SIMD<T, Size>& x) noexcept {
+    auto cos(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(Physica::cos(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    void sincos(const SIMD<T, Size>& x, SIMD<T, Size>& s, SIMD<T, Size>& c) noexcept {
+    void sincos(SIMD<T, Size> x, SIMD<T, Size>& s, SIMD<T, Size>& c) noexcept {
         Physica::sincos(x.toMachine(), s.toMachine(), c.toMachine());
     }
 
     template<Scalar T, int Size>
-    auto tan(const SIMD<T, Size>& x) noexcept {
+    auto tan(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(Physica::tan(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    auto sec(const SIMD<T, Size>& x) noexcept {
+    auto sec(SIMD<T, Size> x) noexcept {
         return reciprocal(cos(x));
     }
 
     template<Scalar T, int Size>
-    auto arctan2(const SIMD<T, Size>& y, const SIMD<T, Size>& x) noexcept {
+    auto arctan2(SIMD<T, Size> y, SIMD<T, Size> x) noexcept {
         return Physica::atan2(y.toMachine(), x.toMachine());
     }
 
     template<Scalar T, int Size>
-    auto tanh(const SIMD<T, Size>& x) noexcept {
+    auto tanh(SIMD<T, Size> x) noexcept {
         return SIMD<T, Size>(Physica::tanh(x.toMachine()));
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> lncosh(const SIMD<T, Size>& x) noexcept {
+    [[nodiscard]] SIMD<T, Size> lncosh(SIMD<T, Size> x) noexcept {
         using Pack = SIMD<T, Size>;
         const auto x1 = abs(x);
         return x1 + ln1p(exp(-x1 * Pack(2))) - Pack(M_LN2);
     }
+
+    template<Scalar T, int Size>
+    auto round(SIMD<T, Size> x) noexcept -> SIMD<T, Size> {
+        return Physica::round(x.toMachine());
+    }
 }
+
+#include "Math/Exp.h"

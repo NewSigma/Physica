@@ -16,6 +16,7 @@ Checks: >
   modernize-*,
   -modernize-return-braced-init-list,
   -modernize-type-traits,
+  -modernize-use-std-numbers,
   -modernize-use-trailing-return-type,
   mpi-*,
   performance-*,

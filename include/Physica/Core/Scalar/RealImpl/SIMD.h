@@ -114,13 +114,14 @@ namespace Physica {
         [[nodiscard]] auto isNegative() const noexcept { return operator<(This(0)); }
         [[nodiscard]] BoolSIMDType isFinite() const noexcept;
         /* Static members */
+        [[nodiscard]] static SIMD inf() noexcept;
         template<int... Order>
         static SIMD blend(const SIMD& x, const SIMD& y);
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits();
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform();
-        [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
+        [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD x, const SIMD y);
     private:
         template<int Order, int... Orders>
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);
