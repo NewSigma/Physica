@@ -66,17 +66,17 @@ namespace Physica {
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] ScalarType operator[](int index) const;
-        [[nodiscard]] SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] SIMD operator*(const SIMD& other) const;
+        [[nodiscard]] SIMD operator+(SIMD other) const;
+        [[nodiscard]] SIMD operator-(SIMD other) const;
+        [[nodiscard]] SIMD operator*(SIMD other) const;
         [[nodiscard]] SIMD operator*(const ScalarType& x) const;
         [[nodiscard]] SIMD operator*(const T& x) const;
-        [[nodiscard]] SIMD operator/(const SIMD& other) const;
+        [[nodiscard]] SIMD operator/(SIMD other) const;
         [[nodiscard]] SIMD operator-() const;
-        void operator+=(const SIMD& other) { *this = *this + other; }
-        void operator-=(const SIMD& other) { *this = *this - other; }
-        void operator*=(const SIMD& other) { *this = *this * other; }
-        void operator/=(const SIMD& other) { *this = *this / other; }
+        void operator+=(SIMD other) { *this = *this + other; }
+        void operator-=(SIMD other) { *this = *this - other; }
+        void operator*=(SIMD other) { *this = *this * other; }
+        void operator/=(SIMD other) { *this = *this / other; }
         /* Operations */
         void load(const ScalarType* p);
         void load_partial(const ScalarType* p, int n);
@@ -109,10 +109,7 @@ namespace Physica {
     };
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> mul_add(
-            const SIMD<Complex<T>, Size>& a,
-            const SIMD<Complex<T>, Size>& b,
-            const SIMD<Complex<T>, Size>& c) noexcept;
+    [[nodiscard]] SIMD<Complex<T>, Size> mul_add(SIMD<Complex<T>, Size> a, SIMD<Complex<T>, Size> b, SIMD<Complex<T>, Size> c) noexcept;
 }
 
 namespace Physica {

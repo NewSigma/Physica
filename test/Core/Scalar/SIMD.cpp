@@ -24,7 +24,7 @@ using RandomSource = Random<MT19937, 10000>;
 
 namespace {
     template<Scalar T, int Size>
-    void testMath(const SIMD<T, Size>& x) {
+    void testMath(const SIMD<T, Size> x) {
         constexpr double prec = T::Prec == Float32 ? 1E-6 : 1E-15;
         /* Divide */ {
             const auto y = SIMD<T, Size>::template random_uniform<RandomSource>();

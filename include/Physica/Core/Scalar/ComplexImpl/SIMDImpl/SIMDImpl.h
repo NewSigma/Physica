@@ -53,12 +53,12 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator+(const SIMD& other) const {
+    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator+(const SIMD other) const {
         return asComplex(FullRealType::operator+(other));
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-(const SIMD& other) const {
+    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-(const SIMD other) const {
         return asComplex(FullRealType::operator-(other));
     }
     /**
@@ -66,7 +66,7 @@ namespace Physica {
      * [1] vectorclass add-on; https://github.com/vectorclass/add-on
      */
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const SIMD& other) const {
+    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const SIMD other) const {
         const auto pair = makeFullRealImag();
         return asComplex(mul_addsub(pair.first, other.asReal(), pair.second * other.swapRealImag()));
     }
@@ -85,7 +85,7 @@ namespace Physica {
      * [1] vectorclass add-on; https://github.com/vectorclass/add-on
      */
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator/(const SIMD& other) const {
+    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator/(const SIMD other) const {
         const auto pair = makeFullRealImag();
         const T factor = reciprocal(abs(other.asReal()).max()); // Avoid underflow
         const auto normed = other * factor;
@@ -118,15 +118,16 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size>& SIMD<Complex<T>, Size>::cutoff(int count) {
+    auto SIMD<Complex<T>, Size>::cutoff(int count) -> SIMD& {
         assert(0 < count && count < int(Size) && "[Error]: Invalid count");
         RealBase::cutoff(2 * count);
         return *this;
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size>::FullRealPair SIMD<Complex<T>, Size>::makeFullRealImag() const noexcept {
-        FullRealType re, im;
+    auto SIMD<Complex<T>, Size>::makeFullRealImag() const noexcept -> FullRealPair {
+        FullRealType re;
+        FullRealType im;
         if constexpr (T::Prec == Float32) {
             re = FullRealType::template shuffle<0, 0, 2, 2>();
             im = FullRealType::template shuffle<1, 1, 3, 3>();
@@ -150,7 +151,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::sum() const {
+    auto SIMD<Complex<T>, Size>::sum() const -> ScalarType {
         if constexpr (isSeparatable)
             return getHigh().sum() + getLow().sum();
         else {
@@ -162,7 +163,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::real() const noexcept {
+    auto SIMD<Complex<T>, Size>::real() const noexcept -> RealType {
         if constexpr (isSeparatable)
             return permRealImag().getLow();
         else {
@@ -175,7 +176,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::imag() const noexcept {
+    auto SIMD<Complex<T>, Size>::imag() const noexcept -> RealType {
         if constexpr (isSeparatable)
             return permRealImag().getHigh();
         else {
@@ -188,17 +189,14 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::asComplex(FullRealType reals) {
+    auto SIMD<Complex<T>, Size>::asComplex(FullRealType reals) -> SIMD {
         This result{};
         static_cast<FullRealType&>(result) = std::move(reals);
         return result;
     }
 
     template<Scalar T, int Size>
-    SIMD<Complex<T>, Size> mul_add(
-            const SIMD<Complex<T>, Size>& a,
-            const SIMD<Complex<T>, Size>& b,
-            const SIMD<Complex<T>, Size>& c) noexcept {
+    SIMD<Complex<T>, Size> mul_add(const SIMD<Complex<T>, Size> a, const SIMD<Complex<T>, Size> b, const SIMD<Complex<T>, Size> c) noexcept {
         return a * b + c;
     }
 }

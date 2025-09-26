@@ -85,20 +85,20 @@ namespace Physica {
             }
             else {
                 using Uv = U::ValueType;
-                Uv values[Pack::size()];
+                Array<Uv, Pack::size()> values{};
                 for (size_t i = 0; i < Pack::size(); ++i, ++index)
                     values[i] = Uv(calc(index));
                 ValuePacket packet{};
-                packet.load(values);
+                packet.load(values.data());
                 return Pack(std::move(packet));
             }
         }
         else {
-            U buffer[Pack::size()];
+            Array<U, Pack::size()> buffer{};
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 buffer[i] = U(calc(index));
             Pack packet{};
-            packet.load(buffer);
+            packet.load(buffer.data());
             return packet;
         }
     }
@@ -119,20 +119,20 @@ namespace Physica {
             }
             else {
                 using Uv = U::ValueType;
-                Uv values[Pack::size()];
+                Array<Uv, Pack::size()> values{};
                 for (size_t i = 0; i < Pack::size(); ++i, ++index)
                     values[i] = i < count ? Uv(calc(index)) : Uv(0);
                 ValuePacket packet{};
-                packet.load(values);
+                packet.load(values.data());
                 return Pack(std::move(packet));
             }
         }
         else {
-            U buffer[Pack::size()];
+            Array<U, Pack::size()> buffer{};
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 buffer[i] = i < count ? U(calc(index)) : U(0);
             Pack packet{};
-            packet.load_partial(buffer, count);
+            packet.load_partial(buffer.data(), count);
             return packet;
         }
     }
@@ -241,9 +241,9 @@ namespace Physica {
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
         if constexpr (isReverseDiff) {
             size_t index = 0;
-            Tv elem = calc_value(0), temp;
+            Tv elem = calc_value(0);
             for(size_t i = 1; i < getLength(); ++i) {
-                temp = calc_value(i);
+                const Tv temp = calc_value(i);
                 if (elem < temp) {
                     elem = temp;
                     index = i;
@@ -304,9 +304,9 @@ namespace Physica {
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
         if constexpr (isReverseDiff) {
             size_t index = 0;
-            Tv elem = calc_value(0), temp;
+            Tv elem = calc_value(0);
             for(size_t i = 1; i < getLength(); ++i) {
-                temp = calc_value(i);
+                const Tv temp = calc_value(i);
                 if (elem > temp) {
                     elem = temp;
                     index = i;

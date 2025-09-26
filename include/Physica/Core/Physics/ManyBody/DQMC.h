@@ -77,6 +77,7 @@ namespace Physica {
         void invalidates();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] const auto& getParams() const noexcept { return *params; }
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
         [[nodiscard]] auto& getAuxField() noexcept { return aux; }

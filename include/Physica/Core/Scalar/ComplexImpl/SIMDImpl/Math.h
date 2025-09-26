@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size>& x) noexcept {
+    [[nodiscard]] SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size> x) noexcept {
         return sqrt(x.squaredNorm());
     }
     /**
@@ -30,7 +30,7 @@ namespace Physica {
      * [1] add-on; https://github.com/vectorclass/add-on
      */
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x) noexcept {
+    [[nodiscard]] SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size> x) noexcept {
         using RealPack = SIMD<T, Size * 2>;
         const RealPack x1 = x.asReal();
         const RealPack t1 = x1 * x1;
@@ -83,7 +83,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> exp(const SIMD<Complex<T>, Size>& x) noexcept {
+    [[nodiscard]] SIMD<Complex<T>, Size> exp(const SIMD<Complex<T>, Size> x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         using RealType = ResultType::RealType;
         if constexpr (ResultType::isSeparatable) {
@@ -109,7 +109,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> ln(const SIMD<Complex<T>, Size>& x) noexcept {
+    [[nodiscard]] SIMD<Complex<T>, Size> ln(const SIMD<Complex<T>, Size> x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         using RealType = ResultType::RealType;
         if constexpr (ResultType::isSeparatable) {
@@ -147,12 +147,12 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> ln1p(const SIMD<Complex<T>, Size>& x) noexcept {
+    [[nodiscard]] SIMD<Complex<T>, Size> ln1p(const SIMD<Complex<T>, Size> x) noexcept {
         return ln(T(1) + x);
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size>& x) noexcept {
+    [[nodiscard]] SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size> x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         Complex<T> arr[Size];
         for (int i = 0; i < Size; ++i)
@@ -163,7 +163,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> lncosh(const SIMD<Complex<T>, Size>& x) noexcept {
+    [[nodiscard]] SIMD<Complex<T>, Size> lncosh(const SIMD<Complex<T>, Size> x) noexcept {
         using ResultType = SIMD<Complex<T>, Size>;
         using RealType = ResultType::RealType;
         if constexpr (ResultType::isSeparatable) {

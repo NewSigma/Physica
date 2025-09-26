@@ -28,6 +28,7 @@ namespace Physica {
     public:
         enum Observable {
             Density,
+            Kinetic,
             DoubleOccupy
         };
     private:
@@ -67,6 +68,11 @@ namespace Physica {
             case Density:
                 observe = T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();
                 break;
+            case Kinetic: {
+                const auto& hoppingT = dqmc.getParams().getHoppingMatrix();
+                observe = -hadamard(hoppingT, greenU + greenD).sum().real();
+                break;
+            }
             case DoubleOccupy:
                 observe = (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(dqmc.getNumSite());
                 break;

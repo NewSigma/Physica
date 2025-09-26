@@ -112,7 +112,8 @@ namespace Physica {
         const int numSplit = params.second;
         const Tr factor = exp(traceMu / Tr(numSplit));
 
-        BufferType buffer(getLength()), term;
+        BufferType buffer(getLength());
+        BufferType term(getLength());
         Tr lnNorm1 = 0;
         target = v;
         for (int i = 0; i < numSplit; ++i) {
@@ -126,7 +127,7 @@ namespace Physica {
                 lnNorm1 += ln(norm1);
             }
 
-            term = target;
+            target.assign(term);
             for (int n = 1; n <= numTaylorTerm; ++n) {
                 term *= reciprocal(Tr(numSplit * n));
                 {

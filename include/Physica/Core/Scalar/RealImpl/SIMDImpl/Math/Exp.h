@@ -48,13 +48,13 @@ namespace Physica {
             constexpr float32 max_x = []() consteval -> float32 {
                 switch (Base) {
                 case 0:
-                    return 87.3F;
+                    return 87.33655F;
                 case 1:
-                    return 89.0F;
+                    return 89.415985F;
                 case 2:
                     return 126.0F;
                 case 10:
-                    return 37.9F;
+                    return 37.92978F;
                 default:
                     unreachable();
                 };
@@ -63,8 +63,8 @@ namespace Physica {
             Pack x;
             Pack r;
             if constexpr (Base <= 1) {
-                constexpr float32 ln2_hi = 0.693359375F;
-                constexpr float32 ln2_lo = -2.12194440E-4F;
+                constexpr float ln2_hi = 0.693359375F;
+                constexpr float ln2_lo = -2.12194440E-4F;
                 r = round(initial_x * std::numbers::log2e_v<float>);
                 x = initial_x;
                 x = nmul_add(r, Pack(ln2_hi), x); // subtraction in two steps for higher precision
@@ -77,8 +77,8 @@ namespace Physica {
                 x = (initial_x - r) * std::numbers::ln2_v<float>;
             }
             else {
-                constexpr float32 log10_2_hi = 0.301025391F;
-                constexpr float32 log10_2_lo = 4.60503907E-6F;
+                constexpr float log10_2_hi = 0.301025391F;
+                constexpr float log10_2_lo = 4.60503907E-6F;
                 r = round(initial_x * (std::numbers::log2e_v<float> * std::numbers::ln10_v<float>));
                 x = initial_x;
                 x = nmul_add(r, Pack(log10_2_hi), x);
@@ -87,14 +87,14 @@ namespace Physica {
             }
 
             Pack z = polynomial_5(x.toMachine(), P0, P1, P2, P3, P4, P5);
-            Pack n2 = vm_pow2n(r.toMachine());
+            const Pack n2 = vm_pow2n(r.toMachine());
             z = mul_add(z, x * x, x);
             z = ExpM1 ? mul_add(z, n2, n2 - Pack(1)) : ((z + Pack(1)) * n2);
 
-            auto inRange  = abs(initial_x) < Pack(max_x);
-            bool overflow = !inRange.horizontal_and();
+            const auto inRange  = abs(initial_x) < Pack(max_x);
+            const bool overflow = !inRange.horizontal_and();
             if (overflow) [[unlikely]] {
-                auto z0 = Pack::select(initial_x.isPositive(), Pack::inf(), Pack(ExpM1 ? -1 : 0));
+                const Pack z0 = Pack::select(initial_x.isPositive(), Pack::inf(), Pack(ExpM1 ? -1 : 0));
                 z = Pack::select(inRange, z, z0);
             }
             return z;
@@ -117,13 +117,13 @@ namespace Physica {
             constexpr float64 max_x = []() consteval -> float64 {
                 switch (Base) {
                 case 0:
-                    return 708.39;
+                    return 708.3964185322641;
                 case 1:
-                    return 709.7; // lower limit for 0.5*exp(x) is -707.6, but we are using 0.5*exp(x) only for positive x in hyperbolic functions
+                    return 709.782712893384;
                 case 2:
                     return 1022.0;
                 case 10:
-                    return 307.65;
+                    return 307.6526555685888;
                 default:
                     unreachable();
                 };
@@ -132,8 +132,8 @@ namespace Physica {
             Pack x;
             Pack r;
             if constexpr (Base <= 1) {
-                constexpr float64 ln2_hi = 0.693145751953125;
-                constexpr float64 ln2_lo = 1.42860682030941723212E-6;
+                constexpr double ln2_hi = 0.693145751953125;
+                constexpr double ln2_lo = 1.42860682030941723212E-6;
                 r = round(initial_x * std::numbers::log2e);
                 x = initial_x;
                 x = nmul_add(r, Pack(ln2_hi), x);
@@ -146,8 +146,8 @@ namespace Physica {
                 x = (initial_x - r) * std::numbers::ln2;
             }
             else {
-                constexpr float64 log10_2_hi = 0.30102999554947019;
-                constexpr float64 log10_2_lo = 1.1451100899212592E-10;
+                constexpr double log10_2_hi = 0.30102999554947019;
+                constexpr double log10_2_lo = 1.1451100899212592E-10;
                 r = round(initial_x * (std::numbers::log2e * std::numbers::ln10));
                 x = initial_x;
                 x = nmul_add(r, Pack(log10_2_hi), x);
@@ -156,13 +156,13 @@ namespace Physica {
             }
 
             Pack z = polynomial_13m(x.toMachine(), P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13);
-            Pack n2 = vm_pow2n(r.toMachine());
+            const Pack n2 = vm_pow2n(r.toMachine());
             z = ExpM1 ? mul_add(z, n2, n2 - Pack(1)) : (z + Pack(1)) * n2;
 
-            auto inRange  = abs(initial_x) < Pack(max_x);
-            bool overflow = !inRange.horizontal_and();
+            const auto inRange  = abs(initial_x) < Pack(max_x);
+            const bool overflow = !inRange.horizontal_and();
             if (overflow) [[unlikely]] {
-                auto z0 = Pack::select(initial_x.isPositive(), Pack::inf(), Pack(ExpM1 ? -1 : 0));
+                const Pack z0 = Pack::select(initial_x.isPositive(), Pack::inf(), Pack(ExpM1 ? -1 : 0));
                 z = Pack::select(inRange, z, z0);
             }
             return z;

@@ -67,19 +67,19 @@ namespace Physica {
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] __host__ __device__ inline float16 operator[](int index) const noexcept;
-        [[nodiscard]] __host__ __device__ inline SIMD operator+(const SIMD& other) const noexcept;
-        [[nodiscard]] __host__ __device__ inline SIMD operator-(const SIMD& other) const noexcept;
-        [[nodiscard]] __host__ __device__ inline SIMD operator*(const SIMD& other) const noexcept;
-        [[nodiscard]] __host__ __device__ inline SIMD operator/(const SIMD& other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator+(SIMD other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator-(SIMD other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator*(SIMD other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator/(SIMD other) const noexcept;
         [[nodiscard]] __host__ __device__ inline SIMD operator-() const noexcept;
-        __host__ __device__ void operator+=(const SIMD& other) noexcept { *this = *this + other; }
-        __host__ __device__ void operator-=(const SIMD& other) noexcept { *this = *this - other; }
-        __host__ __device__ void operator*=(const SIMD& other) noexcept { *this = *this * other; }
-        __host__ __device__ void operator/=(const SIMD& other) noexcept { *this = *this / other; }
-        //[[nodiscard]] inline BoolSIMDType operator>(const SIMD& other) const;
-        //[[nodiscard]] inline BoolSIMDType operator<(const SIMD& other) const;
-        //[[nodiscard]] inline BoolSIMDType operator>=(const SIMD& other) const { return !(*this < other); }
-        //[[nodiscard]] inline BoolSIMDType operator<=(const SIMD& other) const { return !(*this > other); }
+        __host__ __device__ void operator+=(const SIMD other) noexcept { *this = *this + other; }
+        __host__ __device__ void operator-=(const SIMD other) noexcept { *this = *this - other; }
+        __host__ __device__ void operator*=(const SIMD other) noexcept { *this = *this * other; }
+        __host__ __device__ void operator/=(const SIMD other) noexcept { *this = *this / other; }
+        //[[nodiscard]] inline BoolSIMDType operator>(SIMD other) const;
+        //[[nodiscard]] inline BoolSIMDType operator<(SIMD other) const;
+        //[[nodiscard]] inline BoolSIMDType operator>=(const SIMD other) const { return !(*this < other); }
+        //[[nodiscard]] inline BoolSIMDType operator<=(const SIMD other) const { return !(*this > other); }
         /* Operations */
         __host__ __device__ inline void load(const float16* p);
         __host__ __device__ inline void load_partial(const float16* p, int n);
@@ -110,19 +110,19 @@ namespace Physica {
         return __high2half(*this);
     }
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator+(const SIMD& other) const noexcept {
+    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator+(const SIMD other) const noexcept {
         return This(__hadd2(toMachine(), other.toMachine()));
     }
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator-(const SIMD& other) const noexcept {
+    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator-(const SIMD other) const noexcept {
         return This(__hsub2(toMachine(), other.toMachine()));
     }
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator*(const SIMD& other) const noexcept {
+    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator*(const SIMD other) const noexcept {
         return This(__hmul2(toMachine(), other.toMachine()));
     }
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator/(const SIMD& other) const noexcept {
+    __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator/(const SIMD other) const noexcept {
         return This(__h2div(toMachine(), other.toMachine()));
     }
 
@@ -157,7 +157,7 @@ namespace Physica {
     }
 
     [[nodiscard]] __host__ __device__ inline SIMD<Real<Float16>, 2> mul_add(
-            const SIMD<Real<Float16>, 2>& a, const SIMD<Real<Float16>, 2>& b, const SIMD<Real<Float16>, 2>& c) noexcept {
+            const SIMD<Real<Float16>, 2> a, const SIMD<Real<Float16>, 2> b, const SIMD<Real<Float16>, 2> c) noexcept {
     #ifdef __CUDA_ARCH__
         return SIMD<Real<Float16>, 2>(__hfma2(a.toMachine(), b.toMachine(), c.toMachine()));
     #else

@@ -64,30 +64,30 @@ namespace Physica {
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] operator MachineType() const noexcept { return toMachine(); }
         [[nodiscard]] T operator[](int index) const;
-        [[nodiscard]] SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] SIMD operator*(const SIMD& other) const;
+        [[nodiscard]] SIMD operator+(SIMD other) const;
+        [[nodiscard]] SIMD operator-(SIMD other) const;
+        [[nodiscard]] SIMD operator*(SIMD other) const;
         [[nodiscard]] SIMD operator*(const T& x) const;
-        [[nodiscard]] SIMD operator/(const SIMD& other) const;
+        [[nodiscard]] SIMD operator/(SIMD other) const;
         [[nodiscard]] SIMD operator-() const;
-        [[nodiscard]] SIMD operator&(const SIMD& other) const;
-        [[nodiscard]] SIMD operator|(const SIMD& other) const;
-        [[nodiscard]] SIMD operator^(const SIMD& other) const;
+        [[nodiscard]] SIMD operator&(SIMD other) const;
+        [[nodiscard]] SIMD operator|(SIMD other) const;
+        [[nodiscard]] SIMD operator^(SIMD other) const;
         [[nodiscard]] SIMD operator!() const;
-        void operator+=(const SIMD& other) { *this = *this + other; }
-        void operator-=(const SIMD& other) { *this = *this - other; }
-        void operator*=(const SIMD& other) { *this = *this * other; }
+        void operator+=(const SIMD other) { *this = *this + other; }
+        void operator-=(const SIMD other) { *this = *this - other; }
+        void operator*=(const SIMD other) { *this = *this * other; }
         void operator*=(const T& x) { *this = *this * x; }
-        void operator/=(const SIMD& other) { *this = *this / other; }
-        void operator&=(const SIMD& other) { *this = *this & other; }
-        void operator|=(const SIMD& other) { *this = *this | other; }
-        void operator^=(const SIMD& other) { *this = *this ^ other; }
-        [[nodiscard]] auto operator==(const SIMD& other) const;
-        [[nodiscard]] auto operator>(const SIMD& other) const;
-        [[nodiscard]] auto operator<(const SIMD& other) const;
-        [[nodiscard]] auto operator!=(const SIMD& other) const { return !(*this == other); }
-        [[nodiscard]] auto operator>=(const SIMD& other) const { return !(*this < other); }
-        [[nodiscard]] auto operator<=(const SIMD& other) const { return !(*this > other); }
+        void operator/=(const SIMD other) { *this = *this / other; }
+        void operator&=(const SIMD other) { *this = *this & other; }
+        void operator|=(const SIMD other) { *this = *this | other; }
+        void operator^=(const SIMD other) { *this = *this ^ other; }
+        [[nodiscard]] auto operator==(SIMD other) const;
+        [[nodiscard]] auto operator>(SIMD other) const;
+        [[nodiscard]] auto operator<(SIMD other) const;
+        [[nodiscard]] auto operator!=(const SIMD other) const { return !(*this == other); }
+        [[nodiscard]] auto operator>=(const SIMD other) const { return !(*this < other); }
+        [[nodiscard]] auto operator<=(const SIMD other) const { return !(*this > other); }
         /* Operations */
         void load(const T* p);
         void load_partial(const T* p, int n);
@@ -116,19 +116,19 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static SIMD inf() noexcept;
         template<int... Order>
-        static SIMD blend(const SIMD& x, const SIMD& y);
+        static SIMD blend(SIMD x, SIMD y);
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits();
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform();
-        [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD x, const SIMD y);
+        [[nodiscard]] static SIMD select(BoolSIMDType flags, SIMD x, SIMD y);
     private:
         template<int Order, int... Orders>
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);
     };
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size>& packet) {
+    [[nodiscard]] SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size> packet) {
         return packet * scalar;
     }
 

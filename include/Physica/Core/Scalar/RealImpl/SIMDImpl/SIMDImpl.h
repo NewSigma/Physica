@@ -83,17 +83,17 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::operator+(const SIMD& other) const {
+    SIMD<T, Size> SIMD<T, Size>::operator+(const SIMD other) const {
         return SIMD(toMachine() + other.toMachine());
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::operator-(const SIMD& other) const {
+    SIMD<T, Size> SIMD<T, Size>::operator-(const SIMD other) const {
         return SIMD(toMachine() - other.toMachine());
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::operator*(const SIMD& other) const {
+    SIMD<T, Size> SIMD<T, Size>::operator*(const SIMD other) const {
         return SIMD(toMachine() * other.toMachine());
     }
 
@@ -103,7 +103,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::operator/(const SIMD& other) const {
+    SIMD<T, Size> SIMD<T, Size>::operator/(const SIMD other) const {
         return SIMD(toMachine() / other.toMachine());
     }
 
@@ -113,17 +113,17 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::operator&(const SIMD& other) const {
+    SIMD<T, Size> SIMD<T, Size>::operator&(const SIMD other) const {
         return SIMD(toMachine() & other.toMachine());
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::operator|(const SIMD& other) const {
+    SIMD<T, Size> SIMD<T, Size>::operator|(const SIMD other) const {
         return SIMD(toMachine() | other.toMachine());
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size> SIMD<T, Size>::operator^(const SIMD& other) const {
+    SIMD<T, Size> SIMD<T, Size>::operator^(const SIMD other) const {
         return SIMD(toMachine() ^ other.toMachine());
     }
 
@@ -133,17 +133,17 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    auto SIMD<T, Size>::operator==(const SIMD& other) const {
+    auto SIMD<T, Size>::operator==(const SIMD other) const {
         return BoolSIMDType(toMachine() == other.toMachine());
     }
 
     template<Scalar T, int Size>
-    auto SIMD<T, Size>::operator>(const SIMD& other) const {
+    auto SIMD<T, Size>::operator>(const SIMD other) const {
         return BoolSIMDType(toMachine() > other.toMachine());
     }
     
     template<Scalar T, int Size>
-    auto SIMD<T, Size>::operator<(const SIMD& other) const {
+    auto SIMD<T, Size>::operator<(const SIMD other) const {
         return BoolSIMDType(toMachine() < other.toMachine());
     }
 
@@ -276,7 +276,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     template<int... Order>
-    SIMD<T, Size> SIMD<T, Size>::blend(const SIMD& x, const SIMD& y) {
+    SIMD<T, Size> SIMD<T, Size>::blend(const SIMD x, const SIMD y) {
         static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
         if constexpr (Size == 2)
             return Physica::blend2<Order...>(x.toMachine(), y.toMachine());
@@ -394,10 +394,7 @@ namespace Physica {
      * \returns a * b -/+ c
      */
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_addsub(
-            const SIMD<T, Size> a,
-            const SIMD<T, Size> b,
-            const SIMD<T, Size> c) noexcept {
+    [[nodiscard]] SIMD<T, Size> mul_addsub(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDiffable, "[Error]: Not implemented");
         if constexpr (T::Prec == Float32) {
             if constexpr (Size == 4) {
