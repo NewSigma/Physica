@@ -14,6 +14,18 @@ if(${RUN_RESULT_VAR} MATCHES 1)
 endif()
 message(STATUS "Performing CheckRightShift --Passed")
 
+physica_check(L1D HostDevAttr/L1D.cpp)
+set(CacheSizeL1D ${RUN_OUTPUT_VAR})
+
+physica_check(CacheLine HostDevAttr/CacheLine.cpp)
+set(LineSizeL1D ${RUN_OUTPUT_VAR})
+
+physica_check(L2 HostDevAttr/L2.cpp)
+set(CacheSizeL2 ${RUN_OUTPUT_VAR})
+
+physica_check(L3 HostDevAttr/L3.cpp)
+set(CacheSizeL3 ${RUN_OUTPUT_VAR})
+
 if(${PHYSICA_CUDA})
     # WarpSize
     physica_check(WarpSize CUDADevAttr/WarpSize.cpp)

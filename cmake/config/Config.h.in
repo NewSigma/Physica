@@ -26,6 +26,14 @@ namespace Physica {
     constexpr static const char* Version = "@CMAKE_PROJECT_VERSION@";
     constexpr static const char* GitHash = "@GIT_HASH@";
 
+    class HostDevAttr {
+    public:
+        constexpr static int CacheSizeL1D = @CacheSizeL1D@;
+        constexpr static int LineSizeL1D = @LineSizeL1D@;
+        constexpr static int CacheSizeL2 = @CacheSizeL2@;
+        constexpr static int CacheSizeL3 = @CacheSizeL3@;
+    };
+
     class CUDADevAttr {
     public:
     #ifdef PHYSICA_CUDA
