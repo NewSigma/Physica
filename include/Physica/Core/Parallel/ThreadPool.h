@@ -46,7 +46,7 @@ namespace Physica {
             std::queue<Handle> queue;
             std::mutex mutex;
         public:
-            ThreadData() : thread(), queue(), mutex() {}
+            ThreadData() = default;
             /* Operations */
             void push(Handle handle) noexcept;
             Handle pop() noexcept;
@@ -79,7 +79,7 @@ namespace Physica {
         void waitExit();
         void restart();
         /* Getters */
-        [[nodiscard]] int getNumThreads() const noexcept { return thread_data.getLength(); }
+        [[nodiscard]] int getNumThreads() const noexcept { return static_cast<int>(thread_data.getLength()); }
         /* Setters */
         void shouldExit() noexcept;
         /* Static Members */
@@ -92,8 +92,6 @@ namespace Physica {
         void workerMainLoop(int thread_id) noexcept;
         /* Static Members */
         [[nodiscard]] static ThreadInfo& getThreadInfo() noexcept;
-        [[nodiscard]] static int getNumProcesser() noexcept;
-        [[nodiscard]] static int makeNumThread() noexcept;
     };
 
     inline int ThreadPool::getThreadID() noexcept {

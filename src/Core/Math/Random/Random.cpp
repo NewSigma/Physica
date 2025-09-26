@@ -42,9 +42,9 @@ namespace {
     }
 }
 
-RandomBase::RandomBase(SeedType seed_, RandomOption option, bool fixed) noexcept {
+RandomBase::RandomBase(SeedType seed_, RandomOption option) noexcept : seed(seed_) {
     try {
-        reseed(seed_, option, fixed);
+        reseed(seed_, option);
     }
     catch (std::exception& e) {
         std::cerr << std::format("RNG init failed: {}\n", e.what());
@@ -59,19 +59,26 @@ RandomBase::~RandomBase() {
 #endif
 }
 
-void RandomBase::reseed(SeedType seed_, RandomOption option, bool fixed) {
+void RandomBase::reseed(SeedType seed_, RandomOption option) {
     seed = seed_;
-    tseed = (fixed || ThreadPool::isMainThread()) ? seed : (seed + ThreadPool::getThreadID() + 1);
-    if constexpr (HasMKL()) {
-        check_vsl(vslNewStream(&pStream, rngID_MKL(option), tseed));
-        RandomSeed::toNextSeed(tseed);
+    SeedType temp = seed;
+    if (!ThreadPool::isMainThread())
+        for (int i = 0; i < (ThreadPool::getThreadID() + 1) * tseed.size(); ++i)
+            RandomSeed::toNextSeed(temp);
+
+    for (auto& elem : tseed) {
+        elem = temp;
+        RandomSeed::toNextSeed(temp);
     }
+
+    if constexpr (HasMKL())
+        check_vsl(vslNewStream(&pStream, rngID_MKL(option), tseed[MKL]));
+
     if constexpr (HasCUDA()) {
 #ifdef PHYSICA_CUDA
         check(curandCreateGenerator(&curand, rngID_cuRAND(option)));
         check(curandSetGeneratorOrdering(curand, CURAND_ORDERING_PSEUDO_DYNAMIC));
-        check(curandSetPseudoRandomGeneratorSeed(curand, tseed));
-        RandomSeed::toNextSeed(tseed);
+        check(curandSetPseudoRandomGeneratorSeed(curand, tseed[CUDA]));
 #endif
     }
 }

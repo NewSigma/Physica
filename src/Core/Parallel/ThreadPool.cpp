@@ -40,6 +40,24 @@ namespace {
     };
 
     [[maybe_unused]] const GlobalEnv init{};
+
+    int getNumProcesser() noexcept {
+    #ifdef __linux__
+        return get_nprocs();
+    #else
+        SYSTEM_INFO sinfo;
+        GetSystemInfo(&sinfo);
+        return sinfo.dwNumberOfProcessors;
+    #endif
+    }
+
+    int makeNumThread() noexcept {
+        const auto numProcesser = getNumProcesser();
+        int num = ThreadPool::numThreadRequired;
+        if (num == 0 || num > numProcesser)
+            num = numProcesser * 3 / 4;
+        return num;
+    }
 }
 
 int ThreadPool::numThreadRequired = 0;
@@ -76,7 +94,15 @@ ThreadPool::~ThreadPool() {
 void ThreadPool::schedule(Handle handle) noexcept {
     assert(handle != nullptr);
     assert(!handle.done());
-    const int schedule_to = isMainThread() ? 0 : getThreadInfo().id;
+    int schedule_to{};
+    if (isMainThread()) {
+        static int MainThreadCounter = 0;
+        schedule_to = MainThreadCounter;
+        MainThreadCounter = (MainThreadCounter + 1) % getNumThreads();
+    }
+    else
+        schedule_to = getThreadInfo().id;
+
     thread_data[schedule_to].push(handle);
     cond.notify_one();
 }
@@ -107,7 +133,7 @@ void ThreadPool::restart() {
     const int numThread = makeNumThread();
     thread_data = Array<ThreadData>(numThread);
     for (int i = 0; i < numThread; ++i) {
-        thread_data[i].thread.reset(new std::thread([this, i]() { workerMainLoop(i); }));
+        thread_data[i].thread = std::make_unique<std::thread>([this, i]() { workerMainLoop(i); });
     }
 }
 
@@ -154,21 +180,4 @@ auto ThreadPool::getThreadInfo() noexcept -> ThreadInfo& {
         info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
     }
     return *info;
-}
-
-int ThreadPool::getNumProcesser() noexcept {
-#ifdef __linux__
-    return get_nprocs();
-#else
-    SYSTEM_INFO sinfo;
-    GetSystemInfo(&sinfo);
-    return sinfo.dwNumberOfProcessors;
-#endif
-}
-
-int ThreadPool::makeNumThread() noexcept {
-    const auto numProcesser = getNumProcesser();
-    if (numThreadRequired == 0 || numThreadRequired > numProcesser)
-        numThreadRequired = numProcesser * 3 / 4;
-    return numThreadRequired;
 }
