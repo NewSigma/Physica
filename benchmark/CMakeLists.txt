@@ -19,6 +19,7 @@ target_sources(Benchmark PRIVATE CRCoro.cpp)
 target_sources(Benchmark PRIVATE Mnist.cpp)
 
 get_target_property(benchmark_INCLUDE_DIR benchmark::benchmark INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(Benchmark PRIVATE .)
 target_include_directories(Benchmark PRIVATE ${benchmark_INCLUDE_DIR}) # Explicit include to help clangd
 
 target_link_libraries(Benchmark PhysicaCore benchmark::benchmark)

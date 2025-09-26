@@ -38,6 +38,8 @@ namespace {
         bool ReportContext(const Context&) override { return true; }
         void ReportRuns(const std::vector<Run>& reports) override;
         void Finalize() override;
+    private:
+        [[nodiscard]] static TimeUnit selectTimeUnit(const Run& r);
     };
 
     Reporter::Reporter() : ConsoleReporter(OutputOptions::OO_None) {
@@ -57,16 +59,28 @@ namespace {
     }
 
     void Reporter::Finalize() {
-        for (const auto& pair : subReportMap) {
+        for (auto& pair : subReportMap) {
             std::ofstream fout(pair.first, std::ios_base::trunc);
             Base::SetOutputStream(&fout);
 
-            const auto& subReports = pair.second;
+            auto& subReports = pair.second;
             Base::PrintHeader(subReports[0]);
-            for (const auto& r : subReports)
+            for (auto& r : subReports) {
+                r.time_unit = selectTimeUnit(r);
                 Base::PrintRunData(r);
+            }
+
         }
         Base::SetOutputStream(&std::cout);
+    }
+
+    TimeUnit Reporter::selectTimeUnit(const Run& r) {
+        const auto time = r.GetAdjustedRealTime();
+        if (time > 1E9)
+            return kSecond;
+        if (time > 1E6)
+            return kMillisecond;
+        return time > 1E3 ? kMicrosecond : kNanosecond;
     }
 }
 
