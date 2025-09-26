@@ -37,11 +37,13 @@ namespace {
     }
 }
 
-BENCHMARK(add<float32>)->Name("add float32 mkl")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(add<float32>)->Name("add float32 mkl")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(add<float32>)->Name("add float32 mkl")->Unit(benchmark::kNanosecond)->Arg(256);
-BENCHMARK(add<float32>)->Name("add float32 mkl")->Unit(benchmark::kNanosecond)->Arg(512);
-BENCHMARK(add<float64>)->Name("add float64 mkl")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(add<float64>)->Name("add float64 mkl")->Unit(benchmark::kNanosecond)->Arg(256);
-BENCHMARK(add<float64>)->Name("add float64 mkl")->Unit(benchmark::kNanosecond)->Arg(1024);
-BENCHMARK(add<float64>)->Name("add float64 mkl")->Unit(benchmark::kNanosecond)->Arg(8192);
+BENCHMARK(add<float32>)->Name("add float32 mkl")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(256)
+    ->Arg(512);
+BENCHMARK(add<float64>)->Name("add float64 mkl")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(8192);

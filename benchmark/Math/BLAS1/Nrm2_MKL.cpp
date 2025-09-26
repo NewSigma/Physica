@@ -36,11 +36,12 @@ namespace {
     }
 }
 
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(2);
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(4);
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(8);
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(16);
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(64);
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(256);
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(1024);
-BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")->Arg(16384);
+BENCHMARK(nrm2_mkl)->Name("nrm2 mkl")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);

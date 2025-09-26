@@ -45,6 +45,7 @@ BENCHMARK(gemm_mkl<4>)->Name("GEMM mkl")->Unit(benchmark::kNanosecond)->Arg(4);
 BENCHMARK(gemm_mkl<8>)->Name("GEMM mkl")->Unit(benchmark::kNanosecond)->Arg(8);
 BENCHMARK(gemm_mkl<16>)->Name("GEMM mkl")->Unit(benchmark::kNanosecond)->Arg(16);
 BENCHMARK(gemm_mkl<32>)->Name("GEMM mkl")->Unit(benchmark::kNanosecond)->Arg(32);
-BENCHMARK(gemm_mkl)->Name("GEMM mkl")->Unit(benchmark::kMicrosecond)->Arg(64);
-BENCHMARK(gemm_mkl)->Name("GEMM mkl")->Unit(benchmark::kMillisecond)->Arg(256);
-BENCHMARK(gemm_mkl)->Name("GEMM mkl")->Unit(benchmark::kMillisecond)->Arg(1024);
+BENCHMARK(gemm_mkl)->Name("GEMM mkl")->Unit(benchmark::kMicrosecond)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024);

@@ -44,6 +44,7 @@ BENCHMARK(qr_mkl<4>)->Name("QR mkl")->Unit(benchmark::kNanosecond)->Arg(4);
 BENCHMARK(qr_mkl<8>)->Name("QR mkl")->Unit(benchmark::kNanosecond)->Arg(8);
 BENCHMARK(qr_mkl<16>)->Name("QR mkl")->Unit(benchmark::kNanosecond)->Arg(16);
 BENCHMARK(qr_mkl<32>)->Name("QR mkl")->Unit(benchmark::kNanosecond)->Arg(32);
-BENCHMARK(qr_mkl)->Name("QR mkl")->Unit(benchmark::kMicrosecond)->Arg(64);
-BENCHMARK(qr_mkl)->Name("QR mkl")->Unit(benchmark::kMillisecond)->Arg(256);
-BENCHMARK(qr_mkl)->Name("QR mkl")->Unit(benchmark::kMillisecond)->Arg(1024);
+BENCHMARK(qr_mkl)->Name("QR mkl")->Unit(benchmark::kMicrosecond)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024);

@@ -48,20 +48,22 @@ namespace {
     }
 }
 
-BENCHMARK(axpy)->Name("axpy")->Arg(2);
-BENCHMARK(axpy)->Name("axpy")->Arg(4);
-BENCHMARK(axpy)->Name("axpy")->Arg(8);
-BENCHMARK(axpy)->Name("axpy")->Arg(16);
-BENCHMARK(axpy)->Name("axpy")->Arg(64);
-BENCHMARK(axpy)->Name("axpy")->Arg(256);
-BENCHMARK(axpy)->Name("axpy")->Arg(1024);
-BENCHMARK(axpy)->Name("axpy")->Arg(16384);
+BENCHMARK(axpy)->Name("axpy")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);
 
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(2);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(4);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(8);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(16);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(64);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(256);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(1024);
-BENCHMARK(axpy_base)->Name("axpy base")->Arg(16384);
+BENCHMARK(axpy_base)->Name("axpy base")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);

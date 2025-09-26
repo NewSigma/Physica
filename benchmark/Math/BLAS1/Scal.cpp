@@ -50,20 +50,22 @@ namespace {
     }
 }
 
-BENCHMARK(scal)->Name("scal")->Arg(2);
-BENCHMARK(scal)->Name("scal")->Arg(4);
-BENCHMARK(scal)->Name("scal")->Arg(8);
-BENCHMARK(scal)->Name("scal")->Arg(16);
-BENCHMARK(scal)->Name("scal")->Arg(64);
-BENCHMARK(scal)->Name("scal")->Arg(256);
-BENCHMARK(scal)->Name("scal")->Arg(1024);
-BENCHMARK(scal)->Name("scal")->Arg(16384);
+BENCHMARK(scal)->Name("scal")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);
 
-BENCHMARK(scal_base)->Name("scal base")->Arg(2);
-BENCHMARK(scal_base)->Name("scal base")->Arg(4);
-BENCHMARK(scal_base)->Name("scal base")->Arg(8);
-BENCHMARK(scal_base)->Name("scal base")->Arg(16);
-BENCHMARK(scal_base)->Name("scal base")->Arg(64);
-BENCHMARK(scal_base)->Name("scal base")->Arg(256);
-BENCHMARK(scal_base)->Name("scal base")->Arg(1024);
-BENCHMARK(scal_base)->Name("scal base")->Arg(16384);
+BENCHMARK(scal_base)->Name("scal base")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);

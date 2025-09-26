@@ -46,20 +46,22 @@ namespace {
     }
 }
 
-BENCHMARK(asum)->Name("asum")->Arg(2);
-BENCHMARK(asum)->Name("asum")->Arg(4);
-BENCHMARK(asum)->Name("asum")->Arg(8);
-BENCHMARK(asum)->Name("asum")->Arg(16);
-BENCHMARK(asum)->Name("asum")->Arg(64);
-BENCHMARK(asum)->Name("asum")->Arg(256);
-BENCHMARK(asum)->Name("asum")->Arg(1024);
-BENCHMARK(asum)->Name("asum")->Arg(16384);
+BENCHMARK(asum)->Name("asum")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);
 
-BENCHMARK(asum_base)->Name("asum base")->Arg(2);
-BENCHMARK(asum_base)->Name("asum base")->Arg(4);
-BENCHMARK(asum_base)->Name("asum base")->Arg(8);
-BENCHMARK(asum_base)->Name("asum base")->Arg(16);
-BENCHMARK(asum_base)->Name("asum base")->Arg(64);
-BENCHMARK(asum_base)->Name("asum base")->Arg(256);
-BENCHMARK(asum_base)->Name("asum base")->Arg(1024);
-BENCHMARK(asum_base)->Name("asum base")->Arg(16384);
+BENCHMARK(asum_base)->Name("asum base")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);

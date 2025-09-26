@@ -35,11 +35,13 @@ namespace {
     }
 }
 
-BENCHMARK(exp<float32>)->Name("exp float32 mkl")->Unit(benchmark::kNanosecond)->Arg(8);
-BENCHMARK(exp<float32>)->Name("exp float32 mkl")->Unit(benchmark::kNanosecond)->Arg(64);
-BENCHMARK(exp<float32>)->Name("exp float32 mkl")->Unit(benchmark::kNanosecond)->Arg(512);
-BENCHMARK(exp<float32>)->Name("exp float32 mkl")->Unit(benchmark::kNanosecond)->Arg(1024);
-BENCHMARK(exp<float64>)->Name("exp float64 mkl")->Unit(benchmark::kNanosecond)->Arg(8);
-BENCHMARK(exp<float64>)->Name("exp float64 mkl")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(exp<float64>)->Name("exp float64 mkl")->Unit(benchmark::kNanosecond)->Arg(32);
-BENCHMARK(exp<float64>)->Name("exp float64 mkl")->Unit(benchmark::kNanosecond)->Arg(64);
+BENCHMARK(exp<float32>)->Name("exp float32 mkl")->Unit(benchmark::kNanosecond)
+    ->Arg(8)
+    ->Arg(64)
+    ->Arg(512)
+    ->Arg(1024);
+BENCHMARK(exp<float64>)->Name("exp float64 mkl")->Unit(benchmark::kNanosecond)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(32)
+    ->Arg(64);

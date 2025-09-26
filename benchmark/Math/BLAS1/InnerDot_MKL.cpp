@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,18 +35,22 @@ namespace {
     }
 }
 
-BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);

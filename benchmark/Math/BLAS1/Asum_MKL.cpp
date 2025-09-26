@@ -36,11 +36,12 @@ namespace {
     }
 }
 
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(2);
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(4);
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(8);
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(16);
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(64);
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(256);
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(1024);
-BENCHMARK(asum_mkl)->Name("asum mkl")->Arg(16384);
+BENCHMARK(asum_mkl)->Name("asum mkl")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);

@@ -45,34 +45,42 @@ namespace {
     }
 }
 
-BENCHMARK(innerDot<float32>)->Name("innerDot float32")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot<float32>)->Name("innerDot float32")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot<float32>)->Name("innerDot float32")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot<float32>)->Name("innerDot float32")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot<float64>)->Name("innerDot float64")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot<float64>)->Name("innerDot float64")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot<float64>)->Name("innerDot float64")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot<float64>)->Name("innerDot float64")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat32>)->Name("innerDot cfloat32")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot<cfloat32>)->Name("innerDot cfloat32")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot<cfloat32>)->Name("innerDot cfloat32")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot<cfloat32>)->Name("innerDot cfloat32")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot<cfloat64>)->Name("innerDot cfloat64")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot<cfloat64>)->Name("innerDot cfloat64")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot<cfloat64>)->Name("innerDot cfloat64")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot<cfloat64>)->Name("innerDot cfloat64")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 // Baseline
-BENCHMARK(innerDot_base<float32>)->Name("innerDot base float32")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_base<float32>)->Name("innerDot base float32")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_base<float32>)->Name("innerDot base float32")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_base<float32>)->Name("innerDot base float32")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot_base<float64>)->Name("innerDot base float64")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_base<float64>)->Name("innerDot base float64")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_base<float64>)->Name("innerDot base float64")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_base<float64>)->Name("innerDot base float64")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot_base<cfloat32>)->Name("innerDot base cfloat32")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_base<cfloat32>)->Name("innerDot base cfloat32")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_base<cfloat32>)->Name("innerDot base cfloat32")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_base<cfloat32>)->Name("innerDot base cfloat32")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);
 
-BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot base cfloat64")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot base cfloat64")->Unit(benchmark::kNanosecond)->Arg(128);
-BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot base cfloat64")->Unit(benchmark::kNanosecond)->Arg(1024);
+BENCHMARK(innerDot_base<cfloat64>)->Name("innerDot base cfloat64")->Unit(benchmark::kNanosecond)
+    ->Arg(16)
+    ->Arg(128)
+    ->Arg(1024);

@@ -36,11 +36,12 @@ namespace {
     }
 }
 
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(2);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(4);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(8);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(16);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(64);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(256);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(1024);
-BENCHMARK(axpy_mkl)->Name("axpy mkl")->Arg(16384);
+BENCHMARK(axpy_mkl)->Name("axpy mkl")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);

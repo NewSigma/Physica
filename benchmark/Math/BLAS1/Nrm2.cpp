@@ -46,20 +46,22 @@ namespace {
     }
 }
 
-BENCHMARK(nrm2)->Name("nrm2")->Arg(2);
-BENCHMARK(nrm2)->Name("nrm2")->Arg(4);
-BENCHMARK(nrm2)->Name("nrm2")->Arg(8);
-BENCHMARK(nrm2)->Name("nrm2")->Arg(16);
-BENCHMARK(nrm2)->Name("nrm2")->Arg(64);
-BENCHMARK(nrm2)->Name("nrm2")->Arg(256);
-BENCHMARK(nrm2)->Name("nrm2")->Arg(1024);
-BENCHMARK(nrm2)->Name("nrm2")->Arg(16384);
+BENCHMARK(nrm2)->Name("nrm2")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);
 
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(2);
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(4);
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(8);
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(16);
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(64);
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(256);
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(1024);
-BENCHMARK(nrm2_base)->Name("nrm2 base")->Arg(16384);
+BENCHMARK(nrm2_base)->Name("nrm2 base")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024)
+    ->Arg(16384);

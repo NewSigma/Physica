@@ -48,16 +48,18 @@ namespace {
     }
 }
 
-BENCHMARK(copy)->Name("copy")->Arg(1 << 4);
-BENCHMARK(copy)->Name("copy")->Arg(1 << 8);
-BENCHMARK(copy)->Name("copy")->Arg(1 << 10);
-BENCHMARK(copy)->Name("copy")->Arg(1 << 11);
-BENCHMARK(copy)->Name("copy")->Arg(1 << 12);
-BENCHMARK(copy)->Name("copy")->Arg(1 << 16);
+BENCHMARK(copy)->Name("copy")
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(4UL * 1024UL / sizeof(float64))
+    ->Arg(64UL * 1024UL / sizeof(float64))
+    ->Arg(1024UL * 1024UL / sizeof(float64))
+    ->Arg(16UL * 1024UL * 1024UL / sizeof(float64));
 
-BENCHMARK(copy_base)->Name("copy base")->Arg(1 << 4);
-BENCHMARK(copy_base)->Name("copy base")->Arg(1 << 8);
-BENCHMARK(copy_base)->Name("copy base")->Arg(1 << 10);
-BENCHMARK(copy_base)->Name("copy base")->Arg(1 << 11);
-BENCHMARK(copy_base)->Name("copy base")->Arg(1 << 12);
-BENCHMARK(copy_base)->Name("copy base")->Arg(1 << 16);
+BENCHMARK(copy_base)->Name("copy base")
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(4UL * 1024UL / sizeof(float64))
+    ->Arg(64UL * 1024UL / sizeof(float64))
+    ->Arg(1024UL * 1024UL / sizeof(float64))
+    ->Arg(16UL * 1024UL * 1024UL / sizeof(float64));

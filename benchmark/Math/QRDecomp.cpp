@@ -59,15 +59,17 @@ BENCHMARK(qr<4>)->Name("QR")->Unit(benchmark::kNanosecond)->Arg(4);
 BENCHMARK(qr<8>)->Name("QR")->Unit(benchmark::kNanosecond)->Arg(8);
 BENCHMARK(qr<16>)->Name("QR")->Unit(benchmark::kNanosecond)->Arg(16);
 BENCHMARK(qr<32>)->Name("QR")->Unit(benchmark::kNanosecond)->Arg(32);
-BENCHMARK(qr)->Name("QR")->Unit(benchmark::kMicrosecond)->Arg(64);
-BENCHMARK(qr)->Name("QR")->Unit(benchmark::kMillisecond)->Arg(256);
-BENCHMARK(qr)->Name("QR")->Unit(benchmark::kMillisecond)->Arg(1024);
+BENCHMARK(qr)->Name("QR")->Unit(benchmark::kMicrosecond)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024);
 
 BENCHMARK(qr_base<2>)->Name("QR base")->Unit(benchmark::kNanosecond)->Arg(2);
 BENCHMARK(qr_base<4>)->Name("QR base")->Unit(benchmark::kNanosecond)->Arg(4);
 BENCHMARK(qr_base<8>)->Name("QR base")->Unit(benchmark::kNanosecond)->Arg(8);
 BENCHMARK(qr_base<16>)->Name("QR base")->Unit(benchmark::kNanosecond)->Arg(16);
 BENCHMARK(qr_base<32>)->Name("QR base")->Unit(benchmark::kNanosecond)->Arg(32);
-BENCHMARK(qr_base)->Name("QR base")->Unit(benchmark::kMicrosecond)->Arg(64);
-BENCHMARK(qr_base)->Name("QR base")->Unit(benchmark::kMillisecond)->Arg(256);
-BENCHMARK(qr_base)->Name("QR base")->Unit(benchmark::kMillisecond)->Arg(1024);
+BENCHMARK(qr_base)->Name("QR base")->Unit(benchmark::kMicrosecond)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024);
