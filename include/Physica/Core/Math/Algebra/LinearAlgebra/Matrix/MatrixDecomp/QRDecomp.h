@@ -39,6 +39,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
+        using Tv = T::ValueType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
         MatrixND working;
@@ -59,9 +60,11 @@ namespace Physica {
         void compute_base(const Matrix auto& source);
         void compute_mkl(const Matrix auto& source);
 
-        [[nodiscard]] Trv calcDetQ() const noexcept;
+        [[nodiscard]] Tv calcDetQ() const noexcept;
         void toQDT(VectorND<Tr>& diagD) noexcept;
         [[nodiscard]] VectorND<Tr> toQDT();
+
+        [[nodiscard]] T det() const noexcept;
 
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
@@ -75,8 +78,6 @@ namespace Physica {
         [[nodiscard]] auto getMatrixR() const noexcept;
         [[nodiscard]] MatrixND getMatrixQ_mkl() const;
         [[nodiscard]] const auto& getMatrixP() const noexcept requires(Pivot) { return perm; }
-        /* Static members */
-        [[nodiscard]] static Trv calcDetQ(size_t size) noexcept;
     };
 
     template<Scalar T, bool Pivot>
@@ -104,7 +105,9 @@ namespace Physica {
     void QRDecomp<T, Pivot>::compute_base(const Matrix auto& source) {
         static_assert(!Pivot && "Not implemented");
         working = source;
-        for (size_t i = 0; i < taus.getLength() - !working.isOverdetermined(); ++i) {
+
+        size_t i = 0;
+        for (; i < taus.getLength() - !working.isOverdetermined(); ++i) {
             auto col = working.col(i);
             auto buffer = col.tail(i);
             const T sign = unit(buffer[0]);
@@ -114,11 +117,22 @@ namespace Physica {
                 applyHouseholder(buffer, working.bottomRightCorner(i, i + 1));
             taus[i] = std::exchange(col[i], -norm * sign);
         }
+        // Other LAPACK implementations might modify the final element, so always clear it.
+        if (i < taus.getLength())
+            taus[i] = T(0);
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::calcDetQ() const noexcept -> Trv {
-        return calcDetQ(taus.getLength());
+    auto QRDecomp<T, Pivot>::calcDetQ() const noexcept -> Tv {
+        if constexpr (isComplex) {
+            T x = 1;
+            for (auto tau : taus)
+                if (!tau.isZero()) [[likely]]
+                    x *= -tau / tau.conjugate();
+            return x;
+        }
+        else
+            return std::ranges::count_if(taus, [](T x) { return !x.isZero(); }) % 2 == 0 ? 1 : -1;
     }
     /**
      * Decompose matrix like A = QDT(no pivoting), or A = QDTP(poviting), where D is diagonal
@@ -147,11 +161,18 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
+    T QRDecomp<T, Pivot>::det() const noexcept {
+        T result = calcDetQ() * getMatrixR().det();
+        if constexpr (Pivot)
+            result *= perm.det();
+        return result;
+    }
+
+    template<Scalar T, bool Pivot>
     void QRDecomp<T, Pivot>::resize(size_t row, size_t col) {
         working.resize(row, col);
         auto l = std::min(row, col);
         taus.resize(l);
-        taus[l - 1] = 0; // For historic reason, BLAS-like interface will allocate a unused element
         if constexpr (Pivot)
             perm = Perm(col);
     }
@@ -175,11 +196,6 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     auto QRDecomp<T, Pivot>::getMatrixR() const noexcept {
         return working.triu();
-    }
-
-    template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::calcDetQ(size_t size) noexcept -> Trv {
-        return (size % 2 != 0) ? 1.0 : -1.0;
     }
 }
 

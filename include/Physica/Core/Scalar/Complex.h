@@ -67,13 +67,13 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
 
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator+(const U& x) const requires(!Diffable<U>);
+        [[nodiscard]] __host__ __device__ auto operator+(const U& x) const noexcept requires(!Diffable<U>);
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator-(const U& x) const requires(!Diffable<U>);
+        [[nodiscard]] __host__ __device__ auto operator-(const U& x) const noexcept requires(!Diffable<U>);
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator*(const U& x) const requires(!Diffable<U>);
+        [[nodiscard]] __host__ __device__ auto operator*(const U& x) const noexcept requires(!Diffable<U>);
         template<Scalar U>
-        [[nodiscard]] __host__ __device__ auto operator/(const U& x) const requires(!Diffable<U>);
+        [[nodiscard]] __host__ __device__ auto operator/(const U& x) const noexcept requires(!Diffable<U>);
         [[nodiscard]] __host__ __device__ This operator-() const;
         /* Operations */
         [[nodiscard]] __host__ __device__ T squaredNorm() const;

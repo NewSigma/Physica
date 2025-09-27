@@ -65,7 +65,7 @@ namespace Physica {
 
     template<Scalar T>
     template<Scalar U>
-    __host__ __device__ auto Complex<T>::operator+(const U& x) const requires(!Diffable<U>) {
+    __host__ __device__ auto Complex<T>::operator+(const U& x) const noexcept requires(!Diffable<U>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
         if constexpr (U::isComplex)
             return RtnType(real() + x.real(), imag() + x.imag());
@@ -75,7 +75,7 @@ namespace Physica {
 
     template<Scalar T>
     template<Scalar U>
-    __host__ __device__ auto Complex<T>::operator-(const U& x) const requires(!Diffable<U>) {
+    __host__ __device__ auto Complex<T>::operator-(const U& x) const noexcept requires(!Diffable<U>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
         if constexpr (U::isComplex)
             return RtnType(real() - x.real(), imag() - x.imag());
@@ -85,7 +85,7 @@ namespace Physica {
 
     template<Scalar T>
     template<Scalar U>
-    __host__ __device__ auto Complex<T>::operator*(const U& x) const requires(!Diffable<U>) {
+    __host__ __device__ auto Complex<T>::operator*(const U& x) const noexcept requires(!Diffable<U>) {
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
         if constexpr (U::isComplex) {
             const auto& re_1 = real();
@@ -109,7 +109,8 @@ namespace Physica {
 
     template<Scalar T>
     template<Scalar U>
-    __host__ __device__ auto Complex<T>::operator/(const U& x) const requires(!Diffable<U>) {
+    __host__ __device__ auto Complex<T>::operator/(const U& x) const noexcept requires(!Diffable<U>) {
+        assert(!x.isZero() && "[Error]: Divide by zero");
         using RtnType = Internal::BinaryScalarOpRtnTy<This, U>::Type;
         if constexpr (U::isComplex) {
             const auto& re_1 = real();

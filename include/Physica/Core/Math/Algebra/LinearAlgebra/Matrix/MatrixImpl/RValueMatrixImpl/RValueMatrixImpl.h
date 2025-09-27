@@ -331,7 +331,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::trace() const -> T {
-        assert(getRow() == getCol());
+        assert(isSquare());
         T result = T(0);
         for (size_t i = 0; i < getRow(); ++i)
             result += calc(i, i);
@@ -345,7 +345,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::det() const -> CoDiff<T> {
-        assert(getRow() == getCol() && "[Error]: Determinate requires square matrix");
+        assert(isSquare() && "[Error]: Determinate requires square matrix");
         constexpr size_t Order = RowAtCompile > ColAtCompile ? RowAtCompile : ColAtCompile;
         if constexpr (Order == 1)
             return calc(0, 0);
@@ -355,10 +355,8 @@ namespace Physica {
             return calc(0, 0) * (calc(1, 1) * calc(2, 2) - calc(1, 2) * calc(2, 1))
                  + calc(0, 1) * (calc(1, 2) * calc(2, 0) - calc(1, 0) * calc(2, 2))
                  + calc(0, 2) * (calc(1, 0) * calc(2, 1) - calc(1, 1) * calc(2, 0));
-        else {
-            QRDecomp<T, false> qr(Base::getDerived());
-            return qr.calcDetQ() * qr.getMatrixR().det();
-        }
+        else
+            return QRDecomp<T, false>(Base::getDerived()).det();
     }
 
     template<class Derived>
