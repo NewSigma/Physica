@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<>;
@@ -25,7 +25,7 @@ using RandomSource = Random<>;
 namespace {
     template<Scalar T>
     void add(benchmark::State& state) {
-        const int64_t size = state.range(0);
+        const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
@@ -38,7 +38,7 @@ namespace {
 
     template<Scalar T>
     void add_base(benchmark::State& state) {
-        const int64_t size = state.range(0);
+        const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
@@ -50,24 +50,8 @@ namespace {
     }
 }
 
-BENCHMARK(add<float32>)->Name("add float32")->Unit(benchmark::kNanosecond)
-    ->Arg(16)
-    ->Arg(128)
-    ->Arg(256)
-    ->Arg(512);
-BENCHMARK(add<float64>)->Name("add float64")->Unit(benchmark::kNanosecond)
-    ->Arg(16)
-    ->Arg(256)
-    ->Arg(1024)
-    ->Arg(8192);
+BENCHMARK(add<float32>)->Name("add float32")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(add<float64>)->Name("add float64")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
 
-BENCHMARK(add_base<float32>)->Name("add float32 base")->Unit(benchmark::kNanosecond)
-    ->Arg(16)
-    ->Arg(128)
-    ->Arg(256)
-    ->Arg(512);
-BENCHMARK(add_base<float64>)->Name("add float64 base")->Unit(benchmark::kNanosecond)
-    ->Arg(16)
-    ->Arg(256)
-    ->Arg(1024)
-    ->Arg(8192);
+BENCHMARK(add_base<float32>)->Name("add float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(add_base<float64>)->Name("add float64 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

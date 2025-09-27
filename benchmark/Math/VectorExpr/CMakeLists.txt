@@ -1,10 +1,12 @@
 target_sources(Benchmark PRIVATE Add.cpp)
 target_sources(Benchmark PRIVATE Exp.cpp)
 target_sources(Benchmark PRIVATE LnCosh.cpp)
+target_sources(Benchmark PRIVATE Square.cpp)
 target_sources(Benchmark PRIVATE Sub.cpp)
 
 if(${PHYSICA_MKL})
     target_sources(Benchmark PRIVATE Add_MKL.cpp)
     target_sources(Benchmark PRIVATE Exp_MKL.cpp)
+    target_sources(Benchmark PRIVATE Square_MKL.cpp)
     target_sources(Benchmark PRIVATE Sub_MKL.cpp)
 endif()

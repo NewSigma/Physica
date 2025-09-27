@@ -38,7 +38,9 @@ namespace Physica {
                 vzAdd_64(n, a, b, r);
         }
         else {
-            if constexpr (T::Prec == Float32)
+            if constexpr (T::Prec == Float16)
+                vhAdd_64(n, a, b, r);
+            else if constexpr (T::Prec == Float32)
                 vsAdd_64(n, a, b, r);
             else
                 vdAdd_64(n, a, b, r);

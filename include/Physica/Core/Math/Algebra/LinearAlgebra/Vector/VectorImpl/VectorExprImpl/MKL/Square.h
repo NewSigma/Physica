@@ -18,30 +18,23 @@
  */
 #pragma once
 
-#include "../Exp.h"
+#include "../Square.h"
 
 namespace Physica {
     template<Vector V>
-    void VectorExpr<ExprType::Exp, V>::assign_mkl(Vector auto& v) const noexcept {
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+    void VectorExpr<ExprType::Square, V>::assign_mkl(Vector auto& v) const noexcept {
+        using Tm = T::MachineType;
         Base::getExpr().assert_assign_mkl(v);
 
         size_t n = Base::getLength();
         const auto* a = reinterpret_cast<const Tm*>(Base::getExpr().data());
         auto* y = reinterpret_cast<Tm*>(v.data());
-        if constexpr (isComplex) {
-            if constexpr (T::Prec == Float32)
-                vcExp_64(n, a, y);
-            else
-                vzExp_64(n, a, y);
-        }
-        else {
-            if constexpr (T::Prec == Float16)
-                vhExp_64(n, a, y);
-            else if constexpr (T::Prec == Float32)
-                vsExp_64(n, a, y);
-            else
-                vdExp_64(n, a, y);
-        }
+
+        if constexpr (T::Prec == Float16)
+            vhSqr_64(n, a, y);
+        else if constexpr (T::Prec == Float32)
+            vsSqr_64(n, a, y);
+        else
+            vdSqr_64(n, a, y);
     }
 }

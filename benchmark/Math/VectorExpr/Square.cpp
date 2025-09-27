@@ -24,18 +24,32 @@ using RandomSource = Random<>;
 
 namespace {
     template<Scalar T>
-    void add(benchmark::State& state) {
+    void square(benchmark::State& state) {
         const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
-        const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
-        const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
+        const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            (a + b).assign_mkl(buffer);
+            square(x).assign(buffer);
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
+    }
+
+    template<Scalar T>
+    void square_base(benchmark::State& state) {
+        const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
+        const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            square(x).assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(add<float32>)->Name("add float32 mkl")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(add<float64>)->Name("add float64 mkl")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(square<float32>)->Name("square float32")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(square<float64>)->Name("square float64")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+
+BENCHMARK(square_base<float32>)->Name("square float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(square_base<float64>)->Name("square float64 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

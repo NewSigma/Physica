@@ -38,7 +38,9 @@ namespace Physica {
                 vzSub_64(n, a, b, r);
         }
         else {
-            if constexpr (T::Prec == Float32)
+            if constexpr (T::Prec == Float16)
+                vhSub_64(n, a, b, r);
+            else if constexpr (T::Prec == Float32)
                 vsSub_64(n, a, b, r);
             else
                 vdSub_64(n, a, b, r);
