@@ -136,7 +136,7 @@ namespace Physica {
     void Random<Option, FixedSeed>::reseed(SeedType seed) {
         if constexpr (IsSeedFixed)
             assert(seed == FixedSeed);
-        Base::reseed(seed, Option, FixedSeed);
+        Base::reseed(seed, Option);
         gen.seed(getTSeed()[CPP]);
     }
 

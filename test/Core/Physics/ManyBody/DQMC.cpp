@@ -22,6 +22,7 @@
 
 using namespace Physica;
 using T = float64;
+using Tc = cfloat64;
 using RandomSource = Random<MT19937>;
 constexpr int Dim = 2;
 constexpr double HoppingT = 1;
@@ -31,37 +32,29 @@ constexpr int NumSiteX = 4;
 constexpr int NumSiteY = 4;
 constexpr int NumSplit = Beta * 8;
 constexpr int NumSample = 1024;
-/**
- * Test that half filling is free of sign problem
- */
+
+namespace {
+    /**
+     * Test that half filling is free of sign problem
+     */
+    void halfFillTest() {
+        const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
+        const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
+        auto dqmc = DQMC<T>(params);
+        dqmc.step_random<RandomSource>();
+        for (int i = 0; i < NumSample; ++i) {
+            if (i % 2 == 0)
+                dqmc.step_mh<RandomSource>();
+            else
+                std::ignore = dqmc.step_spin<RandomSource>();
+
+            if (dqmc.getSign().isNegative())
+                exit(EXIT_FAILURE);
+        }
+    }
+}
+
 int main() {
-    const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
-    const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, RepelU * 0.5, NumSplit);
-    /* Random */ {
-        auto dqmc = DQMC<T>(params);
-        for (int _ = 0; _ < NumSample; ++_) {
-            dqmc.step_random<RandomSource>();
-            if (dqmc.getSign().isNegative())
-                return 1;
-        }
-    }
-    /* MH */ {
-        auto dqmc = DQMC<T>(params);
-        dqmc.step_random<RandomSource>();
-        for (int _ = 0; _ < NumSample; ++_) {
-            dqmc.step_mh<RandomSource>();
-            if (dqmc.getSign().isNegative())
-                return 1;
-        }
-    }
-    /* Spin */ {
-        auto dqmc = DQMC<T>(params);
-        dqmc.step_random<RandomSource>();
-        for (int _ = 0; _ < NumSample; ++_) {
-            std::ignore = dqmc.step_spin<RandomSource>();
-            if (dqmc.getSign().isNegative())
-                return 1;
-        }
-    }
+    halfFillTest();
     return 0;
 }

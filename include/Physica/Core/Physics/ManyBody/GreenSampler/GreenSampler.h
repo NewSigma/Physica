@@ -24,12 +24,11 @@ namespace Physica {
     template<Scalar T>
     class GreenSampler {
         using This = GreenSampler<T>;
-
-        static_assert(!T::isComplex, "[Error]: Observables are real");
     protected:
+        using Tr = T::RealType;
         using Tv = T::ValueType;
     private:
-        VectorND<T> lnAbsDets;
+        VectorND<Tr> lnAbsDets;
         VectorND<Tv> signs;
         size_t cursor = 0;
     public:
@@ -55,7 +54,7 @@ namespace Physica {
         [[nodiscard]] size_t getNumSample() const noexcept { return signs.getLength(); }
         [[nodiscard]] size_t getCursor() const noexcept { return cursor; }
     protected:
-        void sample(T lnAbsDet, T sign) noexcept;
+        void sample(Tr lnAbsDet, Tv sign) noexcept;
     };
 
     template<Scalar T>
@@ -87,7 +86,7 @@ namespace Physica {
 
     template<Scalar T>
     T GreenSampler<T>::lnPartitionZ() const {
-        const T factor = lnAbsDets.max();
+        const Tr factor = lnAbsDets.max();
         return ln(exp(lnAbsDets - factor) * getSigns()) + factor;
     }
 
@@ -100,7 +99,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void GreenSampler<T>::sample(T lnAbsDet, T sign) noexcept {
+    void GreenSampler<T>::sample(Tr lnAbsDet, Tv sign) noexcept {
         lnAbsDets[cursor] = lnAbsDet;
         signs[cursor] = sign;
         cursor = (cursor + 1) % getNumSample();

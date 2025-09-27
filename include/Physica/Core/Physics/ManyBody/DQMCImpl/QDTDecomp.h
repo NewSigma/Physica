@@ -29,12 +29,13 @@ namespace Physica {
         using MatrixND = HubbardParams<T>::MatrixND;
 
         using Tr = T::RealType;
+        using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
         MatrixND matrixQ;
         DiagMatrix<Tr> matrixD; // matrixD suffers from over/underflow
         QRDecomp<T> qr;
-        Trv detQ;
+        Tv detQ;
     public:
         QDTDecomp() = default;
         QDTDecomp(size_t size);
@@ -48,7 +49,7 @@ namespace Physica {
         [[nodiscard]] This operator*(const This& other) const;
         /* Operations */
         void compute(const Matrix auto& source);
-        [[nodiscard]] Trv calcDetQ() const noexcept;
+        [[nodiscard]] Tv calcDetQ() const noexcept;
 
         void single_flip(int site, Tr factor, Tr invfac) noexcept;
 
@@ -68,12 +69,13 @@ namespace Physica {
     };
 
     template<Scalar T>
-    QDTDecomp<T>::QDTDecomp(size_t size) : matrixQ(size, size), matrixD(size), qr(size, size), detQ(QRDecomp<T>::calcDetQ(size)) {}
+    QDTDecomp<T>::QDTDecomp(size_t size) : matrixQ(size, size), matrixD(size), qr(size, size) {}
 
     template<Scalar T>
     QDTDecomp<T>::QDTDecomp(QRDecomp<T> qr_) : QDTDecomp(qr_.getRow()) {
         assert(qr_.getWorking().isSquare());
         qr = std::move(qr_);
+        detQ = qr.calcDetQ();
         toQDT();
     }
 
@@ -104,16 +106,17 @@ namespace Physica {
 
     template<Scalar T>
     void QDTDecomp<T>::compute(const Matrix auto& source) {
-        assert(source.getRow() == source.getCol());
+        assert(source.isSquare());
         if (source.getRow() != getSize()) [[unlikely]]
             resize(source.getRow());
 
         qr.compute(source);
+        detQ = qr.calcDetQ();
         toQDT();
     }
 
     template<Scalar T>
-    auto QDTDecomp<T>::calcDetQ() const noexcept -> Trv {
+    auto QDTDecomp<T>::calcDetQ() const noexcept -> Tv {
         return detQ;
     }
 

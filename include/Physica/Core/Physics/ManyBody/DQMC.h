@@ -34,7 +34,10 @@ namespace Physica {
         using MatrixND = Params::MatrixND;
 
         using Tr = T::RealType;
+        using Tv = T::ValueType;
         using Trv = Tr::ValueType;
+
+        constexpr static bool isComplex = T::isComplex;
     private:
         const Params* params;
         DenseMatrix<Trv> aux;
@@ -48,8 +51,8 @@ namespace Physica {
         MatrixND buffer;
 
         Tr lnAbsDet;
-        Tr signU = 1;
-        Tr signD = 1;
+        Tv signU = 1;
+        Tv signD = 1;
         Array<MatrixND> greenUs;
         Array<MatrixND> greenDs;
     public:
@@ -85,7 +88,7 @@ namespace Physica {
         [[nodiscard]] Tr getLnAbsDet() const noexcept { return lnAbsDet; }
         [[nodiscard]] Tr getSignU() const noexcept { return signU; }
         [[nodiscard]] Tr getSignD() const noexcept { return signD; }
-        [[nodiscard]] Tr getSign() const noexcept { return signU * signD; }
+        [[nodiscard]] Tv getSign() const noexcept { return signU * signD; }
         [[nodiscard]] int getNumEqualGreen() const noexcept { return greenUs.getLength(); }
         [[nodiscard]] const auto& getGreenUs() const noexcept { return greenUs; }
         [[nodiscard]] const auto& getGreenDs() const noexcept { return greenDs; }
@@ -94,18 +97,19 @@ namespace Physica {
         void resize(int numSite, int numSplit);
 
         Vector2D<Tr> calcDelta(int site, int split) const noexcept;
-        Vector2D<Tr> calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept;
+        Vector2D<Tv> calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept;
         void single_flip(int site, int split) noexcept;
-        void flipGreens(int site, int split, Vector2D<Tr> deltaRatios);
+        void flipGreens(int site, int split, Vector2D<Tv> deltaRatios);
         void stepMHImpl(int site, int split, Tr prop);
         Trv stepSpinImpl(int site, int split, Tr prop);
 
         void splitDiag(const QDTDecomp<T>& qdt) noexcept;
-        [[nodiscard]] std::array<Tr, 2> calcDet(const QDTDecomp<T>& qdt);
+        [[nodiscard]] std::pair<Tr, Tv> calcDet(const QDTDecomp<T>& qdt);
         void calcGreens();
         /* Static members */
         template<RNG R>
         [[nodiscard]] static Array<int> makeRandomSites(int numSite);
+        static void checkSign(Tv sign1, Tv sign2);
     };
 
     template<Scalar T>
@@ -250,19 +254,19 @@ namespace Physica {
 
     template<Scalar T>
     auto DQMC<T>::calcDelta(int site, int split) const noexcept -> Vector2D<Tr> {
-        const Tr x = Tr(2) * params->getAlpha() * aux(site, split);
-        return exp(Vector2D<Tr>{-x, x}) - Tr(1); // The Eq. above Eq.(7.33) of [2]
+        const Tr x = Trv(2) * params->getAlpha() * aux(site, split);
+        return exp(Vector2D<Tr>{-x, x}) - Trv(1); // The Eq. above Eq.(7.33) of [2]
     }
 
     template<Scalar T>
-    auto DQMC<T>::calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept -> Vector2D<Tr> {
+    auto DQMC<T>::calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept -> Vector2D<Tv> {
         assert(site < getNumSite() && split < getNumSplit());
         assert(getNumEqualGreen() == getNumSplit() && "[Error]: Cannot use rank-1 update if equal-time greens are not complete");
         const int split1 = (split + 1) % getNumSplit();
-        Vector2D<Tr> result = deltas;
-        result[0] *= Tr(1) - greenUs[split1](site, site).real();
-        result[1] *= Tr(1) - greenDs[split1](site, site).real();
-        result += Tr(1);
+        Vector2D<Tv> result = deltas;
+        result[0] *= Trv(1) - greenUs[split1](site, site);
+        result[1] *= Trv(1) - greenDs[split1](site, site);
+        result += Trv(1);
         return result; // Eq.(7.36) of [2]
     }
 
@@ -278,12 +282,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::flipGreens(int site, int split, Vector2D<Tr> deltaRatios) {
+    void DQMC<T>::flipGreens(int site, int split, Vector2D<Tv> deltaRatios) {
         // Eq. (7.44) of [2]
         const int numSite = getNumSite();
         VectorND<T> vc(numSite);
         VectorND<T> vr(numSite);
-        auto flipGreen = [site, &vc, &vr](MatrixND& green, Tr deltaRatio) {
+        auto flipGreen = [site, &vc, &vr](MatrixND& green, Tv deltaRatio) {
             vc = (green - UnitMatrix<T>(green)).col(site);
             vr = green.row(site);
             green += deltaRatio * (vc * vr.transpose());
@@ -340,16 +344,16 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto DQMC<T>::calcDet(const QDTDecomp<T>& qdt) -> std::array<Tr, 2> {
+    auto DQMC<T>::calcDet(const QDTDecomp<T>& qdt) -> std::pair<Tr, Tv> {
         splitDiag(qdt);
 
         buffer = qdt.getMatrixQ() * diagB.inverse();
-        qr.compute(buffer.transpose() + diagS * qdt.getMatrixT());
+        qr.compute(buffer.hermite() + diagS * qdt.getMatrixT());
         qr.getWorking().diag() += Tr(std::numeric_limits<T>::min()); // Handle potential underflow
 
         Tr lnAD = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        Tr sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
-        assert(abs(sign) == Trv(1) && "[Error]: Bad sign");
+        Tv sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
+        assert(isComplex || abs(sign) == Trv(1) && "[Error]: Bad sign");
         return {lnAD, sign};
     }
 
@@ -357,10 +361,10 @@ namespace Physica {
     void DQMC<T>::calcGreens() {
         const int numSite = getNumSite();
         auto temp = MatrixND(numSite, numSite);
-        auto calcGreen = [this, &temp](const QDTDecomp<T>& qdt, MatrixND& green) -> std::array<Tr, 2> {
+        auto calcGreen = [this, &temp](const QDTDecomp<T>& qdt, MatrixND& green) -> std::pair<Tr, Tv> {
             const auto det = calcDet(qdt);
             temp = buffer * qr.getMatrixQ();
-            green = qr.getMatrixR().inverse() * temp.transpose();
+            green = qr.getMatrixR().inverse() * temp.hermite();
             return det;
         };
 
@@ -369,8 +373,9 @@ namespace Physica {
         for (size_t i = 0; i < greenUs.getLength(); ++i) {
             const int to = (numSplit + i - 1) % numSplit;
             auto [lnAD, sign] = calcGreen(chainU.multiply(i, to), greenUs[i]);
+            if (i != 0)
+                checkSign(signU, sign);
 
-            assert((i == 0 || signU == sign) && "[Error]: Unexpected sign mismatch");
             toNextMean(lnAbsDetU, i, lnAD);
             signU = sign;
         }
@@ -379,8 +384,9 @@ namespace Physica {
         for (size_t i = 0; i < greenDs.getLength(); ++i) {
             const int to = (numSplit + i - 1) % numSplit;
             auto [lnAD, sign] = calcGreen(chainD.multiply(i, to), greenDs[i]);
+            if (i != 0)
+                checkSign(signD, sign);
 
-            assert((i == 0 || signD == sign) && "[Error]: Unexpected sign mismatch");
             toNextMean(lnAbsDetD, i, lnAD);
             signD = sign;
         }
@@ -395,5 +401,12 @@ namespace Physica {
             sites[i] = i;
         std::ranges::shuffle(sites, R::getInstance());
         return sites;
+    }
+
+    template<Scalar T>
+    void DQMC<T>::checkSign(Tv sign1, Tv sign2) {
+        // TODO: check complex sign
+        if constexpr (!isComplex)
+            assert(sign1 == sign2 && "[Error]: Unexpected sign mismatch");
     }
 }
