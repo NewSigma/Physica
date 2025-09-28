@@ -120,6 +120,30 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueVector<Derived>::toNextMean(size_t lastNumSample, const Vector auto& sample) noexcept {
+        assert(Base::isFinite() && "[Error]: Propagating NAN");
+        assert(Base::getLength() == sample.getLength());
+        Base::assert_assign(sample);
+
+        const T factor1 = T(lastNumSample);
+        const T factor2 = reciprocal(T(lastNumSample + 1));
+        auto& mean = Base::getDerived();
+        mean = (factor1 * mean + sample) * factor2;
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::toNextVariance(Derived& mean, size_t lastNumSample, const Vector auto& sample) noexcept {
+        assert(Base::isFinite() && "[Error]: Propagating NAN");
+        Base::assert_assign(sample);
+
+        const T factor1 = T(lastNumSample);
+        const T factor2 = reciprocal(T(lastNumSample + 1));
+        auto& var = Base::getDerived();
+        var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
+        mean.toNextMean(lastNumSample, sample);
+    }
+
+    template<class Derived>
     void LValueVector<Derived>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");

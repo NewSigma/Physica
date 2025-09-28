@@ -127,6 +127,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ RealType norm() const noexcept;
         [[nodiscard]] __host__ __device__ auto squaredNorm() const noexcept;
         [[nodiscard]] __host__ __device__ ScalarType sum() const noexcept;
+
+        __host__ __device__ void toNextMean(size_t lastNumSample, ScalarType sample) noexcept;
+        __host__ __device__ void toNextVariance(ScalarType& __restrict mean, size_t lastNumSample, ScalarType sample) noexcept;
         /* Getters */
         __host__ __device__ constexpr static size_t size() { return 1; }
         [[nodiscard]] __host__ __device__ auto value_ptr() noexcept;
@@ -366,6 +369,26 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto ScalarBase<Derived>::sum() const noexcept -> ScalarType {
         return this->getDerived();
+    }
+
+    template<class Derived>
+    __host__ __device__ void ScalarBase<Derived>::toNextMean(size_t lastNumSample, ScalarType sample) noexcept {
+        assert(isFinite() && "[Error]: Propagating NAN");
+        const auto factor1 = ScalarType(lastNumSample);
+        const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        auto& mean = Base::getDerived();
+        mean = (factor1 * mean + sample) * factor2;
+    }
+
+    template<class Derived>
+    __host__ __device__ void ScalarBase<Derived>::toNextVariance(ScalarType& __restrict mean, size_t lastNumSample, ScalarType sample) noexcept {
+        assert(this != &mean && "[Error]: Var and mean cannot overlap");
+        assert(isFinite() && "[Error]: Propagating NAN");
+        const auto factor1 = ScalarType(lastNumSample);
+        const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
+        auto& var = Base::getDerived();
+        var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
+        mean.toNextMean(lastNumSample, sample);
     }
 
     template<class Derived>

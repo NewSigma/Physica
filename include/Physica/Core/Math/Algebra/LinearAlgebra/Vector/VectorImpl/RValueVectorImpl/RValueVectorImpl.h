@@ -21,10 +21,6 @@
 #include "FormatedVector.h"
 
 namespace Physica {
-    // Forward Decl
-    template<Scalar T>
-    __host__ __device__ void toNextMean(T& mean, size_t lastNumSample, T sample) noexcept;
-
     template<class Derived>
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto& v) const noexcept {
@@ -412,7 +408,7 @@ namespace Physica {
         auto result = T(0);
         const auto& v = Base::getDerived();
         for(size_t i = 0; i < getLength(); ++i)
-            toNextMean(result, i, v.calc(i));
+           result.toNextMean(i, v.calc(i));
 
         if constexpr (isReverseDiff) {
             auto y = co_yield std::move(result);
@@ -444,6 +440,18 @@ namespace Physica {
         const size_t length = getLength();
         return (x - prior_mean).squaredNorm() / Trv(length - 1);
     }
+    /**
+     * More stable for large dataset. Prior version is not provided because they behave similarly at large dataset.
+     */
+    template<class Derived>
+    auto RValueVector<Derived>::variance_stable() const -> T {
+        using ScalarType = T::ScalarType;
+        ScalarType result = 0;
+        ScalarType mean = 0;
+        for (size_t i = 0; i < getLength(); ++i)
+            result.toNextVariance(mean, i, calc(i));
+        return result;
+    }
 
     template<class Derived>
     auto RValueVector<Derived>::deviation() const -> T {
@@ -453,6 +461,11 @@ namespace Physica {
     template<class Derived>
     auto RValueVector<Derived>::deviation(const T& prior_mean) const -> T {
         return sqrt(variance(prior_mean));
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::deviation_stable() const -> T {
+        return sqrt(variance_stable());
     }
 
     template<class Derived>

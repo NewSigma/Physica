@@ -154,7 +154,7 @@ namespace Physica {
                 x = from + hadamard(coeff, x);
                 IntegT y = nn(x);
                 IntegT sample = y * exp(lnJ.value());
-                toNextVariance(var, mean, i, sample);
+                var.toNextVariance(mean, i, sample);
                 loss += calcLoss_normal(nn(x), lnJ);
             }
             loss /= Trv(numSample);

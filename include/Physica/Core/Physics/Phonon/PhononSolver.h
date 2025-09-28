@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "PhononSolverImpl/BHProjector.h"
@@ -135,7 +134,7 @@ namespace Physica {
                     for (size_t cell = 0; cell < getNumCell(); ++cell)
                         forceConst[col + cell * shift] = rSpace[cell];
                 }
-                toNextMean(averageDrift, row, removeDriftForce(forceConst));
+                averageDrift.toNextMean(row, removeDriftForce(forceConst));
 
                 for (size_t col = 0; col < unitCellDOF; ++col) {
                     const size_t shift = unitCellDOF;

@@ -21,7 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica {
     class PIPhonon final {
@@ -127,8 +126,8 @@ namespace Physica {
 
                 const size_t offset_corr = force_corr.toIndex1D(r, c);
                 for (size_t cell = 0; cell < numCell; ++cell) {
-                    toNextMean(force_corr[offset_corr][cell], numSample, buffer1[cell]);
-                    toNextMean(momentum_corr[offset_corr][cell], numSample, buffer2[cell]);
+                    force_corr[offset_corr][cell].toNextMean(numSample, buffer1[cell]);
+                    momentum_corr[offset_corr][cell].toNextMean(numSample, buffer2[cell]);
                 }
             }
         }

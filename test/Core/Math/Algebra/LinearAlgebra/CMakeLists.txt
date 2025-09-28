@@ -2,14 +2,16 @@ physica_add_test(EigenSolver Eigen/EigenSolver.cpp)
 physica_add_test(JacobiDavidson Eigen/JacobiDavidson.cpp)
 physica_add_test(SymmEigenSolver Eigen/SymmEigenSolver.cpp)
 
+physica_add_test(LinearSystem LinearSystem/LinearSystem.cpp)
+physica_add_test(LUSolver LinearSystem/LUSolver.cpp)
+
 add_subdirectory(Matrix)
 
+physica_add_test(Covariance Vector/Covariance.cpp)
 physica_add_test(DenseVector Vector/DenseVector.cpp)
 physica_add_test(DiffVector Vector/DiffVector.cpp)
 physica_add_test(Givens Vector/Givens.cpp)
 physica_add_test(HouseHolder Vector/HouseHolder.cpp)
-physica_add_test(LinearSystem LinearSystem/LinearSystem.cpp)
-physica_add_test(LUSolver LinearSystem/LUSolver.cpp)
 if(${PHYSICA_CUDA})
     physica_add_test(DenseVector_cuda Vector/DenseVector.cu)
     physica_add_test(DiffVector_cuda Vector/DiffVector.cu)

@@ -43,7 +43,7 @@ int main() {
                      [](T, const XVector&) -> XVector {
                          return {T(lambda) * sqrt(2 * stepSize * diffuseD) * T::random_normal<RandomSource>()};
                      });
-        toNextMean(y, i, solver.getSolution().row(0));
+        y.toNextMean(i, solver.getSolution().row(0));
     }
 
     const VectorND<T> t = VectorND<T>::linspace(0, t_max, y.getLength());

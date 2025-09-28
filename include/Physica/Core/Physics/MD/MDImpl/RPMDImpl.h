@@ -517,7 +517,7 @@ namespace Physica {
         parallel_for<P>(kernel, getNumReplica(), 0).wait();
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < buffer.getLength(); ++i)
-            toNextMean(result, i, buffer[i]);
+            result.toNextMean(i, buffer[i]);
         return result;
     }
     /**
@@ -574,7 +574,7 @@ namespace Physica {
         parallel_for<P>(kernel, getNumReplica(), 0).wait();
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < buffer.getLength(); ++i)
-            toNextMean(result, i, buffer[i]);
+            result.toNextMean(i, buffer[i]);
         return result;
     }
 
@@ -634,7 +634,7 @@ namespace Physica {
             };
             parallel_for<P>(kernel, getNumReplica(), 0).wait();
             for (size_t i = 0; i < buffer.getLength(); ++i)
-                toNextMean(result, i, buffer[i]);
+                result.toNextMean(i, buffer[i]);
         }
         return result;
     }

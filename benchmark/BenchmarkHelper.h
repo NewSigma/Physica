@@ -19,9 +19,8 @@
 #pragma once
 
 #include "Physica/Core/Scalar/Real.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
-#include "Cycler.h"
+#include "Physica/Core/Utils/Cycler.h"
 
 namespace Physica {
     class Benchmark {
@@ -35,9 +34,9 @@ namespace Physica {
                     const auto from = Cycler::tic();
                     fn();
                     const auto to = Cycler::toc();
-                    toNextMean(temp, j, ScalarType(Cycler::toSeconds(to - from)));
+                    temp.toNextMean(j, ScalarType(Cycler::toSeconds(to - from)));
                 }
-                toNextVariance(var, mean, i, temp);
+                var.toNextVariance(mean, i, temp);
             }
             return std::make_pair(mean, sqrt(var));
         }

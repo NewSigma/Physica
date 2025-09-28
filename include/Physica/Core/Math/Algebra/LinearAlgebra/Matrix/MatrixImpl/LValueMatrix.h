@@ -43,6 +43,7 @@ namespace Physica {
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
         using PtrTy = ScalarType::PtrTy;
@@ -56,7 +57,21 @@ namespace Physica {
         This& operator=(This&& m) noexcept = delete;
 
         template<Scalar T>
-        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
+        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
+            // FIXME: We have to put it in class because NVCC 12.8 rejects valid.
+            ScalarType::template checkAssign<T>();
+            const size_t maxMajor = Base::getMaxMajor();
+            const size_t maxMinor = Base::getMaxMinor();
+            for (size_t i = 0; i < maxMajor; ++i) {
+                for (size_t j = 0; j < maxMinor; ++j) {
+                    if constexpr (ReverseDiff<T>)
+                        refFromMajorMinor(i, j) = x.value();
+                    else
+                        refFromMajorMinor(i, j) = x;
+                }
+            }
+            return Base::getDerived();
+        }
         void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
         void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
         void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
@@ -75,6 +90,8 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 
+        void toNextMean(size_t lastNumSample, const Matrix auto& sample) noexcept;
+        void toNextVariance(Derived& mean, size_t lastNumSample, const Matrix auto& sample) noexcept;
         void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] auto row(size_t r) noexcept;

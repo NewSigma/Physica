@@ -18,7 +18,6 @@
  */
 #include <QApplication>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -30,46 +29,47 @@ constexpr int NumStep = 41;
 constexpr int NumSite = 4;
 constexpr int NumState = 256;
 
-VectorType readTPQ() {
-    VectorType result(NumStep);
-    MatrixType buffer(NumStep, 6);
-    for (int i = 0; i < NumAve; ++i) {
-        char path[32];
-        sprintf(path, "SS_rand%d.dat", i);
-        std::ifstream fin(path);
-        if (!fin)
-            exit(EXIT_FAILURE);
-        fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        for (size_t r = 0; r < buffer.getRow(); ++r)
-            for (size_t c = 0; c < buffer.getCol(); ++c)
-                fin >> buffer(r, c);
-        toNextMean(result, i, buffer.col(4));
+namespace {
+    VectorType readTPQ() {
+        VectorType result(NumStep);
+        MatrixType buffer(NumStep, 6);
+        for (int i = 0; i < NumAve; ++i) {
+            std::ifstream fin(std::format("SS_rand{}.dat", i));
+            if (!fin)
+                exit(EXIT_FAILURE);
+            fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            for (size_t r = 0; r < buffer.getRow(); ++r)
+                for (size_t c = 0; c < buffer.getCol(); ++c)
+                    fin >> buffer(r, c);
+            result.toNextMean(i, buffer.col(4));
+        }
+        result *= reciprocal(ScalarType(NumSite));
+        return result;
     }
-    result *= reciprocal(ScalarType(NumSite));
-    return result;
-}
 
-VectorType readFullDiag(const VectorType& betas) {
-    VectorType energys(NumState), numParticle(NumState);
-    {
-        MatrixType buffer(NumState, 5);
-        std::ifstream fin("zvo_phys.dat");
-        if (!fin)
-            exit(EXIT_FAILURE);
-        fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        for (size_t r = 0; r < buffer.getRow(); ++r)
-            for (size_t c = 0; c < buffer.getCol(); ++c)
-                fin >> buffer(r, c);
-        energys = buffer.col(0);
-        numParticle = buffer.col(1);
+    VectorType readFullDiag(const VectorType& betas) {
+        VectorType energys(NumState);
+        VectorType numParticle(NumState);
+        {
+            MatrixType buffer(NumState, 5);
+            std::ifstream fin("zvo_phys.dat");
+            if (!fin)
+                exit(EXIT_FAILURE);
+            fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            for (size_t r = 0; r < buffer.getRow(); ++r)
+                for (size_t c = 0; c < buffer.getCol(); ++c)
+                    fin >> buffer(r, c);
+            energys = buffer.col(0);
+            numParticle = buffer.col(1);
+        }
+        VectorType result(betas.getLength());
+        for (size_t i = 0; i < betas.getLength(); ++i) {
+            const VectorType weights = exp(energys * (-betas[i]));
+            result[i] = numParticle * weights / weights.sum();
+        }
+        result *= reciprocal(ScalarType(NumSite));
+        return result;
     }
-    VectorType result(betas.getLength());
-    for (size_t i = 0; i < betas.getLength(); ++i) {
-        const VectorType weights = exp(energys * (-betas[i]));
-        result[i] = numParticle * weights / weights.sum();
-    }
-    result *= reciprocal(ScalarType(NumSite));
-    return result;
 }
 
 int main(int argc, char** argv) {

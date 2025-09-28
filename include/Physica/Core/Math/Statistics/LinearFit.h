@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearSystem.h"
-#include "NumCharacter.h"
 
 namespace Physica {
     /**

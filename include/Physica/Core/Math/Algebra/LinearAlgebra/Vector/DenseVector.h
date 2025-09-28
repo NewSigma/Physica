@@ -73,6 +73,10 @@ namespace Physica {
         using Base::rend;
         using Base::crend;
 
+        [[nodiscard]] T skew() const;
+        [[nodiscard]] T excess_kurt() const;
+        [[nodiscard]] T kurt() const;
+
         using Base::zeros;
         using Base::random_uniform;
         using Base::random_normal;

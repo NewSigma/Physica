@@ -99,9 +99,9 @@ namespace {
 
                 for (unsigned int j = 0; j < 100; ++j) {
                     rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
-                    toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
+                   temp.toNextMean(j, rpmd.calcKinetic<KineticModel>());
                 }
-                toNextVariance(var, mean, i, temp);
+                var.toNextVariance(mean, i, temp);
             }
         }
         constexpr double answer = 61.8;

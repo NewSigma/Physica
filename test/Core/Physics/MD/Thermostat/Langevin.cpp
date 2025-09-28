@@ -89,11 +89,11 @@ int main() {
                 auto col = temp.col(replica);
                 col = hadamard(hadamard(momentum.col(replica), momentum.col((replica + 1) % numReplica)), kineticModel.getRepMass()) * factor;
             }
-            toNextMean(buffer, i, temp);
-            toNextMean(temperature_sample, i, rpmd.calcTemperature<KineticModel>());
+            buffer.toNextMean(i, temp);
+            temperature_sample.toNextMean(i, rpmd.calcTemperature<KineticModel>());
         }
-        toNextVariance(varCorr, meanCorr, sys, buffer);
-        toNextVariance(varTemperature, meanTemperature, sys, temperature_sample);
+        varCorr.toNextVariance(meanCorr, sys, buffer);
+        varTemperature.toNextVariance(meanTemperature, sys, temperature_sample);
     }
     const MatrixType deviaCorr = sqrt_elem(varCorr);
 

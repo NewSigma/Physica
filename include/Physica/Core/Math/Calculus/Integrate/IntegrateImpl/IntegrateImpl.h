@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 /*!
  * Bug: if the start of integrate domain is much larger than step size, the result will be 0. May be use taylor series
  * and expend the function to the first order.
@@ -127,7 +127,7 @@ namespace Physica {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             VectorType x = VectorType::template random_uniform<R>(Base::from(), Base::to());
-            toNextMean(result, i, fn(x));
+           result.toNextMean(i, fn(x));
         }
 
         T factor = 1;
@@ -144,7 +144,7 @@ namespace Physica {
         T mean = 0;
         T variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
-            toNextVariance(variance, mean, i, solve<R>(fn));
+            variance.toNextVariance(mean, i, solve<R>(fn));
         deviation = sqrt(variance);
         return mean;
     }
@@ -158,7 +158,7 @@ namespace Physica {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             const VectorType x = VectorType::template random_any<R>(dim, distribution);
-            toNextMean(result, i, fn(x) / importance(x));
+           result.toNextMean(i, fn(x) / importance(x));
         }
         return result;
     }
@@ -175,7 +175,7 @@ namespace Physica {
         T mean = 0;
         T variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
-            toNextVariance(variance, mean, i, solve(fn, importance));
+            variance.toNextVariance(mean, i, solve(fn, importance));
         deviation = sqrt(variance);
         return mean;
     }

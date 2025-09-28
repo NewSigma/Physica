@@ -19,7 +19,6 @@
 #pragma once
 
 #include "DecisionTree.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica {
     /*
@@ -103,7 +102,7 @@ namespace Physica {
         else {
             T mean = 0;
             for (size_t i = 0; i < trees.getLength(); ++i)
-                toNextMean(mean, i, trees[i].predict(features));
+                mean.toNextMean(i, trees[i].predict(features));
             return mean;
         }
     }
@@ -185,7 +184,7 @@ namespace Physica {
             }
             const T newError = makeTestError(predictions, dataset.labels, numTestSample);
             const T deltaError = newError - train<R>(numTree, dataset).second;
-            toNextMean(mean, i, deltaError);
+            mean.toNextMean(i, deltaError);
         }
         return mean;
     }
@@ -302,7 +301,7 @@ namespace Physica {
             numTestSample[sampleId] += 1;
         }
         else {
-            toNextMean(predictions[sampleId], numTestSample[sampleId], prediction);
+            predictions[sampleId].toNextMean(numTestSample[sampleId], prediction);
             numTestSample[sampleId] += 1;
         }
     }

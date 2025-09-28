@@ -72,6 +72,8 @@ namespace Physica {
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 
+        void toNextMean(size_t lastNumSample, const Vector auto& sample) noexcept;
+        void toNextVariance(Derived& mean, size_t lastNumSample, const Vector auto& sample) noexcept;
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>

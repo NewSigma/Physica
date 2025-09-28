@@ -164,8 +164,10 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> mean_stable() const noexcept;
         [[nodiscard]] CoDiff<T> variance() const noexcept;
         [[nodiscard]] T variance(const T& prior_mean) const;
+        [[nodiscard]] T variance_stable() const;
         [[nodiscard]] T deviation() const;
         [[nodiscard]] T deviation(const T& prior_mean) const;
+        [[nodiscard]] T deviation_stable() const;
         [[nodiscard]] CoDiff<T> lnSumExp() const noexcept;
         [[nodiscard]] CoDiff<T> crossEntropy(size_t index) const noexcept;
         [[nodiscard]] CoDiff<T> lnSoftmax(size_t index) const noexcept;
@@ -217,6 +219,15 @@ namespace Physica {
         template<Vector V, size_t Size>
         void assign_add_simd(V& v) const noexcept;
     };
+
+    template<Vector T>
+    auto covariance(const T& x, const T& y) -> T::ScalarType {
+        assert(x.getLength() == y.getLength());
+        using ScalarType = T::ScalarType;
+        const ScalarType x_mean = x.mean();
+        const ScalarType y_mean = y.mean();
+        return hadamard((x - x_mean), (y - y_mean)).sum() / ScalarType(x.getLength() - 1);
+    }
 
     template<Vector V1, Vector V2>
     bool vectorNear(const V1& v1, const V2& v2, double precision) noexcept {

@@ -79,7 +79,7 @@ namespace Physica {
             default:
                 unreachable();
             }
-            toNextMean(mean, i, observe);
+            mean.toNextMean(i, observe);
         }
         observes[Base::getCursor()] = mean;
         Base::sample(dqmc.getLnAbsDet(), dqmc.getSign());

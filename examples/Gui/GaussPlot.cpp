@@ -19,7 +19,6 @@
 #include <QApplication>
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Gui/Plot/GaussPlot.h"
@@ -72,11 +71,11 @@ int main(int argc, char** argv) {
             auto col = rpmd.getRingPolymer().asMatrix().col(0);
             auto momentum = col.head(numMolecular);
             temp = hadamard(square(momentum), repMass) * ScalarType(0.5);
-            toNextMean(buffer, i, temp);
+            buffer.toNextMean(i, temp);
         }
 
         for (size_t j = 0; j < numMolecular; ++j) {
-            toNextVariance(varKinetic[j], meanKinetic[j], sys, buffer[j]);
+            varKinetic[j].toNextVariance(meanKinetic[j], sys, buffer[j]);
         }
     }
     const VectorType deviaKinetic = sqrt(varKinetic);

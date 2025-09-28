@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 
@@ -59,7 +58,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     MSD<T, Dim>::MSD(MDCellType initCell_) : initCell(std::move(initCell_)), numSample(0) {
         buffer.resize(getNumParticle(), 3);
-        buffer = T(0);
+        buffer.zeros();
     }
 
     template<Scalar T, unsigned int Dim>
@@ -70,7 +69,7 @@ namespace Physica {
             const auto r = pos.row(i);
             const VectorType squaredDist = square(initCell.minDistVector(r, i));
             auto meanSquaredDist = buffer.row(i);
-            toNextMean(meanSquaredDist, numSample, squaredDist);
+            meanSquaredDist.toNextMean(numSample, squaredDist);
         }
         numSample += 1;
     }

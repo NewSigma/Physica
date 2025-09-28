@@ -136,10 +136,10 @@ namespace {
                 const size_t numO = rpmd.getNumParticle() / 3;
                 const size_t numH = numO * 2;
                 for (size_t j = 0; j < numO; ++j) {
-                    toNextMean(temp, 2 * j, cell.minDistVector(numH + j, 2 * j).norm());
-                    toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
+                   temp.toNextMean(2 * j, cell.minDistVector(numH + j, 2 * j).norm());
+                   temp.toNextMean(2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
                 }
-                toNextMean(bond, i, temp);
+                bond.toNextMean(i, temp);
                 rpmd.nvt_step<RandomSource, Thread>(thermo, kineticModel, forceModel);
             }
         }

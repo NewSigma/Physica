@@ -20,7 +20,6 @@
 #include <iostream>
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Gui/Plot/Plot.h"
 
@@ -85,7 +84,7 @@ public:
         return lattice.getSize();
     }
 private:
-    ScalarType deltaDotSpin(size_t i, size_t j) const {
+    [[nodiscard]] ScalarType deltaDotSpin(size_t i, size_t j) const {
         const size_t order_1 = lattice.getRow() - 1;
         ScalarType spin = lattice(i > 0 ? (i - 1) : order_1, j);
         spin += lattice(i < order_1 ? (i + 1) : 0, j);
@@ -108,11 +107,12 @@ int main(int argc, char** argv) {
         ising.init<RandomSource>();
         ising.step<RandomSource>(2000);
 
-        ScalarType energy = 0, energy2 = 0;
+        ScalarType energy = 0;
+        ScalarType energy2 = 0;
         for (size_t i = 0; i < NumSample; ++i) {
             ising.step<RandomSource>(10);
-            toNextMean(energy, i, ising.getEnergy());
-            toNextMean(energy2, i, square(ising.getEnergy()));
+            energy.toNextMean(i, ising.getEnergy());
+            energy2.toNextMean(i, square(ising.getEnergy()));
         }
         Cv[i] = (energy2 - square(energy)) / (square(t[i]) * ScalarType(ising.getNumSite()));
     }, NumPoint, ThreadPool::numThreadRequired).wait();

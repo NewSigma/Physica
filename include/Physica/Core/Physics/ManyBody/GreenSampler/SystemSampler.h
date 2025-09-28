@@ -103,7 +103,7 @@ namespace Physica {
                 unreachable();
             }
             fft.transform();
-            toNextMean(observes[Base::getCursor()], i, fft.getKSpace().squaredNorms() * reciprocal(T(numSite)));
+            observes[Base::getCursor()].toNextMean(i, fft.getKSpace().squaredNorms() * reciprocal(T(numSite)));
         }
         Base::sample(dqmc.getLnAbsDet(), dqmc.getSign());
     }

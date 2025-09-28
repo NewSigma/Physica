@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
                 kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);
                 for (size_t j = 0; j < mean.getLength(); ++j) {
                     const ScalarType flux = calcThermoFlux(rpmd);
-                    toNextMean(mean[j], sample, flux0 * flux);
+                    mean[j].toNextMean(sample, flux0 * flux);
                     kineticModel.do_nve_step_for(1.0, timeStep);
                     kineticModel.post_nve_step(rpmd.getRingPolymer());
                     rpmd.getRingPolymer().removeDrift();

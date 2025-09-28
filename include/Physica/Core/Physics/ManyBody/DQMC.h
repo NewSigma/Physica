@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "DQMCImpl/CyclicChainQDT.h"
 
 namespace Physica {
@@ -376,7 +375,7 @@ namespace Physica {
             if (i != 0)
                 checkSign(signU, sign);
 
-            toNextMean(lnAbsDetU, i, lnAD);
+            lnAbsDetU.toNextMean(i, lnAD);
             signU = sign;
         }
 
@@ -387,7 +386,7 @@ namespace Physica {
             if (i != 0)
                 checkSign(signD, sign);
 
-            toNextMean(lnAbsDetD, i, lnAD);
+            lnAbsDetD.toNextMean(i, lnAD);
             signD = sign;
         }
         lnAbsDet = lnAbsDetU + lnAbsDetD;

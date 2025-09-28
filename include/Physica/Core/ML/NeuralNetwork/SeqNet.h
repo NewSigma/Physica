@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Layer/LayerBase.h"
 
 namespace Physica {
@@ -91,7 +90,7 @@ namespace Physica {
         const size_t size = dataset.getSize();
         T result = 0;
         for (size_t i = 0; i < size; ++i)
-            toNextMean(result, i, loss(dataset, i));
+            result.toNextMean(i, loss(dataset, i));
         return result;
     }
 }

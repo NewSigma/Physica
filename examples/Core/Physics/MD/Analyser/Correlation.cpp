@@ -123,12 +123,12 @@ int main(int argc, char** argv) {
                     rpmd.nvt_step<RandomSource, Sequential>(
                             thermo, kineticModel, forceModel);
                     sampler.sample(p1);
-                    toNextMean(corr_dir_sample[step], sample, p0 * p1);
+                    corr_dir_sample[step].toNextMean(sample, p0 * p1);
                 }
             }
             mutex.lock();
-            toNextVariance(corr_fft_var, corr_fft, sys, sampler.makeCorr(false));
-            toNextVariance(corr_dir_var, corr_dir, sys, corr_dir_sample);
+            corr_fft_var.toNextVariance(corr_fft, sys, sampler.makeCorr(false));
+            corr_dir_var.toNextVariance(corr_dir, sys, corr_dir_sample);
             sys += 1;
             mutex.unlock();
         }, numSystem, ThreadPool::numThreadRequired).wait();

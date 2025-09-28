@@ -242,12 +242,12 @@ namespace Physica {
 
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
-            toNextVariance(var, mean, n, xy);
+            var.toNextVariance(mean, n, xy);
             // Loss has minimal value to avoid the grid size reducing to 0
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
-                toNextMean(lossMat(index, i), counts[index][i], l);
+                lossMat(index, i).toNextMean(counts[index][i], l);
                 counts[index][i] += 1;
             }
         }
@@ -278,12 +278,12 @@ namespace Physica {
 
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
-            toNextVariance(var, mean, n, xy);
+            var.toNextVariance(mean, n, xy);
 
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
-                toNextMean(lossMat(index, i), counts[index][i], l);
+                lossMat(index, i).toNextMean(counts[index][i], l);
                 counts[index][i] += 1;
             }
         }

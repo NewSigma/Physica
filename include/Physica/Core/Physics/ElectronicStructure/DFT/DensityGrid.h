@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Basis/PlainWaveBasis.h"
 #include "SpinPair.h"
 

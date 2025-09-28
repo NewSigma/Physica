@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "NumCharacter.h"
 
 namespace Physica {
     /**
@@ -80,13 +79,13 @@ namespace Physica {
 
             fft.transform();
             auto& kSpace = fft.getKSpace();
-            toNextMean(mean, numSample, kSpace[0].real() / T(numStep));
+            mean.toNextMean(numSample, kSpace[0].real() / T(numStep));
             kSpace = kSpace.squaredNorms();
             fft.invTransform();
 
             for (size_t i = 0; i < numStep; ++i)
                 head[i] /= T(numStep - i);
-            toNextMean(corr, numSample, head);
+            corr.toNextMean(numSample, head);
             numSample += 1;
             step = 0;
         }
