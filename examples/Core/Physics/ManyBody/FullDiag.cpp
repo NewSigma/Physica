@@ -27,7 +27,7 @@
 using namespace Physica;
 using ScalarType = float64; // Will overflow if use float32
 using VectorType = VectorND<ScalarType>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 using VectorPair = std::pair<VectorType, VectorType>;
 using SpectrumMatrix = SymmArray<VectorPair, Dynamic>;
 constexpr unsigned int NumSite = 4;

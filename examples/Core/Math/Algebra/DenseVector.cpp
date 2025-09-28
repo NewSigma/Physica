@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 int main() {
     VectorND<float64> a(8, 1.0); // A vector of length 8, with its elements being 1.0

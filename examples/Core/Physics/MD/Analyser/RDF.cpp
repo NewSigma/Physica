@@ -29,7 +29,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 using EwaldType = Ewald<ScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);

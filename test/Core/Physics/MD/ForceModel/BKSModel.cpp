@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 // FIXME: Re-enable this test
 constexpr bool Disable = sizeof(int) == 0;

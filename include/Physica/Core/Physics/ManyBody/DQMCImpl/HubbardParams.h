@@ -153,7 +153,6 @@ namespace Physica {
                     hoppingMatrix(from, next) = -hoppingT;
                     hoppingMatrix(next, from) = -hoppingT;
                 }
-
             }
         }
         else {

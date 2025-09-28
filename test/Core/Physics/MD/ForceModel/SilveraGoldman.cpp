@@ -28,7 +28,7 @@ using dfloat = Diff<Tv, DiffMode::Reverse, 1>;
 constexpr bool Disable = sizeof(int) == 0;
 
 class PressTest {
-    using RandomSource = Random<MT19937>;
+    using RandomSource = Random<>;
     using MDCellType = MDCell<dfloat>;
     using LatticeMatrix = MDCellType::LatticeMatrix;
     using PositionMatrix = MDCellType::PositionMatrix;

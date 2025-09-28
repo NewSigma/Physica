@@ -73,7 +73,7 @@ WaterDropSolver::WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_)
         , const3(0) {}
 
 T WaterDropSolver::solve() {
-    return bisection([&](const T& lambda) { //We use bisection method by experience and without any prove
+    return bisection([&](const T& lambda) { // Use bisection method based on experience
                setLambda(lambda);
                solver.rungeKutta4([&](const T& r, const Vector2D<T>& v) -> Vector2D<T> {
                        const T momentum = v[1];
@@ -84,7 +84,7 @@ T WaterDropSolver::solve() {
                        return {momentum, term1 - term2};
                    });
                return getMinTangent();
-           }, T(0), T(-1.1), T(1.1)); //1.1 is selected by experience
+           }, T(0), T(-1.1), T(1.1)); // 1.1 is selected based on experience
 }
 
 int WaterDropSolver::output() {

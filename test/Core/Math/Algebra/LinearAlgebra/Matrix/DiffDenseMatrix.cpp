@@ -22,7 +22,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<Diff<ScalarType, DiffMode::Reverse, 1>>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 int main() {
     MatrixType m = MatrixType::random_uniform<RandomSource>(4, 4);

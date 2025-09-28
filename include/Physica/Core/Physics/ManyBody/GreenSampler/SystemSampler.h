@@ -64,7 +64,7 @@ namespace Physica {
         [[nodiscard]] int getNumSiteY() const noexcept { return fft.getRSpaceSize()[1]; }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
-        MatrixND calcMeanImpl(std::optional<const VectorND<T>&> lnWeights) const;
+        MatrixND calcMeanImpl(std::optional<std::reference_wrapper<const VectorND<T>>> lnWeights) const;
     };
 
     template<Scalar T>
@@ -110,7 +110,7 @@ namespace Physica {
 
     template<Scalar T>
     auto SystemSampler<T>::calcMean() const -> MatrixND {
-        return calcMeanImpl(nullptr);
+        return calcMeanImpl({});
     }
 
     template<Scalar T>
@@ -126,7 +126,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcMeanImpl(std::optional<const VectorND<T>&> lnWeights) const -> MatrixND {
+    auto SystemSampler<T>::calcMeanImpl(std::optional<std::reference_wrapper<const VectorND<T>>> lnWeights) const -> MatrixND {
         const int kX = getNumSiteX();
         const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
         MatrixND result(kX, kY);

@@ -26,7 +26,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 constexpr unsigned int NumSiteX = 4;
 constexpr unsigned int NumSiteY = 2;
 constexpr unsigned int NumSite = NumSiteX * NumSiteY;
@@ -35,7 +35,7 @@ constexpr double RepelU = 8;
 constexpr double Beta = 16;
 
 namespace {
-    static void main(benchmark::State& state) {
+    void bench(benchmark::State& state) {
         using ReprType = FermiRepr<2, NumSite, true>;
         using Hamilton = HubbardMatrix<ScalarType, ReprType>;
         const SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
@@ -48,4 +48,4 @@ namespace {
     }
 }
 
-BENCHMARK(main)->Name("TPQ")->Unit(benchmark::kSecond);
+BENCHMARK(bench)->Name("TPQ")->Unit(benchmark::kSecond);

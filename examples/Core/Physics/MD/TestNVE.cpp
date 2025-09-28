@@ -26,7 +26,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 using MDType = RPMD<ScalarType, 3, 1>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, false>;

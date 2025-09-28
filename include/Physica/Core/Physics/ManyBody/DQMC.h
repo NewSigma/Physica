@@ -403,7 +403,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void DQMC<T>::checkSign(Tv sign1, Tv sign2) {
+    void DQMC<T>::checkSign([[maybe_unused]] Tv sign1, [[maybe_unused]] Tv sign2) {
         // TODO: check complex sign
         if constexpr (!isComplex)
             assert(sign1 == sign2 && "[Error]: Unexpected sign mismatch");

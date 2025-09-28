@@ -141,7 +141,7 @@ namespace Physica {
         do {
             MatrixND& abs_error = fock;
             abs_error = abs_elem(*errorMatrices.crbegin());
-            const bool nearConverge = abs_error.max() <= T(1E-1); //1E-1 seleted by experiment
+            const bool nearConverge = abs_error.max() <= T(1E-1); // 1E-1 seleted based on experiments
             const bool doEDIIS = iteration > 0 && (iteration % EDIISBufferSize == 0) && !nearConverge;
             if (doEDIIS)
                 EDIISInterpolation(fockMatrices, densityMatrices, energyBuffer);

@@ -27,7 +27,7 @@ using namespace Physica;
 using Physica::Dynamic;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using RandomSource = Random<MT19937, 10000>;
+using RandomSource = Random<>;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);

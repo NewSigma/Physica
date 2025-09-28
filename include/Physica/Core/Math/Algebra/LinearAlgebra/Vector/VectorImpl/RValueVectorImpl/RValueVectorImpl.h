@@ -577,7 +577,7 @@ namespace Physica {
      * The first element of \param target will be the factor to construct houseHolder matrix.
      * The other parts of \param target will be essential HouseHolder vector.
      * 
-     * \return The norm of \param source
+     * \return Norm of original vector
      * 
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236-244

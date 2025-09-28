@@ -34,19 +34,19 @@ namespace Physica {
     class [[nodiscard]] Task;
 
     template<ExecutePolicy P>
-    [[nodiscard]] Task<P> schedule(auto func) noexcept {
+    [[nodiscard]] Task<P> schedule(std::invocable<> auto fn) noexcept {
         static_assert(P != Concurrent, "[Error]: Not support");
-        func();
+        fn();
         co_return;
     }
 
     template<ExecutePolicy P>
-    void parallel_for(auto func, size_t num_loop) noexcept {
+    void parallel_for(auto, size_t) noexcept {
         static_assert(P == Sequential, "[Error]: Not implemented");
     }
 
     template<ExecutePolicy P>
-    void parallel_for(auto func, size_t num_loop, int part) noexcept {
+    void parallel_for(auto, size_t, int) noexcept {
         static_assert(P == Sequential, "[Error]: Not implemented");
     }
 }

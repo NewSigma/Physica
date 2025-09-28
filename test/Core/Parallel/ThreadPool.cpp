@@ -23,7 +23,7 @@ using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = VectorND<ScalarType>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 int main() {
     const MatrixType A = MatrixType::random_uniform<RandomSource>(4);

@@ -40,7 +40,7 @@ using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact, GPU>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};

@@ -23,7 +23,7 @@
 using namespace Physica;
 using T = float64;
 using Tc = cfloat64;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 constexpr int Dim = 2;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;

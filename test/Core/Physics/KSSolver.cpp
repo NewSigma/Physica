@@ -25,7 +25,7 @@
 using namespace Physica;
 using ScalarType = float64;
 using ComplexType = Complex<ScalarType>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 namespace Physica {
     class Test {

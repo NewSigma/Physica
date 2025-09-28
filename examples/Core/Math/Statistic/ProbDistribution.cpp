@@ -22,7 +22,7 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);

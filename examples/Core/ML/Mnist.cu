@@ -143,7 +143,7 @@ namespace Physica {
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse>;
 using Dataset = Mnist::DatasetType<device_obj<VectorND<T>>>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 static std::pair<Dataset, Dataset> makeDataset() {
     const Mnist mnist("./data");

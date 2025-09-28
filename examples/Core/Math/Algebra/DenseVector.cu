@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 using DVector = device_obj<VectorND<float64>>; // Simply dress anything with device_obj<> to get its CUDA version
 
 int main() {

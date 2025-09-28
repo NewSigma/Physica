@@ -25,7 +25,7 @@
 
 using namespace Physica;
 using ScalarType = float32;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 /**
  * Reference:
  * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:304-308

@@ -28,7 +28,7 @@ BasicConst::BasicConst()
     expectedRelativeError = T(1, 1 - GlobalPrecision);
     expectedRelativeError.setByte(0, 1);
 
-    stepSize = T(1, -GlobalPrecision / 2); //(- GlobalPrecision / 2) is selected by experience.
+    stepSize = T(1, -GlobalPrecision / 2); //( - GlobalPrecision / 2) is selected based on experience
     stepSize.setByte(0, 1);
 
     R_MAX = 2147483647;

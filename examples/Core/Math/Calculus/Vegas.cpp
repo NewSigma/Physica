@@ -23,7 +23,7 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 using T = float64;
 
 T func(const VectorND<T>& x) {

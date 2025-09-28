@@ -87,14 +87,14 @@ namespace Physica {
     }
 
     template<ExecutePolicy P>
-    [[nodiscard]] Task<Concurrent> parallel_for(auto func, size_t num_loop) noexcept requires(P == Thread) {
+    [[nodiscard]] Task<Concurrent> parallel_for(std::invocable<size_t> auto fn, size_t num_loop) noexcept requires(P == Thread) {
         assert(num_loop > 0);
         Array<Task<Thread>> tasks(num_loop);
         for (size_t i = 0; i < num_loop; ++i) {
-            tasks[i] = [](auto func, size_t i) noexcept -> Task<Thread> {
-                func(i);
+            tasks[i] = [](auto fn, size_t i) noexcept -> Task<Thread> {
+                fn(i);
                 co_return;
-            }(func, i);
+            }(fn, i);
         }
 
         co_await std::suspend_always{};
@@ -103,19 +103,19 @@ namespace Physica {
     }
 
     template<ExecutePolicy P>
-    [[nodiscard]] Task<Concurrent> parallel_for(auto func, size_t num_loop, int part) noexcept requires(P == Thread) {
-        const bool shouldInferPart = part <= 0;
+    [[nodiscard]] Task<Concurrent> parallel_for(std::invocable<size_t> auto fn, size_t num_loop, int part) noexcept requires(P == Thread) {
+        const bool shouldInferPart = part <= 0 || part > num_loop;
         if (shouldInferPart)
-            part = ThreadPool::getInstance().getNumThreads();
+            part = std::min<size_t>(ThreadPool::getInstance().getNumThreads(), num_loop);
 
         using Range = Task<Thread>::Range;
         Array<Task<Thread>> tasks(part);
         for (int i = 0; i < part; ++i) {
-            tasks[i] = [](auto func, Range range) noexcept -> Task<Thread> {
+            tasks[i] = [](auto fn, Range range) noexcept -> Task<Thread> {
                 for (size_t loop = range.first; loop < range.second; ++loop)
-                    func(loop);
+                    fn(loop);
                 co_return;
-            }(func, Task<Thread>::splitJob(num_loop, part, i));
+            }(fn, Task<Thread>::splitJob(num_loop, part, i));
         }
 
         co_await std::suspend_always{};

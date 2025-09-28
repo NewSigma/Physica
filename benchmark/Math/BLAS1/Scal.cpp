@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 namespace {
     void scal(benchmark::State& state) {

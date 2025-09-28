@@ -100,7 +100,7 @@ namespace {
         using T = std::conditional<BC == BoundaryCond::TBC, cfloat64, float64>::type;
         using ReprType = FermiRepr<1, NumSite, false>;
         using Hamilton = HubbardMatrix<T, ReprType, BC>;
-        using RandomSource = Random<MT19937>;
+        using RandomSource = Random<>;
 
         SquareLattice<Dim, BC> lattice;
         if constexpr (BC == Physica::BoundaryCond::TBC)

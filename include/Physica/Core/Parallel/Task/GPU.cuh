@@ -33,12 +33,12 @@ namespace Physica {
     }
 
     template<ExecutePolicy P>
-    Task<Concurrent> parallel_for(auto func, size_t num_loop) noexcept requires(P == GPU) {
-        return parallel_for<Thread>(func, num_loop);
+    Task<Concurrent> parallel_for(std::invocable<size_t> auto fn, size_t num_loop) noexcept requires(P == GPU) {
+        return parallel_for<Thread>(fn, num_loop);
     }
 
     template<ExecutePolicy P>
-    Task<Concurrent> parallel_for(auto func, size_t num_loop, int part) noexcept requires(P == GPU) {
-        return parallel_for<Thread>(func, num_loop, part);
+    Task<Concurrent> parallel_for(std::invocable<size_t> auto fn, size_t num_loop, int part) noexcept requires(P == GPU) {
+        return parallel_for<Thread>(fn, num_loop, part);
     }
 }

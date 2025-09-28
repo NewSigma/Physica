@@ -21,7 +21,7 @@
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<>;
 
 int main() {
 #ifdef PHYSICA_HDF5
