@@ -148,6 +148,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto isZero() const noexcept;
         [[nodiscard]] __host__ __device__ auto isPositive() const noexcept;
         [[nodiscard]] __host__ __device__ auto isNegative() const noexcept;
+        [[nodiscard]] __host__ __device__ auto isFinite() const noexcept;
         /* Static Members */
         static bool matchSign(const ScalarType& s1, const ScalarType& s2);
         template<Scalar U>
@@ -463,6 +464,11 @@ namespace Physica {
             return value().isNegative();
         else
             return Base::getDerived().isNegative();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto ScalarBase<Derived>::isFinite() const noexcept {
+        return Base::getDerived().isFinite();
     }
 
     template<class Derived>

@@ -24,7 +24,7 @@
 #endif
 #include "Physica/Core/Exception/MKL/VSL.h"
 #include "Physica/Core/Utils/Container/Array.h"
-#include "RandomSeed.h"
+#include "SeedSequence.h"
 
 namespace Physica {
     enum RandomOption : char {
@@ -36,17 +36,12 @@ namespace Physica {
         public:
             using SeedType = uint64_t;
         protected:
-            enum SeedID : char {
-                CPP = 0,
-                MKL = 1,
-                CUDA = 2
-            };
+            SeedSequence<> seq;
         private:
             VSLStreamStatePtr pStream = nullptr;
             [[no_unique_address]] curandGenerator_t curand{};
 
-            SeedType seed;
-            Array<SeedType, 3> tseed{};
+            SeedType seed{};
         public:
             RandomBase() = delete;
             ~RandomBase();
@@ -55,10 +50,10 @@ namespace Physica {
             [[nodiscard]] operator curandGenerator_t() noexcept { return curand; }
             /* Getters */
             [[nodiscard]] SeedType getSeed() const noexcept { return seed; }
-            [[nodiscard]] const auto& getTSeed() const noexcept { return tseed; }
         protected:
-            RandomBase(SeedType seed_, RandomOption option) noexcept;
+            RandomBase(RandomOption option) noexcept;
             /* Operations */
+            void reseed(RandomOption option);
             void reseed(SeedType seed_, RandomOption option);
         };
 
@@ -88,12 +83,11 @@ namespace Physica {
     class PHYSICA_API Random : public Internal::RandomBase {
         using This = Random<Option, FixedSeed>;
         using Base = Internal::RandomBase;
+        using GenType = std::mt19937;
     public:
-        using result_type = uint64_t;
+        using result_type = GenType::result_type;
         constexpr static bool IsSeedFixed = Traits<This>::IsSeedFixed;
     private:
-        using GenType = std::mt19937;
-
         GenType gen;
     public:
         ~Random() = default;
@@ -101,7 +95,7 @@ namespace Physica {
         [[nodiscard]] result_type operator()() { return gen(); }
         /* Operations */
         void reseed();
-        void reseed(SeedType seed_);
+        void reseed(SeedType seed_) requires(!IsSeedFixed);
         /* Getters */
         [[nodiscard]] GenType& getGen() noexcept { return gen; }
         /* Static members */
@@ -118,26 +112,26 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
-        /* Static members */
-        static SeedType genSeed() noexcept;
     };
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>::Random() noexcept : Base(genSeed(), Option) {
-        gen.seed(getTSeed()[CPP]);
+    Random<Option, FixedSeed>::Random() noexcept : Base(Option) {
+        gen.seed(seq);
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
     void Random<Option, FixedSeed>::reseed() {
-        reseed(genSeed());
+        if constexpr (IsSeedFixed)
+            Base::reseed(FixedSeed, Option);
+        else
+            Base::reseed(Option);
+        gen.seed(seq);
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    void Random<Option, FixedSeed>::reseed(SeedType seed) {
-        if constexpr (IsSeedFixed)
-            assert(seed == FixedSeed);
+    void Random<Option, FixedSeed>::reseed(SeedType seed) requires(!IsSeedFixed) {
         Base::reseed(seed, Option);
-        gen.seed(getTSeed()[CPP]);
+        gen.seed(seq);
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
@@ -165,16 +159,6 @@ namespace Physica {
             for (int& i : arr)
                 i = dist(getInstance());
         }
-    }
-
-    template<RandomOption Option, uint64_t FixedSeed>
-    auto Random<Option, FixedSeed>::genSeed() noexcept -> SeedType {
-        SeedType seed{};
-        if constexpr (IsSeedFixed)
-            seed = FixedSeed;
-        else
-            RandomSeed::rdrand(seed);
-        return seed;
     }
 }
 

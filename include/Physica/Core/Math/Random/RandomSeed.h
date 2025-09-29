@@ -35,6 +35,33 @@ namespace Physica {
         class RdrandException : public std::exception {};
     public:
     #ifdef __linux__
+        static void rdseed(uint16_t& __restrict integer) {
+            for(int i = 0; i < RetryLimit; ++i) {
+                const int code = _rdseed16_step(&integer);
+                if (code == 1) [[likely]]
+                    return;
+            }
+            throw RdrandException();
+        }
+
+        static void rdseed(uint32_t& __restrict integer) {
+            for(int i = 0; i < RetryLimit; ++i) {
+                const int code = _rdseed32_step(&integer);
+                if (code == 1) [[likely]]
+                    return;
+            }
+            throw RdrandException();
+        }
+
+        static void rdseed(uint64_t& __restrict integer) {
+            for(int i = 0; i < RetryLimit; ++i) {
+                const int code = _rdseed64_step(reinterpret_cast<unsigned long long*>(&integer));
+                if (code == 1) [[likely]]
+                    return;
+            }
+            throw RdrandException();
+        }
+
         static void rdrand(uint16_t& __restrict integer) {
             for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand16_step(&integer);
@@ -62,17 +89,5 @@ namespace Physica {
             throw RdrandException();
         }
     #endif
-        /**
-         * Generate a sequence of random seed (using the PCG-XSH-RS scheme)
-         *
-         * Reference:
-         * [1] Eigen; https://eigen.tuxfamily.org  
-         * [2] https://www.pcg-random.org/
-         */
-        static uint32_t toNextSeed(uint64_t& state) noexcept {
-            const uint64_t current = state;
-            state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
-            return static_cast<uint32_t>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
-        }
     };
 }

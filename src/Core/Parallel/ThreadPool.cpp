@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Parallel/ThreadPool.h"
-#include "Physica/Core/Math/Random/RandomSeed.h"
 #include <memory>
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>
@@ -57,6 +56,18 @@ namespace {
         if (num == 0 || num > numProcesser)
             num = numProcesser * 3 / 4;
         return num;
+    }
+    /**
+     * Generate a sequence of random seed (using the PCG-XSH-RS scheme)
+     *
+     * Reference:
+     * [1] Eigen; https://eigen.tuxfamily.org  
+     * [2] https://www.pcg-random.org/
+     */
+    uint32_t toNextState(uint64_t& state) noexcept {
+        const uint64_t current = state;
+        state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
+        return static_cast<uint32_t>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
     }
 }
 
@@ -108,7 +119,7 @@ void ThreadPool::schedule(Handle handle) noexcept {
 }
 
 auto ThreadPool::steal() noexcept -> Handle {
-    const auto random = RandomSeed::toNextSeed(getThreadInfo().randState);
+    const auto random = toNextState(getThreadInfo().randState);
     const int numThreads = getNumThreads();
     for (int i = 0; i < numThreads; ++i) {
         Handle handle = thread_data[(random + i) % numThreads].pop();

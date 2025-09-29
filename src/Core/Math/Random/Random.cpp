@@ -19,7 +19,11 @@
 #include <iostream>
 #include <format>
 #include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Parallel/ThreadPool.h"
+#ifdef PHYSICA_MPI
+    #include "Physica/Core/Parallel/MPIContext.h"
+#endif
 
 using namespace Physica;
 using namespace Physica::Internal;
@@ -42,9 +46,9 @@ namespace {
     }
 }
 
-RandomBase::RandomBase(SeedType seed_, RandomOption option) noexcept : seed(seed_) {
+RandomBase::RandomBase(RandomOption option) noexcept {
     try {
-        reseed(seed_, option);
+        reseed(option);
     }
     catch (std::exception& e) {
         std::cerr << std::format("RNG init failed: {}\n", e.what());
@@ -59,26 +63,31 @@ RandomBase::~RandomBase() {
 #endif
 }
 
+void RandomBase::reseed(RandomOption option) {
+    SeedType seed{};
+    RandomSeed::rdseed(seed);
+    reseed(seed, option);
+}
+
 void RandomBase::reseed(SeedType seed_, RandomOption option) {
     seed = seed_;
-    SeedType temp = seed;
-    if (!ThreadPool::isMainThread())
-        for (int i = 0; i < (ThreadPool::getThreadID() + 1) * tseed.size(); ++i)
-            RandomSeed::toNextSeed(temp);
-
-    for (auto& elem : tseed) {
-        elem = temp;
-        RandomSeed::toNextSeed(temp);
-    }
+    seq = SeedSequence<>({
+        static_cast<uint32_t>(seed),
+        static_cast<uint32_t>(seed >> 32UL),
+        static_cast<uint32_t>(ThreadPool::getThreadID()),
+    #ifdef PHYSICA_MPI
+        static_cast<uint32_t>(HasMPI() ? MPIContext::getInstance().getProcessID() : 0)
+    #endif
+    });
 
     if constexpr (HasMKL())
-        check_vsl(vslNewStream(&pStream, rngID_MKL(option), tseed[MKL]));
+        check_vsl(vslNewStream(&pStream, rngID_MKL(option), seq.generate<uint64_t>()));
 
     if constexpr (HasCUDA()) {
-#ifdef PHYSICA_CUDA
+    #ifdef PHYSICA_CUDA
         check(curandCreateGenerator(&curand, rngID_cuRAND(option)));
         check(curandSetGeneratorOrdering(curand, CURAND_ORDERING_PSEUDO_DYNAMIC));
-        check(curandSetPseudoRandomGeneratorSeed(curand, tseed[CUDA]));
-#endif
+        check(curandSetPseudoRandomGeneratorSeed(curand, seq.generate<uint64_t>()));
+    #endif
     }
 }
