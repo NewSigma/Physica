@@ -28,27 +28,12 @@
 using namespace Physica;
 using namespace Physica::Internal;
 
-namespace {
-    [[maybe_unused]] int rngID_MKL(RandomOption) noexcept {
-    #ifdef PHYSICA_MKL
-        return VSL_BRNG_MT19937;
-    #else
-        return 0;
-    #endif
-    }
-
-    [[maybe_unused]] curandRngType_t rngID_cuRAND(RandomOption) noexcept {
-    #ifdef PHYSICA_CUDA
-        return CURAND_RNG_PSEUDO_MTGP32;
-    #else
-        return 0;
-    #endif
-    }
-}
-
-RandomBase::RandomBase(RandomOption option) noexcept {
+RandomBase::RandomBase(uint64_t seed_, RandomOption option) noexcept {
     try {
-        reseed(option);
+        if (seed_ == Dynamic)
+            reseed(option);
+        else
+            reseed(seed_, option);
     }
     catch (std::exception& e) {
         std::cerr << std::format("RNG init failed: {}\n", e.what());
@@ -57,19 +42,21 @@ RandomBase::RandomBase(RandomOption option) noexcept {
 }
 
 RandomBase::~RandomBase() {
-    check_vsl(vslDeleteStream(&pStream));
+    if (pStream)
+        check_vsl(vslDeleteStream(&pStream));
 #ifdef PHYSICA_CUDA
-    check(curandDestroyGenerator(curand));
+    if (curand)
+        check(curandDestroyGenerator(curand));
 #endif
 }
 
 void RandomBase::reseed(RandomOption option) {
-    SeedType seed{};
+    uint64_t seed{};
     RandomSeed::rdseed(seed);
     reseed(seed, option);
 }
 
-void RandomBase::reseed(SeedType seed_, RandomOption option) {
+void RandomBase::reseed(uint64_t seed_, RandomOption option) {
     seed = seed_;
     seq = SeedSequence<>({
         static_cast<uint32_t>(seed),
@@ -80,14 +67,21 @@ void RandomBase::reseed(SeedType seed_, RandomOption option) {
     #endif
     });
 
-    if constexpr (HasMKL())
-        check_vsl(vslNewStream(&pStream, rngID_MKL(option), seq.generate<uint64_t>()));
+    
+    if constexpr (HasMKL()) {
+        int id_mkl = rngID_MKL(option);
+        if (id_mkl != 0)
+            check_vsl(vslNewStream(&pStream, id_mkl, seq.generate<uint64_t>()));
+    }
 
     if constexpr (HasCUDA()) {
     #ifdef PHYSICA_CUDA
-        check(curandCreateGenerator(&curand, rngID_cuRAND(option)));
-        check(curandSetGeneratorOrdering(curand, CURAND_ORDERING_PSEUDO_DYNAMIC));
-        check(curandSetPseudoRandomGeneratorSeed(curand, seq.generate<uint64_t>()));
+        auto id_curand = rngID_cuRAND(option);
+        if (id_curand != CURAND_RNG_TEST) {
+            check(curandCreateGenerator(&curand, id_curand));
+            check(curandSetGeneratorOrdering(curand, CURAND_ORDERING_PSEUDO_DYNAMIC));
+            check(curandSetPseudoRandomGeneratorSeed(curand, seq.generate<uint64_t>()));
+        }
     #endif
     }
 }

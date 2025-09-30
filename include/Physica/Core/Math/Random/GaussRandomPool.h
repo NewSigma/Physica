@@ -25,7 +25,7 @@ namespace Physica {
     template<Scalar T, class RandomPoolType>
     class GaussRandomPool {
     public:
-        using GeneratorType = RandomPoolType::GeneratorType;
+        using Generator = RandomPoolType::Generator;
     private:
         VectorND<T> rands;
     public:
@@ -43,12 +43,12 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return rands.getLength(); }
         /* Static member */
-        [[nodiscard]] static GeneratorType& getGen() noexcept { return RandomPoolType::getInstance().getGen(); }
+        [[nodiscard]] static Generator& generator() noexcept { return RandomPoolType::getInstance().generator(); }
     };
 
     template<Scalar T, class RandomPoolType>
     GaussRandomPool<T, RandomPoolType>::GaussRandomPool(size_t size) : rands(size) {
-        init(RandomPoolType::getInstance().getGen());
+        init(RandomPoolType::getInstance().generator());
     }
 
     template<Scalar T, class RandomPoolType>
@@ -60,7 +60,7 @@ namespace Physica {
     template<Scalar T, class RandomPoolType>
     T GaussRandomPool<T, RandomPoolType>::operator()() const noexcept {
         std::uniform_int_distribution<size_t> dist(0, getSize() - 1);
-        return rands[dist(RandomPoolType::getInstance().getGen())];
+        return rands[dist(RandomPoolType::getInstance().generator())];
     }
 
     template<Scalar T, class RandomPoolType>

@@ -210,7 +210,7 @@ namespace Physica {
     template<class Derived>
     template<RNG R>
     void ContinuousVector<Derived>::random_uniform() {
-        if constexpr (HasMKL()) {
+        if constexpr (R::MKL_Ready) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Prec == Float32)
@@ -227,7 +227,7 @@ namespace Physica {
     template<class Derived>
     template<RNG R>
     void ContinuousVector<Derived>::random_normal() {
-        if constexpr (HasMKL() && !isForwardDiff) {
+        if constexpr (R::MKL_Ready && !isForwardDiff) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Prec == Float32)

@@ -119,7 +119,6 @@ namespace Physica {
      */
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::linspace(T from, T to, size_t count) -> This {
-        assert(from < to);
         assert(count > 1);
         Trv n = Trv(count - 1);
         This result = This(count);

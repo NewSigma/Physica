@@ -45,7 +45,7 @@
 #else
     #define __host__
     #define __device__
-    struct curandGenerator_t {};
+    using curandGenerator_t void*;
     using curandRngType_t = int;
 #endif
 

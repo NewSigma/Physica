@@ -73,7 +73,7 @@ namespace Physica {
     template<tparams>
     template<RNG R>
     void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform() {
-        if constexpr (MatrixOption::isElementMatrix<This>()) {
+        if constexpr (R::cuRAND_Ready && MatrixOption::isElementMatrix<This>()) {
             check(curandSetStream(R::getInstance(), CUDAContext::getInstance()));
             if constexpr (T::Prec == Float32)
                 check(curandGenerateUniform(R::getInstance(), (Tm*)data(), getRow() * getCol()));
@@ -89,7 +89,7 @@ namespace Physica {
     template<tparams>
     template<RNG R>
     void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal() {
-        if constexpr (MatrixOption::isElementMatrix<This>()) {
+        if constexpr (R::cuRAND_Ready && MatrixOption::isElementMatrix<This>()) {
             check(curandSetStream(R::getInstance(), CUDAContext::getInstance()));
             if constexpr (T::Prec == Float32)
                 check(curandGenerateNormal(R::getInstance(), (Tm*)data(), getRow() * getCol(), 0, 1));
