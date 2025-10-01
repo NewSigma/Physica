@@ -20,8 +20,7 @@
 
 using namespace Physica;
 
-Sobol::Sobol()
-        : numStep(0), mask(MaxDim * MaxBit), buffer(MaxDim, 0) {
+Sobol::Sobol() : numStep(0), mask(MaxDim * MaxBit), buffer(MaxDim, 0) {
     constexpr static int MaskInit[]{1, 1, 1, 1, 1, 1, 3, 1, 3, 3, 1, 1, 5, 7, 7, 3, 3, 5, 15, 11, 5, 15, 13, 9};
     for (unsigned int i = 0; i < sizeof(MaskInit) / sizeof(int); ++i)
         mask[i] = MaskInit[i];
@@ -46,6 +45,39 @@ Sobol::Sobol()
             iu[j][k] = i;
         }
     }
+}
+
+void Sobol::step(int i) {
+    for (int _ = 0; _ < i; ++_) {
+        const int m = pre_step();
+        for (int j = 0; j < MaxDim; ++j)
+            buffer[j] ^= mask[m + j];
+    }
+}
+
+void Sobol::reset() {
+    numStep = 0;
+    for (auto& x : buffer)
+        x = 0;
+}
+
+void Sobol::swap(This& __restrict obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    std::swap(numStep, obj.numStep);
+    mask.swap(obj.mask);
+    buffer.swap(obj.buffer);
+}
+
+int Sobol::pre_step() {
+    unsigned int im = numStep++;
+    int j = 0;
+    for (; j < MaxBit; ++j) {
+        if (im % 2 == 0)
+            break;
+        im >>= 1;
+    }
+    assert(j < MaxBit && "MaxBit too small in sobol");
+    return j * MaxDim;
 }
 
 auto Sobol::getInstance() noexcept -> This& {

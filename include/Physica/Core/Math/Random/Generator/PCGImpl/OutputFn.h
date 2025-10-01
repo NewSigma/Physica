@@ -43,7 +43,7 @@
 #include <cstdint>
 
 namespace Physica::Internal {
-    template<std::integral T>
+    template<class T>
     consteval static T multiplier() {
         if constexpr (std::same_as<uint8_t, T>)
             return 141U;
@@ -59,7 +59,7 @@ namespace Physica::Internal {
         }
     }
 
-    template<std::integral T>
+    template<class T>
     consteval static T increment() {
         if constexpr (std::same_as<uint8_t, T>)
             return 77U;
@@ -75,7 +75,7 @@ namespace Physica::Internal {
         }
     }
 
-    template<std::integral T>
+    template<class T>
     consteval static T multiplierMCG() {
         if constexpr (std::same_as<uint8_t, T>)
             return 217U;
@@ -91,7 +91,7 @@ namespace Physica::Internal {
         }
     }
 
-    template<std::integral T>
+    template<class T>
     consteval static T unmultiplierMCG() {
         if constexpr (std::same_as<uint8_t, T>)
             return 105U;

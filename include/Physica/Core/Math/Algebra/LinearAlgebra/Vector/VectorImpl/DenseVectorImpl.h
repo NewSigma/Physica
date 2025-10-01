@@ -48,7 +48,7 @@ namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::skew() const -> T {
         This temp = *this;
-        temp.normalize();
+        temp.standardize();
         temp = hadamard(square(temp), temp);
         const size_t length = getLength();
         const T factor = T(length * length) / T((length - 1) * (length - 2));
@@ -58,7 +58,7 @@ namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::excess_kurt() const -> T {
         This temp = *this;
-        temp.normalize();
+        temp.standardize();
         temp = square(temp);
         const T mean2 = temp.mean();
         temp = square(temp);

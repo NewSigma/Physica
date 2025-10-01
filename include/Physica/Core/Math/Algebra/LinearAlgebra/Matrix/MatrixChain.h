@@ -115,8 +115,8 @@ namespace Physica {
     void MatrixChain<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         chain.swap(obj.chain);
-        std::swap(price, obj.price);
-        std::swap(point, obj.point);
+        price.swap(obj.price);
+        point.swap(obj.point);
     }
 
     template<Scalar T>

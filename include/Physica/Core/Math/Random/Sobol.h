@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -56,14 +56,6 @@ namespace Physica {
         int pre_step();
     };
 
-    void Sobol::step(int i) {
-        for (int _ = 0; _ < i; ++_) {
-            const int m = pre_step();
-            for (int j = 0; j < MaxDim; ++j)
-                buffer[j] ^= mask[m + j];
-        }
-    }
-
     template<Vector T>
     void Sobol::fill(T& x) {
         static_assert(T::SizeAtCompile <= MaxDim, "[Error]: Vector is too long");
@@ -75,30 +67,5 @@ namespace Physica {
             x[i] = buffer[i];
         }
         x *= factor;
-    }
-
-    void Sobol::reset() {
-        numStep = 0;
-        for (auto& x : buffer)
-            x = 0;
-    }
-
-    void Sobol::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(numStep, obj.numStep);
-        mask.swap(obj.mask);
-        buffer.swap(obj.buffer);
-    }
-
-    int Sobol::pre_step() {
-        unsigned int im = numStep++;
-        int j = 0;
-        for (; j < MaxBit; ++j) {
-            if (im % 2 == 0)
-                break;
-            im >>= 1;
-        }
-        assert(j < MaxBit && "MaxBit too small in sobol");
-        return j * MaxDim;
     }
 }

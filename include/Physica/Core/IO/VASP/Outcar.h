@@ -23,19 +23,20 @@
 
 namespace Physica {
     class PHYSICA_API Outcar {
+        using This = Outcar;
         using ScalarType = float64;
 
         VectorND<ScalarType> force;
         ScalarType internalEnergy;
     public:
         Outcar(const char* path, unsigned int numAtom);
-        Outcar(const Outcar&) = default;
-        Outcar(Outcar&&) noexcept = default;
+        Outcar(const This&) = default;
+        Outcar(This&&) noexcept = default;
         ~Outcar() = default;
         /* Operators */
-        Outcar& operator=(Outcar& obj) noexcept { swap(obj); return *this; }
+        Outcar& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(Outcar& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
         [[nodiscard]] const VectorND<ScalarType>& getForce() const noexcept { return force; }

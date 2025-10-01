@@ -218,8 +218,8 @@ namespace Physica {
     void IceGenerator<T>::swap(IceGenerator& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         initialCell.swap(obj.initialCell);
-        std::swap(maxDistOO, obj.maxDistOO);
-        std::swap(maxDistOH, obj.maxDistOH);
+        maxDistOO.swap(obj.maxDistOO);
+        maxDistOH.swap(obj.maxDistOH);
         isHydrogenOccupied.swap(obj.isHydrogenOccupied);
         numHydrogenRequired.swap(obj.numHydrogenRequired);
     }

@@ -21,9 +21,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Random/RandomSeed.h"
 #include "Physica/Core/Parallel/ThreadPool.h"
-#ifdef PHYSICA_MPI
-    #include "Physica/Core/Parallel/MPIContext.h"
-#endif
+#include "Physica/Core/Parallel/MPIContext.h"
 
 using namespace Physica;
 using namespace Physica::Internal;
@@ -58,13 +56,11 @@ void RandomBase::reseed(RandomOption option) {
 
 void RandomBase::reseed(uint64_t seed_, RandomOption option) {
     seed = seed_;
-    seq = SeedSequence<>({
+    seq = SeedSequence<4>({
         static_cast<uint32_t>(seed),
         static_cast<uint32_t>(seed >> 32UL),
         static_cast<uint32_t>(ThreadPool::getThreadID()),
-    #ifdef PHYSICA_MPI
-        static_cast<uint32_t>(HasMPI() ? MPIContext::getInstance().getProcessID() : 0)
-    #endif
+        static_cast<uint32_t>(MPIContext::getInstance().getProcessID())
     });
 
     

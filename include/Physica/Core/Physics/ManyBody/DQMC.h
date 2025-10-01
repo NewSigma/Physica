@@ -76,7 +76,6 @@ namespace Physica {
         template<RNG R>
         void step_spin_for(int numStep);
 
-        void invalidates();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return *params; }
@@ -94,6 +93,8 @@ namespace Physica {
     private:
         /* Operations */
         void resize(int numSite, int numSplit);
+        void invalidate(int split);
+        void invalidates();
 
         Vector2D<Tr> calcDelta(int site, int split) const noexcept;
         Vector2D<Tv> calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept;
@@ -151,9 +152,10 @@ namespace Physica {
         const int numSite = getNumSite();
         auto props = VectorND<Tr>(numSite);
         auto sites = makeRandomSites<R>(numSite);
+        auto dist = std::uniform_int_distribution<>(0, getNumSplit() - 1);
         for (int step = 0; step < numStep; ++step) {
             props.template random_uniform<R>();
-            int split = step % getNumSplit();
+            int split = dist(R::getInstance());
             for (int i = 0; i < numSite; ++i)
                 stepMHImpl(sites[i], split, props[i]);
 
@@ -185,31 +187,16 @@ namespace Physica {
         const int numSite = getNumSite();
         auto props = VectorND<Tr>(numSite);
         auto sites = makeRandomSites<R>(numSite);
+        auto dist = std::uniform_int_distribution<>(0, getNumSplit() - 1);
         for (int step = 0; step < numStep; ++step) {
             props.template random_uniform<R>();
-            int split = step % getNumSplit();
+            int split = dist(R::getInstance());
             for (int i = 0; i < numSite; ++i)
                 stepSpinImpl(sites[i], split, props[i]);
 
             calcGreens();
             std::ranges::shuffle(sites, R::getInstance());
         }
-    }
-
-    template<Scalar T>
-    void DQMC<T>::invalidates() {
-        const int numSplit = getNumSplit();
-        DiagMatrix<Tr> expU(getNumSite());
-        for (int split = 0; split < numSplit; ++split) {
-            expU.diag() = exp(params->getAlpha() * aux.col(split));
-            chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
-            expU.diag() = exp(-params->getAlpha() * aux.col(split));
-            chainD[split].setMatrixR(kinetic.getMatrixR() * expU);
-        }
-        chainU.invalidates();
-        chainD.invalidates();
-
-        calcGreens();
     }
 
     template<Scalar T>
@@ -249,6 +236,36 @@ namespace Physica {
 
         greenUs.resize(numSplit, numSite, numSite);
         greenDs.resize(numSplit, numSite, numSite);
+    }
+
+    template<Scalar T>
+    void DQMC<T>::invalidate(int split) {
+        DiagMatrix<Tr> expU(getNumSite());
+        expU.diag() = exp(params->getAlpha() * aux.col(split));
+        chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
+        expU.diag() = exp(-params->getAlpha() * aux.col(split));
+        chainD[split].setMatrixR(kinetic.getMatrixR() * expU);
+
+        chainU.invalidate(split);
+        chainD.invalidate(split);
+
+        calcGreens();
+    }
+
+    template<Scalar T>
+    void DQMC<T>::invalidates() {
+        const int numSplit = getNumSplit();
+        DiagMatrix<Tr> expU(getNumSite());
+        for (int split = 0; split < numSplit; ++split) {
+            expU.diag() = exp(params->getAlpha() * aux.col(split));
+            chainU[split].setMatrixR(kinetic.getMatrixR() * expU);
+            expU.diag() = exp(-params->getAlpha() * aux.col(split));
+            chainD[split].setMatrixR(kinetic.getMatrixR() * expU);
+        }
+        chainU.invalidates();
+        chainD.invalidates();
+
+        calcGreens();
     }
 
     template<Scalar T>

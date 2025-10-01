@@ -27,6 +27,7 @@ namespace Physica {
      */
     template<Scalar T, unsigned int Dim, BaroType Type>
     class CFireModel : private FireModel<T, Dim> {
+        using This = CFireModel<T, Dim, Type>;
         using Base = FireModel<T, Dim>;
         using typename Base::MDType;
         using LatticeMatrix = MDType::LatticeMatrix;
@@ -49,7 +50,7 @@ namespace Physica {
         void nve_step(MDType& rpmd) const;
         void forceStep(MDType& rpmd, LatticeMatrix stress);
         void mixingStep(MDType& rpmd);
-        void swap(CFireModel& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::getTimeStep;
         using Base::getForceNorm;
@@ -92,7 +93,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, BaroType Type>
-    void CFireModel<T, Dim, Type>::swap(CFireModel& __restrict obj) noexcept {
+    void CFireModel<T, Dim, Type>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         baro.swap(obj.baro);

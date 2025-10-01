@@ -182,7 +182,7 @@ namespace Physica {
     void SymmEigenSolver<T, Order>::swap(This& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
-        std::swap(eigenvectors, solver.eigenvectors);
+        eigenvectors.swap(solver.eigenvectors);
     }
 
     template<Scalar T, size_t Order>

@@ -121,7 +121,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void DiagMatrix<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(diags, obj.diags);
+        diags.swap(obj.diags);
     }
 
     template<Scalar T, size_t Order>

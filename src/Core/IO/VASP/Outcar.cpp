@@ -37,7 +37,7 @@ Outcar::Outcar(const char* path, unsigned int numAtom)
     readEnergy(fin, buffer);
 }
 
-void Outcar::swap(Outcar& __restrict obj) noexcept {
+void Outcar::swap(This& __restrict obj) noexcept {
     assert(this != &obj && "[Error]: Self swap is likely a bug");
     force.swap(obj.force);
     internalEnergy.swap(obj.internalEnergy);

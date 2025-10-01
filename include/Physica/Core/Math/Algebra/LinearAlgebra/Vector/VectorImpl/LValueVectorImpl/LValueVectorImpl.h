@@ -214,7 +214,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueVector<Derived>::normalize() {
+    void LValueVector<Derived>::standardize() {
+        assert(Base::getLength() > 1);
         auto& x = Base::getDerived();
         const T mean = Base::mean();
         const T factor = reciprocal(Base::deviation());

@@ -43,6 +43,7 @@
  *
  * Reference:
  * [1] Melissa O'Neill, pcg-cpp (2022); https://github.com/imneme/pcg-cpp
+ * [2] PCG generator; http://www.pcg-random.org
  */
 #include "PCGImpl/Engine.h"
 #include "PCGImpl/Extend.h"

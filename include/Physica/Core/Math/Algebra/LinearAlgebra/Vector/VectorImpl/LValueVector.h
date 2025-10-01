@@ -105,7 +105,7 @@ namespace Physica {
         void clamp_min(const Tv& minimum);
         void clamp_max(const Tv& maximum);
         void toUnit();
-        void normalize();
+        void standardize();
         using Base::householder;
         Tr householder();
 

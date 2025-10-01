@@ -143,8 +143,7 @@ namespace Physica {
      * [1] Rev. Mod. Phys. 73, 515; https://doi.org/10.1103/RevModPhys.73.515
      */
     template<Scalar T, bool IsSmallCell>
-    RSpaceEwald<T, IsSmallCell>::ComplexType
-    RSpaceEwald<T, IsSmallCell>::forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const {
+    auto RSpaceEwald<T, IsSmallCell>::forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const -> ComplexType {
         const size_t atom1 = dof1 / 3;
         const size_t atom2 = dof2 / 3;
         const size_t direction1 = dof1 % 3U;
@@ -192,13 +191,12 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    RSpaceEwald<T, IsSmallCell>::LatticeMatrix
-    RSpaceEwald<T, IsSmallCell>::virial(const PositionMatrix& pos) const {
+    auto RSpaceEwald<T, IsSmallCell>::virial(const PositionMatrix& pos) const -> LatticeMatrix {
         return Base::virial(lattice, pos);
     }
 
     template<Scalar T, bool IsSmallCell>
-    void RSpaceEwald<T, IsSmallCell>::swap(RSpaceEwald& __restrict obj) noexcept {
+    void RSpaceEwald<T, IsSmallCell>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         lattice.swap(obj.lattice);
@@ -321,8 +319,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool IsSmallCell>
-    RSpaceEwald<T, IsSmallCell>::BornChargeArray
-    RSpaceEwald<T, IsSmallCell>::makeBornCharge(const VectorND<T>& charges) {
+    auto RSpaceEwald<T, IsSmallCell>::makeBornCharge(const VectorND<T>& charges) -> BornChargeArray {
         BornChargeArray result(charges.getLength(), Matrix3D(3, 3, T(0)));
         for (size_t i = 0; i < result.getLength(); ++i) {
             auto diag = result[i].diag();

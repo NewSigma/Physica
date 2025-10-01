@@ -19,8 +19,8 @@
 #pragma once
 
 #ifdef PHYSICA_MPI
-
-#include <mpi/mpi.h>
+    #include <mpi/mpi.h>
+#endif
 #include "Physica/Macro.h"
 
 namespace Physica {
@@ -37,7 +37,9 @@ namespace Physica {
         [[nodiscard]] inline static int getNumProcess() noexcept;
         [[nodiscard]] inline static int getProcessID() noexcept; 
         /* Static memebers */
+    #ifdef PHYSICA_MPI
         [[nodiscard]] static MPI_Comm getWorld() noexcept { return MPI_COMM_WORLD; }
+    #endif
         [[nodiscard]] static MPIContext& getInstance() noexcept;
         static void wait();
     private:
@@ -45,16 +47,18 @@ namespace Physica {
     };
 
     inline int MPIContext::getNumProcess() noexcept {
-        int result = 0;
+        int result = 1;
+    #ifdef PHYSICA_MPI
         MPI_Comm_size(getWorld(), &result);
+    #endif
         return result;
     }
 
     inline int MPIContext::getProcessID() noexcept {
-        int result = -1;
+        int result = 0;
+    #ifdef PHYSICA_MPI
         MPI_Comm_rank(getWorld(), &result);
+    #endif
         return result;
     }
 }
-
-#endif
