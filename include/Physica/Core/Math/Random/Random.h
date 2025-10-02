@@ -95,7 +95,7 @@ namespace Physica {
     concept QRNG = std::derived_from<T, Internal::QRandomBase>;
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.
-     * We are following a simplified generator compared to NumPy's default [1].
+     * We use the same random number generator as NumPy [1].
      *
      * Note: Even if we fix the random seed, thread stealing may still break reproducibility.
      * 
@@ -107,7 +107,7 @@ namespace Physica {
      * Reference:
      * [1] NumPy BitGenerators; https://numpy.org/doc/stable/reference/random/bit_generators/index.html
      */
-    template<RandomOption Option = PCG32DXSM, uint64_t FixedSeed = Physica::Dynamic>
+    template<RandomOption Option = PCG64DXSM, uint64_t FixedSeed = Physica::Dynamic>
     class PHYSICA_API Random : public Internal::RandomBase {
         using This = Random<Option, FixedSeed>;
         using Base = Internal::RandomBase;
