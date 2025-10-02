@@ -25,11 +25,14 @@ namespace Physica {
     class SiteSampler : public GreenSampler<T> {
         using This = SiteSampler<T>;
         using Base = GreenSampler<T>;
+        using typename Base::Trv;
     public:
-        enum Observable {
+        enum Observable : char {
             Density,
+            DoubleOccupy,
             Kinetic,
-            DoubleOccupy
+            Potential,
+            Internal
         };
     private:
         VectorND<T> observes;
@@ -50,37 +53,21 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
+    private:
+        template<Scalar U>
+        static T calcObservable(const DQMC<U>& dqmc, int split, Observable type) noexcept;
     };
 
     template<Scalar T>
-    SiteSampler<T>::SiteSampler(size_t numSample) : Base(numSample), observes(numSample) {}
+    SiteSampler<T>::SiteSampler(size_t numSample)
+            : Base(numSample), observes(numSample) {}
 
     template<Scalar T>
     template<Scalar U>
     void SiteSampler<T>::sample(const DQMC<U>& dqmc, Observable type) {
         T mean = 0;
-        for (int i = 0; i < dqmc.getNumEqualGreen(); ++i) {
-            const auto& greenU = dqmc.getGreenUs()[i];
-            const auto& greenD = dqmc.getGreenDs()[i];
-
-            T observe;
-            switch (type) {
-            case Density:
-                observe = T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();
-                break;
-            case Kinetic: {
-                const auto& hoppingT = dqmc.getParams().getHoppingMatrix();
-                observe = -hadamard(hoppingT, greenU + greenD).sum().real();
-                break;
-            }
-            case DoubleOccupy:
-                observe = (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(dqmc.getNumSite());
-                break;
-            default:
-                unreachable();
-            }
-            mean.toNextMean(i, observe);
-        }
+        for (int i = 0; i < dqmc.getNumEqualGreen(); ++i)
+            mean.toNextMean(i, calcObservable(dqmc, i, type));
         observes[Base::getCursor()] = mean;
         Base::sample(dqmc.getLnAbsDet(), dqmc.getSign());
     }
@@ -100,5 +87,28 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         observes.swap(obj.observes);
+    }
+
+    template<Scalar T>
+    template<Scalar U>
+    T SiteSampler<T>::calcObservable(const DQMC<U>& dqmc, int split, Observable type) noexcept {
+        const auto& greenU = dqmc.getGreenUs()[split];
+        const auto& greenD = dqmc.getGreenDs()[split];
+        switch (type) {
+        case Density:
+            return T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();
+        case DoubleOccupy:
+            return (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(dqmc.getNumSite());
+        case Kinetic: {
+            const auto& hoppingT = dqmc.getParams().getHoppingMatrix();
+            return -hadamard(hoppingT, greenU + greenD).sum().real() / T(dqmc.getNumSite());
+        }
+        case Potential:
+            return calcObservable(dqmc, split, DoubleOccupy) * dqmc.getParams().getRepelU();
+        case Internal:
+            return calcObservable(dqmc, split, Kinetic) + calcObservable(dqmc, split, Potential);
+        default:
+            unreachable();
+        }
     }
 }

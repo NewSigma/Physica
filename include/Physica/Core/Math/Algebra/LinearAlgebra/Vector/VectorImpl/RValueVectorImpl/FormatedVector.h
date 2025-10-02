@@ -25,34 +25,42 @@ namespace Physica {
 
     template<Vector T>
     class FormatedVector<T> {
+        using This = FormatedVector<T>;
+
         const T& data;
         std::string prefix;
         std::string suffix;
         std::string separator;
     public:
         FormatedVector(const T& data_);
+        FormatedVector(const This&) = delete;
+        FormatedVector(This&&) noexcept = delete;
+        ~FormatedVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
-        FormatedVector& toFormatMMA();
+        This& toFormatMMA();
         /* Getters */
         [[nodiscard]] const T& getData() const noexcept { return data; }
         [[nodiscard]] const std::string& getPrefix() const noexcept { return prefix; }
         [[nodiscard]] const std::string& getSuffix() const noexcept { return suffix; }
         [[nodiscard]] const std::string& getSeparator() const noexcept { return separator; }
         /* Setters */
-        FormatedVector& setPrefix(std::string prefix_);
-        FormatedVector& setSuffix(std::string suffix_);
-        FormatedVector& setSeparator(std::string separator_);
+        This& setPrefix(std::string prefix_);
+        This& setSuffix(std::string suffix_);
+        This& setSeparator(std::string separator_);
     };
 
     template<Vector T>
     FormatedVector<T>::FormatedVector(const T& data_)
             : data(data_)
-            , prefix("(")
-            , suffix(")")
+            , prefix("{")
+            , suffix("}")
             , separator(", ") {}
 
     template<Vector T>
-    FormatedVector<T>& FormatedVector<T>::toFormatMMA() {
+    auto FormatedVector<T>::toFormatMMA() -> This& {
         setPrefix("{");
         setSuffix("}");
         setSeparator(",");
@@ -60,19 +68,19 @@ namespace Physica {
     }
 
     template<Vector T>
-    FormatedVector<T>& FormatedVector<T>::setPrefix(std::string prefix_) {
+    auto FormatedVector<T>::setPrefix(std::string prefix_) -> This& {
         prefix = std::move(prefix_);
         return *this;
     }
 
     template<Vector T>
-    FormatedVector<T>& FormatedVector<T>::setSuffix(std::string suffix_) {
+    auto FormatedVector<T>::setSuffix(std::string suffix_) -> This& {
         suffix = std::move(suffix_);
         return *this;
     }
 
     template<Vector T>
-    FormatedVector<T>& FormatedVector<T>::setSeparator(std::string separator_) {
+    auto FormatedVector<T>::setSeparator(std::string separator_) -> This& {
         separator = std::move(separator_);
         return *this;
     }

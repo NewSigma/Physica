@@ -35,7 +35,7 @@ namespace Physica {
         using MatrixND = LinearLayer<T>::template MatrixND<U>;
     private:
         device_obj<VectorND<Tv>> mask;
-        int numBin;
+        int numBin = 0;
     public:
         device_obj() = default;
         device_obj(int dim, int numBin_);
@@ -48,7 +48,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(DNN auto& nn, device_obj<MatrixND<Tv>>& x) const;
-        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& x2) const;
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const;
 
         template<RNG R>
         void random_shuffle();
@@ -114,8 +114,8 @@ namespace Physica {
                     deltas_ = asStruct(deltas.values()),
                     lnsumexps_ = asStruct(lnsumexps),
                     factor = calcFactor()] __device__() mutable {
-            const int sample = blockIdx.x * blockDim.x + threadIdx.x;
-            const int i = blockIdx.y;
+            const auto sample = blockIdx.x * blockDim.x + threadIdx.x;
+            const auto i = blockIdx.y;
             auto z = z_.getDerived().col(sample);
             if (z[i].isZero())
                 return;
@@ -156,8 +156,8 @@ namespace Physica {
                          indices_ = asStruct(indices),
                          deltaG_ = asStruct(deltas.grads()),
                          lnsumexps_ = asStruct(lnsumexps)] __device__() mutable {
-                const int sample = blockIdx.x * blockDim.x + threadIdx.x;
-                const int i = blockIdx.y;
+                const auto sample = blockIdx.x * blockDim.x + threadIdx.x;
+                const auto i = blockIdx.y;
                 const auto weights = weights_.getDerived().col(sample);
                 const auto& indices = indices_.getDerived();
                 const auto& deltaG = deltaG_.getDerived();
@@ -168,7 +168,7 @@ namespace Physica {
 
                 const auto grid = weights.reshape_row(dim, numBin);
                 const auto row = grid.row(i);
-                const int index = indices(i, sample);
+                const auto index = indices(i, sample);
                 const Tv lnsumexp = lnsumexps(sample, i);
                 const Tv s = softmax(row.values()).calc(index, lnsumexp);
                 const Tv g = (s - square(s)) * deltaG(sample, i);

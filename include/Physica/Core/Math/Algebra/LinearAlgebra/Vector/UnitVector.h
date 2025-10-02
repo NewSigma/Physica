@@ -28,10 +28,10 @@ namespace Physica {
         using This = UnitVector<T, Length>;
         using Base = RValueVector<This>;
 
-        size_t index1;
+        size_t nonzero;
         size_t length;
     public:
-        UnitVector(size_t index1_, size_t length_);
+        UnitVector(size_t nonzero_, size_t length_);
         UnitVector(const This&) = default;
         UnitVector(This&&) noexcept = default;
         ~UnitVector() = default;
@@ -41,22 +41,25 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t index) const;
+        [[nodiscard]] size_t getNonZero() const noexcept { return nonzero; }
         [[nodiscard]] size_t getLength() const noexcept { return length; }
     };
 
     template<Scalar T, size_t Length>
-    UnitVector<T, Length>::UnitVector(size_t index1_, size_t length_) : index1(index1_), length(length_) {}
+    UnitVector<T, Length>::UnitVector(size_t nonzero_, size_t length_) : nonzero(nonzero_), length(length_) {
+        assert(nonzero < length);
+    }
 
     template<Scalar T, size_t Length>
     void UnitVector<T, Length>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(index1, obj.index1);
+        std::swap(nonzero, obj.nonzero);
         std::swap(length, obj.length);
     }
 
     template<Scalar T, size_t Length>
     T UnitVector<T, Length>::calc(size_t index) const {
-        return index == index1 ? T(1) : T(0);
+        return index == nonzero ? T(1) : T(0);
     }
 }
 

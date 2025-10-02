@@ -27,6 +27,7 @@ namespace Physica {
     protected:
         using Tr = T::RealType;
         using Tv = T::ValueType;
+        using Trv = Tr::ValueType;
     private:
         VectorND<Tr> lnAbsDets;
         VectorND<Tv> signs;
