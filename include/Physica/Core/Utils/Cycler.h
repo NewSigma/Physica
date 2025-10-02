@@ -50,8 +50,9 @@ namespace Physica {
          * Because of out of order execution, the result may be less  or more than several cycles.
          * Use tic() and toc() to avoid this problem.
          */
-        [[nodiscard]] static __forceinline uint64_t now() {
-            uint32_t lo, hi;
+        [[nodiscard]] static __forceinline uint64_t now() noexcept {
+            uint32_t lo{};
+            uint32_t hi{};
         #ifdef __GNUC__
             __asm__ __volatile__ (
                     "rdtsc"
@@ -69,8 +70,9 @@ namespace Physica {
          *
          * This function is slower than now().
          */
-        [[nodiscard]] static __forceinline uint64_t tic() {
-            uint32_t lo, hi;
+        [[nodiscard]] static __forceinline uint64_t tic() noexcept {
+            uint32_t lo{};
+            uint32_t hi{};
         #ifdef __GNUC__
             __asm__ __volatile__ (
                     "cpuid\n\t"
@@ -89,8 +91,9 @@ namespace Physica {
          *
          * This function is slower than now().
          */
-        [[nodiscard]] static __forceinline uint64_t toc() {
-            uint32_t lo, hi;
+        [[nodiscard]] static __forceinline uint64_t toc() noexcept {
+            uint32_t lo{};
+            uint32_t hi{};
         #ifdef __GNUC__
             __asm__ __volatile__ (
                     "rdtscp\n\t"
