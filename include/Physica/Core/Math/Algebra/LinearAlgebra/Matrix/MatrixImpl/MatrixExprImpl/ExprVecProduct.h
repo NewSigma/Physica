@@ -31,10 +31,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const LazyDestroy<M> expr;
-        const LazyDestroy<V> vec;
+        LazyDestroy<M> expr;
+        LazyDestroy<V> vec;
     public:
-        MatExprVecProd(M&& expr_, V&& vec_);
+        MatExprVecProd(M expr_, V vec_);
         MatExprVecProd(const This&) = default;
         MatExprVecProd(This&&) noexcept = default;
         ~MatExprVecProd() = default;
@@ -57,7 +57,7 @@ namespace Physica {
     };
 
     template<Matrix M, Vector V>
-    MatExprVecProd<M, V>::MatExprVecProd(M&& expr_, V&& vec_) : expr(std::forward<M>(expr_)), vec(std::forward<V>(vec_)) {
+    MatExprVecProd<M, V>::MatExprVecProd(M expr_, V vec_) : expr(std::forward<M>(expr_)), vec(std::forward<V>(vec_)) {
         assert(expr.getCol() == vec.getLength());
     }
 
@@ -83,11 +83,11 @@ namespace Physica {
                     (lhs * (-rhs)).template assign<P>(target);
             }
             else if constexpr (Type == ExprType::Add)
-                target.template operator=<P>(expr.getLHS() * vec + expr.getRHS() * vec);
+                (expr.getLHS() * vec + expr.getRHS() * vec).template assign<P>(target);
             else if constexpr (Type == ExprType::Sub)
-                target.template operator=<P>(expr.getLHS() * vec - expr.getRHS() * vec);
+                (expr.getLHS() * vec - expr.getRHS() * vec).template assign<P>(target);
             else if constexpr (Type == ExprType::Mul)
-                target.template operator=<P>((expr.getLHS() * vec) * expr.getRHS());
+                ((expr.getLHS() * vec) * expr.getRHS()).template assign<P>(target);
             else
                 static_assert(!FastAssign, "[Error]: assign is not implemented");
         }

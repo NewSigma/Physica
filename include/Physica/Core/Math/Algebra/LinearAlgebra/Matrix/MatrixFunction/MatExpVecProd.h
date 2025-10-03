@@ -48,10 +48,10 @@ namespace Physica {
         constexpr static std::array<float, BufferSize> ThetaFloat32{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
         constexpr static std::array<double, BufferSize> ThetaFloat64{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
 
-        const LazyDestroy<M> mexp;
-        const LazyDestroy<V> v;
+        LazyDestroy<M> mexp;
+        LazyDestroy<V> v;
     public:
-        MatExpVecProd(M&& mexp_, V&& v_);
+        MatExpVecProd(M mexp_, V v_);
         MatExpVecProd(const This&) = default;
         MatExpVecProd(This&&) noexcept = default;
         ~MatExpVecProd() = default;
@@ -82,7 +82,8 @@ namespace Physica {
     };
 
     template<Matrix M, Vector V>
-    MatExpVecProd<M, V>::MatExpVecProd(M&& mexp_, V&& v_) : mexp(std::forward<M>(mexp_)), v(std::forward<V>(v_)) {
+    MatExpVecProd<M, V>::MatExpVecProd(M mexp_, V v_) : mexp(std::forward<M>(mexp_)), v(std::forward<V>(v_)) {
+        static_assert(std::is_reference_v<M> && std::is_reference_v<V>);
         assert(mexp.getCol() == v.getLength());
     }
 
@@ -115,7 +116,7 @@ namespace Physica {
         BufferType buffer(getLength());
         BufferType term(getLength());
         Tr lnNorm1 = 0;
-        target = v;
+        v.assign(target);
         for (int i = 0; i < numSplit; ++i) {
             Tr norm1 = target.normInf();
             if constexpr (NoFactor) {
@@ -173,7 +174,7 @@ namespace Physica {
             return std::make_pair(numMinCostTerm, numSplit);
         }
 
-        Trv powerNorms[MaxNormOrder];
+        Array<Trv, MaxNormOrder> powerNorms{};
         const Tr normalizer = reciprocal(norm1); // pow() has the risk of overflow
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
             const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * matI, order).template norm1_power<P>(MaxNormIteration);

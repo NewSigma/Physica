@@ -32,9 +32,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tr;
     private:
-        const LazyDestroy<M> m;
+        LazyDestroy<M> m;
     public:
-        MatrixExp(M&& m_);
+        MatrixExp(M m_);
         MatrixExp(const This&) = default;
         MatrixExp(This&&) noexcept = default;
         ~MatrixExp() = default;
@@ -58,7 +58,8 @@ namespace Physica {
     };
 
     template<Matrix M>
-    MatrixExp<M>::MatrixExp(M&& m_) : m(std::forward<M>(m_)) {
+    MatrixExp<M>::MatrixExp(M m_) : m(std::forward<M>(m_)) {
+        static_assert(std::is_reference_v<M>);
         assert(m.getRow() == m.getCol());
     }
 
