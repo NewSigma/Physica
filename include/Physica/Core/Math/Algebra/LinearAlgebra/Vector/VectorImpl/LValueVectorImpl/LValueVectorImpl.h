@@ -34,14 +34,12 @@ namespace Physica {
 
     template<class Derived>
     Derived& LValueVector<Derived>::operator=(const Scalar auto& x) {
-        constexpr bool isReverseDiffX = ReverseDiff<decltype(x)>;
-        static_assert(!isReverseDiff || !isReverseDiffX, "[Error]: Assign a diffable scalar to diffable vector discards grads");
-        for (size_t i = 0; i < Base::getLength(); ++i) {
-            if constexpr (isReverseDiffX)
-                (*this)[i] = x.value();
-            else
-                (*this)[i] = x;
-        }
+        static_assert(!isReverseDiff || !ReverseDiff<decltype(x)>, "[Error]: Assign a diffable scalar to diffable vector discards grads");
+        if constexpr (!std::same_as<T, std::remove_cvref_t<decltype(x)>>)
+            return operator=(T(x));
+
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            (*this)[i] = x;
         return Base::getDerived();
     }
 

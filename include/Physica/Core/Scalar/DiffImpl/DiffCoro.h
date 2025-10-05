@@ -53,7 +53,11 @@ namespace Physica {
             /* Operations */
             auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
             std::suspend_never initial_suspend() noexcept { return {}; }
-            void await_transform(auto&&) noexcept = delete;
+            void await_transform(auto&&) noexcept = delete
+                #ifdef __cpp_deleted_function // FIXME: Remove it once we dump to CXX26
+                    ("[Error]: Differential coroutine must yield values")
+                #endif
+                ;
             std::suspend_always final_suspend() noexcept { return {}; }
             suspend_yield yield_value(auto&& arg) noexcept;
             void return_void() noexcept {}

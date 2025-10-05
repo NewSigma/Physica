@@ -29,7 +29,8 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<Scalar U>
-    __host__ __device__ Diff<T, Mode, Order>::Diff(const U& x) requires(!ReverseDiff<U>) {
+    __host__ __device__ Diff<T, Mode, Order>::Diff(const U& x) {
+        static_assert(!ReverseDiff<U>, "[Error]: Assign reverse diffable scalar to another scalar discards compute graph");
         static_assert(T::isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
         if constexpr (Diffable<U>) {
             v = x.value();
