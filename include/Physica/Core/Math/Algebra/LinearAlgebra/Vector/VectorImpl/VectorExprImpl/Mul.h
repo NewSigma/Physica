@@ -154,34 +154,66 @@ namespace Physica {
             : public BinaryVectorExpr<ExprType::Mul, V1, V2> {
         using Base = BinaryVectorExpr<ExprType::Mul, V1, V2>;
     public:
+        using Base::isComplex;
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tm;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t index) const {
-            return Base::getLHS().calc(index) * Base::getRHS().calc(index);
-        }
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& v) const;
+        void assign_mkl(Vector auto& v) const noexcept;
+        template<ExecutePolicy P = Sequential>
+        void assign_base(Vector auto& v) const;
 
-        [[nodiscard]] Tv calc_value(size_t index) const {
-            return Base::getLHS().calc_value(index) * Base::getRHS().calc_value(index);
-        }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            return Base::getLHS().template packet<Pack>(index) * Base::getRHS().template packet<Pack>(index);
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<Pack>(index, count) * Base::getRHS().template packetPartial<Pack>(index, count);
-        }
+        [[nodiscard]] Pack packet(size_t index) const;
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
         using Base::reverse;
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector V1, Vector V2>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprType::Mul, V1, V2>::assign(Vector auto& v) const {
+        assign_base<P>(v);
+    }
+
+    template<Vector V1, Vector V2>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprType::Mul, V1, V2>::assign_base(Vector auto& v) const {
+        Base::template assign<P>(v);
+    }
+
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprType::Mul, V1, V2>::calc(size_t index) const -> CoDiff<T> {
+        return Base::getLHS().calc(index) * Base::getRHS().calc(index);
+    }
+
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprType::Mul, V1, V2>::calc_value(size_t index) const -> Tv {
+        return Base::getLHS().calc_value(index) * Base::getRHS().calc_value(index);
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Mul, V1, V2>::packet(size_t index) const {
+        return Base::getLHS().template packet<Pack>(index) * Base::getRHS().template packet<Pack>(index);
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Mul, V1, V2>::packetPartial(size_t index, size_t count) const {
+        return Base::getLHS().template packetPartial<Pack>(index, count) * Base::getRHS().template packetPartial<Pack>(index, count);
+    }
 
     template<Vector V1, Vector V2>
     void VectorExpr<ExprType::Mul, V1, V2>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {

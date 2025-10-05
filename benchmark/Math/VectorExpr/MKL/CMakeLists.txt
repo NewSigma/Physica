@@ -1,10 +1,5 @@
 target_sources(Benchmark PRIVATE Add.cpp)
 target_sources(Benchmark PRIVATE Exp.cpp)
-target_sources(Benchmark PRIVATE LnCosh.cpp)
 target_sources(Benchmark PRIVATE Mul.cpp)
 target_sources(Benchmark PRIVATE Square.cpp)
 target_sources(Benchmark PRIVATE Sub.cpp)
-
-if(${PHYSICA_MKL})
-    add_subdirectory(MKL)
-endif()

@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <benchmark/benchmark.h>
-#include "Exp.h"
+#include "../Exp.h"
 
 using namespace Physica;
 

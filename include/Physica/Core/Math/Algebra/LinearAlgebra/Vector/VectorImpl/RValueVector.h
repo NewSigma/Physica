@@ -73,12 +73,11 @@ namespace Physica {
         class EnableMKL<V1, V2> {
             using U1 = std::remove_cvref<V1>::type;
             using U2 = std::remove_cvref<V2>::type;
-            using ScalarType1 = U1::ScalarType;
-            using ScalarType2 = U2::ScalarType;
+            using T = U1::ScalarType;
         public:
             constexpr static bool value = HasMKL()
-                                       && std::same_as<ScalarType1, ScalarType2>
-                                       && (ScalarType1::Prec == Float32 || ScalarType1::Prec == Float64)
+                                       && std::same_as<T, typename U2::ScalarType>
+                                       && (T::Prec == Float16 || T::Prec == Float32 || T::Prec == Float64)
                                        && is_continuous<U1>::value
                                        && is_continuous<U2>::value
                                        && !Diffable<U1>
@@ -106,6 +105,8 @@ namespace Physica {
         using Tc = T::ComplexType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
+
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;

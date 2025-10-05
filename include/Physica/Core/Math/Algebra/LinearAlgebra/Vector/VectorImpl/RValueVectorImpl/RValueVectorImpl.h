@@ -651,7 +651,10 @@ namespace Physica {
         using V = std::remove_cvref<decltype(target)>::type;
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = V::SizeAtCompile;
-        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
+        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
+            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+        else
+            static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
         static_assert(V::isComplex || !isComplex, "[Error]: Assign a complex vector to real vector discards imags");
         static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
     }
