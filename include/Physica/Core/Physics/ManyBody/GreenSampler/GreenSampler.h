@@ -29,17 +29,18 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     private:
+        const DQMC<T>& dqmc;
         VectorND<Tr> lnAbsDets;
         VectorND<Tv> signs;
         size_t cursor = 0;
     public:
-        GreenSampler(size_t numSample);
-        GreenSampler(const This&) = default;
-        GreenSampler(This&&) noexcept = default;
+        GreenSampler(const DQMC<T>& dqmc_, size_t numSample);
+        GreenSampler(const This&) = delete;
+        GreenSampler(This&&) noexcept = delete;
         ~GreenSampler() = default;
         /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calcMean(const VectorND<T>& observes) const;
         [[nodiscard]] T calcMean(const VectorND<T>& observes, const VectorND<T>& lnWeights) const;
@@ -48,18 +49,21 @@ namespace Physica {
         [[nodiscard]] T lnPartitionZ() const;
 
         void reset() { cursor = 0; }
-        void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] int getNumSite() const noexcept { return dqmc.getNumSite(); }
+        [[nodiscard]] auto getRepelU() const noexcept { return dqmc.getParams().getRepelU(); }
+        [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return dqmc.getParams().getHoppingMatrix(); }
+
         [[nodiscard]] const auto& getLnAbsDets() const noexcept { return lnAbsDets; }
         [[nodiscard]] const auto& getSigns() const noexcept { return signs; }
         [[nodiscard]] size_t getNumSample() const noexcept { return signs.getLength(); }
         [[nodiscard]] size_t getCursor() const noexcept { return cursor; }
     protected:
-        void sample(Tr lnAbsDet, Tv sign) noexcept;
+        void sample() noexcept;
     };
 
     template<Scalar T>
-    GreenSampler<T>::GreenSampler(size_t numSample) : lnAbsDets(numSample), signs(numSample) {
+    GreenSampler<T>::GreenSampler(const DQMC<T>& dqmc_, size_t numSample) : dqmc(dqmc_), lnAbsDets(numSample), signs(numSample) {
         assert(numSample > 0);
     }
 
@@ -92,17 +96,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void GreenSampler<T>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        lnAbsDets.swap(obj.lnAbsDets);
-        signs.swap(obj.signs);
-        std::swap(cursor, obj.cursor);
-    }
-
-    template<Scalar T>
-    void GreenSampler<T>::sample(Tr lnAbsDet, Tv sign) noexcept {
-        lnAbsDets[cursor] = lnAbsDet;
-        signs[cursor] = sign;
+    void GreenSampler<T>::sample() noexcept {
+        lnAbsDets[cursor] = dqmc.getLnAbsDet();
+        signs[cursor] = dqmc.getSign();
         cursor = (cursor + 1) % getNumSample();
     }
 }

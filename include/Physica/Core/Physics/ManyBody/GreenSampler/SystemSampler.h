@@ -32,31 +32,31 @@ namespace Physica {
     class SystemSampler : public GreenSampler<T> {
         using This = SystemSampler<T>;
         using Base = GreenSampler<T>;
-        using MatrixND = DenseMatrix<T>;
+
+        using MatrixND = DQMC<T>::MatrixND;
+        using GreenArray = DQMC<T>::GreenArray;
     public:
         enum Observable {
-            AFM,  // Antiferromagnetic Structure Factor
-            CDW,  // Charge Density Wave
-            DOW   // Double Occupancy Wave
+            AFM, // Antiferromagnetic Structure Factor
+            CDW, // Charge Density Wave
+            DOW // Double Occupancy Wave
         };
     private:
         Array<MatrixND> observes;
         FFT<T, 2> fft;
     public:
-        SystemSampler(const LatticeModel<2>& lattice, size_t numSample);
-        SystemSampler(const This&) = default;
-        SystemSampler(This&&) noexcept = default;
+        SystemSampler(const DQMC<T>& dqmc, const LatticeModel<2>& lattice, size_t numSample);
+        SystemSampler(const This&) = delete;
+        SystemSampler(This&&) noexcept = delete;
         ~SystemSampler() = default;
         /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Scalar U>
-        void sample(const DQMC<U>& dqmc, Observable type);
-        [[nodiscard]] MatrixND calcMean() const;
-        [[nodiscard]] MatrixND calcMean(const VectorND<T>& lnWeights) const;
+        void sample(const Array<MatrixND, 2>& greens, Observable type);
+        void sample(const GreenArray& greens, Observable type);
 
-        void swap(This& __restrict obj) noexcept;
+        [[nodiscard]] MatrixND calcMean() const;
         /* Getters */
         using Base::getNumSample;
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
@@ -64,12 +64,12 @@ namespace Physica {
         [[nodiscard]] int getNumSiteY() const noexcept { return fft.getRSpaceSize()[1]; }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
-        MatrixND calcMeanImpl(std::optional<std::reference_wrapper<const VectorND<T>>> lnWeights) const;
+        MatrixND calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) noexcept;
     };
 
     template<Scalar T>
-    SystemSampler<T>::SystemSampler(const LatticeModel<2>& lattice, size_t numSample)
-            : Base(numSample)
+    SystemSampler<T>::SystemSampler(const DQMC<T>& dqmc, const LatticeModel<2>& lattice, size_t numSample)
+            : Base(dqmc, numSample)
             , observes(numSample)
             , fft(lattice.getSuperSize(), PlanFlag::Estimate) {
         for (auto& elem : observes)
@@ -77,56 +77,21 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Scalar U>
-    void SystemSampler<T>::sample(const DQMC<U>& dqmc, Observable type) {
-        const int numSite = getNumSite();
-        assert(numSite == dqmc.getNumSite() && "[Error]: Inconsistent site numbers");
+    void SystemSampler<T>::sample(const Array<MatrixND, 2>& greens, Observable type) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type);
+        Base::sample();
+    }
+
+    template<Scalar T>
+    void SystemSampler<T>::sample(const GreenArray& greens, Observable type) {
         observes[Base::getCursor()].zeros();
-        for (int i = 0; i < dqmc.getNumEqualGreen(); ++i) {
-            const auto& greenU = dqmc.getGreenUs()[i];
-            const auto& greenD = dqmc.getGreenDs()[i];
-            auto flatten = fft.getRSpace().flatten();
-            switch (type) {
-            case AFM:
-                for (int i = 0; i < numSite; ++i)
-                    flatten[i] = greenU.diag()[i] - greenD.diag()[i];
-                break;
-            case CDW:
-                for (int i = 0; i < numSite; ++i)
-                    flatten[i] = T(2) - greenU.diag()[i] - greenD.diag()[i];
-                break;
-            case DOW:
-                for (int i = 0; i < numSite; ++i)
-                    flatten[i] = (T(1) - greenU.diag()[i]) * (T(1) - greenD.diag()[i]);
-                break;
-            default:
-                unreachable();
-            }
-            fft.transform();
-            observes[Base::getCursor()].toNextMean(i, fft.getKSpace().squaredNorms() * reciprocal(T(numSite)));
-        }
-        Base::sample(dqmc.getLnAbsDet(), dqmc.getSign());
+        for (int i = 0; i < greens.getCol(); ++i)
+            observes[Base::getCursor()].toNextMean(i, calcObservable(greens(0, i), greens(1, i), type));
+        Base::sample();
     }
 
     template<Scalar T>
     auto SystemSampler<T>::calcMean() const -> MatrixND {
-        return calcMeanImpl({});
-    }
-
-    template<Scalar T>
-    auto SystemSampler<T>::calcMean(const VectorND<T>& lnWeights) const -> MatrixND {
-        return calcMeanImpl(lnWeights);
-    }
-
-    template<Scalar T>
-    void SystemSampler<T>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
-        observes.swap(obj.observes);
-    }
-
-    template<Scalar T>
-    auto SystemSampler<T>::calcMeanImpl(std::optional<std::reference_wrapper<const VectorND<T>>> lnWeights) const -> MatrixND {
         const int kX = getNumSiteX();
         const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
         MatrixND result(kX, kY);
@@ -135,9 +100,33 @@ namespace Physica {
             for (int y = 0; y < kY; ++y) {
                 for (size_t i = 0; i < observes.getLength(); ++i)
                     buffer[i] = observes[i](x, y);
-                result(x, y) = lnWeights.has_value() ? Base::calcMean(buffer, lnWeights.value()) : Base::calcMean(buffer);
+                result(x, y) = Base::calcMean(buffer);
             }
         }
         return result;
+    }
+
+    template<Scalar T>
+    auto SystemSampler<T>::calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) noexcept -> MatrixND {
+        int numSite = Base::getNumSite();
+        auto flatten = fft.getRSpace().flatten();
+        switch (type) {
+        case AFM:
+            for (int i = 0; i < numSite; ++i)
+                flatten[i] = greenU.diag()[i] - greenD.diag()[i];
+            break;
+        case CDW:
+            for (int i = 0; i < numSite; ++i)
+                flatten[i] = T(2) - greenU.diag()[i] - greenD.diag()[i];
+            break;
+        case DOW:
+            for (int i = 0; i < numSite; ++i)
+                flatten[i] = (T(1) - greenU.diag()[i]) * (T(1) - greenD.diag()[i]);
+            break;
+        default:
+            unreachable();
+        }
+        fft.transform();
+        return fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
     }
 }

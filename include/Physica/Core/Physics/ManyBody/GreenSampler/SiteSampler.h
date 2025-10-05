@@ -25,7 +25,11 @@ namespace Physica {
     class SiteSampler : public GreenSampler<T> {
         using This = SiteSampler<T>;
         using Base = GreenSampler<T>;
+        using typename Base::Tv;
         using typename Base::Trv;
+
+        using MatrixND = DQMC<T>::MatrixND;
+        using GreenArray = DQMC<T>::GreenArray;
     public:
         enum Observable : char {
             Density,
@@ -37,39 +41,42 @@ namespace Physica {
     private:
         VectorND<T> observes;
     public:
-        SiteSampler(size_t numSample);
-        SiteSampler(const This&) = default;
-        SiteSampler(This&&) noexcept = default;
+        SiteSampler(const DQMC<T>& dqmc_, size_t numSample);
+        SiteSampler(const This&) = delete;
+        SiteSampler(This&&) noexcept = delete;
         ~SiteSampler() = default;
         /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Scalar U>
-        void sample(const DQMC<U>& dqmc, Observable type);
-        [[nodiscard]] T calcMean() const;
-        [[nodiscard]] T calcMean(const VectorND<T>& lnWeights) const;
+        void sample(const Array<MatrixND, 2>& greens, Observable type);
+        void sample(const GreenArray& greens, Observable type);
 
-        void swap(This& __restrict obj) noexcept;
+        [[nodiscard]] T calcMean() const;
         /* Getters */
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
     private:
-        template<Scalar U>
-        static T calcObservable(const DQMC<U>& dqmc, int split, Observable type) noexcept;
+        T calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) const noexcept;
     };
 
     template<Scalar T>
-    SiteSampler<T>::SiteSampler(size_t numSample)
-            : Base(numSample), observes(numSample) {}
+    SiteSampler<T>::SiteSampler(const DQMC<T>& dqmc_, size_t numSample)
+            : Base(dqmc_, numSample)
+            , observes(numSample) {}
 
     template<Scalar T>
-    template<Scalar U>
-    void SiteSampler<T>::sample(const DQMC<U>& dqmc, Observable type) {
+    void SiteSampler<T>::sample(const Array<MatrixND, 2>& greens, Observable type) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type);
+        Base::sample();
+    }
+
+    template<Scalar T>
+    void SiteSampler<T>::sample(const GreenArray& greens, Observable type) {
         T mean = 0;
-        for (int i = 0; i < dqmc.getNumEqualGreen(); ++i)
-            mean.toNextMean(i, calcObservable(dqmc, i, type));
+        for (int i = 0; i < greens.getCol(); ++i)
+            mean.toNextMean(i, calcObservable(greens(0, i), greens(1, i), type));
         observes[Base::getCursor()] = mean;
-        Base::sample(dqmc.getLnAbsDet(), dqmc.getSign());
+        Base::sample();
     }
 
     template<Scalar T>
@@ -78,35 +85,20 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T SiteSampler<T>::calcMean(const VectorND<T>& lnWeights) const {
-        return Base::calcMean(observes, lnWeights);
-    }
-
-    template<Scalar T>
-    void SiteSampler<T>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
-        observes.swap(obj.observes);
-    }
-
-    template<Scalar T>
-    template<Scalar U>
-    T SiteSampler<T>::calcObservable(const DQMC<U>& dqmc, int split, Observable type) noexcept {
-        const auto& greenU = dqmc.getGreenUs()[split];
-        const auto& greenD = dqmc.getGreenDs()[split];
+    T SiteSampler<T>::calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) const noexcept {
         switch (type) {
         case Density:
             return T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();
         case DoubleOccupy:
-            return (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(dqmc.getNumSite());
+            return (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(Base::getNumSite());
         case Kinetic: {
-            const auto& hoppingT = dqmc.getParams().getHoppingMatrix();
-            return -hadamard(hoppingT, greenU + greenD).sum().real() / T(dqmc.getNumSite());
+            const auto& hoppingT = Base::getHoppingMatrix();
+            return -hadamard(hoppingT, greenU + greenD).sum().real() / T(Base::getNumSite());
         }
         case Potential:
-            return calcObservable(dqmc, split, DoubleOccupy) * dqmc.getParams().getRepelU();
+            return calcObservable(greenU, greenD, DoubleOccupy) * Base::getRepelU();
         case Internal:
-            return calcObservable(dqmc, split, Kinetic) + calcObservable(dqmc, split, Potential);
+            return calcObservable(greenU, greenD, Kinetic) + calcObservable(greenU, greenD, Potential);
         default:
             unreachable();
         }
