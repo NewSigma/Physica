@@ -72,14 +72,8 @@ namespace Physica {
 
 namespace std {
     template<>
-    struct formatter<Physica::KernelConfig, char> {
-        constexpr auto parse(std::format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const Physica::KernelConfig& obj, std::format_context& ctx) const {
-            return std::format_to(ctx.out(), "Blocks: ({}, {}, {})\nThreads: ({}, {}, {})",
-                    obj.blocks.x, obj.blocks.y, obj.blocks.z, obj.threads.x, obj.threads.y, obj.threads.z);
-        }
+    struct PHYSICA_API formatter<Physica::KernelConfig, char> {
+        constexpr static auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+        static auto format(const Physica::KernelConfig& obj, std::format_context& ctx) -> std::format_context::iterator;
     };
 }

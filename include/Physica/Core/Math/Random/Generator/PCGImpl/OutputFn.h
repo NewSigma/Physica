@@ -44,7 +44,7 @@
 
 namespace Physica::Internal {
     template<class T>
-    consteval static T multiplier() {
+    consteval static T multiplier() noexcept {
         if constexpr (std::same_as<uint8_t, T>)
             return 141U;
         if constexpr (std::same_as<uint16_t, T>)
@@ -60,7 +60,7 @@ namespace Physica::Internal {
     }
 
     template<class T>
-    consteval static T increment() {
+    consteval static T increment() noexcept {
         if constexpr (std::same_as<uint8_t, T>)
             return 77U;
         if constexpr (std::same_as<uint16_t, T>)
@@ -76,7 +76,7 @@ namespace Physica::Internal {
     }
 
     template<class T>
-    consteval static T multiplierMCG() {
+    consteval static T multiplierMCG() noexcept {
         if constexpr (std::same_as<uint8_t, T>)
             return 217U;
         if constexpr (std::same_as<uint16_t, T>)
@@ -92,7 +92,7 @@ namespace Physica::Internal {
     }
 
     template<class T>
-    consteval static T unmultiplierMCG() {
+    consteval static T unmultiplierMCG() noexcept {
         if constexpr (std::same_as<uint8_t, T>)
             return 105U;
         if constexpr (std::same_as<uint16_t, T>)
@@ -128,11 +128,11 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct xsh_rs_mixin {
-        static xtype output(itype internal) {
+        static xtype output(itype internal) noexcept {
             constexpr uint8_t bits = sizeof(itype) * 8;
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t sparebits = bits - xtypebits;
-            constexpr uint8_t opbits = [=]() {
+            constexpr uint8_t opbits = [=]() noexcept {
                 if (sparebits >= 64 + 5)
                     return 5;
                 if (sparebits >= 32 + 4)
@@ -163,11 +163,11 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct xsh_rr_mixin {
-        static xtype output(itype internal) {
-            constexpr uint8_t bits = uint8_t(sizeof(itype) * 8);
-            constexpr uint8_t xtypebits = uint8_t(sizeof(xtype) * 8);
+        static xtype output(itype internal) noexcept {
+            constexpr uint8_t bits = sizeof(itype) * 8;
+            constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t sparebits = bits - xtypebits;
-            constexpr uint8_t wantedopbits = [=]() {
+            constexpr uint8_t wantedopbits = [=]() noexcept {
                 if (xtypebits >= 128)
                     return 7;
                 if (xtypebits >= 64)
@@ -199,12 +199,12 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct rxs_mixin {
-        static xtype output_rxs(itype internal) {
+        static xtype output_rxs(itype internal) noexcept {
             constexpr uint8_t bits = sizeof(itype) * 8;
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t shift = bits - xtypebits;
             constexpr uint8_t extrashift = (xtypebits - shift) / 2;
-            uint8_t rshift = [=]() {
+            uint8_t rshift = [=]() noexcept {
                 if (shift > (64 + 8))
                     return (internal >> (bits - 6)) & 63;
                 if (shift > (32 + 4))
@@ -237,10 +237,10 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct rxs_m_xs_mixin {
-        static xtype output(itype internal) {
+        static xtype output(itype internal) noexcept {
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t bits = sizeof(itype) * 8;
-            constexpr uint8_t opbits = [=]() {
+            constexpr uint8_t opbits = [=]() noexcept {
                 if (xtypebits >= 128)
                     return 6;
                 if (xtypebits >= 64)
@@ -261,9 +261,9 @@ namespace Physica::Internal {
             return result;
         }
 
-        static itype unoutput(itype internal) {
+        static itype unoutput(itype internal) noexcept {
             constexpr uint8_t bits = sizeof(itype) * 8;
-            constexpr uint8_t opbits = [=]() {
+            constexpr uint8_t opbits = [=]() noexcept {
                 if (bits >= 128)
                     return 6;
                 if (bits >= 64)
@@ -290,10 +290,10 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct rxs_m_mixin {
-        static xtype output(itype internal) {
+        static xtype output(itype internal) noexcept {
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t bits = sizeof(itype) * 8;
-            constexpr uint8_t opbits = [=]() {
+            constexpr uint8_t opbits = [=]() noexcept {
                 if (xtypebits >= 128)
                     return 6;
                 if (xtypebits >= 64)
@@ -331,7 +331,7 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct dxsm_mixin {
-        xtype output(itype internal) {
+        xtype output(itype internal) noexcept {
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t itypebits = sizeof(itype) * 8;
             static_assert(xtypebits <= itypebits / 2,
@@ -356,11 +356,11 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct xsl_rr_mixin {
-        static xtype output(itype internal) {
+        static xtype output(itype internal) noexcept {
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t bits = sizeof(itype) * 8;
             constexpr uint8_t sparebits = bits - xtypebits;
-            constexpr uint8_t wantedopbits = [=]() {
+            constexpr uint8_t wantedopbits = [=]() noexcept {
                 if (xtypebits >= 128)
                     return 7;
                 if (xtypebits >= 64)
@@ -408,11 +408,11 @@ namespace Physica::Internal {
         };
         using htype = typename halfsize_trait<itype>::type;
 
-        static itype output(itype internal) {
+        static itype output(itype internal) noexcept {
             constexpr uint8_t htypebits = sizeof(htype) * 8;
             constexpr uint8_t bits = sizeof(itype) * 8;
             constexpr uint8_t sparebits = bits - htypebits;
-            constexpr uint8_t wantedopbits = [=]() {
+            constexpr uint8_t wantedopbits = [=]() noexcept {
                 if (htypebits >= 128)
                     return 7;
                 if (htypebits >= 64)
@@ -451,7 +451,7 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct xsh_mixin {
-        static xtype output(itype internal) {
+        static xtype output(itype internal) noexcept {
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t bits = sizeof(itype) * 8;
             constexpr uint8_t sparebits = bits - xtypebits;
@@ -472,7 +472,7 @@ namespace Physica::Internal {
      */
     template<typename xtype, typename itype>
     struct xsl_mixin {
-        xtype output(itype internal) {
+        xtype output(itype internal) noexcept {
             constexpr uint8_t xtypebits = sizeof(xtype) * 8;
             constexpr uint8_t bits = sizeof(itype) * 8;
             constexpr uint8_t sparebits = bits - xtypebits;

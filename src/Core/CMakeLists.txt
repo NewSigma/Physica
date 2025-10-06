@@ -2,12 +2,13 @@ add_library(PhysicaCore)
 
 add_subdirectory(Exception)
 add_subdirectory(IO)
+add_subdirectory(Scalar)
 
-file(GLOB_RECURSE SOURCES_CORE Math/*.cpp Parallel/*.cpp Physics/*.cpp Scalar/*.cpp Utils/*.cpp)
+file(GLOB_RECURSE SOURCES_CORE Math/*.cpp Parallel/*.cpp Physics/*.cpp Utils/*.cpp)
 target_sources(PhysicaCore PRIVATE ${SOURCES_CORE})
 
 if(${PHYSICA_CUDA})
-    file(GLOB_RECURSE SOURCES_CUDA Math/*.cu Parallel/*.cu Physics/*.cu Scalar/*.cu Utils/*.cu)
+    file(GLOB_RECURSE SOURCES_CUDA Math/*.cu Parallel/*.cu Physics/*.cu Utils/*.cu)
     target_sources(PhysicaCore PRIVATE ${SOURCES_CUDA})
 endif()
 

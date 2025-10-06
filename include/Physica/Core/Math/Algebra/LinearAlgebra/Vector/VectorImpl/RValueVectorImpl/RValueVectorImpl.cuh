@@ -26,8 +26,7 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const requires(CUDA<V>) {
-        assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
-        host_obj::assert_assign(target);
+        assert_assign(target);
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
@@ -308,6 +307,17 @@ namespace Physica {
         const uint32_t numThread = std::min<uint32_t>(length, MaxThread);
         const uint32_t numBlock = (length + numThread - 1) / numThread;
         return KernelConfig(numBlock, numThread);
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assert_assign(const Vector auto& target) const noexcept {
+        host_obj::static_assert_assign(target);
+
+        using V = std::remove_cvref<decltype(target)>::type;
+        constexpr size_t Size1 = SizeAtCompile;
+        constexpr size_t Size2 = V::SizeAtCompile;
+        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
+            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
     }
 
     template<class Derived>

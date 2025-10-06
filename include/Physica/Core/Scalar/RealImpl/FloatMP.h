@@ -187,21 +187,8 @@ namespace std {
     struct numeric_limits<Physica::Real<Physica::FloatMP>> : public numeric_limits<double> {};
 
     template<>
-    struct formatter<Physica::Real<Physica::FloatMP>, char> {
-        constexpr auto parse(std::format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const Physica::Real<Physica::FloatMP>& obj, std::format_context& ctx) const {
-            const auto& basicConst = Physica::BasicConst::getInstance();
-            const int power = obj.getPower();
-            int exp = int(power * basicConst.ln_2_10);
-            double coeff = std::exp(power * basicConst.ln_2 - exp * basicConst.ln_10) * obj[obj.getSize() - 1];
-            while (coeff > 10) {
-                ++exp;
-                coeff /= 10;
-            }
-            return std::format_to(ctx.out(), "{}e{}", coeff, exp);
-        }
+    struct PHYSICA_API formatter<Physica::Real<Physica::FloatMP>, char> {
+        constexpr static auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+        static auto format(const Physica::Real<Physica::FloatMP>& obj, std::format_context& ctx) -> std::format_context::iterator;
     };
 }

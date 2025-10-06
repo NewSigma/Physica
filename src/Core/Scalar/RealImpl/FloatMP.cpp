@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/AddBasic.h"
 #include "Physica/Core/Scalar/RealImpl/FloatMPImpl/DivBasic.h"
@@ -738,5 +737,20 @@ namespace Physica {
         Real<FloatMP> temp(s);
         s -= BasicConst::getInstance()._1;
         return temp;
+    }
+}
+
+namespace std {
+    auto formatter<Real<FloatMP>, char>::format(
+            const Real<FloatMP>& obj, std::format_context& ctx) -> std::format_context::iterator{
+        const auto& basicConst = BasicConst::getInstance();
+        const int power = obj.getPower();
+        int exp = int(power * basicConst.ln_2_10);
+        double coeff = std::exp(power * basicConst.ln_2 - exp * basicConst.ln_10) * obj[obj.getSize() - 1];
+        while (coeff > 10) {
+            ++exp;
+            coeff /= 10;
+        }
+        return std::format_to(ctx.out(), "{}e{}", coeff, exp);
     }
 }

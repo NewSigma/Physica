@@ -61,121 +61,32 @@ namespace Physica::Internal {
      * template-metaprogramming tricks to handle some of the subtle variations
      * involved.
      */
-
     template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    class engine : protected output_mixin
-            , public stream_mixin {
+    class engine : public stream_mixin, protected output_mixin {
     protected:
         itype state_;
-
-        struct can_specify_stream_tag {};
-        struct no_specifiable_stream_tag {};
 
         using stream_mixin::increment;
     public:
         using result_type = xtype;
         using state_type = itype;
-
-        constexpr static size_t period_pow2() {
-            return sizeof(state_type) * 8 - 2 * stream_mixin::is_mcg;
-        }
-
-        // It would be nice to use std::numeric_limits for these, but
-        // we can't be sure that it'd be defined for the 128-bit types.
-
-        constexpr static result_type min() {
-            return result_type(0UL);
-        }
-
-        constexpr static result_type max() {
-            return result_type(~result_type(0UL));
-        }
-    protected:
-        itype bump(itype state) {
-            return state * multiplier<itype>() + increment();
-        }
-
-        itype base_generate() {
-            return state_ = bump(state_);
-        }
-
-        itype base_generate0() {
-            itype old_state = state_;
-            state_ = bump(state_);
-            return old_state;
-        }
     public:
-        result_type operator()() {
+        explicit engine(itype state = itype(0xcafef00dd15ea5e5ULL)) noexcept;
+        template<typename sm = stream_mixin>
+        engine(itype state, typename sm::stream_state stream_seed) noexcept;
+        template<typename SeedSeq>
+        explicit engine(SeedSeq& seedSeq) noexcept requires(!stream_mixin::can_specify_stream);
+        template<typename SeedSeq>
+        explicit engine(SeedSeq& seedSeq) noexcept requires(stream_mixin::can_specify_stream);
+        /* Operators */
+        result_type operator()() noexcept {
             if (output_previous)
                 return this->output(base_generate0());
             return this->output(base_generate());
         }
 
-        result_type operator()(result_type upper_bound) {
+        result_type operator()(result_type upper_bound) noexcept {
             return bounded_rand(*this, upper_bound);
-        }
-    protected:
-        static itype advance(itype state, itype delta, itype cur_mult, itype cur_plus);
-
-        static itype distance(itype cur_state, itype newstate, itype cur_mult, itype cur_plus, itype mask = ~itype(0U));
-
-        itype distance(itype newstate, itype mask = itype(~itype(0U))) const {
-            return distance(state_, newstate, multiplier<itype>(), increment(), mask);
-        }
-    public:
-        void advance(itype delta) {
-            state_ = advance(state_, delta, this->multiplier(), this->increment());
-        }
-
-        void backstep(itype delta) {
-            advance(-delta);
-        }
-
-        void discard(itype delta) {
-            advance(delta);
-        }
-
-        bool wrapped() {
-            if (stream_mixin::is_mcg) {
-                // For MCGs, the low order two bits never change. In this
-                // implementation, we keep them fixed at 3 to make this test
-                // easier.
-                return state_ == 3;
-            }
-            return state_ == 0;
-        }
-
-        engine(itype state = itype(0xcafef00dd15ea5e5ULL))
-                : state_(this->is_mcg ? state | state_type(3U)
-                                      : bump(state + this->increment())) {
-            // Nothing else to do.
-        }
-
-        // This function may or may not exist.  It thus has to be a template
-        // to use SFINAE; users don't have to worry about its template-ness.
-
-        template<typename sm = stream_mixin>
-        engine(itype state, typename sm::stream_state stream_seed)
-                : stream_mixin(stream_seed), state_(this->is_mcg ? state | state_type(3U) : bump(state + this->increment())) {
-            // Nothing else to do.
-        }
-
-        template<typename SeedSeq>
-        engine(SeedSeq& seedSeq, typename std::enable_if<!stream_mixin::can_specify_stream && !std::is_convertible<SeedSeq, itype>::value && !std::is_convertible<SeedSeq, engine>::value, no_specifiable_stream_tag>::type = {})
-                : engine(generate_one<itype>(std::forward<SeedSeq>(seedSeq))) {
-            // Nothing else to do.
-        }
-
-        template<typename SeedSeq>
-        engine(SeedSeq& seedSeq, typename std::enable_if<stream_mixin::can_specify_stream && !std::is_convertible<SeedSeq, itype>::value && !std::is_convertible<SeedSeq, engine>::value, can_specify_stream_tag>::type = {}) {
-            std::array<itype, 2> seeddata{};
-            seedSeq.generate(seeddata);
-            seed(seeddata[1], seeddata[0]);
-        }
-
-        template<typename... Args>
-        void seed(Args&&... args) {
-            new (this) engine(std::forward<Args>(args)...);
         }
 
         template<typename xtype1, typename itype1, typename output_mixin1, bool output_previous1, typename stream_mixin_lhs, typename stream_mixin_rhs>
@@ -188,20 +99,59 @@ namespace Physica::Internal {
 
         template<typename CharT, typename Traits, typename xtype1, typename itype1, typename output_mixin1, bool output_previous1, typename stream_mixin1>
         friend std::basic_ostream<CharT, Traits>&
-        operator<<(std::basic_ostream<CharT, Traits>& out,
-                   const engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin1>&);
+        operator<<(std::basic_ostream<CharT, Traits>& out, const engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin1>&);
 
         template<typename CharT, typename Traits, typename xtype1, typename itype1, typename output_mixin1, bool output_previous1, typename stream_mixin1>
         friend std::basic_istream<CharT, Traits>&
-        operator>>(std::basic_istream<CharT, Traits>& in,
-                   engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin1>& rng);
+        operator>>(std::basic_istream<CharT, Traits>& in, engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin1>& rng);
+        /* Operations */
+        void advance(itype delta) noexcept;
+        void backstep(itype delta) noexcept;
+        void discard(itype delta) noexcept;
+        bool wrapped() noexcept;
+
+        template<typename... Args>
+        void seed(Args&&... args) noexcept;
+        /* Static members */
+        constexpr static size_t period_pow2() noexcept { return sizeof(state_type) * 8 - 2 * stream_mixin::is_mcg; }
+        constexpr static result_type min() noexcept { return std::numeric_limits<result_type>::min(); }
+        constexpr static result_type max() noexcept { return std::numeric_limits<result_type>::max(); }
+    protected:
+        itype bump(itype state) noexcept;
+        itype base_generate() noexcept;
+        itype base_generate0() noexcept;
+        itype distance(itype newstate, itype mask = itype(~itype(0U))) const noexcept;
+        /* Static members */
+        static itype advance(itype state, itype delta, itype cur_mult, itype cur_plus) noexcept;
+        static itype distance(itype cur_state, itype newstate, itype cur_mult, itype cur_plus, itype mask = ~itype(0U)) noexcept;
     };
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(itype state) noexcept
+            : state_(this->is_mcg ? (state | state_type(3U)) : bump(state + this->increment())) {}
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<typename sm>
+    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(itype state, typename sm::stream_state stream_seed) noexcept
+            : stream_mixin(stream_seed), state_(this->is_mcg ? state | state_type(3U) : bump(state + this->increment())) {}
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<typename SeedSeq>
+    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(SeedSeq& seedSeq) noexcept requires(!stream_mixin::can_specify_stream)
+            : engine(generate_one<itype>(std::forward<SeedSeq>(seedSeq))) {}
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<typename SeedSeq>
+    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(SeedSeq& seedSeq) noexcept requires(stream_mixin::can_specify_stream)
+    {
+        std::array<itype, 2> seeddata{};
+        seedSeq.generate(seeddata);
+        seed(seeddata[1], seeddata[0]);
+    }
 
     template<typename CharT, typename Traits, typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
     std::basic_ostream<CharT, Traits>&
-    operator<<(std::basic_ostream<CharT, Traits>& out,
-               const engine<xtype, itype, output_mixin, output_previous, stream_mixin>& rng) {
-
+    operator<<(std::basic_ostream<CharT, Traits>& out, const engine<xtype, itype, output_mixin, output_previous, stream_mixin>& rng) {
         auto orig_flags = out.flags(std::ios_base::dec | std::ios_base::left);
         auto space = out.widen(' ');
         auto orig_fill = out.fill();
@@ -235,53 +185,6 @@ namespace Physica::Internal {
         return in;
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::advance(
-            itype state, itype delta, itype cur_mult, itype cur_plus) {
-        // The method used here is based on Brown, "Random Number Generation
-        // with Arbitrary Stride,", Transactions of the American Nuclear
-        // Society (Nov. 1994).  The algorithm is very similar to fast
-        // exponentiation.
-        //
-        // Even though delta is an unsigned integer, we can pass a
-        // signed integer to go backwards, it just goes "the long way round".
-
-        constexpr itype ZERO = 0U; // itype may be a non-trivial types, so
-        constexpr itype ONE = 1U; // we define some ugly constants.
-        itype acc_mult = 1;
-        itype acc_plus = 0;
-        while (delta > ZERO) {
-            if (delta & ONE) {
-                acc_mult *= cur_mult;
-                acc_plus = acc_plus * cur_mult + cur_plus;
-            }
-            cur_plus = (cur_mult + ONE) * cur_plus;
-            cur_mult *= cur_mult;
-            delta >>= 1;
-        }
-        return acc_mult * state + acc_plus;
-    }
-
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::distance(
-            itype cur_state, itype newstate, itype cur_mult, itype cur_plus, itype mask) {
-        constexpr itype ONE = 1U; // itype could be weird, so use constant
-        bool is_mcg = cur_plus == itype(0);
-        itype the_bit = is_mcg ? itype(4U) : itype(1U);
-        itype distance = 0U;
-        while ((cur_state & mask) != (newstate & mask)) {
-            if ((cur_state & the_bit) != (newstate & the_bit)) {
-                cur_state = cur_state * cur_mult + cur_plus;
-                distance |= the_bit;
-            }
-            assert((cur_state & the_bit) == (newstate & the_bit));
-            the_bit <<= 1;
-            cur_plus = (cur_mult + ONE) * cur_plus;
-            cur_mult *= cur_mult;
-        }
-        return is_mcg ? distance >> 2 : distance;
-    }
-
     template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin_lhs, typename stream_mixin_rhs>
     itype operator-(const engine<xtype, itype, output_mixin, output_previous, stream_mixin_lhs>& lhs,
                     const engine<xtype, itype, output_mixin, output_previous, stream_mixin_rhs>& rhs) {
@@ -310,5 +213,106 @@ namespace Physica::Internal {
     inline bool operator!=(const engine<xtype, itype, output_mixin, output_previous, stream_mixin_lhs>& lhs,
                            const engine<xtype, itype, output_mixin, output_previous, stream_mixin_rhs>& rhs) {
         return !operator==(lhs, rhs);
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::advance(itype delta) noexcept {
+        state_ = advance(state_, delta, this->multiplier(), this->increment());
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::backstep(itype delta) noexcept {
+        advance(-delta);
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::discard(itype delta) noexcept {
+        advance(delta);
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    bool engine<xtype, itype, output_mixin, output_previous, stream_mixin>::wrapped() noexcept {
+        if (stream_mixin::is_mcg) {
+            // For MCGs, the low order two bits never change. In this
+            // implementation, we keep them fixed at 3 to make this test
+            // easier.
+            return state_ == 3;
+        }
+        return state_ == 0;
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<typename... Args>
+    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::seed(Args&&... args) noexcept {
+        new (this) engine(std::forward<Args>(args)...);
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::bump(itype state) noexcept {
+        return state * multiplier<itype>() + increment();
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::base_generate() noexcept {
+        return state_ = bump(state_);
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::base_generate0() noexcept {
+        itype old_state = state_;
+        state_ = bump(state_);
+        return old_state;
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::distance(itype newstate, itype mask) const noexcept {
+        return distance(state_, newstate, multiplier<itype>(), increment(), mask);
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::advance(
+            itype state, itype delta, itype cur_mult, itype cur_plus) noexcept {
+        // The method used here is based on Brown, "Random Number Generation
+        // with Arbitrary Stride,", Transactions of the American Nuclear
+        // Society (Nov. 1994).  The algorithm is very similar to fast
+        // exponentiation.
+        //
+        // Even though delta is an unsigned integer, we can pass a
+        // signed integer to go backwards, it just goes "the long way round".
+
+        constexpr itype ZERO = 0U; // itype may be a non-trivial types, so
+        constexpr itype ONE = 1U; // we define some ugly constants.
+        itype acc_mult = 1;
+        itype acc_plus = 0;
+        while (delta > ZERO) {
+            if (delta & ONE) {
+                acc_mult *= cur_mult;
+                acc_plus = acc_plus * cur_mult + cur_plus;
+            }
+            cur_plus = (cur_mult + ONE) * cur_plus;
+            cur_mult *= cur_mult;
+            delta >>= 1;
+        }
+        return acc_mult * state + acc_plus;
+    }
+
+    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::distance(
+            itype cur_state, itype newstate, itype cur_mult, itype cur_plus, itype mask) noexcept {
+        constexpr itype ONE = 1U; // itype could be weird, so use constant
+        bool is_mcg = cur_plus == itype(0);
+        itype the_bit = is_mcg ? itype(4U) : itype(1U);
+        itype distance = 0U;
+        while ((cur_state & mask) != (newstate & mask)) {
+            if ((cur_state & the_bit) != (newstate & the_bit)) {
+                cur_state = cur_state * cur_mult + cur_plus;
+                distance |= the_bit;
+            }
+            assert((cur_state & the_bit) == (newstate & the_bit));
+            the_bit <<= 1;
+            cur_plus = (cur_mult + ONE) * cur_plus;
+            cur_mult *= cur_mult;
+        }
+        return is_mcg ? distance >> 2 : distance;
     }
 }

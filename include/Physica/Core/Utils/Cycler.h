@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <x86intrin.h>
 #include "Physica/Macro.h"
 #include "Physica/Core/Exception/NoImplException.h"
 
@@ -51,18 +52,7 @@ namespace Physica {
          * Use tic() and toc() to avoid this problem.
          */
         [[nodiscard]] static __forceinline uint64_t now() noexcept {
-            uint32_t lo{};
-            uint32_t hi{};
-        #ifdef __GNUC__
-            __asm__ __volatile__ (
-                    "rdtsc"
-                    : "=a" (lo), "=d" (hi)
-                    ::
-            );
-        #else
-            noImpl(__func__);
-        #endif
-            return ((static_cast<uint64_t>(hi) << 32U) | lo);
+            return __rdtsc();
         }
         /**
          * Start the timing, the instructions
