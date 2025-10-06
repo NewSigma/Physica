@@ -74,14 +74,14 @@ namespace Physica {
     void SiteSampler<T>::sample(const GreenArray& greens, Observable type) {
         T mean = 0;
         for (int i = 0; i < greens.getCol(); ++i)
-            mean.toNextMean(i, calcObservable(greens(0, i), greens(1, i), type));
+            mean.toNextMean(i, calcObservable(greens(0, i), greens(1, i), type) * Base::dqmc.getSign());
         observes[Base::getCursor()] = mean;
         Base::sample();
     }
 
     template<Scalar T>
     T SiteSampler<T>::calcMean() const {
-        return Base::calcMean(observes);
+        return observes.mean() / Base::calcSign();
     }
 
     template<Scalar T>

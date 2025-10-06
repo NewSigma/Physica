@@ -28,8 +28,9 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
-    private:
+
         const DQMC<T>& dqmc;
+    private:
         VectorND<Tr> lnAbsDets;
         VectorND<Tv> signs;
         size_t cursor = 0;
@@ -42,11 +43,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calcMean(const VectorND<T>& observes) const;
-        [[nodiscard]] T calcMean(const VectorND<T>& observes, const VectorND<T>& lnWeights) const;
-        [[nodiscard]] Tv calcSign() const noexcept;
-        [[nodiscard]] Tv calcSign(const VectorND<T>& lnWeights) const;
         [[nodiscard]] T lnPartitionZ() const;
+        [[nodiscard]] Tv calcSign() const noexcept;
 
         void reset() { cursor = 0; }
         /* Getters */
@@ -68,31 +66,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T GreenSampler<T>::calcMean(const VectorND<T>& observes) const {
-        return hadamard(observes, signs).mean() / calcSign();
-    }
-
-    template<Scalar T>
-    T GreenSampler<T>::calcMean(const VectorND<T>& observes, const VectorND<T>& lnWeights) const {
-        VectorND<T> buffer = hadamard(exp(lnWeights - lnWeights.max()), signs);
-        return hadamard(buffer, observes).mean() / buffer.mean();
+    T GreenSampler<T>::lnPartitionZ() const {
+        const Tr factor = lnAbsDets.max();
+        return ln(exp(lnAbsDets - factor) * getSigns()) + factor;
     }
 
     template<Scalar T>
     auto GreenSampler<T>::calcSign() const noexcept -> Tv {
         return signs.mean();
-    }
-
-    template<Scalar T>
-    auto GreenSampler<T>::calcSign(const VectorND<T>& lnWeights) const -> Tv {
-        VectorND<T> buffer = exp(lnWeights - lnWeights.max());
-        return hadamard(buffer, signs).mean() / buffer.mean();
-    }
-
-    template<Scalar T>
-    T GreenSampler<T>::lnPartitionZ() const {
-        const Tr factor = lnAbsDets.max();
-        return ln(exp(lnAbsDets - factor) * getSigns()) + factor;
     }
 
     template<Scalar T>

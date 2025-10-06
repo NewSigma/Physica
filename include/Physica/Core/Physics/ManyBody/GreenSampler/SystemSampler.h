@@ -32,6 +32,7 @@ namespace Physica {
     class SystemSampler : public GreenSampler<T> {
         using This = SystemSampler<T>;
         using Base = GreenSampler<T>;
+        using typename Base::Tv;
 
         using MatrixND = DQMC<T>::MatrixND;
         using GreenArray = DQMC<T>::GreenArray;
@@ -86,7 +87,7 @@ namespace Physica {
     void SystemSampler<T>::sample(const GreenArray& greens, Observable type) {
         observes[Base::getCursor()].zeros();
         for (int i = 0; i < greens.getCol(); ++i)
-            observes[Base::getCursor()].toNextMean(i, calcObservable(greens(0, i), greens(1, i), type));
+            observes[Base::getCursor()].toNextMean(i, calcObservable(greens(0, i), greens(1, i), type) * Base::dqmc.getSign());
         Base::sample();
     }
 
@@ -94,13 +95,14 @@ namespace Physica {
     auto SystemSampler<T>::calcMean() const -> MatrixND {
         const int kX = getNumSiteX();
         const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
+        const Tv sign = Base::calcSign();
         MatrixND result(kX, kY);
         VectorND<T> buffer(getNumSample());
         for (int x = 0; x < kX; ++x) {
             for (int y = 0; y < kY; ++y) {
                 for (size_t i = 0; i < observes.getLength(); ++i)
                     buffer[i] = observes[i](x, y);
-                result(x, y) = Base::calcMean(buffer);
+                result(x, y) = buffer.mean() / sign;
             }
         }
         return result;
