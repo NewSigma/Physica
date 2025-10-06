@@ -51,6 +51,7 @@ namespace Physica {
         /* Operations */
         void sample(const Array<MatrixND, 2>& greens, Observable type);
         void sample(const GreenArray& greens, Observable type);
+        void sample(const GreenArray& greens, const Vector auto& weights, Observable type);
 
         [[nodiscard]] T calcMean() const;
         /* Getters */
@@ -76,6 +77,16 @@ namespace Physica {
         for (int i = 0; i < greens.getCol(); ++i)
             mean.toNextMean(i, calcObservable(greens(0, i), greens(1, i), type) * Base::dqmc.getSign());
         observes[Base::getCursor()] = mean;
+        Base::sample();
+    }
+
+    template<Scalar T>
+    void SiteSampler<T>::sample(const GreenArray& greens, const Vector auto& weights, Observable type) {
+        assert(greens.getCol() == weights.getLength());
+        T sum = 0;
+        for (int i = 0; i < greens.getCol(); ++i)
+            sum += calcObservable(greens(0, i), greens(1, i), type) * weights[i];
+        observes[Base::getCursor()] = sum;
         Base::sample();
     }
 
