@@ -39,7 +39,7 @@ namespace Physica {
         using TransposeRtnTy = std::conditional<MatrixOption::isSymmMatrix<M>(), const Derived&, Transpose<Derived>>::type;
         using HermiteRtnTy = std::conditional<MatrixOption::isHermiteMatrix<M>(), const Derived&, Hermite<Derived>>::type;
 
-        const LazyDestroy<M> expr;
+        LazyDestroy<M> expr;
     public:
         UnitaryMatrixExpr(M expr_) : expr(std::forward<M>(expr_)) {}
         UnitaryMatrixExpr(const This&) = default;
@@ -88,17 +88,10 @@ namespace Physica {
         using TransposeRtnTy = std::conditional<Traits<Derived>::isSymm, const This&, Transpose<This>>::type;
         using HermiteRtnTy = std::conditional<Traits<Derived>::isHermite, const This&, Hermite<This>>::type;
 
-        const LazyDestroy<LHS> lhs;
-        const LazyDestroy<RHS> rhs;
+        LazyDestroy<LHS> lhs;
+        LazyDestroy<RHS> rhs;
     public:
-        BinaryMatrixExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
-            if constexpr (Matrix<LHS> && Matrix<RHS>) {
-                assert(getLHS().getRow() == getRHS().getRow());
-                assert(getLHS().getCol() == getRHS().getCol());
-            }
-            else if constexpr (Vector<RHS>)
-                assert(getLHS().getCol() == getRHS().getLength());
-        }
+        BinaryMatrixExpr(LHS lhs_, RHS rhs_);
         BinaryMatrixExpr(const This&) = default;
         BinaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~BinaryMatrixExpr() = default;
@@ -131,6 +124,16 @@ namespace Physica {
         [[nodiscard]] auto& getLHS() noexcept { return lhs; }
         [[nodiscard]] auto& getRHS() noexcept { return rhs; }
     };
+
+    template<ExprType Type, class LHS, class RHS>
+    BinaryMatrixExpr<Type, LHS, RHS>::BinaryMatrixExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+        if constexpr (Matrix<LHS> && Matrix<RHS>) {
+            assert(getLHS().getRow() == getRHS().getRow());
+            assert(getLHS().getCol() == getRHS().getCol());
+        }
+        else if constexpr (Vector<RHS>)
+            assert(getLHS().getCol() == getRHS().getLength());
+    }
 
     template<ExprType Type, class LHS, class RHS>
     template<Vector V>

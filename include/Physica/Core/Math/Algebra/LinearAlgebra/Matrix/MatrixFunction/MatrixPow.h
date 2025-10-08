@@ -25,6 +25,8 @@ namespace Physica {
 
     template<Matrix M>
     class MatrixPow : public RValueMatrix<MatrixPow<M>> {
+        static_assert(std::is_reference_v<M>);
+
         using This = MatrixPow<M>;
         using Base = RValueMatrix<This>;
 
@@ -35,10 +37,10 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        const LazyDestroy<M> m;
+        LazyDestroy<M> m;
         int power;
     public:
-        MatrixPow(M&& m_, int power_);
+        MatrixPow(M m_, int power_);
         MatrixPow(const This&) = default;
         MatrixPow(This&&) = default;
         ~MatrixPow() = default;
@@ -63,7 +65,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    MatrixPow<M>::MatrixPow(M&& m_, int power_) : m(std::forward<M>(m_)), power(power_) {}
+    MatrixPow<M>::MatrixPow(M m_, int power_) : m(std::forward<M>(m_)), power(power_) {}
 
     template<Matrix M>
     template<Vector V>

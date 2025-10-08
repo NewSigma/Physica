@@ -43,6 +43,17 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assert_assign(const Vector auto& target) const noexcept {
+        static_assert_assign(target);
+
+        using V = std::remove_cvref<decltype(target)>::type;
+        constexpr size_t Size1 = SizeAtCompile;
+        constexpr size_t Size2 = V::SizeAtCompile;
+        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
+            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+    }
+
+    template<class Derived>
     template<Packet Pack>
     __device__ Pack device_obj<RValueVector<Derived>>::packet(size_t index) const {
         assert(index + Pack::size() <= getLength());
@@ -310,14 +321,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assert_assign(const Vector auto& target) const noexcept {
+    __host__ __device__ void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& target) noexcept {
         host_obj::static_assert_assign(target);
-
-        using V = std::remove_cvref<decltype(target)>::type;
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = V::SizeAtCompile;
-        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
-            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+        static_assert(CUDA<decltype(target)>, "[Error]: Device object cannot be assigned to host object");
     }
 
     template<class Derived>

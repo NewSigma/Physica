@@ -56,6 +56,23 @@ namespace Physica {
     }
 
     template<class Derived>
+    void RValueVector<Derived>::assert_assign(const Vector auto& target) const noexcept {
+        static_assert_assign(target);
+
+        using V = std::remove_cvref<decltype(target)>::type;
+        constexpr size_t Size1 = SizeAtCompile;
+        constexpr size_t Size2 = V::SizeAtCompile;
+        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
+            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+    }
+
+    template<class Derived>
+    void RValueVector<Derived>::assert_assign_mkl(const Vector auto& target) const noexcept {
+        assert_assign(target);
+        static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
+    }
+
+    template<class Derived>
     auto RValueVector<Derived>::calc(size_t index) const noexcept {
         return Base::getDerived().calc(index);
     }
@@ -186,7 +203,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::conjugate() const noexcept {
-        return ConjugateVector<Derived>(Base::getDerived());
+        return Conjugate<Derived>(Base::getDerived());
     }
 
     template<class Derived>
@@ -654,23 +671,6 @@ namespace Physica {
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
         static_assert(V::isComplex || !isComplex, "[Error]: Assign a complex vector to real vector discards imags");
         static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
-    }
-
-    template<class Derived>
-    __host__ __device__ void RValueVector<Derived>::assert_assign(const Vector auto& target) const noexcept {
-        static_assert_assign(target);
-
-        using V = std::remove_cvref<decltype(target)>::type;
-        constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = V::SizeAtCompile;
-        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
-            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
-    }
-
-    template<class Derived>
-    void RValueVector<Derived>::assert_assign_mkl(const Vector auto& target) const noexcept {
-        assert_assign(target);
-        static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
     }
     /**
      * FIXME: We cannot use unknown references in params of constexpr, refactor once we dump to Clang 20.

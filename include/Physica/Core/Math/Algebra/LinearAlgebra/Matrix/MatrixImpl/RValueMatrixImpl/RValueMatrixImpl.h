@@ -59,6 +59,13 @@ namespace Physica {
     }
 
     template<class Derived>
+    void RValueMatrix<Derived>::assert_assign(const Matrix auto& target) const noexcept {
+        static_assert_assign(target);
+        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
+        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::row(size_t r) noexcept {
         return RowVector(Base::getDerived(), r, 0, getCol());
     }
@@ -496,8 +503,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Matrix M>
-    __host__ __device__ void RValueMatrix<Derived>::assert_assign(const M&) noexcept {
+    __host__ __device__ void RValueMatrix<Derived>::static_assert_assign(const Matrix auto& target) noexcept {
+        using M = std::remove_cvref_t<decltype(target)>;
         static_assert(RowAtCompile == M::RowAtCompile || RowAtCompile == Dynamic || M::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == M::ColAtCompile || ColAtCompile == Dynamic || M::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
         static_assert(!isComplex || M::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");

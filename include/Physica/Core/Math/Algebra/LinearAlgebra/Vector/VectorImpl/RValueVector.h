@@ -30,7 +30,7 @@ namespace Physica {
     template<class Derived> class RValueMatrix;
     template<class Derived> class ContinuousMatrix;
     template<class VectorType> class TransposeVector;
-    template<class VectorType> class ConjugateVector;
+    template<class> class Conjugate;
     template<class VectorType> class HermiteVector;
     template<Vector V1, Vector V2> class CrossProduct;
     template<class T> class RealVector;
@@ -122,6 +122,8 @@ namespace Physica {
         void assign(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto& v) const noexcept;
+        void assert_assign(const Vector auto& target) const noexcept;
+        void assert_assign_mkl(const Vector auto& target) const noexcept;
 
         [[nodiscard]] auto calc(size_t index) const noexcept;
         [[nodiscard]] auto calc_value(size_t index) const noexcept;
@@ -199,8 +201,6 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
         __host__ __device__ constexpr static void static_assert_assign(const Vector auto& target) noexcept;
-        void assert_assign(const Vector auto& target) const noexcept;
-        void assert_assign_mkl(const Vector auto& target) const noexcept;
         template<Vector V>
         consteval static size_t maxSizeAtCompile() noexcept;
     protected:
@@ -256,6 +256,7 @@ namespace Physica {
 
 #include "RValueVectorImpl/RValueVectorImpl.h"
 #include "RValueVectorImpl/ReversalVector.h"
+#include "RValueVectorImpl/Conjugate.h"
 #include "RValueVectorImpl/CrossProduct.h"
 #include "RValueVectorImpl/VectorConvert.h"
 #include "RValueVectorImpl/InnerDot.h"

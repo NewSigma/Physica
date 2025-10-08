@@ -39,7 +39,7 @@ namespace Physica {
         using This = UnitaryVectorExpr<Type, V>;
         using Base = RValueVector<VectorExpr<Type, V>>;
     private:
-        const LazyDestroy<V> expr;
+        LazyDestroy<V> expr;
     public:
         UnitaryVectorExpr(V expr_) : expr(std::forward<V>(expr_)) {}
         UnitaryVectorExpr(const This&) = default;
@@ -65,13 +65,10 @@ namespace Physica {
         using This = BinaryVectorExpr<Type, LHS, RHS>;
         using Base = RValueVector<VectorExpr<Type, LHS, RHS>>;
     private:
-        const LazyDestroy<LHS> lhs;
-        const LazyDestroy<RHS> rhs;
+        LazyDestroy<LHS> lhs;
+        LazyDestroy<RHS> rhs;
     public:
-        BinaryVectorExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
-            if constexpr (Vector<LHS> && Vector<RHS>)
-                assert(lhs.getLength() == rhs.getLength());
-        }
+        BinaryVectorExpr(LHS lhs_, RHS rhs_);
         BinaryVectorExpr(const This&) = default;
         BinaryVectorExpr(This&&) noexcept = default;
         ~BinaryVectorExpr() = default;
@@ -85,6 +82,12 @@ namespace Physica {
         [[nodiscard]] auto& getLHS() noexcept { return lhs; }
         [[nodiscard]] auto& getRHS() noexcept { return rhs; }
     };
+
+    template<ExprType Type, class LHS, class RHS>
+    BinaryVectorExpr<Type, LHS, RHS>::BinaryVectorExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+        if constexpr (Vector<LHS> && Vector<RHS>)
+            assert(lhs.getLength() == rhs.getLength());
+    }
 
     template<ExprType Type, class LHS, class RHS>
     size_t BinaryVectorExpr<Type, LHS, RHS>::getLength() const noexcept {

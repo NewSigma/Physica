@@ -18,33 +18,44 @@
  */
 #pragma once
 
-#include "../RValueMatrix.h"
+#include "../RValueVector.h"
 
 namespace Physica {
-    template<Matrix M>
-    class Conjugate<M> : public RValueMatrix<Conjugate<M>> {
-        using This = Conjugate<M>;
-        using Base = RValueMatrix<This>;
+    template<Vector V>
+    class Conjugate<V> : public RValueVector<Conjugate<V>> {
+        using This = Conjugate<V>;
+        using Base = RValueVector<This>;
     protected:
         using typename Base::T;
+        using typename Base::Tv;
     private:
-        const M& matrix;
+        const V& vec;
     public:
-        Conjugate(const M& matrix_) : matrix(matrix_) {}
+        explicit Conjugate(const V& vec_) : vec(vec_) {}
         Conjugate(const This&) = delete;
         Conjugate(This&&) = delete;
         ~Conjugate() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto& target) const;
         /* Getters */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return matrix.getCol(); }
+        [[nodiscard]] T calc(size_t index) const { return vec.calc(index).conjugate(); }
+        [[nodiscard]] Tv calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
+        [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
     };
+
+    template<Vector V>
+    template<ExecutePolicy P>
+    void Conjugate<V>::assign(Vector auto& target) const {
+        for (size_t i = 0; i < vec.getLength(); ++i)
+            target[i] = calc(i);
+    }
 }
 
 namespace Physica {
-    template<Matrix M>
-    class Traits<Conjugate<M>> : public Traits<M> {};
+    template<Vector V>
+    class Traits<Conjugate<V>> : public Traits<V> {};
 }

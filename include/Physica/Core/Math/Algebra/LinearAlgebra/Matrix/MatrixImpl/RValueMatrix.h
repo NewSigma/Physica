@@ -107,6 +107,7 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         void assign_add(Matrix auto& target) const;
+        void assert_assign(const Matrix auto& target) const noexcept;
 
         [[nodiscard]] auto row(size_t r) noexcept;
         [[nodiscard]] const auto row(size_t r) const noexcept;
@@ -197,8 +198,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
-        template<Matrix M>
-        __host__ __device__ static void assert_assign(const M& target) noexcept;
+        __host__ __device__ static void static_assert_assign(const Matrix auto& target) noexcept;
     protected:
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;

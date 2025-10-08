@@ -29,6 +29,8 @@ namespace Physica {
      */
     template<Matrix M, Vector V>
     class MatExpVecProd : public RValueVector<MatExpVecProd<M, V>> {
+        static_assert(std::is_reference_v<M> && std::is_reference_v<V>);
+
         using This = MatExpVecProd<M, V>;
         using Base = RValueVector<This>;
     public:
@@ -83,7 +85,6 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     MatExpVecProd<M, V>::MatExpVecProd(M mexp_, V v_) : mexp(std::forward<M>(mexp_)), v(std::forward<V>(v_)) {
-        static_assert(std::is_reference_v<M> && std::is_reference_v<V>);
         assert(mexp.getCol() == v.getLength());
     }
 

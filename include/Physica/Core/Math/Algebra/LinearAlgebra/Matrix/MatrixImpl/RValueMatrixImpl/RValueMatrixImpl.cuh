@@ -25,10 +25,8 @@
 namespace Physica {
     template<class Derived>
     template<Matrix M>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M& target) const requires(CUDA<M>) {
-        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
-        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
-        host_obj::assert_assign(target);
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M& target) const {
+        assert_assign(target);
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
@@ -58,11 +56,16 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>) {
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto& target) const {
+        assert_assign(target);
+        target = target + Base::getDerived();
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assert_assign(const Matrix auto& target) const noexcept {
+        static_assert_assign(target);
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
-        host_obj::assert_assign(target);
-        target = target + Base::getDerived();
     }
 
     template<class Derived>
@@ -328,6 +331,12 @@ namespace Physica {
         const uint32_t numBlockX = (maxMinor + numThread - 1) / numThread;
         const uint32_t numBlockY = maxMajor;
         return KernelConfig({numBlockX, numBlockY}, numThread);
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Matrix auto& target) noexcept {
+        host_obj::static_assert_assign(target);
+        static_assert(CUDA<decltype(target)>, "[Error]: Device object cannot be assigned to host object");
     }
 }
 

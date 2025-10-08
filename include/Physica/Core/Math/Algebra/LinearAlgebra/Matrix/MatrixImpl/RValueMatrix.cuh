@@ -59,8 +59,9 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
-        __host__ __device__ void assign(M& target) const requires(CUDA<M>);
-        __host__ __device__ void assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>);
+        __host__ __device__ void assign(M& target) const;
+        __host__ __device__ void assign_add(Matrix auto& target) const;
+        __host__ __device__ void assert_assign(const Matrix auto& target) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ const auto row(size_t r) const noexcept;
@@ -128,6 +129,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept;
         [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept;
+        __host__ __device__ static void static_assert_assign(const Matrix auto& target) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

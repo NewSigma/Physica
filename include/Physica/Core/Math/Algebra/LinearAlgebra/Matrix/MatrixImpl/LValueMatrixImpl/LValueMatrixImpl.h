@@ -26,7 +26,6 @@ namespace Physica {
     Derived& LValueMatrix<Derived>::operator=(const Matrix auto& m) {
         if constexpr (std::is_same<const Derived&, decltype(m)>::value)
             assert(this != &m && "[Error]: Self assign is likely a bug");
-        Base::assert_assign(m);
         Base::getDerived().resize(m.getRow(), m.getCol());
         m.assign(Base::getDerived());
         return Base::getDerived();

@@ -23,6 +23,8 @@
 namespace Physica {
     template<Matrix M, Vector V>
     class MatPowVecProd : public RValueVector<MatPowVecProd<M, V>> {
+        static_assert(std::is_reference_v<M> && std::is_reference_v<V>);
+
         using This = MatPowVecProd<M, V>;
         using Base = RValueVector<This>;
     public:
@@ -30,10 +32,10 @@ namespace Physica {
     protected:
         using typename Base::Tv;
     private:
-        const LazyDestroy<M> mpow;
-        const LazyDestroy<V> v;
+        LazyDestroy<M> mpow;
+        LazyDestroy<V> v;
     public:
-        MatPowVecProd(M&& mpow_, V&& v_);
+        MatPowVecProd(M mpow_, V v_);
         MatPowVecProd(const This&) = default;
         MatPowVecProd(This&&) noexcept = default;
         ~MatPowVecProd() = default;
@@ -53,7 +55,7 @@ namespace Physica {
     };
 
     template<Matrix M, Vector V>
-    MatPowVecProd<M, V>::MatPowVecProd(M&& mpow_, V&& v_) : mpow(std::forward<M>(mpow_)), v(std::forward<V>(v_)) {
+    MatPowVecProd<M, V>::MatPowVecProd(M mpow_, V v_) : mpow(std::forward<M>(mpow_)), v(std::forward<V>(v_)) {
         assert(mpow.getCol() == v.getLength());
     }
 
