@@ -56,6 +56,7 @@ namespace Physica {
         SIMD(MachineType x) : pack(x) {}
         SIMD(Pack value) : pack(value) {}
         SIMD(HalfType a, HalfType b);
+        explicit SIMD(BoolSIMDType x) noexcept;
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
@@ -118,7 +119,9 @@ namespace Physica {
         template<int... Order>
         static SIMD blend(SIMD x, SIMD y);
         template<bool... Flags>
-        [[nodiscard]] static SIMD makeSignBits();
+        [[nodiscard]] static SIMD makeSignBits() noexcept;
+        template<bool... Flags>
+        [[nodiscard]] static SIMD toOpposite(SIMD x) noexcept;
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform();
         [[nodiscard]] static SIMD select(BoolSIMDType flags, SIMD x, SIMD y);
@@ -131,30 +134,6 @@ namespace Physica {
     [[nodiscard]] SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size> packet) {
         return packet * scalar;
     }
-
-    template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_add(
-            const SIMD<T, Size>& a,
-            const SIMD<T, Size>& b,
-            const SIMD<T, Size>& c) noexcept;
-
-    template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> nmul_add(
-            const SIMD<T, Size> a,
-            const SIMD<T, Size> b,
-            const SIMD<T, Size> c) noexcept;
-
-    template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_sub(
-            const SIMD<T, Size> a,
-            const SIMD<T, Size> b,
-            const SIMD<T, Size> c) noexcept;
-
-    template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_addsub(
-            const SIMD<T, Size> a,
-            const SIMD<T, Size> b,
-            const SIMD<T, Size> c) noexcept;
 }
 
 namespace Physica {

@@ -75,6 +75,9 @@ namespace Physica {
     SIMD<T, Size>::SIMD(HalfType a, HalfType b) : pack(a.toMachine(), b.toMachine()) {}
 
     template<Scalar T, int Size>
+    SIMD<T, Size>::SIMD(BoolSIMDType x) noexcept : pack(x.toMachine()) {}
+
+    template<Scalar T, int Size>
     T SIMD<T, Size>::operator[](int index) const {
         if constexpr (isForward)
             return T(pack.operator[](index * 2), pack.operator[](index * 2 + 1));
@@ -292,7 +295,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     template<bool... Flags>
-    SIMD<T, Size> SIMD<T, Size>::makeSignBits() {
+    auto SIMD<T, Size>::makeSignBits() noexcept -> This {
         using IntType = std::conditional<T::Prec == Float32, uint32_t, uint64_t>::type;
         constexpr auto Functor = [](bool flag) consteval -> IntType {
             constexpr IntType Mask = T::Prec == Float32 ? IntType(0x80000000U) : IntType(0x8000000000000000U);
@@ -332,6 +335,13 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    template<bool... Flags>
+    auto SIMD<T, Size>::toOpposite(SIMD x) noexcept -> This {
+        auto mask = makeSignBits<Flags...>();
+        return This(BoolSIMDType(x) ^ BoolSIMDType(mask));
+    }
+
+    template<Scalar T, int Size>
     template<RNG R>
     SIMD<T, Size> SIMD<T, Size>::random_uniform() {
         SIMD result{};
@@ -364,29 +374,20 @@ namespace Physica {
             return makeShuffleMask<Orders...>(result);
         return result;
     }
-    //////////////////////////////////////////////////////////////////
+
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_add(
-            const SIMD<T, Size>& a,
-            const SIMD<T, Size>& b,
-            const SIMD<T, Size>& c) noexcept {
+    [[nodiscard]] SIMD<T, Size> mul_add(const SIMD<T, Size>& a, const SIMD<T, Size>& b, const SIMD<T, Size>& c) noexcept {
         return SIMD<T, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> nmul_add(
-            const SIMD<T, Size> a,
-            const SIMD<T, Size> b,
-            const SIMD<T, Size> c) noexcept {
+    [[nodiscard]] SIMD<T, Size> nmul_add(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDiffable, "[Error]: Not implemented");
         return SIMD<T, Size>(nmul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_sub(
-            const SIMD<T, Size> a,
-            const SIMD<T, Size> b,
-            const SIMD<T, Size> c) noexcept {
+    [[nodiscard]] SIMD<T, Size> mul_sub(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDiffable, "[Error]: Not implemented");
         return SIMD<T, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
     }

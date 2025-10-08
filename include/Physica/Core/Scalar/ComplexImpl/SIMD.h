@@ -85,7 +85,8 @@ namespace Physica {
 
         This& cutoff(int count);
 
-        FullRealPair makeFullRealImag() const noexcept;
+        [[nodiscard]] This conjugate() const noexcept;
+        [[nodiscard]] FullRealPair makeFullRealImag() const noexcept;
         using Base::swapRealImag;
         using Base::permRealImag;
         using Base::squaredNorm;

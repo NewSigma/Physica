@@ -110,6 +110,7 @@ namespace Physica {
     private:
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
+        using ConjugateRtnTy = std::conditional<isComplex, Conjugate<Derived>, const Derived&>::type;
         using RealsRtnTy = std::conditional<isComplex, RealVector<Derived>, Derived&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, ValueVector<Derived>, Derived&>::type;
     public:
@@ -150,7 +151,7 @@ namespace Physica {
 
         [[nodiscard]] auto format() const;
         [[nodiscard]] auto transpose() const noexcept;
-        [[nodiscard]] auto conjugate() const noexcept;
+        [[nodiscard]] ConjugateRtnTy conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;

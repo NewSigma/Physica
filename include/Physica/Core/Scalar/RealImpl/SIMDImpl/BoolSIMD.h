@@ -20,19 +20,19 @@
 
 namespace Physica {
     template<Scalar T, int Size>
-    class BoolSIMD : private Traits<BoolSIMD<T, Size>>::BaseType {
+    class BoolSIMD : private Traits<BoolSIMD<T, Size>>::Pack {
         using This = BoolSIMD<T, Size>;
-    public:
-        using Base = Traits<This>::BaseType;
+        using Base = Traits<This>::Pack;
     public:
         BoolSIMD() = default;
         explicit BoolSIMD(Base value) : Base(value) {}
         using Base::Base;
-        BoolSIMD(const BoolSIMD&) = default;
-        BoolSIMD(BoolSIMD&&) noexcept = default;
+        BoolSIMD(const This&) = default;
+        BoolSIMD(This&&) noexcept = default;
         /* Operators */
-        BoolSIMD& operator=(const BoolSIMD&) = default;
-        BoolSIMD& operator=(BoolSIMD&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
+        [[nodiscard]] This operator^(This other) const noexcept;
         /* Operations */
         [[nodiscard]] bool horizontal_and() const;
         [[nodiscard]] bool horizontal_or() const;
@@ -42,6 +42,11 @@ namespace Physica {
         [[nodiscard]] Base& toMachine() noexcept { return *this; }
         [[nodiscard]] const Base& toMachine() const noexcept { return *this; }
     };
+
+    template<Scalar T, int Size>
+    auto BoolSIMD<T, Size>::operator^(This other) const noexcept -> This {
+        return This(toMachine() ^ other.toMachine());
+    }
 
     template<Scalar T, int Size>
     bool BoolSIMD<T, Size>::horizontal_and() const {
@@ -56,18 +61,17 @@ namespace Physica {
     template<Scalar T>
     class BoolSIMD<T, 1> {
         using This = BoolSIMD<T, 1>;
-    public:
-        using Base = Traits<This>::BaseType;
+        using Base = Traits<This>::Pack;
     private:
         bool b;
     public:
         BoolSIMD() = default;
         explicit BoolSIMD(bool value) : b(value) {}
-        BoolSIMD(const BoolSIMD&) = default;
-        BoolSIMD(BoolSIMD&&) noexcept = default;
+        BoolSIMD(const This&) = default;
+        BoolSIMD(This&&) noexcept = default;
         /* Operators */
-        BoolSIMD& operator=(const BoolSIMD&) = default;
-        BoolSIMD& operator=(BoolSIMD&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         [[nodiscard]] bool horizontal_or() const { return b; }
         /* Getters */
@@ -91,6 +95,6 @@ namespace Physica {
         using Type1 = std::conditional<Size == 2, Size2Type, Size4Type>::type;
         using Type2 = std::conditional<Size == 8, Size8Type, Size16Type>::type;
     public:
-        using BaseType = std::conditional<Size <= 4, Type1, Type2>::type;
+        using Pack = std::conditional<Size <= 4, Type1, Type2>::type;
     };
 }

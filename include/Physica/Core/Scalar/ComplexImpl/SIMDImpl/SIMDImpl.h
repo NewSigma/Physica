@@ -125,6 +125,20 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    auto SIMD<Complex<T>, Size>::conjugate() const noexcept -> This {
+        if constexpr (Size == 1)
+            return asComplex(RealBase::template toOpposite<0, 1>(asReal()));
+        else if constexpr (Size == 2)
+            return asComplex(RealBase::template toOpposite<0, 1, 0, 1>(asReal()));
+        else if constexpr (Size == 4)
+            return asComplex(RealBase::template toOpposite<0, 1, 0, 1, 0, 1, 0, 1>(asReal()));
+        else {
+            static_assert(Size == 8, "[Error]: Unexpected type");
+            return asComplex(RealBase::template toOpposite<0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1>(asReal()));
+        }
+    }
+
+    template<Scalar T, int Size>
     auto SIMD<Complex<T>, Size>::makeFullRealImag() const noexcept -> FullRealPair {
         FullRealType re;
         FullRealType im;

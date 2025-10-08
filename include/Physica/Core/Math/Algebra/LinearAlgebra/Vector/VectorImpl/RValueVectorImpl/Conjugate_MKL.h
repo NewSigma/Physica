@@ -18,29 +18,19 @@
  */
 #pragma once
 
-#include "../Exp.h"
+#include "Conjugate.h"
 
 namespace Physica {
     template<Vector V>
-    void VectorExpr<ExprType::Exp, V>::assign_mkl(Vector auto& v) const noexcept {
-        Base::getExpr().assert_assign_mkl(v);
+    void Conjugate<V>::assign_mkl(Vector auto& v) const noexcept {
+        vec.assert_assign_mkl(v);
 
         size_t n = Base::getLength();
-        const auto* a = reinterpret_cast<const Tm*>(Base::getExpr().data());
+        const auto* a = reinterpret_cast<const Tm*>(vec.data());
         auto* y = reinterpret_cast<Tm*>(v.data());
-        if constexpr (isComplex) {
-            if constexpr (T::Prec == Float32)
-                vcExp_64(n, a, y);
-            else
-                vzExp_64(n, a, y);
-        }
-        else {
-            if constexpr (T::Prec == Float16)
-                vhExp_64(n, a, y);
-            else if constexpr (T::Prec == Float32)
-                vsExp_64(n, a, y);
-            else
-                vdExp_64(n, a, y);
-        }
+        if constexpr (T::Prec == Float32)
+            vcExp_64(n, a, y);
+        else
+            vzExp_64(n, a, y);
     }
 }

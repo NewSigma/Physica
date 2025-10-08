@@ -202,8 +202,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::conjugate() const noexcept {
-        return Conjugate<Derived>(Base::getDerived());
+    auto RValueVector<Derived>::conjugate() const noexcept -> ConjugateRtnTy {
+        if constexpr (isComplex)
+            return Conjugate<Derived>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>

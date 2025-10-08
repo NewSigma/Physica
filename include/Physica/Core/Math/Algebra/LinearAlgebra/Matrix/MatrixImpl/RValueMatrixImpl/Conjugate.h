@@ -37,8 +37,9 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return matrix.getCol(); }
     };

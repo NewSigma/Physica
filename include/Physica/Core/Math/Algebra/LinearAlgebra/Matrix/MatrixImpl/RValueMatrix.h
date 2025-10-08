@@ -89,6 +89,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
     private:
+        using ConjugateRtnTy = std::conditional<isComplex, Conjugate<Derived>, const Derived&>::type;
         using RealsRtnTy = std::conditional<isComplex, RealMatrix<Derived>, Derived&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, ValueMatrix<Derived>, Derived&>::type;
     public:
@@ -172,7 +173,7 @@ namespace Physica {
         [[nodiscard]] auto format() const noexcept;
         [[nodiscard]] auto inverse() const noexcept;
         [[nodiscard]] auto transpose() const noexcept;
-        [[nodiscard]] auto conjugate() const noexcept;
+        [[nodiscard]] ConjugateRtnTy conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
         [[nodiscard]] auto flatten() const noexcept;
 

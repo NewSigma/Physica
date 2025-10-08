@@ -1,4 +1,5 @@
 target_sources(Benchmark PRIVATE Add.cpp)
+target_sources(Benchmark PRIVATE Conj.cpp)
 target_sources(Benchmark PRIVATE Exp.cpp)
 target_sources(Benchmark PRIVATE LnCosh.cpp)
 target_sources(Benchmark PRIVATE Mul.cpp)

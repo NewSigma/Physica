@@ -394,8 +394,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::conjugate() const noexcept {
-        return Conjugate<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::conjugate() const noexcept -> ConjugateRtnTy {
+        if constexpr (isComplex)
+            return Conjugate<Derived>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
