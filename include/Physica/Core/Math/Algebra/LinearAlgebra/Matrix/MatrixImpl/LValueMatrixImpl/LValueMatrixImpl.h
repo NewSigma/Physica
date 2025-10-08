@@ -62,23 +62,30 @@ namespace Physica {
 
     template<class Derived>
     void LValueMatrix<Derived>::toNextMean(size_t lastNumSample, const Matrix auto& sample) noexcept {
-        assert(Base::isFinite() && "[Error]: Propagating NAN");
         Base::assert_assign(sample);
+        auto& mean = Base::getDerived();
+        if (lastNumSample == 0) [[unlikely]] {
+            sample.assign(mean);
+            return;
+        }
 
         const T factor1 = T(lastNumSample);
         const T factor2 = reciprocal(T(lastNumSample + 1));
-        auto& mean = Base::getDerived();
         mean = (factor1 * mean + sample) * factor2;
     }
 
     template<class Derived>
     void LValueMatrix<Derived>::toNextVariance(Derived& mean, size_t lastNumSample, const Matrix auto& sample) noexcept {
-        assert(Base::isFinite() && "[Error]: Propagating NAN");
         Base::assert_assign(sample);
+        auto& var = Base::getDerived();
+        if (lastNumSample == 0) [[unlikely]] {
+            sample.assign(mean);
+            var.zeros();
+            return;
+        }
 
         const T factor1 = T(lastNumSample);
         const T factor2 = reciprocal(T(lastNumSample + 1));
-        auto& var = Base::getDerived();
         var = (var + square_elem(mean - sample) * factor2) * (factor1 * factor2);
         mean.toNextMean(lastNumSample, sample);
     }

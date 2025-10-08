@@ -374,20 +374,29 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ void ScalarBase<Derived>::toNextMean(size_t lastNumSample, ScalarType sample) noexcept {
-        assert(isFinite() && "[Error]: Propagating NAN");
+        auto& mean = Base::getDerived();
+        if (lastNumSample == 0) [[unlikely]] {
+            mean = sample;
+            return;
+        }
+
         const auto factor1 = ScalarType(lastNumSample);
         const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        auto& mean = Base::getDerived();
         mean = (factor1 * mean + sample) * factor2;
     }
 
     template<class Derived>
     __host__ __device__ void ScalarBase<Derived>::toNextVariance(ScalarType& __restrict mean, size_t lastNumSample, ScalarType sample) noexcept {
         assert(this != &mean && "[Error]: Var and mean cannot overlap");
-        assert(isFinite() && "[Error]: Propagating NAN");
+        auto& var = Base::getDerived();
+        if (lastNumSample == 0) [[unlikely]] {
+            mean = sample;
+            var = 0;
+            return;
+        }
+
         const auto factor1 = ScalarType(lastNumSample);
         const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        auto& var = Base::getDerived();
         var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
         mean.toNextMean(lastNumSample, sample);
     }
