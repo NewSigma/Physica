@@ -98,7 +98,7 @@ namespace Physica {
         else if constexpr (Size1 == 8)
             return x.template permute<0, 2, 4, 6, 1, 3, 5, 7>();
         else {
-            static_assert(size() == 16, "[Error]: Unexpected size");
+            static_assert(Size1 == 16, "[Error]: Unexpected size");
             return x.template permute<0, 2, 4, 6, 8, 10, 12, 14, 1, 3, 5, 7, 9, 11, 13, 15>();
         }
     }
@@ -114,7 +114,7 @@ namespace Physica {
         else if constexpr (Size1 == 8)
             return x.template permute<0, 4, 1, 5, 2, 6, 3, 7>();
         else {
-            static_assert(size() == 16, "[Error]: Unexpected size");
+            static_assert(Size1 == 16, "[Error]: Unexpected size");
             return x.template permute<0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15>();
         }
     }

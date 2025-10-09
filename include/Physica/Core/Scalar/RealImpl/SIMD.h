@@ -120,8 +120,6 @@ namespace Physica {
         static SIMD blend(SIMD x, SIMD y);
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits() noexcept;
-        template<bool... Flags>
-        [[nodiscard]] static SIMD toOpposite(SIMD x) noexcept;
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform();
         [[nodiscard]] static SIMD select(BoolSIMDType flags, SIMD x, SIMD y);

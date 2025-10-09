@@ -335,13 +335,6 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    template<bool... Flags>
-    auto SIMD<T, Size>::toOpposite(SIMD x) noexcept -> This {
-        auto mask = makeSignBits<Flags...>();
-        return This(BoolSIMDType(x) ^ BoolSIMDType(mask));
-    }
-
-    template<Scalar T, int Size>
     template<RNG R>
     SIMD<T, Size> SIMD<T, Size>::random_uniform() {
         SIMD result{};
