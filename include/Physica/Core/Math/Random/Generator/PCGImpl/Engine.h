@@ -41,117 +41,104 @@
 
 #include <cstddef>
 #include <iostream>
-#include <type_traits>
 #include <utility>
 #include "OutputFn.h"
 
 namespace Physica::Internal {
-    /*
-     * This is where it all comes together.  This function joins together three
-     * mixin classes which define
-     *    - the LCG additive constant (the stream)
-     *    - the LCG multiplier
-     *    - the output function
-     * in addition, we specify the type of the LCG state, and the result type,
-     * and whether to use the pre-advance version of the state for the output
-     * (increasing instruction-level parallelism) or the post-advance version
-     * (reducing register pressure).
-     *
-     * Given the high level of parameterization, the code has to use some
-     * template-metaprogramming tricks to handle some of the subtle variations
-     * involved.
-     */
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    class engine : public stream_mixin, protected output_mixin {
-    protected:
-        itype state_;
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    class engine final : public Stream {
+    public:
+        using result_type = OutI;
+        using state_type = WorkI;
+    private:
+        using Fn = OutputFn<OutI, WorkI, Type>;
+        using Stream::increment;
 
-        using stream_mixin::increment;
+        WorkI state_;
+        [[no_unique_address]] Fn output;
     public:
-        using result_type = xtype;
-        using state_type = itype;
-    public:
-        explicit engine(itype state = itype(0xcafef00dd15ea5e5ULL)) noexcept;
-        template<typename sm = stream_mixin>
-        engine(itype state, typename sm::stream_state stream_seed) noexcept;
-        template<typename SeedSeq>
-        explicit engine(SeedSeq& seedSeq) noexcept requires(!stream_mixin::can_specify_stream);
-        template<typename SeedSeq>
-        explicit engine(SeedSeq& seedSeq) noexcept requires(stream_mixin::can_specify_stream);
+        explicit engine(WorkI state = WorkI(0xCAFEF00DD15EA5E5ULL)) noexcept;
+        template<typename sm = Stream>
+        engine(WorkI state, typename sm::stream_state stream_seed) noexcept;
+        explicit engine(auto& seedSeq) noexcept requires(!Stream::can_specify_stream);
+        explicit engine(auto& seedSeq) noexcept requires(Stream::can_specify_stream);
         /* Operators */
-        result_type operator()() noexcept {
-            if (output_previous)
-                return this->output(base_generate0());
-            return this->output(base_generate());
-        }
+        result_type operator()() noexcept;
+        result_type operator()(result_type upper_bound) noexcept;
 
-        result_type operator()(result_type upper_bound) noexcept {
-            return bounded_rand(*this, upper_bound);
-        }
+        template<typename xtype1, typename itype1, OutputFnType Type1, typename stream_mixin_lhs, typename stream_mixin_rhs>
+        friend bool operator==(const engine<xtype1, itype1, Type1, stream_mixin_lhs>&,
+                               const engine<xtype1, itype1, Type1, stream_mixin_rhs>&);
 
-        template<typename xtype1, typename itype1, typename output_mixin1, bool output_previous1, typename stream_mixin_lhs, typename stream_mixin_rhs>
-        friend bool operator==(const engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin_lhs>&,
-                               const engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin_rhs>&);
+        template<typename xtype1, typename itype1, OutputFnType Type1, typename stream_mixin_lhs, typename stream_mixin_rhs>
+        friend itype1 operator-(const engine<xtype1, itype1, Type1, stream_mixin_lhs>&,
+                                const engine<xtype1, itype1, Type1, stream_mixin_rhs>&);
 
-        template<typename xtype1, typename itype1, typename output_mixin1, bool output_previous1, typename stream_mixin_lhs, typename stream_mixin_rhs>
-        friend itype1 operator-(const engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin_lhs>&,
-                                const engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin_rhs>&);
-
-        template<typename CharT, typename Traits, typename xtype1, typename itype1, typename output_mixin1, bool output_previous1, typename stream_mixin1>
+        template<typename CharT, typename Traits, typename xtype1, typename itype1, OutputFnType Type1, typename stream_mixin1>
         friend std::basic_ostream<CharT, Traits>&
-        operator<<(std::basic_ostream<CharT, Traits>& out, const engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin1>&);
+        operator<<(std::basic_ostream<CharT, Traits>& out, const engine<xtype1, itype1, Type, stream_mixin1>&);
 
-        template<typename CharT, typename Traits, typename xtype1, typename itype1, typename output_mixin1, bool output_previous1, typename stream_mixin1>
+        template<typename CharT, typename Traits, typename xtype1, typename itype1, OutputFnType Type1, typename stream_mixin1>
         friend std::basic_istream<CharT, Traits>&
-        operator>>(std::basic_istream<CharT, Traits>& in, engine<xtype1, itype1, output_mixin1, output_previous1, stream_mixin1>& rng);
+        operator>>(std::basic_istream<CharT, Traits>& in, engine<xtype1, itype1, Type, stream_mixin1>& rng);
         /* Operations */
-        void advance(itype delta) noexcept;
-        void backstep(itype delta) noexcept;
-        void discard(itype delta) noexcept;
-        bool wrapped() noexcept;
+        void advance(WorkI delta) noexcept;
+        void backstep(WorkI delta) noexcept;
+        void discard(WorkI delta) noexcept;
 
         template<typename... Args>
         void seed(Args&&... args) noexcept;
+        /* Getters */
+        [[nodiscard]] bool wrapped() const noexcept;
         /* Static members */
-        constexpr static size_t period_pow2() noexcept { return sizeof(state_type) * 8 - 2 * stream_mixin::is_mcg; }
+        constexpr static size_t period_pow2() noexcept { return sizeof(state_type) * 8 - 2 * Stream::is_mcg; }
         constexpr static result_type min() noexcept { return std::numeric_limits<result_type>::min(); }
         constexpr static result_type max() noexcept { return std::numeric_limits<result_type>::max(); }
     protected:
-        itype bump(itype state) noexcept;
-        itype base_generate() noexcept;
-        itype base_generate0() noexcept;
-        itype distance(itype newstate, itype mask = itype(~itype(0U))) const noexcept;
+        WorkI bump(WorkI state) noexcept;
+        WorkI base_generate0() noexcept;
+        WorkI distance(WorkI newstate, WorkI mask = WorkI(~WorkI(0U))) const noexcept;
         /* Static members */
-        static itype advance(itype state, itype delta, itype cur_mult, itype cur_plus) noexcept;
-        static itype distance(itype cur_state, itype newstate, itype cur_mult, itype cur_plus, itype mask = ~itype(0U)) noexcept;
+        static WorkI advance(WorkI state, WorkI delta, WorkI cur_mult, WorkI cur_plus) noexcept;
+        static WorkI distance(WorkI cur_state, WorkI newstate, WorkI cur_mult, WorkI cur_plus, WorkI mask = ~WorkI(0U)) noexcept;
     };
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(itype state) noexcept
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    engine<OutI, WorkI, Type, Stream>::engine(WorkI state) noexcept
             : state_(this->is_mcg ? (state | state_type(3U)) : bump(state + this->increment())) {}
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
     template<typename sm>
-    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(itype state, typename sm::stream_state stream_seed) noexcept
-            : stream_mixin(stream_seed), state_(this->is_mcg ? state | state_type(3U) : bump(state + this->increment())) {}
+    engine<OutI, WorkI, Type, Stream>::engine(WorkI state, typename sm::stream_state stream_seed) noexcept
+            : Stream(stream_seed), state_(this->is_mcg ? state | state_type(3U) : bump(state + this->increment())) {}
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    template<typename SeedSeq>
-    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(SeedSeq& seedSeq) noexcept requires(!stream_mixin::can_specify_stream)
-            : engine(generate_one<itype>(std::forward<SeedSeq>(seedSeq))) {}
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    engine<OutI, WorkI, Type, Stream>::engine(auto& seedSeq) noexcept requires(!Stream::can_specify_stream)
+            : engine(seedSeq.template generate<WorkI>()) {}
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    template<typename SeedSeq>
-    engine<xtype, itype, output_mixin, output_previous, stream_mixin>::engine(SeedSeq& seedSeq) noexcept requires(stream_mixin::can_specify_stream)
-    {
-        std::array<itype, 2> seeddata{};
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    engine<OutI, WorkI, Type, Stream>::engine(auto& seedSeq) noexcept requires(Stream::can_specify_stream) {
+        std::array<WorkI, 2> seeddata{};
         seedSeq.generate(seeddata);
         seed(seeddata[1], seeddata[0]);
     }
 
-    template<typename CharT, typename Traits, typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    auto engine<OutI, WorkI, Type, Stream>::operator()() noexcept -> result_type {
+        constexpr bool OutputPrev = sizeof(WorkI) <= 8;
+        const WorkI old_state = state_;
+        state_ = bump(state_);
+        return output(OutputPrev ? old_state : state_);
+    }
+
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    auto engine<OutI, WorkI, Type, Stream>::operator()(result_type upper_bound) noexcept -> result_type {
+        return bounded_rand(*this, upper_bound);
+    }
+
+    template<typename CharT, typename Traits, class OutI, class WorkI, OutputFnType Type, class Stream>
     std::basic_ostream<CharT, Traits>&
-    operator<<(std::basic_ostream<CharT, Traits>& out, const engine<xtype, itype, output_mixin, output_previous, stream_mixin>& rng) {
+    operator<<(std::basic_ostream<CharT, Traits>& out, const engine<OutI, WorkI, Type, Stream>& rng) {
         auto orig_flags = out.flags(std::ios_base::dec | std::ios_base::left);
         auto space = out.widen(' ');
         auto orig_fill = out.fill();
@@ -165,14 +152,14 @@ namespace Physica::Internal {
         return out;
     }
 
-    template<typename CharT, typename Traits, typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<typename CharT, typename Traits, class OutI, class WorkI, OutputFnType Type, class Stream>
     std::basic_istream<CharT, Traits>&
-    operator>>(std::basic_istream<CharT, Traits>& in, engine<xtype, itype, output_mixin, output_previous, stream_mixin>& rng) {
+    operator>>(std::basic_istream<CharT, Traits>& in, engine<OutI, WorkI, Type, Stream>& rng) {
         auto orig_flags = in.flags(std::ios_base::dec | std::ios_base::skipws);
 
-        itype multiplier;
-        itype increment;
-        itype state;
+        WorkI multiplier;
+        WorkI increment;
+        WorkI state;
         in >> multiplier >> increment >> state;
 
         bool good = !in.fail() && (multiplier == rng.multiplier()) && (increment == rng.increment());
@@ -185,93 +172,87 @@ namespace Physica::Internal {
         return in;
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin_lhs, typename stream_mixin_rhs>
-    itype operator-(const engine<xtype, itype, output_mixin, output_previous, stream_mixin_lhs>& lhs,
-                    const engine<xtype, itype, output_mixin, output_previous, stream_mixin_rhs>& rhs) {
+    template<class OutI, class WorkI, OutputFnType Type, typename stream_mixin_lhs, typename stream_mixin_rhs>
+    WorkI operator-(const engine<OutI, WorkI, Type, stream_mixin_lhs>& lhs,
+                    const engine<OutI, WorkI, Type, stream_mixin_rhs>& rhs) {
         static_assert(std::same_as<stream_mixin_lhs, stream_mixin_rhs>, "Incomparable generators");
         if (lhs.increment() == rhs.increment())
             return rhs.distance(lhs.state_);
 
-        constexpr itype ONE = 1U;
-        itype lhs_diff = lhs.increment() + (lhs.multiplier() - ONE) * lhs.state_;
-        itype rhs_diff = rhs.increment() + (rhs.multiplier() - ONE) * rhs.state_;
-        if ((lhs_diff & itype(3U)) != (rhs_diff & itype(3U))) {
+        constexpr WorkI ONE = 1U;
+        WorkI lhs_diff = lhs.increment() + (lhs.multiplier() - ONE) * lhs.state_;
+        WorkI rhs_diff = rhs.increment() + (rhs.multiplier() - ONE) * rhs.state_;
+        if ((lhs_diff & WorkI(3U)) != (rhs_diff & WorkI(3U))) {
             rhs_diff = -rhs_diff;
         }
-        return rhs.distance(rhs_diff, lhs_diff, rhs.multiplier(), itype(0U));
+        return rhs.distance(rhs_diff, lhs_diff, rhs.multiplier(), WorkI(0U));
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin_lhs, typename stream_mixin_rhs>
-    bool operator==(const engine<xtype, itype, output_mixin, output_previous, stream_mixin_lhs>& lhs,
-                    const engine<xtype, itype, output_mixin, output_previous, stream_mixin_rhs>& rhs) {
+    template<class OutI, class WorkI, OutputFnType Type, typename stream_mixin_lhs, typename stream_mixin_rhs>
+    bool operator==(const engine<OutI, WorkI, Type, stream_mixin_lhs>& lhs,
+                    const engine<OutI, WorkI, Type, stream_mixin_rhs>& rhs) {
         return (lhs.multiplier() == rhs.multiplier())
             && (lhs.increment() == rhs.increment())
             && (lhs.state_ == rhs.state_);
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin_lhs, typename stream_mixin_rhs>
-    inline bool operator!=(const engine<xtype, itype, output_mixin, output_previous, stream_mixin_lhs>& lhs,
-                           const engine<xtype, itype, output_mixin, output_previous, stream_mixin_rhs>& rhs) {
+    template<class OutI, class WorkI, OutputFnType Type, typename stream_mixin_lhs, typename stream_mixin_rhs>
+    inline bool operator!=(const engine<OutI, WorkI, Type, stream_mixin_lhs>& lhs,
+                           const engine<OutI, WorkI, Type, stream_mixin_rhs>& rhs) {
         return !operator==(lhs, rhs);
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::advance(itype delta) noexcept {
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    void engine<OutI, WorkI, Type, Stream>::advance(WorkI delta) noexcept {
         state_ = advance(state_, delta, this->multiplier(), this->increment());
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::backstep(itype delta) noexcept {
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    void engine<OutI, WorkI, Type, Stream>::backstep(WorkI delta) noexcept {
         advance(-delta);
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::discard(itype delta) noexcept {
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    void engine<OutI, WorkI, Type, Stream>::discard(WorkI delta) noexcept {
         advance(delta);
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    bool engine<xtype, itype, output_mixin, output_previous, stream_mixin>::wrapped() noexcept {
-        if (stream_mixin::is_mcg) {
-            // For MCGs, the low order two bits never change. In this
-            // implementation, we keep them fixed at 3 to make this test
-            // easier.
-            return state_ == 3;
-        }
-        return state_ == 0;
-    }
-
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
     template<typename... Args>
-    void engine<xtype, itype, output_mixin, output_previous, stream_mixin>::seed(Args&&... args) noexcept {
+    void engine<OutI, WorkI, Type, Stream>::seed(Args&&... args) noexcept {
         new (this) engine(std::forward<Args>(args)...);
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::bump(itype state) noexcept {
-        return state * multiplier<itype>() + increment();
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    bool engine<OutI, WorkI, Type, Stream>::wrapped() const noexcept {
+        // For MCGs, the low order two bits never change. In this
+        // implementation, we keep them fixed at 3 to make this test
+        // easier.
+        if (Stream::is_mcg)
+            return state_ == 3;
+        return state_ == 0;
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::base_generate() noexcept {
-        return state_ = bump(state_);
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    WorkI engine<OutI, WorkI, Type, Stream>::bump(WorkI state) noexcept {
+        return state * Fn::multiplier() + Fn::increment();
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::base_generate0() noexcept {
-        itype old_state = state_;
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    WorkI engine<OutI, WorkI, Type, Stream>::base_generate0() noexcept {
+        WorkI old_state = state_;
         state_ = bump(state_);
         return old_state;
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::distance(itype newstate, itype mask) const noexcept {
-        return distance(state_, newstate, multiplier<itype>(), increment(), mask);
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    WorkI engine<OutI, WorkI, Type, Stream>::distance(WorkI newstate, WorkI mask) const noexcept {
+        return distance(state_, newstate, Fn::multiplier(), Fn::increment(), mask);
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::advance(
-            itype state, itype delta, itype cur_mult, itype cur_plus) noexcept {
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    WorkI engine<OutI, WorkI, Type, Stream>::advance(
+            WorkI state, WorkI delta, WorkI cur_mult, WorkI cur_plus) noexcept {
         // The method used here is based on Brown, "Random Number Generation
         // with Arbitrary Stride,", Transactions of the American Nuclear
         // Society (Nov. 1994).  The algorithm is very similar to fast
@@ -280,10 +261,10 @@ namespace Physica::Internal {
         // Even though delta is an unsigned integer, we can pass a
         // signed integer to go backwards, it just goes "the long way round".
 
-        constexpr itype ZERO = 0U; // itype may be a non-trivial types, so
-        constexpr itype ONE = 1U; // we define some ugly constants.
-        itype acc_mult = 1;
-        itype acc_plus = 0;
+        constexpr WorkI ZERO = 0U; // WorkI may be a non-trivial types, so
+        constexpr WorkI ONE = 1U; // we define some ugly constants.
+        WorkI acc_mult = 1;
+        WorkI acc_plus = 0;
         while (delta > ZERO) {
             if (delta & ONE) {
                 acc_mult *= cur_mult;
@@ -296,13 +277,13 @@ namespace Physica::Internal {
         return acc_mult * state + acc_plus;
     }
 
-    template<typename xtype, typename itype, typename output_mixin, bool output_previous, typename stream_mixin>
-    itype engine<xtype, itype, output_mixin, output_previous, stream_mixin>::distance(
-            itype cur_state, itype newstate, itype cur_mult, itype cur_plus, itype mask) noexcept {
-        constexpr itype ONE = 1U; // itype could be weird, so use constant
-        bool is_mcg = cur_plus == itype(0);
-        itype the_bit = is_mcg ? itype(4U) : itype(1U);
-        itype distance = 0U;
+    template<class OutI, class WorkI, OutputFnType Type, class Stream>
+    WorkI engine<OutI, WorkI, Type, Stream>::distance(
+            WorkI cur_state, WorkI newstate, WorkI cur_mult, WorkI cur_plus, WorkI mask) noexcept {
+        constexpr WorkI ONE = 1U; // WorkI could be weird, so use constant
+        bool is_mcg = cur_plus == WorkI(0);
+        WorkI the_bit = is_mcg ? WorkI(4U) : WorkI(1U);
+        WorkI distance = 0U;
         while ((cur_state & mask) != (newstate & mask)) {
             if ((cur_state & the_bit) != (newstate & the_bit)) {
                 cur_state = cur_state * cur_mult + cur_plus;

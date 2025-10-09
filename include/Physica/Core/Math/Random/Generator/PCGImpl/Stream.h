@@ -62,25 +62,15 @@ namespace Physica::Internal {
      */
     template<typename itype>
     class unique_stream {
-    protected:
-        constexpr static bool is_mcg = false;
-
-        void set_stream(...) noexcept {
-            Physica::noImpl("Is never called, but is provided for symmetry with specific_stream");
-        }
     public:
         using state_type = itype;
-
-        constexpr itype increment() const noexcept {
-            return itype(reinterpret_cast<uintptr_t>(this) | 1);
-        }
-
-        constexpr itype stream() const noexcept {
-            return increment() >> 1;
-        }
-
         constexpr static bool can_specify_stream = false;
-
+    protected:
+        constexpr static bool is_mcg = false;
+    public:
+        /* Getters */
+        constexpr itype stream() const noexcept { return increment() >> 1; }
+        constexpr itype increment() const noexcept { return itype(reinterpret_cast<uintptr_t>(this) | 1); }
         constexpr static size_t streams_pow2() noexcept {
             return (sizeof(itype) < sizeof(size_t) ? sizeof(itype) : sizeof(size_t)) * 8 - 1U;
         }
@@ -90,83 +80,52 @@ namespace Physica::Internal {
 
     template<typename itype>
     class no_stream {
-    protected:
-        constexpr static bool is_mcg = true;
-
-        void set_stream(...) noexcept {
-            Physica::noImpl("Is never called, but is provided for symmetry with specific_stream");
-        }
     public:
         using state_type = itype;
-
-        constexpr static itype increment() noexcept {
-            return 0;
-        }
-
         constexpr static bool can_specify_stream = false;
-
-        constexpr static size_t streams_pow2() noexcept {
-            return 0U;
-        }
+    protected:
+        constexpr static bool is_mcg = true;
+    public:
+        constexpr static itype increment() noexcept { return 0; }
+        constexpr static size_t streams_pow2() noexcept { return 0U; }
     protected:
         constexpr no_stream() = default;
     };
 
     template<typename itype>
     class oneseq_stream {
-    protected:
-        constexpr static bool is_mcg = false;
-
-        void set_stream(...) {
-            Physica::noImpl("Is never called, but is provided for symmetry with specific_stream");
-        }
     public:
         using state_type = itype;
-
-        constexpr static itype stream() noexcept {
-            return increment<itype>() >> 1;
-        }
-
         constexpr static bool can_specify_stream = false;
-
-        constexpr static size_t streams_pow2() noexcept {
-            return 0U;
-        }
+    protected:
+        constexpr static bool is_mcg = false;
+    public:
+        constexpr static itype stream() noexcept {return increment<itype>() >> 1; }
+        constexpr static size_t streams_pow2() noexcept { return 0U; }
     protected:
         constexpr oneseq_stream() = default;
     };
 
     template<typename itype>
     class specific_stream {
-    protected:
-        constexpr static bool is_mcg = false;
-
-        itype inc_ = Internal::increment<itype>();
     public:
         using state_type = itype;
         using stream_state = itype;
-
-        constexpr itype increment() const noexcept {
-            return inc_;
-        }
-
-        itype stream() noexcept {
-            return inc_ >> 1;
-        }
-
-        void set_stream(itype specific_seq) noexcept {
-            inc_ = (specific_seq << 1) | 1;
-        }
-
         constexpr static bool can_specify_stream = true;
+    protected:
+        constexpr static bool is_mcg = false;
 
-        constexpr static size_t streams_pow2() noexcept {
-            return (sizeof(itype) * 8) - 1U;
-        }
+        itype inc_ = OutputFn<uint8_t, itype, DXSM>::increment();
+    public:
+        /* Operations */
+        itype stream() noexcept { return inc_ >> 1; }
+        /* Getters */
+        constexpr itype increment() const noexcept { return inc_; }
+        constexpr static size_t streams_pow2() noexcept { return (sizeof(itype) * 8) - 1U; }
+        /* Setters */
+        void set_stream(itype specific_seq) noexcept { inc_ = (specific_seq << 1) | 1; }
     protected:
         specific_stream() = default;
-
-        specific_stream(itype specific_seq) noexcept
-                : inc_(itype(specific_seq << 1) | itype(1U)) {}
+        specific_stream(itype specific_seq) noexcept : inc_(itype(specific_seq << 1) | itype(1U)) {}
     };
 }

@@ -50,127 +50,127 @@
 #include "PCGImpl/Stream.h"
 
 namespace Physica::Internal {
-    template<typename xtype, typename itype, template<typename XT, typename IT> class output_mixin, bool output_previous = (sizeof(itype) <= 8)>
-    using oneseq_base = engine<xtype, itype, output_mixin<xtype, itype>, output_previous, oneseq_stream<itype>>;
+    template<typename xtype, typename itype, OutputFnType Type>
+    using oneseq_base = engine<xtype, itype, Type, oneseq_stream<itype>>;
 
-    template<typename xtype, typename itype, template<typename XT, typename IT> class output_mixin, bool output_previous = (sizeof(itype) <= 8)>
-    using unique_base = engine<xtype, itype, output_mixin<xtype, itype>, output_previous, unique_stream<itype>>;
+    template<typename xtype, typename itype, OutputFnType Type>
+    using unique_base = engine<xtype, itype, Type, unique_stream<itype>>;
 
-    template<typename xtype, typename itype, template<typename XT, typename IT> class output_mixin, bool output_previous = (sizeof(itype) <= 8)>
-    using setseq_base = engine<xtype, itype, output_mixin<xtype, itype>, output_previous, specific_stream<itype>>;
+    template<typename xtype, typename itype, OutputFnType Type>
+    using setseq_base = engine<xtype, itype, Type, specific_stream<itype>>;
 
-    template<typename xtype, typename itype, template<typename XT, typename IT> class output_mixin, bool output_previous = (sizeof(itype) <= 8)>
-    using mcg_base = engine<xtype, itype, output_mixin<xtype, itype>, output_previous, no_stream<itype>>;
+    template<typename xtype, typename itype, OutputFnType Type>
+    using mcg_base = engine<xtype, itype, Type, no_stream<itype>>;
 
     namespace pcg_engines {
         /* Predefined types for XSH RS */
 
-        using oneseq_xsh_rs_16_8 = oneseq_base<uint8_t, uint16_t, xsh_rs_mixin>;
-        using oneseq_xsh_rs_32_16 = oneseq_base<uint16_t, uint32_t, xsh_rs_mixin>;
-        using oneseq_xsh_rs_64_32 = oneseq_base<uint32_t, uint64_t, xsh_rs_mixin>;
+        using oneseq_xsh_rs_16_8 = oneseq_base<uint8_t, uint16_t, XSH_RS>;
+        using oneseq_xsh_rs_32_16 = oneseq_base<uint16_t, uint32_t, XSH_RS>;
+        using oneseq_xsh_rs_64_32 = oneseq_base<uint32_t, uint64_t, XSH_RS>;
 
-        using unique_xsh_rs_16_8 = unique_base<uint8_t, uint16_t, xsh_rs_mixin>;
-        using unique_xsh_rs_32_16 = unique_base<uint16_t, uint32_t, xsh_rs_mixin>;
-        using unique_xsh_rs_64_32 = unique_base<uint32_t, uint64_t, xsh_rs_mixin>;
+        using unique_xsh_rs_16_8 = unique_base<uint8_t, uint16_t, XSH_RS>;
+        using unique_xsh_rs_32_16 = unique_base<uint16_t, uint32_t, XSH_RS>;
+        using unique_xsh_rs_64_32 = unique_base<uint32_t, uint64_t, XSH_RS>;
 
-        using setseq_xsh_rs_16_8 = setseq_base<uint8_t, uint16_t, xsh_rs_mixin>;
-        using setseq_xsh_rs_32_16 = setseq_base<uint16_t, uint32_t, xsh_rs_mixin>;
-        using setseq_xsh_rs_64_32 = setseq_base<uint32_t, uint64_t, xsh_rs_mixin>;
+        using setseq_xsh_rs_16_8 = setseq_base<uint8_t, uint16_t, XSH_RS>;
+        using setseq_xsh_rs_32_16 = setseq_base<uint16_t, uint32_t, XSH_RS>;
+        using setseq_xsh_rs_64_32 = setseq_base<uint32_t, uint64_t, XSH_RS>;
 
-        using mcg_xsh_rs_16_8 = mcg_base<uint8_t, uint16_t, xsh_rs_mixin>;
-        using mcg_xsh_rs_32_16 = mcg_base<uint16_t, uint32_t, xsh_rs_mixin>;
-        using mcg_xsh_rs_64_32 = mcg_base<uint32_t, uint64_t, xsh_rs_mixin>;
+        using mcg_xsh_rs_16_8 = mcg_base<uint8_t, uint16_t, XSH_RS>;
+        using mcg_xsh_rs_32_16 = mcg_base<uint16_t, uint32_t, XSH_RS>;
+        using mcg_xsh_rs_64_32 = mcg_base<uint32_t, uint64_t, XSH_RS>;
 
         /* Predefined types for XSH RR */
 
-        using oneseq_xsh_rr_16_8 = oneseq_base<uint8_t, uint16_t, xsh_rr_mixin>;
-        using oneseq_xsh_rr_32_16 = oneseq_base<uint16_t, uint32_t, xsh_rr_mixin>;
-        using oneseq_xsh_rr_64_32 = oneseq_base<uint32_t, uint64_t, xsh_rr_mixin>;
+        using oneseq_xsh_rr_16_8 = oneseq_base<uint8_t, uint16_t, XSH_RR>;
+        using oneseq_xsh_rr_32_16 = oneseq_base<uint16_t, uint32_t, XSH_RR>;
+        using oneseq_xsh_rr_64_32 = oneseq_base<uint32_t, uint64_t, XSH_RR>;
 
-        using unique_xsh_rr_16_8 = unique_base<uint8_t, uint16_t, xsh_rr_mixin>;
-        using unique_xsh_rr_32_16 = unique_base<uint16_t, uint32_t, xsh_rr_mixin>;
-        using unique_xsh_rr_64_32 = unique_base<uint32_t, uint64_t, xsh_rr_mixin>;
+        using unique_xsh_rr_16_8 = unique_base<uint8_t, uint16_t, XSH_RR>;
+        using unique_xsh_rr_32_16 = unique_base<uint16_t, uint32_t, XSH_RR>;
+        using unique_xsh_rr_64_32 = unique_base<uint32_t, uint64_t, XSH_RR>;
 
-        using setseq_xsh_rr_16_8 = setseq_base<uint8_t, uint16_t, xsh_rr_mixin>;
-        using setseq_xsh_rr_32_16 = setseq_base<uint16_t, uint32_t, xsh_rr_mixin>;
-        using setseq_xsh_rr_64_32 = setseq_base<uint32_t, uint64_t, xsh_rr_mixin>;
+        using setseq_xsh_rr_16_8 = setseq_base<uint8_t, uint16_t, XSH_RR>;
+        using setseq_xsh_rr_32_16 = setseq_base<uint16_t, uint32_t, XSH_RR>;
+        using setseq_xsh_rr_64_32 = setseq_base<uint32_t, uint64_t, XSH_RR>;
 
-        using mcg_xsh_rr_16_8 = mcg_base<uint8_t, uint16_t, xsh_rr_mixin>;
-        using mcg_xsh_rr_32_16 = mcg_base<uint16_t, uint32_t, xsh_rr_mixin>;
-        using mcg_xsh_rr_64_32 = mcg_base<uint32_t, uint64_t, xsh_rr_mixin>;
+        using mcg_xsh_rr_16_8 = mcg_base<uint8_t, uint16_t, XSH_RR>;
+        using mcg_xsh_rr_32_16 = mcg_base<uint16_t, uint32_t, XSH_RR>;
+        using mcg_xsh_rr_64_32 = mcg_base<uint32_t, uint64_t, XSH_RR>;
 
         /* Predefined types for RXS M XS */
 
-        using oneseq_rxs_m_xs_8_8 = oneseq_base<uint8_t, uint8_t, rxs_m_xs_mixin>;
-        using oneseq_rxs_m_xs_16_16 = oneseq_base<uint16_t, uint16_t, rxs_m_xs_mixin>;
-        using oneseq_rxs_m_xs_32_32 = oneseq_base<uint32_t, uint32_t, rxs_m_xs_mixin>;
-        using oneseq_rxs_m_xs_64_64 = oneseq_base<uint64_t, uint64_t, rxs_m_xs_mixin>;
+        using oneseq_rxs_m_xs_8_8 = oneseq_base<uint8_t, uint8_t, RXS_M_XS>;
+        using oneseq_rxs_m_xs_16_16 = oneseq_base<uint16_t, uint16_t, RXS_M_XS>;
+        using oneseq_rxs_m_xs_32_32 = oneseq_base<uint32_t, uint32_t, RXS_M_XS>;
+        using oneseq_rxs_m_xs_64_64 = oneseq_base<uint64_t, uint64_t, RXS_M_XS>;
 
-        using unique_rxs_m_xs_8_8 = unique_base<uint8_t, uint8_t, rxs_m_xs_mixin>;
-        using unique_rxs_m_xs_16_16 = unique_base<uint16_t, uint16_t, rxs_m_xs_mixin>;
-        using unique_rxs_m_xs_32_32 = unique_base<uint32_t, uint32_t, rxs_m_xs_mixin>;
-        using unique_rxs_m_xs_64_64 = unique_base<uint64_t, uint64_t, rxs_m_xs_mixin>;
+        using unique_rxs_m_xs_8_8 = unique_base<uint8_t, uint8_t, RXS_M_XS>;
+        using unique_rxs_m_xs_16_16 = unique_base<uint16_t, uint16_t, RXS_M_XS>;
+        using unique_rxs_m_xs_32_32 = unique_base<uint32_t, uint32_t, RXS_M_XS>;
+        using unique_rxs_m_xs_64_64 = unique_base<uint64_t, uint64_t, RXS_M_XS>;
 
-        using setseq_rxs_m_xs_8_8 = setseq_base<uint8_t, uint8_t, rxs_m_xs_mixin>;
-        using setseq_rxs_m_xs_16_16 = setseq_base<uint16_t, uint16_t, rxs_m_xs_mixin>;
-        using setseq_rxs_m_xs_32_32 = setseq_base<uint32_t, uint32_t, rxs_m_xs_mixin>;
-        using setseq_rxs_m_xs_64_64 = setseq_base<uint64_t, uint64_t, rxs_m_xs_mixin>;
+        using setseq_rxs_m_xs_8_8 = setseq_base<uint8_t, uint8_t, RXS_M_XS>;
+        using setseq_rxs_m_xs_16_16 = setseq_base<uint16_t, uint16_t, RXS_M_XS>;
+        using setseq_rxs_m_xs_32_32 = setseq_base<uint32_t, uint32_t, RXS_M_XS>;
+        using setseq_rxs_m_xs_64_64 = setseq_base<uint64_t, uint64_t, RXS_M_XS>;
 
         // MCG versions don't make sense here, so aren't defined.
 
         /* Predefined types for RXS M */
 
-        using oneseq_rxs_m_16_8 = oneseq_base<uint8_t, uint16_t, rxs_m_mixin>;
-        using oneseq_rxs_m_32_16 = oneseq_base<uint16_t, uint32_t, rxs_m_mixin>;
-        using oneseq_rxs_m_64_32 = oneseq_base<uint32_t, uint64_t, rxs_m_mixin>;
+        using oneseq_rxs_m_16_8 = oneseq_base<uint8_t, uint16_t, RXS_M>;
+        using oneseq_rxs_m_32_16 = oneseq_base<uint16_t, uint32_t, RXS_M>;
+        using oneseq_rxs_m_64_32 = oneseq_base<uint32_t, uint64_t, RXS_M>;
 
-        using unique_rxs_m_16_8 = unique_base<uint8_t, uint16_t, rxs_m_mixin>;
-        using unique_rxs_m_32_16 = unique_base<uint16_t, uint32_t, rxs_m_mixin>;
-        using unique_rxs_m_64_32 = unique_base<uint32_t, uint64_t, rxs_m_mixin>;
+        using unique_rxs_m_16_8 = unique_base<uint8_t, uint16_t, RXS_M>;
+        using unique_rxs_m_32_16 = unique_base<uint16_t, uint32_t, RXS_M>;
+        using unique_rxs_m_64_32 = unique_base<uint32_t, uint64_t, RXS_M>;
 
-        using setseq_rxs_m_16_8 = setseq_base<uint8_t, uint16_t, rxs_m_mixin>;
-        using setseq_rxs_m_32_16 = setseq_base<uint16_t, uint32_t, rxs_m_mixin>;
-        using setseq_rxs_m_64_32 = setseq_base<uint32_t, uint64_t, rxs_m_mixin>;
+        using setseq_rxs_m_16_8 = setseq_base<uint8_t, uint16_t, RXS_M>;
+        using setseq_rxs_m_32_16 = setseq_base<uint16_t, uint32_t, RXS_M>;
+        using setseq_rxs_m_64_32 = setseq_base<uint32_t, uint64_t, RXS_M>;
 
-        using mcg_rxs_m_16_8 = mcg_base<uint8_t, uint16_t, rxs_m_mixin>;
-        using mcg_rxs_m_32_16 = mcg_base<uint16_t, uint32_t, rxs_m_mixin>;
-        using mcg_rxs_m_64_32 = mcg_base<uint32_t, uint64_t, rxs_m_mixin>;
+        using mcg_rxs_m_16_8 = mcg_base<uint8_t, uint16_t, RXS_M>;
+        using mcg_rxs_m_32_16 = mcg_base<uint16_t, uint32_t, RXS_M>;
+        using mcg_rxs_m_64_32 = mcg_base<uint32_t, uint64_t, RXS_M>;
 
         /* Predefined types for DXSM */
 
-        using oneseq_dxsm_16_8 = oneseq_base<uint8_t, uint16_t, dxsm_mixin>;
-        using oneseq_dxsm_32_16 = oneseq_base<uint16_t, uint32_t, dxsm_mixin>;
-        using oneseq_dxsm_64_32 = oneseq_base<uint32_t, uint64_t, dxsm_mixin>;
+        using oneseq_dxsm_16_8 = oneseq_base<uint8_t, uint16_t, DXSM>;
+        using oneseq_dxsm_32_16 = oneseq_base<uint16_t, uint32_t, DXSM>;
+        using oneseq_dxsm_64_32 = oneseq_base<uint32_t, uint64_t, DXSM>;
 
-        using unique_dxsm_16_8 = unique_base<uint8_t, uint16_t, dxsm_mixin>;
-        using unique_dxsm_32_16 = unique_base<uint16_t, uint32_t, dxsm_mixin>;
-        using unique_dxsm_64_32 = unique_base<uint32_t, uint64_t, dxsm_mixin>;
+        using unique_dxsm_16_8 = unique_base<uint8_t, uint16_t, DXSM>;
+        using unique_dxsm_32_16 = unique_base<uint16_t, uint32_t, DXSM>;
+        using unique_dxsm_64_32 = unique_base<uint32_t, uint64_t, DXSM>;
 
-        using setseq_dxsm_16_8 = setseq_base<uint8_t, uint16_t, dxsm_mixin>;
-        using setseq_dxsm_32_16 = setseq_base<uint16_t, uint32_t, dxsm_mixin>;
-        using setseq_dxsm_64_32 = setseq_base<uint32_t, uint64_t, dxsm_mixin>;
+        using setseq_dxsm_16_8 = setseq_base<uint8_t, uint16_t, DXSM>;
+        using setseq_dxsm_32_16 = setseq_base<uint16_t, uint32_t, DXSM>;
+        using setseq_dxsm_64_32 = setseq_base<uint32_t, uint64_t, DXSM>;
 
-        using mcg_dxsm_16_8 = mcg_base<uint8_t, uint16_t, dxsm_mixin>;
-        using mcg_dxsm_32_16 = mcg_base<uint16_t, uint32_t, dxsm_mixin>;
-        using mcg_dxsm_64_32 = mcg_base<uint32_t, uint64_t, dxsm_mixin>;
+        using mcg_dxsm_16_8 = mcg_base<uint8_t, uint16_t, DXSM>;
+        using mcg_dxsm_32_16 = mcg_base<uint16_t, uint32_t, DXSM>;
+        using mcg_dxsm_64_32 = mcg_base<uint32_t, uint64_t, DXSM>;
 
         /* Predefined types for XSL RR (only defined for "large" types) */
 
-        using oneseq_xsl_rr_64_32 = oneseq_base<uint32_t, uint64_t, xsl_rr_mixin>;
+        using oneseq_xsl_rr_64_32 = oneseq_base<uint32_t, uint64_t, XSL_RR>;
 
-        using unique_xsl_rr_64_32 = unique_base<uint32_t, uint64_t, xsl_rr_mixin>;
+        using unique_xsl_rr_64_32 = unique_base<uint32_t, uint64_t, XSL_RR>;
 
-        using setseq_xsl_rr_64_32 = setseq_base<uint32_t, uint64_t, xsl_rr_mixin>;
+        using setseq_xsl_rr_64_32 = setseq_base<uint32_t, uint64_t, XSL_RR>;
 
-        using mcg_xsl_rr_64_32 = mcg_base<uint32_t, uint64_t, xsl_rr_mixin>;
+        using mcg_xsl_rr_64_32 = mcg_base<uint32_t, uint64_t, XSL_RR>;
 
         /* Predefined types for XSL RR RR (only defined for "large" types) */
 
-        using oneseq_xsl_rr_rr_64_64 = oneseq_base<uint64_t, uint64_t, xsl_rr_rr_mixin>;
+        using oneseq_xsl_rr_rr_64_64 = oneseq_base<uint64_t, uint64_t, XSL_RR_RR>;
 
-        using unique_xsl_rr_rr_64_64 = unique_base<uint64_t, uint64_t, xsl_rr_rr_mixin>;
+        using unique_xsl_rr_rr_64_64 = unique_base<uint64_t, uint64_t, XSL_RR_RR>;
 
-        using setseq_xsl_rr_rr_64_64 = setseq_base<uint64_t, uint64_t, xsl_rr_rr_mixin>;
+        using setseq_xsl_rr_rr_64_64 = setseq_base<uint64_t, uint64_t, XSL_RR_RR>;
 
         // MCG versions don't make sense here, so aren't defined.
 
@@ -189,16 +189,13 @@ namespace Physica::Internal {
         using ext_std64 = extended<table_pow2, advance_pow2, BaseRNG, oneseq_rxs_m_xs_64_64, KDD>;
 
         template<uint8_t table_pow2, uint8_t advance_pow2, bool KDD = true>
-        using ext_oneseq_rxs_m_xs_32_32 =
-                ext_std32<table_pow2, advance_pow2, oneseq_rxs_m_xs_32_32, KDD>;
+        using ext_oneseq_rxs_m_xs_32_32 = ext_std32<table_pow2, advance_pow2, oneseq_rxs_m_xs_32_32, KDD>;
 
         template<uint8_t table_pow2, uint8_t advance_pow2, bool KDD = true>
-        using ext_mcg_xsh_rs_64_32 =
-                ext_std32<table_pow2, advance_pow2, mcg_xsh_rs_64_32, KDD>;
+        using ext_mcg_xsh_rs_64_32 = ext_std32<table_pow2, advance_pow2, mcg_xsh_rs_64_32, KDD>;
 
         template<uint8_t table_pow2, uint8_t advance_pow2, bool KDD = true>
-        using ext_oneseq_xsh_rs_64_32 =
-                ext_std32<table_pow2, advance_pow2, oneseq_xsh_rs_64_32, KDD>;
+        using ext_oneseq_xsh_rs_64_32 = ext_std32<table_pow2, advance_pow2, oneseq_xsh_rs_64_32, KDD>;
 
         template<uint8_t table_pow2, uint8_t advance_pow2, bool KDD = true>
         using ext_setseq_xsh_rr_64_32 = ext_std32<table_pow2, advance_pow2, setseq_xsh_rr_64_32, KDD>;

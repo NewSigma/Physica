@@ -99,102 +99,29 @@ namespace Physica::Internal {
 
         constexpr static size_t table_size = 1UL << table_pow2;
         constexpr static size_t table_shift = stypebits - table_pow2;
-        constexpr static state_type table_mask =
-                (state_type(1U) << table_pow2) - state_type(1U);
+        constexpr static state_type table_mask = (state_type(1U) << table_pow2) - state_type(1U);
 
-        constexpr static bool may_tick =
-                (advance_pow2 < stypebits) && (advance_pow2 < tick_limit_pow2);
+        constexpr static bool may_tick = (advance_pow2 < stypebits) && (advance_pow2 < tick_limit_pow2);
         constexpr static size_t tick_shift = stypebits - advance_pow2;
-        constexpr static state_type tick_mask =
-                may_tick ? state_type(
-                                   (uint64_t(1) << (advance_pow2 * may_tick)) - 1)
-                         // ^-- stupidity to appease GCC warnings
-                         : ~state_type(0U);
+        constexpr static state_type tick_mask = may_tick ? state_type((uint64_t(1) << (advance_pow2 * may_tick)) - 1) : ~state_type(0U); // ^-- stupidity to appease GCC warnings
 
         constexpr static bool may_tock = stypebits < tick_limit_pow2;
 
         std::array<result_type, table_size> data_;
-
-        void advance_table();
-
-        void advance_table(state_type delta, bool isForwards = true);
-
-        result_type& get_extended_value() {
-            state_type state = this->state_;
-            if (KDD && baseclass::is_mcg) {
-                // The low order bits of an MCG are constant, so drop them.
-                state >>= 2;
-            }
-            size_t index = KDD ? state & table_mask
-                               : state >> table_shift;
-
-            if (may_tick) {
-                bool tick = KDD ? (state & tick_mask) == state_type(0U)
-                                : (state >> tick_shift) == state_type(0U);
-                if (tick)
-                    advance_table();
-            }
-            if (may_tock) {
-                bool tock = state == state_type(0U);
-                if (tock)
-                    advance_table();
-            }
-            return data_[index];
-        }
     public:
+        extended();
+        extended(const result_type* data);
+        extended(const result_type* data, state_type seed);
+        extended(state_type seed);
+        template<typename bc = baseclass>
+        extended(state_type seed, typename bc::stream_state stream_seed);
+        template<typename bc = baseclass>
+        extended(const result_type* data, state_type seed, typename bc::stream_state stream_seed);
         template<typename SeedSeq>
-        extended(SeedSeq& seedSeq) requires(!std::is_convertible<SeedSeq, result_type>::value && !std::is_convertible<SeedSeq, extended>::value)
-                : baseclass(seedSeq) {
-            seedSeq.generate(data_);
-        }
-
-        extended(const result_type* data)
-                : baseclass() {
-            datainit(data);
-        }
-
-        extended(const result_type* data, state_type seed)
-                : baseclass(seed) {
-            datainit(data);
-        }
-
-        // This function may or may not exist.  It thus has to be a template
-        // to use SFINAE; users don't have to worry about its template-ness.
-
-        template<typename bc = baseclass>
-        extended(const result_type* data, state_type seed, typename bc::stream_state stream_seed)
-                : baseclass(seed, stream_seed) {
-            datainit(data);
-        }
-
-        extended()
-                : baseclass() {
-            selfinit();
-        }
-
-        extended(state_type seed)
-                : baseclass(seed) {
-            selfinit();
-        }
-
-        // This function may or may not exist.  It thus has to be a template
-        // to use SFINAE; users don't have to worry about its template-ness.
-
-        template<typename bc = baseclass>
-        extended(state_type seed, typename bc::stream_state stream_seed)
-                : baseclass(seed, stream_seed) {
-            selfinit();
-        }
+        extended(SeedSeq& seedSeq) requires(!std::is_convertible<SeedSeq, result_type>::value && !std::is_convertible<SeedSeq, extended>::value);
         /* Operators */
-        result_type operator()() {
-            result_type rhs = get_extended_value();
-            result_type lhs = this->baseclass::operator()();
-            return lhs ^ rhs;
-        }
-
-        result_type operator()(result_type upper_bound) {
-            return bounded_rand(*this, upper_bound);
-        }
+        result_type operator()();
+        result_type operator()(result_type upper_bound);
 
         bool operator==(const This& other) const;
 
@@ -207,52 +134,78 @@ namespace Physica::Internal {
         operator>>(std::basic_istream<CharT, Traits>& in, extended<table_pow2_, advance_pow2_, baseclass_, extvalclass_, KDD_>&);
         /* Operations */
         template<typename... Args>
-        void seed(Args&&... args) {
-            new (this) extended(std::forward<Args>(args)...);
-        }
-
-        void set(result_type wanted) {
-            result_type& rhs = get_extended_value();
-            result_type lhs = this->baseclass::operator()();
-            rhs = lhs ^ wanted;
-        }
-
+        void seed(Args&&... args);
+        void set(result_type wanted);
         void advance(state_type distance, bool forwards = true);
-
-        void backstep(state_type distance) {
-            advance(distance, false);
-        }
+        void backstep(state_type distance);
         /* Getters */
         constexpr static size_t period_pow2() { return baseclass::period_pow2() + table_size * extvalclass::period_pow2(); }
     private:
         void selfinit();
         void datainit(const result_type* data);
+
+        void advance_table();
+        void advance_table(state_type delta, bool isForwards = true);
+
+        result_type& get_extended_value();
     };
 
     template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
-    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::datainit(const result_type* data) {
-        for (size_t i = 0; i < table_size; ++i)
-            data_[i] = data[i];
+    extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::extended()
+            : baseclass() {
+        selfinit();
     }
 
     template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
-    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::selfinit() {
-        // We need to fill the extended table with something, and we have
-        // very little provided data, so we use the base generator to
-        // produce values.  Although not ideal (use a seed sequence, folks!),
-        // unexpected correlations are mitigated by
-        //      - using XOR differences rather than the number directly
-        //      - the way the table is accessed, its values *won't* be accessed
-        //        in the same order the were written.
-        //      - any strange correlations would only be apparent if we
-        //        were to backstep the generator so that the base generator
-        //        was generating the same values again
-        result_type lhs = baseclass::operator()();
-        result_type rhs = baseclass::operator()();
-        result_type xdiff = lhs - rhs;
-        for (size_t i = 0; i < table_size; ++i) {
-            data_[i] = baseclass::operator()() ^ xdiff;
-        }
+    extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::extended(const result_type* data)
+            : baseclass() {
+        datainit(data);
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::extended(const result_type* data, state_type seed)
+            : baseclass(seed) {
+        datainit(data);
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::extended(state_type seed)
+            : baseclass(seed) {
+        selfinit();
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    template<typename bc>
+    extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::extended(state_type seed, typename bc::stream_state stream_seed)
+            : baseclass(seed, stream_seed) {
+        selfinit();
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    template<typename bc>
+    extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::extended(const result_type* data, state_type seed, typename bc::stream_state stream_seed)
+            : baseclass(seed, stream_seed) {
+        datainit(data);
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    template<typename SeedSeq>
+    extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::extended(SeedSeq& seedSeq)
+            requires(!std::is_convertible<SeedSeq, result_type>::value && !std::is_convertible<SeedSeq, extended>::value)
+            : baseclass(seedSeq) {
+        seedSeq.generate(data_);
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    auto extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::operator()() -> result_type {
+        result_type rhs = get_extended_value();
+        result_type lhs = this->baseclass::operator()();
+        return lhs ^ rhs;
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    auto extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::operator()(result_type upper_bound) -> result_type {
+        return bounded_rand(*this, upper_bound);
     }
 
     template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
@@ -312,6 +265,84 @@ namespace Physica::Internal {
     }
 
     template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    template<typename... Args>
+    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::seed(Args&&... args) {
+        new (this) extended(std::forward<Args>(args)...);
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::set(result_type wanted) {
+        result_type& rhs = get_extended_value();
+        result_type lhs = this->baseclass::operator()();
+        rhs = lhs ^ wanted;
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::advance(state_type distance, bool forwards) {
+        static_assert(KDD,
+                      "Efficient advance is too hard for non-KDD extension. "
+                      "For a weak advance, cast to base class");
+        state_type zero =
+                baseclass::is_mcg ? this->state_ & state_type(3U) : state_type(0U);
+        if (may_tick) {
+            state_type ticks = distance >> (advance_pow2 * may_tick);
+            // ^-- stupidity to appease GCC
+            // warnings
+            state_type adv_mask =
+                    baseclass::is_mcg ? tick_mask << 2 : tick_mask;
+            state_type next_advance_distance = this->distance(zero, adv_mask);
+            if (!forwards)
+                next_advance_distance = (-next_advance_distance) & tick_mask;
+            if (next_advance_distance < (distance & tick_mask)) {
+                ++ticks;
+            }
+            if (ticks)
+                advance_table(ticks, forwards);
+        }
+        if (forwards) {
+            if (may_tock && this->distance(zero) <= distance)
+                advance_table();
+            baseclass::advance(distance);
+        }
+        else {
+            if (may_tock && -(this->distance(zero)) <= distance)
+                advance_table(state_type(1U), false);
+            baseclass::advance(-distance);
+        }
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::backstep(state_type distance) {
+        advance(distance, false);
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::datainit(const result_type* data) {
+        for (size_t i = 0; i < table_size; ++i)
+            data_[i] = data[i];
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
+    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::selfinit() {
+        // We need to fill the extended table with something, and we have
+        // very little provided data, so we use the base generator to
+        // produce values.  Although not ideal (use a seed sequence, folks!),
+        // unexpected correlations are mitigated by
+        //      - using XOR differences rather than the number directly
+        //      - the way the table is accessed, its values *won't* be accessed
+        //        in the same order the were written.
+        //      - any strange correlations would only be apparent if we
+        //        were to backstep the generator so that the base generator
+        //        was generating the same values again
+        result_type lhs = baseclass::operator()();
+        result_type rhs = baseclass::operator()();
+        result_type xdiff = lhs - rhs;
+        for (size_t i = 0; i < table_size; ++i) {
+            data_[i] = baseclass::operator()() ^ xdiff;
+        }
+    }
+
+    template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
     void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::advance_table() {
         bool carry = false;
         for (size_t i = 0; i < table_size; ++i) {
@@ -348,37 +379,25 @@ namespace Physica::Internal {
     }
 
     template<uint8_t table_pow2, uint8_t advance_pow2, typename baseclass, typename extvalclass, bool KDD>
-    void extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::advance(
-            state_type distance, bool forwards) {
-        static_assert(KDD,
-                      "Efficient advance is too hard for non-KDD extension. "
-                      "For a weak advance, cast to base class");
-        state_type zero =
-                baseclass::is_mcg ? this->state_ & state_type(3U) : state_type(0U);
+    auto extended<table_pow2, advance_pow2, baseclass, extvalclass, KDD>::get_extended_value() -> result_type& {
+        state_type state = this->state_;
+        if (KDD && baseclass::is_mcg) {
+            // The low order bits of an MCG are constant, so drop them.
+            state >>= 2;
+        }
+        size_t index = KDD ? state & table_mask : state >> table_shift;
+
         if (may_tick) {
-            state_type ticks = distance >> (advance_pow2 * may_tick);
-            // ^-- stupidity to appease GCC
-            // warnings
-            state_type adv_mask =
-                    baseclass::is_mcg ? tick_mask << 2 : tick_mask;
-            state_type next_advance_distance = this->distance(zero, adv_mask);
-            if (!forwards)
-                next_advance_distance = (-next_advance_distance) & tick_mask;
-            if (next_advance_distance < (distance & tick_mask)) {
-                ++ticks;
-            }
-            if (ticks)
-                advance_table(ticks, forwards);
-        }
-        if (forwards) {
-            if (may_tock && this->distance(zero) <= distance)
+            bool tick = KDD ? (state & tick_mask) == state_type(0U) : (state >> tick_shift) == state_type(0U);
+            if (tick)
                 advance_table();
-            baseclass::advance(distance);
         }
-        else {
-            if (may_tock && -(this->distance(zero)) <= distance)
-                advance_table(state_type(1U), false);
-            baseclass::advance(-distance);
+
+        if (may_tock) {
+            bool tock = state == state_type(0U);
+            if (tock)
+                advance_table();
         }
+        return data_[index];
     }
 }

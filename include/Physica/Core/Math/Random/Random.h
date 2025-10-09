@@ -113,8 +113,8 @@ namespace Physica {
         using Base = Internal::RandomBase;
 
         template<RandomOption> struct GeneratorImpl;
-        template<> struct GeneratorImpl<PCG32DXSM> { using Type = Internal::setseq_base<uint32_t, uint64_t, Internal::dxsm_mixin>; };
-        template<> struct GeneratorImpl<PCG64DXSM> { using Type = Internal::setseq_base<uint64_t, __uint128_t, Internal::dxsm_mixin>; };
+        template<> struct GeneratorImpl<PCG32DXSM> { using Type = Internal::setseq_base<uint32_t, uint64_t, Internal::DXSM>; };
+        template<> struct GeneratorImpl<PCG64DXSM> { using Type = Internal::setseq_base<uint64_t, __uint128_t, Internal::DXSM>; };
         template<> struct GeneratorImpl<MT19937> { using Type = std::mt19937; };
 
         using Generator = GeneratorImpl<Option>::Type;
