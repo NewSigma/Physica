@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -23,7 +23,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ![](./TPQ.png)
 
-**图1** 分别使用Physica和HPhi 3.5.2$^{[2]}$计算Hubbard模型倒温度$\beta$与粒子密度间关系，使用全对角化和TPQ两种方法，$U/t = 8$，格点数$L = 4$。由于不能自适应地调整展开阶数，HPhi计算结果不稳定。
+**图1** 分别使用Physica和HPhi 3.5.2$^{[2]}$计算Hubbard模型倒温度$\beta$与粒子密度间关系，使用全对角化和TPQ两种方法，$U/t = 8$，格点数$L = 4$, 统计不确定度小于线宽。由于不能自适应地调整展开阶数，HPhi计算结果更快地积累数值误差。
 
     HPhi输入(FullDiag)
     model = "Fermion HubbardGC"
@@ -40,10 +40,10 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
     L = 4
     U = 8
     t = 1
-    lanczos_max = 41
+    lanczos_max = 161
     LargeValue = 10
-    NumAve = 100
-    # ExpandCoef = 10 增加展开阶数可以减小TPQ和FullDiag的偏差
+    NumAve = 8192
+    # ExpandCoef = 10 增加展开阶数以TPQ和Full-ED的偏差
 
 经测试, 在Intel(R) Xeon(R) Platinum 8358 + 256G平台上，4x4 Hubbard模型上Physica相比HPhi 3.5.2快1300倍
 

@@ -28,6 +28,7 @@ Checks: >
   -readability-identifier-length,
   -readability-identifier-naming,
   -readability-implicit-bool-conversion,
+  -readability-isolate-declaration,
   -readability-magic-numbers,
   -readability-math-missing-parentheses,
   -readability-named-parameter,
