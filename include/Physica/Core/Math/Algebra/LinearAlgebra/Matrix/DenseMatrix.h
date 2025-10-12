@@ -87,6 +87,7 @@ namespace Physica {
         using Storage::data_ptr;
         using Storage::getCol;
         using Storage::getRow;
+        using Storage::getSize;
         /* Static members */
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);

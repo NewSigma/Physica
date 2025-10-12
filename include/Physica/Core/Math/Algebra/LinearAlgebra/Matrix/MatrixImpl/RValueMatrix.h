@@ -110,6 +110,11 @@ namespace Physica {
         void assign_add(Matrix auto& target) const;
         void assert_assign(const Matrix auto& target) const noexcept;
 
+        [[nodiscard]] auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+        [[nodiscard]] auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
+        [[nodiscard]] auto calcFromMajorMinor(size_t major, size_t minor) const;
+        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept requires(isReverseDiff);
+
         [[nodiscard]] auto row(size_t r) noexcept;
         [[nodiscard]] const auto row(size_t r) const noexcept;
         [[nodiscard]] auto col(size_t c) noexcept;
@@ -147,11 +152,6 @@ namespace Physica {
         [[nodiscard]] auto tril() noexcept;
         [[nodiscard]] const auto tril() const noexcept;
 
-        [[nodiscard]] auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
-        [[nodiscard]] auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
-        [[nodiscard]] auto calcFromMajorMinor(size_t major, size_t minor) const;
-        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept requires(isReverseDiff);
-
         [[nodiscard]] Tr norm1() const;
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Tr norm1_power(unsigned int maxIteration) const;
@@ -187,6 +187,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }
+        [[nodiscard]] size_t getSize() const noexcept { return getRow() * getCol(); }
         [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
         [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
 

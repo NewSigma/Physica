@@ -66,6 +66,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
+        return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
+    }
+
+    template<class Derived>
+    void RValueMatrix<Derived>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+        Base::getDerived().reverse(grad);
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::row(size_t r) noexcept {
         return RowVector(Base::getDerived(), r, 0, getCol());
     }
@@ -246,16 +256,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
-        return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
-    }
-
-    template<class Derived>
-    void RValueMatrix<Derived>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept requires(isReverseDiff) {
-        Base::getDerived().reverse(grad);
-    }
-
-    template<class Derived>
     auto RValueMatrix<Derived>::max() const -> T {
         T result;
         if constexpr (MatrixOption::isColMatrix<This>()) {
@@ -302,26 +302,13 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::sum() const -> CoDiff<T> {
         if constexpr (isReverseDiff) {
-            Tv v = 0;
-            std::forward_list<CoDiff<T>> elems{};
-            for (size_t major = 0; major < getMaxMajor(); ++major) {
-                size_t minor = 0;
-                auto list = co_for([&]{ return minor < getMaxMinor(); }, [&]{ ++minor; }, [&]{
-                    auto elem = calcFromMajorMinor(major, minor);
-                    v += elem.value();
-                    return elem;
-                });
-                elems.merge(std::move(list));
-            }
-            auto result = co_yield std::move(v);
-            for (auto& elem : elems)
-                elem.reverse(result.grad());
+            auto result = co_yield values().sum();
+            Base::getDerived().reverse(result.grad() / Trv(getRow() * getCol()));
         }
         else {
             T result = 0;
             for (size_t major = 0; major < getMaxMajor(); ++major)
-                for (size_t minor = 0; minor < getMaxMinor(); ++minor)
-                    result += calcFromMajorMinor(major, minor);
+                result += MatrixOption::isColMatrix<Derived>() ? col(major).sum() : row(major).sum();
             co_return std::move(result);
         }
     }

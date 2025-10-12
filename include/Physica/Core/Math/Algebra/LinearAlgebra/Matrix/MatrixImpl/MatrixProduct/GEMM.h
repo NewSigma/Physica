@@ -48,6 +48,7 @@ namespace Physica {
         using Base::isComplex;
     protected:
         using typename Base::T;
+        using typename Base::Tv;
     private:
         using DefaultType = DenseMatrix<T,
                                         Internal::ProductOption<M1, M2>::Option,
@@ -71,7 +72,8 @@ namespace Physica {
         void assign_mkl(Matrix auto& target) const noexcept;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
 
-        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
         /* Getters */
@@ -138,11 +140,13 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> T {
-        T result(0);
-        for (size_t i = 0; i < mat1.getCol(); ++i)
-            result += mat1.calc(row, i) * mat2.calc(i, col);
-        return result;
+    auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
+        return mat1.row(row) * mat2.col(col);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto GEMM<M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
+        return (mat1.values() * mat2.values()).calc(row, col);
     }
 
     template<Matrix M1, Matrix M2>

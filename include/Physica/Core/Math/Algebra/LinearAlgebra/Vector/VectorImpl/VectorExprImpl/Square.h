@@ -30,8 +30,8 @@ namespace Physica {
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
-        using typename Base::Tc;
         using typename Base::Tv;
+        using typename Base::Trv;
     public:
         using Base::Base;
         /* Operations */
@@ -89,7 +89,7 @@ namespace Physica {
     template<Vector V>
     void VectorExpr<ExprType::Square, V>::reverse(const Scalar auto& grad) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
-        expr.reverse(expr.values() * (Tv(2) * grad));
+        expr.reverse(expr.values() * (Trv(2) * grad));
     }
 
     template<Vector V>

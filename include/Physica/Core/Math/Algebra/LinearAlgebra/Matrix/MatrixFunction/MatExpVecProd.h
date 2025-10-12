@@ -34,15 +34,14 @@ namespace Physica {
         using This = MatExpVecProd<M, V>;
         using Base = RValueVector<This>;
     public:
-        using typename Base::ScalarType;
         using ParamPair = std::pair<int, int>;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
         using typename Base::Tr;
         using typename Base::Trv;
         using Tm = Tr::MachineType;
     private:
-        constexpr static bool IsFloat = ScalarType::Prec == Float;
         constexpr static int MaxNumTaylorTerm = 55;
         constexpr static int MaxNormOrder = 8;
         constexpr static int MaxNormIteration = 16;
@@ -70,7 +69,7 @@ namespace Physica {
         template<bool NoFactor = false, ExecutePolicy P = Sequential>
         auto assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type;
 
-        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tr calcTraceMu() const { return mexp.calcTraceMu(); }
         template<ExecutePolicy P>
@@ -105,7 +104,7 @@ namespace Physica {
     auto MatExpVecProd<M, V>::assign(Vector auto& target, Tr traceMu, ParamPair params) const -> std::conditional<NoFactor, Tr, void>::type {
         constexpr size_t SizeAtCompile1 = std::remove_cvref_t<decltype(target)>::SizeAtCompile;
         constexpr size_t SizeAtCompile2 = std::max(SizeAtCompile1, Base::SizeAtCompile);
-        using BufferType = DenseVector<ScalarType, SizeAtCompile2>;
+        using BufferType = DenseVector<T, SizeAtCompile2>;
 
         assert(getLength() == target.getLength());
         const Tr epsilon = std::numeric_limits<Tr>::epsilon();
@@ -176,7 +175,7 @@ namespace Physica {
         }
 
         Array<Trv, MaxNormOrder> powerNorms{};
-        const Tr normalizer = reciprocal(norm1); // pow() has the risk of overflow
+        const Tr normalizer = reciprocal(norm1); // Avoid potential overflow of pow()
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
             const Tr pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * matI, order).template norm1_power<P>(MaxNormIteration);
             powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(Trv(order))) * norm1.value();
@@ -199,7 +198,7 @@ namespace Physica {
     constexpr auto MatExpVecProd<M, V>::calcTheta(int numTaylorTerm) -> Tm {
         assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
         const int bufferIndex = (numTaylorTerm - 1) / 5; 
-        return IsFloat ? ThetaFloat32[bufferIndex] : ThetaFloat64[bufferIndex];
+        return (T::Prec == Float) ? ThetaFloat32[bufferIndex] : ThetaFloat64[bufferIndex];
     }
 }
 

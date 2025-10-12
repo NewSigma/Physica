@@ -67,6 +67,7 @@ namespace Physica {
         using Base::operator=;
         using Base::operator();
         /* Operations */
+        using Base::resize;
         void resize(size_t row, size_t col);
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;

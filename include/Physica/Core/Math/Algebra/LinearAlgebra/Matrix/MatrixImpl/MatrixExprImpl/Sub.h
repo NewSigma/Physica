@@ -64,17 +64,32 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) - Base::getRHS().calc(row, col);
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) - Base::getRHS().calc_value(row, col);
-        }
+        void reverse(const auto& grad) const noexcept;
 
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
     };
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Sub, M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
+        return Base::getLHS().calc(row, col) - Base::getRHS().calc(row, col);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Sub, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
+        return Base::getLHS().calc_value(row, col) - Base::getRHS().calc_value(row, col);
+    }
+
+    template<Matrix M1, Matrix M2>
+    void MatrixExpr<ExprType::Sub, M1, M2>::reverse(const auto& grad) const noexcept {
+        if constexpr (ReverseDiff<M1>)
+            Base::getLHS().reverse(grad);
+        if constexpr (ReverseDiff<M2>)
+            Base::getRHS().reverse(-grad);
+    }
 
     template<Matrix T, Scalar U>
     [[nodiscard]] auto operator-(T&& m, U&& x) noexcept requires(!CUDA<T>) {

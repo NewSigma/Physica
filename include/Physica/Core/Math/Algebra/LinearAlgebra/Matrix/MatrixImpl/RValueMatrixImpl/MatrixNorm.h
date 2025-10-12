@@ -54,12 +54,11 @@ namespace Physica {
             return abs(calc(0, 0));
 
         const Trv factor = reciprocal(Trv(length));
-        
         VectorND<T> y(length);
         VectorND<T> z(length);
         size_t lastIndex = 0;
         size_t index = 0;
-        for (unsigned int iteration = 0; iteration < maxIteration; ++iteration) [[likely]] {
+        for (unsigned int iteration = 0; iteration < maxIteration; ++iteration) {
             const Derived& m = Base::getDerived();
             if (iteration == 0) {
                 z = factor;

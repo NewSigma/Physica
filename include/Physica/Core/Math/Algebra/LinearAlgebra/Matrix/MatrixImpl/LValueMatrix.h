@@ -92,6 +92,7 @@ namespace Physica {
 
         void toNextMean(size_t lastNumSample, const Matrix auto& sample) noexcept;
         void toNextVariance(Derived& mean, size_t lastNumSample, const Matrix auto& sample) noexcept;
+        void reverse(const Scalar auto& grad) const noexcept requires(isReverseDiff);
         void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] auto row(size_t r) noexcept;

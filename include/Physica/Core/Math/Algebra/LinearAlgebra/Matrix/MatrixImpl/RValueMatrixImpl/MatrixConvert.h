@@ -38,9 +38,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).real(); }
+        /* Operations */
+        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).real(); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -62,9 +63,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).imag(); }
+        /* Operations */
+        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).imag(); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -76,6 +78,7 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Trv;
     private:
         const M& mat;
     public:
@@ -86,12 +89,27 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).squaredNorm(); }
+        /* Operations */
+        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).squaredNorm(); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc(row, col).value().squaredNorm(); }
+
+        void reverse(const auto& grad) const noexcept;
+        using Base::reverse;
+        /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
+
+    template<class M>
+    void SquaredNormMatrix<M>::reverse(const auto& grad) const noexcept {
+        using U = decltype(grad);
+        if constexpr (Scalar<U>)
+            mat.reverse((Trv(2) * grad) * mat.values());
+        else {
+            static_assert(Matrix<U>);
+            mat.reverse(hadamard(Trv(2) * mat.values(), grad));
+        }
+    }
 
     template<class M>
     class NormMatrix : public RValueMatrix<NormMatrix<M>> {
@@ -110,9 +128,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).norm(); }
+        /* Operations */
+        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const { return mat.calc(row, col).norm(); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc(row, col).value().norm(); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -133,9 +152,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc_value(row, col); }
         [[nodiscard]] T calc_value(size_t row, size_t col) const { return calc(row, col); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -157,9 +177,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Getters */
+        /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(row, col).template grad<GradOrder>(); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
+        /* Getters */
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };

@@ -25,6 +25,8 @@
 using namespace Physica;
 
 namespace {
+
+
     void setThreadEnv() noexcept {
     #ifdef PHYSICA_MKL
         vmlSetMode(VML_HA | VML_FTZDAZ_CURRENT | VML_ERRMODE_NOERR);
@@ -69,6 +71,21 @@ namespace {
         state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
         return static_cast<uint32_t>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
     }
+
+    struct ThreadInfo {
+        int id;
+        uint64_t randState;
+    };
+
+    ThreadInfo& getThreadInfo() noexcept {
+        thread_local static std::unique_ptr<ThreadInfo> info = nullptr;
+        if (info == nullptr) {
+            info = std::make_unique<ThreadInfo>();
+            info->id = ThreadPool::MainThreadID;
+            info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
+        }
+        return *info;
+    }
 }
 
 int ThreadPool::numThreadRequired = 0;
@@ -91,10 +108,10 @@ auto ThreadPool::ThreadData::pop() noexcept -> Handle {
 ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");
     for (int i = 0; i < numThreads; ++i) {
-        thread_data[i].thread.reset(new std::thread([i]() noexcept {
+        thread_data[i].thread = std::thread([i]() noexcept {
             setThreadEnv();
             getInstance().workerMainLoop(i);
-        }));
+        });
     }
 }
 
@@ -133,8 +150,8 @@ void ThreadPool::waitExit() {
     shouldExit();
     for (auto& data : thread_data) {
         auto& thread = data.thread;
-        if (thread->joinable())
-            thread->join();
+        if (thread.joinable())
+            thread.join();
     }
 }
 
@@ -144,7 +161,9 @@ void ThreadPool::restart() {
     const int numThread = makeNumThread();
     thread_data = Array<ThreadData>(numThread);
     for (int i = 0; i < numThread; ++i) {
-        thread_data[i].thread = std::make_unique<std::thread>([this, i]() { workerMainLoop(i); });
+        thread_data[i].thread = std::thread([i]() noexcept {
+            getInstance().workerMainLoop(i);
+        });
     }
 }
 
@@ -160,9 +179,12 @@ auto ThreadPool::getInstance() noexcept -> This& {
     return pool;
 }
 
+int ThreadPool::getThreadID() noexcept {
+    return getThreadInfo().id;
+}
+
 void ThreadPool::workerMainLoop(int thread_id) noexcept {
-    auto& threadInfo = getThreadInfo();
-    threadInfo.id = thread_id;
+    getThreadInfo().id = thread_id;
     auto& data = thread_data[thread_id];
     while (true) {
         Handle handle = data.pop();
@@ -181,14 +203,4 @@ void ThreadPool::workerMainLoop(int thread_id) noexcept {
             cond.wait(poolLocker);
         }
     }
-}
-
-auto ThreadPool::getThreadInfo() noexcept -> ThreadInfo& {
-    thread_local static std::unique_ptr<ThreadInfo> info = nullptr;
-    if (info == nullptr) {
-        info = std::make_unique<ThreadInfo>();
-        info->id = MainThreadID;
-        info->randState = std::hash<std::thread::id>()(std::this_thread::get_id());
-    }
-    return *info;
 }

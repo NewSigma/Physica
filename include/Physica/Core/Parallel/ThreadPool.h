@@ -41,7 +41,7 @@ namespace Physica {
         using Handle = std::coroutine_handle<>;
         class ThreadData {
         public:
-            std::unique_ptr<std::thread> thread;
+            std::thread thread;
         private:
             std::queue<Handle> queue;
             std::mutex mutex;
@@ -51,17 +51,11 @@ namespace Physica {
             void push(Handle handle) noexcept;
             Handle pop() noexcept;
         };
-
-        struct ThreadInfo {
-            int id;
-            uint64_t randState;
-        };
     public:
         static int numThreadRequired;
-    private:
         // Larger than any thread ID, main thread is not maintained by thread pool
         constexpr static int MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
-
+    private:
         Array<ThreadData> thread_data;
         std::mutex poolMutex;
         std::condition_variable cond;
@@ -84,21 +78,11 @@ namespace Physica {
         void shouldExit() noexcept;
         /* Static Members */
         [[nodiscard]] static This& getInstance() noexcept;
-        [[nodiscard]] static inline int getThreadID() noexcept;
-        [[nodiscard]] static inline bool isMainThread() noexcept;
+        [[nodiscard]] static int getThreadID() noexcept;
+        [[nodiscard]] static bool isMainThread() noexcept { return getThreadID() == MainThreadID; }
     private:
         ThreadPool(int numThreads);
         /* Operations */
         void workerMainLoop(int thread_id) noexcept;
-        /* Static Members */
-        [[nodiscard]] static ThreadInfo& getThreadInfo() noexcept;
     };
-
-    inline int ThreadPool::getThreadID() noexcept {
-        return getThreadInfo().id;
-    }
-
-    inline bool ThreadPool::isMainThread() noexcept {
-        return getThreadID() == MainThreadID;
-    }
 }
