@@ -56,22 +56,22 @@ namespace {
     }
 }
 // Note: IntelLLVM is sensitive to static matrix size
-BENCHMARK(gemm<2>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(2);
-BENCHMARK(gemm<4>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(4);
-BENCHMARK(gemm<8>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(8);
-BENCHMARK(gemm<16>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(gemm<32>)->Name("GEMM")->Unit(benchmark::kNanosecond)->Arg(32);
-BENCHMARK(gemm)->Name("GEMM")->Unit(benchmark::kMicrosecond)
+BENCHMARK(gemm<2>)->Name("GEMM")->Arg(2);
+BENCHMARK(gemm<4>)->Name("GEMM")->Arg(4);
+BENCHMARK(gemm<8>)->Name("GEMM")->Arg(8);
+BENCHMARK(gemm<16>)->Name("GEMM")->Arg(16);
+BENCHMARK(gemm<32>)->Name("GEMM")->Arg(32);
+BENCHMARK(gemm)->Name("GEMM")
     ->Arg(64)
     ->Arg(256)
     ->Arg(1024);
 
-BENCHMARK(gemm_base<2>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(2);
-BENCHMARK(gemm_base<4>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(4);
-BENCHMARK(gemm_base<8>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(8);
-BENCHMARK(gemm_base<16>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(16);
-BENCHMARK(gemm_base<32>)->Name("GEMM base")->Unit(benchmark::kNanosecond)->Arg(32);
-BENCHMARK(gemm_base)->Name("GEMM base")->Unit(benchmark::kMicrosecond)
+BENCHMARK(gemm_base<2>)->Name("GEMM base")->Arg(2);
+BENCHMARK(gemm_base<4>)->Name("GEMM base")->Arg(4);
+BENCHMARK(gemm_base<8>)->Name("GEMM base")->Arg(8);
+BENCHMARK(gemm_base<16>)->Name("GEMM base")->Arg(16);
+BENCHMARK(gemm_base<32>)->Name("GEMM base")->Arg(32);
+BENCHMARK(gemm_base)->Name("GEMM base")
     ->Arg(64)
     ->Arg(256)
     ->Arg(1024);

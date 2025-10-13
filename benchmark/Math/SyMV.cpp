@@ -37,12 +37,12 @@ namespace {
     }
 }
 
-BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kNanosecond)
+BENCHMARK(kernel)->Name("SyMV")
     ->Arg(2)
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)
     ->Arg(64);
-BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kMicrosecond)->Arg(256);
-BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kMicrosecond)->Arg(1024);
-BENCHMARK(kernel)->Name("SyMV")->Unit(benchmark::kMillisecond)->Arg(16384);
+BENCHMARK(kernel)->Name("SyMV")->Arg(256);
+BENCHMARK(kernel)->Name("SyMV")->Arg(1024);
+BENCHMARK(kernel)->Name("SyMV")->Arg(16384);

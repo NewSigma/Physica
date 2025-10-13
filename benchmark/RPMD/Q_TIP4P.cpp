@@ -113,4 +113,4 @@ namespace {
     }
 }
 
-BENCHMARK(bench)->Name("Q_TIP4P")->Unit(benchmark::kMillisecond);
+BENCHMARK(bench)->Name("Q_TIP4P");

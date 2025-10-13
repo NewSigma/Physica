@@ -141,7 +141,14 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
-        return mat1.row(row) * mat2.col(col);
+        if constexpr (IsIntelLLVM()) {
+            T result(0);
+            for (size_t i = 0; i < mat1.getCol(); ++i)
+                result += mat1.calc(row, i) * mat2.calc(i, col);
+            return result;
+        }
+        else // Intel LLVM does not optimize the following code well
+            return mat1.row(row) * mat2.col(col);
     }
 
     template<Matrix M1, Matrix M2>

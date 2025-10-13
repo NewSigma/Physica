@@ -61,4 +61,4 @@ namespace {
     }
 }
 
-BENCHMARK(bench)->Name("ParaH cuda")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);
+BENCHMARK(bench)->Name("ParaH cuda")->Arg(108)->Arg(256)->Arg(500)->Arg(864);

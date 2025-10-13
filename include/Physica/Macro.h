@@ -110,6 +110,14 @@ namespace Physica {
     #endif
     }
 
+    [[maybe_unused]] consteval static bool IsIntelLLVM() noexcept {
+    #ifdef __INTEL_LLVM_COMPILER
+        return true;
+    #else
+        return false;
+    #endif
+    }
+
     [[maybe_unused]] consteval static bool HasHDF5() noexcept {
     #ifdef PHYSICA_HDF5
         return true;

@@ -47,7 +47,7 @@ namespace {
     }
 }
 
-BENCHMARK(direct<false>)->Name("EigenSolver s")->Unit(benchmark::kMillisecond);
-BENCHMARK(direct<true>)->Name("EigenSolver sv")->Unit(benchmark::kMillisecond);
-BENCHMARK(base<false>)->Name("EigenSolver s base")->Unit(benchmark::kMillisecond);
-BENCHMARK(base<true>)->Name("EigenSolver sv base")->Unit(benchmark::kMillisecond);
+BENCHMARK(direct<false>)->Name("EigenSolver s");
+BENCHMARK(direct<true>)->Name("EigenSolver sv");
+BENCHMARK(base<false>)->Name("EigenSolver s base");
+BENCHMARK(base<true>)->Name("EigenSolver sv base");

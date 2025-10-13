@@ -62,6 +62,6 @@ namespace {
     }
 }
 
-BENCHMARK(kernel1)->Name("UnitMV 1")->Unit(benchmark::kNanosecond)->Arg(256);
-BENCHMARK(kernel2)->Name("UnitMV 2")->Unit(benchmark::kNanosecond)->Arg(256);
-BENCHMARK(kernel3)->Name("UnitMV 3")->Unit(benchmark::kNanosecond)->Arg(256);
+BENCHMARK(kernel1)->Name("UnitMV 1")->Arg(256);
+BENCHMARK(kernel2)->Name("UnitMV 2")->Arg(256);
+BENCHMARK(kernel3)->Name("UnitMV 3")->Arg(256);

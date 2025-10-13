@@ -66,4 +66,4 @@ namespace {
     }
 }
 
-BENCHMARK(bench)->Name("ParaH auto")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);
+BENCHMARK(bench)->Name("ParaH auto")->Arg(108)->Arg(256)->Arg(500)->Arg(864);

@@ -70,4 +70,4 @@ namespace {
     }
 }
 
-BENCHMARK(func)->Name("HardCore")->Unit(benchmark::kMicrosecond);
+BENCHMARK(func)->Name("HardCore");

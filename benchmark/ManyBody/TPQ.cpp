@@ -48,4 +48,4 @@ namespace {
     }
 }
 
-BENCHMARK(bench)->Name("TPQ")->Unit(benchmark::kSecond);
+BENCHMARK(bench)->Name("TPQ");

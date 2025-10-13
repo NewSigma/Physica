@@ -65,8 +65,6 @@ namespace Physica {
      */
     template<class Derived>
     class RValueMatrix : public CRTPBase<RValueMatrix<Derived>> {
-        static_assert(!std::is_const<Derived>::value, "[Error]: A common mistake, const is unnecessary");
-        static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
         using This = RValueMatrix<Derived>;
         using Base = CRTPBase<This>;
         using RowVector = RMatrixBlock<Derived, 1, Dynamic>;

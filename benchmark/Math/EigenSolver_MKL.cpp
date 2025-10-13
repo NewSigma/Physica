@@ -36,5 +36,5 @@ namespace {
     }
 }
 
-BENCHMARK(kernel<false>)->Name("EigenSolver s mkl")->Unit(benchmark::kMillisecond);
-BENCHMARK(kernel<true>)->Name("EigenSolver sv mkl")->Unit(benchmark::kMillisecond);
+BENCHMARK(kernel<false>)->Name("EigenSolver s mkl");
+BENCHMARK(kernel<true>)->Name("EigenSolver sv mkl");

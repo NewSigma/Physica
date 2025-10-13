@@ -35,12 +35,12 @@ namespace {
     }
 }
 
-BENCHMARK(exp<float32>)->Name("exp float32 mkl")->Unit(benchmark::kNanosecond)
+BENCHMARK(exp<float32>)->Name("exp float32 mkl")
     ->Arg(8)
     ->Arg(64)
     ->Arg(512)
     ->Arg(1024);
-BENCHMARK(exp<float64>)->Name("exp float64 mkl")->Unit(benchmark::kNanosecond)
+BENCHMARK(exp<float64>)->Name("exp float64 mkl")
     ->Arg(8)
     ->Arg(16)
     ->Arg(32)

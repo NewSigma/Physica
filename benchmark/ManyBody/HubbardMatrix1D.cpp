@@ -48,4 +48,4 @@ namespace {
     }
 }
 
-BENCHMARK(func)->Name("HubbardMatrix1D")->Unit(benchmark::kMillisecond);
+BENCHMARK(func)->Name("HubbardMatrix1D");

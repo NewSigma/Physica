@@ -57,5 +57,5 @@ namespace {
     }
 }
 
-BENCHMARK(bench1)->Name("CRCoro base")->Unit(benchmark::kNanosecond)->Arg(2048);
-BENCHMARK(bench2)->Name("CRCoro")->Unit(benchmark::kMicrosecond)->Arg(2048);
+BENCHMARK(bench1)->Name("CRCoro base")->Arg(2048);
+BENCHMARK(bench2)->Name("CRCoro")->Arg(2048);

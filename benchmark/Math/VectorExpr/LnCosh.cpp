@@ -36,7 +36,7 @@ namespace {
     }
 }
 
-BENCHMARK(lncosh<float32>)->Name("lncosh float32")->Unit(benchmark::kNanosecond);
-BENCHMARK(lncosh<float64>)->Name("lncosh float64")->Unit(benchmark::kNanosecond);
-BENCHMARK(lncosh<cfloat32>)->Name("lncosh cfloat32")->Unit(benchmark::kNanosecond);
-BENCHMARK(lncosh<cfloat64>)->Name("lncosh cfloat64")->Unit(benchmark::kNanosecond);
+BENCHMARK(lncosh<float32>)->Name("lncosh float32");
+BENCHMARK(lncosh<float64>)->Name("lncosh float64");
+BENCHMARK(lncosh<cfloat32>)->Name("lncosh cfloat32");
+BENCHMARK(lncosh<cfloat64>)->Name("lncosh cfloat64");

@@ -35,22 +35,22 @@ namespace {
     }
 }
 
-BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")->Unit(benchmark::kNanosecond)
+BENCHMARK(innerDot_mkl<float32>)->Name("innerDot mkl float32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")->Unit(benchmark::kNanosecond)
+BENCHMARK(innerDot_mkl<float64>)->Name("innerDot mkl float64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")->Unit(benchmark::kNanosecond)
+BENCHMARK(innerDot_mkl<cfloat32>)->Name("innerDot mkl cfloat32")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
 
-BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")->Unit(benchmark::kNanosecond)
+BENCHMARK(innerDot_mkl<cfloat64>)->Name("innerDot mkl cfloat64")
     ->Arg(16)
     ->Arg(128)
     ->Arg(1024);
