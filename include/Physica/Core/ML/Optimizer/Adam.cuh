@@ -70,8 +70,8 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Diffable U>
-        void step(U& target);
+        void step(Diffable auto& target);
+        void step(Diffable auto& target, Diffable auto&... targets);
         void clear() { targetBufferMap.clear(); }
 
         void swap(This& __restrict obj) noexcept;
@@ -96,8 +96,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Diffable U>
-    void device_obj<Adam<T>>::step(U& target) {
+    void device_obj<Adam<T>>::step(Diffable auto& target) {
+        using U = decltype(target);
         using BufferType = std::conditional<Vector<U>, VectorBuffer, MatrixBuffer>::type;
         if (!args.decay.isZero())
             target.grads() += args.decay * target.values();
@@ -130,6 +130,12 @@ namespace Physica {
             target.values() -= alpha * divide(m, sqrt_elem(v) + args.epsilon);
         beta1t *= beta1;
         beta2t *= beta2;
+    }
+
+    template<Scalar T>
+    void device_obj<Adam<T>>::step(Diffable auto& target, Diffable auto&... targets) {
+        step(target);
+        step(targets...);
     }
 
     template<Scalar T>

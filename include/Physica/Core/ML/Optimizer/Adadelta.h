@@ -62,8 +62,8 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Diffable U>
-        void step(U& target);
+        void step(Diffable auto& target);
+        void step(Diffable auto& target, Diffable auto&... targets);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -72,8 +72,8 @@ namespace Physica {
     };
 
     template<Scalar T>
-    template<Diffable U>
-    void Adadelta<T>::step(U& target) {
+    void Adadelta<T>::step(Diffable auto& target) {
+        using U = decltype(target);
         using BufferType = std::conditional<Vector<U>, VectorBuffer, MatrixBuffer>::type;
         if (!decay.isZero())
             target.grads() += decay * target.values();
@@ -101,6 +101,12 @@ namespace Physica {
             target.grads() = hadamard(sqrt_elem(divide(u + epsilon, v + epsilon)), target.grads());
         u = rho * u + (T(1) - rho) * target.grads().squaredNorms();
         target.values() -= lr * target.grads();
+    }
+
+    template<Scalar T>
+    void Adadelta<T>::step(Diffable auto& target, Diffable auto&... targets) {
+        step(target);
+        step(targets...);
     }
 
     template<Scalar T>

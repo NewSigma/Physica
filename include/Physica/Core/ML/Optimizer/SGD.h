@@ -38,8 +38,8 @@ namespace Physica {
         /* Operators */
         SGD& operator=(SGD obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Diffable U>
-        void step(U& target) const;
+        void step(Diffable auto& target) const;
+        void step(Diffable auto& target, Diffable auto&... targets) const;
         void swap(SGD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T& getLearnRate() noexcept { return lr; }
@@ -50,14 +50,20 @@ namespace Physica {
     SGD<T>::SGD(T lr_) : lr(lr_) {}
 
     template<Scalar T>
-    template<Diffable U>
-    void SGD<T>::step(U& target) const {
+    void SGD<T>::step(Diffable auto& target) const {
+        using U = decltype(target);
         if constexpr (Scalar<U>)
             target.value() -= lr * target.grad().value();
         else if constexpr (Vector<U> || Matrix<U>)
             target.values() -= lr * target.grads().values();
         else
             target.step(*this);
+    }
+
+    template<Scalar T>
+    void SGD<T>::step(Diffable auto& target, Diffable auto&... targets) const {
+        step(target);
+        step(targets...);
     }
 
     template<Scalar T>

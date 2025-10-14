@@ -40,8 +40,8 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Diffable U>
-        void step(U& target);
+        void step(Diffable auto& target);
+        void step(Diffable auto& target, Diffable auto&... targets);
         void swap(This& __restrict obj) noexcept;
     };
 
@@ -53,8 +53,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Diffable U>
-    void device_obj<MomentSGD<T>>::step(U& target) {
+    void device_obj<MomentSGD<T>>::step(Diffable auto& target) {
+        using U = decltype(target);
         using BufferType = std::conditional<Vector<U>, VectorType, MatrixType>::type;
 
         void* pTarget = (void*)(&target);
@@ -73,6 +73,12 @@ namespace Physica {
         auto& lastGrad = std::get<BufferType>(var);
         lastGrad = moment * lastGrad + target.grads();
         target.values() -= lr * lastGrad;
+    }
+
+    template<Scalar T>
+    void device_obj<MomentSGD<T>>::step(Diffable auto& target, Diffable auto&... targets) {
+        step(target);
+        step(targets...);
     }
 
     template<Scalar T>

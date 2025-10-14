@@ -303,7 +303,7 @@ namespace Physica {
     auto RValueMatrix<Derived>::sum() const -> CoDiff<T> {
         if constexpr (isReverseDiff) {
             auto result = co_yield values().sum();
-            Base::getDerived().reverse(result.grad() / Trv(getRow() * getCol()));
+            Base::getDerived().reverse(result.grad());
         }
         else {
             T result = 0;
@@ -319,8 +319,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::mean() const -> T {
-        return sum() / Trv(getRow() * getCol());
+    auto RValueMatrix<Derived>::mean() const -> CoDiff<T> {
+        return sum() / Trv(getSize());
     }
 
     template<class Derived>
