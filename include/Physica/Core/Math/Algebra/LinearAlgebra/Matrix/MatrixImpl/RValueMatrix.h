@@ -101,8 +101,6 @@ namespace Physica {
         [[nodiscard]] auto operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>);
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>);
-        template<Matrix M>
-        [[nodiscard]] auto operator*(const M& mat) const noexcept requires(((ColAtCompile != 1 && M::ColAtCompile != 1) || (ColAtCompile == 1 && M::ColAtCompile == 1)) && !CUDA<M>);
         /* Operations */
         void assign(Matrix auto& target) const;
         void assign_add(Matrix auto& target) const;

@@ -76,6 +76,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
+
+        [[nodiscard]] auto values() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
@@ -162,6 +164,16 @@ namespace Physica {
             mat1.reverse(grad * mat2.transpose());
         if constexpr (ReverseDiff<M2>)
             mat2.reverse(mat1.transpose() * grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto GEMM<M1, M2>::values() const noexcept {
+        return mat1.values() * mat2.values();
+    }
+
+    template<Matrix M1, Matrix M2>
+    GEMM<M1, M2> operator*(const M1& mat1, const M2& mat2) noexcept requires(((M1::ColAtCompile != 1 && M2::ColAtCompile != 1) || (M1::ColAtCompile == 1 && M2::ColAtCompile == 1)) && !CUDA<M1> && !CUDA<M2>) {
+        return GEMM<M1, M2>(mat1, mat2);
     }
 }
 

@@ -67,10 +67,13 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
+        using Base::reverse;
         void reverse(const auto& grad) const noexcept;
 
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
+
+        [[nodiscard]] auto values() const noexcept;
     };
 
     template<Matrix M1, Matrix M2>
@@ -89,6 +92,11 @@ namespace Physica {
             Base::getLHS().reverse(grad);
         if constexpr (ReverseDiff<M2>)
             Base::getRHS().reverse(-grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] auto MatrixExpr<ExprType::Sub, M1, M2>::values() const noexcept {
+        return Base::getLHS().values() - Base::getRHS().values();
     }
 
     template<Matrix T, Scalar U>
