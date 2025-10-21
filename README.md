@@ -1,11 +1,11 @@
 # Physica
 
-Physica is a high-performance and scalable C++ template library, dedicated to providing a rapid iteration platform for new algorithms. It provides the following two main features:
+*Physica* is a high-performance and scalable C++ template library, dedicated to providing a rapid iteration platform for new algorithms. It provides the following two main features:
 
 - Differentiable linear algebra library that leverages SIMD and GPU acceleration
 - Domain specific composable modules for computational physics
 
-Physica is also an open source platform that maintains scientific code written in Physica and related data. We expect Physica, as a platform and not just a software, to promote the development of open science. The open source community continuously ensures that the results remain readable, reproducible and reliable.
+It is also an open source platform that maintains scientific code and related data. We expect it as a platform and not just a software, to promote the development of open science. The open source community continuously ensures that the results remain readable, reproducible and reliable.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ Physica is also an open source platform that maintains scientific code written i
 
 ## Design philosophy
 
-Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
+Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. *Physica* targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
 ## Features
 
@@ -37,7 +37,7 @@ We provide a conda package to help with fast deployment:
 conda install -c conda-forge -c nvidia newsigma::physica
 ```
 
-which installs the required dependencies to build Physica. Refer to [Install.md](doc/Install.md) for instructions on how to build Physica.
+which installs the required dependencies. Refer to [Install.md](doc/Install.md) for instructions on how to build *Physica*.
 
 ## Maintainers
 
@@ -49,7 +49,7 @@ Feel free to dive in! Open an issue or submit PRs.
 
 ### Something you can do
 
-1.Test Physica on your machine and report bugs.  
+1.Test it on your machine and report bugs.  
 
 2.Tell us new features you want.  
 

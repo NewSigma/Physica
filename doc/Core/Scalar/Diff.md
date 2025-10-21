@@ -18,13 +18,13 @@ Physica在前向传播完成时暂停协程以等待未来的梯度。使用RAII
     void reverse(GradType grad = 1) const noexcept { ... } // 累积梯度但不进行传播
     ```
 
+### 反向传播 + 模板表达式
+
 对于模板表达式的情况, 传递前向传播的值可以避免重复计算的开销
 
     ``` C++
     void reverse(ValueType value, GradType grad = 1) const noexcept { ... }
     ```
-
-### Checkpoint
 
 注意到，模板表达式本身并不执行实际计算, 亦不储存计算结果。因此，模板表达式反向传播过程中若需使用表达式的结果，会触发必要的前向传播以获取该值，该机制等同于Checkpoint技术。
 
