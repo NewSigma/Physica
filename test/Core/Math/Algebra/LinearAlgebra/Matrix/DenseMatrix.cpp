@@ -41,7 +41,7 @@ int main() {
     }
     /* Row double matrix */ {
         using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Row>;
         const auto data = MatrixType::random_uniform<RandomSource>(16, 20);
 
         TempFile tmp("/tmp/tmpXXXXXX");
@@ -55,7 +55,7 @@ int main() {
     }
     /* Row complex float matrix */ {
         using T = Complex<float32>;
-        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Row>;
         const auto data = MatrixType::random_uniform<RandomSource>(16, 12);
 
         TempFile tmp("/tmp/tmpXXXXXX");

@@ -25,7 +25,6 @@ namespace Physica {
     template<class Derived>
     auto ContinuousMatrix<Derived>::toNumpy() const {
         using namespace nanobind;
-        static_assert(MatrixOption::isElementMatrix<Derived>(), "[Error]: Vector storage cannot cast to numpy");
         constexpr auto Major = MatrixOption::getMajor<Derived>() == MatrixOption::Row ? c_config : f_contig;
         using T = ScalarType::MachineType;
         using ResultType = ndarray<T, numpy, Major>;

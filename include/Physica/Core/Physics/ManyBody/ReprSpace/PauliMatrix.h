@@ -104,7 +104,7 @@ namespace Physica {
         static_assert(!T::isComplex);
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = 2;
         constexpr static size_t ColAtCompile = 2;
         constexpr static size_t SizeAtCompile = 4;

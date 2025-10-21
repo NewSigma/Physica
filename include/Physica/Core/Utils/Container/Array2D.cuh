@@ -29,14 +29,11 @@ namespace Physica {
         using ArrayType = device_obj<typename host_obj::ArrayType>;
         using IndexType = host_obj::IndexType;
 
-        constexpr static bool isVectorStorage = host_obj::isVectorStorage;
         constexpr static bool isDynamicArray = host_obj::isDynamicArray;
         constexpr static bool isColMajor = host_obj::isColMajor;
-        using SizeType = std::conditional<isVectorStorage, size_t, PlainStruct<void>>::type;
     private:
         ArrayType arr;
         [[no_unique_address]] IndexType r = 0;
-        SizeType size = 0; // FIXME: Double [[no_unique_address]] makes NVCC 12.8, arch 75 miscompilation
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t col);

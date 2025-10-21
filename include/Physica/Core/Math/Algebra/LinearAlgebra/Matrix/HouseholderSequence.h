@@ -106,7 +106,7 @@ namespace Physica {
     class Traits<HouseholderSequence<T, ColWiseRead>> {
     public:
         using ScalarType = T::ScalarType;
-        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;

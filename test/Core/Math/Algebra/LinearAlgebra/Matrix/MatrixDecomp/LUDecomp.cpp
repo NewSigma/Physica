@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
 
 using namespace Physica;
-using Matrix3D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+using Matrix3D = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
 
 template<bool Pivot>
 void test(const Matrix auto& answer) {

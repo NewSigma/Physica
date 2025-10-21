@@ -24,7 +24,7 @@ using MatrixType = DenseMatrix<T>;
 using RandomSource = Random<MT19937, 10000>;
 
 int main() {
-    MatrixType a[6];
+    Array<MatrixType, 6> a{};
     a[0] = MatrixType::random_uniform<RandomSource>(30, 35);
     a[1] = MatrixType::random_uniform<RandomSource>(35, 15);
     a[2] = MatrixType::random_uniform<RandomSource>(15, 5);

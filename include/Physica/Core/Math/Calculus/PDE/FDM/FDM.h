@@ -52,7 +52,7 @@ namespace Physica {
     template<Scalar T>
     class FDM : public FDMBase {
     public:
-        using DataMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic>;
+        using DataMatrix = DenseMatrix<T, MatrixOption::Col, Dynamic, Dynamic>;
     private:
         DataMatrix data;
         std::vector<Boundary> boundaries;

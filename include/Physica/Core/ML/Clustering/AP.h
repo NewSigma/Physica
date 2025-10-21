@@ -32,7 +32,7 @@ namespace Physica {
      */
     template<Scalar T>
     class AP {
-        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Row>;
         using SimilarMatrix = DenseSymmMatrix<T>;
     private:
         MatrixType responsibility;

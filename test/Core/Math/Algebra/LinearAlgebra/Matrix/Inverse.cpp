@@ -21,7 +21,7 @@
 using namespace Physica;
 
 int main() {
-    typedef DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 4, 4> Matrix4x4;
+    typedef DenseMatrix<float64, MatrixOption::Col, 4, 4> Matrix4x4;
     const Matrix4x4 input{{1, 1, 1, 1}, {1, 1, -1, -1}, {1, -1, 1, -1}, {1, -1, -1, 1}};
     Inverse<Matrix4x4> inv(input);
     const Matrix4x4 result(inv);

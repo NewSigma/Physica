@@ -118,7 +118,7 @@ namespace Physica {
             rho_new = rho_old + fft.getRSpace().flatten();
         }
         else {
-            using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+            using MatrixType = DenseMatrix<T, MatrixOption::Col>;
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
             MatrixType diisMat = MatrixType(numValidRecord + 1, numValidRecord + 1, 1.0);
             diisMat(0, 0) = T(0);

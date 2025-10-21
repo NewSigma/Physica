@@ -108,7 +108,6 @@ namespace Physica {
         constexpr bool isTranspose2 = is_transpose<T2>::value;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
         static_assert(MatrixOption::isColMatrix<U1>() && MatrixOption::isColMatrix<U2>(), "[Error]: cuBLAS uses column major");
-        static_assert(MatrixOption::isElementMatrix<U1>() && MatrixOption::isElementMatrix<U2>(), "[Error]: cuBLAS need element storage");
         static_assert(!Diffable<This>);
 
         using Tm = ScalarType::MachineType;

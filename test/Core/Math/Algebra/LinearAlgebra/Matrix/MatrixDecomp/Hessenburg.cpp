@@ -55,19 +55,19 @@ int main() {
     using RealType = float64;
     using ComplexType = Complex<RealType>;
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 4, 4>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 4, 4>;
         const MatrixType mat{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
         if (!hessTest(mat, 1E-15))
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 3, 3>;
         const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
         if (!hessTest(mat, 1E-15))
             return 1;
     }
     /* Test degeneracy */ {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 6, 6>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 6, 6>;
         const MatrixType mat1{{ 0.1343184046,             0,             0, -0.1343184056,             0,             0},
                               {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
                               {            0,             0,  0.1342191829,             0,             0, -0.1342191848},
@@ -77,13 +77,13 @@ int main() {
         if (!hessTest(mat1, 1E-15))
             return 1;
 
-        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, 6, 6>;
+        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Col, 6, 6>;
         const ComplexMatrix mat2 = mat1;
         if (!hessTest(mat2, 1E-15))
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 8, 8>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 8, 8>;
         const MatrixType mat{{2.5, 0, 0.866025, 0, 0.481812, 0, 0.318105, 0},
                             {0, 10.5, 0, 4.97494, 0, 3.06186, 0, 2.12934},
                             {0.866025, 0, 25.5, 0, 14.1869, 0, 9.36654, 0},
@@ -96,7 +96,7 @@ int main() {
             return 1;
     }
     /* Complex case */ {
-        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col, 3, 3>;
         const MatrixType mat{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
         if (!hessTest(mat, 1E-12))
             return 1;

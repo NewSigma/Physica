@@ -107,10 +107,9 @@ namespace Physica {
     private:
         constexpr static int OtherMajor = MatrixOption::isColMatrix<T>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr static int Major = MatrixOption::isAnyMajor<T>() ? MatrixOption::AnyMajor : OtherMajor;
-        constexpr static int Storage = MatrixOption::getStorage<T>();
     public:
         using ScalarType = T::ScalarType;
-        constexpr static int Option = Major | Storage;
+        constexpr static int Option = Major;
         constexpr static size_t RowAtCompile = T::ColAtCompile;
         constexpr static size_t ColAtCompile = T::RowAtCompile;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
@@ -120,7 +119,7 @@ namespace Physica {
     class Traits<TransposeVector<T>> {
     public:
         using ScalarType = T::ScalarType;
-        constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
+        constexpr static int Option = MatrixOption::Row;
         constexpr static size_t RowAtCompile = 1;
         constexpr static size_t ColAtCompile = T::SizeAtCompile;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;

@@ -41,8 +41,8 @@ namespace Physica {
         using WorkingMatrix = Schur<T, Order>::WorkingMatrix;
     public:
         using EigenvalueVector = DenseVector<Tc, Order>;
-        using EigenvectorMatrix = DenseMatrix<Tc, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
-        using RawEigenvectorType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
+        using EigenvectorMatrix = DenseMatrix<Tc, MatrixOption::Col, Order, Order>;
+        using RawEigenvectorType = DenseMatrix<T, MatrixOption::Col, Order, Order>;
     private:
         EigenvalueVector eigenvalues;
         RawEigenvectorType rawEigenvectors;

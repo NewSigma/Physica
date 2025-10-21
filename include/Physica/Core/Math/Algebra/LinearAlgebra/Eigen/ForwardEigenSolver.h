@@ -34,7 +34,7 @@ namespace Physica {
         using Tcv = Tc::ValueType;
     public:
         using EigenvalueVector = DenseVector<Tc, Order>;
-        using EigenvectorMatrix = DenseMatrix<Tc, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
+        using EigenvectorMatrix = DenseMatrix<Tc, MatrixOption::Col, Order, Order>;
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;

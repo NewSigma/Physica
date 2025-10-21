@@ -25,7 +25,7 @@ namespace Physica {
     class ODESolver {
     public:
         using VectorType = DenseVector<T, Dim>;
-        using SolutionType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dim>;
+        using SolutionType = DenseMatrix<T, MatrixOption::Col, Dim>;
     protected:
         VectorND<T> x;
         SolutionType solution;
@@ -65,7 +65,7 @@ namespace Physica {
         const size_t col_1 = solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             const T& x_i = x[i];
-            solution.asArray()[i + 1] = rungeKutta4_step(stepSize, x_i, solution.asArray()[i], fn);
+            solution.col(i + 1) = rungeKutta4_step(stepSize, x_i, solution.col(i), fn);
             x[i + 1] = x_i + stepSize;
         }
     }

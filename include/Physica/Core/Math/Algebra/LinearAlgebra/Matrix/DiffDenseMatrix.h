@@ -38,11 +38,12 @@ namespace Physica {
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
+        using typename Base::Tv;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
         using ValueMatrix = DenseMatrix<T, Option, Row, Col>;
-        using initializer_list = ValueMatrix::initializer_list;
+        using VectorIniter = ValueMatrix::VectorIniter;
         using GradType = ScalarType::GradType;
         using GradMatrix = std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Option, Row, Col>>::type;
 
@@ -53,7 +54,8 @@ namespace Physica {
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T init);
         DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff);
-        DenseMatrix(initializer_list list);
+        DenseMatrix(std::initializer_list<Tv> list);
+        DenseMatrix(std::initializer_list<VectorIniter> list);
         DenseMatrix(ValueMatrix v_, GradMatrix g_);
         template<Vector V>
         explicit(isReverseDiff) DenseMatrix(const V& vec) requires(!ReverseDiff<V>);

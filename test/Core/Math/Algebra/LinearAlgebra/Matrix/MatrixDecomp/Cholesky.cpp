@@ -23,7 +23,7 @@ using namespace Physica;
 
 int main() {
     {
-        typedef DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element, 3, 3> Matrix3x3;
+        typedef DenseMatrix<float64, MatrixOption::Col, 3, 3> Matrix3x3;
         Matrix3x3 mat{5, -2, 0, -2, 3, -1, 0, -1, 1};
         Cholesky cholesky(mat);
         Matrix3x3 decomp(cholesky);
@@ -35,7 +35,7 @@ int main() {
                     return 1;
     }
     {
-        typedef DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 3, 3> Matrix3x3;
+        typedef DenseMatrix<float64, MatrixOption::Col, 3, 3> Matrix3x3;
         Matrix3x3 mat{{5, -2, 0}, {-2, 3, -1}, {0, -1, 1}};
         Cholesky cholesky(mat);
         Matrix3x3 decomp(cholesky);
@@ -47,7 +47,7 @@ int main() {
                     return 1;
     }
     {
-        using Matrix5x5 = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 5, 5>;
+        using Matrix5x5 = DenseMatrix<float64, MatrixOption::Col, 5, 5>;
         const Matrix5x5 mat{
             {1.066666667,             0,  0.1523809524,             0, 0.05079365079},
             {            0,  0.1523809524,             0, 0.05079365079,             0},

@@ -25,7 +25,7 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     class LUDecomp {
         using This = LUDecomp;
-        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col>;
         using BiasArray = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
 
         constexpr static bool isComplex = T::isComplex;

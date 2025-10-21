@@ -33,7 +33,22 @@ namespace Physica {
             : Storage(row, col, std::move(value)) {}
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(initializer_list list) : Storage(std::move(list)) {}
+    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : Storage(std::move(list)) {}
+
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)
+            : DenseMatrix(MatrixOption::isColMatrix<This>() ? list.begin()->getLength() : list.size(),
+                          MatrixOption::isColMatrix<This>() ? list.size() : list.begin()->getLength()) {
+        size_t major = 0;
+        for (auto& v : list) {
+            assert(v.getLength() == getMaxMinor());
+            if constexpr (MatrixOption::isColMatrix<This>())
+                this->col(major) = v;
+            else
+                this->row(major) = v;
+            major += 1;
+        }
+    }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const Matrix auto& mat)
@@ -158,7 +173,7 @@ namespace Physica {
      * Helper function that communicates with C libraries.
      */
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This requires(MatrixOption::isElementMatrix<This>()) {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This {
         return This(Storage::read(row, col, p));
     }
 }

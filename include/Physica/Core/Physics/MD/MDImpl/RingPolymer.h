@@ -32,8 +32,8 @@ namespace Physica {
         using MDCellType = MDCell<T, Dim>;
         using MassVector = MDCellType::MassVector;
         using PositionMatrix = MDCellType::PositionMatrix;
-        using PhaseMatrix = DenseMatrix<T, PhaseMatrixMajor | MatrixOption::Vector, Dynamic, NumReplica>;
-        using BufferType = DenseMatrix<BufferScalarType, MatrixOption::Row | MatrixOption::Vector, 2>;
+        using PhaseMatrix = DenseMatrix<T, PhaseMatrixMajor, Dynamic, NumReplica>;
+        using BufferType = DenseMatrix<BufferScalarType, MatrixOption::Row, 2>;
         using FFTType = FFT<T, 1>;
     private:
         PhaseMatrix phase;

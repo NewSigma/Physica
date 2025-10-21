@@ -38,7 +38,7 @@ namespace Physica {
         /* Operations */
         void solve(std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto  random);
         /* Static members */
-        static void step(T stepSize, T& x, VectorType& sol, std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto random);
+        static void step(T stepSize, T& x, Vector auto&& sol, std::invocable<T, VectorType> auto fn, std::invocable<T, VectorType> auto random);
     };
 
     template<Scalar T, size_t Dim>
@@ -46,8 +46,8 @@ namespace Physica {
         const size_t col_1 = Base::solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             T temp = Base::x[i];
-            Base::solution.asArray()[i + 1] = Base::solution.col(i);
-            step(Base::stepSize, temp, Base::solution.asArray()[i + 1], fn, random);
+            Base::solution.col(i + 1) = Base::solution.col(i);
+            step(Base::stepSize, temp, Base::solution.col(i + 1), fn, random);
             Base::x[i + 1] = temp;
         }
     }
@@ -56,7 +56,7 @@ namespace Physica {
     void SRK2<T, Dim>::step(
             T stepSize,
             T& x,
-            VectorType& sol,
+            Vector auto&& sol,
             std::invocable<T, VectorType> auto fn,
             std::invocable<T, VectorType> auto random) {
         using FunctionResult = std::invoke_result<decltype(fn), T, VectorType>::type;

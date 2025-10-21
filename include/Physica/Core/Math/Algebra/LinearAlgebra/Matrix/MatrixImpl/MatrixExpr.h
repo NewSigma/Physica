@@ -163,13 +163,10 @@ namespace Physica {
         constexpr static bool SameMajor = MatrixOption::isSameMajor<LHS1, RHS1>();
         constexpr static int Major = SameMajor ? MatrixOption::getMajor<LHS1>()
                                                : int(MatrixOption::AnyMajor);
-        constexpr static bool SameStorage = MatrixOption::isSameStorage<LHS1, RHS1>();
-        constexpr static int Storage = SameStorage ? MatrixOption::getStorage<LHS1>()
-                                                   : int(MatrixOption::AnyStorage);
         constexpr static bool IsReal = Type == ExprType::Abs || Type == ExprType::Square;
     public:
         using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
-        constexpr static int Option = Major | Storage;
+        constexpr static int Option = Major;
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile > RHS1::RowAtCompile ? LHS1::RowAtCompile : RHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile > RHS1::ColAtCompile ? LHS1::ColAtCompile : RHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile > RHS1::SizeAtCompile ? LHS1::SizeAtCompile : RHS1::SizeAtCompile;

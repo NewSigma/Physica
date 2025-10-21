@@ -22,44 +22,42 @@
 
 namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t order) : Array2D(order, order) {}
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t order)
+            : Array2D(order, order) {}
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args) : r(row) {
-        if constexpr (isVectorStorage) {
-            if constexpr (isColMajor)
-                new (&arr) ArrayType(col, row, std::forward<decltype(args)>(args)...);
-            else
-                new (&arr) ArrayType(row, col, std::forward<decltype(args)>(args)...);
-        }
-        else
-            new (&arr) ArrayType(row * col, std::forward<decltype(args)>(args)...);
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(size_t row, size_t col, auto&&... args)
+            : r(row) {
+        new (&arr) ArrayType(row * col, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Option, Row, Col, Allocator>::Array2D(std::initializer_list<InitializerType> list) : arr(list) {
-        if constexpr (isVectorStorage) {
-            const size_t length = arr.getLength();
-            r = isColMajor ? (getSize() / length) : length;
-        }
-        else
-            assert((Row != Dynamic || Col != Dynamic) && "[Error]: Either row or col must be given at compile");
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(std::initializer_list<T> list)
+            : arr(list) {
+        assert((Row != Dynamic || Col != Dynamic) && "[Error]: Either row or col must be given at compile");
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    Array2D<T, Option, Row, Col, Allocator>::Array2D(ArrayType arr_, IndexType r_) : arr(std::move(arr_)), r(r_) {}
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(std::initializer_list<ArrayType> list)
+            : Array2D(isColMajor ? list.begin()->getLength() : list.size(), isColMajor ? list.size() : list.begin()->getLength()) {
+        size_t i = 0;
+        for (auto& subarr : list) {
+            assert(subarr.getLength() == getMaxMinor());
+            for (auto& elem : subarr) {
+                arr[i] = elem;
+                i += 1;
+            }
+        }
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    Array2D<T, Option, Row, Col, Allocator>::Array2D(ArrayType arr_, IndexType r_)
+            : arr(std::move(arr_)), r(r_) {}
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     T& Array2D<T, Option, Row, Col, Allocator>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getCol());
-        if constexpr (isVectorStorage) {
-            if constexpr (isColMajor)
-                return arr[c][r];
-            else
-                return arr[r][c];
-        }
-        else
-            return arr[toIndex1D(r, c)];
+        return arr[toIndex1D(r, c)];
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -71,13 +69,7 @@ namespace Physica {
     void Array2D<T, Option, Row, Col, Allocator>::resize(size_t row, size_t col, auto&&... args) {
         assert((Row == row || Row == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert((Col == col || Col == Dynamic) && "[Error]: Cannot resize a fixed array");
-        if constexpr (isVectorStorage) {
-            arr.resize(isColMajor ? col : row);
-            for (auto& elem : arr)
-                elem.resize(isColMajor ? row : col, std::forward<decltype(args)>(args)...);
-        }
-        else
-            arr.resize(row * col, std::forward<decltype(args)>(args)...);
+        arr.resize(row * col, std::forward<decltype(args)>(args)...);
         r = row;
     }
 
@@ -88,11 +80,7 @@ namespace Physica {
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::zeros() noexcept {
-        if constexpr (isVectorStorage)
-            for (auto& v : asArray())
-                v.zeros();
-        else
-            asArray().zeros();
+        asArray().zeros();
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -105,67 +93,42 @@ namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::swap_row(size_t r1, size_t r2) noexcept {
         assert(r1 < getRow() && r2 < getRow());
-        if constexpr (isVectorStorage) {
-            if constexpr (isColMajor)
-                for (auto& elem : arr)
-                    elem[r1].swap(elem[r2]);
-            else
-                arr[r1].swap(arr[r2]);
+        if constexpr (isColMajor) {
+            const size_t row = getRow();
+            const size_t col = getCol();
+            for (size_t i = 0, temp = 0; i < col; ++i, temp += row)
+                arr[temp + r1].swap(arr[temp + r2]);
         }
         else {
-            if constexpr (isColMajor) {
-                const size_t row = getRow();
-                const size_t col = getCol();
-                for (size_t i = 0, temp = 0; i < col; ++i, temp += row)
-                    arr[temp + r1].swap(arr[temp + r2]);
-            }
-            else {
-                const size_t col = getCol();
-                const size_t offset1 = r1 * col;
-                const size_t offset2 = r2 * col;
-                for (size_t i = 0; i < col; ++i)
-                    arr[offset1 + i].swap(arr[offset2 + i]);
-            }
+            const size_t col = getCol();
+            const size_t offset1 = r1 * col;
+            const size_t offset2 = r2 * col;
+            for (size_t i = 0; i < col; ++i)
+                arr[offset1 + i].swap(arr[offset2 + i]);
         }
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::swap_col(size_t c1, size_t c2) noexcept {
         assert(c1 < getCol() && c2 < getCol());
-        if constexpr (isVectorStorage) {
-            if constexpr (isColMajor) {
-                arr[c1].swap(arr[c2]);
-            }
-            else
-                for (auto& elem : arr)
-                    elem[c1].swap(elem[c2]);
+        if constexpr (isColMajor) {
+            const size_t row = getRow();
+            const size_t offset1 = c1 * row;
+            const size_t offset2 = c2 * row;
+            for (size_t i = 0; i < row; ++i)
+                arr[offset1 + i].swap(arr[offset2 + i]);
         }
         else {
-            if constexpr (isColMajor) {
-                const size_t row = getRow();
-                const size_t offset1 = c1 * row;
-                const size_t offset2 = c2 * row;
-                for (size_t i = 0; i < row; ++i)
-                    arr[offset1 + i].swap(arr[offset2 + i]);
-            }
-            else {
-                const size_t row = getRow();
-                const size_t col = getCol();
-                for (size_t i = 0, temp = 0; i < row; ++i, temp += col)
-                    arr[temp + c1].swap(arr[temp + c2]);
-            }
+            const size_t row = getRow();
+            const size_t col = getCol();
+            for (size_t i = 0, temp = 0; i < row; ++i, temp += col)
+                arr[temp + c1].swap(arr[temp + c2]);
         }
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     __host__ __device__ T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) noexcept {
-        if constexpr (isVectorStorage) {
-            const size_t major = isColMajor ? col : row;
-            const size_t minor = isColMajor ? row : col;
-            return arr[major].data() + minor;
-        }
-        else
-            return arr.data() + toIndex1D(row, col);
+        return arr.data() + toIndex1D(row, col);
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -207,10 +170,17 @@ namespace Physica {
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::getSize() const noexcept {
-        if constexpr (isVectorStorage)
-            return arr.getLength() == 0 ? 0 : arr.getLength() * arr[0].getLength();
-        else
-            return arr.getLength();
+        return arr.getLength();
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::getMaxMajor() const noexcept {
+        return isColMajor ? getCol() : getRow();
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::getMaxMinor() const noexcept {
+        return isColMajor ? getRow() : getCol();
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -221,7 +191,7 @@ namespace Physica {
      * Helper function that communicates with C libraries.
      */
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    auto Array2D<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This requires(MatrixOption::isElementMatrix<This>()) {
+    auto Array2D<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This {
         This result{};
         new (&result.arr) ArrayType::read(row * col, p);
         result.r = row;

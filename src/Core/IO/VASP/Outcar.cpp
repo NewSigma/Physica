@@ -44,7 +44,7 @@ void Outcar::swap(This& __restrict obj) noexcept {
 }
 
 void Outcar::readForce(std::ifstream& fin, Array<char>& buffer) {
-    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 6>;
+    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row, Dynamic, 6>;
 
     std::string str{};
     do {

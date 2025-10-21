@@ -147,7 +147,7 @@ namespace Physica {
     class Traits<DiagMatrix<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

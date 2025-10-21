@@ -73,7 +73,7 @@ namespace Physica {
     template<Scalar T, size_t Power>
     DenseVector<Complex<T>, Power>
     polyRoot(const Polynomial<T, Power>& poly) {
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Power, Power>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col, Power, Power>;
 
         const size_t power = poly.getPower();
         auto companion = MatrixType::zeros(power);

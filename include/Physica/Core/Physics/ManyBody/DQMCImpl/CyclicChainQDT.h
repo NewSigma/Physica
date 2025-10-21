@@ -34,7 +34,7 @@ namespace Physica {
 
         using Tr = T::RealType;
     private:
-        constexpr static int Option = MatrixOption::Col | MatrixOption::Element;
+        constexpr static int Option = MatrixOption::Col;
 
         Array2D<QDTDecomp<T>, Option> decomps;
         Array2D<bool, Option> readys;

@@ -50,7 +50,7 @@ namespace Physica {
         using DeviceCellList = device_obj<CellListType>;
         using DeviceVector3D = device_obj<Vector3D<T>>;
         using ForceBufferType = device_obj<DenseMatrix<T>>;
-        using VirialBufferType = device_obj<DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;
+        using VirialBufferType = device_obj<DenseMatrix<T, MatrixOption::Col, NumVirialElem>>;
         using PageLockedVector = DenseVector<T, Dynamic, PageLockedAllocator<T>>;
     private:
         T cutoff;

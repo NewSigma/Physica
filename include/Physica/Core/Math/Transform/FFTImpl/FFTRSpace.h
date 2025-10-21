@@ -249,7 +249,7 @@ namespace Physica {
     public:
         using Derived = T;
         using ScalarType = Traits<T>::ScalarType;
-        constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
+        constexpr static int Option = MatrixOption::Row;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

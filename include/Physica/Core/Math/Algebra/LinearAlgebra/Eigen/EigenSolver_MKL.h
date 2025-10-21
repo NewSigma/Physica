@@ -27,7 +27,7 @@ namespace Physica {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         constexpr int Major = MatrixOption::isColMatrix<decltype(source)>() ? MatrixOption::Col : MatrixOption::Row;
         constexpr int Layout = Major == MatrixOption::Col ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
-        using WorkingMatrixMKL = DenseMatrix<T, Major | MatrixOption::Element>;
+        using WorkingMatrixMKL = DenseMatrix<T, Major>;
 
         pre_compute(source);
         const size_t order = source.getRow();

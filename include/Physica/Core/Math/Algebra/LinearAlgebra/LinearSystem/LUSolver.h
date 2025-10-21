@@ -25,7 +25,7 @@ namespace Physica {
     class LUSolver {
         using This = LUSolver<T, Option, Order>;
         using MatrixType = DenseMatrix<T, Option, Order, Order>;
-        using MatrixB = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector>;
+        using MatrixB = DenseMatrix<T, MatrixOption::Col>;
     private:
         LUDecomp<T, true> lu;
     public:

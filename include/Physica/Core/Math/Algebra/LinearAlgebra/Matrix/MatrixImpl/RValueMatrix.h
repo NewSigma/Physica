@@ -53,8 +53,6 @@ namespace Physica {
             constexpr static bool value = HasMKL()
                                        && std::same_as<ScalarType1, ScalarType2>
                                        && (ScalarType1::Prec == Float32 || ScalarType1::Prec == Float64)
-                                       && MatrixOption::isElementMatrix<U1>()
-                                       && MatrixOption::isElementMatrix<U2>()
                                        && is_continuous<U1>::value
                                        && is_continuous<U2>::value
                                        && !Diffable<U1>;

@@ -28,10 +28,7 @@ using ScalarType = float64;
 
 class InfiniteDeepWell {
     constexpr static size_t baseSetCount = 8;
-    using MatrixType = DenseMatrix<ScalarType,
-                                MatrixOption::Col | MatrixOption::Vector,
-                                baseSetCount,
-                                baseSetCount>;
+    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, baseSetCount, baseSetCount>;
 public:
     int execute(int argc, char** argv) {
         MatrixType overlap = getOverlapMatrix();
@@ -150,10 +147,7 @@ private:
 class HedrogenAtom {
     constexpr static size_t baseSetCount = 4;
     constexpr static double baseSetCoeff[baseSetCount]{13.00773, 1.962079, 0.444529, 0.1219492};
-    using MatrixType = DenseMatrix<ScalarType,
-                                MatrixOption::Col | MatrixOption::Vector,
-                                baseSetCount,
-                                baseSetCount>;
+    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, baseSetCount, baseSetCount>;
 public:
     int execute(int argc, char** argv) {
         MatrixType overlap = getOverlapMatrix();
@@ -252,18 +246,14 @@ class HeliumAtom {
     constexpr static size_t baseSetCount = 4;
     constexpr static double baseSetCoeff[baseSetCount]{0.298073, 1.242567, 5.782948, 38.474970};
 public:
-    using MatrixType = DenseMatrix<ScalarType,
-                                MatrixOption::Col | MatrixOption::Vector,
-                                baseSetCount,
-                                baseSetCount>;
-    using VectorType = MatrixType::VectorType;
+    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, baseSetCount, baseSetCount>;
 public:
-    int execute(int argc, char** argv, VectorType& trial_solution, const ScalarType& criteria) {
+    int execute(int argc, char** argv, VectorND<ScalarType>& trial_solution, const ScalarType& criteria) {
         MatrixType overlap = getOverlapMatrix();
         //Workaround for generalised eigenvalue problem
         MatrixType cholesky = Cholesky(overlap);
         MatrixType inv_cholesky = cholesky.inverse();
-        auto real_eigenvalues = VectorType{};
+        auto real_eigenvalues = VectorND<ScalarType>{};
         bool stop = false;
         do {
             MatrixType hamilton = getHamiltonMatrix(trial_solution);
@@ -278,10 +268,10 @@ public:
             }
 
             auto eigenvectors = solver.getEigenvectors();
-            VectorType real_eigenvector = eigenvectors.col(groundStateIndex).reals();
+            VectorND<ScalarType> real_eigenvector = eigenvectors.col(groundStateIndex).reals();
             real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
 
-            stop = VectorType(real_eigenvector - trial_solution).norm() < criteria;
+            stop = VectorND<ScalarType>(real_eigenvector - trial_solution).norm() < criteria;
             trial_solution = real_eigenvector;
         } while(!stop);
 
@@ -298,7 +288,7 @@ private:
         return exp(ScalarType(-baseSetCoeff[n]) * square(s));
     }
 
-    MatrixType getHamiltonMatrix(const VectorType& trial_solution) {
+    MatrixType getHamiltonMatrix(const VectorND<ScalarType>& trial_solution) {
         auto result = MatrixType::zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
@@ -340,7 +330,7 @@ private:
         return numerator / demoninator;
     }
 
-    ScalarType groundStateEnergy(const VectorType& solution) {
+    ScalarType groundStateEnergy(const VectorND<ScalarType>& solution) {
         ScalarType energy = ScalarType(0);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
@@ -384,7 +374,7 @@ int main(int argc, char** argv) {
     exit_code |= HedrogenAtom().execute(argc, argv);
 
     std::cout << "Example 3:\n";
-    HeliumAtom::VectorType solution{0.25, 0.25, 0.25, 0.25};
+    VectorND<ScalarType> solution{0.25, 0.25, 0.25, 0.25};
     exit_code |= HeliumAtom().execute(argc, argv, solution, 1E-8);
     return exit_code;
 }

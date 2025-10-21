@@ -37,7 +37,7 @@ namespace Physica {
         using Base = Decouplable;
         using RealType = T::RealType;
         constexpr static size_t NumSingularValue = RowAtCompile > ColAtCompile ? ColAtCompile : RowAtCompile;
-        constexpr static int Option = MatrixOption::Col | MatrixOption::Vector;
+        constexpr static int Option = MatrixOption::Col;
     public:
         using SingularValueVector = DenseVector<RealType, NumSingularValue>;
         using WorkingMatrix = DenseMatrix<RealType, Option, RowAtCompile, ColAtCompile>;

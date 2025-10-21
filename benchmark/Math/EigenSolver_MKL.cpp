@@ -27,7 +27,7 @@ namespace {
     template<bool NeedEigenVec>
     void kernel(benchmark::State& state) {
         using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col>;
         const SquareLattice<1> lattice({10}, 1);
         const MatrixType data = TransIsingMatrix<T, SpinRepr<1, 10>>(1, 0.01, lattice, SpinRepr<1, 10>(10));
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);

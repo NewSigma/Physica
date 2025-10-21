@@ -173,13 +173,13 @@ namespace Physica {
     template<Matrix M>
     class Traits<TrigUpper<M>> : public Traits<M> {
     public:
-        constexpr static int Option = MatrixOption::getMajor<M>() | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::getMajor<M>();
     };
 
     template<Matrix M>
     class Traits<TrigLower<M>> : public Traits<M> {
     public:
-        constexpr static int Option = MatrixOption::getMajor<M>() | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::getMajor<M>();
     };
 }
 

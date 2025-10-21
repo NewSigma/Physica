@@ -33,7 +33,7 @@ namespace Physica {
     class QRDecomp {
         constexpr static bool isComplex = T::isComplex;
         using This = QRDecomp<T, Pivot>;
-        using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using MatrixND = DenseMatrix<T, MatrixOption::Col>;
         using Perm = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
 
         using Tr = T::RealType;

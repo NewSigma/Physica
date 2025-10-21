@@ -35,7 +35,7 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
-        using SamplePool = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dynamic, Dim>;
+        using SamplePool = DenseMatrix<T, MatrixOption::Col, Dynamic, Dim>;
     public:
         using typename Base::BornChargeArray;
     private:

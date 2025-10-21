@@ -146,7 +146,7 @@ namespace Physica {
                 if (isGoodInitial) {
                     eigenvector = searchSpace.col(0);
                     eigenvalue = searchSpaceProj(0, 0);
-                    residule.swap(searchSpace.asArray()[1]);
+                    residule = searchSpace.asArray()[1];
                     squaredRes = residule.squaredNorm();
                     eigenGoal = eigenvalue;
                 }

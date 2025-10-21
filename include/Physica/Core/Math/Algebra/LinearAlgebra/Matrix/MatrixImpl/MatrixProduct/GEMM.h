@@ -32,10 +32,7 @@ namespace Physica {
             constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Col)
                                                                : int(MatrixOption::Row))
                                                    : int(MatrixOption::AnyMajor);
-            constexpr static int Storage = (MatrixOption::isElementMatrix<M1>() && MatrixOption::isElementMatrix<M2>())
-                                         ? MatrixOption::Element
-                                         : MatrixOption::Vector;
-            constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major) | Storage;
+            constexpr static int Option = Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major;
         };
     }
 
@@ -105,7 +102,9 @@ namespace Physica {
         constexpr bool UseMKL2 = Internal::EnableMKL<M1, M>::value;
         constexpr bool UseMKL3 = Internal::EnableMKL<M2, M>::value;
         constexpr bool UseMKL = UseMKL1 && UseMKL2 && UseMKL3;
-        constexpr bool SameMajor = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M2>();
+        constexpr bool SameMajor1 = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M>();
+        constexpr bool SameMajor2 = MatrixOption::getMajor<M2>() == MatrixOption::getMajor<M>();
+        constexpr bool SameMajor = SameMajor1 && SameMajor2;
         assert(target.getRow() == getRow() && target.getCol() == getCol());
         if constexpr (UseMKL && SameMajor) {
             if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
@@ -186,7 +185,7 @@ namespace Physica {
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
-        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = M1::RowAtCompile;
         constexpr static size_t ColAtCompile = M2::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

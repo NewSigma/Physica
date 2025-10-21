@@ -38,7 +38,7 @@ namespace Physica {
         constexpr static bool isComplex = T::isComplex;
     public:
         using MatrixND = Params::MatrixND;
-        using GreenArray = Array2D<MatrixND, MatrixOption::Col | MatrixOption::Element, 2>;
+        using GreenArray = Array2D<MatrixND, MatrixOption::Col, 2>;
     private:
         const Params* params;
         DenseMatrix<Trv> aux;

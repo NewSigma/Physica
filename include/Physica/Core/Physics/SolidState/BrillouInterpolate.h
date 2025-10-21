@@ -36,7 +36,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Tc = T::ComplexType;
         using LatticeMatrix = PeriodicCell<Tr, Dim>::LatticeMatrix;
-        using CoeffMatrixM = DenseMatrix<Tc, MatrixOption::Row | MatrixOption::Vector>;
+        using CoeffMatrixM = DenseMatrix<Tc, MatrixOption::Row>;
         using Vec3D = Vector3D<Tr>;
 
         DenseTensor<Tc, 3> baseCoeff;

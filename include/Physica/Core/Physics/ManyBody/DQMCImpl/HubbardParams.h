@@ -31,7 +31,7 @@ namespace Physica {
         using Tr = T::RealType;
         using Tc = T::ComplexType;
     public:
-        using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using MatrixND = DenseMatrix<T, MatrixOption::Col>;
     private:
         MatrixND hoppingMatrix;
         MatrixND expB;

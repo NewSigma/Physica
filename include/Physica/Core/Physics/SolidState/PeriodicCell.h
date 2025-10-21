@@ -46,9 +46,9 @@ namespace Physica {
         using Base = Internal::PeriodicCellImpl;
         using Tv = T::ValueType;
     public:
-        using LatticeMatrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
-        using InvLatticeMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
-        using PositionMatrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
+        using LatticeMatrix = DenseMatrix<T, MatrixOption::Row, Dim, Dim>;
+        using InvLatticeMatrix = DenseMatrix<T, MatrixOption::Col, Dim, Dim>;
+        using PositionMatrix = DenseMatrix<T, MatrixOption::Row, Dynamic, Dim>;
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Array<ssize_t, Dim>;
     protected:

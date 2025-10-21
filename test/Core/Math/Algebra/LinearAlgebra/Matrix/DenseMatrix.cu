@@ -31,7 +31,7 @@ int main() {
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<float32, MatrixOption::Col | MatrixOption::Element>;
+        using MatrixType = DenseMatrix<float32, MatrixOption::Col>;
         using DeviceMatrix = MatrixType::device_obj_type;
         const MatrixType A = MatrixType::random_uniform<RandomSource>(3, 4);
         const MatrixType B = A.transpose();

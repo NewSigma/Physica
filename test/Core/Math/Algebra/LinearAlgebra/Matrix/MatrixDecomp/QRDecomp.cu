@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.cuh"
 
 using namespace Physica;
-using Matrix3D = DenseMatrix<float32, MatrixOption::Col | MatrixOption::Element, 3>;
+using Matrix3D = DenseMatrix<float32, MatrixOption::Col, 3>;
 
 void testQR(device_obj<QRDecomp<float32>>& qr, const Matrix3D& answer) {
     device_obj<Matrix3D> matrixQ = qr.getMatrixQ();

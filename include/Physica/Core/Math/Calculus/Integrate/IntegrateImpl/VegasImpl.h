@@ -151,7 +151,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    auto Vegas<T, TakeLn>::compress(VectorND<Trv>& vars) -> Trv {
+    auto Vegas<T, TakeLn>::compress(Vector auto&& vars) -> Trv {
         const auto sum = vars.sum();
         const bool noData = sum.isZero();
         if (noData)
@@ -173,7 +173,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void Vegas<T, TakeLn>::refineGrid() {
         parallel_for<P>([this](size_t dim) {
-            const auto meanVar = compress(lossMat.asArray()[dim]);
+            const auto meanVar = compress(lossMat.col(dim));
             const bool noData = meanVar.isZero();
             if (noData) [[unlikely]] // No data in the dimension, usually we should have enough samples to avoid it
                 return;

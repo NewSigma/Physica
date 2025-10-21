@@ -26,7 +26,7 @@ namespace Physica {
     template<Scalar T>
     class MatrixSequence {
         using This = MatrixSequence<T>;
-        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Row>;
         MatrixType mat;
         std::ifstream fin;
         uint64_t stepNum;

@@ -114,7 +114,7 @@ namespace Physica {
         static_assert(MatrixMajor == MatrixOption::Col || MatrixMajor == MatrixOption::Row, "[Error]: Invalid major");
     public:
         using ScalarType = V::ScalarType;
-        constexpr static int Option = MatrixMajor | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixMajor;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = V::SizeAtCompile;

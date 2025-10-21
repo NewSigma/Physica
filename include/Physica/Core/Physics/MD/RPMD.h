@@ -44,7 +44,7 @@ namespace Physica {
     public:
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
         using PhaseMatrix = RingPolymerType::PhaseMatrix;
-        using ForceMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic, ForceMatrixAllocator>;
+        using ForceMatrix = DenseMatrix<T, MatrixOption::Col, Dynamic, Dynamic, ForceMatrixAllocator>;
         using MDCellType = RingPolymerType::MDCellType;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;

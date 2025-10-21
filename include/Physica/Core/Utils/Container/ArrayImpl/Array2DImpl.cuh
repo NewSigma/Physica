@@ -36,7 +36,7 @@ namespace Physica {
 
     template<tparams>
     device_obj<Array2D>::device_obj(const host_obj& storage)
-            : arr(storage.arr), r(storage.r), size(storage.getSize()) {}
+            : arr(storage.arr), r(storage.r) {}
 
     template<tparams>
     __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) -> T& {
@@ -54,32 +54,16 @@ namespace Physica {
         assert((Row == row || Row == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert((Col == col || Col == Dynamic) && "[Error]: Cannot resize a fixed array");
         assert(row > 0 && col > 0);
-        if constexpr (isVectorStorage) {
-            if constexpr (IsDevice())
-                noImpl("[Error]: resize() is not supported on device");
-            else {
-                const size_t major = isColMajor ? col : row;
-                const size_t minor = isColMajor ? row : col;
-                arr.resize(major);
-                auto host_arr = arr.toHost();
-                for (auto& elem : host_arr)
-                    elem.resize(minor, std::forward<decltype(args)>(args)...);
-                host_arr.toDevice(arr);
-                size = row * col;
-            }
-        }
-        else {
-            if constexpr (IsDevice())
-                assert(Row * Col != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-            else
-                arr.resize(row * col, std::forward<decltype(args)>(args)...);
-        }
+
+        if constexpr (IsDevice())
+            assert(Row * Col != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
+        else
+            arr.resize(row * col, std::forward<decltype(args)>(args)...);
         r = row;
     }
 
     template<tparams>
     void device_obj<Array2D>::zeros() {
-        static_assert(!isVectorStorage, "[Error]: Not implemented");
         check(cudaMemsetAsync(asArray().data(), 0, getRow() * getCol() * sizeof(T), CUDAContext::getInstance()));
     }
 
@@ -110,7 +94,6 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);
         std::swap(r, obj.r);
-        std::swap(size, obj.size);
     }
 
     template<tparams>
@@ -147,28 +130,14 @@ namespace Physica {
 
     template<tparams>
     __host__ __device__ size_t device_obj<Array2D>::getSize() const noexcept {
-        if constexpr (isVectorStorage)
-            return size;
-        else
-            return arr.getLength();
+        return arr.getLength();
     }
 
     template<tparams>
     __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) -> T* {
         assert(row < getRow());
         assert(col < getCol());
-        if constexpr (isVectorStorage) {
-            const size_t major = isColMajor ? col : row;
-            const size_t minor = isColMajor ? row : col;
-            if constexpr (IsDevice())
-                return arr[major].data() + minor;
-            else {
-                auto host_arr = arr.toPlainHost();
-                return host_arr[major].getDerived().data() + minor;
-            }
-        }
-        else
-            return arr.data() + toIndex1D(row, col);
+        return arr.data() + toIndex1D(row, col);
     }
 
     template<tparams>

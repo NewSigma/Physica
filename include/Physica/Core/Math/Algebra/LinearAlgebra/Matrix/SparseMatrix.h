@@ -21,11 +21,10 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Option = MatrixOption::Row | MatrixOption::Element>
+    template<Scalar T, int Option = MatrixOption::Row>
     class SparseMatrix : public RValueMatrix<SparseMatrix<T, Option>> {
         using This = SparseMatrix<T, Option>;
         using Base = RValueMatrix<This>;
-        static_assert(MatrixOption::isElementMatrix<This>(), "[Error]: Sparse matrix should be element matrix");
     private:
         Array<T> elements;
         Array<size_t> minorIndexes;

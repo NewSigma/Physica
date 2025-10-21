@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica;
-using Matrix4D = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Element, 4, 4>;
+using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
 
 int main() {
     const Matrix4D m2{0, 0.125, 0.125, 0, 0.125, 0, 0, 0.125, 0.125, 0, 0, 0.125, 0, 0.125, 0.125, 0};

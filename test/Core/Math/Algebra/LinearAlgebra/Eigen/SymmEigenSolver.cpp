@@ -50,7 +50,7 @@ namespace {
 
 int main() {
     {
-        using MatrixType = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
         const MatrixType data{
                 {-0.590316, -2.195140, -2.374630},
                 {-1.250060, -0.297493,  1.403490},
@@ -61,7 +61,7 @@ int main() {
             return 1;
 
         using T = Diff<float64, DiffMode::Forward, 1>;
-        using DiffMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+        using DiffMatrix = DenseMatrix<T, MatrixOption::Col, 3, 3>;
         const DiffMatrix mat1 = mat;
         if (!eigenTest(mat1, 1E-14))
             return 1;

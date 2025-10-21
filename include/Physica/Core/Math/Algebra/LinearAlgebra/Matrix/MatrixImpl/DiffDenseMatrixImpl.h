@@ -37,7 +37,13 @@ namespace Physica {
             : v(row, col, init.value()), g(row, col, init.grad()) {}
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(initializer_list list) : v(std::move(list)) {
+    DiffDenseMatrix::DenseMatrix(std::initializer_list<Tv> list) : v(std::move(list)) {
+        g = GradMatrix(v.getRow(), v.getCol());
+        g.zeros();
+    }
+
+    template<tparams>
+    DiffDenseMatrix::DenseMatrix(std::initializer_list<VectorIniter> list) : v(std::move(list)) {
         g = GradMatrix(v.getRow(), v.getCol());
         g.zeros();
     }

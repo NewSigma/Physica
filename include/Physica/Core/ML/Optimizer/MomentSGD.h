@@ -28,7 +28,7 @@ namespace Physica {
 
         using This = MomentSGD<T>;
         using VectorType = VectorND<T>;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col>;
     private:
         std::unordered_map<void*, std::variant<VectorType, MatrixType>> targetBufferMap;
         T lr;

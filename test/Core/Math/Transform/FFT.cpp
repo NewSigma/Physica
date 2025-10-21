@@ -158,7 +158,7 @@ int main() {
         constexpr double freq1 = 10;
         constexpr double freq2 = 5;
 
-        DenseMatrix<RealType, MatrixOption::Row | MatrixOption::Vector> data(N1, N2);
+        DenseMatrix<RealType, MatrixOption::Row> data(N1, N2);
         for (size_t i = 0; i < N1; ++i)
             for (size_t j = 0; j < N2; ++j)
                 data(i, j) = RealType(std::sin(2 * M_PI * freq1 * i * deltaX) + 2 * std::cos(2 * M_PI * freq2 * j * deltaY));

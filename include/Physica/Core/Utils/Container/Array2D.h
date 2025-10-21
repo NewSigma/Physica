@@ -24,13 +24,12 @@
 
 namespace Physica {
     template<class T,
-             int Option = MatrixOption::Col | MatrixOption::Vector,
+             int Option = MatrixOption::Col,
              size_t Row = Dynamic,
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
     class Array2D {
         using This = Array2D<T, Option, Row, Col, Allocator>;
-        constexpr static bool isVectorStorage = !(Option & MatrixOption::Element);
         constexpr static bool isDynamicArray = Row == Dynamic && Col == Dynamic;
         constexpr static bool isColMajor = !(Option & MatrixOption::Row);
         constexpr static size_t MaxMajor = isColMajor ? Col : Row;
@@ -38,23 +37,15 @@ namespace Physica {
 
         template<class U>
         struct Helper {
-            using VectorType = Array<T, MaxMinor>;
-            using EArrayType = Array<T, Row * Col>;
+            using ArrayType = Array<T, Row * Col>;
         };
 
         template<Scalar U>
         struct Helper<U> {
-            using VectorType = DenseVector<T, MaxMinor>;
-            using EArrayType = DenseVector<T, Row * Col>;
+            using ArrayType = DenseVector<T, Row * Col>;
         };
-    public:
-        using VectorType = Helper<T>::VectorType;
-        using InitializerType = std::conditional<isVectorStorage, VectorType, T>::type;
     private:
-        using AllocatorV = Allocator::template rebind_alloc<VectorType>;
-        using VArrayType = Array<VectorType, MaxMajor, AllocatorV>;
-        using EArrayType = Helper<T>::EArrayType;
-        using ArrayType = std::conditional<isVectorStorage, VArrayType, EArrayType>::type;
+        using ArrayType = Helper<T>::ArrayType;
         using IndexType = std::conditional<isDynamicArray, size_t, PlainStruct<void>>::type;
 
         ArrayType arr;
@@ -63,7 +54,8 @@ namespace Physica {
         Array2D() = default;
         explicit Array2D(size_t order);
         Array2D(size_t row, size_t col, auto&&... args);
-        Array2D(std::initializer_list<InitializerType> list);
+        Array2D(std::initializer_list<T> list);
+        Array2D(std::initializer_list<ArrayType> list);
         Array2D(const This&) = default;
         Array2D(This&&) noexcept = default;
         ~Array2D() = default;
@@ -92,9 +84,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept;
         [[nodiscard]] __host__ __device__ bool empty() const noexcept;
         /* Static members */
-        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
+        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p);
     private:
         Array2D(ArrayType arr_, IndexType r_);
 

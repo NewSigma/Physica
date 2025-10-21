@@ -92,7 +92,7 @@ namespace Physica {
         template<ExecutePolicy P>
         void refineGrid();
         Trv calcGridLossImpl() const;
-        Trv compress(VectorND<Trv>& vars);
+        Trv compress(Vector auto&& vars);
 
         template<RNG R>
         [[nodiscard]] std::pair<VectorND<Trv>, VectorND<Trv>> sample(const int* indices) const;

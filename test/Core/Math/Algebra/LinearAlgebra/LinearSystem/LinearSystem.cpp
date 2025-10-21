@@ -24,7 +24,7 @@ using namespace Physica;
 int main() {
     using ScalarType = float64;
     using VectorType = Vector4D<ScalarType>;
-    const DenseMatrix<ScalarType, MatrixOption::Vector | MatrixOption::Row, 4, 5> A
+    const DenseMatrix<ScalarType, MatrixOption::Row, 4, 5> A
             {{0.691809621910274, -0.000696013585639699, 0.131671000379563, -0.0701048797366553, 4.316511702487202E-1},
             {-0.000696013585639699, 0.816492585748236, 0.0216969440126965, -0.0884307621566726, 1.548712563601895E-2},
             {0.131671000379563, 0.0216969440126965, 0.643819646681362, -0.131016640264434, 9.840637243791538E-1},

@@ -28,7 +28,7 @@ namespace Physica {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         using host_obj = QRDecomp<T>;
         using This = device_obj<host_obj>;
-        using MatrixND = device_obj<DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>>;
+        using MatrixND = device_obj<DenseMatrix<T, MatrixOption::Col>>;
         using DeviceVector = device_obj<VectorND<T>>;
         using Tc = T::ComplexType;
         constexpr static bool isComplex = T::isComplex;

@@ -77,7 +77,7 @@ static void realApplyTest() noexcept {
     VectorType v(rank);
     std::ignore = x.householder(v);
 
-    using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, 4, 4>;
+    using MatrixType = DenseMatrix<T, MatrixOption::Col, 4, 4>;
     const MatrixType m{x, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
     const MatrixType l_answer{{-7.34849, 0, 0, 0}, {-13.0639, 0.203133, -0.729156, -1.66145}, {-20.6846, 0.473976, -1.70137, -3.87671}, {-28.3052, 0.74482, -2.67357, -6.09197}};
     MatrixType l_result = m;
@@ -96,7 +96,7 @@ static void realApplyTest() noexcept {
 static void complexApplyTest() noexcept {
     using ScalarType = Complex<T>;
     using VectorType = Vector2D<ScalarType>;
-    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, 2, 2>;
+    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, 2, 2>;
 
     const VectorType x{{1, 1}, {3, -5}};
     const size_t rank = x.getLength();

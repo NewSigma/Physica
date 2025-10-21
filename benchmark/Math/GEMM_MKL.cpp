@@ -27,7 +27,7 @@ namespace {
     void gemm_mkl(benchmark::State& state) {
         static_assert(Order >= 0);
         using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Col, Order, Order>;
         const size_t order = state.range(0);
         const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
         const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);

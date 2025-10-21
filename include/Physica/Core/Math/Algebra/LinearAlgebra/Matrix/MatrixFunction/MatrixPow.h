@@ -89,7 +89,7 @@ namespace Physica {
     template<Matrix M>
     class Traits<MatrixPow<M>> : public Traits<std::remove_cvref_t<M>> {
     public:
-        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static int Option = MatrixOption::AnyMajor;
     };
 }
 

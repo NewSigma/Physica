@@ -31,7 +31,7 @@ namespace Physica {
      * Option is combinations of \enum MatrixOption
      */
     template<Scalar T,
-             int Option = MatrixOption::Col | MatrixOption::Vector,
+             int Option = MatrixOption::Col,
              size_t Row = Dynamic,
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
@@ -47,15 +47,16 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
-        using initializer_list = std::initializer_list<typename Storage::InitializerType>;
-        using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Col, Row, Col>;
-        using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Col>;
+        using ColMatrix = DenseMatrix<T, MatrixOption::Col, Row, Col>;
+        using RowMatrix = DenseMatrix<T, MatrixOption::Row, Row, Col>;
+        using VectorIniter = DenseVector<T, MatrixOption::isColMatrix<This>() ? Row : Col>;
     public:
         DenseMatrix() = default;
         explicit DenseMatrix(size_t order);
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T value);
-        DenseMatrix(initializer_list list);
+        DenseMatrix(std::initializer_list<T> list);
+        DenseMatrix(std::initializer_list<VectorIniter> list);
         DenseMatrix(const Matrix auto& mat);
         DenseMatrix(const Vector auto& vec);
         DenseMatrix(const This&) = default;
@@ -88,6 +89,8 @@ namespace Physica {
         using Storage::getCol;
         using Storage::getRow;
         using Storage::getSize;
+        using Storage::getMaxMajor;
+        using Storage::getMaxMinor;
         /* Static members */
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);
@@ -101,7 +104,7 @@ namespace Physica {
         template<RNG R>
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
         [[nodiscard]] static auto meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This>;
-        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) requires(MatrixOption::isElementMatrix<This>());
+        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p);
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
         friend class device_obj<This>;

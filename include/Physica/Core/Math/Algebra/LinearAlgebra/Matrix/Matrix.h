@@ -33,20 +33,14 @@ namespace Physica {
     template<class T>
     concept Matrix = Internal::MatrixObj<std::remove_cvref_t<T>> || Internal::MatrixObj<remove_codiff_t<std::remove_cvref_t<T>>>;
     /**
-     * This enum decides how the data is stored in a matrix.
-     * A dense matrix can be stored as elements or vectors in rows or cols.
-     *
-     * It is recommended that store elements to store a small matrix.
+     * \class MatrixOption handles properties of matrix
      */
     class MatrixOption {
     public:
         enum : char {
-            Col = 0b0000,
-            Row = 0b0001,
-            AnyMajor = 0b0010,
-            Vector = 0b0000,
-            Element = 0b0100,
-            AnyStorage = 0b1000
+            Col = 0b00,
+            Row = 0b01,
+            AnyMajor = 0b10,
         };
     public:
         template<class MatrixType>
@@ -70,35 +64,9 @@ namespace Physica {
             return isAnyMajor<MatrixType>() ? AnyMajor : Major;
         }
 
-        template<class MatrixType>
-        consteval static bool isElementMatrix() noexcept {
-            return isAnyStorage<MatrixType>() || Traits<std::remove_cvref_t<MatrixType>>::Option & Element;
-        }
-
-        template<class MatrixType>
-        consteval static bool isVectorMatrix() noexcept {
-            return isAnyStorage<MatrixType>() || !isElementMatrix<MatrixType>();
-        }
-
-        template<class MatrixType>
-        consteval static bool isAnyStorage() noexcept {
-            return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyStorage;
-        }
-
-        template<class MatrixType>
-        consteval static int getStorage() noexcept {
-            constexpr int Storage = isElementMatrix<MatrixType>() ? Element : Vector;
-            return isAnyStorage<MatrixType>() ? AnyStorage : Storage;
-        }
-
         template<class MatrixType1, class MatrixType2>
         consteval static bool isSameMajor() noexcept {
             return getMajor<MatrixType1>() == getMajor<MatrixType2>();
-        }
-
-        template<class MatrixType1, class MatrixType2>
-        consteval static bool isSameStorage() noexcept {
-            return getStorage<MatrixType1>() == getStorage<MatrixType2>();
         }
 
         template<class MatrixType>

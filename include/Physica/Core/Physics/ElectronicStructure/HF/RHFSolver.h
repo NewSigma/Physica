@@ -36,7 +36,7 @@ namespace Physica {
     template<class BaseSetType>
     class RHFSolver {
         using T = Traits<BaseSetType>::ScalarType;
-        using MatrixND = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector>;
+        using MatrixND = DenseMatrix<T, MatrixOption::Col>;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
         constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
@@ -45,7 +45,7 @@ namespace Physica {
         using EDIISBuffer = Array<MatrixND, EDIISBufferSize>;
         using DIISBuffer = Array<MatrixND, DIISBufferSize - 1>;
         using MatrixBuffer = Array<MatrixND, MatrixBufferSize>;
-        using DIISMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, DIISBufferSize, DIISBufferSize>;
+        using DIISMatrix = DenseMatrix<T, MatrixOption::Col, DIISBufferSize, DIISBufferSize>;
     private:
         const Molecular<T>& molecular;
         ElectronConfig electronConfig;
@@ -304,8 +304,8 @@ namespace Physica {
             }
         }
 
-        auto equalityConstraint = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 1, Dynamic>(1, problemDim + 1, T(1));
-        auto inequalityConstraint = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>(problemDim, problemDim + 1, T(0));
+        auto equalityConstraint = DenseMatrix<T, MatrixOption::Row, 1, Dynamic>(1, problemDim + 1, T(1));
+        auto inequalityConstraint = DenseMatrix<T, MatrixOption::Row>(problemDim, problemDim + 1, T(0));
         auto block = inequalityConstraint.leftCols(problemDim);
         block.toUnitMatrix();
         auto initial = VectorND<T>(problemDim, T(0));
