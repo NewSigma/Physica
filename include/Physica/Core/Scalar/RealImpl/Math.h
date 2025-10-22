@@ -334,6 +334,16 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
+    __host__ __device__ Real<Prec> sigmoid(const Real<Prec>& x) noexcept {
+        using T = Real<Prec>;
+        if (x.isPositive())
+            return reciprocal(T(1) + exp(-x));
+
+        auto y = exp(x);
+        return y / (T(1) + y);
+    }
+
+    template<FloatPrec Prec>
     __host__ __device__ Real<Prec> floor(const Real<Prec>& x) noexcept {
         if constexpr (Prec == Float32)
             return Real<Prec>(::floorf(x.toMachine()));

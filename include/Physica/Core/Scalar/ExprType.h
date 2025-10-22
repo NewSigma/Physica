@@ -56,6 +56,7 @@ namespace Physica {
         ArcSinh,
         ArcTanh,
         LnCosh,
-        Softmax
+        Softmax,
+        Sigmoid,
     };
 }
