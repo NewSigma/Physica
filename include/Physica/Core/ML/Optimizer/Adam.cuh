@@ -47,8 +47,8 @@ namespace Physica {
         };
 
         struct MatrixBuffer {
-            device_obj<DenseMatrix<T, MatrixOption::Col>> m;
-            device_obj<DenseMatrix<T, MatrixOption::Col>> v;
+            device_obj<DenseMatrix<T>> m;
+            device_obj<DenseMatrix<T>> v;
             T beta1t;
             T beta2t;
 

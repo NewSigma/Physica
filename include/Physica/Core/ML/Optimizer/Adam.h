@@ -54,8 +54,8 @@ namespace Physica {
         };
 
         struct MatrixBuffer {
-            DenseMatrix<T, MatrixOption::Col> m;
-            DenseMatrix<T, MatrixOption::Col> v;
+            DenseMatrix<T> m;
+            DenseMatrix<T> v;
             T beta1t;
             T beta2t;
 

@@ -35,14 +35,13 @@ namespace Physica {
     public:
         DiagMatrix() = default;
         explicit DiagMatrix(size_t order);
-        explicit DiagMatrix(VectorType diags_);
+        explicit DiagMatrix(const Vector auto& diags_);
         DiagMatrix(const This&) = default;
         DiagMatrix(This&&) noexcept = default;
         ~DiagMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        template<Vector V>
-        [[nodiscard]] V&& operator*(V&& v) const noexcept;
+        [[nodiscard]] auto operator*(Vector auto&& v) const noexcept;
         using Base::operator*;
 
         void operator*=(const Scalar auto& x);
@@ -71,13 +70,12 @@ namespace Physica {
     DiagMatrix<T, Order>::DiagMatrix(size_t order) : diags(order) {}
 
     template<Scalar T, size_t Order>
-    DiagMatrix<T, Order>::DiagMatrix(VectorType diags_) : diags(std::move(diags_)) {}
+    DiagMatrix<T, Order>::DiagMatrix(const Vector auto& diags_) : diags(diags_) {}
 
     template<Scalar T, size_t Order>
-    template<Vector V>
-    V&& DiagMatrix<T, Order>::operator*(V&& v) const noexcept {
+    auto DiagMatrix<T, Order>::operator*(Vector auto&& v) const noexcept {
         assert(getCol() == v.getLength());
-        return hadamard(diags, v);
+        return hadamard(diags, std::forward<decltype(v)>(v));
     }
 
     template<Scalar T, size_t Order>

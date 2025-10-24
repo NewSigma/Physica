@@ -40,6 +40,7 @@ namespace Physica {
         /* Operations */
         void step(Diffable auto& target) const;
         void step(Diffable auto& target, Diffable auto&... targets) const;
+        void clear() const noexcept {}
         void swap(SGD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T& getLearnRate() noexcept { return lr; }

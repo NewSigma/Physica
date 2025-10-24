@@ -25,6 +25,9 @@ namespace Physica {
 #define DiffDenseMatrix DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>
 
     template<tparams>
+    DiffDenseMatrix::DenseMatrix(size_t order) : DenseMatrix(order, order) {}
+
+    template<tparams>
     DiffDenseMatrix::DenseMatrix(size_t row, size_t col) : v(row, col), g(row, col) {}
 
     template<tparams>

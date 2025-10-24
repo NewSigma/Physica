@@ -32,7 +32,7 @@ namespace Physica {
     template<Scalar T>
     class LinearSystem {
         using This = LinearSystem<T>;
-        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col>;
+        using WorkingMatrix = DenseMatrix<T>;
 
         WorkingMatrix working;
     public:

@@ -27,7 +27,7 @@ namespace Physica {
 
         using This = device_obj<MomentSGD<T>>;
         using VectorType = device_obj<VectorND<T>>;
-        using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Col>>;
+        using MatrixType = device_obj<DenseMatrix<T>>;
     private:
         std::unordered_map<void*, std::variant<VectorType, MatrixType>> targetBufferMap;
         T lr;

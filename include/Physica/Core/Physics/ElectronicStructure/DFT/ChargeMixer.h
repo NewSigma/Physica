@@ -118,9 +118,8 @@ namespace Physica {
             rho_new = rho_old + fft.getRSpace().flatten();
         }
         else {
-            using MatrixType = DenseMatrix<T, MatrixOption::Col>;
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
-            MatrixType diisMat = MatrixType(numValidRecord + 1, numValidRecord + 1, 1.0);
+            auto diisMat = DenseMatrix<T>(numValidRecord + 1, numValidRecord + 1, 1.0);
             diisMat(0, 0) = T(0);
             /* Construct equation */ {
                 for (size_t i = 1; i < diisMat.getRow(); ++i) {
@@ -135,7 +134,7 @@ namespace Physica {
             /* Solve */ {
                 auto b = VectorND<T>(diisMat.getRow(), 0);
                 b[0] = 1;
-                const MatrixType inv_A = diisMat.inverse();
+                const DenseMatrix<T> inv_A = diisMat.inverse();
                 x = inv_A * b;
             }
 

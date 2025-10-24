@@ -36,7 +36,7 @@ namespace Physica {
     template<class BaseSetType>
     class RHFSolver {
         using T = Traits<BaseSetType>::ScalarType;
-        using MatrixND = DenseMatrix<T, MatrixOption::Col>;
+        using MatrixND = DenseMatrix<T>;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
         constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]

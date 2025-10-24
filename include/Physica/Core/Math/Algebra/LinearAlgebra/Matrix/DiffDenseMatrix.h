@@ -51,6 +51,7 @@ namespace Physica {
         GradMatrix g;
     public:
         DenseMatrix() = default;
+        explicit DenseMatrix(size_t order);
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T init);
         DenseMatrix(size_t row, size_t col, ScalarType init) requires(isForwardDiff);

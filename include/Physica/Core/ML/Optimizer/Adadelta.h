@@ -41,8 +41,8 @@ namespace Physica {
         };
 
         struct MatrixBuffer {
-            DenseMatrix<T, MatrixOption::Col> v;
-            DenseMatrix<T, MatrixOption::Col> u;
+            DenseMatrix<T> v;
+            DenseMatrix<T> u;
 
             MatrixBuffer() = default;
             MatrixBuffer(size_t row, size_t col) : v(row, col, 0), u(row, col, 0) {}
@@ -64,6 +64,7 @@ namespace Physica {
         /* Operations */
         void step(Diffable auto& target);
         void step(Diffable auto& target, Diffable auto&... targets);
+        void clear() noexcept;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -107,6 +108,11 @@ namespace Physica {
     void Adadelta<T>::step(Diffable auto& target, Diffable auto&... targets) {
         step(target);
         step(targets...);
+    }
+
+    template<Scalar T>
+    void Adadelta<T>::clear() noexcept {
+        targetBufferMap.clear();
     }
 
     template<Scalar T>

@@ -78,8 +78,8 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
-        [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
+        [[nodiscard]] int getNumSite() const noexcept { return aux.getRow(); }
+        [[nodiscard]] int getNumSplit() const noexcept { return aux.getCol(); }
         [[nodiscard]] const auto& getParams() const noexcept { return *params; }
         [[nodiscard]] const auto& getAuxField() const noexcept { return aux; }
 
@@ -110,7 +110,7 @@ namespace Physica {
 
     template<Scalar T>
     DQMC<T>::DQMC(const Params& params_) : params(&params_) {
-        resize(getNumSite(), getNumSplit());
+        resize(params->getNumSite(), params->getNumSplit());
 
         kinetic.compute(params->getExpB());
         for (int split = 0; split < getNumSplit(); ++split) {
