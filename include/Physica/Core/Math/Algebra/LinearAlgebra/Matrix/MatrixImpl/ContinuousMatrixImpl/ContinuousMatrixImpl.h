@@ -216,12 +216,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::flatten() {
+    auto ContinuousMatrix<Derived>::flatten() noexcept {
         return FlattenC<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    const auto ContinuousMatrix<Derived>::flatten() const {
+    const auto ContinuousMatrix<Derived>::flatten() const noexcept {
         return FlattenC<Derived>(Base::getConstCastDerived());
     }
 

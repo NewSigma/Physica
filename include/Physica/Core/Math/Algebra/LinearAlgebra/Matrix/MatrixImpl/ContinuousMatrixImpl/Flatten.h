@@ -32,6 +32,8 @@ namespace Physica {
     protected:
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
+        using RefTy = ScalarType::RefTy;
+        using ConstRefTy = ScalarType::ConstRefTy;
     public:
         FlattenC(ContinuousMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         FlattenC(const This&) = default;
@@ -41,8 +43,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operators */
-        [[nodiscard]] ScalarType& operator[](size_t index) { return *data_ptr(index); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
+        [[nodiscard]] RefTy operator[](size_t index) { return *data_ptr(index); }
+        [[nodiscard]] ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */

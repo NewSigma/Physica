@@ -36,7 +36,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const noexcept;
+        void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Vector auto& v) const noexcept;
@@ -54,7 +54,7 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Exp, V>::assign(Vector auto& v) const noexcept {
+    void VectorExpr<ExprType::Exp, V>::assign(Vector auto&& v) const noexcept {
         using V1 = std::remove_cvref_t<decltype(v)>;
         constexpr size_t Length = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
         constexpr bool SmallVector = 0 < Length && Length <= 32;

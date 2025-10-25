@@ -84,6 +84,22 @@ assign具有整体性，因此FastAssign具有传播性。
 
 FastPacket = true表示可以快速构造SIMD对象. 对于右值表达式, 需要逐个计算元素并保存在栈上, 此时FastPacket = false
 
+## 模板表达式
+
+一元操作可以显示约束:
+
+``` C++
+template<ExprType Type, Matrix M>
+class UnitaryMatrixExpr { ... };
+```
+
+考虑到可能的非Abel性, 二元操作需要更一般的声明:
+
+``` C++
+template<ExprType Type, class LHS, class RHS>
+class BinaryMatrixExpr { ... };
+```
+
 ## Reference
 
 [1] Eigen; https://eigen.tuxfamily.org  

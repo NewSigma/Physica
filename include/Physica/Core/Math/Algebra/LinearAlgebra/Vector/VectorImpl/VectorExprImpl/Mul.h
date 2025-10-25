@@ -38,7 +38,7 @@ namespace Physica {
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const;
+        void assign(Vector auto&& v) const;
         void assign_mkl(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Vector auto& v) const;
@@ -78,7 +78,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Mul, V, U>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Mul, V, U>::assign(Vector auto&& v) const {
         constexpr bool FastAssign = Traits<std::remove_cvref_t<V>>::FastAssign;
         if constexpr (FastAssign) {
             getLHS().template assign<P>(v);
@@ -164,7 +164,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const;
+        void assign(Vector auto&& v) const;
         void assign_mkl(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Vector auto& v) const;
@@ -183,7 +183,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Mul, V1, V2>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Mul, V1, V2>::assign(Vector auto&& v) const {
         assign_base<P>(v);
     }
 

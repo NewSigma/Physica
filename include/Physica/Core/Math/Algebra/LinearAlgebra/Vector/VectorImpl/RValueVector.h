@@ -120,7 +120,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const noexcept;
+        void assign(Vector auto&& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto& v) const noexcept;
         void assert_assign(const Vector auto& target) const noexcept;

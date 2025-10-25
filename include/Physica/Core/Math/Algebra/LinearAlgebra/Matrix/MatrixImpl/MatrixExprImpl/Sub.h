@@ -21,33 +21,58 @@
 #include "../MatrixExpr.h"
 
 namespace Physica {
-    template<class T, class U>
-    class MatrixExpr<ExprType::Sub, T, U>
-            : public BinaryMatrixExpr<ExprType::Sub, T, U> {
-        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either types should be Scalar");
+    template<class U, class V>
+    class MatrixExpr<ExprType::Sub, U, V>
+            : public BinaryMatrixExpr<ExprType::Sub, U, V> {
+        static_assert(Scalar<U> || Scalar<V>, "[Error]: Either types should be Scalar");
 
-        using Base = BinaryMatrixExpr<ExprType::Sub, T, U>;
-    public:
-        using typename Base::ScalarType;
+        using Base = BinaryMatrixExpr<ExprType::Sub, U, V>;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
-                return Base::getLHS().calc(row, col) - Base::getRHS();
-            else
-                return Base::getLHS() - Base::getRHS().calc(row, col);
-        }
+        void assign(Matrix auto& target) const;
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            if constexpr (Matrix<T>)
-                return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
-            else
-                return Base::getLHS().value() - Base::getRHS().calc_value(row, col);
-        }
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<class U, class V>
+    void MatrixExpr<ExprType::Sub, U, V>::assign(Matrix auto& target) const {
+        if constexpr (Matrix<U>) {
+            if constexpr (MatrixOption::isSameMajor<U, decltype(target)>())
+                (getLHS().flatten() - getRHS()).assign(target.flatten());
+            else
+                Base::assign(target);
+        }
+        else {
+            if constexpr (MatrixOption::isSameMajor<V, decltype(target)>())
+                (getLHS() - getRHS().flatten()).assign(target.flatten());
+            else
+                Base::assign(target);
+        }
+    }
+
+    template<class U, class V>
+    auto MatrixExpr<ExprType::Sub, U, V>::calc(size_t row, size_t col) const -> T {
+        if constexpr (Matrix<U>)
+            return Base::getLHS().calc(row, col) - Base::getRHS();
+        else
+            return Base::getLHS() - Base::getRHS().calc(row, col);
+    }
+
+    template<class U, class V>
+    auto MatrixExpr<ExprType::Sub, U, V>::calc_value(size_t row, size_t col) const -> Tv {
+        if constexpr (Matrix<U>)
+            return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
+        else
+            return Base::getLHS().value() - Base::getRHS().calc_value(row, col);
+    }
 
     template<Matrix M1, Matrix M2>
     class MatrixExpr<ExprType::Sub, M1, M2>
@@ -64,6 +89,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
+        void assign(Matrix auto& target) const;
+
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
@@ -74,39 +101,52 @@ namespace Physica {
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
 
         [[nodiscard]] auto values() const noexcept;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
 
     template<Matrix M1, Matrix M2>
+    void MatrixExpr<ExprType::Sub, M1, M2>::assign(Matrix auto& target) const {
+        constexpr bool SameMajor1 = MatrixOption::isSameMajor<M1, decltype(target)>();
+        constexpr bool SameMajor2 = MatrixOption::isSameMajor<M2, decltype(target)>();
+        if constexpr (SameMajor1 && SameMajor2)
+            (getLHS().flatten() - getRHS().flatten()).assign(target.flatten());
+        else
+            Base::assign(target);
+    }
+
+    template<Matrix M1, Matrix M2>
     auto MatrixExpr<ExprType::Sub, M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
-        return Base::getLHS().calc(row, col) - Base::getRHS().calc(row, col);
+        return getLHS().calc(row, col) - getRHS().calc(row, col);
     }
 
     template<Matrix M1, Matrix M2>
     auto MatrixExpr<ExprType::Sub, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
-        return Base::getLHS().calc_value(row, col) - Base::getRHS().calc_value(row, col);
+        return getLHS().calc_value(row, col) - getRHS().calc_value(row, col);
     }
 
     template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprType::Sub, M1, M2>::reverse(const auto& grad) const noexcept {
         if constexpr (ReverseDiff<M1>)
-            Base::getLHS().reverse(grad);
+            getLHS().reverse(grad);
         if constexpr (ReverseDiff<M2>)
-            Base::getRHS().reverse(-grad);
+            getRHS().reverse(-grad);
     }
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] auto MatrixExpr<ExprType::Sub, M1, M2>::values() const noexcept {
-        return Base::getLHS().values() - Base::getRHS().values();
+        return getLHS().values() - getRHS().values();
     }
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] auto operator-(T&& m, U&& x) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Sub, T&&, U&&>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Scalar U>
+    [[nodiscard]] auto operator-(M&& m, U&& x) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Sub, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] auto operator-(U&& x, T&& m) noexcept requires(!CUDA<T>) {
-        return MatrixExpr<ExprType::Sub, U&&, T&&>(std::forward<U>(x), std::forward<T>(m));
+    template<Matrix M, Scalar U>
+    [[nodiscard]] auto operator-(U&& x, M&& m) noexcept requires(!CUDA<M>) {
+        return MatrixExpr<ExprType::Sub, U&&, M&&>(std::forward<U>(x), std::forward<M>(m));
     }
 
     template<Matrix M1, Matrix M2>

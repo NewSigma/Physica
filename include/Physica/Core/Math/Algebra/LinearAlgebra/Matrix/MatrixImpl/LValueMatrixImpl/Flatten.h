@@ -40,6 +40,9 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        using Base::operator=;
+        /* Operations */
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;

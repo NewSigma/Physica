@@ -43,7 +43,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const noexcept;
+        void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Vector auto& v) const noexcept;
@@ -60,7 +60,7 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    void Conjugate<V>::assign(Vector auto& v) const noexcept {
+    void Conjugate<V>::assign(Vector auto&& v) const noexcept {
         assign_base<P>(v);
     }
 

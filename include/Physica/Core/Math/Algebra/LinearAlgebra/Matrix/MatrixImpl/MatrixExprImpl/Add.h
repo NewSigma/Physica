@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,14 +31,32 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) + Base::getRHS();
-        }
+        void assign(Matrix auto& target) const;
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) + Base::getRHS().value();
-        }
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Matrix M, Scalar U>
+    void MatrixExpr<ExprType::Add, M, U>::assign(Matrix auto& target) const {
+        if constexpr (MatrixOption::isSameMajor<M, decltype(target)>())
+            (getLHS().flatten() + getRHS()).assign(target.flatten());
+        else
+            Base::assign(target);
+    }
+
+    template<Matrix M, Scalar U>
+    auto MatrixExpr<ExprType::Add, M, U>::calc(size_t row, size_t col) const -> T {
+        return getLHS().calc(row, col) + getRHS();
+    }
+
+    template<Matrix M, Scalar U>
+    auto MatrixExpr<ExprType::Add, M, U>::calc_value(size_t row, size_t col) const -> Tv {
+        return getLHS().calc_value(row, col) + getRHS().value();
+    }
 
     template<Matrix M, Vector U>
     class MatrixExpr<ExprType::Add, M, U>
@@ -59,13 +77,13 @@ namespace Physica {
         }
     };
 
-    template<Matrix T1, Matrix T2>
-    class MatrixExpr<ExprType::Add, T1, T2>
-            : public BinaryMatrixExpr<ExprType::Add, T1, T2> {
-        using Base = BinaryMatrixExpr<ExprType::Add, T1, T2>;
-        using This = MatrixExpr<ExprType::Add, T1, T2>;
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<T1>() && MatrixOption::isSymmMatrix<T2>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T1>() && MatrixOption::isHermiteMatrix<T2>();
+    template<Matrix M1, Matrix M2>
+    class MatrixExpr<ExprType::Add, M1, M2>
+            : public BinaryMatrixExpr<ExprType::Add, M1, M2> {
+        using Base = BinaryMatrixExpr<ExprType::Add, M1, M2>;
+        using This = MatrixExpr<ExprType::Add, M1, M2>;
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M1>() && MatrixOption::isSymmMatrix<M2>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M1>() && MatrixOption::isHermiteMatrix<M2>();
         using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
         using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     protected:
@@ -74,17 +92,37 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const {
-            return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
-        }
+        void assign(Matrix auto& target) const;
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
-        }
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
     };
+
+    template<Matrix M1, Matrix M2>
+    void MatrixExpr<ExprType::Add, M1, M2>::assign(Matrix auto& target) const {
+        constexpr bool SameMajor1 = MatrixOption::isSameMajor<M1, decltype(target)>();
+        constexpr bool SameMajor2 = MatrixOption::isSameMajor<M2, decltype(target)>();
+        if constexpr (SameMajor1 && SameMajor2)
+            (getLHS().flatten() + getRHS().flatten()).assign(target.flatten());
+        else
+            Base::assign(target);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Add, M1, M2>::calc(size_t row, size_t col) const -> T {
+        return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Add, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
+        return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
+    }
 
     template<Matrix M, Scalar U>
     [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M>) {
@@ -93,7 +131,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard]] auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M>) {
-        return m + x;
+        return std::forward<M>(m) + std::forward<U>(x);
     }
 
     template<Matrix M, Vector U>
@@ -103,11 +141,11 @@ namespace Physica {
 
     template<Matrix M, Vector U>
     [[nodiscard]] auto operator+(U&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<U>) {
-        return m + x;
+        return std::forward<M>(m) + std::forward<U>(x);
     }
 
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] auto operator+(T1&& m1, T2&& m2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return MatrixExpr<ExprType::Add, T1&&, T2&&>(std::forward<T1>(m1), std::forward<T2>(m2));
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] auto operator+(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
+        return MatrixExpr<ExprType::Add, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

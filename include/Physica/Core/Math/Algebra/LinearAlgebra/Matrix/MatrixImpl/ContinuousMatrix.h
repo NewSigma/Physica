@@ -120,8 +120,8 @@ namespace Physica {
         void resize(const Matrix auto& m, auto&&... args);
         auto resize(size_t r, size_t c, auto&&... args);
 
-        [[nodiscard]] auto flatten();
-        [[nodiscard]] const auto flatten() const;
+        [[nodiscard]] auto flatten() noexcept;
+        [[nodiscard]] const auto flatten() const noexcept;
 
         const H5DataSet<2> read(const H5Loc& loc, const char* name);
         H5DataSet<2> write(H5Loc& loc, const char* name) const;

@@ -341,7 +341,7 @@ namespace Physica {
 
     template<class Derived>
     const auto LValueMatrix<Derived>::flatten() const {
-        return FlattenL<Derived>(Base::getDerived());
+        return FlattenL<Derived>(Base::getConstCastDerived());
     }
 
     template<class Derived>

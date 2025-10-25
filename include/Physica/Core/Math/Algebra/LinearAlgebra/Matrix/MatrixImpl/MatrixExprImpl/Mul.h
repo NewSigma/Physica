@@ -39,6 +39,8 @@ namespace Physica {
         [[nodiscard]] auto operator-() const& noexcept;
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
+        void assign(Matrix auto& target) const;
+
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
@@ -50,6 +52,14 @@ namespace Physica {
         using Base::getLHS;
         using Base::getRHS;
     };
+
+    template<Matrix M, Scalar U>
+    void MatrixExpr<ExprType::Mul, M, U>::assign(Matrix auto& target) const {
+        if constexpr (MatrixOption::isSameMajor<M, decltype(target)>())
+            (getLHS().flatten() * getRHS()).assign(target.flatten());
+        else
+            Base::assign(target);
+    }
 
     template<Matrix M, Scalar U>
     auto MatrixExpr<ExprType::Mul, M, U>::calc(size_t row, size_t col) const -> CoDiff<T> {
@@ -83,13 +93,10 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const {
-            return getLHS().calc(row, col) * getRHS().calc(row, col);
-        }
+        void assign(Matrix auto& target) const;
 
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const {
-            return getLHS().calc_value(row, col) * getRHS().calc_value(row, col);
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
         using Base::reverse;
@@ -97,6 +104,26 @@ namespace Physica {
         using Base::getLHS;
         using Base::getRHS;
     };
+
+    template<Matrix M1, Matrix M2>
+    void MatrixExpr<ExprType::Mul, M1, M2>::assign(Matrix auto& target) const {
+        constexpr bool SameMajor1 = MatrixOption::isSameMajor<M1, decltype(target)>();
+        constexpr bool SameMajor2 = MatrixOption::isSameMajor<M2, decltype(target)>();
+        if constexpr (SameMajor1 && SameMajor2)
+            hadamard(getLHS().flatten(), getRHS().flatten()).assign(target.flatten());
+        else
+            Base::assign(target);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Mul, M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
+        return getLHS().calc(row, col) * getRHS().calc(row, col);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Mul, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
+        return getLHS().calc_value(row, col) * getRHS().calc_value(row, col);
+    }
 
     template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprType::Mul, M1, M2>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
@@ -115,7 +142,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard]] auto operator*(U&& x, M&& m) noexcept requires(!CUDA<M>) {
-        return m * x;
+        return std::forward<M>(m) * std::forward<U>(x);
     }
 
     template<Matrix M1, Matrix M2>

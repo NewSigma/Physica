@@ -36,7 +36,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const;
+        void assign(Vector auto&& v) const;
         void assign_mkl(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Vector auto& v) const;
@@ -54,7 +54,7 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Square, V>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Square, V>::assign(Vector auto&& v) const {
         assign_base<P>(v);
     }
 

@@ -132,7 +132,7 @@ namespace Physica {
         using Base::Base;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& v) const;
+        void assign(Vector auto&& v) const;
         void assign_mkl(Vector auto& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_base(Vector auto& v) const;
@@ -153,7 +153,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Sub, V1, V2>::assign(Vector auto& v) const {
+    void VectorExpr<ExprType::Sub, V1, V2>::assign(Vector auto&& v) const {
         constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
         constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {

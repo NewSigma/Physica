@@ -39,7 +39,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void ContinuousVector<Derived>::assign(Vector auto& v) const noexcept {
+    void ContinuousVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
         constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
