@@ -111,8 +111,9 @@ namespace Physica {
         [[nodiscard]] HalfType getLow() const noexcept { return pack.get_low(); }
         [[nodiscard]] HalfType getHigh() const noexcept { return pack.get_high(); }
         [[nodiscard]] This value() const noexcept { return *this; }
-        [[nodiscard]] auto isPositive() const noexcept { return operator>(This(0)); }
-        [[nodiscard]] auto isNegative() const noexcept { return operator<(This(0)); }
+        [[nodiscard]] BoolSIMDType isZero() const noexcept;
+        [[nodiscard]] BoolSIMDType isPositive() const noexcept;
+        [[nodiscard]] BoolSIMDType isNegative() const noexcept;
         [[nodiscard]] BoolSIMDType isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] static SIMD inf() noexcept;

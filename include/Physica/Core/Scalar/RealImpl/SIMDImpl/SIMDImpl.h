@@ -107,6 +107,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     SIMD<T, Size> SIMD<T, Size>::operator/(const SIMD other) const {
+        // Vector partial reciprocal might divide by zero, do not assert it.
         return SIMD(toMachine() / other.toMachine());
     }
 
@@ -246,6 +247,21 @@ namespace Physica {
     template<Scalar T, int Size>
     T SIMD<T, Size>::min() const {
         return Physica::horizontal_min1(toMachine());
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<T, Size>::isZero() const noexcept -> BoolSIMDType {
+        return operator==(This(0));
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<T, Size>::isPositive() const noexcept -> BoolSIMDType {
+        return operator>(This(0));
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<T, Size>::isNegative() const noexcept -> BoolSIMDType {
+        return operator<(This(0));
     }
 
     template<Scalar T, int Size>

@@ -39,6 +39,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     [[nodiscard]] auto reciprocal(SIMD<T, Size> x) noexcept {
+        // Vector partial reciprocal might divide by zero, do not assert it.
         using ResultType = SIMD<T, Size>;
         return ResultType(1) / x;
     }

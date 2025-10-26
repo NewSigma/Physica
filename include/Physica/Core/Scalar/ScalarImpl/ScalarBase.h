@@ -146,6 +146,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ const GradRtnTy<GradOrder>& grad() const noexcept;
         [[nodiscard]] __host__ __device__ auto isZero() const noexcept;
+        [[nodiscard]] __host__ __device__ auto isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ auto isPositive() const noexcept;
         [[nodiscard]] __host__ __device__ auto isNegative() const noexcept;
         [[nodiscard]] __host__ __device__ auto isFinite() const noexcept;
@@ -455,6 +456,14 @@ namespace Physica {
             return value().isZero();
         else
             return Base::getDerived().isZero();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto ScalarBase<Derived>::isSubNormal() const noexcept {
+        if constexpr (isDiffable)
+            return value().isSubNormal();
+        else
+            return Base::getDerived().isSubNormal();
     }
 
     template<class Derived>

@@ -33,23 +33,41 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t index) const { return reciprocal(Base::getExpr().calc(index)); }
-
-        [[nodiscard]] Tv calc_value(size_t index) const { return reciprocal(Base::getExpr().calc_value(index)); }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            return Pack(1) / Base::getExpr().template packet<Pack>(index);
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return (Pack(1) / Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
-        }
+        [[nodiscard]] Pack packet(size_t index) const;
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
         void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
     };
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Reciprocal, V>::calc(size_t index) const -> CoDiff<T> {
+        return reciprocal(Base::getExpr().calc(index));
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Reciprocal, V>::calc_value(size_t index) const -> Tv { return reciprocal(Base::getExpr().calc_value(index)); }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Reciprocal, V>::packet(size_t index) const {
+        auto x = Base::getExpr().template packet<Pack>(index);
+        assert(!x.isZero().horizontal_or() && "[Error]: Divide by zero");
+        return reciprocal(x);
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Reciprocal, V>::packetPartial(size_t index, size_t count) const {
+        auto x = reciprocal(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
+        assert(x.isFinite().horizontal_and() && "[Error]: Divide by zero");
+        return x;
+    }
 
     template<Vector V>
     void VectorExpr<ExprType::Reciprocal, V>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {

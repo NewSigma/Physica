@@ -142,7 +142,7 @@ namespace Physica {
         const size_t length = taus.getLength();
         assert(diagD.getLength() == length);
         for (size_t i = 0; i < length; ++i) {
-            if (working(i, i).isZero()) {
+            if (working(i, i).isSubNormal()) {
                 diagD[i] = 1;
                 continue;
             }

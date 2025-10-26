@@ -108,8 +108,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ int getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ int getPower() const noexcept { return power; }
         [[nodiscard]] __host__ __device__ int getSize() const noexcept { return std::abs(length); }
-        [[nodiscard]] __host__ __device__ bool isZero() const { return byte[getSize() - 1] == 0; }
         [[nodiscard]] MachineType toMachine() const noexcept { return double(*this); }
+        [[nodiscard]] bool isZero() const { return byte[getSize() - 1] == 0; }
+        [[nodiscard]] constexpr static bool isSubNormal() noexcept { return false; }
         [[nodiscard]] bool isPositive() const { return !isZero() && length > 0; }
         [[nodiscard]] bool isNegative() const { return !isZero() && length < 0; }
         [[nodiscard]] bool isInteger() const { return getSize() - 1 == power; }

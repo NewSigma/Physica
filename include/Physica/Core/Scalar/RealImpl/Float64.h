@@ -69,7 +69,7 @@ namespace Physica {
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        __host__ __device__ explicit operator float() const noexcept { return d; }
+        __host__ __device__ explicit operator float() const noexcept { return float(d); }
         __host__ __device__ explicit operator double() const noexcept { return d; }
         __host__ __device__ constexpr Real operator+(const Real& s) const noexcept;
         __host__ __device__ constexpr Real operator-(const Real& s) const noexcept;
@@ -88,6 +88,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ double toMachine() const noexcept { return d; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
+        [[nodiscard]] __host__ __device__ bool isSubNormal() const noexcept{ return std::abs(d) < std::numeric_limits<double>::min(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
@@ -128,7 +129,7 @@ namespace Physica {
     }
 
     __host__ __device__ inline Real<Float64> Real<Float64>::mod() const noexcept {
-        double buffer;
+        double buffer{};
         return std::modf(toMachine(), &buffer);
     }
 
