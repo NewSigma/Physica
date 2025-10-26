@@ -56,6 +56,7 @@ namespace Physica {
 
     template<Scalar T, int Size>
     [[nodiscard]] auto ln(SIMD<T, Size> x) noexcept {
+        assert(x.isPositive().horizontal_and());
         return SIMD<T, Size>(log(x.toMachine()));
     }
 

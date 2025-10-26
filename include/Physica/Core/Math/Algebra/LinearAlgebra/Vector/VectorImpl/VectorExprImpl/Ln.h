@@ -33,25 +33,41 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t index) const { return ln(Base::getExpr().calc(index)); }
-
-        [[nodiscard]] Tv calc_value(size_t index) const { return ln(Base::getExpr().calc_value(index)); }
-
-        template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            return ln(Base::getExpr().template packet<Pack>(index));
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return ln(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
-        }
+        [[nodiscard]] Pack packet(size_t index) const;
+        template<Packet Pack>
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
         void reverse(const auto& grad) const noexcept requires(isReverseDiff);
     };
 
     template<Vector V>
-    void VectorExpr<ExprType::Ln, V>::reverse(const auto& grad) const noexcept requires(isReverseDiff){
+    auto VectorExpr<ExprType::Ln, V>::calc(size_t index) const -> CoDiff<T> {
+        return ln(Base::getExpr().calc(index));
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Ln, V>::calc_value(size_t index) const -> Tv {
+        return ln(Base::getExpr().calc_value(index));
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Ln, V>::packet(size_t index) const {
+        return ln(Base::getExpr().template packet<Pack>(index));
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Ln, V>::packetPartial(size_t index, size_t count) const {
+        return ln(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
+    }
+
+    template<Vector V>
+    void VectorExpr<ExprType::Ln, V>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<decltype(grad)>)
             expr.reverse(grad.value() / expr.values());

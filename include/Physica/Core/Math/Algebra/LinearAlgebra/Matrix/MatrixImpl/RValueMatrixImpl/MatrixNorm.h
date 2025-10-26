@@ -105,7 +105,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::normF() const -> Tr {
+    auto RValueMatrix<Derived>::normF() const -> CoDiff<Tr> {
         return sqrt(squaredNorms().sum());
     }
 
