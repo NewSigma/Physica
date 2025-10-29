@@ -44,7 +44,7 @@ namespace Physica {
 
         [[nodiscard]] T det() const;
         [[nodiscard]] constexpr static Trv lnAbsDet() noexcept { return Trv(0); }
-        [[nodiscard]] PermMatrix inverse() const noexcept;
+        [[nodiscard]] PermMatrix inv() const noexcept;
 
         void resize(size_t order);
         void swapRows(size_t row1, size_t row2);
@@ -91,7 +91,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PermMatrix<T> PermMatrix<T>::inverse() const noexcept {
+    PermMatrix<T> PermMatrix<T>::inv() const noexcept {
         Array<size_t> result(indices.getLength());
         for (size_t i = 0; i < result.getLength(); ++i)
             result[indices[i]] = i;

@@ -42,29 +42,31 @@ using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact, GPU>;
 using RandomSource = Random<>;
 
-MDCellType makeSystem() {
-    MDCellType::LatticeMatrix lattice{latticeSize};
+namespace {
+    MDCellType makeSystem() {
+        MDCellType::LatticeMatrix lattice{latticeSize};
 
-    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
-    posVec *= ScalarType(latticeSize);
-    std::sort(posVec.begin(), posVec.end());
-    MDCellType::PositionMatrix pos(numMolecular, 1);
-    pos.col(0) = posVec;
+        auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
+        posVec *= ScalarType(latticeSize);
+        std::ranges::sort(posVec);
+        MDCellType::PositionMatrix pos(numMolecular, 1);
+        pos.col(0) = posVec;
 
-    MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = i % 2 == 0 ? 3.0 : 1.0;
+        MDCellType::MassVector massVec(numMolecular);
+        for (size_t i = 0; i < numMolecular; ++i) {
+            massVec[i] = i % 2 == 0 ? 3.0 : 1.0;
+        }
+        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
     }
-    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
-}
 
-ScalarType calcThermoFlux(MDType& rpmd) {
-    ScalarType flux = 0;
-    auto col = rpmd.getPhaseMatrix().col(0);
-    const auto& massVec = rpmd.getMassVec();
-    for (size_t i = 0; i < numMolecular; ++i)
-        flux += col[i] * square(col[i]) / square(massVec[i]);
-    return flux;
+    ScalarType calcThermoFlux(MDType& rpmd) {
+        ScalarType flux = 0;
+        auto col = rpmd.getPhaseMatrix().col(0);
+        const auto& massVec = rpmd.getMassVec();
+        for (size_t i = 0; i < numMolecular; ++i)
+            flux += col[i] * square(col[i]) / square(massVec[i]);
+        return flux;
+    }
 }
 
 int main(int argc, char** argv) {
@@ -91,7 +93,7 @@ int main(int argc, char** argv) {
                     kineticModel.updateMomentum(rpmd.getRingPolymer());
                 }
             }
-            record.asArray()[sys] = std::move(mean);
+            record.col(sys) = std::move(mean);
         }, record.getCol(), ThreadPool::numThreadRequired).wait();
 
         for (size_t i = 0; i < mean.getLength(); ++i) {

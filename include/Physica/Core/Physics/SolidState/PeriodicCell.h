@@ -124,7 +124,7 @@ namespace Physica {
         static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn);
         static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, std::invocable<VectorType> auto fn);
     protected:
-        [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
+        [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inv(); }
         void toDirect(const InvLatticeMatrix& invLattice);
         void normalize_direct();
         CoDiff<void> scale_direct(const T& factor);
@@ -613,7 +613,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     void PeriodicCell<T, Dim>::toDirect(PositionMatrix& target, const LatticeMatrix& lattice) {
-        const InvLatticeMatrix inv = lattice.inverse();
+        const InvLatticeMatrix inv = lattice.inv();
         toDirect(target, inv);
     }
 

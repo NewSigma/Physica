@@ -52,7 +52,7 @@ namespace Physica {
         [[nodiscard]] Tr lnAbsDet() const;
         [[nodiscard]] Trv sgndet() const;
 
-        [[nodiscard]] This inverse() const;
+        [[nodiscard]] This inv() const;
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
 
         void resize(size_t order);
@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    auto DiagMatrix<T, Order>::inverse() const -> This {
+    auto DiagMatrix<T, Order>::inv() const -> This {
         return This(VectorType(reciprocal(diags)));
     }
 

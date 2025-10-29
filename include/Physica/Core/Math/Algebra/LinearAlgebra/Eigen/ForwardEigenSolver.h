@@ -85,7 +85,7 @@ namespace Physica {
         if constexpr (isHermite || isRealSymm)
             transGrads = basis.hermite() * GradMatrix(source.grads() * basis);
         else
-            transGrads = GradMatrix(basis.inverse()) * GradMatrix(source.grads() * basis);
+            transGrads = GradMatrix(basis.inv()) * GradMatrix(source.grads() * basis);
 
         eigenvalues.values() = std::move(solver.getEigenvalues());
         eigenvalues.grads() = transGrads.diag();

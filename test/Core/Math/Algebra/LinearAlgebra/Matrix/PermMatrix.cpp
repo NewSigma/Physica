@@ -32,7 +32,7 @@ int main() {
         if (!vectorNear(perm_v, answer, 1E-15))
             return 1;
     }
-    const auto inv = perm.inverse();
+    const auto inv = perm.inv();
     const VectorND<ScalarType> v1 = inv * perm_v;
     if (!vectorNear(v, v1, 1E-15))
         return 1;

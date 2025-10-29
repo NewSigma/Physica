@@ -109,7 +109,10 @@ namespace Physica {
     };
 
     template<Scalar T>
-    DQMC<T>::DQMC(const Params& params_) : params(&params_) {
+    DQMC<T>::DQMC(const Params& params_)
+            : params(&params_)
+            , chainU(params_.getNumSplit())
+            , chainD(params_.getNumSplit()) {
         resize(params->getNumSite(), params->getNumSplit());
 
         kinetic.compute(params->getExpB());
@@ -249,8 +252,6 @@ namespace Physica {
         assert(numSite > 0 && "[Error]: Invalid NumSite");
         assert(numSplit > 0);
         aux.resize(numSite, numSplit);
-        chainU.resize(numSplit);
-        chainD.resize(numSplit);
         kinetic.resize(numSite, numSite);
 
         qr.resize(numSite, numSite);
@@ -397,7 +398,7 @@ namespace Physica {
     auto DQMC<T>::calcDet(const QDTDecomp<T>& qdt) -> std::pair<Tr, Tv> {
         splitDiag(qdt);
 
-        buffer = qdt.getMatrixQ() * diagB.inverse();
+        buffer = qdt.getMatrixQ() * diagB.inv();
         qr.compute(buffer.hermite() + diagS * qdt.getMatrixT());
         qr.getWorking().diag() += Tr(std::numeric_limits<T>::min()); // Handle potential underflow
 
@@ -414,7 +415,7 @@ namespace Physica {
         auto calcGreen = [this, &temp](const QDTDecomp<T>& qdt, MatrixND& green) -> std::pair<Tr, Tv> {
             const auto det = calcDet(qdt);
             temp = buffer * qr.getMatrixQ();
-            green = qr.getMatrixR().inverse() * temp.hermite();
+            green = qr.getMatrixR().inv() * temp.hermite();
             return det;
         };
 

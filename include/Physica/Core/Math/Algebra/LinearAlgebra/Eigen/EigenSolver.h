@@ -189,14 +189,14 @@ namespace Physica {
         const size_t size = getSize();
         EigenvectorMatrix result(size, size);
         if constexpr (isComplex) {
-            RawEigenvectorType inv = rawEigenvectors.inverse();
+            RawEigenvectorType inv = rawEigenvectors.inv();
             for (size_t i = 0; i < size; ++i)
                 result.col(i) = rawEigenvectors * hadamard(eigenvalues, inv.col(i));
             return result;
         }
         else {
             const EigenvectorMatrix eigenvectors = getEigenvectors();
-            const EigenvectorMatrix inv = eigenvectors.inverse();
+            const EigenvectorMatrix inv = eigenvectors.inv();
             for (size_t i = 0; i < size; ++i)
                 result.col(i) = eigenvectors * hadamard(eigenvalues, inv.col(i));
             return RawEigenvectorType(result.reals());

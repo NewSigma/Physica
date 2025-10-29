@@ -68,6 +68,7 @@ namespace Physica {
         void swap(This& __restrict solver) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getEigenvalues() const noexcept { return eigenvalues; }
+        [[nodiscard]] auto& getEigenvalues() noexcept { return eigenvalues; }
         [[nodiscard]] const EigenvectorMatrix& getEigenvectors() const noexcept;
         [[nodiscard]] bool getNeedEigenvectors() const noexcept;
     private:

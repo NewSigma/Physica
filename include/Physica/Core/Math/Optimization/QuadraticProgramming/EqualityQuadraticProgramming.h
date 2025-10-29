@@ -111,7 +111,7 @@ namespace Physica {
             else
                 equationMatA = objectiveMatG;
         }
-        const DenseMatrix<T, MatrixOption::Row> inv_equationMatA = equationMatA.inverse();
+        const DenseMatrix<T, MatrixOption::Row> inv_equationMatA = equationMatA.inv();
         const VectorND<T> solution = inv_equationMatA * equationVecB;
         x -= solution.head(degreeOfFreedom);
         if (haveConstraints)

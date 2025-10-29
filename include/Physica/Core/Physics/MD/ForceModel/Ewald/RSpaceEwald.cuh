@@ -147,7 +147,7 @@ namespace Physica {
         assert(charges.getLength() != 0 && "[Error]: Charges should be initialized before lattice update");
         lattice = lattice_;
         repLatt = PeriodicCell<T, Dim>::makeRepLattice(lattice_);
-        invLatt = lattice_.inverse();
+        invLatt = lattice_.inv();
         volume = PeriodicCell<T, Dim>::getVolume(lattice_);
         inv_volume = reciprocal(volume);
 

@@ -46,7 +46,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] auto getLHS() const noexcept { return mat1.inverse(); }
+        [[nodiscard]] auto getLHS() const noexcept { return mat1.inv(); }
         [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
     };
 

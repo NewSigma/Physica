@@ -134,7 +134,7 @@ namespace Physica {
             /* Solve */ {
                 auto b = VectorND<T>(diisMat.getRow(), 0);
                 b[0] = 1;
-                const DenseMatrix<T> inv_A = diisMat.inverse();
+                const DenseMatrix<T> inv_A = diisMat.inv();
                 x = inv_A * b;
             }
 

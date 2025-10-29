@@ -126,7 +126,7 @@ namespace Physica {
         formOverlapMatrix();
 
         const MatrixND cholesky = Cholesky(overlap);
-        const MatrixND inv_cholesky = cholesky.inverse();
+        const MatrixND inv_cholesky = cholesky.inv();
 
         auto densityMatrices = EDIISBuffer(EDIISBufferSize, baseSetSize, baseSetSize, T(0));
         auto sameSpinElectronDensity = MatrixND::zeros(baseSetSize);
@@ -335,7 +335,7 @@ namespace Physica {
         /* Solve linear equation */ {
             DenseVector<T, DIISBufferSize> b = DenseVector<T, DIISBufferSize>(DIISBufferSize, T(0));
             b[0] = -T(1);
-            const DIISMatrix inv_A = DIISMat.inverse();
+            const DIISMatrix inv_A = DIISMat.inv();
             x = inv_A * b;
         }
 

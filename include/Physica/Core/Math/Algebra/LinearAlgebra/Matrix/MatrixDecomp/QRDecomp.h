@@ -47,6 +47,7 @@ namespace Physica {
         [[no_unique_address]] Perm perm;
     public:
         QRDecomp() = default;
+        explicit QRDecomp(size_t order);
         QRDecomp(size_t row, size_t col);
         QRDecomp(const Matrix auto& source);
         QRDecomp(const This&) = default;
@@ -79,6 +80,9 @@ namespace Physica {
         [[nodiscard]] MatrixND getMatrixQ_mkl() const;
         [[nodiscard]] const auto& getMatrixP() const noexcept requires(Pivot) { return perm; }
     };
+
+    template<Scalar T, bool Pivot>
+    QRDecomp<T, Pivot>::QRDecomp(size_t order) : QRDecomp(order , order) {}
 
     template<Scalar T, bool Pivot>
     QRDecomp<T, Pivot>::QRDecomp(size_t row, size_t col) {

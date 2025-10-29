@@ -143,16 +143,18 @@ namespace Physica {
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse>;
 using Dataset = Mnist::DatasetType<device_obj<VectorND<T>>>;
-using RandomSource = Random<>;
+using RandomSource = Random<MT19937>;
 
-static std::pair<Dataset, Dataset> makeDataset() {
-    const Mnist mnist("./data");
-    auto dataset = mnist.makeTrainDataset<VectorND<T>>();
-    for (size_t i = 0; i < dataset.getSize(); ++i) {
-        auto& sample = dataset.getSamples()[i];
-        sample = sample * T(1.0 / 128) - T(1);
+namespace {
+    std::pair<Dataset, Dataset> makeDataset() {
+        const Mnist mnist("./data");
+        auto dataset = mnist.makeTrainDataset<VectorND<T>>();
+        for (size_t i = 0; i < dataset.getSize(); ++i) {
+            auto& sample = dataset.getSamples()[i];
+            sample = sample * T(1.0 / 128) - T(1);
+        }
+        return dataset.randomSplit<RandomSource>(54000);
     }
-    return dataset.randomSplit<RandomSource>(54000);
 }
 
 int main(int argc, char** argv) {

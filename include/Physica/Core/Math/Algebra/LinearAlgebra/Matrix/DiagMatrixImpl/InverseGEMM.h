@@ -44,7 +44,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] const M1& getLHS() const noexcept { return mat1; }
-        [[nodiscard]] auto getRHS() const noexcept { return mat2.inverse(); }
+        [[nodiscard]] auto getRHS() const noexcept { return mat2.inv(); }
     };
 
     template<Matrix M1, Scalar U, size_t Order>
@@ -79,7 +79,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] auto getLHS() const noexcept { return mat1.inverse(); }
+        [[nodiscard]] auto getLHS() const noexcept { return mat1.inv(); }
         [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
     };
 

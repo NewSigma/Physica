@@ -165,7 +165,7 @@ namespace Physica {
         [[nodiscard]] auto sgndet() const;
 
         [[nodiscard]] auto format() const noexcept;
-        [[nodiscard]] auto inverse() const noexcept;
+        [[nodiscard]] auto inv() const noexcept;
         [[nodiscard]] auto transpose() const noexcept;
         [[nodiscard]] ConjugateRtnTy conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;

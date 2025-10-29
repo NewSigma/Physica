@@ -34,7 +34,7 @@ public:
         MatrixType overlap = getOverlapMatrix();
         //Workaround for generalised eigenvalue problem
         MatrixType cholesky = Cholesky(overlap);
-        MatrixType inv_cholesky = cholesky.inverse();
+        MatrixType inv_cholesky = cholesky.inv();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
         EigenSolver<ScalarType> solver(hamilton_mod, true);
@@ -153,7 +153,7 @@ public:
         MatrixType overlap = getOverlapMatrix();
         //Workaround for generalised eigenvalue problem
         MatrixType cholesky = Cholesky(overlap);
-        MatrixType inv_cholesky = cholesky.inverse();
+        MatrixType inv_cholesky = cholesky.inv();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
         EigenSolver<ScalarType> solver(hamilton_mod, true);
@@ -252,7 +252,7 @@ public:
         MatrixType overlap = getOverlapMatrix();
         //Workaround for generalised eigenvalue problem
         MatrixType cholesky = Cholesky(overlap);
-        MatrixType inv_cholesky = cholesky.inverse();
+        MatrixType inv_cholesky = cholesky.inv();
         auto real_eigenvalues = VectorND<ScalarType>{};
         bool stop = false;
         do {

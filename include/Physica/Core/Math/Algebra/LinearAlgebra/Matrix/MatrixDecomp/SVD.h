@@ -36,9 +36,9 @@ namespace Physica {
         static_assert(!T::isComplex, "[Error]: SVD class do not support complex data");
         using Base = Decouplable;
         using RealType = T::RealType;
-        constexpr static size_t NumSingularValue = RowAtCompile > ColAtCompile ? ColAtCompile : RowAtCompile;
         constexpr static int Option = MatrixOption::Col;
     public:
+        constexpr static size_t NumSingularValue = RowAtCompile > ColAtCompile ? ColAtCompile : RowAtCompile;
         using SingularValueVector = DenseVector<RealType, NumSingularValue>;
         using WorkingMatrix = DenseMatrix<RealType, Option, RowAtCompile, ColAtCompile>;
         using LSingularMatrix = DenseMatrix<RealType, Option, RowAtCompile, RowAtCompile>;

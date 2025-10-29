@@ -363,7 +363,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::inverse() const noexcept {
+    auto RValueMatrix<Derived>::inv() const noexcept {
         return Inverse<Derived>(Base::getDerived());
     }
 

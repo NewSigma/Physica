@@ -97,6 +97,7 @@ namespace Physica {
         /* Getters */
         using Base::size;
         using Base::value;
+        using RealBase::isZero;
         using RealBase::isFinite;
         [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }

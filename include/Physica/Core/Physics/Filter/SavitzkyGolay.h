@@ -73,7 +73,7 @@ namespace Physica {
         }
 
         inv = coeffs.transpose() * coeffs;
-        MatrixType temp = inv.inverse();
+        MatrixType temp = inv.inv();
         inv.swap(temp);
     }
 
