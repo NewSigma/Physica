@@ -228,7 +228,7 @@ namespace Physica {
             givens_vec[1] = -givens_vec[1];
             applyGivens(subBlock, givens_vec, index, index + 1);
 
-            const T mean = (subBlock(1, index + index) + subBlock(index + 1, index)) * T(0.5);
+            const T mean = (subBlock(index, index + 1) + subBlock(index + 1, index)) * T(0.5);
             subBlock(index, index + 1) = subBlock(index + 1, index) = mean;
 
             if (getNeedEigenvectors())
