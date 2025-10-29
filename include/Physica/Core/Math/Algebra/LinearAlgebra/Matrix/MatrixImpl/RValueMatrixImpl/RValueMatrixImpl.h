@@ -368,6 +368,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::pinv() const noexcept {
+        return PseudoInverse<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::transpose() const noexcept {
         return Transpose<Derived>(Base::getDerived());
     }
@@ -496,6 +501,7 @@ namespace Physica {
 
 #include "Sum.h"
 #include "Inverse.h"
+#include "PseudoInverse.h"
 #include "Transpose.h"
 #include "Conjugate.h"
 #include "Hermite.h"

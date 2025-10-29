@@ -26,6 +26,7 @@ namespace Physica {
     template<class, bool ReduceCol> class MatrixSum;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
     template<class> class Inverse;
+    template<Matrix> class PseudoInverse;
     template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;
@@ -166,6 +167,7 @@ namespace Physica {
 
         [[nodiscard]] auto format() const noexcept;
         [[nodiscard]] auto inv() const noexcept;
+        [[nodiscard]] auto pinv() const noexcept;
         [[nodiscard]] auto transpose() const noexcept;
         [[nodiscard]] ConjugateRtnTy conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
