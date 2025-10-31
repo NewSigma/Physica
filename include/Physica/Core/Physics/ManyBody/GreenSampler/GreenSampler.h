@@ -31,7 +31,6 @@ namespace Physica {
 
         const DQMC<T>& dqmc;
     private:
-        VectorND<Tr> lnAbsDets;
         VectorND<Tv> signs;
         size_t cursor = 0;
     public:
@@ -43,7 +42,6 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T lnPartitionZ() const;
         [[nodiscard]] Tv calcSign() const noexcept;
 
         void reset() { cursor = 0; }
@@ -52,7 +50,6 @@ namespace Physica {
         [[nodiscard]] auto getRepelU() const noexcept { return dqmc.getParams().getRepelU(); }
         [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return dqmc.getParams().getHoppingMatrix(); }
 
-        [[nodiscard]] const auto& getLnAbsDets() const noexcept { return lnAbsDets; }
         [[nodiscard]] const auto& getSigns() const noexcept { return signs; }
         [[nodiscard]] size_t getNumSample() const noexcept { return signs.getLength(); }
         [[nodiscard]] size_t getCursor() const noexcept { return cursor; }
@@ -61,14 +58,8 @@ namespace Physica {
     };
 
     template<Scalar T>
-    GreenSampler<T>::GreenSampler(const DQMC<T>& dqmc_, size_t numSample) : dqmc(dqmc_), lnAbsDets(numSample), signs(numSample) {
+    GreenSampler<T>::GreenSampler(const DQMC<T>& dqmc_, size_t numSample) : dqmc(dqmc_), signs(numSample) {
         assert(numSample > 0);
-    }
-
-    template<Scalar T>
-    T GreenSampler<T>::lnPartitionZ() const {
-        const Tr factor = lnAbsDets.max();
-        return ln(exp(lnAbsDets - factor) * getSigns()) + factor;
     }
 
     template<Scalar T>
@@ -78,7 +69,6 @@ namespace Physica {
 
     template<Scalar T>
     void GreenSampler<T>::sample() noexcept {
-        lnAbsDets[cursor] = dqmc.getLnAbsDet();
         signs[cursor] = dqmc.getSign();
         cursor = (cursor + 1) % getNumSample();
     }

@@ -34,7 +34,7 @@ namespace Physica {
         using MatrixND = DenseMatrix<T>;
     private:
         MatrixND hoppingMatrix;
-        MatrixND expB;
+        MatrixND expT;
         Tr alpha;
         Tr beta;
         Tr repelU;
@@ -53,6 +53,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] Tr calcBetaMu() const noexcept;
+        [[nodiscard]] MatrixND calcInvExpT() const;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -62,9 +63,9 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return hoppingMatrix; }
-        [[nodiscard]] int getNumSite() const noexcept { return expB.getRow(); }
+        [[nodiscard]] int getNumSite() const noexcept { return expT.getRow(); }
         [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
-        [[nodiscard]] const auto& getExpB() const noexcept { return expB; }
+        [[nodiscard]] const auto& getExpT() const noexcept { return expT; }
         [[nodiscard]] Tr getAlpha() const noexcept { return alpha; }
         [[nodiscard]] Tr getBeta() const noexcept { return beta; }
         [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
@@ -94,8 +95,8 @@ namespace Physica {
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
         makeHoppingMatrix<Dim, BC>(hoppingT, lattice);
 
-        DenseMatrix<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
-        expB = exp(hoppingMatrixB);
+        MatrixND hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
+        expT = exp(hoppingMatrixB);
         alpha = calcAlpha(beta, repelU, numSplit);
         makeLnSpinWeights();
     }
@@ -106,10 +107,16 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto HubbardParams<T>::calcInvExpT() const -> MatrixND {
+        MatrixND hoppingMatrixB = beta / T(numSplit) * hoppingMatrix;
+        return exp(hoppingMatrixB);
+    }
+
+    template<Scalar T>
     void HubbardParams<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         hoppingMatrix.swap(obj.hoppingMatrix);
-        expB.swap(obj.expB);
+        expT.swap(obj.expT);
         alpha.swap(obj.alpha);
         beta.swap(obj.beta);
         repelU.swap(obj.repelU);

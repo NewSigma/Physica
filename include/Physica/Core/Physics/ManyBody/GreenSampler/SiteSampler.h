@@ -25,11 +25,10 @@ namespace Physica {
     class SiteSampler : public GreenSampler<T> {
         using This = SiteSampler<T>;
         using Base = GreenSampler<T>;
+        using GreenArray = ImagKinetic<T>::GreenArray;
+
         using typename Base::Tv;
         using typename Base::Trv;
-
-        using MatrixND = DQMC<T>::MatrixND;
-        using GreenArray = DQMC<T>::GreenArray;
     public:
         enum Observable : char {
             Density,
@@ -49,7 +48,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const Array<MatrixND, 2>& greens, Observable type);
+        void sample(const Array<DenseMatrix<T>, 2>& greens, Observable type);
         void sample(const GreenArray& greens, Observable type);
         void sample(const GreenArray& greens, const Vector auto& weights, Observable type);
 
@@ -57,7 +56,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
     private:
-        T calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) const noexcept;
+        T calcObservable(const DenseMatrix<T>& greenU, const DenseMatrix<T>& greenD, Observable type) const noexcept;
     };
 
     template<Scalar T>
@@ -66,7 +65,7 @@ namespace Physica {
             , observes(numSample) {}
 
     template<Scalar T>
-    void SiteSampler<T>::sample(const Array<MatrixND, 2>& greens, Observable type) {
+    void SiteSampler<T>::sample(const Array<DenseMatrix<T>, 2>& greens, Observable type) {
         observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type);
         Base::sample();
     }
@@ -96,7 +95,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T SiteSampler<T>::calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) const noexcept {
+    T SiteSampler<T>::calcObservable(const DenseMatrix<T>& greenU, const DenseMatrix<T>& greenD, Observable type) const noexcept {
         switch (type) {
         case Density:
             return T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();

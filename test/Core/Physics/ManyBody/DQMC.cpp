@@ -43,11 +43,7 @@ namespace {
         auto dqmc = DQMC<T>(params);
         dqmc.step_random<RandomSource>();
         for (int i = 0; i < NumSample; ++i) {
-            if (i % 2 == 0)
-                std::ignore = dqmc.step_spin<RandomSource>();
-            else
-                std::ignore = dqmc.step_pair<RandomSource>();
-
+            dqmc.step_spin<RandomSource>();
             if (dqmc.getSign().isNegative())
                 exit(EXIT_FAILURE);
         }
