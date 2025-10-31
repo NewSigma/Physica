@@ -18,135 +18,16 @@
  */
 #pragma once
 
-#include "../LValueMatrix.h"
+#include "../RValueMatrix.h"
 
 namespace Physica {
-    namespace Internal {
-        template<Matrix SourceType, Matrix TargetType, size_t Order>
-        struct InverseImpl {
-            static void run(const SourceType& source, TargetType& target) {
-                const ssize_t order = source.getRow();
-                const ssize_t order1 = ssize_t(order) - 1;
-                SourceType copy = source;
-                if constexpr (MatrixOption::isSameMajor<SourceType, TargetType>()) {
-                    target.toUnitMatrix();
-                    for (ssize_t i = 0; i < order1; ++i) {
-                        ssize_t k = i;
-                        while (copy.refFromMajorMinor(k, i).isZero()) {
-                            ++k;
-                            [[maybe_unused]] const bool isNotSingular = k < order;
-                            assert(isNotSingular);
-                        }
-                        if (k != i) {
-                            copy.majorSwap(k, i);
-                            target.majorSwap(k, i);
-                        }
-
-                        for (ssize_t j = i + 1; j < order; ++j) {
-                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
-                            copy.majorReduce(j, i, factor);
-                            target.majorReduce(j, i, factor);
-                        }
-                    }
-
-                    for (ssize_t i = order1; i > 0; --i) {
-                        ssize_t k = i;
-                        while (copy.refFromMajorMinor(k, i).isZero()) {
-                            --k;
-                            [[maybe_unused]] const bool isNotSingular = k < order;
-                            assert(isNotSingular);
-                        }
-                        if (k != i) {
-                            copy.majorSwap(k, i);
-                            target.majorSwap(k, i);
-                        }
-
-                        for (ssize_t j = 0; j < i; ++j) {
-                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
-                            copy.majorReduce(j, i, factor);
-                            target.majorReduce(j, i, factor);
-                        }
-                    }
-                    for (ssize_t i = 0; i < order; ++i)
-                        target.majorMulScalar(i, reciprocal(copy(i, i)));
-                }
-                else {
-                    auto temp = SourceType::unitMatrix(order);
-                    for (ssize_t i = 0; i < order1; ++i) {
-                        auto k = i;
-                        while (copy.refFromMajorMinor(k, i).isZero()) {
-                            ++k;
-                            assert(k < order);
-                        }
-                        if (k != i) {
-                            copy.majorSwap(k, i);
-                            temp.majorSwap(k, i);
-                        }
-
-                        for (ssize_t j = i + 1; j < order; ++j) {
-                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
-                            copy.majorReduce(j, i, factor);
-                            temp.majorReduce(j, i, factor);
-                        }
-                    }
-
-                    for (ssize_t i = order1; i > 0; --i) {
-                        auto k = i;
-                        while (copy.refFromMajorMinor(k, i).isZero()) {
-                            --k;
-                            assert(k < order);
-                        }
-                        if (k != i) {
-                            copy.majorSwap(k, i);
-                            target.majorSwap(k, i);
-                        }
-
-                        for (ssize_t j = 0; j < i; ++j) {
-                            auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
-                            copy.majorReduce(j, i, factor);
-                            temp.majorReduce(j, i, factor);
-                        }
-                    }
-                    for (ssize_t i = 0; i < order; ++i)
-                        temp.majorMulScalar(i, reciprocal(copy(i, i)));
-                    target = temp;
-                }
-            }
-        };
-
-        template<Matrix SourceType, Matrix TargetType>
-        struct InverseImpl<SourceType, TargetType, 3> {
-            static void run(const SourceType& source, TargetType& target) {
-                const auto repDet = reciprocal(source.det());
-                if constexpr (MatrixOption::isRowMatrix<TargetType>()) {
-                    target(0, 0) = (source(1, 1) * source(2, 2) - source(1, 2) * source(2, 1)) * repDet;
-                    target(0, 1) = (source(2, 1) * source(0, 2) - source(0, 1) * source(2, 2)) * repDet;
-                    target(0, 2) = (source(0, 1) * source(1, 2) - source(1, 1) * source(0, 2)) * repDet;
-                    target(1, 0) = (source(2, 0) * source(1, 2) - source(1, 0) * source(2, 2)) * repDet;
-                    target(1, 1) = (source(0, 0) * source(2, 2) - source(2, 0) * source(0, 2)) * repDet;
-                    target(1, 2) = (source(1, 0) * source(0, 2) - source(0, 0) * source(1, 2)) * repDet;
-                    target(2, 0) = (source(1, 0) * source(2, 1) - source(2, 0) * source(1, 1)) * repDet;
-                    target(2, 1) = (source(2, 0) * source(0, 1) - source(0, 0) * source(2, 1)) * repDet;
-                    target(2, 2) = (source(0, 0) * source(1, 1) - source(1, 0) * source(0, 1)) * repDet;
-                }
-                else {
-                    target(0, 0) = (source(1, 1) * source(2, 2) - source(1, 2) * source(2, 1)) * repDet;
-                    target(1, 0) = (source(2, 0) * source(1, 2) - source(1, 0) * source(2, 2)) * repDet;
-                    target(2, 0) = (source(1, 0) * source(2, 1) - source(2, 0) * source(1, 1)) * repDet;
-                    target(0, 1) = (source(2, 1) * source(0, 2) - source(0, 1) * source(2, 2)) * repDet;
-                    target(1, 1) = (source(0, 0) * source(2, 2) - source(2, 0) * source(0, 2)) * repDet;
-                    target(2, 1) = (source(2, 0) * source(0, 1) - source(0, 0) * source(2, 1)) * repDet;
-                    target(0, 2) = (source(0, 1) * source(1, 2) - source(1, 1) * source(0, 2)) * repDet;
-                    target(1, 2) = (source(1, 0) * source(0, 2) - source(0, 0) * source(1, 2)) * repDet;
-                    target(2, 2) = (source(0, 0) * source(1, 1) - source(1, 0) * source(0, 1)) * repDet;
-                }
-            }
-        };
-    }
+    template<Scalar, bool> class LUDecomp;
 
     template<Matrix M>
     class Inverse<M> : public RValueMatrix<Inverse<M>> {
         using This = Inverse<M>;
+        using Base = RValueMatrix<This>;
+        using typename Base::T;
 
         const M& mat;
     public:
@@ -163,6 +44,8 @@ namespace Physica {
         [[nodiscard]] const M& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
+    private:
+        void assign3D(Matrix auto& target) const;
     };
 
     template<Matrix M>
@@ -173,8 +56,44 @@ namespace Physica {
     template<Matrix M>
     void Inverse<M>::assign(Matrix auto& target) const {
         using M1 = std::remove_cvref_t<decltype(target)>;
-        constexpr size_t Order = M::RowAtCompile == Dynamic ? M1::RowAtCompile : M::RowAtCompile;
-        Internal::InverseImpl<M, M1, Order>::run(mat, target);
+        constexpr size_t Order = std::max(M::RowAtCompile, M1::RowAtCompile);
+        if constexpr (Order == 1)
+            target = reciprocal(mat(0, 0));
+        else if constexpr (Order == 3)
+            assign3D(target);
+        else {
+            auto lu = LUDecomp<T, true>(mat);
+            target = lu.getMatrixL().inv();
+            target *= lu.getPerm().inv();
+            target = lu.getMatrixU().inv() * target;
+        }
+    }
+
+    template<Matrix M>
+    void Inverse<M>::assign3D(Matrix auto& target) const {
+        const auto repDet = reciprocal(mat.det());
+        if constexpr (MatrixOption::isRowMatrix<decltype(target)>()) {
+            target(0, 0) = (mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1)) * repDet;
+            target(0, 1) = (mat(2, 1) * mat(0, 2) - mat(0, 1) * mat(2, 2)) * repDet;
+            target(0, 2) = (mat(0, 1) * mat(1, 2) - mat(1, 1) * mat(0, 2)) * repDet;
+            target(1, 0) = (mat(2, 0) * mat(1, 2) - mat(1, 0) * mat(2, 2)) * repDet;
+            target(1, 1) = (mat(0, 0) * mat(2, 2) - mat(2, 0) * mat(0, 2)) * repDet;
+            target(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2)) * repDet;
+            target(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1)) * repDet;
+            target(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1)) * repDet;
+            target(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1)) * repDet;
+        }
+        else {
+            target(0, 0) = (mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1)) * repDet;
+            target(1, 0) = (mat(2, 0) * mat(1, 2) - mat(1, 0) * mat(2, 2)) * repDet;
+            target(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1)) * repDet;
+            target(0, 1) = (mat(2, 1) * mat(0, 2) - mat(0, 1) * mat(2, 2)) * repDet;
+            target(1, 1) = (mat(0, 0) * mat(2, 2) - mat(2, 0) * mat(0, 2)) * repDet;
+            target(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1)) * repDet;
+            target(0, 2) = (mat(0, 1) * mat(1, 2) - mat(1, 1) * mat(0, 2)) * repDet;
+            target(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2)) * repDet;
+            target(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1)) * repDet;
+        }
     }
 }
 

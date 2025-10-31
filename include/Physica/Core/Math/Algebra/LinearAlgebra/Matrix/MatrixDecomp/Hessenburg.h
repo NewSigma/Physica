@@ -54,9 +54,9 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void resize(size_t size);
-        void swap(This& __restrict obj);
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return working.getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return working.getRow(); }
         [[nodiscard]] MatrixH getMatrixH() const noexcept { return MatrixH(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
     private:
@@ -78,7 +78,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    void Hessenburg<T, Order>::swap(This& __restrict obj) {
+    void Hessenburg<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         normVector.swap(obj.normVector);
@@ -137,8 +137,8 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return hess.getSize(); }
-        [[nodiscard]] size_t getCol() const noexcept { return hess.getSize(); }
+        [[nodiscard]] size_t getRow() const noexcept { return hess.getOrder(); }
+        [[nodiscard]] size_t getCol() const noexcept { return hess.getOrder(); }
     };
 
     template<Scalar T, size_t Order>

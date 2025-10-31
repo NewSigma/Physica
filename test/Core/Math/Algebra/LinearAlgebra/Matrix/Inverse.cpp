@@ -17,16 +17,37 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
 
 using namespace Physica;
 
+namespace {
+    void testInv(const Matrix auto& m, double prec) {
+        using M = std::remove_cvref<decltype(m)>::type;
+        using T = M::ScalarType;
+        Inverse<M> inv(m);
+        const M result(inv);
+        M prod = result * m;
+        std::cout << prod << '\n';
+        if (!matrixNear(prod, UnitMatrix<T>(m.getRow()), prec))
+            exit(EXIT_FAILURE);
+    }
+}
+
 int main() {
-    typedef DenseMatrix<float64, MatrixOption::Col, 4, 4> Matrix4x4;
-    const Matrix4x4 input{{1, 1, 1, 1}, {1, 1, -1, -1}, {1, -1, 1, -1}, {1, -1, -1, 1}};
-    Inverse<Matrix4x4> inv(input);
-    const Matrix4x4 result(inv);
-    const Matrix4x4 answer{{0.25, 0.25, 0.25, 0.25}, {0.25, 0.25, -0.25, -0.25}, {0.25, -0.25, 0.25, -0.25}, {0.25, -0.25, -0.25, 0.25}};
-    if (!matrixNear(answer, result, 1E-15))
-        return 1;
+    using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
+    testInv(Matrix4D{
+            {1,  1,  1,  1},
+            {1,  1, -1, -1},
+            {1, -1,  1, -1},
+            {1, -1, -1,  1}
+    }, 1E-15);
+    testInv(Matrix4D{
+            {1,  2, 0, 1},
+            {0,  1, 1, 0},
+            {2,  0, 1, 1},
+            {1,  1, 0, 1}
+    }, 1E-15);
     return 0;
 }

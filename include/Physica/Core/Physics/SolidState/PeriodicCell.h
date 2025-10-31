@@ -19,8 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Exception/BadConvergenceException.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Scalar/Real.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
 
 namespace Physica {
     namespace Internal {
@@ -33,7 +32,7 @@ namespace Physica {
         };
     }
 
-    enum class ExtendCellOption {
+    enum class ExtendCellOption : char {
         AtomMajor,
         CellMajor
     };
@@ -67,7 +66,7 @@ namespace Physica {
         PeriodicCell(This&&) noexcept = default;
         ~PeriodicCell() = default;
         /* Operators */
-        This& operator=(This cell) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] VectorType minDistVector(size_t id_from, size_t id_to) const;
         [[nodiscard]] VectorType minDistVector(VectorType from, size_t id_to) const;
@@ -166,12 +165,6 @@ namespace Physica {
             : lattice(cell.getLattice())
             , pos(cell.getPos())
             , type(cell.getType()) {}
-
-    template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>& PeriodicCell<T, Dim>::operator=(PeriodicCell cell) noexcept {
-        swap(cell);
-        return *this;
-    }
 
     template<Scalar T, unsigned int Dim>
     auto PeriodicCell<T, Dim>::minDistVector(size_t id_from, size_t id_to) const -> VectorType {
@@ -332,7 +325,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice() const {
+    auto PeriodicCell<T, Dim>::makeRepLattice() const -> LatticeMatrix {
         return makeRepLattice(lattice);
     }
 
@@ -361,14 +354,14 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    PeriodicCell<T, Dim> PeriodicCell<T, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
+    auto PeriodicCell<T, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const -> This {
         This result = *this;
         result.toSuperCell<Option>(x, y, z);
         return result;
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim> PeriodicCell<T, Dim>::makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const {
+    auto PeriodicCell<T, Dim>::makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const -> This {
         This result = *this;
         result.toUnitCell(x, y, z);
         return result;
@@ -411,13 +404,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice(
-            T normA,
-            T normB,
-            T normC,
-            T alpha,
-            T beta,
-            T gamma) {
+    auto PeriodicCell<T, Dim>::makeLattice(T normA, T normB, T normC, T alpha, T beta, T gamma) -> LatticeMatrix {
         LatticeMatrix result{};
         result(0, 0) = normA;
         result(0, 1) = T(0);
@@ -432,11 +419,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice2D(
-            T normA,
-            T normB,
-            T normC,
-            T gamma) {
+    auto PeriodicCell<T, Dim>::makeLattice2D(T normA, T normB, T normC, T gamma) -> LatticeMatrix {
         LatticeMatrix result{};
         result(0, 0) = normA;
         result(0, 1) = T(0);
@@ -456,8 +439,7 @@ namespace Physica {
      * [1] Acta Cryst. A32, 297 (1976); https://doi.org/10.1107/S0567739476000636
      */
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice(
-            const LatticeMatrix& lattice, double precision, unsigned int maxIteration) {
+    auto PeriodicCell<T, Dim>::makeNiggliLattice(const LatticeMatrix& lattice, double precision, unsigned int maxIteration) -> LatticeMatrix{
         assert(precision > 0 && "[Error]: Precision should be positive");
         assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
         T squaredNormA = lattice.row(0).squaredNorm();
@@ -565,8 +547,7 @@ namespace Physica {
      * A directly simplified version of above function
      */
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice2D(
-            const LatticeMatrix& lattice, unsigned int maxIteration) {
+    auto PeriodicCell<T, Dim>::makeNiggliLattice2D(const LatticeMatrix& lattice, unsigned int maxIteration) -> LatticeMatrix {
         assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
         T squaredNormA = lattice.row(0).squaredNorm();
         T squaredNormB = lattice.row(1).squaredNorm();

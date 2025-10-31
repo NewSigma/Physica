@@ -20,33 +20,43 @@
 
 using namespace Physica;
 using Matrix3D = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
+using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
 
-template<bool Pivot>
-void test(const Matrix auto& answer) {
-    LUDecomp<float64, Pivot> lu(answer.getRow());
-    auto product = [&]() {
-        Matrix3D matrixL = lu.getMatrixLU().tril();
-        matrixL.diag() = float64(1);
-        Matrix3D result = matrixL * lu.getMatrixU();
-        if constexpr (Pivot)
-            result = Matrix3D(lu.getPerm() * result);
+namespace {
+    template<bool Pivot>
+    void test(const Matrix auto& answer, double prec) {
+        using M = std::remove_cvref<decltype(answer)>::type;
+        LUDecomp<float64, Pivot> lu(answer.getRow());
+        auto product = [&, prec]() {
+            M matrixL = lu.getMatrixLU().tril();
+            matrixL.diag() = float64(1);
+            M result = matrixL * lu.getMatrixU();
+            if constexpr (Pivot)
+                result = M(lu.getPerm() * result);
 
-        if (!matrixNear(result, answer, 1E-15))
-            exit(1);
-    };
+            if (!matrixNear(result, answer, prec))
+                exit(1);
+        };
 
-    lu.compute_base(answer);
-    product();
-
-    if constexpr (HasMKL()) {
-        lu.compute_mkl(answer);
+        lu.compute_base(answer);
         product();
+
+        if constexpr (HasMKL()) {
+            lu.compute_mkl(answer);
+            product();
+        }
     }
 }
 
 int main() {
     const Matrix3D mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
-    test<false>(mat1);
-    test<true>(mat1);
+    test<false>(mat1, 1E-15);
+    test<true>(mat1, 1E-15);
+    test<true>(Matrix4D{
+        {1,  2, 0, 1},
+        {0,  1, 1, 0},
+        {2,  0, 1, 1},
+        {1,  1, 0, 1}
+    }, 1E-15);
     return 0;
 }

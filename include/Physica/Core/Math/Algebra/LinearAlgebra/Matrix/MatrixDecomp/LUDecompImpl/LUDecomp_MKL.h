@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Exception/MKL/Lapack.h"
-#include "LUDecomp.h"
+#include "../LUDecomp.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
@@ -50,6 +50,7 @@ namespace Physica {
             perm = PermMatrix<T>(m);
             for (size_t i = 0; i < m; ++i)
                 perm.swapRows(i, ipiv[i] - 1);
+            perm = perm.inv();
         }
         else {
             if constexpr (isComplex) {
