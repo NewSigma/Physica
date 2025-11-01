@@ -42,7 +42,7 @@ namespace Physica {
         [[nodiscard]] void* address() const noexcept { return h.address(); }
         [[nodiscard]] bool done() const noexcept;
     protected:
-        TaskBase(std::coroutine_handle<> h_) : h(std::move(h_)) {}
+        TaskBase(std::coroutine_handle<> h_) : h(h_) {}
         TaskBase(This&& obj) noexcept;
         /* Operations */
         void swap(This& __restrict obj) noexcept;
@@ -52,7 +52,8 @@ namespace Physica {
 
     inline TaskBase::~TaskBase() {
         if (h) {
-            assert(h.done());
+            assert(std::uncaught_exceptions() == 0 && "[Error]: Task escapes on unwinding");
+            assert(h.done() && "[Error]: Task escapes before finishing");
             h.destroy();
             h = nullptr;
         }

@@ -53,18 +53,16 @@ namespace Physica {
         Task(Task&& obj) noexcept = default;
         ~Task() = default;
         /* Operators */
-        Task& operator=(Task obj) noexcept {
-            swap(obj);
-            return *this;
-        }
+        Task& operator=(Task obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        [[nodiscard]] std::exception_ptr wait(std::nothrow_t) noexcept;
         void wait();
         void swap(Task& __restrict obj) noexcept { Base::swap(obj); }
         /* Static members */
         [[nodiscard]] inline static Range splitJob(size_t num_loop, int part, int i) noexcept;
     };
 
-    inline void Task<Thread>::wait() {
+    inline auto Task<Thread>::wait(std::nothrow_t) noexcept -> std::exception_ptr {
         while (!done()) {
             auto handle = ThreadPool::getInstance().steal();
             if (handle)
@@ -72,9 +70,11 @@ namespace Physica {
             else
                 std::this_thread::yield();
         }
+        return Base::handle<Promise>().promise().ex;
+    }
 
-        std::exception_ptr ex = Base::handle<Promise>().promise().ex;
-        if (ex)
+    inline void Task<Thread>::wait() {
+        if (auto ex = wait(std::nothrow))
             std::rethrow_exception(ex);
     }
 
@@ -98,8 +98,14 @@ namespace Physica {
         }
 
         co_await std::suspend_always{};
-        for (auto& task : tasks)
-            task.wait();
+        std::exception_ptr firstEx = nullptr;
+        for (auto& task : tasks) {
+            auto ex = task.wait(std::nothrow);
+            firstEx = (firstEx == nullptr) ? ex : nullptr;
+        }
+
+        if (firstEx)
+            std::rethrow_exception(firstEx);
     }
 
     template<ExecutePolicy P>
@@ -119,7 +125,13 @@ namespace Physica {
         }
 
         co_await std::suspend_always{};
-        for (auto& task : tasks)
-            task.wait();
+        std::exception_ptr firstEx = nullptr;
+        for (auto& task : tasks) {
+            auto ex = task.wait(std::nothrow);
+            firstEx = (firstEx == nullptr) ? ex : nullptr;
+        }
+
+        if (firstEx)
+            std::rethrow_exception(firstEx);
     }
 }
