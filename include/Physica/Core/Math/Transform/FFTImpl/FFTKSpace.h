@@ -57,14 +57,14 @@ namespace Physica {
     };
 
     template<class Derived>
-    FFTKSpace<Derived, 1>& FFTKSpace<Derived, 1>::operator=(const FFTKSpace<Derived, 1>& obj) {
+    auto FFTKSpace<Derived, 1>::operator=(const FFTKSpace<Derived, 1>& obj) -> This& {
         resize(obj.getLength());
         obj.assign(*this);
         return *this;
     }
 
     template<class Derived>
-    FFTKSpace<Derived, 1>::ScalarType FFTKSpace<Derived, 1>::calc(size_t index) const {
+    auto FFTKSpace<Derived, 1>::calc(size_t index) const -> ScalarType {
         assert(index < getRSpaceSize());
         if (index < getLength())
             return (*this)[index];
@@ -93,10 +93,10 @@ namespace Physica {
     template<class Derived>
     class FFTKSpace<Derived, 2>
             : public CRTPBase<FFTKSpace<Derived, 2>>
-            , public ContinuousMatrix<FFTKSpace<Derived, 2>> {
+            , public LValueMatrix<FFTKSpace<Derived, 2>> {
         using This = FFTKSpace<Derived, 2>;
         using Base = CRTPBase<This>;
-        using MatrixBase = ContinuousMatrix<This>;
+        using MatrixBase = LValueMatrix<This>;
     public:
         using typename MatrixBase::ScalarType;
     protected:
@@ -123,7 +123,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    FFTKSpace<Derived, 2>& FFTKSpace<Derived, 2>::operator=(const FFTKSpace<Derived, 2>& obj) {
+    auto FFTKSpace<Derived, 2>::operator=(const FFTKSpace<Derived, 2>& obj) -> This& {
         resize(obj.getRow(), obj.getCol());
         obj.assign(*this);
         return *this;
@@ -186,7 +186,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    FFTKSpace<Derived, 3>& FFTKSpace<Derived, 3>::operator=(const FFTKSpace<Derived, 3>& obj) {
+    auto FFTKSpace<Derived, 3>::operator=(const FFTKSpace<Derived, 3>& obj) -> This& {
         resize(obj.getDim());
         obj.assign(*this);
         return *this;

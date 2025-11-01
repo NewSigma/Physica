@@ -22,6 +22,16 @@
 
 namespace Physica {
     template<class Derived>
+    template<ExecutePolicy P>
+    void ContinuousMatrix<Derived>::assign(Matrix auto&& m) const noexcept {
+        using M = decltype(m);
+        if constexpr (is_continuous<M>::value && MatrixOption::isSameMajor<Derived, M>())
+            Base::getDerived().flatten().template assign<P>(m.flatten());
+        else
+            Base::template assign<P>(m);
+    }
+
+    template<class Derived>
     auto ContinuousMatrix<Derived>::row(size_t r) noexcept {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)

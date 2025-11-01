@@ -25,6 +25,7 @@
 
 namespace Physica {
     template<class Derived>
+    template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto& target) const {
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");

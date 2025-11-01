@@ -36,6 +36,7 @@ namespace Physica {
         using Base::ColAtCompile;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
@@ -58,6 +59,9 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
         /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Matrix auto&& m) const noexcept;
+
         [[nodiscard]] auto toNumpy() const;
 
         [[nodiscard]] auto row(size_t r) noexcept;

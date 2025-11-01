@@ -57,7 +57,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    FFTRSpace<Derived, 1>& FFTRSpace<Derived, 1>::operator=(const FFTRSpace<Derived, 1>& obj) {
+    auto FFTRSpace<Derived, 1>::operator=(const FFTRSpace<Derived, 1>& obj) -> This& {
         resize(obj.getLength());
         obj.assign(*this);
         return *this;
@@ -71,7 +71,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ FFTRSpace<Derived, 1>::PtrTy FFTRSpace<Derived, 1>::data_ptr(size_t index) {
+    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) -> PtrTy {
         assert(index < getLength());
         if constexpr (isComplex)
             return Base::getDerived().asComplexBuffer() + index;
@@ -80,17 +80,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ FFTRSpace<Derived, 1>::ConstPtrTy FFTRSpace<Derived, 1>::data_ptr(size_t index) const {
+    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTRSpace<Derived, 2>
             : public CRTPBase<FFTRSpace<Derived, 2>>
-            , public ContinuousMatrix<FFTRSpace<Derived, 2>> {
+            , public LValueMatrix<FFTRSpace<Derived, 2>> {
         using This = FFTRSpace<Derived, 2>;
         using Base = CRTPBase<This>;
-        using MatrixBase = ContinuousMatrix<This>;
+        using MatrixBase = LValueMatrix<This>;
     public:
         using typename MatrixBase::ScalarType;
         using MatrixBase::isComplex;
@@ -118,7 +118,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    FFTRSpace<Derived, 2>& FFTRSpace<Derived, 2>::operator=(const FFTRSpace<Derived, 2>& obj) {
+    auto FFTRSpace<Derived, 2>::operator=(const FFTRSpace<Derived, 2>& obj) -> This& {
         resize(obj.getRow(), obj.getCol());
         obj.assign(*this);
         return *this;
@@ -133,7 +133,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ FFTRSpace<Derived, 2>::PtrTy FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
+    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) -> PtrTy {
         assert(row < getRow());
         assert(col < getCol());
         const size_t numColumn = getCol();
@@ -146,7 +146,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ FFTRSpace<Derived, 2>::ConstPtrTy FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
     //////////////////////////////////////////////////////////////////////
@@ -188,7 +188,7 @@ namespace Physica {
     };
 
     template<class Derived>
-    FFTRSpace<Derived, 3>& FFTRSpace<Derived, 3>::operator=(const FFTRSpace<Derived, 3>& obj) {
+    auto FFTRSpace<Derived, 3>::operator=(const FFTRSpace<Derived, 3>& obj) -> This& {
         resize(obj.getDim());
         obj.assign(*this);
         return *this;
@@ -211,8 +211,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ FFTRSpace<Derived, 3>::PtrTy
-    FFTRSpace<Derived, 3>::data_ptr(Index3D index) {
+    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) -> PtrTy {
         assert(index[0] < getDimX());
         assert(index[1] < getDimY());
         assert(index[2] < getDimZ());
@@ -225,8 +224,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ FFTRSpace<Derived, 3>::ConstPtrTy
-    FFTRSpace<Derived, 3>::data_ptr(Index3D index) const {
+    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) const -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

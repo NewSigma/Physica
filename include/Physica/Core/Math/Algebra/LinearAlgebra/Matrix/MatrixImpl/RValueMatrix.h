@@ -101,6 +101,7 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>);
         /* Operations */
+        template<ExecutePolicy P = Sequential>
         void assign(Matrix auto& target) const;
         void assign_add(Matrix auto& target) const;
         void assert_assign(const Matrix auto& target) const noexcept;
