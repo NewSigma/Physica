@@ -121,9 +121,6 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
 
-        void resize(const Matrix auto& m, auto&&... args);
-        auto resize(size_t r, size_t c, auto&&... args);
-
         [[nodiscard]] auto flatten() noexcept;
         [[nodiscard]] const auto flatten() const noexcept;
 

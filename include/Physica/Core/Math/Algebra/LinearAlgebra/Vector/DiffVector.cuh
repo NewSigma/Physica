@@ -62,7 +62,7 @@ namespace Physica {
         /* Operations */
         void zero_grad();
 
-        using Base::resize;
+        void resize(const Vector auto& x);
         void resize(size_t size);
 
         [[nodiscard]] host_obj toHost() const;

@@ -44,6 +44,8 @@ namespace Physica {
         using VectorBase::operator[];
         /* Operations */
         void transform(const Vector auto& data);
+
+        using VectorBase::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
@@ -105,6 +107,8 @@ namespace Physica {
         using MatrixBase::operator();
         /* Operations */
         void transform(const Matrix auto& data);
+
+        using MatrixBase::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }

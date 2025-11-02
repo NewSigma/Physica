@@ -43,6 +43,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.getSize(); }

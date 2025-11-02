@@ -51,7 +51,8 @@ namespace Physica {
         [[nodiscard]] __device__ RefTy operator[](size_t index);
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const;
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
+        using Base::resize;
+        __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return vec.getDerived().data() + from + index; }

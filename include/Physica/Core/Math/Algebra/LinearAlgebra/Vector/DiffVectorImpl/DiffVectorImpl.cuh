@@ -51,6 +51,11 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
+    void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(const Vector auto& x) {
+        resize(x.getLength());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
     void device_obj<DenseVector<Diff<T, Mode, Order>>>::resize(size_t size) {
         if (size != getLength()) {
             v.resize(size);

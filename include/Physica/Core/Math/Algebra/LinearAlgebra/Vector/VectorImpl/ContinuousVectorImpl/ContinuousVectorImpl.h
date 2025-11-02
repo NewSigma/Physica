@@ -252,7 +252,7 @@ namespace Physica {
     auto ContinuousVector<Derived>::read(const H5Loc& loc, const char* name) -> const DataSetType {
         const auto dataset = loc.openDataSet<DataDim>(name);
         const size_t length = dataset.getSize(0);
-        resize(length);
+        Base::resize(length);
 
         const auto memSpace = H5DataSpace<1>(length);
         if constexpr (isDiffable) {

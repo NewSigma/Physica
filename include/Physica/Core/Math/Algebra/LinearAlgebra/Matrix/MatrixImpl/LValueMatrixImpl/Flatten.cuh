@@ -41,9 +41,9 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Operators */
-        [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return *data_ptr(index); }
-        [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
+        /* Operations */
+        using Base::resize;
+        __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);

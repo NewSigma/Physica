@@ -26,9 +26,7 @@ namespace Physica {
     template<Vector T, size_t Length>
     class ContinuousVectorBlock : public ContinuousVector<ContinuousVectorBlock<T, Length>> {
         using This = ContinuousVectorBlock<T, Length>;
-    public:
         using Base = ContinuousVector<This>;
-        using ScalarType = T::ScalarType;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -55,7 +53,9 @@ namespace Physica {
         template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
         void writePacket(size_t index, Packet auto packet);
         void writePacketPartial(size_t index, size_t count, Packet auto packet);
-        void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
+
+        using Base::resize;
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] PtrTy data_ptr(size_t index) { return vec.data() + from + index; }

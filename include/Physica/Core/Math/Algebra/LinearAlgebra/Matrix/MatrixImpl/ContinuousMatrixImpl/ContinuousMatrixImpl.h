@@ -216,16 +216,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    void ContinuousMatrix<Derived>::resize(const Matrix auto& m, auto&&... args) {
-        resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
-    }
-
-    template<class Derived>
-    auto ContinuousMatrix<Derived>::resize(size_t r, size_t c, auto&&... args) {
-        return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
-    }
-
-    template<class Derived>
     auto ContinuousMatrix<Derived>::flatten() noexcept {
         return FlattenC<Derived>(Base::getDerived());
     }
@@ -241,7 +231,7 @@ namespace Physica {
         const auto dataset = loc.openDataSet<2>(name);
         const size_t maxMajor = dataset.getSize(0);
         const size_t maxMinor = dataset.getSize(1);
-        resize(Base::rowFromMajorMinor(maxMajor, maxMinor), Base::colFromMajorMinor(maxMajor, maxMinor));
+        Base::resize(Base::rowFromMajorMinor(maxMajor, maxMinor), Base::colFromMajorMinor(maxMajor, maxMinor));
 
         const auto memSpace = H5DataSpace<1>({maxMinor});
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});

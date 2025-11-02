@@ -69,6 +69,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    void RValueMatrix<Derived>::resize(const Matrix auto& m, auto&&... args) {
+        resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::resize(size_t r, size_t c, auto&&... args) {
+        return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::row(size_t r) noexcept {
         return RowVector(Base::getDerived(), r, 0, getCol());
     }

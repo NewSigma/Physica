@@ -43,6 +43,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const;
         void invTransform(const Vector auto& data);
+
+        using VectorBase::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
@@ -110,6 +112,8 @@ namespace Physica {
         using MatrixBase::operator();
         /* Operations */
         void invTransform(const Matrix auto& data);
+
+        using MatrixBase::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }

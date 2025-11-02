@@ -47,7 +47,8 @@ namespace Physica {
         This& operator=(const This& v);
         This& operator=(This&& v) noexcept;
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
+        using Base::resize;
+        __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);

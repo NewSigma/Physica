@@ -27,7 +27,7 @@ namespace Physica {
         if constexpr (std::is_same<const Derived&, decltype(v)>::value)
             assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
-        x.resize(v.getLength());
+        x.resize(v);
         v.template assign<P>(x);
         return x;
     }

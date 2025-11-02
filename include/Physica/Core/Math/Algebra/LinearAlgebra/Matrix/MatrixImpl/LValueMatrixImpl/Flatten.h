@@ -24,14 +24,12 @@ namespace Physica {
     template<Matrix T>
     class FlattenL<T> : public LValueVector<FlattenL<T>> {
         using This = FlattenL<T>;
+        using Base = LValueVector<This>;
 
         T& mat;
-    public:
-        using Base = LValueVector<This>;
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     public:
         FlattenL(LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         FlattenL(const This&) = default;
@@ -42,6 +40,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }

@@ -35,8 +35,8 @@ namespace Physica {
         const V& vec;
     public:
         explicit Conjugate(const V& vec_) : vec(vec_) {}
-        Conjugate(const This&) = delete;
-        Conjugate(This&&) = delete;
+        Conjugate(const This&) = default;
+        Conjugate(This&&) = default;
         ~Conjugate() = default;
         /* Operators */
         This& operator=(const This&) = delete;

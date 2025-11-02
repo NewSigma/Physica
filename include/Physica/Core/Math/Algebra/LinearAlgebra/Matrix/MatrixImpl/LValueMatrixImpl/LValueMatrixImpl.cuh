@@ -27,7 +27,7 @@ namespace Physica {
         static_assert(RowAtCompile == Dynamic || M::RowAtCompile == Dynamic || RowAtCompile == M::RowAtCompile, "[Error]: Incompatible row number");
         static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
         auto& target = Base::getDerived();
-        target.resize(m.getRow(), m.getCol());
+        target.resize(m);
         m.assign(target);
         return target;
     }

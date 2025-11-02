@@ -42,7 +42,7 @@ namespace Physica {
             };
             CUDAExecutor::launch<MaxThreadPerBlock>(func, target.makeKernelConfig());
         }
-        else {
+        else if constexpr (IsDevice()) {
             const size_t maxMajor = target.getMaxMajor();
             const size_t maxMinor = target.getMaxMinor();
             for (size_t major = 0; major < maxMajor; ++major) {
@@ -66,6 +66,16 @@ namespace Physica {
         static_assert_assign(target);
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::resize(const Matrix auto& m, auto&&... args) {
+        resize(m.getRow(), m.getCol(), std::forward<decltype(args)>(args)...);
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::resize(size_t r, size_t c, auto&&... args) {
+        return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
     }
 
     template<class Derived>

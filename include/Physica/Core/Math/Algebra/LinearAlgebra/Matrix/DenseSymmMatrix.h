@@ -61,15 +61,18 @@ namespace Physica {
         /* Operations */
         using Base::assign;
         using Base::calc;
-        using Base::format;
-        using Storage::zeros;
         using Storage::resize;
+        void resize(const Matrix auto& m, auto&&... args);
+
         [[nodiscard]] ScalarType max() const { return asVector().max(); }
         [[nodiscard]] ScalarType min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return *this; }
         void swap(This& __restrict m) noexcept;
 
+        using Base::format;
+
+        using Storage::zeros;
         template<RNG R>
         void random_uniform() { asVector().template random_uniform<R>(); }
         template<RNG R>
@@ -137,6 +140,11 @@ namespace Physica {
     template<Vector V>
     auto DenseSymmMatrix<T, Order>::operator*(const V& v) const noexcept {
         return SyMV<T, Order, V>(*this, v);
+    }
+
+    template<Scalar T, size_t Order>
+    void DenseSymmMatrix<T, Order>::resize(const Matrix auto& m, auto&&... args) {
+        Base::resize(m, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Order>

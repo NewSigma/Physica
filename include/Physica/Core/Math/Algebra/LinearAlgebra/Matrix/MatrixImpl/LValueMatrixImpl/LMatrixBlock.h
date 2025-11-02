@@ -51,6 +51,7 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
@@ -91,6 +92,7 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
@@ -131,6 +133,7 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
@@ -168,6 +171,7 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }

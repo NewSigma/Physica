@@ -64,6 +64,9 @@ namespace Physica {
         [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const;
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
 
+        __host__ __device__ void resize(const Vector auto& x) { resize(x.getLength()); }
+        __host__ __device__ auto resize(size_t length) { return Base::getDerived().resize(length); }
+
         [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
 
         [[nodiscard]] __device__ Tr norm() const;

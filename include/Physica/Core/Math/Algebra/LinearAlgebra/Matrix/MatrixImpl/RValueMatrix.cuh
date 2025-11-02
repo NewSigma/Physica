@@ -63,6 +63,9 @@ namespace Physica {
         __host__ __device__ void assign_add(Matrix auto& target) const;
         __host__ __device__ void assert_assign(const Matrix auto& target) const noexcept;
 
+        __host__ __device__ void resize(const Matrix auto& m, auto&&... args);
+        __host__ __device__ auto resize(size_t r, size_t c, auto&&... args);
+
         [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ const auto row(size_t r) const noexcept;
         [[nodiscard]] __host__ __device__ auto col(size_t c) noexcept;

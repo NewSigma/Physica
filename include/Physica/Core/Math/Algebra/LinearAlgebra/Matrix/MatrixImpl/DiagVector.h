@@ -62,6 +62,7 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }

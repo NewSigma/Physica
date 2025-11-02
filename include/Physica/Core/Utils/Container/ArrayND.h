@@ -31,7 +31,7 @@ namespace Physica {
     class ArrayND {
         static_assert(Dim >= 0, "[Error]: Invalid Dim");
         using This = ArrayND<T, Dim>;
-        using IndexArray = Array<size_t, Dim>;
+        using ShapeType = Array<size_t, Dim>;
         
         template<class U>
         struct Helper {
@@ -46,50 +46,50 @@ namespace Physica {
         using ArrayType = Helper<T>::Type;
 
         ArrayType arr;
-        IndexArray shape;
+        ShapeType shape;
     public:
         ArrayND() = default;
-        explicit ArrayND(IndexArray shape_, auto&&... args);
+        explicit ArrayND(ShapeType shape_, auto&&... args);
         explicit ArrayND(size_t dim0, auto... dims);
         ArrayND(const This&) = default;
         ArrayND(This&&) noexcept = default;
         ~ArrayND() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator()(const IndexArray& indices);
-        [[nodiscard]] const T& operator()(const IndexArray& indices) const;
+        [[nodiscard]] T& operator()(const ShapeType& indices);
+        [[nodiscard]] const T& operator()(const ShapeType& indices) const;
         [[nodiscard]] T& operator()(size_t dim0, auto... dims);
         [[nodiscard]] const T& operator()(size_t dim0, auto... dims) const;
         /* Operations */
-        void resize(IndexArray shape_, auto&&... args);
+        void resize(ShapeType shape_, auto&&... args);
         void resize(size_t dim0, auto... dims);
         void zeros() noexcept;
 
-        [[nodiscard]] size_t toIndex1D(const IndexArray& indices) const noexcept;
-        [[nodiscard]] IndexArray toIndexND(size_t index) const noexcept;
+        [[nodiscard]] size_t toIndex1D(const ShapeType& indices) const noexcept;
+        [[nodiscard]] ShapeType toIndexND(size_t index) const noexcept;
 
-        void forND(std::invocable<T&, IndexArray> auto func);
-        void forND(std::invocable<const T&, IndexArray> auto func) const;
+        void forND(std::invocable<T&, ShapeType> auto func);
+        void forND(std::invocable<const T&, ShapeType> auto func) const;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto& asArray() noexcept { return arr; }
         [[nodiscard]] const auto& asArray() const noexcept { return arr; }
-        [[nodiscard]] T* data_ptr(const IndexArray& indices) noexcept;
-        [[nodiscard]] const T* data_ptr(const IndexArray& indices) const noexcept;
-        [[nodiscard]] const IndexArray& getShape() const noexcept { return shape; }
+        [[nodiscard]] T* data_ptr(const ShapeType& indices) noexcept;
+        [[nodiscard]] const T* data_ptr(const ShapeType& indices) const noexcept;
+        [[nodiscard]] const ShapeType& getShape() const noexcept { return shape; }
         [[nodiscard]] size_t getShape(int dim) const noexcept { return shape[dim]; }
         [[nodiscard]] int getDim() const noexcept { return shape.getLength(); }
         [[nodiscard]] size_t getSize() const noexcept { return arr.getLength(); }
         [[nodiscard]] bool empty() const noexcept { return arr.empty(); }
         /* Static members */
-        [[nodiscard]] static size_t toSize(const IndexArray& shape) noexcept;
-        [[nodiscard]] static size_t toIndex1D(const IndexArray& shape, const IndexArray& indices) noexcept;
-        [[nodiscard]] static IndexArray toIndexND(const IndexArray& shape, size_t index) noexcept;
+        [[nodiscard]] static size_t toSize(const ShapeType& shape) noexcept;
+        [[nodiscard]] static size_t toIndex1D(const ShapeType& shape, const ShapeType& indices) noexcept;
+        [[nodiscard]] static ShapeType toIndexND(const ShapeType& shape, size_t index) noexcept;
     private:
-        static IndexArray toIndexArray(auto... dims) noexcept;
-        static void toIndexArrayImpl(IndexArray& arr, int i, size_t dim0, auto... dims) noexcept;
-        static void toIndexArrayImpl(IndexArray&, int) noexcept {}
+        static ShapeType toShape(auto... dims) noexcept;
+        static void toShapeImpl(ShapeType& arr, int count, size_t dim0, auto... dims) noexcept;
+        static void toShapeImpl(ShapeType&, int) noexcept {}
     };
 
     template<size_t Dim, class Functor>

@@ -108,9 +108,6 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
 
-        void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
-        auto resize(size_t r, size_t c) { return Base::getDerived().resize(r, c); }
-
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;
         /* Getters */

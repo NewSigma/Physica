@@ -28,7 +28,7 @@ namespace Physica {
             assert(this != &v && "[Error]: Self assign is likely a bug");
         auto& x = Base::getDerived();
         if constexpr (IsHost())
-            x.resize(v.getLength());
+            x.resize(v);
         v.assign(x);
         return x;
     }

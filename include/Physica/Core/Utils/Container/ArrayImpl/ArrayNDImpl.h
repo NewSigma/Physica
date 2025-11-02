@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<class T, int Dim>
-    ArrayND<T, Dim>::ArrayND(IndexArray shape_, auto&&... args) {
+    ArrayND<T, Dim>::ArrayND(ShapeType shape_, auto&&... args) {
         resize(std::move(shape_), std::forward<decltype(args)>(args)...);
     }
 
@@ -32,18 +32,18 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    T& ArrayND<T, Dim>::operator()(const IndexArray& indices) {
+    T& ArrayND<T, Dim>::operator()(const ShapeType& indices) {
         return *data_ptr(indices);
     }
 
     template<class T, int Dim>
-    const T& ArrayND<T, Dim>::operator()(const IndexArray& indices) const {
+    const T& ArrayND<T, Dim>::operator()(const ShapeType& indices) const {
         return const_cast<This&>(*this)(indices);
     }
 
     template<class T, int Dim>
     T& ArrayND<T, Dim>::operator()(size_t dim0, auto... dims) {
-        return operator()(toIndexArray(dim0, dims...));
+        return operator()(toShape(dim0, dims...));
     }
 
     template<class T, int Dim>
@@ -52,7 +52,7 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    void ArrayND<T, Dim>::resize(IndexArray shape_, auto&&... args) {
+    void ArrayND<T, Dim>::resize(ShapeType shape_, auto&&... args) {
         assert(shape_.getLength() < std::numeric_limits<int>::max() && "[Error]: Does not support");
         shape = std::move(shape_);
         arr.resize(toSize(shape), std::forward<decltype(args)>(args)...);
@@ -60,7 +60,7 @@ namespace Physica {
 
     template<class T, int Dim>
     void ArrayND<T, Dim>::resize(size_t dim0, auto... dims) {
-        resize(toIndexArray(dim0, dims...));
+        resize(toShape(dim0, dims...));
     }
 
     template<class T, int Dim>
@@ -69,24 +69,24 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    size_t ArrayND<T, Dim>::toIndex1D(const IndexArray& indices) const noexcept {
+    size_t ArrayND<T, Dim>::toIndex1D(const ShapeType& indices) const noexcept {
         return toIndex1D(shape, indices);
     }
 
     template<class T, int Dim>
-    auto ArrayND<T, Dim>::toIndexND(size_t index) const noexcept -> IndexArray {
+    auto ArrayND<T, Dim>::toIndexND(size_t index) const noexcept -> ShapeType {
         assert(index < getSize() && "[Error]: Index out of range");
         return toIndexND(shape, index);
     }
 
     template<class T, int Dim>
-    void ArrayND<T, Dim>::forND(std::invocable<T&, IndexArray> auto func) {
+    void ArrayND<T, Dim>::forND(std::invocable<T&, ShapeType> auto func) {
         for (size_t i = 0; i < getSize(); ++i)
             func(arr[i], toIndexND(i));
     }
 
     template<class T, int Dim>
-    void ArrayND<T, Dim>::forND(std::invocable<const T&, IndexArray> auto func) const {
+    void ArrayND<T, Dim>::forND(std::invocable<const T&, ShapeType> auto func) const {
         for (size_t i = 0; i < getSize(); ++i)
             func(arr[i], toIndexND(i));
     }
@@ -99,17 +99,17 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) noexcept {
+    T* ArrayND<T, Dim>::data_ptr(const ShapeType& indices) noexcept {
         return arr.data() + toIndex1D(indices);
     }
 
     template<class T, int Dim>
-    const T* ArrayND<T, Dim>::data_ptr(const IndexArray& indices) const noexcept {
+    const T* ArrayND<T, Dim>::data_ptr(const ShapeType& indices) const noexcept {
         return const_cast<This&>(*this).data_ptr(indices);
     }
 
     template<class T, int Dim>
-    size_t ArrayND<T, Dim>::toSize(const IndexArray& shape) noexcept {
+    size_t ArrayND<T, Dim>::toSize(const ShapeType& shape) noexcept {
         const int dim = shape.getLength();
         size_t size = shape[0];
         for (int i = 1; i < dim; ++i)
@@ -118,7 +118,7 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    size_t ArrayND<T, Dim>::toIndex1D(const IndexArray& shape, const IndexArray& indices) noexcept {
+    size_t ArrayND<T, Dim>::toIndex1D(const ShapeType& shape, const ShapeType& indices) noexcept {
         size_t index = 0;
         size_t stride = 1;
         for (int i = static_cast<int>(shape.getLength()) - 1; i >= 0; --i) {
@@ -130,9 +130,9 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    auto ArrayND<T, Dim>::toIndexND(const IndexArray& shape, size_t index) noexcept -> IndexArray {
+    auto ArrayND<T, Dim>::toIndexND(const ShapeType& shape, size_t index) noexcept -> ShapeType {
         const int dim = shape.getLength();
-        IndexArray indices(shape.size());
+        ShapeType indices(shape.size());
         size_t remaining = index;
         for (int i = 0; i < dim; ++i) {
             size_t stride = 1;
@@ -146,17 +146,17 @@ namespace Physica {
     }
 
     template<class T, int Dim>
-    auto ArrayND<T, Dim>::toIndexArray(auto... dims) noexcept -> IndexArray {
+    auto ArrayND<T, Dim>::toShape(auto... dims) noexcept -> ShapeType {
         constexpr int Dim1 = sizeof...(dims);
         static_assert(Dim == Dim1 || Dim == Dynamic, "[Error]: Dim is not self consistent");
-        IndexArray indices(Dim1);
-        toIndexArrayImpl(indices, 0, dims...);
+        ShapeType indices(Dim1);
+        toShapeImpl(indices, 0, dims...);
         return indices;
     }
 
     template<class T, int Dim>
-    void ArrayND<T, Dim>::toIndexArrayImpl(IndexArray& arr, int count, size_t dim0, auto... dims) noexcept {
+    void ArrayND<T, Dim>::toShapeImpl(ShapeType& arr, int count, size_t dim0, auto... dims) noexcept {
         arr[count] = dim0;
-        toIndexArrayImpl(arr, count + 1, dims...);
+        toShapeImpl(arr, count + 1, dims...);
     }
 }

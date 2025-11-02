@@ -38,7 +38,7 @@ namespace Physica {
             };
             CUDAExecutor::launch<MaxThreadPerBlock>(func, makeKernelConfig());
         }
-        else
+        else if constexpr (IsDevice())
             assign_impl(target);
     }
 

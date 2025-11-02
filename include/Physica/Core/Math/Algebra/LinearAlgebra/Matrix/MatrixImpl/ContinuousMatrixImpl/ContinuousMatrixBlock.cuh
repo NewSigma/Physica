@@ -57,6 +57,7 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
@@ -100,6 +101,7 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
@@ -136,6 +138,7 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
@@ -175,6 +178,7 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }

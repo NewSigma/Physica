@@ -44,13 +44,13 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] T calcMean(int from = 0) const requires(!TakeLn);
-        [[nodiscard]] T calcDevia(int from = 0) const requires(!TakeLn);
-        [[nodiscard]] T calcVar(int from = 0) const requires(!TakeLn);
+        [[nodiscard]] T calcMean(int from = 0) const;
+        [[nodiscard]] T calcDevia(int from = 0) const;
+        [[nodiscard]] T calcVar(int from = 0) const;
 
-        [[nodiscard]] T calcLnMean(int from = 0) const requires(TakeLn);
-        [[nodiscard]] T calcLnDevia(int from = 0) const requires(TakeLn);
-        [[nodiscard]] T calcLnVar(int from = 0) const requires(TakeLn);
+        [[nodiscard]] T calcLnMean(int from = 0) const;
+        [[nodiscard]] T calcLnDevia(int from = 0) const;
+        [[nodiscard]] T calcLnVar(int from = 0) const;
 
         [[nodiscard]] T calcSquaredChi(int from = 0) const;
 
@@ -80,37 +80,43 @@ namespace Physica {
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcMean(int from) const requires(!TakeLn) {
+    T AdaptiveBase<T, TakeLn>::calcMean(int from) const {
+        static_assert(!TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return reciprocal(vars.tail(from)) * means.tail(from) / reciprocal(vars.tail(from)).sum();
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcVar(int from) const requires(!TakeLn) {
+    T AdaptiveBase<T, TakeLn>::calcVar(int from) const {
+        static_assert(!TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return reciprocal(reciprocal(vars.tail(from)).sum());
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcDevia(int from) const requires(!TakeLn) {
+    T AdaptiveBase<T, TakeLn>::calcDevia(int from) const {
+        static_assert(!TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return sqrt(calcVar(from));
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcLnMean(int from) const requires(TakeLn) {
+    T AdaptiveBase<T, TakeLn>::calcLnMean(int from) const {
+        static_assert(TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return (means.tail(from) - vars.tail(from)).lnSumExp() + calcLnVar();
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcLnDevia(int from) const requires(TakeLn) {
+    T AdaptiveBase<T, TakeLn>::calcLnDevia(int from) const {
+        static_assert(TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return Trv(0.5) * calcLnVar(from);
     }
 
     template<Scalar T, bool TakeLn>
-    T AdaptiveBase<T, TakeLn>::calcLnVar(int from) const requires(TakeLn) {
+    T AdaptiveBase<T, TakeLn>::calcLnVar(int from) const {
+        static_assert(TakeLn, "[Error]: Not available");
         assert(0 <= from && from < getNumRefine());
         return -(-vars.tail(from)).lnSumExp();
     }

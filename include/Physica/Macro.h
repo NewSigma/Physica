@@ -45,7 +45,8 @@
 #else
     #define __host__
     #define __device__
-    using curandGenerator_t = void*;
+    struct curandGenerator;
+    using curandGenerator_t = curandGenerator*; // Do not conflict with other pointers 
     using curandRngType_t = int;
 #endif
 
@@ -77,7 +78,7 @@ namespace Physica {
     [[maybe_unused]] constexpr static unsigned int PhysicaWordSize = sizeof(void*) * CHAR_BIT;
     [[maybe_unused]] constexpr size_t Dynamic = 0;
 
-    enum class Backend : int8_t {
+    enum class Backend : char {
         Base,
         MKL
     };

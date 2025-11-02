@@ -56,6 +56,9 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+
         [[nodiscard]] This& row(size_t r) {
             assert(r == 0);
             return *this;
@@ -64,7 +67,6 @@ namespace Physica {
             assert(r == 0);
             return *this;
         }
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] PtrTy data_ptr(size_t index) {
@@ -109,6 +111,9 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+
         [[nodiscard]] This& col([[maybe_unused]] size_t c) {
             assert(c == 0);
             return *this;
@@ -117,7 +122,6 @@ namespace Physica {
             assert(c == 0);
             return *this;
         }
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] PtrTy data_ptr(size_t index) {
@@ -158,6 +162,9 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
+        void resize([[maybe_unused]] size_t length) { assert(length == 1); }
+
         [[nodiscard]] This& row(size_t r) {
             assert(r == 0);
             return *this;
@@ -174,7 +181,6 @@ namespace Physica {
             assert(c == 0);
             return *this;
         }
-        void resize([[maybe_unused]] size_t length) { assert(length == 1); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] PtrTy data_ptr([[maybe_unused]] size_t index) {
@@ -212,6 +218,7 @@ namespace Physica {
         This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
+        using Base::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }

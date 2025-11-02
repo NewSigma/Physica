@@ -136,8 +136,7 @@ namespace Physica {
 
     template<Scalar T>
     auto TPQ<T>::lnPartitionZ() const -> Tr {
-        const bool isUnderflow = abs(asVector()).max() < Tr(std::numeric_limits<Tr>::min());
-        if (isUnderflow)
+        if (abs(asVector()).max().isSubNormal())
             return Smallest;
         return Base::lnSquaredNorm() + Tr(2) * lnZ0;
     }
@@ -146,8 +145,7 @@ namespace Physica {
     auto TPQ<T>::lnSquaredDot(const VectorND<Tr>& other) const -> Tr {
         assert(Base::getLength() == other.getLength() && "[Error]: Dimensions do not match");
         const Tr maxabs = abs(asVector()).max();
-        const bool isUnderflow = maxabs < Tr(std::numeric_limits<Tr>::min());
-        if (isUnderflow)
+        if (maxabs.isSubNormal())
             return Smallest;
 
         const Tr factor = reciprocal(maxabs);

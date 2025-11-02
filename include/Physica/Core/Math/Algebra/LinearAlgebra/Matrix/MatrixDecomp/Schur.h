@@ -58,10 +58,18 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto& getMatrixT() noexcept { return matrixT; }
-        [[nodiscard]] auto& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
+        [[nodiscard]] auto& getMatrixU() noexcept {
+            assert(computeMatrixU);
+            return matrixU;
+        }
         [[nodiscard]] const auto& getMatrixT() const noexcept { return matrixT; }
-        [[nodiscard]] const auto& getMatrixU() const noexcept { assert(computeMatrixU); return matrixU; }
+        [[nodiscard]] const auto& getMatrixU() const noexcept {
+            assert(computeMatrixU);
+            return matrixU;
+        }
     private:
+        void compute2D(const Matrix auto& normalized);
+        void computeND(const Matrix auto& normalized);
         void splitOffTwoRows(size_t index);
         Vector3D<T> realShift(size_t upper, size_t iter);
         void francisQR(size_t lower, size_t sub_order, Vector3D<T> shift);
@@ -91,74 +99,17 @@ namespace Physica {
             matrixT = RealType(0);
             return;
         }
+
         const RealType inv_factor = reciprocal(factor);
         const auto normalized = source * inv_factor; // Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
-
-        const size_t order = source.getRow();
-        size_t iter = 0;
         exshift = 0;
-        if (order != 2) {
-            const Hessenburg<T, Order> hess(normalized);
-            matrixT = hess.getMatrixH();
-
-            size_t upper = order - 1;
-            size_t total_iter = 0;
-            const size_t max_iter = Decouplable::maxItePerCol * order;
-            while (1 <= upper && upper < order) {
-                const size_t lower = activeWindowDownDiag(matrixT, upper);
-                if (lower == upper) {
-                    matrixT(upper, upper) += exshift;
-                    upper -= 1;
-                    iter = 0;
-                }
-                else {
-                    if (total_iter == max_iter) [[unlikely]]
-                        throw BadConvergenceException(BadConvergenceMessage);
-
-                    if constexpr (T::isComplex) {
-                        const auto shift = complexShift(upper, iter);
-                        complexQR(lower, upper, shift);
-                        ++iter;
-                        ++total_iter;
-                    }
-                    else {
-                        if (lower + 1 == upper) {
-                            splitOffTwoRows(lower);
-                            upper -= 2;
-                            iter = 0;
-                        }
-                        else {
-                            const size_t sub_order = upper - lower + 1;
-                            const auto shift = realShift(upper, iter);
-                            francisQR(lower, sub_order, shift);
-                            ++iter;
-                            ++total_iter;
-                        }
-                    }
-                }
-            }
-            matrixT(0, 0) += exshift;
-
-            if (computeMatrixU) {
-                WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
-                matrixU = std::move(temp);
-            }
-        }
+        if constexpr (Order == 2)
+            compute2D(normalized);
         else {
-            matrixT = normalized;
-            if constexpr (T::isComplex) {
-                while (activeWindowDownDiag(matrixT, 1) != 1) {
-                    if (iter == Decouplable::maxItePerCol) [[unlikely]]
-                        throw BadConvergenceException(BadConvergenceMessage);
-                    const auto shift = complexShift(1, iter);
-                    complexQR(0, 1, shift);
-                    iter += 1;
-                }
-            }
-            else {
-                if (activeWindowDownDiag(matrixT, 1) != 1)
-                    splitOffTwoRows(0);
-            }
+            if (source.getRow() != 2)
+                computeND(normalized);
+            else
+                compute2D(normalized);
         }
         matrixT *= factor;
     }
@@ -170,6 +121,76 @@ namespace Physica {
         matrixU.swap(obj.matrixU);
         std::swap(computeMatrixU, obj.computeMatrixU);
         exshift.swap(obj.exshift);
+    }
+
+    template<Scalar T, size_t Order>
+    void Schur<T, Order>::compute2D(const Matrix auto& normalized) {
+        matrixT = normalized;
+        if constexpr (T::isComplex) {
+            size_t iter = 0;
+            while (activeWindowDownDiag(matrixT, 1) != 1) {
+                if (iter == Decouplable::maxItePerCol) [[unlikely]]
+                    throw BadConvergenceException(BadConvergenceMessage);
+                const auto shift = complexShift(1, iter);
+                complexQR(0, 1, shift);
+                iter += 1;
+            }
+        }
+        else {
+            if (activeWindowDownDiag(matrixT, 1) != 1)
+                splitOffTwoRows(0);
+        }
+    }
+
+    template<Scalar T, size_t Order>
+    void Schur<T, Order>::computeND(const Matrix auto& normalized) {
+        const Hessenburg<T, Order> hess(normalized);
+        matrixT = hess.getMatrixH();
+
+        size_t iter = 0;
+        size_t order = normalized.getRow();
+        size_t upper = order - 1;
+        size_t total_iter = 0;
+        const size_t max_iter = Decouplable::maxItePerCol * order;
+        while (1 <= upper && upper < order) {
+            const size_t lower = activeWindowDownDiag(matrixT, upper);
+            if (lower == upper) {
+                matrixT(upper, upper) += exshift;
+                upper -= 1;
+                iter = 0;
+            }
+            else {
+                if (total_iter == max_iter) [[unlikely]]
+                    throw BadConvergenceException(BadConvergenceMessage);
+
+                if constexpr (T::isComplex) {
+                    const auto shift = complexShift(upper, iter);
+                    complexQR(lower, upper, shift);
+                    ++iter;
+                    ++total_iter;
+                }
+                else {
+                    if (lower + 1 == upper) {
+                        splitOffTwoRows(lower);
+                        upper -= 2;
+                        iter = 0;
+                    }
+                    else {
+                        const size_t sub_order = upper - lower + 1;
+                        const auto shift = realShift(upper, iter);
+                        francisQR(lower, sub_order, shift);
+                        ++iter;
+                        ++total_iter;
+                    }
+                }
+            }
+        }
+        matrixT(0, 0) += exshift;
+
+        if (computeMatrixU) {
+            WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
+            matrixU = std::move(temp);
+        }
     }
     /**
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.

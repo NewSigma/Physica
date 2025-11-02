@@ -29,13 +29,16 @@ namespace Physica {
         Z
     };
 
-    template<Scalar T, PauliIndex Idx>
-    class PauliMatrix : public RValueMatrix<PauliMatrix<T, Idx>> {
-        using This = PauliMatrix<T, Idx>;
-        using ElemType = std::conditional<Idx == PauliIndex::Y, typename T::ComplexType, T>::type;
-
-        int site;
+    template<Scalar U, PauliIndex Idx>
+    class PauliMatrix : public RValueMatrix<PauliMatrix<U, Idx>> {
+        using This = PauliMatrix<U, Idx>;
+        using Base = RValueMatrix<This>;
+    protected:
+        using typename Base::T;
+    private:
+        int site = 0;
     public:
+        PauliMatrix() = default;
         PauliMatrix(int site_);
         PauliMatrix(const This&) = default;
         PauliMatrix(This&&) noexcept = default;
@@ -44,10 +47,10 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        constexpr static ElemType calc(size_t row, size_t col) noexcept;
+        constexpr static T calc(size_t row, size_t col) noexcept;
 
         template<int Dim, int NumSite>
-        ElemType apply(SpinState<Dim, NumSite>& psi) const noexcept;
+        T apply(SpinState<Dim, NumSite>& psi) const noexcept;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -55,55 +58,55 @@ namespace Physica {
         constexpr static size_t getCol() noexcept { return 2; }
     };
 
-    template<Scalar T, PauliIndex Idx>
-    PauliMatrix<T, Idx>::PauliMatrix(int site_) : site(site_) {}
+    template<Scalar U, PauliIndex Idx>
+    PauliMatrix<U, Idx>::PauliMatrix(int site_) : site(site_) {}
 
-    template<Scalar T, PauliIndex Idx>
-    constexpr auto PauliMatrix<T, Idx>::calc(size_t row, size_t col) noexcept -> ElemType {
+    template<Scalar U, PauliIndex Idx>
+    constexpr auto PauliMatrix<U, Idx>::calc(size_t row, size_t col) noexcept -> T {
         using enum PauliIndex;
         if constexpr (Idx == I)
-            return ElemType(row == col ? 1 : 0);
+            return T(row == col ? 1 : 0);
         else if constexpr (Idx == X)
-            return ElemType(row == col ? 0 : 1);
+            return T(row == col ? 0 : 1);
         else if constexpr (Idx == Y)
-            return ElemType(0, row == col ? 0 : (row == 0 ? -1 : 1));
+            return T(0, row == col ? 0 : (row == 0 ? -1 : 1));
         else
-            return ElemType(row == col ? (row == 0 ? 1 : -1) : 0);
+            return T(row == col ? (row == 0 ? 1 : -1) : 0);
     }
 
-    template<Scalar T, PauliIndex Idx>
+    template<Scalar U, PauliIndex Idx>
     template<int Dim, int NumSite>
-    auto PauliMatrix<T, Idx>::apply(SpinState<Dim, NumSite>& psi) const noexcept -> ElemType {
+    auto PauliMatrix<U, Idx>::apply(SpinState<Dim, NumSite>& psi) const noexcept -> T {
         using enum PauliIndex;
         if constexpr (Idx == I)
-            return ElemType(1);
+            return T(1);
         else if constexpr (Idx == X) {
             psi = psi.flip(site);
-            return ElemType(1);
+            return T(1);
         }
         else if constexpr (Idx == Y) {
             const bool flag = psi.isSpinUp(site);
             psi = psi.flip(site);
-            return ElemType(0, flag ? 1 : -1);
+            return T(0, flag ? 1 : -1);
         }
         else {
-            return ElemType(psi.isSpinUp(site) ? 1 : -1);
+            return T(psi.isSpinUp(site) ? 1 : -1);
         }
     }
 
-    template<Scalar T, PauliIndex Idx>
-    void PauliMatrix<T, Idx>::swap(This& __restrict obj) noexcept {
+    template<Scalar U, PauliIndex Idx>
+    void PauliMatrix<U, Idx>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(site, obj.site);
     }
 }
 
 namespace Physica {
-    template<Scalar T, PauliIndex I>
-    class Traits<PauliMatrix<T, I>> {
-        static_assert(!T::isComplex);
+    template<Scalar U, PauliIndex Idx>
+    class Traits<PauliMatrix<U, Idx>> {
+        static_assert(!U::isComplex);
     public:
-        using ScalarType = T;
+        using ScalarType = std::conditional<Idx == PauliIndex::Y, typename U::ComplexType, U>::type;
         constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = 2;
         constexpr static size_t ColAtCompile = 2;

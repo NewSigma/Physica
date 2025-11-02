@@ -44,7 +44,7 @@ namespace Physica {
         struct KernelFuture {
             cudaStream_t stream;
 
-            void wait() { check(cudaStreamSynchronize(stream)); }
+            void wait() const { check(cudaStreamSynchronize(stream)); }
         };
     public:
         template<int MaxThreadsPerBlock = Dynamic, int MinBlocksPerMultiprocessor = Dynamic>

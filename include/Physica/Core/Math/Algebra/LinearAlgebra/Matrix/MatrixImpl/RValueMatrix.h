@@ -111,6 +111,9 @@ namespace Physica {
         [[nodiscard]] auto calcFromMajorMinor(size_t major, size_t minor) const;
         void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept requires(isReverseDiff);
 
+        void resize(const Matrix auto& m, auto&&... args);
+        auto resize(size_t r, size_t c, auto&&... args);
+
         [[nodiscard]] auto row(size_t r) noexcept;
         [[nodiscard]] const auto row(size_t r) const noexcept;
         [[nodiscard]] auto col(size_t c) noexcept;

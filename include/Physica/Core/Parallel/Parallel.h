@@ -21,7 +21,7 @@
 #include "Physica/Macro.h"
 
 namespace Physica {
-    enum ExecutePolicy {
+    enum ExecutePolicy : char {
         Sequential,
         Concurrent,
         Thread,

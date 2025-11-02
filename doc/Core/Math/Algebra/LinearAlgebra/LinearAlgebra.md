@@ -89,14 +89,14 @@ FastPacket = true表示可以快速构造SIMD对象. 对于右值表达式, 需�
 一元操作可以显示约束:
 
 ``` C++
-template<ExprType Type, Matrix M>
+template<ExprType, Matrix M>
 class UnitaryMatrixExpr { ... };
 ```
 
 考虑到可能的非Abel性, 二元操作需要更一般的声明:
 
 ``` C++
-template<ExprType Type, class LHS, class RHS>
+template<ExprType, class LHS, class RHS>
 class BinaryMatrixExpr { ... };
 ```
 
