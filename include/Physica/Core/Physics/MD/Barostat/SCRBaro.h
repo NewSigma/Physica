@@ -29,7 +29,7 @@ namespace Physica {
      * [1] J. Chem. Phys. 153, 114107 (2020); https://doi.org/10.1063/5.0020514
      * [2] arXiv:2111.06402; https://doi.org/10.48550/arXiv.2111.06402
      */
-    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
+    template<Scalar T, size_t NumReplica, RNG R = Random<>, BaroType Type>
     class SCRBaro : private Berendsen<T, NumReplica, Type> {
         using Base = Berendsen<T, NumReplica, Type>;
         using typename Base::MDCellType;

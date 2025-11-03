@@ -88,12 +88,12 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < half(0); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }
         /* Static members */
-        template<RNG R>
-        [[nodiscard]] static Real random_uniform();
-        template<RNG R>
-        [[nodiscard]] static Real random_normal();
-        template<RNG R>
-        [[nodiscard]] static Real random_any(auto& distribution) { return This(float32::random_any<R>(distribution)); }
+        template<RNG R = Random<>>
+        [[nodiscard]] static Real random_uniform() noexcept;
+        template<RNG R = Random<>>
+        [[nodiscard]] static Real random_normal() noexcept;
+        template<RNG R = Random<>>
+        [[nodiscard]] static Real random_any(auto& distribution) noexcept { return This(float32::random_any<R>(distribution)); }
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept { return H5::PredType::NATIVE_INT16; }
     };
 
@@ -106,12 +106,12 @@ namespace Physica {
     }
 
     template<RNG R>
-    auto Real<Float16>::random_uniform() -> This {
+    auto Real<Float16>::random_uniform() noexcept -> This {
         return This(float32::random_uniform<R>());
     }
 
     template<RNG R>
-    auto Real<Float16>::random_normal() -> This {
+    auto Real<Float16>::random_normal() noexcept -> This {
         return This(float32::random_normal<R>());
     }
 

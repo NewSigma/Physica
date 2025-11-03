@@ -71,11 +71,11 @@ namespace Physica {
         void mesh_uniform(size_t dim);
         void mesh_tanh(size_t dim, Trv range);
 
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R = Random<>, ExecutePolicy P = Sequential>
         Trv warmup(std::invocable<VectorND<Trv>> auto fn, int numWarm);
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R = Random<>, ExecutePolicy P = Sequential>
         void integral(std::invocable<VectorND<Trv>> auto fn);
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R = Random<>, ExecutePolicy P = Sequential>
         [[nodiscard]] Trv calcGridLoss(std::invocable<VectorND<Trv>> auto fn) const;
 
         const H5Group read(const H5Loc& loc, const char* name);

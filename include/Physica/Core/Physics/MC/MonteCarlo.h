@@ -39,7 +39,7 @@ namespace Physica {
         /* Operators */
         MonteCarlo& operator=(MonteCarlo mc) noexcept;
         /* Operations */
-        template<RNG R, ExecutePolicy P>
+        template<RNG R = Random<>, ExecutePolicy P>
         void nvt_step(const auto& forceModel);
         void normalizePos() { cell.normalize(); }
         void swap(MonteCarlo& __restrict mc) noexcept;

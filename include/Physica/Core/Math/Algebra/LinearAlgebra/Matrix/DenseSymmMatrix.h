@@ -73,11 +73,11 @@ namespace Physica {
         using Base::format;
 
         using Storage::zeros;
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_uniform() { asVector().template random_uniform<R>(); }
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_normal() { asVector().template random_normal<R>(); }
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_any(auto& distribution) { asVector().template random_any<R>(distribution); }
 
         using Storage::read;
@@ -92,11 +92,11 @@ namespace Physica {
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(size_t order);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_normal(size_t order);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_any(size_t order, auto& distribution);
     };
     /**

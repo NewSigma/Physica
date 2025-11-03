@@ -95,9 +95,9 @@ namespace Physica {
         /* Static Members */
         [[nodiscard]] static This nan() noexcept;
         [[nodiscard]] static This fromPhase(T phase) noexcept;
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform();
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_normal();
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept;
     };

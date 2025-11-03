@@ -35,9 +35,9 @@ namespace Physica {
     public:
         ~device_obj() = default;
         /* Operations */
-        template<RNG R, ExecutePolicy P>
+        template<RNG R = Random<>, ExecutePolicy P>
         void train_step(int batchSize, const auto& dataset);
-        template<RNG R, ExecutePolicy P>
+        template<RNG R = Random<>, ExecutePolicy P>
         void train_step_for(int64_t numStep, int batchSize, const auto& dataset);
 
         [[nodiscard]] auto loss(const auto& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }

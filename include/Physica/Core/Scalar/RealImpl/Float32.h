@@ -95,14 +95,14 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static Members */
         [[nodiscard]] inline static Real nan() noexcept;
-        template<RNG R>
-        [[nodiscard]] static Real random_uniform();
-        template<RNG R>
-        [[nodiscard]] static Real random_normal();
-        template<RNG R>
-        [[nodiscard]] static Real random_normal(GaussRandomPool<This, R>& pool) { return pool(); }
-        template<RNG R>
-        [[nodiscard]] static Real random_any(auto& distribution) { return Real(distribution(R::getInstance())); }
+        template<RNG R = Random<>>
+        [[nodiscard]] static Real random_uniform() noexcept;
+        template<RNG R = Random<>>
+        [[nodiscard]] static Real random_normal() noexcept;
+        template<RNG R = Random<>>
+        [[nodiscard]] static Real random_normal(GaussRandomPool<This, R>& pool) noexcept { return pool(); }
+        template<RNG R = Random<>>
+        [[nodiscard]] static Real random_any(auto& distribution) noexcept { return Real(distribution(R::getInstance())); }
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept { return H5::PredType::NATIVE_FLOAT; }
     #ifdef PHYSICA_MPI
         [[nodiscard]] static MPI_Datatype dtype_mpi() noexcept { return MPI_FLOAT; }
@@ -144,12 +144,12 @@ namespace Physica {
     }
 
     template<RNG R>
-    Real<Float32> Real<Float32>::random_uniform() {
+    auto Real<Float32>::random_uniform() noexcept -> This {
         return Real(std::generate_canonical<float, std::numeric_limits<float>::digits>(R::getInstance()));
     }
 
     template<RNG R>
-    Real<Float32> Real<Float32>::random_normal() {
+    auto Real<Float32>::random_normal() noexcept -> This {
         std::normal_distribution<float> dist{};
         return Real(dist(R::getInstance()));
     }

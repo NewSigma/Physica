@@ -72,11 +72,11 @@ namespace Physica {
         void toHost(host_obj& obj) const;
         void toHostAsync(host_obj& obj) const;
 
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_uniform();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_normal();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_any(auto& distribution);
 
         void swap(This& __restrict obj) noexcept;
@@ -93,11 +93,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto& grads() const noexcept { return g; }
         [[nodiscard]] __host__ __device__ auto& grads() noexcept { return g; }
         /* Static members */
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(size_t row, size_t col);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_normal(size_t row, size_t col);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
     };
 }

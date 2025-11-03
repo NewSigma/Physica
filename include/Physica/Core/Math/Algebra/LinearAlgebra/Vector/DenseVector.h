@@ -98,13 +98,13 @@ namespace Physica {
         [[nodiscard]] ConstPtrTy data_ptr(size_t index) const { return data() + index; }
         /* Static members */
         [[nodiscard]] static This zeros(size_t len);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(size_t len);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(const This& v1, const This& v2);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_normal(size_t len);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_any(size_t len, auto& distribution);
         [[nodiscard]] static This linspace(T from, T to, size_t count);
         [[nodiscard]] static This read(size_t length, const T* __restrict p);

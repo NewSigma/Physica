@@ -13,6 +13,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
 else()
     add_compile_options(-Wall -Wfatal-errors -mrdrnd -march=native -ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt -fno-math-errno -fno-trapping-math -fno-signed-zeros)
     add_link_options(-Wl,-O2,-Bsymbolic,--gc-sections)
+
+    #add_compile_options(-mdaz-ftz) # FIXME: enable it once we dump to clang 19
+
     if(CMAKE_BUILD_TYPE MATCHES Debug)
         add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Og>)
     elseif(CMAKE_BUILD_TYPE MATCHES Release)
@@ -82,7 +85,7 @@ if(${PHYSICA_CUDA})
     add_definitions(-DPHYSICA_CUDA)
 
     if(CMAKE_CUDA_COMPILER_ID MATCHES Clang)
-        add_compile_options(-Wno-unknown-cuda-version)
+        add_compile_options(-Wno-unknown-cuda-version -fcuda-flush-denormals-to-zero)
     else()
         # clangd does not work with response file
         # Reference: https://github.com/clangd/clangd/discussions/1676

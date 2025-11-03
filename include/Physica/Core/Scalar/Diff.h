@@ -86,11 +86,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept;
         /* Static members */
         [[nodiscard]] static This fromPhase(RealType phase) noexcept requires(isComplex);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static auto random_uniform();
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static auto random_normal();
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static auto random_any(auto& distribution);
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept;
     };

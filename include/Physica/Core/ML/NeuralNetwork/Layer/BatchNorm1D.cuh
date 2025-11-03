@@ -62,11 +62,11 @@ namespace Physica {
         void step(auto& optimizer);
         void zero_grad();
 
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_normal();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_xavier_uniform(Tv gain);
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_xavier_normal(Tv gain);
         void swap(This& __restrict obj) noexcept;
         /* Getters */

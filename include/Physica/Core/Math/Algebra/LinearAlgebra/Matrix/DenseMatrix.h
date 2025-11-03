@@ -98,13 +98,13 @@ namespace Physica {
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);
         [[nodiscard]] static This unitMatrix(size_t order);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(size_t order) { return random_uniform<R>(order, order); }
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(size_t row, size_t col);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_normal(size_t row, size_t col);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
         [[nodiscard]] static auto meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This>;
         [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p);

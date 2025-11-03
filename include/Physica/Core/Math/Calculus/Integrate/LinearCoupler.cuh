@@ -50,7 +50,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(DNN auto& nn, device_obj<MatrixND<Tv>>& x) const;
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const;
 
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_shuffle();
 
         void swap(This& __restrict obj) noexcept;
@@ -182,7 +182,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R = Random<>>
     void device_obj<LinearCoupler<T>>::random_shuffle() {
         VectorND<Tv> mask_shuffle(getDim());
         mask_shuffle.zeros();

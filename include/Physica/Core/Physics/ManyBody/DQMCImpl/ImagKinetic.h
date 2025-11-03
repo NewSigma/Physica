@@ -52,7 +52,7 @@ namespace Physica {
         [[nodiscard]] Trv calcP(int site, int split, Tr alpha) const noexcept;
         void single_flip(int site, int split, Tr alpha) noexcept;
 
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_uniform();
         void swap(This& __restrict obj) noexcept;
         /* Getters */

@@ -119,14 +119,14 @@ namespace Physica {
     public:
         Integrate(Base range, uint64_t sampleCount_);
         /* Operations */
-        template<RNG R>
+        template<RNG R = Random<>>
         T solve(std::invocable<VectorType> auto fn) const;
-        template<RNG R>
+        template<RNG R = Random<>>
         T solve_e(unsigned int numSequence, std::invocable<VectorType> auto fn, T& deviation) const;
 
-        template<RNG R>
+        template<RNG R = Random<>>
         T solve(std::invocable<VectorType> auto fn, std::invocable<VectorType> auto importance, auto& distribution) const;
-        template<RNG R>
+        template<RNG R = Random<>>
         T solve_e(unsigned int numSequence,
                   std::invocable<VectorType> auto fn,
                   std::invocable<VectorType> auto importance,

@@ -139,11 +139,11 @@ namespace Physica {
         [[nodiscard]] const auto flatten() const;
 
         void toUnitMatrix();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_uniform();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_normal();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_any(auto& distribution);
 
         template<int GradOrder = 1>

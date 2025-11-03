@@ -62,11 +62,11 @@ namespace Physica {
         using Base::toHost;
         using Base::toHostAsync;
 
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_uniform();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_normal();
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_any(auto& distribution);
 
         using Base::read;
@@ -78,11 +78,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
         /* Static members */
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(size_t len);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_normal(size_t len);
-        template<RNG R>
+        template<RNG R = Random<>>
         [[nodiscard]] static This random_any(size_t len, auto& distribution);
     };
 

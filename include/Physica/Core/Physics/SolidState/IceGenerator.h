@@ -47,9 +47,9 @@ namespace Physica {
         IceGenerator& operator=(IceGenerator obj) noexcept;
         /* Operations */
         Array<CrystalCellType> exhaust();
-        template<RNG R> CrystalCellType makeRand();
-        template<RNG R> CrystalCellType makeDefects(unsigned int numDefect) const;
-        template<RNG R> Array<size_t> randRing() const;
+        template<RNG R = Random<>> CrystalCellType makeRand();
+        template<RNG R = Random<>> CrystalCellType makeDefects(unsigned int numDefect) const;
+        template<RNG R = Random<>> Array<size_t> randRing() const;
         CrystalCellType makeRingMove(const Array<size_t>& ring, PositionMatrix& momentumMat) const;
         void swap(IceGenerator& __restrict obj) noexcept;
         /* Setters */

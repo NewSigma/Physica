@@ -37,7 +37,7 @@ namespace Physica {
         VectorND<ScalarType> intrinsicDim;
         VectorND<ScalarType> correlateDim;
     public:
-        template<RNG R>
+        template<RNG R = Random<>>
         DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const Vector auto& radius);
         /* Operations */
         ScalarType intrinDim(const Matrix auto& data, const Vector auto& radius) const;

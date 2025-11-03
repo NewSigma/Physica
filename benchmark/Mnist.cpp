@@ -45,7 +45,7 @@ namespace Physica {
         LinearLayer<T> layer2 = LinearLayer<T>(HiddenW, 10);
         SGD<Tv> opt = SGD<Tv>(LearnRate);
     public:
-        template<RNG R>
+        template<RNG R = Random<>>
         MnistNet(R&) {
             layer1.template random_xavier_normal<R>(1);
             layer2.template random_xavier_normal<R>(1);

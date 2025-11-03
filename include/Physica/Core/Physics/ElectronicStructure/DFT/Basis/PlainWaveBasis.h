@@ -45,7 +45,7 @@ namespace Physica {
         void normalize();
         T calcNumElectron() const;
 
-        template<RNG R>
+        template<RNG R = Random<>>
         void random_normal();
         void swap(PlainWaveBasis& __restrict obj) noexcept;
         /* Getters */

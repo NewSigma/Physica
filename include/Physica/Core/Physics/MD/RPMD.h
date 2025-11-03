@@ -80,14 +80,14 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void nve_step_for(T duration, auto& kineticModel, auto& forceModel);
 
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R = Random<>, ExecutePolicy P = Sequential>
         void nvt_step(const auto& thermostat, auto& kineticModel, auto& forceModel);
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R = Random<>, ExecutePolicy P = Sequential>
         void nvt_step_for(T duration, const auto& thermostat, auto& kineticModel, auto& forceModel);
 
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R = Random<>, ExecutePolicy P = Sequential>
         void npt_step(const auto& thermostat, auto& barostat, auto& kineticModel, auto& forceModel);
-        template<RNG R, ExecutePolicy P = Sequential>
+        template<RNG R = Random<>, ExecutePolicy P = Sequential>
         void npt_step_for(T duration, const auto& thermostat, auto& barostat, auto& kineticModel, auto& forceModel);
 
         template<ExecutePolicy P = Sequential>
@@ -95,7 +95,7 @@ namespace Physica {
         template<BaroType Type, ExecutePolicy P = Sequential>
         void fire_pstep(CFireModel<T, Dim, Type>& cfire, auto& kineticModel, auto& forceModel);
 
-        template<class KineticModel, RNG R>
+        template<class KineticModel, RNG R = Random<>>
         void initMomentum();
         template<class KineticModel>
         void scaleVelocity();
