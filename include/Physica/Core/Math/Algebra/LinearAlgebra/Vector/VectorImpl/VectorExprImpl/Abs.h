@@ -28,12 +28,17 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tm;
     private:
         constexpr static bool isComplexV = std::remove_cvref_t<V>::isComplex;
         constexpr static bool isReverseDiff = Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Vector auto&& v) const;
+        void assign_mkl(Vector auto& v) const noexcept;
+
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
         [[nodiscard]] Tv calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
 
@@ -45,6 +50,12 @@ namespace Physica {
 
         [[nodiscard]] T max() const;
     };
+
+    template<Vector V>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprType::Abs, V>::assign(Vector auto&& v) const {
+        Base::template assign_base<P>(v);
+    }
 
     template<Vector V>
     template<Packet Pack>
@@ -89,3 +100,7 @@ namespace Physica {
         return VectorExpr<ExprType::Abs, V&&>(std::forward<V>(v));
     }
 }
+
+#ifdef PHYSICA_MKL
+    #include "MKL/Abs.h"
+#endif

@@ -39,7 +39,7 @@ namespace Physica {
         /* Operators */
         constexpr This& operator=(auto&&) { return *this; }
         /* Operations */
-        void swap(This&) {}
+        constexpr void swap(This&) noexcept {}
     };
 
     template<class T>

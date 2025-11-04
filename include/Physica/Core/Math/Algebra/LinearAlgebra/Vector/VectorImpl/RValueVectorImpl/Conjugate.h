@@ -45,8 +45,6 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
-        template<ExecutePolicy P = Sequential>
-        void assign_base(Vector auto& v) const noexcept;
 
         [[nodiscard]] T calc(size_t index) const { return vec.calc(index).conjugate(); }
         [[nodiscard]] Tv calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
@@ -63,13 +61,7 @@ namespace Physica {
     template<Vector V>
     template<ExecutePolicy P>
     void Conjugate<V>::assign(Vector auto&& v) const noexcept {
-        assign_base<P>(v);
-    }
-
-    template<Vector V>
-    template<ExecutePolicy P>
-    void Conjugate<V>::assign_base(Vector auto& v) const noexcept {
-        Base::template assign<P>(v);
+        Base::template assign_base<P>(v);
     }
 
     template<Vector V>

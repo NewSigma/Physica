@@ -38,8 +38,6 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
-        template<ExecutePolicy P = Sequential>
-        void assign_base(Vector auto& v) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -60,18 +58,12 @@ namespace Physica {
         constexpr bool SmallVector = 0 < Length && Length <= 32;
         if constexpr (Internal::EnableMKL<V, V1>::value && !SmallVector && T::Prec == Float64) {
             if (Base::getLength() <= 32)
-                assign_base(v);
+                Base::template assign_base<P>(v);
             else
                 assign_mkl(v);
         }
         else
-            assign_base(v);
-    }
-
-    template<Vector V>
-    template<ExecutePolicy P>
-    void VectorExpr<ExprType::Exp, V>::assign_base(Vector auto& v) const noexcept {
-        Base::template assign<P>(v);
+            Base::template assign_base<P>(v);
     }
 
     template<Vector V>

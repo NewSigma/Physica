@@ -64,8 +64,6 @@ namespace Physica {
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;
-        template<ExecutePolicy P = Sequential>
-        void assign_base(Vector auto& v) const noexcept;
         void assign_mkl(Vector auto& v) const noexcept;
 
         template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;

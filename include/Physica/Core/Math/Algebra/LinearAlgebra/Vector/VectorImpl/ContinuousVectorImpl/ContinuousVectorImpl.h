@@ -57,16 +57,10 @@ namespace Physica {
                     memcpy(v.data(), data(), Base::getLength() * sizeof(T));
             }
             else
-                assign_base<P>(v);
+                Base::template assign_base<P>(v);
         }
         else
-            assign_base<P>(v);
-    }
-
-    template<class Derived>
-    template<ExecutePolicy P>
-    void ContinuousVector<Derived>::assign_base(Vector auto& v) const noexcept {
-        Base::template assign<P>(v);
+            Base::template assign_base<P>(v);
     }
 
     template<class Derived>

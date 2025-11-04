@@ -40,6 +40,12 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
+    void RValueVector<Derived>::assign_base(Vector auto&& v) const noexcept {
+        assign<P>(v);
+    }
+
+    template<class Derived>
+    template<ExecutePolicy P>
     void RValueVector<Derived>::assign_add(Vector auto& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr static size_t Length1 = SizeAtCompile;

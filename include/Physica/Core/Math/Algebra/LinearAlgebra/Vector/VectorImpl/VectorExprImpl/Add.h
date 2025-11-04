@@ -77,8 +77,6 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const;
         void assign_mkl(Vector auto& v) const noexcept;
-        template<ExecutePolicy P = Sequential>
-        void assign_base(Vector auto& v) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t s) const;
         [[nodiscard]] Tv calc_value(size_t s) const;
@@ -121,17 +119,11 @@ namespace Physica {
                 if (Base::getLength() > Critical)
                     assign_mkl(v);
                 else
-                    assign_base<P>(v);
+                    Base::template assign_base<P>(v);
             }
             else
-                assign_base<P>(v);
+                Base::template assign_base<P>(v);
         }
-    }
-
-    template<Vector V1, Vector V2>
-    template<ExecutePolicy P>
-    void VectorExpr<ExprType::Add, V1, V2>::assign_base(Vector auto& v) const {
-        Base::template assign<P>(v);
     }
 
     template<Vector V1, Vector V2>
