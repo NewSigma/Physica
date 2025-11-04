@@ -23,6 +23,8 @@
 namespace Physica {
     template<Matrix M>
     class Conjugate<M> : public RValueMatrix<Conjugate<M>> {
+        static_assert(M::isComplex, "[Error]: Unnecessary conjugate call on real matrix");
+
         using This = Conjugate<M>;
         using Base = RValueMatrix<This>;
     protected:
@@ -39,6 +41,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
+
+        [[nodiscard]] const M& conjugate() const noexcept { return matrix; }
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return matrix.getCol(); }

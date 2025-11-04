@@ -54,6 +54,8 @@ namespace Physica {
         [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const noexcept;
+
+        [[nodiscard]] const V& conjugate() const noexcept { return vec; }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
     };

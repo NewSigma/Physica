@@ -29,7 +29,7 @@ namespace {
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            x.assign_mkl(buffer);
+            x.conjugate().assign_mkl(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

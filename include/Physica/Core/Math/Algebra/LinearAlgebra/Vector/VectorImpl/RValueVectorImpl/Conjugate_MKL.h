@@ -29,8 +29,8 @@ namespace Physica {
         const auto* a = reinterpret_cast<const Tm*>(vec.data());
         auto* y = reinterpret_cast<Tm*>(v.data());
         if constexpr (T::Prec == Float32)
-            vcExp_64(n, a, y);
+            vcConj_64(n, a, y);
         else
-            vzExp_64(n, a, y);
+            vzConj_64(n, a, y);
     }
 }
