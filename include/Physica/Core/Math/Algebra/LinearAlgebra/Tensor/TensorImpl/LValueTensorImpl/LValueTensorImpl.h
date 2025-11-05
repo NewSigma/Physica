@@ -33,7 +33,7 @@ namespace Physica {
         if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(other)>>::value)
             assert(this != &other && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
-        x.resize(other.getShape());
+        x.resize(other);
         other.assign(x);
         return x;
     }
@@ -49,15 +49,15 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueTensor<Derived>::forND(std::invocable<T&, IndexArray> auto fn) {
-        Physica::forND(Base::getShape(), [this, fn](const IndexArray& index) {
+    void LValueTensor<Derived>::forND(std::invocable<T&, IndexType> auto fn) {
+        Physica::forND(Base::getShape(), [this, fn](const IndexType& index) {
             fn(operator()(index), index);
         });
     }
 
     template<class Derived>
-    void LValueTensor<Derived>::forND(std::invocable<const T&, IndexArray> auto fn) const {
-        Physica::forND(Base::getShape(), [this, fn](const IndexArray& index) {
+    void LValueTensor<Derived>::forND(std::invocable<const T&, IndexType> auto fn) const {
+        Physica::forND(Base::getShape(), [this, fn](const IndexType& index) {
             fn(operator()(index), index);
         });
     }

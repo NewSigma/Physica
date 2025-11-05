@@ -28,7 +28,7 @@ namespace Physica {
         using Base = RValueTensor<Derived>;
     public:
         using typename Base::ScalarType;
-        using typename Base::IndexArray;
+        using typename Base::IndexType;
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
@@ -60,8 +60,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
 
-        void forND(std::invocable<T&, IndexArray> auto fn);
-        void forND(std::invocable<const T&, IndexArray> auto fn) const;
+        void forND(std::invocable<T&, IndexType> auto fn);
+        void forND(std::invocable<const T&, IndexType> auto fn) const;
 
         [[nodiscard]] LTensorBlock<Derived> block(Index3D from, Index3D count);
         [[nodiscard]] const LTensorBlock<Derived> block(Index3D from, Index3D count) const;

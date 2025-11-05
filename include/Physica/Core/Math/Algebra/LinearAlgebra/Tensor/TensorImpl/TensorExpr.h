@@ -48,8 +48,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] auto getShape() const noexcept;
-        [[nodiscard]] size_t getShape(int dim) const;
+        [[nodiscard]] size_t dim(int index) const noexcept;
+        [[nodiscard]] decltype(auto) getShape() const noexcept;
         [[nodiscard]] int getDim() const;
         [[nodiscard]] size_t getSize() const noexcept;
         [[nodiscard]] const LHS& getLHS() const noexcept { return *lhs; }
@@ -57,19 +57,19 @@ namespace Physica {
     };
 
     template<ExprType Type, class LHS, class RHS>
-    auto BinaryTensorExpr<Type, LHS, RHS>::getShape() const noexcept {
+    size_t BinaryTensorExpr<Type, LHS, RHS>::dim(int index) const noexcept {
+        if constexpr (Tensor<LHS>)
+            return getLHS().getShape(index);
+        else
+            return getRHS().getShape(index);
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    decltype(auto) BinaryTensorExpr<Type, LHS, RHS>::getShape() const noexcept {
         if constexpr (Tensor<LHS>)
             return getLHS().getShape();
         else
             return getRHS().getShape();
-    }
-
-    template<ExprType Type, class LHS, class RHS>
-    size_t BinaryTensorExpr<Type, LHS, RHS>::getShape(int dim) const {
-        if constexpr (Tensor<LHS>)
-            return getLHS().getShape(dim);
-        else
-            return getRHS().getShape(dim);
     }
 
     template<ExprType Type, class LHS, class RHS>
@@ -92,23 +92,23 @@ namespace Physica {
 namespace Physica {
     template<ExprType Type, Tensor LHS, Tensor RHS>
     class Traits<TensorExpr<Type, LHS, RHS>> {
-        constexpr static int Dim1 = Traits<LHS>::Dim;
-        constexpr static int Dim2 = Traits<RHS>::Dim;
+        constexpr static int NDim1 = Traits<LHS>::NDim;
+        constexpr static int NDim2 = Traits<RHS>::NDim;
 
         using T = LHS::ScalarType;
         using Tr = T::RealType;
         using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS::ScalarType>::Type;
-        static_assert(Dim1 == Dynamic || Dim2 == Dynamic || (Dim1 == Dim2), "[Error]: Tensor dimentions do not match");
+        static_assert(NDim1 == Dynamic || NDim2 == Dynamic || (NDim1 == NDim2), "[Error]: Tensor dimentions do not match");
     public:
         using ScalarType = std::conditional<Type == ExprType::Abs, Tr, T12>::type;
-        constexpr static int Dim = Dim1 > Dim2 ? Dim1 : Dim2;
+        constexpr static int NDim = NDim1 > NDim2 ? NDim1 : NDim2;
     };
 
     template<ExprType Type, Tensor LHS, Scalar RHS>
     class Traits<TensorExpr<Type, LHS, RHS>> {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
-        constexpr static int Dim = Traits<LHS>::Dim;
+        constexpr static int NDim = Traits<LHS>::NDim;
     };
 
     template<ExprType Type, Scalar LHS, Tensor RHS>

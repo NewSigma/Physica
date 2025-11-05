@@ -21,31 +21,34 @@
 #include "../DenseTensor.h"
 
 namespace Physica {
-    template<Scalar T, int Dim>
-    DenseTensor<T, Dim>::DenseTensor(IndexArray shape, auto&&... args) : Storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
+    template<Scalar T, int... Dims>
+    DenseTensor<T, Dims...>::DenseTensor(size_t dim0, auto... dims) : Storage(dim0, dims...) {}
 
-    template<Scalar T, int Dim>
-    void DenseTensor<T, Dim>::resize(IndexArray shape, auto&&... args) {
-        Storage::resize(std::move(shape), std::forward<decltype(args)>(args)...);
+    template<Scalar T, int... Dims>
+    DenseTensor<T, Dims...>::DenseTensor(IndexType shape, auto&&... args) : Storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
+
+    template<Scalar T, int... Dims>
+    void DenseTensor<T, Dims...>::resize(IndexType shape) {
+        Storage::resize(std::move(shape));
     }
 
-    template<Scalar T, int Dim>
-    void DenseTensor<T, Dim>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, int... Dims>
+    void DenseTensor<T, Dims...>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Storage::swap(obj);
     }
 
-    template<Scalar T, int Dim>
+    template<Scalar T, int... Dims>
     template<RNG R>
-    auto DenseTensor<T, Dim>::random_uniform(IndexArray shape) -> This {
+    auto DenseTensor<T, Dims...>::random_uniform(IndexType shape) -> This {
         auto result = This(std::move(shape));
         result.asArray().template random_uniform<R>();
         return result;
     }
 
-    template<Scalar T, int Dim>
+    template<Scalar T, int... Dims>
     template<RNG R>
-    auto DenseTensor<T, Dim>::random_normal(IndexArray shape) -> This {
+    auto DenseTensor<T, Dims...>::random_normal(IndexType shape) -> This {
         auto result = This(std::move(shape));
         result.asArray().template random_normal<R>();
         return result;

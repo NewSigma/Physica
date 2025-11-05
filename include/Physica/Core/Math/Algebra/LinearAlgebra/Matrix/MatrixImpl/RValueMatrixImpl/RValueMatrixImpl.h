@@ -59,7 +59,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
+    decltype(auto) RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
@@ -74,7 +74,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::resize(size_t r, size_t c, auto&&... args) {
+    decltype(auto) RValueMatrix<Derived>::resize(size_t r, size_t c, auto&&... args) {
         return Base::getDerived().resize(r, c, std::forward<decltype(args)>(args)...);
     }
 

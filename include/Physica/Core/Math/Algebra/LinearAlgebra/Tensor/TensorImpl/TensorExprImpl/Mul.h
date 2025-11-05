@@ -21,48 +21,50 @@
 #include "../TensorExpr.h"
 
 namespace Physica {
-    template<Tensor T, Scalar U>
-    class TensorExpr<ExprType::Mul, T, U>
-            : public BinaryTensorExpr<ExprType::Mul, T, U> {
-        using Base = BinaryTensorExpr<ExprType::Mul, T, U>;
+    template<Tensor X, Scalar U>
+    class TensorExpr<ExprType::Mul, X, U>
+            : public BinaryTensorExpr<ExprType::Mul, X, U> {
+        using Base = BinaryTensorExpr<ExprType::Mul, X, U>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::IndexArray;
+        using typename Base::IndexType;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] ScalarType calc(const IndexArray& indices) const {
+        [[nodiscard]] T calc(const IndexType& indices) const {
             return Base::getLHS().calc(indices) * Base::getRHS();
         }
     };
 
-    template<Tensor T1, Tensor T2>
-    class TensorExpr<ExprType::Mul, T1, T2>
-            : public BinaryTensorExpr<ExprType::Mul, T1, T2> {
-        using Base = BinaryTensorExpr<ExprType::Mul, T1, T2>;
+    template<Tensor X1, Tensor X2>
+    class TensorExpr<ExprType::Mul, X1, X2>
+            : public BinaryTensorExpr<ExprType::Mul, X1, X2> {
+        using Base = BinaryTensorExpr<ExprType::Mul, X1, X2>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::IndexArray;
+        using typename Base::IndexType;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Getters */
-        [[nodiscard]] ScalarType calc(const IndexArray& indices) const {
+        [[nodiscard]] T calc(const IndexType& indices) const {
             return Base::getLHS().calc(indices) * Base::getRHS().calc(indices);
         }
     };
 
-    template<Tensor T, Scalar U>
-    [[nodiscard]] auto operator*(const T& x, const U& y) noexcept {
-        return TensorExpr<ExprType::Mul, T, U>(x, y);
+    template<Tensor X, Scalar U>
+    [[nodiscard]] auto operator*(const X& x, const U& y) noexcept {
+        return TensorExpr<ExprType::Mul, X, U>(x, y);
     }
 
-    template<Tensor T, Scalar U>
-    [[nodiscard]] auto operator*(const U& y, const T& x) noexcept {
+    template<Tensor X, Scalar U>
+    [[nodiscard]] auto operator*(const U& y, const X& x) noexcept {
         return x * y;
     }
 
-    template<Tensor T1, Tensor T2>
-    [[nodiscard]] auto hadamard(const T1& x, const T2& y) noexcept {
-        return TensorExpr<ExprType::Mul, T1, T2>(x, y);
+    template<Tensor X1, Tensor X2>
+    [[nodiscard]] auto hadamard(const X1& x, const X2& y) noexcept {
+        return TensorExpr<ExprType::Mul, X1, X2>(x, y);
     }
 }

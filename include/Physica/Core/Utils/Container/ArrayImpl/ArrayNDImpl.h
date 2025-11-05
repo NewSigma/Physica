@@ -21,95 +21,116 @@
 #include "../ArrayND.h"
 
 namespace Physica {
-    template<class T, int Dim>
-    ArrayND<T, Dim>::ArrayND(ShapeType shape_, auto&&... args) {
+    template<class T, int... Dims>
+    ArrayND<T, Dims...>::ArrayND(IndexType shape_, auto&&... args) {
         resize(std::move(shape_), std::forward<decltype(args)>(args)...);
     }
 
-    template<class T, int Dim>
-    ArrayND<T, Dim>::ArrayND(size_t dim0, auto... dims) {
+    template<class T, int... Dims>
+    ArrayND<T, Dims...>::ArrayND(size_t dim0, auto... dims) {
         resize(dim0, dims...);
     }
 
-    template<class T, int Dim>
-    T& ArrayND<T, Dim>::operator()(const ShapeType& indices) {
+    template<class T, int... Dims>
+    T& ArrayND<T, Dims...>::operator()(const IndexType& indices) {
         return *data_ptr(indices);
     }
 
-    template<class T, int Dim>
-    const T& ArrayND<T, Dim>::operator()(const ShapeType& indices) const {
+    template<class T, int... Dims>
+    const T& ArrayND<T, Dims...>::operator()(const IndexType& indices) const {
         return const_cast<This&>(*this)(indices);
     }
 
-    template<class T, int Dim>
-    T& ArrayND<T, Dim>::operator()(size_t dim0, auto... dims) {
+    template<class T, int... Dims>
+    T& ArrayND<T, Dims...>::operator()(size_t dim0, auto... dims) {
         return operator()(toShape(dim0, dims...));
     }
 
-    template<class T, int Dim>
-    const T& ArrayND<T, Dim>::operator()(size_t dim0, auto... dims) const {
+    template<class T, int... Dims>
+    const T& ArrayND<T, Dims...>::operator()(size_t dim0, auto... dims) const {
         return const_cast<This&>(*this)(dim0, dims...);
     }
 
-    template<class T, int Dim>
-    void ArrayND<T, Dim>::resize(ShapeType shape_, auto&&... args) {
-        assert(shape_.getLength() < std::numeric_limits<int>::max() && "[Error]: Does not support");
-        shape = std::move(shape_);
-        arr.resize(toSize(shape), std::forward<decltype(args)>(args)...);
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::resize(IndexType shape_, auto&&... args) {
+        if constexpr (StaticShape)
+            assert(std::ranges::equal(shape_, IndexType{Dims...}) && "[Error]: Inconsistent size");
+        else
+            shape = std::move(shape_);
+        arr.resize(toSize(getShape()), std::forward<decltype(args)>(args)...);
     }
 
-    template<class T, int Dim>
-    void ArrayND<T, Dim>::resize(size_t dim0, auto... dims) {
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::resize(size_t dim0, auto... dims) {
         resize(toShape(dim0, dims...));
     }
 
-    template<class T, int Dim>
-    void ArrayND<T, Dim>::zeros() noexcept {
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::zeros() noexcept {
         arr.zeros();
     }
 
-    template<class T, int Dim>
-    size_t ArrayND<T, Dim>::toIndex1D(const ShapeType& indices) const noexcept {
-        return toIndex1D(shape, indices);
+    template<class T, int... Dims>
+    size_t ArrayND<T, Dims...>::toIndex1D(const IndexType& indices) const noexcept {
+        return toIndex1D(getShape(), indices);
     }
 
-    template<class T, int Dim>
-    auto ArrayND<T, Dim>::toIndexND(size_t index) const noexcept -> ShapeType {
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::toIndexND(size_t index) const noexcept -> IndexType {
         assert(index < getSize() && "[Error]: Index out of range");
-        return toIndexND(shape, index);
+        return toIndexND(getShape(), index);
     }
 
-    template<class T, int Dim>
-    void ArrayND<T, Dim>::forND(std::invocable<T&, ShapeType> auto func) {
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::forND(std::invocable<T&, IndexType> auto func) {
         for (size_t i = 0; i < getSize(); ++i)
             func(arr[i], toIndexND(i));
     }
 
-    template<class T, int Dim>
-    void ArrayND<T, Dim>::forND(std::invocable<const T&, ShapeType> auto func) const {
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::forND(std::invocable<const T&, IndexType> auto func) const {
         for (size_t i = 0; i < getSize(); ++i)
             func(arr[i], toIndexND(i));
     }
 
-    template<class T, int Dim>
-    void ArrayND<T, Dim>::swap(This& __restrict obj) noexcept {
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);
         shape.swap(obj.shape);
     }
 
-    template<class T, int Dim>
-    T* ArrayND<T, Dim>::data_ptr(const ShapeType& indices) noexcept {
+    template<class T, int... Dims>
+    constexpr size_t ArrayND<T, Dims...>::dim(int index) const noexcept {
+        assert(0 <= index && index < NDim);
+        if constexpr (StaticShape) {
+            std::array<int, NDim> buffer{Dims...};
+            return buffer[index];
+        }
+        else
+            return shape[index];
+    }
+
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::getShape() const noexcept -> IndexType {
+        if constexpr (StaticShape)
+            return toShape(Dims...);
+        else
+            return shape;
+    }
+
+    template<class T, int... Dims>
+    T* ArrayND<T, Dims...>::data_ptr(const IndexType& indices) noexcept {
         return arr.data() + toIndex1D(indices);
     }
 
-    template<class T, int Dim>
-    const T* ArrayND<T, Dim>::data_ptr(const ShapeType& indices) const noexcept {
+    template<class T, int... Dims>
+    const T* ArrayND<T, Dims...>::data_ptr(const IndexType& indices) const noexcept {
         return const_cast<This&>(*this).data_ptr(indices);
     }
 
-    template<class T, int Dim>
-    size_t ArrayND<T, Dim>::toSize(const ShapeType& shape) noexcept {
+    template<class T, int... Dims>
+    size_t ArrayND<T, Dims...>::toSize(const IndexType& shape) noexcept {
         const int dim = shape.getLength();
         size_t size = shape[0];
         for (int i = 1; i < dim; ++i)
@@ -117,8 +138,8 @@ namespace Physica {
         return size;
     }
 
-    template<class T, int Dim>
-    size_t ArrayND<T, Dim>::toIndex1D(const ShapeType& shape, const ShapeType& indices) noexcept {
+    template<class T, int... Dims>
+    size_t ArrayND<T, Dims...>::toIndex1D(const IndexType& shape, const IndexType& indices) noexcept {
         size_t index = 0;
         size_t stride = 1;
         for (int i = static_cast<int>(shape.getLength()) - 1; i >= 0; --i) {
@@ -129,10 +150,10 @@ namespace Physica {
         return index;
     }
 
-    template<class T, int Dim>
-    auto ArrayND<T, Dim>::toIndexND(const ShapeType& shape, size_t index) noexcept -> ShapeType {
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
         const int dim = shape.getLength();
-        ShapeType indices(shape.size());
+        IndexType indices(shape.size());
         size_t remaining = index;
         for (int i = 0; i < dim; ++i) {
             size_t stride = 1;
@@ -145,17 +166,15 @@ namespace Physica {
         return indices;
     }
 
-    template<class T, int Dim>
-    auto ArrayND<T, Dim>::toShape(auto... dims) noexcept -> ShapeType {
-        constexpr int Dim1 = sizeof...(dims);
-        static_assert(Dim == Dim1 || Dim == Dynamic, "[Error]: Dim is not self consistent");
-        ShapeType indices(Dim1);
+    template<class T, int... Dims>
+    auto ArrayND<T, Dims...>::toShape(auto... dims) noexcept -> IndexType {
+        IndexType indices(NDim);
         toShapeImpl(indices, 0, dims...);
         return indices;
     }
 
-    template<class T, int Dim>
-    void ArrayND<T, Dim>::toShapeImpl(ShapeType& arr, int count, size_t dim0, auto... dims) noexcept {
+    template<class T, int... Dims>
+    void ArrayND<T, Dims...>::toShapeImpl(IndexType& arr, int count, size_t dim0, auto... dims) noexcept {
         arr[count] = dim0;
         toShapeImpl(arr, count + 1, dims...);
     }

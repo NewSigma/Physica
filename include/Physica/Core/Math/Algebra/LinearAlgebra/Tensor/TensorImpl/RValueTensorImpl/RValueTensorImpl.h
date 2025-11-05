@@ -32,18 +32,28 @@ namespace Physica {
     }
 
     template<class Derived>
-    size_t RValueTensor<Derived>::toIndex1D(const IndexArray& indices) const noexcept {
-        return ArrayND<ScalarType, Dim>::toIndex1D(getShape(), indices);
+    decltype(auto) RValueTensor<Derived>::calc(size_t dim0, auto... dims) const {
+        return Base::getDerived().calc(dim0, dims...);
     }
 
     template<class Derived>
-    auto RValueTensor<Derived>::toIndexND(size_t index) const noexcept -> IndexArray {
-        return ArrayND<ScalarType, Dim>::toIndexND(getShape(), index);
+    decltype(auto) RValueTensor<Derived>::calc(IndexType index) const {
+        return Base::getDerived().calc(index);
     }
 
     template<class Derived>
-    void RValueTensor<Derived>::forND(std::invocable<T, IndexArray> auto fn) const {
-        Physica::forND(getShape(), [this, fn](const IndexArray& index) {
+    size_t RValueTensor<Derived>::toIndex1D(const IndexType& indices) const noexcept {
+        return ArrayND<T, NDim>::toIndex1D(getShape(), indices);
+    }
+
+    template<class Derived>
+    auto RValueTensor<Derived>::toIndexND(size_t index) const noexcept -> IndexType {
+        return ArrayND<T, NDim>::toIndexND(getShape(), index);
+    }
+
+    template<class Derived>
+    void RValueTensor<Derived>::forND(std::invocable<T, IndexType> auto fn) const {
+        Physica::forND(getShape(), [this, fn](const IndexType& index) {
             fn(calc(index), index);
         });
     }
@@ -83,33 +93,21 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueTensor<Derived>::getShape() const noexcept -> IndexArray {
-        const auto& x = Base::getDerived();
-        IndexArray shape(x.getDim());
-        for (int i = 0; i < static_cast<int>(shape.getLength()); ++i)
-            shape[i] = x.getShape(i);
-        return shape;
+    size_t RValueTensor<Derived>::dim(int index) const noexcept {
+        return Base::getDerived().dim(index);
     }
 
     template<class Derived>
-    auto RValueTensor<Derived>::getDim() const noexcept {
-        if constexpr (Dim == Dynamic)
-            return Base::getDerived().getDim();
-        else
-            return Dim;
+    auto RValueTensor<Derived>::getShape() const noexcept -> IndexType {
+        return Base::getDerived().getShape();
     }
 
     template<class Derived>
     size_t RValueTensor<Derived>::getSize() const noexcept {
-        size_t size = getShape(0);
-        for (int i = 1; i < getDim(); ++i)
-            size *= getShape(i);
+        size_t size = dim(0);
+        for (int i = 1; i < NDim; ++i)
+            size *= dim(i);
         return size;
-    }
-
-    template<class Derived>
-    size_t RValueTensor<Derived>::toSize(const IndexArray& shape) {
-        return ArrayND<ScalarType, Dim>::toSize(shape);;
     }
 
     template<class Derived>

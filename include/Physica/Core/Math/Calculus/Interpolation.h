@@ -185,10 +185,10 @@ namespace Physica {
     }
 
     template<Tensor X>
-    DenseTensor<typename X::ScalarType> interpolate_fft(const X& data, Index3D newDim) {
-        static_assert(X::Dim == 3);
+    auto interpolate_fft(const X& data, Index3D newDim) -> DenseTensor<typename X::ScalarType, 3> {
+        static_assert(X::NDim == 3);
         using T = X::ScalarType;
-        using ResultType = DenseTensor<T>;
+        using ResultType = DenseTensor<T, 3>;
         using RealType = T::RealType;
         using ComplexType = T::ComplexType;
         constexpr size_t Dim = 3;
@@ -210,7 +210,7 @@ namespace Physica {
                 phase *= RealType(2 * M_PI);
                 const auto factor = ComplexType::fromPhase(phase);
                 if constexpr (!isComplex) {
-                    if (kIndex[2] >= kSpace.getShape(2)) {
+                    if (kIndex[2] >= kSpace.dim(2)) {
                         Index3D kIndex1;
                         kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
                         kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);
@@ -259,7 +259,7 @@ namespace Physica {
             phase *= RealType(2 * M_PI);
             const auto factor = ComplexType::fromPhase(phase);
             if constexpr (!isComplex) {
-                if (kIndex[2] >= kSpace.getShape(2)) {
+                if (kIndex[2] >= kSpace.dim(2)) {
                     Index3D kIndex1;
                     kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
                     kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);

@@ -128,8 +128,8 @@ namespace Physica {
         void assert_assign(const Vector auto& target) const noexcept;
         void assert_assign_mkl(const Vector auto& target) const noexcept;
 
-        [[nodiscard]] auto calc(size_t index) const noexcept;
-        [[nodiscard]] auto calc_value(size_t index) const noexcept;
+        [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
+        [[nodiscard]] decltype(auto) calc_value(size_t index) const noexcept;
         template<Packet Pack>
         [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
@@ -137,7 +137,7 @@ namespace Physica {
         void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
 
         void resize(const Vector auto& x) { resize(x.getLength()); }
-        auto resize(size_t length) { return Base::getDerived().resize(length); }
+        decltype(auto) resize(size_t length) { return Base::getDerived().resize(length); }
 
         template<size_t Length = Dynamic>
         [[nodiscard]] auto head(size_t to) & noexcept;

@@ -175,14 +175,15 @@ namespace Physica {
         using TensorBase::operator();
         /* Operations */
         void transform(const Tensor auto& data);
+
+        using TensorBase::resize;
         void resize([[maybe_unused]] Index3D size);
         /* Getters */
+        [[nodiscard]] size_t dim(int index) const noexcept { return getShape()[index]; }
         [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getRSpaceSize(); }
-        [[nodiscard]] size_t getShape(int dim) const noexcept { return getShape()[dim]; }
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
-        [[nodiscard]] size_t getSize() const noexcept { return TensorBase::toSize(Base::getDerived().getRSpaceSize()); }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(Index3D index);
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(Index3D index) const;
     protected:
@@ -263,6 +264,6 @@ namespace Physica {
     public:
         using Derived = T;
         using ScalarType = Traits<T>::ScalarType;
-        constexpr static int Dim = 3;
+        constexpr static int NDim = 3;
     };
 }

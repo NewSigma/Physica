@@ -21,16 +21,19 @@
 #include "TensorImpl/LValueTensor.h"
 
 namespace Physica {
-    template<Scalar T, int Dim = Dynamic>
-    class DenseTensor : public LValueTensor<DenseTensor<T, Dim>>, private ArrayND<T, Dim> {
-        using This = DenseTensor<T, Dim>;
+    template<Scalar T, int... Dims>
+    class DenseTensor : public LValueTensor<DenseTensor<T, Dims...>>, private ArrayND<T, Dims...> {
+        using This = DenseTensor<T, Dims...>;
         using Base = LValueTensor<This>;
-        using Storage = ArrayND<T, Dim>;
+        using Storage = ArrayND<T, Dims...>;
+    public:
+        using Base::NDim;
     protected:
-        using typename Base::IndexArray;
+        using typename Base::IndexType;
     public:
         DenseTensor() = default;
-        DenseTensor(IndexArray shape, auto&&... args);
+        DenseTensor(size_t dim0, auto... dims);
+        DenseTensor(IndexType shape, auto&&... args);
         DenseTensor(const This&) = default;
         DenseTensor(This&&) noexcept = default;
         ~DenseTensor() = default;
@@ -39,25 +42,26 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Storage::operator();
         /* Operations */
-        using Base::random_normal;
-        void resize(IndexArray shape, auto&&... args);
-
         using Storage::toIndex1D;
         using Storage::toIndexND;
         using Storage::forND;
 
+        using Base::resize;
+        void resize(IndexType shape);
+
+        using Base::random_normal;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Storage::asArray;
-        using Storage::data_ptr;
+        using Storage::dim;
         using Storage::getShape;
-        using Storage::getDim;
+        using Storage::data_ptr;
+        using Storage::asArray;
         using Storage::getSize;
         /* Static members */
         template<RNG R = Random<>>
-        static DenseTensor random_uniform(IndexArray shape);
+        static DenseTensor random_uniform(IndexType shape);
         template<RNG R = Random<>>
-        static DenseTensor random_normal(IndexArray shape);
+        static DenseTensor random_normal(IndexType shape);
     };
 
     template<Scalar T> using Tensor3D = DenseTensor<T, 3>;
@@ -66,17 +70,18 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, int Dim_>
-    class Traits<DenseTensor<T, Dim_>> {
+    template<Scalar T, int... Dims>
+    class Traits<DenseTensor<T, Dims...>> {
+        static_assert(sizeof...(Dims) > 0, "[Error]: Dims is not specified");
     public:
         using ScalarType = T;
-        constexpr static int Dim = Dim_;
+        constexpr static int NDim = ArrayND<T, Dims...>::NDim;
     };
 }
 
 namespace std {
-    template<Physica::Scalar T, size_t Dim>
-    void swap(Physica::DenseTensor<T, Dim>& __restrict x, Physica::DenseTensor<T, Dim>& __restrict y) noexcept {
+    template<Physica::Scalar T, int... Dims>
+    void swap(Physica::DenseTensor<T, Dims...>& __restrict x, Physica::DenseTensor<T, Dims...>& __restrict y) noexcept {
         x.swap(y);
     }
 }
