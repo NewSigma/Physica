@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../LValueTensor.h"
+#include "TensorSlice.h"
 
 namespace Physica {
     template<class Derived>
@@ -63,12 +64,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) {
+    auto LValueTensor<Derived>::slice(IndexType index, int dimRow, int dimCol) noexcept {
+        return TensorSlice<Derived>(Base::getDerived(), index, dimRow, dimCol);
+    }
+
+    template<class Derived>
+    const auto LValueTensor<Derived>::slice(IndexType index, int dimRow, int dimCol) const noexcept {
+        return TensorSlice<Derived>(Base::getDerived(), index, dimRow, dimCol);
+    }
+
+    template<class Derived>
+    LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) noexcept {
         return {Base::getDerived(), from, count};
     }
 
     template<class Derived>
-    const LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) const {
+    const LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) const noexcept {
         return {Base::getDerived(), from, count};
     }
 

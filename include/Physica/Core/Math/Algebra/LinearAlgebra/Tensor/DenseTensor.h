@@ -28,7 +28,6 @@ namespace Physica {
         using Storage = ArrayND<T, Dims...>;
     public:
         using Base::NDim;
-    protected:
         using typename Base::IndexType;
     public:
         DenseTensor() = default;

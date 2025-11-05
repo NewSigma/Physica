@@ -63,8 +63,10 @@ namespace Physica {
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;
 
-        [[nodiscard]] LTensorBlock<Derived> block(Index3D from, Index3D count);
-        [[nodiscard]] const LTensorBlock<Derived> block(Index3D from, Index3D count) const;
+        [[nodiscard]] auto slice(IndexType index, int dimRow, int dimCol) noexcept;
+        [[nodiscard]] const auto slice(IndexType index, int dimRow, int dimCol) const noexcept;
+        [[nodiscard]] LTensorBlock<Derived> block(Index3D from, Index3D count) noexcept;
+        [[nodiscard]] const LTensorBlock<Derived> block(Index3D from, Index3D count) const noexcept;
 
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;

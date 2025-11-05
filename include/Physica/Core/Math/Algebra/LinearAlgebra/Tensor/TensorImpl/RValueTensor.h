@@ -42,9 +42,10 @@ namespace Physica {
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
+
+        using IndexType = Array<size_t, NDim>;
     protected:
         using T = ScalarType;
-        using IndexType = Array<size_t, NDim>;
     public:
         ~RValueTensor() = default;
         /* Operators */
