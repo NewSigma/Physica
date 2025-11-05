@@ -28,10 +28,9 @@ namespace Physica {
         using This = FFTKSpace<Derived, 1>;
         using Base = CRTPBase<This>;
         using VectorBase = ContinuousVector<This>;
-        using RealType = Traits<This>::ScalarType::RealType;
-    public:
-        using typename VectorBase::ScalarType;
     protected:
+        using typename VectorBase::T;
+        using typename VectorBase::Tr;
         using typename VectorBase::PtrTy;
         using typename VectorBase::ConstPtrTy;
     public:
@@ -41,8 +40,9 @@ namespace Physica {
         using VectorBase::operator=;
         using VectorBase::operator[];
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const;
+        [[nodiscard]] T calc(size_t index) const;
         void invTransform(const Vector auto& data);
+        [[nodiscard]] Tr parseval() const;
 
         using VectorBase::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
@@ -66,7 +66,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto FFTKSpace<Derived, 1>::calc(size_t index) const -> ScalarType {
+    auto FFTKSpace<Derived, 1>::calc(size_t index) const -> T {
         assert(index < getRSpaceSize());
         if (index < getLength())
             return (*this)[index];
@@ -78,6 +78,14 @@ namespace Physica {
         data.assert_assign(*this);
         *this = data;
         Base::getDerived().invTransform();
+    }
+
+    template<class Derived>
+    auto FFTKSpace<Derived, 1>::parseval() const -> Tr {
+        Tr result = 0;
+        for (size_t i = 0; i < getRSpaceSize(); ++i)
+            result += calc(i).squaredNorm();
+        return result / Tr(getRSpaceSize());
     }
 
     template<class Derived>
@@ -99,9 +107,8 @@ namespace Physica {
         using This = FFTKSpace<Derived, 2>;
         using Base = CRTPBase<This>;
         using MatrixBase = LValueMatrix<This>;
-    public:
-        using typename MatrixBase::ScalarType;
     protected:
+        using typename MatrixBase::T;
         using typename MatrixBase::PtrTy;
         using typename MatrixBase::ConstPtrTy;
     public:
@@ -159,9 +166,8 @@ namespace Physica {
         using This = FFTKSpace<Derived, 3>;
         using Base = CRTPBase<This>;
         using TensorBase = LValueTensor<This>;
-    public:
-        using typename TensorBase::ScalarType;
     protected:
+        using typename TensorBase::T;
         using typename TensorBase::PtrTy;
         using typename TensorBase::ConstPtrTy;
     public:

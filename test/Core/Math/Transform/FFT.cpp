@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,45 +22,86 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica;
-using RealType = float64;
-using ComplexType = Complex<RealType>;
+using T = float64;
+using Tc = T::ComplexType;
 
 namespace {
+    void testReal2D() {
+        const size_t N1 = 50;
+        const size_t N2 = 100;
+        const double deltaX = 0.01;
+        const double deltaY = 0.01;
+        constexpr T freq1 = 10;
+        constexpr T freq2 = 5;
+
+        DenseMatrix<T, MatrixOption::Row> data(N1, N2);
+        for (size_t i = 0; i < N1; ++i)
+            for (size_t j = 0; j < N2; ++j)
+                data(i, j) = T(sin(T(2 * i) * MathConst<T>::pi * freq1 * deltaX) + cos(T(2 * j) * MathConst<T>::pi * freq2 * deltaY) * 2);
+
+        FFT<T, 2> fft({N1, N2}, PlanFlag::Estimate);
+        fft.transform(data);
+        /* Test freq */ {
+            const T deltaFreq1 = fft.getKSpaceDelta(deltaX, 0) / (MathConst<T>::pi * 2);
+            const T deltaFreq2 = fft.getKSpaceDelta(deltaY, 1) / (MathConst<T>::pi * 2);
+            const auto index1 = size_t((freq1 / deltaFreq1).toMachine());
+            const auto index2 = size_t((freq2 / deltaFreq2).toMachine());
+            const VectorND<T> intense = fft.getKSpace().flatten().norms();
+            const T freq1_power = intense[index1 * fft.getKSpaceSize()[1]];
+            const T freq1_power_conj = intense[(N1 - index1) * fft.getKSpaceSize()[1]];
+            const T freq2_power = intense[index2];
+            if (!scalarNear(freq1_power, freq1_power_conj, 1E-15))
+                exit(EXIT_FAILURE);
+            if (!scalarNear(freq2_power / freq1_power, T(2), 1E-14))
+                exit(EXIT_FAILURE);
+        }
+        /* Test inv */ {
+            constexpr double precision = 1E-11;
+            fft.invTransform();
+            for (size_t i = 0; i < data.getRow(); ++i) {
+                for (size_t j = 0; j < data.getCol(); ++j) {
+                    const bool isNear = scalarNear(data(i, j), fft.getRSpace()(i, j), precision);
+                    const bool isSmall = abs(data(i, j)) < T(precision) && abs(fft.getRSpace()(i, j)) < T(precision);
+                    if(!isNear && !isSmall)
+                        exit(EXIT_FAILURE);
+                }
+            }
+        }
+    }
+
     void test_differentiable() {
-        using ValueType = float64;
-        using ComplexPlainScalar = Complex<ValueType>;
-        using ScalarType = Diff<ValueType, DiffMode::Forward, 1>;
-        using ComplexType = Diff<ComplexPlainScalar, DiffMode::Forward, 1>;
+        using dfloat = Diff<T, DiffMode::Forward, 1>;
+        using dcfloat = Diff<Tc, DiffMode::Forward, 1>;
         const size_t N = 100;
         constexpr double freq1 = 3;
         constexpr double freq2 = 4;
 
-        VectorND<ValueType> values(N);
-        VectorND<ValueType> grads(N);
-        VectorND<ScalarType> data(N);
+        VectorND<T> values(N);
+        VectorND<T> grads(N);
+        VectorND<dfloat> data(N);
         for (size_t i = 0; i < N; ++i) {
-            const ValueType x = ValueType(i) * 0.01;
-            values[i] = sin(ValueType(2 * M_PI * freq1) * x) + sin(ValueType(2 * M_PI * freq2) * x) * 2;
-            grads[i] = cos(ValueType(2 * M_PI * freq1) * x) * 2 + cos(ValueType(2 * M_PI * freq2) * x);
-            data[i] = ScalarType(values[i], grads[i]);
+            const T x = T(i) * 0.01;
+            values[i] = sin(T(2 * M_PI * freq1) * x) + sin(T(2 * M_PI * freq2) * x) * 2;
+            grads[i] = cos(T(2 * M_PI * freq1) * x) * 2 + cos(T(2 * M_PI * freq2) * x);
+            data[i] = dfloat(values[i], grads[i]);
         }
-        VectorND<ComplexType> answer{};
+        VectorND<dcfloat> answer{};
         /* Make answer */ {
-            FFT<ValueType> fft(N, PlanFlag::Estimate);
+            FFT<T> fft(N, PlanFlag::Estimate);
             fft.getRSpace() = values;
             fft.transform();
-            VectorND<ComplexPlainScalar> k_values = fft.getKSpace();
+            VectorND<Tc> k_values = fft.getKSpace();
             fft.getRSpace() = grads;
             fft.transform();
-            VectorND<ComplexPlainScalar> k_grads = fft.getKSpace();
+            VectorND<Tc> k_grads = fft.getKSpace();
             if (k_values.getLength() != k_grads.getLength()) [[unlikely]]
                 exit(EXIT_FAILURE);
 
             answer.resize(k_values.getLength());
             for (size_t i = 0; i < answer.getLength(); ++i)
-                answer[i] = ComplexType(k_values[i], k_grads[i]);
+                answer[i] = dcfloat(k_values[i], k_grads[i]);
         }
-        FFT<ScalarType> fft(N, PlanFlag::Estimate);
+        FFT<dfloat> fft(N, PlanFlag::Estimate);
         /* Test transform */ {
             fft.getRSpace() = data;
             fft.transform();
@@ -71,8 +112,8 @@ namespace {
             constexpr double precision = 1E-13;
             fft.invTransform();
             for (size_t i = 0; i < data.getLength(); ++i) {
-                const bool isNear = scalarNear(ScalarType(data[i]), ScalarType(fft.getRSpace()[i]), precision);
-                const bool isSmall = abs(data[i].value()) < ValueType(precision) && abs(fft.getRSpace()[i].value()) < ValueType(precision);
+                const bool isNear = scalarNear(dfloat(data[i]), dfloat(fft.getRSpace()[i]), precision);
+                const bool isSmall = abs(data[i].value()) < T(precision) && abs(fft.getRSpace()[i].value()) < T(precision);
                 if(!isNear && !isSmall)
                     exit(EXIT_FAILURE);
             }
@@ -87,28 +128,28 @@ int main() {
         constexpr double freq1 = 3;
         constexpr double freq2 = 4;
         
-        VectorND<RealType> data(N);
+        VectorND<T> data(N);
         {
-            const VectorND<RealType> v_x = VectorND<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
+            const VectorND<T> v_x = VectorND<T>::linspace(T(0), T(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
-                data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
+                data[i] = sin(T(2 * M_PI * freq1) * x) + sin(T(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<RealType> fft(data, PlanFlag::Measure);
-        const VectorND<RealType> intense = fft.getKSpace().norms();
+        FFT<T> fft(data, PlanFlag::Measure);
+        const VectorND<T> intense = fft.getKSpace().norms();
 
         /* Parseval theorem */ {
-            const RealType power = square(data).sum();
-            const RealType power_fft = square(intense).sum() / RealType(intense.getLength() - 1);
-            if (!scalarNear(power, power_fft, 1E-15))
+            const T energyR = data.squaredNorm();
+            const T energyK = fft.getKSpace().parseval();
+            if (!scalarNear(energyR, energyK, 1E-15))
                 return 1;
         }
         /* Test freq */ {
-            const double deltaFreq = double(fft.getKSpaceDelta(RealType(t_max / N))) / (2 * M_PI);
-            const RealType freq1_power = intense[freq1 / deltaFreq];
-            const RealType freq2_power = intense[freq2 / deltaFreq];
-            if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
+            const double deltaFreq = double(fft.getKSpaceDelta(T(t_max / N))) / (2 * M_PI);
+            const T freq1_power = intense[size_t(freq1 / deltaFreq)];
+            const T freq2_power = intense[size_t(freq2 / deltaFreq)];
+            if (!scalarNear(freq2_power / freq1_power, T(2), 1E-14))
                 return 1;
         }
         /* Test inv */ {
@@ -116,7 +157,7 @@ int main() {
             fft.invTransform();
             for (size_t i = 0; i < data.getLength(); ++i) {
                 const bool isNear = scalarNear(data[i], fft.getRSpace()[i], 1E-14);
-                const bool isSmall = abs(data[i]) < RealType(precision) && abs(fft.getRSpace()[i]) < RealType(precision);
+                const bool isSmall = abs(data[i]) < T(precision) && abs(fft.getRSpace()[i]) < T(precision);
                 if(!isNear && !isSmall)
                     return 1;
             }
@@ -128,21 +169,21 @@ int main() {
         constexpr double freq1 = 3;
         constexpr double freq2 = 4;
         
-        VectorND<ComplexType> data(N);
+        VectorND<Tc> data(N);
         {
-            const VectorND<RealType> v_x = VectorND<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
+            const VectorND<T> v_x = VectorND<T>::linspace(T(0), T(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
-                data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
+                data[i] = sin(T(2 * M_PI * freq1) * x) + sin(T(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<ComplexType> fft(data, PlanFlag::Estimate);
-        VectorND<ComplexType> trans(N);
+        FFT<Tc> fft(data, PlanFlag::Estimate);
+        VectorND<Tc> trans(N);
         for (size_t i = 0; i < N; ++i) {
-            ComplexType temp(0);
+            Tc temp(0);
             for (size_t j = 0; j < N; ++j) {
-                RealType phase = 2 * M_PI * j * i / N;
-                temp += data[j] * ComplexType(cos(phase), -sin(phase));
+                T phase = MathConst<T>::pi * 2 * j * i / N;
+                temp += data[j] * Tc(cos(phase), -sin(phase));
             }
             trans[i] = temp;
         }
@@ -150,46 +191,7 @@ int main() {
         if (!vectorNear(data, fft.getRSpace(), 1E-14))
             return 1;
     }
-    /* 2d real */ {
-        const size_t N1 = 50;
-        const size_t N2 = 100;
-        const double deltaX = 0.01;
-        const double deltaY = 0.01;
-        constexpr double freq1 = 10;
-        constexpr double freq2 = 5;
-
-        DenseMatrix<RealType, MatrixOption::Row> data(N1, N2);
-        for (size_t i = 0; i < N1; ++i)
-            for (size_t j = 0; j < N2; ++j)
-                data(i, j) = RealType(std::sin(2 * M_PI * freq1 * i * deltaX) + 2 * std::cos(2 * M_PI * freq2 * j * deltaY));
-
-        FFT<RealType, 2> fft({N1, N2}, PlanFlag::Estimate);
-        fft.transform(data);
-        /* Test freq */ {
-            const double deltaFreq1 = double(fft.getKSpaceDelta(deltaX, 0)) / (2 * M_PI);
-            const double deltaFreq2 = double(fft.getKSpaceDelta(deltaY, 1)) / (2 * M_PI);
-            const VectorND<RealType> intense = fft.getKSpace().flatten().norms();
-            const RealType freq1_power = intense[size_t(freq1 / deltaFreq1) * fft.getKSpaceSize()[1]];
-            const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / deltaFreq1)) * fft.getKSpaceSize()[1]];
-            const RealType freq2_power = intense[freq2 / deltaFreq2];
-            if (!scalarNear(freq1_power, freq1_power_conj, 1E-15))
-                return 1;
-            if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
-                return 1;
-        }
-        /* Test inv */ {
-            constexpr double precision = 1E-11;
-            fft.invTransform();
-            for (size_t i = 0; i < data.getRow(); ++i) {
-                for (size_t j = 0; j < data.getCol(); ++j) {
-                    const bool isNear = scalarNear(data(i, j), fft.getRSpace()(i, j), precision);
-                    const bool isSmall = abs(data(i, j)) < RealType(precision) && abs(fft.getRSpace()(i, j)) < RealType(precision);
-                    if(!isNear && !isSmall)
-                        return 1;
-                }
-            }
-        }
-    }
+    testReal2D();
     test_differentiable();
     return 0;
 }

@@ -55,7 +55,8 @@ namespace Physica {
         double d;
     public:
         constexpr Real() = default;
-        __host__ __device__ constexpr Real(double d_) noexcept : d(d_) {}
+        __host__ __device__ constexpr Real(std::floating_point auto d_) noexcept : d(d_) {}
+        __host__ __device__ constexpr Real(std::integral auto i) noexcept : d(i) {}
         Real(const Integer& i) : Real(double(i)) {}
         Real(const Rational& r) : Real(double(r)) {}
         template<Scalar T>
