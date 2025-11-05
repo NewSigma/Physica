@@ -43,7 +43,7 @@ namespace Physica {
 
     template<class T, int... Dims>
     T& ArrayND<T, Dims...>::operator()(size_t dim0, auto... dims) {
-        return operator()(toShape(dim0, dims...));
+        return operator()(IndexType({dim0, static_cast<size_t>(dims)...}));
     }
 
     template<class T, int... Dims>
@@ -53,16 +53,16 @@ namespace Physica {
 
     template<class T, int... Dims>
     void ArrayND<T, Dims...>::resize(IndexType shape_, auto&&... args) {
+        arr.resize(toSize(shape_), std::forward<decltype(args)>(args)...);
         if constexpr (StaticShape)
             assert(std::ranges::equal(shape_, IndexType{Dims...}) && "[Error]: Inconsistent size");
         else
             shape = std::move(shape_);
-        arr.resize(toSize(getShape()), std::forward<decltype(args)>(args)...);
     }
 
     template<class T, int... Dims>
     void ArrayND<T, Dims...>::resize(size_t dim0, auto... dims) {
-        resize(toShape(dim0, dims...));
+        resize(IndexType({dim0, static_cast<size_t>(dims)...}));
     }
 
     template<class T, int... Dims>
@@ -114,7 +114,7 @@ namespace Physica {
     template<class T, int... Dims>
     auto ArrayND<T, Dims...>::getShape() const noexcept -> IndexType {
         if constexpr (StaticShape)
-            return toShape(Dims...);
+            return IndexType(Dims...);
         else
             return shape;
     }
@@ -164,18 +164,5 @@ namespace Physica {
             remaining %= stride;
         }
         return indices;
-    }
-
-    template<class T, int... Dims>
-    auto ArrayND<T, Dims...>::toShape(auto... dims) noexcept -> IndexType {
-        IndexType indices(NDim);
-        toShapeImpl(indices, 0, dims...);
-        return indices;
-    }
-
-    template<class T, int... Dims>
-    void ArrayND<T, Dims...>::toShapeImpl(IndexType& arr, int count, size_t dim0, auto... dims) noexcept {
-        arr[count] = dim0;
-        toShapeImpl(arr, count + 1, dims...);
     }
 }

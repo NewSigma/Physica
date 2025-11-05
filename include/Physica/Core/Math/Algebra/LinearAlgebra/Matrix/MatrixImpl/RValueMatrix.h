@@ -161,6 +161,7 @@ namespace Physica {
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
         [[nodiscard]] CoDiff<T> sum() const;
+        [[nodiscard]] auto sum_rows() const;
         [[nodiscard]] auto sum_cols() const;
         [[nodiscard]] CoDiff<T> mean() const;
         [[nodiscard]] T trace() const;

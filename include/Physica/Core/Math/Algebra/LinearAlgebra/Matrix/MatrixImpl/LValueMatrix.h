@@ -59,7 +59,7 @@ namespace Physica {
         template<Scalar T>
         Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
             // FIXME: We have to put it in class because NVCC 12.8 rejects valid.
-            ScalarType::template checkAssign<T>();
+            ScalarType::template assert_assign<T>();
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
             for (size_t i = 0; i < maxMajor; ++i) {

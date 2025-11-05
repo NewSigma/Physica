@@ -75,7 +75,7 @@ namespace Physica {
 
     template<class Derived>
     void FFTKSpace<Derived, 1>::invTransform(const Vector auto& data) {
-        assert(data.getLength() == getLength());
+        data.assert_assign(*this);
         *this = data;
         Base::getDerived().invTransform();
     }
@@ -135,8 +135,7 @@ namespace Physica {
 
     template<class Derived>
     void FFTKSpace<Derived, 2>::invTransform(const Matrix auto& data) {
-        assert(data.getRow() == getRow());
-        assert(data.getCol() == getCol());
+        data.assert_assign(*this);
         *this = data;
         Base::getDerived().invTransform();
     }
@@ -199,9 +198,7 @@ namespace Physica {
 
     template<class Derived>
     void FFTKSpace<Derived, 3>::invTransform(const Tensor auto& data) {
-        assert(data.getDimX() == getDimX());
-        assert(data.getDimY() == getDimY());
-        assert(data.getDimZ() == getDimZ());
+        data.assert_assign(*this);
         *this = data;
         Base::getDerived().invTransform();
     }

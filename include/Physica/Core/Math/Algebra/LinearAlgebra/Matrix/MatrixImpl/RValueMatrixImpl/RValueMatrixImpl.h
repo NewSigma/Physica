@@ -317,6 +317,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto RValueMatrix<Derived>::sum_rows() const {
+        return MatrixSum<Derived, false>(Base::getDerived());
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::sum_cols() const {
         return MatrixSum<Derived, true>(Base::getDerived());
     }

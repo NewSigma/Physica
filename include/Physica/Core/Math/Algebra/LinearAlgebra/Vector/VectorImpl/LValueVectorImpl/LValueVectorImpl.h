@@ -28,6 +28,7 @@ namespace Physica {
             assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& x = Base::getDerived();
         x.resize(v);
+        v.assert_assign(x);
         v.template assign<P>(x);
         return x;
     }

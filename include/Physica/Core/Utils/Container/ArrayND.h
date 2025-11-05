@@ -91,10 +91,6 @@ namespace Physica {
         [[nodiscard]] static size_t toSize(const IndexType& shape) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexType& shape, const IndexType& indices) noexcept;
         [[nodiscard]] static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;
-    private:
-        static IndexType toShape(auto... dims) noexcept;
-        static void toShapeImpl(IndexType& arr, int count, size_t dim0, auto... dims) noexcept;
-        static void toShapeImpl(IndexType&, int) noexcept {}
     };
 
     template<size_t Dim, class Functor>

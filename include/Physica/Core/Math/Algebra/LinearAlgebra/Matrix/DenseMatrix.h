@@ -112,6 +112,9 @@ namespace Physica {
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
         friend class device_obj<This>;
     };
+
+    // Just give me a matrix. This is what you'll get.
+    template<Scalar T> using MatrixND = DenseMatrix<T>;
 }
 
 namespace Physica {

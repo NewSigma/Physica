@@ -85,7 +85,6 @@ namespace Physica {
 
     template<Scalar T>
     void SystemSampler<T>::sample(const GreenArray& greens, Observable type) {
-        observes[Base::getCursor()].zeros();
         for (int i = 0; i < greens.getCol(); ++i)
             observes[Base::getCursor()].toNextMean(i, calcObservable(greens(0, i), greens(1, i), type) * Base::dqmc.getSign());
         Base::sample();
