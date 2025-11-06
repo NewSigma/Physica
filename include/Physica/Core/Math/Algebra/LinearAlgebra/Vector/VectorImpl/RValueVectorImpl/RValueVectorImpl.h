@@ -74,8 +74,8 @@ namespace Physica {
 
     template<class Derived>
     void RValueVector<Derived>::assert_assign_mkl(const Vector auto& target) const noexcept {
-        assert_assign(target);
         static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
+        assert_assign(target);
     }
 
     template<class Derived>
@@ -204,7 +204,7 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::transpose() const noexcept {
-        return TransposeVector<Derived>(Base::getDerived());
+        return Transpose<Derived>(Base::getDerived());
     }
 
     template<class Derived>

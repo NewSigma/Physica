@@ -33,7 +33,7 @@ namespace {
         const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
         MatrixType m(order, order);
         for (auto _ : state) {
-            m = m1 * m2;
+            (m1 * m2).assign(m);
             benchmark::DoNotOptimize(m);
             benchmark::ClobberMemory();
         }

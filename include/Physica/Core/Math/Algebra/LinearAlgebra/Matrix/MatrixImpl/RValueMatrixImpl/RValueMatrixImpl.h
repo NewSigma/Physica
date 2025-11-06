@@ -19,16 +19,13 @@
 #pragma once
 
 #include <cassert>
-#include <forward_list>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 #include "FormatedMatrix.h"
 
 namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueMatrix<Derived>::assign(Matrix auto& target) const {
-        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
-        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+    void RValueMatrix<Derived>::assign(Matrix auto&& target) const {
         assert_assign(target);
 
         const size_t maxMajor = target.getMaxMajor();
@@ -39,9 +36,13 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<ExecutePolicy P>
+    void RValueMatrix<Derived>::assign_base(Matrix auto&& target) const {
+        assign<P>(target);
+    }
+
+    template<class Derived>
     void RValueMatrix<Derived>::assign_add(Matrix auto& target) const {
-        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
-        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
         assert_assign(target);
 
         const size_t maxMajor = target.getMaxMajor();
@@ -56,6 +57,12 @@ namespace Physica {
         static_assert_assign(target);
         assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+    }
+
+    template<class Derived>
+    void RValueMatrix<Derived>::assert_assign_mkl(const Matrix auto& target) const noexcept {
+        static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
+        assert_assign(target);
     }
 
     template<class Derived>

@@ -85,6 +85,8 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
+
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
         using ConjugateRtnTy = std::conditional<isComplex, Conjugate<Derived>, const Derived&>::type;
         using RealsRtnTy = std::conditional<isComplex, RealMatrix<Derived>, Derived&>::type;
@@ -102,9 +104,12 @@ namespace Physica {
         [[nodiscard]] auto operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>);
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Matrix auto& target) const;
+        void assign(Matrix auto&& target) const;
+        template<ExecutePolicy P = Sequential>
+        void assign_base(Matrix auto&& target) const;
         void assign_add(Matrix auto& target) const;
         void assert_assign(const Matrix auto& target) const noexcept;
+        void assert_assign_mkl(const Matrix auto& target) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] decltype(auto) calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }

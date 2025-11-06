@@ -81,7 +81,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto device_obj<RValueVector<Derived>>::transpose() const noexcept {
-        return device_obj<TransposeVector<Derived>>(Base::getDerived());
+        return device_obj<Transpose<Derived>>(Base::getDerived());
     }
 
     template<class Derived>

@@ -21,6 +21,11 @@
 #include "Hermite.h"
 
 namespace Physica {
+    template<class T>
+    struct remove_hermite<device_obj<Hermite<T>>> {
+        using Type = device_obj<T>;
+    };
+
     template<Matrix M>
     class device_obj<Hermite<M>> : public device_obj<RValueMatrix<Hermite<M>>> {
         using host_obj = Hermite<M>;

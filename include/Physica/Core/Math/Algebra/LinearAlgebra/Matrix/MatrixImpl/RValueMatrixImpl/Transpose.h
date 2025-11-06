@@ -26,13 +26,8 @@ namespace Physica {
         using Type = T;
     };
 
-    template<Matrix T>
+    template<class T>
     struct remove_transpose<Transpose<T>> {
-        using Type = T;
-    };
-
-    template<Vector T>
-    struct remove_transpose<TransposeVector<T>> {
         using Type = T;
     };
 
@@ -41,17 +36,18 @@ namespace Physica {
         constexpr static bool value = !std::is_same<T, typename remove_transpose<T>::Type>::value;
     };
 
-    template<Matrix T>
-    class Transpose<T> : public RValueMatrix<Transpose<T>> {
-        using This = Transpose<T>;
+    template<Matrix M>
+    class Transpose<M> : public RValueMatrix<Transpose<M>> {
+        using This = Transpose<M>;
         using Base = RValueMatrix<This>;
 
-        const T& mat;
+        const M& mat;
     public:        
-        using typename Base::ScalarType;
+        using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tm;
     public:
-        Transpose(const T& mat_) : mat(mat_) {}
+        Transpose(const M& mat_) : mat(mat_) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
@@ -59,7 +55,11 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(col, row); }
+        template<ExecutePolicy P = Sequential>
+        void assign(Matrix auto&& target) const;
+        void assign_mkl(Matrix auto&& target) const;
+
+        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(col, row); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc_value(col, row); }
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
@@ -67,61 +67,79 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
     };
 
-    template<Vector T>
-    class TransposeVector<T> : public RValueMatrix<TransposeVector<T>> {
-        using This = TransposeVector<T>;
+    template<Matrix M>
+    template<ExecutePolicy P>
+    void Transpose<M>::assign(Matrix auto&& target) const {
+        constexpr bool LargeMatrix = M::SizeAtCompile == Dynamic;
+        if constexpr (LargeMatrix && Internal::EnableMKL<M, decltype(target)>::value && MatrixOption::isSameMajor<M, decltype(target)>()) {
+            if (Base::getSize() <= 16)
+                Base::template assign<P>(target);
+            else
+                assign_mkl(target);
+        }
+        else
+            Base::template assign<P>(target);
+    }
+
+    template<Vector V>
+    class Transpose<V> : public RValueMatrix<Transpose<V>> {
+        using This = Transpose<V>;
         using Base = RValueMatrix<This>;
     public:
-        using typename Base::ScalarType;
+        using typename Base::T;
         using typename Base::Tv;
     private:
-        const T& vec;
+        const V& vec;
     public:
-        explicit TransposeVector(const T& vec_) : vec(vec_) {}
-        TransposeVector(const This&) = default;
-        TransposeVector(This&&) noexcept = default;
-        ~TransposeVector() = default;
+        explicit Transpose(const V& vec_) : vec(vec_) {}
+        Transpose(const This&) = default;
+        Transpose(This&&) noexcept = default;
+        ~Transpose() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
 
-        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
+        [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         [[nodiscard]] Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
     };
 
-    template<Vector T>
-    void TransposeVector<T>::assign(Matrix auto& target) const {
+    template<Vector V>
+    void Transpose<V>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(target.rowFromMajorMinor(0, i), target.colFromMajorMinor(0, i));
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<Transpose<T>> {
+    template<Matrix M>
+    class Traits<Transpose<M>> {
     private:
-        constexpr static int OtherMajor = MatrixOption::isColMatrix<T>() ? MatrixOption::Row : MatrixOption::Col;
-        constexpr static int Major = MatrixOption::isAnyMajor<T>() ? MatrixOption::AnyMajor : OtherMajor;
+        constexpr static int OtherMajor = MatrixOption::isColMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
+        constexpr static int Major = MatrixOption::isAnyMajor<M>() ? MatrixOption::AnyMajor : OtherMajor;
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = M::ScalarType;
         constexpr static int Option = Major;
-        constexpr static size_t RowAtCompile = T::ColAtCompile;
-        constexpr static size_t ColAtCompile = T::RowAtCompile;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        constexpr static size_t RowAtCompile = M::ColAtCompile;
+        constexpr static size_t ColAtCompile = M::RowAtCompile;
+        constexpr static size_t SizeAtCompile = M::SizeAtCompile;
     };
 
-    template<Vector T>
-    class Traits<TransposeVector<T>> {
+    template<Vector V>
+    class Traits<Transpose<V>> {
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = V::ScalarType;
         constexpr static int Option = MatrixOption::Row;
         constexpr static size_t RowAtCompile = 1;
-        constexpr static size_t ColAtCompile = T::SizeAtCompile;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        constexpr static size_t ColAtCompile = V::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
     };
 }
+
+#ifdef PHYSICA_MKL
+    #include "Transpose_MKL.h"
+#endif

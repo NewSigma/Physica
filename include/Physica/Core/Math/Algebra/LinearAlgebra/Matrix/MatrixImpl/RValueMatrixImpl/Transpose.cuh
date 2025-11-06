@@ -21,29 +21,24 @@
 #include "../RValueMatrix.cuh"
 
 namespace Physica {
-    template<Matrix T>
+    template<class T>
     struct remove_transpose<device_obj<Transpose<T>>> {
         using Type = device_obj<T>;
     };
 
-    template<Vector T>
-    struct remove_transpose<device_obj<TransposeVector<T>>> {
-        using Type = device_obj<T>;
-    };
-
-    template<Matrix T>
-    class device_obj<Transpose<T>> : public device_obj<RValueMatrix<Transpose<T>>> {
-        using host_obj = Transpose<T>;
+    template<Matrix M>
+    class device_obj<Transpose<M>> : public device_obj<RValueMatrix<Transpose<M>>> {
+        using host_obj = Transpose<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
 
-        PlainStruct<const device_obj<T>> mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        using typename Base::ScalarType;
+        using typename Base::T;
         using typename Base::Tv;
         using Base::isReverseDiff;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -51,7 +46,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return getExpr().calc(col, row); }
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return getExpr().calc(col, row); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return getExpr().calc_value(col, row); }
 
         void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) { getExpr().reverse(grad.transpose()); }
@@ -61,19 +56,19 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getExpr().getRow(); }
     };
 
-    template<Vector T>
-    class device_obj<TransposeVector<T>> : public device_obj<RValueMatrix<TransposeVector<T>>> {
-        using host_obj = TransposeVector<T>;
+    template<Vector V>
+    class device_obj<Transpose<V>> : public device_obj<RValueMatrix<Transpose<V>>> {
+        using host_obj = Transpose<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
 
-        PlainStruct<const device_obj<T>> vec;
+        PlainStruct<const device_obj<V>> vec;
     public:
-        using typename Base::ScalarType;
+        using typename Base::T;
         using typename Base::Tv;
         using Base::isReverseDiff;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<T>& vec_) : vec(asStruct(vec_)) {}
+        __host__ __device__ explicit device_obj(const device_obj<V>& vec_) : vec(asStruct(vec_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -81,7 +76,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.getDerived().calc(col); }
+        [[nodiscard]] __device__ T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.getDerived().calc(col); }
         [[nodiscard]] __device__ Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
 
         void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) { vec.getDerived().reverse(grad); }
@@ -92,9 +87,9 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<device_obj<Transpose<T>>> : public Traits<Transpose<T>> {};
+    template<Matrix M>
+    class Traits<device_obj<Transpose<M>>> : public Traits<Transpose<M>> {};
 
-    template<Vector T>
-    class Traits<device_obj<TransposeVector<T>>> : public Traits<TransposeVector<T>> {};
+    template<Vector V>
+    class Traits<device_obj<Transpose<V>>> : public Traits<Transpose<V>> {};
 }

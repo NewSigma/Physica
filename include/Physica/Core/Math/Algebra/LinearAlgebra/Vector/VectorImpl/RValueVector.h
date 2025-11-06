@@ -29,7 +29,7 @@ namespace Physica {
     template<class Derived> class ContinuousVector;
     template<class Derived> class RValueMatrix;
     template<class Derived> class ContinuousMatrix;
-    template<class VectorType> class TransposeVector;
+    template<class> class Transpose;
     template<class> class Conjugate;
     template<class> class Hermite;
     template<Vector V1, Vector V2> class CrossProduct;
