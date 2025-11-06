@@ -75,8 +75,8 @@ namespace Physica {
         template<RNG R = Random<>> void random_uniform();
         template<RNG R = Random<>> void random_normal();
         /* Getters */
-        [[nodiscard]] PtrTy data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }
-        [[nodiscard]] ConstPtrTy data_ptr(Index3D index) const { return Base::getDerived().data_ptr(index); }
+        [[nodiscard]] PtrTy data_ptr(Index3D index) noexcept { return Base::getDerived().data_ptr(index); }
+        [[nodiscard]] ConstPtrTy data_ptr(Index3D index) const noexcept { return Base::getDerived().data_ptr(index); }
         /* Static members */
         using Base::forPointIndexInTensor;
     protected:

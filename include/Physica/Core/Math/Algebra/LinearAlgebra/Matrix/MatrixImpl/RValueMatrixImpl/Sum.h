@@ -45,7 +45,7 @@ namespace Physica {
 
         void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
         /* Getters */
-        [[nodiscard]] size_t getLength() const;
+        [[nodiscard]] size_t getLength() const noexcept;
     };
 
     template<class M, bool ReduceCol>
@@ -73,7 +73,7 @@ namespace Physica {
     }
 
     template<class M, bool ReduceCol>
-    size_t MatrixSum<M, ReduceCol>::getLength() const {
+    size_t MatrixSum<M, ReduceCol>::getLength() const noexcept {
         if constexpr (ReduceCol)
             return mat.getRow();
         else

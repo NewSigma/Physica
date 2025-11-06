@@ -45,12 +45,12 @@ namespace Physica {
         /* Operations */
         void setBit(size_t s, bool b);
         /* Getters */
-        [[nodiscard]] inline size_t getLength() const;
+        [[nodiscard]] inline size_t getLength() const noexcept;
     private:
         BitArray(unsigned char* arr, size_t bitCount);
     };
 
-    inline size_t BitArray::getLength() const {
+    inline size_t BitArray::getLength() const noexcept {
         //((bitCount >> 3U) + (bitCount & 8U)) is the upper approximation of (bitCount / 8).
         return (bitCount >> 3U) + (bitCount & 8U);
     }

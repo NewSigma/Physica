@@ -51,8 +51,8 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
     };
 
     template<Vector T, size_t Length>
@@ -87,13 +87,13 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) -> PtrTy {
+    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) noexcept -> PtrTy {
         assert((index + from) < to);
         return vec.getDerived().data_ptr(index);
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const -> ConstPtrTy {
+    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

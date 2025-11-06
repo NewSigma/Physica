@@ -139,13 +139,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) -> PtrTy {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < Base::getLength());
         return Base::getDerived().data_ptr(index);
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) const -> ConstPtrTy {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

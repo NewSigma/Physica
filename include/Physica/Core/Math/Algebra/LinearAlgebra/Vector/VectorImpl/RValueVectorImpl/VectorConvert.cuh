@@ -42,7 +42,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).real(); }
         [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).real(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
@@ -66,7 +66,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).imag(); }
         [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).imag(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
@@ -92,7 +92,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).squaredNorm(); }
         [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).squaredNorm(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
@@ -116,7 +116,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).norm(); }
         [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).norm(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V>
@@ -140,7 +140,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc_value(s); }
         [[nodiscard]] __device__ T calc_value(size_t s) const { return calc(s); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 
     template<class V, int GradOrder>
@@ -164,7 +164,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).template grad<GradOrder>(); }
         [[nodiscard]] __device__ Tv calc_value(size_t s) const { return calc(s).value(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
     };
 }
 

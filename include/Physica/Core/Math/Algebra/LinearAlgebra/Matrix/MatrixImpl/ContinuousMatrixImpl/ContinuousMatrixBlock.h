@@ -68,11 +68,11 @@ namespace Physica {
         }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] PtrTy data_ptr(size_t index) {
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept {
             assert(index < colCount && "[Error]: Index overflow");
             return pVecHead + index;
         }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const {
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept {
             return const_cast<This&>(*this).data_ptr(index);
         }
     };
@@ -122,11 +122,11 @@ namespace Physica {
         }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] PtrTy data_ptr(size_t index) {
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept {
             assert(index < rowCount && "[Error]: Index overflow");
             return pVecHead + index;
         }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const {
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept {
             return const_cast<This&>(*this).data_ptr(index);
         }
     };
@@ -180,11 +180,11 @@ namespace Physica {
         }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
-        [[nodiscard]] PtrTy data_ptr([[maybe_unused]] size_t index) {
+        [[nodiscard]] PtrTy data_ptr([[maybe_unused]] size_t index) noexcept {
             assert(index == 0 && "[Error]: Index overflow");
             return pVecHead;
         }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const {
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept {
             return const_cast<This&>(*this).data_ptr(index);
         }
     };
@@ -219,8 +219,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col);
-        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
     };
 
     template<Matrix T, size_t Row, size_t Col>
@@ -238,14 +238,14 @@ namespace Physica {
     }
 
     template<Matrix T, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) -> PtrTy {
+    auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);
     }
 
     template<Matrix T, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
+    auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);

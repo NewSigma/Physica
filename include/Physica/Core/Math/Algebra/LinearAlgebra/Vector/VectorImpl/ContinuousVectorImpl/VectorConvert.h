@@ -43,9 +43,9 @@ namespace Physica {
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == v.getLength()); }
         /* Getters */
-        [[nodiscard]] PtrTy data_ptr(size_t i) { return (*v.data_ptr(i)).value_ptr(); }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] PtrTy data_ptr(size_t i) noexcept { return (*v.data_ptr(i)).value_ptr(); }
+        [[nodiscard]] ConstPtrTy data_ptr(size_t i) const noexcept { return const_cast<This&>(*this).data_ptr(i); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class T, int GradOrder>
@@ -70,8 +70,8 @@ namespace Physica {
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == v.getLength()); }
         /* Getters */
-        [[nodiscard]] PtrTy data_ptr(size_t i) { return v.data_ptr(i).template grad_ptr<GradOrder>(); }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] PtrTy data_ptr(size_t i) noexcept { return v.data_ptr(i).template grad_ptr<GradOrder>(); }
+        [[nodiscard]] ConstPtrTy data_ptr(size_t i) const noexcept { return const_cast<This&>(*this).data_ptr(i); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 }

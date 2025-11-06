@@ -47,17 +47,17 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.getSize(); }
-        [[nodiscard]] PtrTy data_ptr(size_t index);
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
     };
 
     template<Tensor T>
-    auto FlattenL<T>::data_ptr(size_t index) -> PtrTy {
+    auto FlattenL<T>::data_ptr(size_t index) noexcept -> PtrTy {
         return tensor.data_ptr(tensor.toIndexND(index));
     }
 
     template<Tensor T>
-    auto FlattenL<T>::data_ptr(size_t index) const -> ConstPtrTy {
+    auto FlattenL<T>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

@@ -41,7 +41,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).real(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).real(); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class V>
@@ -64,7 +64,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).imag(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).imag(); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class V>
@@ -152,7 +152,7 @@ namespace Physica {
 
         [[nodiscard]] auto values() const noexcept { return v.values().squaredNorms(); }
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class V>
@@ -175,7 +175,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] CoDiff<T> calc(size_t s) const { return v.calc(s).norm(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).norm(); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class V>
@@ -197,7 +197,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] T calc(size_t s) const { return v.calc_value(s); }
         [[nodiscard]] T calc_value(size_t s) const { return calc(s); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class V, int GradOrder>
@@ -220,7 +220,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return calc(s).value(); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class V, int MaskOrder>
@@ -245,7 +245,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] T calc(size_t s) const { return v.calc(s).template mask<MaskOrder>(); }
         [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s); }
-        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<Vector V, int MaskOrder>

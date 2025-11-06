@@ -58,8 +58,8 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
-        [[nodiscard]] PtrTy data_ptr(size_t index) { return vec.data() + from + index; }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const { return vec.data() + from + index; }
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept { return vec.data() + from + index; }
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept { return vec.data() + from + index; }
     };
 
     template<Vector T, size_t Length>

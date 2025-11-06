@@ -74,9 +74,9 @@ namespace Physica {
         using Base::write;
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() { return Length; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t size() noexcept { return Length; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return Length; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr.data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr.data(); }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }

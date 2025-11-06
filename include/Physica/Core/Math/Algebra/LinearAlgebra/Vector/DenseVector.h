@@ -94,8 +94,8 @@ namespace Physica {
         /* Getters */
         using Storage::getLength;
         using Storage::data;
-        [[nodiscard]] PtrTy data_ptr(size_t index) { return data() + index; }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const { return data() + index; }
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept { return data() + index; }
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept { return data() + index; }
         /* Static members */
         [[nodiscard]] static This zeros(size_t len);
         template<RNG R = Random<>>

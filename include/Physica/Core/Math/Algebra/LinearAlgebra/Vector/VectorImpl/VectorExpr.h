@@ -49,7 +49,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return getExpr().getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return getExpr().getLength(); }
         [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
         [[nodiscard]] auto& getExpr() noexcept { return expr; }
     };

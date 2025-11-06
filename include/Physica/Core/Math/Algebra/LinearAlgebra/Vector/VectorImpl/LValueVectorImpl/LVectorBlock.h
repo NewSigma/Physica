@@ -53,8 +53,8 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
-        [[nodiscard]] PtrTy data_ptr(size_t index);
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
     };
 
     template<Vector T, size_t Length>
@@ -89,13 +89,13 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    auto LVectorBlock<T, Length>::data_ptr(size_t index) -> PtrTy {
+    auto LVectorBlock<T, Length>::data_ptr(size_t index) noexcept -> PtrTy {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 
     template<Vector T, size_t Length>
-    auto LVectorBlock<T, Length>::data_ptr(size_t index) const -> ConstPtrTy {
+    auto LVectorBlock<T, Length>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }

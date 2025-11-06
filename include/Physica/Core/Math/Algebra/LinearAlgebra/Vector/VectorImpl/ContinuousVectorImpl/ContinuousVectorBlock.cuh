@@ -55,8 +55,8 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept { return vec.getDerived().data() + from + index; }
     };
 
     template<Vector T, size_t Length>

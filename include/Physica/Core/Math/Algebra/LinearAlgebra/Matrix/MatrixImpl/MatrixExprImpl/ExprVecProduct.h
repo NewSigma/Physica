@@ -51,7 +51,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
-        [[nodiscard]] size_t getLength() const { return expr.getRow(); }
+        [[nodiscard]] size_t getLength() const noexcept { return expr.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return expr; }
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };

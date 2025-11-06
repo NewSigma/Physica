@@ -50,8 +50,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -73,7 +73,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) -> PtrTy {
+    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) noexcept -> PtrTy {
         assert(index < getLength());
         if constexpr (isComplex)
             return Base::getDerived().asComplexBuffer() + index;
@@ -82,7 +82,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) const -> ConstPtrTy {
+    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
     //////////////////////////////////////////////////////////////////////
@@ -113,8 +113,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -136,7 +136,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) -> PtrTy {
+    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < getRow());
         assert(col < getCol());
         const size_t numColumn = getCol();
@@ -149,7 +149,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const -> ConstPtrTy {
+    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
     //////////////////////////////////////////////////////////////////////
@@ -183,8 +183,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(Index3D index);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(Index3D index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(Index3D index) noexcept;
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(Index3D index) const noexcept;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -213,7 +213,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) -> PtrTy {
+    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) noexcept -> PtrTy {
         assert(index[0] < getDimX());
         assert(index[1] < getDimY());
         assert(index[2] < getDimZ());
@@ -226,7 +226,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) const -> ConstPtrTy {
+    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) const noexcept -> ConstPtrTy {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

@@ -51,7 +51,7 @@ namespace Physica {
         auto values() const noexcept { return mat.getDerived().values() * vec.getDerived().values(); }
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const;
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getLHS().getRow(); }
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return mat.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return vec.getDerived(); }
     };

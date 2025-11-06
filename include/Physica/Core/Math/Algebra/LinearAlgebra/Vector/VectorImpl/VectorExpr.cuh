@@ -39,7 +39,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getExpr().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getLength(); }
         [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return expr.getDerived(); }
         [[nodiscard]] __host__ __device__ auto& getExpr() noexcept { return expr.getDerived(); }
     };
@@ -65,7 +65,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getLHS().getLength(); }
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
         [[nodiscard]] __host__ __device__ auto& getLHS() noexcept { return lhs.getDerived(); }
