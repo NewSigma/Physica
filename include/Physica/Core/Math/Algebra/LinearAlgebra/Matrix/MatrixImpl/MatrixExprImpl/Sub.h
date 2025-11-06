@@ -79,10 +79,6 @@ namespace Physica {
             : public BinaryMatrixExpr<ExprType::Sub, M1, M2> {
         using Base = BinaryMatrixExpr<ExprType::Sub, M1, M2>;
         using This = MatrixExpr<ExprType::Sub, M1, M2>;
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M1>() && MatrixOption::isSymmMatrix<M2>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M1>() && MatrixOption::isHermiteMatrix<M2>();
-        using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
-        using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -97,8 +93,8 @@ namespace Physica {
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
 
-        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
-        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
+        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] decltype(auto) hermite() const noexcept;
 
         [[nodiscard]] auto values() const noexcept;
         /* Getters */
@@ -132,6 +128,24 @@ namespace Physica {
             getLHS().reverse(grad);
         if constexpr (ReverseDiff<M2>)
             getRHS().reverse(-grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    decltype(auto) MatrixExpr<ExprType::Sub, M1, M2>::transpose() const noexcept {
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M1>() && MatrixOption::isSymmMatrix<M2>();
+        using RtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
+        return RtnTy(*this);
+    }
+
+    template<Matrix M1, Matrix M2>
+    decltype(auto) MatrixExpr<ExprType::Sub, M1, M2>::hermite() const noexcept {
+        if constexpr (Base::isComplex) {
+            constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M1>() && MatrixOption::isHermiteMatrix<M2>();
+            using RtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
+            return RtnTy(*this);
+        }
+        else
+            return transpose();
     }
 
     template<Matrix M1, Matrix M2>

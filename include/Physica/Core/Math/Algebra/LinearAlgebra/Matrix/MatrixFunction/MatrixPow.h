@@ -29,11 +29,6 @@ namespace Physica {
 
         using This = MatrixPow<M>;
         using Base = RValueMatrix<This>;
-
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M>();
-        using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
-        using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     protected:
         using typename Base::T;
     private:
@@ -55,8 +50,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
 
-        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
-        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
+        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] decltype(auto) hermite() const noexcept;
         /* Getters */
         [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
         [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
@@ -66,6 +61,24 @@ namespace Physica {
 
     template<Matrix M>
     MatrixPow<M>::MatrixPow(M m_, int power_) : m(std::forward<M>(m_)), power(power_) {}
+
+    template<Matrix M>
+    decltype(auto) MatrixPow<M>::transpose() const noexcept {
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M>();
+        using RtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
+        return RtnTy(*this);
+    }
+
+    template<Matrix M>
+    decltype(auto) MatrixPow<M>::hermite() const noexcept {
+        if constexpr (Base::isComplex) {
+            constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M>();
+            using RtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
+            return RtnTy(*this);
+        }
+        else
+            return transpose();
+    }
 
     template<Matrix M>
     template<Vector V>

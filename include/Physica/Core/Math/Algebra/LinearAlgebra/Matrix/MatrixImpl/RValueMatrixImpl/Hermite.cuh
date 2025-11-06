@@ -21,32 +21,37 @@
 #include "Hermite.h"
 
 namespace Physica {
-    template<Matrix T>
-    class device_obj<Hermite<T>> : public device_obj<RValueMatrix<Hermite<T>>> {
-        using host_obj = Hermite<T>;
+    template<Matrix M>
+    class device_obj<Hermite<M>> : public device_obj<RValueMatrix<Hermite<M>>> {
+        using host_obj = Hermite<M>;
         using Base = device_obj<RValueMatrix<host_obj>>;
     public:
         using typename Base::ScalarType;
     private:
-        const device_obj<T>& matrix;
+        const device_obj<M>& matrix;
     public:
-        device_obj(const device_obj<T>& matrix_) : matrix(matrix_) {}
+        explicit device_obj(const device_obj<M>& matrix_);
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
     };
 
-    template<Vector T>
-    class device_obj<HermiteVector<T>> : public device_obj<RValueMatrix<HermiteVector<T>>> {
-        using host_obj = HermiteVector<T>;
+    template<Matrix M>
+    device_obj<Hermite<M>>::device_obj(const device_obj<M>& matrix_) : matrix(matrix_) {
+        static_assert(M::isComplex, "[Error]: Do not call hermite on real matrix");
+    }
+
+    template<Vector V>
+    class device_obj<Hermite<V>> : public device_obj<RValueMatrix<Hermite<V>>> {
+        using host_obj = Hermite<V>;
         using Base = device_obj<RValueMatrix<host_obj>>;
     public:
         using typename Base::ScalarType;
     private:
-        const device_obj<T>& vec;
+        const device_obj<V>& vec;
     public:
-        explicit device_obj(const device_obj<T>& vec_) : vec(vec_) {}
+        explicit device_obj(const device_obj<V>& vec_);
         /* Operations */
         __device__ void assign(Matrix auto& target) const;
         /* Getters */
@@ -55,18 +60,23 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
     };
 
-    template<Vector T>
-    __device__ void device_obj<HermiteVector<T>>::assign(Matrix auto& target) const {
+    template<Vector V>
+    device_obj<Hermite<V>>::device_obj(const device_obj<V>& vec_) : vec(vec_) {
+        static_assert(V::isComplex, "[Error]: Do not call hermite on real vector");
+    }
+
+    template<Vector V>
+    __device__ void device_obj<Hermite<V>>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(target.rowFromMajorMinor(0, i), target.colFromMajorMinor(0, i));
     }
 }
 
 namespace Physica {
-    template <Matrix T>
-    class Traits<device_obj<Hermite<T>>> : public Traits<Hermite<T>> {};
+    template <Matrix M>
+    class Traits<device_obj<Hermite<M>>> : public Traits<Hermite<M>> {};
 
-    template <Vector T>
-    class Traits<device_obj<HermiteVector<T>>> : public Traits<HermiteVector<T>> {};
+    template <Vector V>
+    class Traits<device_obj<Hermite<V>>> : public Traits<Hermite<V>> {};
 }
 

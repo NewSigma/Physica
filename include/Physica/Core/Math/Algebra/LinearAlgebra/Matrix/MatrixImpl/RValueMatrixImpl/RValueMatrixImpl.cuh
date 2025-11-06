@@ -275,7 +275,10 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::hermite() const noexcept {
-        return device_obj<Hermite<Derived>>(Base::getDerived());
+        if constexpr (isComplex)
+            return device_obj<Hermite<Derived>>(Base::getDerived());
+        else
+            return transpose();
     }
 
     template<class Derived>

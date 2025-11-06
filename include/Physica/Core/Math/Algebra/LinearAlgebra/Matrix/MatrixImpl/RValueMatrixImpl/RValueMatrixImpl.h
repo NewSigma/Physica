@@ -403,7 +403,10 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::hermite() const noexcept {
-        return Hermite<Derived>(Base::getDerived());
+        if constexpr (isComplex)
+            return Hermite<Derived>(Base::getDerived());
+        else
+            return transpose();
     }
 
     template<class Derived>

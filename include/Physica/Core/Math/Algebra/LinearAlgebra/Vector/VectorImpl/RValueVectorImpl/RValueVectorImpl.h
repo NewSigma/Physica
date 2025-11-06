@@ -217,7 +217,10 @@ namespace Physica {
 
     template<class Derived>
     auto RValueVector<Derived>::hermite() const noexcept {
-        return HermiteVector<Derived>(Base::getDerived());
+        if constexpr (isComplex)
+            return Hermite<Derived>(Base::getDerived());
+        else
+            return transpose();
     }
 
     template<class Derived>

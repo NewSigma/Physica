@@ -31,7 +31,7 @@ namespace Physica {
     template<class Derived> class ContinuousMatrix;
     template<class VectorType> class TransposeVector;
     template<class> class Conjugate;
-    template<class VectorType> class HermiteVector;
+    template<class> class Hermite;
     template<Vector V1, Vector V2> class CrossProduct;
     template<class T> class RealVector;
     template<class T> class ImagVector;
