@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Tensor X>
-    class TensorSlice : public LValueMatrix<TensorSlice<X>> {
-        using This = TensorSlice<X>;
-        using Base = LValueMatrix<TensorSlice<X>>;
+    class TensorFiber : public LValueVector<TensorFiber<X>> {
+        using This = TensorFiber<X>;
+        using Base = LValueVector<TensorFiber<X>>;
         using IndexType = X::IndexType;
         constexpr static int NDim = X::NDim;
     protected:
@@ -33,56 +33,50 @@ namespace Physica {
     private:
         X& tensor;
         IndexType index;
-        int dimRow;
-        int dimCol;
+        int dim;
     public:
-        TensorSlice(X& tensor, int dimRow, int dimCol, IndexType index);
-        TensorSlice(const This&) = default;
-        TensorSlice(This&&) noexcept = default;
-        ~TensorSlice() = default;
+        TensorFiber(X& tensor, int dim, IndexType index);
+        TensorFiber(const This&) = default;
+        TensorFiber(This&&) noexcept = default;
+        ~TensorFiber() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
         using Base::resize;
-        void resize(size_t row, size_t col);
+        void resize(size_t length);
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(dimRow); }
-        [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(dimCol); }
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(dim); }
+        [[nodiscard]] PtrTy data_ptr(size_t i) noexcept;
         using Base::data_ptr;
     };
 
     template<Tensor X>
-    TensorSlice<X>::TensorSlice(X& tensor, int dimRow, int dimCol, IndexType index)
-            : tensor(tensor), index(index), dimRow(dimRow), dimCol(dimCol) {
-        assert(dimRow < NDim && dimCol < NDim);
-        assert(dimRow != dimCol);
+    TensorFiber<X>::TensorFiber(X& tensor, int dim, IndexType index)
+            : tensor(tensor), index(index), dim(dim) {
+        assert(dim < NDim);
         for (int i = 0; i < NDim; ++i) {
-            if (i == dimRow)
-                continue;
-            if (i == dimCol)
+            if (i == dim)
                 continue;
             assert(index[i] < tensor.dim(i));
         }
     }
 
     template<Tensor X>
-    void TensorSlice<X>::resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
-        assert(row == getRow() && col == getCol());
+    void TensorFiber<X>::resize([[maybe_unused]] size_t length) {
+        assert(length == getLength());
     }
 
     template<Tensor X>
-    auto TensorSlice<X>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
+    auto TensorFiber<X>::data_ptr(size_t i) noexcept -> PtrTy {
         auto idx = index;
-        idx[dimRow] = row;
-        idx[dimCol] = col;
+        idx[dim] = i;
         return tensor.data_ptr(idx);
     }
 }
 
 namespace Physica {
     template<Tensor X>
-    class Traits<TensorSlice<X>> {
+    class Traits<TensorFiber<X>> {
     public:
         using ScalarType = X::ScalarType;
         constexpr static int Option = MatrixOption::AnyMajor;
