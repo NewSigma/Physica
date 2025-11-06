@@ -27,15 +27,14 @@ namespace Physica {
         using This = LValueTensor<Derived>;
         using Base = RValueTensor<Derived>;
     public:
-        using typename Base::ScalarType;
         using typename Base::IndexType;
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
-        using RefTy = ScalarType::RefTy;
-        using ConstRefTy = ScalarType::ConstRefTy;
+        using PtrTy = T::PtrTy;
+        using ConstPtrTy = T::ConstPtrTy;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
     public:
         ~LValueTensor() = default;
         /* Operators */
@@ -53,12 +52,12 @@ namespace Physica {
         void operator+=(const Tensor auto& x);
         void operator-=(const Tensor auto& x);
 
-        [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
-        [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
-        [[nodiscard]] ScalarType& operator()(Index3D index) { return *data_ptr(index); }
-        [[nodiscard]] const ScalarType& operator()(Index3D index) const { return *data_ptr(index); }
+        [[nodiscard]] RefTy& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
+        [[nodiscard]] ConstRefTy& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
+        [[nodiscard]] RefTy& operator()(Index3D index) { return *data_ptr(index); }
+        [[nodiscard]] ConstRefTy& operator()(Index3D index) const { return *data_ptr(index); }
         /* Operations */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
+        [[nodiscard]] T calc(Index3D index) const { return operator()(index); }
 
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;
@@ -74,8 +73,8 @@ namespace Physica {
         template<RNG R = Random<>> void random_uniform();
         template<RNG R = Random<>> void random_normal();
         /* Getters */
-        [[nodiscard]] ScalarType* data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }
-        [[nodiscard]] const ScalarType* data_ptr(Index3D index) const { return Base::getDerived().data_ptr(index); }
+        [[nodiscard]] PtrTy data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }
+        [[nodiscard]] ConstPtrTy data_ptr(Index3D index) const { return Base::getDerived().data_ptr(index); }
         /* Static members */
         using Base::forPointIndexInTensor;
     protected:

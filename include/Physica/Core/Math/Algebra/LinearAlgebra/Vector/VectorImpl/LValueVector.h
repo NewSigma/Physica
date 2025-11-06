@@ -33,7 +33,6 @@ namespace Physica {
         template<size_t Length>
         using BlockType = LVectorBlock<Derived, Length>;
     public:
-        using typename Base::ScalarType;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
@@ -41,10 +40,10 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Tr;
         using typename Base::Trv;
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
-        using RefTy = ScalarType::RefTy;
-        using ConstRefTy = ScalarType::ConstRefTy;
+        using PtrTy = T::PtrTy;
+        using ConstPtrTy = T::ConstPtrTy;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
     public:
         ~LValueVector() = default;
         /* Operators */
@@ -70,7 +69,7 @@ namespace Physica {
         void writePacket(size_t index, Packet auto packet);
         void writePacketPartial(size_t index, size_t count, Packet auto packet);
 
-        [[nodiscard]] CoDiff<ScalarType> sum() const;
+        [[nodiscard]] CoDiff<T> sum() const;
 
         void toNextMean(size_t lastNumSample, const Vector auto& sample) noexcept;
         void toNextVariance(Derived& mean, size_t lastNumSample, const Vector auto& sample) noexcept;

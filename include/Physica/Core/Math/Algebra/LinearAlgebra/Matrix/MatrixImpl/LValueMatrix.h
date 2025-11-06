@@ -46,10 +46,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
-        using RefTy = ScalarType::RefTy;
-        using ConstRefTy = ScalarType::ConstRefTy;
+        using PtrTy = T::PtrTy;
+        using ConstPtrTy = T::ConstPtrTy;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
     public:
         ~LValueMatrix() = default;
         /* Operators */

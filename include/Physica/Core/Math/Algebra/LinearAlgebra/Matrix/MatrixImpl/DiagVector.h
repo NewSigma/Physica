@@ -47,11 +47,9 @@ namespace Physica {
     class DiagVector<T, true> : public LValueVector<DiagVector<T, true>> {
         using This = DiagVector<T, true>;
         using Base = LValueVector<This>;
-    public:
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         T& mat;
     public:

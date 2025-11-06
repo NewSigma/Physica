@@ -28,12 +28,11 @@ namespace Physica {
         T& mat;
     public:
         using Base = ContinuousVector<This>;
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
-        using RefTy = ScalarType::RefTy;
-        using ConstRefTy = ScalarType::ConstRefTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
+        using typename Base::RefTy;
+        using typename Base::ConstRefTy;
     public:
         FlattenC(ContinuousMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         FlattenC(const This&) = default;

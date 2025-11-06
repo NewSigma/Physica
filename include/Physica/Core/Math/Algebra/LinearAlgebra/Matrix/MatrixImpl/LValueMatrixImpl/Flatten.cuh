@@ -29,10 +29,9 @@ namespace Physica {
         const device_obj<T>& mat;
     public:
         using Base = device_obj<LValueVector<host_obj>>;
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     public:
         __host__ __device__ device_obj(const device_obj<LValueMatrix<T>>& mat_) : mat(mat_) {}
         device_obj(const This&) = default;

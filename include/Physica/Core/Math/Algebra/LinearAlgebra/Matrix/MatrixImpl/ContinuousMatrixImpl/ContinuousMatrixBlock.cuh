@@ -27,13 +27,12 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         PlainStruct<device_obj<T>> mat;
         size_t fromRow;
@@ -71,13 +70,12 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         PlainStruct<device_obj<T>> mat;
         size_t fromRow;
@@ -114,11 +112,9 @@ namespace Physica {
         using host_obj = ContinuousMatrixBlock<T, 1, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
-    public:
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         PlainStruct<device_obj<T>> mat;
         size_t fromRow;
@@ -156,12 +152,10 @@ namespace Physica {
             : public device_obj<LValueMatrix<ContinuousMatrixBlock<T, Row, Col>>> {
         using host_obj = ContinuousMatrixBlock<T, Row, Col>;
         using This = device_obj<host_obj>;
-    public:
         using Base = device_obj<LValueMatrix<host_obj>>;
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         PlainStruct<device_obj<T>> mat;
         size_t fromRow;

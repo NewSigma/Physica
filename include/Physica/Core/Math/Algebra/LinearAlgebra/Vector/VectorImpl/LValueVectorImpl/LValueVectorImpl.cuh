@@ -34,8 +34,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Scalar T>
-    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const T& x) {
+    template<Scalar U>
+    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const U& x) {
         constexpr int WarpSize = Physica::CUDADevAttr::WarpSize;
         const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;
@@ -89,7 +89,7 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
         using U = std::remove_cvref_t<decltype(grad)>;
-        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
         if constexpr (Scalar<U>) {
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);

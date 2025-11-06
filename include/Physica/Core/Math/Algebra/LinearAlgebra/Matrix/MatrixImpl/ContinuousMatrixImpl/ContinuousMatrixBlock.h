@@ -28,13 +28,12 @@ namespace Physica {
         using This = ContinuousMatrixBlock<T, 1, Col>;
         using Base = ContinuousVector<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         PtrTy pVecHead;
         size_t colCount;
@@ -83,13 +82,12 @@ namespace Physica {
         using This = ContinuousMatrixBlock<T, Row, 1>;
         using Base = ContinuousVector<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         PtrTy pVecHead;
         size_t rowCount;
@@ -138,13 +136,12 @@ namespace Physica {
         using This = ContinuousMatrixBlock<T, 1, 1>;
         using Base = ContinuousVector<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         PtrTy pVecHead;
         size_t rowCount;
@@ -198,10 +195,9 @@ namespace Physica {
         using Base = LValueMatrix<This>;
     public:
         using Base::isComplex;
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;

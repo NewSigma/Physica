@@ -77,13 +77,13 @@ namespace Physica {
     template<class Derived>
     void LValueVector<Derived>::writePacket(size_t index, const Packet auto packet) {
         using Pack = std::remove_cvref_t<decltype(packet)>;
-        using T = Traits<Pack>::ScalarType;
-        if constexpr (T::isForwardDiff) {
+        using U = Traits<Pack>::ScalarType;
+        if constexpr (U::isForwardDiff) {
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 (*this)[index] = packet[i];
         }
         else {
-            Array<T, Pack::size()> buffer{};
+            Array<U, Pack::size()> buffer{};
             packet.store(buffer.data());
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 (*this)[index] = buffer[i];
@@ -93,13 +93,13 @@ namespace Physica {
     template<class Derived>
     void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const Packet auto packet) {
         using Pack = std::remove_cvref_t<decltype(packet)>;
-        using T = Traits<Pack>::ScalarType;
-        if constexpr (T::isForwardDiff) {
+        using U = Traits<Pack>::ScalarType;
+        if constexpr (U::isForwardDiff) {
             for (size_t i = 0; i < count; ++i, ++index)
                 (*this)[index] = packet[i];
         }
         else {
-            Array<T, Pack::size()> buffer{};
+            Array<U, Pack::size()> buffer{};
             packet.store(buffer.data());
             for (size_t i = 0; i < count; ++i, ++index)
                 (*this)[index] = buffer[i];
@@ -107,7 +107,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueVector<Derived>::sum() const -> CoDiff<ScalarType> {
+    auto LValueVector<Derived>::sum() const -> CoDiff<T> {
         if constexpr (isReverseDiff) {
             auto result = co_yield Base::values().sum();
             const auto& grad = result.grad();
@@ -151,7 +151,7 @@ namespace Physica {
     template<class Derived>
     void LValueVector<Derived>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
         using U = std::remove_cvref_t<decltype(grad)>;
-        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
+        static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
         if constexpr (Scalar<U>) {
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);
@@ -242,21 +242,21 @@ namespace Physica {
     template<RNG R>
     void LValueVector<Derived>::random_uniform() {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::template random_uniform<R>();
+            this->operator[](i) = T::template random_uniform<R>();
     }
 
     template<class Derived>
     template<RNG R>
     void LValueVector<Derived>::random_normal() {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::template random_normal<R>();
+            this->operator[](i) = T::template random_normal<R>();
     }
 
     template<class Derived>
     template<RNG R>
     void LValueVector<Derived>::random_any(auto& distribution) {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::template random_any<R>(distribution);
+            this->operator[](i) = T::template random_any<R>(distribution);
     }
 
     template<class Derived>

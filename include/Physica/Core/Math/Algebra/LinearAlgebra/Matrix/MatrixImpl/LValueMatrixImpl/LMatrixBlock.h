@@ -29,12 +29,11 @@ namespace Physica {
         using This = LMatrixBlock<T, 1, Col>;
         using Base = LValueVector<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -67,12 +66,11 @@ namespace Physica {
         using This = LMatrixBlock<T, Row, 1>;
         using Base = LValueVector<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -106,12 +104,11 @@ namespace Physica {
         using This = LMatrixBlock<T, 1, 1>;
         using Base = LValueVector<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -145,12 +142,11 @@ namespace Physica {
         using This = LMatrixBlock<T, Dynamic, Dynamic>;
         using Base = LValueMatrix<This>;
     public:
-        using typename Base::ScalarType;
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;

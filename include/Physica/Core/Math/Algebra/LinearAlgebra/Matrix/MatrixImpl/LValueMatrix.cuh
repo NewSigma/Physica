@@ -35,19 +35,20 @@ namespace Physica {
         using Base::ColAtCompile;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
-        using RefTy = ScalarType::RefTy;
-        using ConstRefTy = ScalarType::ConstRefTy;
+        using PtrTy = T::PtrTy;
+        using ConstPtrTy = T::ConstPtrTy;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
     public:
         /* Operators */
         This& operator=(const This& m) = delete;
         This& operator=(This&& m) noexcept = delete;
 
-        template<Scalar T>
-        __host__ __device__ device_obj<Derived>& operator=(const T& x);
+        template<Scalar U>
+        __host__ __device__ device_obj<Derived>& operator=(const U& x);
         __host__ __device__ void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
         __host__ __device__ void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
         __host__ __device__ void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }

@@ -29,14 +29,14 @@ namespace Physica {
         template<size_t Length>
         using BlockType = device_obj<LVectorBlock<Derived, Length>>;
     public:
-        using typename Base::ScalarType;
         using Base::isReverseDiff;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
-        using RefTy = ScalarType::RefTy;
-        using ConstRefTy = ScalarType::ConstRefTy;
+        using PtrTy = T::PtrTy;
+        using ConstPtrTy = T::ConstPtrTy;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -44,8 +44,8 @@ namespace Physica {
         This& operator=(This&& obj) = delete;
         __host__ __device__ device_obj<Derived>& operator=(const Vector auto& v) requires(CUDA<decltype(v)>);
 
-        template<Scalar T>
-        device_obj<Derived>& operator=(const T& x);
+        template<Scalar U>
+        device_obj<Derived>& operator=(const U& x);
         __host__ __device__ void operator+=(const Scalar auto& x);
         __host__ __device__ void operator-=(const Scalar auto& x);
         __host__ __device__ void operator*=(const Scalar auto& x);

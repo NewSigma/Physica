@@ -33,8 +33,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Scalar T>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const T& x) {
+    template<Scalar U>
+    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const U& x) {
         if (IsHost()) {
             auto func = [m_ = asStruct(Base::getDerived()), x] __device__() mutable {
                 auto& m = m_.getDerived();

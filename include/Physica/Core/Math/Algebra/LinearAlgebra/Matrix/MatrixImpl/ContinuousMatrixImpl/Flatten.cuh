@@ -30,10 +30,11 @@ namespace Physica {
         device_obj<T>& mat;
     public:
         using Base = device_obj<ContinuousVector<host_obj>>;
-        using typename Base::ScalarType;
     protected:
-        using PtrTy = ScalarType::PtrTy;
-        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
+        using typename Base::RefTy;
+        using typename Base::ConstRefTy;
     public:
         device_obj(device_obj<ContinuousMatrix<T>>& mat_) : mat(mat_.getDerived()) {}
         device_obj(const This&) = default;
@@ -43,8 +44,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operators */
-        [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return *data_ptr(index); }
-        [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
+        [[nodiscard]] __device__ RefTy& operator[](size_t index) { return *data_ptr(index); }
+        [[nodiscard]] __device__ const ConstRefTy& operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
