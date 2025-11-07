@@ -25,30 +25,39 @@ namespace Physica {
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236
      */
-    template<Matrix M, Vector V>
-    void applyHouseholder(const V& householder, M&& mat) {
-        using T = std::remove_cvref<M>::type::ScalarType;
-        using BufferType = DenseVector<T, V::SizeAtCompile>;
-        assert(householder.getLength() == mat.getRow());
-        BufferType copy = householder;
+    template<Matrix M, Vector V, Scalar T>
+    void applyHouseholder(const T factor, const V& householder, M&& mat) {
+        constexpr size_t BufferSize = V::SizeAtCompile == Dynamic ? Dynamic : (V::SizeAtCompile + 1);
+        using BufferType = DenseVector<T, BufferSize>;
+        assert(householder.getLength() + 1 == mat.getRow());
+        auto copy = BufferType(householder.getLength() + 1);
+        copy[0] = 1;
+        copy.tail(1) = householder;
 
-        const T factor = copy[0];
-        copy[0] = T(1);
         const BufferType temp1 = copy * factor;
         mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
+    template<Matrix M, Vector V, Scalar T>
+    void applyHouseholder(M&& mat, const T factor, const V& householder) {
+        constexpr size_t BufferSize = V::SizeAtCompile == Dynamic ? Dynamic : (V::SizeAtCompile + 1);
+        using BufferType = DenseVector<T, BufferSize>;
+        assert(householder.getLength() + 1 == mat.getCol());
+        auto copy = BufferType(householder.getLength() + 1);
+        copy[0] = 1;
+        copy.tail(1) = householder;
+
+        using BufferType1 = DenseVector<T, decltype(mat * copy)::SizeAtCompile>;
+        mat -= BufferType1(mat * copy) * (copy.hermite() * factor);
+    }
+
+    template<Matrix M, Vector V>
+    void applyHouseholder(const V& householder, M&& mat) {
+        applyHouseholder(householder[0], householder.tail(1), mat);
+    }
+
     template<Matrix M, Vector V>
     void applyHouseholder(M&& mat, const V& householder) {
-        using T = std::remove_cvref<M>::type::ScalarType;
-        using BufferType = DenseVector<T, V::SizeAtCompile>;
-        assert(householder.getLength() == mat.getCol());
-        BufferType copy = householder;
-
-        using ProductType = decltype(mat * copy);
-        using BufferType1 = DenseVector<T, ProductType::SizeAtCompile>;
-        const T factor = copy[0];
-        copy[0] = T(1);
-        mat -= BufferType1(mat * copy) * (copy.hermite() * factor);
+        applyHouseholder(mat, householder[0], householder.tail(1));
     }
 }

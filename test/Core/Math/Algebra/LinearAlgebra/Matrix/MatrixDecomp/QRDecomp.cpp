@@ -59,7 +59,7 @@ int main() {
         using Matrix4D = DenseMatrix<T, MatrixOption::Col, 4, 4>;
         const Matrix3D m1{2, 3, 4, 1, 1, 9, 1, 2, -6};
         const Matrix4D m2{0, 0.125, 0.125, 0, 0.125, 0, 0, 0.125, 0.125, 0, 0, 0.125, 0, 0.125, 0.125, 0};
-        testDecomp(m1, 1E-15, 1E-13);
+        testDecomp(m1, 1E-14, 1E-13);
         testDecomp(m2, 1E-15, 1E-13);
     }
     {

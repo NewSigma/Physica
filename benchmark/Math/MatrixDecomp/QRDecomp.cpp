@@ -23,28 +23,47 @@ using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
-    template<int Order = 0>
-    void qr_mkl(benchmark::State& state) {
-        static_assert(Order >= 0);
+    void qr(benchmark::State& state) {
         using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col, Order, Order>;
         const size_t order = state.range(0);
-        const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
-        QRDecomp<float64> qr(order, order);
+        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
+        QRDecomp<T> qr(order, order);
         for (auto _ : state) {
-            qr.compute_mkl(m);
+            qr.compute(m);
+            benchmark::DoNotOptimize(qr);
+            benchmark::ClobberMemory();
+        }
+    }
+
+    void qr_base(benchmark::State& state) {
+        using T = float64;
+        const size_t order = state.range(0);
+        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
+        QRDecomp<T> qr(order, order);
+        for (auto _ : state) {
+            qr.compute_base(m);
             benchmark::DoNotOptimize(qr);
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(qr_mkl<2>)->Name("QR mkl")->Arg(2);
-BENCHMARK(qr_mkl<4>)->Name("QR mkl")->Arg(4);
-BENCHMARK(qr_mkl<8>)->Name("QR mkl")->Arg(8);
-BENCHMARK(qr_mkl<16>)->Name("QR mkl")->Arg(16);
-BENCHMARK(qr_mkl<32>)->Name("QR mkl")->Arg(32);
-BENCHMARK(qr_mkl)->Name("QR mkl")
+BENCHMARK(qr)->Name("QR")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(32)
+    ->Arg(64)
+    ->Arg(256)
+    ->Arg(1024);
+
+BENCHMARK(qr_base)->Name("QR base")
+    ->Arg(2)
+    ->Arg(4)
+    ->Arg(8)
+    ->Arg(16)
+    ->Arg(32)
     ->Arg(64)
     ->Arg(256)
     ->Arg(1024);

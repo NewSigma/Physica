@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
@@ -33,7 +33,6 @@ namespace Physica {
     class QRDecomp {
         constexpr static bool isComplex = T::isComplex;
         using This = QRDecomp<T, Pivot>;
-        using MatrixND = DenseMatrix<T>;
         using Perm = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
 
         using Tr = T::RealType;
@@ -41,8 +40,9 @@ namespace Physica {
         using Tc = T::ComplexType;
         using Tv = T::ValueType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        constexpr static size_t Threhold = 16;
     private:
-        MatrixND working;
+        MatrixND<T> working;
         VectorND<T> taus;
         [[no_unique_address]] Perm perm;
     public:
@@ -75,9 +75,10 @@ namespace Physica {
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
-        [[nodiscard]] MatrixND getMatrixQ() const;
+        [[nodiscard]] MatrixND<T> getMatrixQ() const;
+        [[nodiscard]] MatrixND<T> getMatrixQ_mkl() const;
+        [[nodiscard]] MatrixND<T> getMatrixQ_base() const;
         [[nodiscard]] auto getMatrixR() const noexcept;
-        [[nodiscard]] MatrixND getMatrixQ_mkl() const;
         [[nodiscard]] const auto& getMatrixP() const noexcept requires(Pivot) { return perm; }
     };
 
@@ -99,8 +100,18 @@ namespace Physica {
     void QRDecomp<T, Pivot>::compute(const M& source) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
-        if constexpr (HasMKL() && (M::SizeAtCompile > 16 || M::SizeAtCompile == Dynamic))
-            compute_mkl<M>(source);
+        constexpr bool SmallMatrix = M::SizeAtCompile <= Threhold && M::SizeAtCompile != Dynamic;
+        if constexpr (HasMKL() && !SmallMatrix) {
+            if constexpr (M::SizeAtCompile > Threhold) {
+                compute_mkl<M>(source);
+                return;
+            }
+
+            if (source.getSize() > Threhold)
+                compute_mkl<M>(source);
+            else
+                compute_base<M>(source);
+        }
         else
             compute_base<M>(source);
     }
@@ -190,11 +201,28 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixQ() const -> MatrixND {
-        if constexpr (HasMKL())
-            return getMatrixQ_mkl();
+    auto QRDecomp<T, Pivot>::getMatrixQ() const -> MatrixND<T> {
+        if constexpr (HasMKL()) {
+            if constexpr (isComplex) // Our complex householder is slightly different from MKL, getMatrixQ_base() cannot apply to compute_mkl.
+                return getMatrixQ_mkl();
+
+            if (working.getSize() > Threhold)
+                return getMatrixQ_mkl();
+            return getMatrixQ_base();
+        }
         else
-            noImpl(__func__);
+            return getMatrixQ_base();
+    }
+
+    template<Scalar T, bool Pivot>
+    auto QRDecomp<T, Pivot>::getMatrixQ_base() const -> MatrixND<T> {
+        auto result = MatrixND<T>::unitMatrix(getRow());
+        for (size_t i = 0; i < taus.getLength() - !working.isOverdetermined(); ++i) {
+            auto block = result.rightCols(i);
+            const auto col = working.col(i);
+            applyHouseholder(block, taus[i], col.tail(i + 1));
+        }
+        return result;
     }
 
     template<Scalar T, bool Pivot>

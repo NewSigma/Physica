@@ -57,7 +57,9 @@ namespace Physica {
     template<Vector V>
     template<Packet Pack>
     Pack VectorExpr<ExprType::Ln, V>::packet(size_t index) const {
-        return ln(Base::getExpr().template packet<Pack>(index));
+        auto x = Base::getExpr().template packet<Pack>(index);
+        assert(x.isPositive().horizontal_and());
+        return ln(x);
     }
 
     template<Vector V>

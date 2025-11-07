@@ -71,14 +71,14 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixQ_mkl() const -> MatrixND {
+    auto QRDecomp<T, Pivot>::getMatrixQ_mkl() const -> MatrixND<T> {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         constexpr int Layout = LAPACK_COL_MAJOR;
         const size_t m = getRow();
         const size_t n = m;
         const size_t k = getCol();
         const size_t lda = m;
-        MatrixND result(m, lda);
+        MatrixND<T> result(m, lda);
         result.leftCols(k) = working;
         auto* a = reinterpret_cast<Tm*>(result.data());
         auto* tau = reinterpret_cast<const Tm*>(taus.data());
