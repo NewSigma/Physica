@@ -345,6 +345,15 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueMatrix<Derived>::zeros() noexcept {
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        for (size_t major = 0; major < maxMajor; ++major)
+            for (size_t minor = 0; minor < maxMinor; ++minor)
+                refFromMajorMinor(major, minor) = T(0);
+    }
+
+    template<class Derived>
     void LValueMatrix<Derived>::toUnitMatrix() {
         assert(Base::getRow() == Base::getCol());
         const size_t order = Base::getRow();

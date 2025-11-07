@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include <QApplication>
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
@@ -46,20 +47,22 @@ constexpr double unitMassM = 1;
 constexpr size_t maxHandleNum = 100;
 constexpr size_t numStep = 2000000;
 
-MDCellType makeSystem() {
-    MDCellType::LatticeMatrix lattice{latticeSize};
+namespace {
+    MDCellType makeSystem() {
+        MDCellType::LatticeMatrix lattice{latticeSize};
 
-    auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
-    posVec *= ScalarType(latticeSize);
-    std::sort(posVec.begin(), posVec.end());
-    MDCellType::PositionMatrix pos(numMolecular, 1);
-    pos.col(0) = posVec;
+        auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
+        posVec *= ScalarType(latticeSize);
+        std::ranges::sort(posVec);
+        MDCellType::PositionMatrix pos(numMolecular, 1);
+        pos.col(0) = posVec;
 
-    MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
+        MDCellType::MassVector massVec(numMolecular);
+        for (size_t i = 0; i < numMolecular; ++i) {
+            massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
+        }
+        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
     }
-    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
 int main(int argc, char** argv) {
@@ -81,7 +84,7 @@ int main(int argc, char** argv) {
     const auto z = pdf.makeDistribution();
 
     QApplication app(argc, argv);
-    Plot3D* plot3d = new Plot3D();
+    auto* plot3d = new Plot3D();
     auto& surf = plot3d->surf(grid.first, grid.second, z);
     surf.setBaseGradient(Plot3D::makeDefaultGrad());
     surf.setColorStyle(Q3DTheme::ColorStyleRangeGradient);

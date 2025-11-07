@@ -138,6 +138,7 @@ namespace Physica {
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;
 
+        void zeros() noexcept;
         void toUnitMatrix();
         template<RNG R = Random<>>
         void random_uniform();

@@ -27,15 +27,19 @@ Plot3D::Plot3D(QWidget* parent)
         , surface(new Q3DSurface()) {
     if (parent == nullptr) {
         QRect primaryScreenRec = QGuiApplication::primaryScreen()->geometry();
-        resize(primaryScreenRec.width() / 2, primaryScreenRec.height() / 1.6);
+        resize(primaryScreenRec.width() / 2, int(double(primaryScreenRec.height()) / 1.6));
     }
     setAttribute(Qt::WA_DeleteOnClose);
     setLayout(vLayout);
 
     surface->activeTheme()->setType(Q3DTheme::ThemePrimaryColors);
-    surface->axisX()->setLabelAutoRotation(30);
-    surface->axisY()->setLabelAutoRotation(90);
-    surface->axisZ()->setLabelAutoRotation(30);
+    getAxisX()->setLabelAutoRotation(30);
+    getAxisY()->setLabelAutoRotation(90);
+    getAxisZ()->setLabelAutoRotation(30);
+
+    getAxisX()->setTitleVisible(true);
+    getAxisY()->setTitleVisible(true);
+    getAxisZ()->setTitleVisible(true);
 
     auto* widget = QWidget::createWindowContainer(surface, this);
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

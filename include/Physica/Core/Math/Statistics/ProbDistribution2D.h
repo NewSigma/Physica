@@ -52,8 +52,8 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
-        [[nodiscard]] size_t getNumBinX() const noexcept { return bucket.getShape(0); }
-        [[nodiscard]] size_t getNumBinY() const noexcept { return bucket.getShape(1); }
+        [[nodiscard]] size_t getNumBinX() const noexcept { return bucket.dim(0); }
+        [[nodiscard]] size_t getNumBinY() const noexcept { return bucket.dim(1); }
         [[nodiscard]] T getFromPointX() const noexcept { return seperatesX[0]; }
         [[nodiscard]] T getFromPointY() const noexcept { return seperatesY[0]; }
         [[nodiscard]] T getToPointX() const noexcept { return *seperatesX.crbegin(); }
