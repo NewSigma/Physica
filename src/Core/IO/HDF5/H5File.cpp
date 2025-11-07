@@ -29,7 +29,7 @@ H5File::H5File(
         const H5::FileAccPropList& access_plist)
         : Base(name, openflag_, create_plist, access_plist), openflag(openflag_) {}
 
-H5File::H5File(const H5File& obj)
+H5File::H5File(const This& obj)
         : Base(obj), openflag(obj.openflag) {}
 
 H5DataSet<1> H5File::createDataSet(const std::string& filepath, const std::string& name) {
@@ -56,8 +56,8 @@ H5Group H5File::openGroup(const std::string& name) {
     return Base::createGroup(name, 0);
 }
 
-H5File H5File::open(const std::string& name) {
+H5File H5File::open(const std::string& name, unsigned int openflag) {
     if (std::filesystem::exists(name))
-        return H5File(name, ReadWrite);
-    return create(name);
+        return H5File(name, openflag);
+    return H5File(name, H5File::Creat | openflag);
 }

@@ -21,12 +21,13 @@
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>
 #endif
+#ifdef PHYSICA_HDF5
+    #include "Physica/Core/IO/HDF5/HDF5.h"
+#endif
 
 using namespace Physica;
 
 namespace {
-
-
     void setThreadEnv() noexcept {
     #ifdef PHYSICA_MKL
         vmlSetMode(VML_HA | VML_FTZDAZ_CURRENT | VML_ERRMODE_NOERR);
@@ -37,6 +38,9 @@ namespace {
     public:
         GlobalEnv() noexcept {
             setThreadEnv();
+        #ifdef PHYSICA_HDF5
+            H5::Exception::dontPrint();
+        #endif
         }
     };
 

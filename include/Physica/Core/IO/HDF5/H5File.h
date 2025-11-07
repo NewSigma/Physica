@@ -22,6 +22,7 @@
 
 namespace Physica {
     class PHYSICA_API H5File : public H5::H5File, public H5Loc {
+        using This = H5File;
         using Base = H5::H5File;
         using Loc = H5Loc;
     public:
@@ -38,16 +39,12 @@ namespace Physica {
         unsigned int openflag;
     public:
         H5File() = default;
-        H5File(const std::string& name,
-               unsigned int openflag_ = OpenFlag::ReadOnly,
-               const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
-               const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
-        H5File(const H5File& obj);
-        H5File(H5File&&) noexcept = delete;
+        H5File(const This& obj);
+        H5File(This&&) noexcept = delete;
         virtual ~H5File() = default;
         /* Operators */
-        H5File& operator=(H5File& obj) = default;
-        H5File& operator=(H5File&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         using Loc::exists;
         using Loc::createDataSet;
@@ -59,7 +56,11 @@ namespace Physica {
         [[nodiscard]] unsigned int getOpenflag() const noexcept { return openflag; }
         [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
         /* Static members */
-        [[nodiscard]] static H5File create(const std::string& name) { return H5File(name, H5File::Creat | H5File::ReadWrite); }
-        [[nodiscard]] static H5File open(const std::string& name);
+        [[nodiscard]] static H5File open(const std::string& name, unsigned int openflag = ReadWrite);
+    private:
+        H5File(const std::string& name,
+               unsigned int openflag_ = OpenFlag::ReadOnly,
+               const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
+               const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
     };
 }
