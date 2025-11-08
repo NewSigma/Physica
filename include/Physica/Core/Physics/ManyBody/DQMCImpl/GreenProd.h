@@ -30,14 +30,14 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     private:
-        DenseMatrix<T> expT;
+        MatrixND<T> expT;
         CyclicChainQDT<T> chainU;
         CyclicChainQDT<T> chainD;
 
         QRDecomp<T> qr;
         DiagMatrix<Tr> diagB;
         DiagMatrix<Tr> diagS;
-        DenseMatrix<T> buffer;
+        MatrixND<T>  buffer;
 
         Tr lnAbsDet;
         Tv sgnDet = 1;
@@ -61,7 +61,7 @@ namespace Physica {
         [[nodiscard]] int getNumSplit() const noexcept { return chainU.getNumSplit(); }
     private:
         void splitDiag(const QDTDecomp<T>& qdt, Tr betaMu) noexcept;
-        [[nodiscard]] std::pair<Tr, Tv> calcDet(const QDTDecomp<T>& qdt, Tr betaMu);
+        [[nodiscard]] std::pair<Tr, Tv> calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu);
         /* Static members */
         static void checkSign(Tv sign1, Tv sign2) noexcept;
     };
@@ -118,21 +118,12 @@ namespace Physica {
 
     template<Scalar T>
     void GreenProd<T>::calcGreens(GreenArray& greens, Tr betaMu) {
-        const int numSite = getNumSite();
-        auto temp = DenseMatrix<T>(numSite, numSite);
-        auto calcGreen = [this, betaMu, &temp](const QDTDecomp<T>& qdt, DenseMatrix<T>& green) -> std::pair<Tr, Tv> {
-            const auto det = calcDet(qdt, betaMu);
-            temp = buffer * qr.getMatrixQ();
-            green = qr.getMatrixR().inv() * temp.hermite();
-            return det;
-        };
-
         const int numSplit = getNumSplit();
         Tr lnAbsDetU = 0;
         Tv signU;
         for (size_t i = 0; i < numSplit; ++i) {
             const int to = (numSplit + i - 1) % numSplit;
-            auto [lnAD, sign] = calcGreen(chainU.multiply(i, to), greens(0, i));
+            auto [lnAD, sign] = calcGreen(chainU.multiply(i, to), greens(0, i), betaMu);
             if (i != 0)
                 checkSign(signU, sign);
 
@@ -144,7 +135,7 @@ namespace Physica {
         Tv signD;
         for (size_t i = 0; i < numSplit; ++i) {
             const int to = (numSplit + i - 1) % numSplit;
-            auto [lnAD, sign] = calcGreen(chainD.multiply(i, to), greens(1, i));
+            auto [lnAD, sign] = calcGreen(chainD.multiply(i, to), greens(1, i), betaMu);
             if (i != 0)
                 checkSign(signD, sign);
 
@@ -182,7 +173,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto GreenProd<T>::calcDet(const QDTDecomp<T>& qdt, Tr betaMu) -> std::pair<Tr, Tv> {
+    auto GreenProd<T>::calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu) -> std::pair<Tr, Tv> {
         splitDiag(qdt, betaMu);
 
         buffer = qdt.getMatrixQ() * diagB.inv();
@@ -192,6 +183,9 @@ namespace Physica {
         Tr lnAD = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
         Tv sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
         assert(T::isComplex || abs(sign) == Trv(1) && "[Error]: Bad sign");
+
+        MatrixND<T> temp = buffer * qr.getMatrixQ();
+        green = qr.getMatrixR().inv() * temp.hermite();
         return {lnAD, sign};
     }
 

@@ -112,10 +112,10 @@ namespace Physica {
         for (size_t from = 0; from < getNumSplit(); ++from) {
             for (size_t to = 0; to < getNumSplit(); ++to) {
                 bool diag = from == to;
-                bool ready = readys(from, to);
                 bool canFastUpdate = to == split;
-                if (canFastUpdate && (ready || diag)) {
-                    decomps(from, to).single_flip(site, factor, invfac);
+                if (canFastUpdate) {
+                    if (readys(from, to) || diag)
+                        decomps(from, to).single_flip(site, factor, invfac);
                     continue;
                 }
 

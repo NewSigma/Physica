@@ -41,6 +41,7 @@ namespace Physica {
         const Params* params;
         ImagKinetic<T> kinetic;
         GreenProd<T> productor;
+        Array<int> sites;
     public:
         DQMC() = delete;
         DQMC(const Params& params_);
@@ -68,9 +69,7 @@ namespace Physica {
         [[nodiscard]] Tv getSign() const noexcept { return kinetic.getSign(); }
     private:
         /* Operations */
-        void stepSpinImpl(int site, int split, Tr prob);
-
-        void single_flip(int site, int split) noexcept;
+        void metropolis(int site, int split, Tr prob);
         void calcGreens();
         /* Static members */
         template<RNG R>
@@ -81,8 +80,11 @@ namespace Physica {
     DQMC<T>::DQMC(const Params& params_)
             : params(&params_)
             , kinetic(params_.getNumSite(), params_.getNumSplit())
-            , productor(params_) {
+            , productor(params_)
+            , sites(params_.getNumSite()) {
         assert(getNumSplit() % 2 == 0 && "[Error]: An even number of splits is required");
+        for (int i = 0; i < getNumSite(); ++i)
+            sites[i] = i;
     }
 
     template<Scalar T>
@@ -97,11 +99,11 @@ namespace Physica {
     void DQMC<T>::step_spin() {
         const int numSite = getNumSite();
         const auto probs = VectorND<Tr>::template random_uniform<R>(numSite);
-        const auto sites = makeRandomSites<R>(numSite);
+        std::ranges::shuffle(sites, R::getInstance());
+
         const int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(R::getInstance());
         for (int i = 0; i < numSite; ++i)
-            stepSpinImpl(sites[i], split, probs[i]);
-
+            metropolis(sites[i], split, probs[i]);
         calcGreens();
     }
 
@@ -112,16 +114,14 @@ namespace Physica {
         assert(numStep % getNumSplit() == 0 && "[Warn]: Suggest divisable step num");
         const int numSite = getNumSite();
         auto probs = VectorND<Tr>(numSite);
-        auto sites = makeRandomSites<R>(numSite);
         auto dist = std::uniform_int_distribution<>(0, getNumSplit() - 1);
         for (int _ = 0; _ < numStep; ++_) {
+            std::ranges::shuffle(sites, R::getInstance());
             probs.template random_uniform<R>();
             int split = dist(R::getInstance());
             for (int i = 0; i < numSite; ++i)
-                stepSpinImpl(sites[i], split, probs[i]);
-
+                metropolis(sites[i], split, probs[i]);
             calcGreens();
-            std::ranges::shuffle(sites, R::getInstance());
         }
     }
 
@@ -130,38 +130,26 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(params, obj.params);
         kinetic.swap(obj.kinetic);
+        productor.swap(obj.productor);
+        sites.swap(obj.sites);
     }
 
     template<Scalar T>
-    void DQMC<T>::stepSpinImpl(int site, int split, Tr prob) {
+    void DQMC<T>::metropolis(int site, int split, Tr prob) {
         const bool accept = prob < kinetic.calcP(site, split, params->getAlpha());
-        if (accept)
-            single_flip(site, split);
-    }
+        if (accept) {
+            const Tr x = Tr(2) * params->getAlpha() * getAuxField()(site, split);
+            const Vector2D<Tr> arr = exp(Vector2D<Tr>{-x, x});
 
-    template<Scalar T>
-    void DQMC<T>::single_flip(int site, int split) noexcept {
-        const Tr x = Tr(2) * params->getAlpha() * getAuxField()(site, split);
-        const Vector2D<Tr> arr = exp(Vector2D<Tr>{-x, x});
-
-        auto deltas = kinetic.calcDelta(site, split, params->getAlpha());
-        auto ratios = kinetic.calcRatio(site, split, deltas);
-        productor.single_flip(site, split, arr, ratios);
-        kinetic.single_flip(site, split, params->getAlpha());
+            auto deltas = kinetic.calcDelta(site, split, params->getAlpha());
+            auto ratios = kinetic.calcRatio(site, split, deltas);
+            productor.single_flip(site, split, arr, ratios);
+            kinetic.single_flip(site, split, params->getAlpha());
+        }
     }
 
     template<Scalar T>
     void DQMC<T>::calcGreens() {
         productor.calcGreens(getGreens(), params->calcBetaMu());
-    }
-
-    template<Scalar T>
-    template<RNG R>
-    Array<int> DQMC<T>::makeRandomSites(int numSite) {
-        auto sites = Array<int>(numSite);
-        for (int i = 0; i < numSite; ++i)
-            sites[i] = i;
-        std::ranges::shuffle(sites, R::getInstance());
-        return sites;
     }
 }
