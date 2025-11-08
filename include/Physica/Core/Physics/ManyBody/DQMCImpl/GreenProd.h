@@ -25,7 +25,8 @@ namespace Physica {
     template<Scalar T>
     class GreenProd {
         using This = GreenProd<T>;
-        using GreenArray = ImagKinetic<T>::GreenArray;
+        using GreenPair = ImagKinetic<T>::GreenPair;
+
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
@@ -50,11 +51,11 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void invalidate(const DenseMatrix<T>& aux, GreenArray& greens, Tr alpha, Tr betaMu, int split);
-        void invalidates(const DenseMatrix<T>& aux, GreenArray& greens, Tr alpha, Tr betaMu);
+        void invalidate(const MatrixND<T>& aux, Tr alpha, int split);
+        void invalidates(const MatrixND<T>& aux, Tr alpha);
 
         void single_flip(int site, int split, Vector2D<Tr> factors, Vector2D<Tv> ratios) noexcept;
-        void calcGreens(GreenArray& greens, Tr betaMu);
+        void calcGreens(GreenPair& greens, int split, Tr betaMu);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return qr.getRow(); }
@@ -62,8 +63,6 @@ namespace Physica {
     private:
         void splitDiag(const QDTDecomp<T>& qdt, Tr betaMu) noexcept;
         [[nodiscard]] std::pair<Tr, Tv> calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu);
-        /* Static members */
-        static void checkSign(Tv sign1, Tv sign2) noexcept;
     };
 
     template<Scalar T>
@@ -77,7 +76,7 @@ namespace Physica {
             , buffer(params.getNumSite()) {}
 
     template<Scalar T>
-    void GreenProd<T>::invalidate(const DenseMatrix<T>& aux, GreenArray& greens, Tr alpha, Tr betaMu, int split) {
+    void GreenProd<T>::invalidate(const MatrixND<T>& aux, Tr alpha, int split) {
         DiagMatrix<Tr> expU(getNumSite());
         expU.diag() = exp(alpha * aux.col(split));
         chainU[split] = expT * expU;
@@ -86,12 +85,10 @@ namespace Physica {
 
         chainU.invalidate(split);
         chainD.invalidate(split);
-
-        calcGreens(greens, betaMu);
     }
 
     template<Scalar T>
-    void GreenProd<T>::invalidates(const DenseMatrix<T>& aux, GreenArray& greens, Tr alpha, Tr betaMu) {
+    void GreenProd<T>::invalidates(const MatrixND<T>& aux, Tr alpha) {
         const int numSplit = getNumSplit();
         DiagMatrix<Tr> expU(getNumSite());
         for (int split = 0; split < numSplit; ++split) {
@@ -102,8 +99,6 @@ namespace Physica {
         }
         chainU.invalidates();
         chainD.invalidates();
-
-        calcGreens(greens, betaMu);
     }
 
     template<Scalar T>
@@ -117,29 +112,19 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void GreenProd<T>::calcGreens(GreenArray& greens, Tr betaMu) {
+    void GreenProd<T>::calcGreens(GreenPair& greens, int split, Tr betaMu) {
         const int numSplit = getNumSplit();
-        Tr lnAbsDetU = 0;
-        Tv signU;
-        for (size_t i = 0; i < numSplit; ++i) {
-            const int to = (numSplit + i - 1) % numSplit;
-            auto [lnAD, sign] = calcGreen(chainU.multiply(i, to), greens(0, i), betaMu);
-            if (i != 0)
-                checkSign(signU, sign);
-
-            lnAbsDetU.toNextMean(i, lnAD);
+        const int from = (split + 1) % numSplit;
+        const int to = (numSplit + split) % numSplit;
+        Tr lnAbsDetU, lnAbsDetD, signU, signD;
+        {
+            auto [lnAD, sign] = calcGreen(chainU.multiply(from, to), greens[0], betaMu);
+            lnAbsDetU = lnAD;
             signU = sign;
         }
-
-        Tr lnAbsDetD = 0;
-        Tv signD;
-        for (size_t i = 0; i < numSplit; ++i) {
-            const int to = (numSplit + i - 1) % numSplit;
-            auto [lnAD, sign] = calcGreen(chainD.multiply(i, to), greens(1, i), betaMu);
-            if (i != 0)
-                checkSign(signD, sign);
-
-            lnAbsDetD.toNextMean(i, lnAD);
+        {
+            auto [lnAD, sign] = calcGreen(chainD.multiply(from, to), greens[1], betaMu);
+            lnAbsDetD = lnAD;
             signD = sign;
         }
         lnAbsDet = lnAbsDetU + lnAbsDetD;
@@ -187,12 +172,5 @@ namespace Physica {
         MatrixND<T> temp = buffer * qr.getMatrixQ();
         green = qr.getMatrixR().inv() * temp.hermite();
         return {lnAD, sign};
-    }
-
-    template<Scalar T>
-    void GreenProd<T>::checkSign([[maybe_unused]] Tv sign1, [[maybe_unused]] Tv sign2) noexcept {
-        // TODO: check complex sign
-        if constexpr (!T::isComplex)
-            assert(sign1 == sign2 && "[Error]: Unexpected sign mismatch");
     }
 }

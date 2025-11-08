@@ -32,10 +32,9 @@ namespace Physica {
     class SystemSampler : public GreenSampler<T> {
         using This = SystemSampler<T>;
         using Base = GreenSampler<T>;
-        using typename Base::Tv;
+        using GreenPair = DQMC<T>::GreenPair;
 
-        using MatrixND = DQMC<T>::MatrixND;
-        using GreenArray = DQMC<T>::GreenArray;
+        using typename Base::Tv;
     public:
         enum Observable {
             AFM, // Antiferromagnetic Structure Factor
@@ -43,7 +42,7 @@ namespace Physica {
             DOW // Double Occupancy Wave
         };
     private:
-        Array<MatrixND> observes;
+        Array<MatrixND<T>> observes;
         FFT<T, 2> fft;
     public:
         SystemSampler(const DQMC<T>& dqmc, const LatticeModel<2>& lattice, size_t numSample);
@@ -54,10 +53,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const Array<MatrixND, 2>& greens, Observable type);
-        void sample(const GreenArray& greens, Observable type);
+        void sample(const GreenPair& greens, Observable type);
 
-        [[nodiscard]] MatrixND calcMean() const;
+        [[nodiscard]] MatrixND<T> calcMean() const;
         /* Getters */
         using Base::getNumSample;
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
@@ -65,7 +63,7 @@ namespace Physica {
         [[nodiscard]] int getNumSiteY() const noexcept { return fft.getRSpaceSize()[1]; }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
-        MatrixND calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) noexcept;
+        MatrixND<T> calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable type) noexcept;
     };
 
     template<Scalar T>
@@ -78,24 +76,17 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void SystemSampler<T>::sample(const Array<MatrixND, 2>& greens, Observable type) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type);
+    void SystemSampler<T>::sample(const GreenPair& greens, Observable type) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * Base::dqmc.getSign();
         Base::sample();
     }
 
     template<Scalar T>
-    void SystemSampler<T>::sample(const GreenArray& greens, Observable type) {
-        for (int i = 0; i < greens.getCol(); ++i)
-            observes[Base::getCursor()].toNextMean(i, calcObservable(greens(0, i), greens(1, i), type) * Base::dqmc.getSign());
-        Base::sample();
-    }
-
-    template<Scalar T>
-    auto SystemSampler<T>::calcMean() const -> MatrixND {
+    auto SystemSampler<T>::calcMean() const -> MatrixND<T> {
         const int kX = getNumSiteX();
         const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
         const Tv sign = Base::calcSign();
-        MatrixND result(kX, kY);
+        MatrixND<T> result(kX, kY);
         VectorND<T> buffer(getNumSample());
         for (int x = 0; x < kX; ++x) {
             for (int y = 0; y < kY; ++y) {
@@ -108,7 +99,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcObservable(const MatrixND& greenU, const MatrixND& greenD, Observable type) noexcept -> MatrixND {
+    auto SystemSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable type) noexcept -> MatrixND<T> {
         int numSite = Base::getNumSite();
         auto flatten = fft.getRSpace().flatten();
         switch (type) {

@@ -34,10 +34,10 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
     public:
-        using GreenArray = Array2D<DenseMatrix<T>, MatrixOption::Col, 2>;
+        using GreenPair = Array<MatrixND<T>, 2>;
     private:
         MatrixND<Trv> aux;
-        GreenArray greens;
+        GreenPair greens;
         Tv sgnDet = 1;
     public:
         ImagKinetic(int numSite, int numSplit);
@@ -48,7 +48,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         Vector2D<Tr> calcDelta(int site, int split, Tr alpha) const noexcept;
-        Vector2D<Tv> calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept;
+        Vector2D<Tv> calcRatio(int site, Vector2D<Tr> deltas) const noexcept;
         [[nodiscard]] Trv calcP(int site, int split, Tr alpha) const noexcept;
         void single_flip(int site, int split, Tr alpha) noexcept;
 
@@ -62,7 +62,7 @@ namespace Physica {
         [[nodiscard]] auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Tv getSign() const noexcept { return sgnDet; }
     private:
-        void flipGreens(int site, int split, Vector2D<Tv> deltaRatios);
+        void flipGreens(int site, Vector2D<Tv> deltaRatios);
     };
 
     template<Scalar T>
@@ -77,12 +77,11 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto ImagKinetic<T>::calcRatio(int site, int split, Vector2D<Tr> deltas) const noexcept -> Vector2D<Tv> {
-        assert(site < getNumSite() && split < getNumSplit());
-        const int split1 = (split + 1) % getNumSplit();
+    auto ImagKinetic<T>::calcRatio(int site, Vector2D<Tr> deltas) const noexcept -> Vector2D<Tv> {
+        assert(site < getNumSite());
         Vector2D<Tv> result = deltas;
-        result[0] *= Trv(1) - greens(0, split1)(site, site);
-        result[1] *= Trv(1) - greens(1, split1)(site, site);
+        for (int spin : {0, 1})
+            result[spin] *= Trv(1) - greens[spin](site, site);
         result += Trv(1);
         return result; // Eq.(7.36) of [1]
     }
@@ -90,36 +89,34 @@ namespace Physica {
     template<Scalar T>
     auto ImagKinetic<T>::calcP(int site, int split, Tr alpha) const noexcept -> Trv {
         const auto deltas = calcDelta(site, split, alpha);
-        const auto ratios = calcRatio(site, split, deltas);
+        const auto ratios = calcRatio(site, deltas);
         return abs(ratios.prod());
     }
 
     template<Scalar T>
     void ImagKinetic<T>::single_flip(int site, int split, Tr alpha) noexcept {
         const auto deltas = calcDelta(site, split, alpha);
-        const auto ratios = calcRatio(site, split, deltas);
+        const auto ratios = calcRatio(site, deltas);
         auto spins = aux.row(site);
         spins[split] = -spins[split];
 
-        flipGreens(site, split, divide(deltas, ratios));
+        flipGreens(site, divide(deltas, ratios));
         Tv prod = ratios.prod();
         sgnDet *= unit(prod);
     }
 
     template<Scalar T>
-    void ImagKinetic<T>::flipGreens(int site, int split, Vector2D<Tv> deltaRatios) {
+    void ImagKinetic<T>::flipGreens(int site, Vector2D<Tv> deltaRatios) {
         // Eq. (7.44) of [1]
         const int numSite = getNumSite();
         VectorND<T> vc(numSite);
         VectorND<T> vr(numSite);
-        auto flipGreen = [site, &vc, &vr](MatrixND<T>& green, Tv deltaRatio) {
+        for (int spin : {0, 1}) {
+            auto& green = greens[spin];
             vc = (green - UnitMatrix<T>(green)).col(site);
             vr = green.row(site);
-            green += deltaRatio * (vc * vr.transpose());
-        };
-        const int split1 = (split + 1) % getNumSplit();
-        for (int spin : {0, 1})
-            flipGreen(greens(spin, split1), deltaRatios[spin]);
+            green += deltaRatios[spin] * (vc * vr.transpose());
+        }
     }
 
     template<Scalar T>
