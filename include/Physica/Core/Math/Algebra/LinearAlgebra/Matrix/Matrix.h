@@ -43,6 +43,8 @@ namespace Physica {
             AnyMajor = 0b10,
         };
     public:
+        MatrixOption() = delete;
+        /* Static members */
         template<class MatrixType>
         consteval static bool isColMatrix() noexcept {
             return isAnyMajor<MatrixType>() || !(Traits<std::remove_cvref_t<MatrixType>>::Option & Row);
@@ -114,7 +116,5 @@ namespace Physica {
             using HermiteType1 = std::remove_cvref<HermiteType>::type;
             return std::is_base_of<HermiteType1, M>::value;
         }
-    private:
-        MatrixOption();
     };
 }

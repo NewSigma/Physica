@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,16 +28,16 @@ int main() {
     
     const auto dataspace = H5DataSpace<1>({strlen(str)});
     {
-        H5File h5f(temp.getName(), H5File::ReadWrite | H5File::Creat);
+        auto h5f = H5File::open(temp.getName());
         auto dataset = h5f.createDataSet<1>("/data", H5::PredType::NATIVE_CHAR, dataspace);
         dataset.write(str, H5::PredType::NATIVE_CHAR);
     }
     {
-        char buffer[32];
-        H5File h5f(temp.getName(), H5File::ReadOnly);
+        Array<char, 32> buffer{};
+        auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
         auto dataset = h5f.openDataSet<1>("/data");
-        dataset.readStr(buffer);
-        if (strcmp(str, buffer) != 0)
+        dataset.readStr(buffer.data());
+        if (strcmp(str, buffer.data()) != 0)
             return 1;
     }
     return 0;

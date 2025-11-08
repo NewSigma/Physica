@@ -34,6 +34,8 @@ namespace Physica {
         constexpr static bool isColMajor = !(Option & MatrixOption::Row);
         constexpr static size_t MaxMajor = isColMajor ? Col : Row;
         constexpr static size_t MaxMinor = isColMajor ? Row : Col;
+        constexpr static int TransOption = isColMajor ? MatrixOption::Row : MatrixOption::Col;
+        using TransposeRtnTy = Array2D<T, TransOption, Col, Row, Allocator>;;
 
         template<class U>
         struct Helper {
@@ -66,13 +68,14 @@ namespace Physica {
         /* Operations */
         void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t order);
-        void zeros() noexcept;
-
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
+        [[nodiscard]] TransposeRtnTy transpose() const noexcept;
+
+        void zeros() noexcept;
         void swap(This& __restrict obj) noexcept;
         void swap_row(size_t r1, size_t r2) noexcept;
         void swap_col(size_t c1, size_t c2) noexcept;
@@ -94,6 +97,7 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
         /* Friends */
+        friend class Array2D<T, TransOption, Col, Row, Allocator>;
         friend class device_obj<This>;
     };
 }

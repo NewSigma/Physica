@@ -25,9 +25,10 @@ namespace Physica {
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236
      */
-    template<Matrix M, Vector V, Scalar T>
-    void applyHouseholder(const T factor, const V& householder, M&& mat) {
+    template<Matrix M, Vector V>
+    void applyHouseholder(const Scalar auto factor, const V& householder, M&& mat) {
         constexpr size_t BufferSize = V::SizeAtCompile == Dynamic ? Dynamic : (V::SizeAtCompile + 1);
+        using T = V::ScalarType;
         using BufferType = DenseVector<T, BufferSize>;
         assert(householder.getLength() + 1 == mat.getRow());
         auto copy = BufferType(householder.getLength() + 1);
@@ -38,9 +39,10 @@ namespace Physica {
         mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
-    template<Matrix M, Vector V, Scalar T>
-    void applyHouseholder(M&& mat, const T factor, const V& householder) {
+    template<Matrix M, Vector V>
+    void applyHouseholder(M&& mat, const Scalar auto factor, const V& householder) {
         constexpr size_t BufferSize = V::SizeAtCompile == Dynamic ? Dynamic : (V::SizeAtCompile + 1);
+        using T = V::ScalarType;
         using BufferType = DenseVector<T, BufferSize>;
         assert(householder.getLength() + 1 == mat.getCol());
         auto copy = BufferType(householder.getLength() + 1);
@@ -53,11 +55,19 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     void applyHouseholder(const V& householder, M&& mat) {
-        applyHouseholder(householder[0], householder.tail(1), mat);
+        using T = V::ScalarType;
+        if (householder.getLength() == 1) [[unlikely]]
+            mat *= T(1) - householder.calc(0);
+        else
+            applyHouseholder(householder.calc(0), householder.tail(1), mat);
     }
 
     template<Matrix M, Vector V>
     void applyHouseholder(M&& mat, const V& householder) {
-        applyHouseholder(mat, householder[0], householder.tail(1));
+        using T = V::ScalarType;
+        if (householder.getLength() == 1) [[unlikely]]
+            mat *= T(1) - householder.calc(0);
+        else
+            applyHouseholder(mat, householder.calc(0), householder.tail(1));
     }
 }

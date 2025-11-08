@@ -79,6 +79,14 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    auto Array2D<T, Option, Row, Col, Allocator>::transpose() const noexcept -> TransposeRtnTy {
+        TransposeRtnTy result{};
+        result.arr = arr;
+        result.r = r;
+        return result;
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::zeros() noexcept {
         asArray().zeros();
     }

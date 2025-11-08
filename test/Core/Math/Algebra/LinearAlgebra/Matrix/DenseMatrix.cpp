@@ -31,7 +31,7 @@ int main() {
         const auto data = MatrixType::random_uniform<RandomSource>(32, 16);
 
         TempFile tmp("/tmp/tmpXXXXXX");
-        H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
+        auto h5f = H5File::open(tmp.getName());
         data.write(h5f, "/set");
 
         MatrixType buffer(data.getRow(), data.getCol());
@@ -45,7 +45,7 @@ int main() {
         const auto data = MatrixType::random_uniform<RandomSource>(16, 20);
 
         TempFile tmp("/tmp/tmpXXXXXX");
-        H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
+        auto h5f = H5File::open(tmp.getName());
         data.write(h5f, "/set");
 
         MatrixType buffer(data.getRow(), data.getCol());
@@ -59,7 +59,7 @@ int main() {
         const auto data = MatrixType::random_uniform<RandomSource>(16, 12);
 
         TempFile tmp("/tmp/tmpXXXXXX");
-        H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
+        auto h5f = H5File::open(tmp.getName());
         data.write(h5f, "/set");
 
         MatrixType buffer(data.getRow(), data.getCol());

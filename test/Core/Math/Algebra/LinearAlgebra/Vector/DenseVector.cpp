@@ -67,12 +67,12 @@ namespace {
 
             TempFile tmp("/tmp/tmpXXXXXX");
             {
-                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
+                auto h5f = H5File::open(tmp.getName());
                 data.write(h5f, "set");
             }
             VectorND<T> buffer(data.getLength());
             {
-                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
+                auto h5f = H5File::open(tmp.getName(), H5File::OpenFlag::ReadOnly);
                 buffer.read(h5f, "set");
             }
             if (data != buffer)
@@ -84,12 +84,12 @@ namespace {
 
             TempFile tmp("/tmp/tmpXXXXXX");
             {
-                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
+                auto h5f = H5File::open(tmp.getName());
                 data.write(h5f, "set");
             }
             VectorND<T> buffer(data.getLength());
             {
-                H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
+                auto h5f = H5File::open(tmp.getName(), H5File::OpenFlag::ReadOnly);
                 buffer.read(h5f, "set");
             }
             if (data != buffer)

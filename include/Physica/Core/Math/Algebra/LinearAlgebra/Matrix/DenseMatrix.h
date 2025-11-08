@@ -76,6 +76,7 @@ namespace Physica {
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
+        using Base::transpose;
         [[nodiscard]] auto& flatten() noexcept { return Storage::asArray(); }
         [[nodiscard]] const auto& flatten() const noexcept { return Storage::asArray(); }
 

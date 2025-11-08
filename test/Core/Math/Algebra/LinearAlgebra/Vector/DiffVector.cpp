@@ -41,11 +41,11 @@ namespace {
 
         TempFile tmp("/tmp/tmpXXXXXX");
         {
-            auto h5f = H5File::create(tmp.getName());
+            auto h5f = H5File::open(tmp.getName());
             data.write(h5f, "x");
         }
         VectorND<dfloat> result;
-        auto h5f = H5File(tmp.getName());
+        auto h5f = H5File::open(tmp.getName(), H5File::ReadOnly);
         result.read(h5f, "x");
         if (data != result)
             exit(EXIT_FAILURE);
