@@ -32,7 +32,7 @@ namespace Physica {
     class SystemSampler : public GreenSampler<T> {
         using This = SystemSampler<T>;
         using Base = GreenSampler<T>;
-        using GreenPair = DQMC<T>::GreenPair;
+        using GreenPair = ImagKinetic<T>::GreenPair;
 
         using typename Base::Tv;
     public:

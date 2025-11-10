@@ -140,7 +140,7 @@ namespace {
         axisY->setLabelFormat("%.1f");
 
         const auto betas = VectorND<T>::linspace(0, PlotRange, PlotPoint);
-        H5File h5f("TPQ.h5", H5File::ReadOnly);
+        auto h5f = H5File::open("TPQ.h5", H5File::ReadOnly);
         QPen pen1, pen2;
         {
             VectorND<T> tpq_hphi;

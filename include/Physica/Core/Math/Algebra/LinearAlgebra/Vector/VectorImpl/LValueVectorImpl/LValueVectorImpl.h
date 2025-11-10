@@ -51,7 +51,7 @@ namespace Physica {
 
     template<class Derived>
     void LValueVector<Derived>::operator-=(const Vector auto& v) {
-        Base::getDerived() += -v; // To avoid alias
+        Base::getDerived() += -v;
     }
 
     template<class Derived>

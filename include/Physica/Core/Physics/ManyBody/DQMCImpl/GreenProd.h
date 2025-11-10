@@ -51,8 +51,8 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void invalidate(const MatrixND<T>& aux, Tr alpha, int split);
-        void invalidates(const MatrixND<T>& aux, Tr alpha);
+        void invalidate(const MatrixND<Trv>& aux, Tr alpha, int split);
+        void invalidates(const MatrixND<Trv>& aux, Tr alpha);
 
         void single_flip(int site, int split, Vector2D<Tr> factors, Vector2D<Tv> ratios) noexcept;
         void calcGreens(GreenPair& greens, int split, Tr betaMu);
@@ -76,7 +76,7 @@ namespace Physica {
             , buffer(params.getNumSite()) {}
 
     template<Scalar T>
-    void GreenProd<T>::invalidate(const MatrixND<T>& aux, Tr alpha, int split) {
+    void GreenProd<T>::invalidate(const MatrixND<Trv>& aux, Tr alpha, int split) {
         DiagMatrix<Tr> expU(getNumSite());
         expU.diag() = exp(alpha * aux.col(split));
         chainU[split] = expT * expU;
@@ -88,7 +88,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void GreenProd<T>::invalidates(const MatrixND<T>& aux, Tr alpha) {
+    void GreenProd<T>::invalidates(const MatrixND<Trv>& aux, Tr alpha) {
         const int numSplit = getNumSplit();
         DiagMatrix<Tr> expU(getNumSite());
         for (int split = 0; split < numSplit; ++split) {
@@ -116,7 +116,8 @@ namespace Physica {
         const int numSplit = getNumSplit();
         const int from = (split + 1) % numSplit;
         const int to = (numSplit + split) % numSplit;
-        Tr lnAbsDetU, lnAbsDetD, signU, signD;
+        Tr lnAbsDetU, lnAbsDetD;
+        T signU, signD;
         {
             auto [lnAD, sign] = calcGreen(chainU.multiply(from, to), greens[0], betaMu);
             lnAbsDetU = lnAD;

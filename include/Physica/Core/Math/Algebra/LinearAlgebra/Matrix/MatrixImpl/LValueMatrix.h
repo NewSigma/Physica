@@ -78,8 +78,8 @@ namespace Physica {
         void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
 
         Derived& operator=(const Matrix auto& m);
-        void operator+=(const Matrix auto& m) { Base::getDerived() = Base::getDerived() + m; }
-        void operator-=(const Matrix auto& m) { Base::getDerived() = Base::getDerived() - m; }
+        void operator+=(const Matrix auto& m);
+        void operator-=(const Matrix auto& m);
         void operator*=(const Matrix auto& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
 
         [[nodiscard]] RefTy operator()(size_t row, size_t col);

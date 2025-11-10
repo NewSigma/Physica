@@ -82,8 +82,8 @@ namespace Physica {
             : params(&params_)
             , kinetic(params_.getNumSite(), params_.getNumSplit())
             , productor(params_)
-            , sites(params_.getNumSite())
-            , probs(params_.getNumSite()) {
+            , probs(params_.getNumSite())
+            , sites(params_.getNumSite()) {
         assert(getNumSplit() % 2 == 0 && "[Error]: An even number of splits is required");
         for (int i = 0; i < getNumSite(); ++i)
             sites[i] = i;

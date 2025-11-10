@@ -32,6 +32,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueMatrix<Derived>::operator+=(const Matrix auto& m) {
+        m.assign_add(Base::getDerived());
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::operator-=(const Matrix auto& m) {
+        Base::getDerived() += -m;
+    }
+
+    template<class Derived>
     auto LValueMatrix<Derived>::operator()(size_t row, size_t col) -> RefTy {
         return *data_ptr(row, col);
     }

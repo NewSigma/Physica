@@ -37,12 +37,12 @@ H5DataSet<1> H5File::createDataSet(const std::string& filepath, const std::strin
     if (!fin)
         throw IOException("[Error]: File not found");
     fin.seekg(0, std::ios::end);
-    const hsize_t size = fin.tellg();
+    const auto size = fin.tellg();
     fin.seekg(0, std::ios::beg);
 
     auto buffer = Array<char>(size);
     fin.read(buffer.data(), size);
-    const auto space = H5DataSpace<1>({size});
+    const auto space = H5DataSpace<1>({static_cast<hsize_t>(size)});
     auto dataset = Base::createDataSet(name, H5::PredType::NATIVE_CHAR, space);
     dataset.write(buffer.data(), H5::PredType::NATIVE_CHAR);
     return dataset;
@@ -59,5 +59,7 @@ H5Group H5File::openGroup(const std::string& name) {
 H5File H5File::open(const std::string& name, unsigned int openflag) {
     if (std::filesystem::exists(name))
         return H5File(name, openflag);
+    if (!bool(openflag & ReadWrite))
+        throw IOException("File not found");
     return H5File(name, H5File::Creat | openflag);
 }

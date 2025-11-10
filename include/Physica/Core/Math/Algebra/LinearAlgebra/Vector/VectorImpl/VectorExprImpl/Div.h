@@ -21,95 +21,131 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<class T, class U>
-    class VectorExpr<ExprType::Div, T, U>
-            : public BinaryVectorExpr<ExprType::Div, T, U> {
-        static_assert(Scalar<T> || Scalar<U>, "[Error]: Either type should be Scalar");
+    template<class U, class V>
+    class VectorExpr<ExprType::Div, U, V>
+            : public BinaryVectorExpr<ExprType::Div, U, V> {
+        static_assert(Scalar<U> || Scalar<V>, "[Error]: Either type should be Scalar");
 
-        using Base = BinaryVectorExpr<ExprType::Div, T, U>;
-    public:
-        using typename Base::ScalarType;
+        using Base = BinaryVectorExpr<ExprType::Div, U, V>;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
     public:
-        VectorExpr(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
-            if constexpr (Vector<T>)
-                assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
-        }
+        VectorExpr(U lhs, V rhs);
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
-            if constexpr (Vector<T>)
-                return Base::getLHS().calc(s) / Base::getRHS();
-            else
-                return Base::getLHS() / Base::getRHS().calc(s);
-        }
-
-        [[nodiscard]] Tv calc_value(size_t s) const {
-            if constexpr (Vector<T>)
-                return Base::getLHS().calc_value(s) / Base::getRHS().value();
-            else
-                return Base::getLHS().value() / Base::getRHS().calc_value(s);
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t s) const;
+        [[nodiscard]] Tv calc_value(size_t s) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            if constexpr (Vector<T>)
-                return Base::getLHS().template packet<Pack>(index) * Pack(reciprocal(Base::getRHS()));
-            else
-                return Pack(Base::getLHS()) / Base::getRHS().template packet<Pack>(index);
-        }
-
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            if constexpr (Vector<T>)
-                return Base::getLHS().template packetPartial<Pack>(index, count) * Pack(reciprocal(Base::getRHS()));
-            else
-                return Pack(Base::getLHS()) / Base::getRHS().template packetPartial<Pack>(index, count);
-        }
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
     };
+
+    template<class U, class V>
+    VectorExpr<ExprType::Div, U, V>::VectorExpr(U lhs, V rhs) : Base(std::forward<U>(lhs), std::forward<V>(rhs)) {
+        if constexpr (Vector<U>)
+            assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
+    }
+
+    template<class U, class V>
+    auto VectorExpr<ExprType::Div, U, V>::calc(size_t s) const -> CoDiff<T> {
+        if constexpr (Vector<U>)
+            return Base::getLHS().calc(s) / Base::getRHS();
+        else
+            return Base::getLHS() / Base::getRHS().calc(s);
+    }
+
+    template<class U, class V>
+    auto VectorExpr<ExprType::Div, U, V>::calc_value(size_t s) const -> Tv {
+        if constexpr (Vector<U>)
+            return Base::getLHS().calc_value(s) / Base::getRHS().value();
+        else
+            return Base::getLHS().value() / Base::getRHS().calc_value(s);
+    }
+
+    template<class U, class V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Div, U, V>::packet(size_t index) const {
+        if constexpr (Vector<U>)
+            return Base::getLHS().template packet<Pack>(index) * Pack(reciprocal(Base::getRHS()));
+        else {
+            auto div = Base::getRHS().template packet<Pack>(index);
+            assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
+            return Pack(Base::getLHS()) / div;
+        }
+    }
+
+    template<class U, class V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Div, U, V>::packetPartial(size_t index, size_t count) const {
+        if constexpr (Vector<U>)
+            return Base::getLHS().template packetPartial<Pack>(index, count) * Pack(reciprocal(Base::getRHS()));
+        else {
+            auto div = Base::getRHS().template packetPartial<Pack>(index, count);
+            for (size_t i = 0; i < count; ++i)
+                assert(!div[i].isZero() && "[Error]: Divide by zero");
+            return (Pack(Base::getLHS()) / div).cutoff(count);
+        }
+    }
 
     template<Vector V1, Vector V2>
     class VectorExpr<ExprType::Div, V1, V2>
             : public BinaryVectorExpr<ExprType::Div, V1, V2> {
         using Base = BinaryVectorExpr<ExprType::Div, V1, V2>;
-    public:
-        using typename Base::ScalarType;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
-            assert(!Base::getRHS().calc(s).isZero() && "[Error]: Divide by zero");
-            return Base::getLHS().calc(s) / Base::getRHS().calc(s);
-        }
-
-        [[nodiscard]] Tv calc_value(size_t s) const {
-            assert(!Base::getRHS().calc_value(s).isZero() && "[Error]: Divide by zero");
-            return Base::getLHS().calc_value(s) / Base::getRHS().calc_value(s);
-        }
+        [[nodiscard]] CoDiff<T> calc(size_t s) const;
+        [[nodiscard]] Tv calc_value(size_t s) const;
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            return Base::getLHS().template packet<Pack>(index) / Base::getRHS().template packet<Pack>(index);
-        }
-
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            const auto pack1 = Base::getLHS().template packetPartial<Pack>(index, count);
-            const auto pack2 = Base::getRHS().template packetPartial<Pack>(index, count);
-            return (pack1 / pack2).cutoff(count);
-        }
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
     };
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] auto operator/(T&& v, U&& x) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Div, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprType::Div, V1, V2>::calc(size_t s) const -> CoDiff<T> {
+        assert(!Base::getRHS().calc(s).isZero() && "[Error]: Divide by zero");
+        return Base::getLHS().calc(s) / Base::getRHS().calc(s);
     }
 
-    template<Scalar U, Vector T>
-    [[nodiscard]] auto operator/(U&& x, T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Div, U&&, T&&>(std::forward<U>(x), std::forward<T>(v));
+    template<Vector V1, Vector V2>
+    auto VectorExpr<ExprType::Div, V1, V2>::calc_value(size_t s) const -> Tv {
+        assert(!Base::getRHS().calc_value(s).isZero() && "[Error]: Divide by zero");
+        return Base::getLHS().calc_value(s) / Base::getRHS().calc_value(s);
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Div, V1, V2>::packet(size_t index) const {
+        auto div = Base::getRHS().template packet<Pack>(index);
+        assert(!div.isZero().horizontal_or() && "[Error]: Divide by zero");
+        return Base::getLHS().template packet<Pack>(index) / div;
+    }
+
+    template<Vector V1, Vector V2>
+    template<Packet Pack>
+    Pack VectorExpr<ExprType::Div, V1, V2>::packetPartial(size_t index, size_t count) const {
+        const auto pack1 = Base::getLHS().template packetPartial<Pack>(index, count);
+        const auto pack2 = Base::getRHS().template packetPartial<Pack>(index, count);
+        for (size_t i = 0; i < count; ++i)
+            assert(!pack2[i].isZero() && "[Error]: Divide by zero");
+        return (pack1 / pack2).cutoff(count);
+    }
+
+    template<Vector V, Scalar U>
+    [[nodiscard]] auto operator/(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Div, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
+    }
+
+    template<Scalar U, Vector V>
+    [[nodiscard]] auto operator/(U&& x, V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprType::Div, U&&, V&&>(std::forward<U>(x), std::forward<V>(v));
     }
 
     template<Vector V1, Vector V2>

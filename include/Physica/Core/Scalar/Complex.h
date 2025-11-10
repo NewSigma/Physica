@@ -81,7 +81,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ T phase() const;
 
         [[nodiscard]] PacketType packet() const;
-        void writePacket(const PacketType packet);
+        void writePacket(PacketType packet);
         __host__ __device__ void swap(Complex& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ T& real() noexcept { return re; }
@@ -91,6 +91,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ std::complex<Tm> toMachine() const noexcept;
         [[nodiscard]] __host__ __device__ auto toMachineThrust() const noexcept;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return re.isZero() && im.isZero(); }
+        [[nodiscard]] __host__ __device__ bool isSubNormal() const noexcept { return re.isSubNormal() && im.isSubNormal(); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
         /* Static Members */
         [[nodiscard]] static This nan() noexcept;

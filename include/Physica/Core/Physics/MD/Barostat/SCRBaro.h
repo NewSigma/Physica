@@ -29,7 +29,7 @@ namespace Physica {
      * [1] J. Chem. Phys. 153, 114107 (2020); https://doi.org/10.1063/5.0020514
      * [2] arXiv:2111.06402; https://doi.org/10.48550/arXiv.2111.06402
      */
-    template<Scalar T, size_t NumReplica, RNG R = Random<>, BaroType Type>
+    template<Scalar T, size_t NumReplica, BaroType Type, RNG R = Random<>>
     class SCRBaro : private Berendsen<T, NumReplica, Type> {
         using Base = Berendsen<T, NumReplica, Type>;
         using typename Base::MDCellType;
@@ -56,13 +56,13 @@ namespace Physica {
         [[nodiscard]] LatticeMatrix makeDiffuseMatrix(T pressPerDOF) const;
     };
 
-    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
-    SCRBaro<T, NumReplica, R, Type>::SCRBaro(
+    template<Scalar T, size_t NumReplica, BaroType Type, RNG R>
+    SCRBaro<T, NumReplica, Type, R>::SCRBaro(
             T compressRate, T tempT, T targetP) : Base(compressRate, tempT, targetP) {}
 
-    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
+    template<Scalar T, size_t NumReplica, BaroType Type, RNG R>
     template<class ForceModel>
-    void SCRBaro<T, NumReplica, R, Type>::npt_step(auto& rpmd, const LatticeMatrix& stress, T deltaT) {
+    void SCRBaro<T, NumReplica, Type, R>::npt_step(auto& rpmd, const LatticeMatrix& stress, T deltaT) {
         const T pressPerDOF = (Base::tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
         const auto decayMatrix = Base::makeDecayMatrix(stress, pressPerDOF);
         const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);
@@ -84,8 +84,8 @@ namespace Physica {
             }));
     }
 
-    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
-    auto SCRBaro<T, NumReplica, R, Type>::makeDiffuseMatrix(T pressPerDOF) const -> LatticeMatrix {
+    template<Scalar T, size_t NumReplica, BaroType Type, RNG R>
+    auto SCRBaro<T, NumReplica, Type, R>::makeDiffuseMatrix(T pressPerDOF) const -> LatticeMatrix {
         const T diffuseFactor = sqrt(T(2.0 / Dim) * Base::compressRate * pressPerDOF);
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (Type == BaroType::Anisotropic) {
@@ -108,8 +108,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, size_t NumReplica, RNG R, BaroType Type>
-    class Traits<SCRBaro<T, NumReplica, R, Type>> {
+    template<Scalar T, size_t NumReplica, BaroType Type, RNG R>
+    class Traits<SCRBaro<T, NumReplica, Type, R>> {
     public:
         constexpr static unsigned int Order = 1;
     };

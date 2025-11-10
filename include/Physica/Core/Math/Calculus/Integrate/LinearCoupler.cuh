@@ -182,7 +182,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R = Random<>>
+    template<RNG R>
     void device_obj<LinearCoupler<T>>::random_shuffle() {
         VectorND<Tv> mask_shuffle(getDim());
         mask_shuffle.zeros();

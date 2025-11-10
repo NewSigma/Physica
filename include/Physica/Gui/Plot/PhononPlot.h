@@ -94,7 +94,7 @@ namespace Physica {
             size_t point,
             VectorType& freq,
             ComplexMatrix* eigenvector,
-            const VectorType& lastFreq,
+            const Vector auto& lastFreq,
             VectorType& lastDeltaFreq);
         void sortFreq(VectorType& freq, ComplexMatrix* eigenvector, const VectorType& predictFreq) const;
     };
@@ -102,7 +102,7 @@ namespace Physica {
     template<Scalar T>
     PhononPlot<T>::PhononPlot() : Plot(0, 0, 0, 0, 1, 100), currentX(0) {
         const QFont font = Plot::getAxisX()->labelsFont();
-        QCategoryAxis* axisX = new QCategoryAxis();
+        auto* axisX = new QCategoryAxis();
         axisX->append("Γ", 0);
         axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
         axisX->setLinePenColor(Qt::black);
@@ -246,12 +246,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononPlot<T>::EigenSolverType PhononPlot<T>::diagonalize(
+    auto PhononPlot<T>::diagonalize(
             const PhononType& phonon,
             const KSpaceFCGrid& forceConstants,
             T factor,
             Vector3D from,
-            Vector3D to) {
+            Vector3D to) -> EigenSolverType {
         const Vector3D qPoint = from * (T(1) - factor) + to * factor;
         auto fcMatrix = phonon.interpolatePoint(qPoint, forceConstants);
         phonon.toDynamicMatrix(fcMatrix);
@@ -259,8 +259,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononPlot<T>::VectorType
-    PhononPlot<T>::makeFreq(const EigenSolverType& eigen) {
+    auto PhononPlot<T>::makeFreq(const EigenSolverType& eigen) -> VectorType {
         using namespace Physica;
         auto freq = PhononType::makeFreq(eigen);
         freq *= T(PhyConst<AU>::freqToTHz(1));
@@ -270,13 +269,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PhononPlot<T>::MatrixType PhononPlot<T>::calcPaths(
+    auto PhononPlot<T>::calcPaths(
             const PhononType& phonon,
             const KSpaceFCGrid& forceConstants,
             const VectorType& factors,
             Vector3D from,
             Vector3D to,
-            BandConnectMethod method) {
+            BandConnectMethod method) -> MatrixType {
         const size_t numPoint = factors.getLength();
         MatrixType result(phonon.getNumBand(), numPoint);
         VectorType lastDeltaFreq;
@@ -284,7 +283,7 @@ namespace Physica {
             const auto eigen = diagonalize(phonon, forceConstants, factors[i], from, to);
             auto freq = makeFreq(eigen);
             if (method == BandConnectMethod::Predict)
-                predictConnect(i, freq, nullptr, result.asArray()[i == 0 ? 0 : (i - 1)], lastDeltaFreq);
+                predictConnect(i, freq, nullptr, result.col(i == 0 ? 0 : (i - 1)), lastDeltaFreq);
             auto col = result.col(i);
             col = freq;
         }
@@ -296,7 +295,7 @@ namespace Physica {
             size_t point,
             VectorType& freq,
             ComplexMatrix* eigenvector,
-            const VectorType& lastFreq,
+            const Vector auto& lastFreq,
             VectorType& lastDeltaFreq) {
         const bool isLastFreqReady = point != 0;
         if (isLastFreqReady) {

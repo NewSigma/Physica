@@ -83,7 +83,7 @@ namespace Physica {
         assert(b.getRow() == getOrder());
         MatrixB result(getOrder(), b.getCol());
         for (size_t i = 0; i < b.getCol(); ++i)
-            result.asArray() = solve(result.col(i));
+            result.col(i) = solve(result.col(i));
         return result;
     }
 

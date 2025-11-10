@@ -88,7 +88,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
         __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ float toMachine() const noexcept { return f; }
+        [[nodiscard]] __host__ __device__ constexpr float toMachine() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == 0; }
         [[nodiscard]] __host__ __device__ bool isSubNormal() const noexcept{ return std::abs(f) < std::numeric_limits<float>::min(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > 0; }

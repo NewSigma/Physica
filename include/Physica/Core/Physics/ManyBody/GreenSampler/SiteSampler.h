@@ -82,7 +82,7 @@ namespace Physica {
         case DoubleOccupy:
             return (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(Base::getNumSite());
         case MagMoment:
-            return calcObservable(greenU, greenD, Density) - calcObservable(greenU, greenD, DoubleOccupy) * 2;
+            return calcObservable(greenU, greenD, Density) - calcObservable(greenU, greenD, DoubleOccupy) * Trv(2);
         case Kinetic: {
             const auto& hoppingT = Base::getHoppingMatrix();
             return -hadamard(hoppingT, greenU + greenD).sum().real() / T(Base::getNumSite());

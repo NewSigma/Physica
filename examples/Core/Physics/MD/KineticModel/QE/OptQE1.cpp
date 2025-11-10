@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <QApplication>
 #include "Physica/Core/IO/QE/PWscfOut.h"
 #include "Physica/Gui/Plot/Plot.h"
@@ -55,7 +54,7 @@ int main(int argc, char** argv) {
         }
         {
             VectorND<ScalarType> fire;
-            H5File h5f("FireQE2.h5", H5File::ReadOnly);
+            auto h5f = H5File::open("FireQE2.h5", H5File::ReadOnly);
             fire.read(h5f, "force");
             const VectorType logNorm = ln(fire) * reciprocal(ln(ScalarType(10)));
             plot->line(logNorm).setName("FIRE(Physica)");
