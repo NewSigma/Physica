@@ -163,7 +163,7 @@ namespace {
         const ComplexMatrix mat2 = mat1;
         eigenTest(mat2, 1E-15);
 
-        DenseMatrix<float64> m = TransIsingMatrix<float64, SpinRepr<1, 8>>(1, 0.01, SquareLattice<1>({{8}, 1}), SpinRepr<1, 8>(8));
+        DenseMatrix<float64> m = TransIsingMatrix<float64, 1, 8>(1, 0.01, SquareLattice<1>({{8}, 1}));
         eigenTest(m, 1E-12);
     }
 

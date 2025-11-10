@@ -46,7 +46,8 @@ namespace Physica {
     public:
         ~HamiltonMatrix() = default;
         /* Operations */
-        [[nodiscard]] const This& hermite() const noexcept { return *this; }
+        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] const Derived& hermite() const noexcept { return Base::getDerived(); }
         /* Getters */
         [[nodiscard]] const auto& getModel() const noexcept { return Base::getDerived().getModel(); }
         [[nodiscard]] const auto& getRepr() const noexcept { return Base::getDerived().getRepr(); }
@@ -61,6 +62,14 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
     };
+
+    template<class Derived>
+    decltype(auto) HamiltonMatrix<Derived>::transpose() const noexcept {
+        if constexpr (T::isComplex)
+            return Base::transpose();
+        else
+            return Base::getDerived();
+    }
 }
 
 namespace Physica {

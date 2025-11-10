@@ -28,11 +28,8 @@ namespace Physica {
         using Base = ReprBasis<This>;
     public:
         using typename Base::StateType;
-    private:
-        int numSpin;
     public:
         SpinRepr() = default;
-        SpinRepr(int numSpin_);
         SpinRepr(const This&) = default;
         SpinRepr(This&&) noexcept = default;
         ~SpinRepr() = default;
@@ -43,14 +40,9 @@ namespace Physica {
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] int getNumSpin() const noexcept { return numSpin; }
-        [[nodiscard]] size_t getNumState() const noexcept { return size_t(1) << numSpin; }
+        [[nodiscard]] constexpr static int getNumSpin() noexcept { return NumSite; }
+        [[nodiscard]] constexpr static size_t getNumState() noexcept { return size_t(1) << NumSite; }
     };
-
-    template<int Dim, int NumSite>
-    SpinRepr<Dim, NumSite>::SpinRepr(int numSpin_) : numSpin(numSpin_) {
-        assert(numSpin == NumSite);
-    }
 
     template<int Dim, int NumSite>
     auto SpinRepr<Dim, NumSite>::operator[](size_t index) const noexcept -> StateType {
@@ -67,7 +59,6 @@ namespace Physica {
     template<int Dim, int NumSite>
     void SpinRepr<Dim, NumSite>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(numSpin, obj.numSpin);
     }
 }
 

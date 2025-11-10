@@ -149,7 +149,7 @@ namespace Physica {
         if constexpr (BC == PBC) {
             for (size_t from = 0; from < numSite; ++from) {
                 if constexpr (Dim > 1) {
-                    const auto& targets = lattice.getHopIndexArray()[from];
+                    const auto& targets = lattice.getNeighbors()[from];
                     for (size_t to : targets) {
                         hoppingMatrix(from, to) -= hoppingT;
                         hoppingMatrix(to, from) -= hoppingT;
@@ -170,7 +170,7 @@ namespace Physica {
             const auto& boundary = lattice.getSiteBoundaryMap();
             for (size_t from = 0; from < numSite; ++from) {
                 if constexpr (Dim > 1) {
-                    const auto& targets = lattice.getHopIndexArray()[from];
+                    const auto& targets = lattice.getNeighbors()[from];
                     for (size_t to : targets) {
                         PhaseScalar phase = 1;
                         auto pair = std::make_pair(from, to);

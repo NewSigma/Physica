@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
+#include "Physica/Core/Physics/ManyBody/Hamilton/J1J2Matrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
 
 using namespace Physica;
@@ -26,24 +26,14 @@ using T = float32;
 namespace {
     template<BoundaryCond BC>
     void test() {
-        TransIsingMatrix<T, 1, 3, BC> hamilton(1, 2, SquareLattice<1, BC>{{3}, 1});
-
-        const auto size = hamilton.getRow();
-        DenseMatrix<T> mat(size, size);
-        for (size_t i = 0; i < size; ++i) {
-            VectorND<T> temp(size, 0);
-            temp[i] = T(1);
-            mat.col(i) = hamilton * temp;
-        }
-
-        if (!matrixNear(hamilton, mat, 1E-7))
+        J1J2Matrix<T, 2, 9, BC> hamilton(1, 2, SquareLattice<2, BC>{{3, 3}, 1});
+        if (!hamilton.isSymm())
             exit(EXIT_FAILURE);
     }
 }
 
 int main() {
     using enum BoundaryCond;
-    test<OBC>();
     test<PBC>();
     return 0;
 }

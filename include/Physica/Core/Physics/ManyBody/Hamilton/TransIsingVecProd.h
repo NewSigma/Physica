@@ -22,16 +22,11 @@
 #include "TransIsingMatrix.h"
 
 namespace Physica {
-    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
-    class TransIsingVecProd : public RValueVector<TransIsingVecProd<T, U, BC, V>> {
-        using MatrixType = TransIsingMatrix<T, U, BC>;
-        using This = TransIsingVecProd<T, U, BC, V>;
+    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
+    class TransIsingVecProd : public RValueVector<TransIsingVecProd<T, Dim, NumSite, BC, V>> {
+        using MatrixType = TransIsingMatrix<T, Dim, NumSite, BC>;
+        using This = TransIsingVecProd<T, Dim, NumSite, BC, V>;
         using Base = RValueVector<This>;
-
-        using StateType = U::StateType;
-        constexpr static unsigned int Dim = MatrixType::Dim;
-        constexpr static unsigned int NumSite = MatrixType::NumSite;
-        constexpr static unsigned int SiteDOF = MatrixType::SiteDOF;
     public:
         using ScalarType = Base::ScalarType;
         using RealType = ScalarType::RealType;
@@ -57,19 +52,19 @@ namespace Physica {
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     private:
         /* Getters */
-        [[nodiscard]] const U& getRepr() const noexcept { return mat.getRepr(); }
+        [[nodiscard]] const auto& getRepr() const noexcept { return mat.getRepr(); }
         [[nodiscard]] T getCouplingJ() const noexcept { return mat.getCouplingJ(); }
         [[nodiscard]] T getTransG() const noexcept { return mat.getTransG(); }
     };
 
-    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
-    TransIsingVecProd<T, U, BC, V>::TransIsingVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
+    TransIsingVecProd<T, Dim, NumSite, BC, V>::TransIsingVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
+    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
     template<ExecutePolicy P>
-    void TransIsingVecProd<T, U, BC, V>::assign(Vector auto& target) const {
+    void TransIsingVecProd<T, Dim, NumSite, BC, V>::assign(Vector auto& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target.zeros();
 
@@ -104,9 +99,9 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, Representation U, BoundaryCond BC, Vector V>
-    class Traits<TransIsingVecProd<T, U, BC, V>> {
-        using MatrixType = TransIsingMatrix<T, U, BC>;
+    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
+    class Traits<TransIsingVecProd<T, Dim, NumSite, BC, V>> {
+        using MatrixType = TransIsingMatrix<T, Dim, NumSite, BC>;
         using T1 = V::ScalarType;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T, T1>::Type;

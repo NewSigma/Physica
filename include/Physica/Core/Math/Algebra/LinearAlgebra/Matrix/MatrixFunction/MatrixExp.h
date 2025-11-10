@@ -48,7 +48,7 @@ namespace Physica {
         [[nodiscard]] auto operator*(V&& v) && noexcept;
         /* Operations */
         void assign(Matrix auto& target) const;
-        [[nodiscard]] T calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
+        [[nodiscard]] T calc(size_t, size_t) const { noImpl("MatrixExp::calc() is low performance and should be avoided"); }
 
         [[nodiscard]] Tr calcTraceMu() const;
         /* Getters */

@@ -47,6 +47,9 @@ namespace Physica {
 
     template<int Dim>
     size_t SiteIndex<Dim>::toIndex1D(This dims) const noexcept {
+        for (int i = 0; i < Dim + 1; ++i)
+            assert((*this)[i] < dims[i] && "[Error]: Broken dim");
+
         size_t result = (*this)[0];
         for (int dim = 1; dim <= Dim; ++dim)
             result = result * dims[dim] + (*this)[dim];

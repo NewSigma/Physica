@@ -33,18 +33,19 @@ namespace Physica {
         using typename Base::IndexType;
         using ArgVector = std::conditional<BC == BoundaryCond::TBC, DenseVector<float64, Dim>, PlainStruct<void>>::type;
     private:
-        struct Hash {
+        struct Hasher {
             std::size_t operator()(const std::pair<int32_t, int32_t>& pair) const noexcept {
                 return std::hash<int64_t>{}((static_cast<int64_t>(pair.first) << 32U) | pair.second);
             }
         };
 
-        using HopIndexArray = std::conditional<(Dim > 1), Array<Array<size_t>>, PlainStruct<void>>::type;
+        using NeighborArray = std::conditional<(Dim > 1), Array<Array<size_t>>, PlainStruct<void>>::type;
         using SiteBoundaryMap = std::conditional<BC != BoundaryCond::PBC,
-                                                 std::unordered_map<std::pair<int, int>, int, Hash>,
+                                                 std::unordered_map<std::pair<int, int>, int, Hasher>,
                                                  PlainStruct<void>>::type;
 
-        [[no_unique_address]] HopIndexArray hopIndexArr;
+        [[no_unique_address]] NeighborArray neighbors;
+        [[no_unique_address]] NeighborArray nNeighbors;
         [[no_unique_address]] SiteBoundaryMap siteBoundaryMap;
         [[no_unique_address]] ArgVector phaseArgs;
     public:
@@ -58,26 +59,32 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void forNeighSites(std::invocable<int, int> auto fn, int site) const;
+        void forNNeighSites(std::invocable<int, int> auto fn, int site) const;
         template<Scalar T>
         auto calcPhase() const noexcept;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const auto& getHopIndexArray() const noexcept;
+        [[nodiscard]] const auto& getNeighbors() const noexcept;
+        [[nodiscard]] const auto& getNNeighbors() const noexcept;
         [[nodiscard]] const auto& getSiteBoundaryMap() const noexcept;
         [[nodiscard]] const auto& getPhaseArgs() const noexcept;
         /* Setters */
         void setPhaseArgs(ArgVector phaseArgs_) noexcept requires(BC == BoundaryCond::TBC);
     private:
-        HopIndexArray makeHopIndexArray() const noexcept;
+        NeighborArray makeNeighbors() const noexcept;
+        NeighborArray makeNNeighbors() const noexcept;
         SiteBoundaryMap makeSiteBoundaryMap() const noexcept;
     };
 
     template<int Dim, BoundaryCond BC>
     SquareLattice<Dim, BC>::SquareLattice(DimArray superSize, size_t numUnitCellSite) requires(BC != BoundaryCond::TBC)
             : Base(superSize, numUnitCellSite) {
-        if constexpr (Dim > 1)
-            hopIndexArr = makeHopIndexArray();
+        if constexpr (Dim > 1) {
+            neighbors = makeNeighbors();
+            nNeighbors = makeNNeighbors();
+        }
+
         if constexpr (BC != BoundaryCond::PBC)
             siteBoundaryMap = makeSiteBoundaryMap();
     }
@@ -86,7 +93,7 @@ namespace Physica {
     SquareLattice<Dim, BC>::SquareLattice(DimArray superSize, size_t numUnitCellSite, ArgVector phaseArgs_) requires(BC == BoundaryCond::TBC)
             : Base(std::move(superSize), numUnitCellSite) {
         if constexpr (Dim > 1)
-            hopIndexArr = makeHopIndexArray();
+            neighbors = makeNeighbors();
         siteBoundaryMap = makeSiteBoundaryMap();
         setPhaseArgs(std::move(phaseArgs_));
     }
@@ -96,9 +103,20 @@ namespace Physica {
         if constexpr (Dim == 1)
             fn(site, (site + 1) % Base::getNumSuperCellSite());
         else {
-            const auto& hopTargets = getHopIndexArray()[site];
-            for (int site1 : hopTargets)
-                fn(site, site1);
+            const auto& sites = getNeighbors()[site];
+            for (int i : sites)
+                fn(site, i);
+        }
+    }
+
+    template<int Dim, BoundaryCond BC>
+    void SquareLattice<Dim, BC>::forNNeighSites(std::invocable<int, int> auto fn, int site) const {
+        if constexpr (Dim == 1)
+            fn(site, (site + 2) % Base::getNumSuperCellSite());
+        else {
+            const auto& sites = getNNeighbors()[site];
+            for (int i : sites)
+                fn(site, i);
         }
     }
 
@@ -123,15 +141,21 @@ namespace Physica {
     void SquareLattice<Dim, BC>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
-        hopIndexArr.swap(obj.hopIndexArr);
+        neighbors.swap(obj.neighbors);
         siteBoundaryMap.swap(obj.siteBoundaryMap);
         phaseArgs.swap(obj.phaseArgs);
     }
 
     template<int Dim, BoundaryCond BC>
-    const auto& SquareLattice<Dim, BC>::getHopIndexArray() const noexcept {
+    const auto& SquareLattice<Dim, BC>::getNeighbors() const noexcept {
         static_assert(Dim > 1, "[Error]: Not available");
-        return hopIndexArr;
+        return neighbors;
+    }
+
+    template<int Dim, BoundaryCond BC>
+    const auto& SquareLattice<Dim, BC>::getNNeighbors() const noexcept {
+        static_assert(Dim > 1, "[Error]: Not available");
+        return nNeighbors;
     }
 
     template<int Dim, BoundaryCond BC>
@@ -153,21 +177,43 @@ namespace Physica {
     }
 
     template<int Dim, BoundaryCond BC>
-    auto SquareLattice<Dim, BC>::makeHopIndexArray() const noexcept -> HopIndexArray {
+    auto SquareLattice<Dim, BC>::makeNeighbors() const noexcept -> NeighborArray {
         const auto numSite = Base::getNumSuperCellSite();
-        HopIndexArray result(numSite);
-        Base::forSiteInLattice([this, numSite, &result](const IndexType index) noexcept {
-            const auto& dims = Base::getDims();
-            Array<size_t> hopTargets{};
-            hopTargets.reserve(numSite * Dim * 2);
-            for (int dim = 0; dim < Dim; ++dim) {
-                IndexType index1 = index;
-                index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
-                hopTargets.append(IndexType::toIndex1D(dims, index1));
-            }
-            hopTargets.squeeze();
+        NeighborArray result(numSite);
+        Base::forSiteInLattice([this, &result](const IndexType index) noexcept {
+            const auto dims = Base::calcDims();
             const auto site = IndexType::toIndex1D(dims, index);
-            result[site] = std::move(hopTargets);
+            Array<size_t, Dim> hopTargets{};
+            for (int dim = 0; dim < Dim; ++dim) {
+                IndexType indexN = index;
+                indexN[dim] = (indexN[dim] + 1) % Base::getSuperSize()[dim];
+                hopTargets[dim] = IndexType::toIndex1D(dims, indexN);
+            }
+            result[site] = hopTargets;
+        });
+        return result;
+    }
+
+    template<int Dim, BoundaryCond BC>
+    auto SquareLattice<Dim, BC>::makeNNeighbors() const noexcept -> NeighborArray {
+        static_assert(Dim == 2, "[Error]: Not implemented");
+        const auto numSite = Base::getNumSuperCellSite();
+        NeighborArray result(numSite);
+        Base::forSiteInLattice([this, &result](IndexType index) noexcept {
+            const auto dims = Base::calcDims();
+            const auto site = IndexType::toIndex1D(dims, index);
+            Array<size_t, Dim> hopTargets{};
+            index[0] = (index[0] + 1) % dims[0];
+            for (int dim = 0; dim < Dim; ++dim) {
+                IndexType indexNN = index;
+                size_t size = Base::getSuperSize()[1];
+                if (dim == 0)
+                    indexNN[1] = (index[1] + 1) % size;
+                else
+                    indexNN[1] = (index[1] + size - 1) % size;
+                hopTargets[dim] = IndexType::toIndex1D(dims, indexNN);
+            }
+            result[site] = hopTargets;
         });
         return result;
     }
@@ -176,7 +222,7 @@ namespace Physica {
     auto SquareLattice<Dim, BC>::makeSiteBoundaryMap() const noexcept -> SiteBoundaryMap {
         SiteBoundaryMap map{};
         Base::forSiteInLattice([this, &map](const IndexType index) noexcept {
-            const auto& dims = Base::getDims();
+            const auto dims = Base::calcDims();
             const auto site = IndexType::toIndex1D(dims, index);
             for (int dim = 0; dim < Dim; ++dim) {
                 bool onBoundary = index[dim] == dims[dim] - 1;

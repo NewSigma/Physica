@@ -21,7 +21,7 @@
 #include "SiteIndex.h"
 
 namespace Physica {
-    enum class BoundaryCond {
+    enum class BoundaryCond : char {
         PBC,
         APBC,
         TBC,
@@ -37,7 +37,7 @@ namespace Physica {
         using IndexType = SiteIndex<Dim>;
     private:
         DimArray superSize;
-        size_t numUnitCellSite;
+        size_t numUnitCellSite{};
     public:
         LatticeModel() = default;
         LatticeModel(DimArray superSize_, size_t numUnitCellSite_);
@@ -48,6 +48,8 @@ namespace Physica {
         LatticeModel& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void forSiteInLattice(std::invocable<IndexType> auto func) const noexcept(std::is_nothrow_invocable<decltype(func), IndexType>::value);
+        [[nodiscard]] IndexType calcDims() const noexcept;
+        [[nodiscard]] size_t toIndex1D(IndexType indexND) const noexcept;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -55,7 +57,6 @@ namespace Physica {
         [[nodiscard]] size_t getNumCell() const noexcept;
         [[nodiscard]] size_t getNumUnitCellSite() const noexcept { return numUnitCellSite; }
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return getNumUnitCellSite() * getNumCell(); }
-        [[nodiscard]] IndexType getDims() const noexcept;
     };
 
     template<int Dim>
@@ -86,6 +87,21 @@ namespace Physica {
     }
 
     template<int Dim>
+    auto LatticeModel<Dim>::calcDims() const noexcept -> IndexType {
+        if constexpr (Dim == 1)
+            return IndexType{superSize[0], numUnitCellSite};
+        if constexpr (Dim == 2)
+            return IndexType{superSize[0], superSize[1], numUnitCellSite};
+        if constexpr (Dim == 3)
+            return IndexType{superSize[0], superSize[1], superSize[2], numUnitCellSite};
+    }
+
+    template<int Dim>
+    size_t LatticeModel<Dim>::toIndex1D(IndexType indexND) const noexcept {
+        return IndexType::toIndex1D(calcDims(), indexND);
+    }
+
+    template<int Dim>
     void LatticeModel<Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         superSize.swap(obj.superSize);
@@ -98,15 +114,5 @@ namespace Physica {
         for (auto size : superSize)
             result *= size;
         return result;
-    }
-
-    template<int Dim>
-    auto LatticeModel<Dim>::getDims() const noexcept -> IndexType {
-        if constexpr (Dim == 1)
-            return IndexType{superSize[0], numUnitCellSite};
-        if constexpr (Dim == 2)
-            return IndexType{superSize[0], superSize[1], numUnitCellSite};
-        if constexpr (Dim == 3)
-            return IndexType{superSize[0], superSize[1], superSize[2], numUnitCellSite};
     }
 }

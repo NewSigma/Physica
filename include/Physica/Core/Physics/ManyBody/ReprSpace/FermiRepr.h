@@ -39,8 +39,8 @@ namespace Physica {
         using DownStateIndexMap = std::conditional<UseInversionSymm, PlainStruct<void>, StateIndexMap>::type;
         using PairType = std::pair<StateArray, StateIndexMap>;
 
-        int numSpinUp;
-        int numSpinDown;
+        int numSpinUp{};
+        int numSpinDown{};
         StateArray upStates;
         StateIndexMap upIndexMap;
         [[no_unique_address]] DownStateArray downStates;

@@ -72,7 +72,7 @@ namespace Physica {
         [[nodiscard]] T trace() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Lattice::getHopIndexArray;
+        using Lattice::getNeighbors;
         [[nodiscard]] T getHoppingT() const noexcept { return hoppingT; }
         [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
         [[nodiscard]] const Lattice& getLattice() const noexcept { return *this; }

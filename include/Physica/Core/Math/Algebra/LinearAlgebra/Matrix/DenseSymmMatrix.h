@@ -36,8 +36,6 @@ namespace Physica {
         using typename Base::ScalarType;
         using ColMatrix = This;
         using RowMatrix = This;
-    private:
-        using HermiteRtnTy = std::conditional<ScalarType::isComplex, Hermite<This>, const This&>::type;
     public:
         DenseSymmMatrix() = default;
         DenseSymmMatrix(const Matrix auto& mat);
@@ -67,7 +65,7 @@ namespace Physica {
         [[nodiscard]] ScalarType max() const { return asVector().max(); }
         [[nodiscard]] ScalarType min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
-        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return *this; }
+        [[nodiscard]] decltype(auto) hermite() const noexcept;
         void swap(This& __restrict m) noexcept;
 
         using Base::format;
@@ -111,7 +109,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    DenseSymmMatrix<T, Order>& DenseSymmMatrix<T, Order>::operator=(const Scalar auto& x) {
+    auto DenseSymmMatrix<T, Order>::operator=(const Scalar auto& x) -> This& {
         asVector() = x;
         return *this;
     }
@@ -148,13 +146,21 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    decltype(auto) DenseSymmMatrix<T, Order>::hermite() const noexcept {
+        if constexpr (T::isComplex)
+            return Base::hermite();
+        else
+            return *this;
+    }
+
+    template<Scalar T, size_t Order>
     void DenseSymmMatrix<T, Order>::swap(This& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
     }
 
     template<Scalar T, size_t Order>
-    DenseSymmMatrix<T, Order> DenseSymmMatrix<T, Order>::unitMatrix(size_t order) {
+    auto DenseSymmMatrix<T, Order>::unitMatrix(size_t order) -> This {
         DenseSymmMatrix<T, Order> result(order);
         result.toUnitMatrix();
         return result;
