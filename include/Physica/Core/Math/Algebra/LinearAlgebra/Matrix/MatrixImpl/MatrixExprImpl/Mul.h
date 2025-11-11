@@ -54,6 +54,16 @@ namespace Physica {
     };
 
     template<Matrix M, Scalar U>
+    auto MatrixExpr<ExprType::Mul, M, U>::operator-() const& noexcept {
+        return getLHS() * (-getRHS());
+    }
+
+    template<Matrix M, Scalar U>
+    auto MatrixExpr<ExprType::Mul, M, U>::operator-() && noexcept {
+        return std::move(getLHS()) * (-getRHS());
+    }
+
+    template<Matrix M, Scalar U>
     void MatrixExpr<ExprType::Mul, M, U>::assign(Matrix auto& target) const {
         if constexpr (MatrixOption::isSameMajor<M, decltype(target)>())
             (getLHS().flatten() * getRHS()).assign(target.flatten());
@@ -69,16 +79,6 @@ namespace Physica {
     template<Matrix M, Scalar U>
     auto MatrixExpr<ExprType::Mul, M, U>::calc_value(size_t row, size_t col) const -> Tv {
         return getLHS().calc_value(row, col) * getRHS().value();
-    }
-
-    template<Matrix M, Scalar U>
-    auto MatrixExpr<ExprType::Mul, M, U>::operator-() const& noexcept {
-        return getLHS() * (-getRHS());
-    }
-
-    template<Matrix M, Scalar U>
-    auto MatrixExpr<ExprType::Mul, M, U>::operator-() && noexcept {
-        return std::move(getLHS()) * (-getRHS());
     }
 
     template<Matrix M1, Matrix M2>

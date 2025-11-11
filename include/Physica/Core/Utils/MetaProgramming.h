@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,8 +21,7 @@
 #include <type_traits>
 
 namespace Physica {
-    template<class ScalarType>
-    class ScalarRef;
+    template<class> class ScalarRef;
 
     namespace Internal {
         template<class T>
@@ -34,10 +33,19 @@ namespace Physica {
         struct remove_ScalarRef<ScalarRef<T>> {
             using Type = T;
         };
+
+        template<template<class...> class, class>
+        struct is_instance_of : std::false_type {};
+
+        template<template<class...> class Template, class... Args>
+        struct is_instance_of<Template, Template<Args...>> : std::true_type {};
     }
 
     template<class T>
     struct remove_cvref {
         using Type = Internal::remove_ScalarRef<std::remove_cvref_t<T>>::Type;
     };
+
+    template<template<class...> class Template, class T>
+    concept instanceof = Internal::is_instance_of<Template, std::remove_cvref_t<T>>::value;
 }

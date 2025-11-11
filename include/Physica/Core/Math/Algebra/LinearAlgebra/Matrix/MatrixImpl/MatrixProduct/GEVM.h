@@ -21,62 +21,100 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
-    template<Vector T, Matrix U>
-    class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<T, U>> {
-        using This = VectorMatrixProduct<T, U>;
+    /**
+     * \class GEVM represents a outer product expression
+     *
+     * To compute (row vector) * (matrix), users should convert it to (matrix)^T * (col vector).
+     */
+    template<Vector V, Matrix M>
+    class GEVM : public RValueMatrix<GEVM<V, M>> {
+        using This = GEVM<V, M>;
     public:
         using Base = RValueMatrix<This>;
         using Base::isReverseDiff;
-        using typename Base::ScalarType;
+        using typename Base::T;
     private:
-        const T& vec;
-        const U& mat;
+        const V& vec;
+        const M& mat;
     public:
-        VectorMatrixProduct(const T& vec_, const U& mat_);
-        VectorMatrixProduct(const This&) = default;
-        VectorMatrixProduct(This&&) noexcept = default;
-        ~VectorMatrixProduct() = default;
+        GEVM(const V& vec_, const M& mat_);
+        GEVM(const This&) = default;
+        GEVM(This&&) noexcept = default;
+        ~GEVM() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        void assign(Matrix auto& target) const;
+        void assign_base(Matrix auto& target) const;
+        void assign_add(Matrix auto& target) const;
+
+        [[nodiscard]] T calc(size_t row, size_t col) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] size_t getRow() const { return vec.getLength(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] const T& getLHS() const noexcept { return vec; }
-        [[nodiscard]] const U& getRHS() const noexcept { return mat; }
+        [[nodiscard]] const V& getLHS() const noexcept { return vec; }
+        [[nodiscard]] const M& getRHS() const noexcept { return mat; }
     };
 
-    template<Vector T, Matrix U>
-    VectorMatrixProduct<T, U>::VectorMatrixProduct(const T& vec_, const U& mat_) : vec(vec_), mat(mat_) {
+    template<Vector V, Matrix M>
+    GEVM<V, M>::GEVM(const V& vec_, const M& mat_) : vec(vec_), mat(mat_) {
         assert(vec.getLength() > 0 && mat.getCol() > 0 && "[Error]: Empty vector or matrix");
         assert(mat.getRow() == 1 && "[Error]: Dimensions do not match");
     }
 
-    template<Vector T, Matrix U>
-    auto VectorMatrixProduct<T, U>::calc(size_t row, size_t col) const -> ScalarType {
+    template<Vector V, Matrix M>
+    void GEVM<V, M>::assign(Matrix auto& target) const {
+        assign_base(target);
+    }
+
+    template<Vector V, Matrix M>
+    void GEVM<V, M>::assign_base(Matrix auto& target) const {
+        if constexpr (MatrixOption::isColMatrix<decltype(target)>()) {
+            for (size_t c = 0; c < getCol(); ++c)
+                target.col(c) = vec * mat(0, c);
+        }
+        else {
+            for (size_t r = 0; r < getRow(); ++r)
+                target.row(r) = vec[r] * mat.flatten();
+        }
+    }
+
+    template<Vector V, Matrix M>
+    void GEVM<V, M>::assign_add(Matrix auto& target) const {
+        if constexpr (MatrixOption::isColMatrix<decltype(target)>()) {
+            for (size_t c = 0; c < getCol(); ++c)
+                target.col(c) += vec * mat.calc(0, c);
+        }
+        else {
+            for (size_t r = 0; r < getRow(); ++r)
+                target.row(r) += vec[r] * mat.flatten();
+        }
+    }
+
+    template<Vector V, Matrix M>
+    auto GEVM<V, M>::calc(size_t row, size_t col) const -> T {
         return vec.calc(row) * mat.calc(0, col);
     }
-    /**
-     * \note Here we force the row of \param mat is 1, because in Physica vectors are naturally col vectors.
-     * To compute row vector * matrix, users should converted it to matrix^T * col vector.
-     */
-    template<Vector T, Matrix U>
-    [[nodiscard]] auto operator*(const T& vec, const U& mat) noexcept requires(U::RowAtCompile == 1) {
-        return VectorMatrixProduct<T, U>(vec, mat);
+
+    template<Vector V, Matrix M>
+    [[nodiscard]] auto operator*(const V& vec, const M& mat) noexcept {
+        static_assert(M::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
+        return GEVM<V, M>(vec, mat);
     }
 }
 
 namespace Physica {
-    template<Vector T, Matrix U>
-    class Traits<VectorMatrixProduct<T, U>> {
-        static_assert(U::RowAtCompile == 1 || U::RowAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
+    template<Vector V, Matrix M>
+    class Traits<GEVM<V, M>> {
+        static_assert(M::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename V::ScalarType, typename M::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor;
-        constexpr static size_t RowAtCompile = T::SizeAtCompile;
-        constexpr static size_t ColAtCompile = U::ColAtCompile;
+        constexpr static size_t RowAtCompile = V::SizeAtCompile;
+        constexpr static size_t ColAtCompile = M::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
+
+#include "MatrixProductImpl/GEVMExpr.h"
