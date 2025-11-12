@@ -41,8 +41,10 @@ namespace Physica {
         const Params* params;
         ImagKinetic<T> kinetic;
         GreenProd<T> productor;
+
         VectorND<Tr> probs;
         Array<int> sites;
+        int cursor = 0;
     public:
         DQMC() = delete;
         DQMC(const Params& params_);
@@ -101,11 +103,11 @@ namespace Physica {
     void DQMC<T>::step_spin() {
         std::ranges::shuffle(sites, R::getInstance());
         probs.template random_uniform<R>();
-        int split = std::uniform_int_distribution<>(0, getNumSplit() - 1)(R::getInstance());
-        calcGreens(split);
+        calcGreens(cursor);
         for (int i = 0; i < getNumSite(); ++i)
-            metropolis(sites[i], split, probs[i]);
-        productor.invalidate(split);
+            metropolis(sites[i], cursor, probs[i]);
+        productor.invalidate(cursor);
+        cursor = (cursor + 1) % getNumSplit();
     }
 
     template<Scalar T>
@@ -128,6 +130,7 @@ namespace Physica {
         kinetic.swap(obj.kinetic);
         productor.swap(obj.productor);
         sites.swap(obj.sites);
+        std::swap(cursor, obj.cursor);
     }
 
     template<Scalar T>
