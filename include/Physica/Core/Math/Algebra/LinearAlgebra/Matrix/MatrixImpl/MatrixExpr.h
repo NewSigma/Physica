@@ -26,7 +26,6 @@ namespace Physica {
      * \class MatrixExpr represents \param T \param type \param U. e.g. matrix + scalar, expression * expression
      */
     template<ExprType Type, class T, class U = T> class MatrixExpr;
-    template<Matrix M, Vector V> class MatExprVecProd;
 
     template<ExprType Type, Matrix M>
     class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
@@ -48,11 +47,6 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-
-        template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) const& noexcept requires(!CUDA<V>);
-        template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) && noexcept requires(!CUDA<V>);
         /* Operations */
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
@@ -62,18 +56,6 @@ namespace Physica {
         [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
         [[nodiscard]] auto& getExpr() noexcept { return expr; }
     };
-
-    template<ExprType Type, Matrix M>
-    template<Vector V>
-    auto UnitaryMatrixExpr<Type, M>::operator*(V&& v) const& noexcept requires(!CUDA<V>) {
-        return MatExprVecProd<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
-    }
-
-    template<ExprType Type, Matrix M>
-    template<Vector V>
-    auto UnitaryMatrixExpr<Type, M>::operator*(V&& v) && noexcept requires(!CUDA<V>) {
-        return MatExprVecProd<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
-    }
 
     template<ExprType Type, class LHS, class RHS>
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
@@ -98,11 +80,6 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-
-        template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) const& noexcept requires(!CUDA<V>);
-        template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) && noexcept requires(!CUDA<V>);
         /* Operations */
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
@@ -133,18 +110,6 @@ namespace Physica {
         }
         else if constexpr (Vector<RHS>)
             assert(getLHS().getCol() == getRHS().getLength());
-    }
-
-    template<ExprType Type, class LHS, class RHS>
-    template<Vector V>
-    auto BinaryMatrixExpr<Type, LHS, RHS>::operator*(V&& v) const& noexcept requires(!CUDA<V>) {
-        return MatExprVecProd<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
-    }
-
-    template<ExprType Type, class LHS, class RHS>
-    template<Vector V>
-    auto BinaryMatrixExpr<Type, LHS, RHS>::operator*(V&& v) && noexcept requires(!CUDA<V>) {
-        return MatExprVecProd<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
     }
 }
 
@@ -242,4 +207,3 @@ namespace Physica {
 #include "MatrixExprImpl/Cos.h"
 #include "MatrixExprImpl/Tanh.h"
 #include "MatrixExprImpl/Sech.h"
-#include "MatrixExprImpl/ExprVecProduct.h"

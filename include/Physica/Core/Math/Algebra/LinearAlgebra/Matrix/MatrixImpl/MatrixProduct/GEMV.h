@@ -149,3 +149,5 @@ namespace Physica {
         constexpr static bool FastPacket = false;
     };
 }
+
+#include "GEMVExpr.h"

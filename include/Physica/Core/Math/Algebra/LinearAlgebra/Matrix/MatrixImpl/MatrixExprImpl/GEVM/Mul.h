@@ -18,12 +18,9 @@
  */
 #pragma once
 
-#include "../GEVM.h"
+#include "../Mul.h"
 
 namespace Physica {
-    template<ExprType, class, class> class MatrixExpr;
-    template<ExprType, class, class> class BinaryMatrixExpr;
-
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
     class MatrixExpr<ExprType::Mul, M, U> : public BinaryMatrixExpr<ExprType::Mul, M, U> {
         using Base = BinaryMatrixExpr<ExprType::Mul, M, U>;

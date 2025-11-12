@@ -49,13 +49,13 @@ namespace Physica {
         using promise_type = T;
     public:
         auto get_return_object() noexcept { return RValueWrapper(&Base::getDerived()); }
-        std::suspend_never initial_suspend() noexcept { return {}; }
+        auto initial_suspend() noexcept { return std::suspend_never{}; }
         void await_transform(auto&&) noexcept = delete
             #ifdef __cpp_deleted_function // FIXME: Remove it once we dump to CXX26
                 ("[Error]: CRCoro never suspends")
             #endif
             ;
-        std::suspend_always final_suspend() noexcept { return {}; }
+        auto final_suspend() noexcept { return std::suspend_always{}; }
         void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
         [[noreturn]] void unhandled_exception() { throw; }
     protected:

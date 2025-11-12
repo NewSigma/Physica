@@ -150,3 +150,5 @@ namespace Physica {
         return MatrixExpr<ExprType::Mul, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }
+
+#include "GEVM/Mul.h"
