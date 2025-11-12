@@ -51,7 +51,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void invalidate(const MatrixND<Trv>& aux, Tr alpha, int split);
+        void invalidate(int split);
         void invalidates(const MatrixND<Trv>& aux, Tr alpha);
 
         void single_flip(int site, int split, Vector2D<Tr> factors, Vector2D<Tv> ratios) noexcept;
@@ -76,13 +76,7 @@ namespace Physica {
             , buffer(params.getNumSite()) {}
 
     template<Scalar T>
-    void GreenProd<T>::invalidate(const MatrixND<Trv>& aux, Tr alpha, int split) {
-        DiagMatrix<Tr> expU(getNumSite());
-        expU.diag() = exp(alpha * aux.col(split));
-        chainU[split] = expT * expU;
-        expU.diag() = exp(-alpha * aux.col(split));
-        chainD[split] = expT * expU;
-
+    void GreenProd<T>::invalidate(int split) {
         chainU.invalidate(split);
         chainD.invalidate(split);
     }

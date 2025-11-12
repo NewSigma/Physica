@@ -105,6 +105,7 @@ namespace Physica {
         calcGreens(split);
         for (int i = 0; i < getNumSite(); ++i)
             metropolis(sites[i], split, probs[i]);
+        productor.invalidate(split);
     }
 
     template<Scalar T>
