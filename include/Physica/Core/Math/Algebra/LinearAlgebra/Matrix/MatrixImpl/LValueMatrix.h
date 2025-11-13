@@ -46,6 +46,7 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
+        using typename Base::Trv;
         using PtrTy = T::PtrTy;
         using ConstPtrTy = T::ConstPtrTy;
         using RefTy = T::RefTy;
@@ -140,6 +141,7 @@ namespace Physica {
 
         void zeros() noexcept;
         void toUnitMatrix();
+        [[nodiscard]] VectorND<T> balance();
         template<RNG R = Random<>>
         void random_uniform();
         template<RNG R = Random<>>

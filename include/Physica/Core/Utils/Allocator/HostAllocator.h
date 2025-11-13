@@ -65,7 +65,7 @@ namespace Physica {
     [[nodiscard]] T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
         assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = calcSize(n);
-        void* p;
+        void* p{};
         if constexpr (OverAlign)
             p = ::operator new(size, std::align_val_t(Align), std::nothrow_t{});
         else

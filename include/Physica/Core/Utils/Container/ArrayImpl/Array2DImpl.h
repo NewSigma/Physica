@@ -34,7 +34,7 @@ namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     Array2D<T, Option, Row, Col, Allocator>::Array2D(std::initializer_list<T> list)
             : arr(list) {
-        assert((Row != Dynamic || Col != Dynamic) && "[Error]: Either row or col must be given at compile");
+        static_assert(Row != Dynamic || Col != Dynamic, "[Error]: Either row or col must be given at compile");
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>

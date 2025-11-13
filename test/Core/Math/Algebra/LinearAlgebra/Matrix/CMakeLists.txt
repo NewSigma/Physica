@@ -7,6 +7,8 @@ physica_add_test(Schur MatrixDecomp/Schur.cpp)
 physica_add_test(SVD MatrixDecomp/SVD.cpp)
 physica_add_test(Tridiagonalization MatrixDecomp/Tridiagonalization.cpp)
 physica_add_test(MatrixExp MatrixFunc/MatrixExp.cpp)
+
+physica_add_test(Balance Balance.cpp)
 physica_add_test(DenseMatrix DenseMatrix.cpp)
 physica_add_test(MatrixExpr MatrixExpr.cpp)
 physica_add_test(DenseSymmMatrix DenseSymmMatrix.cpp)

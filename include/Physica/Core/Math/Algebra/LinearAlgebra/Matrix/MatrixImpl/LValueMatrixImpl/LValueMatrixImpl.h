@@ -371,6 +371,46 @@ namespace Physica {
             for (size_t j = 0; j < order; ++j)
                 refFromMajorMinor(i, j) = Tr(i == j ? 1 : 0);
     }
+    /**
+     * Transforms like D^{-1}AD, \returns diagonal part of matrix D
+     * Using exact minimum instead of the one from [1] is faster and usually works good, though it introduces some rounding error.
+     *
+     * Reference:
+     * [1] arxiv:1401.5766; https://doi.org/10.48550/arxiv.1401.5766
+     */
+    template<class Derived>
+    auto LValueMatrix<Derived>::balance() -> VectorND<T> {
+        static_assert(!MatrixOption::isSymmMatrix<Derived>(), "[Error]: Unnecesary balancing on symm matrix");
+        assert(Base::isSquare() && "[Error]: balance() requires a square matrix");
+
+        const size_t order = Base::getRow();
+        auto& m = Base::getDerived();
+        VectorND<T> result(order, 1);
+        size_t numIteration = 0;
+        while (true) {
+            bool converged = true;
+            for (size_t i = 0; i < order; ++i) {
+                Trv normR = m.row(i).squaredNorm();
+                Trv normC = m.col(i).squaredNorm();
+                Trv fac = sqrt(normC / normR);
+                Trv rep = reciprocal(fac);
+                if ((fac + rep) >= Trv(2 / 0.95)) {
+                    m.col(i) *= rep;
+                    m.row(i) *= fac;
+                    result[i] *= fac;
+                    converged = false;
+                }
+            }
+
+            if (converged)
+                break;
+
+            numIteration += 1;
+            if (numIteration == order) [[unlikely]]
+                throw BadConvergenceException("[Error]: balance() failed to converge");
+        }
+        return result;
+    }
 
     template<class Derived>
     template<RNG R>
