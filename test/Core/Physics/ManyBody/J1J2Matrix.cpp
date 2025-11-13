@@ -26,8 +26,16 @@ using T = float32;
 namespace {
     template<BoundaryCond BC>
     void test() {
-        J1J2Matrix<T, 2, 9, BC> hamilton(1, 2, SquareLattice<2, BC>{{3, 3}, 1});
+        J1J2Matrix<T, 2, 9, BC> hamilton(1, 0.3, SquareLattice<2, BC>{{3, 3}, 1});
         if (!hamilton.isSymm())
+            exit(EXIT_FAILURE);
+
+        const auto size = hamilton.getRow();
+        DenseMatrix<T> mat(size, size);
+        for (size_t i = 0; i < size; ++i)
+            mat.col(i) = hamilton * UnitVector<T>(i, size);
+
+        if (!matrixNear(hamilton, mat, 1E-7))
             exit(EXIT_FAILURE);
     }
 }

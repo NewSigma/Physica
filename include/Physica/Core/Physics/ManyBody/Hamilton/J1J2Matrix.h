@@ -23,6 +23,9 @@
 #include "HamiltonMatrix.h"
 
 namespace Physica {
+    template<Scalar, int, int, BoundaryCond, Vector>
+    class J1J2VecProd;
+
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC = BoundaryCond::PBC>
     class J1J2Matrix : public HamiltonMatrix<J1J2Matrix<T, Dim, NumSite, BC>>
                      , public SquareLattice<Dim, BC> {
@@ -51,6 +54,8 @@ namespace Physica {
         ~J1J2Matrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+
+        [[nodiscard]] auto operator*(const Vector auto& v) const noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
@@ -65,6 +70,12 @@ namespace Physica {
     J1J2Matrix<T, Dim, NumSite, BC>::J1J2Matrix(Tr couplingJ1, Tr couplingJ2, Lattice lattice)
             : Lattice(std::move(lattice)), couplingJ1(couplingJ1), couplingJ2(couplingJ2) {
         assert(Lattice::getNumSuperCellSite() == NumSite && "[Error]: Number is not consistent");
+    }
+
+    template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
+    auto J1J2Matrix<T, Dim, NumSite, BC>::operator*(const Vector auto& v) const noexcept {
+        using V = std::remove_cvref_t<decltype(v)>;
+        return J1J2VecProd<T, Dim, NumSite, BC, V>(*this, v);
     }
 
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
@@ -83,7 +94,7 @@ namespace Physica {
                     numNextAntiSpin += psiR[from] == psiR[to] ? 1 : -1;
                 }, i);
             }
-            return getCouplingJ1() * T(numAntiSpin) + getCouplingJ2() * T(numNextAntiSpin);
+            return (getCouplingJ1() * T(numAntiSpin) + getCouplingJ2() * T(numNextAntiSpin)) * Trv(0.25);
         }
 
         const auto psiC = repr[col];
@@ -96,17 +107,17 @@ namespace Physica {
         bool match = false;
         auto finder = [&, diffMask](int from, int to) noexcept {
             IntType mask = (IntType(1) << from) | (IntType(1) << to);
-            match = mask == diffMask;
+            match |= mask == diffMask;
         };
 
         for (int i = 0; i < NumSite; ++i) {
             Lattice::forNeighSites(finder, i);
             if (match)
-                return Trv(2) * getCouplingJ1();
+                return Trv(0.5) * getCouplingJ1();
 
             Lattice::forNNeighSites(finder, i);
             if (match)
-                return Trv(2) * getCouplingJ2();
+                return Trv(0.5) * getCouplingJ2();
         }
         return Trv(0);
     }
@@ -129,3 +140,5 @@ namespace Physica {
         constexpr static BoundaryCond Boundary = BC;
     };
 }
+
+#include "J1J2VecProd.h"
