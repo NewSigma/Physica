@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,20 +27,16 @@ constexpr double RepelU = 2;
 namespace {
     template<unsigned int NumSite, unsigned int NumSpinUp, unsigned int NumSpinDown>
     void testRSpinMatrix1D() {
-        using ScalarType = float64;
-        using VectorType = VectorND<ScalarType>;
-        using MatrixType = DenseMatrix<ScalarType>;
+        using T = float64;
         using ReprType = FermiRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 
         SquareLattice<1> lattice({NumSite}, 1);
-        const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
+        const HubbardMatrix<T, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
         const size_t numState = hamilton.getNumState();
-        MatrixType mat(numState, numState);
+        MatrixND<T> mat(numState, numState);
         for (size_t i = 0; i < numState; ++i) {
-            VectorType temp(numState, 0);
-            temp[i] = ScalarType(1);
             auto col = mat.col(i);
-            col = hamilton * temp;
+            col = hamilton * UnitVector<T>(i, numState);
         }
 
         if (!matrixNear(hamilton, mat, 1E-15))
@@ -49,20 +45,16 @@ namespace {
 
     template<unsigned int NumSiteX, unsigned int NumSiteY, unsigned int NumSpinUp, unsigned int NumSpinDown>
     void testRSpinMatrix2D() {
-        using ScalarType = float64;
-        using VectorType = VectorND<ScalarType>;
-        using MatrixType = DenseMatrix<ScalarType>;
+        using T = float64;
         using ReprType = FermiRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
 
         SquareLattice<2> lattice({NumSiteX, NumSiteY}, 1);
-        const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
+        const HubbardMatrix<T, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType(NumSpinUp, NumSpinDown));
         const size_t numState = hamilton.getNumState();
-        MatrixType mat(numState, numState);
+        MatrixND<T> mat(numState, numState);
         for (size_t i = 0; i < numState; ++i) {
-            VectorType temp(numState, 0);
-            temp[i] = ScalarType(1);
             auto col = mat.col(i);
-            col = hamilton * temp;
+            col = hamilton * UnitVector<T>(i, numState);
         }
 
         if (!matrixNear(hamilton, mat, 1E-15))
@@ -72,21 +64,16 @@ namespace {
     void testKSpinMatrix() {
         constexpr unsigned int NumSite = 4;
         constexpr unsigned int NumParticle = NumSite / 2;
-        using RealType = float64;
-        using ScalarType = Complex<RealType>;
-        using VectorType = VectorND<ScalarType>;
-        using MatrixType = DenseMatrix<ScalarType>;
+        using T = cfloat64;
         using ReprType = KFermiRepr<1, NumSite, true>;
 
         SquareLattice<1> lattice({NumSite}, 1);
-        const HubbardMatrix<ScalarType, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
+        const HubbardMatrix<T, ReprType> hamilton(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
         const size_t numState = hamilton.getNumState();
-        MatrixType mat(numState, numState);
+        MatrixND<T> mat(numState, numState);
         for (size_t i = 0; i < numState; ++i) {
-            VectorType temp(numState, 0);
-            temp[i] = ScalarType(1);
             auto col = mat.col(i);
-            col = hamilton * temp;
+            col = hamilton * UnitVector<T>(i, numState);
         }
 
         if (!matrixNear(hamilton, mat, 1E-15))

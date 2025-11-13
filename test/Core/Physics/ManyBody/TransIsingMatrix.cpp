@@ -30,11 +30,8 @@ namespace {
 
         const auto size = hamilton.getRow();
         DenseMatrix<T> mat(size, size);
-        for (size_t i = 0; i < size; ++i) {
-            VectorND<T> temp(size, 0);
-            temp[i] = T(1);
-            mat.col(i) = hamilton * temp;
-        }
+        for (size_t i = 0; i < size; ++i)
+            mat.col(i) = hamilton * UnitVector<T>(i, size);
 
         if (!matrixNear(hamilton, mat, 1E-7))
             exit(EXIT_FAILURE);

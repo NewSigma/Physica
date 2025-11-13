@@ -56,7 +56,7 @@ namespace Physica {
     void ImagMagnon<T>::sample(const MatrixND<T>& aux) {
         for (size_t site = 0; site < aux.getRow(); ++site) {
             fft.transform(aux.row(site));
-            magnons.fiber(2, {Base::getCursor(), site, Dynamic}) = fft.getKSpace() * reciprocal(T(getNumSplit()));
+            magnons.fiber(2, {Base::getCursor(), site, Dynamic}) = fft.getKSpace() * reciprocal(sqrt(T(getNumSplit())));
         }
         Base::sample();
     }

@@ -29,7 +29,6 @@ namespace Physica {
         using Base = RValueVector<This>;
     public:
         using ScalarType = Base::ScalarType;
-        using RealType = ScalarType::RealType;
     private:
         const MatrixType& mat;
         const V& vec;
@@ -45,7 +44,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& target) const;
 
-        [[nodiscard]] ScalarType calc(size_t index) const { noImpl(__func__); }
+        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
@@ -72,13 +71,13 @@ namespace Physica {
         for (size_t i = 0; i < getLength(); ++i) {
             using enum PauliIndex;
             auto psi0 = repr[i];
-            const T g = getTransG() * vec[i];
+            const T g = getTransG() * vec.calc(i);
             for (unsigned int site = 0; site < NumSite; ++site) {
                 auto psi = psi0;
                 target[repr[psi]] -= PauliMatrix<T, X>(site).apply(psi) * g;
             }
 
-            const T couplingJ = getCouplingJ() * vec[i];
+            const T couplingJ = getCouplingJ() * vec.calc(i);
             if constexpr (BC == BoundaryCond::OBC) {
                 for (unsigned int site = 0; site < NumSite - 1; ++site) {
                     auto coeff = PauliMatrix<T, Z>(site).apply(psi0);

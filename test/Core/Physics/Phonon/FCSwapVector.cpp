@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,10 +22,12 @@ using namespace Physica;
 using ScalarType = float64;
 using VectorType = FCSwapVector<ScalarType>;
 
-bool testIndex1D5D(size_t numDOF, const Index3D& superSize, size_t index1D) {
-    const auto index5D = VectorType::index1DTo5D(numDOF, superSize, index1D);
-    const auto index1D_1 = VectorType::index5DTo1D(numDOF, superSize, index5D);
-    return index1D == index1D_1;
+namespace {
+    bool testIndex1D5D(size_t numDOF, const Index3D& superSize, size_t index1D) {
+        const auto index5D = VectorType::index1DTo5D(numDOF, superSize, index1D);
+        const auto index1D_1 = VectorType::index5DTo1D(numDOF, superSize, index5D);
+        return index1D == index1D_1;
+    }
 }
 
 int main() {
