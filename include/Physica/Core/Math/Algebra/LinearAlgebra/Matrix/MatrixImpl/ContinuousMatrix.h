@@ -34,9 +34,11 @@ namespace Physica {
         using typename Base::ScalarType;
         using Base::RowAtCompile;
         using Base::ColAtCompile;
+        using Base::isComplex;
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
+        using typename Base::Tm;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
@@ -124,6 +126,7 @@ namespace Physica {
         [[nodiscard]] auto flatten() noexcept;
         [[nodiscard]] const auto flatten() const noexcept;
 
+        [[nodiscard]] VectorND<T> balance_mkl();
         const H5DataSet<2> read(const H5Loc& loc, const char* name);
         H5DataSet<2> write(H5Loc& loc, const char* name) const;
 
@@ -146,4 +149,6 @@ namespace Physica {
 
 #include "ContinuousMatrixImpl/ContinuousMatrixImpl.h" // IWYU pragma: export
 #include "ContinuousMatrixImpl/Flatten.h"
-
+#ifdef PHYSICA_MKL
+    #include "ContinuousMatrixImpl/ContinuousMatrix_MKL.h"
+#endif

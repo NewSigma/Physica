@@ -160,6 +160,8 @@ namespace Physica {
         LValueMatrix() = default;
         LValueMatrix(const This&) = default;
         LValueMatrix(This&&) noexcept = default;
+        /* Operations */
+        void assert_balance() const noexcept;
     };
 }
 

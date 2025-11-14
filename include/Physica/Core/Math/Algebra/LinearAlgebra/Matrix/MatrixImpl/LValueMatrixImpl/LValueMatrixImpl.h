@@ -380,8 +380,7 @@ namespace Physica {
      */
     template<class Derived>
     auto LValueMatrix<Derived>::balance() -> VectorND<T> {
-        static_assert(!MatrixOption::isSymmMatrix<Derived>(), "[Error]: Unnecesary balancing on symm matrix");
-        assert(Base::isSquare() && "[Error]: balance() requires a square matrix");
+        assert_balance();
 
         const size_t order = Base::getRow();
         auto& m = Base::getDerived();
@@ -402,12 +401,9 @@ namespace Physica {
                 }
             }
 
-            if (converged)
+            if (converged || numIteration >= 32) // 32 usually large enough
                 break;
-
             numIteration += 1;
-            if (numIteration == order) [[unlikely]]
-                throw BadConvergenceException("[Error]: balance() failed to converge");
         }
         return result;
     }
@@ -473,5 +469,11 @@ namespace Physica {
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
         return Base::getDerived()(r, c);
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::assert_balance() const noexcept {
+        static_assert(!MatrixOption::isSymmMatrix<Derived>(), "[Error]: Unnecesary balancing on symm matrix");
+        assert(Base::isSquare() && "[Error]: balance() requires a square matrix");
     }
 }
