@@ -33,12 +33,10 @@ namespace Physica {
         using MatrixND = HubbardParams<T>::MatrixND;
 
         using Tr = T::RealType;
+        using OptionalQDT = std::optional<QDTDecomp<T>>;
     private:
-        constexpr static int Option = MatrixOption::Col;
-
-        Array2D<QDTDecomp<T>, Option> decomps;
-        Array2D<bool, Option> readys;
-        Array<Array<bool*>> chainBuffer;
+        Array2D<OptionalQDT> decomps;
+        Array<Array<OptionalQDT*>> chainBuffer;
     public:
         CyclicChainQDT() = default;
         explicit CyclicChainQDT(size_t numSplit);
@@ -47,7 +45,7 @@ namespace Physica {
         ~CyclicChainQDT() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] QDTDecomp<T>& operator[](size_t i) { return decomps(i, i); }
+        [[nodiscard]] auto& operator[](size_t i) { return decomps(i, i); }
         /* Operations */
         [[nodiscard]] const QDTDecomp<T>& multiply(size_t from, size_t to) noexcept;
         void single_flip(int site, int split, Tr factor, Tr invfac) noexcept;
@@ -57,7 +55,6 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getDecomps() const noexcept { return decomps; }
-        [[nodiscard]] const auto& getReadys() const noexcept { return readys; }
         [[nodiscard]] size_t getNumSplit() const noexcept { return decomps.getRow(); }
     private:
         [[nodiscard]] bool inRange(size_t from, size_t to, size_t split) const noexcept;
@@ -66,7 +63,6 @@ namespace Physica {
     template<Scalar T>
     CyclicChainQDT<T>::CyclicChainQDT(size_t numSplit)
             : decomps(numSplit, numSplit)
-            , readys(numSplit, numSplit)
             , chainBuffer(numSplit) {
         for (size_t split = 0; split < numSplit; ++split) {
             // Buffering reduces time complexity from O(n^2) to O(n).
@@ -74,7 +70,7 @@ namespace Physica {
             for (size_t from = 0; from < numSplit; ++from) {
                 for (size_t to = 0; to < numSplit; ++to) {
                     if (inRange(from, to, split))
-                        subchains.append(readys.data_ptr(from, to));
+                        subchains.append(decomps.data_ptr(from, to));
                 }
             }
             subchains.squeeze();
@@ -88,40 +84,39 @@ namespace Physica {
     auto CyclicChainQDT<T>::multiply(size_t from, size_t to) noexcept -> const QDTDecomp<T>& {
         assert(from < getNumSplit() && to < getNumSplit());
         auto& result = decomps(from, to);
-        if (from == to || readys(from, to))
-            return result;
+        if (result)
+            return *result;
 
-        readys(from, to) = true;
         if (from < to) {
             for (size_t i = from; i < to; ++i) {
-                if (readys(from, i) && readys(i + 1, to)) {
-                    result = decomps(from, i) * decomps(i + 1, to);
-                    return result;
+                if (decomps(from, i) && decomps(i + 1, to)) {
+                    result = (*decomps(from, i)) * (*decomps(i + 1, to));
+                    return *result;
                 }
             }
             const size_t p = (from + to) / 2;
             result = multiply(from, p) * multiply(p + 1, to);
-            return result;
+            return *result;
         }
 
         assert(from > to);
         for (size_t i = from; i < getNumSplit(); ++i) {
             size_t i1 = (i + 1) % getNumSplit();
-            if (readys(from, i) && readys(i1, to)) {
-                result = decomps(from, i) * decomps(i1, to);
-                return result;
+            if (decomps(from, i) && decomps(i1, to)) {
+                result = (*decomps(from, i)) * (*decomps(i1, to));
+                return *result;
             }
         }
 
         for (size_t i = 0; i < to; ++i) {
-            if (readys(from, i) && readys(i + 1, to)) {
-                result = decomps(from, i) * decomps(i + 1, to);
-                return result;
+            if (decomps(from, i) && decomps(i + 1, to)) {
+                result = (*decomps(from, i)) * (*decomps(i + 1, to));
+                return *result;
             }
         }
 
         result = multiply(from, getNumSplit() - 1) * multiply(0, to);
-        return result;
+        return *result;
     }
 
     template<Scalar T>
@@ -129,29 +124,29 @@ namespace Physica {
         assert(split < getNumSplit());
         assert(scalarNear(factor * invfac, Tr(1), std::numeric_limits<T>::epsilon() * 10) && "[Error]: Invalid argument");
         for (size_t from = 0; from < getNumSplit(); ++from) {
-            bool ready = readys(from, split) || (from == split);
+            bool ready = decomps(from, split) || (from == split);
             if (ready)
-                decomps(from, split).single_flip(site, factor, invfac);
+                decomps(from, split)->single_flip(site, factor, invfac);
         }
     }
 
     template<Scalar T>
     void CyclicChainQDT<T>::invalidate(int split) noexcept {
         assert(split < getNumSplit());
-        for (bool* ready : chainBuffer[split])
-            *ready = false;
+        for (auto* optional : chainBuffer[split])
+            optional->reset();
     }
 
     template<Scalar T>
     void CyclicChainQDT<T>::invalidates() noexcept {
-        readys.zeros();
+        for (auto& elem : decomps.asArray())
+            elem.reset();
     }
 
     template<Scalar T>
     void CyclicChainQDT<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         decomps.swap(obj.decomps);
-        readys.swap(obj.readys);
         chainBuffer.swap(obj.chainBuffer);
     }
     /**
@@ -159,6 +154,8 @@ namespace Physica {
      */
     template<Scalar T>
     bool CyclicChainQDT<T>::inRange(size_t from, size_t to, size_t split) const noexcept {
+        if (from == to)
+            return false;
         bool cond1 = from <= split;
         bool cond2 = split < to;
         bool inRange1 = (from < to) && cond1 && cond2;

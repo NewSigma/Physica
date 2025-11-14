@@ -83,6 +83,9 @@ namespace Physica {
 
     template<Scalar T>
     void GreenProd<T>::invalidates(const MatrixND<Trv>& aux, Tr alpha) {
+        chainU.invalidates();
+        chainD.invalidates();
+
         const int numSplit = getNumSplit();
         DiagMatrix<Tr> expU(getNumSite());
         for (int split = 0; split < numSplit; ++split) {
@@ -91,8 +94,6 @@ namespace Physica {
             expU.diag() = exp(-alpha * aux.col(split));
             chainD[split] = expT * expU;
         }
-        chainU.invalidates();
-        chainD.invalidates();
     }
 
     template<Scalar T>
