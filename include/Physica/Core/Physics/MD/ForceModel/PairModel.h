@@ -134,7 +134,7 @@ namespace Physica {
                     CoDiff<Vec3D> from = pos.row(i) + delta;
                     for (size_t j = i; j < numParticle; ++j) {
                         const T r2 = (from - pos.row(j)).squaredNorm();
-                        const bool isNotSelf = Tv(std::numeric_limits<T>::min()) < r2;
+                        const bool isNotSelf = !r2.isSubNormal();
                         if (isNotSelf && r2 < squared_cutoff) {
                             const T dist = sqrt(r2);
                             if constexpr (IsPotDependOnAtomIndex)
@@ -329,7 +329,7 @@ namespace Physica {
                             auto to = pos.row(j);
                             r = to - from;
                             const T norm2 = r.squaredNorm();
-                            const bool isNotSelf = T(std::numeric_limits<T>::min()) < norm2;
+                            const bool isNotSelf = !norm2.isSubNormal();
                             if (isNotSelf && norm2 < squared_cutoff) {
                                 const T norm1 = sqrt(norm2);
                                 fn(i, j, r, norm1, norm2);

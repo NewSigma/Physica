@@ -95,7 +95,7 @@ namespace Physica {
             matrixU = WorkingMatrix::unitMatrix(source.getRow());
 
         const RealType factor = abs_elem(source).max();
-        if (factor < std::numeric_limits<T>::min()) {
+        if (factor.isSubNormal()) {
             matrixT = RealType(0);
             return;
         }

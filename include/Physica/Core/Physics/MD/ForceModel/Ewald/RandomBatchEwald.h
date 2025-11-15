@@ -126,7 +126,7 @@ namespace Physica {
         for (size_t _ = 0; _ < numLoop; ++_) {
             const Vector3D<T> waveG = randWaveG();
             const T squaredNorm = T(waveG.squaredNorm());
-            const bool isGammaPoint = squaredNorm < T(std::numeric_limits<T>::min());
+            const bool isGammaPoint = squaredNorm.isSubNormal();
             if (isGammaPoint) {
                 numLoop += 1;
                 continue;
@@ -185,7 +185,7 @@ namespace Physica {
         PeriodicCell<T, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             Base::getKSpaceSumRange(), Base::getRepLattice(), [this, factor](Vector3D<T> delta) {
                 const T squaredNorm = T(delta.squaredNorm());
-                const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
+                const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                 if (isNotGammaPoint)
                     sumGauss += exp(-squaredNorm * factor);
             });

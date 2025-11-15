@@ -234,7 +234,7 @@ namespace Physica {
             const auto& grid = strucFactorGrids[i];
             BasisType::forKIndexInBasis(repLatt, kSpaceIonCoulomb.getShape(), [this, factor2, &grid](Vector3D<T> waveK, Index3D index) {
                 const T squaredNorm = waveK.squaredNorm();
-                const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
+                const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                 if (isNotGammaPoint) [[likely]]
                     kSpaceIonCoulomb(index) += factor2 * grid(index) / squaredNorm;
             });

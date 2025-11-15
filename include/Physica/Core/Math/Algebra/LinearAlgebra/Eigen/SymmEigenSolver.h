@@ -107,7 +107,7 @@ namespace Physica {
         }
 
         const Tr factor = abs_elem(source).max();
-        if (factor < std::numeric_limits<T>::min()) {
+        if (factor.isSubNormal()) {
             eigenvalues = Tr(0);
             return;
         }

@@ -159,7 +159,7 @@ namespace Physica {
                 {
                     const Vec3D x = pos.row(atom1) - pos.row(atom2) + delta;
                     const T norm = x.norm();
-                    const bool isNotSelf = norm > T(std::numeric_limits<T>::min());
+                    const bool isNotSelf = !norm.isSubNormal();
                     if (isNotSelf) {
                         const T phase = waveQ * delta;
                         temp = rSpaceForceConstImpl1(norm) * (x[direction1] * x[direction2]);
@@ -175,7 +175,7 @@ namespace Physica {
                     for (size_t i = 0; i < getNumParticle(); ++i) {
                         const Vec3D x = pos.row(atom1) - pos.row(i) + delta;
                         const T norm = x.norm();
-                        const bool isNotSelf = norm > T(std::numeric_limits<T>::min());
+                        const bool isNotSelf = !norm.isSubNormal();
                         if (isNotSelf) {
                             ComplexType temp2 = rSpaceForceConstImpl1(norm) * (x[direction1] * x[direction2]);
                             if (isSameDirection)

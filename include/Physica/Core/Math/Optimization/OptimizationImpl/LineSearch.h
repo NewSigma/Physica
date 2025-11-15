@@ -96,7 +96,7 @@ namespace Physica {
             const VectorType& x,
             const VectorType& gradient,
             const VectorType& direction) const {
-        if (gradient.squaredNorm() < std::numeric_limits<T>::min())
+        if (gradient.squaredNorm().isSubNormal())
             return 0;
         T step_lower = T(0);
         const T step_upper = maxStepSize;

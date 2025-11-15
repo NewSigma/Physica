@@ -130,7 +130,7 @@ namespace Physica {
             getKSpaceSumRange(), getRepLattice(), [this, factor, &pos, &kSpaceSum, &dots, &sin_vec, &cos_vec](Vector3D<T> delta) {
                 const auto& charges = getCharges();
                 const T squaredNorm = delta.squaredNorm();
-                const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
+                const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                 if (isNotGammaPoint) {
                     dots = pos * delta;
                     sincos(dots, sin_vec, cos_vec);
@@ -170,7 +170,7 @@ namespace Physica {
             getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D<T> delta) {
                 const auto& charges = getCharges();
                 const T squaredNorm = T(delta.squaredNorm());
-                const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
+                const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                 if (isNotGammaPoint) {
                     dots = pos * delta;
                     sincos(dots, sin_vec, cos_vec);
@@ -226,7 +226,7 @@ namespace Physica {
             getKSpaceSumRange(), getRepLattice(), [this, &pos, &kSpaceVirial, &dots, &sin_vec, &cos_vec, factor](Vector3D<T> delta) {
                 const auto& charges = getCharges();
                 const T squaredNorm = T(delta.squaredNorm());
-                const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
+                const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                 if (isNotGammaPoint) {
                     dots = pos * delta;
                     sincos(dots, sin_vec, cos_vec);
@@ -311,7 +311,7 @@ namespace Physica {
                 {
                     const Vector3D<T> waveSum = waveQ + waveG;
                     const T squaredNorm = waveSum.squaredNorm();
-                    const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
+                    const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                     if (isNotGammaPoint) {
                         const T factor2 = squaredNorm * exp(squaredNorm * factor1);
                         const T phase = waveSum * (pos.row(atom1) - pos.row(atom2));
@@ -324,7 +324,7 @@ namespace Physica {
                 if (isSameAtom) {
                     const auto& charges = getCharges();
                     const T squaredNorm = waveG.squaredNorm();
-                    const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
+                    const bool isNotGammaPoint = !squaredNorm.isSubNormal();
                     if (isNotGammaPoint) {
                         const size_t numParticle = getNumParticle();
                         const VectorND<T> dots = pos * waveG;

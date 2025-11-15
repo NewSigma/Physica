@@ -248,7 +248,7 @@ namespace Physica {
         const auto& derived = Base::getDerived();
         const Tr maxabs = abs(derived).max();
         // We require a small threhold to avoid latter ill-conditioned reciprocal.
-        assert(maxabs > Trv(std::numeric_limits<T>::min()) && "[Error]: Vectors near zero are invalid");
+        assert(!maxabs.isSubNormal() && "[Error]: Vectors near zero are invalid");
         const Tr factor = reciprocal(maxabs);
         return ln((derived * factor).squaredNorm()) + Tr(2) * ln(maxabs);
     }
@@ -623,14 +623,14 @@ namespace Physica {
         const T v0 = calc(0);
         const Tr sourceNorm0 = v0.squaredNorm();
         const Tr squaredTailNorm = tail<TailLength>(1).squaredNorm();
-        if (squaredTailNorm > std::numeric_limits<T>::min()) [[likely]] {
+        if (!squaredTailNorm.isSubNormal()) [[likely]] {
             const Tr norm = sqrt(squaredTailNorm + sourceNorm0);
             target[0] = Tr(1) + abs(v0) / norm;
             target.template tail<TailLength>(1) = tail<TailLength>(1) * reciprocal(v0 + unit(v0.value()) * norm);
             return norm;
         }
         else {
-            const bool isZeroVector = sourceNorm0 < std::numeric_limits<T>::min();
+            const bool isZeroVector = sourceNorm0.isSubNormal();
             if (isZeroVector) {
                 target.zeros();
                 return Trv(0);

@@ -22,11 +22,11 @@
 #include "State/SpinState.h"
 
 namespace Physica {
-    enum class PauliIndex {
-        I,
-        X,
-        Y,
-        Z
+    enum class PauliIndex : char {
+        I = 0,
+        X = 1,
+        Y = 2,
+        Z = 3
     };
 
     template<Scalar U, PauliIndex Idx>
