@@ -31,7 +31,7 @@ namespace Physica {
         using IntType = uint64_t;
         static_assert(NumSite <= sizeof(IntType) * CHAR_BIT, "[Error]: Unexpected large site number");
     private:
-        IntType occupyBits;
+        IntType occupyBits = 0;
     public:
         SpinState() = default;
         SpinState(IntType occupyBits_) noexcept;

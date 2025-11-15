@@ -65,7 +65,7 @@ namespace Physica {
     template<Scalar U, int Dim, int NumSite, BoundaryCond BC, Vector V>
     template<ExecutePolicy P>
     void J1J2VecProd<U, Dim, NumSite, BC, V>::assign(Vector auto& target) const {
-        assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
+        Base::assert_assign(target);
         target.zeros();
 
         const auto& repr = getRepr();

@@ -76,7 +76,7 @@ namespace Physica {
         }
         else {
             for (size_t r = 0; r < getRow(); ++r)
-                target.row(r) = vec[r] * mat.flatten();
+                target.row(r) = vec.calc(r) * mat.flatten();
         }
     }
 
@@ -88,7 +88,7 @@ namespace Physica {
         }
         else {
             for (size_t r = 0; r < getRow(); ++r)
-                target.row(r) += vec[r] * mat.flatten();
+                target.row(r) += vec.calc(r) * mat.flatten();
         }
     }
 

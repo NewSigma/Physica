@@ -23,7 +23,7 @@
 namespace Physica {
     template<ExprType, class, class U> class MatrixExpr;
 
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -58,12 +58,12 @@ namespace Physica {
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     GEMV<M, V>::GEMV(M expr_, V vec_) : expr(std::forward<M>(expr_)), vec(std::forward<V>(vec_)) {
         assert(expr.getCol() == vec.getLength());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     auto GEMV<M, V>::operator-() const noexcept {
         if constexpr (Traits<M1>::FastAssign)
             return (-getLHS()) * getRHS();
@@ -71,7 +71,7 @@ namespace Physica {
             return getLHS() * (-getRHS());
     }
 
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
@@ -97,7 +97,7 @@ namespace Physica {
             Base::assign(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign_add(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
@@ -129,19 +129,19 @@ namespace Physica {
             Base::assign_add(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     auto GEMV<M, V>::calc(size_t index) const -> T {
         return expr.row(index) * vec;
     }
 
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
         return expr.row(index).values() * vec.values();
     }
 }
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_v1<MatrixExpr, M>)
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref_t<M>;
         using V1 = std::remove_cvref_t<V>;

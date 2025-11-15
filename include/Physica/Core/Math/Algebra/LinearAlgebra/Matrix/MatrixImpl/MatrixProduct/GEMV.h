@@ -21,9 +21,9 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector U>
-    class GEMV : public RValueVector<GEMV<M, U>> {
-        using This = GEMV<M, U>;
+    template<Matrix M, Vector V>
+    class GEMV : public RValueVector<GEMV<M, V>> {
+        using This = GEMV<M, V>;
         using Base = RValueVector<This>;
     public:
         using Base::isReverseDiff;
@@ -32,9 +32,9 @@ namespace Physica {
         using typename Base::Tv;
     private:
         LazyDestroy<M> mat;
-        LazyDestroy<U> vec;
+        LazyDestroy<V> vec;
     public:
-        GEMV(M mat_, U vec_);
+        GEMV(M mat_, V vec_);
         GEMV(const This&) = default;
         GEMV(This&&) noexcept = default;
         ~GEMV() = default;
@@ -58,14 +58,12 @@ namespace Physica {
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
 
-    template<Matrix M, Vector U>
-    GEMV<M, U>::GEMV(M mat_, U vec_) : mat(std::forward<M>(mat_)), vec(std::forward<U>(vec_)) {
-        assert(mat.getCol() == vec.getLength());
-    }
+    template<Matrix M, Vector V>
+    GEMV<M, V>::GEMV(M mat_, V vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {}
 
-    template<Matrix M, Vector U>
+    template<Matrix M, Vector V>
     template<ExecutePolicy P>
-    void GEMV<M, U>::assign(Vector auto& target) const noexcept {
+    void GEMV<M, V>::assign(Vector auto& target) const noexcept {
         if constexpr (isReverseDiff)
             values().template assign<P>(target);
         else {
@@ -81,18 +79,18 @@ namespace Physica {
         }
     }
 
-    template<Matrix M, Vector U>
-    auto GEMV<M, U>::calc(size_t index) const -> CoDiff<T> {
+    template<Matrix M, Vector V>
+    auto GEMV<M, V>::calc(size_t index) const -> CoDiff<T> {
         return mat.row(index) * vec;
     }
 
-    template<Matrix M, Vector U>
-    auto GEMV<M, U>::calc_value(size_t index) const -> Tv {
+    template<Matrix M, Vector V>
+    auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
         return mat.values().row(index) * vec.values();
     }
 
-    template<Matrix M, Vector U>
-    void GEMV<M, U>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+    template<Matrix M, Vector V>
+    void GEMV<M, V>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
         assert(grad.getLength() == getLength());
         const auto& g = grad.values();
         if constexpr (ReverseDiff<M>) {
@@ -106,7 +104,7 @@ namespace Physica {
             }
         }
 
-        if constexpr (ReverseDiff<U>) {
+        if constexpr (ReverseDiff<V>) {
             if constexpr (MatrixOption::isRowMatrix<M>()) {
                 for (size_t i = 0; i < getLength(); ++i)
                     vec.reverse(mat.values().row(i) * g.calc(i));
@@ -119,31 +117,34 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     [[nodiscard]] auto RValueMatrix<Derived>::operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
+        assert(getCol() == v.getLength());
         return GEMV<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
     }
 
     template<class Derived>
     template<Vector V>
     [[nodiscard]] auto RValueMatrix<Derived>::operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
+        assert(getCol() == v.getLength());
         return GEMV<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
     }
 
     template<class Derived>
     template<Vector V>
     [[nodiscard]] auto RValueMatrix<Derived>::operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>) {
+        assert(getCol() == v.getLength());
         return row(0) * v;
     }
 }
 
 namespace Physica {
-    template<Matrix M, Vector U>
-    class Traits<GEMV<M, U>> {
+    template<Matrix M, Vector V>
+    class Traits<GEMV<M, V>> {
         using M1 = std::remove_cvref_t<M>;
-        using U1 = std::remove_cvref_t<U>;
-        static_assert(M1::ColAtCompile == U1::SizeAtCompile || M1::ColAtCompile == Dynamic || U1::SizeAtCompile == Dynamic,
+        using V1 = std::remove_cvref_t<V>;
+        static_assert(M1::ColAtCompile == V1::SizeAtCompile || M1::ColAtCompile == Dynamic || V1::SizeAtCompile == Dynamic,
                 "Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename U1::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = MatrixOption::isColMatrix<M>();
         constexpr static bool FastPacket = false;

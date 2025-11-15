@@ -30,7 +30,6 @@ namespace Physica {
     template<Scalar T>
     class CyclicChainQDT {
         using This = CyclicChainQDT<T>;
-        using MatrixND = HubbardParams<T>::MatrixND;
 
         using Tr = T::RealType;
         using OptionalQDT = std::optional<QDTDecomp<T>>;

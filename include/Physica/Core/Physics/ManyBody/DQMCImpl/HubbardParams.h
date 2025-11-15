@@ -30,11 +30,9 @@ namespace Physica {
 
         using Tr = T::RealType;
         using Tc = T::ComplexType;
-    public:
-        using MatrixND = DenseMatrix<T>;
     private:
-        MatrixND hoppingMatrix;
-        MatrixND expT;
+        MatrixND<T> hoppingMatrix;
+        MatrixND<T> expT;
         Tr alpha;
         Tr beta;
         Tr repelU;
@@ -53,7 +51,7 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] Tr calcBetaMu() const noexcept;
-        [[nodiscard]] MatrixND calcInvExpT() const;
+        [[nodiscard]] MatrixND<T> calcInvExpT() const;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -95,7 +93,7 @@ namespace Physica {
         assert(numSplit > 0 && "[Error]: Invalid NumSplit");
         makeHoppingMatrix<Dim, BC>(hoppingT, lattice);
 
-        MatrixND hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
+        MatrixND<T> hoppingMatrixB = -beta / T(numSplit) * hoppingMatrix;
         expT = exp(hoppingMatrixB);
         alpha = calcAlpha(beta, repelU, numSplit);
         makeLnSpinWeights();
@@ -107,8 +105,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto HubbardParams<T>::calcInvExpT() const -> MatrixND {
-        MatrixND hoppingMatrixB = beta / T(numSplit) * hoppingMatrix;
+    auto HubbardParams<T>::calcInvExpT() const -> MatrixND<T> {
+        MatrixND<T> hoppingMatrixB = beta / T(numSplit) * hoppingMatrix;
         return exp(hoppingMatrixB);
     }
 

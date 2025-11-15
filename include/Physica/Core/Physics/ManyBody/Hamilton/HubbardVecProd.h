@@ -76,7 +76,7 @@ namespace Physica {
     template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
     template<ExecutePolicy P>
     void HubbardVecProd<T0, U, BC, V>::assign(Vector auto& target) const {
-        assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
+        Base::assert_assign(target);
         if constexpr (P == Thread) {
             parallel_for<Thread>([&](size_t i) {
                 target[i] = calc(i);

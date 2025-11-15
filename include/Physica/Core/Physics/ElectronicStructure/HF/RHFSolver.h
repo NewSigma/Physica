@@ -36,27 +36,26 @@ namespace Physica {
     template<class BaseSetType>
     class RHFSolver {
         using T = Traits<BaseSetType>::ScalarType;
-        using MatrixND = DenseMatrix<T>;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
         constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
         constexpr static size_t MatrixBufferSize = std::max(EDIISBufferSize, DIISBufferSize);
         static_assert(DIISBufferSize >= 3, "DIISBufferSize less than three makes no sence");
-        using EDIISBuffer = Array<MatrixND, EDIISBufferSize>;
-        using DIISBuffer = Array<MatrixND, DIISBufferSize - 1>;
-        using MatrixBuffer = Array<MatrixND, MatrixBufferSize>;
+        using EDIISBuffer = Array<MatrixND<T>, EDIISBufferSize>;
+        using DIISBuffer = Array<MatrixND<T>, DIISBufferSize - 1>;
+        using MatrixBuffer = Array<MatrixND<T>, MatrixBufferSize>;
         using DIISMatrix = DenseMatrix<T, MatrixOption::Col, DIISBufferSize, DIISBufferSize>;
     private:
         const Molecular<T>& molecular;
         ElectronConfig electronConfig;
         size_t numOccupiedOrbit;
         DenseSymmMatrix<T, Dynamic> singleHamilton;
-        MatrixND overlap;
+        MatrixND<T> overlap;
         Array<BaseSetType> baseSet;
         T selfConsistentEnergy;
-        MatrixND wave;
+        MatrixND<T> wave;
         EigenSolver<T> eigenSolver;
-        size_t iteration;
+        size_t iteration = 0;
     public:
         RHFSolver(const Molecular<T>& m, const ElectronConfig& electronConfig_, size_t baseSetSize);
         RHFSolver(const RHFSolver&) = delete;
@@ -73,28 +72,28 @@ namespace Physica {
         [[nodiscard]] size_t getBaseSetSize() const noexcept { return baseSet.getLength(); }
         [[nodiscard]] T getSelfConsistentEnergy() const noexcept { return selfConsistentEnergy; }
         [[nodiscard]] T getTotalEnergy() const noexcept { return selfConsistentEnergy + molecular.getNuclearRepulsionEnergy(); }
-        [[nodiscard]] const MatrixND& getWave() const noexcept { return wave; }
+        [[nodiscard]] const auto& getWave() const noexcept { return wave; }
         [[nodiscard]] size_t getIteration() const noexcept { return iteration; }
         /* Setters */
-        void setInitialWave(const MatrixND& initialWave) { wave = initialWave; }
+        void setInitialWave(const MatrixND<T>& initialWave) { wave = initialWave; }
     private:
         void formSingleHamilton();
         void formOverlapMatrix();
         void formDensityMatrix(EDIISBuffer& densityMatrices,
-                               MatrixND& sameSpinElectronDensity);
+                               MatrixND<T>& sameSpinElectronDensity);
         void formFockMatrix(MatrixBuffer& fockMatrices,
-                            const MatrixND& electronDensity,
-                            const MatrixND& sameSpinElectronDensity);
+                            const MatrixND<T>& electronDensity,
+                            const MatrixND<T>& sameSpinElectronDensity);
         void preDIIS(const MatrixBuffer& fockMatrices,
                      DIISBuffer& errorMatrices,
-                     const MatrixND& electronDensity,
-                     const MatrixND& inv_cholesky,
+                     const MatrixND<T>& electronDensity,
+                     const MatrixND<T>& inv_cholesky,
                      DIISMatrix& DIISMat);
         void EDIISInterpolation(MatrixBuffer& fockMatrices,
                                 EDIISBuffer& densityMatrices,
                                 const DenseVector<T, EDIISBufferSize>& energyBuffer);
-        MatrixND DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat);
-        void updateWaves(const MatrixND& inv_cholesky);
+        MatrixND<T> DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat);
+        void updateWaves(const MatrixND<T>& inv_cholesky);
         void updateSelfConsistentEnergy(DenseVector<T, EDIISBufferSize>& energyBuffer);
     };
 
@@ -107,9 +106,8 @@ namespace Physica {
             , overlap(baseSetSize, baseSetSize)
             , baseSet(baseSetSize)
             , selfConsistentEnergy()
-            , wave(MatrixND::zeros(baseSetSize, electronConfig.getNumOccupiedOrbit()))
-            , eigenSolver(baseSetSize, true)
-            , iteration(0) {
+            , wave(MatrixND<T>::zeros(baseSetSize, electronConfig.getNumOccupiedOrbit()))
+            , eigenSolver(baseSetSize, true) {
         assert(numOccupiedOrbit <= baseSetSize);
     }
     /**
@@ -125,21 +123,21 @@ namespace Physica {
         formSingleHamilton();
         formOverlapMatrix();
 
-        const MatrixND cholesky = Cholesky(overlap);
-        const MatrixND inv_cholesky = cholesky.inv();
+        const MatrixND<T> cholesky = Cholesky(overlap);
+        const MatrixND<T> inv_cholesky = cholesky.inv();
 
         auto densityMatrices = EDIISBuffer(EDIISBufferSize, baseSetSize, baseSetSize, T(0));
-        auto sameSpinElectronDensity = MatrixND::zeros(baseSetSize);
+        auto sameSpinElectronDensity = MatrixND<T>::zeros(baseSetSize);
         auto fockMatrices = MatrixBuffer(MatrixBufferSize, baseSetSize, baseSetSize, T(0));
-        MatrixND fock;
+        MatrixND<T> fock;
         auto errorMatrices = DIISBuffer(DIISBufferSize - 1, baseSetSize, baseSetSize, T(0));
         DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -T(1));
         DIISMat(0, 0) = T(0);
         DenseVector<T, EDIISBufferSize> energyBuffer{};
 
         iteration = 0;
-        do {
-            MatrixND& abs_error = fock;
+        while (true) {
+            auto& abs_error = fock;
             abs_error = abs_elem(*errorMatrices.crbegin());
             const bool nearConverge = abs_error.max() <= T(1E-1); // 1E-1 seleted based on experiments
             const bool doEDIIS = iteration > 0 && (iteration % EDIISBufferSize == 0) && !nearConverge;
@@ -157,7 +155,7 @@ namespace Physica {
             else
                 fock = *fockMatrices.crbegin();
 
-            const MatrixND modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
+            const MatrixND<T> modifiedFock = (inv_cholesky * fock).compute() * inv_cholesky.transpose();
             eigenSolver.compute(modifiedFock);
             eigenSolver.sort();
 
@@ -173,7 +171,7 @@ namespace Physica {
 
             if ((++iteration) > maxIte)
                 return false;
-        } while(true);
+        }
         return true;
     }
 
@@ -206,12 +204,12 @@ namespace Physica {
 
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::formDensityMatrix(EDIISBuffer& densityMatrices,
-                                                   MatrixND& sameSpinElectronDensity) {
+                                                   MatrixND<T>& sameSpinElectronDensity) {
         for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
             densityMatrices[i].swap(densityMatrices[i + 1]);
 
         const size_t baseSetSize = getBaseSetSize();
-        MatrixND& electronDensity = *densityMatrices.rbegin();
+        MatrixND<T>& electronDensity = *densityMatrices.rbegin();
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
             for (; j < i; ++j) {
@@ -240,8 +238,8 @@ namespace Physica {
 
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::formFockMatrix(MatrixBuffer& fockMatrices,
-                                                const MatrixND& electronDensity,
-                                                const MatrixND& sameSpinElectronDensity) {
+                                                const MatrixND<T>& electronDensity,
+                                                const MatrixND<T>& sameSpinElectronDensity) {
         const size_t size = getBaseSetSize();
         auto& fock = *fockMatrices.begin();
         for (size_t p = 0; p < size; ++p) {
@@ -265,13 +263,13 @@ namespace Physica {
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::preDIIS(const MatrixBuffer& fockMatrices,
                                          DIISBuffer& errorMatrices,
-                                         const MatrixND& electronDensity,
-                                         const MatrixND& inv_cholesky,
+                                         const MatrixND<T>& electronDensity,
+                                         const MatrixND<T>& inv_cholesky,
                                          DIISMatrix& DIISMat) {
         /* Insert next error matrix */ {
-            const MatrixND term1 = (*fockMatrices.crbegin() * electronDensity).compute() * overlap;
-            const MatrixND term2 = (overlap * electronDensity).compute() * (*fockMatrices.crbegin());
-            const MatrixND temp = term1 - term2;
+            const MatrixND<T> term1 = (*fockMatrices.crbegin() * electronDensity).compute() * overlap;
+            const MatrixND<T> term2 = (overlap * electronDensity).compute() * (*fockMatrices.crbegin());
+            const MatrixND<T> temp = term1 - term2;
             errorMatrices[0] = (inv_cholesky * temp).compute() * inv_cholesky.transpose();
             for (size_t i = 0; i < errorMatrices.getLength() - 1; ++i)
                 errorMatrices[i].swap(errorMatrices[i + 1]);
@@ -293,8 +291,8 @@ namespace Physica {
                                                     const DenseVector<T, EDIISBufferSize>& energyBuffer) {
         constexpr size_t problemDim = EDIISBuffer::getLength();
         auto G = DenseSymmMatrix<T>(problemDim, T(0));
-        MatrixND deltaFock;
-        MatrixND deltaDensity;
+        MatrixND<T> deltaFock;
+        MatrixND<T> deltaDensity;
         constexpr size_t offset = MatrixBuffer::getLength() - problemDim;
         for (size_t r = 0; r < problemDim; ++r) {
             for (size_t c = r + 1; c < problemDim; ++c) {
@@ -330,7 +328,7 @@ namespace Physica {
     }
 
     template<class BaseSetType>
-    auto RHFSolver<BaseSetType>::DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat) -> MatrixND {
+    auto RHFSolver<BaseSetType>::DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat) -> MatrixND<T> {
         DenseVector<T, DIISBufferSize> x{};
         /* Solve linear equation */ {
             DenseVector<T, DIISBufferSize> b = DenseVector<T, DIISBufferSize>(DIISBufferSize, T(0));
@@ -339,7 +337,7 @@ namespace Physica {
             x = inv_A * b;
         }
 
-        MatrixND extrapolate_fock = MatrixND::zeros(getBaseSetSize());
+        auto extrapolate_fock = MatrixND<T>::zeros(getBaseSetSize());
         constexpr size_t offset = MatrixBuffer::getLength() - DIISBuffer::getLength();
         for (size_t i = 1; i < x.getLength(); ++i)
             extrapolate_fock += fockMatrices[offset + i - 1] * x[i];
@@ -347,7 +345,7 @@ namespace Physica {
     }
 
     template<class BaseSetType>
-    void RHFSolver<BaseSetType>::updateWaves(const MatrixND& inv_cholesky) {
+    void RHFSolver<BaseSetType>::updateWaves(const MatrixND<T>& inv_cholesky) {
         const auto& eigenvectors = eigenSolver.getRawEigenvectors();
         for (size_t i = 0; i < numOccupiedOrbit; ++i) {
             auto eigenState = wave.col(i);

@@ -95,7 +95,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return f < 0; }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static Members */
-        [[nodiscard]] inline static Real nan() noexcept;
+        [[nodiscard]] constexpr static Real nan() noexcept;
         template<RNG R = Random<>>
         [[nodiscard]] static Real random_uniform() noexcept;
         template<RNG R = Random<>>
@@ -131,7 +131,7 @@ namespace Physica {
     }
 
     __host__ __device__ inline Real<Float32> Real<Float32>::mod() const noexcept {
-        float buffer;
+        float buffer{};
         return std::modf(toMachine(), &buffer);
     }
 
@@ -140,8 +140,8 @@ namespace Physica {
         return isfinite(f);
     }
 
-    inline Real<Float32> Real<Float32>::nan() noexcept {
-        return std::nanf("");
+    constexpr Real<Float32> Real<Float32>::nan() noexcept {
+        return std::numeric_limits<float>::quiet_NaN();
     }
 
     template<RNG R>

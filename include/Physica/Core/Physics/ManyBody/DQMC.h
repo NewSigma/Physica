@@ -30,7 +30,6 @@ namespace Physica {
     class DQMC {
         using This = DQMC<T>;
         using Params = HubbardParams<T>;
-        using MatrixND = Params::MatrixND;
 
         using Tr = T::RealType;
         using Tv = T::ValueType;

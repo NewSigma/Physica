@@ -26,13 +26,12 @@ namespace Physica {
     template<Scalar T>
     class QDTDecomp {
         using This = QDTDecomp<T>;
-        using MatrixND = HubbardParams<T>::MatrixND;
 
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
-        MatrixND matrixQ;
+        MatrixND<T> matrixQ;
         DiagMatrix<Tr> matrixD; // matrixD suffers from over/underflow
         QRDecomp<T> qr;
         Tv detQ;
@@ -90,7 +89,7 @@ namespace Physica {
      */
     template<Scalar T>
     auto QDTDecomp<T>::operator*(const This& other) const -> This {
-        MatrixND buffer = getMatrixT() * other.getMatrixQ();
+        MatrixND<T> buffer = getMatrixT() * other.getMatrixQ();
         buffer = getMatrixD() * buffer;
         buffer = buffer * other.getMatrixD();
 
@@ -149,7 +148,7 @@ namespace Physica {
 
     template<Scalar T>
     auto QDTDecomp<T>::dump() const -> const This& {
-        MatrixND x = getMatrixQ() * getMatrixD() * getMatrixT();
+        MatrixND<T> x = getMatrixQ() * getMatrixD() * getMatrixT();
         std::cout << x;
         return *this;
     }

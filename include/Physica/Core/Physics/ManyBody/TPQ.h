@@ -37,7 +37,6 @@ namespace Physica {
         using Base = VectorND<T>;
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
-        using MatrixND = DenseMatrix<T>;
         // The lowest minus float number, keeping enough digits for later algebra
         constexpr static Tr Smallest = -std::numeric_limits<T>::max() * std::numeric_limits<Tr>::epsilon();
 
@@ -78,7 +77,7 @@ namespace Physica {
         /* Static members */
         template<RNG R = Random<>>
         [[nodiscard]] static This random_normal(size_t len);
-        [[nodiscard]] static Tr calcObserveUVT(Tr beta, Tr mu, const MatrixND& lnPartitionNVT, const MatrixND& observeNVT);
+        [[nodiscard]] static Tr calcObserveUVT(Tr beta, Tr mu, const MatrixND<T>& lnPartitionNVT, const MatrixND<T>& observeNVT);
     private:
         using Base::random_uniform;
         using Base::random_any;
@@ -201,7 +200,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto TPQ<T>::calcObserveUVT(Tr beta, Tr mu, const MatrixND& lnPartitionNVT, const MatrixND& observeNVT) -> Tr {
+    auto TPQ<T>::calcObserveUVT(Tr beta, Tr mu, const MatrixND<T>& lnPartitionNVT, const MatrixND<T>& observeNVT) -> Tr {
         assert(lnPartitionNVT.getRow() == lnPartitionNVT.getCol());
         assert(lnPartitionNVT.getRow() == observeNVT.getRow());
         assert(lnPartitionNVT.getCol() == observeNVT.getCol());

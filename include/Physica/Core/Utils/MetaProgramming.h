@@ -41,10 +41,16 @@ namespace Physica {
         struct is_instance_of<Template, Template<Args...>> : std::true_type {};
 
         template<template<auto, class...> class, class>
-        struct is_instance_of_v1 : std::false_type {};
+        struct is_instance_of_xt : std::false_type {};
 
         template<template<auto, class...> class Template, auto Arg0, class... Args>
-        struct is_instance_of_v1<Template, Template<Arg0, Args...>> : std::true_type {};
+        struct is_instance_of_xt<Template, Template<Arg0, Args...>> : std::true_type {};
+
+        template<template<class, auto...> class, class>
+        struct is_instance_of_tx : std::false_type {};
+
+        template<template<class, auto...> class Template, class Arg0, auto... Args>
+        struct is_instance_of_tx<Template, Template<Arg0, Args...>> : std::true_type {};
     }
 
     template<class T>
@@ -54,7 +60,15 @@ namespace Physica {
 
     template<template<class...> class Template, class T>
     concept instanceof = Internal::is_instance_of<Template, std::remove_cvref_t<T>>::value;
-
+    /**
+     * x: Non type template param
+     * t: Type template param
+     *
+     * It is unfortunate that we cannot implement instanceof in an elegant way.
+     */
     template<template<auto, class...> class Template, class T>
-    concept instanceof_v1 = Internal::is_instance_of_v1<Template, std::remove_cvref_t<T>>::value;
+    concept instanceof_xt = Internal::is_instance_of_xt<Template, std::remove_cvref_t<T>>::value;
+
+    template<template<class, auto...> class Template, class T>
+    concept instanceof_tx = Internal::is_instance_of_tx<Template, std::remove_cvref_t<T>>::value;
 }
