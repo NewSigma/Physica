@@ -41,21 +41,28 @@ namespace Physica {
     template<ExecutePolicy P>
     void ContinuousVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
-        constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
-        constexpr bool Beneficial = Length == Dynamic || (Length * sizeof(T) > Critical);
         constexpr bool isContinuous = is_continuous<V>::value;
         constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
         constexpr bool Copyable = std::is_trivially_copyable<T>::value;
-        if constexpr (Beneficial && isContinuous && SameScalar && Copyable) {
-            if (Base::getLength() * sizeof(T) > Critical) {
-                if constexpr (isDiffable) {
-                    Base::getDerived().values().template assign<P>(v.values());
-                    Base::getDerived().grads().template assign<P>(v.grads());
-                }
-                else
-                    memcpy(v.data(), data(), Base::getLength() * sizeof(T));
+        if constexpr (isContinuous && SameScalar && Copyable) {
+            if constexpr (isDiffable) {
+                auto& x = Base::getDerived();
+                x.values().template assign<P>(v.values());
+                x.grads().template assign<P>(v.grads());
+                return;
             }
+
+            constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
+            if constexpr (Length != Dynamic) {
+                memcpy(v.data(), data(), Length * sizeof(T)); // Static memcpy
+                return;
+            }
+
+            constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
+            constexpr bool Beneficial = Length == Dynamic || (Length * sizeof(T) > Critical);
+            size_t size = Base::getLength() * sizeof(T);
+            if (Beneficial && size > Critical)
+                memcpy(v.data(), data(), size);
             else
                 Base::template assign_base<P>(v);
         }
