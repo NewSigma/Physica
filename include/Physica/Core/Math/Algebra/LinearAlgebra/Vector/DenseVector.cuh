@@ -41,8 +41,7 @@ namespace Physica {
         device_obj() = default;
         using Storage::Storage; // Handle __host__ and __device__ in base class
         device_obj(const host_obj& obj);
-        template<Vector V>
-        __host__ __device__ device_obj(const V& v) requires(CUDA<V>);
+        __host__ __device__ device_obj(const Vector auto& v);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

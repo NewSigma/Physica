@@ -47,7 +47,7 @@ namespace Physica {
         [[nodiscard]] __device__ RefTy& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ const ConstRefTy& operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+        __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;

@@ -54,7 +54,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] __host__ __device__ const MassVector& getMassVec() const { return massVec; }
         [[nodiscard]] __host__ __device__ T getMass(size_t particleID) const { return massVec[particleID]; }
-        [[nodiscard]] __host__ __device__ const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
+        [[nodiscard]] __host__ __device__ const auto& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] __host__ __device__ constexpr static Type getType() noexcept { return Type::Cartesian; }
         /* Setters */
         void setLattice(const host_obj& cell);
@@ -89,8 +89,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    void device_obj<MDCell<T, Dim>>::setLattice(
-            const HostLatticeMatrix& lattice_, const HostInvLatticeMatrix& invLattice_) {
+    void device_obj<MDCell<T, Dim>>::setLattice(const HostLatticeMatrix& lattice_, const HostInvLatticeMatrix& invLattice_) {
         Base::setLattice(lattice_);
         invLattice = invLattice_;
     }

@@ -54,17 +54,12 @@ namespace Physica {
         __host__ __device__ void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
         __host__ __device__ void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<Vector V>
-        __host__ __device__ void operator+=(const V& v) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() + v; }
-        template<Vector V>
-        __host__ __device__ void operator-=(const V& v) requires(CUDA<V>) { Base::getDerived() = Base::getDerived() - v; }
+        __host__ __device__ void operator+=(const Vector auto& v) { Base::getDerived() = Base::getDerived() + v; }
+        __host__ __device__ void operator-=(const Vector auto& v) { Base::getDerived() = Base::getDerived() - v; }
 
-        template<Matrix M>
-        __host__ __device__ device_obj<Derived>& operator=(const M& m) requires(CUDA<M>);
-        template<Matrix M>
-        __host__ __device__ void operator+=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() + m; }
-        template<Matrix M>
-        __host__ __device__ void operator-=(const M& m) requires(CUDA<M>) { Base::getDerived() = Base::getDerived() - m; }
+        __host__ __device__ device_obj<Derived>& operator=(const Matrix auto& m);
+        __host__ __device__ void operator+=(const Matrix auto& m) { Base::getDerived() = Base::getDerived() + m; }
+        __host__ __device__ void operator-=(const Matrix auto& m) { Base::getDerived() = Base::getDerived() - m; }
 
         [[nodiscard]] __device__ RefTy operator()(size_t row, size_t col);
         [[nodiscard]] __device__ ConstRefTy operator()(size_t row, size_t col) const;

@@ -80,8 +80,7 @@ namespace Physica {
             V& result) {
         static_assert(P == GPU, "[Error]: Incorrect policy");
         dim3 gridDims;
-        size_t numThread;
-        preParallel(lattice, invLattice, cartesianPos, gridDims, numThread);
+        size_t numThread = preParallel(lattice, invLattice, cartesianPos, gridDims);
         if constexpr (IsSmallCell) {
             const auto numCell = cellList.getNumCell();
             if (numCell != forceBuffer.getCol())
@@ -129,8 +128,7 @@ namespace Physica {
             const PositionMatrix& cartesianPos) -> LatticeMatrix {
         static_assert(!IsSmallCell, "[Error]: Not implemented for small cell");
         dim3 gridDims;
-        size_t numThread;
-        preParallel(lattice, invLattice, cartesianPos, gridDims, numThread);
+        size_t numThread = preParallel(lattice, invLattice, cartesianPos, gridDims);
         const size_t numParticle = cartesianPos.getRow();
         virialBuffer.resize(NumVirialElem, numParticle);
 
@@ -239,17 +237,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    void device_obj<PairModel<Derived>>::preParallel(
+    size_t device_obj<PairModel<Derived>>::preParallel(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos,
-            dim3& gridDims,
-            size_t& numThread) {
+            dim3& gridDims) {
         CUDAContext::getInstance().wait(); //Ensure reentrancy
         swapBuffer = cartesianPos.flatten();
         auto flatten_pos = cell.getPos().flatten();
         swapBuffer.toDeviceAsync(flatten_pos);
         cell.setLattice(lattice, invLattice);
+        size_t numThread{};
         if constexpr (IsSmallCell) {
             const auto range = MDCellType::estimateRange(lattice, cutoff);
             Index3D temp;
@@ -278,9 +276,10 @@ namespace Physica {
             gridDims.z = static_cast<unsigned int>(cellList.getCellGridDimZ());
             const size_t maxNumAtomInCell = hostCellList.calcMaxNumAtomInCell();
             const size_t maxThread = CUDADevAttr::MaxThreadsPerBlock;
-            numThread = maxNumAtomInCell > maxThread ? maxThread : maxNumAtomInCell;
             assert(maxThread >= maxNumAtomInCell && "[Error]: Too many particle in the cell, performance may be pool");
+            numThread = maxNumAtomInCell > maxThread ? maxThread : maxNumAtomInCell;
         }
+        return numThread;
     }
 
     template<class Derived>

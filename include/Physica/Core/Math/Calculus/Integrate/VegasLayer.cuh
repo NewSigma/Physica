@@ -44,8 +44,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Matrix M>
-        [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const M& x) const requires(CUDA<M>);
+        [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const Matrix auto& x) const;
 
         void step(auto& optimizer);
         void zero_grad();
@@ -65,8 +64,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<Matrix M>
-    auto device_obj<VegasLayer<T>>::forward(const M& x) const -> CoDiff<device_obj<MatrixND<T>>> requires(CUDA<M>) {
+    auto device_obj<VegasLayer<T>>::forward(const Matrix auto& x) const -> CoDiff<device_obj<MatrixND<T>>> {
         assert(x.getRow() == weights.getLength());
         CoDiff<device_obj<MatrixND<T>>> y = x + weights;
         if constexpr (ReverseDiff<T>) {

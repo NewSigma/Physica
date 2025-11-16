@@ -22,10 +22,12 @@
 
 namespace Physica {
     template<class Derived>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) requires(CUDA<decltype(v)>) {
+    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) {
         using V = std::remove_cvref_t<decltype(v)>;
         if constexpr (std::is_same<Derived, V>::value)
             assert(this != &v && "[Error]: Self assign is likely a bug");
+        Base::assert_assign(v);
+
         auto& x = Base::getDerived();
         if constexpr (IsHost())
             x.resize(v);
@@ -75,15 +77,25 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const Vector auto& v) requires(CUDA<decltype(v)>) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const Vector auto& v) {
         assert(Base::getLength() == v.getLength());
         Base::getDerived() = Base::getDerived() + v;
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const Vector auto& v) requires(CUDA<decltype(v)>) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const Vector auto& v) {
         assert(Base::getLength() == v.getLength());
         Base::getDerived() += -v;
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<LValueVector<Derived>>::operator[](size_t index) -> RefTy {
+        return *data_ptr(index);
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<LValueVector<Derived>>::operator[](size_t index) const -> ConstRefTy {
+        return const_cast<This&>(*this)[index];
     }
 
     template<class Derived>

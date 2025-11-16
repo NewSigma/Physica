@@ -22,10 +22,8 @@
 
 namespace Physica {
     template<class Derived>
-    template<Matrix M>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const M& m) requires(CUDA<M>) {
-        static_assert(RowAtCompile == Dynamic || M::RowAtCompile == Dynamic || RowAtCompile == M::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
+    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const Matrix auto& m) {
+        Base::assert_assign(m);
         auto& target = Base::getDerived();
         target.resize(m);
         m.assign(target);
@@ -61,7 +59,7 @@ namespace Physica {
 
     template<class Derived>
     __device__ auto device_obj<LValueMatrix<Derived>>::operator()(size_t row, size_t col) const -> ConstRefTy {
-        return *data_ptr(row, col);
+        return const_cast<This&>(*this)(row, col);
     }
 
     template<class Derived>

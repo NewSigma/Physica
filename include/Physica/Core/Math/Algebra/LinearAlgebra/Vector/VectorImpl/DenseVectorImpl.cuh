@@ -25,8 +25,7 @@ namespace Physica {
     device_obj<DenseVector<T, Length, Allocator>>::device_obj(const host_obj& obj) : Storage(obj) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    template<Vector V>
-    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const V& v) requires(CUDA<V>) : Storage(v.getLength()) {
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const Vector auto& v) : Storage(v.getLength()) {
         v.assign(*this);
     }
 

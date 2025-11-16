@@ -349,7 +349,7 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Matrix auto& target) noexcept {
         host_obj::static_assert_assign(target);
-        static_assert(CUDA<decltype(target)>, "[Error]: Device object cannot be assigned to host object");
+        static_assert(SizeAtCompile != Dynamic || CUDA<decltype(target)>, "[Error]: Host object cannot be assigned to dynamic device object");
     }
 }
 

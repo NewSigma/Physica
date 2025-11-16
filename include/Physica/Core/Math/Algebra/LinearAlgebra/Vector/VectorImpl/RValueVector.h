@@ -42,7 +42,7 @@ namespace Physica {
 
     template<class T>
     class is_continuous {
-        using U = std::remove_cvref<T>::type;
+        using U = remove_device_obj<std::remove_cvref_t<T>>::Type;
     public:
         constexpr static bool value = std::is_base_of<ContinuousVector<U>, U>::value || std::is_base_of<ContinuousMatrix<U>, U>::value;
     };

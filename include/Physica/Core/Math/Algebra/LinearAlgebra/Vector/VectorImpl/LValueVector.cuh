@@ -42,7 +42,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) = delete;
-        __host__ __device__ device_obj<Derived>& operator=(const Vector auto& v) requires(CUDA<decltype(v)>);
+        __host__ __device__ device_obj<Derived>& operator=(const Vector auto& v);
 
         template<Scalar U>
         device_obj<Derived>& operator=(const U& x);
@@ -51,11 +51,11 @@ namespace Physica {
         __host__ __device__ void operator*=(const Scalar auto& x);
         __host__ __device__ void operator/=(const Scalar auto& x);
 
-        __host__ __device__ void operator+=(const Vector auto& v) requires(CUDA<decltype(v)>);
-        __host__ __device__ void operator-=(const Vector auto& v) requires(CUDA<decltype(v)>);
+        __host__ __device__ void operator+=(const Vector auto& v);
+        __host__ __device__ void operator-=(const Vector auto& v);
 
-        [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
-        [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
+        [[nodiscard]] __device__ RefTy operator[](size_t index);
+        [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const;
         /* Operations */
         [[nodiscard]] __device__ ConstRefTy calc(size_t index) const { return operator[](index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return calc(index).value(); }

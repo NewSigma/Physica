@@ -49,8 +49,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        __host__ __device__ void assign(Matrix auto& target) const requires(CUDA<decltype(target)>);
-        __host__ __device__ void assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>);
+        __host__ __device__ void assign(Matrix auto& target) const;
+        __host__ __device__ void assign_add(Matrix auto& target) const;
 
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
@@ -75,7 +75,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign(Matrix auto& target) const requires(CUDA<decltype(target)>) {
+    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign(Matrix auto& target) const {
         if constexpr (IsHost())
             assign_impl_cublas<false>(target);
         else
@@ -83,7 +83,7 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign_add(Matrix auto& target) const requires(CUDA<decltype(target)>) {
+    __host__ __device__ void device_obj<GEMM<T1, T2>>::assign_add(Matrix auto& target) const {
         if constexpr (IsHost())
             assign_impl_cublas<true>(target);
         else
@@ -101,14 +101,13 @@ namespace Physica {
     template<Matrix T1, Matrix T2>
     template<bool AssignAdd>
     void device_obj<GEMM<T1, T2>>::assign_impl_cublas(Matrix auto& target) const {
-        using U1 = remove_transpose<T1>::Type;
-        using U2 = remove_transpose<T2>::Type;
         constexpr bool IsDeviceMatrix = Traits<T1>::SizeAtCompile == Dynamic && Traits<T2>::SizeAtCompile == Dynamic;
         constexpr bool isTranspose1 = is_transpose<T1>::value;
         constexpr bool isTranspose2 = is_transpose<T2>::value;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
-        static_assert(MatrixOption::isColMatrix<U1>() && MatrixOption::isColMatrix<U2>(), "[Error]: cuBLAS uses column major");
+        static_assert(MatrixOption::isColMatrix<T1>() && MatrixOption::isColMatrix<T2>(), "[Error]: cuBLAS uses column major");
         static_assert(!Diffable<This>);
+        Base::assert_assign(target);
 
         using Tm = ScalarType::MachineType;
         const auto op1 = isTranspose1 ? CUBLAS_OP_T : CUBLAS_OP_N;

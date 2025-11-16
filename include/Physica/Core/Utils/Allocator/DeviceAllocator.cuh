@@ -64,22 +64,24 @@ namespace Physica {
 
     template<class T>
     __host__ __device__ DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
-        pointer p;
+        assert(n > 0 && "[Error]: Allocate nothing");
+        size_t size = n * sizeof(value_type);
+        void* p{};
         if constexpr (IsDevice())
-            p = HostAllocator<value_type>{}.allocate(n);
+            p = ::operator new(size);
         else {
             if constexpr (CUDADevAttr::MemoryPoolsSupported)
-                cudaMallocAsync(&p, n * sizeof(value_type), CUDAContext::getInstance());
+                cudaMallocAsync(&p, size, CUDAContext::getInstance());
             else
-                cudaMalloc(&p, n * sizeof(value_type));
+                cudaMalloc(&p, size);
         }
-        return p;
+        return reinterpret_cast<pointer>(p);
     }
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
         if constexpr (IsDevice())
-            HostAllocator<value_type>{}.deallocate(p, n);
+            ::operator delete(p);
         else {
             if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
                 if constexpr (CUDADevAttr::MemoryPoolsSupported)

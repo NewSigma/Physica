@@ -25,7 +25,7 @@
 namespace Physica {
     template<class Derived>
     template<Vector V>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const requires(CUDA<V>) {
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const {
         assert_assign(target);
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
@@ -323,12 +323,12 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& target) noexcept {
         host_obj::static_assert_assign(target);
-        static_assert(CUDA<decltype(target)>, "[Error]: Device object cannot be assigned to host object");
+        static_assert(SizeAtCompile != Dynamic || CUDA<decltype(target)>, "[Error]: Host object cannot be assigned to dynamic device object");
     }
 
     template<class Derived>
     template<Vector V>
-    __device__ void device_obj<RValueVector<Derived>>::assign_impl(V& target) const requires(CUDA<V>) {
+    __device__ void device_obj<RValueVector<Derived>>::assign_impl(V& target) const {
         if constexpr (Internal::EnableSIMD<device_obj<Derived>, V>::value) {
             constexpr static size_t Size1 = Derived::SizeAtCompile;
             constexpr static size_t Size2 = V::SizeAtCompile;

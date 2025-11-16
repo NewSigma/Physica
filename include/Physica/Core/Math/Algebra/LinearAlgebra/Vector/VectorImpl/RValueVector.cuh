@@ -53,7 +53,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Vector V>
-        __host__ __device__ void assign(V& target) const requires(CUDA<V>);
+        __host__ __device__ void assign(V& target) const;
         __host__ __device__ void assert_assign(const Vector auto& target) const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
@@ -110,7 +110,7 @@ namespace Physica {
         device_obj(This&&) noexcept = default;
     private:
         template<Vector V>
-        __device__ void assign_impl(V& target) const requires(CUDA<V>);
+        __device__ void assign_impl(V& target) const;
     };
 }
 

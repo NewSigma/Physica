@@ -56,7 +56,7 @@ namespace Physica {
         This& operator=(This obj) { swap(obj); return *this; }
         /* Operations */
         template<Matrix M>
-        [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const M& x) requires(CUDA<M>);
+        [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const M& x);
         void reverse(const This& __restrict other) const noexcept;
 
         void step(auto& optimizer);
@@ -83,7 +83,7 @@ namespace Physica {
 
     template<Scalar T>
     template<Matrix M>
-    auto device_obj<BatchNorm1D<T>>::forward(const M& x) -> CoDiff<device_obj<MatrixND<T>>> requires(CUDA<M>) {
+    auto device_obj<BatchNorm1D<T>>::forward(const M& x) -> CoDiff<device_obj<MatrixND<T>>> {
         assert(getLength() == x.getRow() && "[Error]: Dimensions do not match");
         device_obj<MatrixND<Tv>> normal(x.getRow(), x.getCol());
         auto func = [normal_ = asStruct(normal),

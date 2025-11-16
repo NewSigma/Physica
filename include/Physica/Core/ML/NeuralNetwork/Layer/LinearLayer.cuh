@@ -51,10 +51,8 @@ namespace Physica {
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<Vector V>
-        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(const V& x) const requires(CUDA<V>);
-        template<Matrix M>
-        [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const M& x) const requires(CUDA<M>);
+        [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(const Vector auto& x) const;
+        [[nodiscard]] CoDiff<device_obj<MatrixND<T>>> forward(const Matrix auto& x) const;
         void reverse(const This& __restrict other) const noexcept;
 
         void step(auto& optimizer);
@@ -115,8 +113,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<Vector V>
-    auto device_obj<LinearLayer<T, WithBias>>::forward(const V& x) const -> CoDiff<device_obj<VectorND<T>>> requires(CUDA<V>) {
+    auto device_obj<LinearLayer<T, WithBias>>::forward(const Vector auto& x) const -> CoDiff<device_obj<VectorND<T>>> {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (ReverseDiff<T>) {
             auto expr1 = weights * x;
@@ -139,8 +136,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool WithBias>
-    template<Matrix M>
-    auto device_obj<LinearLayer<T, WithBias>>::forward(const M& x) const -> CoDiff<device_obj<MatrixND<T>>>  requires(CUDA<M>) {
+    auto device_obj<LinearLayer<T, WithBias>>::forward(const Matrix auto& x) const -> CoDiff<device_obj<MatrixND<T>>> {
         assert(x.getRow() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (ReverseDiff<T>) {
             auto expr1 = weights * x;

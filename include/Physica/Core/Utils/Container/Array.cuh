@@ -101,11 +101,11 @@ namespace Physica {
         [[no_unique_address]] allocator_type alloc;
     public:
         device_obj() = default;
-        explicit device_obj(size_t length_, auto&&... args);
+        __host__ __device__ explicit device_obj(size_t length_, auto&&... args);
         explicit device_obj(const host_obj& array);
         device_obj(const This& obj);
         device_obj(This&& obj) noexcept;
-        ~device_obj();
+        __host__ __device__ ~device_obj();
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
@@ -155,8 +155,11 @@ namespace Physica {
     };
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, auto&&... args) {
-        host_obj(length_, std::forward<decltype(args)>(args)...).toDevice(*this);
+    __host__ __device__ device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, auto&&... args) {
+        if constexpr (IsHost())
+            host_obj(length_, std::forward<decltype(args)>(args)...).toDevice(*this);
+        else
+            noImpl(__func__);
     }
 
     template<class T, class Allocator>
@@ -198,10 +201,16 @@ namespace Physica {
     device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
         if constexpr (!isTrivial) {
             if (length != 0) {
-                Array<ElemType, Dynamic> buffer(length);
-                auto& ctx = CUDAContext::getInstance();
-                cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
-                ctx.wait();
+                if constexpr (IsHost()) {
+                    Array<ElemType, Dynamic> buffer(length);
+                    auto& ctx = CUDAContext::getInstance();
+                    cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
+                    ctx.wait();
+                }
+                else {
+                    for (size_t i = 0; i < getLength(); ++i)
+                        alloc.destroy(Base::data_ptr(i));
+                }
             }
         }
         alloc.deallocate(d_data, capacity);

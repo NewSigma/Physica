@@ -114,13 +114,12 @@ namespace Physica {
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void preParallel(
+        size_t preParallel(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos,
-                dim3& gridDims,
-                size_t& numThread);
-        [[nodiscard]] __device__ size_t forPairInCutoff(std::invocable<int, int, DeviceVector3D, T, T> auto func) const;
+                dim3& gridDims);
+        [[nodiscard]] __device__ size_t forPairInCutoff(std::invocable<int, int, DeviceVector3D, T, T> auto fn) const;
     };
 }
 

@@ -44,7 +44,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        __host__ __device__ void assign(Vector auto& target) const requires(CUDA<decltype(target)>);
+        __host__ __device__ void assign(Vector auto& target) const;
 
         void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
 
@@ -67,11 +67,12 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    __host__ __device__ void device_obj<GEMV<T, U>>::assign(Vector auto& target) const requires(CUDA<decltype(target)>) {
+    __host__ __device__ void device_obj<GEMV<T, U>>::assign(Vector auto& target) const {
         if constexpr (IsHost())
             Base::assign(target);
         else {
             if constexpr (MatrixOption::isColMatrix<T>()) {
+                Base::assert_assign(target);
                 const auto& m = getLHS();
                 const auto& v = getRHS();
                 target = m.col(0) * v.calc(0);
