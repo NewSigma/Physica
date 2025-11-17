@@ -56,7 +56,7 @@ namespace Physica {
         [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
         [[nodiscard]] __device__ Tv calc_value(size_t, size_t) const { noImpl("GEMM.calc_value() is low performance and should be avoided"); }
 
-        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept;
 
         __host__ __device__ auto values() const noexcept { return getLHS().values() * getRHS().values(); }
         /* Getters */
@@ -91,7 +91,8 @@ namespace Physica {
     }
 
     template<Matrix T1, Matrix T2>
-    void device_obj<GEMM<T1, T2>>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<GEMM<T1, T2>>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         if constexpr (ReverseDiff<T1>)
             getLHS().reverse(grad * getRHS().values().transpose());
         if constexpr (ReverseDiff<T2>)

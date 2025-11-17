@@ -65,7 +65,7 @@ namespace Physica {
 
     template<class Derived>
     template<Packet Pack>
-    __device__ Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
+    __device__ Pack device_obj<RValueVector<Derived>>::packetPartial(size_t index, [[maybe_unused]] size_t count) const {
         assert(index + Pack::size() <= getLength());
         assert(count == 1 && "[Error]: No need to call partial version");
         if constexpr (Scalar<Pack>)
@@ -75,7 +75,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    void device_obj<RValueVector<Derived>>::reverse(const Vector auto&, const Vector auto& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<RValueVector<Derived>>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         Base::getDerived().reverse(grad);
     }
 

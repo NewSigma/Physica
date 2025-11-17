@@ -134,7 +134,7 @@ namespace Physica {
         [[nodiscard]] Pack packet(size_t index) const noexcept;
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const noexcept;
-        void reverse(const Vector auto& y, const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& y, const Vector auto& grad) const noexcept;
 
         void resize(const Vector auto& x) { resize(x.getLength()); }
         decltype(auto) resize(size_t length) { return Base::getDerived().resize(length); }

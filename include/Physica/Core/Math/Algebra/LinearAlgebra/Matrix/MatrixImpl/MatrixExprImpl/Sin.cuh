@@ -35,8 +35,6 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const;
-
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
     };
 
     template<Matrix M>

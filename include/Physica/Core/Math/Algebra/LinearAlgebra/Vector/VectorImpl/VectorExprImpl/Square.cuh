@@ -44,11 +44,12 @@ namespace Physica {
             return square(Base::getExpr().calc_value(index));
         }
 
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept;
     };
 
     template<Vector V>
-    void device_obj<VectorExpr<ExprType::Square, V>>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<VectorExpr<ExprType::Square, V>>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(expr.values() * (Tv(2) * grad));
     }

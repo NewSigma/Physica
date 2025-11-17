@@ -72,7 +72,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
-        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept;
 
         [[nodiscard]] auto values() const noexcept;
         /* Getters */
@@ -158,7 +158,8 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    void GEMM<M1, M2>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+    void GEMM<M1, M2>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         if constexpr (ReverseDiff<M1>)
             mat1.reverse(grad * mat2.transpose());
         if constexpr (ReverseDiff<M2>)

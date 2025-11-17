@@ -38,11 +38,12 @@ namespace Physica {
             return ln(Base::getExpr().calc_value(row, col));
         }
 
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept;
     };
 
     template<Matrix M>
-    void MatrixExpr<ExprType::Ln, M>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+    void MatrixExpr<ExprType::Ln, M>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(divide(grad, expr.values()));
     }

@@ -21,17 +21,17 @@
 using namespace Physica;
 
 namespace {
-    int64_t combination1(int m, int n) {
+    int64_t test(int m, int n) noexcept {
         if (n == 0 || m == n)
             return 1;
-        return combination1(m - 1, n) + combination1(m - 1, n - 1);
+        return test(m - 1, n) + test(m - 1, n - 1);
     }
 }
 
 int main() {
     for (int m = 0; m <= 16; ++m)
         for (int n = 0; n <= m; ++n)
-            if (combination1(m, n) != combination(m, n))
+            if (test(m, n) != binomial(m, n))
                 return 1;
     return 0;
 }

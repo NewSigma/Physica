@@ -67,7 +67,7 @@ namespace Physica {
         [[nodiscard]] __device__ ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
-        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ const auto row(size_t r) const noexcept;

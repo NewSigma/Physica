@@ -89,7 +89,7 @@ namespace Physica {
     template<int Dim, int NumSite>
     std::ostream& operator<<(std::ostream& os, SpinState<Dim, NumSite> e) {
         auto mask = e.makeHighMask();
-        for (int i = 0; i < int(NumSite); ++i) {
+        for (int i = 0; i < NumSite; ++i) {
             const bool flag = (e.getOccupyBits() & mask) == 0;
             os << (flag ? '0' : '1');
             mask >>= 1;
@@ -127,12 +127,12 @@ namespace std {
             auto bits = psi.getOccupyBits();
             int i = 0;
             size_t result = 0;
-            for (int site = 0; site < int(NumSite); ++site) {
+            for (int site = 0; site < NumSite; ++site) {
                 const bool isOccupy = bits % 2 == 1;
                 if (isOccupy) {
                     i += 1;
                     if (site >= i)
-                        result += Physica::combination(site, i);
+                        result += Physica::binomial(site, i);
                 }
                 bits >>= 1;
             }

@@ -157,7 +157,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    void RValueVector<Derived>::reverse(const Vector auto&, const Vector auto& grad) const noexcept requires(isReverseDiff) {
+    void RValueVector<Derived>::reverse(const Vector auto&, const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         Base::getDerived().reverse(grad);
     }
 

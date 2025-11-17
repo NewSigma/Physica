@@ -43,7 +43,7 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
-        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept;
     };
 
     template<class T1, class T2>
@@ -81,7 +81,8 @@ namespace Physica {
     }
 
     template<class T1, class T2>
-    void VectorExpr<ExprType::Sub, T1, T2>::reverse(const auto& grad) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Sub, T1, T2>::reverse(const auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& lhs = Base::getLHS();
         const auto& rhs = Base::getRHS();
         if constexpr (Scalar<decltype(grad)>) {
@@ -143,7 +144,7 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -205,7 +206,8 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    void VectorExpr<ExprType::Sub, V1, V2>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+    void VectorExpr<ExprType::Sub, V1, V2>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& g = grad.values();
         if constexpr (ReverseDiff<V1>)
             Base::getLHS().reverse(g);

@@ -73,7 +73,7 @@ namespace Physica {
 
         void toNextMean(size_t lastNumSample, const Vector auto& sample) noexcept;
         void toNextVariance(Derived& mean, size_t lastNumSample, const Vector auto& sample) noexcept;
-        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] auto head(size_t to) noexcept;

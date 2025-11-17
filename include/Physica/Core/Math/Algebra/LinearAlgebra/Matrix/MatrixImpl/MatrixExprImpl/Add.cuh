@@ -70,7 +70,8 @@ namespace Physica {
         }
 
         using Base::reverse;
-        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+        void reverse(const Matrix auto& grad) const noexcept {
+            static_assert(isReverseDiff);
             if constexpr (ReverseDiff<T>)
                 Base::getLHS().reverse(grad);
             if constexpr (ReverseDiff<U>)

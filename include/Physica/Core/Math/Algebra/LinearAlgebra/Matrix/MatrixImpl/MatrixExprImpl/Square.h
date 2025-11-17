@@ -36,7 +36,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
-        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
     };
 
@@ -51,7 +51,8 @@ namespace Physica {
     }
 
     template<Matrix M>
-    void MatrixExpr<ExprType::Square, M>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+    void MatrixExpr<ExprType::Square, M>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(Tv(2) * hadamard(expr.values(), grad));
     }

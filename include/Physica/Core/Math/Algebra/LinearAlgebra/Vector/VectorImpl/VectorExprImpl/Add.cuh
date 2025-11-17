@@ -55,7 +55,8 @@ namespace Physica {
         }
 
         using Base::reverse;
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+        void reverse(const Vector auto& grad) const noexcept {
+            static_assert(isReverseDiff);
             const auto& g = grad.values();
             if constexpr (ReverseDiff<T>)
                 Base::getLHS().reverse(g);
@@ -100,12 +101,13 @@ namespace Physica {
         }
 
         using Base::reverse;
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept;
         auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
     };
 
     template<Vector T1, Vector T2>
-    void device_obj<VectorExpr<ExprType::Add, T1, T2>>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
+    void device_obj<VectorExpr<ExprType::Add, T1, T2>>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& g = grad.values();
         assert(g.getLength() == Base::getLength());
         if constexpr (ReverseDiff<T1>)

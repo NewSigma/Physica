@@ -46,7 +46,7 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void assign(Vector auto& target) const;
 
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept;
 
         auto values() const noexcept { return mat.getDerived().values() * vec.getDerived().values(); }
         /* Getters */
@@ -85,11 +85,12 @@ namespace Physica {
     }
 
     template<Matrix T, Vector U>
-    void device_obj<GEMV<T, U>>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
-        assert(grad.getLength() == getLength());
+    void device_obj<GEMV<T, U>>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& g = grad.values();
         const auto& m = mat.getDerived();
         const auto& v = vec.getDerived();
+        Base::assert_assign(grad);
         if constexpr (ReverseDiff<T>)
             m.reverse(g * v.values().transpose());
         if constexpr (ReverseDiff<U>)

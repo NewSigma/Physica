@@ -104,7 +104,7 @@ namespace Physica {
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
         [[nodiscard]] __device__ ScalarType calcFromMajorMinor(size_t row, size_t col) const;
-        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto sum_rows() const;
         [[nodiscard]] __host__ __device__ auto sum_cols() const;

@@ -146,7 +146,8 @@ namespace Physica {
                 return square(v.template packetPartial<Pack>(index, count));
         }
 
-        void reverse(const Scalar auto& grad) const noexcept requires(isReverseDiff) {
+        void reverse(const Scalar auto& grad) const noexcept {
+            static_assert(isReverseDiff);
             v.reverse(Tv(2) * grad * v.values());
         }
 

@@ -49,12 +49,18 @@ namespace Physica {
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const { return getExpr().calc(col, row); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return getExpr().calc_value(col, row); }
 
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) { getExpr().reverse(grad.transpose()); }
+        void reverse(const Vector auto& grad) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat.getDerived(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getExpr().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getExpr().getRow(); }
     };
+
+    template<Matrix M>
+    void device_obj<Transpose<M>>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
+        getExpr().reverse(grad.transpose());
+    }
 
     template<Vector V>
     class device_obj<Transpose<V>> : public device_obj<RValueMatrix<Transpose<V>>> {
@@ -79,11 +85,17 @@ namespace Physica {
         [[nodiscard]] __device__ T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.getDerived().calc(col); }
         [[nodiscard]] __device__ Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
 
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) { vec.getDerived().reverse(grad); }
+        void reverse(const Vector auto& grad) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getDerived().getLength(); }
     };
+
+    template<Vector V>
+    void device_obj<Transpose<V>>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
+        vec.getDerived().reverse(grad);
+    }
 }
 
 namespace Physica {

@@ -33,7 +33,7 @@ namespace Physica {
             return result;
         IntType temp = 0;
         for(; temp < i; ++temp)
-            result -= combination(i, temp) * bernoulli(temp) / (i - temp + 1);
+            result -= binomial(i, temp) * bernoulli(temp) / (i - temp + 1);
         return result;
     }
     /**

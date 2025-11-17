@@ -98,7 +98,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
-        void reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
         /* Getters */
         using Base::getLHS;
@@ -126,7 +126,8 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    void MatrixExpr<ExprType::Mul, M1, M2>::reverse(const Matrix auto& grad) const noexcept requires(isReverseDiff) {
+    void MatrixExpr<ExprType::Mul, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(isReverseDiff);
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         if constexpr (Diffable<M1>)

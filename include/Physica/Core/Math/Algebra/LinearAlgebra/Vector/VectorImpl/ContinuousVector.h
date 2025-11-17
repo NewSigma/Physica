@@ -70,7 +70,7 @@ namespace Physica {
         template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
         template<Packet Pack> void writePacket(size_t index, Pack packet);
         template<Packet Pack> void writePacketPartial(size_t index, size_t count, Pack packet);
-        void reverse(const auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const auto& grad) const noexcept;
 
         template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
         template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;

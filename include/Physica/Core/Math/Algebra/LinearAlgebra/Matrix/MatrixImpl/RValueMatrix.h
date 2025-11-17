@@ -114,7 +114,7 @@ namespace Physica {
         [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] decltype(auto) calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
         [[nodiscard]] decltype(auto) calcFromMajorMinor(size_t major, size_t minor) const;
-        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept;
 
         void resize(const Matrix auto& m, auto&&... args);
         decltype(auto) resize(size_t r, size_t c, auto&&... args);

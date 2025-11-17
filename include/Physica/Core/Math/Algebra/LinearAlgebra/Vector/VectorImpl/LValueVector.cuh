@@ -60,7 +60,7 @@ namespace Physica {
         [[nodiscard]] __device__ ConstRefTy calc(size_t index) const { return operator[](index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return calc(index).value(); }
 
-        __host__ __device__ void reverse(const auto& grad) const noexcept requires(isReverseDiff);
+        __host__ __device__ void reverse(const auto& grad) const noexcept;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ auto head(size_t to) noexcept;

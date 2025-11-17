@@ -49,7 +49,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
 
         using Base::reverse;
-        void reverse(const Vector auto& grad) const noexcept requires(isReverseDiff);
+        void reverse(const Vector auto& grad) const noexcept;
 
         auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
@@ -90,8 +90,9 @@ namespace Physica {
     }
 
     template<Matrix M, Vector V>
-    void GEMV<M, V>::reverse(const Vector auto& grad) const noexcept requires(isReverseDiff) {
-        assert(grad.getLength() == getLength());
+    void GEMV<M, V>::reverse(const Vector auto& grad) const noexcept {
+        static_assert(isReverseDiff);
+        grad.assert_assign(vec);
         const auto& g = grad.values();
         if constexpr (ReverseDiff<M>) {
             if constexpr (MatrixOption::isRowMatrix<M>()) {
