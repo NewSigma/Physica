@@ -82,6 +82,9 @@ namespace Physica {
 
         [[nodiscard]] PacketType packet() const;
         void writePacket(PacketType packet);
+
+        using Base::random_uniform;
+        using Base::random_normal;
         __host__ __device__ void swap(Complex& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ T& real() noexcept { return re; }

@@ -86,6 +86,9 @@ namespace Physica {
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;
+
+        using Base::random_uniform;
+        using Base::random_normal;
         __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr float toMachine() const noexcept { return f; }

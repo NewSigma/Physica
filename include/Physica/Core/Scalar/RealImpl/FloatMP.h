@@ -49,8 +49,7 @@ namespace Physica {
     template<>
     class PHYSICA_API Real<FloatMP> : public ScalarBase<Real<FloatMP>>, public CRCoro<Real<FloatMP>> {
         using This = Real<FloatMP>;
-    public:
-        using ScalarType = Real<FloatMP>;
+        using Base = ScalarBase<This>;
     private:
         //Store effective digits using little endian standard.
         MPUnit* __restrict byte;
@@ -100,8 +99,11 @@ namespace Physica {
         [[nodiscard]] bool operator< (const Real& other) const;
         [[nodiscard]] bool operator== (const Real& other) const;
         /* Operations */
+        using Base::random_uniform;
+        using Base::random_normal;
         Real& toOpposite() noexcept { length = -length; return *this; }
         Real& toAbs() noexcept { length = getSize(); return *this; }
+
         void swap(Real& __restrict obj) noexcept;
         void dump() const noexcept;
         /* Getters */

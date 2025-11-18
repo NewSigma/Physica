@@ -72,6 +72,9 @@ namespace Physica {
 
         [[nodiscard]] This conjugate() const noexcept;
         [[nodiscard]] CoDiff<This> squaredNorm() const noexcept;
+
+        using Base::random_uniform;
+        using Base::random_normal;
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         __host__ __device__ void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */

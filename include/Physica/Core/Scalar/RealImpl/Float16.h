@@ -80,6 +80,8 @@ namespace Physica {
         __host__ __device__ bool operator<(const Real& s) const noexcept { return h < s.h; }
         __host__ __device__ bool operator==(const Real& s) const noexcept { return h == s.h; }
         /* Operations */
+        using Base::random_uniform;
+        using Base::random_normal;
         __host__ __device__ void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
         [[nodiscard]] __host__ __device__ half toMachine() const noexcept { return h; }
