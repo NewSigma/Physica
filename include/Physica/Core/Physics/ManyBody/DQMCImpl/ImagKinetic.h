@@ -50,6 +50,7 @@ namespace Physica {
         Vector2D<Tr> calcDelta(int site, int split, Tr alpha) const noexcept;
         Vector2D<Tv> calcRatio(int site, Vector2D<Tr> deltas) const noexcept;
         [[nodiscard]] Trv calcP(int site, int split, Tr alpha) const noexcept;
+        void single_flip(int site, int split) noexcept;
         void single_flip(int site, int split, Tr alpha) noexcept;
 
         template<RNG R = Random<>>
@@ -94,11 +95,16 @@ namespace Physica {
     }
 
     template<Scalar T>
+    void ImagKinetic<T>::single_flip(int site, int split) noexcept {
+        auto spins = aux.row(site);
+        spins[split] = -spins[split];
+    }
+
+    template<Scalar T>
     void ImagKinetic<T>::single_flip(int site, int split, Tr alpha) noexcept {
         const auto deltas = calcDelta(site, split, alpha);
         const auto ratios = calcRatio(site, deltas);
-        auto spins = aux.row(site);
-        spins[split] = -spins[split];
+        single_flip(site, split);
 
         flipGreens(site, divide(deltas, ratios));
         Tv prod = ratios.prod();
