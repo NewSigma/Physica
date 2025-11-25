@@ -52,8 +52,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return chain.getLength(); }
     private:
-        size_t deltaPrice(size_t n) const noexcept;
-        bool isCheaper(size_t new_p, size_t old_p, size_t n, size_t middle) const noexcept;
+        [[nodiscard]] size_t deltaPrice(size_t n) const noexcept;
+        [[nodiscard]] bool isCheaper(size_t new_p, size_t old_p, size_t n, size_t middle) const noexcept;
     };
 
     template<Scalar T>

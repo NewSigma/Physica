@@ -139,7 +139,7 @@ void plotPWBaseWave(double energy, double radialNum) {
 /**
  * Reference:
  * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:14-28
- * [2] J. Chem. Phys., 71, 614-642 (1979); https://doi.org/10.1063/1.438414
+ * [2] J. Chem. Phys. 71, 614-642 (1979); https://doi.org/10.1063/1.438414
  */
 int main(int argc, char** argv) {
     const double step = 0.005;
