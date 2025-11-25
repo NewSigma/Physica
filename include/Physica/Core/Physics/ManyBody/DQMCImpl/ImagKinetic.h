@@ -68,7 +68,7 @@ namespace Physica {
     template<Scalar T>
     ImagKinetic<T>::ImagKinetic(int numSite, int numSplit)
             : aux(numSite, numSplit)
-            , greens(2, numSplit, numSite, numSite) {}
+            , greens(2, numSite, numSite) {}
 
     template<Scalar T>
     auto ImagKinetic<T>::calcDelta(int site, int split, Tr alpha) const noexcept -> Vector2D<Tr> {

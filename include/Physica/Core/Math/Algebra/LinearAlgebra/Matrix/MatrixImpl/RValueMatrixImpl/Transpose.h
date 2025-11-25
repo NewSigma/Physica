@@ -61,6 +61,8 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(col, row); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return mat.calc_value(col, row); }
+
+        [[nodiscard]] const M& transpose() const noexcept { return mat; }
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
@@ -103,6 +105,8 @@ namespace Physica {
 
         [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         [[nodiscard]] Tv calc_value([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc_value(col); }
+
+        [[nodiscard]] const V& transpose() const noexcept { return vec; }
         /* Getters */
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }

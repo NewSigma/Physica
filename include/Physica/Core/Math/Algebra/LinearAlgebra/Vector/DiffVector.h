@@ -55,8 +55,7 @@ namespace Physica {
         DenseVector(std::initializer_list<T> list);
         DenseVector(std::initializer_list<ScalarType> list) requires(isForwardDiff);
         DenseVector(ValueVector v_, GradVector g_) noexcept;
-        template<Vector V>
-        explicit(isReverseDiff) DenseVector(const V& v_) requires(!ReverseDiff<V>);
+        explicit(isReverseDiff) DenseVector(const Vector auto& src); // Force explicit conversion to avoid misuse
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;

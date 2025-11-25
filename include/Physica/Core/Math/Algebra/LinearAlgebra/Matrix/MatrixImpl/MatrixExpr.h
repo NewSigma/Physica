@@ -202,6 +202,7 @@ namespace Physica {
 #include "MatrixExprImpl/Unit.h"
 #include "MatrixExprImpl/Square.h"
 #include "MatrixExprImpl/Ln.h"
+#include "MatrixExprImpl/Ln1p.h"
 #include "MatrixExprImpl/Exp.h"
 #include "MatrixExprImpl/Sin.h"
 #include "MatrixExprImpl/Cos.h"

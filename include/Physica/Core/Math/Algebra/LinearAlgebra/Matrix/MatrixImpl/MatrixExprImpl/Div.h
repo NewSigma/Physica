@@ -115,31 +115,31 @@ namespace Physica {
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         static_assert(Diffable<M1> && !Diffable<M2>, "[Error]: Not implemented");
-        lhs.reverse(divide(grad, rhs));
+        lhs.reverse(divide_elem(grad, rhs));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto operator/(M&& m, U&& x) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto divide_elem(M&& m, U&& x) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Div, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
-    [[nodiscard]] auto operator/(U&& x, M&& m) noexcept requires(!CUDA<M>) {
+    [[nodiscard]] auto divide_elem(U&& x, M&& m) noexcept requires(!CUDA<M>) {
         return MatrixExpr<ExprType::Div, U&&, M&&>(std::forward<U>(x), std::forward<M>(m));
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] auto divide(M&& m, V&& x) noexcept requires(!CUDA<M> && !CUDA<V>) {
+    [[nodiscard]] auto divide_elem(M&& m, V&& x) noexcept requires(!CUDA<M> && !CUDA<V>) {
         return MatrixExpr<ExprType::Div, M&&, V&&>(std::forward<M>(m), std::forward<V>(x));
     }
 
     template<Matrix M, Vector V>
-    [[nodiscard]] auto divide(V&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<V>) {
+    [[nodiscard]] auto divide_elem(V&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<V>) {
         return MatrixExpr<ExprType::Div, V&&, M&&>(std::forward<V>(x), std::forward<M>(m));
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto divide(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
+    [[nodiscard]] auto divide_elem(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
         return MatrixExpr<ExprType::Div, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

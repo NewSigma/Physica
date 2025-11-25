@@ -25,9 +25,6 @@ namespace Physica {
     class VectorExpr<ExprType::Square, V> : public UnitaryVectorExpr<ExprType::Square, V> {
         using This = VectorExpr<ExprType::Square, V>;
         using Base = UnitaryVectorExpr<ExprType::Square, V>;
-    public:
-        using Base::isComplex;
-        using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -47,7 +44,8 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
 
-        void reverse(const Scalar auto& grad) const noexcept;
+        void reverse(const auto& grad) const noexcept;
+        using Base::reverse;
     };
 
     template<Vector V>
@@ -79,10 +77,16 @@ namespace Physica {
     }
 
     template<Vector V>
-    void VectorExpr<ExprType::Square, V>::reverse(const Scalar auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+    void VectorExpr<ExprType::Square, V>::reverse(const auto& grad) const noexcept {
+        static_assert(Base::isReverseDiff);
+        using G = decltype(grad);
         const auto& expr = Base::getExpr();
-        expr.reverse(expr.values() * (Trv(2) * grad));
+        if constexpr (Scalar<G>)
+            expr.reverse(expr.values() * (Trv(2) * grad));
+        else {
+            static_assert(Vector<G>, "[Error]: Unexpected type");
+            expr.reverse(hadamard(expr.values(), grad) * Trv(2));
+        }
     }
 
     template<Vector V>

@@ -45,7 +45,7 @@ namespace Physica {
         Array<MatrixND<T>> observes;
         FFT<T, 2> fft;
     public:
-        SystemSampler(const DQMC<T>& dqmc, const LatticeModel<2>& lattice, size_t numSample);
+        SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample);
         SystemSampler(const This&) = delete;
         SystemSampler(This&&) noexcept = delete;
         ~SystemSampler() = default;
@@ -53,7 +53,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, Observable type);
+        void sample(const GreenPair& greens, T sign, Observable type);
 
         [[nodiscard]] MatrixND<T> calcMean() const;
         /* Getters */
@@ -67,8 +67,8 @@ namespace Physica {
     };
 
     template<Scalar T>
-    SystemSampler<T>::SystemSampler(const DQMC<T>& dqmc, const LatticeModel<2>& lattice, size_t numSample)
-            : Base(dqmc, numSample)
+    SystemSampler<T>::SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample)
+            : Base(params, numSample)
             , observes(numSample)
             , fft(lattice.getSuperSize(), PlanFlag::Estimate) {
         for (auto& elem : observes)
@@ -76,9 +76,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void SystemSampler<T>::sample(const GreenPair& greens, Observable type) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * Base::dqmc.getSign();
-        Base::sample();
+    void SystemSampler<T>::sample(const GreenPair& greens, T sign, Observable type) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * sign;
+        Base::sample(sign);
     }
 
     template<Scalar T>

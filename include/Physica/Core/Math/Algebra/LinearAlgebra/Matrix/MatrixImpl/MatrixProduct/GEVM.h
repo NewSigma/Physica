@@ -29,15 +29,15 @@ namespace Physica {
     template<Vector V, Matrix M>
     class GEVM : public RValueMatrix<GEVM<V, M>> {
         using This = GEVM<V, M>;
-    public:
         using Base = RValueMatrix<This>;
-        using Base::isReverseDiff;
+    protected:
         using typename Base::T;
+        using typename Base::Tv;
     private:
-        const V& vec;
-        const M& mat;
+        LazyDestroy<V> vec;
+        LazyDestroy<M> mat;
     public:
-        GEVM(const V& vec_, const M& mat_);
+        GEVM(V vec_, M mat_);
         GEVM(const This&) = default;
         GEVM(This&&) noexcept = default;
         ~GEVM() = default;
@@ -50,15 +50,19 @@ namespace Physica {
         void assign_add(Matrix auto& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+
+        void reverse(const Matrix auto& grad) const noexcept;
+        using Base::reverse;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return vec.getLength(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] const V& getLHS() const noexcept { return vec; }
-        [[nodiscard]] const M& getRHS() const noexcept { return mat; }
+        [[nodiscard]] const auto& getLHS() const noexcept { return vec; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return mat; }
     };
 
     template<Vector V, Matrix M>
-    GEVM<V, M>::GEVM(const V& vec_, const M& mat_) : vec(vec_), mat(mat_) {
+    GEVM<V, M>::GEVM(V vec_, M mat_) : vec(std::forward<V>(vec_)), mat(std::forward<M>(mat_)) {
         assert(vec.getLength() > 0 && mat.getCol() > 0 && "[Error]: Empty vector or matrix");
         assert(mat.getRow() == 1 && "[Error]: Dimensions do not match");
     }
@@ -98,21 +102,40 @@ namespace Physica {
     }
 
     template<Vector V, Matrix M>
-    [[nodiscard]] auto operator*(const V& vec, const M& mat) noexcept {
-        static_assert(M::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
-        return GEVM<V, M>(vec, mat);
+    auto GEVM<V, M>::calc_value(size_t row, size_t col) const -> Tv {
+        return vec.calc_value(row) * mat.calc_value(0, col);
+    }
+
+    template<Vector V, Matrix M>
+    void GEVM<V, M>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(Base::isReverseDiff);
+        if constexpr (Diffable<V>)
+            vec.reverse(grad * mat.transpose());
+        if constexpr (Diffable<M>)
+            mat.reverse(grad.transpose() * vec);
+    }
+
+    template<Vector V, Matrix M>
+    [[nodiscard]] auto operator*(V&& vec, M&& mat) noexcept requires(!CUDA<V> && !CUDA<M>) {
+        static_assert(std::remove_cvref_t<M>::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
+        return GEVM<V&&, M&&>(std::forward<V>(vec), std::forward<M>(mat));
     }
 }
 
 namespace Physica {
     template<Vector V, Matrix M>
     class Traits<GEVM<V, M>> {
-        static_assert(M::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
+        using V1 = std::remove_cvref<V>::type;
+        using M1 = std::remove_cvref<M>::type;
+        using T1 = V1::ScalarType;
+        using T2 = M1::ScalarType;
+
+        static_assert(M1::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename V::ScalarType, typename M::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static int Option = MatrixOption::AnyMajor;
-        constexpr static size_t RowAtCompile = V::SizeAtCompile;
-        constexpr static size_t ColAtCompile = M::ColAtCompile;
+        constexpr static size_t RowAtCompile = V1::SizeAtCompile;
+        constexpr static size_t ColAtCompile = M1::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

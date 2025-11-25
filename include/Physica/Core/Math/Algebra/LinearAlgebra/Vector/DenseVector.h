@@ -107,6 +107,7 @@ namespace Physica {
         template<RNG R = Random<>>
         [[nodiscard]] static This random_any(size_t len, auto& distribution);
         [[nodiscard]] static This linspace(T from, T to, size_t count);
+        [[nodiscard]] static This read(const H5Loc& loc, const char* name);
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
     };
 

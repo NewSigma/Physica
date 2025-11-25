@@ -269,11 +269,13 @@ namespace Physica {
 
     template<class Derived>
     auto LValueMatrix<Derived>::diag() noexcept {
+        assert(Base::isSquare());
         return DiagVector<Derived, true>(Base::getDerived());
     }
 
     template<class Derived>
     const auto LValueMatrix<Derived>::diag() const noexcept {
+        assert(Base::isSquare());
         return DiagVector<Derived, true>(Base::getConstCastDerived());
     }
     /**

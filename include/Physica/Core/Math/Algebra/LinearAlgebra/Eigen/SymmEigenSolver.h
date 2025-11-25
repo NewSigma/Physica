@@ -102,7 +102,8 @@ namespace Physica {
         assert(source.getRow() == eigenvalues.getLength() && "[Error]: Dimensions do not match");
         if (source.getRow() == 1) [[unlikely]] {
             eigenvalues[0] = source.calc(0, 0);
-            eigenvectors(0, 0) = T(1);
+            if (getNeedEigenvectors())
+                eigenvectors(0, 0) = T(1);
             return;
         }
 

@@ -41,7 +41,7 @@ namespace Physica {
     private:
         VectorND<T> observes;
     public:
-        SiteSampler(const DQMC<T>& dqmc_, size_t numSample);
+        SiteSampler(const HubbardParams<T>& params, size_t numSample);
         SiteSampler(const This&) = delete;
         SiteSampler(This&&) noexcept = delete;
         ~SiteSampler() = default;
@@ -49,7 +49,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, Observable type);
+        void sample(const GreenPair& greens, T sign, Observable type);
 
         [[nodiscard]] T calcMean() const;
         /* Getters */
@@ -59,14 +59,14 @@ namespace Physica {
     };
 
     template<Scalar T>
-    SiteSampler<T>::SiteSampler(const DQMC<T>& dqmc_, size_t numSample)
-            : Base(dqmc_, numSample)
+    SiteSampler<T>::SiteSampler(const HubbardParams<T>& params, size_t numSample)
+            : Base(params, numSample)
             , observes(numSample) {}
 
     template<Scalar T>
-    void SiteSampler<T>::sample(const GreenPair& greens, Observable type) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * Base::dqmc.getSign();
-        Base::sample();
+    void SiteSampler<T>::sample(const GreenPair& greens, T sign, Observable type) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * sign;
+        Base::sample(sign);
     }
 
     template<Scalar T>

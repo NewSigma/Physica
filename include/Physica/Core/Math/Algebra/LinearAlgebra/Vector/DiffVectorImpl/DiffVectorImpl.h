@@ -58,14 +58,15 @@ namespace Physica {
             : v(std::move(v_)), g(std::move(g_)) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    template<Vector V>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v_) requires(!ReverseDiff<V>) : DenseVector(v_.getLength()) {
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const Vector auto& src) : DenseVector(src.getLength()) {
+        using V = decltype(src);
+        static_assert(!ReverseDiff<V>, "[Error]: Copying a reverse diff object corrupts the compute graph");
         if constexpr (!Diffable<V>) {
-            v_.assign(v);
+            src.assign(v);
             g.zeros();
         }
         else
-            v_.assign(*this);
+            src.assign(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>

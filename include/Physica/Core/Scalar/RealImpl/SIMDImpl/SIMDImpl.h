@@ -385,7 +385,7 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_add(const SIMD<T, Size>& a, const SIMD<T, Size>& b, const SIMD<T, Size>& c) noexcept {
+    [[nodiscard]] SIMD<T, Size> mul_add(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
         return SIMD<T, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 

@@ -40,37 +40,57 @@ namespace Physica {
 
     template<Matrix M>
     class Hermite<M> : public RValueMatrix<Hermite<M>> {
-        using Base = RValueMatrix<Hermite<M>>;
-    public:
-        using typename Base::ScalarType;
+        using This = Hermite<M>;
+        using Base = RValueMatrix<This>;
+    protected:
+        using typename Base::T;
     private:
-        const M& matrix;
+        const M& mat;
     public:
-        explicit Hermite(const M& matrix_);
+        explicit Hermite(const M& mat_);
+        Hermite(const This&) = default;
+        Hermite(This&&) noexcept = default;
+        ~Hermite() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] T calc(size_t row, size_t col) const { return mat.calc(col, row).conjugate(); }
+
+        [[nodiscard]] const M& hermite() const noexcept { return mat; }
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row).conjugate(); }
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getCol(); }
-        [[nodiscard]] size_t getCol() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
+        [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
     };
 
     template<Matrix M>
-    Hermite<M>::Hermite(const M& matrix_) : matrix(matrix_) {
+    Hermite<M>::Hermite(const M& mat_) : mat(mat_) {
         static_assert(M::isComplex, "[Error]: Do not call hermite on real matrix");
     }
 
     template<Vector V>
     class Hermite<V> : public RValueMatrix<Hermite<V>> {
-        using Base = RValueMatrix<Hermite<V>>;
-    public:
-        using typename Base::ScalarType;
+        using This = Hermite<V>;
+        using Base = RValueMatrix<This>;
+    protected:
+        using typename Base::T;
     private:
         const V& vec;
     public:
         explicit Hermite(const V& vec_);
+        Hermite(const This&) = default;
+        Hermite(This&&) noexcept = default;
+        ~Hermite() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
+
+        [[nodiscard]] T calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
+
+        [[nodiscard]] const V& hermite() const noexcept { return vec; }
         /* Getters */
-        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
         [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] size_t getCol() const noexcept { return vec.getLength(); }
     };

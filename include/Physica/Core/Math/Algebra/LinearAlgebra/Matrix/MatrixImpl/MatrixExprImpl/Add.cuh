@@ -21,35 +21,36 @@
 #include "../MatrixExpr.cuh"
 
 namespace Physica {
-    template<Matrix T, Scalar U>
-    class device_obj<MatrixExpr<ExprType::Add, T, U>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, T, U>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, T, U>>;
-    public:
-        using typename Base::ScalarType;
+    template<Matrix M, Scalar U>
+    class device_obj<MatrixExpr<ExprType::Add, M, U>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Add, M, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, M, U>>;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) + Base::getRHS();
         }
 
         __host__ __device__ auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
     };
 
-    template<Matrix T, Vector U>
-    class device_obj<MatrixExpr<ExprType::Add, T, U>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, T, U>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, T, U>>;
+    template<Matrix M, Vector U>
+    class device_obj<MatrixExpr<ExprType::Add, M, U>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Add, M, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, M, U>>;
     public:
-        using typename Base::ScalarType;
-        using typename Base::Tv;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
         using Base::Base;
         /* Operations */
         __host__ __device__ void assign(Matrix auto& target) const {
-            constexpr bool FastAssign = Traits<std::remove_cvref_t<T>>::FastAssign;
+            constexpr bool FastAssign = Traits<std::remove_cvref_t<M>>::FastAssign;
             if constexpr (FastAssign) {
                 Base::getLHS().assign(target);
                 target += Base::getRHS();
@@ -58,7 +59,7 @@ namespace Physica {
                 Base::assign(target);
         }
 
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const {
             if constexpr (isReverseDiff)
                 return calc_value(row, col);
             else
@@ -72,7 +73,7 @@ namespace Physica {
         using Base::reverse;
         void reverse(const Matrix auto& grad) const noexcept {
             static_assert(isReverseDiff);
-            if constexpr (ReverseDiff<T>)
+            if constexpr (ReverseDiff<M>)
                 Base::getLHS().reverse(grad);
             if constexpr (ReverseDiff<U>)
                 Base::getRHS().reverse(grad.sum_cols());
@@ -81,14 +82,15 @@ namespace Physica {
         __host__ __device__ auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
     };
 
-    template<Matrix T1, Matrix T2>
-    class device_obj<MatrixExpr<ExprType::Add, T1, T2>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, T1, T2>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, T1, T2>>;
+    template<Matrix M1, Matrix M2>
+    class device_obj<MatrixExpr<ExprType::Add, M1, M2>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Add, M1, M2>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, M1, M2>>;
     public:
+        using Base::isReverseDiff;
+    protected:
         using typename Base::T;
         using typename Base::Tv;
-        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
@@ -106,28 +108,28 @@ namespace Physica {
         __host__ __device__ auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
     };
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(T&& m, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<MatrixExpr<ExprType::Add, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator+(M&& m, U&& x) noexcept requires(CUDA<M>) {
+        return device_obj<MatrixExpr<ExprType::Add, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(U&& x, T&& m) noexcept requires(CUDA<T>) {
+    template<Matrix M, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator+(U&& x, M&& m) noexcept requires(CUDA<M>) {
         return m + x;
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ auto operator+(T&& m, U&& x) noexcept requires(CUDA<T> && CUDA<U>) {
-        return device_obj<MatrixExpr<ExprType::Add, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Vector U>
+    [[nodiscard]] __host__ __device__ auto operator+(M&& m, U&& x) noexcept requires(CUDA<M> && CUDA<U>) {
+        return device_obj<MatrixExpr<ExprType::Add, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ auto operator+(U&& x, T&& m) noexcept requires(CUDA<T> && CUDA<U>) {
+    template<Matrix M, Vector U>
+    [[nodiscard]] __host__ __device__ auto operator+(U&& x, M&& m) noexcept requires(CUDA<M> && CUDA<U>) {
         return m + x;
     }
 
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] __host__ __device__ auto operator+(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<MatrixExpr<ExprType::Add, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] __host__ __device__ auto operator+(M1&& m1, M2&& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
+        return device_obj<MatrixExpr<ExprType::Add, M1&&, M2&&>>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

@@ -24,11 +24,12 @@ namespace Physica {
     /**
      * \class FormatedMatrix convert a matrix to text, either readable to human, or other softwares.
      */
-    template<Matrix T>
+    template<Matrix M>
     class FormatedMatrix {
-        using ScalarType = T::ScalarType;
+        using This = FormatedMatrix<M>;
+        using ScalarType = M::ScalarType;
 
-        const T& data;
+        const M& data;
         std::string matPrefix;
         std::string matSuffix;
         std::string rowPrefix;
@@ -36,9 +37,15 @@ namespace Physica {
         std::string rowSeparator;
         std::string separator;
     public:
-        FormatedMatrix(const T& data_);
+        FormatedMatrix(const M& data_);
+        FormatedMatrix(const This&) = delete;
+        FormatedMatrix(This&&) noexcept = delete;
+        ~FormatedMatrix() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
-        FormatedMatrix& toFormatMMA();
+        This& toFormatMMA();
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return data.calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return data.getRow(); }
@@ -50,33 +57,31 @@ namespace Physica {
         [[nodiscard]] const std::string& getRowSeparator() const noexcept { return rowSeparator; }
         [[nodiscard]] const std::string& getSeparator() const noexcept { return separator; }
         /* Setters */
-        FormatedMatrix& setMatPrefix(std::string matPrefix_);
-        FormatedMatrix& setMatSuffix(std::string matSuffix_);
-        FormatedMatrix& setRowPrefix(std::string rowPrefix_);
-        FormatedMatrix& setRowSuffix(std::string rowSuffix_);
-        FormatedMatrix& setRowSeparator(std::string rowSeparator_);
-        FormatedMatrix& setSeparator(std::string separator_);
+        This& setMatPrefix(std::string matPrefix_);
+        This& setMatSuffix(std::string matSuffix_);
+        This& setRowPrefix(std::string rowPrefix_);
+        This& setRowSuffix(std::string rowSuffix_);
+        This& setRowSeparator(std::string rowSeparator_);
+        This& setSeparator(std::string separator_);
+    private:
+        [[nodiscard]] bool isVectorLike() const noexcept { return (getRow() == 1) || (getCol() == 1); }
     };
 
-    template<Matrix T>
-    FormatedMatrix<T>::FormatedMatrix(const T& data_)
+    template<Matrix M>
+    FormatedMatrix<M>::FormatedMatrix(const M& data_)
             : data(data_)
-            , matPrefix("")
-            , matSuffix("")
-            , rowPrefix("")
-            , rowSuffix("")
-            , rowSeparator("")
+            , matSuffix("\n")
+            , rowSeparator("\n")
             , separator(" ") {
-        bool isVectorLike = (getRow() == 1) || (getCol() == 1);
-        if (isVectorLike) {
+        if (isVectorLike()) {
             setMatPrefix("(");
             setMatSuffix(")");
             setSeparator(", ");
         }
     }
 
-    template<Matrix T>
-    FormatedMatrix<T>& FormatedMatrix<T>::toFormatMMA() {
+    template<Matrix M>
+    auto FormatedMatrix<M>::toFormatMMA() -> This& {
         setMatPrefix("{");
         setMatSuffix("}");
         setRowPrefix("{");
@@ -86,38 +91,38 @@ namespace Physica {
         return *this;
     }
 
-    template<Matrix T>
-    FormatedMatrix<T>& FormatedMatrix<T>::setMatPrefix(std::string matPrefix_) {
+    template<Matrix M>
+    auto FormatedMatrix<M>::setMatPrefix(std::string matPrefix_) -> This& {
         matPrefix = std::move(matPrefix_);
         return *this;
     }
 
-    template<Matrix T>
-    FormatedMatrix<T>& FormatedMatrix<T>::setMatSuffix(std::string matSuffix_) {
+    template<Matrix M>
+    auto FormatedMatrix<M>::setMatSuffix(std::string matSuffix_) -> This& {
         matSuffix = std::move(matSuffix_);
         return *this;
     }
 
-    template<Matrix T>
-    FormatedMatrix<T>& FormatedMatrix<T>::setRowPrefix(std::string rowPrefix_) {
+    template<Matrix M>
+    auto FormatedMatrix<M>::setRowPrefix(std::string rowPrefix_) -> This& {
         rowPrefix = std::move(rowPrefix_);
         return *this;
     }
 
-    template<Matrix T>
-    FormatedMatrix<T>& FormatedMatrix<T>::setRowSuffix(std::string rowSuffix_) {
+    template<Matrix M>
+    auto FormatedMatrix<M>::setRowSuffix(std::string rowSuffix_) -> This& {
         rowSuffix = std::move(rowSuffix_);
         return *this;
     }
 
-    template<Matrix T>
-    FormatedMatrix<T>& FormatedMatrix<T>::setRowSeparator(std::string rowSeparator_) {
+    template<Matrix M>
+    auto FormatedMatrix<M>::setRowSeparator(std::string rowSeparator_) -> This& {
         rowSeparator = std::move(rowSeparator_);
         return *this;
     }
 
-    template<Matrix T>
-    FormatedMatrix<T>& FormatedMatrix<T>::setSeparator(std::string separator_) {
+    template<Matrix M>
+    auto FormatedMatrix<M>::setSeparator(std::string separator_) -> This& {
         separator = std::move(separator_);
         return *this;
     }
@@ -129,20 +134,22 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Matrix T>
-    struct formatter<Physica::FormatedMatrix<T>, char> {
+    template<Physica::Matrix M>
+    struct formatter<Physica::FormatedMatrix<M>, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
             return ctx.begin();
         }
 
-        auto format(const Physica::FormatedMatrix<T>& obj, std::format_context& ctx) const {
+        auto format(const Physica::FormatedMatrix<M>& obj, std::format_context& ctx) const {
             const size_t col = obj.getCol();
             const size_t row = obj.getRow();
-
-            size_t width = 0;
-            for (size_t c = 0; c < col; ++c)
-                for (size_t r = 0; r < row; ++ r)
-                    width = std::max(width, std::formatted_size("{}", obj.calc(r, c).real()));
+            const auto width = [&obj, row, col]() noexcept {
+                size_t result = 0;
+                for (size_t c = 0; c < col; ++c)
+                    for (size_t r = 0; r < row; ++ r)
+                        result = std::max(result, std::formatted_size("{}", obj.calc(r, c).real()));
+                return static_cast<std::streamsize>(result);
+            }();
 
             std::stringstream ss{};
             ss << obj.getMatPrefix();
@@ -155,7 +162,7 @@ namespace std {
                     if (!isLastElem)
                         ss << obj.getSeparator();
                 }
-                ss << obj.getRowSuffix() << '\n';
+                ss << obj.getRowSuffix();
 
                 const bool isLastRow = r + 1 == row;
                 if (!isLastRow)

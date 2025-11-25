@@ -50,11 +50,11 @@ namespace Physica {
         TPQ() = default;
         TPQ(size_t length);
         TPQ(size_t length, Tr traceMu_, int numMinCostTerm_, int numSplit_);
-        TPQ(const This&) = default;
-        TPQ(This&&) noexcept = default;
+        TPQ(const TPQ&) = default;
+        TPQ(TPQ&&) noexcept = default;
         ~TPQ() = default;
         /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        TPQ& operator=(TPQ obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void pre_nvt_step(const Matrix auto& hamiltonH, Tr deltaBeta);
@@ -63,7 +63,7 @@ namespace Physica {
 
         [[nodiscard]] Tr lnPartitionZ() const;
         [[nodiscard]] Tr lnSquaredDot(const VectorND<Tr>& other) const;
-        void swap(This& __restrict obj) noexcept;
+        void swap(TPQ& __restrict obj) noexcept;
 
         template<RNG R = Random<>>
         void random_normal();
@@ -76,7 +76,7 @@ namespace Physica {
         [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
         template<RNG R = Random<>>
-        [[nodiscard]] static This random_normal(size_t len);
+        [[nodiscard]] static TPQ random_normal(size_t len);
         [[nodiscard]] static Tr calcObserveUVT(Tr beta, Tr mu, const MatrixND<T>& lnPartitionNVT, const MatrixND<T>& observeNVT);
     private:
         using Base::random_uniform;
@@ -155,7 +155,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void TPQ<T>::swap(This& __restrict obj) noexcept {
+    void TPQ<T>::swap(TPQ& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         beta.swap(obj.beta);
@@ -176,7 +176,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     TPQ<T> TPQ<T>::random_normal(size_t len) {
-        This result(len);
+        TPQ result(len);
         result.random_normal<R>();
         return result;
     }

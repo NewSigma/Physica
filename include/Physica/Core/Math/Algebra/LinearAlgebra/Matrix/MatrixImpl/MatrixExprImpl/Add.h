@@ -35,6 +35,9 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
+
+        void reverse(const Matrix auto& grad) const noexcept;
+        using Base::reverse;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -56,6 +59,17 @@ namespace Physica {
     template<Matrix M, Scalar U>
     auto MatrixExpr<ExprType::Add, M, U>::calc_value(size_t row, size_t col) const -> Tv {
         return getLHS().calc_value(row, col) + getRHS().value();
+    }
+
+    template<Matrix M, Scalar U>
+    void MatrixExpr<ExprType::Add, M, U>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(Base::isReverseDiff);
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        if constexpr (Diffable<M>)
+            lhs.reverse(grad);
+        if constexpr (Diffable<U>)
+            rhs.reverse(grad.sum());
     }
 
     template<Matrix M, Vector U>
@@ -82,10 +96,6 @@ namespace Physica {
             : public BinaryMatrixExpr<ExprType::Add, M1, M2> {
         using Base = BinaryMatrixExpr<ExprType::Add, M1, M2>;
         using This = MatrixExpr<ExprType::Add, M1, M2>;
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M1>() && MatrixOption::isSymmMatrix<M2>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M1>() && MatrixOption::isHermiteMatrix<M2>();
-        using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
-        using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -97,8 +107,11 @@ namespace Physica {
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
-        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
-        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
+        void reverse(const Matrix auto& grad) const noexcept;
+        using Base::reverse;
+
+        [[nodiscard]] auto transpose() const noexcept;
+        [[nodiscard]] auto hermite() const noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -122,6 +135,35 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     auto MatrixExpr<ExprType::Add, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
         return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
+    }
+
+    template<Matrix M1, Matrix M2>
+    void MatrixExpr<ExprType::Add, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
+        static_assert(Base::isReverseDiff);
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        if constexpr (Diffable<M1>)
+            lhs.reverse(grad);
+        if constexpr (Diffable<M2>)
+            rhs.reverse(grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Add, M1, M2>::transpose() const noexcept {
+        if constexpr (MatrixOption::isSymmMatrix<M1>() && MatrixOption::isSymmMatrix<M2>())
+            return *this;
+        else
+            return Transpose<This>(*this);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto MatrixExpr<ExprType::Add, M1, M2>::hermite() const noexcept {
+        if constexpr (MatrixOption::isHermiteMatrix<M1>() && MatrixOption::isHermiteMatrix<M2>())
+            return *this;
+        else if constexpr (Base::isComplex)
+            return Hermite<This>(*this);
+        else
+            return transpose();
     }
 
     template<Matrix M, Scalar U>

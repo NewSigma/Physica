@@ -29,12 +29,12 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
-        const DQMC<T>& dqmc;
+        const HubbardParams<T>& params;
     private:
         VectorND<Tv> signs;
         size_t cursor = 0;
     public:
-        GreenSampler(const DQMC<T>& dqmc_, size_t numSample);
+        GreenSampler(const HubbardParams<T>& params, size_t numSample);
         GreenSampler(const This&) = delete;
         GreenSampler(This&&) noexcept = delete;
         ~GreenSampler() = default;
@@ -46,19 +46,19 @@ namespace Physica {
 
         void reset() { cursor = 0; }
         /* Getters */
-        [[nodiscard]] int getNumSite() const noexcept { return dqmc.getNumSite(); }
-        [[nodiscard]] auto getRepelU() const noexcept { return dqmc.getParams().getRepelU(); }
-        [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return dqmc.getParams().getHoppingMatrix(); }
+        [[nodiscard]] int getNumSite() const noexcept { return params.getNumSite(); }
+        [[nodiscard]] auto getRepelU() const noexcept { return params.getRepelU(); }
+        [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return params.getHoppingMatrix(); }
 
         [[nodiscard]] const auto& getSigns() const noexcept { return signs; }
         [[nodiscard]] size_t getNumSample() const noexcept { return signs.getLength(); }
         [[nodiscard]] size_t getCursor() const noexcept { return cursor; }
     protected:
-        void sample() noexcept;
+        void sample(T sign) noexcept;
     };
 
     template<Scalar T>
-    GreenSampler<T>::GreenSampler(const DQMC<T>& dqmc_, size_t numSample) : dqmc(dqmc_), signs(numSample) {
+    GreenSampler<T>::GreenSampler(const HubbardParams<T>& params, size_t numSample) : params(params), signs(numSample) {
         assert(numSample > 0);
     }
 
@@ -68,8 +68,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void GreenSampler<T>::sample() noexcept {
-        signs[cursor] = dqmc.getSign();
+    void GreenSampler<T>::sample(T sign) noexcept {
+        signs[cursor] = sign;
         cursor = (cursor + 1) % getNumSample();
     }
 }

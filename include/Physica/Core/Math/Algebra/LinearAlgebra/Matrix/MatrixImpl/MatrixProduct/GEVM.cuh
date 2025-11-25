@@ -23,20 +23,17 @@
 
 namespace Physica {
     template<Vector V, Matrix M>
-    class device_obj<GEVM<V, M>>
-            : public device_obj<RValueMatrix<GEVM<V, M>>> {
-        static_assert(M::RowAtCompile == 1 || M::RowAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
+    class device_obj<GEVM<V, M>> : public device_obj<RValueMatrix<GEVM<V, M>>> {
         using host_obj = GEVM<V, M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
     protected:
         using typename Base::T;
     private:
-        Physica::PlainStruct<const device_obj<V>> vec;
-        Physica::PlainStruct<const device_obj<M>> mat;
+        Physica::PlainStruct<const std::remove_cvref_t<V>> vec;
+        Physica::PlainStruct<const std::remove_cvref_t<M>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<V>& vec_, const device_obj<M>& mat_);
+        __host__ __device__ device_obj(V vec_, M mat_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -50,10 +47,7 @@ namespace Physica {
     };
 
     template<Vector V, Matrix M>
-    __host__ __device__ device_obj<GEVM<V, M>>::device_obj(const device_obj<V>& vec_, const device_obj<M>& mat_)
-            : vec(asStruct(vec_)), mat(asStruct(mat_)) {
-        assert(mat_.getRow() == 1);
-    }
+    __host__ __device__ device_obj<GEVM<V, M>>::device_obj(V vec_, M mat_) : vec(asStruct(vec_)), mat(asStruct(mat_)) {}
 
     template<Vector V, Matrix M>
     __device__ auto device_obj<GEVM<V, M>>::calc(size_t row, size_t col) const -> T {
@@ -61,9 +55,9 @@ namespace Physica {
     }
 
     template<Vector V, Matrix M>
-    [[nodiscard]] __host__ __device__ auto operator*(const device_obj<V>& vec, const device_obj<M>& mat) noexcept requires(M::RowAtCompile == 1) {
-        assert(mat.getRow() == 1);
-        return device_obj<GEVM<V, M>>(vec, mat);
+    [[nodiscard]] __host__ __device__ auto operator*(V&& vec, M&& mat) noexcept requires(CUDA<V> && CUDA<M>) {
+        static_assert(std::remove_cvref_t<M>::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
+        return device_obj<GEVM<V&&, M&&>>(std::forward<V>(vec), std::forward<M>(mat));
     }
 }
 
