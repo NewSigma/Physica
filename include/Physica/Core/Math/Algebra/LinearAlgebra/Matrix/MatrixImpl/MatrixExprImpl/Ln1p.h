@@ -24,6 +24,7 @@ namespace Physica {
     template<Matrix M>
     class MatrixExpr<ExprType::Ln1p, M>
             : public UnitaryMatrixExpr<ExprType::Ln1p, M> {
+        using This = MatrixExpr<ExprType::Ln1p, M>;
         using Base = UnitaryMatrixExpr<ExprType::Ln1p, M>;
     public:
         using Base::isReverseDiff;
@@ -39,16 +40,25 @@ namespace Physica {
 
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto row(size_t r) noexcept;
+        [[nodiscard]] const auto row(size_t r) const noexcept;
+        [[nodiscard]] auto col(size_t c) noexcept;
+        [[nodiscard]] const auto col(size_t c) const noexcept;
+
+        [[nodiscard]] auto values() const noexcept;
+        /* Getters */
+        using Base::getExpr;
     };
 
     template<Matrix M>
     auto MatrixExpr<ExprType::Ln1p, M>::calc(size_t row, size_t col) const -> T {
-        return ln1p(Base::getExpr().calc(row, col));
+        return ln1p(getExpr().calc(row, col));
     }
 
     template<Matrix M>
     auto MatrixExpr<ExprType::Ln1p, M>::calc_value(size_t row, size_t col) const -> Tv {
-        return ln1p(Base::getExpr().calc_value(row, col));
+        return ln1p(getExpr().calc_value(row, col));
     }
 
     template<Matrix M>
@@ -58,6 +68,31 @@ namespace Physica {
         static_assert(isReverseDiff);
         auto& expr = Base::getExpr();
         expr.reverse(divide_elem(grad, expr.values() + Trv(1)));
+    }
+
+    template<Matrix M>
+    auto MatrixExpr<ExprType::Ln1p, M>::row(size_t r) noexcept {
+        return ln1p(getExpr().row(r));
+    }
+
+    template<Matrix M>
+    const auto MatrixExpr<ExprType::Ln1p, M>::row(size_t r) const noexcept {
+        return const_cast<This&>(*this).row(r);
+    }
+
+    template<Matrix M>
+    auto MatrixExpr<ExprType::Ln1p, M>::col(size_t c) noexcept {
+        return ln1p(getExpr().col(c));
+    }
+
+    template<Matrix M>
+    const auto MatrixExpr<ExprType::Ln1p, M>::col(size_t c) const noexcept {
+        return const_cast<This&>(*this).col(c);
+    }
+
+    template<Matrix M>
+    auto MatrixExpr<ExprType::Ln1p, M>::values() const noexcept {
+        return ln1p_elem(getExpr().values());
     }
 
     template<Matrix M>

@@ -87,10 +87,6 @@ namespace Physica {
         using Tc = T::ComplexType;
 
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
-    private:
-        using ConjugateRtnTy = std::conditional<isComplex, Conjugate<Derived>, const Derived&>::type;
-        using RealsRtnTy = std::conditional<isComplex, RealMatrix<Derived>, Derived&>::type;
-        using ValuesRtnTy = std::conditional<isDiffable, ValueMatrix<Derived>, Derived&>::type;
     public:
         ~RValueMatrix() = default;
         /* Operators */
@@ -179,17 +175,17 @@ namespace Physica {
         [[nodiscard]] auto inv() const noexcept;
         [[nodiscard]] auto pinv() const noexcept;
         [[nodiscard]] auto transpose() const noexcept;
-        [[nodiscard]] ConjugateRtnTy conjugate() const noexcept;
+        [[nodiscard]] decltype(auto) conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
         [[nodiscard]] auto flatten() const noexcept;
 
-        [[nodiscard]] RealsRtnTy reals() const noexcept;
+        [[nodiscard]] decltype(auto) reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;
         [[nodiscard]] auto squaredNorms() const noexcept;
         [[nodiscard]] auto norms() const noexcept;
-        [[nodiscard]] ValuesRtnTy values() const noexcept;
+        [[nodiscard]] decltype(auto) values() const noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] auto grads() const noexcept;
+        [[nodiscard]] decltype(auto) grads() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }

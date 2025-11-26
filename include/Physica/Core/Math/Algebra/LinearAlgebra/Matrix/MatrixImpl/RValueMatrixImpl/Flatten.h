@@ -21,41 +21,52 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
-    class FlattenR<T> : public RValueVector<FlattenR<T>> {
-        using This = FlattenR<T>;
+    template<Matrix M>
+    class FlattenR<M> : public RValueVector<FlattenR<M>> {
+        using This = FlattenR<M>;
+        using Base = RValueVector<FlattenR<M>>;
 
-        const T& mat;
+        const M& mat;
+    protected:
+        using typename Base::T;
+        using typename Base::Tv;
     public:
-        using Base = RValueVector<FlattenR<T>>;
-        using typename Base::ScalarType;
-    public:
-        FlattenR(const T& mat_) : mat(mat_) {}
+        FlattenR(const M& mat_) : mat(mat_) {}
         FlattenR(const This&) = default;
         FlattenR(This&&) noexcept = default;
         ~FlattenR() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] T calc(size_t index) const;
+        [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
 
-    template<Matrix T>
-    auto FlattenR<T>::calc(size_t index) const -> ScalarType {
+    template<Matrix M>
+    auto FlattenR<M>::calc(size_t index) const -> T {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
     }
+
+    template<Matrix M>
+    auto FlattenR<M>::calc_value(size_t index) const -> Tv {
+        const size_t major = index / mat.getMaxMinor();
+        const size_t minor = index % mat.getMaxMinor();
+        return mat.calc_value(mat.rowFromMajorMinor(major, minor),
+                              mat.colFromMajorMinor(major, minor));
+    }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<FlattenR<T>> {
+    template<Matrix M>
+    class Traits<FlattenR<M>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
+        using ScalarType = M::ScalarType;
+        constexpr static size_t SizeAtCompile = M::RowAtCompile * M::ColAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

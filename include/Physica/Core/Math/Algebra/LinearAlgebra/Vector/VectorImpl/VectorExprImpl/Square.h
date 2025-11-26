@@ -46,6 +46,10 @@ namespace Physica {
 
         void reverse(const auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto values() const noexcept;
+        /* Getters */
+        using Base::getExpr;
     };
 
     template<Vector V>
@@ -56,37 +60,42 @@ namespace Physica {
 
     template<Vector V>
     auto VectorExpr<ExprType::Square, V>::calc(size_t index) const -> CoDiff<T> {
-        return square(Base::getExpr().calc(index));
+        return square(getExpr().calc(index));
     }
 
     template<Vector V>
     auto VectorExpr<ExprType::Square, V>::calc_value(size_t index) const -> Tv {
-        return square(Base::getExpr().calc_value(index));
+        return square(getExpr().calc_value(index));
     }
 
     template<Vector V>
     template<Packet Pack>
     Pack VectorExpr<ExprType::Square, V>::packet(size_t index) const {
-        return square(Base::getExpr().template packet<Pack>(index));
+        return square(getExpr().template packet<Pack>(index));
     }
 
     template<Vector V>
     template<Packet Pack>
     Pack VectorExpr<ExprType::Square, V>::packetPartial(size_t index, size_t count) const {
-        return square(Base::getExpr().template packetPartial<Pack>(index, count));
+        return square(getExpr().template packetPartial<Pack>(index, count));
     }
 
     template<Vector V>
     void VectorExpr<ExprType::Square, V>::reverse(const auto& grad) const noexcept {
         static_assert(Base::isReverseDiff);
         using G = decltype(grad);
-        const auto& expr = Base::getExpr();
+        const auto& expr = getExpr();
         if constexpr (Scalar<G>)
             expr.reverse(expr.values() * (Trv(2) * grad));
         else {
             static_assert(Vector<G>, "[Error]: Unexpected type");
             expr.reverse(hadamard(expr.values(), grad) * Trv(2));
         }
+    }
+
+    template<Vector V>
+    auto VectorExpr<ExprType::Square, V>::values() const noexcept {
+        return square(getExpr().values());
     }
 
     template<Vector V>

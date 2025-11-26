@@ -314,14 +314,15 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::sum() const -> CoDiff<T> {
+        const auto& x = Base::getDerived();
         if constexpr (isReverseDiff) {
-            auto result = co_yield values().sum();
-            Base::getDerived().reverse(result.grad());
+            auto result = co_yield x.values().sum();
+            x.reverse(result.grad());
         }
         else {
             T result = 0;
             for (size_t major = 0; major < getMaxMajor(); ++major)
-                result += MatrixOption::isColMatrix<Derived>() ? col(major).sum() : row(major).sum();
+                result += MatrixOption::isColMatrix<Derived>() ? x.col(major).sum() : x.row(major).sum();
             co_return std::move(result);
         }
     }
@@ -404,7 +405,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::conjugate() const noexcept -> ConjugateRtnTy {
+    decltype(auto) RValueMatrix<Derived>::conjugate() const noexcept {
         if constexpr (isComplex)
             return Conjugate<Derived>(Base::getDerived());
         else
@@ -425,8 +426,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::reals() const noexcept -> RealsRtnTy {
-        return RealsRtnTy(Base::getDerived());
+    decltype(auto) RValueMatrix<Derived>::reals() const noexcept {
+        if constexpr (isComplex)
+            return RealMatrix<Derived>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
@@ -445,13 +449,16 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::values() const noexcept -> ValuesRtnTy {
-        return ValuesRtnTy(Base::getDerived());
+    decltype(auto) RValueMatrix<Derived>::values() const noexcept {
+        if constexpr (isDiffable)
+            return ValueMatrix<Derived>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
     template<int GradOrder>
-    auto RValueMatrix<Derived>::grads() const noexcept {
+    decltype(auto) RValueMatrix<Derived>::grads() const noexcept {
         if constexpr (isReverseDiff)
             return Base::getDerived().template grads<GradOrder>();
         else
