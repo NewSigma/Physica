@@ -26,10 +26,6 @@ namespace Physica {
             : public BinaryMatrixExpr<ExprType::Mul, M, U> {
         using Base = BinaryMatrixExpr<ExprType::Mul, M, U>;
         using This = MatrixExpr<ExprType::Mul, M, U>;
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M>();
-        using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
-        using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -45,9 +41,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] T trace() const { return getLHS().trace() * getRHS(); }
-        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
-        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
-        [[nodiscard]] T sum() const { return Base::getLHS().sum() * Base::getRHS(); }
+        [[nodiscard]] T sum() const { return getLHS().sum() * getRHS(); }
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;

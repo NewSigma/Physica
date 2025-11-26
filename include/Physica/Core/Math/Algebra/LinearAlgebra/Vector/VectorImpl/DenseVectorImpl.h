@@ -130,7 +130,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    auto DenseVector<T, Length, Allocator>::read(const H5Loc& loc, const char* name) -> This {
+    auto DenseVector<T, Length, Allocator>::read_hdf5(const H5Loc& loc, const char* name) -> This {
         This result{};
         result.read(loc, name);
         return result;

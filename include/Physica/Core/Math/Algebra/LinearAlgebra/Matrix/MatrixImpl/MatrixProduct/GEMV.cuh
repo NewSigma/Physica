@@ -90,7 +90,7 @@ namespace Physica {
         const auto& g = grad.values();
         const auto& m = mat.getDerived();
         const auto& v = vec.getDerived();
-        Base::assert_assign(grad);
+        grad.assert_assign(*this);
         if constexpr (ReverseDiff<T>)
             m.reverse(g * v.values().transpose());
         if constexpr (ReverseDiff<U>)

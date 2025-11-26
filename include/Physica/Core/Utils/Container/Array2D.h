@@ -35,7 +35,6 @@ namespace Physica {
         constexpr static size_t MaxMajor = isColMajor ? Col : Row;
         constexpr static size_t MaxMinor = isColMajor ? Row : Col;
         constexpr static int TransOption = isColMajor ? MatrixOption::Row : MatrixOption::Col;
-        using TransposeRtnTy = Array2D<T, TransOption, Col, Row, Allocator>;;
 
         template<class U>
         struct Helper {
@@ -73,7 +72,7 @@ namespace Physica {
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
-        [[nodiscard]] TransposeRtnTy transpose() const noexcept;
+        [[nodiscard]] auto transpose() const noexcept;
 
         void zeros() noexcept;
         void swap(This& __restrict obj) noexcept;

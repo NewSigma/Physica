@@ -34,8 +34,8 @@ namespace Physica {
         Array<uint64_t> particleBucket;
         T cellVolume;
         T stepSize;
-        unsigned int numStep;
-        unsigned int numSample;
+        unsigned int numStep = 0;
+        unsigned int numSample = 0;
     public:
         RDF() = default;
         RDF(Array<bool> isFromParticle_,
@@ -53,7 +53,7 @@ namespace Physica {
         void sample(const MDCell<U>& cell);
         VectorND<T> makeDists() const;
         VectorND<T> makeRDF() const;
-        void swap(RDF& __restrict rdf) noexcept;
+        void swap(RDF& __restrict obj) noexcept;
         [[nodiscard]] bool checkRadius(const PeriodicCell<T, 3>& cell) const;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return isFromParticle.getLength(); }
@@ -62,8 +62,8 @@ namespace Physica {
         /* Setters */
         void setCellVolume(T cellVolume_) { cellVolume = cellVolume_; }
     private:
-        uint64_t sumFromParticle() const;
-        uint64_t sumToParticle() const;
+        [[nodiscard]] uint64_t sumFromParticle() const;
+        [[nodiscard]] uint64_t sumToParticle() const;
     };
 
     template<Scalar T>
@@ -77,8 +77,7 @@ namespace Physica {
             , particleBucket(numStep_, 0)
             , cellVolume(cellVolume_)
             , stepSize(std::move(stepSize_))
-            , numStep(numStep_)
-            , numSample(0) {
+            , numStep(numStep_) {
         assert(isFromParticle.getLength() == isToParticle.getLength());
         assert(stepSize.isPositive());
     }
@@ -115,7 +114,7 @@ namespace Physica {
     VectorND<T> RDF<T>::makeDists() const {
         VectorND<T> dists(numStep);
         for (size_t i = 0; i < dists.getLength(); ++i)
-            dists[i] = stepSize * (i + 1.5);
+            dists[i] = stepSize * (T(i + 1) + 0.5);
         return dists;
     }
 

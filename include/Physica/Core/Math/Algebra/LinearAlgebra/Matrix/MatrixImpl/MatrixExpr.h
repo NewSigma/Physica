@@ -35,9 +35,6 @@ namespace Physica {
     public:
         using Base::isReverseDiff;
     private:
-        using TransposeRtnTy = std::conditional<MatrixOption::isSymmMatrix<M>(), const Derived&, Transpose<Derived>>::type;
-        using HermiteRtnTy = std::conditional<MatrixOption::isHermiteMatrix<M>(), const Derived&, Hermite<Derived>>::type;
-
         LazyDestroy<M> expr;
     public:
         UnitaryMatrixExpr(M expr_) : expr(std::forward<M>(expr_)) {}
@@ -48,14 +45,30 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
-        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] decltype(auto) hermite() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
         [[nodiscard]] auto& getExpr() noexcept { return expr; }
     };
+
+    template<ExprType Type, Matrix M>
+    decltype(auto) UnitaryMatrixExpr<Type, M>::transpose() const noexcept {
+        if constexpr (MatrixOption::isSymmMatrix<M>())
+            return Base::getDerived();
+        else
+            return Base::transpose();
+    }
+
+    template<ExprType Type, Matrix M>
+    decltype(auto) UnitaryMatrixExpr<Type, M>::hermite() const noexcept {
+        if constexpr (MatrixOption::isHermiteMatrix<M>())
+            return Base::getDerived();
+        else
+            return Base::hermite();
+    }
 
     template<ExprType Type, class LHS, class RHS>
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
@@ -67,9 +80,6 @@ namespace Physica {
     public:
         using Base::isReverseDiff;
     private:
-        using TransposeRtnTy = std::conditional<Traits<Derived>::isSymm, const This&, Transpose<This>>::type;
-        using HermiteRtnTy = std::conditional<Traits<Derived>::isHermite, const This&, Hermite<This>>::type;
-
         LazyDestroy<LHS> lhs;
         LazyDestroy<RHS> rhs;
     public:
@@ -81,8 +91,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
-        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] decltype(auto) hermite() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const {
             if constexpr (Matrix<LHS>)
@@ -100,6 +110,9 @@ namespace Physica {
         [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
         [[nodiscard]] auto& getLHS() noexcept { return lhs; }
         [[nodiscard]] auto& getRHS() noexcept { return rhs; }
+        /* Static members */
+        [[nodiscard]] consteval static bool isStaticSymm() noexcept;
+        [[nodiscard]] consteval static bool isStaticHermite() noexcept;
     };
 
     template<ExprType Type, class LHS, class RHS>
@@ -110,6 +123,50 @@ namespace Physica {
         }
         else if constexpr (Vector<RHS>)
             assert(getLHS().getCol() == getRHS().getLength());
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    decltype(auto) BinaryMatrixExpr<Type, LHS, RHS>::transpose() const noexcept {
+        if constexpr (isStaticSymm())
+            return Base::getDerived();
+        else
+            return Base::transpose();
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    decltype(auto) BinaryMatrixExpr<Type, LHS, RHS>::hermite() const noexcept {
+        if constexpr (isStaticHermite())
+            return Base::getDerived();
+        else
+            return Base::hermite();
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    consteval bool BinaryMatrixExpr<Type, LHS, RHS>::isStaticSymm() noexcept {
+        if constexpr (Matrix<LHS> && Matrix<RHS>)
+            return MatrixOption::isSymmMatrix<LHS>() && MatrixOption::isSymmMatrix<RHS>();
+        else if constexpr (Vector<LHS> || Vector<RHS>)
+            return false;
+        else if constexpr (Scalar<LHS>)
+            return MatrixOption::isSymmMatrix<RHS>();
+        else {
+            static_assert(Scalar<RHS>, "[Error]: Unexpected type");
+            return MatrixOption::isSymmMatrix<LHS>();
+        }
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    consteval bool BinaryMatrixExpr<Type, LHS, RHS>::isStaticHermite() noexcept {
+        if constexpr (Matrix<LHS> && Matrix<RHS>)
+            return MatrixOption::isHermiteMatrix<LHS>() && MatrixOption::isHermiteMatrix<RHS>();
+        else if constexpr (Vector<LHS> || Vector<RHS>)
+            return false;
+        else if constexpr (Scalar<LHS>)
+            return MatrixOption::isHermiteMatrix<RHS>() && !std::remove_cvref_t<LHS>::isComplex;
+        else {
+            static_assert(Scalar<RHS>, "[Error]: Unexpected type");
+            return MatrixOption::isHermiteMatrix<LHS>() && !std::remove_cvref_t<RHS>::isComplex;
+        }
     }
 }
 
@@ -137,8 +194,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile > RHS1::SizeAtCompile ? LHS1::SizeAtCompile : RHS1::SizeAtCompile;
 
         constexpr static bool FastAssign = false;
-        constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>() && MatrixOption::isSymmMatrix<RHS>();
-        constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && MatrixOption::isHermiteMatrix<RHS>();
     };
 
     template<ExprType Type_, Matrix LHS_, Vector RHS_>
@@ -182,8 +237,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
 
         constexpr static bool FastAssign = Traits<LHS1>::FastAssign;
-        constexpr static bool isSymm = MatrixOption::isSymmMatrix<LHS>();
-        constexpr static bool isHermite = MatrixOption::isHermiteMatrix<LHS>() && !RHS1::isComplex;
     };
 
     template<ExprType Type, Scalar LHS, Matrix RHS>

@@ -29,26 +29,27 @@ namespace Physica {
      */
     template<Scalar T>
     class Correlation {
-        using VectorType = VectorND<T>;
+        using This = Correlation<T>;
 
         FFT<T, 1> fft;
-        VectorType corr;
+        VectorND<T> corr;
         T mean;
-        size_t numSample;
-        size_t step;
+        size_t numSample = 0;
+        size_t step = 0;
     public:
         Correlation() = default;
         Correlation(size_t numStep);
-        Correlation(const Correlation&) = default;
-        Correlation(Correlation&&) noexcept = default;
+        Correlation(const This&) = default;
+        Correlation(This&&) noexcept = default;
         ~Correlation() = default;
         /* Operators */
-        Correlation& operator=(Correlation obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void sample(T data);
         void resample() noexcept { step = 0; }
-        [[nodiscard]] VectorType makeCorr(bool removeDrift) const;
-        void swap(Correlation& __restrict obj) noexcept;
+        [[nodiscard]] VectorND<T> makeCorr(bool removeDrift) const;
+
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumStep() const noexcept { return corr.getLength(); }
         [[nodiscard]] T getMean() const noexcept { return mean; }
@@ -58,9 +59,7 @@ namespace Physica {
     template<Scalar T>
     Correlation<T>::Correlation(size_t numStep)
             : fft(numStep * 2, PlanFlag::Estimate)
-            , corr(numStep, 0)
-            , numSample(0)
-            , step(0) {
+            , corr(numStep, 0) {
         assert(numStep > 1 && "[Error]: Invalid step number");
     }
 
@@ -74,8 +73,7 @@ namespace Physica {
         
         const bool isDataEnough = step == numStep;
         if (isDataEnough) {
-            auto tail = rSpace.tail(numStep);
-            tail = T(0);
+            rSpace.tail(numStep).zeros();
 
             fft.transform();
             auto& kSpace = fft.getKSpace();
@@ -92,15 +90,15 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Correlation<T>::VectorType Correlation<T>::makeCorr(bool removeDrift) const {
-        VectorType result = corr;
+    auto Correlation<T>::makeCorr(bool removeDrift) const -> VectorND<T> {
+        VectorND<T> result = corr;
         if (removeDrift)
             result -= square(mean);
         return result;
     }
 
     template<Scalar T>
-    void Correlation<T>::swap(Correlation& __restrict obj) noexcept {
+    void Correlation<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft.swap(obj.fft);
         corr.swap(obj.corr);

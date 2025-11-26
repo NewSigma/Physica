@@ -109,9 +109,6 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
-
-        [[nodiscard]] auto transpose() const noexcept;
-        [[nodiscard]] auto hermite() const noexcept;
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
@@ -146,24 +143,6 @@ namespace Physica {
             lhs.reverse(grad);
         if constexpr (Diffable<M2>)
             rhs.reverse(grad);
-    }
-
-    template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprType::Add, M1, M2>::transpose() const noexcept {
-        if constexpr (MatrixOption::isSymmMatrix<M1>() && MatrixOption::isSymmMatrix<M2>())
-            return *this;
-        else
-            return Transpose<This>(*this);
-    }
-
-    template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprType::Add, M1, M2>::hermite() const noexcept {
-        if constexpr (MatrixOption::isHermiteMatrix<M1>() && MatrixOption::isHermiteMatrix<M2>())
-            return *this;
-        else if constexpr (Base::isComplex)
-            return Hermite<This>(*this);
-        else
-            return transpose();
     }
 
     template<Matrix M, Scalar U>

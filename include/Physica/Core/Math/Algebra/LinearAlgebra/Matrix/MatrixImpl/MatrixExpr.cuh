@@ -29,9 +29,6 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<Derived>>;
     private:
-        using TransposeRtnTy = std::conditional<MatrixOption::isSymmMatrix<M>(), const device_obj<Derived>&, device_obj<Transpose<Derived>>>::type;
-        using HermiteRtnTy = std::conditional<MatrixOption::isHermiteMatrix<M>(), const device_obj<Derived>&, device_obj<Hermite<Derived>>>::type;
-
         PlainStruct<const std::remove_cvref_t<M>> expr;
     public:
         __host__ __device__ device_obj(M expr_);
@@ -42,8 +39,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
-        [[nodiscard]] __host__ __device__ HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] __host__ __device__ decltype(auto) transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) hermite() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
@@ -53,6 +50,22 @@ namespace Physica {
 
     template<ExprType Type, Matrix M>
     __host__ __device__ device_obj<UnitaryMatrixExpr<Type, M>>::device_obj(M expr_) : expr(asStruct(expr_)) {}
+
+    template<ExprType Type, Matrix M>
+    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<Type, M>>::transpose() const noexcept {
+        if constexpr (MatrixOption::isSymmMatrix<M>())
+            return Base::getDerived();
+        else
+            return Base::transpose();
+    }
+
+    template<ExprType Type, Matrix M>
+    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<Type, M>>::hermite() const noexcept {
+        if constexpr (MatrixOption::isHermiteMatrix<M>())
+            return Base::getDerived();
+        else
+            return Base::hermite();
+    }
 
     template<ExprType Type, class LHS, class RHS>
     class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
@@ -64,9 +77,6 @@ namespace Physica {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>>;
     private:
-        using TransposeRtnTy = std::conditional<Traits<Derived>::isSymm, const device_obj<Derived>&, device_obj<Transpose<Derived>>>::type;
-        using HermiteRtnTy = std::conditional<Traits<Derived>::isHermite, const device_obj<Derived>&, device_obj<Hermite<Derived>>>::type;
-
         PlainStruct<const std::remove_cvref_t<LHS>> lhs;
         PlainStruct<const std::remove_cvref_t<RHS>> rhs;
     public:
@@ -78,8 +88,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ TransposeRtnTy transpose() const noexcept { return Base::getDerived(); }
-        [[nodiscard]] __host__ __device__ HermiteRtnTy hermite() const noexcept { return Base::getDerived(); }
+        [[nodiscard]] __host__ __device__ decltype(auto) transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) hermite() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const;
         [[nodiscard]] __host__ __device__ size_t getCol() const;
@@ -99,6 +109,22 @@ namespace Physica {
             assert(getLHS().getLength() == getRHS().getRow());
         else if constexpr (Vector<RHS>)
             assert(getLHS().getRow() == getRHS().getLength());
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    __host__ __device__ decltype(auto) device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::transpose() const noexcept {
+        if constexpr (host_obj::isStaticSymm())
+            return Base::getDerived();
+        else
+            return Base::transpose();
+    }
+
+    template<ExprType Type, class LHS, class RHS>
+    __host__ __device__ decltype(auto) device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::hermite() const noexcept {
+        if constexpr (host_obj::isStaticHermite())
+            return Base::getDerived();
+        else
+            return Base::hermite();
     }
 
     template<ExprType Type, class LHS, class RHS>
