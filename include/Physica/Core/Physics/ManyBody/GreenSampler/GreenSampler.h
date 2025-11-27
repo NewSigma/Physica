@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/ManyBody/DQMC.h"
+#include "Physica/Core/Physics/ManyBody/DQMCImpl/HubbardParams.h"
 
 namespace Physica {
     template<Scalar T>

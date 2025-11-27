@@ -46,7 +46,7 @@ namespace Physica {
         T lnZ;
     public:
         FreqDQMC() = delete;
-        FreqDQMC(const Params& params_, int freqCutoff);
+        FreqDQMC(const Params& params_, Trv freqDensity);
         FreqDQMC(const This&) = default;
         FreqDQMC(This&&) noexcept = default;
         ~FreqDQMC() = default;
@@ -66,7 +66,6 @@ namespace Physica {
         [[nodiscard]] const auto& getParams() const noexcept { return *params; }
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
-        [[nodiscard]] size_t getFreqCutoff() const noexcept { return rSquareOmegas.getLength(); }
         [[nodiscard]] auto& getGreens() noexcept { return kinetic.getGreens(); }
     private:
         /* Operations */
@@ -74,18 +73,18 @@ namespace Physica {
         void makeActionR();
         T calcLnZ();
         /* Static members */
-        template<RNG R>
-        [[nodiscard]] static Array<int> makeRandomSites(int numSite);
+        [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity);
     };
 
     template<Scalar T>
-    FreqDQMC<T>::FreqDQMC(const Params& params_, int freqCutoff)
+    FreqDQMC<T>::FreqDQMC(const Params& params_, Trv freqDensity)
             : params(&params_)
-            , rSquareOmegas(freqCutoff)
+            , rSquareOmegas(calcFreqCutoff(params_.getBeta(), freqDensity))
             , kinetic(params_.getNumSite(), params_.getNumSplit())
             , actionR(params_.getHoppingMatrix())
             , eig(params_.getNumSite(), true) {
-        for (size_t i = 0; i < getFreqCutoff(); ++i)
+        assert(freqDensity.isPositive());
+        for (size_t i = 0; i < rSquareOmegas.getLength(); ++i)
             rSquareOmegas[i] = T(2 * i + 1);
         rSquareOmegas *= MathConst<T>::pi / params->getBeta();
         rSquareOmegas = reciprocal(square(rSquareOmegas));
@@ -164,5 +163,11 @@ namespace Physica {
         actionR.diag() = -actionR.diag();
         T lnZD = diagonalize(getGreens()[1]);
         return lnZU + lnZD;
+    }
+
+    template<Scalar T>
+    int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) {
+        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
+        return (i + 1) * 4; // Multiple of 4 so that SIMD works
     }
 }

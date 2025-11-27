@@ -34,7 +34,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        [[nodiscard]] This addX(size_t delta, size_t period) const noexcept;
         [[nodiscard]] size_t toIndex1D(This dims) const noexcept;
+
         using Base::swap;
         /* Getters */
         [[nodiscard]] size_t getSite() const noexcept { return (*this)[Dim]; }
@@ -44,6 +46,13 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static size_t toIndex1D(This dims, This index) noexcept { return index.toIndex1D(dims); }
     };
+
+    template<int Dim>
+    auto SiteIndex<Dim>::addX(size_t delta, size_t period) const noexcept -> This {
+        This result = *this;
+        result[0] = (result[0] + delta) % period;
+        return result;
+    }
 
     template<int Dim>
     size_t SiteIndex<Dim>::toIndex1D(This dims) const noexcept {

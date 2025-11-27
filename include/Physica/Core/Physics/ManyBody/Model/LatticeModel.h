@@ -54,6 +54,9 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DimArray& getSuperSize() const noexcept { return superSize; }
+        [[nodiscard]] size_t getNumCellX() const noexcept;
+        [[nodiscard]] size_t getNumCellY() const noexcept;
+        [[nodiscard]] size_t getNumCellZ() const noexcept;
         [[nodiscard]] size_t getNumCell() const noexcept;
         [[nodiscard]] size_t getNumUnitCellSite() const noexcept { return numUnitCellSite; }
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return getNumUnitCellSite() * getNumCell(); }
@@ -109,10 +112,27 @@ namespace Physica {
     }
 
     template<int Dim>
+    size_t LatticeModel<Dim>::getNumCellX() const noexcept {
+        return superSize[0];
+    }
+
+    template<int Dim>
+    size_t LatticeModel<Dim>::getNumCellY() const noexcept {
+        static_assert(Dim > 1, "[Error]: Y-dim does not exist");
+        return superSize[1];
+    }
+
+    template<int Dim>
+    size_t LatticeModel<Dim>::getNumCellZ() const noexcept {
+        static_assert(Dim > 2, "[Error]: Z-dim does not exist");
+        return superSize[2];
+    }
+
+    template<int Dim>
     size_t LatticeModel<Dim>::getNumCell() const noexcept {
         size_t result = 1;
-        for (auto size : superSize)
-            result *= size;
+        for (int i = 0; i < Dim; ++i)
+            result *= superSize[i];
         return result;
     }
 }

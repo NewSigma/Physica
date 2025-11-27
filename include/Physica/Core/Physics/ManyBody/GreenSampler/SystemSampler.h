@@ -20,6 +20,7 @@
 
 #include "GreenSampler.h"
 #include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Core/Physics/ManyBody/DQMCImpl/ImagKinetic.h"
 
 namespace Physica {
     /**

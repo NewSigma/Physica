@@ -19,6 +19,7 @@
 #pragma once
 
 #include "GreenSampler.h"
+#include "Physica/Core/Physics/ManyBody/DQMCImpl/ImagKinetic.h"
 
 namespace Physica {
     template<Scalar T>
