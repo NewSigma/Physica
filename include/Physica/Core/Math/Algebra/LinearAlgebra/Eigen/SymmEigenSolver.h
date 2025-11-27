@@ -48,7 +48,7 @@ namespace Physica {
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;
     public:
-        SymmEigenSolver();
+        SymmEigenSolver() = default;
         SymmEigenSolver(size_t size, bool needEigenvectors);
         SymmEigenSolver(const Matrix auto& source, bool needEigenvectors);
         SymmEigenSolver(const This&) = default;
@@ -78,10 +78,7 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Order>
-    SymmEigenSolver<T, Order>::SymmEigenSolver() : eigenvalues(), eigenvectors() {}
-
-    template<Scalar T, size_t Order>
-    SymmEigenSolver<T, Order>::SymmEigenSolver(size_t size, bool needEigenvectors) : SymmEigenSolver() {
+    SymmEigenSolver<T, Order>::SymmEigenSolver(size_t size, bool needEigenvectors) {
         resize(size, needEigenvectors);
     }
 
@@ -93,7 +90,10 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     void SymmEigenSolver<T, Order>::compute(const Matrix auto& source) {
-        compute_base(source);
+        if constexpr (HasMKL() && !Diffable<T>)
+            compute_mkl(source);
+        else
+            compute_base(source);
     }
 
     template<Scalar T, size_t Order>
@@ -252,3 +252,7 @@ namespace std {
         solver1.swap(solver2);
     }
 }
+
+#ifdef PHYSICA_MKL
+    #include "SymmEigenSolver_MKL.h"
+#endif

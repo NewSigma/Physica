@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,9 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <benchmark/benchmark.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
 
 using namespace Physica;
 
@@ -27,13 +26,17 @@ namespace {
     template<bool NeedEigenVec>
     void kernel(benchmark::State& state) {
         using T = float64;
-        const SquareLattice<1> lattice({10}, 1);
-        const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
-        EigenSolver<T> solver(data.getRow(), NeedEigenVec);
-        for (auto _ : state)
-            solver.compute_mkl(data);
+        const auto size = state.range(0);
+        SymmEigenSolver<T> solver(size, NeedEigenVec);
+
+        auto m = MatrixND<T>::random_uniform<Random<MT19937>>(size);
+        for (auto _ : state) {
+            solver.compute_mkl(m);
+            benchmark::DoNotOptimize(solver);
+            benchmark::ClobberMemory();
+        }
     }
 }
 
-BENCHMARK(kernel<false>)->Name("EigenSolver s mkl");
-BENCHMARK(kernel<true>)->Name("EigenSolver sv mkl");
+BENCHMARK(kernel<false>)->Name("SymmEigenSolver s mkl")->Arg(4)->Arg(64)->Arg(1024);
+BENCHMARK(kernel<true>)->Name("SymmEigenSolver sv mkl")->Arg(4)->Arg(64)->Arg(1024);

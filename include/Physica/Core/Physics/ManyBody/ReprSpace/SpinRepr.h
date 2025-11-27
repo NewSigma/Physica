@@ -38,7 +38,7 @@ namespace Physica {
         [[nodiscard]] StateType operator[](size_t index) const noexcept;
         [[nodiscard]] size_t operator[](StateType state) const noexcept;
         /* Operations */
-        void swap(This& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept {}
         /* Getters */
         [[nodiscard]] constexpr static int getNumSpin() noexcept { return NumSite; }
         [[nodiscard]] constexpr static size_t getNumState() noexcept { return size_t(1) << NumSite; }
@@ -54,11 +54,6 @@ namespace Physica {
     size_t SpinRepr<Dim, NumSite>::operator[](StateType state) const noexcept {
         assert(state.getOccupyBits() < getNumState() && "[Error]: Index out of range");
         return state.getOccupyBits();
-    }
-
-    template<int Dim, int NumSite>
-    void SpinRepr<Dim, NumSite>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
     }
 }
 

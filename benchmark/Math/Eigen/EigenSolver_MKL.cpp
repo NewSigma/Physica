@@ -19,33 +19,23 @@
 #include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
 
 using namespace Physica;
 
 namespace {
     template<bool NeedEigenVec>
-    void direct(benchmark::State& state) {
+    void kernel(benchmark::State& state) {
         using T = float64;
         const SquareLattice<1> lattice({10}, 1);
         const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);
-        for (auto _ : state)
-            solver.compute(data);
-    }
-
-    template<bool NeedEigenVec>
-    void base(benchmark::State& state) {
-        using T = float64;
-        const SquareLattice<1> lattice({10}, 1);
-        const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
-        EigenSolver<T> solver(data.getRow(), NeedEigenVec);
-        for (auto _ : state)
-            solver.compute_base(data);
+        for (auto _ : state) {
+            solver.compute_mkl(data);
+            benchmark::DoNotOptimize(solver);
+            benchmark::ClobberMemory();
+        }
     }
 }
 
-BENCHMARK(direct<false>)->Name("EigenSolver s");
-BENCHMARK(direct<true>)->Name("EigenSolver sv");
-BENCHMARK(base<false>)->Name("EigenSolver s base");
-BENCHMARK(base<true>)->Name("EigenSolver sv base");
+BENCHMARK(kernel<false>)->Name("EigenSolver s mkl");
+BENCHMARK(kernel<true>)->Name("EigenSolver sv mkl");
