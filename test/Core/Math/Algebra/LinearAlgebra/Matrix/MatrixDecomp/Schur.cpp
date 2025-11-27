@@ -58,7 +58,7 @@ namespace {
         Schur<typename M::ScalarType> schur(mat, true);
         if (!isUpperQuasiTriangle(schur.getMatrixT()))
             return false;
-        M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
+        M A = (schur.getMatrixU() * schur.getMatrixT()).compute() * schur.getMatrixU().transpose();
         return (A - mat).norm1() <= mat.norm1() * precision;
     }
 
@@ -68,7 +68,7 @@ namespace {
         Schur<typename M::ScalarType> schur(mat, true);
         if (!isUpperTriangle(schur.getMatrixT()))
             return false;
-        M A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
+        M A = (schur.getMatrixU() * schur.getMatrixT()).compute() * schur.getMatrixU().hermite();
         return (A - mat).norm1() <= mat.norm1() * precision;
     }
 }

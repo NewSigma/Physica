@@ -153,7 +153,8 @@ namespace Physica {
             eig.compute(actionR);
             auto eigenvalues = VectorND<Tf>(eig.getEigenvalues());
             T lnZ = ln1p_elem(square(eigenvalues - shiftMu) * rSquareOmegas.transpose()).sum().reverse(repBeta);
-            green = eig.getEigenvectors() * DiagMatrix<T>(eigenvalues.grads()) * eig.getEigenvectors().transpose();
+            MatrixND<T> temp = eig.getEigenvectors() * DiagMatrix<T>(eigenvalues.grads());
+            green = temp * eig.getEigenvectors().transpose();
             green.diag() = Trv(0.5) + green.diag();
             return lnZ;
         };

@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "GEMM.h"
+#include "GEMMTrans.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2>
-    void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
+    void GEMM<M1, Transpose<M2>>::assign_mkl(Matrix auto& target) const noexcept {
         constexpr int Major = MatrixOption::isRowMatrix<M1>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr auto Layout = Major == MatrixOption::Row ? CblasRowMajor : CblasColMajor;
         const size_t m = getRow();
@@ -40,15 +40,15 @@ namespace Physica {
             const Tc alpha = 1;
             const Tc beta = 0;
             if constexpr (T::Prec == Float32)
-                cblas_cgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, (Tm*)&alpha, a, lda, b, ldb, (Tm*)&beta, c, ldc);
+                cblas_cgemm_64(Layout, CblasNoTrans, CblasTrans, m, n, k, (Tm*)&alpha, a, lda, b, ldb, (Tm*)&beta, c, ldc);
             else
-                cblas_zgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, (Tm*)&alpha, a, lda, b, ldb, (Tm*)&beta, c, ldc);
+                cblas_zgemm_64(Layout, CblasNoTrans, CblasTrans, m, n, k, (Tm*)&alpha, a, lda, b, ldb, (Tm*)&beta, c, ldc);
         }
         else {
             if constexpr (T::Prec == Float32)
-                cblas_sgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);
+                cblas_sgemm_64(Layout, CblasNoTrans, CblasTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);
             else
-                cblas_dgemm_64(Layout, CblasNoTrans, CblasNoTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);
+                cblas_dgemm_64(Layout, CblasNoTrans, CblasTrans, m, n, k, 1, a, lda, b, ldb, 0, c, ldc);
         }
     }
 }

@@ -24,35 +24,17 @@ namespace Physica {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     class DenseMatrix;
 
-    namespace Internal {
-        template<Matrix M1, Matrix M2>
-        struct ProductOption {
-            constexpr static bool SameMajor = MatrixOption::isSameMajor<M1, M2>();
-            constexpr static bool RowMajor = MatrixOption::isRowMatrix<M1>();
-            constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Col)
-                                                               : int(MatrixOption::Row))
-                                                   : int(MatrixOption::AnyMajor);
-            constexpr static int Option = Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major;
-        };
-    }
-
     template<Matrix M1, Matrix M2>
     class GEMM : public RValueMatrix<GEMM<M1, M2>> {
         using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
     public:
-        using Base::isReverseDiff;
-        using Base::isComplex;
+        constexpr static int Critical = 32;
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tm;
     private:
-        using DefaultType = DenseMatrix<T,
-                                        Internal::ProductOption<M1, M2>::Option,
-                                        Base::RowAtCompile,
-                                        Base::ColAtCompile,
-                                        HostAllocator<T>>;
-
         const M1& mat1;
         const M2& mat2;
     public:
@@ -65,9 +47,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
-        void assign_base(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const noexcept;
-        [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
+        [[nodiscard]] auto compute() const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
@@ -80,6 +61,9 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] const M1& getLHS() const noexcept { return mat1; }
         [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
+        /* Static members */
+        template<Matrix M>
+        [[nodiscard]] constexpr static bool UseMKL() noexcept;
         /* Friends */
         friend class device_obj<This>;
     };
@@ -94,50 +78,26 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
-        using M = decltype(target);
-        constexpr int Critical = 32;
-        constexpr bool Large1 = M1::SizeAtCompile == Dynamic || M1::SizeAtCompile > Critical;
-        constexpr bool Large2 = M2::SizeAtCompile == Dynamic || M2::SizeAtCompile > Critical;
-        constexpr bool UseMKL1 = Large1 && Large2;
-        constexpr bool UseMKL2 = Internal::EnableMKL<M1, M>::value;
-        constexpr bool UseMKL3 = Internal::EnableMKL<M2, M>::value;
-        constexpr bool UseMKL = UseMKL1 && UseMKL2 && UseMKL3;
-        constexpr bool SameMajor1 = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M>();
-        constexpr bool SameMajor2 = MatrixOption::getMajor<M2>() == MatrixOption::getMajor<M>();
-        constexpr bool SameMajor = SameMajor1 && SameMajor2;
-        assert(target.getRow() == getRow() && target.getCol() == getCol());
-        if constexpr (UseMKL && SameMajor) {
+        Base::assert_assign(target);
+        if constexpr (UseMKL<decltype(target)>()) {
             if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
                 assign_mkl(target);
             else
-                assign_base(target);
+                Base::assign_base(target);
         }
         else
-            assign_base(target);
+            Base::assign_base(target);
     }
 
     template<Matrix M1, Matrix M2>
-    void GEMM<M1, M2>::assign_base(Matrix auto& target) const {
-        constexpr static int defaultMajor = Internal::ProductOption<M1, M2>::Major;
-        constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
-        if constexpr (isAnyMajor) {
-            for (size_t i = 0; i < target.getMaxMajor(); ++i) {
-                for (size_t j = 0; j < target.getMaxMinor(); ++j) {
-                    const size_t r = target.rowFromMajorMinor(i, j);
-                    const size_t c = target.colFromMajorMinor(i, j);
-                    target.refFromMajorMinor(i, j) = calc(r, c);
-                }
-            }
-        }
-        else {
-            for (size_t i = 0; i < (defaultMajor == MatrixOption::Col ? getCol() : getRow()); ++i) {
-                for (size_t j = 0; j < (defaultMajor == MatrixOption::Col ?  getRow() : getCol()); ++j) {
-                    const size_t r = MatrixOption::rowFromMajorMinor<DefaultType>(i, j);
-                    const size_t c = MatrixOption::colFromMajorMinor<DefaultType>(i, j);
-                    target(r, c) = calc(r, c);
-                }
-            }
-        }
+    auto GEMM<M1, M2>::compute() const {
+        constexpr static bool SameMajor = MatrixOption::isSameMajor<M1, M2>();
+        constexpr static bool RowMajor = MatrixOption::isRowMatrix<M1>();
+        constexpr static auto Major1 = RowMajor ? MatrixOption::Col : MatrixOption::Row;
+        constexpr static auto Major = SameMajor ? Major1 : MatrixOption::AnyMajor;
+        constexpr static int Option = Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major;
+        using RtnTy = DenseMatrix<T, Option, Base::RowAtCompile, Base::ColAtCompile, HostAllocator<T>>;
+        return RtnTy(*this);
     }
 
     template<Matrix M1, Matrix M2>
@@ -159,7 +119,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(Base::isReverseDiff);
         if constexpr (ReverseDiff<M1>)
             mat1.reverse(grad * mat2.transpose());
         if constexpr (ReverseDiff<M2>)
@@ -170,9 +130,26 @@ namespace Physica {
     auto GEMM<M1, M2>::values() const noexcept {
         return mat1.values() * mat2.values();
     }
+    /**
+     * FIXME: We cannot use unknown references in params of constexpr, refactor once we dump to Clang 20.
+     */
+    template<Matrix M1, Matrix M2>
+    template<Matrix M>
+    constexpr bool GEMM<M1, M2>::UseMKL() noexcept {
+        constexpr bool Large1 = M1::SizeAtCompile == Dynamic || M1::SizeAtCompile > Critical;
+        constexpr bool Large2 = M2::SizeAtCompile == Dynamic || M2::SizeAtCompile > Critical;
+        constexpr bool UseMKL1 = Large1 && Large2;
+        constexpr bool UseMKL2 = Internal::EnableMKL<M1, M>::value;
+        constexpr bool UseMKL3 = Internal::EnableMKL<M2, M>::value;
+        constexpr bool UseMKL = UseMKL1 && UseMKL2 && UseMKL3;
+        constexpr bool SameMajor1 = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M>();
+        constexpr bool SameMajor2 = MatrixOption::getMajor<M2>() == MatrixOption::getMajor<M>();
+        constexpr bool SameMajor = SameMajor1 && SameMajor2;
+        return UseMKL && SameMajor;
+    }
 
     template<Matrix M1, Matrix M2>
-    GEMM<M1, M2> operator*(const M1& mat1, const M2& mat2) noexcept requires(((M1::ColAtCompile != 1 && M2::ColAtCompile != 1) || (M1::ColAtCompile == 1 && M2::ColAtCompile == 1)) && !CUDA<M1> && !CUDA<M2>) {
+    [[nodiscard]] auto operator*(const M1& mat1, const M2& mat2) noexcept requires(((M1::ColAtCompile != 1 && M2::ColAtCompile != 1) || (M1::ColAtCompile == 1 && M2::ColAtCompile == 1)) && !CUDA<M1> && !CUDA<M2>) {
         return GEMM<M1, M2>(mat1, mat2);
     }
 }
@@ -196,3 +173,4 @@ namespace Physica {
 #ifdef PHYSICA_MKL
     #include "GEMM_MKL.h"
 #endif
+#include "GEMMTrans.h"
