@@ -70,8 +70,9 @@ namespace Physica {
     private:
         /* Operations */
         void metropolis(int site, Tr prob);
-        void makeActionR();
-        T calcLnZ();
+        template<RNG R>
+        [[nodiscard]] T randAuxField();
+        [[nodiscard]] T calcLnZ();
         /* Static members */
         [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity);
     };
@@ -93,25 +94,23 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void FreqDQMC<T>::step_random() {
-        kinetic.template random_uniform<R>();
-        makeActionR();
+        for (int i = 0; i < getNumSite(); ++i)
+            actionR(i, i) = randAuxField<R>();
         lnZ = calcLnZ().value();
     }
 
     template<Scalar T>
     template<RNG R>
     void FreqDQMC<T>::step_spin() {
-        int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
-        int split = std::uniform_int_distribution<int>(0, getNumSplit() - 1)(R::getInstance());
-        kinetic.single_flip(site, split);
-        makeActionR();
+        const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
+        const T save = std::exchange(actionR(site, site), randAuxField<R>());
 
         const auto lnZ1 = calcLnZ();
         const bool accept = Trv::template random_uniform<R>() < exp(lnZ1.value() - lnZ.value());
         if (accept)
             lnZ = lnZ1;
         else
-            kinetic.single_flip(site, split);
+            actionR(site, site) = save;
     }
 
     template<Scalar T>
@@ -136,11 +135,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void FreqDQMC<T>::makeActionR() {
-        const T factor = params->getAlpha() / params->getBeta();
-        auto diag = actionR.diag();
-        for (int i = 0; i < getNumSite(); ++i)
-            diag[i] = factor * kinetic.getAuxField().row(i).sum();
+    template<RNG R>
+    T FreqDQMC<T>::randAuxField() {
+        return T::template random_normal<R>() * sqrt(params->getRepelU() / params->getBeta());
     }
 
     template<Scalar T>
