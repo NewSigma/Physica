@@ -78,7 +78,7 @@ namespace Physica {
     template<Matrix M>
     void MatrixExp<M>::assign(Matrix auto& target) const {
         const Tr traceMu = calcTraceMu();
-        const auto params = ((*this) * VectorND<T>(getRow())).template calcParam<Sequential>(traceMu);
+        const auto params = ((*this) * UnitVector<T>(0, getRow())).template calcParam<Sequential>(traceMu);
         for (size_t i = 0; i < getCol(); ++i) {
             auto col = target.col(i);
             ((*this) * UnitVector<T>(i, getRow())).assign(col, traceMu, params);

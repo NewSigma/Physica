@@ -68,9 +68,9 @@ namespace Physica {
             values().template assign<P>(target);
         else {
             if constexpr (MatrixOption::isColMatrix<M>()) {
-                target = mat.col(0) * vec.calc(0);
+                (mat.col(0) * vec.calc(0)).template assign<P>(target);
                 for (size_t i = 1; i < vec.getLength(); ++i)
-                    target += mat.col(i) * vec.calc(i);
+                    (mat.col(i) * vec.calc(i)).template assign_add<P>(target);
             }
             else {
                 for (size_t i = 0; i < getLength(); ++i)

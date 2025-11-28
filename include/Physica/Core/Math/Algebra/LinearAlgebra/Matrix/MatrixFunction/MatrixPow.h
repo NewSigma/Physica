@@ -50,8 +50,8 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t, size_t) const { noImpl("MatrixPow::calc() is low performance and should be avoided"); }
 
-        [[nodiscard]] decltype(auto) transpose() const noexcept;
-        [[nodiscard]] decltype(auto) hermite() const noexcept;
+        [[nodiscard]] auto transpose() const noexcept;
+        [[nodiscard]] auto hermite() const noexcept;
         /* Getters */
         [[nodiscard]] const auto& getMatrix() const noexcept { return m; }
         [[nodiscard]] size_t getRow() const noexcept { return m.getRow(); }
@@ -63,21 +63,13 @@ namespace Physica {
     MatrixPow<M>::MatrixPow(M m_, int power_) : m(std::forward<M>(m_)), power(power_) {}
 
     template<Matrix M>
-    decltype(auto) MatrixPow<M>::transpose() const noexcept {
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<M>();
-        using RtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
-        return RtnTy(*this);
+    auto MatrixPow<M>::transpose() const noexcept {
+        return pow(m.transpose(), power);
     }
 
     template<Matrix M>
-    decltype(auto) MatrixPow<M>::hermite() const noexcept {
-        if constexpr (Base::isComplex) {
-            constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<M>();
-            using RtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
-            return RtnTy(*this);
-        }
-        else
-            return transpose();
+    auto MatrixPow<M>::hermite() const noexcept {
+        return pow(m.hermite(), power);
     }
 
     template<Matrix M>

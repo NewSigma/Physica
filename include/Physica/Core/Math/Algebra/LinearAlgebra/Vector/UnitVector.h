@@ -40,7 +40,7 @@ namespace Physica {
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] T calc(size_t index) const;
+        [[nodiscard]] T calc(size_t index) const noexcept;
         [[nodiscard]] size_t getNonZero() const noexcept { return nonzero; }
         [[nodiscard]] size_t getLength() const noexcept { return length; }
     };
@@ -58,8 +58,8 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Length>
-    T UnitVector<T, Length>::calc(size_t index) const {
-        return index == nonzero ? T(1) : T(0);
+    T UnitVector<T, Length>::calc(size_t index) const noexcept {
+        return T(index == nonzero ? 1 : 0);
     }
 }
 
