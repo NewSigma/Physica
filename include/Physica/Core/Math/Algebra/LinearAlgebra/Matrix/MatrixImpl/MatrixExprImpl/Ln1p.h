@@ -26,8 +26,6 @@ namespace Physica {
             : public UnitaryMatrixExpr<ExprType::Ln1p, M> {
         using This = MatrixExpr<ExprType::Ln1p, M>;
         using Base = UnitaryMatrixExpr<ExprType::Ln1p, M>;
-    public:
-        using Base::isReverseDiff;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -63,11 +61,15 @@ namespace Physica {
 
     template<Matrix M>
     void MatrixExpr<ExprType::Ln1p, M>::reverse(const auto& grad) const noexcept {
-        using G = decltype(grad);
-        static_assert(Scalar<G> || Matrix<G>, "[Error]: Unexpected type");
-        static_assert(isReverseDiff);
+        static_assert(Base::isReverseDiff);
+        using U = decltype(grad);
         auto& expr = Base::getExpr();
-        expr.reverse(divide_elem(grad, expr.values() + Trv(1)));
+        if constexpr (Scalar<U>)
+            expr.reverse(reciprocal_elem(expr.values() + Trv(1)) * grad);
+        else {
+            static_assert(Matrix<U>, "[Error]: Unexpected type");
+            expr.reverse(divide_elem(grad, expr.values() + Trv(1)));
+        }
     }
 
     template<Matrix M>

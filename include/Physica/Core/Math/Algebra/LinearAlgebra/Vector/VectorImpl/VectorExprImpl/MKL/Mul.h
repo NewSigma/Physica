@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<Vector V, Scalar U>
-    void VectorExpr<ExprType::Mul, V, U>::assign_add_mkl(Vector auto& v) const noexcept {
+    void VectorExpr<ExprType::Mul, V, U>::assign_add_mkl(Vector auto&& v) const noexcept {
         Base::getLHS().assert_assign_mkl(v);
 
         const size_t n = Base::getLength();

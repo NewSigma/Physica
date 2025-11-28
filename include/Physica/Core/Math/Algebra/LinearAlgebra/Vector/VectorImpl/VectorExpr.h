@@ -99,8 +99,13 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<ExprType Type, Vector LHS, Vector RHS>
-    class Traits<VectorExpr<Type, LHS, RHS>> {
+    template<ExprType Type_, Vector LHS_, Vector RHS_>
+    class Traits<VectorExpr<Type_, LHS_, RHS_>> {
+    public:
+        constexpr static ExprType Type = Type_;
+        using LHS = LHS_;
+        using RHS = RHS_;
+    private:
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
         using T = LHS1::ScalarType;
@@ -130,8 +135,13 @@ namespace Physica {
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 
-    template<ExprType Type, Vector LHS, Scalar RHS>
-    class Traits<VectorExpr<Type, LHS, RHS>> {
+    template<ExprType Type_, Vector LHS_, Scalar RHS_>
+    class Traits<VectorExpr<Type_, LHS_, RHS_>> {
+    public:
+        constexpr static ExprType Type = Type_;
+        using LHS = LHS_;
+        using RHS = RHS_;
+    private:
         using LHS1 = std::remove_cvref_t<LHS>;
         using RHS1 = std::remove_cvref_t<RHS>;
     public:

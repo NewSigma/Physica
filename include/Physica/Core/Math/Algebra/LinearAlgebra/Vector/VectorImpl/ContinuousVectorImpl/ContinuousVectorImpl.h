@@ -117,23 +117,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    void ContinuousVector<Derived>::reverse(const auto& grad) const noexcept {
-        using U = std::remove_cvref_t<decltype(grad)>;
-        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        static_assert(isReverseDiff);
-        if constexpr (Scalar<U> || Vector<U>) {
-            if constexpr (Vector<U>)
-                assert(Base::getLength() == grad.getLength());
-            Base::getConstCastDerived().grads() += grad;
-        }
-        else {
-            static_assert(Matrix<U>, "[Error]: Unexpected type");
-            assert(Base::getLength() == grad.getRow());
-            reverse(grad.sum_cols());
-        }
-    }
-
-    template<class Derived>
     template<size_t Length>
     auto ContinuousVector<Derived>::head(size_t to) noexcept {
         return BlockType<Length>(Base::getDerived(), 0, to);

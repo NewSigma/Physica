@@ -54,6 +54,8 @@ namespace Physica {
 
         void reverse(const Matrix auto& grad) const noexcept;
         using Base::reverse;
+
+        [[nodiscard]] auto values() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return vec.getLength(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
@@ -113,6 +115,11 @@ namespace Physica {
             vec.reverse(grad * mat.transpose());
         if constexpr (Diffable<M>)
             mat.reverse(grad.transpose() * vec);
+    }
+
+    template<Vector V, Matrix M>
+    auto GEVM<V, M>::values() const noexcept {
+        return vec.values() * mat.values();
     }
 
     template<Vector V, Matrix M>

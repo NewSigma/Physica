@@ -42,10 +42,10 @@ namespace Physica {
         void assign_mkl(Vector auto& v) const noexcept;
 
         template<ExecutePolicy P = Sequential>
-        void assign_add(Vector auto& v) const;
-        void assign_add_mkl(Vector auto& v) const noexcept;
+        void assign_add(Vector auto&& v) const;
+        void assign_add_mkl(Vector auto&& v) const noexcept;
         template<ExecutePolicy P = Sequential>
-        void assign_add_base(Vector auto& v) const noexcept;
+        void assign_add_base(Vector auto&& v) const noexcept;
 
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
@@ -88,7 +88,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Mul, V, U>::assign_add(Vector auto& v) const {
+    void VectorExpr<ExprType::Mul, V, U>::assign_add(Vector auto&& v) const {
         using V1 = std::remove_cvref_t<decltype(v)>;
         constexpr size_t Length = std::max(Base::SizeAtCompile, V1::SizeAtCompile);
         constexpr bool SmallVector = 0 < Length && Length <= 128;
@@ -104,7 +104,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Mul, V, U>::assign_add_base(Vector auto& v) const noexcept {
+    void VectorExpr<ExprType::Mul, V, U>::assign_add_base(Vector auto&& v) const noexcept {
         Base::template assign_add<P>(v);
     }
 
@@ -221,7 +221,17 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     [[nodiscard]] auto operator*(V&& v, U&& x) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Mul, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
+        using RtnTy = VectorExpr<ExprType::Mul, V&&, U&&>;
+        if constexpr (instanceof_xt<VectorExpr, V>) {
+            constexpr ExprType ID = Traits<V>::Type;
+            using RHS = Traits<V>::RHS;
+            if constexpr (ID == ExprType::Mul && Scalar<RHS>)
+                return v.getLHS() * (v.getRHS() * x);
+            else
+                return RtnTy(std::forward<V>(v), std::forward<U>(x));
+        }
+        else
+            return RtnTy(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector V>
@@ -231,7 +241,27 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     [[nodiscard]] auto hadamard(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
-        return VectorExpr<ExprType::Mul, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
+        using RtnTy = VectorExpr<ExprType::Mul, V1&&, V2&&>;
+        if constexpr (instanceof_xt<VectorExpr, V1>) {
+            using RHS1 = Traits<V1>::RHS;
+            constexpr ExprType ID1 = Traits<V1>::Type;
+            if constexpr (ID1 == ExprType::Mul && Scalar<RHS1>) // if we can lower V1
+                return hadamard(v2, v1.getLHS()) * v1.getRHS();
+            else if constexpr (instanceof_xt<VectorExpr, V2>) { // if not, see if we can lower V2
+                using RHS2 = Traits<V2>::RHS;
+                constexpr ExprType ID2 = Traits<V2>::Type;
+                if constexpr (ID2 == ExprType::Mul && Scalar<RHS2>)
+                    return hadamard(v1, v2.getLHS()) * v2.getRHS();
+                else
+                    return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));
+            }
+            else // there is nothing we can do here
+                return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));
+        }
+        else if constexpr (instanceof_xt<VectorExpr, V2>)
+            return hadamard(std::forward<V2>(v2), std::forward<V1>(v1));
+        else
+            return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }
 

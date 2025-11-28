@@ -51,7 +51,7 @@ namespace Physica {
         using Base::reverse;
         void reverse(const Vector auto& grad) const noexcept;
 
-        auto values() const noexcept { return mat.values() * vec.values(); }
+        [[nodiscard]] auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return mat; }

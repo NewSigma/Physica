@@ -90,10 +90,10 @@ namespace Physica {
         [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
 
-        [[nodiscard]] const ValueVector& values() const noexcept { return v; }
-        [[nodiscard]] ValueVector& values() noexcept { return v; }
-        [[nodiscard]] const GradVector& grads() const noexcept { return g; }
-        [[nodiscard]] GradVector& grads() noexcept { return g; }
+        [[nodiscard]] const auto& values() const noexcept { return v; }
+        [[nodiscard]] auto& values() noexcept { return v; }
+        [[nodiscard]] const auto& grads() const noexcept { return g; }
+        [[nodiscard]] auto& grads() noexcept { return g; }
         /* Static members */
         template<RNG R = Random<>>
         [[nodiscard]] static This random_uniform(size_t len);

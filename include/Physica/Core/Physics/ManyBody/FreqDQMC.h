@@ -67,6 +67,8 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
         [[nodiscard]] auto& getGreens() noexcept { return kinetic.getGreens(); }
+        /* Static members */
+        [[nodiscard]] static Trv getSign() noexcept { return 1; }
     private:
         /* Operations */
         void metropolis(int site, Tr prob);

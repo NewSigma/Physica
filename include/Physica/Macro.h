@@ -70,6 +70,9 @@
 namespace Physica {
     template<class T>
     class Traits;
+
+    template<class R> requires(std::is_reference<R>::value)
+    class Traits<R> : public Traits<std::remove_cvref_t<R>> {};
     /**
      * Forward declaration for friend-class-based tests
      */

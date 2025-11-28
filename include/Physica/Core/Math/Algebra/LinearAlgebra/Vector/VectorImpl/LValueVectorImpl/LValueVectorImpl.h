@@ -150,18 +150,19 @@ namespace Physica {
 
     template<class Derived>
     void LValueVector<Derived>::reverse(const auto& grad) const noexcept {
-        static_assert(isReverseDiff);
         using U = std::remove_cvref_t<decltype(grad)>;
         static_assert(std::same_as<typename T::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
-        if constexpr (Scalar<U>) {
-            for (size_t i = 0; i < Base::getLength(); ++i)
-                (*this)[i].reverse(grad);
+        static_assert(isReverseDiff);
+        if constexpr (Scalar<U>)
+            Base::getConstCastDerived().grads() += grad;
+        else if constexpr (Vector<U>) {
+            assert(Base::getLength() == grad.getLength());
+            grad.assign_add(Base::getConstCastDerived().grads());
         }
         else {
-            static_assert(Vector<U>, "[Error]: Unexpected type");
-            assert(Base::getLength() == grad.getLength());
-            for (size_t i = 0; i < Base::getLength(); ++i)
-                (*this)[i].reverse(grad.calc(i));
+            static_assert(Matrix<U>, "[Error]: Unexpected type");
+            assert(Base::getLength() == grad.getRow());
+            reverse(grad.sum_cols());
         }
     }
 

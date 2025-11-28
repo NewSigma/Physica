@@ -101,20 +101,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueMatrix<Derived>::reverse(const Scalar auto& grad) const noexcept {
+    void LValueMatrix<Derived>::reverse(const auto& grad) const noexcept {
         using U = std::remove_cvref_t<decltype(grad)>;
-        static_assert(std::same_as<typename ScalarType::GradType, U>, "[Error]: Inconsistent ScalarType");
+        static_assert(std::same_as<typename ScalarType::GradType, typename U::ScalarType>, "[Error]: Inconsistent ScalarType");
         static_assert(isReverseDiff);
-        Base::getConstCastDerived().grads() += grad;
-    }
-
-    template<class Derived>
-    void LValueMatrix<Derived>::reverse(const Matrix auto& grad) const noexcept {
-        using M = std::remove_cvref_t<decltype(grad)>;
-        static_assert(std::same_as<typename ScalarType::GradType, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
-        static_assert(isReverseDiff);
-        Base::assert_assign(grad);
-        Base::getConstCastDerived().grads() += grad;
+        if constexpr (Scalar<U>)
+            Base::getConstCastDerived().grads() += grad;
+        else {
+            static_assert(Matrix<U>, "[Error]: Unexpected type");
+            Base::assert_assign(grad);
+            grad.assign_add(Base::getConstCastDerived().grads());
+        }
     }
 
     template<class Derived>
