@@ -37,7 +37,7 @@ namespace Physica {
 
         using typename Base::Tv;
     public:
-        enum Observable {
+        enum Observable : char {
             AFM, // Antiferromagnetic Structure Factor
             CDW, // Charge Density Wave
             DOW // Double Occupancy Wave
@@ -45,8 +45,9 @@ namespace Physica {
     private:
         Array<MatrixND<T>> observes;
         FFT<T, 2> fft;
+        Observable type;
     public:
-        SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample);
+        SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample, Observable type);
         SystemSampler(const This&) = delete;
         SystemSampler(This&&) noexcept = delete;
         ~SystemSampler() = default;
@@ -54,7 +55,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, T sign, Observable type);
+        void sample(const GreenPair& greens, T sign);
 
         [[nodiscard]] MatrixND<T> calcMean() const;
         /* Getters */
@@ -64,21 +65,22 @@ namespace Physica {
         [[nodiscard]] int getNumSiteY() const noexcept { return fft.getRSpaceSize()[1]; }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
-        MatrixND<T> calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable type) noexcept;
+        MatrixND<T> calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept;
     };
 
     template<Scalar T>
-    SystemSampler<T>::SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample)
+    SystemSampler<T>::SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample, Observable type)
             : Base(params, numSample)
             , observes(numSample)
-            , fft(lattice.getSuperSize(), PlanFlag::Estimate) {
+            , fft(lattice.getSuperSize(), PlanFlag::Estimate)
+            , type(type) {
         for (auto& elem : observes)
             elem.resize(fft.getKSpace());
     }
 
     template<Scalar T>
-    void SystemSampler<T>::sample(const GreenPair& greens, T sign, Observable type) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * sign;
+    void SystemSampler<T>::sample(const GreenPair& greens, T sign) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1]) * sign;
         Base::sample(sign);
     }
 
@@ -96,11 +98,23 @@ namespace Physica {
                 result(x, y) = buffer.mean() / sign;
             }
         }
+
+        if (type == AFM) {
+            // Add a minimum value to highlight the paramagnetic phase
+            result += T(std::numeric_limits<T>::min());
+        }
+        else if (type == CDW) {
+            // Ignore numerical errors
+            for (int x = 0; x < kX; ++x)
+                for (int y = 0; y < kY; ++y)
+                    if (result(x, y) < square(T(std::numeric_limits<T>::epsilon())))
+                        result(x, y) = 0;
+        }
         return result;
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable type) noexcept -> MatrixND<T> {
+    auto SystemSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept -> MatrixND<T> {
         int numSite = Base::getNumSite();
         auto flatten = fft.getRSpace().flatten();
         switch (type) {
