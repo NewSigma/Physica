@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Sin, V> : public UnitaryVectorExpr<ExprType::Sin, V> {
-        using This = VectorExpr<ExprType::Sin, V>;
-        using Base = UnitaryVectorExpr<ExprType::Sin, V>;
+    class VectorExpr<ExprID::Sin, V> : public UnitaryVectorExpr<ExprID::Sin, V> {
+        using This = VectorExpr<ExprID::Sin, V>;
+        using Base = UnitaryVectorExpr<ExprID::Sin, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -38,6 +38,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto sin(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Sin, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Sin, V&&>(std::forward<V>(v));
     }
 }

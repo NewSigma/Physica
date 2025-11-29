@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M, Scalar U>
-    class device_obj<MatrixExpr<ExprType::Mul, M, U>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Mul, M, U>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, M, U>>;
+    class device_obj<MatrixExpr<ExprID::Mul, M, U>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Mul, M, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Mul, M, U>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -46,9 +46,9 @@ namespace Physica {
     };
 
     template<Matrix T1, Vector T2>
-    class device_obj<MatrixExpr<ExprType::Mul, T1, T2>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, T1, T2>>;
+    class device_obj<MatrixExpr<ExprID::Mul, T1, T2>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Mul, T1, T2>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Mul, T1, T2>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -70,9 +70,9 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    class device_obj<MatrixExpr<ExprType::Mul, M1, M2>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Mul, M1, M2>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, M1, M2>>;
+    class device_obj<MatrixExpr<ExprID::Mul, M1, M2>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Mul, M1, M2>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Mul, M1, M2>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -100,7 +100,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    void device_obj<MatrixExpr<ExprType::Mul, M1, M2>>::reverse(const Matrix auto& grad) const noexcept {
+    void device_obj<MatrixExpr<ExprID::Mul, M1, M2>>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
@@ -112,7 +112,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator*(M&& m, U&& x) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprType::Mul, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
+        return device_obj<MatrixExpr<ExprID::Mul, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
@@ -122,7 +122,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     [[nodiscard]] __host__ __device__ auto hadamard(M&& m, V&& x) noexcept requires(CUDA<M> && CUDA<V>) {
-        return device_obj<MatrixExpr<ExprType::Mul, M&&, V&&>>(std::forward<M>(m), std::forward<V>(x));
+        return device_obj<MatrixExpr<ExprID::Mul, M&&, V&&>>(std::forward<M>(m), std::forward<V>(x));
     }
 
     template<Matrix M, Vector V>
@@ -132,6 +132,6 @@ namespace Physica {
 
     template<Matrix T1, Matrix T2>
     [[nodiscard]] auto hadamard(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<MatrixExpr<ExprType::Mul, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
+        return device_obj<MatrixExpr<ExprID::Mul, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
     }
 }

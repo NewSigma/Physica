@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<MatrixExpr<ExprType::Sech, M>>
-            : public device_obj<UnitaryMatrixExpr<ExprType::Sech, M>> {
-        using Base = device_obj<UnitaryMatrixExpr<ExprType::Sech, M>>;
+    class device_obj<MatrixExpr<ExprID::Sech, M>>
+            : public device_obj<UnitaryMatrixExpr<ExprID::Sech, M>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprID::Sech, M>>;
     public:
         using typename Base::T;
         using typename Base::Tv;
@@ -37,7 +37,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprType::Sech, M>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<MatrixExpr<ExprID::Sech, M>>::calc(size_t row, size_t col) const -> T {
         if constexpr (isReverseDiff)
             return calc_value(row, col);
         else
@@ -45,12 +45,12 @@ namespace Physica {
     }
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprType::Sech, M>>::calc_value(size_t row, size_t col) const -> Tv {
+    __device__ auto device_obj<MatrixExpr<ExprID::Sech, M>>::calc_value(size_t row, size_t col) const -> Tv {
         return sech(Base::getExpr().calc_value(row, col));
     }
 
     template<Matrix M>
     [[nodiscard]] __host__ __device__ auto sech_elem(M&& m) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprType::Sech, M&&>>(std::forward<M>(m));
+        return device_obj<MatrixExpr<ExprID::Sech, M&&>>(std::forward<M>(m));
     }
 }

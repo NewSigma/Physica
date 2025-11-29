@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Exp, M>
-            : public UnitaryMatrixExpr<ExprType::Exp, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Exp, M>;
+    class MatrixExpr<ExprID::Exp, M>
+            : public UnitaryMatrixExpr<ExprID::Exp, M> {
+        using Base = UnitaryMatrixExpr<ExprID::Exp, M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -40,6 +40,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto exp_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Exp, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Exp, M&&>(std::forward<M>(m));
     }
 }

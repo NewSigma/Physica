@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<MatrixExpr<ExprType::Sqrt, M>>
-            : public device_obj<UnitaryMatrixExpr<ExprType::Sqrt, M>> {
-        using Base = device_obj<UnitaryMatrixExpr<ExprType::Sqrt, M>>;
+    class device_obj<MatrixExpr<ExprID::Sqrt, M>>
+            : public device_obj<UnitaryMatrixExpr<ExprID::Sqrt, M>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprID::Sqrt, M>>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -40,6 +40,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] __host__ __device__ auto sqrt_elem(M&& m) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprType::Sqrt, M&&>>(std::forward<M>(m));
+        return device_obj<MatrixExpr<ExprID::Sqrt, M&&>>(std::forward<M>(m));
     }
 }

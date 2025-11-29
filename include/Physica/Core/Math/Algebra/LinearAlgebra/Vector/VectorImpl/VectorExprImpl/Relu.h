@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Relu, V> : public UnitaryVectorExpr<ExprType::Relu, V> {
-        using This = VectorExpr<ExprType::Relu, V>;
-        using Base = UnitaryVectorExpr<ExprType::Relu, V>;
+    class VectorExpr<ExprID::Relu, V> : public UnitaryVectorExpr<ExprID::Relu, V> {
+        using This = VectorExpr<ExprID::Relu, V>;
+        using Base = UnitaryVectorExpr<ExprID::Relu, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -46,7 +46,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    void VectorExpr<ExprType::Relu, V>::reverse(const Vector auto& grad) const noexcept {
+    void VectorExpr<ExprID::Relu, V>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& g = grad.values();
         for (size_t i = 0; i < Base::getLength(); ++i) {
@@ -57,6 +57,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto relu(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Relu, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Relu, V&&>(std::forward<V>(v));
     }
 }

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Sech, M>
-            : public UnitaryMatrixExpr<ExprType::Sech, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Sech, M>;
+    class MatrixExpr<ExprID::Sech, M>
+            : public UnitaryMatrixExpr<ExprID::Sech, M> {
+        using Base = UnitaryMatrixExpr<ExprID::Sech, M>;
     public:
         using typename Base::T;
         using typename Base::Tv;
@@ -40,6 +40,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto sech_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Sech, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Sech, M&&>(std::forward<M>(m));
     }
 }

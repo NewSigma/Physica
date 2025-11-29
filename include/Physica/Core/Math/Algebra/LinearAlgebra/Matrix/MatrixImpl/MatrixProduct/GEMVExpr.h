@@ -21,14 +21,14 @@
 #include "GEMV.h"
 
 namespace Physica {
-    template<ExprType, class, class U> class MatrixExpr;
+    template<ExprID, class, class U> class MatrixExpr;
 
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
         using M1 = std::remove_cvref_t<M>;
-        constexpr static ExprType Type = Traits<M1>::Type;
+        constexpr static ExprID ID = Traits<M1>::ID;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -76,7 +76,7 @@ namespace Physica {
     void GEMV<M, V>::assign(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
-            if constexpr (Type == ExprType::Minus) {
+            if constexpr (ID == ExprID::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
                 if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
@@ -84,11 +84,11 @@ namespace Physica {
                 else
                     (lhs * (-rhs)).template assign<P>(target);
             }
-            else if constexpr (Type == ExprType::Add)
+            else if constexpr (ID == ExprID::Add)
                 (expr.getLHS() * vec + expr.getRHS() * vec).template assign<P>(target);
-            else if constexpr (Type == ExprType::Sub)
+            else if constexpr (ID == ExprID::Sub)
                 (expr.getLHS() * vec - expr.getRHS() * vec).template assign<P>(target);
-            else if constexpr (Type == ExprType::Mul)
+            else if constexpr (ID == ExprID::Mul)
                 ((expr.getLHS() * vec) * expr.getRHS()).template assign<P>(target);
             else
                 static_assert(!FastAssign, "[Error]: assign is not implemented");
@@ -102,7 +102,7 @@ namespace Physica {
     void GEMV<M, V>::assign_add(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
-            if constexpr (Type == ExprType::Minus) {
+            if constexpr (ID == ExprID::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
                 if constexpr (Traits<std::remove_cvref_t<M>>::FastAssign)
@@ -110,15 +110,15 @@ namespace Physica {
                 else
                     (lhs * (-rhs)).template assign_add<P>(target);
             }
-            else if constexpr (Type == ExprType::Add) {
+            else if constexpr (ID == ExprID::Add) {
                 auto expr1 = expr.getLHS() * vec + expr.getRHS() * vec;
                 expr1.template assign_add<P>(target);
             }
-            else if constexpr (Type == ExprType::Sub) {
+            else if constexpr (ID == ExprID::Sub) {
                 auto expr1 = expr.getLHS() * vec - expr.getRHS() * vec;
                 expr1.template assign_add<P>(target);
             }
-            else if constexpr (Type == ExprType::Mul) {
+            else if constexpr (ID == ExprID::Mul) {
                 auto expr1 = (expr.getLHS() * vec) * expr.getRHS();
                 expr1.template assign_add<P>(target);
             }
@@ -151,11 +151,11 @@ namespace Physica {
         constexpr static bool calcFastAssign() {
             using U = Traits<M1>::RHS;
             constexpr bool isScalarU = Scalar<U>;
-            constexpr ExprType Type = Traits<M1>::Type;
+            constexpr ExprID ID = Traits<M1>::ID;
 
-            if constexpr (Type == ExprType::Minus)
+            if constexpr (ID == ExprID::Minus)
                 return Traits<M1>::FastAssign;
-            else if constexpr (Type == ExprType::Add || Type == ExprType::Sub) {
+            else if constexpr (ID == ExprID::Add || ID == ExprID::Sub) {
                 if constexpr (!isScalarU) {
                     using M2 = Traits<M1>::LHS;
                     using Add = decltype(std::declval<M2>() * std::declval<V>() + std::declval<U>() * std::declval<V>());
@@ -163,7 +163,7 @@ namespace Physica {
                 }
                 return false;
             }
-            else if constexpr (Type == ExprType::Mul)
+            else if constexpr (ID == ExprID::Mul)
                 return isScalarU;
             else
                 return false;

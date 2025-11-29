@@ -18,19 +18,19 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/ExprType.h"
+#include "Physica/Core/Scalar/ExprID.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
     /**
      * \class MatrixExpr represents \param T \param type \param U. e.g. matrix + scalar, expression * expression
      */
-    template<ExprType Type, class T, class U = T> class MatrixExpr;
+    template<ExprID ID, class T, class U = T> class MatrixExpr;
 
-    template<ExprType Type, Matrix M>
-    class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
-        using Derived = MatrixExpr<Type, M>;
-        using This = UnitaryMatrixExpr<Type, M>;
+    template<ExprID ID, Matrix M>
+    class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<ID, M>> {
+        using Derived = MatrixExpr<ID, M>;
+        using This = UnitaryMatrixExpr<ID, M>;
         using Base = RValueMatrix<Derived>;
     public:
         using Base::isReverseDiff;
@@ -54,28 +54,28 @@ namespace Physica {
         [[nodiscard]] auto& getExpr() noexcept { return expr; }
     };
 
-    template<ExprType Type, Matrix M>
-    decltype(auto) UnitaryMatrixExpr<Type, M>::transpose() const noexcept {
+    template<ExprID ID, Matrix M>
+    decltype(auto) UnitaryMatrixExpr<ID, M>::transpose() const noexcept {
         if constexpr (MatrixOption::isSymmMatrix<M>())
             return Base::getDerived();
         else
             return Base::transpose();
     }
 
-    template<ExprType Type, Matrix M>
-    decltype(auto) UnitaryMatrixExpr<Type, M>::hermite() const noexcept {
+    template<ExprID ID, Matrix M>
+    decltype(auto) UnitaryMatrixExpr<ID, M>::hermite() const noexcept {
         if constexpr (MatrixOption::isHermiteMatrix<M>())
             return Base::getDerived();
         else
             return Base::hermite();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
+    template<ExprID ID, class LHS, class RHS>
+    class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<ID, LHS, RHS>> {
         static_assert(Matrix<LHS> || Matrix<RHS>, "[Error]: Either types should be Matrix");
 
-        using Derived = MatrixExpr<Type, LHS, RHS>;
-        using This = BinaryMatrixExpr<Type, LHS, RHS>;
+        using Derived = MatrixExpr<ID, LHS, RHS>;
+        using This = BinaryMatrixExpr<ID, LHS, RHS>;
         using Base = RValueMatrix<Derived>;
     public:
         using Base::isReverseDiff;
@@ -115,8 +115,8 @@ namespace Physica {
         [[nodiscard]] consteval static bool isStaticHermite() noexcept;
     };
 
-    template<ExprType Type, class LHS, class RHS>
-    BinaryMatrixExpr<Type, LHS, RHS>::BinaryMatrixExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+    template<ExprID ID, class LHS, class RHS>
+    BinaryMatrixExpr<ID, LHS, RHS>::BinaryMatrixExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
         if constexpr (Matrix<LHS> && Matrix<RHS>) {
             assert(getLHS().getRow() == getRHS().getRow());
             assert(getLHS().getCol() == getRHS().getCol());
@@ -125,24 +125,24 @@ namespace Physica {
             assert(getLHS().getCol() == getRHS().getLength());
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    decltype(auto) BinaryMatrixExpr<Type, LHS, RHS>::transpose() const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    decltype(auto) BinaryMatrixExpr<ID, LHS, RHS>::transpose() const noexcept {
         if constexpr (isStaticSymm())
             return Base::getDerived();
         else
             return Base::transpose();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    decltype(auto) BinaryMatrixExpr<Type, LHS, RHS>::hermite() const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    decltype(auto) BinaryMatrixExpr<ID, LHS, RHS>::hermite() const noexcept {
         if constexpr (isStaticHermite())
             return Base::getDerived();
         else
             return Base::hermite();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    consteval bool BinaryMatrixExpr<Type, LHS, RHS>::isStaticSymm() noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    consteval bool BinaryMatrixExpr<ID, LHS, RHS>::isStaticSymm() noexcept {
         if constexpr (Matrix<LHS> && Matrix<RHS>)
             return MatrixOption::isSymmMatrix<LHS>() && MatrixOption::isSymmMatrix<RHS>();
         else if constexpr (Vector<LHS> || Vector<RHS>)
@@ -155,8 +155,8 @@ namespace Physica {
         }
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    consteval bool BinaryMatrixExpr<Type, LHS, RHS>::isStaticHermite() noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    consteval bool BinaryMatrixExpr<ID, LHS, RHS>::isStaticHermite() noexcept {
         if constexpr (Matrix<LHS> && Matrix<RHS>)
             return MatrixOption::isHermiteMatrix<LHS>() && MatrixOption::isHermiteMatrix<RHS>();
         else if constexpr (Vector<LHS> || Vector<RHS>)
@@ -171,10 +171,10 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<ExprType Type_, Matrix LHS_, Matrix RHS_>
-    class Traits<MatrixExpr<Type_, LHS_, RHS_>> {
+    template<ExprID ID_, Matrix LHS_, Matrix RHS_>
+    class Traits<MatrixExpr<ID_, LHS_, RHS_>> {
     public:
-        constexpr static ExprType Type = Type_;
+        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
@@ -185,7 +185,7 @@ namespace Physica {
         constexpr static bool SameMajor = MatrixOption::isSameMajor<LHS1, RHS1>();
         constexpr static int Major = SameMajor ? MatrixOption::getMajor<LHS1>()
                                                : int(MatrixOption::AnyMajor);
-        constexpr static bool IsReal = Type == ExprType::Abs || Type == ExprType::Square;
+        constexpr static bool IsReal = ID == ExprID::Abs || ID == ExprID::Square;
     public:
         using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
         constexpr static int Option = Major;
@@ -196,10 +196,10 @@ namespace Physica {
         constexpr static bool FastAssign = false;
     };
 
-    template<ExprType Type_, Matrix LHS_, Vector RHS_>
-    class Traits<MatrixExpr<Type_, LHS_, RHS_>> {
+    template<ExprID ID_, Matrix LHS_, Vector RHS_>
+    class Traits<MatrixExpr<ID_, LHS_, RHS_>> {
     public:
-        constexpr static ExprType Type = Type_;
+        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
@@ -217,13 +217,13 @@ namespace Physica {
         constexpr static bool isHermite = false;
     };
 
-    template<ExprType Type, Vector LHS, Matrix RHS>
-    class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
+    template<ExprID ID, Vector LHS, Matrix RHS>
+    class Traits<MatrixExpr<ID, LHS, RHS>> : public Traits<MatrixExpr<ID, RHS, LHS>> {};
 
-    template<ExprType Type_, Matrix LHS_, Scalar RHS_>
-    class Traits<MatrixExpr<Type_, LHS_, RHS_>> {
+    template<ExprID ID_, Matrix LHS_, Scalar RHS_>
+    class Traits<MatrixExpr<ID_, LHS_, RHS_>> {
     public:
-        constexpr static ExprType Type = Type_;
+        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
@@ -239,8 +239,8 @@ namespace Physica {
         constexpr static bool FastAssign = Traits<LHS1>::FastAssign;
     };
 
-    template<ExprType Type, Scalar LHS, Matrix RHS>
-    class Traits<MatrixExpr<Type, LHS, RHS>> : public Traits<MatrixExpr<Type, RHS, LHS>> {};
+    template<ExprID ID, Scalar LHS, Matrix RHS>
+    class Traits<MatrixExpr<ID, LHS, RHS>> : public Traits<MatrixExpr<ID, RHS, LHS>> {};
 }
 
 #include "MatrixExprImpl/Minus.h"

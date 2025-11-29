@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<MatrixExpr<ExprType::Sin, M>>
-            : public device_obj<UnitaryMatrixExpr<ExprType::Sin, M>> {
-        using Base = device_obj<UnitaryMatrixExpr<ExprType::Sin, M>>;
+    class device_obj<MatrixExpr<ExprID::Sin, M>>
+            : public device_obj<UnitaryMatrixExpr<ExprID::Sin, M>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprID::Sin, M>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -38,7 +38,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprType::Sin, M>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<MatrixExpr<ExprID::Sin, M>>::calc(size_t row, size_t col) const -> T {
         if constexpr (isReverseDiff)
             return calc_value(row, col);
         else
@@ -46,12 +46,12 @@ namespace Physica {
     }
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprType::Sin, M>>::calc_value(size_t row, size_t col) const -> Tv {
+    __device__ auto device_obj<MatrixExpr<ExprID::Sin, M>>::calc_value(size_t row, size_t col) const -> Tv {
         return sin(Base::getExpr().calc_value(row, col));
     }
 
     template<Matrix M>
     [[nodiscard]] auto sin_elem(M&& m) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprType::Sin, M&&>>(std::forward<M>(m));
+        return device_obj<MatrixExpr<ExprID::Sin, M&&>>(std::forward<M>(m));
     }
 }

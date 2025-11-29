@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Softmax, V>
-            : public UnitaryVectorExpr<ExprType::Softmax, V> {
-        using Base = UnitaryVectorExpr<ExprType::Softmax, V>;
+    class VectorExpr<ExprID::Softmax, V>
+            : public UnitaryVectorExpr<ExprID::Softmax, V> {
+        using Base = UnitaryVectorExpr<ExprID::Softmax, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -45,25 +45,25 @@ namespace Physica {
     };
 
     template<Vector V>
-    auto VectorExpr<ExprType::Softmax, V>::calc(size_t i, T lnsumexp) const -> T {
+    auto VectorExpr<ExprID::Softmax, V>::calc(size_t i, T lnsumexp) const -> T {
         return exp(Base::getExpr().calc(i) - lnsumexp);
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Softmax, V>::calc_value(size_t i, Tv lnsumexp) const -> Tv {
+    auto VectorExpr<ExprID::Softmax, V>::calc_value(size_t i, Tv lnsumexp) const -> Tv {
         return exp(Base::getExpr().calc_value(i) - lnsumexp);
     }
 
     template<Vector V>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Softmax, V>::assign(Vector auto&& v) const {
+    void VectorExpr<ExprID::Softmax, V>::assign(Vector auto&& v) const {
         const auto& expr = Base::getExpr();
         const T factor = expr.lnSumExp();
         v = exp(expr - factor);
     }
 
     template<Vector V>
-    void VectorExpr<ExprType::Softmax, V>::reverse(const Vector auto& y, const Vector auto& grad) const noexcept {
+    void VectorExpr<ExprID::Softmax, V>::reverse(const Vector auto& y, const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& g = grad.values();
         Base::getExpr().reverse(hadamard(y, g) - (y * g) * y);
@@ -71,6 +71,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto softmax(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Softmax, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Softmax, V&&>(std::forward<V>(v));
     }
 }

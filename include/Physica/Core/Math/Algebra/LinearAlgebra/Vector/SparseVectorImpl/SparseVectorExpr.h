@@ -21,12 +21,12 @@
 #include "RSparseVector.h"
 
 namespace Physica {
-    template<ExprType type, Vector T1, class T2 = T1> class SparseVectorExpr;
+    template<ExprID, Vector T1, class T2 = T1> class SparseVectorExpr;
 
     template<Vector T, Scalar U>
-    class SparseVectorExpr<ExprType::Mul, T, U>
-            : public RSparseVector<SparseVectorExpr<ExprType::Mul, T, U>> {
-        using This = SparseVectorExpr<ExprType::Mul, T, U>;
+    class SparseVectorExpr<ExprID::Mul, T, U>
+            : public RSparseVector<SparseVectorExpr<ExprID::Mul, T, U>> {
+        using This = SparseVectorExpr<ExprID::Mul, T, U>;
         using Base = RSparseVector<This>;
         using typename Base::ScalarType;
         using typename Base::NonZeroPair;
@@ -54,18 +54,18 @@ namespace Physica {
     //////////////////////////////////////Mul//////////////////////////////////////
     template<Vector T, Scalar U>
     [[nodiscard]] auto operator*(const RSparseVector<T>& v, const U& x) noexcept {
-        return SparseVectorExpr<ExprType::Mul, T, U>(v.getDerived(), x);
+        return SparseVectorExpr<ExprID::Mul, T, U>(v.getDerived(), x);
     }
 
     template<Vector T, Scalar U>
     [[nodiscard]] auto operator*(const U& x, const RSparseVector<T>& v) noexcept {
-        return SparseVectorExpr<ExprType::Mul, T, U>(v * x);
+        return SparseVectorExpr<ExprID::Mul, T, U>(v * x);
     }
 }
 
 namespace Physica {
-    template<ExprType type, Vector T, Scalar U>
-    class Traits<SparseVectorExpr<type, T, U>> {
+    template<ExprID ID, Vector T, Scalar U>
+    class Traits<SparseVectorExpr<ID, T, U>> {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;

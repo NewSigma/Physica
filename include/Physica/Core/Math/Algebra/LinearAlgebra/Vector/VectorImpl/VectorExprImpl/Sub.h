@@ -22,11 +22,11 @@
 
 namespace Physica {
     template<class T1, class T2>
-    class VectorExpr<ExprType::Sub, T1, T2>
-            : public BinaryVectorExpr<ExprType::Sub, T1, T2> {
+    class VectorExpr<ExprID::Sub, T1, T2>
+            : public BinaryVectorExpr<ExprID::Sub, T1, T2> {
         static_assert(Scalar<T1> || Scalar<T2>, "[Error]: Either type should be Scalar");
 
-        using Base = BinaryVectorExpr<ExprType::Sub, T1, T2>;
+        using Base = BinaryVectorExpr<ExprID::Sub, T1, T2>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -52,7 +52,7 @@ namespace Physica {
     };
 
     template<class T1, class T2>
-    auto VectorExpr<ExprType::Sub, T1, T2>::calc(size_t s) const -> CoDiff<T> {
+    auto VectorExpr<ExprID::Sub, T1, T2>::calc(size_t s) const -> CoDiff<T> {
         if constexpr (Vector<T1>)
             return getLHS().calc(s) - getRHS();
         else
@@ -60,7 +60,7 @@ namespace Physica {
     }
 
     template<class T1, class T2>
-    auto VectorExpr<ExprType::Sub, T1, T2>::calc_value(size_t s) const -> Tv {
+    auto VectorExpr<ExprID::Sub, T1, T2>::calc_value(size_t s) const -> Tv {
         if constexpr (Vector<T1>)
             return getLHS().calc_value(s) - getRHS().value();
         else
@@ -69,7 +69,7 @@ namespace Physica {
 
     template<class T1, class T2>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Sub, T1, T2>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Sub, T1, T2>::packet(size_t index) const {
         if constexpr (Vector<T1>)
             return getLHS().template packet<Pack>(index) - Pack(getRHS());
         else
@@ -78,7 +78,7 @@ namespace Physica {
 
     template<class T1, class T2>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Sub, T1, T2>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Sub, T1, T2>::packetPartial(size_t index, size_t count) const {
         if constexpr (Vector<T1>)
             return getLHS().template packetPartial<Pack>(index, count) - Pack(getRHS(), count);
         else
@@ -86,7 +86,7 @@ namespace Physica {
     }
 
     template<class T1, class T2>
-    void VectorExpr<ExprType::Sub, T1, T2>::reverse(const auto& grad) const noexcept {
+    void VectorExpr<ExprID::Sub, T1, T2>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
@@ -124,7 +124,7 @@ namespace Physica {
     }
 
     template<class T1, class T2>
-    auto VectorExpr<ExprType::Sub, T1, T2>::values() const noexcept {
+    auto VectorExpr<ExprID::Sub, T1, T2>::values() const noexcept {
         if constexpr (Vector<T1>)
             return getLHS().values() - getRHS().value();
         else
@@ -132,9 +132,9 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    class VectorExpr<ExprType::Sub, V1, V2>
-            : public BinaryVectorExpr<ExprType::Sub, V1, V2> {
-        using Base = BinaryVectorExpr<ExprType::Sub, V1, V2>;
+    class VectorExpr<ExprID::Sub, V1, V2>
+            : public BinaryVectorExpr<ExprID::Sub, V1, V2> {
+        using Base = BinaryVectorExpr<ExprID::Sub, V1, V2>;
     public:
         using Base::isComplex;
     protected:
@@ -166,7 +166,7 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Sub, V1, V2>::assign(Vector auto&& v) const {
+    void VectorExpr<ExprID::Sub, V1, V2>::assign(Vector auto&& v) const {
         constexpr bool FastAssign1 = Traits<std::remove_cvref_t<V1>>::FastAssign;
         constexpr bool FastAssign2 = Traits<std::remove_cvref_t<V2>>::FastAssign;
         if constexpr (FastAssign1) {
@@ -198,29 +198,29 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprType::Sub, V1, V2>::calc(size_t s) const -> CoDiff<T> {
+    auto VectorExpr<ExprID::Sub, V1, V2>::calc(size_t s) const -> CoDiff<T> {
         return getLHS().calc(s) - getRHS().calc(s);
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprType::Sub, V1, V2>::calc_value(size_t s) const -> Tv {
+    auto VectorExpr<ExprID::Sub, V1, V2>::calc_value(size_t s) const -> Tv {
         return getLHS().calc_value(s) - getRHS().calc_value(s);
     }
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Sub, V1, V2>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Sub, V1, V2>::packet(size_t index) const {
         return getLHS().template packet<Pack>(index) - getRHS().template packet<Pack>(index);
     }
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Sub, V1, V2>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Sub, V1, V2>::packetPartial(size_t index, size_t count) const {
         return getLHS().template packetPartial<Pack>(index, count) - getRHS().template packetPartial<Pack>(index, count);
     }
 
     template<Vector V1, Vector V2>
-    void VectorExpr<ExprType::Sub, V1, V2>::reverse(const Vector auto& grad) const noexcept {
+    void VectorExpr<ExprID::Sub, V1, V2>::reverse(const Vector auto& grad) const noexcept {
         static_assert(Base::isReverseDiff);
         const auto& g = grad.values();
         if constexpr (ReverseDiff<V1>)
@@ -230,23 +230,23 @@ namespace Physica {
     }
 
     template<Vector V1, Vector V2>
-    auto VectorExpr<ExprType::Sub, V1, V2>::values() const noexcept {
+    auto VectorExpr<ExprID::Sub, V1, V2>::values() const noexcept {
         return getLHS().values() - getRHS().values();
     }
 
     template<Vector T, Scalar U>
     [[nodiscard]] auto operator-(T&& v, U&& x) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Sub, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
+        return VectorExpr<ExprID::Sub, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector T>
     [[nodiscard]] auto operator-(U&& x, T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprType::Sub, U&&, T&&>(std::forward<U>(x), std::forward<T>(v));
+        return VectorExpr<ExprID::Sub, U&&, T&&>(std::forward<U>(x), std::forward<T>(v));
     }
 
     template<Vector V1, Vector V2>
     [[nodiscard]] auto operator-(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
-        return VectorExpr<ExprType::Sub, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
+        return VectorExpr<ExprID::Sub, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }
 

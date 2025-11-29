@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprType::Tan, V>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Tan, V>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Tan, V>>;
+    class device_obj<VectorExpr<ExprID::Tan, V>>
+            : public device_obj<UnitaryVectorExpr<ExprID::Tan, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Tan, V>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -47,6 +47,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto tan(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprType::Tan, V&&>>(std::forward<V>(v));
+        return device_obj<VectorExpr<ExprID::Tan, V&&>>(std::forward<V>(v));
     }
 }

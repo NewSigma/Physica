@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprType::Minus, V>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Minus, V>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Minus, V>>;
+    class device_obj<VectorExpr<ExprID::Minus, V>>
+            : public device_obj<UnitaryVectorExpr<ExprID::Minus, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Minus, V>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -38,7 +38,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    __device__ auto device_obj<VectorExpr<ExprType::Minus, V>>::calc(size_t index) const -> T {
+    __device__ auto device_obj<VectorExpr<ExprID::Minus, V>>::calc(size_t index) const -> T {
         if constexpr (isReverseDiff)
             return calc_value(index);
         else
@@ -46,12 +46,12 @@ namespace Physica {
     }
 
     template<Vector V>
-    __device__ auto device_obj<VectorExpr<ExprType::Minus, V>>::calc_value(size_t index) const -> Tv {
+    __device__ auto device_obj<VectorExpr<ExprID::Minus, V>>::calc_value(size_t index) const -> Tv {
         return -Base::getExpr().calc_value(index);
     }
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto operator-(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprType::Minus, V&&>>(std::forward<V>(v));
+        return device_obj<VectorExpr<ExprID::Minus, V&&>>(std::forward<V>(v));
     }
 }

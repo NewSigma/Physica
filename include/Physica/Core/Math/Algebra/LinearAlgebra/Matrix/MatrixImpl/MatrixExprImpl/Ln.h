@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Ln, M>
-            : public UnitaryMatrixExpr<ExprType::Ln, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Ln, M>;
+    class MatrixExpr<ExprID::Ln, M>
+            : public UnitaryMatrixExpr<ExprID::Ln, M> {
+        using Base = UnitaryMatrixExpr<ExprID::Ln, M>;
     public:
         using typename Base::T;
         using typename Base::Tv;
@@ -42,7 +42,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    void MatrixExpr<ExprType::Ln, M>::reverse(const Vector auto& grad) const noexcept {
+    void MatrixExpr<ExprID::Ln, M>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(divide(grad, expr.values()));
@@ -50,6 +50,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto ln_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Ln, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Ln, M&&>(std::forward<M>(m));
     }
 }

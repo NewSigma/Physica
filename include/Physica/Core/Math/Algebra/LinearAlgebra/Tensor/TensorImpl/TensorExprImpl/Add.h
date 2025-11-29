@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Tensor X1, Tensor X2>
-    class TensorExpr<ExprType::Add, X1, X2>
-            : public BinaryTensorExpr<ExprType::Add, X1, X2> {
-        using Base = BinaryTensorExpr<ExprType::Add, X1, X2>;
+    class TensorExpr<ExprID::Add, X1, X2>
+            : public BinaryTensorExpr<ExprID::Add, X1, X2> {
+        using Base = BinaryTensorExpr<ExprID::Add, X1, X2>;
     public:
         using typename Base::IndexType;
     protected:
@@ -39,6 +39,6 @@ namespace Physica {
 
     template<Tensor X1, Tensor X2>
     [[nodiscard]] auto operator+(const X1& x, const X2& y) noexcept {
-        return TensorExpr<ExprType::Add, X1, X2>(x, y);
+        return TensorExpr<ExprID::Add, X1, X2>(x, y);
     }
 }

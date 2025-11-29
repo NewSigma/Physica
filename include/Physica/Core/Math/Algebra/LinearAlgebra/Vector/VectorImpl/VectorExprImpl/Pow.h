@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V, Scalar U>
-    class VectorExpr<ExprType::Pow, V, U>
-            : public BinaryVectorExpr<ExprType::Pow, V, U> {
-        using Base = BinaryVectorExpr<ExprType::Pow, V, U>;
+    class VectorExpr<ExprID::Pow, V, U>
+            : public BinaryVectorExpr<ExprID::Pow, V, U> {
+        using Base = BinaryVectorExpr<ExprID::Pow, V, U>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -38,6 +38,6 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     [[nodiscard]] auto pow(V&& v, U&& x) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Pow, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
+        return VectorExpr<ExprID::Pow, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 }

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprType::Square, V>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Square, V>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Square, V>>;
+    class device_obj<VectorExpr<ExprID::Square, V>>
+            : public device_obj<UnitaryVectorExpr<ExprID::Square, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Square, V>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -48,7 +48,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    void device_obj<VectorExpr<ExprType::Square, V>>::reverse(const Vector auto& grad) const noexcept {
+    void device_obj<VectorExpr<ExprID::Square, V>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(expr.values() * (Tv(2) * grad));
@@ -56,6 +56,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto square(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprType::Square, V&&>>(std::forward<V>(v));
+        return device_obj<VectorExpr<ExprID::Square, V&&>>(std::forward<V>(v));
     }
 }

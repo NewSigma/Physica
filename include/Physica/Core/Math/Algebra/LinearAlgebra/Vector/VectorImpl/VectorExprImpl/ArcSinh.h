@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::ArcSinh, V> : public UnitaryVectorExpr<ExprType::ArcSinh, V> {
-        using This = VectorExpr<ExprType::ArcSinh, V>;
-        using Base = UnitaryVectorExpr<ExprType::ArcSinh, V>;
+    class VectorExpr<ExprID::ArcSinh, V> : public UnitaryVectorExpr<ExprID::ArcSinh, V> {
+        using This = VectorExpr<ExprID::ArcSinh, V>;
+        using Base = UnitaryVectorExpr<ExprID::ArcSinh, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -38,6 +38,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto arcsinh(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::ArcSinh, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::ArcSinh, V&&>(std::forward<V>(v));
     }
 }

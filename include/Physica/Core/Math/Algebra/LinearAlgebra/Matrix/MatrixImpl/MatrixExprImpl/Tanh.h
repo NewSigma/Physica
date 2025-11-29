@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Tanh, M>
-            : public UnitaryMatrixExpr<ExprType::Tanh, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Tanh, M>;
+    class MatrixExpr<ExprID::Tanh, M>
+            : public UnitaryMatrixExpr<ExprID::Tanh, M> {
+        using Base = UnitaryMatrixExpr<ExprID::Tanh, M>;
     public:
         using typename Base::T;
         using typename Base::Tv;
@@ -40,6 +40,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto tanh_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Tanh, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Tanh, M&&>(std::forward<M>(m));
     }
 }

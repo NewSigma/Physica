@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Tan, V> : public UnitaryVectorExpr<ExprType::Tan, V> {
-        using This = VectorExpr<ExprType::Tan, V>;
-        using Base = UnitaryVectorExpr<ExprType::Tan, V>;
+    class VectorExpr<ExprID::Tan, V> : public UnitaryVectorExpr<ExprID::Tan, V> {
+        using This = VectorExpr<ExprID::Tan, V>;
+        using Base = UnitaryVectorExpr<ExprID::Tan, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -44,6 +44,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto tan(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Tan, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Tan, V&&>(std::forward<V>(v));
     }
 }

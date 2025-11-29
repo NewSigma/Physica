@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Sqrt, V> : public UnitaryVectorExpr<ExprType::Sqrt, V> {
-        using This = VectorExpr<ExprType::Sqrt, V>;
-        using Base = UnitaryVectorExpr<ExprType::Sqrt, V>;
+    class VectorExpr<ExprID::Sqrt, V> : public UnitaryVectorExpr<ExprID::Sqrt, V> {
+        using This = VectorExpr<ExprID::Sqrt, V>;
+        using Base = UnitaryVectorExpr<ExprID::Sqrt, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -44,6 +44,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto sqrt(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Sqrt, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Sqrt, V&&>(std::forward<V>(v));
     }
 }

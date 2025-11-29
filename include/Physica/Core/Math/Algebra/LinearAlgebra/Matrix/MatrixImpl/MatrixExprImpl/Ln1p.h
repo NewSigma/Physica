@@ -22,10 +22,10 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Ln1p, M>
-            : public UnitaryMatrixExpr<ExprType::Ln1p, M> {
-        using This = MatrixExpr<ExprType::Ln1p, M>;
-        using Base = UnitaryMatrixExpr<ExprType::Ln1p, M>;
+    class MatrixExpr<ExprID::Ln1p, M>
+            : public UnitaryMatrixExpr<ExprID::Ln1p, M> {
+        using This = MatrixExpr<ExprID::Ln1p, M>;
+        using Base = UnitaryMatrixExpr<ExprID::Ln1p, M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -50,17 +50,17 @@ namespace Physica {
     };
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Ln1p, M>::calc(size_t row, size_t col) const -> T {
+    auto MatrixExpr<ExprID::Ln1p, M>::calc(size_t row, size_t col) const -> T {
         return ln1p(getExpr().calc(row, col));
     }
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Ln1p, M>::calc_value(size_t row, size_t col) const -> Tv {
+    auto MatrixExpr<ExprID::Ln1p, M>::calc_value(size_t row, size_t col) const -> Tv {
         return ln1p(getExpr().calc_value(row, col));
     }
 
     template<Matrix M>
-    void MatrixExpr<ExprType::Ln1p, M>::reverse(const auto& grad) const noexcept {
+    void MatrixExpr<ExprID::Ln1p, M>::reverse(const auto& grad) const noexcept {
         static_assert(Base::isReverseDiff);
         using U = decltype(grad);
         auto& expr = Base::getExpr();
@@ -73,32 +73,32 @@ namespace Physica {
     }
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Ln1p, M>::row(size_t r) noexcept {
+    auto MatrixExpr<ExprID::Ln1p, M>::row(size_t r) noexcept {
         return ln1p(getExpr().row(r));
     }
 
     template<Matrix M>
-    const auto MatrixExpr<ExprType::Ln1p, M>::row(size_t r) const noexcept {
+    const auto MatrixExpr<ExprID::Ln1p, M>::row(size_t r) const noexcept {
         return const_cast<This&>(*this).row(r);
     }
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Ln1p, M>::col(size_t c) noexcept {
+    auto MatrixExpr<ExprID::Ln1p, M>::col(size_t c) noexcept {
         return ln1p(getExpr().col(c));
     }
 
     template<Matrix M>
-    const auto MatrixExpr<ExprType::Ln1p, M>::col(size_t c) const noexcept {
+    const auto MatrixExpr<ExprID::Ln1p, M>::col(size_t c) const noexcept {
         return const_cast<This&>(*this).col(c);
     }
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Ln1p, M>::values() const noexcept {
+    auto MatrixExpr<ExprID::Ln1p, M>::values() const noexcept {
         return ln1p_elem(getExpr().values());
     }
 
     template<Matrix M>
     [[nodiscard]] auto ln1p_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Ln1p, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Ln1p, M&&>(std::forward<M>(m));
     }
 }

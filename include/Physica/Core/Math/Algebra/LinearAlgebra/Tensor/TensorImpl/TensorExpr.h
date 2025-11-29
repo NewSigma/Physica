@@ -18,19 +18,19 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/ExprType.h"
+#include "Physica/Core/Scalar/ExprID.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/Tensor.h"
 
 namespace Physica {
-    template<ExprType Type, Tensor LHS, class RHS = LHS>
+    template<ExprID ID, Tensor LHS, class RHS = LHS>
     class TensorExpr;
 
-    template<ExprType Type, class LHS, class RHS>
-    class BinaryTensorExpr : public RValueTensor<TensorExpr<Type, LHS, RHS>> {
+    template<ExprID ID, class LHS, class RHS>
+    class BinaryTensorExpr : public RValueTensor<TensorExpr<ID, LHS, RHS>> {
         static_assert(Tensor<LHS> || Tensor<RHS>, "[Error]: Either type should be Tensor");
 
-        using This = BinaryTensorExpr<Type, LHS, RHS>;
-        using Base = RValueTensor<TensorExpr<Type, LHS, RHS>>;
+        using This = BinaryTensorExpr<ID, LHS, RHS>;
+        using Base = RValueTensor<TensorExpr<ID, LHS, RHS>>;
     public:
         using Base::isReverseDiff;
     private:
@@ -56,32 +56,32 @@ namespace Physica {
         [[nodiscard]] const RHS& getRHS() const noexcept { return *rhs; }
     };
 
-    template<ExprType Type, class LHS, class RHS>
-    size_t BinaryTensorExpr<Type, LHS, RHS>::dim(int index) const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    size_t BinaryTensorExpr<ID, LHS, RHS>::dim(int index) const noexcept {
         if constexpr (Tensor<LHS>)
             return getLHS().getShape(index);
         else
             return getRHS().getShape(index);
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    decltype(auto) BinaryTensorExpr<Type, LHS, RHS>::getShape() const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    decltype(auto) BinaryTensorExpr<ID, LHS, RHS>::getShape() const noexcept {
         if constexpr (Tensor<LHS>)
             return getLHS().getShape();
         else
             return getRHS().getShape();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    int BinaryTensorExpr<Type, LHS, RHS>::getDim() const {
+    template<ExprID ID, class LHS, class RHS>
+    int BinaryTensorExpr<ID, LHS, RHS>::getDim() const {
         if constexpr (Tensor<LHS>)
             return getLHS().getDim();
         else
             return getRHS().getDim();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    size_t BinaryTensorExpr<Type, LHS, RHS>::getSize() const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    size_t BinaryTensorExpr<ID, LHS, RHS>::getSize() const noexcept {
         if constexpr (Tensor<LHS>)
             return getLHS().getSize();
         else
@@ -90,8 +90,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<ExprType Type, Tensor LHS, Tensor RHS>
-    class Traits<TensorExpr<Type, LHS, RHS>> {
+    template<ExprID ID, Tensor LHS, Tensor RHS>
+    class Traits<TensorExpr<ID, LHS, RHS>> {
         constexpr static int NDim1 = Traits<LHS>::NDim;
         constexpr static int NDim2 = Traits<RHS>::NDim;
 
@@ -100,19 +100,19 @@ namespace Physica {
         using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS::ScalarType>::Type;
         static_assert(NDim1 == Dynamic || NDim2 == Dynamic || (NDim1 == NDim2), "[Error]: Tensor dimentions do not match");
     public:
-        using ScalarType = std::conditional<Type == ExprType::Abs, Tr, T12>::type;
+        using ScalarType = std::conditional<ID == ExprID::Abs, Tr, T12>::type;
         constexpr static int NDim = NDim1 > NDim2 ? NDim1 : NDim2;
     };
 
-    template<ExprType Type, Tensor LHS, Scalar RHS>
-    class Traits<TensorExpr<Type, LHS, RHS>> {
+    template<ExprID ID, Tensor LHS, Scalar RHS>
+    class Traits<TensorExpr<ID, LHS, RHS>> {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
         constexpr static int NDim = Traits<LHS>::NDim;
     };
 
-    template<ExprType Type, Scalar LHS, Tensor RHS>
-    class Traits<TensorExpr<Type, LHS, RHS>> : public Traits<TensorExpr<Type, RHS, LHS>> {};
+    template<ExprID ID, Scalar LHS, Tensor RHS>
+    class Traits<TensorExpr<ID, LHS, RHS>> : public Traits<TensorExpr<ID, RHS, LHS>> {};
 }
 
 #include "TensorExprImpl/Add.h"

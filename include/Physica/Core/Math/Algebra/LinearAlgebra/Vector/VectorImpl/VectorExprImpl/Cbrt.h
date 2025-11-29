@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Cbrt, V> : public UnitaryVectorExpr<ExprType::Cbrt, V> {
-        using This = VectorExpr<ExprType::Cbrt, V>;
-        using Base = UnitaryVectorExpr<ExprType::Cbrt, V>;
+    class VectorExpr<ExprID::Cbrt, V> : public UnitaryVectorExpr<ExprID::Cbrt, V> {
+        using This = VectorExpr<ExprID::Cbrt, V>;
+        using Base = UnitaryVectorExpr<ExprID::Cbrt, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -54,6 +54,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto cbrt(V&& v) noexcept {
-        return VectorExpr<ExprType::Cbrt, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Cbrt, V&&>(std::forward<V>(v));
     }
 }

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector T1, Vector T2>
-    class VectorExpr<ExprType::MoreEq, T1, T2>
-            : public BinaryVectorExpr<ExprType::MoreEq, T1, T2> {
-        using Base = BinaryVectorExpr<ExprType::MoreEq, T1, T2>;
+    class VectorExpr<ExprID::MoreEq, T1, T2>
+            : public BinaryVectorExpr<ExprID::MoreEq, T1, T2> {
+        using Base = BinaryVectorExpr<ExprID::MoreEq, T1, T2>;
     protected:
         using typename Base::T;
     public:
@@ -47,9 +47,9 @@ namespace Physica {
     };
 
     template<Vector V, Scalar U>
-    class VectorExpr<ExprType::MoreEq, V, U>
-            : public BinaryVectorExpr<ExprType::MoreEq, V, U> {
-        using Base = BinaryVectorExpr<ExprType::MoreEq, V, U>;
+    class VectorExpr<ExprID::MoreEq, V, U>
+            : public BinaryVectorExpr<ExprID::MoreEq, V, U> {
+        using Base = BinaryVectorExpr<ExprID::MoreEq, V, U>;
     protected:
         using typename Base::T;
     public:
@@ -73,11 +73,11 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     [[nodiscard]] auto operator>=(V&& v, U&& x) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::MoreEq, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
+        return VectorExpr<ExprID::MoreEq, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Vector T1, Vector T2>
     [[nodiscard]] auto operator>=(T1&& v1, T2&& v2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return VectorExpr<ExprType::MoreEq, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
+        return VectorExpr<ExprID::MoreEq, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }

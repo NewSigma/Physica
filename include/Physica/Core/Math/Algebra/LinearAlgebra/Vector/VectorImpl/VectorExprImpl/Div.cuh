@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<class T, class U>
-    class device_obj<VectorExpr<ExprType::Div, T, U>>
-            : public device_obj<BinaryVectorExpr<ExprType::Div, T, U>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Div, T, U>>;
+    class device_obj<VectorExpr<ExprID::Div, T, U>>
+            : public device_obj<BinaryVectorExpr<ExprID::Div, T, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Div, T, U>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -42,9 +42,9 @@ namespace Physica {
     };
 
     template<Vector T1, Vector T2>
-    class device_obj<VectorExpr<ExprType::Div, T1, T2>>
-            : public device_obj<BinaryVectorExpr<ExprType::Div, T1, T2>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Div, T1, T2>>;
+    class device_obj<VectorExpr<ExprID::Div, T1, T2>>
+            : public device_obj<BinaryVectorExpr<ExprID::Div, T1, T2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Div, T1, T2>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -58,16 +58,16 @@ namespace Physica {
 
     template<Vector T, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator/(T&& v, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Div, T&&, U&&>>(v, x);
+        return device_obj<VectorExpr<ExprID::Div, T&&, U&&>>(v, x);
     }
 
     template<Vector T, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator/(U&& x, T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Div, U&&, T&&>>(x, v);
+        return device_obj<VectorExpr<ExprID::Div, U&&, T&&>>(x, v);
     }
 
     template<Vector T1, Vector T2>
     [[nodiscard]] auto divide(T1&& v1, T2&& v2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<VectorExpr<ExprType::Div, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
+        return device_obj<VectorExpr<ExprID::Div, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }

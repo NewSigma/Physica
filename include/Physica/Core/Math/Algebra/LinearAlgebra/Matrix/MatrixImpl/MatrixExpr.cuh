@@ -21,11 +21,11 @@
 #include "MatrixExpr.h"
 
 namespace Physica {
-    template<ExprType Type, Matrix M>
-    class device_obj<UnitaryMatrixExpr<Type, M>> : public device_obj<RValueMatrix<MatrixExpr<Type, M>>> {
+    template<ExprID ID, Matrix M>
+    class device_obj<UnitaryMatrixExpr<ID, M>> : public device_obj<RValueMatrix<MatrixExpr<ID, M>>> {
         static_assert(CUDA<M>, "[Error]: Invalid type");
-        using host_obj = UnitaryMatrixExpr<Type, M>;
-        using Derived = MatrixExpr<Type, M>;
+        using host_obj = UnitaryMatrixExpr<ID, M>;
+        using Derived = MatrixExpr<ID, M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<Derived>>;
     private:
@@ -48,34 +48,34 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto& getExpr() noexcept { return expr.getDerived(); }
     };
 
-    template<ExprType Type, Matrix M>
-    __host__ __device__ device_obj<UnitaryMatrixExpr<Type, M>>::device_obj(M expr_) : expr(asStruct(expr_)) {}
+    template<ExprID ID, Matrix M>
+    __host__ __device__ device_obj<UnitaryMatrixExpr<ID, M>>::device_obj(M expr_) : expr(asStruct(expr_)) {}
 
-    template<ExprType Type, Matrix M>
-    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<Type, M>>::transpose() const noexcept {
+    template<ExprID ID, Matrix M>
+    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<ID, M>>::transpose() const noexcept {
         if constexpr (MatrixOption::isSymmMatrix<M>())
             return Base::getDerived();
         else
             return Base::transpose();
     }
 
-    template<ExprType Type, Matrix M>
-    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<Type, M>>::hermite() const noexcept {
+    template<ExprID ID, Matrix M>
+    __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<ID, M>>::hermite() const noexcept {
         if constexpr (MatrixOption::isHermiteMatrix<M>())
             return Base::getDerived();
         else
             return Base::hermite();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
+    template<ExprID ID, class LHS, class RHS>
+    class device_obj<BinaryMatrixExpr<ID, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<ID, LHS, RHS>>> {
         static_assert(Matrix<LHS> || Matrix<RHS>, "[Error]: Either types should be Matrix");
         static_assert((CUDA<LHS> || Scalar<LHS>) && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
 
-        using host_obj = BinaryMatrixExpr<Type, LHS, RHS>;
-        using Derived = MatrixExpr<Type, LHS, RHS>;
+        using host_obj = BinaryMatrixExpr<ID, LHS, RHS>;
+        using Derived = MatrixExpr<ID, LHS, RHS>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>>;
+        using Base = device_obj<RValueMatrix<MatrixExpr<ID, LHS, RHS>>>;
     private:
         PlainStruct<const std::remove_cvref_t<LHS>> lhs;
         PlainStruct<const std::remove_cvref_t<RHS>> rhs;
@@ -99,8 +99,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto& getRHS() noexcept { return rhs.getDerived(); }
     };
 
-    template<ExprType Type, class LHS, class RHS>
-    __host__ __device__ device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
         if constexpr (Matrix<LHS> && Matrix<RHS>) {
             assert(getLHS().getRow() == getRHS().getRow());
             assert(getLHS().getCol() == getRHS().getCol());
@@ -111,32 +111,32 @@ namespace Physica {
             assert(getLHS().getRow() == getRHS().getLength());
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    __host__ __device__ decltype(auto) device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::transpose() const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ decltype(auto) device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::transpose() const noexcept {
         if constexpr (host_obj::isStaticSymm())
             return Base::getDerived();
         else
             return Base::transpose();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    __host__ __device__ decltype(auto) device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::hermite() const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ decltype(auto) device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::hermite() const noexcept {
         if constexpr (host_obj::isStaticHermite())
             return Base::getDerived();
         else
             return Base::hermite();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    __host__ __device__ size_t device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::getRow() const {
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ size_t device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getRow() const {
         if constexpr (Matrix<LHS>)
             return getLHS().getRow();
         else
             return getRHS().getRow();
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    __host__ __device__ size_t device_obj<BinaryMatrixExpr<Type, LHS, RHS>>::getCol() const {
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ size_t device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getCol() const {
         if constexpr (Matrix<LHS>)
             return getLHS().getCol();
         else
@@ -145,8 +145,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template <ExprType type, class T1, class T2>
-    class Traits<device_obj<MatrixExpr<type, T1, T2>>> : public Traits<MatrixExpr<type, T1, T2>> {};
+    template <ExprID ID, class T1, class T2>
+    class Traits<device_obj<MatrixExpr<ID, T1, T2>>> : public Traits<MatrixExpr<ID, T1, T2>> {};
 }
 
 #include "MatrixExprImpl/Minus.cuh"

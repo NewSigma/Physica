@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<MatrixExpr<ExprType::Relu, M>>
-            : public device_obj<UnitaryMatrixExpr<ExprType::Relu, M>> {
-        using Base = device_obj<UnitaryMatrixExpr<ExprType::Relu, M>>;
+    class device_obj<MatrixExpr<ExprID::Relu, M>>
+            : public device_obj<UnitaryMatrixExpr<ExprID::Relu, M>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprID::Relu, M>>;
     public:
         using typename Base::T;
         using typename Base::Tv;
@@ -48,7 +48,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    void device_obj<MatrixExpr<ExprType::Relu, M>>::reverse(const Matrix auto& grad) const noexcept {
+    void device_obj<MatrixExpr<ExprID::Relu, M>>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard(relu_elem(unit_elem(expr.values())), grad.values()));
@@ -56,6 +56,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] __host__ __device__ auto relu_elem(M&& m) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprType::Relu, M&&>>(std::forward<M>(m));
+        return device_obj<MatrixExpr<ExprID::Relu, M&&>>(std::forward<M>(m));
     }
 }

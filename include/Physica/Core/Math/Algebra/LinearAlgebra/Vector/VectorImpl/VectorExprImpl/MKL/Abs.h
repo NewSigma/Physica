@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Vector V>
-    void VectorExpr<ExprType::Abs, V>::assign_mkl(Vector auto& v) const noexcept {
+    void VectorExpr<ExprID::Abs, V>::assign_mkl(Vector auto& v) const noexcept {
         Base::getExpr().assert_assign_mkl(v);
 
         size_t n = Base::getLength();

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Square, M>
-            : public UnitaryMatrixExpr<ExprType::Square, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Square, M>;
+    class MatrixExpr<ExprID::Square, M>
+            : public UnitaryMatrixExpr<ExprID::Square, M> {
+        using Base = UnitaryMatrixExpr<ExprID::Square, M>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -41,17 +41,17 @@ namespace Physica {
     };
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Square, M>::calc(size_t row, size_t col) const -> T {
+    auto MatrixExpr<ExprID::Square, M>::calc(size_t row, size_t col) const -> T {
         return square(Base::getExpr().calc(row, col));
     }
 
     template<Matrix M>
-    auto MatrixExpr<ExprType::Square, M>::calc_value(size_t row, size_t col) const -> Tv {
+    auto MatrixExpr<ExprID::Square, M>::calc_value(size_t row, size_t col) const -> Tv {
         return square(Base::getExpr().calc_value(row, col));
     }
 
     template<Matrix M>
-    void MatrixExpr<ExprType::Square, M>::reverse(const Matrix auto& grad) const noexcept {
+    void MatrixExpr<ExprID::Square, M>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(Tv(2) * hadamard(expr.values(), grad));
@@ -59,6 +59,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto square_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Square, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Square, M&&>(std::forward<M>(m));
     }
 }

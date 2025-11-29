@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprType::Relu, V>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Relu, V>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Relu, V>>;
+    class device_obj<VectorExpr<ExprID::Relu, V>>
+            : public device_obj<UnitaryVectorExpr<ExprID::Relu, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Relu, V>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<Vector T>
-    void device_obj<VectorExpr<ExprType::Relu, T>>::reverse(const Vector auto& grad) const noexcept {
+    void device_obj<VectorExpr<ExprID::Relu, T>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard(relu(unit(expr.values())), grad.values()));
@@ -57,6 +57,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto relu(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprType::Relu, V&&>>(std::forward<V>(v));
+        return device_obj<VectorExpr<ExprID::Relu, V&&>>(std::forward<V>(v));
     }
 }

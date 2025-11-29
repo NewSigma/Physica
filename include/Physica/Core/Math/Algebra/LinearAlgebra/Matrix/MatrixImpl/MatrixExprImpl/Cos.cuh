@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class device_obj<MatrixExpr<ExprType::Cos, M>>
-            : public device_obj<UnitaryMatrixExpr<ExprType::Cos, M>> {
-        using Base = device_obj<UnitaryMatrixExpr<ExprType::Cos, M>>;
+    class device_obj<MatrixExpr<ExprID::Cos, M>>
+            : public device_obj<UnitaryMatrixExpr<ExprID::Cos, M>> {
+        using Base = device_obj<UnitaryMatrixExpr<ExprID::Cos, M>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -41,7 +41,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprType::Cos, M>>::calc(size_t row, size_t col) const -> T {
+    __device__ auto device_obj<MatrixExpr<ExprID::Cos, M>>::calc(size_t row, size_t col) const -> T {
         if constexpr (isReverseDiff)
             return calc_value(row, col);
         else
@@ -49,12 +49,12 @@ namespace Physica {
     }
 
     template<Matrix M>
-    __device__ auto device_obj<MatrixExpr<ExprType::Cos, M>>::calc_value(size_t row, size_t col) const -> Tv {
+    __device__ auto device_obj<MatrixExpr<ExprID::Cos, M>>::calc_value(size_t row, size_t col) const -> Tv {
         return cos(Base::getExpr().calc_value(row, col));
     }
 
     template<Matrix M>
-    void device_obj<MatrixExpr<ExprType::Cos, M>>::reverse(const Matrix auto& grad) const noexcept {
+    void device_obj<MatrixExpr<ExprID::Cos, M>>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(-hadamard(grad, sin_elem(expr.values())));
@@ -62,6 +62,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto cos_elem(M&& m) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprType::Cos, M&&>>(std::forward<M>(m));
+        return device_obj<MatrixExpr<ExprID::Cos, M&&>>(std::forward<M>(m));
     }
 }

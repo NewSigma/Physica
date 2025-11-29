@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Reciprocal, M>
-            : public UnitaryMatrixExpr<ExprType::Reciprocal, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Reciprocal, M>;
+    class MatrixExpr<ExprID::Reciprocal, M>
+            : public UnitaryMatrixExpr<ExprID::Reciprocal, M> {
+        using Base = UnitaryMatrixExpr<ExprID::Reciprocal, M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -40,6 +40,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto reciprocal_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Reciprocal, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Reciprocal, M&&>(std::forward<M>(m));
     }
 }

@@ -22,12 +22,12 @@
 #include "VectorExpr.h"
 
 namespace Physica {
-    template<ExprType Type, Vector V>
-    class device_obj<UnitaryVectorExpr<Type, V>> : public device_obj<RValueVector<VectorExpr<Type, V>>> {
+    template<ExprID ID, Vector V>
+    class device_obj<UnitaryVectorExpr<ID, V>> : public device_obj<RValueVector<VectorExpr<ID, V>>> {
         static_assert(CUDA<V>, "[Error]: Invalid type");
-        using host_obj = UnitaryVectorExpr<Type, V>;
+        using host_obj = UnitaryVectorExpr<ID, V>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<VectorExpr<Type, V>>>;
+        using Base = device_obj<RValueVector<VectorExpr<ID, V>>>;
     private:
         PlainStruct<const std::remove_cvref_t<V>> expr;
     public:
@@ -44,15 +44,15 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto& getExpr() noexcept { return expr.getDerived(); }
     };
 
-    template<ExprType Type, Vector V>
-    __host__ __device__ device_obj<UnitaryVectorExpr<Type, V>>::device_obj(V expr_) : expr(asStruct(expr_)) {}
+    template<ExprID ID, Vector V>
+    __host__ __device__ device_obj<UnitaryVectorExpr<ID, V>>::device_obj(V expr_) : expr(asStruct(expr_)) {}
 
-    template<ExprType Type, Vector LHS, class RHS>
-    class device_obj<BinaryVectorExpr<Type, LHS, RHS>> : public device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>> {
+    template<ExprID ID, Vector LHS, class RHS>
+    class device_obj<BinaryVectorExpr<ID, LHS, RHS>> : public device_obj<RValueVector<VectorExpr<ID, LHS, RHS>>> {
         static_assert(CUDA<LHS> && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
-        using host_obj = BinaryVectorExpr<Type, LHS, RHS>;
+        using host_obj = BinaryVectorExpr<ID, LHS, RHS>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>>;
+        using Base = device_obj<RValueVector<VectorExpr<ID, LHS, RHS>>>;
     private:
         PlainStruct<const std::remove_cvref_t<LHS>> lhs;
         PlainStruct<const std::remove_cvref_t<RHS>> rhs;
@@ -72,16 +72,16 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto& getRHS() noexcept { return rhs.getDerived(); }
     };
 
-    template<ExprType Type, Vector LHS, class RHS>
-    __host__ __device__ device_obj<BinaryVectorExpr<Type, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
+    template<ExprID ID, Vector LHS, class RHS>
+    __host__ __device__ device_obj<BinaryVectorExpr<ID, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
         if constexpr (Vector<RHS>)
             assert(getLHS().getLength() == getRHS().getLength());
     }
 }
 
 namespace Physica {
-    template<ExprType Type, Vector Expr1, class Expr2>
-    class Traits<device_obj<VectorExpr<Type, Expr1, Expr2>>> : public Traits<VectorExpr<Type, Expr1, Expr2>> {};
+    template<ExprID ID, Vector Expr1, class Expr2>
+    class Traits<device_obj<VectorExpr<ID, Expr1, Expr2>>> : public Traits<VectorExpr<ID, Expr1, Expr2>> {};
 }
 
 #include "VectorExprImpl/Add.cuh"

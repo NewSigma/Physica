@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M, Scalar U>
-    class device_obj<MatrixExpr<ExprType::Add, M, U>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, M, U>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, M, U>>;
+    class device_obj<MatrixExpr<ExprID::Add, M, U>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Add, M, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Add, M, U>>;
     protected:
         using typename Base::T;
     public:
@@ -38,9 +38,9 @@ namespace Physica {
     };
 
     template<Matrix M, Vector U>
-    class device_obj<MatrixExpr<ExprType::Add, M, U>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, M, U>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, M, U>>;
+    class device_obj<MatrixExpr<ExprID::Add, M, U>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Add, M, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Add, M, U>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -83,9 +83,9 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    class device_obj<MatrixExpr<ExprType::Add, M1, M2>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, M1, M2>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, M1, M2>>;
+    class device_obj<MatrixExpr<ExprID::Add, M1, M2>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Add, M1, M2>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Add, M1, M2>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -110,7 +110,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator+(M&& m, U&& x) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprType::Add, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
+        return device_obj<MatrixExpr<ExprID::Add, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
@@ -120,7 +120,7 @@ namespace Physica {
 
     template<Matrix M, Vector U>
     [[nodiscard]] __host__ __device__ auto operator+(M&& m, U&& x) noexcept requires(CUDA<M> && CUDA<U>) {
-        return device_obj<MatrixExpr<ExprType::Add, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
+        return device_obj<MatrixExpr<ExprID::Add, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Vector U>
@@ -130,6 +130,6 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] __host__ __device__ auto operator+(M1&& m1, M2&& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
-        return device_obj<MatrixExpr<ExprType::Add, M1&&, M2&&>>(std::forward<M1>(m1), std::forward<M2>(m2));
+        return device_obj<MatrixExpr<ExprID::Add, M1&&, M2&&>>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

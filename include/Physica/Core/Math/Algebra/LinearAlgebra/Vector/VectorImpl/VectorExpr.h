@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/Scalar/ExprType.h"
+#include "Physica/Core/Scalar/ExprID.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "RValueVector.h"
 
@@ -27,17 +27,17 @@ namespace Physica {
     /**
      * \class VectorExpr implements template expression for vectors, which will reduce temporary objects.
      * 
-     * Operations defined as \tparam LHS \tparam Type \tparam RHS. e.g. vector + scalar, expression * expression
+     * Operations defined as \tparam LHS \tparam ID \tparam RHS. e.g. vector + scalar, expression * expression
      */
-    template<ExprType Type, class LHS, class RHS = LHS>
+    template<ExprID ID, class LHS, class RHS = LHS>
     class VectorExpr;
 
-    template<ExprType Type, Vector V>
-    class UnitaryVectorExpr : public RValueVector<VectorExpr<Type, V>> {
+    template<ExprID ID, Vector V>
+    class UnitaryVectorExpr : public RValueVector<VectorExpr<ID, V>> {
         static_assert(std::is_reference<V>::value, "[Error]: Expect a reference");
         static_assert(!std::is_const<V>::value, "[Error]: Const is implied");
-        using This = UnitaryVectorExpr<Type, V>;
-        using Base = RValueVector<VectorExpr<Type, V>>;
+        using This = UnitaryVectorExpr<ID, V>;
+        using Base = RValueVector<VectorExpr<ID, V>>;
     private:
         LazyDestroy<V> expr;
     public:
@@ -54,16 +54,16 @@ namespace Physica {
         [[nodiscard]] auto& getExpr() noexcept { return expr; }
     };
 
-    template<ExprType Type, class LHS, class RHS>
-    class BinaryVectorExpr : public RValueVector<VectorExpr<Type, LHS, RHS>> {
+    template<ExprID ID, class LHS, class RHS>
+    class BinaryVectorExpr : public RValueVector<VectorExpr<ID, LHS, RHS>> {
         static_assert(Vector<LHS> || Vector<RHS>, "[Error]: Either type should be Vector");
         static_assert(std::is_reference<LHS>::value, "[Error]: Expect a reference");
         static_assert(std::is_reference<RHS>::value, "[Error]: Expect a reference");
         static_assert(!std::is_const<LHS>::value, "[Error]: Const is implied");
         static_assert(!std::is_const<RHS>::value, "[Error]: Const is implied");
 
-        using This = BinaryVectorExpr<Type, LHS, RHS>;
-        using Base = RValueVector<VectorExpr<Type, LHS, RHS>>;
+        using This = BinaryVectorExpr<ID, LHS, RHS>;
+        using Base = RValueVector<VectorExpr<ID, LHS, RHS>>;
     private:
         LazyDestroy<LHS> lhs;
         LazyDestroy<RHS> rhs;
@@ -83,14 +83,14 @@ namespace Physica {
         [[nodiscard]] auto& getRHS() noexcept { return rhs; }
     };
 
-    template<ExprType Type, class LHS, class RHS>
-    BinaryVectorExpr<Type, LHS, RHS>::BinaryVectorExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+    template<ExprID ID, class LHS, class RHS>
+    BinaryVectorExpr<ID, LHS, RHS>::BinaryVectorExpr(LHS lhs_, RHS rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
         if constexpr (Vector<LHS> && Vector<RHS>)
             assert(lhs.getLength() == rhs.getLength());
     }
 
-    template<ExprType Type, class LHS, class RHS>
-    size_t BinaryVectorExpr<Type, LHS, RHS>::getLength() const noexcept {
+    template<ExprID ID, class LHS, class RHS>
+    size_t BinaryVectorExpr<ID, LHS, RHS>::getLength() const noexcept {
         if constexpr (Vector<LHS>)
             return getLHS().getLength();
         else
@@ -99,10 +99,10 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<ExprType Type_, Vector LHS_, Vector RHS_>
-    class Traits<VectorExpr<Type_, LHS_, RHS_>> {
+    template<ExprID ID_, Vector LHS_, Vector RHS_>
+    class Traits<VectorExpr<ID_, LHS_, RHS_>> {
     public:
-        constexpr static ExprType Type = Type_;
+        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
@@ -121,24 +121,24 @@ namespace Physica {
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
 
         constexpr static bool calcFastAssign() {
-            if constexpr (Type == ExprType::Minus)
+            if constexpr (ID == ExprID::Minus)
                 return Traits<LHS1>::FastAssign;
-            else if constexpr (Type == ExprType::Add || Type == ExprType::Sub)
+            else if constexpr (ID == ExprID::Add || ID == ExprID::Sub)
                 return FastAssign1 || FastAssign2;
             else
                 return false;
         }
     public:
-        using ScalarType = std::conditional<Type == ExprType::Abs, Tr, T12>::type;
+        using ScalarType = std::conditional<ID == ExprID::Abs, Tr, T12>::type;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
         constexpr static bool FastAssign = calcFastAssign();
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 
-    template<ExprType Type_, Vector LHS_, Scalar RHS_>
-    class Traits<VectorExpr<Type_, LHS_, RHS_>> {
+    template<ExprID ID_, Vector LHS_, Scalar RHS_>
+    class Traits<VectorExpr<ID_, LHS_, RHS_>> {
     public:
-        constexpr static ExprType Type = Type_;
+        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
@@ -151,8 +151,8 @@ namespace Physica {
         constexpr static bool FastPacket = Traits<LHS1>::FastPacket;
     };
 
-    template<ExprType Type, Scalar LHS, Vector RHS>
-    class Traits<VectorExpr<Type, LHS, RHS>> : public Traits<VectorExpr<Type, RHS, LHS>> {};
+    template<ExprID ID, Scalar LHS, Vector RHS>
+    class Traits<VectorExpr<ID, LHS, RHS>> : public Traits<VectorExpr<ID, RHS, LHS>> {};
 }
 
 #ifdef PHYSICA_MKL

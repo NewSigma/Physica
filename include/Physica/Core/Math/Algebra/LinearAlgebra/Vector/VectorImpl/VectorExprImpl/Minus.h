@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Minus, V>
-            : public UnitaryVectorExpr<ExprType::Minus, V> {
-        using Base = UnitaryVectorExpr<ExprType::Minus, V>;
+    class VectorExpr<ExprID::Minus, V>
+            : public UnitaryVectorExpr<ExprID::Minus, V> {
+        using Base = UnitaryVectorExpr<ExprID::Minus, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -49,7 +49,7 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Minus, V>::assign(Vector auto&& v) const {
+    void VectorExpr<ExprID::Minus, V>::assign(Vector auto&& v) const {
         const auto& expr = Base::getExpr();
         constexpr bool IsBinaryExpr = requires { expr.getLHS() * expr.getRHS(); };
 
@@ -71,35 +71,35 @@ namespace Physica {
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Minus, V>::calc(size_t s) const -> CoDiff<T> {
+    auto VectorExpr<ExprID::Minus, V>::calc(size_t s) const -> CoDiff<T> {
         return -Base::getExpr().calc(s);
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Minus, V>::calc_value(size_t index) const -> Tv {
+    auto VectorExpr<ExprID::Minus, V>::calc_value(size_t index) const -> Tv {
         return -Base::getExpr().calc_value(index);
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Minus, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Minus, V>::packet(size_t index) const {
         return -Base::getExpr().template packet<Pack>(index);
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Minus, V>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Minus, V>::packetPartial(size_t index, size_t count) const {
         return -Base::getExpr().template packetPartial<Pack>(index, count);
     }
 
     template<Vector V>
-    void VectorExpr<ExprType::Minus, V>::reverse(const auto& grad) const noexcept {
+    void VectorExpr<ExprID::Minus, V>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff);
         Base::getExpr().reverse(-grad);
     }
 
     template<Vector V>
     [[nodiscard]] auto operator-(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Minus, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Minus, V&&>(std::forward<V>(v));
     }
 }

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector T>
-    class device_obj<VectorExpr<ExprType::Exp, T>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Exp, T>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Exp, T>>;
+    class device_obj<VectorExpr<ExprID::Exp, T>>
+            : public device_obj<UnitaryVectorExpr<ExprID::Exp, T>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Exp, T>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -37,6 +37,6 @@ namespace Physica {
 
     template<Vector T>
     [[nodiscard]] __host__ __device__ auto exp(T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Exp, T&&>>(std::forward<T>(v));
+        return device_obj<VectorExpr<ExprID::Exp, T&&>>(std::forward<T>(v));
     }
 }

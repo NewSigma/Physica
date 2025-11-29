@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<class T, class U> requires(Scalar<T> || Scalar<U>)
-    class MatrixExpr<ExprType::Div, T, U>
-            : public BinaryMatrixExpr<ExprType::Div, T, U> {
-        using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
+    class MatrixExpr<ExprID::Div, T, U>
+            : public BinaryMatrixExpr<ExprID::Div, T, U> {
+        using Base = BinaryMatrixExpr<ExprID::Div, T, U>;
     public:
         using typename Base::ScalarType;
     protected:
@@ -51,9 +51,9 @@ namespace Physica {
     };
 
     template<class T, class U> requires(Vector<T> || Vector<U>)
-    class MatrixExpr<ExprType::Div, T, U>
-            : public BinaryMatrixExpr<ExprType::Div, T, U> {
-        using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
+    class MatrixExpr<ExprID::Div, T, U>
+            : public BinaryMatrixExpr<ExprID::Div, T, U> {
+        using Base = BinaryMatrixExpr<ExprID::Div, T, U>;
     public:
         using typename Base::ScalarType;
     protected:
@@ -77,9 +77,9 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    class MatrixExpr<ExprType::Div, M1, M2>
-            : public BinaryMatrixExpr<ExprType::Div, M1, M2> {
-        using Base = BinaryMatrixExpr<ExprType::Div, M1, M2>;
+    class MatrixExpr<ExprID::Div, M1, M2>
+            : public BinaryMatrixExpr<ExprID::Div, M1, M2> {
+        using Base = BinaryMatrixExpr<ExprID::Div, M1, M2>;
     public:
         using typename Base::ScalarType;
     protected:
@@ -99,19 +99,19 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprType::Div, M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
+    auto MatrixExpr<ExprID::Div, M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
         assert(!getRHS().calc(row, col).isZero() && "[Error]: Divide by zero");
         return getLHS().calc(row, col) / getRHS().calc(row, col);
     }
 
     template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprType::Div, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
+    auto MatrixExpr<ExprID::Div, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
         assert(!getRHS().calc_value(row, col).isZero() && "[Error]: Divide by zero");
         return getLHS().calc_value(row, col) / getRHS().calc_value(row, col);
     }
 
     template<Matrix M1, Matrix M2>
-    void MatrixExpr<ExprType::Div, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
+    void MatrixExpr<ExprID::Div, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         static_assert(Diffable<M1> && !Diffable<M2>, "[Error]: Not implemented");
@@ -120,26 +120,26 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard]] auto divide_elem(M&& m, U&& x) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Div, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
+        return MatrixExpr<ExprID::Div, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
     [[nodiscard]] auto divide_elem(U&& x, M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Div, U&&, M&&>(std::forward<U>(x), std::forward<M>(m));
+        return MatrixExpr<ExprID::Div, U&&, M&&>(std::forward<U>(x), std::forward<M>(m));
     }
 
     template<Matrix M, Vector V>
     [[nodiscard]] auto divide_elem(M&& m, V&& x) noexcept requires(!CUDA<M> && !CUDA<V>) {
-        return MatrixExpr<ExprType::Div, M&&, V&&>(std::forward<M>(m), std::forward<V>(x));
+        return MatrixExpr<ExprID::Div, M&&, V&&>(std::forward<M>(m), std::forward<V>(x));
     }
 
     template<Matrix M, Vector V>
     [[nodiscard]] auto divide_elem(V&& x, M&& m) noexcept requires(!CUDA<M> && !CUDA<V>) {
-        return MatrixExpr<ExprType::Div, V&&, M&&>(std::forward<V>(x), std::forward<M>(m));
+        return MatrixExpr<ExprID::Div, V&&, M&&>(std::forward<V>(x), std::forward<M>(m));
     }
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] auto divide_elem(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
-        return MatrixExpr<ExprType::Div, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
+        return MatrixExpr<ExprID::Div, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

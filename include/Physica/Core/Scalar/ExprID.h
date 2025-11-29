@@ -20,9 +20,9 @@
 
 namespace Physica {
     /**
-     * \class ExprType is used in implementation of expression template and auto differential.
+     * \class ExprID is used in implementation of expression template and auto differential.
      */
-    enum class ExprType : char {
+    enum class ExprID : char {
         Minus,
         Add,
         Sub,

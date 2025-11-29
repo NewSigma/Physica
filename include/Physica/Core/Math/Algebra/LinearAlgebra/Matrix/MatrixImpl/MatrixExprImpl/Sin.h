@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M>
-    class MatrixExpr<ExprType::Sin, M>
-            : public UnitaryMatrixExpr<ExprType::Sin, M> {
-        using Base = UnitaryMatrixExpr<ExprType::Sin, M>;
+    class MatrixExpr<ExprID::Sin, M>
+            : public UnitaryMatrixExpr<ExprID::Sin, M> {
+        using Base = UnitaryMatrixExpr<ExprID::Sin, M>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -40,6 +40,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto sin_elem(M&& m) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Sin, M&&>(std::forward<M>(m));
+        return MatrixExpr<ExprID::Sin, M&&>(std::forward<M>(m));
     }
 }

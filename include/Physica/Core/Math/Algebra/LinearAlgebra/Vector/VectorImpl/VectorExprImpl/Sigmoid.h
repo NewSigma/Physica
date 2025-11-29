@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Sigmoid, V> : public UnitaryVectorExpr<ExprType::Sigmoid, V> {
-        using This = VectorExpr<ExprType::Sigmoid, V>;
-        using Base = UnitaryVectorExpr<ExprType::Sigmoid, V>;
+    class VectorExpr<ExprID::Sigmoid, V> : public UnitaryVectorExpr<ExprID::Sigmoid, V> {
+        using This = VectorExpr<ExprID::Sigmoid, V>;
+        using Base = UnitaryVectorExpr<ExprID::Sigmoid, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -37,6 +37,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto sigmoid(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Sigmoid, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Sigmoid, V&&>(std::forward<V>(v));
     }
 }

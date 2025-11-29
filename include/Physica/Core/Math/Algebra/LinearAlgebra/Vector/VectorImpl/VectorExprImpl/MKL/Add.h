@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<Vector V1, Vector V2>
-    void VectorExpr<ExprType::Add, V1, V2>::assign_mkl(Vector auto& v) const noexcept {
+    void VectorExpr<ExprID::Add, V1, V2>::assign_mkl(Vector auto& v) const noexcept {
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         Base::getLHS().assert_assign_mkl(v);
         Base::getRHS().assert_assign_mkl(v);

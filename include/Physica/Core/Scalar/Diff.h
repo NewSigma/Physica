@@ -20,7 +20,7 @@
 
 #include <iosfwd>
 #include "Physica/Core/Scalar/Real.h"  // IWYU pragma: export
-#include "Physica/Core/Scalar/ExprType.h"
+#include "Physica/Core/Scalar/ExprID.h"
 #include "DiffImpl/DiffCoro.h"
 
 namespace Physica {

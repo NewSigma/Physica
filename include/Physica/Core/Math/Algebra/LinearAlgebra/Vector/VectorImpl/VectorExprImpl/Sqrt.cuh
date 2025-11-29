@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprType::Sqrt, V>> : public device_obj<UnitaryVectorExpr<ExprType::Sqrt, V>> {
-        using This = device_obj<VectorExpr<ExprType::Sqrt, V>>;
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Sqrt, V>>;
+    class device_obj<VectorExpr<ExprID::Sqrt, V>> : public device_obj<UnitaryVectorExpr<ExprID::Sqrt, V>> {
+        using This = device_obj<VectorExpr<ExprID::Sqrt, V>>;
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Sqrt, V>>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -38,6 +38,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto sqrt(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprType::Sqrt, V&&>>(std::forward<V>(v));
+        return device_obj<VectorExpr<ExprID::Sqrt, V&&>>(std::forward<V>(v));
     }
 }

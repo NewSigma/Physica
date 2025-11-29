@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Abs, V> : public UnitaryVectorExpr<ExprType::Abs, V> {
-        using This = VectorExpr<ExprType::Abs, V>;
-        using Base = UnitaryVectorExpr<ExprType::Abs, V>;
+    class VectorExpr<ExprID::Abs, V> : public UnitaryVectorExpr<ExprID::Abs, V> {
+        using This = VectorExpr<ExprID::Abs, V>;
+        using Base = UnitaryVectorExpr<ExprID::Abs, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -53,13 +53,13 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Abs, V>::assign(Vector auto&& v) const {
+    void VectorExpr<ExprID::Abs, V>::assign(Vector auto&& v) const {
         Base::template assign_base<P>(v);
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Abs, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Abs, V>::packet(size_t index) const {
         if constexpr (isComplexV)
             return sqrt(Base::getExpr().squaredNorms().template packet<Pack>(index));
         else
@@ -68,7 +68,7 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Abs, V>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Abs, V>::packetPartial(size_t index, size_t count) const {
         if constexpr (isComplexV)
             return sqrt(Base::getExpr().squaredNorms().template packetPartial<Pack>(index, count));
         else
@@ -76,7 +76,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    void VectorExpr<ExprType::Abs, V>::reverse(const auto& grad) const noexcept {
+    void VectorExpr<ExprID::Abs, V>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff);
         using U = decltype(grad);
         const auto& expr = Base::getExpr();
@@ -89,7 +89,7 @@ namespace Physica {
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Abs, V>::max() const -> T {
+    auto VectorExpr<ExprID::Abs, V>::max() const -> T {
         if constexpr (isComplexV)
             return sqrt(Base::getExpr().squaredNorms().max());
         else
@@ -98,7 +98,7 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto abs(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Abs, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Abs, V&&>(std::forward<V>(v));
     }
 }
 

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Ln, V> : public UnitaryVectorExpr<ExprType::Ln, V> {
-        using This = VectorExpr<ExprType::Ln, V>;
-        using Base = UnitaryVectorExpr<ExprType::Ln, V>;
+    class VectorExpr<ExprID::Ln, V> : public UnitaryVectorExpr<ExprID::Ln, V> {
+        using This = VectorExpr<ExprID::Ln, V>;
+        using Base = UnitaryVectorExpr<ExprID::Ln, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -45,18 +45,18 @@ namespace Physica {
     };
 
     template<Vector V>
-    auto VectorExpr<ExprType::Ln, V>::calc(size_t index) const -> CoDiff<T> {
+    auto VectorExpr<ExprID::Ln, V>::calc(size_t index) const -> CoDiff<T> {
         return ln(Base::getExpr().calc(index));
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Ln, V>::calc_value(size_t index) const -> Tv {
+    auto VectorExpr<ExprID::Ln, V>::calc_value(size_t index) const -> Tv {
         return ln(Base::getExpr().calc_value(index));
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Ln, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Ln, V>::packet(size_t index) const {
         auto x = Base::getExpr().template packet<Pack>(index);
         assert(x.isPositive().horizontal_and());
         return ln(x);
@@ -64,12 +64,12 @@ namespace Physica {
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Ln, V>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Ln, V>::packetPartial(size_t index, size_t count) const {
         return ln(Base::getExpr().template packetPartial<Pack>(index, count)).cutoff(count);
     }
 
     template<Vector V>
-    void VectorExpr<ExprType::Ln, V>::reverse(const auto& grad) const noexcept {
+    void VectorExpr<ExprID::Ln, V>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         if constexpr (Scalar<decltype(grad)>)
@@ -82,6 +82,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto ln(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Ln, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Ln, V&&>(std::forward<V>(v));
     }
 }

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector T, Scalar U>
-    class device_obj<VectorExpr<ExprType::Sub, T, U>>
-            : public device_obj<BinaryVectorExpr<ExprType::Sub, T, U>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Sub, T, U>>;
+    class device_obj<VectorExpr<ExprID::Sub, T, U>>
+            : public device_obj<BinaryVectorExpr<ExprID::Sub, T, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Sub, T, U>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -37,9 +37,9 @@ namespace Physica {
     };
 
     template<Vector T1, Vector T2>
-    class device_obj<VectorExpr<ExprType::Sub, T1, T2>>
-            : public device_obj<BinaryVectorExpr<ExprType::Sub, T1, T2>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Sub, T1, T2>>;
+    class device_obj<VectorExpr<ExprID::Sub, T1, T2>>
+            : public device_obj<BinaryVectorExpr<ExprID::Sub, T1, T2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Sub, T1, T2>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -52,11 +52,11 @@ namespace Physica {
 
     template<Vector T, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator-(T&& v, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprType::Sub, T&&, U&&>>(std::forward<T>(v), std::forward<U>(x));
+        return device_obj<VectorExpr<ExprID::Sub, T&&, U&&>>(std::forward<T>(v), std::forward<U>(x));
     }
 
     template<Vector T1, Vector T2>
     [[nodiscard]] __host__ __device__ auto operator-(T1&& v1, T2&& v2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<VectorExpr<ExprType::Sub, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
+        return device_obj<VectorExpr<ExprID::Sub, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
     }
 }

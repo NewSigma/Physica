@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Sech, V> : public UnitaryVectorExpr<ExprType::Sech, V> {
-        using This = VectorExpr<ExprType::Sech, V>;
-        using Base = UnitaryVectorExpr<ExprType::Sech, V>;
+    class VectorExpr<ExprID::Sech, V> : public UnitaryVectorExpr<ExprID::Sech, V> {
+        using This = VectorExpr<ExprID::Sech, V>;
+        using Base = UnitaryVectorExpr<ExprID::Sech, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -38,6 +38,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto sech(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Sech, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Sech, V&&>(std::forward<V>(v));
     }
 }

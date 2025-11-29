@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Square, V> : public UnitaryVectorExpr<ExprType::Square, V> {
-        using This = VectorExpr<ExprType::Square, V>;
-        using Base = UnitaryVectorExpr<ExprType::Square, V>;
+    class VectorExpr<ExprID::Square, V> : public UnitaryVectorExpr<ExprID::Square, V> {
+        using This = VectorExpr<ExprID::Square, V>;
+        using Base = UnitaryVectorExpr<ExprID::Square, V>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -54,34 +54,34 @@ namespace Physica {
 
     template<Vector V>
     template<ExecutePolicy P>
-    void VectorExpr<ExprType::Square, V>::assign(Vector auto&& v) const {
+    void VectorExpr<ExprID::Square, V>::assign(Vector auto&& v) const {
         Base::template assign_base<P>(v);
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Square, V>::calc(size_t index) const -> CoDiff<T> {
+    auto VectorExpr<ExprID::Square, V>::calc(size_t index) const -> CoDiff<T> {
         return square(getExpr().calc(index));
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Square, V>::calc_value(size_t index) const -> Tv {
+    auto VectorExpr<ExprID::Square, V>::calc_value(size_t index) const -> Tv {
         return square(getExpr().calc_value(index));
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Square, V>::packet(size_t index) const {
+    Pack VectorExpr<ExprID::Square, V>::packet(size_t index) const {
         return square(getExpr().template packet<Pack>(index));
     }
 
     template<Vector V>
     template<Packet Pack>
-    Pack VectorExpr<ExprType::Square, V>::packetPartial(size_t index, size_t count) const {
+    Pack VectorExpr<ExprID::Square, V>::packetPartial(size_t index, size_t count) const {
         return square(getExpr().template packetPartial<Pack>(index, count));
     }
 
     template<Vector V>
-    void VectorExpr<ExprType::Square, V>::reverse(const auto& grad) const noexcept {
+    void VectorExpr<ExprID::Square, V>::reverse(const auto& grad) const noexcept {
         static_assert(Base::isReverseDiff);
         using G = decltype(grad);
         const auto& expr = getExpr();
@@ -94,13 +94,13 @@ namespace Physica {
     }
 
     template<Vector V>
-    auto VectorExpr<ExprType::Square, V>::values() const noexcept {
+    auto VectorExpr<ExprID::Square, V>::values() const noexcept {
         return square(getExpr().values());
     }
 
     template<Vector V>
     [[nodiscard]] auto square(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Square, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Square, V&&>(std::forward<V>(v));
     }
 }
 

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class device_obj<VectorExpr<ExprType::Sin, V>> : public device_obj<UnitaryVectorExpr<ExprType::Sin, V>> {
-        using This = device_obj<VectorExpr<ExprType::Sin, V>>;
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Sin, V>>;
+    class device_obj<VectorExpr<ExprID::Sin, V>> : public device_obj<UnitaryVectorExpr<ExprID::Sin, V>> {
+        using This = device_obj<VectorExpr<ExprID::Sin, V>>;
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Sin, V>>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -38,6 +38,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto sin(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprType::Sin, V&&>>(std::forward<V>(v));
+        return device_obj<VectorExpr<ExprID::Sin, V&&>>(std::forward<V>(v));
     }
 }

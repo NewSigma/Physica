@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
-    class MatrixExpr<ExprType::Mul, M, U> : public BinaryMatrixExpr<ExprType::Mul, M, U> {
-        using Base = BinaryMatrixExpr<ExprType::Mul, M, U>;
-        using This = MatrixExpr<ExprType::Mul, M, U>;
+    class MatrixExpr<ExprID::Mul, M, U> : public BinaryMatrixExpr<ExprID::Mul, M, U> {
+        using Base = BinaryMatrixExpr<ExprID::Mul, M, U>;
+        using This = MatrixExpr<ExprID::Mul, M, U>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -44,31 +44,31 @@ namespace Physica {
     };
 
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
-    void MatrixExpr<ExprType::Mul, M, U>::assign(Matrix auto& target) const {
+    void MatrixExpr<ExprID::Mul, M, U>::assign(Matrix auto& target) const {
         assign_base(target);
     }
 
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
-    void MatrixExpr<ExprType::Mul, M, U>::assign_base(Matrix auto& target) const {
+    void MatrixExpr<ExprID::Mul, M, U>::assign_base(Matrix auto& target) const {
         const auto& vec = getLHS().getLHS();
         const auto& mat = getLHS().getRHS();
         ((getRHS() * vec) * mat).assign(target);
     }
 
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
-    void MatrixExpr<ExprType::Mul, M, U>::assign_add(Matrix auto& target) const {
+    void MatrixExpr<ExprID::Mul, M, U>::assign_add(Matrix auto& target) const {
         const auto& vec = getLHS().getLHS();
         const auto& mat = getLHS().getRHS();
         ((getRHS() * vec) * mat).assign_add(target);
     }
 
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
-    auto MatrixExpr<ExprType::Mul, M, U>::calc(size_t row, size_t col) const -> CoDiff<T> {
+    auto MatrixExpr<ExprID::Mul, M, U>::calc(size_t row, size_t col) const -> CoDiff<T> {
         return getLHS().calc(row, col) * getRHS();
     }
 
     template<Matrix M, Scalar U> requires(instanceof<GEVM, M>)
-    auto MatrixExpr<ExprType::Mul, M, U>::calc_value(size_t row, size_t col) const -> Tv {
+    auto MatrixExpr<ExprID::Mul, M, U>::calc_value(size_t row, size_t col) const -> Tv {
         return getLHS().value(row, col) * getRHS().value();
     }
 }

@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Matrix M, Scalar U>
-    class MatrixExpr<ExprType::Add, M, U>
-            : public BinaryMatrixExpr<ExprType::Add, M, U> {
-        using Base = BinaryMatrixExpr<ExprType::Add, M, U>;
+    class MatrixExpr<ExprID::Add, M, U>
+            : public BinaryMatrixExpr<ExprID::Add, M, U> {
+        using Base = BinaryMatrixExpr<ExprID::Add, M, U>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -44,7 +44,7 @@ namespace Physica {
     };
 
     template<Matrix M, Scalar U>
-    void MatrixExpr<ExprType::Add, M, U>::assign(Matrix auto& target) const {
+    void MatrixExpr<ExprID::Add, M, U>::assign(Matrix auto& target) const {
         if constexpr (MatrixOption::isSameMajor<M, decltype(target)>())
             (getLHS().flatten() + getRHS()).assign(target.flatten());
         else
@@ -52,17 +52,17 @@ namespace Physica {
     }
 
     template<Matrix M, Scalar U>
-    auto MatrixExpr<ExprType::Add, M, U>::calc(size_t row, size_t col) const -> T {
+    auto MatrixExpr<ExprID::Add, M, U>::calc(size_t row, size_t col) const -> T {
         return getLHS().calc(row, col) + getRHS();
     }
 
     template<Matrix M, Scalar U>
-    auto MatrixExpr<ExprType::Add, M, U>::calc_value(size_t row, size_t col) const -> Tv {
+    auto MatrixExpr<ExprID::Add, M, U>::calc_value(size_t row, size_t col) const -> Tv {
         return getLHS().calc_value(row, col) + getRHS().value();
     }
 
     template<Matrix M, Scalar U>
-    void MatrixExpr<ExprType::Add, M, U>::reverse(const Matrix auto& grad) const noexcept {
+    void MatrixExpr<ExprID::Add, M, U>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(Base::isReverseDiff);
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
@@ -73,9 +73,9 @@ namespace Physica {
     }
 
     template<Matrix M, Vector U>
-    class MatrixExpr<ExprType::Add, M, U>
-            : public BinaryMatrixExpr<ExprType::Add, M, U> {
-        using Base = BinaryMatrixExpr<ExprType::Add, M, U>;
+    class MatrixExpr<ExprID::Add, M, U>
+            : public BinaryMatrixExpr<ExprID::Add, M, U> {
+        using Base = BinaryMatrixExpr<ExprID::Add, M, U>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -92,10 +92,10 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    class MatrixExpr<ExprType::Add, M1, M2>
-            : public BinaryMatrixExpr<ExprType::Add, M1, M2> {
-        using Base = BinaryMatrixExpr<ExprType::Add, M1, M2>;
-        using This = MatrixExpr<ExprType::Add, M1, M2>;
+    class MatrixExpr<ExprID::Add, M1, M2>
+            : public BinaryMatrixExpr<ExprID::Add, M1, M2> {
+        using Base = BinaryMatrixExpr<ExprID::Add, M1, M2>;
+        using This = MatrixExpr<ExprID::Add, M1, M2>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -115,7 +115,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    void MatrixExpr<ExprType::Add, M1, M2>::assign(Matrix auto& target) const {
+    void MatrixExpr<ExprID::Add, M1, M2>::assign(Matrix auto& target) const {
         constexpr bool SameMajor1 = MatrixOption::isSameMajor<M1, decltype(target)>();
         constexpr bool SameMajor2 = MatrixOption::isSameMajor<M2, decltype(target)>();
         if constexpr (SameMajor1 && SameMajor2)
@@ -125,17 +125,17 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprType::Add, M1, M2>::calc(size_t row, size_t col) const -> T {
+    auto MatrixExpr<ExprID::Add, M1, M2>::calc(size_t row, size_t col) const -> T {
         return Base::getLHS().calc(row, col) + Base::getRHS().calc(row, col);
     }
 
     template<Matrix M1, Matrix M2>
-    auto MatrixExpr<ExprType::Add, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
+    auto MatrixExpr<ExprID::Add, M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
         return Base::getLHS().calc_value(row, col) + Base::getRHS().calc_value(row, col);
     }
 
     template<Matrix M1, Matrix M2>
-    void MatrixExpr<ExprType::Add, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
+    void MatrixExpr<ExprID::Add, M1, M2>::reverse(const Matrix auto& grad) const noexcept {
         static_assert(Base::isReverseDiff);
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
@@ -147,7 +147,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M>) {
-        return MatrixExpr<ExprType::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
+        return MatrixExpr<ExprID::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
@@ -157,7 +157,7 @@ namespace Physica {
 
     template<Matrix M, Vector U>
     [[nodiscard]] auto operator+(M&& m, U&& x) noexcept requires(!CUDA<M> && !CUDA<U>) {
-        return MatrixExpr<ExprType::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
+        return MatrixExpr<ExprID::Add, M&&, U&&>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Vector U>
@@ -167,6 +167,6 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] auto operator+(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
-        return MatrixExpr<ExprType::Add, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
+        return MatrixExpr<ExprID::Add, M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

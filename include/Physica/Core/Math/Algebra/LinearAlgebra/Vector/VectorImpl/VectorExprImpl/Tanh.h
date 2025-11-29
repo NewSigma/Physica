@@ -22,9 +22,9 @@
 
 namespace Physica {
     template<Vector V>
-    class VectorExpr<ExprType::Tanh, V> : public UnitaryVectorExpr<ExprType::Tanh, V> {
-        using This = VectorExpr<ExprType::Tanh, V>;
-        using Base = UnitaryVectorExpr<ExprType::Tanh, V>;
+    class VectorExpr<ExprID::Tanh, V> : public UnitaryVectorExpr<ExprID::Tanh, V> {
+        using This = VectorExpr<ExprID::Tanh, V>;
+        using Base = UnitaryVectorExpr<ExprID::Tanh, V>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -51,7 +51,7 @@ namespace Physica {
     };
 
     template<Vector V>
-    void VectorExpr<ExprType::Tanh, V>::reverse(const Vector auto& y, const Vector auto& grad) const noexcept {
+    void VectorExpr<ExprID::Tanh, V>::reverse(const Vector auto& y, const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard((Tv(1) - square(y.values())), grad));
@@ -59,6 +59,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto tanh(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprType::Tanh, V&&>(std::forward<V>(v));
+        return VectorExpr<ExprID::Tanh, V&&>(std::forward<V>(v));
     }
 }
