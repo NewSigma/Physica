@@ -56,21 +56,22 @@ namespace Physica {
 
     template<Scalar T>
     void DWaveSampler<T>::sample(const GreenPair& greens, T sign) {
-        const MatrixND<T> hopUp = UnitMatrix<T>(getNumSite()) - greens[0];
-        const MatrixND<T> hopDown = UnitMatrix<T>(getNumSite()) - greens[1];
-
-        using IndexType = SquareLattice<2>::IndexType;
         auto buffer = MatrixND<T>(corr.getLength(), getNumSite());
-        lattice.forSiteInLattice([&](const IndexType indexM) {
+        for (int siteM = 0; siteM < getNumSite(); ++siteM) {
+            const auto indexM = lattice.toIndexND(siteM);
             const size_t dimX = lattice.getNumCellX();
-            const size_t idM = lattice.toIndex1D(indexM);
-            const size_t idN = lattice.toIndex1D(indexM.addX(1, dimX));
+            const size_t siteN = lattice.toIndex1D(indexM.shift(0, 1, dimX));
             for (size_t i = 0; i < dimX; ++i) {
-                const size_t idI = lattice.toIndex1D(indexM.addX(i, dimX));
-                const size_t idJ = lattice.toIndex1D(indexM.addX(i + 1, dimX));
-                buffer(i, idM) = (hopUp(idM, idI) * hopDown(idN, idJ) + hopUp(idM, idJ) * hopDown(idN, idI)) * Trv(0.5);
+                using Base::calcDensityCorr;
+                const size_t siteI = lattice.toIndex1D(indexM.shift(0, i, dimX));
+                const size_t siteJ = lattice.toIndex1D(indexM.shift(0, i + 1, dimX));
+                buffer(i, siteM) = calcDensityCorr(greens[0], siteM, siteI) * calcDensityCorr(greens[1], siteN, siteJ)
+                                 + calcDensityCorr(greens[0], siteM, siteJ) * calcDensityCorr(greens[1], siteN, siteI)
+                                 + calcDensityCorr(greens[1], siteM, siteI) * calcDensityCorr(greens[0], siteN, siteJ)
+                                 + calcDensityCorr(greens[1], siteM, siteJ) * calcDensityCorr(greens[0], siteN, siteI);
             }
-        });
+        }
+        buffer *= Trv(0.5);
         corr.toNextMean(Base::getCursor(), buffer.sum_cols() * reciprocal(Trv(getNumSite())));
         Base::sample(sign);
     }

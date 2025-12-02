@@ -33,16 +33,18 @@ namespace Physica {
     public:
         enum Observable : char {
             Density,
+            Density2,
             DoubleOccupy,
             MagMoment,
             Kinetic,
             Potential,
-            Internal
+            Internal,
         };
     private:
         VectorND<T> observes;
+        Observable type;
     public:
-        SiteSampler(const HubbardParams<T>& params, size_t numSample);
+        SiteSampler(const HubbardParams<T>& params, size_t numSample, Observable type);
         SiteSampler(const This&) = delete;
         SiteSampler(This&&) noexcept = delete;
         ~SiteSampler() = default;
@@ -50,22 +52,24 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, T sign, Observable type);
+        void sample(const GreenPair& greens, T sign);
 
         [[nodiscard]] T calcMean() const;
         /* Getters */
+        using Base::getNumSite;
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
     private:
-        T calcObservable(const DenseMatrix<T>& greenU, const DenseMatrix<T>& greenD, Observable type) const noexcept;
+        [[nodiscard]] T calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable typeX) const noexcept;
     };
 
     template<Scalar T>
-    SiteSampler<T>::SiteSampler(const HubbardParams<T>& params, size_t numSample)
+    SiteSampler<T>::SiteSampler(const HubbardParams<T>& params, size_t numSample, Observable type)
             : Base(params, numSample)
-            , observes(numSample) {}
+            , observes(numSample)
+            , type(type) {}
 
     template<Scalar T>
-    void SiteSampler<T>::sample(const GreenPair& greens, T sign, Observable type) {
+    void SiteSampler<T>::sample(const GreenPair& greens, T sign) {
         observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * sign;
         Base::sample(sign);
     }
@@ -76,17 +80,33 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T SiteSampler<T>::calcObservable(const DenseMatrix<T>& greenU, const DenseMatrix<T>& greenD, Observable type) const noexcept {
-        switch (type) {
+    T SiteSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD, Observable typeX) const noexcept {
+        switch (typeX) {
         case Density:
             return T(2) - greenU.diag().reals().mean() - greenD.diag().reals().mean();
+        case Density2: {
+            int numSite = getNumSite();
+            T result = 0;
+            for (int siteA = 0; siteA < numSite; ++siteA) {
+                for (int siteB = 0; siteB < numSite; ++siteB) {
+                    result += Base::calcDensityCorr(greenU, siteA, siteB);
+                    result += Base::calcDensityCorr(greenD, siteA, siteB);
+                }
+            }
+            result /= Trv(numSite * numSite);
+
+            T rhoU = T(1) - greenU.diag().reals().mean();
+            T rhoD = T(1) - greenD.diag().reals().mean();
+            result += rhoU * rhoD * Trv(2);
+            return result;
+        }
         case DoubleOccupy:
-            return (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(Base::getNumSite());
+            return (T(1) - greenU.diag().reals()) * (T(1) - greenD.diag().reals()) / T(getNumSite());
         case MagMoment:
             return calcObservable(greenU, greenD, Density) - calcObservable(greenU, greenD, DoubleOccupy) * Trv(2);
         case Kinetic: {
             const auto& hoppingT = Base::getHoppingMatrix();
-            return -hadamard(hoppingT, greenU + greenD).sum().real() / T(Base::getNumSite());
+            return -hadamard(hoppingT, greenU + greenD).sum().real() / T(getNumSite());
         }
         case Potential:
             return calcObservable(greenU, greenD, DoubleOccupy) * Base::getRepelU();

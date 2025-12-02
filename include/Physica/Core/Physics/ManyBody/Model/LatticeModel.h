@@ -19,6 +19,7 @@
 #pragma once
 
 #include "SiteIndex.h"
+#include "Physica/Core/Utils/Container/ArrayND.h"
 
 namespace Physica {
     enum class BoundaryCond : char {
@@ -50,10 +51,11 @@ namespace Physica {
         void forSiteInLattice(std::invocable<IndexType> auto func) const noexcept(std::is_nothrow_invocable<decltype(func), IndexType>::value);
         [[nodiscard]] IndexType calcDims() const noexcept;
         [[nodiscard]] size_t toIndex1D(IndexType indexND) const noexcept;
+        [[nodiscard]] IndexType toIndexND(size_t index1D) const noexcept;
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const DimArray& getSuperSize() const noexcept { return superSize; }
+        [[nodiscard]] const auto& getSuperSize() const noexcept { return superSize; }
         [[nodiscard]] size_t getNumCellX() const noexcept;
         [[nodiscard]] size_t getNumCellY() const noexcept;
         [[nodiscard]] size_t getNumCellZ() const noexcept;
@@ -102,6 +104,11 @@ namespace Physica {
     template<int Dim>
     size_t LatticeModel<Dim>::toIndex1D(IndexType indexND) const noexcept {
         return IndexType::toIndex1D(calcDims(), indexND);
+    }
+
+    template<int Dim>
+    auto LatticeModel<Dim>::toIndexND(size_t index1D) const noexcept -> IndexType {
+        return IndexType::toIndexND(calcDims(), index1D);
     }
 
     template<int Dim>

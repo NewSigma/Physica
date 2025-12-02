@@ -34,20 +34,21 @@ namespace Physica {
         using This = SystemSampler<T>;
         using Base = GreenSampler<T>;
         using GreenPair = ImagKinetic<T>::GreenPair;
+        constexpr static int Dim = 2;
 
         using typename Base::Tv;
     public:
         enum Observable : char {
-            AFM, // Antiferromagnetic Structure Factor
-            CDW, // Charge Density Wave
-            DOW // Double Occupancy Wave
+            Spin,
+            Charge,
+            DoubleOccupy,
         };
     private:
+        LatticeModel<Dim> lattice;
         Array<MatrixND<T>> observes;
-        FFT<T, 2> fft;
         Observable type;
     public:
-        SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample, Observable type);
+        SystemSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type);
         SystemSampler(const This&) = delete;
         SystemSampler(This&&) noexcept = delete;
         ~SystemSampler() = default;
@@ -58,25 +59,26 @@ namespace Physica {
         void sample(const GreenPair& greens, T sign);
 
         [[nodiscard]] MatrixND<T> calcMean() const;
+        [[nodiscard]] MatrixND<T> calcStructFactor() const;
         /* Getters */
         using Base::getNumSample;
         [[nodiscard]] const auto& getObserves() const noexcept { return observes; }
-        [[nodiscard]] int getNumSiteX() const noexcept { return fft.getRSpaceSize()[0]; }
-        [[nodiscard]] int getNumSiteY() const noexcept { return fft.getRSpaceSize()[1]; }
+        [[nodiscard]] int getNumSiteX() const noexcept { return lattice.getNumCellX(); }
+        [[nodiscard]] int getNumSiteY() const noexcept { return lattice.getNumCellY(); }
         [[nodiscard]] int getNumSite() const noexcept { return getNumSiteX() * getNumSiteY(); }
     private:
-        MatrixND<T> calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept;
+        [[nodiscard]] T calcCorr(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept;
+        [[nodiscard]] MatrixND<T> calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept;
+
+        using Base::calcDensityCorr;
     };
 
     template<Scalar T>
-    SystemSampler<T>::SystemSampler(const HubbardParams<T>& params, const LatticeModel<2>& lattice, size_t numSample, Observable type)
+    SystemSampler<T>::SystemSampler(const HubbardParams<T>& params, const LatticeModel<Dim>& lattice, size_t numSample, Observable type)
             : Base(params, numSample)
+            , lattice(lattice)
             , observes(numSample)
-            , fft(lattice.getSuperSize(), PlanFlag::Estimate)
-            , type(type) {
-        for (auto& elem : observes)
-            elem.resize(fft.getKSpace());
-    }
+            , type(type) {}
 
     template<Scalar T>
     void SystemSampler<T>::sample(const GreenPair& greens, T sign) {
@@ -86,25 +88,28 @@ namespace Physica {
 
     template<Scalar T>
     auto SystemSampler<T>::calcMean() const -> MatrixND<T> {
-        const int kX = getNumSiteX();
-        const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
-        const Tv sign = Base::calcSign();
-        MatrixND<T> result(kX, kY);
-        VectorND<T> buffer(getNumSample());
-        for (int x = 0; x < kX; ++x) {
-            for (int y = 0; y < kY; ++y) {
-                for (size_t i = 0; i < observes.getLength(); ++i)
-                    buffer[i] = observes[i](x, y);
-                result(x, y) = buffer.mean() / sign;
-            }
-        }
+        MatrixND<T> result(getNumSiteX(), getNumSiteY());
+        for (size_t i = 0; i < observes.getLength(); ++i)
+            result.toNextMean(i, observes[i]);
+        result *= reciprocal(Base::calcSign());
+        return result;
+    }
 
-        if (type == AFM) {
+    template<Scalar T>
+    MatrixND<T> SystemSampler<T>::calcStructFactor() const {
+        FFT<T, Dim> fft(lattice.getSuperSize(), PlanFlag::Estimate);
+        fft.getRSpace() = calcMean();
+        fft.transform();
+
+        MatrixND<T> result = fft.getKSpace().squaredNorms();
+        if (type == Spin) {
             // Add a minimum value to highlight the paramagnetic phase
             result += T(std::numeric_limits<T>::min());
         }
-        else if (type == CDW) {
+        else if (type == Charge) {
             // Ignore numerical errors
+            const int kX = getNumSiteX();
+            const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
             for (int x = 0; x < kX; ++x)
                 for (int y = 0; y < kY; ++y)
                     if (result(x, y) < square(T(std::numeric_limits<T>::epsilon())))
@@ -114,26 +119,36 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto SystemSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept -> MatrixND<T> {
-        int numSite = Base::getNumSite();
-        auto flatten = fft.getRSpace().flatten();
+    T SystemSampler<T>::calcCorr(const MatrixND<T>& greenU, int siteA, const MatrixND<T>& greenD, int siteB) const noexcept {
         switch (type) {
-        case AFM:
-            for (int i = 0; i < numSite; ++i)
-                flatten[i] = greenU.diag()[i] - greenD.diag()[i];
+        case Spin:
+            return calcDensityCorr(greenU, siteA, siteB) + calcDensityCorr(greenD, siteA, siteB)
+                 - calcDensityCorr(greenU, siteA, greenD, siteB) - calcDensityCorr(greenU, siteB, greenD, siteA);
+        case Charge:
+            return calcDensityCorr(greenU, siteA, siteB) + calcDensityCorr(greenD, siteA, siteB)
+                 + calcDensityCorr(greenU, siteA, greenD, siteB) + calcDensityCorr(greenU, siteB, greenD, siteA);
             break;
-        case CDW:
-            for (int i = 0; i < numSite; ++i)
-                flatten[i] = T(2) - greenU.diag()[i] - greenD.diag()[i];
-            break;
-        case DOW:
-            for (int i = 0; i < numSite; ++i)
-                flatten[i] = (T(1) - greenU.diag()[i]) * (T(1) - greenD.diag()[i]);
-            break;
+        case DoubleOccupy:
+            // TODO: Avoid mean field approximation
+            return calcDensityCorr(greenU, siteA, greenD, siteB) * calcDensityCorr(greenU, siteB, greenD, siteA);
         default:
             unreachable();
         }
-        fft.transform();
-        return fft.getKSpace().squaredNorms() * reciprocal(T(numSite));
+    }
+
+    template<Scalar T>
+    auto SystemSampler<T>::calcObservable(const MatrixND<T>& greenU, const MatrixND<T>& greenD) noexcept -> MatrixND<T> {
+        MatrixND<T> result(getNumSiteX(), getNumSiteY());
+        for (int siteA = 0; siteA < getNumSite(); ++siteA) {
+            const auto indexA = lattice.toIndexND(siteA);
+            for (int x = 0; x < getNumSiteX(); ++x) {
+                for (int y = 0; y < getNumSiteY(); ++y) {
+                    const auto indexB = indexA.shift(0, x, getNumSiteX()).shift(1, y, getNumSiteY());
+                    const size_t siteB = lattice.toIndex1D(indexB);
+                    result(x, y).toNextMean(siteA, calcCorr(greenU, siteA, greenD, siteB));
+                }
+            }
+        }
+        return result;
     }
 }
