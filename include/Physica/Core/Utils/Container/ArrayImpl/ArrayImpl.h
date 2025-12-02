@@ -63,6 +63,16 @@ namespace Physica {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
         memset(arr.data(), 0, Length * sizeof(T));
     }
+
+    template<class T, size_t Length, class Allocator>
+    __host__ __device__ void Array<T, Length, Allocator>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        #ifdef __CUDA_ARCH__
+            thrust::swap(arr, obj.arr);
+        #else
+            arr.swap(obj.arr);
+        #endif
+    }
     /**
      * Helper function that communicates with C libraries.
      */
@@ -77,13 +87,31 @@ namespace Physica {
     }
 
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ void Array<T, Length, Allocator>::swap(This& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        #ifdef __CUDA_ARCH__
-            thrust::swap(arr, obj.arr);
-        #else
-            arr.swap(obj.arr);
-        #endif
+    size_t Array<T, Length, Allocator>::toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept {
+        size_t index = 0;
+        size_t stride = 1;
+        for (int i = static_cast<int>(shape.getLength()) - 1; i >= 0; --i) {
+            assert(indices[i] < shape[i] && "[Error]: Index out of range");
+            index += indices[i] * stride;
+            stride *= shape[i];
+        }
+        return index;
+    }
+
+    template<class T, size_t Length, class Allocator>
+    auto Array<T, Length, Allocator>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
+        const int dim = shape.getLength();
+        IndexType indices(shape.size());
+        size_t remaining = index;
+        for (int i = 0; i < dim; ++i) {
+            size_t stride = 1;
+            for (int j = i + 1; j < dim; ++j)
+                stride *= shape[j]; 
+            indices[i] = remaining / stride;
+            assert(indices[i] < shape[i] && "[Error]: Index out of range");
+            remaining %= stride;
+        }
+        return indices;
     }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>

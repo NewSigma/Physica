@@ -72,13 +72,13 @@ namespace Physica {
 
     template<class T, int... Dims>
     size_t ArrayND<T, Dims...>::toIndex1D(const IndexType& indices) const noexcept {
-        return toIndex1D(getShape(), indices);
+        return IndexType::toIndex1D(getShape(), indices);
     }
 
     template<class T, int... Dims>
     auto ArrayND<T, Dims...>::toIndexND(size_t index) const noexcept -> IndexType {
         assert(index < getSize() && "[Error]: Index out of range");
-        return toIndexND(getShape(), index);
+        return IndexType::toIndexND(getShape(), index);
     }
 
     template<class T, int... Dims>
@@ -136,33 +136,5 @@ namespace Physica {
         for (int i = 1; i < dim; ++i)
             size *= shape[i];
         return size;
-    }
-
-    template<class T, int... Dims>
-    size_t ArrayND<T, Dims...>::toIndex1D(const IndexType& shape, const IndexType& indices) noexcept {
-        size_t index = 0;
-        size_t stride = 1;
-        for (int i = static_cast<int>(shape.getLength()) - 1; i >= 0; --i) {
-            assert(indices[i] < shape[i] && "[Error]: Index out of range");
-            index += indices[i] * stride;
-            stride *= shape[i];
-        }
-        return index;
-    }
-
-    template<class T, int... Dims>
-    auto ArrayND<T, Dims...>::toIndexND(const IndexType& shape, size_t index) noexcept -> IndexType {
-        const int dim = shape.getLength();
-        IndexType indices(shape.size());
-        size_t remaining = index;
-        for (int i = 0; i < dim; ++i) {
-            size_t stride = 1;
-            for (int j = i + 1; j < dim; ++j)
-                stride *= shape[j]; 
-            indices[i] = remaining / stride;
-            assert(indices[i] < shape[i] && "[Error]: Index out of range");
-            remaining %= stride;
-        }
-        return indices;
     }
 }

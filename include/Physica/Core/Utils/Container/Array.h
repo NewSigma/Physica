@@ -33,6 +33,7 @@ namespace Physica {
                 , public CRCoro<Array<T, Length, Allocator>> {
         static_assert(!std::is_same_v<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
         using This = Array<T, Length, Allocator>;
+        using IndexType = Array<size_t, Length>;
     public:
         using Base = ArrayBase<This, Allocator>;
         using typename Base::ElemType;
@@ -84,6 +85,8 @@ namespace Physica {
         void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
         /* Static members */
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p);
+        [[nodiscard]] static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
+        [[nodiscard]] static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;
     };
 
     template<class T, class Allocator>

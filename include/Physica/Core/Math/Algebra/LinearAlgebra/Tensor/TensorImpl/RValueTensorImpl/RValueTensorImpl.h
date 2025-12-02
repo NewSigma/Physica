@@ -43,12 +43,12 @@ namespace Physica {
 
     template<class Derived>
     size_t RValueTensor<Derived>::toIndex1D(const IndexType& indices) const noexcept {
-        return ArrayND<T, NDim>::toIndex1D(getShape(), indices);
+        return IndexType::toIndex1D(getShape(), indices);
     }
 
     template<class Derived>
     auto RValueTensor<Derived>::toIndexND(size_t index) const noexcept -> IndexType {
-        return ArrayND<T, NDim>::toIndexND(getShape(), index);
+        return IndexType::toIndexND(getShape(), index);
     }
 
     template<class Derived>

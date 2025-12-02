@@ -89,8 +89,6 @@ namespace Physica {
         [[nodiscard]] bool empty() const noexcept { return arr.empty(); }
         /* Static members */
         [[nodiscard]] static size_t toSize(const IndexType& shape) noexcept;
-        [[nodiscard]] static size_t toIndex1D(const IndexType& shape, const IndexType& indices) noexcept;
-        [[nodiscard]] static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;
     };
 
     template<size_t Dim, class Functor>
