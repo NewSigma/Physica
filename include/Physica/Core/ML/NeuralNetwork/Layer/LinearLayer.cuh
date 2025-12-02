@@ -65,17 +65,17 @@ namespace Physica {
         void toHostAsync(host_obj& obj) const;
 
         void fill(Tv x);
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_xavier_uniform(Tv gain);
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_xavier_normal(Tv gain);
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_kaiming_uniform(Tv gain);
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_kaiming_normal(Tv gain);
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_any(auto& distribution);
 
         const H5Group read(const H5Loc& loc, const char* name);

@@ -109,11 +109,11 @@ namespace Physica {
         [[nodiscard]] Tr norm2_mkl() const noexcept;
 
         void zeros();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_uniform();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_any(auto& distribution);
 
         const DataSetType read(const H5Loc& loc, const char* name);

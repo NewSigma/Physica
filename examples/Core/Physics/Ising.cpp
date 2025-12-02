@@ -44,7 +44,7 @@ public:
             , temperature(temperature_)
             , energy(0) {}
     /* Operations */
-    template<RNG R = Random<>>
+    template<RNG R>
     void init() {
         std::uniform_real_distribution<float> dist{};
         for (uint64_t i = 0; i < lattice.getCol(); ++i)
@@ -53,7 +53,7 @@ public:
         energy = 0;
     }
 
-    template<RNG R = Random<>>
+    template<RNG R>
     void step(uint64_t stepNum) {
         uint64_t iteration = stepNum * lattice.getRow() * lattice.getCol();
 

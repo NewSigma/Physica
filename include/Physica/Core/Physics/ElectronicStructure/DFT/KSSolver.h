@@ -66,7 +66,7 @@ namespace Physica {
         /* Operations */
         bool solve(T criteria, size_t maxIte);
 
-        template<RNG R = Random<>> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial);
+        template<RNG R> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial);
         void swap(KSSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return hamiltonH.getRepLattice(); }

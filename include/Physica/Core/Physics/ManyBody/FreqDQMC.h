@@ -53,12 +53,12 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RNG R = Random<>>
+        template<RNG R>
         void step_random();
 
-        template<RNG R = Random<>>
+        template<RNG R>
         void step_spin();
-        template<RNG R = Random<>>
+        template<RNG R>
         void step_spin_for(int numStep);
 
         void swap(This& __restrict obj) noexcept;

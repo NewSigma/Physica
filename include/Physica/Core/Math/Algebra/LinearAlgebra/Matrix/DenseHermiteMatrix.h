@@ -56,11 +56,11 @@ namespace Physica {
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         void swap(This& __restrict m) noexcept;
 
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_uniform();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_any(auto& distribution);
 
         const H5DataSet<1> read(const H5Loc& loc, const char* name);
@@ -73,11 +73,11 @@ namespace Physica {
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static This random_normal(size_t order);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static This random_any(size_t order, auto& distribution);
         [[nodiscard]] bool isHermiteMatrix(const Matrix auto& mat, double precision);
     };

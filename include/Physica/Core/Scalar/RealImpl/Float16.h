@@ -90,11 +90,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < half(0); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }
         /* Static members */
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static Real random_uniform() noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static Real random_normal() noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static Real random_any(auto& distribution) noexcept { return This(float32::random_any<R>(distribution)); }
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept { return H5::PredType::NATIVE_INT16; }
     };

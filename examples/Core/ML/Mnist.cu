@@ -50,7 +50,7 @@ namespace Physica {
         Linear layer2 = Linear(HiddenW, 10);
         SGD<Tv> opt = SGD<Tv>(LearnRate);
     public:
-        template<RNG R = Random<>>
+        template<RNG R>
         device_obj(R&) {
             layer1.template random_xavier_normal<R>(1);
             layer2.template random_xavier_normal<R>(1);

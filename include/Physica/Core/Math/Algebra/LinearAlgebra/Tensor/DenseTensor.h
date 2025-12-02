@@ -57,9 +57,9 @@ namespace Physica {
         using Storage::asArray;
         using Storage::getSize;
         /* Static members */
-        template<RNG R = Random<>>
+        template<RNG R>
         static DenseTensor random_uniform(IndexType shape);
-        template<RNG R = Random<>>
+        template<RNG R>
         static DenseTensor random_normal(IndexType shape);
     };
 

@@ -109,11 +109,11 @@ namespace Physica {
         Tr householder();
 
         void zeros() noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_uniform();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_any(auto& distribution);
 
         template<int GradOrder = 1>

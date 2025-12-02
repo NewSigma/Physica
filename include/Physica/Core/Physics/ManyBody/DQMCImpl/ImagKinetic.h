@@ -53,7 +53,7 @@ namespace Physica {
         void single_flip(int site, int split) noexcept;
         void single_flip(int site, int split, Tr alpha) noexcept;
 
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_uniform();
         void swap(This& __restrict obj) noexcept;
         /* Getters */

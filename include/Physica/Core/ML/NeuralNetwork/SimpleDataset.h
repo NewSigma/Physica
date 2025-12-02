@@ -48,7 +48,7 @@ namespace Physica {
         /* Operations */
         void reserve(size_t size);
         void append(DataType data);
-        template<RNG R = Random<>>
+        template<RNG R>
         SplitResultType randomSplit(size_t firstSize) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */

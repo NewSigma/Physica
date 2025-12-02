@@ -47,15 +47,15 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getNumTree() const noexcept { return trees.getLength(); }
         /* Static members */
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static std::pair<RandomForest, T> train(unsigned int numTree, const Dataset& dataset);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static T makeFeatureImportance(
                 size_t featureId,
                 unsigned int numForest,
                 unsigned int numTree,
                 Dataset dataset);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] std::forward_list<size_t> selectImportantFeature(
                 unsigned int numForest,
                 unsigned int numTree,

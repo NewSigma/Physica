@@ -105,7 +105,7 @@ namespace Physica {
         [[nodiscard]] RealType real() const noexcept;
         [[nodiscard]] RealType imag() const noexcept;
         /* Static members */
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
         [[nodiscard]] static SIMD asComplex(FullRealType reals);
     };

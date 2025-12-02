@@ -50,7 +50,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(DNN auto& nn, device_obj<MatrixND<Tv>>& x) const;
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const;
 
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_shuffle();
 
         void swap(This& __restrict obj) noexcept;

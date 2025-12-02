@@ -49,9 +49,9 @@ namespace Physica {
         [[nodiscard]] T* getCoeffs() noexcept { return coeffs; }
         [[nodiscard]] const T* getCoeffs() const noexcept { return coeffs; }
         /* Static Members */
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static GTOnG randomBase(const VectorND<T>& center) { return randomBase(center, 0, 0, 0); }
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static GTOnG randomBase(const VectorND<T>& center, size_t l, size_t m, size_t n);
     };
 

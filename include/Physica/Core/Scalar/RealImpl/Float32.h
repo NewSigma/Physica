@@ -99,13 +99,13 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static Members */
         [[nodiscard]] constexpr static Real nan() noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static Real random_uniform() noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static Real random_normal() noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static Real random_normal(GaussRandomPool<This, R>& pool) noexcept { return pool(); }
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static Real random_any(auto& distribution) noexcept { return Real(distribution(R::getInstance())); }
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept { return H5::PredType::NATIVE_FLOAT; }
     #ifdef PHYSICA_MPI

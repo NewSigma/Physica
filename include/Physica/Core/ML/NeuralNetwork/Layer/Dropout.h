@@ -37,7 +37,7 @@ namespace Physica {
         /* Operator */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] CoDiff<VectorND<T>> forward(const VectorND<T>& x) const;
         void reverse(const This& __restrict obj) const noexcept {}
 

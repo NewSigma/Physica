@@ -28,6 +28,7 @@ namespace Physica {
      */
     template<Scalar T>
     class IceGenerator {
+        using This = IceGenerator<T>;
         using PositionMatrix = PeriodicCell<T, 3>::PositionMatrix;
         using CrystalCellType = CrystalCell<T>;
         constexpr static double BondLengthOH = PhyConst<AU>::angstormToBohr(1);
@@ -40,36 +41,41 @@ namespace Physica {
     public:
         IceGenerator(T maxDistOO_, T maxDistOH_);
         IceGenerator(CrystalCellType initialCell_, T maxDistOO_, T maxDistOH_);
-        IceGenerator(const IceGenerator&) = default;
-        IceGenerator(IceGenerator&&) noexcept = default;
+        IceGenerator(const This&) = default;
+        IceGenerator(This&&) noexcept = default;
         ~IceGenerator() = default;
         /* Operators */
-        IceGenerator& operator=(IceGenerator obj) noexcept;
+        This& operator=(This obj) noexcept;
         /* Operations */
-        Array<CrystalCellType> exhaust();
-        template<RNG R = Random<>> CrystalCellType makeRand();
-        template<RNG R = Random<>> CrystalCellType makeDefects(unsigned int numDefect) const;
-        template<RNG R = Random<>> Array<size_t> randRing() const;
-        CrystalCellType makeRingMove(const Array<size_t>& ring, PositionMatrix& momentumMat) const;
-        void swap(IceGenerator& __restrict obj) noexcept;
+        [[nodiscard]] Array<CrystalCellType> exhaust();
+        template<RNG R>
+        [[nodiscard]] CrystalCellType makeRand();
+        template<RNG R>
+        [[nodiscard]] CrystalCellType makeDefects(unsigned int numDefect) const;
+        template<RNG R>
+        [[nodiscard]] Array<size_t> randRing() const;
+        [[nodiscard]] CrystalCellType makeRingMove(const Array<size_t>& ring, PositionMatrix& momentumMat) const;
+        void swap(This& __restrict obj) noexcept;
         /* Setters */
         void setInitialCell(CrystalCellType cell);
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return initialCell.getNumParticle() / 3U; }
     private:
-        PositionMatrix prepareRun();
+        [[nodiscard]] PositionMatrix prepareRun();
         void searchDanglingH(PositionMatrix& pos);
-        Array<size_t> findOInRadius(size_t indexO, T radius) const;
-        Array<size_t> findBondedH(size_t indexMolecule) const;
-        Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
-        std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexMolecule) const;
-        size_t findHydrogenBetweenO(size_t indexO1, size_t indexO2) const;
-        template<RNG R> size_t makeRandEmptyO() const;
-        template<RNG R> size_t makeRandFreeH(size_t indexO) const;
+        [[nodiscard]] Array<size_t> findOInRadius(size_t indexO, T radius) const;
+        [[nodiscard]] Array<size_t> findBondedH(size_t indexMolecule) const;
+        [[nodiscard]] Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
+        [[nodiscard]] std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexMolecule) const;
+        [[nodiscard]] size_t findHydrogenBetweenO(size_t indexO1, size_t indexO2) const;
+        template<RNG R>
+        [[nodiscard]] size_t makeRandEmptyO() const;
+        template<RNG R>
+        [[nodiscard]] size_t makeRandFreeH(size_t indexO) const;
         void fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH);
-        size_t countFreeH(const Array<size_t>& hIndexes) const;
+        [[nodiscard]] size_t countFreeH(const Array<size_t>& hIndexes) const;
         void searchForPairs(PositionMatrix& pos);
-        size_t getIndexToPair() const;
+        [[nodiscard]] size_t getIndexToPair() const;
         template<RNG R> void randUninitializedH(PositionMatrix& pos);
         void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Array<CrystalCellType>& result);
         /* Getters */

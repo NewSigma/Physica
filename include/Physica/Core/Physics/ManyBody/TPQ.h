@@ -65,7 +65,7 @@ namespace Physica {
         [[nodiscard]] Tr lnSquaredDot(const VectorND<Tr>& other) const;
         void swap(TPQ& __restrict obj) noexcept;
 
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal();
         /* Getters */
         [[nodiscard]] Tr getBeta() const noexcept { return beta; }
@@ -75,7 +75,7 @@ namespace Physica {
         [[nodiscard]] const Base& asVector() const noexcept { return *this; }
         [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static TPQ random_normal(size_t len);
         [[nodiscard]] static Tr calcObserveUVT(Tr beta, Tr mu, const MatrixND<T>& lnPartitionNVT, const MatrixND<T>& observeNVT);
     private:

@@ -60,11 +60,11 @@ namespace Physica {
         void toHostAsync(host_obj& obj) const;
 
         void zeros();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_uniform();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_any(auto& distribution);
 
         using Storage::swap;
@@ -75,11 +75,11 @@ namespace Physica {
         using Storage::getCol;
         /* Static members */
         [[nodiscard]] static device_obj unitMatrix(size_t order);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static This random_uniform(size_t row, size_t col);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static This random_normal(size_t row, size_t col);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
     };
 

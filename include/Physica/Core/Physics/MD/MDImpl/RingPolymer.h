@@ -49,7 +49,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class KineticModel, RNG R = Random<>> void initMomentum(T temperatureT);
+        template<class KineticModel, RNG R> void initMomentum(T temperatureT);
         template<class KineticModel> void scaleVelocity(T temperatureT);
         [[nodiscard]] DenseVector<T, Dim> makeDriftMomentum() const;
         void removeDrift();

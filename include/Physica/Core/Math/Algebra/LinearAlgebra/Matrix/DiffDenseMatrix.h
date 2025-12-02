@@ -77,11 +77,11 @@ namespace Physica {
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_uniform();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal();
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_any(auto& distribution);
 
         void swap(This& __restrict obj) noexcept;
@@ -101,11 +101,11 @@ namespace Physica {
         [[nodiscard]] GradMatrix& grads() noexcept { return g; }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static auto random_uniform(size_t row, size_t col);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static auto random_normal(size_t row, size_t col);
-        template<RNG R = Random<>>
+        template<RNG R>
         [[nodiscard]] static auto random_any(size_t row, size_t col, auto& distribution);
     private:
         friend class device_obj<This>;

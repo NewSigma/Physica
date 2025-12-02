@@ -52,7 +52,7 @@ namespace Physica {
         /* Operators */
         This& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<RNG R = Random<>, ExecutePolicy P>
+        template<RNG R, ExecutePolicy P>
         void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(This& __restrict obj) noexcept;
         /* Setters */

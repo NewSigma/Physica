@@ -36,13 +36,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    IceGenerator<T>& IceGenerator<T>::operator=(IceGenerator obj) noexcept {
+    auto IceGenerator<T>::operator=(This obj) noexcept -> This& {
         swap(obj);
         return *this;
     }
 
     template<Scalar T>
-    Array<typename IceGenerator<T>::CrystalCellType> IceGenerator<T>::exhaust() {
+    auto IceGenerator<T>::exhaust() -> Array<CrystalCellType> {
         Array<CrystalCellType> result{};
         PositionMatrix pos = prepareRun();
         searchDanglingH(pos);
@@ -52,8 +52,8 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRand() {
-        PositionMatrix pos = prepareRun();;
+    auto IceGenerator<T>::makeRand() -> CrystalCellType{
+        PositionMatrix pos = prepareRun();
         searchDanglingH(pos);
         while (!isFinished()) {
             const size_t randO = makeRandEmptyO<R>();
@@ -69,7 +69,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    IceGenerator<T>::CrystalCellType IceGenerator<T>::makeDefects(unsigned int numDefect) const {
+    auto IceGenerator<T>::makeDefects(unsigned int numDefect) const -> CrystalCellType {
         assert(numDefect < getNumMolecule());
         PositionMatrix pos = initialCell.getPos();
 
@@ -173,8 +173,7 @@ namespace Physica {
      * [1] J. Chem. Phys. 118, 9291 (2003); https://doi.org/10.1063/1.1568337
      */
     template<Scalar T>
-    IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRingMove(
-                const Array<size_t>& ring, PositionMatrix& momentumMat) const {
+    auto IceGenerator<T>::makeRingMove(const Array<size_t>& ring, PositionMatrix& momentumMat) const -> CrystalCellType {
         const bool isInvalidRing = ring.getLength() == 0;
         if (isInvalidRing)
             return initialCell;
@@ -215,7 +214,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void IceGenerator<T>::swap(IceGenerator& __restrict obj) noexcept {
+    void IceGenerator<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         initialCell.swap(obj.initialCell);
         maxDistOO.swap(obj.maxDistOO);
@@ -234,7 +233,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    IceGenerator<T>::PositionMatrix IceGenerator<T>::prepareRun() {
+    auto IceGenerator<T>::prepareRun() -> PositionMatrix {
         for (auto& elem : isHydrogenOccupied)
             elem = false;
         for (auto& elem : numHydrogenRequired)
@@ -374,14 +373,13 @@ namespace Physica {
     size_t IceGenerator<T>::makeRandFreeH(size_t indexO) const {
         assert(indexO < getNumMolecule());
         const auto hInRange = findBondedH(indexO);
-        auto& gen = R::getInstance();
-        size_t randLogicIndex;
-        /* Rand index */ {
+        const size_t randLogicIndex = [&]() {
             const size_t numFreeH = countFreeH(hInRange);
             assert(numFreeH > numHydrogenRequired[indexO]);
             std::uniform_int_distribution<size_t> dist(0, numFreeH - 1);
-            randLogicIndex = dist(gen);
-        }
+            return dist(R::getInstance());
+        }();
+
         size_t logicIndex = 0;
         for (size_t physicalIndex = 0; physicalIndex < hInRange.getLength(); ++physicalIndex) {
             const bool isFree = isHydrogenOccupied[hInRange[physicalIndex]] == false;

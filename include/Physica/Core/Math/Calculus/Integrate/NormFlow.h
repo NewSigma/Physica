@@ -60,9 +60,9 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<DNN Net, RNG R = Random<>, ExecutePolicy P = Sequential>
+        template<DNN Net, RNG R, ExecutePolicy P = Sequential>
         Trv warmup(Net& nn, int numWarm);
-        template<DNN Net, RNG R = Random<>, ExecutePolicy P = Sequential>
+        template<DNN Net, RNG R, ExecutePolicy P = Sequential>
         void integral(Net& nn);
 
         void swap(This& __restrict obj) noexcept;

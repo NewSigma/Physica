@@ -131,9 +131,9 @@ namespace Physica {
 
         __host__ __device__ void toNextMean(size_t lastNumSample, ScalarType sample) noexcept;
         __host__ __device__ void toNextVariance(ScalarType& __restrict mean, size_t lastNumSample, ScalarType sample) noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_uniform() noexcept;
-        template<RNG R = Random<>>
+        template<RNG R>
         void random_normal() noexcept;
         /* Getters */
         __host__ __device__ constexpr static size_t size() { return 1; }

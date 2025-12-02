@@ -37,7 +37,7 @@ namespace Physica {
         GaussRandomPool& operator=(GaussRandomPool obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] T operator()() const noexcept;
         /* Operations */
-        template<RNG R = Random<>>
+        template<RNG R>
         void init();
         void swap(GaussRandomPool& __restrict obj) noexcept;
         /* Getters */

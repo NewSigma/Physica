@@ -72,8 +72,8 @@ namespace Physica {
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;
 
-        template<RNG R = Random<>> void random_uniform();
-        template<RNG R = Random<>> void random_normal();
+        template<RNG R> void random_uniform();
+        template<RNG R> void random_normal();
         /* Getters */
         [[nodiscard]] PtrTy data_ptr(Index3D index) noexcept { return Base::getDerived().data_ptr(index); }
         [[nodiscard]] ConstPtrTy data_ptr(Index3D index) const noexcept { return Base::getDerived().data_ptr(index); }
