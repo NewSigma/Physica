@@ -110,9 +110,6 @@ namespace Physica {
     private:
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
-        using ConjugateRtnTy = std::conditional<isComplex, Conjugate<Derived>, const Derived&>::type;
-        using RealsRtnTy = std::conditional<isComplex, RealVector<Derived>, Derived&>::type;
-        using ValuesRtnTy = std::conditional<isDiffable, ValueVector<Derived>, Derived&>::type;
     public:
         ~RValueVector() = default;
         /* Operators */
@@ -156,7 +153,7 @@ namespace Physica {
 
         [[nodiscard]] auto format() const;
         [[nodiscard]] auto transpose() const noexcept;
-        [[nodiscard]] ConjugateRtnTy conjugate() const noexcept;
+        [[nodiscard]] decltype(auto) conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
 
         [[nodiscard]] CoDiff<Tr> norm1() const noexcept;
@@ -190,17 +187,17 @@ namespace Physica {
         Tr householder(Vector auto& target) const;
 
         template<Matrix M>
-        auto reshape(const M& mat) const noexcept;
+        [[nodiscard]] auto reshape(const M& mat) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_col(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto reshape_col(size_t row, size_t col) const noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        auto reshape_row(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto reshape_row(size_t row, size_t col) const noexcept;
 
-        [[nodiscard]] RealsRtnTy reals() const noexcept;
+        [[nodiscard]] decltype(auto) reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;
         [[nodiscard]] auto squaredNorms() const noexcept;
         [[nodiscard]] auto norms() const noexcept;
-        [[nodiscard]] ValuesRtnTy values() const noexcept;
+        [[nodiscard]] decltype(auto) values() const noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads() const noexcept;
         /* Getters */
@@ -208,7 +205,7 @@ namespace Physica {
         /* Static members */
         __host__ __device__ constexpr static void static_assert_assign(const Vector auto& target) noexcept;
         template<Vector V>
-        consteval static size_t maxSizeAtCompile() noexcept;
+        [[nodiscard]] consteval static size_t maxSizeAtCompile() noexcept;
     protected:
         RValueVector() = default;
         RValueVector(const This&) = default;
@@ -228,13 +225,13 @@ namespace Physica {
         void assign_add_simd(V& v) const noexcept;
     };
 
-    template<Vector T>
-    auto covariance(const T& x, const T& y) -> T::ScalarType {
+    template<Vector V>
+    auto covariance(const V& x, const V& y) -> V::ScalarType {
         assert(x.getLength() == y.getLength());
-        using ScalarType = T::ScalarType;
-        const ScalarType x_mean = x.mean();
-        const ScalarType y_mean = y.mean();
-        return hadamard((x - x_mean), (y - y_mean)).sum() / ScalarType(x.getLength() - 1);
+        using T = V::ScalarType;
+        const T x_mean = x.mean();
+        const T y_mean = y.mean();
+        return hadamard((x - x_mean), (y - y_mean)).sum() / T(x.getLength() - 1);
     }
 
     template<Vector V1, Vector V2>

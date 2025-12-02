@@ -144,7 +144,7 @@ namespace Physica {
     }
 
     template<Scalar U, Vector V>
-    [[nodiscard]] auto operator/(U&& x, V&& v) noexcept requires(!CUDA<V>) {
+    [[nodiscard]] auto divide(U&& x, V&& v) noexcept requires(!CUDA<V>) {
         return VectorExpr<ExprID::Div, U&&, V&&>(std::forward<U>(x), std::forward<V>(v));
     }
 

@@ -209,7 +209,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::conjugate() const noexcept -> ConjugateRtnTy {
+    decltype(auto) RValueVector<Derived>::conjugate() const noexcept {
         if constexpr (isComplex)
             return Conjugate<Derived>(Base::getDerived());
         else
@@ -643,8 +643,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::reals() const noexcept -> RealsRtnTy {
-        return RealsRtnTy(Base::getDerived());
+    decltype(auto) RValueVector<Derived>::reals() const noexcept {
+        if constexpr (isComplex)
+            return RealVector<Derived>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
@@ -663,8 +666,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::values() const noexcept -> ValuesRtnTy {
-        return ValuesRtnTy(Base::getDerived());
+    decltype(auto) RValueVector<Derived>::values() const noexcept {
+        if constexpr (isDiffable)
+            return ValueVector<Derived>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
