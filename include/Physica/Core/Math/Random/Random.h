@@ -71,7 +71,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr curandRngType_t rngID_cuRAND(RandomOption option) noexcept {
+    constexpr curandRngType_t rngID_cuRAND([[maybe_unused]] RandomOption option) noexcept {
     #ifdef PHYSICA_CUDA
         switch (option) {
         case MT19937:

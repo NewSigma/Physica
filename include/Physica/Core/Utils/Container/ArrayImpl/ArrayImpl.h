@@ -47,8 +47,9 @@ namespace Physica {
 
     template<class T, size_t Length, class Allocator>
     template<size_t OtherLength, class OtherAlloc>
-    Array<T, Length, Allocator>::Array(const Array<T, OtherLength, OtherAlloc>& other) : Array(read(Length, other.data())) {
+    Array<T, Length, Allocator>::Array(const Array<T, OtherLength, OtherAlloc>& other) noexcept : Array(read(Length, other.data())) {
         static_assert(OtherLength == Length || OtherLength == Dynamic, "[Error]: Length do not match");
+        assert(other.getLength() >= Length);
     }
     /**
      * Initializing new elements will not work. A fixed array is assumed to be initialized upon construction.
@@ -77,7 +78,7 @@ namespace Physica {
      * Helper function that communicates with C libraries.
      */
     template<class T, size_t Length, class Allocator>
-    __host__ __device__ auto Array<T, Length, Allocator>::read([[maybe_unused]] size_t length, const T* __restrict p) -> This {
+    __host__ __device__ auto Array<T, Length, Allocator>::read([[maybe_unused]] size_t length, const T* __restrict p) noexcept -> This {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: C type must be trivial");
         assert(length == Length && "[Error]: Length do not match");
         assert(p != nullptr);

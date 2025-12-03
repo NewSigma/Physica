@@ -54,14 +54,14 @@ namespace Physica {
         /* Operations */
         void assign(Tensor auto& x) const;
 
-        [[nodiscard]] decltype(auto) calc(size_t dim0, auto... dims) const;
+        [[nodiscard]] decltype(auto) calc(std::integral auto... dims) const;
         [[nodiscard]] decltype(auto) calc(IndexType index) const;
         [[nodiscard]] size_t toIndex1D(const IndexType& indices) const noexcept;
         [[nodiscard]] IndexType toIndexND(size_t index) const noexcept;
         void forND(std::invocable<T, IndexType> auto fn) const;
 
         void resize(const Tensor auto& x) { resize(x.getShape()); }
-        decltype(auto) resize(size_t dim0, auto... dims) { return Base::getDerived().resize(dim0, dims...); }
+        decltype(auto) resize(std::integral auto... dims) { return Base::getDerived().resize(dims...); }
         decltype(auto) resize(IndexType shape) { return Base::getDerived().resize(shape); }
 
         auto reals() const noexcept;

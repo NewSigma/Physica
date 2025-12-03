@@ -27,8 +27,8 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    ArrayND<T, Dims...>::ArrayND(size_t dim0, auto... dims) {
-        resize(dim0, dims...);
+    ArrayND<T, Dims...>::ArrayND(std::integral auto... dims) {
+        resize(dims...);
     }
 
     template<class T, int... Dims>
@@ -42,13 +42,13 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    T& ArrayND<T, Dims...>::operator()(size_t dim0, auto... dims) {
-        return operator()(IndexType({dim0, static_cast<size_t>(dims)...}));
+    T& ArrayND<T, Dims...>::operator()(std::integral auto... dims) {
+        return operator()(IndexType({static_cast<size_t>(dims)...}));
     }
 
     template<class T, int... Dims>
-    const T& ArrayND<T, Dims...>::operator()(size_t dim0, auto... dims) const {
-        return const_cast<This&>(*this)(dim0, dims...);
+    const T& ArrayND<T, Dims...>::operator()(std::integral auto... dims) const {
+        return const_cast<This&>(*this)(dims...);
     }
 
     template<class T, int... Dims>
@@ -61,8 +61,8 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    void ArrayND<T, Dims...>::resize(size_t dim0, auto... dims) {
-        resize(IndexType({dim0, static_cast<size_t>(dims)...}));
+    void ArrayND<T, Dims...>::resize(std::integral auto... dims) {
+        resize(IndexType({static_cast<size_t>(dims)...}));
     }
 
     template<class T, int... Dims>

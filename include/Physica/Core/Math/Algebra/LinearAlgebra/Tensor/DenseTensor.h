@@ -31,7 +31,7 @@ namespace Physica {
         using typename Base::IndexType;
     public:
         DenseTensor() = default;
-        DenseTensor(size_t dim0, auto... dims);
+        DenseTensor(std::integral auto... dims);
         DenseTensor(IndexType shape, auto&&... args);
         DenseTensor(const This&) = default;
         DenseTensor(This&&) noexcept = default;

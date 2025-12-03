@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Scalar T, int... Dims>
-    DenseTensor<T, Dims...>::DenseTensor(size_t dim0, auto... dims) : Storage(dim0, dims...) {
-        static_assert(sizeof...(dims) + 1 == NDim, "[Error]: NDim is not consistent");
+    DenseTensor<T, Dims...>::DenseTensor(std::integral auto... dims) : Storage(dims...) {
+        static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
     }
 
     template<Scalar T, int... Dims>

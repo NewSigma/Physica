@@ -56,7 +56,7 @@ namespace Physica {
     public:
         ArrayND() = default;
         explicit ArrayND(IndexType shape_, auto&&... args);
-        explicit ArrayND(size_t dim0, auto... dims);
+        explicit ArrayND(std::integral auto... dims);
         ArrayND(const This&) = default;
         ArrayND(This&&) noexcept = default;
         ~ArrayND() = default;
@@ -64,11 +64,11 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] T& operator()(const IndexType& indices);
         [[nodiscard]] const T& operator()(const IndexType& indices) const;
-        [[nodiscard]] T& operator()(size_t dim0, auto... dims);
-        [[nodiscard]] const T& operator()(size_t dim0, auto... dims) const;
+        [[nodiscard]] T& operator()(std::integral auto... dims);
+        [[nodiscard]] const T& operator()(std::integral auto... dims) const;
         /* Operations */
         void resize(IndexType shape_, auto&&... args);
-        void resize(size_t dim0, auto... dims);
+        void resize(std::integral auto... dims);
         void zeros() noexcept;
 
         [[nodiscard]] size_t toIndex1D(const IndexType& indices) const noexcept;

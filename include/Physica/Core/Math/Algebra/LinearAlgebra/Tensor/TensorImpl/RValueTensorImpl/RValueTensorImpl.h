@@ -32,8 +32,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) RValueTensor<Derived>::calc(size_t dim0, auto... dims) const {
-        return Base::getDerived().calc(dim0, dims...);
+    decltype(auto) RValueTensor<Derived>::calc(std::integral auto... dims) const {
+        return Base::getDerived().calc(dims...);
     }
 
     template<class Derived>

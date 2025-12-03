@@ -54,15 +54,15 @@ namespace Physica {
         __host__ __device__ explicit Array(size_t length, auto&&... args);
         __host__ __device__ Array(std::initializer_list<T> list);
         template<size_t OtherLength, class OtherAlloc>
-        Array(const Array<T, OtherLength, OtherAlloc>& other);
+        Array(const Array<T, OtherLength, OtherAlloc>& other) noexcept;
         Array(const This&) = default;
         Array(This&&) noexcept = default;
         ~Array() = default;
         /* Operators */
         __host__ __device__ This& operator=(This array) noexcept { swap(array); return *this; }
         /* Operations */
-        __host__ __device__ void insert(const T&, size_t) { assert(false); }
-        __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Length); }
+        __host__ __device__ void insert(const T&, size_t) noexcept { assert(false); }
+        __host__ __device__ void reserve([[maybe_unused]] size_t size) noexcept { assert(size == Length); }
         __host__ __device__ void resize(size_t length, auto&&... args) noexcept;
         __host__ __device__ void zeros() noexcept;
 
@@ -84,7 +84,7 @@ namespace Physica {
         /* Setters */
         void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
         /* Static members */
-        [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p);
+        [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
         [[nodiscard]] static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;
     };
