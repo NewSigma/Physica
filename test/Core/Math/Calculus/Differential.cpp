@@ -39,7 +39,7 @@ int main() {
             return 1;
 
         result = Differential<ScalarType>::ridders(func, ScalarType(3), ScalarType(1.55));
-        if (!scalarNear(result, answer, 1E-15))
+        if (!scalarNear(result, answer, 1E-14))
             return 1;
     }
     return 0;

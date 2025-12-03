@@ -11,7 +11,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DNOMINMAX)
 else()
-    add_compile_options(-Wall -Wfatal-errors -mrdrnd -march=native -ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt -fno-math-errno -fno-trapping-math -fno-signed-zeros)
+    add_compile_options(-Wall -Wfatal-errors -mrdrnd -march=native -ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt -fno-math-errno -fno-trapping-math -fno-signed-zeros -fassociative-math)
     add_link_options(-Wl,-O2,-Bsymbolic,--gc-sections)
 
     #add_compile_options(-mdaz-ftz) # FIXME: enable it once we dump to clang 19
