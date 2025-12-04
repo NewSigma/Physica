@@ -40,7 +40,7 @@ namespace Physica {
         PageLockedAllocator& operator=(const PageLockedAllocator&) noexcept = default;
         PageLockedAllocator& operator=(PageLockedAllocator&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] static pointer allocate(size_t n);
+        [[nodiscard, gnu::returns_nonnull]] static pointer allocate(size_t n);
         static void deallocate(pointer p, size_t n) noexcept;
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
         void construct(pointer p, auto&&... args);
@@ -48,15 +48,16 @@ namespace Physica {
     };
 
     template<class T>
-    PageLockedAllocator<T>::pointer PageLockedAllocator<T>::allocate(size_t n) {
-        pointer p;
+    auto PageLockedAllocator<T>::allocate(size_t n) -> pointer {
+        pointer p{};
         check(cudaMallocHost(&p, n * sizeof(value_type)));
         return p;
     }
 
     template<class T>
     void PageLockedAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
-        cudaFreeHost(p);
+        if (p != nullptr)
+            cudaFreeHost(p);
     }
 
     template<class T>

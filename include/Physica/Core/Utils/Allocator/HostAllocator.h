@@ -52,7 +52,7 @@ namespace Physica {
         This& operator=(const This&) noexcept = default;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T* allocate(size_t n) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n) noexcept;
         void deallocate(T* p, size_t n) noexcept;
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
         void construct(T* p, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
@@ -62,7 +62,7 @@ namespace Physica {
     };
 
     template<class T, size_t Align>
-    [[nodiscard]] T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
+    T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
         assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = calcSize(n);
         void* p{};
@@ -70,12 +70,14 @@ namespace Physica {
             p = ::operator new(size, std::align_val_t(Align), std::nothrow_t{});
         else
             p = ::operator new(size, std::nothrow_t{});
+        // null return value is rare in reality
         assert(p != nullptr);
         return reinterpret_cast<T*>(p);
     }
 
     template<class T, size_t Align>
     void HostAllocator<T, Align>::deallocate(T* p, size_t) noexcept {
+        // FIXME: Add if (p != nullptr) once llvm improve its nonnull inference
         if constexpr (OverAlign)
             ::operator delete(p, std::align_val_t(Align));
         else

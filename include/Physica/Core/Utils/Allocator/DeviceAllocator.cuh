@@ -56,7 +56,7 @@ namespace Physica {
         DeviceAllocator& operator=(const DeviceAllocator&) noexcept = default;
         DeviceAllocator& operator=(DeviceAllocator&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ pointer allocate(size_t n) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ pointer allocate(size_t n) noexcept;
         __host__ __device__ void deallocate(pointer p, size_t n) noexcept;
         __host__ __device__ void construct(pointer p, auto&&... args);
         __host__ __device__ void destroy(pointer p) noexcept;
@@ -83,7 +83,8 @@ namespace Physica {
         if constexpr (IsDevice())
             ::operator delete(p);
         else {
-            if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
+            // No unnecessary cuda api call to make profiler output cleaner
+            if (p != nullptr) {
                 if constexpr (CUDADevAttr::MemoryPoolsSupported)
                     cudaFreeAsync(p, CUDAContext::getInstance());
                 else

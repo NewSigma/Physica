@@ -41,7 +41,7 @@ namespace Physica {
         This& operator=(const This&) noexcept = default;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T* allocate(size_t n);
+        [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n);
         void deallocate(T* p, size_t n);
         [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
         using Base::construct;
@@ -49,7 +49,7 @@ namespace Physica {
     };
 
     template<class T, size_t Align>
-    [[nodiscard]] T* MMapAllocator<T, Align>::allocate(size_t n) {
+    T* MMapAllocator<T, Align>::allocate(size_t n) {
         assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = Base::calcSize(n);
         constexpr int Prot = PROT_READ | PROT_WRITE;
@@ -64,7 +64,7 @@ namespace Physica {
 
     template<class T, size_t Align>
     void MMapAllocator<T, Align>::deallocate(T* p, size_t n) {
-        if (munmap(p, Base::calcSize(n)))
+        if (munmap(p, Base::calcSize(n))) [[unlikely]]
             throw SystemException();
     }
 

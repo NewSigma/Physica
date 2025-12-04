@@ -134,7 +134,9 @@ namespace Physica {
                 arr[temp + c1].swap(arr[temp + c2]);
         }
     }
-
+    /**
+     * FIXME: Seems llvm cannot infer nonnull for nonnull + GEP
+     */
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     __host__ __device__ T* Array2D<T, Option, Row, Col, Allocator>::data_ptr(size_t row, size_t col) noexcept {
         return arr.data() + toIndex1D(row, col);

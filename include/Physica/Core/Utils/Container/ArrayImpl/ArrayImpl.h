@@ -140,8 +140,12 @@ namespace Physica {
     template<size_t Length, class OtherAlloc>
     Array<T, Dynamic, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value)
             : Array(other.getLength()) {
-        for (size_t i = 0; i < getLength(); ++i)
-            arr[i] = other[i];
+        if constexpr (std::is_trivially_copyable<T>::value)
+            memcpy(arr, other.data(), other.getLength() * sizeof(T));
+        else {
+            for (size_t i = 0; i < other.getLength(); ++i)
+                arr[i] = other[i];
+        }
     }
 
     template<class T, class Allocator>
@@ -256,7 +260,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    auto Array<T, Dynamic, Allocator>::release() noexcept -> pointer {
+    T* Array<T, Dynamic, Allocator>::release() noexcept {
         pointer p = arr;
         arr = nullptr;
         length = capacity = 0;
@@ -282,9 +286,14 @@ namespace Physica {
         std::swap(length, obj.length);
         std::swap(capacity, obj.capacity);
     }
-
+    /**
+     * FIXME: remove __attribute__((returns_nonnull)) and replace with reference once [1] is resolved
+     *
+     * Reference:
+     * [1] GH78399; https://github.com/llvm/llvm-project/issues/78399
+     */
     template<class T, class Allocator>
-    __host__ __device__ auto Array<T, Dynamic, Allocator>::data() noexcept -> pointer {
+    __host__ __device__ T* Array<T, Dynamic, Allocator>::data() noexcept {
         if constexpr (Align == Dynamic)
             return arr;
         else
@@ -292,7 +301,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ auto Array<T, Dynamic, Allocator>::data() const noexcept -> const_pointer {
+    __host__ __device__ const T* Array<T, Dynamic, Allocator>::data() const noexcept {
         return const_cast<This&>(*this).data();
     }
     /**

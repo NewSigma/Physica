@@ -107,7 +107,7 @@ namespace Physica {
         constexpr static size_t MinDeltaSpace = 1024;
         constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
     private:
-        pointer arr = nullptr;
+        T* arr = nullptr;
         size_t length = 0;
         size_t capacity = 0;
         [[no_unique_address]] allocator_type alloc;
@@ -132,7 +132,7 @@ namespace Physica {
         void increase(size_t size) noexcept;
         void decrease(size_t size) noexcept;
         void clear() noexcept;
-        [[nodiscard]] pointer release() noexcept;
+        [[nodiscard]] T* release() noexcept;
         void doubleSpace() noexcept;
         void zeros() noexcept;
 
@@ -145,8 +145,8 @@ namespace Physica {
         using Base::write;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ pointer data() noexcept;
-        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept;
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ T* data() noexcept;
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const T* data() const noexcept;
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
