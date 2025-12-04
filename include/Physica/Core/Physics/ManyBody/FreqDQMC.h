@@ -19,10 +19,10 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
-#include "Physica/Core/Scalar/Diff.h"
 #include "DQMCImpl/ImagKinetic.h"
-#include "DQMCImpl/GreenProd.h"
+#include "DQMCImpl/HubbardParams.h"
 
 namespace Physica {
     template<Scalar T>
@@ -98,7 +98,7 @@ namespace Physica {
     void FreqDQMC<T>::step_random() {
         for (int i = 0; i < getNumSite(); ++i)
             actionR(i, i) = randAuxField<R>();
-        lnZ = calcLnZ().value();
+        lnZ = calcLnZ();
     }
 
     template<Scalar T>
@@ -108,7 +108,7 @@ namespace Physica {
         const T save = std::exchange(actionR(site, site), randAuxField<R>());
 
         const auto lnZ1 = calcLnZ();
-        const bool accept = Trv::template random_uniform<R>() < exp(lnZ1.value() - lnZ.value());
+        const bool accept = Trv::template random_uniform<R>() < exp(lnZ1 - lnZ);
         if (accept)
             lnZ = lnZ1;
         else

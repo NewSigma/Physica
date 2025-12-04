@@ -27,11 +27,12 @@ namespace Physica {
         using This = ImagMagnon<T>;
         using Base = GreenSampler<T>;
         using Tc = T::ComplexType;
+        using Trv = Base::Trv;
     private:
         DenseTensor<Tc, 3> magnons; 
         FFT<T> fft;
     public:
-        ImagMagnon(const DQMC<T>& dqmc, size_t numSample);
+        ImagMagnon(const HubbardParams<T>& params, size_t numSample);
         ImagMagnon(const This&) = delete;
         ImagMagnon(This&&) noexcept = delete;
         ~ImagMagnon() = default;
@@ -39,7 +40,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const MatrixND<T>& aux);
+        void sample(const MatrixND<T>& aux, Trv sign);
         [[nodiscard]] MatrixND<T> calcMean() const;
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return magnons.dim(1); }
@@ -47,18 +48,18 @@ namespace Physica {
     };
 
     template<Scalar T>
-    ImagMagnon<T>::ImagMagnon(const DQMC<T>& dqmc, size_t numSample)
-            : Base(dqmc, numSample)
-            , magnons(numSample, dqmc.getNumSite(), FFT<T>::rSizeToKSize(dqmc.getNumSplit()))
-            , fft(dqmc.getNumSplit(), PlanFlag::Estimate) {}
+    ImagMagnon<T>::ImagMagnon(const HubbardParams<T>& params, size_t numSample)
+            : Base(params, numSample)
+            , magnons(numSample, params.getNumSite(), FFT<T>::rSizeToKSize(params.getNumSplit()))
+            , fft(params.getNumSplit(), PlanFlag::Estimate) {}
 
     template<Scalar T>
-    void ImagMagnon<T>::sample(const MatrixND<T>& aux) {
+    void ImagMagnon<T>::sample(const MatrixND<T>& aux, Trv sign) {
         for (size_t site = 0; site < aux.getRow(); ++site) {
             fft.transform(aux.row(site));
             magnons.fiber(2, {Base::getCursor(), site, Dynamic}) = fft.getKSpace() * reciprocal(sqrt(T(getNumSplit())));
         }
-        Base::sample();
+        Base::sample(sign);
     }
 
     template<Scalar T>

@@ -137,12 +137,12 @@ namespace Physica {
         void random_normal() noexcept;
         /* Getters */
         __host__ __device__ constexpr static size_t size() { return 1; }
-        [[nodiscard]] __host__ __device__ auto value_ptr() noexcept;
-        [[nodiscard]] __host__ __device__ const auto value_ptr() const noexcept;
+        [[nodiscard]] __host__ __device__ auto* value_ptr() noexcept;
+        [[nodiscard]] __host__ __device__ const auto* value_ptr() const noexcept;
         template<int GradOrder>
-        [[nodiscard]] __host__ __device__ auto grad_ptr() noexcept;
+        [[nodiscard]] __host__ __device__ auto* grad_ptr() noexcept;
         template<int GradOrder>
-        [[nodiscard]] __host__ __device__ const auto grad_ptr() const noexcept;
+        [[nodiscard]] __host__ __device__ const auto* grad_ptr() const noexcept;
 
         [[nodiscard]] __host__ __device__ ValueType& value() noexcept;
         [[nodiscard]] __host__ __device__ const ValueType& value() const noexcept;
@@ -420,7 +420,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto ScalarBase<Derived>::value_ptr() noexcept {
+    __host__ __device__ auto* ScalarBase<Derived>::value_ptr() noexcept {
         if constexpr (isDiffable)
             return Base::getDerived().value_ptr();
         else
@@ -428,20 +428,20 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ const auto ScalarBase<Derived>::value_ptr() const noexcept {
+    __host__ __device__ const auto* ScalarBase<Derived>::value_ptr() const noexcept {
         return Base::getConstCastDerived().value_ptr();
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__ auto ScalarBase<Derived>::grad_ptr() noexcept {
+    __host__ __device__ auto* ScalarBase<Derived>::grad_ptr() noexcept {
         static_assert(isDiffable, "[Error]: Cannot take grad ptr of a undiffable scalar");
         return Base::getDerived().template grad_ptr<GradOrder>();
     }
 
     template<class Derived>
     template<int GradOrder>
-    __host__ __device__ const auto ScalarBase<Derived>::grad_ptr() const noexcept {
+    __host__ __device__ const auto* ScalarBase<Derived>::grad_ptr() const noexcept {
         return Base::getConstCastDerived().template grad_ptr<GradOrder>();
     }
 
