@@ -43,10 +43,10 @@ namespace Physica {
 
         template<Scalar U>
         Derived& operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
-        void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
-        void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
-        void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
-        void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
+        void operator+=(const Scalar auto& x);
+        void operator-=(const Scalar auto& x);
+        void operator*=(const Scalar auto& x);
+        void operator/=(const Scalar auto& x);
 
         Derived& operator=(const Tensor auto& other);
         void operator+=(const Tensor auto& x);

@@ -23,6 +23,30 @@
 
 namespace Physica {
     template<class Derived>
+    void LValueMatrix<Derived>::operator+=(const Scalar auto& x) {
+        auto& m = Base::getDerived();
+        (m + x).assign(m);
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::operator-=(const Scalar auto& x) {
+        auto& m = Base::getDerived();
+        (m - x).assign(m);
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::operator*=(const Scalar auto& x) {
+        auto& m = Base::getDerived();
+        (m * x).assign(m);
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::operator/=(const Scalar auto& x) {
+        auto& m = Base::getDerived();
+        (m / x).assign(m);
+    }
+
+    template<class Derived>
     Derived& LValueMatrix<Derived>::operator=(const Matrix auto& m) {
         if constexpr (std::is_same<const Derived&, decltype(m)>::value)
             assert(this != &m && "[Error]: Self assign is likely a bug");

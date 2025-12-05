@@ -31,6 +31,30 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueTensor<Derived>::operator+=(const Scalar auto& x) {
+        auto& t = Base::getDerived();
+        (t + x).assign(t);
+    }
+
+    template<class Derived>
+    void LValueTensor<Derived>::operator-=(const Scalar auto& x) {
+        auto& t = Base::getDerived();
+        (t - x).assign(t);
+    }
+
+    template<class Derived>
+    void LValueTensor<Derived>::operator*=(const Scalar auto& x) {
+        auto& t = Base::getDerived();
+        (t * x).assign(t);
+    }
+
+    template<class Derived>
+    void LValueTensor<Derived>::operator/=(const Scalar auto& x) {
+        auto& t = Base::getDerived();
+        (t / x).assign(t);
+    }
+
+    template<class Derived>
     Derived& LValueTensor<Derived>::operator=(const Tensor auto& other) {
         if constexpr (std::is_same<Derived, std::remove_cvref_t<decltype(other)>>::value)
             assert(this != &other && "[Error]: Self assign is likely a bug");

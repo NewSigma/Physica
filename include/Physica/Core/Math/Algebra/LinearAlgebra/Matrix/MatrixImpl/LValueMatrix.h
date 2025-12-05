@@ -73,10 +73,10 @@ namespace Physica {
             }
             return Base::getDerived();
         }
-        void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
-        void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
-        void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
-        void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
+        void operator+=(const Scalar auto& x);
+        void operator-=(const Scalar auto& x);
+        void operator*=(const Scalar auto& x);
+        void operator/=(const Scalar auto& x);
 
         Derived& operator=(const Matrix auto& m);
         void operator+=(const Matrix auto& m);

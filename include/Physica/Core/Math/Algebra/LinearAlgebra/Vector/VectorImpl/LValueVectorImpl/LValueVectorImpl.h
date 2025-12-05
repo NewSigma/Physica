@@ -22,6 +22,41 @@
 
 namespace Physica {
     template<class Derived>
+    Derived& LValueVector<Derived>::operator=(const Scalar auto& x) {
+        static_assert(!isReverseDiff || !ReverseDiff<decltype(x)>, "[Error]: Assign a diffable scalar to diffable vector discards grads");
+        if constexpr (!std::same_as<T, std::remove_cvref_t<decltype(x)>>)
+            return operator=(T(x));
+
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            (*this)[i] = x;
+        return Base::getDerived();
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::operator+=(const Scalar auto& x) {
+        auto& v = Base::getDerived();
+        (v + x).assign(v);
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::operator-=(const Scalar auto& x) {
+        auto& v = Base::getDerived();
+        (v - x).assign(v);
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::operator*=(const Scalar auto& x) {
+        auto& v = Base::getDerived();
+        (v * x).assign(v);
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::operator/=(const Scalar auto& x) {
+        auto& v = Base::getDerived();
+        (v / x).assign(v);
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     Derived& LValueVector<Derived>::operator=(const Vector auto& v) {
         if constexpr (std::is_same<const Derived&, decltype(v)>::value)
@@ -31,17 +66,6 @@ namespace Physica {
         v.assert_assign(x);
         v.template assign<P>(x);
         return x;
-    }
-
-    template<class Derived>
-    Derived& LValueVector<Derived>::operator=(const Scalar auto& x) {
-        static_assert(!isReverseDiff || !ReverseDiff<decltype(x)>, "[Error]: Assign a diffable scalar to diffable vector discards grads");
-        if constexpr (!std::same_as<T, std::remove_cvref_t<decltype(x)>>)
-            return operator=(T(x));
-
-        for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = x;
-        return Base::getDerived();
     }
 
     template<class Derived>

@@ -43,7 +43,7 @@ else()
 
         if(${PHYSICA_LLVMIR})
             if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Release")
-                message(FATAL "Please enable Release mode for optimizations")
+                message(FATAL_ERROR "Please enable Release mode for optimizations")
             endif()
             add_compile_options(-Xclang -disable-llvm-passes -S -emit-llvm)
             add_compile_options(-Wno-unused-command-line-argument) # Silent unused '-c'

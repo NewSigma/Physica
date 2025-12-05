@@ -102,10 +102,10 @@ namespace Physica {
         /* Operations */
         void initializePlan() noexcept;
         /* Getters */
-        [[nodiscard, gnu::returns_nonnull]] RealType* asRealBuffer() noexcept { return reinterpret_cast<RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] ComplexType* asComplexBuffer() noexcept { return reinterpret_cast<ComplexType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] const RealType* asRealBuffer() const noexcept { return reinterpret_cast<const RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] const ComplexType* asComplexBuffer() const noexcept { return reinterpret_cast<const ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ RealType* asRealBuffer() noexcept { return reinterpret_cast<RealType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ ComplexType* asComplexBuffer() noexcept { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const RealType* asRealBuffer() const noexcept { return reinterpret_cast<const RealType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const ComplexType* asComplexBuffer() const noexcept { return reinterpret_cast<const ComplexType*>(buffer); }
         /* Friends */
         friend class FFTRSpace<This, 1>;
         friend class FFTKSpace<This, 1>;
@@ -182,10 +182,10 @@ namespace Physica {
         [[nodiscard]] size_t componentsSizeFrom(size_t dim) const;
         [[nodiscard]] Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
         /* Getters */
-        [[nodiscard, gnu::returns_nonnull]] RealType* asRealBuffer() noexcept { return reinterpret_cast<RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] ComplexType* asComplexBuffer() noexcept { return reinterpret_cast<ComplexType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] const RealType* asRealBuffer() const noexcept { return reinterpret_cast<const RealType*>(buffer); }
-        [[nodiscard, gnu::returns_nonnull]] const ComplexType* asComplexBuffer() const noexcept { return reinterpret_cast<const ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ RealType* asRealBuffer() noexcept { return reinterpret_cast<RealType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ ComplexType* asComplexBuffer() noexcept { return reinterpret_cast<ComplexType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const RealType* asRealBuffer() const noexcept { return reinterpret_cast<const RealType*>(buffer); }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const ComplexType* asComplexBuffer() const noexcept { return reinterpret_cast<const ComplexType*>(buffer); }
         /* Static members */
         static bool checkSize(const Array<size_t, Dim>& rSpaceSize);
         /* Friends */

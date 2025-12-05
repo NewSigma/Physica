@@ -51,10 +51,10 @@ namespace Physica {
         This& operator=(This&& v) = delete;
 
         Derived& operator=(const Scalar auto& x);
-        void operator+=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() + x; }
-        void operator-=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() - x; }
-        void operator*=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() * x; }
-        void operator/=(const Scalar auto& x) { Base::getDerived() = Base::getDerived() / x; }
+        void operator+=(const Scalar auto& x);
+        void operator-=(const Scalar auto& x);
+        void operator*=(const Scalar auto& x);
+        void operator/=(const Scalar auto& x);
 
         template<ExecutePolicy P = Sequential>
         Derived& operator=(const Vector auto& v);

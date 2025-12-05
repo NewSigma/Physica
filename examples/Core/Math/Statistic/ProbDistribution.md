@@ -15,7 +15,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ProbDistribution使用采样语义计算一维随机变量的概率分布函数, 考虑随机变量
 
-$$y = \ln(1 + \sqrt{1-e^{-\frac{1}{n}}}) \sum_{i = 1}^n s_i$$
+$$y = \ln\left( 1 + \sqrt{1-e^{-1/n}} \right) \sum_{i = 1}^n s_i$$
 
 其中独立随机变量$s_i = \pm 1$满足$p = 1/2$的二项分布
 

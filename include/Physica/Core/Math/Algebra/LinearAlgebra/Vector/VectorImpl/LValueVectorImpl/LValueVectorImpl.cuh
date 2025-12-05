@@ -22,20 +22,6 @@
 
 namespace Physica {
     template<class Derived>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) {
-        using V = std::remove_cvref_t<decltype(v)>;
-        if constexpr (std::is_same<Derived, V>::value)
-            assert(this != &v && "[Error]: Self assign is likely a bug");
-        Base::assert_assign(v);
-
-        auto& x = Base::getDerived();
-        if constexpr (IsHost())
-            x.resize(v);
-        v.assign(x);
-        return x;
-    }
-
-    template<class Derived>
     template<Scalar U>
     device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const U& x) {
         constexpr int WarpSize = Physica::CUDADevAttr::WarpSize;
@@ -58,28 +44,46 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const Scalar auto& x) {
-        Base::getDerived() = Base::getDerived() + x;
+        auto& v = Base::getDerived();
+        (v + x).assign(v);
     }
 
     template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const Scalar auto& x) {
-        Base::getDerived() = Base::getDerived() - x;
+        auto& v = Base::getDerived();
+        (v - x).assign(v);
     }
 
     template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::operator*=(const Scalar auto& x) {
-        Base::getDerived() = Base::getDerived() * x;
+        auto& v = Base::getDerived();
+        (v * x).assign(v);
     }
 
     template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::operator/=(const Scalar auto& x) {
-        Base::getDerived() = Base::getDerived() / x;
+        auto& v = Base::getDerived();
+        (v / x).assign(v);
+    }
+
+    template<class Derived>
+    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const Vector auto& v) {
+        using V = std::remove_cvref_t<decltype(v)>;
+        if constexpr (std::is_same<Derived, V>::value)
+            assert(this != &v && "[Error]: Self assign is likely a bug");
+        Base::assert_assign(v);
+
+        auto& x = Base::getDerived();
+        if constexpr (IsHost())
+            x.resize(v);
+        v.assign(x);
+        return x;
     }
 
     template<class Derived>
     __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const Vector auto& v) {
-        assert(Base::getLength() == v.getLength());
-        Base::getDerived() = Base::getDerived() + v;
+        auto& v0 = Base::getDerived();
+        (v0 + v).assign(v0);
     }
 
     template<class Derived>
