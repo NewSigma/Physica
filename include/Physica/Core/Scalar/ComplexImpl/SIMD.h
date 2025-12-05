@@ -78,10 +78,10 @@ namespace Physica {
         void operator*=(SIMD other) { *this = *this * other; }
         void operator/=(SIMD other) { *this = *this / other; }
         /* Operations */
-        void load(const ScalarType* p);
-        void load_partial(const ScalarType* p, int n);
-        void store(ScalarType* p) const;
-        void store_partial(ScalarType* p, int n) const;
+        void load(const ScalarType* p) noexcept;
+        void load_partial(const ScalarType* p, int n) noexcept;
+        void store(ScalarType* p) const noexcept;
+        void store_partial(ScalarType* p, int n) const noexcept;
 
         This& cutoff(int count);
 

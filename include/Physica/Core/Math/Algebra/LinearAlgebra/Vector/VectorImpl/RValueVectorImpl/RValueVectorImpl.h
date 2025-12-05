@@ -151,7 +151,7 @@ namespace Physica {
             for (size_t i = 0; i < Pack::size(); ++i, ++index)
                 buffer[i] = i < count ? U(calc(index)) : U(0);
             Pack packet{};
-            packet.load_partial(buffer.data(), count);
+            packet.load(buffer.data());
             return packet;
         }
     }

@@ -118,8 +118,8 @@ namespace Physica {
 
         __host__ __device__ Derived& load(ConstPtrTy p);
         __host__ __device__ void store(PtrTy p) const;
-        __host__ __device__ Derived& load_partial(ConstPtrTy p, int n);
-        __host__ __device__ void store_partial(PtrTy p, int n) const;
+        [[noreturn]] __host__ __device__ Derived& load_partial(ConstPtrTy p, int n);
+        [[noreturn]] __host__ __device__ void store_partial(PtrTy p, int n) const;
         void insert(int index, ScalarType value);
 
         [[nodiscard]] __host__ __device__ RealType real() const noexcept;
@@ -309,16 +309,15 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ Derived& ScalarBase<Derived>::load_partial(ConstPtrTy p, int n) {
-        if (n)
-            load(p);
-        return this->getDerived();
+    __host__ __device__ Derived& ScalarBase<Derived>::load_partial(ConstPtrTy, [[maybe_unused]] int n) {
+        assert(false && "[Error]: No partial operation for single scalar");
+        unreachable();
     }
 
     template<class Derived>
-    __host__ __device__ void ScalarBase<Derived>::store_partial(PtrTy p, int n) const {
-        if (n)
-            store(p);
+    __host__ __device__ void ScalarBase<Derived>::store_partial(PtrTy, [[maybe_unused]] int n) const {
+        assert(false && "[Error]: No partial operation for single scalar");
+        unreachable();
     }
 
     template<class Derived>

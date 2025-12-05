@@ -135,10 +135,8 @@ namespace Physica {
     }
 
     __host__ __device__ inline void SIMD<Real<Float16>, 2>::load_partial(const float16* p, int n) {
-        if (n == 1)
-            (*this) = SIMD(*p, 0);
-        else if (n == 2)
-            load(p);
+        assert(n == 1 && "[Error]: Invalid size for partial operation");
+        (*this) = SIMD(*p, 0);
     }
 
     __host__ __device__ inline void SIMD<Real<Float16>, 2>::store(float16* p) const {
@@ -146,10 +144,8 @@ namespace Physica {
     }
 
     __host__ __device__ inline void SIMD<Real<Float16>, 2>::store_partial(float16* p, int n) const {
-        if (n == 1)
-            *p = operator[](0);
-        else if (n == 2)
-            store(p);
+        assert(n == 1 && "[Error]: Invalid size for partial operation");
+        *p = operator[](0);
     }
 
     __host__ __device__ inline Real<Float16> SIMD<Real<Float16>, 2>::sum() const noexcept {

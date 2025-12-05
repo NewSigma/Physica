@@ -98,22 +98,24 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    void SIMD<Complex<T>, Size>::load(const ScalarType* p) {
+    void SIMD<Complex<T>, Size>::load(const ScalarType* p) noexcept {
         FullRealType::load(reinterpret_cast<const T*>(p));
     }
 
     template<Scalar T, int Size>
-    void SIMD<Complex<T>, Size>::load_partial(const ScalarType* p, int n) {
+    void SIMD<Complex<T>, Size>::load_partial(const ScalarType* p, int n) noexcept {
+        assert(0 < n && n < Size && "[Error]: Invalid size for partial operation");
         FullRealType::load_partial(reinterpret_cast<const T*>(p), 2 * n);
     }
 
     template<Scalar T, int Size>
-    void SIMD<Complex<T>, Size>::store(ScalarType* p) const {
+    void SIMD<Complex<T>, Size>::store(ScalarType* p) const noexcept {
         FullRealType::store(reinterpret_cast<T*>(p));
     }
 
     template<Scalar T, int Size>
-    void SIMD<Complex<T>, Size>::store_partial(ScalarType* p, int n) const {
+    void SIMD<Complex<T>, Size>::store_partial(ScalarType* p, int n) const noexcept {
+        assert(0 < n && n < Size && "[Error]: Invalid size for partial operation");
         FullRealType::store_partial(reinterpret_cast<T*>(p), 2 * n);
     }
 

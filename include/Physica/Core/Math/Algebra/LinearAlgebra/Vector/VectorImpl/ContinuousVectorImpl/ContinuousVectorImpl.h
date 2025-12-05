@@ -87,6 +87,7 @@ namespace Physica {
     template<Packet Pack>
     Pack ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
         assert(index + count <= Base::getLength());
+        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
         if constexpr (std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>) {
             Pack packet{};
             packet.load_partial(Base::data_ptr(index), count);
@@ -109,8 +110,9 @@ namespace Physica {
     template<class Derived>
     template<Packet Pack>
     void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const Pack packet) {
-        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<Pack>::ScalarType>;
-        if constexpr (isSameScalar)
+        assert(index + count <= Base::getLength());
+        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
+        if constexpr (std::same_as<ScalarType, typename Traits<Pack>::ScalarType>)
             packet.store_partial(Base::data_ptr(index), count);
         else
             Base::template writePacketPartial<Pack>(index, count, packet);

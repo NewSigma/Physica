@@ -18,17 +18,17 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Utils/Unreachable.h"
-#include "Physica/Core/Scalar/RealImpl/SIMD.h"
 #include "Instruset.h"
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Scalar/RealImpl/SIMD.h"
+#include "Physica/Core/Utils/Unreachable.h"
 
 namespace Physica {
     template<Scalar T, int Size>
-    SIMD<T, Size>::SIMD(const Scalar auto& x) : pack(x.value().toMachine()) {}
+    SIMD<T, Size>::SIMD(const Scalar auto& x) noexcept : pack(x.value().toMachine()) {}
 
     template<Scalar T, int Size>
-    SIMD<T, Size>::SIMD(T x, int count) {
+    SIMD<T, Size>::SIMD(T x, int count) noexcept {
         assert(0 < count && count <= int(Size) && "[Error]: Invalid count");
         if (count == Size) {
             *this = SIMD(x);
@@ -45,7 +45,7 @@ namespace Physica {
         else {
             if constexpr (T::Prec == Float32) {
                 const float f = float(x);
-                switch(count) {
+                switch (count) {
                 case 1:
                     *this = SIMD(Pack(f, 0.0F, 0.0F, 0.0F));
                     break;
@@ -67,12 +67,12 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size>::SIMD(Scalar auto... args) : pack(args.toMachine()...) {
+    SIMD<T, Size>::SIMD(Scalar auto... args) noexcept : pack(args.toMachine()...) {
         static_assert(sizeof...(args) == Size, "[Error]: Number of elements does not match");
     }
 
     template<Scalar T, int Size>
-    SIMD<T, Size>::SIMD(HalfType a, HalfType b) : pack(a.toMachine(), b.toMachine()) {}
+    SIMD<T, Size>::SIMD(HalfType a, HalfType b) noexcept : pack(a.toMachine(), b.toMachine()) {}
 
     template<Scalar T, int Size>
     SIMD<T, Size>::SIMD(BoolSIMDType x) noexcept : pack(x.toMachine()) {}
@@ -145,30 +145,177 @@ namespace Physica {
     auto SIMD<T, Size>::operator>(const SIMD other) const {
         return BoolSIMDType(toMachine() > other.toMachine());
     }
-    
+
     template<Scalar T, int Size>
     auto SIMD<T, Size>::operator<(const SIMD other) const {
         return BoolSIMDType(toMachine() < other.toMachine());
     }
 
     template<Scalar T, int Size>
-    void SIMD<T, Size>::load(const T* p) {
+    void SIMD<T, Size>::load(const T* p) & noexcept {
         pack.load(reinterpret_cast<const typename T::MachineType*>(p));
     }
-
+    /**
+     * Adapted from [1], we require a more strict range of \param n.
+     * SIMD<T, Size>::store_partial() is similar
+     *
+     * Reference:
+     * [1] vectorclass2; https://github.com/vectorclass/version2
+     */
     template<Scalar T, int Size>
-    void SIMD<T, Size>::load_partial(const T* p, int n) {
-        pack.load_partial(n, reinterpret_cast<const typename T::MachineType*>(p));
+    void SIMD<T, Size>::load_partial(const T* p, int n) & noexcept {
+        assert(0 < n && n < Size && "[Error]: Invalid size for partial operation");
+        if constexpr (T::Prec == Float32) {
+            if constexpr (Size == 4) {
+                if constexpr (Instruset::hasAVX512VL())
+                    *this = _mm_maskz_loadu_ps(__mmask8((1U << n) - 1), (float*)p);
+                else {
+                    switch (n) {
+                    case 1:
+                        *this = _mm_load_ss((float*)p);
+                        break;
+                    case 2:
+                        *this = _mm_castpd_ps(_mm_load_sd((double*)p));
+                        break;
+                    case 3: {
+                        auto t1 = _mm_castpd_ps(_mm_load_sd((double*)p));
+                        auto t2 = _mm_load_ss((float*)p + 2);
+                        *this = _mm_movelh_ps(t1, t2);
+                        break;
+                    }
+                    default:
+                        unreachable();
+                    }
+                }
+            }
+            else if constexpr (Size == 8) {
+                if constexpr (Instruset::hasAVX512VL())
+                    *this = _mm256_maskz_loadu_ps(__mmask8((1U << n) - 1), (float*)p);
+                else {
+                    HalfType low{}, high{};
+                    if (n < 4) {
+                        low.load_partial(p, n);
+                        high = HalfType::zeros();
+                    }
+                    else if (n == 4) {
+                        low.load(p);
+                        high = HalfType::zeros();
+                    }
+                    else {
+                        low.load(p);
+                        high.load_partial(p + 4, n - 4);
+                    }
+                    *this = This(low, high);
+                }
+            }
+            else {
+                static_assert(Size == 16, "[Error]: Unexpected size");
+                *this = _mm512_maskz_loadu_ps(__mmask16((1 << n) - 1), (float*)p);
+            }
+        }
+        else {
+            static_assert(T::Prec == Float64);
+            if constexpr (Size == 2)
+                *this = _mm_load_sd((double*)p);
+            else if constexpr (Size == 4) {
+                if constexpr (Instruset::hasAVX512VL())
+                    *this = _mm256_maskz_loadu_pd(__mmask8((1U << n) - 1), (double*)p);
+                else {
+                    HalfType low{}, high{};
+                    if (n < 2) {
+                        low.load_partial(p, 1);
+                        high = HalfType::zeros();
+                    }
+                    else if (n == 2) {
+                        low.load(p);
+                        high = HalfType::zeros();
+                    }
+                    else {
+                        low.load(p);
+                        high.load_partial(p + 2, 1);
+                    }
+                    *this = This(low, high);
+                }
+            }
+            else {
+                static_assert(Size == 8, "[Error]: Unexpected size");
+                *this = _mm512_maskz_loadu_pd(__mmask16((1 << n) - 1), (double*)p);
+            }
+        }
     }
 
     template<Scalar T, int Size>
-    void SIMD<T, Size>::store(T* p) const {
+    void SIMD<T, Size>::store(T* p) const noexcept {
         pack.store(reinterpret_cast<typename T::MachineType*>(p));
     }
 
     template<Scalar T, int Size>
-    void SIMD<T, Size>::store_partial(T* p, int n) const {
-        pack.store_partial(n, reinterpret_cast<typename T::MachineType*>(p));
+    void SIMD<T, Size>::store_partial(T* p, int n) const noexcept {
+        assert(0 < n && n < Size && "[Error]: Invalid size for partial operation");
+        if constexpr (T::Prec == Float32) {
+            if constexpr (Size == 4) {
+                if constexpr (Instruset::hasAVX512VL())
+                    _mm_mask_storeu_ps((float*)p, __mmask8((1U << n) - 1), *this);
+                else {
+                    switch (n) {
+                    case 1:
+                        _mm_store_ss((float*)p, *this);
+                        break;
+                    case 2:
+                        _mm_store_sd((double*)p, _mm_castps_pd(*this));
+                        break;
+                    case 3: {
+                        _mm_store_sd((double*)p, _mm_castps_pd(*this));
+                        _mm_store_ss((float*)p + 2, _mm_movehl_ps(*this, *this));
+                        break;
+                    }
+                    default:
+                        unreachable();
+                    }
+                }
+            }
+            else if constexpr (Size == 8) {
+                if constexpr (Instruset::hasAVX512VL())
+                    _mm256_mask_storeu_ps((float*)p, __mmask8((1U << n) - 1), *this);
+                else {
+                    if (n < 4)
+                        getLow().store_partial(p, n);
+                    else if (n == 4)
+                        getLow().store(p);
+                    else {
+                        getLow().store(p);
+                        getHigh().store_partial(p + 4, n - 4);
+                    }
+                }
+            }
+            else {
+                static_assert(Size == 16, "[Error]: Unexpected size");
+                _mm512_mask_storeu_ps((float*)p, __mmask16((1 << n) - 1), *this);
+            }
+        }
+        else {
+            static_assert(T::Prec == Float64);
+            if constexpr (Size == 2)
+                _mm_store_sd((double*)p, *this);
+            else if constexpr (Size == 4) {
+                if constexpr (Instruset::hasAVX512VL())
+                    _mm256_mask_storeu_pd((double*)p, __mmask8((1U << n) - 1), *this);
+                else {
+                    if (n < 2)
+                        getLow().store_partial(p, 1);
+                    else if (n == 2)
+                        getLow().store(p);
+                    else {
+                        getLow().store(p);
+                        getHigh().store_partial(p + 2, 1);
+                    }
+                }
+            }
+            else {
+                static_assert(Size == 8, "[Error]: Unexpected size");
+                _mm512_mask_storeu_pd((double*)p, __mmask16((1 << n) - 1), *this);
+            }
+        }
     }
 
     template<Scalar T, int Size>
@@ -191,17 +338,22 @@ namespace Physica {
                 return _mm_shuffle_ps(*this, *this, mask);
             else if constexpr (Size == 8)
                 return _mm256_shuffle_ps(*this, *this, mask);
-            else if constexpr (Size == 16)
+            else {
+                static_assert(Size == 16, "[Error]: Unexpected size");
                 return _mm512_shuffle_ps(*this, *this, mask);
+            }
         }
         else {
             static_assert(sizeof...(Order) == Size, "[Error]: Invalid number of orders");
+            static_assert(T::Prec == Float64);
             if constexpr (Size == 2)
                 return _mm_shuffle_pd(*this, *this, mask);
             else if constexpr (Size == 4)
                 return _mm256_shuffle_pd(*this, *this, mask);
-            else if constexpr (Size == 8)
+            else {
+                static_assert(Size == 8, "[Error]: Unexpected size");
                 return _mm512_shuffle_pd(*this, *this, mask);
+            }
         }
     }
 
@@ -328,8 +480,7 @@ namespace Physica {
                 static_assert(Size == 16);
                 // GCC 9.5.0 defines _mm512_setr_epi32 and _mm512_setr_epi64 as macro definitions, and we cannot apply template parameter pack expansion to macro definitions.
                 // Therefore, it is necessary to define our own versions manually.
-                const static auto mm512_setr_epi32 = [](int32_t i0, int32_t i1, int32_t i2, int32_t i3, int32_t i4, int32_t i5, int32_t i6, int32_t i7,
-                                                        int32_t i8, int32_t i9, int32_t i10, int32_t i11, int32_t i12, int32_t i13, int32_t i14, int32_t i15) {
+                const static auto mm512_setr_epi32 = [](int32_t i0, int32_t i1, int32_t i2, int32_t i3, int32_t i4, int32_t i5, int32_t i6, int32_t i7, int32_t i8, int32_t i9, int32_t i10, int32_t i11, int32_t i12, int32_t i13, int32_t i14, int32_t i15) {
                     return _mm512_set_epi32(i15, i14, i13, i12, i11, i10, i9, i8, i7, i6, i5, i4, i3, i2, i1, i0);
                 };
                 return __m512(mm512_setr_epi32(Functor(Flags)...));
@@ -359,6 +510,11 @@ namespace Physica {
             elem = T::template random_uniform<R>();
         result.load(buffer.data());
         return result;
+    }
+
+    template<Scalar T, int Size>
+    auto SIMD<T, Size>::zeros() noexcept -> SIMD {
+        return SIMD(Pack::Zeros());
     }
 
     template<Scalar T, int Size>
@@ -409,9 +565,9 @@ namespace Physica {
         if constexpr (T::Prec == Float32) {
             if constexpr (Size == 4) {
                 if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
-                    return  _mm_fmaddsub_ps(a, b, c);
+                    return _mm_fmaddsub_ps(a, b, c);
                 else if constexpr (Instruset::hasFMA4())
-                    return  _mm_maddsub_ps(a, b, c);
+                    return _mm_maddsub_ps(a, b, c);
                 else if constexpr (Instruset::hasSSE3())
                     return _mm_addsub_ps(a * b, c);
                 else
@@ -420,7 +576,7 @@ namespace Physica {
             else if constexpr (Size == 8) {
                 if constexpr (Instruset::hasAVX()) {
                     if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
-                        return  _mm256_fmaddsub_ps(a, b, c);
+                        return _mm256_fmaddsub_ps(a, b, c);
                     else
                         return _mm256_addsub_ps(a * b, c);
                 }
@@ -439,9 +595,9 @@ namespace Physica {
             static_assert(T::Prec == Float64, "[Error]: Unexpected float type");
             if constexpr (Size == 2) {
                 if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
-                    return  _mm_fmaddsub_pd(a, b, c);
+                    return _mm_fmaddsub_pd(a, b, c);
                 else if constexpr (Instruset::hasFMA4())
-                    return  _mm_maddsub_pd(a, b, c);
+                    return _mm_maddsub_pd(a, b, c);
                 else if constexpr (Instruset::hasSSE3())
                     return _mm_addsub_pd(a * b, c);
                 else
@@ -450,7 +606,7 @@ namespace Physica {
             else if constexpr (Size == 4) {
                 if constexpr (Instruset::hasAVX()) {
                     if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
-                        return  _mm256_fmaddsub_pd(a, b, c);
+                        return _mm256_fmaddsub_pd(a, b, c);
                     else
                         return _mm256_addsub_pd(a * b, c);
                 }

@@ -80,6 +80,8 @@ namespace Physica {
     template<class Derived>
     template<Packet Pack>
     __device__ Pack device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
+        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
+        assert(index + count <= Base::getLength());
         Pack packet{};
         if constexpr (isReverseDiff)
             packet.load_partial(Base::data_ptr(index).value_ptr(), count);
@@ -102,6 +104,8 @@ namespace Physica {
     template<class Derived>
     template<Packet Pack>
     __device__ void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const Pack packet) {
+        assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
+        assert(index + count <= Base::getLength());
         using T1 = std::conditional<isReverseDiff, Tv, T>::type;
         using LocalPacket = std::conditional<Pack::size() == 1, T1, SIMD<T1, Pack::size()>>::type;
         if constexpr (isReverseDiff)

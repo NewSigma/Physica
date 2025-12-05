@@ -119,6 +119,7 @@ namespace Physica {
 
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
+            assert(0 < count && count < Pack::size() && "[Error]: Invalid size for partial operation");
             if constexpr (isComplexV) {
                 static_assert(!isReverseDiff, "[Error]: Not implemented");
                 constexpr size_t MaxSize = BestPacket<ComplexType, Dynamic>::Size;
@@ -129,16 +130,18 @@ namespace Physica {
                     return Pack(x2.real());
                 }
                 else {
-                    constexpr size_t Size1 = Size / 2;
-                    using PacketType = SIMD<ComplexType, Size1>;
-                    const bool flag = count <= Size1;
-                    const size_t count1 = flag ? count : Size1;
-                    const auto x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count1).squaredNorm());
+                    // We cannot finish the work in one run, separate the results into a low half and a high half.
+                    constexpr size_t HalfSize = Size / 2;
+                    using PacketType = SIMD<ComplexType, HalfSize>;
+                    PacketType x2{};
+                    if (count >= HalfSize)
+                        x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
+                    else
+                        x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count).squaredNorm());
 
-                    if (flag)
-                        return Pack(x2.real(), SIMD<T, Size1>(0));
-                    const size_t count2 = count - count1;
-                    const auto y2 = PacketType::asComplex(v.template packetPartial<PacketType>(index + Size / 2, count2).squaredNorm());
+                    if (count <= HalfSize)
+                        return Pack(x2.real(), SIMD<T, HalfSize>(0));
+                    const auto y2 = PacketType::asComplex(v.template packetPartial<PacketType>(index + HalfSize, count - HalfSize).squaredNorm());
                     return Pack(x2.real(), y2.real());
                 }
             }

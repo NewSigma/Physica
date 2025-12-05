@@ -49,13 +49,13 @@ namespace Physica {
         Pack pack;
     public:
         SIMD() = default;
-        explicit SIMD(double x) : pack(x) {}
-        explicit SIMD(const Scalar auto& x);
-        SIMD(T x, int count);
-        SIMD(Scalar auto... args);
-        SIMD(MachineType x) : pack(x) {}
-        SIMD(Pack value) : pack(value) {}
-        SIMD(HalfType a, HalfType b);
+        explicit SIMD(double x) noexcept : pack(x) {}
+        explicit SIMD(const Scalar auto& x) noexcept;
+        SIMD(T x, int count) noexcept;
+        SIMD(Scalar auto... args) noexcept;
+        SIMD(MachineType x) noexcept : pack(x) {}
+        SIMD(Pack value) noexcept : pack(value) {}
+        SIMD(HalfType a, HalfType b) noexcept;
         explicit SIMD(BoolSIMDType x) noexcept;
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
@@ -90,10 +90,10 @@ namespace Physica {
         [[nodiscard]] auto operator>=(const SIMD other) const { return !(*this < other); }
         [[nodiscard]] auto operator<=(const SIMD other) const { return !(*this > other); }
         /* Operations */
-        void load(const T* p);
-        void load_partial(const T* p, int n);
-        void store(T* p) const;
-        void store_partial(T* p, int n) const;
+        void load(const T* p) & noexcept;
+        void load_partial(const T* p, int n) & noexcept;
+        void store(T* p) const noexcept;
+        void store_partial(T* p, int n) const noexcept;
         void insert(int index, const T& value);
         template<int... Order> SIMD shuffle() const;
         template<int... Order> SIMD permute() const;
@@ -123,6 +123,7 @@ namespace Physica {
         [[nodiscard]] static SIMD makeSignBits() noexcept;
         template<RNG R>
         [[nodiscard]] static SIMD random_uniform();
+        [[nodiscard]] static SIMD zeros() noexcept;
         [[nodiscard]] static SIMD select(BoolSIMDType flags, SIMD x, SIMD y);
     private:
         template<int Order, int... Orders>
