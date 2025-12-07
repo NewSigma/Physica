@@ -69,7 +69,7 @@ namespace {
         ThermoType thermo(temperatureT, thermostatTime);
         BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
         for (auto _ : state)
-            rpmd.npt_step<RandomSource, GPU>(thermo, barostat, kineticModel, forceModel);
+            [[clang::noinline]] rpmd.npt_step<RandomSource, GPU>(thermo, barostat, kineticModel, forceModel);
     }
 }
 

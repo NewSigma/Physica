@@ -29,7 +29,7 @@ namespace {
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            square(x).assign(buffer);
+            [[clang::noinline]] square(x).assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -41,7 +41,7 @@ namespace {
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            square(x).assign_base(buffer);
+            [[clang::noinline]] square(x).assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

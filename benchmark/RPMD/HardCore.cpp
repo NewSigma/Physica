@@ -66,7 +66,7 @@ namespace {
         kineticModel.updateMass(rpmd.getRingPolymer());
 
         for (auto _ : state)
-            rpmd.nve_step<Sequential>(kineticModel, forceModel);
+            [[clang::noinline]] rpmd.nve_step<Sequential>(kineticModel, forceModel);
     }
 }
 

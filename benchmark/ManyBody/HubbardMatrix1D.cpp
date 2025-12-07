@@ -42,8 +42,9 @@ namespace {
         VectorND<ScalarType> v1(model.getRow());
 
         for (auto _ : state) {
-            v1 = model * v;
-            v1.swap(v);
+            [[clang::noinline]] (model * v).assign(v1);
+            benchmark::DoNotOptimize(v1);
+            benchmark::ClobberMemory();
         }
     }
 }

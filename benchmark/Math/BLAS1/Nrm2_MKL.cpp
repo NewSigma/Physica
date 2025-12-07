@@ -29,9 +29,9 @@ namespace {
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
+            auto y = x.norm2_mkl();
             benchmark::DoNotOptimize(x);
-            benchmark::DoNotOptimize(x.norm2_mkl());
-            benchmark::ClobberMemory();
+            benchmark::DoNotOptimize(y);
         }
     }
 }

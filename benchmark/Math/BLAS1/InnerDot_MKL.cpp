@@ -29,9 +29,12 @@ namespace {
         const int64_t size = state.range(0);
         const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
-        const auto dot = InnerDot(v1, v2);
-        for (auto _ : state)
-            dot.calc_mkl();
+        auto dot = InnerDot(v1, v2);
+        for (auto _ : state) {
+            auto y = dot.calc_mkl();
+            benchmark::DoNotOptimize(y);
+            benchmark::DoNotOptimize(dot);
+        }
     }
 }
 

@@ -31,7 +31,7 @@ namespace {
         const auto v = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            buffer = m * v;
+            [[clang::noinline]] (m * v).assign(buffer);
             benchmark::DoNotOptimize(buffer);
         }
     }

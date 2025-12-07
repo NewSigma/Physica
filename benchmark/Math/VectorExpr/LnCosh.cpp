@@ -29,7 +29,7 @@ namespace {
         const VectorND<T> data = VectorND<T>::template random_uniform<RandomSource>(1024);
         VectorND<T> buffer(1024);
         for (auto _ : state) {
-            buffer = lncosh(data);
+            [[clang::noinline]] lncosh(data).assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

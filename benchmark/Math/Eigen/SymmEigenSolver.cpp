@@ -30,7 +30,7 @@ namespace {
 
         auto m = MatrixND<T>::random_uniform<Random<MT19937>>(size);
         for (auto _ : state) {
-            solver.compute(m);
+            [[clang::noinline]] solver.compute(m);
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }
@@ -44,7 +44,7 @@ namespace {
 
         auto m = MatrixND<T>::random_uniform<Random<MT19937>>(size);
         for (auto _ : state) {
-            solver.compute_base(m);
+            [[clang::noinline]] solver.compute_base(m);
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }

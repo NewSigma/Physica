@@ -62,7 +62,7 @@ namespace {
         rpmd.initMomentum<KineticModel, RandomSource>();
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         for (auto _ : state)
-            rpmd.nve_step<KineticModel, ForceModel, AutoExecutor>(kineticModel, forceModel);
+            [[clang::noinline]] rpmd.nve_step<KineticModel, ForceModel, AutoExecutor>(kineticModel, forceModel);
     }
 }
 

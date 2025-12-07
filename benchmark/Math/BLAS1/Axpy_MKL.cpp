@@ -31,6 +31,7 @@ namespace {
         for (auto _ : state) {
             (x * T(2)).assign_add_mkl(buffer);
             benchmark::DoNotOptimize(x);
+            benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
     }

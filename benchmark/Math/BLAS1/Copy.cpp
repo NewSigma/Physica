@@ -29,7 +29,7 @@ namespace {
         const auto x = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> y(size);
         for (auto _ : state) {
-            x.assign(y);
+            [[clang::noinline]] x.assign(y);
             benchmark::DoNotOptimize(y);
             benchmark::ClobberMemory();
         }
@@ -41,7 +41,7 @@ namespace {
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> y(size);
         for (auto _ : state) {
-            x.assign_base(y);
+            [[clang::noinline]] x.assign_base(y);
             benchmark::DoNotOptimize(y);
             benchmark::ClobberMemory();
         }

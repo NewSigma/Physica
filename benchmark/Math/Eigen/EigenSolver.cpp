@@ -30,7 +30,7 @@ namespace {
         const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);
         for (auto _ : state) {
-            solver.compute(data);
+            [[clang::noinline]] solver.compute(data);
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }
@@ -43,7 +43,7 @@ namespace {
         const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);
         for (auto _ : state) {
-            solver.compute_base(data);
+            [[clang::noinline]] solver.compute_base(data);
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }

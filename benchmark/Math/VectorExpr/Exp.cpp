@@ -28,7 +28,7 @@ namespace {
         const VectorND<T> data = makeData<T>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            buffer = exp(data);
+            [[clang::noinline]] buffer = exp(data);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -40,7 +40,7 @@ namespace {
         const VectorND<T> data = makeData<T>(size);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            exp(data).assign_base(buffer);
+            [[clang::noinline]] exp(data).assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

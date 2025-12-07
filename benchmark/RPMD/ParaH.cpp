@@ -56,7 +56,7 @@ namespace {
         auto rpmd = makeSystem(numMolecular);
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (auto _ : state)
-            rpmd.nve_step<Thread>(kineticModel, forceModel);
+            [[clang::noinline]] rpmd.nve_step<Thread>(kineticModel, forceModel);
     }
 }
 

@@ -30,7 +30,7 @@ namespace {
         const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            m.transpose().assign(buffer);
+            [[clang::noinline]] m.transpose().assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -43,7 +43,7 @@ namespace {
         const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            m.transpose().assign_base(buffer);
+            [[clang::noinline]] m.transpose().assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

@@ -44,7 +44,7 @@ namespace {
         psi.pre_nvt_step(hamilton, Beta);
         psi.random_normal<RandomSource>();
         for (auto _ : state)
-            psi.nvt_step(hamilton, Beta);
+            [[clang::noinline]] psi.nvt_step(hamilton, Beta);
     }
 }
 

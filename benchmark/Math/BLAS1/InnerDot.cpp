@@ -29,9 +29,13 @@ namespace {
         const int64_t size = state.range(0);
         const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
-        const auto dot = InnerDot(v1, v2);
-        for (auto _ : state)
-            benchmark::DoNotOptimize(dot.calc());
+        auto dot = InnerDot(v1, v2);
+        for (auto _ : state) {
+            T y{};
+            [[clang::noinline]] y = dot.calc();
+            benchmark::DoNotOptimize(y);
+            benchmark::DoNotOptimize(dot);
+        }
     }
 
     template<Scalar T>
@@ -39,9 +43,13 @@ namespace {
         const int64_t size = state.range(0);
         const VectorND<T> v1 = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
-        const auto dot = InnerDot(v1, v2);
-        for (auto _ : state)
-            benchmark::DoNotOptimize(dot.calc_base());
+        auto dot = InnerDot(v1, v2);
+        for (auto _ : state) {
+            T y{};
+            [[clang::noinline]] y =dot.calc_base();
+            benchmark::DoNotOptimize(y);
+            benchmark::DoNotOptimize(dot);
+        }
     }
 }
 

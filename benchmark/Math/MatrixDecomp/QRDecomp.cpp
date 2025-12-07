@@ -29,7 +29,7 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         QRDecomp<T> qr(order, order);
         for (auto _ : state) {
-            qr.compute(m);
+            [[clang::noinline]] qr.compute(m);
             benchmark::DoNotOptimize(qr);
             benchmark::ClobberMemory();
         }
@@ -41,7 +41,7 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         QRDecomp<T> qr(order, order);
         for (auto _ : state) {
-            qr.compute_base(m);
+            [[clang::noinline]] qr.compute_base(m);
             benchmark::DoNotOptimize(qr);
             benchmark::ClobberMemory();
         }

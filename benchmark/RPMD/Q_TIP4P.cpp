@@ -109,7 +109,7 @@ namespace {
         RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (auto _ : state)
-            rpmd.nve_step<Sequential>(kineticModel, forceModel);
+            [[clang::noinline]] rpmd.nve_step<Sequential>(kineticModel, forceModel);
     }
 }
 

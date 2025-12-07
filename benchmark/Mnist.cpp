@@ -162,7 +162,7 @@ namespace {
 
         auto nn = MnistNet<dfloat>(RandomSource::getInstance());
         for (auto _ : state)
-            nn.train_step<RandomSource, Sequential>(BatchSize, dataset);
+            [[clang::noinline]] nn.train_step<RandomSource, Sequential>(BatchSize, dataset);
     }
 }
 

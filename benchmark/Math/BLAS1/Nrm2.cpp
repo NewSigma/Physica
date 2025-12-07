@@ -28,9 +28,10 @@ namespace {
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
+            T y{};
+            [[clang::noinline]] y = x.norm2_base();
             benchmark::DoNotOptimize(x);
-            benchmark::DoNotOptimize(x.norm2_base());
-            benchmark::ClobberMemory();
+            benchmark::DoNotOptimize(y);
         }
     }
 
@@ -39,9 +40,10 @@ namespace {
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
+            T y{};
+            [[clang::noinline]] y = x.norm2_base();
             benchmark::DoNotOptimize(x);
-            benchmark::DoNotOptimize(x.norm2_base());
-            benchmark::ClobberMemory();
+            benchmark::DoNotOptimize(y);
         }
     }
 }
