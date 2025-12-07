@@ -86,7 +86,6 @@ namespace Physica {
 
     template<Matrix M>
     auto TrigUpper<M>::sgndet() const -> Trv {
-        static_assert(!T::isComplex, "[Error]: sgndet() is not well defined for complex matrix");
         return unit(mat.diag()).prod();
     }
 

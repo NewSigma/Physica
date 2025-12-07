@@ -374,14 +374,14 @@ namespace Physica {
 
     template<class Derived>
     auto RValueMatrix<Derived>::lnAbsDet() const -> Tr {
-        LUDecomp<T, false> qr(Base::getDerived());
-        return ln(abs(qr.getMatrixLU().diag())).sum();
+        LUDecomp<T, false> lu(Base::getDerived());
+        return ln(abs(lu.getMatrixLU().diag())).sum();
     }
 
     template<class Derived>
     auto RValueMatrix<Derived>::sgndet() const {
-        static_assert(!T::isComplex, "[Error]: sgndet() is not well defined for complex matrix");
-        return Base::getDerived().sgndet();
+        LUDecomp<T, false> lu(Base::getDerived());
+        return unit(lu.getMatrixLU().diag()).prod();
     }
 
     template<class Derived>
