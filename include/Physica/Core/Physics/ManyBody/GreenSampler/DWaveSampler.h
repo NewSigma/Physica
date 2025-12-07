@@ -44,7 +44,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, T sign);
+        void sample(const GreenPair& greens, T rsign);
         /* Getters */
         [[nodiscard]] size_t getNumSite() const noexcept { return lattice.getNumSuperCellSite(); }
         [[nodiscard]] const auto& getCorr() const noexcept { return corr; }
@@ -55,7 +55,7 @@ namespace Physica {
             : Base(params, numSample), lattice(lattice), corr(lattice.getNumCellX()) {}
 
     template<Scalar T>
-    void DWaveSampler<T>::sample(const GreenPair& greens, T sign) {
+    void DWaveSampler<T>::sample(const GreenPair& greens, T rsign) {
         auto buffer = MatrixND<T>(corr.getLength(), getNumSite());
         for (int siteM = 0; siteM < getNumSite(); ++siteM) {
             const auto indexM = lattice.toIndexND(siteM);
@@ -73,6 +73,6 @@ namespace Physica {
         }
         buffer *= Trv(0.5);
         corr.toNextMean(Base::getCursor(), buffer.sum_cols() * reciprocal(Trv(getNumSite())));
-        Base::sample(sign);
+        Base::sample(rsign);
     }
 }

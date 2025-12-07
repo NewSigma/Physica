@@ -39,9 +39,6 @@ namespace Physica {
         DiagMatrix<Tr> diagB;
         DiagMatrix<Tr> diagS;
         MatrixND<T>  buffer;
-
-        Tr lnAbsDet;
-        Tv sgnDet = 1;
     public:
         GreenProd() = delete;
         GreenProd(const HubbardParams<T>& params);
@@ -54,7 +51,7 @@ namespace Physica {
         void invalidate(int split);
         void invalidates(const MatrixND<Trv>& aux, Tr alpha);
 
-        void single_flip(int site, int split, Vector2D<Tr> factors, Vector2D<Tv> ratios) noexcept;
+        void single_flip(int site, int split, Vector2D<Tr> factors) noexcept;
         void calcGreens(GreenPair& greens, int split, Tr betaMu);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -62,7 +59,8 @@ namespace Physica {
         [[nodiscard]] int getNumSplit() const noexcept { return chainU.getNumSplit(); }
     private:
         void splitDiag(const QDTDecomp<T>& qdt, Tr betaMu) noexcept;
-        [[nodiscard]] std::pair<Tr, Tv> calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu);
+        void calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu);
+        [[nodiscard]] std::pair<Tr, Tv> calcDetGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu);
     };
 
     template<Scalar T>
@@ -97,13 +95,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void GreenProd<T>::single_flip(int site, int split, Vector2D<Tr> factors, Vector2D<Tv> ratios) noexcept {
+    void GreenProd<T>::single_flip(int site, int split, Vector2D<Tr> factors) noexcept {
         chainU.single_flip(site, split, factors[0], factors[1]);
         chainD.single_flip(site, split, factors[1], factors[0]);
-
-        Tv prod = ratios.prod();
-        lnAbsDet += ln(abs(prod));
-        sgnDet *= unit(prod);
     }
 
     template<Scalar T>
@@ -111,20 +105,8 @@ namespace Physica {
         const int numSplit = getNumSplit();
         const int from = (split + 1) % numSplit;
         const int to = (numSplit + split) % numSplit;
-        Tr lnAbsDetU, lnAbsDetD;
-        T signU, signD;
-        {
-            auto [lnAD, sign] = calcGreen(chainU.multiply(from, to), greens[0], betaMu);
-            lnAbsDetU = lnAD;
-            signU = sign;
-        }
-        {
-            auto [lnAD, sign] = calcGreen(chainD.multiply(from, to), greens[1], betaMu);
-            lnAbsDetD = lnAD;
-            signD = sign;
-        }
-        lnAbsDet = lnAbsDetU + lnAbsDetD;
-        sgnDet = signU * signD;
+        calcGreen(chainU.multiply(from, to), greens[0], betaMu);
+        calcGreen(chainD.multiply(from, to), greens[1], betaMu);
     }
 
     template<Scalar T>
@@ -154,19 +136,24 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto GreenProd<T>::calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu) -> std::pair<Tr, Tv> {
+    void GreenProd<T>::calcGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu) {
         splitDiag(qdt, betaMu);
 
         buffer = qdt.getMatrixQ() * diagB.inv();
         qr.compute(buffer.hermite() + diagS * qdt.getMatrixT());
         qr.getWorking().diag() += Tr(std::numeric_limits<T>::min()); // Handle potential underflow
 
-        Tr lnAD = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
-        Tv sign = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
-        assert(T::isComplex || abs(sign) == Trv(1) && "[Error]: Bad sign");
-
         MatrixND<T> temp = buffer * qr.getMatrixQ();
         green = qr.getMatrixR().inv() * temp.hermite();
-        return {lnAD, sign};
+    }
+
+    template<Scalar T>
+    auto GreenProd<T>::calcDetGreen(const QDTDecomp<T>& qdt, MatrixND<T>& green, Tr betaMu) -> std::pair<Tr, Tv> {
+        calcGreen(qdt, green, betaMu);
+
+        Tr lnAD = diagB.lnAbsDet() + qr.getMatrixR().lnAbsDet();
+        Tv sgnD = qdt.calcDetQ() * qr.calcDetQ() * unit(qr.getMatrixR().diag().reals()).prod();
+        assert(T::isComplex || abs(sgnD) == Trv(1) && "[Error]: Bad sign");
+        return {lnAD, sgnD};
     }
 }

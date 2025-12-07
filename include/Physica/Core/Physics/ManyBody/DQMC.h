@@ -69,7 +69,7 @@ namespace Physica {
         [[nodiscard]] int getNumSplit() const noexcept { return kinetic.getNumSplit(); }
         [[nodiscard]] const auto& getAuxField() const noexcept { return kinetic.getAuxField(); }
         [[nodiscard]] auto& getGreens() noexcept { return kinetic.getGreens(); }
-        [[nodiscard]] Tv getSign() const noexcept { return kinetic.getSign(); }
+        [[nodiscard]] Tv getRSign() const noexcept { return kinetic.getRSign(); }
     private:
         /* Operations */
         void metropolis(int site, int split, Tr prob);
@@ -138,10 +138,7 @@ namespace Physica {
         if (accept) {
             const Tr x = Tr(2) * params->getAlpha() * getAuxField()(site, split);
             const Vector2D<Tr> arr = exp(Vector2D<Tr>{-x, x});
-
-            auto deltas = kinetic.calcDelta(site, split, params->getAlpha());
-            auto ratios = kinetic.calcRatio(site, deltas);
-            productor.single_flip(site, split, arr, ratios);
+            productor.single_flip(site, split, arr);
             kinetic.single_flip(site, split, params->getAlpha());
         }
     }

@@ -38,7 +38,7 @@ namespace Physica {
     private:
         MatrixND<Trv> aux;
         GreenPair greens;
-        Tv sgnDet = 1;
+        Tv rsign = 1;
     public:
         ImagKinetic(int numSite, int numSplit);
         ImagKinetic(const This&) = default;
@@ -61,7 +61,7 @@ namespace Physica {
         [[nodiscard]] int getNumSplit() const noexcept { return aux.getCol(); }
         [[nodiscard]] const auto& getAuxField() const noexcept { return aux; }
         [[nodiscard]] auto& getGreens() noexcept { return greens; }
-        [[nodiscard]] Tv getSign() const noexcept { return sgnDet; }
+        [[nodiscard]] Tv getRSign() const noexcept;
     private:
         void flipGreens(int site, Vector2D<Tv> deltaRatios);
     };
@@ -107,8 +107,14 @@ namespace Physica {
         single_flip(site, split);
 
         flipGreens(site, divide(deltas, ratios));
-        Tv prod = ratios.prod();
-        sgnDet *= unit(prod);
+        rsign *= unit(ratios.prod());
+    }
+    /**
+     * Note that observable is <A> = <As>/<s> and signs may differ a factor. We are interested in relative sign only.
+     */
+    template<Scalar T>
+    auto ImagKinetic<T>::getRSign() const noexcept -> Tv {
+        return rsign;
     }
 
     template<Scalar T>
@@ -137,6 +143,6 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         aux.swap(obj.aux);
         greens.swap(obj.greens);
-        sgnDet.swap(obj.sgnDet);
+        rsign.swap(obj.rsign);
     }
 }

@@ -40,7 +40,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const MatrixND<T>& aux, Trv sign);
+        void sample(const MatrixND<T>& aux, Trv rsign);
         [[nodiscard]] MatrixND<T> calcMean() const;
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return magnons.dim(1); }
@@ -54,12 +54,12 @@ namespace Physica {
             , fft(params.getNumSplit(), PlanFlag::Estimate) {}
 
     template<Scalar T>
-    void ImagMagnon<T>::sample(const MatrixND<T>& aux, Trv sign) {
+    void ImagMagnon<T>::sample(const MatrixND<T>& aux, Trv rsign) {
         for (size_t site = 0; site < aux.getRow(); ++site) {
             fft.transform(aux.row(site));
             magnons.fiber(2, {Base::getCursor(), site, Dynamic}) = fft.getKSpace() * reciprocal(sqrt(T(getNumSplit())));
         }
-        Base::sample(sign);
+        Base::sample(rsign);
     }
 
     template<Scalar T>

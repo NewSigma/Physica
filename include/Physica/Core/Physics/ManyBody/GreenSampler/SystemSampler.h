@@ -56,7 +56,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, T sign);
+        void sample(const GreenPair& greens, T rsign);
 
         [[nodiscard]] MatrixND<T> calcMean() const;
         [[nodiscard]] MatrixND<T> calcStructFactor() const;
@@ -81,9 +81,9 @@ namespace Physica {
             , type(type) {}
 
     template<Scalar T>
-    void SystemSampler<T>::sample(const GreenPair& greens, T sign) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1]) * sign;
-        Base::sample(sign);
+    void SystemSampler<T>::sample(const GreenPair& greens, T rsign) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1]) * rsign;
+        Base::sample(rsign);
     }
 
     template<Scalar T>

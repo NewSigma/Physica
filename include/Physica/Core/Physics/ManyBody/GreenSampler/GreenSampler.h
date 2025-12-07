@@ -31,7 +31,7 @@ namespace Physica {
 
         const HubbardParams<T>& params;
     private:
-        VectorND<Tv> signs;
+        VectorND<Tv> rsigns;
         size_t cursor = 0;
     public:
         GreenSampler(const HubbardParams<T>& params, size_t numSample);
@@ -51,28 +51,28 @@ namespace Physica {
         [[nodiscard]] auto getBeta() const noexcept { return params.getBeta(); }
         [[nodiscard]] const auto& getHoppingMatrix() const noexcept { return params.getHoppingMatrix(); }
 
-        [[nodiscard]] const auto& getSigns() const noexcept { return signs; }
-        [[nodiscard]] size_t getNumSample() const noexcept { return signs.getLength(); }
+        [[nodiscard]] const auto& getRSigns() const noexcept { return rsigns; }
+        [[nodiscard]] size_t getNumSample() const noexcept { return rsigns.getLength(); }
         [[nodiscard]] size_t getCursor() const noexcept { return cursor; }
     protected:
-        void sample(T sign) noexcept;
+        void sample(T rsign) noexcept;
         [[nodiscard]] T calcDensityCorr(const MatrixND<T>& green, int siteA, int siteB) const noexcept;
         [[nodiscard]] T calcDensityCorr(const MatrixND<T>& greenA, int siteA, const MatrixND<T>& greenB, int siteB) const noexcept;
     };
 
     template<Scalar T>
-    GreenSampler<T>::GreenSampler(const HubbardParams<T>& params, size_t numSample) : params(params), signs(numSample) {
+    GreenSampler<T>::GreenSampler(const HubbardParams<T>& params, size_t numSample) : params(params), rsigns(numSample) {
         assert(numSample > 0);
     }
 
     template<Scalar T>
     auto GreenSampler<T>::calcSign() const noexcept -> Tv {
-        return signs.mean();
+        return rsigns.mean();
     }
 
     template<Scalar T>
-    void GreenSampler<T>::sample(T sign) noexcept {
-        signs[cursor] = sign;
+    void GreenSampler<T>::sample(T rsign) noexcept {
+        rsigns[cursor] = rsign;
         cursor = (cursor + 1) % getNumSample();
     }
     /**

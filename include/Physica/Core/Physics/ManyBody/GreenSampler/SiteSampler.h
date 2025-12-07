@@ -52,7 +52,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void sample(const GreenPair& greens, T sign);
+        void sample(const GreenPair& greens, T rsign);
 
         [[nodiscard]] T calcMean() const;
         /* Getters */
@@ -69,9 +69,9 @@ namespace Physica {
             , type(type) {}
 
     template<Scalar T>
-    void SiteSampler<T>::sample(const GreenPair& greens, T sign) {
-        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * sign;
-        Base::sample(sign);
+    void SiteSampler<T>::sample(const GreenPair& greens, T rsign) {
+        observes[Base::getCursor()] = calcObservable(greens[0], greens[1], type) * rsign;
+        Base::sample(rsign);
     }
 
     template<Scalar T>

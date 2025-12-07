@@ -44,7 +44,7 @@ namespace {
         dqmc.step_random<RandomSource>();
         for (int i = 0; i < NumSample; ++i) {
             dqmc.step_spin<RandomSource>();
-            if (dqmc.getSign().isNegative())
+            if (dqmc.getRSign().isNegative())
                 exit(EXIT_FAILURE);
         }
     }
