@@ -61,6 +61,11 @@ namespace Physica {
         /* Operators */
         __host__ __device__ This& operator=(This array) noexcept { swap(array); return *this; }
         /* Operations */
+        template<size_t I>
+        [[nodiscard]] constexpr T& get() noexcept;
+        template<size_t I>
+        [[nodiscard]] constexpr const T& get() const noexcept;
+
         __host__ __device__ void insert(const T&, size_t) noexcept { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) noexcept { assert(size == Length); }
         __host__ __device__ void resize(size_t length, auto&&... args) noexcept;
@@ -171,6 +176,14 @@ namespace Physica {
 }
 
 namespace std {
+    template<class T, size_t Length, class Allocator>
+    struct std::tuple_size<Physica::Array<T, Length, Allocator>> : public integral_constant<std::size_t, Length> {};
+
+    template<std::size_t I, class T, size_t Length, class Allocator>
+    struct tuple_element<I, Physica::Array<T, Length, Allocator>> {
+        using type = T;
+    };
+
     template<class T, size_t Length, class Allocator>
     void swap(Physica::Array<T, Length, Allocator>& __restrict array1,
                      Physica::Array<T, Length, Allocator>& __restrict array2) noexcept {

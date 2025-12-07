@@ -26,7 +26,7 @@ using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 namespace {
     template<Vector V>
-    void rangeTest() {
+    consteval void rangeTest() noexcept {
         using It = PtrIteratorF<V>;
         static_assert(std::indirectly_readable<It>);
         static_assert(std::indirectly_writable<It, long>);
@@ -38,6 +38,13 @@ namespace {
         static_assert(std::ranges::contiguous_range<V>);
         static_assert(std::ranges::common_range<V>);
         static_assert(std::ranges::viewable_range<V>);
+    }
+
+    void strucBindTest() noexcept {
+        Vector3D<float64> arr{1, 2, 3};
+        auto [x, y, z] = arr;
+        if (x != 1 || y != 2 || z != 3)
+            exit(EXIT_FAILURE);
     }
 
     void crossProductTest() {
@@ -191,6 +198,7 @@ int main() {
     rangeTest<Vector4D<float32>>();
     rangeTest<VectorND<float64>>();
     rangeTest<decltype(std::declval<VectorND<float64>>().tail(0))>();
+    strucBindTest();
 
     crossProductTest();
     innerDotTest();

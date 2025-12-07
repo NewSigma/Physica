@@ -20,23 +20,30 @@
 
 using namespace Physica;
 
+namespace {
 template<class C>
-void rangeTest() {
-    using I = PtrIteratorF<C>;
-    static_assert(std::indirectly_readable<I>);
-    static_assert(std::indirectly_writable<I, long>);
-    static_assert(std::incrementable<I>);
-    static_assert(std::sized_sentinel_for<I, I>);
-    static_assert(std::contiguous_iterator<I>);
+    consteval void rangeTest() noexcept {
+        using I = PtrIteratorF<C>;
+        static_assert(std::indirectly_readable<I>);
+        static_assert(std::indirectly_writable<I, long>);
+        static_assert(std::incrementable<I>);
+        static_assert(std::sized_sentinel_for<I, I>);
+        static_assert(std::contiguous_iterator<I>);
 
-    static_assert(std::ranges::sized_range<C>);
-    static_assert(std::ranges::contiguous_range<C>);
-    static_assert(std::ranges::common_range<C>);
-    static_assert(std::ranges::viewable_range<C>);
+        static_assert(std::ranges::sized_range<C>);
+        static_assert(std::ranges::contiguous_range<C>);
+        static_assert(std::ranges::common_range<C>);
+        static_assert(std::ranges::viewable_range<C>);
+    }
 }
 
 int main() {
     rangeTest<Array<long, 3>>();
     rangeTest<Array<long>>();
+    // Test structured binding
+    Array<long, 3> arr{1, 2, 3};
+    auto [x, y, z] = arr;
+    if (x != 1 || y != 2 || z != 3)
+        return 1;
     return 0;
 }

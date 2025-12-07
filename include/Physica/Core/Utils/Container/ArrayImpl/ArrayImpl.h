@@ -51,6 +51,18 @@ namespace Physica {
         static_assert(OtherLength == Length || OtherLength == Dynamic, "[Error]: Length do not match");
         assert(other.getLength() >= Length);
     }
+
+    template<class T, size_t Length, class Allocator>
+    template<size_t I>
+    constexpr T& Array<T, Length, Allocator>::get() noexcept {
+        return arr[I];
+    }
+
+    template<class T, size_t Length, class Allocator>
+    template<size_t I>
+    constexpr const T& Array<T, Length, Allocator>::get() const noexcept {
+        return const_cast<This&>(*this).get<I>();
+    }
     /**
      * Initializing new elements will not work. A fixed array is assumed to be initialized upon construction.
      */

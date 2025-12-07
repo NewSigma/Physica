@@ -133,6 +133,14 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Length>
+    struct std::tuple_size<Physica::DenseVector<T, Length>> : public integral_constant<std::size_t, Length> {};
+
+    template<size_t I, Physica::Scalar T, size_t Length>
+    struct tuple_element<I, Physica::DenseVector<T, Length>> {
+        using type = T;
+    };
+
+    template<Physica::Scalar T, size_t Length>
     void swap(Physica::DenseVector<T, Length>& __restrict v1, Physica::DenseVector<T, Length>& __restrict v2) noexcept {
         v1.swap(v2);
     }
