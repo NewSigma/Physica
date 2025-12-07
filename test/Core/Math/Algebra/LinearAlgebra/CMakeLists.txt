@@ -6,6 +6,7 @@ physica_add_test(LinearSystem LinearSystem/LinearSystem.cpp)
 physica_add_test(LUSolver LinearSystem/LUSolver.cpp)
 
 add_subdirectory(Matrix)
+add_subdirectory(MatrixDecomp)
 
 physica_add_test(Covariance Vector/Covariance.cpp)
 physica_add_test(DenseVector Vector/DenseVector.cpp)

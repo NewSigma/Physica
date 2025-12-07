@@ -17,36 +17,36 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/SVD.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Bidiagonalization.h"
 
 using namespace Physica;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col>;
 
 namespace {
-    template<Matrix T>
-    bool doTest(const T& source, double tolerance) {
-        SVD<ScalarType> svd(source);
-        const auto& U = svd.getMatrixU();
-        const auto& V = svd.getMatrixV();
-        const auto& v = svd.getSingulars();
+    template<Matrix M>
+    bool doTest(const M& source, double tolerance) {
+        Bidiagonalization obj(source);
+        M U = obj.getMatrixU();
+        M V = obj.getMatrixV();
+        M B = obj.getMatrixB();
 
-        T A(source.getRow(), source.getCol(), 0);
-        for (size_t i = 0; i < v.getLength(); ++i)
-            A += U.col(i) * V.col(i).transpose() * v[i];
-        return matrixNear(A, source, tolerance);
+        M A = (U * B).compute() * V.transpose();
+        if (!matrixNear(A, source, tolerance))
+            return false;
+        return true;
     }
 }
 
 int main() {
     {
         const MatrixType mat{{1, 2, 3}, {2, 1, 1}, {-2, 0, 1}};
-        if (!doTest(mat, 1E-14))
+        if (!doTest(mat, 1E-15))
             return 1;
     }
     {
         const MatrixType mat{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}, {9, 10, 11, 12, 13}, {7, 6, -8, -9, 5}};
-        if (!doTest(mat, 1E-14))
+        if (!doTest(mat, 1E-15))
             return 1;
     }
     return 0;

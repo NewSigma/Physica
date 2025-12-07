@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Hessenburg.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Hessenburg.h"
 #include "Physica/Core/Scalar/Complex.h"
 
 using namespace Physica;

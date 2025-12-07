@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Tridiagonalization.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Tridiagonalization.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HamiltonMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"

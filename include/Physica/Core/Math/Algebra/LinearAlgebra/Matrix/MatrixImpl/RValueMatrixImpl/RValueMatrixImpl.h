@@ -369,13 +369,13 @@ namespace Physica {
                  + calc(0, 1) * (calc(1, 2) * calc(2, 0) - calc(1, 0) * calc(2, 2))
                  + calc(0, 2) * (calc(1, 0) * calc(2, 1) - calc(1, 1) * calc(2, 0));
         else
-            return QRDecomp<T, false>(Base::getDerived()).det();
+            return LUDecomp<T, false>(Base::getDerived()).det();
     }
 
     template<class Derived>
     auto RValueMatrix<Derived>::lnAbsDet() const -> Tr {
-        QRDecomp<T, false> qr(Base::getDerived());
-        return ln(abs(qr.getMatrixR().diag())).sum();
+        LUDecomp<T, false> qr(Base::getDerived());
+        return ln(abs(qr.getMatrixLU().diag())).sum();
     }
 
     template<class Derived>
@@ -509,10 +509,14 @@ namespace Physica {
             return false;
 
         const size_t order = getRow();
-        for (size_t r = 0; r < order; ++r)
+        for (size_t r = 0; r < order; ++r) {
+            if (!calc(r, r).imag().isZero())
+                return false;
+
             for (size_t c = r + 1; c < order; ++c)
                 if (calc(r, c) != calc(c, r).conjugate())
                     return false;
+        }
         return true;
     }
 

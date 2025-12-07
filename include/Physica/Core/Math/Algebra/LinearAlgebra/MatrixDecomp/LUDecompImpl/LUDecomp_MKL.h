@@ -32,19 +32,20 @@ namespace Physica {
         const size_t n = source.getCol();
         const size_t lda = m;
         auto* a = reinterpret_cast<Tm*>(working.data());
+        int err{};
         if constexpr (Pivot) {
             Array<MKL_INT64> ipiv(m);
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_cgetrf_64(Layout, m, n, a, lda, ipiv.data()));
+                    err = LAPACKE_cgetrf_64(Layout, m, n, a, lda, ipiv.data());
                 else
-                    check_lapack(LAPACKE_zgetrf_64(Layout, m, n, a, lda, ipiv.data()));
+                    err = LAPACKE_zgetrf_64(Layout, m, n, a, lda, ipiv.data());
             }
             else {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_sgetrf_64(Layout, m, n, a, lda, ipiv.data()));
+                    err = LAPACKE_sgetrf_64(Layout, m, n, a, lda, ipiv.data());
                 else
-                    check_lapack(LAPACKE_dgetrf_64(Layout, m, n, a, lda, ipiv.data()));
+                    err = LAPACKE_dgetrf_64(Layout, m, n, a, lda, ipiv.data());
             }
 
             perm = PermMatrix<T>(m);
@@ -55,16 +56,20 @@ namespace Physica {
         else {
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_mkl_cgetrfnp_64(Layout, m, n, a, lda));
+                    err = LAPACKE_mkl_cgetrfnp_64(Layout, m, n, a, lda);
                 else
-                    check_lapack(LAPACKE_mkl_zgetrfnp_64(Layout, m, n, a, lda));
+                    err = LAPACKE_mkl_zgetrfnp_64(Layout, m, n, a, lda);
             }
             else {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_mkl_sgetrfnp_64(Layout, m, n, a, lda));
+                    err = LAPACKE_mkl_sgetrfnp_64(Layout, m, n, a, lda);
                 else
-                    check_lapack(LAPACKE_mkl_dgetrfnp_64(Layout, m, n, a, lda));
+                    err = LAPACKE_mkl_dgetrfnp_64(Layout, m, n, a, lda);
             }
         }
+
+        // err > 0 implies a singular matrix, we do not care about it
+        if (err < 0)
+            check_lapack(err);
     }
 }

@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/QRDecomp.cuh"
 
 using namespace Physica;
 using Matrix3D = DenseMatrix<float32, MatrixOption::Col, 3>;

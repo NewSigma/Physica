@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/QRDecomp.h"
 
 using namespace Physica;
 
@@ -32,7 +33,7 @@ namespace {
         if (!matrixNear(result, m, decompPrec))
             exit(1);
 
-        if (m.isSquare() && (m.getRow() <= 3) && !scalarNear(m.det(), qr.det(), detPrec))
+        if (m.isSquare() && !scalarNear(m.det(), qr.det(), detPrec))
             exit(1);
     }
 

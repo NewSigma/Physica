@@ -19,8 +19,8 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Decouplable.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Tridiagonalization.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Decouplable.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Tridiagonalization.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {

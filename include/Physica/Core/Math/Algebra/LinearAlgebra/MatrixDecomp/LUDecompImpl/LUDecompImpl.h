@@ -23,9 +23,7 @@
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    LUDecomp<T, Pivot>::LUDecomp(size_t size) {
-        resize(size);
-    }
+    LUDecomp<T, Pivot>::LUDecomp(size_t size) : working(size, size), perm(size) {}
 
     template<Scalar T, bool Pivot>
     LUDecomp<T, Pivot>::LUDecomp(const Matrix auto& source) : LUDecomp(source.getRow()) {
@@ -59,6 +57,14 @@ namespace Physica {
 
         if constexpr (Pivot)
             perm = perm.inv();
+    }
+
+    template<Scalar T, bool Pivot>
+    T LUDecomp<T, Pivot>::det() const noexcept {
+        T result = working.diag().prod();
+        if constexpr (Pivot)
+            result *= perm.det();
+        return result;
     }
 
     template<Scalar T, bool Pivot>

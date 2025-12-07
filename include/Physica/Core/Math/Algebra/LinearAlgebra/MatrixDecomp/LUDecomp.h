@@ -35,7 +35,7 @@ namespace Physica {
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
         WorkingMatrix working;
-        [[no_unique_address]] PermMatrix<T> perm;
+        [[no_unique_address]] BiasArray perm;
     public:
         LUDecomp() = default;
         LUDecomp(size_t size);
@@ -49,6 +49,8 @@ namespace Physica {
         void compute(const Matrix auto& source);
         void compute_mkl(const Matrix auto& source);
         void compute_base(const Matrix auto& source);
+
+        [[nodiscard]] T det() const noexcept;
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;

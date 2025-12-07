@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Exception/BadConvergenceException.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/LUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
 
 namespace Physica {
     namespace Internal {

@@ -70,7 +70,7 @@ namespace Physica {
     private:
         void compute2D(const Matrix auto& normalized);
         void computeND(const Matrix auto& normalized);
-        void splitOffTwoRows(size_t index);
+        void splitOffTwoRows(size_t index) noexcept;
         Vector3D<T> realShift(size_t upper, size_t iter);
         void francisQR(size_t lower, size_t sub_order, Vector3D<T> shift);
         void specialHessenburg(size_t lower, size_t sub_order);
@@ -196,7 +196,7 @@ namespace Physica {
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.
      */
     template<Scalar T, size_t Order>
-    void Schur<T, Order>::splitOffTwoRows(size_t index) {
+    void Schur<T, Order>::splitOffTwoRows(size_t index) noexcept {
         const size_t index_1 = index + 1;
         matrixT(index, index) += exshift;
         matrixT(index_1, index_1) += exshift;

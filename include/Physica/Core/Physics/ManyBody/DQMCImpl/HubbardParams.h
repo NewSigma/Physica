@@ -43,7 +43,7 @@ namespace Physica {
     public:
         HubbardParams() = default;
         template<int Dim, BoundaryCond BC>
-        HubbardParams(Tr hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, Tr beta_, Tr chemMu_, int numSplit_);
+        HubbardParams(Tr hoppingT, Tr repelU, const SquareLattice<Dim, BC>& lattice, Tr beta, Tr chemMu, int numSplit);
         HubbardParams(const This&) = default;
         HubbardParams(This&&) noexcept = default;
         ~HubbardParams() = default;
@@ -82,11 +82,11 @@ namespace Physica {
 
     template<Scalar T>
     template<int Dim, BoundaryCond BC>
-    HubbardParams<T>::HubbardParams(Tr hoppingT, Tr repelU_, const SquareLattice<Dim, BC>& lattice, Tr beta_, Tr chemMu_, int numSplit_)
-            : beta(beta_)
-            , repelU(repelU_)
-            , chemMu(chemMu_)
-            , numSplit(numSplit_)
+    HubbardParams<T>::HubbardParams(Tr hoppingT, Tr repelU, const SquareLattice<Dim, BC>& lattice, Tr beta, Tr chemMu, int numSplit)
+            : beta(beta)
+            , repelU(repelU)
+            , chemMu(chemMu)
+            , numSplit(numSplit)
             , lnSpinWeights(lattice.getNumSuperCellSite()) {
         assert(!repelU.isNegative() && "[Error]: It is assumed U >= 0");
         assert(!beta.isNegative() && "[Error]: Negative temperature is invalid");

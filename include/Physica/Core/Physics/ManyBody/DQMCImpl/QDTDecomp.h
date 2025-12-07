@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/QRDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/QRDecomp.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "HubbardParams.h"
 

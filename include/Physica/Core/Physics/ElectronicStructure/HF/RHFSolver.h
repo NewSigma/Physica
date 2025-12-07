@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/ElectronConfig.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomp/Cholesky.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Cholesky.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/QuadraticProgramming.h"
 
