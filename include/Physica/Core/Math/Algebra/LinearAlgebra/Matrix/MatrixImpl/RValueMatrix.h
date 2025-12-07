@@ -257,6 +257,7 @@ namespace Physica {
 #include "MatrixProduct/GEMM.h"
 #include "MatrixProduct/GEMV.h"
 #include "MatrixProduct/GEVM.h"
+#include "MatrixProduct/Kronecker.h"
 #include "RValueMatrixImpl/MatrixNorm.h"
 #include "MatrixExpr.h"
 #include "DiagVector.h"
