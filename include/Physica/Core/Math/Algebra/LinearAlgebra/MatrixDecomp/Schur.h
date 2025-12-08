@@ -221,6 +221,8 @@ namespace Physica {
         }
     }
     /**
+     * Our return value is slightly different from [1]
+     *
      * Reference:
      * [1] Eigen; https://eigen.tuxfamily.org
      */
@@ -247,7 +249,7 @@ namespace Physica {
             else { // MATLAB new ad hoc shift
                 const T s1 = (matrixT(upper_1, upper_1) - matrixT(upper, upper)) * T(0.5);
                 T shift = square(s1) + t2;
-                if (s.isPositive()) {
+                if (shift.isPositive()) {
                     shift = sqrt(shift);
                     if (s1.isNegative())
                         shift = -shift;

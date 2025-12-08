@@ -87,7 +87,7 @@ namespace Physica {
             const size_t length = v1.getLength();
             size_t i = 0;
             const size_t to = length / PacketType::size() * PacketType::size();
-            PacketType buffer(0);
+            auto buffer = PacketType::zeros();
             for (; i < to; i += PacketType::size()) {
                 PacketType p1 = v1.template packet<PacketType>(i);
                 PacketType p2 = v2.template packet<PacketType>(i);

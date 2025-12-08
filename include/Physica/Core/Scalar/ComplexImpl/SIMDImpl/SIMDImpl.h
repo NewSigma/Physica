@@ -205,6 +205,11 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
+    auto SIMD<Complex<T>, Size>::zeros() noexcept -> SIMD {
+        return asComplex(RealBase::zeros());
+    }
+
+    template<Scalar T, int Size>
     auto SIMD<Complex<T>, Size>::asComplex(FullRealType reals) -> SIMD {
         This result{};
         static_cast<FullRealType&>(result) = std::move(reals);

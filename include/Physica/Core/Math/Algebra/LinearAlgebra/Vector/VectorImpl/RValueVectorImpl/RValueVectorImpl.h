@@ -394,7 +394,7 @@ namespace Physica {
         }
         else if constexpr (Internal::EnableSIMD<Derived>::value) {
             const auto& v = Base::getDerived();
-            PacketType buffer(0);
+            auto buffer = PacketType::zeros();
             if constexpr (SizeAtCompile != Dynamic) {
                 constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                 for (size_t i = 0; i < to; i += PacketType::size())

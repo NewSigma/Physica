@@ -191,6 +191,11 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, int Size>
+    auto SIMD<Diff<T, Mode, Order>, Size>::zeros() noexcept -> SIMD {
+        return SIMD(ValueType::zeros(), GradType::zeros());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     auto SIMD<Diff<T, Mode, Order>, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) -> This {
         return This(ValueType::select(flags, x.value(), y.value()), GradType::select(flags, x.grad(), y.grad()));
     }

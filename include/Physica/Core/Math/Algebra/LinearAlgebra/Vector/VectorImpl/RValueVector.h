@@ -94,6 +94,7 @@ namespace Physica {
     public:
         using ScalarType = Traits<Derived>::ScalarType;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
+
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
@@ -261,6 +262,7 @@ namespace Physica {
 #include "RValueVectorImpl/ReversalVector.h"
 #include "RValueVectorImpl/Conjugate.h"
 #include "RValueVectorImpl/CrossProduct.h"
-#include "RValueVectorImpl/VectorConvert.h"
+#include "RValueVectorImpl/VectorConvert/VectorConvert.h"
+#include "RValueVectorImpl/VectorConvert/SquaredNormVector.h"
 #include "RValueVectorImpl/InnerDot.h"
 #include "VectorExpr.h"

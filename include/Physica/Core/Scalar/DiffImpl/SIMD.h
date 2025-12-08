@@ -118,15 +118,10 @@ namespace Physica {
         [[nodiscard]] RealType real() const noexcept;
         [[nodiscard]] RealType imag() const noexcept;
         /* Static members */
+        [[nodiscard]] static SIMD zeros() noexcept;
         [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
         [[nodiscard]] static SIMD asComplex(const FullRealType& reals);
     };
-
-    template<Scalar T, DiffMode Mode, int Order, int Size>
-    [[nodiscard]] auto mul_add(
-            const SIMD<Diff<T, Mode, Order>, Size>& a,
-            const SIMD<Diff<T, Mode, Order>, Size>& b,
-            const SIMD<Diff<T, Mode, Order>, Size>& c);
 }
 
 namespace Physica {
