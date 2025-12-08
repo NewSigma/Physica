@@ -21,8 +21,10 @@
 using namespace Physica;
 
 namespace std {
-    auto formatter<Real<Float16>, char>::format(
-            const Real<Float16>& obj, std::format_context& ctx) -> std::format_context::iterator{
-        return std::format_to(ctx.out(), "{:.4G}", float(obj));
+    auto formatter<Real<Float16>, char>::format(Real<Float16> obj, std::format_context& ctx) -> std::format_context::iterator {
+        auto x = float32(obj);
+        if (x.isZero())
+            x = abs(x);
+        return std::format_to(ctx.out(), "{:.4G}", x.toMachine());
     }
 }

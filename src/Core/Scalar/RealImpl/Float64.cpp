@@ -21,8 +21,9 @@
 using namespace Physica;
 
 namespace std {
-    auto formatter<Real<Float64>, char>::format(
-            const Real<Float64>& obj, std::format_context& ctx) -> std::format_context::iterator{
+    auto formatter<Real<Float64>, char>::format(Real<Float64> obj, std::format_context& ctx) -> std::format_context::iterator {
+        if (obj.isZero())
+            obj = abs(obj);
         return std::format_to(ctx.out(), "{}", obj.toMachine());
     }
 }
