@@ -76,4 +76,4 @@ namespace Physica {
     };
 }
 
-#include "InvLUMatrixL.h"
+#include "LUMatrixLInv.h"

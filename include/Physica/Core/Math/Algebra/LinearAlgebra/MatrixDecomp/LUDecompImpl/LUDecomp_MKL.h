@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/MKL/Lapack.h"
 #include "../LUDecomp.h"
+#include "Physica/Core/Exception/MKL/Lapack.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
@@ -27,7 +27,7 @@ namespace Physica {
         pre_compute(source);
         working = source;
 
-        constexpr int Layout = LAPACK_COL_MAJOR;
+        constexpr static int Layout = LAPACK_COL_MAJOR;
         const size_t m = source.getRow();
         const size_t n = source.getCol();
         const size_t lda = m;

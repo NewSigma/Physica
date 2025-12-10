@@ -67,6 +67,11 @@ namespace Physica {
         return result;
     }
 
+    template<Scalar T, bool Pivot> 
+    auto LUDecomp<T, Pivot>::inv() const noexcept {
+        return Inverse<This>(*this);
+    }
+
     template<Scalar T, bool Pivot>
     void LUDecomp<T, Pivot>::resize(size_t size) {
         working.resize(size, size);

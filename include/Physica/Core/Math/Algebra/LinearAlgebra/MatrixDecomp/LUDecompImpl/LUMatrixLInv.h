@@ -48,6 +48,7 @@ namespace Physica {
 
     template<Scalar T>
     void Inverse<LUMatrixL<T>>::assign(Matrix auto& target) const {
+        Base::assert_assign(target);
         target = -matL;
         target.diag() = Trv(1);
         for (size_t i = 1; i < getCol() - 1; ++i) {

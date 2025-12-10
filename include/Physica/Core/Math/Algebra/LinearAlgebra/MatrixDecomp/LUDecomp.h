@@ -23,6 +23,7 @@
 
 namespace Physica {
     template<Scalar> class LUMatrixL;
+    template<Scalar, bool Pivot> class LUDecompInv;
 
     template<Scalar T, bool Pivot>
     class LUDecomp {
@@ -51,6 +52,7 @@ namespace Physica {
         void compute_base(const Matrix auto& source);
 
         [[nodiscard]] T det() const noexcept;
+        [[nodiscard]] auto inv() const noexcept;
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -68,7 +70,8 @@ namespace Physica {
     };
 }
 
+#include "LUDecompImpl/LUDecompImpl.h"
 #ifdef PHYSICA_MKL
-    #include "LUDecompImpl/LUDecompImpl.h"
     #include "LUDecompImpl/LUDecomp_MKL.h"
 #endif
+#include "LUDecompImpl/LUInverse.h"

@@ -1,0 +1,79 @@
+/*
+ * Copyright 2025 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
+
+namespace Physica {
+    template<Scalar T, bool Pivot>
+    class Inverse<LUDecomp<T, Pivot>> : public RValueMatrix<Inverse<LUDecomp<T, Pivot>>> {
+        using LU = LUDecomp<T, Pivot>;
+        using This = Inverse<LU>;
+        using Base = RValueMatrix<This>;
+
+        using Base::isComplex;
+        using typename Base::Tm;
+    public:
+        constexpr static int Layout = LAPACK_COL_MAJOR;
+    private:
+        const LU& lu;
+    public:
+        Inverse(const LU& lu);
+        Inverse(const This&) = default;
+        Inverse(This&&) noexcept = default;
+        ~Inverse() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] T calc(size_t, size_t) const { noImpl(__func__); }
+
+        void assign(Matrix auto& target) const;
+        void assign_mkl(Matrix auto& target) const;
+        /* Getters */
+        [[nodiscard]] const LU& getLUDecomp() const noexcept { return lu; }
+        [[nodiscard]] size_t getRow() const noexcept { return lu.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+    };
+
+    template<Scalar T, bool Pivot>
+    Inverse<LUDecomp<T, Pivot>>::Inverse(const LU& lu) : lu(lu) {}
+
+    template<Scalar T, bool Pivot>
+    void Inverse<LUDecomp<T, Pivot>>::assign(Matrix auto& target) const {
+        Base::assert_assign(target);
+        if constexpr (HasMKL())
+            assign_mkl(target);
+        else
+            noImpl(__func__);
+    }
+}
+
+namespace Physica {
+    template<Scalar T, bool P>
+    class Traits<Inverse<LUDecomp<T, P>>> : public Traits<LUMatrixL<T>> {
+    public:
+        constexpr static bool Pivot = P;
+    };
+}
+
+#ifdef PHYSICA_MKL
+    #include "LUInverse_MKL.h"
+#endif
+#include "LUInverseGEMV.h"
