@@ -92,7 +92,8 @@ namespace Physica {
         const size_t lda = m;
         void* tau = taus.data();
         int info;
-        check(cusolverDnXgeqrf(ctx, ctx, m, n, dataType, A, lda, dataType, tau, dataType, deviceBuffer.data(), deviceBuffer.getLength(), hostBuffer.data(), hostBuffer.getLength(), &info));
+        void* bufferOnHost = hostBuffer.getLength() == 0 ? nullptr : hostBuffer.data();
+        check(cusolverDnXgeqrf(ctx, ctx, m, n, dataType, A, lda, dataType, tau, dataType, deviceBuffer.data(), deviceBuffer.getLength(), bufferOnHost, hostBuffer.getLength(), &info));
     }
 
     template<Scalar T>

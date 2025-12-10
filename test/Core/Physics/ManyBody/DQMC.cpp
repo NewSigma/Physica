@@ -43,7 +43,7 @@ namespace {
         auto dqmc = DQMC<T>(params);
         dqmc.step_random<RandomSource>();
         for (int i = 0; i < NumSample; ++i) {
-            dqmc.step_spin<RandomSource>();
+            dqmc.step<RandomSource>();
             if (dqmc.getRSign().isNegative())
                 exit(EXIT_FAILURE);
         }

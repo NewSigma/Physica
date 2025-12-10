@@ -29,7 +29,7 @@
 namespace Physica {
     template<Scalar, size_t Dim = 1> class FFT;
 
-    enum class PlanFlag {
+    enum class PlanFlag : char {
         Measure = FFTW_MEASURE,
         Estimate = FFTW_ESTIMATE,
         Patient = FFTW_PATIENT,

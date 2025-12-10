@@ -199,13 +199,16 @@ namespace Physica {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::append(auto&&... args) noexcept {
-        if (length == capacity) [[unlikely]]
+        if (capacity == 0) [[unlikely]]
+            reserve(8);
+        else if (length == capacity) [[unlikely]]
             doubleSpace();
         grow(std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::insert(size_t index, auto&&... args) noexcept {
+        assert(capacity != 0 && "[Error]: Cannot insert to empty array");
         assert(index <= length);
         if (length == capacity)
             doubleSpace();
@@ -246,7 +249,8 @@ namespace Physica {
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::increase(size_t size) noexcept {
         assert(size >= capacity);
-        arr = alloc.reallocate(arr, size, capacity);
+        [[assume(arr != nullptr)]]; // LLVM loses nonnull information after inlining(GH61966)
+        arr = alloc.reallocate(data(), size, capacity);
         capacity = size;
     }
     /*!
@@ -256,11 +260,12 @@ namespace Physica {
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::decrease(size_t size) noexcept {
         assert(size <= capacity);
+        [[assume(arr != nullptr)]];
         if(!std::is_trivially_copyable<T>::value) {
             for(size_t i = size; i < length; ++i)
                 (arr + i)->~T();
         }
-        arr = alloc.reallocate(arr, size);
+        arr = alloc.reallocate(data(), size);
         length = capacity = size;
     }
 
@@ -281,6 +286,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::doubleSpace() noexcept {
+        assert(capacity != 0 && "[Error]: Cannot double empty array");
         increase((capacity * 2) + ((MinDeltaSpace + sizeof(T) - 1) / sizeof(T)));
     }
 
@@ -306,6 +312,7 @@ namespace Physica {
      */
     template<class T, class Allocator>
     __host__ __device__ T* Array<T, Dynamic, Allocator>::data() noexcept {
+        assert(arr != nullptr && "[Error]: We assume data() is nonnull");
         if constexpr (Align == Dynamic)
             return arr;
         else

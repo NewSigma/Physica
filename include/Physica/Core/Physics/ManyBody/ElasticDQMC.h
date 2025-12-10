@@ -26,9 +26,10 @@
 
 namespace Physica {
     template<Scalar T>
-    class FreqDQMC {
-        using This = FreqDQMC<T>;
+    class ElasticDQMC {
+        using This = ElasticDQMC<T>;
         using Params = HubbardParams<T>;
+        using GreenPair = ImagKinetic<T>::GreenPair;
 
         using Tr = T::RealType;
         using Tv = T::ValueType;
@@ -38,18 +39,18 @@ namespace Physica {
     private:
         const Params* params;
         VectorND<Trv> rSquareOmegas;
-        ImagKinetic<T> kinetic;
+        GreenPair greens;
 
         MatrixND<T> actionR;
         SymmEigenSolver<T> eig;
 
         T lnZ;
     public:
-        FreqDQMC() = delete;
-        FreqDQMC(const Params& params_, Trv freqDensity);
-        FreqDQMC(const This&) = default;
-        FreqDQMC(This&&) noexcept = default;
-        ~FreqDQMC() = default;
+        ElasticDQMC() = delete;
+        ElasticDQMC(const Params& params_, Trv freqDensity);
+        ElasticDQMC(const This&) = default;
+        ElasticDQMC(This&&) noexcept = default;
+        ~ElasticDQMC() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -57,16 +58,16 @@ namespace Physica {
         void step_random();
 
         template<RNG R>
-        void step_spin();
+        void step();
         template<RNG R>
-        void step_spin_for(int numStep);
+        void step_for(int numStep);
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return *params; }
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
-        [[nodiscard]] auto& getGreens() noexcept { return kinetic.getGreens(); }
+        [[nodiscard]] auto& getGreens() noexcept { return greens; }
         /* Static members */
         [[nodiscard]] constexpr static Trv getRSign() noexcept { return 1; }
     private:
@@ -80,10 +81,9 @@ namespace Physica {
     };
 
     template<Scalar T>
-    FreqDQMC<T>::FreqDQMC(const Params& params_, Trv freqDensity)
+    ElasticDQMC<T>::ElasticDQMC(const Params& params_, Trv freqDensity)
             : params(&params_)
             , rSquareOmegas(calcFreqCutoff(params_.getBeta(), freqDensity))
-            , kinetic(params_.getNumSite(), params_.getNumSplit())
             , actionR(params_.getHoppingMatrix())
             , eig(params_.getNumSite(), true) {
         assert(freqDensity.isPositive());
@@ -95,7 +95,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void FreqDQMC<T>::step_random() {
+    void ElasticDQMC<T>::step_random() {
         for (int i = 0; i < getNumSite(); ++i)
             actionR(i, i) = randAuxField<R>();
         lnZ = calcLnZ();
@@ -103,7 +103,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void FreqDQMC<T>::step_spin() {
+    void ElasticDQMC<T>::step() {
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         const T save = std::exchange(actionR(site, site), randAuxField<R>());
 
@@ -117,18 +117,18 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void FreqDQMC<T>::step_spin_for(int numStep) {
+    void ElasticDQMC<T>::step_for(int numStep) {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         for (int _ = 0; _ < numStep; ++_)
-            step_spin<R>();
+            step<R>();
     }
 
     template<Scalar T>
-    void FreqDQMC<T>::swap(This& __restrict obj) noexcept {
+    void ElasticDQMC<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(params, obj.params);
         rSquareOmegas.swap(obj.rSquareOmegas);
-        kinetic.swap(obj.kinetic);
+        greens.swap(obj.greens);
 
         actionR.swap(obj.actionR);
         eig.swap(obj.eig);
@@ -138,12 +138,12 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    T FreqDQMC<T>::randAuxField() {
+    T ElasticDQMC<T>::randAuxField() {
         return T::template random_normal<R>() * sqrt(params->getRepelU() / params->getBeta());
     }
 
     template<Scalar T>
-    auto FreqDQMC<T>::calcLnZ() -> T {
+    auto ElasticDQMC<T>::calcLnZ() -> T {
         auto diagonalize = [&](MatrixND<T>& green) {
             using Tf = Diff<T, DiffMode::Reverse>;
             const T shiftMu = params->getChemMu() - params->getRepelU() * 0.5;
@@ -158,15 +158,15 @@ namespace Physica {
             return lnZ;
         };
 
-        T lnZU = diagonalize(getGreens()[0]);
+        T lnZU = diagonalize(greens[0]);
 
         actionR.diag() = -actionR.diag();
-        T lnZD = diagonalize(getGreens()[1]);
+        T lnZD = diagonalize(greens[1]);
         return lnZU + lnZD;
     }
 
     template<Scalar T>
-    int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) {
+    int ElasticDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) {
         int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
         return (i + 1) * 4; // Multiple of 4 so that SIMD works
     }

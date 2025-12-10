@@ -57,9 +57,9 @@ namespace Physica {
         void step_random();
 
         template<RNG R>
-        void step_spin();
+        void step();
         template<RNG R>
-        void step_spin_for(int numStep);
+        void step_for(int numStep);
 
         void calcGreens(int split);
         void swap(This& __restrict obj) noexcept;
@@ -99,7 +99,7 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void DQMC<T>::step_spin() {
+    void DQMC<T>::step() {
         std::ranges::shuffle(sites, R::getInstance());
         probs.template random_uniform<R>();
         calcGreens(cursor);
@@ -111,10 +111,10 @@ namespace Physica {
 
     template<Scalar T>
     template<RNG R>
-    void DQMC<T>::step_spin_for(int numStep) {
+    void DQMC<T>::step_for(int numStep) {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         for (int _ = 0; _ < numStep; ++_)
-            step_spin<R>();
+            step<R>();
     }
 
     template<Scalar T>

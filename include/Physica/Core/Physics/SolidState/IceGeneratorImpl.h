@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include "IceGenerator.h"
-#include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica {
     template<Scalar T>
@@ -79,13 +78,13 @@ namespace Physica {
 
         auto& gen = R::getInstance();
         for (unsigned int i = 0; i < numDefect; ++i) {
-            size_t indexDefectO;
-            /* Random molecular */ {
+            const size_t indexDefectO = [this, i]() {
                 std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1 - i);
                 const size_t randIndex = dist(gen);
-                indexDefectO = permutation[randIndex];
+                size_t result = permutation[randIndex];
                 std::swap(permutation[randIndex], permutation[getNumMolecule() - 1 - i]);
-            }
+                return result;
+            }();
             auto otherO = findOInRadius(indexDefectO, maxDistOO);
             const auto hydrogenInMolecular = findHydrogenInMolecule(indexDefectO);
             {
@@ -275,6 +274,7 @@ namespace Physica {
     Array<size_t> IceGenerator<T>::findBondedH(size_t indexMolecule) const {
         const auto range = CrystalCellType::estimateRange(initialCell.getLattice(), maxDistOO);
         Array<size_t> result{};
+        result.reserve(getNumMolecule() * 2);
         CrystalCellType::forCellInRange(range, initialCell.getLattice(), [this, indexMolecule, &result](Vector3D<T> delta) {
             const T squaredRadiusH = square(maxDistOO * 0.5);
             const T squaredRadiusO = square(maxDistOO);
@@ -289,7 +289,7 @@ namespace Physica {
                     const Vector3D<T> middle = (otherO + initialCell.getPos().row(indexO)) * T(0.5);
                     for (size_t j = 0; j < getEndIndexH(); ++j) {
                         const bool isHInRange = initialCell.minDistVector(middle, j).squaredNorm() < squaredRadiusH;
-                        const bool isOccupied = std::find(result.cbegin(), result.cend(), j) != result.cend();
+                        const bool isOccupied = std::ranges::find(result, j) != result.end();
                         if (isHInRange && !isOccupied)
                             result.append(j);
                     }
@@ -387,9 +387,7 @@ namespace Physica {
                 return hInRange[physicalIndex];
             logicIndex += isFree;
         }
-        [[maybe_unused]] constexpr bool ShouldNotReachHere = false;
-        assert(ShouldNotReachHere);
-        return hInRange[0];
+        unreachable();
     }
 
     template<Scalar T>
@@ -412,7 +410,7 @@ namespace Physica {
     size_t IceGenerator<T>::countFreeH(const Array<size_t>& hIndexes) const {
         size_t numFreeH = 0;
         for (auto h : hIndexes)
-            numFreeH += isHydrogenOccupied[h] == false;
+            numFreeH += !isHydrogenOccupied[h];
         return numFreeH;
     }
 

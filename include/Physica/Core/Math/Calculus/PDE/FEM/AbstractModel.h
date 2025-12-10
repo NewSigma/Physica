@@ -58,13 +58,13 @@ namespace Physica {
     };
 
     template<class MeshType>
-    AbstractModel<MeshType>::AbstractModel(MeshType mesh_) : mesh(std::move(mesh_)) {
-        const size_t n = mesh.getNumFreeNodes();
-        A.resize(n, n);
-        b.resize(n);
-        solver.resize(n);
-        map_var_node.resize(n);
-        map_node_var.resize(mesh.getNumNodes());
+    AbstractModel<MeshType>::AbstractModel(MeshType mesh_)
+            : mesh(std::move(mesh_))
+            , A(mesh.getNumFreeNodes(), mesh.getNumFreeNodes())
+            , b(mesh.getNumFreeNodes())
+            , solver(mesh.getNumFreeNodes())
+            , map_var_node(mesh.getNumFreeNodes())
+            , map_node_var(mesh.getNumNodes()) {
         makeMaps();
     }
 

@@ -32,9 +32,9 @@ namespace Physica {
         Array<T> elements;
         Array<size_t> minorIndexes;
         Array<size_t> majorStarts;
-        size_t maxMinor;
+        size_t maxMinor = 0;
     public:
-        SparseMatrix();
+        SparseMatrix() = default;
         SparseMatrix(size_t row, size_t col);
         SparseMatrix(const This&) = default;
         SparseMatrix(This&&) noexcept = default;
@@ -59,17 +59,15 @@ namespace Physica {
     };
 
     template<Scalar T, int Option>
-    SparseMatrix<T, Option>::SparseMatrix()
-            : Base()
-            , elements()
-            , maxMinor(0) {}
-
-    template<Scalar T, int Option>
     SparseMatrix<T, Option>::SparseMatrix(size_t row, size_t col)
             : Base()
             , elements()
             , majorStarts(MatrixOption::selectMajor<This>(row, col) + 1, 0)
-            , maxMinor(MatrixOption::selectMinor<This>(row, col)) {}
+            , maxMinor(MatrixOption::selectMinor<This>(row, col)) {
+        size_t size = std::max(row, col);
+        elements.reserve(size);
+        minorIndexes.reserve(size);
+    }
 
     template<Scalar T, int Option>
     void SparseMatrix<T, Option>::insert(T x, size_t row, size_t col) {

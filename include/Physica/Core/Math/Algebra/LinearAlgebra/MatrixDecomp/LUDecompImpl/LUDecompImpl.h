@@ -77,9 +77,9 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     void LUDecomp<T, Pivot>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        working.swap(obj);
+        working.swap(obj.working);
         if constexpr (Pivot)
-            perm.swap(perm);
+            perm.swap(obj.perm);
     }
 
     template<Scalar T, bool Pivot>
@@ -89,7 +89,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::pre_compute(const Matrix auto& source) const noexcept {
+    void LUDecomp<T, Pivot>::pre_compute([[maybe_unused]] const Matrix auto& source) const noexcept {
         assert(source.isSquare());
         assert(source.getRow() == getOrder());
     }
