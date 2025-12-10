@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "DQMCImpl/ImagKinetic.h"
-#include "DQMCImpl/HubbardParams.h"
+#include "FreqDQMC.h"
 
 namespace Physica {
     template<Scalar T>
@@ -32,6 +32,7 @@ namespace Physica {
         using GreenPair = ImagKinetic<T>::GreenPair;
 
         using Tr = T::RealType;
+        using Tc = T::ComplexType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
@@ -68,22 +69,18 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
         [[nodiscard]] auto& getGreens() noexcept { return greens; }
-        /* Static members */
+        [[nodiscard]] constexpr static Trv getSign() noexcept { return 1; }
         [[nodiscard]] constexpr static Trv getRSign() noexcept { return 1; }
     private:
-        /* Operations */
-        void metropolis(int site, Tr prob);
         template<RNG R>
         [[nodiscard]] T randAuxField();
         [[nodiscard]] T calcLnZ();
-        /* Static members */
-        [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity);
     };
 
     template<Scalar T>
     ElasticDQMC<T>::ElasticDQMC(const Params& params_, Trv freqDensity)
             : params(&params_)
-            , rSquareOmegas(calcFreqCutoff(params_.getBeta(), freqDensity))
+            , rSquareOmegas(FreqDQMC<Tc>::calcFreqCutoff(params_.getBeta(), freqDensity))
             , actionR(params_.getHoppingMatrix())
             , eig(params_.getNumSite(), true) {
         assert(freqDensity.isPositive());
@@ -163,11 +160,5 @@ namespace Physica {
         actionR.diag() = -actionR.diag();
         T lnZD = diagonalize(greens[1]);
         return lnZU + lnZD;
-    }
-
-    template<Scalar T>
-    int ElasticDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) {
-        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
-        return (i + 1) * 4; // Multiple of 4 so that SIMD works
     }
 }

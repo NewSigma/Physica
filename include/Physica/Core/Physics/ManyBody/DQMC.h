@@ -95,6 +95,7 @@ namespace Physica {
     void DQMC<T>::step_random() {
         kinetic.template random_uniform<R>();
         productor.invalidates(getAuxField(), params->getAlpha());
+        calcGreens(0);
     }
 
     template<Scalar T>

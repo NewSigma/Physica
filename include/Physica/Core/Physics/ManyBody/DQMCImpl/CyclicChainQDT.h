@@ -66,6 +66,7 @@ namespace Physica {
         for (size_t split = 0; split < numSplit; ++split) {
             // Buffering reduces time complexity from O(n^2) to O(n).
             auto& subchains = chainBuffer[split];
+            subchains.reserve(numSplit);
             for (size_t from = 0; from < numSplit; ++from) {
                 for (size_t to = 0; to < numSplit; ++to) {
                     if (inRange(from, to, split))
