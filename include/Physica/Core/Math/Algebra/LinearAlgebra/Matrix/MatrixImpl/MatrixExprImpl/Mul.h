@@ -32,6 +32,8 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operators */
+        using Base::operator*;
+        [[nodiscard]] auto operator*(Scalar auto x) const noexcept;
         [[nodiscard]] auto operator-() const& noexcept;
         [[nodiscard]] auto operator-() && noexcept;
         /* Operations */
@@ -46,6 +48,11 @@ namespace Physica {
         using Base::getLHS;
         using Base::getRHS;
     };
+
+    template<Matrix M, Scalar U>
+    auto MatrixExpr<ExprID::Mul, M, U>::operator*(Scalar auto x) const noexcept {
+        return getLHS() * (getRHS() * x);
+    }
 
     template<Matrix M, Scalar U>
     auto MatrixExpr<ExprID::Mul, M, U>::operator-() const& noexcept {

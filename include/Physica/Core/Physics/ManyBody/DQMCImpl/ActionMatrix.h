@@ -46,6 +46,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        void assign(Matrix auto&& target) const;
+
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
         template<RNG R>
@@ -77,30 +79,59 @@ namespace Physica {
     }
 
     template<Scalar T>
+    void ActionMatrix<T>::assign(Matrix auto&& target) const {
+        target.zeros();
+
+        const int numSite = getNumSite();
+        const Tr shiftChemMu = params.getChemMu() - params.getRepelU() * 0.5;
+        kronecker(UnitMatrix<Trv>(matsubara.getRow()), params.getHoppingMatrix() - UnitMatrix<Trv>(getNumSite()) * shiftChemMu).assign_add(target);
+        kronecker(matsubara, UnitMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
+        for (int rowFreq = 0; rowFreq < getNumFreq() * 2; ++rowFreq) {
+            int offsetR = rowFreq * numSite;
+            for (int colFreq = 0; colFreq <= rowFreq; ++colFreq) {
+                if (rowFreq == colFreq) {
+                    target.block(offsetR, numSite, offsetR, numSite).diag() += auxField.row(0);
+                    continue;
+                }
+                int offsetC = colFreq * numSite;
+                int freq = rowFreq - colFreq;
+                target.block(offsetR, numSite, offsetC, numSite).diag() = auxField.row(freq);
+                target.block(offsetC, numSite, offsetR, numSite).diag() = auxField.row(freq).conjugate();
+            }
+        }
+    }
+
+    template<Scalar T>
     T ActionMatrix<T>::calc(size_t row, size_t col) const {
+        assert(row < getRow());
+        assert(col < getCol());
         const int numSite = getNumSite();
         const size_t rowFreq = row / numSite;
         const size_t rowSite = row % numSite;
         const size_t colFreq = col / numSite;
         const size_t colSite = col % numSite;
-
-        Tr re = kronecker(UnitMatrix<Trv>(matsubara.getRow()), params.getHoppingMatrix()).calc(row, col);
-        Tr im = kronecker(matsubara, UnitMatrix<Trv>(numSite)).calc(row, col);
-        if (rowSite != colSite)
-            return T(re, im);
-
-        if (rowFreq == colFreq) {
-            re -= params.getChemMu() - params.getRepelU() * 0.5;
-            re += auxField(0, rowSite).real() / params.getBeta();
+        bool diagFreq = rowFreq == colFreq;
+        bool diagSite = rowSite == colSite;
+        if (diagFreq) {
+            Tr re = 0, im = 0;
+            re = params.getHoppingMatrix()(rowSite, colSite);
+            if (diagSite) {
+                const Tr shiftChemMu = params.getChemMu() - params.getRepelU() * 0.5;
+                re += auxField(0, rowSite).real() - shiftChemMu;
+                im = matsubara.diag()[rowFreq];
+            }
             return T(re, im);
         }
 
-        T aux;
-        if (rowFreq > colFreq)
-            aux = auxField(rowFreq - colFreq, rowSite);
-        else
-            aux = auxField(colFreq - rowFreq, rowSite).conjugate();
-        return T(re, im) + aux / params.getBeta();
+        if (diagSite) {
+            T aux;
+            if (rowFreq > colFreq)
+                aux = auxField(rowFreq - colFreq, rowSite);
+            else
+                aux = auxField(colFreq - rowFreq, rowSite).conjugate();
+            return aux;
+        }
+        return 0;
     }
 
     template<Scalar T>

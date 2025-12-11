@@ -42,7 +42,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    void RValueMatrix<Derived>::assign_add(Matrix auto& target) const {
+    void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const {
         assert_assign(target);
 
         const size_t maxMajor = target.getMaxMajor();

@@ -103,3 +103,5 @@ namespace Physica {
         constexpr static bool FastAssign = true;
     };
 }
+
+#include "UnitMatrixImpl/Mul.h"

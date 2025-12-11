@@ -21,6 +21,8 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
+    template<Scalar, size_t Order> class UnitMatrix;
+
     template<Matrix M1, Matrix M2>
     class Kronecker : public RValueMatrix<Kronecker<M1, M2>> {
         using This = Kronecker<M1, M2>;
@@ -39,6 +41,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        void assign(Matrix auto&& target) const;
+        void assign_add(Matrix auto&& target) const;
+
         [[nodiscard]] T calc(size_t row, size_t col) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
@@ -47,6 +52,40 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     Kronecker<M1, M2>::Kronecker(const M1& m1, const M2& m2) : m1(m1), m2(m2) {}
+
+    template<Matrix M1, Matrix M2>
+    void Kronecker<M1, M2>::assign(Matrix auto&& target) const {
+        for (size_t r = 0; r < m1.getRow(); ++r) {
+            size_t offsetR = r * m2.getRow();
+            if constexpr (instanceof_tx<UnitMatrix, M1>)
+                m2.assign(target.block(offsetR, m2.getRow(), offsetR, m2.getCol()));
+            else if constexpr (instanceof_tx<DiagMatrix, M2>)
+                (m2 * m1.calc(r, r)).assign(target.block(offsetR, m2.getRow(), offsetR, m2.getCol()));
+            else {
+                for (size_t c = 0; c < m1.getCol(); ++c) {
+                    size_t offsetC = c * m2.getCol();
+                    (m2 * m1.calc(r, c)).assign(target.block(offsetR, m2.getRow(), offsetC, m2.getCol()));
+                }
+            }
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    void Kronecker<M1, M2>::assign_add(Matrix auto&& target) const {
+        for (size_t r = 0; r < m1.getRow(); ++r) {
+            size_t offsetR = r * m2.getRow();
+            if constexpr (instanceof_tx<UnitMatrix, M1>)
+                m2.assign_add(target.block(offsetR, m2.getRow(), offsetR, m2.getCol()));
+            else if constexpr (instanceof_tx<DiagMatrix, M2>)
+                (m2 * m1.calc(r, r)).assign_add(target.block(offsetR, m2.getRow(), offsetR, m2.getCol()));
+            else {
+                for (size_t c = 0; c < m1.getCol(); ++c) {
+                    size_t offsetC = c * m2.getCol();
+                    (m2 * m1.calc(r, c)).assign_add(target.block(offsetR, m2.getRow(), offsetC, m2.getCol()));
+                }
+            }
+        }
+    }
 
     template<Matrix M1, Matrix M2>
     auto Kronecker<M1, M2>::calc(size_t row, size_t col) const -> T {
