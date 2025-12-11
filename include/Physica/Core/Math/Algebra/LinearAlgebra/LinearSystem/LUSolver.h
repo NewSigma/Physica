@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 namespace Physica {
     template<Scalar T, int Option, size_t Order = Dynamic>
@@ -27,7 +27,7 @@ namespace Physica {
         using MatrixType = DenseMatrix<T, Option, Order, Order>;
         using MatrixB = DenseMatrix<T>;
     private:
-        LUDecomp<T, true> lu;
+        DenseLU<T, true> lu;
     public:
         LUSolver() = default;
         LUSolver(MatrixType A);

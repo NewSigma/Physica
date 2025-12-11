@@ -18,20 +18,20 @@
  */
 #pragma once
 
-#include "../LUDecomp.h"
-#include "LUMatrixL.h"
+#include "../DenseLU.h"
+#include "MatrixL.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    LUDecomp<T, Pivot>::LUDecomp(size_t size) : working(size, size), perm(size) {}
+    DenseLU<T, Pivot>::DenseLU(size_t size) : working(size, size), perm(size) {}
 
     template<Scalar T, bool Pivot>
-    LUDecomp<T, Pivot>::LUDecomp(const Matrix auto& source) : LUDecomp(source.getRow()) {
+    DenseLU<T, Pivot>::DenseLU(const Matrix auto& source) : DenseLU(source.getRow()) {
         compute(source);
     }
 
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::compute(const Matrix auto& source) {
+    void DenseLU<T, Pivot>::compute(const Matrix auto& source) {
         if constexpr (HasMKL())
             compute_mkl(source);
         else
@@ -39,7 +39,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::compute_base(const Matrix auto& source) {
+    void DenseLU<T, Pivot>::compute_base(const Matrix auto& source) {
         pre_compute(source);
 
         const size_t order = source.getRow();
@@ -60,27 +60,37 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    T LUDecomp<T, Pivot>::det() const noexcept {
+    T DenseLU<T, Pivot>::det() const noexcept {
         T result = working.diag().prod();
         if constexpr (Pivot)
             result *= perm.det();
         return result;
     }
 
+    template<Scalar T, bool Pivot>
+    auto DenseLU<T, Pivot>::lnAbsDet() const noexcept -> Tr {
+        return ln(abs(working.diag())).sum();
+    }
+
+    template<Scalar T, bool Pivot>
+    T DenseLU<T, Pivot>::sgndet() const noexcept {
+        return unit(working.diag()).prod();
+    }
+
     template<Scalar T, bool Pivot> 
-    auto LUDecomp<T, Pivot>::inv() const noexcept {
+    auto DenseLU<T, Pivot>::inv() const noexcept {
         return Inverse<This>(*this);
     }
 
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::resize(size_t size) {
+    void DenseLU<T, Pivot>::resize(size_t size) {
         working.resize(size, size);
         if constexpr (Pivot)
             perm.resize(size);
     }
 
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::swap(This& __restrict obj) noexcept {
+    void DenseLU<T, Pivot>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         if constexpr (Pivot)
@@ -88,13 +98,13 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    const PermMatrix<T>& LUDecomp<T, Pivot>::getPerm() const noexcept {
+    const PermMatrix<T>& DenseLU<T, Pivot>::getPerm() const noexcept {
         static_assert(Pivot, "[Error]: Perm is available to PLU decomp only");
         return perm;
     }
 
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::pre_compute([[maybe_unused]] const Matrix auto& source) const noexcept {
+    void DenseLU<T, Pivot>::pre_compute([[maybe_unused]] const Matrix auto& source) const noexcept {
         assert(source.isSquare());
         assert(source.getRow() == getOrder());
     }
@@ -103,7 +113,7 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::decomp_col(size_t col) {
+    void DenseLU<T, Pivot>::decomp_col(size_t col) {
         const size_t alpha = col + 1;
         for (size_t j = 1; j < alpha; ++j)
             working(j, col) -= working.row(j).head(j) * working.col(col).head(j);

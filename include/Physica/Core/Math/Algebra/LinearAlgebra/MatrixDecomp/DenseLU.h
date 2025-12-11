@@ -23,27 +23,28 @@
 
 namespace Physica {
     template<Scalar> class LUMatrixL;
-    template<Scalar, bool Pivot> class LUDecompInv;
+    template<Scalar, bool Pivot> class DenseLUInv;
 
     template<Scalar T, bool Pivot>
-    class LUDecomp {
-        using This = LUDecomp;
+    class DenseLU {
+        using This = DenseLU;
         using WorkingMatrix = DenseMatrix<T>;
         using BiasArray = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
 
         constexpr static bool isComplex = T::isComplex;
+        using Tr = T::RealType;
         using Tc = T::ComplexType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
     private:
         WorkingMatrix working;
         [[no_unique_address]] BiasArray perm;
     public:
-        LUDecomp() = default;
-        LUDecomp(size_t size);
-        LUDecomp(const Matrix auto& source);
-        LUDecomp(const This&) = default;
-        LUDecomp(This&&) noexcept = default;
-        ~LUDecomp() = default;
+        DenseLU() = default;
+        DenseLU(size_t size);
+        DenseLU(const Matrix auto& source);
+        DenseLU(const This&) = default;
+        DenseLU(This&&) noexcept = default;
+        ~DenseLU() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -52,6 +53,8 @@ namespace Physica {
         void compute_base(const Matrix auto& source);
 
         [[nodiscard]] T det() const noexcept;
+        [[nodiscard]] Tr lnAbsDet() const noexcept;
+        [[nodiscard]] T sgndet() const noexcept;
         [[nodiscard]] auto inv() const noexcept;
 
         void resize(size_t size);
@@ -70,8 +73,8 @@ namespace Physica {
     };
 }
 
-#include "LUDecompImpl/LUDecompImpl.h"
+#include "DenseLUImpl/DenseLUImpl.h"
 #ifdef PHYSICA_MKL
-    #include "LUDecompImpl/LUDecomp_MKL.h"
+    #include "DenseLUImpl/DenseLU_MKL.h"
 #endif
-#include "LUDecompImpl/LUInverse.h"
+#include "DenseLUImpl/Inverse.h"

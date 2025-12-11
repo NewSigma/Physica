@@ -33,7 +33,7 @@ namespace Physica {
     private:
         ActionMatrix<T> action;
 
-        Array<LUDecomp<T, false>, 2> lu;
+        Array<DenseLU<T, false>, 2> lu;
         GreenPair greens;
         MatrixND<T> buffer;
 

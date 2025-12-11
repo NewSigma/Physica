@@ -369,18 +369,18 @@ namespace Physica {
                  + calc(0, 1) * (calc(1, 2) * calc(2, 0) - calc(1, 0) * calc(2, 2))
                  + calc(0, 2) * (calc(1, 0) * calc(2, 1) - calc(1, 1) * calc(2, 0));
         else
-            return LUDecomp<T, false>(Base::getDerived()).det();
+            return DenseLU<T, false>(Base::getDerived()).det();
     }
 
     template<class Derived>
     auto RValueMatrix<Derived>::lnAbsDet() const -> Tr {
-        LUDecomp<T, false> lu(Base::getDerived());
+        DenseLU<T, false> lu(Base::getDerived());
         return ln(abs(lu.getMatrixLU().diag())).sum();
     }
 
     template<class Derived>
     auto RValueMatrix<Derived>::sgndet() const {
-        LUDecomp<T, false> lu(Base::getDerived());
+        DenseLU<T, false> lu(Base::getDerived());
         return unit(lu.getMatrixLU().diag()).prod();
     }
 

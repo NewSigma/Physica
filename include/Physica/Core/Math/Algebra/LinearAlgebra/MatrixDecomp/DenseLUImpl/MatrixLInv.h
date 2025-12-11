@@ -18,55 +18,54 @@
  */
 #pragma once
 
-#include "../LUDecomp.h"
+#include "MatrixL.h"
 
 namespace Physica {
     template<Scalar T>
-    class LUMatrixL : public RValueMatrix<LUMatrixL<T>> {
-        using This = LUMatrixL<T>;
+    class Inverse<LUMatrixL<T>> : public RValueMatrix<Inverse<LUMatrixL<T>>> {
+        using This = Inverse<LUMatrixL<T>>;
         using Base = RValueMatrix<This>;
         using typename Base::Trv;
 
-        const DenseMatrix<T>& matrixLU;
+        const LUMatrixL<T>& matL;
     public:
-        template<bool Pivot>
-        LUMatrixL(const LUDecomp<T, Pivot>& lu);
-        LUMatrixL(const This&) = delete;
-        LUMatrixL(This&&) noexcept = delete;
-        ~LUMatrixL() = default;
+        Inverse(const LUMatrixL<T>& matL_);
+        Inverse(const This&) = delete;
+        Inverse(This&&) noexcept = delete;
+        ~Inverse() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const;
-
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return matrixLU.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return matrixLU.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return matL.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return matL.getCol(); }
     };
 
     template<Scalar T>
-    template<bool Pivot>
-    LUMatrixL<T>::LUMatrixL(const LUDecomp<T, Pivot>& lu) : matrixLU(lu.getMatrixLU()) {}
+    Inverse<LUMatrixL<T>>::Inverse(const LUMatrixL<T>& matL_) : matL(matL_) {}
 
     template<Scalar T>
-    T LUMatrixL<T>::calc(size_t row, size_t col) const {
-        if (row == col)
-            return T(1);
-        return matrixLU.tril().calc(row, col);
-    }
-
-    template<Scalar T>
-    void LUMatrixL<T>::assign(Matrix auto& target) const {
-        target = matrixLU.tril();
+    void Inverse<LUMatrixL<T>>::assign(Matrix auto& target) const {
+        Base::assert_assign(target);
+        target = -matL;
         target.diag() = Trv(1);
+        for (size_t i = 1; i < getCol() - 1; ++i) {
+            auto corner = target.bottomLeftCorner(i + 1, i);
+
+            auto row = target.row(i);
+            auto col = target.col(i);
+            auto head = row.head(i);
+            auto tail = col.tail(i + 1);
+            corner += tail * head.transpose();
+        }
     }
 }
 
 namespace Physica {
     template<Scalar T>
-    class Traits<LUMatrixL<T>> {
+    class Traits<Inverse<LUMatrixL<T>>> {
     public:
         using ScalarType = T;
         constexpr static int Option = MatrixOption::Col;
@@ -75,5 +74,3 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }
-
-#include "LUMatrixLInv.h"

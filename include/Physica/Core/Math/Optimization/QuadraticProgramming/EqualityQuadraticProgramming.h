@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 namespace Physica {
     /**

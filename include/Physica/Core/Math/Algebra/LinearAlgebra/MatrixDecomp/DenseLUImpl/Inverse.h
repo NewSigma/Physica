@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    class Inverse<LUDecomp<T, Pivot>> : public RValueMatrix<Inverse<LUDecomp<T, Pivot>>> {
-        using LU = LUDecomp<T, Pivot>;
+    class Inverse<DenseLU<T, Pivot>> : public RValueMatrix<Inverse<DenseLU<T, Pivot>>> {
+        using LU = DenseLU<T, Pivot>;
         using This = Inverse<LU>;
         using Base = RValueMatrix<This>;
 
@@ -47,16 +47,16 @@ namespace Physica {
         void assign(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] const LU& getLUDecomp() const noexcept { return lu; }
+        [[nodiscard]] const LU& getDenseLU() const noexcept { return lu; }
         [[nodiscard]] size_t getRow() const noexcept { return lu.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
     };
 
     template<Scalar T, bool Pivot>
-    Inverse<LUDecomp<T, Pivot>>::Inverse(const LU& lu) : lu(lu) {}
+    Inverse<DenseLU<T, Pivot>>::Inverse(const LU& lu) : lu(lu) {}
 
     template<Scalar T, bool Pivot>
-    void Inverse<LUDecomp<T, Pivot>>::assign(Matrix auto& target) const {
+    void Inverse<DenseLU<T, Pivot>>::assign(Matrix auto& target) const {
         Base::assert_assign(target);
         if constexpr (HasMKL())
             assign_mkl(target);
@@ -67,13 +67,13 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, bool P>
-    class Traits<Inverse<LUDecomp<T, P>>> : public Traits<LUMatrixL<T>> {
+    class Traits<Inverse<DenseLU<T, P>>> : public Traits<LUMatrixL<T>> {
     public:
         constexpr static bool Pivot = P;
     };
 }
 
 #ifdef PHYSICA_MKL
-    #include "LUInverse_MKL.h"
+    #include "Inverse_MKL.h"
 #endif
-#include "LUInverseGEMV.h"
+#include "InverseGEMV.h"

@@ -1,7 +1,7 @@
 physica_add_test(Bidiagonalization Bidiagonalization.cpp)
 physica_add_test(Cholesky Cholesky.cpp)
 physica_add_test(Hessenburg Hessenburg.cpp)
-physica_add_test(LUDecomp LUDecomp.cpp)
+physica_add_test(DenseLU DenseLU.cpp)
 physica_add_test(QRDecomp QRDecomp.cpp)
 physica_add_test(Schur Schur.cpp)
 physica_add_test(SVD SVD.cpp)

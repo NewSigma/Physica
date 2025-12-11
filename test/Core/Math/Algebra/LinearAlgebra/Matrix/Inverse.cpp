@@ -18,7 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 using namespace Physica;
 

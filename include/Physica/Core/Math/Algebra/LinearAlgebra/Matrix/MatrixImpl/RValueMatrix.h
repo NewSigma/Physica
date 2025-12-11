@@ -40,7 +40,7 @@ namespace Physica {
     template<class> class NormMatrix;
     template<class> class ValueMatrix;
     template<class, int GradOrder> class GradMatrix;
-    template<Scalar, bool Pivot> class LUDecomp;
+    template<Scalar, bool Pivot> class DenseLU;
     template<Matrix, Matrix> class GEMM;
 
     namespace Internal {

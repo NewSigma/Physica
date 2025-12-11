@@ -18,19 +18,19 @@
  */
 #pragma once
 
-#include "LUInverseGEMV.h"
+#include "InverseGEMV.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getLUDecomp(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     void GEMV<M, V>::assign_mkl(Vector auto& target) const {
         constexpr bool Pivot = Traits<M>::Pivot;
         constexpr int Layout = LAPACK_COL_MAJOR;
         constexpr char trans = 'N';
         size_t n = getLength();
-        const auto* a = reinterpret_cast<const Tm*>(m.getLUDecomp().getMatrixLU().data());
+        const auto* a = reinterpret_cast<const Tm*>(m.getDenseLU().getMatrixLU().data());
         auto* b = reinterpret_cast<Tm*>(target.data());
         if constexpr (Pivot) {
-            MKL_INT64* ipiv = m.getLUDecomp().getPerm().getIndices().data();
+            MKL_INT64* ipiv = m.getDenseLU().getPerm().getIndices().data();
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));

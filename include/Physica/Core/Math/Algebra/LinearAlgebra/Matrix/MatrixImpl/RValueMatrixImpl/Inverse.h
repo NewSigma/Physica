@@ -21,7 +21,7 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
-    template<Scalar, bool> class LUDecomp;
+    template<Scalar, bool> class DenseLU;
 
     template<Matrix M>
     class Inverse<M> : public RValueMatrix<Inverse<M>> {
@@ -65,7 +65,7 @@ namespace Physica {
         else if constexpr (Order == 3)
             assign3D(target);
         else {
-            auto lu = LUDecomp<T, true>(mat);
+            auto lu = DenseLU<T, true>(mat);
             target = lu.getMatrixL().inv();
             target *= lu.getPerm().inv();
             target = lu.getMatrixU().inv() * target;

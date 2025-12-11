@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "LUInverse.h"
+#include "Inverse.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    void Inverse<LUDecomp<T, Pivot>>::assign_mkl(Matrix auto& target) const {
+    void Inverse<DenseLU<T, Pivot>>::assign_mkl(Matrix auto& target) const {
         Base::assert_assign(target);
         lu.getMatrixLU().assign(target);
 

@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include "LUInverse.h"
+#include "Inverse.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getLUDecomp(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -54,10 +54,10 @@ namespace Physica {
         [[nodiscard]] const auto& getRHS() const noexcept { return v; }
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getLUDecomp(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     GEMV<M, V>::GEMV(M m, V v) : m(std::forward<M>(m)), v(std::forward<V>(v)) {}
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getLUDecomp(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         Base::assert_assign(target);
@@ -69,5 +69,5 @@ namespace Physica {
 }
 
 #ifdef PHYSICA_MKL
-    #include "LUInverseGEMV_MKL.h"
+    #include "InverseGEMV_MKL.h"
 #endif

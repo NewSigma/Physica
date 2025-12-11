@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "../LUDecomp.h"
+#include "../DenseLU.h"
 #include "Physica/Core/Exception/MKL/Lapack.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    void LUDecomp<T, Pivot>::compute_mkl(const Matrix auto& source) {
+    void DenseLU<T, Pivot>::compute_mkl(const Matrix auto& source) {
         pre_compute(source);
         working = source;
 

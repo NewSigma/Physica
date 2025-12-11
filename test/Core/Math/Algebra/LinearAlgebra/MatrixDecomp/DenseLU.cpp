@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/LUDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 using namespace Physica;
 using Matrix3D = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
@@ -26,7 +26,7 @@ namespace {
     template<bool Pivot>
     void test(const Matrix auto& answer, double prec) {
         using M = std::remove_cvref<decltype(answer)>::type;
-        LUDecomp<float64, Pivot> lu(answer.getRow());
+        DenseLU<float64, Pivot> lu(answer.getRow());
         auto product = [&, prec]() {
             M matrixL = lu.getMatrixLU().tril();
             matrixL.diag() = float64(1);
