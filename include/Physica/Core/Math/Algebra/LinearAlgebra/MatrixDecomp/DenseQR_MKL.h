@@ -19,11 +19,11 @@
 #pragma once
 
 #include "Physica/Core/Exception/MKL/Lapack.h"
-#include "QRDecomp.h"
+#include "DenseQR.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    void QRDecomp<T, Pivot>::compute_mkl(const Matrix auto& source) {
+    void DenseQR<T, Pivot>::compute_mkl(const Matrix auto& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
@@ -71,7 +71,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixQ_mkl() const -> MatrixND<T> {
+    auto DenseQR<T, Pivot>::getMatrixQ_mkl() const -> MatrixND<T> {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         constexpr int Layout = LAPACK_COL_MAJOR;
         const size_t m = getRow();

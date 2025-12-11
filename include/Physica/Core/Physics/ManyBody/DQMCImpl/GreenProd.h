@@ -35,7 +35,7 @@ namespace Physica {
         CyclicChainQDT<T> chainU;
         CyclicChainQDT<T> chainD;
 
-        QRDecomp<T> qr;
+        DenseQR<T> qr;
         DiagMatrix<Tr> diagB;
         DiagMatrix<Tr> diagS;
         MatrixND<T>  buffer;

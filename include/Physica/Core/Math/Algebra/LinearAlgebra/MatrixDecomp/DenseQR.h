@@ -30,29 +30,30 @@ namespace Physica {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:249
      */
     template<Scalar T, bool Pivot = false>
-    class QRDecomp {
+    class DenseQR {
+        using This = DenseQR<T, Pivot>;
         constexpr static bool isComplex = T::isComplex;
-        using This = QRDecomp<T, Pivot>;
-        using Perm = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
+        constexpr static size_t Threhold = 16;
+        
 
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
         using Tv = T::ValueType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
-        constexpr static size_t Threhold = 16;
+        using PermType = std::conditional<Pivot, PermMatrix<Tr>, PlainStruct<void>>::type;
     private:
         MatrixND<T> working;
         VectorND<T> taus;
-        [[no_unique_address]] Perm perm;
+        [[no_unique_address]] PermType perm;
     public:
-        QRDecomp() = default;
-        explicit QRDecomp(size_t order);
-        QRDecomp(size_t row, size_t col);
-        QRDecomp(const Matrix auto& source);
-        QRDecomp(const This&) = default;
-        QRDecomp(This&&) noexcept = default;
-        ~QRDecomp() = default;
+        DenseQR() = default;
+        explicit DenseQR(size_t order);
+        DenseQR(size_t row, size_t col);
+        DenseQR(const Matrix auto& source);
+        DenseQR(const This&) = default;
+        DenseQR(This&&) noexcept = default;
+        ~DenseQR() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -83,21 +84,21 @@ namespace Physica {
     };
 
     template<Scalar T, bool Pivot>
-    QRDecomp<T, Pivot>::QRDecomp(size_t order) : QRDecomp(order , order) {}
+    DenseQR<T, Pivot>::DenseQR(size_t order) : DenseQR(order , order) {}
 
     template<Scalar T, bool Pivot>
-    QRDecomp<T, Pivot>::QRDecomp(size_t row, size_t col) {
+    DenseQR<T, Pivot>::DenseQR(size_t row, size_t col) {
         resize(row, col);
     }
 
     template<Scalar T, bool Pivot>
-    QRDecomp<T, Pivot>::QRDecomp(const Matrix auto& source) : QRDecomp(source.getRow(), source.getCol()) {
+    DenseQR<T, Pivot>::DenseQR(const Matrix auto& source) : DenseQR(source.getRow(), source.getCol()) {
         compute(source);
     }
 
     template<Scalar T, bool Pivot>
     template<Matrix M>
-    void QRDecomp<T, Pivot>::compute(const M& source) {
+    void DenseQR<T, Pivot>::compute(const M& source) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
         constexpr bool SmallMatrix = M::SizeAtCompile <= Threhold && M::SizeAtCompile != Dynamic;
@@ -117,7 +118,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    void QRDecomp<T, Pivot>::compute_base(const Matrix auto& source) {
+    void DenseQR<T, Pivot>::compute_base(const Matrix auto& source) {
         static_assert(!Pivot && "Not implemented");
         working = source;
 
@@ -138,7 +139,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::calcDetQ() const noexcept -> Tv {
+    auto DenseQR<T, Pivot>::calcDetQ() const noexcept -> Tv {
         if constexpr (isComplex) {
             T x = 1;
             for (auto tau : taus)
@@ -153,7 +154,7 @@ namespace Physica {
      * Decompose matrix like A = QDT(no pivoting), or A = QDTP(poviting), where D is diagonal
      */
     template<Scalar T, bool Pivot>
-    void QRDecomp<T, Pivot>::toQDT(VectorND<Tr>& diagD) noexcept {
+    void DenseQR<T, Pivot>::toQDT(VectorND<Tr>& diagD) noexcept {
         const size_t length = taus.getLength();
         assert(diagD.getLength() == length);
         for (size_t i = 0; i < length; ++i) {
@@ -169,14 +170,14 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::toQDT() -> VectorND<Tr> {
+    auto DenseQR<T, Pivot>::toQDT() -> VectorND<Tr> {
         VectorND<Tr> vecD(taus.getLength());
         toQDT(vecD);
         return vecD;
     }
 
     template<Scalar T, bool Pivot>
-    T QRDecomp<T, Pivot>::det() const noexcept {
+    T DenseQR<T, Pivot>::det() const noexcept {
         T result = calcDetQ() * getMatrixR().det();
         if constexpr (Pivot)
             result *= perm.det();
@@ -184,16 +185,16 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    void QRDecomp<T, Pivot>::resize(size_t row, size_t col) {
+    void DenseQR<T, Pivot>::resize(size_t row, size_t col) {
         working.resize(row, col);
         auto l = std::min(row, col);
         taus.resize(l);
         if constexpr (Pivot)
-            perm = Perm(col);
+            perm = PermType(col);
     }
 
     template<Scalar T, bool Pivot>
-    void QRDecomp<T, Pivot>::swap(This& __restrict obj) noexcept {
+    void DenseQR<T, Pivot>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         taus.swap(obj.taus);
@@ -201,7 +202,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixQ() const -> MatrixND<T> {
+    auto DenseQR<T, Pivot>::getMatrixQ() const -> MatrixND<T> {
         if constexpr (HasMKL()) {
             if constexpr (isComplex) // Our complex householder is slightly different from MKL, getMatrixQ_base() cannot apply to compute_mkl.
                 return getMatrixQ_mkl();
@@ -215,7 +216,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixQ_base() const -> MatrixND<T> {
+    auto DenseQR<T, Pivot>::getMatrixQ_base() const -> MatrixND<T> {
         auto result = MatrixND<T>::unitMatrix(getRow());
         for (size_t i = 0; i < taus.getLength() - !working.isOverdetermined(); ++i) {
             auto block = result.rightCols(i);
@@ -226,11 +227,11 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    auto QRDecomp<T, Pivot>::getMatrixR() const noexcept {
+    auto DenseQR<T, Pivot>::getMatrixR() const noexcept {
         return working.triu();
     }
 }
 
 #ifdef PHYSICA_MKL
-    #include "QRDecomp_MKL.h"
+    #include "DenseQR_MKL.h"
 #endif

@@ -17,13 +17,13 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/QRDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
 
 using namespace Physica;
 
 namespace {
     template<Scalar T, Matrix M, bool Pivot>
-    void testQR(const QRDecomp<T, Pivot>& qr, const M& m, double decompPrec, double detPrec) noexcept {
+    void testQR(const DenseQR<T, Pivot>& qr, const M& m, double decompPrec, double detPrec) noexcept {
         DenseMatrix<T> matrixQ = qr.getMatrixQ();
         M matrixR = qr.getMatrixR();
         M result = matrixQ * matrixR;
@@ -39,8 +39,8 @@ namespace {
 
     void testDecomp(const Matrix auto& m, double decompPrec, double detPrec) noexcept {
         using T = std::remove_cvref<decltype(m)>::type::ScalarType;
-        QRDecomp<T, false> qr(m.getRow(), m.getCol());
-        QRDecomp<T, true> qrp(m.getRow(), m.getCol());
+        DenseQR<T, false> qr(m.getRow(), m.getCol());
+        DenseQR<T, true> qrp(m.getRow(), m.getCol());
         if constexpr (HasMKL()) {
             qr.compute_mkl(m);
             qrp.compute_mkl(m);

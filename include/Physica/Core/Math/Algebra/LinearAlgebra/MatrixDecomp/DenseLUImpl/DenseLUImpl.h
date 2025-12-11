@@ -98,7 +98,7 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    const PermMatrix<T>& DenseLU<T, Pivot>::getPerm() const noexcept {
+    const auto& DenseLU<T, Pivot>::getPerm() const noexcept {
         static_assert(Pivot, "[Error]: Perm is available to PLU decomp only");
         return perm;
     }

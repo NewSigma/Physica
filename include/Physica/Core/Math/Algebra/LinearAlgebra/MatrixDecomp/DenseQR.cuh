@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include "QRDecomp.h"
+#include "DenseQR.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Utils/Container/Array.cuh"
 
 namespace Physica {
     template<Scalar T>
-    class device_obj<QRDecomp<T>> {
+    class device_obj<DenseQR<T>> {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
-        using host_obj = QRDecomp<T>;
+        using host_obj = DenseQR<T>;
         using This = device_obj<host_obj>;
         using MatrixND = device_obj<DenseMatrix<T>>;
         using DeviceVector = device_obj<VectorND<T>>;
@@ -69,17 +69,17 @@ namespace Physica {
     };
 
     template<Scalar T>
-    device_obj<QRDecomp<T>>::device_obj(size_t row, size_t col) {
+    device_obj<DenseQR<T>>::device_obj(size_t row, size_t col) {
         resize(row, col);
     }
 
     template<Scalar T>
-    device_obj<QRDecomp<T>>::device_obj(const Matrix auto& source) : device_obj(source.getRow(), source.getCol()) {
+    device_obj<DenseQR<T>>::device_obj(const Matrix auto& source) : device_obj(source.getRow(), source.getCol()) {
         compute(source);
     }
 
     template<Scalar T>
-    void device_obj<QRDecomp<T>>::compute(const Matrix auto& source) {
+    void device_obj<DenseQR<T>>::compute(const Matrix auto& source) {
         assert(getRow() == source.getRow());
         assert(getCol() == source.getCol());
         working = source;
@@ -97,7 +97,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __device__ T device_obj<QRDecomp<T>>::calcDetQ() const {
+    __device__ T device_obj<DenseQR<T>>::calcDetQ() const {
         int sign = 0;
         for (auto tau : taus)
             sign += tau.isPositive();
@@ -105,7 +105,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void device_obj<QRDecomp<T>>::toQDT() {
+    void device_obj<DenseQR<T>>::toQDT() {
         const size_t length = taus.getLength();
         vecD.resize(length);
 
@@ -133,7 +133,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void device_obj<QRDecomp<T>>::resize(size_t row, size_t col) {
+    void device_obj<DenseQR<T>>::resize(size_t row, size_t col) {
         working.resize(row, col);
         taus.resize(std::min(row, col));
         taus.zeros(); // For historic reason, BLAS-like interface will allocate a unused element
@@ -165,7 +165,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void device_obj<QRDecomp<T>>::swap(This& __restrict obj) noexcept {
+    void device_obj<DenseQR<T>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         taus.swap(obj.taus);
@@ -174,7 +174,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto device_obj<QRDecomp<T>>::getMatrixQ() -> MatrixND {
+    auto device_obj<DenseQR<T>>::getMatrixQ() -> MatrixND {
         static_assert(!isComplex, "[Error]: Not implemented");
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
 
@@ -199,12 +199,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto device_obj<QRDecomp<T>>::getMatrixR() const noexcept {
+    __host__ __device__ auto device_obj<DenseQR<T>>::getMatrixR() const noexcept {
         return working.triu();
     }
 
     template<Scalar T>
-    constexpr cudaDataType device_obj<QRDecomp<T>>::getDataType() noexcept {
+    constexpr cudaDataType device_obj<DenseQR<T>>::getDataType() noexcept {
         if constexpr (isComplex) {
             if constexpr (T::Prec == Float32)
                 return cudaDataType::CUDA_C_32F;

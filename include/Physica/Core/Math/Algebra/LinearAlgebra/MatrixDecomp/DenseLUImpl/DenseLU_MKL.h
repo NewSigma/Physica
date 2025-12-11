@@ -48,7 +48,7 @@ namespace Physica {
                     err = LAPACKE_dgetrf_64(Layout, m, n, a, lda, ipiv.data());
             }
 
-            perm = PermMatrix<T>(m);
+            perm = PermType(m);
             for (size_t i = 0; i < m; ++i)
                 perm.swapRows(i, ipiv[i] - 1);
             perm = perm.inv();

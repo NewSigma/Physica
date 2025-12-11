@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/QRDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "HubbardParams.h"
 
@@ -33,12 +33,12 @@ namespace Physica {
 
         MatrixND<T> matrixQ;
         DiagMatrix<Tr> matrixD; // matrixD suffers from over/underflow
-        QRDecomp<T> qr;
+        DenseQR<T> qr;
         Tv detQ;
     public:
         QDTDecomp() = default;
         QDTDecomp(size_t size);
-        QDTDecomp(QRDecomp<T> qr_);
+        QDTDecomp(DenseQR<T> qr_);
         QDTDecomp(const Matrix auto& source);
         QDTDecomp(const This&) = default;
         QDTDecomp(This&&) noexcept = default;
@@ -72,7 +72,7 @@ namespace Physica {
     QDTDecomp<T>::QDTDecomp(size_t size) : matrixQ(size, size), matrixD(size), qr(size, size) {}
 
     template<Scalar T>
-    QDTDecomp<T>::QDTDecomp(QRDecomp<T> qr_) : QDTDecomp(qr_.getRow()) {
+    QDTDecomp<T>::QDTDecomp(DenseQR<T> qr_) : QDTDecomp(qr_.getRow()) {
         assert(qr_.getWorking().isSquare());
         qr = std::move(qr_);
         detQ = qr.calcDetQ();

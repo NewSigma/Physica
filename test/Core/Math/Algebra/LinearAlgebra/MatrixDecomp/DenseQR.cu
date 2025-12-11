@@ -16,32 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/QRDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.cuh"
 
 using namespace Physica;
-using RandomSource = Random<>;
+using Matrix3D = DenseMatrix<float32, MatrixOption::Col, 3>;
 
-namespace {
-    void qr_mkl(benchmark::State& state) {
-        using T = float64;
-        const size_t order = state.range(0);
-        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        QRDecomp<T> qr(order, order);
-        for (auto _ : state) {
-            qr.compute_mkl(m);
-            benchmark::DoNotOptimize(qr);
-            benchmark::ClobberMemory();
-        }
-    }
+void testQR(device_obj<DenseQR<float32>>& qr, const Matrix3D& answer) {
+    device_obj<Matrix3D> matrixQ = qr.getMatrixQ();
+    device_obj<Matrix3D> matrixR = qr.getMatrixR();
+    Matrix3D result = device_obj<Matrix3D>(matrixQ * matrixR).toHost();
+    if (!matrixNear(result, answer, 1E-6))
+        exit(1);
 }
 
-BENCHMARK(qr_mkl)->Name("QR mkl")
-    ->Arg(2)
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(32)
-    ->Arg(64)
-    ->Arg(256)
-    ->Arg(1024);
+int main() {
+    const Matrix3D answer{2, 3, 4, 1, 1, 9, 1, 2, -6};
+    device_obj<DenseQR<float32>> qr(3, 3);
+
+    qr.compute(answer.toDevice());
+    testQR(qr, answer);
+    return 0;
+}

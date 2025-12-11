@@ -56,8 +56,9 @@ namespace Physica {
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
         [[nodiscard]] int getNumFreq() const noexcept { return auxField.getRow() / 2; }
         [[nodiscard]] int getNumSite() const noexcept { return auxField.getCol(); }
-        [[nodiscard]] size_t getRow() const noexcept { return matsubara.getRow() * getNumSite(); }
-        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getRow() * getNumSite(); }
+        [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
+        [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] auto& getAuxField() noexcept { return auxField; }
     };
 

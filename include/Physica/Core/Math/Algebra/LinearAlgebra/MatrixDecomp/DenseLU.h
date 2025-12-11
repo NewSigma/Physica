@@ -29,15 +29,16 @@ namespace Physica {
     class DenseLU {
         using This = DenseLU;
         using WorkingMatrix = DenseMatrix<T>;
-        using BiasArray = std::conditional<Pivot, PermMatrix<T>, PlainStruct<void>>::type;
 
         constexpr static bool isComplex = T::isComplex;
         using Tr = T::RealType;
         using Tc = T::ComplexType;
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+
+        using PermType = std::conditional<Pivot, PermMatrix<Tr>, PlainStruct<void>>::type;
     private:
         WorkingMatrix working;
-        [[no_unique_address]] BiasArray perm;
+        [[no_unique_address]] PermType perm;
     public:
         DenseLU() = default;
         DenseLU(size_t size);
@@ -66,7 +67,7 @@ namespace Physica {
         [[nodiscard]] const auto& getMatrixLU() const noexcept { return working; }
         [[nodiscard]] auto getMatrixL() const noexcept { return LUMatrixL<T>(*this); }
         [[nodiscard]] auto getMatrixU() const noexcept { return working.triu(); }
-        [[nodiscard]] const PermMatrix<T>& getPerm() const noexcept;
+        [[nodiscard]] const auto& getPerm() const noexcept;
     private:
         void pre_compute(const Matrix auto& source) const noexcept;
         void decomp_col(size_t col);

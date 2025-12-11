@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <benchmark/benchmark.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/QRDecomp.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
 
 using namespace Physica;
 using RandomSource = Random<>;
@@ -27,7 +27,7 @@ namespace {
         using T = float64;
         const size_t order = state.range(0);
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        QRDecomp<T> qr(order, order);
+        DenseQR<T> qr(order, order);
         for (auto _ : state) {
             [[clang::noinline]] qr.compute(m);
             benchmark::DoNotOptimize(qr);
@@ -39,7 +39,7 @@ namespace {
         using T = float64;
         const size_t order = state.range(0);
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        QRDecomp<T> qr(order, order);
+        DenseQR<T> qr(order, order);
         for (auto _ : state) {
             [[clang::noinline]] qr.compute_base(m);
             benchmark::DoNotOptimize(qr);

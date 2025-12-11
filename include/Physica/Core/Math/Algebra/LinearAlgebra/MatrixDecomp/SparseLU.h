@@ -105,7 +105,7 @@ namespace Physica {
     SparseLU<T>::SparseLU(SparseMatrix<T> source, bool needDiag) : SparseLU(source.getRow(), needDiag) {
         assert(source.isSquare());
         spmat = std::move(source);
-        runPardiso(Phase::AnalyseFactor);
+        runPardiso(Phase::AnalyseFactorize);
     }
 
     template<Scalar T>
