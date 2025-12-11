@@ -26,6 +26,7 @@ namespace Physica {
     class PermMatrix : public RValueMatrix<PermMatrix<T>> {
         using This = PermMatrix<T>;
         using Base = RValueMatrix<This>;
+        static_assert(!T::isComplex, "[Error]: Permutation matrix is real");
 
         using typename Base::Trv;
     private:
@@ -100,7 +101,7 @@ namespace Physica {
 
     template<Scalar T>
     void PermMatrix<T>::resize(size_t order) {
-        indices.resize(order);
+        *this = PermMatrix<T>(order);
     }
 
     template<Scalar T>

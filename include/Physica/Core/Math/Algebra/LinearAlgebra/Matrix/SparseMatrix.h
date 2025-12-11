@@ -36,6 +36,7 @@ namespace Physica {
     public:
         SparseMatrix() = default;
         SparseMatrix(size_t row, size_t col);
+        explicit SparseMatrix(const Matrix auto& m);
         SparseMatrix(const This&) = default;
         SparseMatrix(This&&) noexcept = default;
         ~SparseMatrix() = default;
@@ -67,6 +68,17 @@ namespace Physica {
         size_t size = std::max(row, col);
         elements.reserve(size);
         minorIndexes.reserve(size);
+    }
+
+    template<Scalar T, int Option>
+    SparseMatrix<T, Option>::SparseMatrix(const Matrix auto& m) : SparseMatrix(m.getRow(), m.getCol()) {
+        for (size_t r = 0; r < getRow(); ++r) {
+            for (size_t c = 0; c < getCol(); ++c) {
+                T x = m.calc(r, c);
+                if (!x.isZero())
+                    insert(x, r, c);
+            }
+        }
     }
 
     template<Scalar T, int Option>

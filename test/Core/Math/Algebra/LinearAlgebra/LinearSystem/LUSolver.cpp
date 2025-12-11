@@ -22,16 +22,16 @@
 using namespace Physica;
 
 int main() {
-    using ScalarType = float64;
-    using VectorType = Vector4D<ScalarType>;
-    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row, 4, 4>;
+    using T = float64;
+    using VectorType = Vector4D<T>;
+    using MatrixType = DenseMatrix<T, MatrixOption::Row, 4, 4>;
     const MatrixType A{{-0.000696013585639699, 0.816492585748236, 0.0216969440126965, -0.0884307621566726},
                        {0.691809621910274, -0.000696013585639699, 0.131671000379563, -0.0701048797366553},
                        {-0.0701048797366553, -0.0884307621566726, -0.131016640264434, 0.788769710999288},
                        {0.131671000379563, 0.0216969440126965, 0.643819646681362, -0.131016640264434}};
     const VectorType b{4.316511702487202E-1, 1.548712563601895E-2, 9.840637243791538E-1, 1.671684099146560E-1};
     const VectorType answer{0.06910464034803039, 0.6682416388355244, 0.5106380624075890, 1.413471488683768};
-    LUSolver<ScalarType, MatrixType::Option, 4> solver(A);
+    LUSolver<T, MatrixType::Option, 4> solver(A);
     const VectorType result = solver.solve(b);
     if (!vectorNear(result, answer, 1E-15))
         return 1;

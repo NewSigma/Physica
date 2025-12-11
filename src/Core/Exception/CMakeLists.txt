@@ -7,6 +7,7 @@ endif()
 
 if (${PHYSICA_MKL})
     target_sources(PhysicaCore PRIVATE MKL/Lapack.cpp)
+    target_sources(PhysicaCore PRIVATE MKL/Pardiso.cpp)
     target_sources(PhysicaCore PRIVATE MKL/VSL.cpp)
 endif()
 
