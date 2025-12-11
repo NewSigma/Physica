@@ -96,6 +96,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t from) const noexcept;
         [[nodiscard]] __host__ __device__ auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto diag() noexcept;
+        [[nodiscard]] __host__ __device__ const auto diag() const noexcept;
         [[nodiscard]] __host__ __device__ auto triu() noexcept;
         [[nodiscard]] __host__ __device__ const auto triu() const noexcept;
         [[nodiscard]] __host__ __device__ auto tril() noexcept;
@@ -103,7 +105,7 @@ namespace Physica {
 
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
-        [[nodiscard]] __device__ ScalarType calcFromMajorMinor(size_t row, size_t col) const;
+        [[nodiscard]] __device__ T calcFromMajorMinor(size_t major, size_t minor) const;
         void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept;
 
         [[nodiscard]] __host__ __device__ auto sum_rows() const;
@@ -157,3 +159,4 @@ namespace Physica {
 #include "MatrixProduct/GEMV.cuh"
 #include "MatrixProduct/GEVM.cuh"
 #include "MatrixExpr.cuh"
+#include "DiagVector.cuh"

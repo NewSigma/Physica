@@ -9,5 +9,6 @@ physica_add_test(SVD SVD.cpp)
 physica_add_test(Tridiagonalization Tridiagonalization.cpp)
 
 if(${PHYSICA_CUDA})
+    physica_add_test(DenseLU_cuda DenseLU.cu)
     physica_add_test(DenseQR_cuda DenseQR.cu)
 endif()

@@ -229,6 +229,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::diag() noexcept {
+        return device_obj<DiagVector<Derived, false>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ const auto device_obj<RValueMatrix<Derived>>::diag() const noexcept {
+        return device_obj<DiagVector<Derived, false>>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu() noexcept {
         return device_obj<TrigUpper<Derived>>(Base::getDerived());
     }
@@ -249,7 +259,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const -> ScalarType {
+    __device__ auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const -> T {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 

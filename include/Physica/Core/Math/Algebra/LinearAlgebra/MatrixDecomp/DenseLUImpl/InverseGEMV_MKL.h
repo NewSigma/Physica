@@ -30,7 +30,7 @@ namespace Physica {
         const auto* a = reinterpret_cast<const Tm*>(m.getDenseLU().getMatrixLU().data());
         auto* b = reinterpret_cast<Tm*>(target.data());
         if constexpr (Pivot) {
-            MKL_INT64* ipiv = m.getDenseLU().getPerm().getIndices().data();
+            const auto* ipiv = (MKL_INT64*)m.getDenseLU().getPerm().getIndices().data();
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));

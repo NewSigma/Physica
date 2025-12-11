@@ -39,7 +39,7 @@ namespace Physica {
         }
     }
 
-    cudaError_t CUDAStream::query() const {
+    cudaError_t CUDAStream::query() const noexcept {
         return cudaStreamQuery(stream);
     }
 

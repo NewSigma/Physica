@@ -26,10 +26,11 @@ namespace Physica {
         static_assert(!isReverseDiff || !ReverseDiff<decltype(x)>, "[Error]: Assign a diffable scalar to diffable vector discards grads");
         if constexpr (!std::same_as<T, std::remove_cvref_t<decltype(x)>>)
             return operator=(T(x));
-
-        for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = x;
-        return Base::getDerived();
+        else {
+            for (size_t i = 0; i < Base::getLength(); ++i)
+                (*this)[i] = x;
+            return Base::getDerived();
+        }
     }
 
     template<class Derived>

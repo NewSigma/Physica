@@ -22,12 +22,14 @@
 using namespace Physica;
 using Matrix3D = DenseMatrix<float32, MatrixOption::Col, 3>;
 
-void testQR(device_obj<DenseQR<float32>>& qr, const Matrix3D& answer) {
-    device_obj<Matrix3D> matrixQ = qr.getMatrixQ();
-    device_obj<Matrix3D> matrixR = qr.getMatrixR();
-    Matrix3D result = device_obj<Matrix3D>(matrixQ * matrixR).toHost();
-    if (!matrixNear(result, answer, 1E-6))
-        exit(1);
+namespace {
+    void testQR(device_obj<DenseQR<float32>>& qr, const Matrix3D& answer) {
+        device_obj<Matrix3D> matrixQ = qr.getMatrixQ();
+        device_obj<Matrix3D> matrixR = qr.getMatrixR();
+        Matrix3D result = device_obj<Matrix3D>(matrixQ * matrixR).toHost();
+        if (!matrixNear(result, answer, 1E-6))
+            exit(1);
+    }
 }
 
 int main() {

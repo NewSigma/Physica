@@ -19,9 +19,10 @@
 #pragma once
 
 #include <stack>
+#include "CUDAStream.cuh"
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 #include "Physica/Core/Exception/CUDA/cuSolver.cuh"
-#include "CUDAStream.cuh"
+#include "Physica/Core/Scalar/Scalar.h"
 
 struct cublasContext;
 
@@ -67,8 +68,8 @@ namespace Physica {
         /* Operations */
         PageGuard push() { return push(device()); }
         PageGuard push(int device);
-        [[nodiscard]] cudaError_t query() { return getStream().query(); }
-        void wait() { getStream().wait(); }
+        [[nodiscard]] cudaError_t query() const noexcept { return getStream().query(); }
+        void wait() const { getStream().wait(); }
         /* Getters */
         [[nodiscard]] int device() const noexcept { return pages.top().device; }
         [[nodiscard]] const CUDAStream& getStream() const noexcept { return pages.top().stream; }
@@ -76,6 +77,8 @@ namespace Physica {
         void setPointerMode(bool isDeviceSide) noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
+        template<Scalar T>
+        [[nodiscard]] constexpr static cudaDataType getDataType() noexcept;
     private:
         CUDAContext();
         /* Operations */
@@ -84,6 +87,22 @@ namespace Physica {
 
     inline void CUDAContext::setPointerMode(bool isDeviceSide) noexcept {
         cublasSetPointerMode(*this, isDeviceSide ? CUBLAS_POINTER_MODE_DEVICE : CUBLAS_POINTER_MODE_HOST);
+    }
+
+    template<Scalar T>
+    constexpr cudaDataType CUDAContext::getDataType() noexcept {
+        if constexpr (T::isComplex) {
+            if constexpr (T::Prec == Float32)
+                return cudaDataType::CUDA_C_32F;
+            else
+                return cudaDataType::CUDA_C_64F;
+        }
+        else {
+            if constexpr (T::Prec == Float32)
+                return cudaDataType::CUDA_R_32F;
+            else
+                return cudaDataType::CUDA_R_64F;
+        }
     }
 
     __host__ __device__ inline bool isZeroThread() {

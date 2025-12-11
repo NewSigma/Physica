@@ -224,6 +224,41 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::prod() const noexcept -> T {
+        assert(getLength() != 0);
+        if (IsHost()) {
+            using U = std::conditional<isReverseDiff, Tv, T>::type;
+            auto buffer = device_obj<VectorND<U>>(MaxThreadPerBlock);
+            auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
+                const auto& v = v_.getDerived();
+                auto& buffer = buffer_.getDerived();
+                U local = 1;
+                for (int i = (int)threadIdx.x; i < v.getLength(); i += MaxThreadPerBlock) {
+                    if constexpr (isReverseDiff)
+                        local *= v.calc_value(i);
+                    else
+                        local *= v.calc(i);
+                }
+                buffer[threadIdx.x] = local;
+            };
+            CUDAExecutor::launch<MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
+
+            if constexpr (IsHost()) { // To silence warnings
+                CUDAExecutor::wait();
+                return buffer.toHost().prod();
+            }
+            else
+                unreachable();
+        }
+        else {
+            T result = calc(0);
+            for(size_t i = 1; i < getLength(); ++i)
+                result *= calc(i);
+            return result;
+        }
+    }
+
+    template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::crossProduct(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>) {
         return device_obj<CrossProduct<Derived, decltype(v)>>(*this, v);
     }

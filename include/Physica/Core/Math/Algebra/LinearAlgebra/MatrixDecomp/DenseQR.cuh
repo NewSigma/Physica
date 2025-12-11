@@ -28,13 +28,12 @@ namespace Physica {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
         using host_obj = DenseQR<T>;
         using This = device_obj<host_obj>;
-        using MatrixND = device_obj<DenseMatrix<T>>;
         using DeviceVector = device_obj<VectorND<T>>;
         using Tc = T::ComplexType;
         constexpr static bool isComplex = T::isComplex;
         constexpr static int MaxThreadPerBlock = DeviceVector::MaxThreadPerBlock;
     private:
-        MatrixND working;
+        device_obj<MatrixND<T>> working;
         DeviceVector taus;
         DeviceVector vecD;
         device_obj<Array<std::byte>> deviceBuffer;
@@ -62,10 +61,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return working.getCol(); }
-        [[nodiscard]] MatrixND getMatrixQ();
+        [[nodiscard]] device_obj<MatrixND<T>> getMatrixQ();
         [[nodiscard]] __host__ __device__ auto getMatrixR() const noexcept;
-    private:
-        [[nodiscard]] constexpr static cudaDataType getDataType() noexcept;
     };
 
     template<Scalar T>
@@ -80,14 +77,12 @@ namespace Physica {
 
     template<Scalar T>
     void device_obj<DenseQR<T>>::compute(const Matrix auto& source) {
-        assert(getRow() == source.getRow());
-        assert(getCol() == source.getCol());
-        working = source;
+        source.assign(working);
 
         auto& ctx = CUDAContext::getInstance();
         const size_t m = getRow();
         const size_t n = getCol();
-        constexpr cudaDataType dataType = getDataType();
+        constexpr cudaDataType dataType = CUDAContext::getDataType<T>();
         void* A = working.data();
         const size_t lda = m;
         void* tau = taus.data();
@@ -143,7 +138,7 @@ namespace Physica {
         /* Buffer size check 1 */ {
             const size_t m = getRow();
             const size_t n = getCol();
-            constexpr cudaDataType dataType = getDataType();
+            constexpr cudaDataType dataType = CUDAContext::getDataType<T>();
             const size_t lda = m;
             check(cusolverDnXgeqrf_bufferSize(ctx, ctx, m, n, dataType, nullptr, lda, dataType, nullptr, dataType, &deviceBufferSize, &hostBufferSize));
         }
@@ -174,7 +169,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto device_obj<DenseQR<T>>::getMatrixQ() -> MatrixND {
+    auto device_obj<DenseQR<T>>::getMatrixQ() -> device_obj<MatrixND<T>> {
         static_assert(!isComplex, "[Error]: Not implemented");
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
 
@@ -183,7 +178,7 @@ namespace Physica {
         const size_t n = m;
         const size_t k = getCol();
         const size_t lda = m;
-        MatrixND result(m, lda);
+        device_obj<MatrixND<T>> result(m, lda);
         result.leftCols(k) = working;
         auto* A = reinterpret_cast<Tm*>(result.data());
         auto* tau = reinterpret_cast<const Tm*>(taus.data());
@@ -201,21 +196,5 @@ namespace Physica {
     template<Scalar T>
     __host__ __device__ auto device_obj<DenseQR<T>>::getMatrixR() const noexcept {
         return working.triu();
-    }
-
-    template<Scalar T>
-    constexpr cudaDataType device_obj<DenseQR<T>>::getDataType() noexcept {
-        if constexpr (isComplex) {
-            if constexpr (T::Prec == Float32)
-                return cudaDataType::CUDA_C_32F;
-            else
-                return cudaDataType::CUDA_C_64F;
-        }
-        else {
-            if constexpr (T::Prec == Float32)
-                return cudaDataType::CUDA_R_32F;
-            else
-                return cudaDataType::CUDA_R_64F;
-        }
     }
 }

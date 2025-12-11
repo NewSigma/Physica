@@ -34,7 +34,7 @@ namespace Physica {
         CUDAStream& operator=(CUDAStream obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __host__ __device__ operator cudaStream_t() const noexcept { return stream; }
         /* Operations */
-        [[nodiscard]] cudaError_t query() const;
+        [[nodiscard]] cudaError_t query() const noexcept;
         void wait() const;
         void swap(CUDAStream& __restrict obj) noexcept;
     };

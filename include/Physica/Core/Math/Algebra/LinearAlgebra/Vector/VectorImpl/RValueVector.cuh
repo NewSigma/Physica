@@ -83,6 +83,7 @@ namespace Physica {
         [[nodiscard]] __device__ T crossEntropy(size_t index) const;
         [[nodiscard]] __device__ T lnSoftmax(size_t index) const;
         [[nodiscard]] __device__ T softmax(size_t index) const;
+        [[nodiscard]] __host__ __device__ T prod() const noexcept;
         [[nodiscard]] __device__ auto crossProduct(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>);
 
         [[nodiscard]] __device__ T max(int tid, int numThread, T* __restrict shared) const;

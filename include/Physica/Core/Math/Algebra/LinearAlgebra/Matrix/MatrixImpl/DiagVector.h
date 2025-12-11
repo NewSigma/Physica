@@ -72,7 +72,6 @@ namespace Physica {
 namespace Physica {
     template<Matrix T, bool isLValueMatrix>
     class Traits<DiagVector<T, isLValueMatrix>> {
-        static_assert(std::is_convertible<T&, LValueMatrix<T>&>::value == isLValueMatrix, "[Error]: Invalid LValueMatrix");
     public:
         using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile > T::ColAtCompile ? T::RowAtCompile : T::ColAtCompile;
