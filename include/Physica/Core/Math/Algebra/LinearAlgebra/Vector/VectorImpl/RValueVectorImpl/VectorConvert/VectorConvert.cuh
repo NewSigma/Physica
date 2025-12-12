@@ -22,30 +22,6 @@
 
 namespace Physica {
     template<class V>
-    class device_obj<RealVector<V>> : public device_obj<RValueVector<RealVector<V>>> {
-        using host_obj = RealVector<V>;
-        using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<host_obj>>;
-    protected:
-        using typename Base::T;
-        using typename Base::Tv;
-    private:
-        PlainStruct<const device_obj<V>> v;
-    public:
-        __host__ __device__ explicit device_obj(const device_obj<V>& v_) : v(asStruct(v_)) {}
-        device_obj(const This&) = default;
-        device_obj(This&&) noexcept = default;
-        ~device_obj() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
-        /* Getters */
-        [[nodiscard]] __device__ T calc(size_t s) const { return v.getDerived().calc(s).real(); }
-        [[nodiscard]] __device__ Tv calc_value(size_t s) const { return v.getDerived().calc_value(s).real(); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
-    };
-
-    template<class V>
     class device_obj<ImagVector<V>> : public RValueVector<ImagVector<V>> {
         using host_obj = ImagVector<V>;
         using This = device_obj<host_obj>;
@@ -169,9 +145,6 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<class V>
-    class Traits<device_obj<RealVector<V>>> : public Traits<RealVector<V>> {};
-
     template<class V>
     class Traits<device_obj<ImagVector<V>>> : public Traits<ImagVector<V>> {};
 

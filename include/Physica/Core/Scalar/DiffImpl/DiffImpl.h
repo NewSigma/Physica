@@ -93,6 +93,16 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto Diff<T, Mode, Order>::real_ptr() noexcept {
+        return RealType::PtrTy(v.real_ptr(), g.real_ptr());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ const auto Diff<T, Mode, Order>::real_ptr() const noexcept {
+        return Base::real_ptr();
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ void Diff<T, Mode, Order>::swap(ScalarRef<This>&& ref) noexcept {
         assert(ScalarPtr<This>(*this) != ScalarPtr<This>(ref) && "[Error]: Self swap is likely a bug");
         v.swap(ref.value());

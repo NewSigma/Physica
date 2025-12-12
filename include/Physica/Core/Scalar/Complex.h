@@ -89,6 +89,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ T& real() noexcept { return re; }
         [[nodiscard]] __host__ __device__ const T& real() const noexcept { return re; }
+        [[nodiscard]] __host__ __device__ T* real_ptr() noexcept { return &re; }
+        [[nodiscard]] __host__ __device__ const T* real_ptr() const noexcept { return &re; }
         [[nodiscard]] __host__ __device__ T& imag() noexcept { return im; }
         [[nodiscard]] __host__ __device__ const T& imag() const noexcept { return im; }
         [[nodiscard]] __host__ __device__ std::complex<Tm> toMachine() const noexcept;

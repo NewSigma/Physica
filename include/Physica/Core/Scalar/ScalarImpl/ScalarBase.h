@@ -137,6 +137,8 @@ namespace Physica {
         void random_normal() noexcept;
         /* Getters */
         __host__ __device__ constexpr static size_t size() { return 1; }
+        [[nodiscard]] __host__ __device__ auto* real_ptr() noexcept;
+        [[nodiscard]] __host__ __device__ const auto* real_ptr() const noexcept;
         [[nodiscard]] __host__ __device__ auto* value_ptr() noexcept;
         [[nodiscard]] __host__ __device__ const auto* value_ptr() const noexcept;
         template<int GradOrder>
@@ -416,6 +418,19 @@ namespace Physica {
     template<RNG R>
     void ScalarBase<Derived>::random_normal() noexcept {
         Base::getDerived() = Derived::template random_normal<R>();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto* ScalarBase<Derived>::real_ptr() noexcept {
+        if constexpr (isComplex)
+            return Base::getDerived().real_ptr();
+        else
+            return &Base::getDerived();
+    }
+
+    template<class Derived>
+    __host__ __device__ const auto* ScalarBase<Derived>::real_ptr() const noexcept {
+        return Base::getConstCastDerived().real_ptr();
     }
 
     template<class Derived>

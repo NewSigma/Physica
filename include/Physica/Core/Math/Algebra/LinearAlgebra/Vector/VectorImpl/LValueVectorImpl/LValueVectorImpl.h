@@ -287,6 +287,19 @@ namespace Physica {
     }
 
     template<class Derived>
+    decltype(auto) LValueVector<Derived>::reals() noexcept {
+        if constexpr (isComplex)
+            return RealVectorL<Derived>(Base::getDerived());
+        else
+            return Base::getDerived();
+    }
+
+    template<class Derived>
+    decltype(auto) LValueVector<Derived>::reals() const noexcept {
+        return Base::getConstCastDerived().reals();
+    }
+
+    template<class Derived>
     template<int GradOrder>
     auto LValueVector<Derived>::grads() const noexcept {
         return Base::template grads_impl<GradOrder>();

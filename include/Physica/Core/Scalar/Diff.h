@@ -78,6 +78,8 @@ namespace Physica {
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         __host__ __device__ void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
+        [[nodiscard]] __host__ __device__ auto real_ptr() noexcept;
+        [[nodiscard]] __host__ __device__ const auto real_ptr() const noexcept;
         [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &v; }
         [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &g; }
 

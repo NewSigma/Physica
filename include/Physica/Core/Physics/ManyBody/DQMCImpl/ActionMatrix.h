@@ -102,7 +102,7 @@ namespace Physica {
             int offsetR = rowFreq * numSite;
             for (int colFreq = 0; colFreq <= rowFreq; ++colFreq) {
                 if (rowFreq == colFreq) {
-                    target.block(offsetR, numSite, offsetR, numSite).diag() += auxField.row(0) - shiftChemMu;
+                    target.block(offsetR, numSite, offsetR, numSite).diag().reals() = auxField.row(0).reals() - shiftChemMu;
                     continue;
                 }
                 int offsetC = colFreq * numSite;

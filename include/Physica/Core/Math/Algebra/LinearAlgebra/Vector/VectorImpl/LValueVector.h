@@ -22,6 +22,7 @@
 #include "LValueVectorImpl/LVectorBlock.h"
 
 namespace Physica {
+    template<class V> class RealVectorL;
     /**
      * \class LValueVector is a base class for vectors. You can take the address of elements in an LValueVector.
      * An LValueVector can be assigned to an LValueVector, and other vector classes can be assigned to an LValueVector.
@@ -35,6 +36,7 @@ namespace Physica {
     public:
         using Base::isForwardDiff;
         using Base::isReverseDiff;
+        using Base::isComplex;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -116,8 +118,10 @@ namespace Physica {
         template<RNG R>
         void random_any(auto& distribution);
 
+        [[nodiscard]] decltype(auto) reals() noexcept;
+        [[nodiscard]] decltype(auto) reals() const noexcept;
         template<int GradOrder = 1>
-        auto grads() const noexcept;
+        [[nodiscard]] auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
@@ -129,4 +133,5 @@ namespace Physica {
 }
 
 #include "LValueVectorImpl/LValueVectorImpl.h"
+#include "LValueVectorImpl/VectorConvert/RealVector.h"
 #include "LValueVectorImpl/Sincos.h"

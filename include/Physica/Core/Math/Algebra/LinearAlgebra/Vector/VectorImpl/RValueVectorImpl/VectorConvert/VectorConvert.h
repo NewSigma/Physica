@@ -22,29 +22,6 @@
 
 namespace Physica {
     template<class V>
-    class RealVector : public RValueVector<RealVector<V>> {
-        using This = RealVector<V>;
-        using Base = RValueVector<This>;
-    protected:
-        using typename Base::T;
-        using typename Base::Tv;
-    private:
-        const V& v;
-    public:
-        explicit RealVector(const V& v_) : v(v_) {}
-        RealVector(const This&) = default;
-        RealVector(This&&) noexcept = default;
-        ~RealVector() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) = delete;
-        /* Getters */
-        [[nodiscard]] T calc(size_t s) const { return v.calc(s).real(); }
-        [[nodiscard]] Tv calc_value(size_t s) const { return v.calc_value(s).real(); }
-        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-    };
-
-    template<class V>
     class ImagVector : public RValueVector<ImagVector<V>> {
         using This = ImagVector<V>;
         using Base = RValueVector<This>;
@@ -168,19 +145,10 @@ namespace Physica {
 
 namespace Physica {
     template<class V>
-    class Traits<RealVector<V>> {
-    public:
-        using ScalarType = V::ScalarType::RealType;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = Traits<V>::FastPacket;
-    };
+    class Traits<ImagVector<V>> : public Traits<RealVectorR<V>> {};
 
     template<class V>
-    class Traits<ImagVector<V>> : public Traits<RealVector<V>> {};
-
-    template<class V>
-    class Traits<NormVector<V>> : public Traits<RealVector<V>> {};
+    class Traits<NormVector<V>> : public Traits<RealVectorR<V>> {};
 
     template<class V>
     class Traits<ValueVector<V>> {

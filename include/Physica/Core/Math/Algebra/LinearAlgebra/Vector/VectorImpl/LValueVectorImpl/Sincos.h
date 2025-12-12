@@ -24,9 +24,9 @@ namespace Physica {
     template<Vector T1, Vector T2>
     auto sincos(const T1& x, T2& s, T2& c) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
-        constexpr static size_t Size1 = T1::SizeAtCompile;
-        constexpr static size_t Size2 = T2::SizeAtCompile;
-        constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
+        constexpr size_t Size1 = T1::SizeAtCompile;
+        constexpr size_t Size2 = T2::SizeAtCompile;
+        constexpr size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
         using ScalarType1 = T1::ScalarType;
         using ScalarType2 = T2::ScalarType;
         using ScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
