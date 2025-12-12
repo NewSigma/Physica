@@ -71,8 +71,8 @@ namespace Physica {
         template<Packet Pack> void writePacket(size_t index, Pack packet);
         template<Packet Pack> void writePacketPartial(size_t index, size_t count, Pack packet);
 
-        template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
-        template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
+        template<Vector V> void toDevice(device_obj<ContinuousVector<V>>& obj) const;
+        template<Vector V> void toDeviceAsync(device_obj<ContinuousVector<V>>& obj) const;
         [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>

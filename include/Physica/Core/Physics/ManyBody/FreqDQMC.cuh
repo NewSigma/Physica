@@ -31,12 +31,13 @@ namespace Physica {
         using Trv = Tr::ValueType;
 
         using GreenPair = ImagKinetic<Tr>::GreenPair;
+        using BufferType = DenseMatrix<T, MatrixOption::Col, Dynamic, Dynamic, PageLockedAllocator<T>>;
     private:
         Array<device_obj<DenseLU<T, false>>, 2> lu;
         ActionMatrix<T> action;
         device_obj<MatrixND<T>> linearRHS;
-        MatrixND<T> detBuffer;
-        MatrixND<T> solBuffer;
+        BufferType detBuffer;
+        BufferType solBuffer;
 
         GreenPair greens;
         Trv lnAbsDet = Trv::nan();

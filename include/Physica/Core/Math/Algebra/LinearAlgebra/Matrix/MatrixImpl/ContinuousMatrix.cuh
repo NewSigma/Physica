@@ -33,6 +33,7 @@ namespace Physica {
         using Base::RowAtCompile;
         using Base::ColAtCompile;
     protected:
+        using typename Base::T;
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
@@ -51,6 +52,9 @@ namespace Physica {
         This& operator=(This&& obj) noexcept = delete;
         using Base::operator=;
         /* Operations */
+        template<Matrix M> void toHost(ContinuousMatrix<M>& obj) const;
+        template<Matrix M> void toHostAsync(ContinuousMatrix<M>& obj) const;
+
         [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
         [[nodiscard]] __host__ __device__ const auto row(size_t r) const noexcept;
         [[nodiscard]] __host__ __device__ auto col(size_t c) noexcept;

@@ -22,6 +22,30 @@
 
 namespace Physica {
     template<class Derived>
+    template<Matrix M>
+    void device_obj<ContinuousMatrix<Derived>>::toHost(ContinuousMatrix<M>& obj) const {
+        toHostAsync(obj);
+        CUDAContext::getInstance().wait();
+    }
+
+    template<class Derived>
+    template<Matrix M>
+    void device_obj<ContinuousMatrix<Derived>>::toHostAsync(ContinuousMatrix<M>& obj) const {
+        static_assert(std::same_as<ScalarType, typename M::ScalarType>, "[Error]: Incompatible ScalarType");
+        obj.resize(Base::getRow(), Base::getCol());
+
+        const size_t size = Base::getSize() * sizeof(T);
+        if constexpr (M::SizeAtCompile != Dynamic)
+            memcpy(obj.data(), data(), size);
+        else if constexpr (Diffable<T>) {
+            Base::getDerived().values().toHostAsync(obj.getDerived().values());
+            Base::getDerived().grads().toHostAsync(obj.getDerived().grads());
+        }
+        else
+            check(cudaMemcpyAsync(obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::row(size_t r) noexcept {
         const bool useSpecialization = device_obj<ContinuousMatrix<Derived>>::ColAtCompile == 1;
         if constexpr (useSpecialization)
@@ -213,5 +237,31 @@ namespace Physica {
     template<class Derived>
     const auto device_obj<ContinuousMatrix<Derived>>::flatten() const {
         return device_obj<FlattenC<Derived>>(const_cast<This&>(*this));
+    }
+
+    template<class Derived>
+    template<Matrix M>
+    void ContinuousMatrix<Derived>::toDevice(device_obj<ContinuousMatrix<M>>& obj) const {
+        toDeviceAsync(obj);
+        if constexpr (!std::is_trivially_copy_constructible<M>::value)
+            CUDAContext::getInstance().wait();
+    }
+
+    template<class Derived>
+    template<Matrix M>
+    void ContinuousMatrix<Derived>::toDeviceAsync(device_obj<ContinuousMatrix<M>>& obj) const {
+        static_assert(std::is_same<T, typename M::ScalarType>::value,
+                "[Error]: ScalarType inconsistent, additional buffer is necessary");
+        obj.resize(Base::getRow(), Base::getCol());
+
+        const size_t size = Base::getSize() * sizeof(T);
+        if constexpr (M::SizeAtCompile != Dynamic)
+            memcpy(obj.data(), data(), size);
+        else if constexpr (Diffable<M>) {
+            Base::getDerived().values().toDeviceAsync(obj.getDerived().values());
+            Base::getDerived().grads().toDeviceAsync(obj.getDerived().grads());
+        }
+        else
+            check(cudaMemcpyAsync(obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));
     }
 }

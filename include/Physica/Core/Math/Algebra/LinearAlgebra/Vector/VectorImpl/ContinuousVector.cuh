@@ -54,8 +54,8 @@ namespace Physica {
         [[nodiscard]] __device__ Pack packet(size_t index) const;
         template<Packet Pack>
         [[nodiscard]] __device__ Pack packetPartial(size_t index, size_t count) const;
-        __device__ void writePacket(size_t index, const Packet auto packet);
-        __device__ void writePacketPartial(size_t index, size_t count, const Packet auto packet);
+        __device__ void writePacket(size_t index, Packet auto packet);
+        __device__ void writePacketPartial(size_t index, size_t count, Packet auto packet);
         void reverse(const auto& grad) const noexcept;
 
         template<Vector V> void toHost(ContinuousVector<V>& obj) const;

@@ -64,6 +64,8 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& m) const noexcept;
 
+        template<Matrix M> void toDevice(device_obj<ContinuousMatrix<M>>& obj) const;
+        template<Matrix M> void toDeviceAsync(device_obj<ContinuousMatrix<M>>& obj) const;
         [[nodiscard]] auto toNumpy() const;
 
         [[nodiscard]] auto row(size_t r) noexcept;

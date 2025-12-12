@@ -56,8 +56,8 @@ namespace Physica {
 
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
-        void toHost(host_obj& obj) const;
-        void toHostAsync(host_obj& obj) const;
+        using Base::toHost;
+        using Base::toHostAsync;
 
         void zeros();
         template<RNG R>
@@ -93,18 +93,6 @@ namespace Physica {
         device_obj<This> result(getRow(), getCol());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Option, Row, Col, Allocator>::toDevice(device_obj<This>& obj) const {
-        obj.resize(getRow(), getCol());
-        Storage::toDevice(obj);
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Option, Row, Col, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
-        obj.resize(getRow(), getCol());
-        Storage::toDeviceAsync(obj);
     }
 }
 

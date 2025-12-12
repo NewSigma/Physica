@@ -73,8 +73,8 @@ namespace Physica {
         void resize(const Matrix auto& m, auto&&... args);
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
-        void toDevice(device_obj<This>& obj) const;
-        void toDeviceAsync(device_obj<This>& obj) const;
+        using Base::toDevice;
+        using Base::toDeviceAsync;
 
         using Base::transpose;
         [[nodiscard]] auto& flatten() noexcept { return Storage::asArray(); }

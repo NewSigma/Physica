@@ -60,16 +60,6 @@ namespace Physica {
     }
 
     template<tparams>
-    void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::toHost(host_obj& obj) const {
-        Storage::toHost(obj);
-    }
-
-    template<tparams>
-    void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::toHostAsync(host_obj& obj) const {
-        Storage::toHostAsync(obj);
-    }
-
-    template<tparams>
     void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::zeros() {
         check(cudaMemsetAsync(data(), 0, getRow() * getCol() * sizeof(T), CUDAContext::getInstance()));
     }
