@@ -28,7 +28,7 @@ namespace Physica {
         using Base = device_obj<RValueVector<host_obj>>;
     public:
         using Base::isReverseDiff;
-        using Base::MaxThreadPerBlock;
+        using Base::MaxThreadsPerBlock;
     protected:
         using typename Base::T;
         using typename Base::Tv;

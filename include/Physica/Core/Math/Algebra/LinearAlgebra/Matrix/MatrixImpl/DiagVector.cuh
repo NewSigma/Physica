@@ -30,9 +30,9 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        const device_obj<M>& mat;
+        PlainStruct<const device_obj<M>> mat;
     public:
-        explicit device_obj(const device_obj<M>& mat_) : mat(mat_) {}
+        explicit device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;
@@ -40,8 +40,9 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] __device__ T calc(size_t index) const { return mat.calc(index, index); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow(); }
+        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat.getDerived(); }
+        [[nodiscard]] __device__ T calc(size_t index) const { return getExpr().calc(index, index); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow(); }
     };
 }
 

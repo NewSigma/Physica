@@ -142,7 +142,7 @@ namespace Physica {
         };
         auto config = device_obj<VectorND<T>>::makeKernelConfig(numSample);
         config.blocks.y = getDim();
-        CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadPerBlock>(fwd, config);
+        CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadsPerBlock>(fwd, config);
 
         auto expr = ln_elem(deltas);
         CoDiff<device_obj<VectorND<T>>> lnJs = expr.sum_cols();
@@ -175,7 +175,7 @@ namespace Physica {
                 row.reverse(-g / Tv(numBin));
                 row[index].reverse(g);
             };
-            CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadPerBlock>(func, config);
+            CUDAExecutor::launch<device_obj<VectorND<T>>::MaxThreadsPerBlock>(func, config);
         }
         else
             co_return std::move(lnJs);

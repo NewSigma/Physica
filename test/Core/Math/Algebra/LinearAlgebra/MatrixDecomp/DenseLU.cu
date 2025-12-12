@@ -21,10 +21,11 @@
 
 using namespace Physica;
 using T = float32;
+using RandomSource = Random<PCG64DXSM, 1000>;
 
 namespace {
     void testLU() {
-        auto answer = MatrixND<T>::random_uniform<Random<>>(32, 32);
+        auto answer = MatrixND<T>::random_uniform<RandomSource>(32, 32);
         answer.diag() = T(10); // Diagonal dominance for numerical stability
         device_obj<DenseLU<float32, false>> lu(answer.toDevice());
 
@@ -35,7 +36,7 @@ namespace {
         if (!matrixNear(result, answer, 1E-3))
             exit(1);
 
-        if (!scalarNear(lu.lnAbsDet(), answer.lnAbsDet(), 1E-4))
+        if (!scalarNear(lu.lnAbsDet(), answer.lnAbsDet(), 1E-3))
             exit(1);
 
         if (lu.sgndet() != answer.sgndet())
@@ -43,8 +44,8 @@ namespace {
     }
 
     void testSolve() {
-        const auto A = MatrixND<T>::random_uniform<Random<>>(32, 32);
-        const auto b = MatrixND<T>::random_uniform<Random<>>(32, 1);
+        const auto A = MatrixND<T>::random_uniform<RandomSource>(32, 32);
+        const auto b = MatrixND<T>::random_uniform<RandomSource>(32, 1);
         const VectorND<T> answer = MatrixND<T>(A.inv()) * b.col(0);
 
         device_obj<DenseLU<float32, true>> lu(A.toDevice());

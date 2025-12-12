@@ -34,7 +34,7 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using Base::isReverseDiff;
-        using Base::MaxThreadPerBlock;
+        using Base::MaxThreadsPerBlock;
     protected:
         using typename Base::T;
         using typename Base::Tv;

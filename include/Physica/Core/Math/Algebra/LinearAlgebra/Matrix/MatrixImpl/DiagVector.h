@@ -39,6 +39,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
+        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] ScalarType calc(size_t index) const { return mat.calc(index, index); }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
     };
@@ -63,6 +64,7 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
+        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] PtrTy data_ptr(size_t index) noexcept { return mat.data_ptr(index, index); }
         [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept { return mat.data_ptr(index, index); }

@@ -40,7 +40,7 @@ namespace Physica {
                     target(r, c) = source.calc(r, c);
                 }
             };
-            CUDAExecutor::launch<MaxThreadPerBlock>(func, target.makeKernelConfig());
+            CUDAExecutor::launch<MaxThreadsPerBlock>(func, target.makeKernelConfig());
         }
         else if constexpr (IsDevice()) {
             const size_t maxMajor = target.getMaxMajor();
@@ -350,7 +350,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ KernelConfig device_obj<RValueMatrix<Derived>>::makeKernelConfig(size_t maxMajor, size_t maxMinor) noexcept {
-        constexpr size_t MaxThread = MaxThreadPerBlock;
+        constexpr size_t MaxThread = MaxThreadsPerBlock;
         const uint32_t numThread = std::min<uint32_t>(maxMinor, MaxThread);
         const uint32_t numBlockX = (maxMinor + numThread - 1) / numThread;
         const uint32_t numBlockY = maxMajor;

@@ -37,7 +37,7 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static int MaxThreadPerBlock = 256;
+        constexpr static int MaxThreadsPerBlock = 256;
     protected:
         using T = ScalarType;
         using Tr = T::RealType;

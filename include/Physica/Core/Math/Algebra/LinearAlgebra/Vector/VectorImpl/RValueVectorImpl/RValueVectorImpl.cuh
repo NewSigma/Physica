@@ -36,7 +36,7 @@ namespace Physica {
                 if (index < length)
                     target[index] = source.calc(index);
             };
-            CUDAExecutor::launch<MaxThreadPerBlock>(func, makeKernelConfig());
+            CUDAExecutor::launch<MaxThreadsPerBlock>(func, makeKernelConfig());
         }
         else if constexpr (IsDevice())
             assign_impl(target);
@@ -127,12 +127,13 @@ namespace Physica {
         assert(getLength() != 0);
         if (IsHost()) {
             using U = std::conditional<isReverseDiff, Tv, T>::type;
-            auto buffer = device_obj<VectorND<U>>(MaxThreadPerBlock);
+            auto numThreads = std::min<size_t>(getLength(), MaxThreadsPerBlock);
+            auto buffer = device_obj<VectorND<U>>(numThreads);
             auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
                 const auto& v = v_.getDerived();
                 auto& buffer = buffer_.getDerived();
                 U local = 0;
-                for (int i = threadIdx.x; i < v.getLength(); i += MaxThreadPerBlock) {
+                for (int i = (int)threadIdx.x; i < v.getLength(); i += (int)blockDim.x) {
                     if constexpr (isReverseDiff)
                         local += v.calc_value(i);
                     else
@@ -140,7 +141,7 @@ namespace Physica {
                 }
                 buffer[threadIdx.x] = local;
             };
-            CUDAExecutor::launch<MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
+            CUDAExecutor::launch<MaxThreadsPerBlock>(func, KernelConfig(1, numThreads));
 
             if constexpr (IsHost()) { // To silence warnings
                 CUDAExecutor::wait();
@@ -228,12 +229,13 @@ namespace Physica {
         assert(getLength() != 0);
         if (IsHost()) {
             using U = std::conditional<isReverseDiff, Tv, T>::type;
-            auto buffer = device_obj<VectorND<U>>(MaxThreadPerBlock);
+            auto numThreads = std::min<size_t>(getLength(), MaxThreadsPerBlock);
+            auto buffer = device_obj<VectorND<U>>(numThreads);
             auto func = [v_ = asStruct(Base::getDerived()), buffer_ = asStruct(buffer)] __device__() mutable {
                 const auto& v = v_.getDerived();
                 auto& buffer = buffer_.getDerived();
                 U local = 1;
-                for (int i = (int)threadIdx.x; i < v.getLength(); i += MaxThreadPerBlock) {
+                for (int i = (int)threadIdx.x; i < v.getLength(); i += (int)blockDim.x) {
                     if constexpr (isReverseDiff)
                         local *= v.calc_value(i);
                     else
@@ -241,7 +243,7 @@ namespace Physica {
                 }
                 buffer[threadIdx.x] = local;
             };
-            CUDAExecutor::launch<MaxThreadPerBlock>(func, KernelConfig(1, MaxThreadPerBlock));
+            CUDAExecutor::launch<MaxThreadsPerBlock>(func, KernelConfig(1, numThreads));
 
             if constexpr (IsHost()) { // To silence warnings
                 CUDAExecutor::wait();
@@ -350,7 +352,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig(size_t length) noexcept {
-        constexpr uint32_t MaxThread = MaxThreadPerBlock;
+        constexpr uint32_t MaxThread = MaxThreadsPerBlock;
         const uint32_t numThread = std::min<uint32_t>(length, MaxThread);
         const uint32_t numBlock = (length + numThread - 1) / numThread;
         return KernelConfig(numBlock, numThread);

@@ -33,7 +33,7 @@ namespace Physica {
                 if (minor < maxMinor)
                     m.refFromMajorMinor(major, minor) = x;
             };
-            CUDAExecutor::launch<Base::MaxThreadPerBlock>(func, Base::makeKernelConfig());
+            CUDAExecutor::launch<Base::MaxThreadsPerBlock>(func, Base::makeKernelConfig());
         }
         else {
             for (size_t i = 0; i < Base::getMaxMajor(); ++i)

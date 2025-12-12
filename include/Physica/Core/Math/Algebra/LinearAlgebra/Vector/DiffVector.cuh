@@ -31,7 +31,7 @@ namespace Physica {
         using Base = device_obj<ContinuousVector<host_obj>>;
     public:
         using typename Base::ScalarType;
-        using Base::MaxThreadPerBlock;
+        using Base::MaxThreadsPerBlock;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
