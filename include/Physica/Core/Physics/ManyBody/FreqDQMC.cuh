@@ -19,6 +19,7 @@
 #pragma once
 
 #include "FreqDQMC.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.cuh"
 
 namespace Physica {
@@ -153,8 +154,7 @@ namespace Physica {
         const int numSite = getNumSite();
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
-            solBuffer = UnitMatrix<T>(action.getOrder());
-            solBuffer.toDevice(linearRHS);
+            linearRHS = device_obj<UnitMatrix<Tr>>(action.getOrder());
             spinLU.solve(linearRHS);
             linearRHS.toHost(solBuffer);
 

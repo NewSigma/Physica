@@ -26,6 +26,7 @@ namespace Physica {
         using This = UnitMatrix<T, Order>;
         using Base = RValueMatrix<This>;
         using IndexType = std::conditional<Order == Dynamic, size_t, PlainStruct<void>>::type;
+        static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid scalar for unit matrix");
     protected:
         using typename Base::Tv;
     private:
@@ -42,8 +43,10 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] V&& operator*(V&& v) const noexcept;
         /* Operations */
-        [[nodiscard]] T calc(size_t row, size_t col) const { return T(row == col ? 1 : 0); }
-        [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return Tv(row == col ? 1 : 0); }
+        void assign(Matrix auto&& target) const;
+
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] T calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] const This& conjugate() const noexcept { return *this; }
@@ -52,6 +55,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
+        /* Friends */
+        friend class device_obj<This>;
     };
 
     template<Scalar T, size_t Order>
@@ -69,6 +74,23 @@ namespace Physica {
     V&& UnitMatrix<T, Order>::operator*(V&& v) const noexcept {
         assert(getCol() == v.getLength());
         return std::forward<V>(v);
+    }
+
+    template<Scalar T, size_t Order>
+    void UnitMatrix<T, Order>::assign(Matrix auto&& target) const {
+        target.zeros();
+        for (size_t i = 0; i < getRow(); ++i)
+            target(i, i) = T(1);
+    }
+
+    template<Scalar T, size_t Order>
+    T UnitMatrix<T, Order>::calc(size_t row, size_t col) const {
+        return T(row == col ? 1 : 0);
+    }
+
+    template<Scalar T, size_t Order>
+    T UnitMatrix<T, Order>::calc_value(size_t row, size_t col) const {
+        return calc(row, col);
     }
 
     template<Scalar T, size_t Order>

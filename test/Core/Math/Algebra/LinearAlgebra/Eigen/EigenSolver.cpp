@@ -35,18 +35,19 @@ namespace {
 
     template<Matrix M, Backend B>
     void eigenTestImpl(const M& mat, double precision) {
-        using ScalarType = M::ScalarType;
-        using ComplexVector = EigenSolver<ScalarType>::EigenvalueVector;
-        auto solver = EigenSolver<ScalarType>(mat.getRow(), true);
+        using T = M::ScalarType;
+        using Tr = T::RealType;
+        auto solver = EigenSolver<T>(mat.getRow(), true);
         if constexpr (B == Backend::Base)
             solver.compute_base(mat);
         else
             solver.compute_mkl(mat);
 
-        auto checkEigenvectors = [&](EigenSolver<ScalarType>::EigenvectorMatrix& eigenvectors) {
+        auto checkEigenvectors = [&](EigenSolver<T>::EigenvectorMatrix& eigenvectors) {
             size_t order = mat.getRow();
             for (size_t i = 0; i < order; ++i) {
-                const ComplexVector result = (mat - solver.getEigenvalues()[i] * UnitMatrix<ScalarType>(order)) * eigenvectors.col(i);
+                using EigVector = EigenSolver<T>::EigenvalueVector;
+                const EigVector result = (mat - solver.getEigenvalues()[i] * UnitMatrix<Tr>(order)) * eigenvectors.col(i);
                 if (!vectorNearZero(result, precision))
                     exit(EXIT_FAILURE);
             }
