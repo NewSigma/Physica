@@ -82,6 +82,8 @@ namespace Physica {
         linearRHS.resize(size);
         detBuffer.resize(size);
         solBuffer.resize(size);
+
+        action.assign_kinetic(detBuffer);
     }
 
     template<Scalar T>
@@ -130,11 +132,11 @@ namespace Physica {
 
     template<Scalar T>
     auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
-        action.assign(detBuffer);
+        action.assign_potential(detBuffer);
         lu[0].compute(detBuffer);
 
         action.getAuxField() = -action.getAuxField();
-        action.assign(detBuffer);
+        action.assign_potential(detBuffer);
         lu[1].compute(detBuffer);
 
         Trv lnAD = 0, sgnD = 1;
