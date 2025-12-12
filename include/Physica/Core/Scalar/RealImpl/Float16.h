@@ -96,7 +96,9 @@ namespace Physica {
         [[nodiscard]] static Real random_normal() noexcept;
         template<RNG R>
         [[nodiscard]] static Real random_any(auto& distribution) noexcept { return This(float32::random_any<R>(distribution)); }
+    #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept { return H5::PredType::NATIVE_INT16; }
+    #endif
     };
 
     template<Scalar T>
@@ -118,15 +120,15 @@ namespace Physica {
     }
 
     inline std::ostream& operator<<(std::ostream& os, const Real<Float16>& s) {
-        const auto lastPrec = os.precision();
+        int lastPrec = static_cast<int>(os.precision());
         return os << std::setprecision(4) << float(s) << std::setprecision(lastPrec);
     }
-
-    [[nodiscard]] __host__ __device__ inline float16 operator ""_HF(long double x) {
+    // Marked as __device__ because nvcc warning 20014-D, host does not have native float16 support
+    [[nodiscard]] __device__ inline float16 operator ""_HF(long double x) {
         return float16(float(x));
     }
 
-    [[nodiscard]] __host__ __device__ inline float16 operator ""_HF(unsigned long long int x) {
+    [[nodiscard]] __device__ inline float16 operator ""_HF(unsigned long long int x) {
         return float16(int(x));
     }
 }

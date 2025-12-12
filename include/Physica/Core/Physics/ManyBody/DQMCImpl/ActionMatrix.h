@@ -47,6 +47,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         void assign(Matrix auto&& target) const;
+        void assign_kinetic(Matrix auto&& target) const;
+        void assign_potential(Matrix auto&& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
@@ -80,17 +82,27 @@ namespace Physica {
 
     template<Scalar T>
     void ActionMatrix<T>::assign(Matrix auto&& target) const {
-        target.zeros();
+        // Note that we seldom change the kinetic part, separate them to customize the potential part.
+        assign_kinetic(target);
+        assign_potential(target);
+    }
 
+    template<Scalar T>
+    void ActionMatrix<T>::assign_kinetic(Matrix auto&& target) const {
+        const int numSite = getNumSite();
+        kronecker(UnitMatrix<Trv>(matsubara.getRow()), params.getHoppingMatrix()).assign(target);
+        kronecker(matsubara, UnitMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
+    }
+
+    template<Scalar T>
+    void ActionMatrix<T>::assign_potential(Matrix auto&& target) const {
         const int numSite = getNumSite();
         const Tr shiftChemMu = params.getChemMu() - params.getRepelU() * 0.5;
-        kronecker(UnitMatrix<Trv>(matsubara.getRow()), params.getHoppingMatrix() - UnitMatrix<Trv>(getNumSite()) * shiftChemMu).assign_add(target);
-        kronecker(matsubara, UnitMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
         for (int rowFreq = 0; rowFreq < getNumFreq() * 2; ++rowFreq) {
             int offsetR = rowFreq * numSite;
             for (int colFreq = 0; colFreq <= rowFreq; ++colFreq) {
                 if (rowFreq == colFreq) {
-                    target.block(offsetR, numSite, offsetR, numSite).diag() += auxField.row(0);
+                    target.block(offsetR, numSite, offsetR, numSite).diag() += auxField.row(0) - shiftChemMu;
                     continue;
                 }
                 int offsetC = colFreq * numSite;

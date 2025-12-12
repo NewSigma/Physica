@@ -32,14 +32,15 @@ namespace Physica {
 
         using GreenPair = ImagKinetic<Tr>::GreenPair;
     private:
-        ActionMatrix<T> action;
-
         Array<device_obj<DenseLU<T, false>>, 2> lu;
-        GreenPair greens;
-        MatrixND<T> buffer;
+        ActionMatrix<T> action;
+        device_obj<MatrixND<T>> linearRHS;
+        MatrixND<T> detBuffer;
+        MatrixND<T> solBuffer;
 
-        Trv lnAbsDet;
-        Trv sign;
+        GreenPair greens;
+        Trv lnAbsDet = Trv::nan();
+        Trv sign = 1;
     public:
         device_obj(const HubbardParams<Tr>& params, Trv freqDensity);
         device_obj(const This&) = default;
@@ -75,9 +76,12 @@ namespace Physica {
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity)
             : action(params, calcFreqCutoff(params.getBeta(), freqDensity))
             , greens(2, params.getNumSite()) {
+        size_t size = action.getOrder();
         for (auto& spinLU : lu)
-            spinLU.resize(action.getRow());
-        buffer.resize(action);
+            spinLU.resize(size);
+        linearRHS.resize(size);
+        detBuffer.resize(size);
+        solBuffer.resize(size);
     }
 
     template<Scalar T>
@@ -93,6 +97,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void device_obj<FreqDQMC<T>>::step() {
+        assert(lnAbsDet.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         auto aux = action.getAuxField().col(site);
         const VectorND<T> save = aux;
@@ -125,14 +130,12 @@ namespace Physica {
 
     template<Scalar T>
     auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
-        buffer = action;
-        auto dBuffer = buffer.toDevice();
-        lu[0].compute(dBuffer);
+        action.assign(detBuffer);
+        lu[0].compute(detBuffer);
 
         action.getAuxField() = -action.getAuxField();
-        buffer = action;
-        buffer.toDevice(dBuffer);
-        lu[1].compute(dBuffer);
+        action.assign(detBuffer);
+        lu[1].compute(detBuffer);
 
         Trv lnAD = 0, sgnD = 1;
         for (const auto& spinLU : lu) {
@@ -145,18 +148,17 @@ namespace Physica {
     template<Scalar T>
     void device_obj<FreqDQMC<T>>::calcGreen() {
         const int numSite = getNumSite();
-        device_obj<MatrixND<T>> dBuffer;
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
-            buffer = UnitMatrix<T>(action.getOrder());
-            buffer.toDevice(dBuffer);
-            spinLU.solve(dBuffer);
-            dBuffer.toHost(buffer);
+            solBuffer = UnitMatrix<T>(action.getOrder());
+            solBuffer.toDevice(linearRHS);
+            spinLU.solve(linearRHS);
+            linearRHS.toHost(solBuffer);
 
             auto& green = greens[spin];
             green.zeros();
             for (int _ = 0, offset = 0; _ < action.getNumFreq() * 2; ++_) {
-                green += buffer.block(offset, numSite, offset, numSite).reals();
+                green += solBuffer.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }
             green *= reciprocal(getParams().getBeta());

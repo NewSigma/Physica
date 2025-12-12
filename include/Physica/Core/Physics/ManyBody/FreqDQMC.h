@@ -31,12 +31,11 @@ namespace Physica {
 
         using GreenPair = ImagKinetic<Tr>::GreenPair;
     private:
-        ActionMatrix<T> action;
-
         Array<DenseLU<T, false>, 2> lu;
-        GreenPair greens;
-        MatrixND<T> buffer;
+        ActionMatrix<T> action;
+        MatrixND<T> solBuffer;
 
+        GreenPair greens;
         Trv lnAbsDet;
         Trv sign;
     public:
@@ -74,9 +73,10 @@ namespace Physica {
     FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity)
             : action(params, calcFreqCutoff(params.getBeta(), freqDensity))
             , greens(2, params.getNumSite()) {
+        size_t size = action.getOrder();
         for (auto& spinLU : lu)
-            spinLU.resize(action.getRow());
-        buffer.resize(action);
+            spinLU.resize(size);
+        solBuffer.resize(size);
     }
 
     template<Scalar T>
@@ -142,12 +142,12 @@ namespace Physica {
         const int numSite = getNumSite();
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
-            buffer = spinLU.inv();
+            solBuffer = spinLU.inv();
 
             auto& green = greens[spin];
             green.zeros();
             for (int _ = 0, offset = 0; _ < action.getNumFreq() * 2; ++_) {
-                green += buffer.block(offset, numSite, offset, numSite).reals();
+                green += solBuffer.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }
             green *= reciprocal(getParams().getBeta());

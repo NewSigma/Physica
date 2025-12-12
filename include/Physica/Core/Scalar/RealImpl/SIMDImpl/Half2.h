@@ -81,10 +81,10 @@ namespace Physica {
         //[[nodiscard]] inline BoolSIMDType operator>=(const SIMD other) const { return !(*this < other); }
         //[[nodiscard]] inline BoolSIMDType operator<=(const SIMD other) const { return !(*this > other); }
         /* Operations */
-        __host__ __device__ inline void load(const float16* p);
-        __host__ __device__ inline void load_partial(const float16* p, int n);
-        __host__ __device__ inline void store(float16* p) const;
-        __host__ __device__ inline void store_partial(float16* p, int n) const;
+        __device__ inline void load(const float16* p);
+        __device__ inline void load_partial(const float16* p, int n);
+        __device__ inline void store(float16* p) const;
+        __device__ inline void store_partial(float16* p, int n) const;
         //inline void insert(int index, const float16& value);
         [[nodiscard]] __host__ __device__ inline float16 sum() const noexcept;
         //[[nodiscard]] inline float16 max() const;
@@ -129,21 +129,21 @@ namespace Physica {
     __host__ __device__ inline SIMD<Real<Float16>, 2> SIMD<Real<Float16>, 2>::operator-() const noexcept {
         return This(__hneg2(toMachine()));
     }
-
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::load(const float16* p) {
+    // Marked as __device__ because nvcc warning 20014-D, host does not have native float16 support
+    __device__ inline void SIMD<Real<Float16>, 2>::load(const float16* p) {
         *reinterpret_cast<uint32_t*>(this) = *reinterpret_cast<const uint32_t*>(p);
     }
 
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::load_partial(const float16* p, int n) {
+    __device__ inline void SIMD<Real<Float16>, 2>::load_partial(const float16* p, int n) {
         assert(n == 1 && "[Error]: Invalid size for partial operation");
         (*this) = SIMD(*p, 0);
     }
 
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::store(float16* p) const {
+    __device__ inline void SIMD<Real<Float16>, 2>::store(float16* p) const {
         *reinterpret_cast<uint32_t*>(p) = *reinterpret_cast<const uint32_t*>(this);
     }
 
-    __host__ __device__ inline void SIMD<Real<Float16>, 2>::store_partial(float16* p, int n) const {
+    __device__ inline void SIMD<Real<Float16>, 2>::store_partial(float16* p, int n) const {
         assert(n == 1 && "[Error]: Invalid size for partial operation");
         *p = operator[](0);
     }

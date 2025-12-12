@@ -63,6 +63,11 @@ namespace Physica {
     }
 
     template<tparams>
+    __host__ __device__ void device_obj<Array2D>::resize(size_t order) {
+        resize(order, order);
+    }
+
+    template<tparams>
     void device_obj<Array2D>::zeros() {
         check(cudaMemsetAsync(asArray().data(), 0, getRow() * getCol() * sizeof(T), CUDAContext::getInstance()));
     }

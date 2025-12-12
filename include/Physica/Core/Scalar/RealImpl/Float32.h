@@ -107,7 +107,9 @@ namespace Physica {
         [[nodiscard]] static Real random_normal(GaussRandomPool<This, R>& pool) noexcept { return pool(); }
         template<RNG R>
         [[nodiscard]] static Real random_any(auto& distribution) noexcept { return Real(distribution(R::getInstance())); }
+    #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& dtype_hdf5() noexcept { return H5::PredType::NATIVE_FLOAT; }
+    #endif
     #ifdef PHYSICA_MPI
         [[nodiscard]] static MPI_Datatype dtype_mpi() noexcept { return MPI_FLOAT; }
     #endif

@@ -55,6 +55,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void Kronecker<M1, M2>::assign(Matrix auto&& target) const {
+        target.zeros();
         for (size_t r = 0; r < m1.getRow(); ++r) {
             size_t offsetR = r * m2.getRow();
             if constexpr (instanceof_tx<UnitMatrix, M1>)

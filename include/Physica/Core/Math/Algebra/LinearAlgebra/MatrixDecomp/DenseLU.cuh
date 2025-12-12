@@ -77,7 +77,10 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     void device_obj<DenseLU<T, Pivot>>::compute(const Matrix auto& source) {
         assert(source.isSquare());
-        source.assign(working);
+        if constexpr (CUDA<decltype(source)>)
+            source.assign(working);
+        else
+            source.toDeviceAsync(working);
 
         auto& ctx = CUDAContext::getInstance();
         int64_t m = getOrder();

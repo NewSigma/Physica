@@ -51,7 +51,7 @@ namespace Physica {
         using Base::operator=;
         using Storage::operator();
         /* Operations */
-        __host__ __device__ void resize(const Matrix auto& m) { resize(m.getRow(), m.getCol()); }
+        __host__ __device__ void resize(const Matrix auto& m);
         using Storage::resize;
 
         [[nodiscard]] host_obj toHost() const;

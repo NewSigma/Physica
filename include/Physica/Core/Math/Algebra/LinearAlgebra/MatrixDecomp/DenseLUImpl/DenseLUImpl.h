@@ -40,14 +40,9 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_base(const Matrix auto& source) {
-        pre_compute(source);
-
-        const size_t order = source.getRow();
-        if constexpr (Pivot)
-            perm = PermMatrix<T>(order);
-
-        working = source;
-        for (size_t i = 0; i < order; ++i) {
+        source.assert_assign(working);
+        source.assign(working);
+        for (size_t i = 0; i < getOrder(); ++i) {
             if constexpr (Pivot) {
                 size_t j = working.partialPivoting(i);
                 perm.swapRows(i, j);

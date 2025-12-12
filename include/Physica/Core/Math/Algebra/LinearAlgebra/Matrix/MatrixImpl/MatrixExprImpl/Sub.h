@@ -33,7 +33,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        void assign(Matrix auto& target) const;
+        void assign(Matrix auto&& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
@@ -43,7 +43,7 @@ namespace Physica {
     };
 
     template<class U, class V>
-    void MatrixExpr<ExprID::Sub, U, V>::assign(Matrix auto& target) const {
+    void MatrixExpr<ExprID::Sub, U, V>::assign(Matrix auto&& target) const {
         if constexpr (Matrix<U>) {
             if constexpr (MatrixOption::isSameMajor<U, decltype(target)>())
                 (getLHS().flatten() - getRHS()).assign(target.flatten());
@@ -85,7 +85,7 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        void assign(Matrix auto& target) const;
+        void assign(Matrix auto&& target) const;
 
         [[nodiscard]] CoDiff<T> calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
@@ -100,7 +100,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    void MatrixExpr<ExprID::Sub, M1, M2>::assign(Matrix auto& target) const {
+    void MatrixExpr<ExprID::Sub, M1, M2>::assign(Matrix auto&& target) const {
         constexpr bool SameMajor1 = MatrixOption::isSameMajor<M1, decltype(target)>();
         constexpr bool SameMajor2 = MatrixOption::isSameMajor<M2, decltype(target)>();
         if constexpr (SameMajor1 && SameMajor2)

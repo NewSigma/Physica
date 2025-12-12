@@ -24,8 +24,8 @@
 namespace Physica {
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_mkl(const Matrix auto& source) {
-        pre_compute(source);
-        working = source;
+        source.assert_assign(working);
+        source.assign(working);
 
         constexpr static int Layout = LAPACK_COL_MAJOR;
         const size_t m = source.getRow();

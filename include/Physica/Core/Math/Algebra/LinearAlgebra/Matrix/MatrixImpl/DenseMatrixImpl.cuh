@@ -45,6 +45,11 @@ namespace Physica {
     }
 
     template<tparams>
+    __host__ __device__ void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::resize(const Matrix auto& m) {
+        Storage::resize(m.getRow(), m.getCol());
+    }
+
+    template<tparams>
     auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::toHost() const -> host_obj {
         return host_obj(Storage::toHost());
     }
