@@ -27,7 +27,7 @@ namespace Physica {
     class SparseLU {
         using This = SparseLU<T>;
         using Tr = T::RealType;
-        enum class Phase : int64_t {
+        enum Phase : int64_t {
             Analyse = 11,
             Factorize = 22,
             AnalyseFactorize = 12,

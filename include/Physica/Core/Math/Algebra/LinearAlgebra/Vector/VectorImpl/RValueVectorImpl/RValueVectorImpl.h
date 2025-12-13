@@ -645,7 +645,7 @@ namespace Physica {
     template<class Derived>
     decltype(auto) RValueVector<Derived>::reals() const noexcept {
         if constexpr (isComplex)
-            return RealVector<Derived>(Base::getDerived());
+            return RealVectorR<Derived>(Base::getDerived());
         else
             return Base::getDerived();
     }

@@ -31,7 +31,6 @@ else()
         # Reference:
         # [1] GH56671; https://github.com/llvm/llvm-project/issues/56671
         add_compile_options(-fcoro-aligned-allocation)
-        add_link_options(-lstdc++) # Add this if you prefer libstdc++
 
         if (CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
             find_package(IntelSYCL REQUIRED)
@@ -75,7 +74,6 @@ if(${PHYSICA_CUDA})
         set(CMAKE_CUDA_ARCHITECTURES native)
     endif()
     set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
-    set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
     set(CMAKE_CUDA_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED})
     set(CMAKE_CUDA_VISIBILITY_PRESET ${CMAKE_CXX_VISIBILITY_PRESET})
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
@@ -85,8 +83,10 @@ if(${PHYSICA_CUDA})
     add_definitions(-DPHYSICA_CUDA)
 
     if(CMAKE_CUDA_COMPILER_ID MATCHES Clang)
-        add_compile_options(-Wno-unknown-cuda-version -fcuda-flush-denormals-to-zero)
+        set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
+        set(CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS} -Wno-unknown-cuda-version -fcuda-flush-denormals-to-zero)
     else()
+        set(CMAKE_CUDA_STANDARD 20)
         # clangd does not work with response file
         # Reference: https://github.com/clangd/clangd/discussions/1676
         set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
@@ -113,8 +113,8 @@ if(${PHYSICA_CUDA})
             --diag-suppress 20039
             --diag-suppress 20040
             ${CMAKE_CXX_FLAGS})
-        string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
     endif()
+    string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
 
     set(CMAKE_BUILD_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
     set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})

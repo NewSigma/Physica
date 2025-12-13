@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,61 +22,61 @@
 #include "Physica/Core/IO/VTKFile.h"
 
 using namespace Physica;
-using ScalarType = float64;
-using VectorType = Vector2D<ScalarType>;
-
+using T = float64;
 constexpr double gammaY = 0.1;
 constexpr double diffuseD_ = 0.1;
 constexpr double massM = 1;
 
-ScalarType force(VectorType pos) {
-    const ScalarType x = pos[0];
-    const ScalarType p = pos[1];
-    return -x - p * gammaY;
-}
+namespace {
+    T force(Vector2D<T> pos) {
+        const T x = pos[0];
+        const T p = pos[1];
+        return -x - p * gammaY;
+    }
 
-ScalarType diffuseD([[maybe_unused]] VectorType pos) {
-    return ScalarType(diffuseD_);
-}
+    T diffuseD([[maybe_unused]] Vector2D<T> pos) {
+        return T(diffuseD_);
+    }
 
-ScalarType d_diffuseD([[maybe_unused]] VectorType pos) {
-    return ScalarType(0);
-}
+    T d_diffuseD([[maybe_unused]] Vector2D<T> pos) {
+        return T(0);
+    }
 
-ScalarType initial(VectorType pos) {
-    constexpr double square_sigma = 1.0 / 9;
-    constexpr double square_sigma_2 = 1 / (square_sigma * 2);
-    constexpr double factor = square_sigma_2 / M_PI;
-    constexpr double x0 = 5;
-    constexpr double p0 = 5;
-    const ScalarType temp = exp(-(square(pos[0] - x0) + square(pos[1] - p0)) * square_sigma_2);
-    return temp * factor;
-}
+    T initial(Vector2D<T> pos) {
+        constexpr double square_sigma = 1.0 / 9;
+        constexpr double square_sigma_2 = 1 / (square_sigma * 2);
+        constexpr double factor = square_sigma_2 / M_PI;
+        constexpr double x0 = 5;
+        constexpr double p0 = 5;
+        const T temp = exp(-(square(pos[0] - x0) + square(pos[1] - p0)) * square_sigma_2);
+        return temp * factor;
+    }
 
-ScalarType theory_stationary(VectorType pos) {
-    const ScalarType a = ScalarType(gammaY / (diffuseD_ * 2));
-    const ScalarType factor = a * std::sqrt(massM) / M_PI;
-    return exp(-a * (square(pos[0]) * massM + square(pos[1]))) * factor;
+    T theory_stationary(Vector2D<T> pos) {
+        const T a = T(gammaY / (diffuseD_ * 2));
+        const T factor = a * std::sqrt(massM) / M_PI;
+        return exp(-a * (square(pos[0]) * massM + square(pos[1]))) * factor;
+    }
 }
 /**
  * Reference:
  * [1] Nonlinear Dyn 4, 357–372 (1993); https://doi.org/10.1007/BF00120671
  */
 int main() {
-    using ElementType = Rectangle1<ScalarType>;
+    using ElementType = Rectangle1<T>;
     auto mesh = ElementType::rectangle({-10, -10}, {10, 10}, 201, 201);
-    mesh.addDirichletBoundary([](VectorType p) { return scalarNear(abs(p[0]), ScalarType(10), 1E-12)
-                                                     || scalarNear(abs(p[1]), ScalarType(10), 1E-12); },
-                              []([[maybe_unused]] VectorType p) { return ScalarType(0); });
+    mesh.addDirichletBoundary([](Vector2D<T> p) { return scalarNear(abs(p[0]), T(10), 1E-12)
+                                                     || scalarNear(abs(p[1]), T(10), 1E-12); },
+                              []([[maybe_unused]] Vector2D<T> p) { return T(0); });
 
     FokkerPlanckModel model(std::move(mesh), force, diffuseD, d_diffuseD, 1E-3, massM);
     model.setInitialCond(initial);
 
+    std::array<char, 16> buffer{}; //16 is enough
     for (int i = 0; i < 10000; ++i) {
         if (i % 250 == 0) {
-            char buffer[16]; //16 is enough
-            sprintf(buffer, "FP_%d.vtk", i / 250);
-            std::ofstream fout(buffer);
+            sprintf(buffer.data(), "FP_%d.vtk", i / 250);
+            std::ofstream fout(buffer.data());
             fout << VTKFile<ElementType>(model.getMesh(), "FokkerPlanck");
         }
         model.step();

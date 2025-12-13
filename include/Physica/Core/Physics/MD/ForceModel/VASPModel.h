@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -154,10 +154,10 @@ namespace Physica {
             dup2(logFd, STDERR_FILENO);
             [[maybe_unused]] int err = chdir(workingDir.getName());
             /* Execute */ {
-                constexpr int bufferLength = 16; // 16 is enough for unsigned int
-                char numProcess[bufferLength];
+                constexpr int BufferSize = 16; // 16 is enough for unsigned int
+                std::array<char, BufferSize> numProcess{};
                 [[maybe_unused]] int count = sprintf(numProcess, "%d", numMPIProcess);
-                assert(0 <= count && count < bufferLength && "[Error]: Unexpected bad printf");
+                assert(0 <= count && count < BufferSize && "[Error]: Unexpected bad printf");
                 execlp("mpirun", "mpirun", "-n", numProcess, pathToVasp.c_str(), nullptr);
             }
             dup2(standardErr, STDERR_FILENO);

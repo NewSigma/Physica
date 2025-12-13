@@ -52,18 +52,19 @@ namespace Physica {
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
 
+        void flip();
         template<RNG R>
         void randAuxField();
         template<RNG R>
         void randAuxField(int site);
         /* Getters */
-        [[nodiscard]] const auto& getParams() const noexcept { return params; }
-        [[nodiscard]] int getNumFreq() const noexcept { return auxField.getRow() / 2; }
-        [[nodiscard]] int getNumSite() const noexcept { return auxField.getCol(); }
-        [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getRow() * getNumSite(); }
+        [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getOrder() * getNumSite(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
-        [[nodiscard]] auto& getAuxField() noexcept { return auxField; }
+        [[nodiscard]] const auto& getAuxField() noexcept { return auxField; }
+        [[nodiscard]] int getNumFreq() const noexcept { return auxField.getRow() / 2; }
+        [[nodiscard]] int getNumSite() const noexcept { return auxField.getCol(); }
+        [[nodiscard]] const auto& getParams() const noexcept { return params; }
     };
 
     template<Scalar T>
@@ -144,6 +145,11 @@ namespace Physica {
             return aux;
         }
         return 0;
+    }
+
+    template<Scalar T>
+    void ActionMatrix<T>::flip() {
+        auxField = -auxField;
     }
 
     template<Scalar T>

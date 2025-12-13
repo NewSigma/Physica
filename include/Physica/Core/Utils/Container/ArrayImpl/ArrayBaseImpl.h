@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <array>
+#include <cstdio>
 #include <cstring>
 #include "ArrayBase.h"
 
@@ -49,20 +51,20 @@ namespace Physica {
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::read(const auto& loc, const char* name) {
         const auto group = loc.openGroup(name);
-        char buffer[32]; //32 is enough for uint64_t
+        std::array<char, 32> buffer{}; //32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
-            std::sprintf(buffer, "%zu", i);
-            (*this)[i].read(group, buffer);
+            std::sprintf(buffer.data(), "%zu", i);
+            (*this)[i].read(group, buffer.data());
         }
     }
 
     template<class Derived, class Allocator>
     void ArrayBase<Derived, Allocator>::write(auto& loc, const char* name) const {
         auto group = loc.openGroup(name);
-        char buffer[32]; //32 is enough for uint64_t
+        std::array<char, 32> buffer{}; //32 is enough for uint64_t
         for (size_t i = 0; i < getLength(); ++i) {
-            std::sprintf(buffer, "%zu", i);
-            (*this)[i].write(group, buffer);
+            std::sprintf(buffer.data(), "%zu", i);
+            (*this)[i].write(group, buffer.data());
         }
     }
 
@@ -79,7 +81,7 @@ namespace Physica {
 
     template<class Derived, class Allocator>
     template<class... Args>
-    __host__ __device__ consteval bool ArrayBase<Derived, Allocator>::isTrivialDefaultConstruct() {
+    __host__ __device__ consteval bool ArrayBase<Derived, Allocator>::isTrivialDefaultConstruct() noexcept {
         return (sizeof...(Args) == 0) && std::is_trivially_default_constructible<value_type>::value;
     }
 }

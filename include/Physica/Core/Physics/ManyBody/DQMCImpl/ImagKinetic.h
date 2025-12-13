@@ -57,9 +57,9 @@ namespace Physica {
         void random_uniform();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] const auto& getAuxField() const noexcept { return aux; }
         [[nodiscard]] int getNumSite() const noexcept { return aux.getRow(); }
         [[nodiscard]] int getNumSplit() const noexcept { return aux.getCol(); }
-        [[nodiscard]] const auto& getAuxField() const noexcept { return aux; }
         [[nodiscard]] auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Tv getRSign() const noexcept;
     private:

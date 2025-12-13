@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -149,10 +149,10 @@ namespace Physica {
                 throw SystemException();
             close(fd[0]);
             /* Execute */ {
-                constexpr int bufferLength = 16; // 16 is enough for unsigned int
-                char numProcess[bufferLength];
-                [[maybe_unused]] const int count = sprintf(numProcess, "%d", getNumMPIProcess());
-                assert(0 <= count && count < bufferLength && "[Error]: Unexpected bad printf");
+                constexpr int BufferSize = 16; // 16 is enough for unsigned int
+                std::array<char, BufferSize> numProcess{};
+                [[maybe_unused]] const int count = sprintf(numProcess.data(), "%d", getNumMPIProcess());
+                assert(0 <= count && count < BufferSize && "[Error]: Unexpected bad printf");
                 execlp("mpirun", "mpirun", "-n", numProcess, pathToPW.c_str(), "-n", numProcess, "-nk", numProcess, nullptr);
             }
             dup2(standardErr, STDERR_FILENO);

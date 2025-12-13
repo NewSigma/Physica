@@ -25,7 +25,7 @@
 namespace Physica {
     template<class Derived>
     template<Matrix M>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M& target) const {
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M&& target) const {
         assert_assign(target);
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
@@ -56,7 +56,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto& target) const {
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target) const {
         assert_assign(target);
         target = target + Base::getDerived();
     }

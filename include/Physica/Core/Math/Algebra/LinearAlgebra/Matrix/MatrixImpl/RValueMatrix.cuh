@@ -59,8 +59,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<Matrix M>
-        __host__ __device__ void assign(M& target) const;
-        __host__ __device__ void assign_add(Matrix auto& target) const;
+        __host__ __device__ void assign(M&& target) const;
+        __host__ __device__ void assign_add(Matrix auto&& target) const;
         __host__ __device__ void assert_assign(const Matrix auto& target) const noexcept;
 
         __host__ __device__ void resize(const Matrix auto& m, auto&&... args);

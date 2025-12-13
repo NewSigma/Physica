@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
         DenseMatrix<T> trans = solution.transpose();
         const VectorType r = exp(VectorType::linspace(-4, -1, length));
         const T dim = DimEstimator::corrDimen(trans, r);
-        std::cout << "Effective dimention: " << dim << std::endl;
+        std::cout << "Effective dimention: " << dim << '\n';
     }
 
     QApplication app(argc, argv);

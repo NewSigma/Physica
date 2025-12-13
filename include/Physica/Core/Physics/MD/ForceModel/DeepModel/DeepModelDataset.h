@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -69,9 +69,9 @@ namespace Physica {
 
         auto cellGroup = group.openGroup("Cells");
         auto forceGroup = group.openGroup("Forces");
-        char buffer[32]; //32 should be enough to hold size_t
+        std::array<char, 32> buffer{}; //32 should be enough to hold size_t
         for (size_t i = 0; i < numSample; ++i) {
-            sprintf(buffer, "%zu", i);
+            sprintf(buffer.data(), "%zu", i);
             cells[i].read(cellGroup, buffer);
             forces[i].read(forceGroup, buffer);
         }
@@ -83,11 +83,11 @@ namespace Physica {
         auto group = loc.openGroup(name);
         energys.write(group, "Energys");
 
-        char buffer[32]; //32 should be enough to hold size_t
         auto cellGroup = group.openGroup("Cells");
         auto forceGroup = group.openGroup("Forces");
+        std::array<char, 32> buffer{}; //32 should be enough to hold size_t
         for (size_t i = 0; i < getNumSample(); ++i) {
-            sprintf(buffer, "%zu", i);
+            sprintf(buffer.data(), "%zu", i);
             cells[i].write(cellGroup, buffer);
             forces[i].write(forceGroup, buffer);
         }

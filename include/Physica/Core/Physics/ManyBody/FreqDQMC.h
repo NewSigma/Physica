@@ -58,7 +58,6 @@ namespace Physica {
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
-        [[nodiscard]] int getNumSplit() const noexcept { return getParams().getNumSplit(); }
         [[nodiscard]] auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
@@ -117,16 +116,15 @@ namespace Physica {
 
     template<Scalar T>
     int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
-        assert(!freqDensity.isNegative());
         int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
-        return (i + 1) * 4; // Multiple of 4 so that SIMD works
+        return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
     }
 
     template<Scalar T>
     auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
         lu[0].compute(action);
 
-        action.getAuxField() = -action.getAuxField();
+        action.flip();
         lu[1].compute(action);
 
         Trv lnAD = 0, sgnD = 1;

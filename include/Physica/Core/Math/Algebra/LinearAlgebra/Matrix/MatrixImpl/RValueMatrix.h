@@ -64,6 +64,7 @@ namespace Physica {
      */
     template<class Derived>
     class RValueMatrix : public CRTPBase<RValueMatrix<Derived>> {
+        static_assert(!CUDA<Derived>, "[Error]: device_obj<> must be outside RValueMatrix<>");
         using This = RValueMatrix<Derived>;
         using Base = CRTPBase<This>;
         using RowVector = RMatrixBlock<Derived, 1, Dynamic>;

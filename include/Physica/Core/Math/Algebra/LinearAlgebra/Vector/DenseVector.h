@@ -133,7 +133,7 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, size_t Length>
-    struct std::tuple_size<Physica::DenseVector<T, Length>> : public integral_constant<std::size_t, Length> {};
+    struct tuple_size<Physica::DenseVector<T, Length>> : public integral_constant<std::size_t, Length> {};
 
     template<size_t I, Physica::Scalar T, size_t Length>
     struct tuple_element<I, Physica::DenseVector<T, Length>> {

@@ -34,6 +34,7 @@ namespace Physica {
 
     template<class Derived>
     class RValueTensor : public CRTPBase<RValueTensor<Derived>>, public TensorBase {
+        static_assert(!CUDA<Derived>, "[Error]: device_obj<> must be outside RValueTensor<>");
         using This = RValueTensor<Derived>;
         using Base = CRTPBase<This>;
     public:

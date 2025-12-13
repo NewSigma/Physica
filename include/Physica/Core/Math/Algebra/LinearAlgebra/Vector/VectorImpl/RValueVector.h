@@ -33,7 +33,7 @@ namespace Physica {
     template<class> class Conjugate;
     template<class> class Hermite;
     template<Vector V1, Vector V2> class CrossProduct;
-    template<class T> class RealVector;
+    template<class T> class RealVectorR;
     template<class T> class ImagVector;
     template<class T> class SquaredNormVector;
     template<class T> class NormVector;
@@ -89,6 +89,7 @@ namespace Physica {
      */
     template<class Derived>
     class RValueVector : public CRTPBase<RValueVector<Derived>> {
+        static_assert(!CUDA<Derived>, "[Error]: device_obj<> must be outside RValueVector<>");
         using This = RValueVector<Derived>;
         using Base = CRTPBase<This>;
     public:

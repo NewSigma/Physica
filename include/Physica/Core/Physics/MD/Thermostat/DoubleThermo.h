@@ -102,11 +102,8 @@ namespace Physica {
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
                 }, dof, 0).wait();
         }
-        else {
-            for (size_t i = 0; i < dof; ++i) {
-                ringPolymer.asMatrix()(i, 0) *= factor_translational;
-            }
-        }
+        else
+            ringPolymer.asMatrix().col(0).head(dof) *= factor_translational;
     }
 
     template<class KineticModel>

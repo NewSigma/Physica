@@ -177,7 +177,7 @@ namespace Physica {
 
 namespace std {
     template<class T, size_t Length, class Allocator>
-    struct std::tuple_size<Physica::Array<T, Length, Allocator>> : public integral_constant<std::size_t, Length> {};
+    struct tuple_size<Physica::Array<T, Length, Allocator>> : public integral_constant<std::size_t, Length> {};
 
     template<std::size_t I, class T, size_t Length, class Allocator>
     struct tuple_element<I, Physica::Array<T, Length, Allocator>> {

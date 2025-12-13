@@ -298,6 +298,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    __device__ auto device_obj<RValueVector<Derived>>::mean(int tid, int numThread, T* __restrict shared) const -> T {
+        return sum(tid, numThread, shared) / Trv(getLength());
+    }
+
+    template<class Derived>
     __device__ auto device_obj<RValueVector<Derived>>::lnSumExp(int tid, int numThread, T* __restrict shared) const -> T {
         assert(tid < numThread);
         const auto& v = Base::getDerived();
@@ -310,13 +315,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::mean(int tid, int numThread, T* __restrict shared) const -> T {
-        return sum(tid, numThread, shared) / Trv(getLength());
-    }
-
-    template<class Derived>
-    __host__ __device__ auto device_obj<RValueVector<Derived>>::reals() const noexcept -> RealsRtnTy {
-        return RealsRtnTy(Base::getDerived());
+    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::reals() const noexcept {
+        if constexpr (isComplex)
+            return device_obj<RealVectorR<Derived>>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
@@ -335,8 +338,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueVector<Derived>>::values() const noexcept -> ValuesRtnTy {
-        return ValuesRtnTy(Base::getDerived());
+    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::values() const noexcept {
+        if constexpr (isDiffable)
+            return device_obj<ValueVector<Derived>>(Base::getDerived());
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>

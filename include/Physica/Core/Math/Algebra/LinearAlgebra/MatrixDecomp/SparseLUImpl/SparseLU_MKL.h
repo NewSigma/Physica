@@ -50,7 +50,7 @@ namespace Physica {
 
     template<Scalar T>
     void SparseLU<T>::initialize(bool needDiag) noexcept {
-        void* pt = handles.data();
+        void* pt = static_cast<void*>(handles.data());
         const int64_t mtype = getMatrixType();
         auto* iparm = (MKL_INT64*)params.data();
         pardisoinit(pt, (MKL_INT64*)&mtype, iparm);
@@ -65,29 +65,28 @@ namespace Physica {
     void SparseLU<T>::runPardiso(Phase phase, int64_t nrhs, T* b, T* x) {
         assert(((nrhs == 0) == (b == nullptr)) && "[Error]: Params inconsistent");
         assert(!isSolvePhase(phase) || nrhs > 0 && "[Error]: Empty RHS");
-        void* pt = handles.data();
-        const int64_t maxfct = 1;
-        const int64_t mtype = getMatrixType();
-        const int64_t n = getOrder();
+        void* pt = static_cast<void*>(handles.data());
+        const MKL_INT64 maxfct = 1;
+        const MKL_INT64 mtype = getMatrixType();
+        const MKL_INT64 n = getOrder();
         const void* a = spmat.getElements().data();
         const auto* ia = (MKL_INT64*)spmat.getMajorStarts().data();
         const auto* ja = (MKL_INT64*)spmat.getMinorIndexes().data();
-        void* iperm = nullptr;
+        MKL_INT64* iperm = nullptr;
         auto* iparm = (MKL_INT64*)params.data();
-        const int64_t msglvl = 0; // We do not care about logs
-        int64_t err{};
-        pardiso_64(pt, (MKL_INT64*)&maxfct, (MKL_INT64*)&maxfct, (MKL_INT64*)&mtype, (MKL_INT64*)&phase, (MKL_INT64*)&n, a, ia, ja, (MKL_INT64*)iperm, (MKL_INT64*)&nrhs, iparm, (MKL_INT64*)&msglvl, b, x, (MKL_INT64*)&err);
-        check_pardiso(err);
+        const MKL_INT64 msglvl = 0; // We do not care about logs
+        MKL_INT64 err{};
+        pardiso_64(pt, &maxfct, &maxfct, &mtype, (MKL_INT64*)&phase, &n, a, ia, ja, iperm, reinterpret_cast<MKL_INT64*>(&nrhs), iparm, &msglvl, b, x, &err);
+        check_pardiso(static_cast<int>(err));
 
         if (getNeedDiag() && isFactorizePhase(phase)) {
-            pardiso_getdiag(pt, diags.data(), buffer.data(), (MKL_INT64*)&maxfct, (MKL_INT64*)&err);
+            pardiso_getdiag(pt, diags.data(), buffer.data(), &maxfct, &err);
             assert(err == 0 && "[Error]: We should have set iparm[55]");
         }
     }
 
     template<Scalar T>
     constexpr bool SparseLU<T>::isFactorizePhase(Phase p) noexcept {
-        using enum Phase;
         switch (p) {
         case Analyse:
             return false;
@@ -105,7 +104,6 @@ namespace Physica {
 
     template<Scalar T>
     constexpr bool SparseLU<T>::isSolvePhase(Phase p) noexcept {
-        using enum Phase;
         switch (p) {
         case Analyse:
         case Factorize:

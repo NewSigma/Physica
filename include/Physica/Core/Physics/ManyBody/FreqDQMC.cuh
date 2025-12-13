@@ -60,15 +60,11 @@ namespace Physica {
         template<RNG R>
         void step_for(int numStep);
         /* Getters */
-        [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
-        [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
+        [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
-        [[nodiscard]] int getNumSplit() const noexcept { return getParams().getNumSplit(); }
         [[nodiscard]] auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
-        /* Static members */
-        [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
     private:
         [[nodiscard]] Vector2D<Trv> calcDet();
         void calcGreen();
@@ -76,7 +72,7 @@ namespace Physica {
 
     template<Scalar T>
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity)
-            : action(params, calcFreqCutoff(params.getBeta(), freqDensity))
+            : action(params, host_obj::calcFreqCutoff(params.getBeta(), freqDensity))
             , greens(2, params.getNumSite()) {
         size_t size = action.getOrder();
         for (auto& spinLU : lu)
@@ -126,18 +122,11 @@ namespace Physica {
     }
 
     template<Scalar T>
-    int device_obj<FreqDQMC<T>>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
-        assert(!freqDensity.isNegative());
-        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
-        return (i + 1) * 4; // Multiple of 4 so that SIMD works
-    }
-
-    template<Scalar T>
     auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
         action.assign_potential(detBuffer);
         lu[0].compute(detBuffer);
 
-        action.getAuxField() = -action.getAuxField();
+        action.flip();
         action.assign_potential(detBuffer);
         lu[1].compute(detBuffer);
 
@@ -164,7 +153,7 @@ namespace Physica {
                 green += solBuffer.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }
-            green *= reciprocal(getParams().getBeta());
+            green *= reciprocal(action.getBeta());
             green.diag() += Trv(0.5);
         }
     }

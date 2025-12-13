@@ -90,7 +90,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const_pointer data_ptr(size_t index) const noexcept;
         /* Static members */
         template<class... Args>
-        [[nodiscard]] __host__ __device__ consteval static bool isTrivialDefaultConstruct();
+        [[nodiscard]] __host__ __device__ consteval static bool isTrivialDefaultConstruct() noexcept;
     protected:
         ArrayBase() = default;
         ArrayBase(const ArrayBase&) = default;
