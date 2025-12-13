@@ -159,5 +159,6 @@ namespace Physica {
 #include "MatrixProduct/GEMM.cuh"
 #include "MatrixProduct/GEMV.cuh"
 #include "MatrixProduct/GEVM.cuh"
+#include "MatrixProduct/Kronecker.cuh"
 #include "MatrixExpr.cuh"
 #include "DiagVector.cuh"

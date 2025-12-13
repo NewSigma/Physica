@@ -18,25 +18,24 @@
  */
 #pragma once
 
-#include "../RValueMatrix.h"
+#include "../RValueMatrix.cuh"
 
 namespace Physica {
-    template<Scalar, size_t Order> class UnitMatrix;
-
     template<Matrix M1, Matrix M2>
-    class Kronecker : public RValueMatrix<Kronecker<M1, M2>> {
-        using This = Kronecker<M1, M2>;
-        using Base = RValueMatrix<This>;
+    class device_obj<Kronecker<M1, M2>> : public device_obj<RValueMatrix<Kronecker<M1, M2>>> {
+        using host_obj = Kronecker<M1, M2>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<RValueMatrix<host_obj>>;
     protected:
         using typename Base::T;
     private:
-        const M1& m1;
-        const M2& m2;
+        PlainStruct<const M1> m1;
+        PlainStruct<const M2> m2;
     public:
-        Kronecker(const M1& m1, const M2& m2);
-        Kronecker(const This&) = default;
-        Kronecker(This&&) noexcept = default;
-        ~Kronecker() = default;
+        __host__ __device__ device_obj(const M1& m1, const M2& m2);
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -44,19 +43,19 @@ namespace Physica {
         void assign(Matrix auto&& target) const;
         void assign_add(Matrix auto&& target) const;
 
-        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] __device__ T calc(size_t row, size_t col) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] const auto& getLHS() const noexcept { return m1; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return m2; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
+        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return m1.getDerived(); }
+        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return m2.getDerived(); }
     };
 
     template<Matrix M1, Matrix M2>
-    Kronecker<M1, M2>::Kronecker(const M1& m1, const M2& m2) : m1(m1), m2(m2) {}
+    __host__ __device__ device_obj<Kronecker<M1, M2>>::device_obj(const M1& m1, const M2& m2) : m1(asStruct(m1)), m2(asStruct(m2)) {}
 
     template<Matrix M1, Matrix M2>
-    void Kronecker<M1, M2>::assign(Matrix auto&& target) const {
+    void device_obj<Kronecker<M1, M2>>::assign(Matrix auto&& target) const {
         target.zeros();
 
         const auto& lhs = getLHS();
@@ -77,7 +76,7 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    void Kronecker<M1, M2>::assign_add(Matrix auto&& target) const {
+    void device_obj<Kronecker<M1, M2>>::assign_add(Matrix auto&& target) const {
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         for (size_t r = 0; r < lhs.getRow(); ++r) {
@@ -96,40 +95,31 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    auto Kronecker<M1, M2>::calc(size_t row, size_t col) const -> T {
-        const auto& lhs = getLHS();
-        const auto& rhs = getRHS();
-        size_t row1 = row / rhs.getRow();
-        size_t row2 = row % rhs.getRow();
-        size_t col1 = col / rhs.getCol();
-        size_t col2 = col % rhs.getCol();
-        return lhs.calc(row1, col1) * rhs.calc(row2, col2);
+    __device__ auto device_obj<Kronecker<M1, M2>>::calc(size_t row, size_t col) const -> T {
+        size_t row1 = row / getRHS().getRow();
+        size_t row2 = row % getRHS().getRow();
+        size_t col1 = col / getRHS().getCol();
+        size_t col2 = col % getRHS().getCol();
+        return getLHS().calc(row1, col1) * getRHS().calc(row2, col2);
     }
 
     template<Matrix M1, Matrix M2>
-    size_t Kronecker<M1, M2>::getRow() const noexcept {
+    __host__ __device__ size_t device_obj<Kronecker<M1, M2>>::getRow() const noexcept {
         return getLHS().getRow() * getRHS().getRow();
     }
     
     template<Matrix M1, Matrix M2>
-    size_t Kronecker<M1, M2>::getCol() const noexcept {
+    __host__ __device__ size_t device_obj<Kronecker<M1, M2>>::getCol() const noexcept {
         return getLHS().getCol() * getRHS().getCol();
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto kronecker(const M1& m1, const M2& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
-        return Kronecker<M1, M2>(m1, m2);
+    [[nodiscard]] __host__ __device__ auto kronecker(const M1& m1, const M2& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
+        return device_obj<Kronecker<M1, M2>>(m1, m2);
     }
 }
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
-    class Traits<Kronecker<M1, M2>> {
-    public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
-        constexpr static int Option = MatrixOption::AnyMajor;
-        constexpr static size_t RowAtCompile = M1::RowAtCompile * M2::RowAtCompile;
-        constexpr static size_t ColAtCompile = M1::ColAtCompile * M2::ColAtCompile;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
-    };
+    class Traits<device_obj<Kronecker<M1, M2>>> : public Traits<Kronecker<M1, M2>> {};
 }
