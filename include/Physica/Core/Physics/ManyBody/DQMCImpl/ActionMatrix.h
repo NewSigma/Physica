@@ -32,11 +32,10 @@ namespace Physica {
         using Trv = Tr::ValueType;
         static_assert(T::isComplex, "[Error]: Action is complex");
     private:
-        const HubbardParams<Tr>& params;
-
-        MatrixND<T> auxField;
         DiagMatrix<Tr> matsubara;
-        Trv beta;
+        MatrixND<T> auxField;
+
+        const HubbardParams<Tr>& params;
     public:
         ActionMatrix(const HubbardParams<Tr>& params, int numFreq);
         ActionMatrix(const This&) = default;
@@ -69,9 +68,9 @@ namespace Physica {
 
     template<Scalar T>
     ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq)
-            : params(params)
+            : matsubara(numFreq * 2)
             , auxField(numFreq * 2, params.getNumSite())
-            , matsubara(numFreq * 2) {
+            , params(params) {
         assert(numFreq > 0);
         auto& diag = matsubara.diag();
         for (int k = 0; k < diag.getLength(); ++k) {
@@ -91,7 +90,7 @@ namespace Physica {
     template<Scalar T>
     void ActionMatrix<T>::assign_kinetic(Matrix auto&& target) const {
         const int numSite = getNumSite();
-        kronecker(UnitMatrix<Trv>(matsubara.getRow()), params.getHoppingMatrix()).assign(target);
+        kronecker(UnitMatrix<Trv>(matsubara.getOrder()), params.getHoppingMatrix()).assign(target);
         kronecker(matsubara, UnitMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
     }
 

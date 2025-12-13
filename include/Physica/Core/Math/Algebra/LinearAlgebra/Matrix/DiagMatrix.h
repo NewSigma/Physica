@@ -41,10 +41,10 @@ namespace Physica {
         ~DiagMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] auto operator*(Vector auto&& v) const noexcept;
-        using Base::operator*;
 
+        using Base::operator*;
         void operator*=(const Scalar auto& x);
+        [[nodiscard]] auto operator*(Vector auto&& v) const noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
@@ -60,8 +60,9 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] auto& diag() noexcept { return diags; }
         [[nodiscard]] const auto& diag() const noexcept { return diags; }
-        [[nodiscard]] size_t getRow() const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept;
+        [[nodiscard]] size_t getOrder() const noexcept;
+        [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
+        [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
     };
@@ -73,21 +74,19 @@ namespace Physica {
     DiagMatrix<T, Order>::DiagMatrix(const Vector auto& diags_) : diags(diags_) {}
 
     template<Scalar T, size_t Order>
+    void DiagMatrix<T, Order>::operator*=(const Scalar auto& x) {
+        diags *= x;
+    }
+
+    template<Scalar T, size_t Order>
     auto DiagMatrix<T, Order>::operator*(Vector auto&& v) const noexcept {
         assert(getCol() == v.getLength());
         return hadamard(diags, std::forward<decltype(v)>(v));
     }
 
     template<Scalar T, size_t Order>
-    void DiagMatrix<T, Order>::operator*=(const Scalar auto& x) {
-        diags *= x;
-    }
-
-    template<Scalar T, size_t Order>
     T DiagMatrix<T, Order>::calc(size_t row, size_t col) const {
-        if (row != col)
-            return T(0);
-        return diags[row];
+        return row == col ? diags[row] : T(0);
     }
 
     template<Scalar T, size_t Order>
@@ -107,7 +106,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     auto DiagMatrix<T, Order>::inv() const -> This {
-        return This(VectorType(reciprocal(diags)));
+        return This(reciprocal(diags));
     }
 
     template<Scalar T, size_t Order>
@@ -122,15 +121,10 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    size_t DiagMatrix<T, Order>::getRow() const noexcept {
+    size_t DiagMatrix<T, Order>::getOrder() const noexcept {
         if constexpr (Order == Dynamic)
             return diags.getLength();
         return Order;
-    }
-
-    template<Scalar T, size_t Order>
-    size_t DiagMatrix<T, Order>::getCol() const noexcept {
-        return getRow();
     }
 
     template<Scalar T, size_t Order>
