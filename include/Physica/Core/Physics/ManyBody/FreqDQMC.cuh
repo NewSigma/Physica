@@ -31,16 +31,16 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
-        using GreenPair = ImagKinetic<Tr>::GreenPair;
-        using BufferType = DenseMatrix<T, MatrixOption::Col, Dynamic, Dynamic, PageLockedAllocator<T>>;
+        template<Scalar U>
+        using HostMatrix = DenseMatrix<U, MatrixOption::Col, Dynamic, Dynamic, PageLockedAllocator<T>>;
     private:
         Array<device_obj<DenseLU<T, false>>, 2> lu;
         ActionMatrix<T> action;
         device_obj<MatrixND<T>> linearRHS;
-        BufferType detBuffer;
-        BufferType solBuffer;
+        HostMatrix<T> detBuffer;
 
-        GreenPair greens;
+        Array<device_obj<MatrixND<Tr>>> greensD;
+        Array<MatrixND<Tr>, 2> greensH;
         Trv lnAbsDet = Trv::nan();
         Trv sign = 1;
     public:
@@ -56,13 +56,15 @@ namespace Physica {
         void step_random();
 
         template<RNG R>
-        void step();
+        void step(bool warmup = false);
         template<RNG R>
         void step_for(int numStep);
+
+        void traceGreen(int spin);
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
-        [[nodiscard]] auto& getGreens() noexcept { return greens; }
+        [[nodiscard]] auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
     private:
@@ -73,13 +75,13 @@ namespace Physica {
     template<Scalar T>
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity)
             : action(params, host_obj::calcFreqCutoff(params.getBeta(), freqDensity))
-            , greens(2, params.getNumSite()) {
+            , greensD(2, params.getNumSite())
+            , greensH(2, params.getNumSite()) {
         size_t size = action.getOrder();
         for (auto& spinLU : lu)
             spinLU.resize(size);
         linearRHS.resize(size);
         detBuffer.resize(size);
-        solBuffer.resize(size);
 
         action.assign_kinetic(detBuffer);
     }
@@ -91,12 +93,11 @@ namespace Physica {
         auto [lnAD, sgnD] = calcDet();
         lnAbsDet = lnAD;
         sign = sgnD;
-        calcGreen();
     }
 
     template<Scalar T>
     template<RNG R>
-    void device_obj<FreqDQMC<T>>::step() {
+    void device_obj<FreqDQMC<T>>::step(bool warmup) {
         assert(lnAbsDet.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
@@ -107,7 +108,8 @@ namespace Physica {
         if (accept) {
             lnAbsDet = lnAD;
             sign = sgnD;
-            calcGreen();
+            if (!warmup)
+                calcGreen();
         }
         else
             action.getAuxField()(freq, site) = save;
@@ -117,7 +119,39 @@ namespace Physica {
     template<RNG R>
     void device_obj<FreqDQMC<T>>::step_for(int numStep) {
         for (int i = 0; i < numStep; ++i)
-            step<R>();
+            step<R>(true);
+    }
+
+    template<Scalar T>
+    void device_obj<FreqDQMC<T>>::traceGreen(int spin) {
+        auto kernel = [linearRHS_ = asStruct(linearRHS),
+                       green = asStruct(greensD[spin]),
+                       numSite = getNumSite(),
+                       numFreq = getNumFreq(),
+                       repBeta = reciprocal(action.getParams().getBeta())] __device__() mutable {
+            const auto& linearRHS = linearRHS_.getDerived();
+            unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
+            unsigned int col = blockIdx.y;
+            Tr elem = 0;
+            for (int _ = 0, offset = 0; _ < numFreq * 2; ++_) {
+                elem += linearRHS(offset + row, offset + col).real();
+                offset += numSite;
+            }
+
+            elem *= repBeta;
+            if (row == col)
+                elem += Tr(0.5);
+
+            green.getDerived()(row, col) = elem;
+        };
+
+        int numSite = getNumSite();
+        uint32_t numThread = std::min<uint32_t>(numSite, CUDADevAttr::WarpSize);
+        uint32_t numBlockX = (numSite + numThread - 1) / numThread;
+        uint32_t numBlockY = numSite;
+        CUDAExecutor::launch(kernel, KernelConfig({numBlockX, numBlockY}, numThread));
+
+        greensD[spin].toHostAsync(greensH[spin]);
     }
 
     template<Scalar T>
@@ -139,21 +173,12 @@ namespace Physica {
 
     template<Scalar T>
     void device_obj<FreqDQMC<T>>::calcGreen() {
-        const int numSite = getNumSite();
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
             linearRHS = device_obj<UnitMatrix<Tr>>(action.getOrder());
             spinLU.solve(linearRHS);
-            linearRHS.toHost(solBuffer);
-
-            auto& green = greens[spin];
-            green.zeros();
-            for (int _ = 0, offset = 0; _ < action.getNumFreq() * 2; ++_) {
-                green += solBuffer.block(offset, numSite, offset, numSite).reals();
-                offset += numSite;
-            }
-            green *= reciprocal(action.getBeta());
-            green.diag() += Trv(0.5);
+            traceGreen(spin);
         }
+        CUDAExecutor::wait();
     }
 }

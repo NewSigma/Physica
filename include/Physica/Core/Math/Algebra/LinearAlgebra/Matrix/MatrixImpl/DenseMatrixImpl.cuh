@@ -30,6 +30,10 @@ namespace Physica {
     }
 
     template<tparams>
+    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(size_t order)
+            : Storage(order) {}
+
+    template<tparams>
     __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(size_t row, size_t col)
             : Storage(row, col) {}
 

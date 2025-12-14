@@ -51,7 +51,7 @@ namespace Physica {
         void step_random();
 
         template<RNG R>
-        void step();
+        void step(bool warmup);
         template<RNG R>
         void step_for(int numStep);
         /* Getters */
@@ -85,12 +85,11 @@ namespace Physica {
         auto [lnAD, sgnD] = calcDet();
         lnAbsDet = lnAD;
         sign = sgnD;
-        calcGreen();
     }
 
     template<Scalar T>
     template<RNG R>
-    void FreqDQMC<T>::step() {
+    void FreqDQMC<T>::step(bool warmup) {
         assert(lnAbsDet.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
@@ -101,7 +100,8 @@ namespace Physica {
         if (accept) {
             lnAbsDet = lnAD;
             sign = sgnD;
-            calcGreen();
+            if (!warmup)
+                calcGreen();
         }
         else
             action.getAuxField()(freq, site) = save;
@@ -111,7 +111,7 @@ namespace Physica {
     template<RNG R>
     void FreqDQMC<T>::step_for(int numStep) {
         for (int i = 0; i < numStep; ++i)
-            step<R>();
+            step<R>(true);
     }
 
     template<Scalar T>

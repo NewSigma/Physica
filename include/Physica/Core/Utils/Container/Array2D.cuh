@@ -36,6 +36,7 @@ namespace Physica {
         [[no_unique_address]] IndexType r = 0;
     public:
         device_obj() = default;
+        explicit __host__ __device__ device_obj(size_t order);
         __host__ __device__ device_obj(size_t row, size_t col);
         __host__ __device__ device_obj(size_t row, size_t col, T value);
         device_obj(const host_obj& storage);

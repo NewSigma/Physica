@@ -25,6 +25,9 @@ namespace Physica {
 #define Array2D Array2D<T, Option, Row, Col, Allocator>
 
     template<tparams>
+    __host__ __device__ device_obj<Array2D>::device_obj(size_t order) : device_obj(order, order) {}
+
+    template<tparams>
     __host__ __device__ device_obj<Array2D>::device_obj(size_t row, size_t col) {
         resize(row, col);
     }
