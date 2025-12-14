@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica;
-using RandomSource = Random<>;
+using RandomSource = Random<MT19937>;
 
 namespace {
     void trans(benchmark::State& state) {

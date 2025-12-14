@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 using namespace Physica;
-using RandomSource = Random<>;
+using RandomSource = Random<MT19937>;
 
 namespace {
     template<Scalar T>

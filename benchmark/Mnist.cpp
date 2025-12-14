@@ -137,7 +137,7 @@ namespace Physica {
 using T = float32;
 using dfloat = Diff<T, DiffMode::Reverse, 1>;
 using Dataset = Mnist::DatasetType<VectorND<T>>;
-using RandomSource = Random<>;
+using RandomSource = Random<MT19937>;
 
 namespace {
     Dataset makeDataset() {

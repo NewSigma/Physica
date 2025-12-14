@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
 
 using namespace Physica;
-using RandomSource = Random<>;
+using RandomSource = Random<MT19937>;
 
 namespace {
     void qr_mkl(benchmark::State& state) {
