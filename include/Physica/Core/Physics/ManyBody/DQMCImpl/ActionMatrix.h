@@ -55,12 +55,13 @@ namespace Physica {
         template<RNG R>
         void randAuxField();
         template<RNG R>
-        void randAuxField(int site);
+        [[nodiscard]] T randAuxField(int freq, int site);
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return matsubara.getOrder() * getNumSite(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
-        [[nodiscard]] const auto& getAuxField() noexcept { return auxField; }
+        [[nodiscard]] const auto& getAuxField() const noexcept { return auxField; }
+        [[nodiscard]] auto& getAuxField() noexcept { return auxField; }
         [[nodiscard]] int getNumFreq() const noexcept { return auxField.getRow() / 2; }
         [[nodiscard]] int getNumSite() const noexcept { return auxField.getCol(); }
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
@@ -156,21 +157,17 @@ namespace Physica {
     void ActionMatrix<T>::randAuxField() {
         Tr factor = sqrt(params.getRepelU() / params.getBeta());
         auxField.template random_normal<R>();
-        for (int site = 0; site < getNumSite(); ++site)
-            auxField(0, site).imag() = 0;
         auxField.row(0) *= factor;
         auxField.bottomRows(1) *= factor / sqrt(Trv(2));
     }
 
     template<Scalar T>
     template<RNG R>
-    void ActionMatrix<T>::randAuxField(int site) {
+    T ActionMatrix<T>::randAuxField(int freq, int site) {
         Tr factor = sqrt(params.getRepelU() / params.getBeta());
-        auto aux = auxField.col(site);
-        aux.template random_normal<R>();
-        aux[0].imag() = 0;
-        aux[0] *= factor;
-        aux.tail(1) *= factor / sqrt(Trv(2));
+        if (freq != 0)
+            factor /= sqrt(Trv(2));
+        return std::exchange(auxField(freq, site), T::template random_normal<R>() * factor);
     }
 }
 

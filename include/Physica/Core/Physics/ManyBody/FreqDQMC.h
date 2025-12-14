@@ -36,8 +36,8 @@ namespace Physica {
         MatrixND<T> solBuffer;
 
         GreenPair greens;
-        Trv lnAbsDet;
-        Trv sign;
+        Trv lnAbsDet = Trv::nan();
+        Trv sign = 1;
     public:
         FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity);
         FreqDQMC(const This&) = default;
@@ -91,10 +91,10 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void FreqDQMC<T>::step() {
+        assert(lnAbsDet.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
-        auto aux = action.getAuxField().col(site);
-        const VectorND<T> save = aux;
-        action.template randAuxField<R>(site);
+        const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
+        const T save = action.template randAuxField<R>(freq, site);
 
         auto [lnAD, sgnD] = calcDet();
         const bool accept = Trv::template random_uniform<R>() < exp(lnAD - lnAbsDet);
@@ -104,7 +104,7 @@ namespace Physica {
             calcGreen();
         }
         else
-            aux = save;
+            action.getAuxField()(freq, site) = save;
     }
 
     template<Scalar T>

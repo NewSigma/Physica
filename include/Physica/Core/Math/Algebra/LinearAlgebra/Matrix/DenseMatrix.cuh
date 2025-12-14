@@ -73,6 +73,7 @@ namespace Physica {
         using Storage::data_ptr;
         using Storage::getRow;
         using Storage::getCol;
+        using Storage::getSize;
         /* Static members */
         [[nodiscard]] static device_obj unitMatrix(size_t order);
         template<RNG R>

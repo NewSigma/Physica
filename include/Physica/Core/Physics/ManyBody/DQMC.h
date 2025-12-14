@@ -73,9 +73,6 @@ namespace Physica {
     private:
         /* Operations */
         void metropolis(int site, int split, Tr prob);
-        /* Static members */
-        template<RNG R>
-        [[nodiscard]] static Array<int> makeRandomSites(int numSite);
     };
 
     template<Scalar T>
