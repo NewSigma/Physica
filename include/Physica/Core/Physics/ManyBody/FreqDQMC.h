@@ -51,7 +51,7 @@ namespace Physica {
         void step_random();
 
         template<RNG R>
-        void step(bool warmup);
+        void step(bool warmup = false);
         template<RNG R>
         void step_for(int numStep);
         /* Getters */

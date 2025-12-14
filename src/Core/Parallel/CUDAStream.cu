@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
-#include <thread>
 #include "Physica/Core/Parallel/CUDAStream.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
@@ -26,7 +25,7 @@ namespace Physica {
         cudaStreamCreate(&stream);
     }
 
-    CUDAStream::CUDAStream(std::nullptr_t) : stream(nullptr) {}
+    CUDAStream::CUDAStream(std::nullptr_t) {}
 
     CUDAStream::CUDAStream(CUDAStream&& obj) noexcept : stream(obj.stream) {
         obj.stream = nullptr;

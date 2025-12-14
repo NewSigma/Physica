@@ -38,11 +38,12 @@ namespace Physica {
         ActionMatrix<T> action;
         device_obj<MatrixND<T>> linearRHS;
         HostMatrix<T> detBuffer;
+        device_obj<VectorND<T>> diag;
 
         Array<device_obj<MatrixND<Tr>>> greensD;
         Array<MatrixND<Tr>, 2> greensH;
-        Trv lnAbsDet = Trv::nan();
-        Trv sign = 1;
+        float64 lnAbsDet = Trv::nan();
+        float64 sign = 1;
     public:
         device_obj(const HubbardParams<Tr>& params, Trv freqDensity);
         device_obj(const This&) = default;
@@ -60,15 +61,16 @@ namespace Physica {
         template<RNG R>
         void step_for(int numStep);
 
+        [[nodiscard]] float64 promoteDet(const device_obj<MatrixND<T>>& matrixLU);
         void traceGreen(int spin);
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] auto& getGreens() noexcept { return greensH; }
-        [[nodiscard]] Trv getSign() const noexcept { return sign; }
+        [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
     private:
-        [[nodiscard]] Vector2D<Trv> calcDet();
+        [[nodiscard]] Vector2D<float64> calcDet();
         void calcGreen();
     };
 
@@ -82,6 +84,7 @@ namespace Physica {
             spinLU.resize(size);
         linearRHS.resize(size);
         detBuffer.resize(size);
+        diag.resize(size);
 
         action.assign_kinetic(detBuffer);
     }
@@ -104,7 +107,7 @@ namespace Physica {
         const T save = action.template randAuxField<R>(freq, site);
 
         auto [lnAD, sgnD] = calcDet();
-        const bool accept = Trv::template random_uniform<R>() < exp(lnAD - lnAbsDet);
+        const bool accept = float64::template random_uniform<R>() < exp(lnAD - lnAbsDet);
         if (accept) {
             lnAbsDet = lnAD;
             sign = sgnD;
@@ -120,6 +123,25 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::step_for(int numStep) {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
+    }
+    /**
+     * float64 is necessary for determinants
+     */
+    template<Scalar T>
+    auto device_obj<FreqDQMC<T>>::promoteDet(const device_obj<MatrixND<T>>& matrixLU) -> float64 {
+        auto kernel = [matrixLU_ = asStruct(matrixLU), diag_ = asStruct(diag)] __device__() mutable {
+            const auto& matrixLU = matrixLU_.getDerived();
+            auto& diag = diag_.getDerived();
+            unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
+            if (i < diag.getLength())
+                diag[i] = matrixLU(i, i);
+        };
+
+        constexpr int WarpSize = CUDADevAttr::WarpSize;
+        int numThread = WarpSize;
+        int numBlock = (diag.getLength() + (WarpSize - 1)) / WarpSize;
+        CUDAExecutor::launch(kernel, KernelConfig(numBlock, numThread));
+        return DiagMatrix<cfloat64>(diag.toHost()).lnAbsDet();
     }
 
     template<Scalar T>
@@ -155,7 +177,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
+    auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<float64> {
         action.assign_potential(detBuffer);
         lu[0].compute(detBuffer);
 
@@ -163,9 +185,9 @@ namespace Physica {
         action.assign_potential(detBuffer);
         lu[1].compute(detBuffer);
 
-        Trv lnAD = 0, sgnD = 1;
+        float64 lnAD = 0, sgnD = 1;
         for (const auto& spinLU : lu) {
-            lnAD += spinLU.lnAbsDet();
+            lnAD += promoteDet(spinLU.getMatrixLU());
             sgnD *= spinLU.sgndet().real();
         }
         return {lnAD, sgnD};
