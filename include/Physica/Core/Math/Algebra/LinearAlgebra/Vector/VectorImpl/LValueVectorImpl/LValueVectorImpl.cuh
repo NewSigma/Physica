@@ -23,23 +23,35 @@
 namespace Physica {
     template<class Derived>
     template<Scalar U>
-    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const U& x) {
-        constexpr int WarpSize = Physica::CUDADevAttr::WarpSize;
-        const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
-        const int numThread = WarpSize;
-        auto func = [target_ = asStruct(Base::getDerived()), x] __device__() mutable {
-            const unsigned int delta = gridDim.x * blockDim.x;
-            const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
-            auto& target = target_.getDerived();
-            const size_t length = target.getLength();
-            for (unsigned int shift = 0; shift < length; shift += delta) {
-                const unsigned int index = id + shift;
-                if (index < length)
-                    target[index] = x;
+    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const U& x) {
+        Base::static_assert_assign(x);
+        if (IsHost()) {
+            constexpr int WarpSize = Physica::CUDADevAttr::WarpSize;
+            const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
+            const int numThread = WarpSize;
+            auto func = [target_ = asStruct(Base::getDerived()), x] __device__() mutable {
+                const unsigned int delta = gridDim.x * blockDim.x;
+                const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
+                auto& target = target_.getDerived();
+                const size_t length = target.getLength();
+                for (unsigned int shift = 0; shift < length; shift += delta) {
+                    const unsigned int index = id + shift;
+                    if (index < length)
+                        target[index] = x;
+                }
+            };
+            CUDAExecutor::launch<WarpSize>(func, KernelConfig(numBlock, numThread));
+            return Base::getDerived();
+        }
+        else if constexpr (IsDevice()) {
+            if constexpr (!std::same_as<T, U>)
+                return operator=(T(x));
+            else {
+                for (size_t i = 0; i < Base::getLength(); ++i)
+                    (*this)[i] = x;
+                return Base::getDerived();
             }
-        };
-        CUDAExecutor::launch<WarpSize>(func, KernelConfig(numBlock, numThread));
-        return Base::getDerived();
+        }
     }
 
     template<class Derived>

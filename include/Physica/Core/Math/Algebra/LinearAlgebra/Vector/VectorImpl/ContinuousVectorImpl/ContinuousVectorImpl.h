@@ -51,20 +51,22 @@ namespace Physica {
                 x.grads().template assign<P>(v.grads());
                 return;
             }
-
-            constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
-            if constexpr (Length != Dynamic) {
-                memcpy(v.data(), data(), Length * sizeof(T)); // Static memcpy
-                return;
+            else {
+                constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
+                if constexpr (Length != Dynamic) {
+                    memcpy(v.data(), data(), Length * sizeof(T)); // Static memcpy
+                    return;
+                }
+                else {
+                    constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
+                    constexpr bool Beneficial = Length == Dynamic || (Length * sizeof(T) > Critical);
+                    size_t size = Base::getLength() * sizeof(T);
+                    if (Beneficial && size > Critical)
+                        memcpy(v.data(), data(), size);
+                    else
+                        Base::template assign_base<P>(v);
+                }
             }
-
-            constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
-            constexpr bool Beneficial = Length == Dynamic || (Length * sizeof(T) > Critical);
-            size_t size = Base::getLength() * sizeof(T);
-            if (Beneficial && size > Critical)
-                memcpy(v.data(), data(), size);
-            else
-                Base::template assign_base<P>(v);
         }
         else
             Base::template assign_base<P>(v);

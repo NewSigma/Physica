@@ -102,6 +102,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
         [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t length) noexcept;
+        __host__ __device__ static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ static void static_assert_assign(const Vector auto& target) noexcept;
     protected:
         device_obj() = default;

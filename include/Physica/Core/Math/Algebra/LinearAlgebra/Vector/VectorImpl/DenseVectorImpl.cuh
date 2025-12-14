@@ -22,6 +22,14 @@
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(size_t length) : Storage(length) {}
+
+    template<Scalar T, size_t Length, class Allocator>
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(size_t length, T init) : device_obj(length) {
+        *this = init;
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
     device_obj<DenseVector<T, Length, Allocator>>::device_obj(const host_obj& obj) : Storage(obj) {}
 
     template<Scalar T, size_t Length, class Allocator>

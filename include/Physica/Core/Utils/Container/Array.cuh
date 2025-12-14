@@ -199,7 +199,7 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
+    __host__ __device__ device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
         if constexpr (!isTrivial) {
             if (length != 0) {
                 if constexpr (IsHost()) {

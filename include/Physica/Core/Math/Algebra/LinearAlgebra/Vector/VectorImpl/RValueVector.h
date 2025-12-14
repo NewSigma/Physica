@@ -205,6 +205,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
+        __host__ __device__ constexpr static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ constexpr static void static_assert_assign(const Vector auto& target) noexcept;
         template<Vector V>
         [[nodiscard]] consteval static size_t maxSizeAtCompile() noexcept;
@@ -216,13 +217,13 @@ namespace Physica {
         template<int GradOrder>
         auto grads_impl() const noexcept;
     private:
-        template<Vector V, ExecutePolicy P>
-        void assign_for(V& v) const noexcept;
+        template<ExecutePolicy P>
+        void assign_for(Vector auto& v) const noexcept;
         template<Vector V, ExecutePolicy P, size_t Size>
         void assign_simd(V& v) const noexcept;
 
-        template<Vector V, ExecutePolicy P>
-        void assign_add_for(V& v) const noexcept;
+        template<ExecutePolicy P>
+        void assign_add_for(Vector auto& v) const noexcept;
         template<Vector V, size_t Size>
         void assign_add_simd(V& v) const noexcept;
     };

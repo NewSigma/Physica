@@ -39,7 +39,8 @@ namespace Physica {
         using Base::SizeAtCompile;
     public:
         device_obj() = default;
-        using Storage::Storage; // Handle __host__ and __device__ in base class
+        __host__ __device__ explicit device_obj(size_t length);
+        __host__ __device__ device_obj(size_t length, T init);
         device_obj(const host_obj& obj);
         __host__ __device__ device_obj(const Vector auto& v);
         device_obj(const This&) = default;

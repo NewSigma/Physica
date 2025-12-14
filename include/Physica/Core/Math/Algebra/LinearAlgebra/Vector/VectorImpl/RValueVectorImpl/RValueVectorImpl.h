@@ -35,7 +35,7 @@ namespace Physica {
             assign_simd<V, P, Length>(v);
         }
         else
-            assign_for<V, P>(v);
+            assign_for<P>(v);
     }
 
     template<class Derived>
@@ -58,7 +58,7 @@ namespace Physica {
             assign_add_simd<V, Length>(v);
         }
         else
-            assign_add_for<V, P>(v);
+            assign_add_for<P>(v);
     }
 
     template<class Derived>
@@ -683,6 +683,13 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ constexpr void RValueVector<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
+        using U = std::remove_cvref<decltype(source)>::type;
+        static_assert(isComplex || !U::isComplex, "[Error]: Assign a complex scalar to real vector discards imags");
+        static_assert(Diffable<This> || !Diffable<U>, "[Error]: Assign a diffable scalar to normal vector discards grads");
+    }
+
+    template<class Derived>
     __host__ __device__ constexpr void RValueVector<Derived>::static_assert_assign(const Vector auto& target) noexcept {
         using V = std::remove_cvref<decltype(target)>::type;
         constexpr size_t Size1 = SizeAtCompile;
@@ -707,8 +714,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    void RValueVector<Derived>::assign_for(V& v) const noexcept {
+    template<ExecutePolicy P>
+    void RValueVector<Derived>::assign_for(Vector auto& v) const noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] = calc_value(i);
@@ -767,8 +774,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Vector V, ExecutePolicy P>
-    void RValueVector<Derived>::assign_add_for(V& v) const noexcept {
+    template<ExecutePolicy P>
+    void RValueVector<Derived>::assign_add_for(Vector auto& v) const noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] += calc_value(i);

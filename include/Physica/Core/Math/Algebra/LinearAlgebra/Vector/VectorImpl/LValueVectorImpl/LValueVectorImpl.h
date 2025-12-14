@@ -23,7 +23,7 @@
 namespace Physica {
     template<class Derived>
     Derived& LValueVector<Derived>::operator=(const Scalar auto& x) {
-        static_assert(!isReverseDiff || !ReverseDiff<decltype(x)>, "[Error]: Assign a diffable scalar to diffable vector discards grads");
+        Base::static_assert_assign(x);
         if constexpr (!std::same_as<T, std::remove_cvref_t<decltype(x)>>)
             return operator=(T(x));
         else {

@@ -150,7 +150,7 @@ namespace Physica {
             else
                 unreachable();
         }
-        else {
+        else if constexpr (IsDevice()) {
             auto result = T(0);
             for (size_t i = 0; i < getLength(); ++i) {
                 if constexpr (isReverseDiff)
@@ -252,7 +252,7 @@ namespace Physica {
             else
                 unreachable();
         }
-        else {
+        else if constexpr (IsDevice()) {
             T result = calc(0);
             for(size_t i = 1; i < getLength(); ++i)
                 result *= calc(i);
@@ -362,6 +362,11 @@ namespace Physica {
         const uint32_t numThread = std::min<uint32_t>(length, MaxThread);
         const uint32_t numBlock = (length + numThread - 1) / numThread;
         return KernelConfig(numBlock, numThread);
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<RValueVector<Derived>>::static_assert_assign(const Scalar auto& source) noexcept {
+        host_obj::static_assert_assign(source);
     }
 
     template<class Derived>
