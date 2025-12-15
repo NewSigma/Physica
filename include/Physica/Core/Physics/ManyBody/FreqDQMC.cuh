@@ -66,7 +66,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
-        [[nodiscard]] auto& getGreens() noexcept { return greensH; }
+        [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
     private:
@@ -123,6 +123,7 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::step_for(int numStep) {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
+        calcGreen();
     }
     /**
      * float64 is necessary for determinants

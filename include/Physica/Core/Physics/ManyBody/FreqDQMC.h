@@ -58,7 +58,7 @@ namespace Physica {
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
-        [[nodiscard]] auto& getGreens() noexcept { return greens; }
+        [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
         /* Static members */
@@ -112,6 +112,7 @@ namespace Physica {
     void FreqDQMC<T>::step_for(int numStep) {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
+        calcGreen();
     }
 
     template<Scalar T>
