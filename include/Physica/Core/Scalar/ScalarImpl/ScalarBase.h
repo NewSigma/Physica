@@ -253,36 +253,36 @@ namespace Physica {
         checkComplexCompare();
         return double(value()) < s;
     }
-    /**
-     * TODO: Move to \class Diff once we merge forward and reverse pass
-     */
+
     template<class Derived>
     template<Scalar T>
     __host__ __device__ bool ScalarBase<Derived>::operator>(const T& x) const noexcept {
-        static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
-        return value() > x.value();
+        static_assert(isDiffable || T::isDiffable || !std::same_as<Derived, T>, "[Error]: We handle type casts here");
+        using U = Internal::BinaryScalarOpRtnTy<ValueType, typename T::ValueType>::Type;
+        return U(value()) > U(x.value());
     }
 
     template<class Derived>
     template<Scalar T>
     __host__ __device__ bool ScalarBase<Derived>::operator<(const T& x) const noexcept {
-        static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
-        return value() < x.value();
+        static_assert(isDiffable || T::isDiffable || !std::same_as<Derived, T>, "[Error]: We handle type casts here");
+        using U = Internal::BinaryScalarOpRtnTy<ValueType, typename T::ValueType>::Type;
+        return U(value()) < U(x.value());
     }
 
     template<class Derived>
     __host__ __device__ bool ScalarBase<Derived>::operator>=(const Scalar auto& x) const noexcept {
-        return !operator<(x);
+        return !Base::getDerived().operator<(x);
     }
 
     template<class Derived>
     __host__ __device__ bool ScalarBase<Derived>::operator<=(const Scalar auto& x) const noexcept {
-        return !operator>(x);
+        return !Base::getDerived().operator>(x);
     }
 
     template<class Derived>
     __host__ __device__ bool ScalarBase<Derived>::operator!=(const Scalar auto& x) const noexcept {
-        return !operator==(x);
+        return !Base::getDerived().operator==(x);
     }
 
     template<class Derived>
@@ -430,7 +430,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ const auto* ScalarBase<Derived>::real_ptr() const noexcept {
-        return Base::getConstCastDerived().real_ptr();
+        return const_cast<This&>(*this).real_ptr();
     }
 
     template<class Derived>
@@ -443,7 +443,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ const auto* ScalarBase<Derived>::value_ptr() const noexcept {
-        return Base::getConstCastDerived().value_ptr();
+        return const_cast<This&>(*this).value_ptr();
     }
 
     template<class Derived>
@@ -456,7 +456,7 @@ namespace Physica {
     template<class Derived>
     template<int GradOrder>
     __host__ __device__ const auto* ScalarBase<Derived>::grad_ptr() const noexcept {
-        return Base::getConstCastDerived().template grad_ptr<GradOrder>();
+        return const_cast<This&>(*this).template grad_ptr<GradOrder>();
     }
 
     template<class Derived>

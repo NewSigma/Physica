@@ -1,0 +1,6 @@
+physica_add_test(Complex Complex.cpp)
+physica_add_test(Diff Diff.cpp)
+physica_add_test(MathConst MathConst.cpp)
+physica_add_test(FloatMP FloatMP.cpp)
+physica_add_test(Real Real.cpp)
+physica_add_test(SIMD SIMD.cpp)
