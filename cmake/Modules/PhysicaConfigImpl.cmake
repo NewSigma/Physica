@@ -77,7 +77,6 @@ if(${PHYSICA_CUDA})
     set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
     set(CMAKE_CUDA_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED})
     set(CMAKE_CUDA_VISIBILITY_PRESET ${CMAKE_CXX_VISIBILITY_PRESET})
-    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
     enable_language(CUDA)
     find_package(CUDAToolkit REQUIRED)
@@ -88,6 +87,8 @@ if(${PHYSICA_CUDA})
         set(CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS} -Wno-unknown-cuda-version -fcuda-flush-denormals-to-zero)
     else()
         set(CMAKE_CUDA_STANDARD 20)
+        # Disable rdc because clang 22 implementation is buggy. We seldom use it.
+        set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
         # clangd does not work with response file
         # Reference: https://github.com/clangd/clangd/discussions/1676
         set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)

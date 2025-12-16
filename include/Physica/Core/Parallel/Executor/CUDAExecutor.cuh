@@ -25,8 +25,8 @@
 
 namespace Physica {
     namespace Internal {
-        template<int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
-        __global__ void __launch_bounds__(MaxThreadsPerBlock, MinBlocksPerMultiprocessor) kernel(auto fn) {
+        template<class Fn, int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
+        __global__ void __launch_bounds__(MaxThreadsPerBlock, MinBlocksPerMultiprocessor) kernel(Fn fn) {
             return fn();
         }
     }
@@ -55,11 +55,17 @@ namespace Physica {
     template<int MaxThreadsPerBlock, int MinBlocksPerMultiprocessor>
     __host__ __device__ auto CUDAExecutor::launch(auto&& fn, KernelConfig config, size_t sharedMem) -> KernelFuture {
         cudaStream_t stream = nullptr;
-        if constexpr (IsHost())
+        // Both host and device must instantiate the global function
+        [[maybe_unused]] auto kernel = Internal::kernel<std::remove_reference_t<decltype(fn)>, MaxThreadsPerBlock, MinBlocksPerMultiprocessor>;
+        if constexpr (IsHost()) {
             stream = cudaStream_t(CUDAContext::getInstance().getStream());
+            // FIXME: We have to wrap it with lambda because clang rejects it
+            [=]() noexcept {
+                Internal::kernel<std::remove_reference_t<decltype(fn)>, MaxThreadsPerBlock, MinBlocksPerMultiprocessor><<<config.blocks, config.threads, sharedMem, stream>>>(fn);
+            }();
+        }
         else
             noImpl("No dynamic parallel support");
-        Internal::kernel<MaxThreadsPerBlock, MinBlocksPerMultiprocessor><<<config.blocks, config.threads, sharedMem, stream>>>(fn);
         check(cudaGetLastError());
         return KernelFuture(stream);
     }
