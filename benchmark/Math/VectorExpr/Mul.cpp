@@ -28,9 +28,10 @@ namespace {
         const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = hadamard(a, b);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] hadamard(a, b).assign(buffer);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -41,9 +42,10 @@ namespace {
         const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = hadamard(a, b);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] hadamard(a, b).assign_base(buffer);
+            [[clang::noinline]] expr.assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

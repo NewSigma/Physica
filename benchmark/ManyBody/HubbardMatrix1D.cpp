@@ -39,10 +39,12 @@ namespace {
         const SquareLattice<1> lattice({NumSite}, 1);
         const HubbardMatrix<ScalarType, ReprType> model(HoppingT, RepelU, lattice, ReprType({NumParticle, NumParticle}, 0));
         auto v = VectorND<ScalarType>::random_uniform<RandomSource>(model.getRow());
-        VectorND<ScalarType> v1(model.getRow());
+        auto expr = model * v;
 
+        VectorND<ScalarType> v1(model.getRow());
         for (auto _ : state) {
-            [[clang::noinline]] (model * v).assign(v1);
+            
+            [[clang::noinline]] expr.assign(v1);
             benchmark::DoNotOptimize(v1);
             benchmark::ClobberMemory();
         }

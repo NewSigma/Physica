@@ -29,7 +29,8 @@ namespace {
         bool flag = true;
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            [[clang::noinline]] (x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi))).assign(x);
+            auto expr = x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi));
+            [[clang::noinline]] expr.assign(x);
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();
             flag = !flag;
@@ -42,7 +43,8 @@ namespace {
         bool flag = true;
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            [[clang::noinline]] (x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi))).assign_base(x);
+            auto expr = x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi));
+            [[clang::noinline]] expr.assign_base(x);
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();
             flag = !flag;

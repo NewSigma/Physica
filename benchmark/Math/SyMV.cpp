@@ -29,9 +29,10 @@ namespace {
         const auto size = state.range(0);
         const auto m = MatrixType::random_uniform<RandomSource>(size);
         const auto v = VectorND<T>::random_uniform<RandomSource>(size);
+        auto expr = m * v;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] (m * v).assign(buffer);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
         }
     }

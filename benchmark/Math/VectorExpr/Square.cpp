@@ -27,9 +27,10 @@ namespace {
     void square(benchmark::State& state) {
         const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = square(x);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] square(x).assign(buffer);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -39,9 +40,10 @@ namespace {
     void square_base(benchmark::State& state) {
         const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = square(x);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] square(x).assign_base(buffer);
+            [[clang::noinline]] expr.assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

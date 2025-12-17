@@ -27,9 +27,10 @@ namespace {
     void abs(benchmark::State& state) {
         const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = abs(x);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] abs(x).assign(buffer);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -39,9 +40,10 @@ namespace {
     void abs_base(benchmark::State& state) {
         const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = abs(x);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] abs(x).assign_base(buffer);
+            [[clang::noinline]] expr.assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

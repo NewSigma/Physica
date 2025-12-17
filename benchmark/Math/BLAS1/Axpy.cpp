@@ -27,9 +27,10 @@ namespace {
         using T = float64;
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
+        auto expr = x * T(2);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] buffer += x * T(2);
+            [[clang::noinline]] expr.assign_add(buffer);
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
@@ -40,9 +41,10 @@ namespace {
         using T = float64;
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
+        auto expr = x * T(2);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] (x * T(2)).assign_add_base(buffer);
+            [[clang::noinline]] expr.assign_add_base(buffer);
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();

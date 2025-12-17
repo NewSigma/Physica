@@ -47,6 +47,8 @@ else()
             add_compile_options(-Xclang -disable-llvm-passes -S -emit-llvm)
             add_compile_options(-Wno-unused-command-line-argument) # Silent unused '-c'
             add_link_options(--version)
+            set(CMAKE_CUDA_SEPARABLE_COMPILATION ON) # Workaround to avoid linkage
+
             add_custom_target(LLVMIR
                               COMMAND mkdir -p llvm && cd llvm && find .. -name '*.o' -exec mv {} . "\\;"
                               COMMAND mmv '*.cpp.o' "'#1.ll'" && mmv '*.cu.o' "'#1_cu.ll'"

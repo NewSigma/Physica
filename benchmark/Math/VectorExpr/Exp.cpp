@@ -26,9 +26,10 @@ namespace {
     void exp(benchmark::State& state) {
         const int64_t size = state.range(0);
         const VectorND<T> data = makeData<T>(size);
+        auto expr = exp(data);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] buffer = exp(data);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -38,9 +39,10 @@ namespace {
     void exp_base(benchmark::State& state) {
         const int64_t size = state.range(0);
         const VectorND<T> data = makeData<T>(size);
+        auto expr = exp(data);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] exp(data).assign_base(buffer);
+            [[clang::noinline]] expr.assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

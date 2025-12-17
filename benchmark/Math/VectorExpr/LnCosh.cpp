@@ -27,9 +27,10 @@ namespace {
     template<Scalar T>
     void lncosh(benchmark::State& state) {
         const VectorND<T> data = VectorND<T>::template random_uniform<RandomSource>(1024);
+        auto expr = lncosh(data);
         VectorND<T> buffer(1024);
         for (auto _ : state) {
-            [[clang::noinline]] lncosh(data).assign(buffer);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

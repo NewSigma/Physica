@@ -28,9 +28,10 @@ namespace {
         const int64_t size = state.range(0);
         const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
         const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
+        auto expr = v1 - v2 * T(2.0);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] (v1 - v2 * T(2.0)).assign(buffer);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -41,9 +42,10 @@ namespace {
         const int64_t size = state.range(0);
         const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
         const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
+        auto expr = v1 - (UnitMatrix<T>(size) * T(2.0)) * v2;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] (v1 - (UnitMatrix<T>(size) * T(2.0)) * v2).assign(buffer);
+            [[clang::noinline]] expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -53,9 +55,10 @@ namespace {
         using T = float64;
         const int64_t size = state.range(0);
         const auto v = VectorND<T>::random_uniform<RandomSource>(size);
+        auto expr = (UnitMatrix<T>(size) * T(2.0)) * v;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] ((UnitMatrix<T>(size) * T(2.0)) * v).assign_add(buffer);
+            [[clang::noinline]] expr.assign_add(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

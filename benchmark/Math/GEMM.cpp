@@ -31,9 +31,10 @@ namespace {
         const size_t order = state.range(0);
         const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
         const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
+        auto expr = m1 * m2;
         MatrixType m(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] (m1 * m2).assign(m);
+            [[clang::noinline]] expr.assign(m);
             benchmark::DoNotOptimize(m);
             benchmark::ClobberMemory();
         }
@@ -47,9 +48,10 @@ namespace {
         const size_t order = state.range(0);
         const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
         const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
+        auto expr = m1 * m2;
         MatrixType m(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] (m1 * m2).assign_base(m);
+            [[clang::noinline]] expr.assign_base(m);
             benchmark::DoNotOptimize(m);
             benchmark::ClobberMemory();
         }

@@ -28,9 +28,10 @@ namespace {
         using MatrixType = DenseMatrix<T, MatrixOption::Col>;
         const size_t order = state.range(0);
         const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
+        auto trans = m.transpose();
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] m.transpose().assign(buffer);
+            [[clang::noinline]] trans.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -41,9 +42,10 @@ namespace {
         using MatrixType = DenseMatrix<T, MatrixOption::Col>;
         const size_t order = state.range(0);
         const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
+        auto trans = m.transpose();
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] m.transpose().assign_base(buffer);
+            [[clang::noinline]] trans.assign_base(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

@@ -46,7 +46,7 @@ namespace {
         auto dot = InnerDot(v1, v2);
         for (auto _ : state) {
             T y{};
-            [[clang::noinline]] y =dot.calc_base();
+            [[clang::noinline]] y = dot.calc_base();
             benchmark::DoNotOptimize(y);
             benchmark::DoNotOptimize(dot);
         }
