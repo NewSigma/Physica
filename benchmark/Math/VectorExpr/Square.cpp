@@ -20,7 +20,7 @@
 #include "Benchmark.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<MCG>;
 
 namespace {
     template<Scalar T>

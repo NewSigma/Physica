@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 
 using namespace Physica;
+using RandomSource = Random<MCG>;
 
 namespace {
     template<bool NeedEigenVec>
@@ -28,7 +29,7 @@ namespace {
         const auto size = state.range(0);
         SymmEigenSolver<T> solver(size, NeedEigenVec);
 
-        auto m = MatrixND<T>::random_uniform<Random<MT19937>>(size);
+        auto m = MatrixND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
             [[clang::noinline]] solver.compute(m);
             benchmark::DoNotOptimize(solver);
@@ -42,7 +43,7 @@ namespace {
         const auto size = state.range(0);
         SymmEigenSolver<T> solver(size, NeedEigenVec);
 
-        auto m = MatrixND<T>::random_uniform<Random<MT19937>>(size);
+        auto m = MatrixND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
             [[clang::noinline]] solver.compute_base(m);
             benchmark::DoNotOptimize(solver);

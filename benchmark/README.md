@@ -4,7 +4,7 @@ Physica Benchmark用于维护性能测试。由于性能测试对平台的高度
 
 ## Notes
 
-随机数生成器统一为MT19937
+非热点函数随机数生成器统一为MCG
 使用[[clang::noinline]]避免callee内联, 便于后续LLVM IR层次分析。
 
 ## References

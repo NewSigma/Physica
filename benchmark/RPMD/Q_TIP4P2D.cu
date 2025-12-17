@@ -28,7 +28,7 @@
 
 using namespace Physica;
 using ScalarType = float32;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<MCG>;
 using EwaldType = Ewald<ScalarType, device_obj<RSpaceEwald<ScalarType>>>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 using MDType = RPMD<ScalarType, 3, 1, PageLockedAllocator<ScalarType>>;

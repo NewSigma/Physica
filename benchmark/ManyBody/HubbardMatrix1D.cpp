@@ -33,7 +33,7 @@ namespace {
 
         using RealType = float64;
         using ScalarType = Complex<RealType>;
-        using RandomSource = Random<MT19937>;
+        using RandomSource = Random<MCG>;
         using ReprType = KFermiRepr<1, NumSite, true>;
 
         const SquareLattice<1> lattice({NumSite}, 1);

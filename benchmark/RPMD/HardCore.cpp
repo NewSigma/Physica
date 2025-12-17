@@ -27,7 +27,7 @@ using namespace Physica;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using RandomSource = Random<MT19937>;
+using RandomSource = Random<MCG>;
 using PDFType = ProbDistribution<ScalarType>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;

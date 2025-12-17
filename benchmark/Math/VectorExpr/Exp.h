@@ -21,7 +21,7 @@
 namespace Physica {
     template<Scalar T>
     VectorND<T> makeData(size_t size) {
-        using RandomSource = Random<MT19937>;
+        using RandomSource = Random<MCG>;
         const Array<float64, 8> factors{1, 2, 10, 100, -1, -2, -10, -100}; // Covers wide numeric range
 
         VectorND<T> data = VectorND<T>::template random_uniform<RandomSource>(size);

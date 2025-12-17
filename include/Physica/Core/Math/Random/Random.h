@@ -31,7 +31,8 @@ namespace Physica {
     enum RandomOption : char {
         PCG32DXSM,
         PCG64DXSM,
-        MT19937
+        MCG,
+        MT19937,
     };
 
     namespace Internal {
@@ -60,12 +61,13 @@ namespace Physica {
     constexpr int rngID_MKL(RandomOption option) noexcept {
     #ifdef PHYSICA_MKL
         switch (option) {
+        case MCG:
+            return VSL_BRNG_MCG31;
         case MT19937:
             return VSL_BRNG_MT19937;
         default:
             return 0;
         }
-        
     #else
         return 0;
     #endif
@@ -115,6 +117,7 @@ namespace Physica {
         template<RandomOption> struct GeneratorImpl;
         template<> struct GeneratorImpl<PCG32DXSM> { using Type = Internal::setseq_base<uint32_t, uint64_t, Internal::DXSM>; };
         template<> struct GeneratorImpl<PCG64DXSM> { using Type = Internal::setseq_base<uint64_t, __uint128_t, Internal::DXSM>; };
+        template<> struct GeneratorImpl<MCG> { using Type = std::minstd_rand; };
         template<> struct GeneratorImpl<MT19937> { using Type = std::mt19937; };
 
         using Generator = GeneratorImpl<Option>::Type;

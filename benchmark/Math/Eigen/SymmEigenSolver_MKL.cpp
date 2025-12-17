@@ -29,7 +29,7 @@ namespace {
         const auto size = state.range(0);
         SymmEigenSolver<T> solver(size, NeedEigenVec);
 
-        auto m = MatrixND<T>::random_uniform<Random<MT19937>>(size);
+        auto m = MatrixND<T>::random_uniform<Random<MCG>>(size);
         for (auto _ : state) {
             solver.compute_mkl(m);
             benchmark::DoNotOptimize(solver);
