@@ -240,6 +240,23 @@ namespace Physica {
     }
 
     template<class Derived>
+    void device_obj<ContinuousMatrix<Derived>>::zeros() {
+        Base::getDerived().flatten().zeros();
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void device_obj<ContinuousMatrix<Derived>>::random_uniform() {
+        Base::getDerived().flatten().template random_uniform<R>();
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void device_obj<ContinuousMatrix<Derived>>::random_normal() {
+        Base::getDerived().flatten().template random_normal<R>();
+    }
+
+    template<class Derived>
     template<Matrix M>
     void ContinuousMatrix<Derived>::toDevice(device_obj<ContinuousMatrix<M>>& obj) const {
         toDeviceAsync(obj);

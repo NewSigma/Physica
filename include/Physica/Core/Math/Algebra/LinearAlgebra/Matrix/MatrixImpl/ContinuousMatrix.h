@@ -128,6 +128,11 @@ namespace Physica {
         [[nodiscard]] auto flatten() noexcept;
         [[nodiscard]] const auto flatten() const noexcept;
 
+        void zeros();
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
         [[nodiscard]] VectorND<T> balance_mkl();
         const H5DataSet<2> read(const H5Loc& loc, const char* name);
         H5DataSet<2> write(H5Loc& loc, const char* name) const;

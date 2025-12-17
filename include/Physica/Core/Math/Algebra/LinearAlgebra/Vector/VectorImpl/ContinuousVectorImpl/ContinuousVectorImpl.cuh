@@ -160,6 +160,42 @@ namespace Physica {
             check(cudaMemsetAsync(data(), 0, Base::getLength() * sizeof(T)));
     }
 
+    template<class Derived>
+    template<RNG R>
+    void device_obj<ContinuousVector<Derived>>::random_uniform() {
+        if constexpr (R::cuRAND_Ready) {
+            auto& rng = R::getInstance();
+            check(curandSetStream(rng, CUDAContext::getInstance()));
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
+            if constexpr (T::Prec == Float32)
+                check(curandGenerateUniform(rng, (float*)data(), length));
+            else if constexpr (T::Prec == Float64)
+                check(curandGenerateUniformDouble(rng, (double*)data(), length));
+            else
+                Base::template random_uniform<R>();
+        }
+        else
+            Base::template random_uniform<R>();
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void device_obj<ContinuousVector<Derived>>::random_normal() {
+        if constexpr (R::cuRAND_Ready) {
+            auto& rng = R::getInstance();
+            check(curandSetStream(rng, CUDAContext::getInstance()));
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
+            if constexpr (T::Prec == Float32)
+                check(curandGenerateNormal(rng, (float*)data(), length, 0, 1));
+            else if constexpr (T::Prec == Float64)
+                check(curandGenerateNormalDouble(rng, (double*)data(), length, 0, 1));
+            else
+                Base::template random_normal<R>();
+        }
+        else
+            Base::template random_normal<R>();
+    }
+
 #ifdef PHYSICA_HDF5
     template<class Derived>
     auto device_obj<ContinuousVector<Derived>>::read(const H5Loc& loc, const char* name) -> const DataSetType {

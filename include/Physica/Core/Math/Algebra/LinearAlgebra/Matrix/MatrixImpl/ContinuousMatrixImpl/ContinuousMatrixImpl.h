@@ -225,6 +225,23 @@ namespace Physica {
         return FlattenC<Derived>(Base::getConstCastDerived());
     }
 
+    template<class Derived>
+    void ContinuousMatrix<Derived>::zeros() {
+        Base::getDerived().flatten().zeros();
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void ContinuousMatrix<Derived>::random_uniform() {
+        Base::getDerived().flatten().template random_uniform<R>();
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void ContinuousMatrix<Derived>::random_normal() {
+        Base::getDerived().flatten().template random_normal<R>();
+    }
+
 #ifdef PHYSICA_HDF5
     template<class Derived>
     const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Loc& loc, const char* name) {

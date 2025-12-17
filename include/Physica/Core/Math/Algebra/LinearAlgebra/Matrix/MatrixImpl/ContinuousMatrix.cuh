@@ -114,6 +114,12 @@ namespace Physica {
 
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;
+
+        void zeros();
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }

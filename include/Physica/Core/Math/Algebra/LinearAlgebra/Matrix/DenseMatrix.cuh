@@ -60,13 +60,9 @@ namespace Physica {
         using Base::toHost;
         using Base::toHostAsync;
 
-        void zeros();
-        template<RNG R>
-        void random_uniform();
-        template<RNG R>
-        void random_normal();
-        template<RNG R>
-        void random_any(auto& distribution);
+        using Base::random_uniform;
+        using Base::random_normal;
+        using Base::random_any;
 
         using Storage::swap;
         /* Getters */

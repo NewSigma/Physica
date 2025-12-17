@@ -87,6 +87,13 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto reshape_row(size_t row, size_t col) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ const auto reshape_row(size_t row, size_t col) const noexcept;
+
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
+        template<RNG R>
+        void random_any(auto& distribution);
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;

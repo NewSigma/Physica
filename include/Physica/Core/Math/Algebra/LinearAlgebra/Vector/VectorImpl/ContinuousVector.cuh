@@ -75,6 +75,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto segment(size_t from, size_t to) const noexcept;
 
         void zeros();
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
 
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;

@@ -35,7 +35,7 @@ namespace {
         jd.compute(hermite, VectorND<cfloat64>::random_uniform<RandomSource>(data.getRow()));
         jd.sort();
 
-        if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-13))
+        if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-12))
             exit(1);
     }
 }

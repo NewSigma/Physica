@@ -266,6 +266,24 @@ namespace Physica {
     }
 
     template<class Derived>
+    template<RNG R>
+    void device_obj<LValueMatrix<Derived>>::random_uniform() {
+        Derived::template random_uniform<R>(Base::getRow(), Base::getCol()).toDeviceAsync(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void device_obj<LValueMatrix<Derived>>::random_normal() {
+        Derived::template random_normal<R>(Base::getRow(), Base::getCol()).toDeviceAsync(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<RNG R>
+    void device_obj<LValueMatrix<Derived>>::random_any(auto& distribution) {
+        Derived::template random_any<R>(Base::getRow(), Base::getCol(), distribution).toDeviceAsync(Base::getDerived());
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
         assert(row < Base::getRow());
         assert(col < Base::getCol());

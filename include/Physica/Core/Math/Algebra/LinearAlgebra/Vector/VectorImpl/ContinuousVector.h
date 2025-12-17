@@ -113,8 +113,6 @@ namespace Physica {
         void random_uniform();
         template<RNG R>
         void random_normal();
-        template<RNG R>
-        void random_any(auto& distribution);
 
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;

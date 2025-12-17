@@ -102,6 +102,13 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ auto flatten();
         [[nodiscard]] __host__ __device__ const auto flatten() const;
+
+        template<RNG R>
+        void random_uniform();
+        template<RNG R>
+        void random_normal();
+        template<RNG R>
+        void random_any(auto& distribution);
         /* Getters */
         using Base::getRow;
         using Base::getCol;

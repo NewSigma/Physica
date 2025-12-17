@@ -230,12 +230,6 @@ namespace Physica {
             Base::template random_normal<R>();
     }
 
-    template<class Derived>
-    template<RNG R>
-    void ContinuousVector<Derived>::random_any(auto& distribution) {
-        Base::template random_any<R>(distribution);
-    }
-
 #ifdef PHYSICA_HDF5
     template<class Derived>
     auto ContinuousVector<Derived>::read(const H5Loc& loc, const char* name) -> const DataSetType {

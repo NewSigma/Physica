@@ -18,14 +18,13 @@
  */
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
 using ScalarType = float32;
 using HostForceModel = SilveraGoldman<ScalarType, true, true>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomSource = Random<MT19937, 15522090741289029828UL>;
+using RandomSource = Random<MT19937, 1000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -41,7 +40,7 @@ namespace {
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        const double factor = (std::cbrt(double(numMolecular) * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
         cell.scale(factor);
 
         return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
