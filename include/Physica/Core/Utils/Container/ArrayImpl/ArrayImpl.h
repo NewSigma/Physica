@@ -130,9 +130,7 @@ namespace Physica {
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value)
             : length(length_), capacity(length_), alloc() {
-        if (capacity == 0)
-            return;
-
+        assert(capacity > 0);
         arr = alloc.allocate(capacity);
         if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             for (size_t i = 0; i < length_; ++i)
@@ -163,9 +161,7 @@ namespace Physica {
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value)
             : length(obj.length), capacity(obj.capacity), alloc() {
-        if (capacity == 0)
-            return;
-
+        assert(capacity > 0);
         arr = alloc.allocate(capacity);
         if constexpr (!std::is_trivially_copyable<ElemType>::value)
             for(size_t i = 0; i < length; ++i)

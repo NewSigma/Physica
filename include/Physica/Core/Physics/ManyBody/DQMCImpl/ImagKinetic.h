@@ -125,7 +125,7 @@ namespace Physica {
         VectorND<T> vr(numSite);
         for (int spin : {0, 1}) {
             auto& green = greens[spin];
-            vc = (green - UnitMatrix<T>(green)).col(site);
+            vc = (green - UnitMatrix<Trv>(green)).col(site);
             vr = green.row(site);
             green += deltaRatios[spin] * (vc * vr.transpose());
         }

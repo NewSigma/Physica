@@ -99,7 +99,7 @@ namespace Physica {
         if constexpr (Vector<U>)
             target.grads() = hadamard(sqrt(divide(u + epsilon, v + epsilon)), target.grads());
         else
-            target.grads() = hadamard(sqrt_elem(divide(u + epsilon, v + epsilon)), target.grads());
+            target.grads() = hadamard(sqrt_elem(divide_elem(u + epsilon, v + epsilon)), target.grads());
         u = rho * u + (T(1) - rho) * target.grads().squaredNorms();
         target.values() -= lr * target.grads();
     }

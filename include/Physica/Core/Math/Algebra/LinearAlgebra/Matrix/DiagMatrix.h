@@ -50,7 +50,7 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
         [[nodiscard]] Tr lnAbsDet() const;
-        [[nodiscard]] Trv sgndet() const;
+        [[nodiscard]] T sgndet() const;
 
         [[nodiscard]] This inv() const;
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
@@ -100,7 +100,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    auto DiagMatrix<T, Order>::sgndet() const -> Trv {
+    auto DiagMatrix<T, Order>::sgndet() const -> T {
         return unit(diags).prod();
     }
 

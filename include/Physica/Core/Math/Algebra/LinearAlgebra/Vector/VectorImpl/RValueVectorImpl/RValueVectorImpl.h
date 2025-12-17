@@ -68,8 +68,10 @@ namespace Physica {
         using V = std::remove_cvref<decltype(target)>::type;
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = V::SizeAtCompile;
-        if constexpr (Size1 == Dynamic && Size2 == Dynamic)
+        if constexpr (Size1 == Dynamic && Size2 == Dynamic) {
             assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+            assert(getLength() > 0);
+        }
     }
 
     template<class Derived>
@@ -743,9 +745,6 @@ namespace Physica {
         }
         else {
             const size_t length = getLength();
-            if (length == 0)
-                return;
-
             const size_t to = length / PacketSize * PacketSize;
             if constexpr (P == Sequential) {
                 size_t i = 0;

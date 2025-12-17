@@ -603,8 +603,8 @@ namespace Physica {
 
     template<Scalar T, class EwaldType>
     auto Q_TIP4P<T, EwaldType>::makeCellWithoutH(const MDCellType& original) -> MDCellType {
-        const size_t numMolecule = original.getNumParticle() / 3;
-        return MDCellType(original.getLattice(), original.getPos().bottomRows(2 * numMolecule), original.getMassVec());
+        const size_t offset = original.getNumParticle() / 3 * 2;
+        return MDCellType(original.getLattice(), original.getPos().bottomRows(offset), original.getMassVec().tail(offset));
     }
 
     template<Scalar T, class EwaldType>

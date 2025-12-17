@@ -200,8 +200,8 @@ namespace Physica {
     template<RNG R>
     void ContinuousVector<Derived>::random_uniform() {
         if constexpr (R::MKL_Ready) {
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
             if constexpr (ScalarType::Prec == Float32)
                 check_vsl(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Prec == Float64)
@@ -217,8 +217,8 @@ namespace Physica {
     template<RNG R>
     void ContinuousVector<Derived>::random_normal() {
         if constexpr (R::MKL_Ready && !isForwardDiff) {
-            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             [[maybe_unused]] auto& gen = R::getInstance();
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             if constexpr (ScalarType::Prec == Float32)
                 check_vsl(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Prec == Float64)

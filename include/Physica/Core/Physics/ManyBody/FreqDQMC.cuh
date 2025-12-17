@@ -61,7 +61,7 @@ namespace Physica {
         template<RNG R>
         void step_for(int numStep);
 
-        [[nodiscard]] float64 promoteDet(const device_obj<MatrixND<T>>& matrixLU);
+        [[nodiscard]] Vector2D<float64> promoteDet(const device_obj<MatrixND<T>>& matrixLU);
         void traceGreen(int spin);
         /* Getters */
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
@@ -129,7 +129,7 @@ namespace Physica {
      * float64 is necessary for determinants
      */
     template<Scalar T>
-    auto device_obj<FreqDQMC<T>>::promoteDet(const device_obj<MatrixND<T>>& matrixLU) -> float64 {
+    auto device_obj<FreqDQMC<T>>::promoteDet(const device_obj<MatrixND<T>>& matrixLU) -> Vector2D<float64> {
         auto kernel = [matrixLU_ = asStruct(matrixLU), diag_ = asStruct(diag)] __device__() mutable {
             const auto& matrixLU = matrixLU_.getDerived();
             auto& diag = diag_.getDerived();
@@ -142,7 +142,8 @@ namespace Physica {
         int numThread = WarpSize;
         int numBlock = (diag.getLength() + (WarpSize - 1)) / WarpSize;
         CUDAExecutor::launch(kernel, KernelConfig(numBlock, numThread));
-        return DiagMatrix<cfloat64>(diag.toHost()).lnAbsDet();
+        DiagMatrix<cfloat64> mat(diag.toHost());
+        return {mat.lnAbsDet(), mat.sgndet().real()};
     }
 
     template<Scalar T>
@@ -188,8 +189,9 @@ namespace Physica {
 
         float64 lnAD = 0, sgnD = 1;
         for (const auto& spinLU : lu) {
-            lnAD += promoteDet(spinLU.getMatrixLU());
-            sgnD *= spinLU.sgndet().real();
+            auto [x, y] = promoteDet(spinLU.getMatrixLU());
+            lnAD += x;
+            sgnD *= y;
         }
         return {lnAD, sgnD};
     }

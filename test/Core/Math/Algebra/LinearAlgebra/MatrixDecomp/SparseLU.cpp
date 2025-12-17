@@ -40,7 +40,7 @@ namespace {
 
     void testLnAbsDet() {
         using MatrixType = DenseMatrix<T, MatrixOption::Row, 4, 4>;
-        const MatrixType A = MatrixType::random_normal<Random<>>(4, 4);
+        const MatrixType A = MatrixType::random_normal<Random<MT19937, 1000>>(4, 4);
         SparseLU<T> lu(SparseMatrix<T>(A), true);
         if (!scalarNear(lu.lnAbsDet(), A.lnAbsDet(), 1E-14))
             exit(EXIT_FAILURE);
@@ -49,5 +49,6 @@ namespace {
 
 int main() {
     testSolver();
+    testLnAbsDet();
     return 0;
 }

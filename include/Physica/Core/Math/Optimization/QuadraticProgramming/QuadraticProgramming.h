@@ -82,15 +82,18 @@ namespace Physica {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
         assert(equalityConstraint_.getCol() == 0 || equalityConstraint_.getCol() == objectiveVecC.getLength() + 1);
         assert(inequalityConstraint_.getCol() == 0 || inequalityConstraint_.getCol() == objectiveVecC.getLength() + 1);
-        if (equalityConstraint_.getSize() > 0)
+        if (!equalityConstraint_.empty())
             equalityConstraint = equalityConstraint_;
-        if (inequalityConstraint_.getSize() > 0)
+        if (!inequalityConstraint_.empty())
             inequalityConstraint = inequalityConstraint_;
     }
 
     template<Scalar T>
     void QuadraticProgramming<T>::compute(const T& precision) {
-        ConstraintMatrix activeConstraints = equalityConstraint;
+        ConstraintMatrix activeConstraints;
+        if (!equalityConstraint.empty())
+            activeConstraints = equalityConstraint;
+
         while (true) {
             const EqualityQuadraticProgramming<T> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
             const VectorND<T> vec_p = EQP.getSolution() - x;
@@ -101,10 +104,10 @@ namespace Physica {
                     break;
                 
                 auto minimum_index = std::distance(multipliers.cbegin(), minimum_ite);
-                for (auto ite = activeConstraintFlags.begin(); ite != activeConstraintFlags.end(); ++ite) {
-                    if (*ite == true) {
+                for (bool& activeConstraintFlag : activeConstraintFlags) {
+                    if (activeConstraintFlag) {
                         if (minimum_index == 0) {
-                            *ite = false;
+                            activeConstraintFlag = false;
                             break;
                         }
                         --minimum_index;
@@ -127,8 +130,7 @@ namespace Physica {
             const VectorND<T> vec_p = EQP.getSolution() - x;
             if (vec_p.norm() <= x.norm() * precision)
                 break;
-            else
-                updateVariables(vec_p);
+            updateVariables(vec_p);
             updateActiveConstraints(activeConstraints);
         };
     }

@@ -398,9 +398,6 @@ namespace Physica {
             }
             else {
                 const size_t length = getLength();
-                if (length == 0)
-                    return;
-
                 const size_t to = length / PacketSize * PacketSize;
                 size_t i = 0;
                 for (; i < to; i += PacketSize)

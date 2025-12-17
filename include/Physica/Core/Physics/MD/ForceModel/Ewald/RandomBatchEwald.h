@@ -68,6 +68,7 @@ namespace Physica {
         /* Setters */
         void setLattice(LatticeMatrix lattice);
         void setIntegralLimit(T integralLimit);
+        void setIntegralLimit();
     private:
         void updateSumGauss();
         void updateSamplePool();
@@ -83,21 +84,18 @@ namespace Physica {
             , batchSize(batchSize_)  {}
 
     template<Scalar T, RNG R>
-    RandomBatchEwald<T, R>::RandomBatchEwald(
-            size_t samplePoolSize,
-            size_t batchSize_,
-            LatticeMatrix lattice,
-            VectorND<T> charges) : This(samplePoolSize, batchSize_) {
+    RandomBatchEwald<T, R>::RandomBatchEwald(size_t samplePoolSize, size_t batchSize_, LatticeMatrix lattice, VectorND<T> charges)
+            : Base(std::move(lattice), std::move(charges))
+            , samplePool(samplePoolSize, Dim)
+            , batchSize(batchSize_) {
         assert(checkParam(lattice) && "[Error]: Non-orthogonal lattice is not implemented");
-        Base::setCharges(std::move(charges));
-        Base::setLattice(std::move(lattice));
-        setIntegralLimit(calcDefaultIntegralLimit());
+        setIntegralLimit();
     }
 
     template<Scalar T, RNG R>
     RandomBatchEwald<T, R>& RandomBatchEwald<T, R>::operator=(Base base) {
         Base::swap(base);
-        setIntegralLimit(calcDefaultIntegralLimit());
+        setIntegralLimit();
         return *this;
     }
 
@@ -168,7 +166,7 @@ namespace Physica {
     template<Scalar T, RNG R>
     void RandomBatchEwald<T, R>::setLattice(LatticeMatrix lattice) {
         Base::setLattice(std::move(lattice));
-        setIntegralLimit(calcDefaultIntegralLimit());
+        setIntegralLimit();
     }
 
     template<Scalar T, RNG R>
@@ -176,6 +174,11 @@ namespace Physica {
         Base::setIntegralLimit(integralLimit);
         updateSumGauss();
         updateSamplePool();
+    }
+
+    template<Scalar T, RNG R>
+    void RandomBatchEwald<T, R>::setIntegralLimit() {
+        setIntegralLimit(calcDefaultIntegralLimit());
     }
 
     template<Scalar T, RNG R>
