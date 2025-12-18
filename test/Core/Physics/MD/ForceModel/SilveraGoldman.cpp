@@ -52,7 +52,7 @@ public:
 private:
     static MDCellType makeSystem(dfloat& volume) {
         if constexpr (Disable) {
-            LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+            LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
             const auto latticeConst = cbrt(volume);
             lattice *= latticeConst;
 

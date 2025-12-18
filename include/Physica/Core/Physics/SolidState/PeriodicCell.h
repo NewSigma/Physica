@@ -142,7 +142,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     PeriodicCell<T, Dim>::PeriodicCell()
-            : lattice(LatticeMatrix::unitMatrix(Dim))
+            : lattice(LatticeMatrix::identity(Dim))
             , pos()
             , type(Type::Direct) {}
 

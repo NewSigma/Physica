@@ -124,9 +124,9 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::unitMatrix(size_t order) -> This {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::identity(size_t order) -> This {
         DenseMatrix result(order, order);
-        result.toUnitMatrix();
+        result.toIdentity();
         return result;
     }
 

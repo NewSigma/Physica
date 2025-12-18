@@ -57,7 +57,7 @@ namespace {
 
         ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
         const ScalarType latticeFactor(cbrt(cellVolume));
-        CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+        CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::identity(3);
         lattice *= latticeFactor;
 
         CrystalCellType::PositionMatrix pos(numAtom, 3);

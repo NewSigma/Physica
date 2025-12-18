@@ -72,7 +72,7 @@ namespace Physica {
         using Storage::getCol;
         using Storage::getSize;
         /* Static members */
-        [[nodiscard]] static device_obj unitMatrix(size_t order);
+        [[nodiscard]] static device_obj identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t row, size_t col);
         template<RNG R>

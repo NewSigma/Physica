@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 using namespace Physica;
@@ -30,7 +30,7 @@ namespace {
         const M result(inv);
         M prod = result * m;
         std::cout << prod << '\n';
-        if (!matrixNear(prod, UnitMatrix<T>(m.getRow()), prec))
+        if (!matrixNear(prod, IdentityMatrix<T>(m.getRow()), prec))
             exit(EXIT_FAILURE);
     }
 }

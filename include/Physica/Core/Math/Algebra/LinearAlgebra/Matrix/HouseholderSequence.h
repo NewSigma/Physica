@@ -75,7 +75,7 @@ namespace Physica {
         const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getCol());
         assert(shift1 < target.getRow());
 
-        target.toUnitMatrix();
+        target.toIdentity();
         for (size_t i = 0; i < size; ++i) {
             auto block = target.rightCols(i + shift1);
             if constexpr (ColWiseRead) {

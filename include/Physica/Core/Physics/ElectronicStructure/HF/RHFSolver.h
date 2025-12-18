@@ -305,7 +305,7 @@ namespace Physica {
         auto equalityConstraint = DenseMatrix<T, MatrixOption::Row, 1, Dynamic>(1, problemDim + 1, T(1));
         auto inequalityConstraint = DenseMatrix<T, MatrixOption::Row>(problemDim, problemDim + 1, T(0));
         auto block = inequalityConstraint.leftCols(problemDim);
-        block.toUnitMatrix();
+        block.toIdentity();
         auto initial = VectorND<T>(problemDim, T(0));
         QuadraticProgramming<T> QP(G, energyBuffer, equalityConstraint, inequalityConstraint, initial);
         QP.compute_nonconvex(T(1E-10));

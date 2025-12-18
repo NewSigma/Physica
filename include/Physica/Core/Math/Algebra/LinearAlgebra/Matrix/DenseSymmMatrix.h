@@ -89,7 +89,7 @@ namespace Physica {
         [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
-        [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
+        [[nodiscard]] static DenseSymmMatrix identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order);
         template<RNG R>
@@ -160,9 +160,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    auto DenseSymmMatrix<T, Order>::unitMatrix(size_t order) -> This {
+    auto DenseSymmMatrix<T, Order>::identity(size_t order) -> This {
         DenseSymmMatrix<T, Order> result(order);
-        result.toUnitMatrix();
+        result.toIdentity();
         return result;
     }
 

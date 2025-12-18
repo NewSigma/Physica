@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include "../UnitMatrix.h"
+#include "../IdentityMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     class MatrixExpr<ExprID::Mul, M, U>
             : public BinaryMatrixExpr<ExprID::Mul, M, U> {
         using Base = BinaryMatrixExpr<ExprID::Mul, M, U>;
@@ -47,40 +47,40 @@ namespace Physica {
         using Base::getRHS;
     };
 
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     auto MatrixExpr<ExprID::Mul, M, U>::operator*(Scalar auto x) const noexcept {
         return getLHS() * (x * getRHS());
     }
 
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     auto MatrixExpr<ExprID::Mul, M, U>::operator-() const& noexcept {
         return getLHS() * (-getRHS());
     }
 
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     auto MatrixExpr<ExprID::Mul, M, U>::operator-() && noexcept {
         return std::move(getLHS()) * (-getRHS());
     }
 
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     void MatrixExpr<ExprID::Mul, M, U>::assign(Matrix auto&& target) const {
         target.assert_assign(*this);
         target.zeros();
         assign_add(target);
     }
 
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     void MatrixExpr<ExprID::Mul, M, U>::assign_add(Matrix auto&& target) const {
         target.assert_assign(*this);
         target.diag() += getRHS();
     }
 
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     auto MatrixExpr<ExprID::Mul, M, U>::calc(size_t row, size_t col) const -> T {
         return row != col ? T(0) : getRHS();
     }
 
-    template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
+    template<Matrix M, Scalar U> requires(instanceof_tx<IdentityMatrix, M>)
     auto MatrixExpr<ExprID::Mul, M, U>::calc_value(size_t row, size_t col) const -> Tv {
         return row != col ? Tv(0) : getRHS().value();
     }

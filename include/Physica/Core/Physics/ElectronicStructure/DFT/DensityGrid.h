@@ -129,7 +129,7 @@ namespace Physica {
 
     template<Scalar T, bool IsSpinPolarized>
     void DensityGrid<T, IsSpinPolarized>::fit(const DensityGrid& rho) {
-        const LatticeMatrix latt = LatticeMatrix::unitMatrix(3);
+        const LatticeMatrix latt = LatticeMatrix::identity(3);
         auto kernel = [this, &rho](Vector3D<T> pos, Index3D index) {
             {
                 auto& rho_up = getTotalDensity();

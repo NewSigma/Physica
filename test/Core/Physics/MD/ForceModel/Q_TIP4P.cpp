@@ -72,7 +72,7 @@ namespace Physica {
                 constexpr size_t numAtom = MoleculePerCell * 3;
 
                 const Tv latticeConst(cbrt(cellVolume));
-                CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+                CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::identity(3);
                 lattice *= latticeConst;
 
                 CrystalCellType::PositionMatrix pos(numAtom, 3);

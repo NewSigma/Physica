@@ -61,7 +61,7 @@ MDCell<ScalarType> makeSystem() {
     using CrystalCellType = CrystalCell<ScalarType>;
     constexpr size_t MoleculePerCell = 4;
 
-    CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+    CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::identity(3);
     lattice *= ScalarType(latticeConst);
 
     CrystalCellType::PositionMatrix pos(MoleculePerCell, 3);

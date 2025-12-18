@@ -418,7 +418,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueMatrix<Derived>::toUnitMatrix() {
+    void LValueMatrix<Derived>::toIdentity() {
         assert(Base::getRow() == Base::getCol());
         const size_t order = Base::getRow();
         for (size_t i = 0; i < order; ++i)

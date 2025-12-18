@@ -57,7 +57,7 @@ public:
 private:
     static MDCellType makeSystem() {
         if constexpr (Disable) {
-            auto lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+            auto lattice = MDCellType::LatticeMatrix::identity(3);
             auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
             MDCellType::MassVector massVec(numMolecular, mass);
             MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));

@@ -31,7 +31,7 @@ using RandomSource = Random<MT19937, 10000>;
 
 namespace {
     MDCellType makeSystem(size_t numMolecular) {
-        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
         auto pos = MDCellType::PositionMatrix::template random_uniform<RandomSource>(numMolecular, 3);
         MDCellType::MassVector massVec(numMolecular, 1.0);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));

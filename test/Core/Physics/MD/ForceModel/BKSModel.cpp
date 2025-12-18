@@ -75,7 +75,7 @@ namespace Physica {
                 constexpr size_t numAtom = MoleculePerCell * 3;
 
                 const auto latticeConst = cbrt(cellVolume);
-                CoDiff<LatticeMatrix> lattice = LatticeMatrix::unitMatrix(3) * latticeConst;
+                CoDiff<LatticeMatrix> lattice = LatticeMatrix::identity(3) * latticeConst;
 
                 CrystalCellType::PositionMatrix pos(numAtom, 3);
                 std::uniform_real_distribution dist(-0.1, 0.1);

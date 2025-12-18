@@ -91,8 +91,8 @@ namespace Physica {
     template<Scalar T>
     void ActionMatrix<T>::assign_kinetic(Matrix auto&& target) const {
         const int numSite = getNumSite();
-        kronecker(UnitMatrix<Trv>(matsubara.getOrder()), params.getHoppingMatrix()).assign(target);
-        kronecker(matsubara, UnitMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
+        kronecker(IdentityMatrix<Trv>(matsubara.getOrder()), params.getHoppingMatrix()).assign(target);
+        kronecker(matsubara, IdentityMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
     }
 
     template<Scalar T>

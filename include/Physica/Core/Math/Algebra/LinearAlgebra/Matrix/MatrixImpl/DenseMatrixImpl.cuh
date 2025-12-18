@@ -64,8 +64,8 @@ namespace Physica {
     }
 
     template<tparams>
-    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::unitMatrix(size_t order) -> This {
-        return host_obj::unitMatrix(order).toDevice();
+    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::identity(size_t order) -> This {
+        return host_obj::identity(order).toDevice();
     }
 
     template<tparams>

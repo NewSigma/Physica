@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/ForwardEigenSolver.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
 
@@ -47,7 +47,7 @@ namespace {
             size_t order = mat.getRow();
             for (size_t i = 0; i < order; ++i) {
                 using EigVector = EigenSolver<T>::EigenvalueVector;
-                const EigVector result = (mat - solver.getEigenvalues()[i] * UnitMatrix<Tr>(order)) * eigenvectors.col(i);
+                const EigVector result = (mat - solver.getEigenvalues()[i] * IdentityMatrix<Tr>(order)) * eigenvectors.col(i);
                 if (!vectorNearZero(result, precision))
                     exit(EXIT_FAILURE);
             }

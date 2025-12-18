@@ -22,8 +22,8 @@
 
 namespace Physica {
     template<Scalar T, size_t Order = Dynamic>
-    class UnitMatrix : public RValueMatrix<UnitMatrix<T, Order>> {
-        using This = UnitMatrix<T, Order>;
+    class IdentityMatrix : public RValueMatrix<IdentityMatrix<T, Order>> {
+        using This = IdentityMatrix<T, Order>;
         using Base = RValueMatrix<This>;
         using IndexType = std::conditional<Order == Dynamic, size_t, PlainStruct<void>>::type;
         static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid scalar for unit matrix");
@@ -32,12 +32,12 @@ namespace Physica {
     private:
         [[no_unique_address]] IndexType order;
     public:
-        UnitMatrix() = default;
-        explicit UnitMatrix(size_t order_);
-        explicit UnitMatrix(const Matrix auto& m);
-        UnitMatrix(const This&) = default;
-        UnitMatrix(This&&) noexcept = default;
-        ~UnitMatrix() = default;
+        IdentityMatrix() = default;
+        explicit IdentityMatrix(size_t order_);
+        explicit IdentityMatrix(const Matrix auto& m);
+        IdentityMatrix(const This&) = default;
+        IdentityMatrix(This&&) noexcept = default;
+        ~IdentityMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         template<Vector V>
@@ -60,61 +60,61 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Order>
-    UnitMatrix<T, Order>::UnitMatrix(size_t order_) : order(order_) {
+    IdentityMatrix<T, Order>::IdentityMatrix(size_t order_) : order(order_) {
         assert((Order == Dynamic || Order == order_) && "[Error]: tparam and param is not consistent");
     }
 
     template<Scalar T, size_t Order>
-    UnitMatrix<T, Order>::UnitMatrix(const Matrix auto& m) : UnitMatrix(m.getRow()) {
+    IdentityMatrix<T, Order>::IdentityMatrix(const Matrix auto& m) : IdentityMatrix(m.getRow()) {
         assert(m.isSquare());
     }
 
     template<Scalar T, size_t Order>
     template<Vector V>
-    V&& UnitMatrix<T, Order>::operator*(V&& v) const noexcept {
+    V&& IdentityMatrix<T, Order>::operator*(V&& v) const noexcept {
         assert(getCol() == v.getLength());
         return std::forward<V>(v);
     }
 
     template<Scalar T, size_t Order>
-    void UnitMatrix<T, Order>::assign(Matrix auto&& target) const {
+    void IdentityMatrix<T, Order>::assign(Matrix auto&& target) const {
         target.zeros();
         for (size_t i = 0; i < getRow(); ++i)
             target(i, i) = T(1);
     }
 
     template<Scalar T, size_t Order>
-    T UnitMatrix<T, Order>::calc(size_t row, size_t col) const {
+    T IdentityMatrix<T, Order>::calc(size_t row, size_t col) const {
         return T(row == col ? 1 : 0);
     }
 
     template<Scalar T, size_t Order>
-    T UnitMatrix<T, Order>::calc_value(size_t row, size_t col) const {
+    T IdentityMatrix<T, Order>::calc_value(size_t row, size_t col) const {
         return calc(row, col);
     }
 
     template<Scalar T, size_t Order>
-    void UnitMatrix<T, Order>::swap(This& __restrict obj) noexcept {
+    void IdentityMatrix<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(order, obj.order);
     }
 
     template<Scalar T, size_t Order>
-    size_t UnitMatrix<T, Order>::getRow() const noexcept {
+    size_t IdentityMatrix<T, Order>::getRow() const noexcept {
         if constexpr (Order == Dynamic)
             return order;
         return Order;
     }
 
     template<Scalar T, size_t Order>
-    size_t UnitMatrix<T, Order>::getCol() const noexcept {
+    size_t IdentityMatrix<T, Order>::getCol() const noexcept {
         return getRow();
     }
 }
 
 namespace Physica {
     template<Scalar T, size_t Order>
-    class Traits<UnitMatrix<T, Order>> {
+    class Traits<IdentityMatrix<T, Order>> {
     public:
         using ScalarType = T;
         constexpr static int Option = MatrixOption::AnyMajor;
@@ -126,4 +126,4 @@ namespace Physica {
     };
 }
 
-#include "UnitMatrixImpl/Mul.h"
+#include "IdentityMatrixImpl/Mul.h"

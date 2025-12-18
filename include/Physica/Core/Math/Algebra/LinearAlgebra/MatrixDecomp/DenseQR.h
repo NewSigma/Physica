@@ -217,7 +217,7 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     auto DenseQR<T, Pivot>::getMatrixQ_base() const -> MatrixND<T> {
-        auto result = MatrixND<T>::unitMatrix(getRow());
+        auto result = MatrixND<T>::identity(getRow());
         for (size_t i = 0; i < taus.getLength() - !working.isOverdetermined(); ++i) {
             auto block = result.rightCols(i);
             const auto col = working.col(i);

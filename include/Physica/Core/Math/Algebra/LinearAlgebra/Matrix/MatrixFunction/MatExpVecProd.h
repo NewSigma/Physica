@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "MatrixExp.h"
 #include "MatrixPow.h"
 
@@ -155,7 +155,7 @@ namespace Physica {
     template<ExecutePolicy P>
     auto MatExpVecProd<M, V>::calcParam(Tr traceMu) const -> ParamPair {
         constexpr static Tm NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
-        const auto matI = UnitMatrix<Trv>(getLength());
+        const auto matI = IdentityMatrix<Trv>(getLength());
         const Tr norm1 = (mexp.getMatrix() - matI * traceMu).template norm1_power<P>(MaxNormIteration);
         const bool isSmallNorm = Tm(norm1) <= NormLimit;
         int cost = std::numeric_limits<int>::max();

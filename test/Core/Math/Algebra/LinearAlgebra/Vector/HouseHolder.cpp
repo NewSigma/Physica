@@ -104,7 +104,7 @@ static void complexApplyTest() noexcept {
     const T norm = x.householder(v);
 
     const MatrixType m{x, {{-2, 7}, {1, 6}}};
-    MatrixType householderMat = MatrixType::unitMatrix(2);
+    MatrixType householderMat = MatrixType::identity(2);
     applyHouseholder(v, householderMat);
     MatrixType m1 = householderMat * m;
     MatrixType m2 = m;

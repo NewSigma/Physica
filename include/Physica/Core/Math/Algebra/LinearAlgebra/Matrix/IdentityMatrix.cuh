@@ -20,12 +20,12 @@
 
 
 #include "MatrixImpl/RValueMatrix.cuh"
-#include "UnitMatrix.h"
+#include "IdentityMatrix.h"
 
 namespace Physica {
     template<Scalar T, size_t Order>
-    class device_obj<UnitMatrix<T, Order>> : public device_obj<RValueMatrix<UnitMatrix<T, Order>>> {
-        using host_obj = UnitMatrix<T, Order>;
+    class device_obj<IdentityMatrix<T, Order>> : public device_obj<RValueMatrix<IdentityMatrix<T, Order>>> {
+        using host_obj = IdentityMatrix<T, Order>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
         using IndexType = host_obj::IndexType;
@@ -61,18 +61,18 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Order>
-    device_obj<UnitMatrix<T, Order>>::device_obj(size_t order_) : order(order_) {
+    device_obj<IdentityMatrix<T, Order>>::device_obj(size_t order_) : order(order_) {
         assert((Order == Dynamic || Order == order_) && "[Error]: tparam and param is not consistent");
     }
 
     template<Scalar T, size_t Order>
-    device_obj<UnitMatrix<T, Order>>::device_obj(const Matrix auto& m) : device_obj(m.getRow()) {
+    device_obj<IdentityMatrix<T, Order>>::device_obj(const Matrix auto& m) : device_obj(m.getRow()) {
         assert(m.isSquare());
     }
 
     template<Scalar T, size_t Order>
     template<Matrix M>
-    void device_obj<UnitMatrix<T, Order>>::assign(M&& target) const {
+    void device_obj<IdentityMatrix<T, Order>>::assign(M&& target) const {
         target.zeros();
         auto setones = [target_ = asStruct(target)] __device__ () mutable {
             auto& target = target_.getDerived();
@@ -88,44 +88,44 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     template<Vector V>
-    __host__ __device__ V&& device_obj<UnitMatrix<T, Order>>::operator*(V&& v) const noexcept {
+    __host__ __device__ V&& device_obj<IdentityMatrix<T, Order>>::operator*(V&& v) const noexcept {
         static_assert(CUDA<V>);
         assert(getCol() == v.getLength());
         return std::forward<V>(v);
     }
 
     template<Scalar T, size_t Order>
-    __device__ T device_obj<UnitMatrix<T, Order>>::calc(size_t row, size_t col) const {
+    __device__ T device_obj<IdentityMatrix<T, Order>>::calc(size_t row, size_t col) const {
         return T(row == col ? 1 : 0);
     }
 
     template<Scalar T, size_t Order>
-    __device__ T device_obj<UnitMatrix<T, Order>>::calc_value(size_t row, size_t col) const {
+    __device__ T device_obj<IdentityMatrix<T, Order>>::calc_value(size_t row, size_t col) const {
         return calc(row, col);
     }
 
     template<Scalar T, size_t Order>
-    __host__ __device__ void device_obj<UnitMatrix<T, Order>>::swap(This& __restrict obj) noexcept {
+    __host__ __device__ void device_obj<IdentityMatrix<T, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(order, obj.order);
     }
 
     template<Scalar T, size_t Order>
-    __host__ __device__ size_t device_obj<UnitMatrix<T, Order>>::getRow() const noexcept {
+    __host__ __device__ size_t device_obj<IdentityMatrix<T, Order>>::getRow() const noexcept {
         if constexpr (Order == Dynamic)
             return order;
         return Order;
     }
 
     template<Scalar T, size_t Order>
-    __host__ __device__ size_t device_obj<UnitMatrix<T, Order>>::getCol() const noexcept {
+    __host__ __device__ size_t device_obj<IdentityMatrix<T, Order>>::getCol() const noexcept {
         return getRow();
     }
 }
 
 namespace Physica {
     template<Scalar T, size_t Order>
-    class Traits<device_obj<UnitMatrix<T, Order>>> : public Traits<UnitMatrix<T, Order>> {};
+    class Traits<device_obj<IdentityMatrix<T, Order>>> : public Traits<IdentityMatrix<T, Order>> {};
 }
 
-#include "UnitMatrixImpl/Mul.h"
+#include "IdentityMatrixImpl/Mul.h"

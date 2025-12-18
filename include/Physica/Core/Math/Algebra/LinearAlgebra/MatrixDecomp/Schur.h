@@ -92,7 +92,7 @@ namespace Physica {
         assert(source.getRow() == source.getCol());
         computeMatrixU = computeMatrixU_;
         if (computeMatrixU)
-            matrixU = WorkingMatrix::unitMatrix(source.getRow());
+            matrixU = WorkingMatrix::identity(source.getRow());
 
         const RealType factor = abs_elem(source).max();
         if (factor.isSubNormal()) {

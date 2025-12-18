@@ -55,7 +55,7 @@ namespace Physica {
         static MDCellType makeSystem(ScalarType& volume, size_t cellSize) {
             if constexpr (Disable) {
                 constexpr size_t numMolecularUnitCell = 2;
-                LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+                LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
                 const auto latticeConst = cbrt(volume);
                 lattice *= latticeConst;
 

@@ -98,7 +98,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static This zeros(size_t order) { return zeros(order, order); }
         [[nodiscard]] static This zeros(size_t row, size_t col);
-        [[nodiscard]] static This unitMatrix(size_t order);
+        [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order) { return random_uniform<R>(order, order); }
         template<RNG R>

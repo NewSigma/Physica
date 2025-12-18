@@ -145,7 +145,7 @@ namespace Physica {
         void random_normal();
         template<RNG R>
         void random_any(auto& distribution);
-        void toUnitMatrix();
+        void toIdentity();
         [[nodiscard]] VectorND<T> balance();
 
         template<int GradOrder = 1>

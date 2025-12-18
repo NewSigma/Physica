@@ -39,7 +39,7 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 namespace {
     static MDType makeSystem(size_t numMolecular) {
         using MDCellType = MDType::MDCellType;
-        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
         auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));

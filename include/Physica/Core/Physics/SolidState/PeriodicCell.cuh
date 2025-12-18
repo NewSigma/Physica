@@ -64,7 +64,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim>
     device_obj<PeriodicCell<T, Dim>>::device_obj()
-            : lattice(LatticeMatrix::unitMatrix(Dim))
+            : lattice(LatticeMatrix::identity(Dim))
             , pos()
             , type(Type::Direct) {}
 

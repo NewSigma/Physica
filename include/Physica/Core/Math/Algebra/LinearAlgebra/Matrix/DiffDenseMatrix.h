@@ -100,7 +100,7 @@ namespace Physica {
         [[nodiscard]] const GradMatrix& grads() const noexcept { return g; }
         [[nodiscard]] GradMatrix& grads() noexcept { return g; }
         /* Static members */
-        [[nodiscard]] static This unitMatrix(size_t order);
+        [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static auto random_uniform(size_t row, size_t col);
         template<RNG R>

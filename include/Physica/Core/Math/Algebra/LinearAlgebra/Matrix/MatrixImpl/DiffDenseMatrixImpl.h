@@ -138,9 +138,9 @@ namespace Physica {
     }
 
     template<tparams>
-    DiffDenseMatrix DiffDenseMatrix::unitMatrix(size_t order) {
+    DiffDenseMatrix DiffDenseMatrix::identity(size_t order) {
         This result(order, order);
-        result.toUnitMatrix();
+        result.toIdentity();
         return result;
     }
 

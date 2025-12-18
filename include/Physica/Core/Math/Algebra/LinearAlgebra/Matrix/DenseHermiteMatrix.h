@@ -72,7 +72,7 @@ namespace Physica {
         [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
-        [[nodiscard]] static This unitMatrix(size_t order);
+        [[nodiscard]] static This identity(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t order);
         template<RNG R>
@@ -156,9 +156,9 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    DenseHermiteMatrix<T, Order> DenseHermiteMatrix<T, Order>::unitMatrix(size_t order) {
+    DenseHermiteMatrix<T, Order> DenseHermiteMatrix<T, Order>::identity(size_t order) {
         DenseHermiteMatrix<T, Order> result(order);
-        result.toUnitMatrix();
+        result.toIdentity();
         return result;
     }
 

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "FreqDQMC.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.cuh"
 
 namespace Physica {
@@ -200,7 +200,7 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::calcGreen() {
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
-            linearRHS = device_obj<UnitMatrix<Tr>>(action.getOrder());
+            linearRHS = device_obj<IdentityMatrix<Tr>>(action.getOrder());
             spinLU.solve(linearRHS);
             traceGreen(spin);
         }

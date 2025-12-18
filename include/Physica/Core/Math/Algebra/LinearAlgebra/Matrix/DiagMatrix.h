@@ -64,7 +64,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         /* Static members */
-        [[nodiscard]] static This unitMatrix(size_t order);
+        [[nodiscard]] static This identity(size_t order);
     };
 
     template<Scalar T, size_t Order>
@@ -128,7 +128,7 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    auto DiagMatrix<T, Order>::unitMatrix(size_t order) -> This {
+    auto DiagMatrix<T, Order>::identity(size_t order) -> This {
         return This(VectorType(order, 1));
     }
 }
