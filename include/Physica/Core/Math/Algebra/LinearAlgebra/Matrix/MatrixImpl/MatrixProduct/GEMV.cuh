@@ -72,7 +72,7 @@ namespace Physica {
             Base::assign(target);
         else {
             if constexpr (MatrixOption::isColMatrix<T>()) {
-                Base::assert_assign(target);
+                target.assert_assign(*this);
                 const auto& m = getLHS();
                 const auto& v = getRHS();
                 target = m.col(0) * v.calc(0);
@@ -90,7 +90,7 @@ namespace Physica {
         const auto& g = grad.values();
         const auto& m = mat.getDerived();
         const auto& v = vec.getDerived();
-        grad.assert_assign(*this);
+        Base::assert_assign(grad);
         if constexpr (ReverseDiff<T>)
             m.reverse(g * v.values().transpose());
         if constexpr (ReverseDiff<U>)

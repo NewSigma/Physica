@@ -59,7 +59,7 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const noexcept {
-        Base::assert_assign(target);
+        target.assert_assign(*this);
         target.zeros();
 
         const auto& repr = mat.getRepr();

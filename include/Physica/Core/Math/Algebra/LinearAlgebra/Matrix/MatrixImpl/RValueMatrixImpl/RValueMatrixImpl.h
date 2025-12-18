@@ -26,7 +26,7 @@ namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto&& target) const {
-        assert_assign(target);
+        target.assert_assign(Base::getDerived());
 
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
@@ -43,7 +43,7 @@ namespace Physica {
 
     template<class Derived>
     void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const {
-        assert_assign(target);
+        target.assert_assign(Base::getDerived());
 
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
@@ -53,16 +53,16 @@ namespace Physica {
     }
 
     template<class Derived>
-    void RValueMatrix<Derived>::assert_assign(const Matrix auto& target) const noexcept {
-        static_assert_assign(target);
-        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
-        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+    void RValueMatrix<Derived>::assert_assign(const Matrix auto& source) const noexcept {
+        static_assert_assign(source);
+        assert(getRow() == source.getRow() && "[Error]: Dimensions do not match");
+        assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
     }
 
     template<class Derived>
-    void RValueMatrix<Derived>::assert_assign_mkl(const Matrix auto& target) const noexcept {
-        static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
-        assert_assign(target);
+    void RValueMatrix<Derived>::assert_assign_mkl(const Matrix auto& source) const noexcept {
+        static_assert(Internal::EnableMKL<Derived, decltype(source)>::value, "[Error]: Cannot apply MKL to this expr");
+        assert_assign(source);
     }
 
     template<class Derived>
@@ -530,12 +530,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void RValueMatrix<Derived>::static_assert_assign(const Matrix auto& target) noexcept {
-        using M = std::remove_cvref_t<decltype(target)>;
-        static_assert(RowAtCompile == M::RowAtCompile || RowAtCompile == Dynamic || M::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
-        static_assert(ColAtCompile == M::ColAtCompile || ColAtCompile == Dynamic || M::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
-        static_assert(!isComplex || M::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");
-        static_assert(!isDiffable || M::isDiffable, "[Error]: Assign a diffable matrix to normal matrix discards grads");
+    __host__ __device__ void RValueMatrix<Derived>::static_assert_assign(const Matrix auto& source) noexcept {
+        using Src = std::remove_cvref_t<decltype(source)>;
+        static_assert(RowAtCompile == Src::RowAtCompile || RowAtCompile == Dynamic || Src::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
+        static_assert(ColAtCompile == Src::ColAtCompile || ColAtCompile == Dynamic || Src::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
+        static_assert(isComplex || !Src::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");
+        static_assert(isDiffable || !Src::isDiffable, "[Error]: Assign a diffable matrix to normal matrix discards grads");
     }
 }
 

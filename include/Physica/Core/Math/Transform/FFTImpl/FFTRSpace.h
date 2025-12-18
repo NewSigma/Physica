@@ -67,7 +67,7 @@ namespace Physica {
 
     template<class Derived>
     void FFTRSpace<Derived, 1>::transform(const Vector auto& data) {
-        data.assert_assign(*this);
+        VectorBase::assert_assign(data);
         *this = data;
         Base::getDerived().transform();
     }
@@ -130,7 +130,7 @@ namespace Physica {
 
     template<class Derived>
     void FFTRSpace<Derived, 2>::transform(const Matrix auto& data) {
-        data.assert_assign(*this);
+        MatrixBase::assert_assign(data);
         *this = data;
         Base::getDerived().transform();
     }
@@ -200,7 +200,7 @@ namespace Physica {
 
     template<class Derived>
     void FFTRSpace<Derived, 3>::transform(const Tensor auto& data) {
-        data.assert_assign(*this);
+        TensorBase::assert_assign(data);
         *this = data;
         Base::getDerived().transform();
     }

@@ -26,7 +26,7 @@ namespace Physica {
     template<class Derived>
     template<Matrix M>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(M&& target) const {
-        assert_assign(target);
+        target.assert_assign(Base::getDerived());
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
@@ -57,15 +57,16 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign_add(Matrix auto&& target) const {
-        assert_assign(target);
-        target = target + Base::getDerived();
+        const auto& x = Base::getDerived();
+        target.assert_assign(x);
+        target = target + x;
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assert_assign(const Matrix auto& target) const noexcept {
-        static_assert_assign(target);
-        assert(getRow() == target.getRow() && "[Error]: Dimensions do not match");
-        assert(getCol() == target.getCol() && "[Error]: Dimensions do not match");
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assert_assign(const Matrix auto& source) const noexcept {
+        static_assert_assign(source);
+        assert(getRow() == source.getRow() && "[Error]: Dimensions do not match");
+        assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
     }
 
     template<class Derived>
@@ -358,9 +359,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Matrix auto& target) noexcept {
-        host_obj::static_assert_assign(target);
-        static_assert(SizeAtCompile != Dynamic || CUDA<decltype(target)>, "[Error]: Host object cannot be assigned to dynamic device object");
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::static_assert_assign(const Matrix auto& source) noexcept {
+        static_assert(SizeAtCompile != Dynamic || CUDA<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
+        host_obj::static_assert_assign(source);
     }
 }
 

@@ -51,7 +51,7 @@ namespace Physica {
         /* Operations */
         template<Vector V>
         __host__ __device__ void assign(V& target) const;
-        __host__ __device__ void assert_assign(const Vector auto& target) const noexcept;
+        __host__ __device__ void assert_assign(const Vector auto& source) const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
@@ -103,7 +103,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] __host__ __device__ static KernelConfig makeKernelConfig(size_t length) noexcept;
         __host__ __device__ static void static_assert_assign(const Scalar auto& source) noexcept;
-        __host__ __device__ static void static_assert_assign(const Vector auto& target) noexcept;
+        __host__ __device__ static void static_assert_assign(const Vector auto& source) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

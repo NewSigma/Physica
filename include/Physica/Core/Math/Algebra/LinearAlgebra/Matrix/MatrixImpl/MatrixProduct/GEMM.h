@@ -78,7 +78,7 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
-        Base::assert_assign(target);
+        target.assert_assign(*this);
         if constexpr (UseMKL<decltype(target)>()) {
             if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
                 assign_mkl(target);

@@ -124,8 +124,8 @@ namespace Physica {
         void assign_base(Vector auto&& v) const noexcept;
         template<ExecutePolicy P = Sequential>
         void assign_add(Vector auto& v) const noexcept;
-        void assert_assign(const Vector auto& target) const noexcept;
-        void assert_assign_mkl(const Vector auto& target) const noexcept;
+        void assert_assign(const Vector auto& source) const noexcept;
+        void assert_assign_mkl(const Vector auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(size_t index) const noexcept;
         [[nodiscard]] decltype(auto) calc_value(size_t index) const noexcept;
@@ -206,7 +206,7 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
         __host__ __device__ constexpr static void static_assert_assign(const Scalar auto& source) noexcept;
-        __host__ __device__ constexpr static void static_assert_assign(const Vector auto& target) noexcept;
+        __host__ __device__ constexpr static void static_assert_assign(const Vector auto& source) noexcept;
         template<Vector V>
         [[nodiscard]] consteval static size_t maxSizeAtCompile() noexcept;
     protected:

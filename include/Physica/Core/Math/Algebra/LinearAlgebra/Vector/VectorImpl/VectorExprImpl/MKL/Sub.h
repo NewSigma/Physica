@@ -24,8 +24,8 @@ namespace Physica {
     template<Vector V1, Vector V2>
     void VectorExpr<ExprID::Sub, V1, V2>::assign_mkl(Vector auto& v) const noexcept {
         using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
-        Base::getLHS().assert_assign_mkl(v);
-        Base::getRHS().assert_assign_mkl(v);
+        v.assert_assign_mkl(Base::getLHS());
+        v.assert_assign_mkl(Base::getRHS());
 
         size_t n = Base::getLength();
         const auto* a = reinterpret_cast<const Tm*>(Base::getLHS().data());

@@ -40,7 +40,7 @@ namespace Physica {
 
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_base(const Matrix auto& source) {
-        source.assert_assign(working);
+        working.assert_assign(source);
         source.assign(working);
         for (size_t i = 0; i < getOrder(); ++i) {
             if constexpr (Pivot) {

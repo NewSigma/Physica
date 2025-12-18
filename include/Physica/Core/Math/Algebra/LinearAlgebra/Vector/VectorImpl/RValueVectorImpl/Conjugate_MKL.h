@@ -23,7 +23,7 @@
 namespace Physica {
     template<Vector V>
     void Conjugate<V>::assign_mkl(Vector auto& v) const noexcept {
-        vec.assert_assign_mkl(v);
+        v.assert_assign_mkl(vec);
 
         size_t n = Base::getLength();
         const auto* a = reinterpret_cast<const Tm*>(vec.data());

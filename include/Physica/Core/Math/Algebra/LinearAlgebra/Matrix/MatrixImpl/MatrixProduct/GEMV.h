@@ -92,7 +92,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     void GEMV<M, V>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
-        grad.assert_assign(vec);
+        vec.assert_assign(grad);
         const auto& g = grad.values();
         if constexpr (ReverseDiff<M>) {
             if constexpr (MatrixOption::isRowMatrix<M>()) {

@@ -64,14 +64,14 @@ namespace Physica {
 
     template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
     void MatrixExpr<ExprID::Mul, M, U>::assign(Matrix auto&& target) const {
-        Base::assert_assign(target);
+        target.assert_assign(*this);
         target.zeros();
         assign_add(target);
     }
 
     template<Matrix M, Scalar U> requires(instanceof_tx<UnitMatrix, M>)
     void MatrixExpr<ExprID::Mul, M, U>::assign_add(Matrix auto&& target) const {
-        Base::assert_assign(target);
+        target.assert_assign(*this);
         target.diag() += getRHS();
     }
 

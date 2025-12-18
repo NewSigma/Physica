@@ -76,7 +76,7 @@ namespace Physica {
     template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
     template<ExecutePolicy P>
     void HubbardVecProd<T0, U, BC, V>::assign(Vector auto& target) const {
-        Base::assert_assign(target);
+        target.assert_assign(*this);
         if constexpr (P == Thread) {
             parallel_for<Thread>([&](size_t i) {
                 target[i] = calc(i);

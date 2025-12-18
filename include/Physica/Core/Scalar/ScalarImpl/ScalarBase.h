@@ -159,7 +159,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto isFinite() const noexcept;
         /* Static Members */
         static bool matchSign(const ScalarType& s1, const ScalarType& s2);
-        template<Scalar U>
+        template<Scalar Src>
         consteval static void assert_assign() noexcept;
         consteval static void checkComplexCompare() noexcept;
     protected:
@@ -526,10 +526,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<Scalar U>
+    template<Scalar Src>
     consteval void ScalarBase<Derived>::assert_assign() noexcept {
-        static_assert(isDiffable || !U::isDiffable, "[Error]: Assign diffable scalar to normal scalar discards grad");
-        static_assert(isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
+        static_assert(isDiffable || !Src::isDiffable, "[Error]: Assign diffable scalar to normal scalar discards grad");
+        static_assert(isComplex || !Src::isComplex, "[Error]: Assign complex to real discards imag");
     }
 
     template<class Derived>

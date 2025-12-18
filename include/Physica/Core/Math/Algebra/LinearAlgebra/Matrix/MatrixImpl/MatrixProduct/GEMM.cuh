@@ -113,7 +113,7 @@ namespace Physica {
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
         static_assert(MatrixOption::isColMatrix<M1>() && MatrixOption::isColMatrix<M2>(), "[Error]: cuBLAS uses column major");
         static_assert(!Diffable<This>);
-        Base::assert_assign(target);
+        target.assert_assign(*this);
 
         using Tm = ScalarType::MachineType;
         const auto op1 = isTranspose1 ? CUBLAS_OP_T : CUBLAS_OP_N;

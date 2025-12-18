@@ -64,7 +64,7 @@ namespace Physica {
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
     template<ExecutePolicy P>
     void TransIsingVecProd<T, Dim, NumSite, BC, V>::assign(Vector auto& target) const {
-        Base::assert_assign(target);
+        target.assert_assign(*this);
         target.zeros();
 
         const auto& repr = getRepr();

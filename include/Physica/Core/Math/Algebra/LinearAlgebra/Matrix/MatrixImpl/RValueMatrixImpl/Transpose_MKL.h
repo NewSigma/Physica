@@ -24,7 +24,7 @@
 namespace Physica {
     template<Matrix M>
     void Transpose<M>::assign_mkl(Matrix auto&& target) const {
-        mat.assert_assign_mkl(target);
+        target.assert_assign_mkl(mat);
         static_assert(MatrixOption::isSameMajor<M, decltype(target)>(), "[Error]: Cannot apply MKL to this expr");
         constexpr char ordering = MatrixOption::isRowMatrix<M>() ? 'R' : 'C';
         constexpr char trans = 'T';

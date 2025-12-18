@@ -105,8 +105,8 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign_base(Matrix auto&& target) const;
         void assign_add(Matrix auto&& target) const;
-        void assert_assign(const Matrix auto& target) const noexcept;
-        void assert_assign_mkl(const Matrix auto& target) const noexcept;
+        void assert_assign(const Matrix auto& source) const noexcept;
+        void assert_assign_mkl(const Matrix auto& source) const noexcept;
 
         [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] decltype(auto) calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
@@ -203,7 +203,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
-        __host__ __device__ static void static_assert_assign(const Matrix auto& target) noexcept;
+        __host__ __device__ static void static_assert_assign(const Matrix auto& source) noexcept;
     protected:
         RValueMatrix() = default;
         RValueMatrix(const This&) = default;

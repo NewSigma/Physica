@@ -34,7 +34,7 @@ namespace Physica {
         __device__ device_obj(const device_obj<V1>& v1_, const device_obj<V2>& v2_) : v1(v1_), v2(v2_) {}
         /* Operations */
         __device__ void assign(Vector auto&& v) const {
-            Base::assert_assign(v);
+            v.assert_assign(*this);
             v[0] = v1[1] * v2[2] - v1[2] * v2[1];
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];

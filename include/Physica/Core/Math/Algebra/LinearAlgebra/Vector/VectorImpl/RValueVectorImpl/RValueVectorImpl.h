@@ -25,13 +25,11 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        constexpr static size_t Length1 = SizeAtCompile;
-        constexpr static size_t Length2 = V::SizeAtCompile;
-        assert_assign(v);
-
-        assert(getLength() == v.getLength() && "[Error]: Length mismatch between two vector");
+        v.assert_assign(Base::getDerived());
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
-            constexpr static size_t Length = Length1 > Length2 ? Length1 : Length2;
+            constexpr static size_t Length1 = SizeAtCompile;
+            constexpr static size_t Length2 = V::SizeAtCompile;
+            constexpr static size_t Length = std::max(Length1, Length2);
             assign_simd<V, P, Length>(v);
         }
         else
@@ -48,13 +46,11 @@ namespace Physica {
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign_add(Vector auto& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        constexpr static size_t Length1 = SizeAtCompile;
-        constexpr static size_t Length2 = V::SizeAtCompile;
-        assert_assign(v);
-
-        assert(getLength() == v.getLength() && "[Error]: Length mismatch between two vector");
+        v.assert_assign(Base::getDerived());
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {
-            constexpr static size_t Length = Length1 > Length2 ? Length1 : Length2;
+            constexpr static size_t Length1 = SizeAtCompile;
+            constexpr static size_t Length2 = V::SizeAtCompile;
+            constexpr static size_t Length = std::max(Length1, Length2);
             assign_add_simd<V, Length>(v);
         }
         else
@@ -62,22 +58,22 @@ namespace Physica {
     }
 
     template<class Derived>
-    void RValueVector<Derived>::assert_assign(const Vector auto& target) const noexcept {
-        static_assert_assign(target);
+    void RValueVector<Derived>::assert_assign(const Vector auto& source) const noexcept {
+        static_assert_assign(source);
 
-        using V = std::remove_cvref<decltype(target)>::type;
+        using V = std::remove_cvref<decltype(source)>::type;
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = V::SizeAtCompile;
         if constexpr (Size1 == Dynamic && Size2 == Dynamic) {
-            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+            assert(getLength() == source.getLength() && "[Error]: Size mismatch between two vector");
             assert(getLength() > 0);
         }
     }
 
     template<class Derived>
-    void RValueVector<Derived>::assert_assign_mkl(const Vector auto& target) const noexcept {
-        static_assert(Internal::EnableMKL<Derived, decltype(target)>::value, "[Error]: Cannot apply MKL to this expr");
-        assert_assign(target);
+    void RValueVector<Derived>::assert_assign_mkl(const Vector auto& source) const noexcept {
+        static_assert(Internal::EnableMKL<Derived, decltype(source)>::value, "[Error]: Cannot apply MKL to this expr");
+        assert_assign(source);
     }
 
     template<class Derived>
@@ -692,13 +688,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ constexpr void RValueVector<Derived>::static_assert_assign(const Vector auto& target) noexcept {
-        using V = std::remove_cvref<decltype(target)>::type;
+    __host__ __device__ constexpr void RValueVector<Derived>::static_assert_assign(const Vector auto& source) noexcept {
+        using Src = std::remove_cvref<decltype(source)>::type;
         constexpr size_t Size1 = SizeAtCompile;
-        constexpr size_t Size2 = V::SizeAtCompile;
+        constexpr size_t Size2 = Src::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        static_assert(V::isComplex || !isComplex, "[Error]: Assign a complex vector to real vector discards imags");
-        static_assert(Diffable<V> || !Diffable<This>, "[Error]: Assign a diffable vector to normal vector discards grads");
+        static_assert(isComplex || !Src::isComplex, "[Error]: Assign a complex vector to real vector discards imags");
+        static_assert(Diffable<Derived> || !Diffable<Src>, "[Error]: Assign a diffable vector to normal vector discards grads");
     }
     /**
      * FIXME: We cannot use unknown references in params of constexpr, refactor once we dump to Clang 20.

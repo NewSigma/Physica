@@ -26,7 +26,7 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const {
-        assert_assign(target);
+        target.assert_assign(Base::getDerived());
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
@@ -43,14 +43,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assert_assign(const Vector auto& target) const noexcept {
-        static_assert_assign(target);
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assert_assign(const Vector auto& source) const noexcept {
+        static_assert_assign(source);
 
-        using V = std::remove_cvref<decltype(target)>::type;
+        using V = std::remove_cvref<decltype(source)>::type;
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = V::SizeAtCompile;
         if constexpr (Size1 == Dynamic && Size2 == Dynamic)
-            assert(getLength() == target.getLength() && "[Error]: Size mismatch between two vector");
+            assert(getLength() == source.getLength() && "[Error]: Size mismatch between two vector");
     }
 
     template<class Derived>
@@ -370,9 +370,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& target) noexcept {
-        host_obj::static_assert_assign(target);
-        static_assert(SizeAtCompile != Dynamic || CUDA<decltype(target)>, "[Error]: Host object cannot be assigned to dynamic device object");
+    __host__ __device__ void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& source) noexcept {
+        static_assert(SizeAtCompile != Dynamic || CUDA<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
+        host_obj::static_assert_assign(source);
     }
 
     template<class Derived>

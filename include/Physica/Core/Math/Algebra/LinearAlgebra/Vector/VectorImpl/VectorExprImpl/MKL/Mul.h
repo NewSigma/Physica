@@ -23,7 +23,7 @@
 namespace Physica {
     template<Vector V, Scalar U>
     void VectorExpr<ExprID::Mul, V, U>::assign_mkl(Vector auto& v) const noexcept {
-        Base::getLHS().assert_assign_mkl(v);
+        v.assert_assign_mkl(Base::getLHS());
 
         using V1 = std::remove_cvref_t<decltype(v)>;
         if constexpr (std::same_as<std::remove_cvref_t<V>, V1>) {
@@ -61,7 +61,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     void VectorExpr<ExprID::Mul, V, U>::assign_add_mkl(Vector auto&& v) const noexcept {
-        Base::getLHS().assert_assign_mkl(v);
+        v.assert_assign_mkl(Base::getLHS());
 
         const size_t n = Base::getLength();
         const auto alpha = Base::getRHS().toMachine();
@@ -82,8 +82,8 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     void VectorExpr<ExprID::Mul, V1, V2>::assign_mkl(Vector auto& v) const noexcept {
-        Base::getLHS().assert_assign_mkl(v);
-        Base::getRHS().assert_assign_mkl(v);
+        v.assert_assign_mkl(Base::getLHS());
+        v.assert_assign_mkl(Base::getRHS());
 
         size_t n = Base::getLength();
         const auto* a = reinterpret_cast<const Tm*>(Base::getLHS().data());
