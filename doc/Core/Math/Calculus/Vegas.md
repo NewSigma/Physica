@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2025 Weibo He.
 
 This file is part of Physica.
 
@@ -13,9 +13,9 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Vegas
 
-## 卡方统计
+## 关于卡方统计
 
-[1]使用卡方统计评估网格优化的可靠性
+使用卡方统计评估网格优化的可靠性$^{[1]}$:
 
 $$\chi_0^2 = \sum_j \frac{(I_j - \overline{I})^2}{\sigma_j^2}$$
 
@@ -25,23 +25,21 @@ $$\chi^2 = \frac{N_s}{N_r - 1} \sum_j \frac{(I_j - \overline{I})^2}{\sigma_j^2}$
 
 与[1]中定义不同, 上式的平均值为1. 特别地, $N_r = 1$时不涉及网格优化, 规定$\chi^2 = 1$
 
-## Vegas变式 - 模板参数TakeLn
+## 模板参数TakeLn
 
-对一系列大数量级样本进行平均通常导致上溢, 可以通过计算对数均值和对数方差规避该问题. 核心思想是利用恒等式$x = e^{\ln x} \quad (x > 0)$, 将数量级最大的部分分离出去
+对一系列大数量级样本进行平均通常导致上溢或下溢。`TakeLn = true`时计算对数均值和对数方差以缓解该问题. 核心思想是利用恒等式$x = e^{\ln x} \quad (x > 0)$, 将数量级最大的部分分离出去。对数均值:
 
-对数均值
+$$\ln\braket{x} = \ln\left( \frac{1}{n} \sum_i^n x_i \right) = \ln\left( \frac{1}{n} \sum_i^n e^{\ln x_i + \ln x_m - \ln x_m} \right) = \ln x_m + \ln\left( \frac{1}{n} \sum_i^n e^{\ln x_i - \ln x_m} \right)$$
 
-$$\ln\braket{x} = \ln(\frac{1}{n} \sum_i^n x_i) = \ln(\frac{1}{n} \sum_i^n e^{\ln x_i + \ln x_m - \ln x_m}) = \ln x_m + \ln(\frac{1}{n} \sum_i^n e^{\ln x_i - \ln x_m}) = \ln x_m + \ln\braket{e^{\ln x_i - \ln x_m}}$$
+$$= \ln x_m + \ln\braket{e^{\ln x_i - \ln x_m}}$$
 
 同理, 对数方差
 
 $$\ln \sigma^2(x) = \ln(\braket{x_i^2} - \braket{x_i}^2) = 2\ln x_m + \ln \sigma^2(e^{\ln x_i - \ln x_m})$$
 
-其中$x_m = \max(x_1, x_2, ..., x_n)$. 由于$e^{\ln x_i - \ln x_m} \le 1$, 对其求和的性质是良好的.
+其中$x_m = \max(x_1, x_2, ..., x_n)$. $e^{\ln x_i - \ln x_m} \le 1$, 对其求和通常性质良好.
 
-该技术对下溢同样适用
-
-使用上述方法确保Vegas积分中的稳定性, 同样可以对不同迭代次数的结果进行加权求和以得到不确定度更低的统计量([1]中Eq. 30 ~ Eq. 32):
+对不同迭代次数的结果进行加权求和可得到不确定度更低的统计量(Ref. [1] Eq. 30 ~ Eq. 32), 对数模式类似地有:
 
 $$\ln\overline{I} = \ln\sum_j e^{\ln I_j - \ln\sigma_j^2} + \ln\sigma_{\overline I}^2$$
 

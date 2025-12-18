@@ -62,7 +62,8 @@ namespace Physica {
         using ResultType = T::ScalarType;
         using Tv = T::ValueType;
         constexpr int GradOrder = T::GradType::Order;
-        assert(!x.isNegative());
+        if constexpr (!T::isComplex)
+            assert(!x.isNegative());
         const auto v = sqrt(x.template mask<GradOrder>());
         return ResultType(v.value(), Tv(0.5) * x.grad() / v);
     }

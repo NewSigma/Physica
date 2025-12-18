@@ -1,11 +1,15 @@
-# 关于工程结构
+# Project structure
 
-工程结构是用户接触开源软件最开始接触到的。一个干净、目标导向的工程结构应当被视为和设计与注释良好的代码同等重要。Physica的一级工程结构和通常的开源C++项目一致, 包括: 3rdparty, benchmark, doc, examples, include, src 和 test文件夹。在Physica中, 二级工程结构按照模块进行组织。Physica包含以下模块:
+$\quad$The project structure is often the first aspect users encounter when engaging with open-source software. A clean and goal-oriented project organization is as crucial as well-designed and well-documented code. The top-level directory structure of *Physica* follows conventions commonly adopted by open-source C++ projects, consisting of the following directories: `3rdparty`, `benchmark`, `doc`, `examples`, `include`, `src`, and `test`. Within *Physica*, the secondary structure is organized modularly. The modules included in Physica are listed in the following table:
 
-**Core**: 包含Physica核心功能的实现  
-**Gui**: 包含2D和3D绘图支持, 以Qt为绘图后端  
-**Logger**: 基于[NanoLog](https://github.com/PlatformLab/NanoLog)的高性能日志库  
-**Python** Physica python接口后端  
-**phypy** Physica python接口  
+| Module | Description |
+| -------- | -- |
+| Core | Implementation of Physica’s core functionality |
+| Gui | Includes 2D and 3D drawing support, using Qt as the drawing backend |
+| Logger | A high-performance logging library based on [NanoLog](https://github.com/PlatformLab/NanoLog) |
+| Python | Backend of Physica python interface(WIP) |
+| phypy | Physica python interface(WIP) |
 
-二级工程结构分别作用于每个一级工程结构的文件夹。三级和更高级的工程结构包含API和实现。工程结构按照科学逻辑而非工程逻辑进行组织, 这使得特定领域的专家更容易上手使用Physica。工程逻辑隐藏于后缀为Impl文件夹中且被设计为越底层的逻辑位于越深的目录结构。总的来说Physica的工程结构是目标导向的复杂度分层暴露。对实现细节不感兴趣的用户通常也更少看到这些细节, 因为在较浅的目录结构中通常能找到答案。科学研究不具有一成不变的范式，我们尊重用户可以访问和修改到任意底层细节的权利，模板的使用则使得非侵入式的修改更加容易实现。
+$\quad$The secondary project structure extends to each directory within the top-level layout. Tertiary and finer-grained structures encompass APIs and implementation details. The organization follows scientific—rather than purely engineering—logic, allowing domain experts to more readily adopt Physica. Engineering complexities are encapsulated within directories suﬀixed with “Impl”, with lower-level logic nested deeper in the directory hierarchy.
+
+$\quad$Overall, Physica employs a goal-oriented, layered structure that progressively exposes complexity. Users not concerned with implementation details will generally encounter fewer such details, as most common use cases are addressed at shallower directory levels. Since scientific workflows are diverse and often require flexibility, we ensure users retain the ability to access and modify underlying implementation details. The pervasive use of templates further facilitates non-intrusive customization and extension.

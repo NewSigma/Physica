@@ -2,7 +2,7 @@
 
 We adopt CMake as our building system:
 
-[CMake](https://cmake.org/) Refer CMakeLists.txt for minimum version  
+[CMake](https://cmake.org/) Refer CMakeLists.txt for version requirements  
 
 A C++ compiler that support C++ 20, the following compilers passed our test:
 

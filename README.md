@@ -37,7 +37,7 @@ We provide a conda package to help with fast deployment:
 conda install -c conda-forge -c nvidia newsigma::physica
 ```
 
-which installs the required dependencies. Refer to [Install.md](doc/Install.md) for instructions on how to build *Physica*.
+which should install the required dependencies. Refer to [Install.md](doc/Install.md) for a detailed guide on using *Physica*.
 
 ## Maintainers
 
