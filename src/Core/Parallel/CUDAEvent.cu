@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,21 +19,21 @@
 #include <cassert>
 #include "Physica/Core/Parallel/CUDAEvent.cuh"
 
-namespace Physica {
-    CUDAEvent::CUDAEvent() {
-        check(cudaEventCreate(&event));
-    }
+using namespace Physica;
 
-    CUDAEvent::CUDAEvent(CUDAEvent&& obj) noexcept : event(obj.event) {
-        obj.event = nullptr;
-    }
+CUDAEvent::CUDAEvent() {
+    check(cudaEventCreate(&event));
+}
 
-    CUDAEvent::~CUDAEvent() {
-        cudaEventDestroy(event);
-    }
+CUDAEvent::CUDAEvent(CUDAEvent&& obj) noexcept : event(obj.event) {
+    obj.event = nullptr;
+}
 
-    void CUDAEvent::swap(CUDAEvent& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(event, obj.event);
-    }
+CUDAEvent::~CUDAEvent() {
+    cudaEventDestroy(event);
+}
+
+void CUDAEvent::swap(CUDAEvent& __restrict obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    std::swap(event, obj.event);
 }

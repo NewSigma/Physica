@@ -27,7 +27,7 @@ namespace Physica {
     class SparseLU {
         using This = SparseLU<T>;
         using Tr = T::RealType;
-        enum Phase : int64_t {
+        enum Phase : char {
             Analyse = 11,
             Factorize = 22,
             AnalyseFactorize = 12,
@@ -68,7 +68,7 @@ namespace Physica {
         [[nodiscard]] bool getNeedDiag() const noexcept { return params[55]; }
     private:
         void initialize(bool needDiag) noexcept;
-        void runPardiso(Phase p, int64_t nrhs = 0, T* b = nullptr, T* x = nullptr);
+        void compute_pardiso(Phase p, int64_t nrhs = 0, T* b = nullptr, T* x = nullptr);
         /* Static members */
         constexpr static bool isFactorizePhase(Phase p) noexcept;
         constexpr static bool isSolvePhase(Phase p) noexcept;
@@ -105,12 +105,12 @@ namespace Physica {
     SparseLU<T>::SparseLU(SparseMatrix<T> source, bool needDiag) : SparseLU(source.getRow(), needDiag) {
         assert(source.isSquare());
         spmat = std::move(source);
-        runPardiso(Phase::AnalyseFactorize);
+        compute_pardiso(Phase::AnalyseFactorize);
     }
 
     template<Scalar T>
     SparseLU<T>::~SparseLU() {
-        runPardiso(Phase::Destroy);
+        compute_pardiso(Phase::Destroy);
     }
 
     template<Scalar T>

@@ -25,35 +25,35 @@ namespace Physica {
     template<Scalar T>
     void SparseLU<T>::compute(const Matrix auto& source) {
         spmat = SparseMatrix<T>(source);
-        runPardiso(Phase::AnalyseFactor);
+        compute_pardiso(Phase::AnalyseFactor);
     }
 
     template<Scalar T>
     void SparseLU<T>::analyse(const Matrix auto& source) {
         spmat = SparseMatrix<T>(source);
-        runPardiso(Phase::Analyse);
+        compute_pardiso(Phase::Analyse);
     }
 
     template<Scalar T>
     void SparseLU<T>::factorize(const Matrix auto& source) {
         spmat = SparseMatrix<T>(source);
-        runPardiso(Phase::Factorize);
+        compute_pardiso(Phase::Factorize);
     }
 
     template<Scalar T>
     MatrixND<T> SparseLU<T>::solve_mkl(const MatrixND<T>& rhs) {
         assert(rhs.getRow() == getOrder());
         MatrixND<T> result(rhs.getRow(), rhs.getCol());
-        runPardiso(Phase::Solve, rhs.getCol(), const_cast<T*>(rhs.data()), result.data());
+        compute_pardiso(Phase::Solve, rhs.getCol(), const_cast<T*>(rhs.data()), result.data());
         return result;
     }
 
     template<Scalar T>
     void SparseLU<T>::initialize(bool needDiag) noexcept {
         void* pt = static_cast<void*>(handles.data());
-        const int64_t mtype = getMatrixType();
-        auto* iparm = (MKL_INT64*)params.data();
-        pardisoinit(pt, (MKL_INT64*)&mtype, iparm);
+        const MKL_INT mtype = getMatrixType();
+        auto* iparm = (MKL_INT*)params.data();
+        pardisoinit(pt, &mtype, iparm);
         params[34] = 1;
         if (needDiag) {
             params[10] = 0;
@@ -62,12 +62,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void SparseLU<T>::runPardiso(Phase phase, int64_t nrhs, T* b, T* x) {
+    void SparseLU<T>::compute_pardiso(Phase phase, int64_t nrhs, T* b, T* x) {
         assert(((nrhs == 0) == (b == nullptr)) && "[Error]: Params inconsistent");
         assert(!isSolvePhase(phase) || nrhs > 0 && "[Error]: Empty RHS");
         void* pt = static_cast<void*>(handles.data());
         const MKL_INT64 maxfct = 1;
         const MKL_INT64 mtype = getMatrixType();
+        const MKL_INT64 iphase = phase;
         const MKL_INT64 n = getOrder();
         const void* a = spmat.getElements().data();
         const auto* ia = (MKL_INT64*)spmat.getMajorStarts().data();
@@ -76,7 +77,7 @@ namespace Physica {
         auto* iparm = (MKL_INT64*)params.data();
         const MKL_INT64 msglvl = 0; // We do not care about logs
         MKL_INT64 err{};
-        pardiso_64(pt, &maxfct, &maxfct, &mtype, (MKL_INT64*)&phase, &n, a, ia, ja, iperm, reinterpret_cast<MKL_INT64*>(&nrhs), iparm, &msglvl, b, x, &err);
+        pardiso_64(pt, &maxfct, &maxfct, &mtype, &iphase, &n, a, ia, ja, iperm, reinterpret_cast<MKL_INT64*>(&nrhs), iparm, &msglvl, b, x, &err);
         check_pardiso(static_cast<int>(err));
 
         if (getNeedDiag() && isFactorizePhase(phase)) {

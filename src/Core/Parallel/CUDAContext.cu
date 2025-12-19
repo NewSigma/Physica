@@ -16,54 +16,53 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Parallel/CUDAContext.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 
-namespace Physica {
-    CUDAContext::Page::Page(int device_, CUDAStream stream_) : device(device_), stream(std::move(stream_)) {
-        check(cublasCreate(&cublas));
-        check(cublasSetStream(cublas, stream));
+using namespace Physica;
 
-        check(cusolverDnCreate(&cuSolverDn));
-        check(cusolverDnSetStream(cuSolverDn, stream));
+CUDAContext::Page::Page(int device_, CUDAStream stream_) : device(device_), stream(std::move(stream_)) {
+    check(cublasCreate(&cublas));
+    check(cublasSetStream(cublas, stream));
 
-        check(cusolverDnCreateParams(&cuSolverDnParams));
-    }
+    check(cusolverDnCreate(&cuSolverDn));
+    check(cusolverDnSetStream(cuSolverDn, stream));
+    check(cusolverDnCreateParams(&cuSolverDnParams));
+}
 
-    CUDAContext::Page::~Page() {
-        cublasDestroy(cublas);
-        cusolverDnDestroy(cuSolverDn);
-        cusolverDnDestroyParams(cuSolverDnParams);
-    }
+CUDAContext::Page::~Page() {
+    cublasDestroy(cublas);
+    cusolverDnDestroy(cuSolverDn);
+    cusolverDnDestroyParams(cuSolverDnParams);
+}
 
-    CUDAContext::CUDAContext() {
-        setDevice(0);
-        pages.emplace(0, CUDAStream(nullptr));
-    }
+CUDAContext::CUDAContext() {
+    setDevice(0);
+    pages.emplace(0, CUDAStream(nullptr));
+}
 
-    CUDAContext::~CUDAContext() {
-        while (!pages.empty())
-            pages.pop();
-    }
+CUDAContext::~CUDAContext() {
+    while (!pages.empty())
+        pages.pop();
+}
 
-    auto CUDAContext::push(int device) -> PageGuard {
-        setDevice(0);
-        pages.emplace(device, CUDAStream());
-        return {};
-    }
+auto CUDAContext::push(int device) -> PageGuard {
+    setDevice(0);
+    pages.emplace(device, CUDAStream());
+    return {};
+}
 
-    CUDAContext& CUDAContext::getInstance() noexcept {
-        thread_local static auto* instance = new CUDAContext();
-        return *instance;
-    }
+CUDAContext& CUDAContext::getInstance() noexcept {
+    thread_local static CUDAContext instance{};
+    return instance;
+}
 
-    void CUDAContext::setDevice(int device) {
-        check(cudaSetDevice(device));
+void CUDAContext::setDevice(int device) {
+    check(cudaSetDevice(device));
 
-        uint64_t val = std::numeric_limits<uint64_t>::max();
-        cudaMemPool_t memPool;
-        check(cudaDeviceGetDefaultMemPool(&memPool, device));
-        check(cudaMemPoolSetAttribute(memPool, cudaMemPoolAttrReleaseThreshold, &val));
-    }
+    uint64_t val = std::numeric_limits<uint64_t>::max();
+    cudaMemPool_t memPool{};
+    check(cudaDeviceGetDefaultMemPool(&memPool, device));
+    check(cudaMemPoolSetAttribute(memPool, cudaMemPoolAttrReleaseThreshold, &val));
 }

@@ -66,15 +66,15 @@ namespace Physica {
         [[nodiscard]] operator cusolverDnContext*() const noexcept { return pages.top().cuSolverDn; }
         [[nodiscard]] operator cusolverDnParams*() const noexcept { return pages.top().cuSolverDnParams; }
         /* Operations */
-        PageGuard push() { return push(device()); }
-        PageGuard push(int device);
+        [[nodiscard]] PageGuard push() { return push(device()); }
+        [[nodiscard]] PageGuard push(int device);
         [[nodiscard]] cudaError_t query() const noexcept { return getStream().query(); }
         void wait() const { getStream().wait(); }
         /* Getters */
         [[nodiscard]] int device() const noexcept { return pages.top().device; }
         [[nodiscard]] const CUDAStream& getStream() const noexcept { return pages.top().stream; }
         /* Setters */
-        void setPointerMode(bool isDeviceSide) noexcept;
+        void setPointerMode(bool isDeviceSide) const noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
         template<Scalar T>
@@ -85,7 +85,7 @@ namespace Physica {
         static void setDevice(int device);
     };
 
-    inline void CUDAContext::setPointerMode(bool isDeviceSide) noexcept {
+    inline void CUDAContext::setPointerMode(bool isDeviceSide) const noexcept {
         cublasSetPointerMode(*this, isDeviceSide ? CUBLAS_POINTER_MODE_DEVICE : CUBLAS_POINTER_MODE_HOST);
     }
 

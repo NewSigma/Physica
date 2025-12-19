@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include <unistd.h>
-#include <signal.h>
+#include <csignal>
 #include <sys/wait.h>
 #include <sys/prctl.h>
 #include "Physica/Core/Parallel/SubProcess.h"
@@ -29,7 +29,7 @@
 using namespace Physica;
 
 SubProcess::SubProcess()
-        : task(), pid(-1), nice_incr(0) {}
+        : pid(-1), nice_incr(0) {}
 
 SubProcess::SubProcess(std::function<void()> task_, int nice_incr_)
         : task(std::move(task_)), pid(-1), nice_incr(nice_incr_) {}
@@ -43,7 +43,7 @@ ProcessFuture SubProcess::execute() {
     pid = fork();
     if (pid == -1)
         throw SystemException();
-    else if (pid == 0) {
+    if (pid == 0) {
         prctl(PR_SET_PDEATHSIG, SIGTERM);
         /* Set nice */ {
             errno = 0;

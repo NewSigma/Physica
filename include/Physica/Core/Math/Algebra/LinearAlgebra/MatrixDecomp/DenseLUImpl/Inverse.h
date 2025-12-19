@@ -26,11 +26,11 @@ namespace Physica {
         using LU = DenseLU<T, Pivot>;
         using This = Inverse<LU>;
         using Base = RValueMatrix<This>;
-
-        using Base::isComplex;
-        using typename Base::Tm;
     public:
         constexpr static int Layout = LAPACK_COL_MAJOR;
+        using Base::isComplex;
+    protected:
+        using typename Base::Tm;
     private:
         const LU& lu;
     public:

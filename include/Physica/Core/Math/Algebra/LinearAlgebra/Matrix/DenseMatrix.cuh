@@ -60,6 +60,7 @@ namespace Physica {
         using Base::toHost;
         using Base::toHostAsync;
 
+        using Base::zeros;
         using Base::random_uniform;
         using Base::random_normal;
         using Base::random_any;

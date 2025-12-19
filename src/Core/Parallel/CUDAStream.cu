@@ -17,37 +17,37 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
-#include "Physica/Core/Parallel/CUDAStream.cuh"
 #include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Parallel/CUDAStream.cuh"
 
-namespace Physica {
-    CUDAStream::CUDAStream() {
-        cudaStreamCreate(&stream);
+using namespace Physica;
+
+CUDAStream::CUDAStream() {
+    cudaStreamCreate(&stream);
+}
+
+CUDAStream::CUDAStream(std::nullptr_t) {}
+
+CUDAStream::CUDAStream(CUDAStream&& obj) noexcept : stream(obj.stream) {
+    obj.stream = nullptr;
+}
+
+CUDAStream::~CUDAStream() {
+    if (stream != nullptr) {
+        cudaStreamDestroy(stream);
+        stream = nullptr;
     }
+}
 
-    CUDAStream::CUDAStream(std::nullptr_t) {}
+cudaError_t CUDAStream::query() const noexcept {
+    return cudaStreamQuery(stream);
+}
 
-    CUDAStream::CUDAStream(CUDAStream&& obj) noexcept : stream(obj.stream) {
-        obj.stream = nullptr;
-    }
+void CUDAStream::wait() const {
+    check(cudaStreamSynchronize(stream));
+}
 
-    CUDAStream::~CUDAStream() {
-        if (stream != nullptr) {
-            cudaStreamDestroy(stream);
-            stream = nullptr;
-        }
-    }
-
-    cudaError_t CUDAStream::query() const noexcept {
-        return cudaStreamQuery(stream);
-    }
-
-    void CUDAStream::wait() const {
-        check(cudaStreamSynchronize(stream));
-    }
-
-    void CUDAStream::swap(CUDAStream& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(stream, obj.stream);
-    }
+void CUDAStream::swap(CUDAStream& __restrict obj) noexcept {
+    assert(this != &obj && "[Error]: Self swap is likely a bug");
+    std::swap(stream, obj.stream);
 }

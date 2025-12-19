@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Parallel/PBSWarpper.h"
-#include <errno.h>
+#include <cerrno>
 #include <fstream>
 #include "Physica/Core/Exception/BadFileFormatException.h"
 

@@ -24,7 +24,7 @@ namespace Physica {
     class PHYSICA_API CUDAEvent {
         using This = CUDAEvent;
 
-        cudaEvent_t event;
+        cudaEvent_t event = nullptr;
     public:
         CUDAEvent();
         CUDAEvent(const This&) = delete;

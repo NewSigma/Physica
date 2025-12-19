@@ -36,6 +36,7 @@ namespace Physica {
         using Trv = Tr::ValueType;
 
         constexpr static bool isComplex = T::isComplex;
+        static_assert(T::Prec == Float64, "[Warn]: It is highly recommended to use high-precision floats");
     private:
         const Params* params;
         ImagKinetic<T> kinetic;
