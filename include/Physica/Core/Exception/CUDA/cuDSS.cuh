@@ -16,24 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
+#pragma once
 
-using namespace Physica;
+#include <system_error>
+#include <cudss.h>
+#include "Physica/Macro.h"
 
-namespace {
-    class Impl final : public std::error_category {
+namespace Physica {
+    class PHYSICA_API cuDSSException : public std::system_error {
     public:
-        Impl() = default;
-        Impl(const Impl&) = delete;
-        Impl(Impl&&) noexcept = delete;
-        ~Impl() = default;
-        /* Operators */
-        Impl& operator=(const Impl&) = delete;
-        Impl& operator=(Impl&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] const char* name() const noexcept final { return "cuBLAS"; }
-        [[nodiscard]] std::string message(int code) const final { return cublasGetStatusString(cublasStatus_t(code)); }
+        cuDSSException(cudssStatus_t code) noexcept;
     };
-}
 
-cuBLASException::cuBLASException(cublasStatus_t code) noexcept : std::system_error(code, Impl()) {}
+    inline void check(cudssStatus_t err) {
+        if (err != CUDSS_STATUS_SUCCESS) [[unlikely]]
+            throw cuDSSException(err);
+    }
+}

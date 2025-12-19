@@ -31,8 +31,8 @@ namespace {
         Impl& operator=(const Impl&) = delete;
         Impl& operator=(Impl&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] const char* name() const noexcept override final { return "cuRAND"; }
-        [[nodiscard]] std::string message(int code) const override final;
+        [[nodiscard]] const char* name() const noexcept final { return "cuRAND"; }
+        [[nodiscard]] std::string message(int code) const final;
     };
 
     std::string Impl::message(int code) const {
@@ -64,7 +64,7 @@ namespace {
         case CURAND_STATUS_INTERNAL_ERROR:
             return "Internal library error";
         default:
-            return "Bad error code";
+            return "Unknown error";
         }
     }
 }

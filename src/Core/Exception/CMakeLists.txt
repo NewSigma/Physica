@@ -1,6 +1,7 @@
 if (${PHYSICA_CUDA})
     target_sources(PhysicaCore PRIVATE CUDA/cuBLAS.cu)
     target_sources(PhysicaCore PRIVATE CUDA/CUDA.cu)
+    target_sources(PhysicaCore PRIVATE CUDA/cuDSS.cu)
     target_sources(PhysicaCore PRIVATE CUDA/cuRAND.cu)
     target_sources(PhysicaCore PRIVATE CUDA/cuSolver.cu)
 endif()

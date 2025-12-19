@@ -21,6 +21,7 @@
 #include <stack>
 #include "CUDAStream.cuh"
 #include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
+#include "Physica/Core/Exception/CUDA/cuDSS.cuh"
 #include "Physica/Core/Exception/CUDA/cuSolver.cuh"
 #include "Physica/Core/Scalar/Scalar.h"
 
@@ -39,6 +40,7 @@ namespace Physica {
             cublasContext* cublas = nullptr;
             cusolverDnContext* cuSolverDn = nullptr;
             cusolverDnParams* cuSolverDnParams = nullptr;
+            cudssHandle_t cudss = nullptr;
 
             Page(int device_, CUDAStream stream_);
             Page(const Page&) = delete;
@@ -65,6 +67,7 @@ namespace Physica {
         [[nodiscard]] operator cublasContext*() const noexcept { return pages.top().cublas; }
         [[nodiscard]] operator cusolverDnContext*() const noexcept { return pages.top().cuSolverDn; }
         [[nodiscard]] operator cusolverDnParams*() const noexcept { return pages.top().cuSolverDnParams; }
+        [[nodiscard]] operator cudssHandle_t() const noexcept { return pages.top().cudss; }
         /* Operations */
         [[nodiscard]] PageGuard push() { return push(device()); }
         [[nodiscard]] PageGuard push(int device);

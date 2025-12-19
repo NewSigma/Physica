@@ -29,12 +29,16 @@ CUDAContext::Page::Page(int device_, CUDAStream stream_) : device(device_), stre
     check(cusolverDnCreate(&cuSolverDn));
     check(cusolverDnSetStream(cuSolverDn, stream));
     check(cusolverDnCreateParams(&cuSolverDnParams));
+
+    check(cudssCreate(&cudss));
+    check(cudssSetStream(cudss, stream));
 }
 
 CUDAContext::Page::~Page() {
     cublasDestroy(cublas);
     cusolverDnDestroy(cuSolverDn);
     cusolverDnDestroyParams(cuSolverDnParams);
+    cudssDestroy(cudss);
 }
 
 CUDAContext::CUDAContext() {

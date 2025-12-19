@@ -42,17 +42,19 @@ namespace Physica {
         ~SparseMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(const Matrix auto& m);
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
+        void insert(T x, size_t row, size_t col);
 
+        using Base::resize;
+        void resize(size_t row, size_t col);
         [[nodiscard]] device_obj<This> toDevice() const;
         [[nodiscard]] device_obj<This> toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
         void toDeviceAsync(device_obj<This>& obj) const;
 
-        void insert(T x, size_t row, size_t col);
-        void resize(size_t row, size_t col);
-        void clear();
+        void zeros();
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
@@ -78,6 +80,12 @@ namespace Physica {
 
     template<Scalar T, int Option>
     SparseMatrix<T, Option>::SparseMatrix(const Matrix auto& m) : SparseMatrix(m.getRow(), m.getCol()) {
+        operator=(m);
+    }
+
+    template<Scalar T, int Option>
+    auto SparseMatrix<T, Option>::operator=(const Matrix auto& m) -> This& {
+        resize(m);
         for (size_t r = 0; r < getRow(); ++r) {
             for (size_t c = 0; c < getCol(); ++c) {
                 T x = m.calc(r, c);
@@ -85,6 +93,7 @@ namespace Physica {
                     insert(x, r, c);
             }
         }
+        return *this;
     }
 
     template<Scalar T, int Option>
@@ -106,9 +115,9 @@ namespace Physica {
 
     template<Scalar T, int Option>
     void SparseMatrix<T, Option>::insert(T x, size_t row, size_t col) {
-        // TODO: Inserting 0 element is useless
         assert(row < getRow());
         assert(col < getCol());
+        assert(!x.isZero() && "[Error]: Zero element is useless");
         const size_t major = MatrixOption::selectMajor<This>(row, col);
         const size_t minor = MatrixOption::selectMinor<This>(row, col);
         const size_t from = majorStarts[major];
@@ -137,14 +146,13 @@ namespace Physica {
 
     template<Scalar T, int Option>
     void SparseMatrix<T, Option>::resize(size_t row, size_t col) {
-        elements.resize(0);
-        minorIndexes.resize(0);
+        zeros();
         majorStarts.resize(MatrixOption::selectMajor<This>(row, col) + 1, 0);
         maxMinor = MatrixOption::selectMinor<This>(row, col);
     }
 
     template<Scalar T, int Option>
-    void SparseMatrix<T, Option>::clear() {
+    void SparseMatrix<T, Option>::zeros() {
         elements.resize(0);
         minorIndexes.resize(0);
         majorStarts.zeros();

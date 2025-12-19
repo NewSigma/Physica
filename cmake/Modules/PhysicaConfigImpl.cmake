@@ -184,6 +184,8 @@ if(${PHYSICA_CUDA})
     if (EXISTS ${CUDA_MATH_INCLUDE_DIRECTORIES}) # NVIDIA HPC SDK seems do not put math includes in standard location
         include_directories(SYSTEM ${CUDA_MATH_INCLUDE_DIRECTORIES})
     endif()
+
+    find_package(cudss REQUIRED)
 endif()
 
 if(${PHYSICA_MIMALLOC})

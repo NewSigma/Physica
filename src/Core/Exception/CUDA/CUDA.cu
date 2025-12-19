@@ -31,8 +31,8 @@ namespace {
         Impl& operator=(const Impl&) = delete;
         Impl& operator=(Impl&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] const char* name() const noexcept override final { return "CUDA Runtime"; }
-        [[nodiscard]] std::string message(int code) const override final { return cudaGetErrorString(cudaError_t(code)); }
+        [[nodiscard]] const char* name() const noexcept final { return "CUDA Runtime"; }
+        [[nodiscard]] std::string message(int code) const final { return cudaGetErrorString(cudaError_t(code)); }
     };
 }
 

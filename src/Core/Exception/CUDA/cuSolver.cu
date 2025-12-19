@@ -88,7 +88,7 @@ namespace {
         case CUSOLVER_STATUS_INVALID_WORKSPACE:
             return "CuSolver Exception";
         default:
-            return "Bad error code";
+            return "Unknown error";
         }
     }
 }

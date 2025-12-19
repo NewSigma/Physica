@@ -39,11 +39,12 @@ namespace Physica {
         using Tm = T::MachineType;
     public:
         device_obj() = default;
-        device_obj(const host_obj& mat);
+        explicit device_obj(const host_obj& mat);
         explicit __host__ __device__ device_obj(size_t order);
         __host__ __device__ device_obj(size_t row, size_t col);
         __host__ __device__ device_obj(size_t row, size_t col, T value);
         device_obj(const Matrix auto& mat);
+        device_obj(const Vector auto& vec);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

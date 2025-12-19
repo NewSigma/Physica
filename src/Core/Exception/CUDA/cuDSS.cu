@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
+#include "Physica/Core/Exception/CUDA/cuDSS.cuh"
+#include "Physica/Core/Utils/Unreachable.h"
 
 using namespace Physica;
 
@@ -31,9 +32,30 @@ namespace {
         Impl& operator=(const Impl&) = delete;
         Impl& operator=(Impl&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] const char* name() const noexcept final { return "cuBLAS"; }
-        [[nodiscard]] std::string message(int code) const final { return cublasGetStatusString(cublasStatus_t(code)); }
+        [[nodiscard]] const char* name() const noexcept final { return "cuDSS"; }
+        [[nodiscard]] std::string message(int code) const final;
     };
 }
 
-cuBLASException::cuBLASException(cublasStatus_t code) noexcept : std::system_error(code, Impl()) {}
+cuDSSException::cuDSSException(cudssStatus_t code) noexcept : std::system_error(code, Impl()) {}
+
+std::string Impl::message(int code) const {
+    switch (cudssStatus_t(code)) {
+    case CUDSS_STATUS_SUCCESS:
+        return "No error";
+    case CUDSS_STATUS_NOT_INITIALIZED:
+        return "Not initialized";
+    case CUDSS_STATUS_ALLOC_FAILED:
+        return "Allocation failed";
+    case CUDSS_STATUS_INVALID_VALUE:
+        return "Invalid value";
+    case CUDSS_STATUS_NOT_SUPPORTED:
+        return "Not supported";
+    case CUDSS_STATUS_EXECUTION_FAILED:
+        return "Execution failed";
+    case CUDSS_STATUS_INTERNAL_ERROR:
+        return "Internal error";
+    default:
+        return "Unknown error";
+    }
+}
