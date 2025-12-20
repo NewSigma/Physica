@@ -49,7 +49,7 @@ namespace Physica {
     template<class MeshType, class Functor>
     template<class Integrator>
     void PoissonModel<MeshType, Functor>::solve() {
-        Base::A.clear();
+        Base::A.zeros();
         Base::b = ScalarType(0);
         const auto& nodeTypes = mesh.getNodeTypes();
         const auto& coeffs = mesh.getCoeffs();
@@ -75,7 +75,8 @@ namespace Physica {
                         case NodeType::Free: {
                             const size_t col = Base::nodeToVar(baseNode);
                             const ScalarType value = Base::A.calc(row, col) + integral;
-                            Base::A.insert(value, row, col);
+                            if (!value.isZero())
+                                Base::A.insert(value, row, col);
                             break;
                         }
                         case NodeType::Dirichlet:
