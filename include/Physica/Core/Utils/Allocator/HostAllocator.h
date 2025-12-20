@@ -54,7 +54,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n) noexcept;
         void deallocate(T* p, size_t n) noexcept;
-        [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
         void construct(T* p, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
         void destroy(T* p) noexcept;
     protected:
@@ -88,9 +88,6 @@ namespace Physica {
     T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
         assert(new_size > 0 && "[Error]: Allocate nothing");
         T* new_p = allocate(new_size);
-        if (p == nullptr)
-            return new_p;
-
         const size_t size = std::min(new_size, old_size);
         if constexpr (std::is_trivially_copyable<T>::value)
             memcpy(new_p, p, size * sizeof(T));

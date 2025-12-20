@@ -23,6 +23,7 @@
 namespace Physica {
     template<class T>
     class PageLockedAllocator {
+        using This = PageLockedAllocator<T>;
     public:
         using value_type = T;
         using pointer = T*;
@@ -33,22 +34,23 @@ namespace Physica {
         using rebind_alloc = PageLockedAllocator<U>;
     public:
         PageLockedAllocator() noexcept = default;
-        PageLockedAllocator(const PageLockedAllocator&) noexcept = default;
-        PageLockedAllocator(PageLockedAllocator&&) noexcept = default;
+        PageLockedAllocator(const This&) noexcept = default;
+        PageLockedAllocator(This&&) noexcept = default;
         ~PageLockedAllocator() = default;
         /* Operators */
-        PageLockedAllocator& operator=(const PageLockedAllocator&) noexcept = default;
-        PageLockedAllocator& operator=(PageLockedAllocator&&) noexcept = delete;
+        This& operator=(const This&) noexcept = default;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard, gnu::returns_nonnull]] static pointer allocate(size_t n);
         static void deallocate(pointer p, size_t n) noexcept;
-        [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
+        [[nodiscard, gnu::returns_nonnull]] T* reallocate(T* p, size_t new_size, size_t old_size);
         void construct(pointer p, auto&&... args);
         void destroy(pointer p);
     };
 
     template<class T>
     auto PageLockedAllocator<T>::allocate(size_t n) -> pointer {
+        assert(n > 0 && "[Error]: Allocate nothing");
         pointer p{};
         check(cudaMallocHost(&p, n * sizeof(value_type)));
         return p;
@@ -62,11 +64,13 @@ namespace Physica {
 
     template<class T>
     T* PageLockedAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
+        assert(new_size > 0 && "[Error]: Allocate nothing");
         T* new_p = allocate(new_size);
+        size_t size = std::min(new_size, old_size);
         if constexpr (std::is_trivially_copyable<T>::value)
-            memcpy(new_p, p, std::min(new_size, old_size) * sizeof(T));
+            memcpy(new_p, p, size * sizeof(T));
         else {
-            for (size_t i = 0; i < std::min(new_size, old_size); ++i)
+            for (size_t i = 0; i < size; ++i)
                 construct(new_p + i, std::move(p[i]));
         }
         deallocate(p, old_size);
