@@ -88,8 +88,8 @@ namespace Physica {
 
             Pack z = polynomial_5(x.toMachine(), P0, P1, P2, P3, P4, P5);
             const Pack n2 = vm_pow2n(r.toMachine());
-            z = mul_add(z, x * x, x);
-            z = ExpM1 ? mul_add(z, n2, n2 - Pack(1)) : ((z + Pack(1)) * n2);
+            z = fma(z, x * x, x);
+            z = ExpM1 ? fma(z, n2, n2 - Pack(1)) : ((z + Pack(1)) * n2);
 
             const auto inRange  = abs(initial_x) < Pack(max_x);
             const bool overflow = !inRange.horizontal_and();
@@ -157,7 +157,7 @@ namespace Physica {
 
             Pack z = polynomial_13m(x.toMachine(), P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13);
             const Pack n2 = vm_pow2n(r.toMachine());
-            z = ExpM1 ? mul_add(z, n2, n2 - Pack(1)) : (z + Pack(1)) * n2;
+            z = ExpM1 ? fma(z, n2, n2 - Pack(1)) : (z + Pack(1)) * n2;
 
             const auto inRange  = abs(initial_x) < Pack(max_x);
             const bool overflow = !inRange.horizontal_and();

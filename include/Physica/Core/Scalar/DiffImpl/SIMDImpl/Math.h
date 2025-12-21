@@ -22,6 +22,30 @@
 
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order, int Size>
+    [[nodiscard]] CoDiff<SIMD<Diff<T, Mode, Order>, Size>> fma(
+            const SIMD<Diff<T, Mode, Order>, Size>& a,
+            const SIMD<Diff<T, Mode, Order>, Size>& b,
+            const SIMD<Diff<T, Mode, Order>, Size>& c) noexcept {
+        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = ResultType::GradType;
+            auto value = fma(a.value(), b.value(), c.value());
+            auto grad1 = fma(GradType(a), b.grad(), c.grad());
+            auto grad2 = fma(GradType(b), a.grad(), grad1);
+            co_return ResultType(std::move(value), std::move(grad2));
+        }
+        else {
+            auto result = ResultType(fma(a.value(), b.value(), c.value()));
+            co_yield result;
+
+            auto& grad = result.grad();
+            a.reverse(grad * b.value());
+            b.reverse(grad * a.value());
+            c.reverse(grad);
+        }
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, int Size>
     [[nodiscard]] auto abs(const SIMD<Diff<T, Mode, Order>, Size>& x) noexcept {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;

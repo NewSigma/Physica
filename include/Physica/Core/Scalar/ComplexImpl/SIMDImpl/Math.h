@@ -22,6 +22,11 @@
 
 namespace Physica {
     template<Scalar T, int Size>
+    SIMD<Complex<T>, Size> fma(const SIMD<Complex<T>, Size> a, const SIMD<Complex<T>, Size> b, const SIMD<Complex<T>, Size> c) noexcept {
+        return a * b + c;
+    }
+
+    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size> x) noexcept {
         return sqrt(x.squaredNorm());
     }

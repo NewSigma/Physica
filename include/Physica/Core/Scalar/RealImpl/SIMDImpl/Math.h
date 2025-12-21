@@ -23,6 +23,11 @@
 
 namespace Physica {
     template<Scalar T, int Size>
+    [[nodiscard]] SIMD<T, Size> fma(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
+        return SIMD<T, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
+    }
+
+    template<Scalar T, int Size>
     [[nodiscard]] __host__ __device__ SIMD<T, Size> abs(SIMD<T, Size> x) noexcept {
         if constexpr (T::Prec == Float16)
             return SIMD<T, Size>(__habs2(x.toMachine()));

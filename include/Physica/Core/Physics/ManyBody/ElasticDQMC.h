@@ -81,6 +81,7 @@ namespace Physica {
     ElasticDQMC<T>::ElasticDQMC(const Params& params_, Trv freqDensity)
             : params(&params_)
             , rSquareOmegas(FreqDQMC<Tc>::calcFreqCutoff(params_.getBeta(), freqDensity))
+            , greens(2, params_.getNumSite())
             , actionR(params_.getHoppingMatrix())
             , eig(params_.getNumSite(), true) {
         assert(freqDensity.isPositive());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,15 @@
  */
 #pragma once
 
-#include "../RValueVector.cuh"
+#include "Half2.h"
 
 namespace Physica {
-    template<Vector V1, Vector V2>
-    __device__ auto operator*(const V1& v1, const V2& v2) requires(CUDA<V1> && CUDA<V2>) {
-        using T1 = V1::ScalarType;
-        using T2 = V2::ScalarType;
-        using ScalarType = InnerDot<V1, V2>::ScalarType;
-
-        assert(v1.getLength() == v2.getLength() && "[Error]: Dimensions do not match");
-        ScalarType result = 0;
-        for (size_t i = 0; i < v1.getLength(); ++i) {
-            if constexpr (std::same_as<T1, T2>)
-                result = fma(v1.calc(i), v2.calc(i), result);
-            else
-                result += v1.calc(i) * v2.calc(i);
-        }
-        return result;
+    [[nodiscard]] __host__ __device__ inline SIMD<Real<Float16>, 2> fma(
+            const SIMD<Real<Float16>, 2> a, const SIMD<Real<Float16>, 2> b, const SIMD<Real<Float16>, 2> c) noexcept {
+    #ifdef __CUDA_ARCH__
+        return SIMD<Real<Float16>, 2>(__hfma2(a.toMachine(), b.toMachine(), c.toMachine()));
+    #else
+        return a * b + c;
+    #endif
     }
 }

@@ -110,9 +110,6 @@ namespace Physica {
         [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
         [[nodiscard]] static SIMD asComplex(FullRealType reals);
     };
-
-    template<Scalar T, int Size>
-    [[nodiscard]] SIMD<Complex<T>, Size> mul_add(SIMD<Complex<T>, Size> a, SIMD<Complex<T>, Size> b, SIMD<Complex<T>, Size> c) noexcept;
 }
 
 namespace Physica {

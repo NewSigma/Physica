@@ -136,14 +136,14 @@ namespace Physica {
                 constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                 for (size_t i = 0; i < to; i += PacketType::size()) {
                     auto x = v.template packet<PacketType>(i);
-                    buffer = mul_add(x, x, buffer);
+                    buffer = fma(x, x, buffer);
                 }
 
                 constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
                 if constexpr (i != SizeAtCompile) {
                     constexpr size_t count = SizeAtCompile - i;
                     auto x = v.template packetPartial<PacketType>(i, count);
-                    buffer = mul_add(x, x, buffer);
+                    buffer = fma(x, x, buffer);
                 }
             }
             else {
@@ -152,13 +152,13 @@ namespace Physica {
                 const size_t to = length / PacketType::size() * PacketType::size();
                 for (; i < to; i += PacketType::size()) {
                     auto x = v.template packet<PacketType>(i);
-                    buffer = mul_add(x, x, buffer);
+                    buffer = fma(x, x, buffer);
                 }
 
                 if (to != length) {
                     const size_t count = length - i;
                     auto x = v.template packetPartial<PacketType>(i, count);
-                    buffer = mul_add(x, x, buffer);
+                    buffer = fma(x, x, buffer);
                 }
             }
             return buffer.sum();

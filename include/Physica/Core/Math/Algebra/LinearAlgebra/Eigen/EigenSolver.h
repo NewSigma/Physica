@@ -332,7 +332,7 @@ namespace Physica {
                     t0 *= inv_max;
                     t1 *= inv_max;
                     T p0 = p * inv_max;
-                    z = max * sqrt(abs(square(p0) + t0 * t1));
+                    z = max * sqrt(abs(fma(t0, t1, square(p0))));
                 }
                 const T real = p + matrixT(i + 1, i + 1);
                 eigenvalues[i] = Tc(real, z);
@@ -426,12 +426,11 @@ namespace Physica {
 
                         if (abs(x) > (abs(temp1) + abs(eigenvalues[i].imag()))) {
                             const T temp2 = matrixT(j - 1, j - 1) - eigenvalues[i].real();
-                            matrixT(j, i - 1) = (-dot11 - temp2 * matrixT(j - 1, i - 1) + eigenvalues[i].imag() * matrixT(j - 1, i)) / x;
-                            matrixT(j, i) = (-dot12 - temp2 * matrixT(j - 1, i) - eigenvalues[i].imag() * matrixT(j - 1, i - 1)) / x;
+                            matrixT(j, i - 1) = fma(eigenvalues[i].imag(), matrixT(j - 1, i), -fma(temp2, matrixT(j - 1, i - 1), dot11)) / x;
+                            matrixT(j, i) = -fma(eigenvalues[i].imag(), matrixT(j - 1, i - 1), fma(temp2, matrixT(j - 1, i), dot12)) / x;
                         }
                         else {
-                            c = Tc(-dot21 - y * matrixT(j - 1, i - 1), -dot22 - y * matrixT(j - 1, i))
-                              / Tc(temp1, eigenvalues[i].imag());
+                            c = -Tc(fma(y, matrixT(j - 1, i - 1), dot21), fma(y, matrixT(j - 1, i), dot22)) / Tc(temp1, eigenvalues[i].imag());
                             matrixT(j, i - 1) = c.real();
                             matrixT(j, i) = c.imag();
                         }

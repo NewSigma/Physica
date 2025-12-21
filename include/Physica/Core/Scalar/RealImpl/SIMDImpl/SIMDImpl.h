@@ -541,11 +541,6 @@ namespace Physica {
     }
 
     template<Scalar T, int Size>
-    [[nodiscard]] SIMD<T, Size> mul_add(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
-        return SIMD<T, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
-    }
-
-    template<Scalar T, int Size>
     [[nodiscard]] SIMD<T, Size> nmul_add(const SIMD<T, Size> a, const SIMD<T, Size> b, const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDiffable, "[Error]: Not implemented");
         return SIMD<T, Size>(nmul_add(a.toMachine(), b.toMachine(), c.toMachine()));

@@ -207,7 +207,7 @@ namespace Physica {
             const auto subBlock = working.block(lower, sub_order, lower, sub_order);
             const Tr factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * T(0.5);
             const Tr factor2 = square(subBlock(sub_order - 1, sub_order - 2));
-            const Tr factor3 = sqrt(square(factor) + factor2);
+            const Tr factor3 = sqrt(fma(factor, factor, factor2));
             const T shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); // TODO: why we introduce a divide operation
             buffer[0] = subBlock(0, 0) - shift;
             buffer[1] = subBlock(1, 0);

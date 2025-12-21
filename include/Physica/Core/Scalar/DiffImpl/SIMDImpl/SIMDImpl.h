@@ -207,28 +207,4 @@ namespace Physica {
         result.grads = GradType::asComplex(reals.grad());
         return result;
     }
-
-    template<Scalar T, DiffMode Mode, int Order, int Size>
-    [[nodiscard]] CoDiff<SIMD<Diff<T, Mode, Order>, Size>> mul_add(
-            const SIMD<Diff<T, Mode, Order>, Size>& a,
-            const SIMD<Diff<T, Mode, Order>, Size>& b,
-            const SIMD<Diff<T, Mode, Order>, Size>& c) noexcept {
-        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        if constexpr (Mode == DiffMode::Forward) {
-            using GradType = ResultType::GradType;
-            auto value = mul_add(a.value(), b.value(), c.value());
-            auto grad1 = mul_add(GradType(a), b.grad(), c.grad());
-            auto grad2 = mul_add(GradType(b), a.grad(), grad1);
-            co_return ResultType(std::move(value), std::move(grad2));
-        }
-        else {
-            auto result = ResultType(mul_add(a.value(), b.value(), c.value()));
-            co_yield result;
-
-            auto& grad = result.grad();
-            a.reverse(grad * b.value());
-            b.reverse(grad * a.value());
-            c.reverse(grad);
-        }
-    }
 }
