@@ -41,11 +41,12 @@ namespace Physica {
         const Params* params;
         VectorND<Trv> rSquareOmegas;
         GreenPair greens;
+        GreenPair buffer;
 
         MatrixND<T> actionR;
         SymmEigenSolver<T> eig;
 
-        T lnZ;
+        T lnAbsDet;
     public:
         ElasticDQMC() = delete;
         ElasticDQMC(const Params& params_, Trv freqDensity);
@@ -74,7 +75,7 @@ namespace Physica {
     private:
         template<RNG R>
         [[nodiscard]] T randAuxField();
-        [[nodiscard]] T calcLnZ();
+        [[nodiscard]] T diagonalize();
     };
 
     template<Scalar T>
@@ -82,6 +83,7 @@ namespace Physica {
             : params(&params_)
             , rSquareOmegas(FreqDQMC<Tc>::calcFreqCutoff(params_.getBeta(), freqDensity))
             , greens(2, params_.getNumSite())
+            , buffer(2, params_.getNumSite())
             , actionR(params_.getHoppingMatrix())
             , eig(params_.getNumSite(), true) {
         assert(freqDensity.isPositive());
@@ -96,7 +98,8 @@ namespace Physica {
     void ElasticDQMC<T>::step_random() {
         for (int i = 0; i < getNumSite(); ++i)
             actionR(i, i) = randAuxField<R>();
-        lnZ = calcLnZ();
+        lnAbsDet = diagonalize();
+        buffer.swap(greens);
     }
 
     template<Scalar T>
@@ -105,10 +108,12 @@ namespace Physica {
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         const T save = std::exchange(actionR(site, site), randAuxField<R>());
 
-        const auto lnZ1 = calcLnZ();
-        const bool accept = Trv::template random_uniform<R>() < exp(lnZ1 - lnZ);
-        if (accept)
-            lnZ = lnZ1;
+        const auto lnAbsDet1 = diagonalize();
+        const bool accept = Trv::template random_uniform<R>() < exp(lnAbsDet1 - lnAbsDet);
+        if (accept) {
+            lnAbsDet = lnAbsDet1;
+            buffer.swap(greens);
+        }
         else
             actionR(site, site) = save;
     }
@@ -131,7 +136,7 @@ namespace Physica {
         actionR.swap(obj.actionR);
         eig.swap(obj.eig);
 
-        lnZ.swap(obj.lnZ);
+        lnAbsDet.swap(obj.lnAbsDet);
     }
 
     template<Scalar T>
@@ -141,25 +146,22 @@ namespace Physica {
     }
 
     template<Scalar T>
-    auto ElasticDQMC<T>::calcLnZ() -> T {
-        auto diagonalize = [&](MatrixND<T>& green) {
+    auto ElasticDQMC<T>::diagonalize() -> T {
+        T lnAbsDet = 0;
+        for (int spin : {0, 1}) {
             using Tf = Diff<T, DiffMode::Reverse>;
             const T shiftMu = params->getChemMu() - params->getRepelU() * 0.5;
             const T repBeta = reciprocal(params->getBeta());
+            auto& green = buffer[spin];
 
             eig.compute(actionR);
             auto eigenvalues = VectorND<Tf>(eig.getEigenvalues());
-            T lnZ = ln1p_elem(square(eigenvalues - shiftMu) * rSquareOmegas.transpose()).sum().reverse(repBeta);
+            lnAbsDet += ln1p_elem(square(eigenvalues - shiftMu) * rSquareOmegas.transpose()).sum().reverse(repBeta);
             MatrixND<T> temp = eig.getEigenvectors() * DiagMatrix<T>(eigenvalues.grads());
             green = temp * eig.getEigenvectors().transpose();
             green.diag() = Trv(0.5) + green.diag();
-            return lnZ;
-        };
-
-        T lnZU = diagonalize(greens[0]);
-
-        actionR.diag() = -actionR.diag();
-        T lnZD = diagonalize(greens[1]);
-        return lnZU + lnZD;
+            actionR.diag() = -actionR.diag();
+        }
+        return lnAbsDet;
     }
 }
