@@ -23,12 +23,11 @@
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 using namespace Physica;
-using Physica::Dynamic;
-using ScalarType = float32;
-using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
-using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using T = float32;
+using ForceModel = device_obj<SilveraGoldman<T, true>>;
+using KineticModel = FreeModel<T, 3, Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
-using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
+using MDType = RPMD<T, 3, Physica::Dynamic, PageLockedAllocator<T>>;
 using RandomSource = Random<MT19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -57,8 +56,8 @@ namespace {
     * [1] J. Chem. Phys. 122, 184503 (2005); https://doi.org/10.1063/1.1893956
     */
     void testMDRun() {
-        ScalarType mean = 0;
-        ScalarType var = 0;
+        T mean = 0;
+        T var = 0;
         {
             const ThermoType thermo(temperatureT, thermostatTime);
             KineticModel kineticModel(temperatureT, numReplica);
@@ -67,7 +66,7 @@ namespace {
             rpmd.initMomentum<KineticModel, RandomSource>();
 
             for (unsigned int i = 0; i < 6; ++i) {
-                ScalarType temp = 0;
+                T temp = 0;
                 rpmd.nvt_step_for<RandomSource, GPU>(
                     PhyConst<AU>::secondToTime(2 * 1E-12),
                     thermo,
@@ -82,8 +81,8 @@ namespace {
             }
         }
         constexpr double answer = 61.8;
-        const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
-        const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
+        const T energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
+        const T deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
         if (abs(energyPerMol - answer) > deviation * 2.0)
             exit(EXIT_FAILURE);
     }

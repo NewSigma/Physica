@@ -26,9 +26,9 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 
 using namespace Physica;
-using ScalarType = float64;
-using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
+using T = float64;
+using KineticModel = FreeModel<T, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
+using ForceModel = Q_TIP4P<T, Ewald<T>>;
 using ThermoType = DoubleThermo<KineticModel>;
 using RandomSource = Random<MCG>;
 constexpr size_t numReplica = 32;
@@ -40,23 +40,23 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 namespace {
-    Vector3D<ScalarType> randomVector() {
-        const ScalarType theta(ScalarType::random_uniform<RandomSource>() * M_PI);
-        const ScalarType phi(ScalarType::random_uniform<RandomSource>() * M_PI * 2);
-        Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-        result *= ScalarType(ForceModel::equalR);
+    Vector3D<T> randomVector() {
+        const T theta(T::random_uniform<RandomSource>() * M_PI);
+        const T phi(T::random_uniform<RandomSource>() * M_PI * 2);
+        Vector3D<T> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+        result *= T(ForceModel::equalR);
         return result;
     }
 
-    MDCell<ScalarType> makeSystem(unsigned int cellSize) {
-        using CrystalCellType = CrystalCell<ScalarType>;
+    MDCell<T> makeSystem(unsigned int cellSize) {
+        using CrystalCellType = CrystalCell<T>;
         constexpr size_t MoleculePerCell = 4;
         constexpr size_t maxIndexH = MoleculePerCell * 2;
         constexpr size_t maxIndexO = MoleculePerCell * 3;
         constexpr size_t numAtom = MoleculePerCell * 3;
 
-        ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
-        const ScalarType latticeFactor(cbrt(cellVolume));
+        T cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
+        const T latticeFactor(cbrt(cellVolume));
         CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::identity(3);
         lattice *= latticeFactor;
 
@@ -97,7 +97,7 @@ namespace {
 
         CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
         cell.toSuperCell(cellSize, cellSize, cellSize);
-        return MDCell<ScalarType>(std::move(cell));
+        return MDCell<T>(std::move(cell));
     }
 
     void bench(benchmark::State& state) {
@@ -106,7 +106,7 @@ namespace {
         ForceModel forceModel(cell, pair_cutoff, {});
         KineticModel kineticModel(temperatureT, numReplica);
         const ThermoType thermo(temperatureT, thermostatTime);
-        RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
+        RPMD<T> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (auto _ : state)
             [[clang::noinline]] rpmd.nve_step<Sequential>(kineticModel, forceModel);

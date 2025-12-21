@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
@@ -24,11 +25,11 @@
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
 
 using namespace Physica;
-using ScalarType = float64;
-using VectorType = VectorND<ScalarType>;
-using MatrixType = DenseMatrix<ScalarType>;
+using T = float64;
+using VectorType = VectorND<T>;
+using MatrixType = DenseMatrix<T>;
 using RandomSource = Random<MCG>;
-using PDFType = ProbDistribution<ScalarType>;
+using PDFType = ProbDistribution<T>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 512;
@@ -37,17 +38,17 @@ constexpr double temperatureT = 2;
 constexpr double unitMassM = 1;
 constexpr size_t numReplica = 1;
 constexpr size_t maxHandleNum = 1000;
-using MDType = RPMD<ScalarType, 1, numReplica>;
+using MDType = RPMD<T, 1, numReplica>;
 using MDCellType = MDType::MDCellType;
-using ForceModel = EmptyForceModel<ScalarType, 1>;
-using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exact>;
+using ForceModel = EmptyForceModel<T, 1>;
+using KineticModel = HardCore<T, true, numReplica, RPMDIntegrator::Exact>;
 
 namespace {
     MDCellType makeSystem() {
         MDCellType::LatticeMatrix lattice{latticeSize};
 
-        auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
-        std::sort(posVec.begin(), posVec.end());
+        auto posVec = VectorND<T>::random_uniform<RandomSource>(numMolecular);
+        std::ranges::sort(posVec);
         MDCellType::PositionMatrix pos(numMolecular, 1);
         pos.col(0) = posVec;
 

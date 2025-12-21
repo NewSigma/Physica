@@ -23,9 +23,9 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 
 using namespace Physica;
-using ScalarType = float32;
-using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = SilveraGoldman<ScalarType, true>;
+using T = float32;
+using KineticModel = FreeModel<T, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
+using ForceModel = SilveraGoldman<T, true>;
 using RandomSource = Random<MCG>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -35,8 +35,8 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 namespace {
-    RPMD<ScalarType> makeSystem(size_t numMolecular) {
-        using MDCellType = RPMD<ScalarType>::MDCellType;
+    RPMD<T> makeSystem(size_t numMolecular) {
+        using MDCellType = RPMD<T>::MDCellType;
         MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
         auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
         MDCellType::MassVector massVec(numMolecular, mass);
@@ -44,7 +44,7 @@ namespace {
 
         const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
         cell.scale(factor);
-        return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+        return RPMD<T>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     }
 
     void bench(benchmark::State& state) {

@@ -25,11 +25,10 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using Physica::Dynamic;
-using ScalarType = float32;
-using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
+using T = float32;
+using MDType = RPMD<T, 3, Physica::Dynamic, PageLockedAllocator<T>>;
 using MDCellType = MDType::MDCellType;
-using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using KineticModel = FreeModel<T, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomSource = Random<MCG>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -53,9 +52,9 @@ namespace {
     void bench(benchmark::State& state) {
         ThreadPool::numThreadRequired = 8;
         KineticModel kineticModel(temperatureT, numReplica);
-        using HostModel = SilveraGoldman<ScalarType, true, false>;
+        using HostModel = SilveraGoldman<T, true, false>;
 
-        using DeviceModel = SilveraGoldman<ScalarType, true, true>;
+        using DeviceModel = SilveraGoldman<T, true, true>;
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         const size_t numMolecular = state.range();
         MDType rpmd = makeSystem(numMolecular);

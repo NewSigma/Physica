@@ -24,11 +24,10 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
-using Physica::Dynamic;
-using ScalarType = float32;
-using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using T = float32;
+using KineticModel = FreeModel<T, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomSource = Random<MCG>;
-using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
+using MDType = RPMD<T, 3, Physica::Dynamic, PageLockedAllocator<T>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -37,7 +36,7 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 namespace {
-    static MDType makeSystem(size_t numMolecular) {
+    MDType makeSystem(size_t numMolecular) {
         using MDCellType = MDType::MDCellType;
         MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
         auto pos = MDCellType::PositionMatrix::random_uniform<RandomSource>(numMolecular, 3);
@@ -49,8 +48,8 @@ namespace {
         return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
     }
 
-    static void bench(benchmark::State& state) {
-        using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
+    void bench(benchmark::State& state) {
+        using ForceModel = device_obj<SilveraGoldman<T, true, true>>;
         const int numMolecular = state.range(0);
         KineticModel kineticModel(temperatureT, numReplica);
         MDType rpmd = makeSystem(numMolecular);

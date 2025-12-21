@@ -27,14 +27,14 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 
 using namespace Physica;
-using ScalarType = float32;
+using T = float32;
 using RandomSource = Random<MCG>;
-using EwaldType = Ewald<ScalarType, device_obj<RSpaceEwald<ScalarType>>>;
-using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
-using MDType = RPMD<ScalarType, 3, 1, PageLockedAllocator<ScalarType>>;
-using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
+using EwaldType = Ewald<T, device_obj<RSpaceEwald<T>>>;
+using ForceModel = Q_TIP4P<T, EwaldType>;
+using MDType = RPMD<T, 3, 1, PageLockedAllocator<T>>;
+using KineticModel = FreeModel<T, 3, 1, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
-using BarostatType = SCRBaro<ScalarType, 1, RandomSource, BaroType::XY>;
+using BarostatType = SCRBaro<T, 1, RandomSource, BaroType::XY>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double compressRate = 10;
@@ -42,8 +42,8 @@ constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 
 namespace {
-    MDCell<ScalarType> makeSystem(unsigned int cellSize) {
-        using CrystalCellType = CrystalCell<ScalarType>;
+    MDCell<T> makeSystem(unsigned int cellSize) {
+        using CrystalCellType = CrystalCell<T>;
         using LatticeMatrix = CrystalCellType::LatticeMatrix;
         using PositionMatrix = CrystalCellType::PositionMatrix;
         const LatticeMatrix lattice{
@@ -55,7 +55,7 @@ namespace {
         cell.scale(PhyConst<AU>::angstormToBohr(1));
         cell.toSuperCell(cellSize, cellSize, 1);
         cell.toCartesian();
-        return MDCell<ScalarType>(std::move(cell));
+        return MDCell<T>(std::move(cell));
     }
 
     void bench(benchmark::State& state) {

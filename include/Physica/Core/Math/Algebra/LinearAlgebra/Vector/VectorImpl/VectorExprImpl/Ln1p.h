@@ -28,23 +28,39 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Trv;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<T> calc(size_t index) const { return ln1p(Base::getExpr().calc(index)); }
-
         [[nodiscard]] Tv calc_value(size_t index) const { return ln1p(Base::getExpr().calc_value(index)); }
 
         template<Packet Pack>
-        [[nodiscard]] Pack packet(size_t index) const {
-            return ln1p(Base::getExpr().template packet<Pack>(index));
-        }
-
+        [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack>
-        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const {
-            return ln1p(Base::getExpr().template packetPartial<Pack>(index, count));
-        }
+        [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
+
+        void reverse(const Scalar auto& grad) const noexcept;
     };
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Ln1p, V>::packet(size_t index) const {
+        return ln1p(Base::getExpr().template packet<Pack>(index));
+    }
+
+    template<Vector V>
+    template<Packet Pack>
+    Pack VectorExpr<ExprID::Ln1p, V>::packetPartial(size_t index, size_t count) const {
+        return ln1p(Base::getExpr().template packetPartial<Pack>(index, count));
+    }
+
+    template<Vector V>
+    void VectorExpr<ExprID::Ln1p, V>::reverse(const Scalar auto& grad) const noexcept {
+        static_assert(Base::isReverseDiff);
+        const auto& expr = Base::getExpr();
+        expr.reverse(divide(grad.value(), (Trv(1) + expr.values())));
+    }
 
     template<Vector V>
     [[nodiscard]] auto ln1p(V&& v) noexcept requires(!CUDA<V>) {
