@@ -224,7 +224,7 @@ namespace Physica {
 
         template<ExecutePolicy P>
         void assign_add_for(Vector auto& v) const noexcept;
-        template<Vector V, size_t Size>
+        template<Vector V, size_t Length>
         void assign_add_simd(V& v) const noexcept;
     };
 

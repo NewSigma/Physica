@@ -801,8 +801,8 @@ namespace Physica {
         }
         else {
             const size_t length = v.getLength();
-            size_t i = 0;
             const size_t to = length / PacketSize * PacketSize;
+            size_t i = 0;
             for (; i < to; i += PacketSize) {
                 const Pack sum = v.template packet<Pack>(i) + v0.template packet<Pack>(i);
                 v.writePacket(i, sum);

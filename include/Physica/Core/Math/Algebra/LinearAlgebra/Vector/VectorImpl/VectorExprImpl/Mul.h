@@ -62,6 +62,11 @@ namespace Physica {
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
+    private:
+        template<ExecutePolicy P>
+        void assign_add_for(Vector auto& v) const noexcept;
+        template<Vector Target, size_t Size>
+        void assign_add_simd(Target& v) const noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -105,7 +110,24 @@ namespace Physica {
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Mul, V, U>::assign_add_base(Vector auto&& v) const noexcept {
-        Base::template assign_add<P>(v);
+        using Source = std::remove_cvref<V>::type;
+        using Target = std::remove_cvref<decltype(v)>::type;
+        using T1 = Source::ScalarType;
+        using T2 = Target::ScalarType;
+        constexpr bool LowerToFMA = std::same_as<T1, T2>;
+        if constexpr (LowerToFMA) {
+            v.assert_assign(Base::getDerived());
+            if constexpr (Internal::EnableSIMD<Source, Target>::value && !isReverseDiff) {
+                constexpr static size_t Length1 = Source::SizeAtCompile;
+                constexpr static size_t Length2 = Target::SizeAtCompile;
+                constexpr static size_t Length = std::max(Length1, Length2);
+                assign_add_simd<Target, Length>(v);
+            }
+            else
+                assign_add_for<P>(v);
+        }
+        else
+            Base::template assign_add<P>(v);
     }
 
     template<Vector V, Scalar U>
@@ -140,6 +162,44 @@ namespace Physica {
             lhs.reverse(rhs.value() * g);
         if constexpr (ReverseDiff<U>)
             rhs.reverse(lhs.values() * g);
+    }
+
+    template<Vector V, Scalar U>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprID::Mul, V, U>::assign_add_for(Vector auto& v) const noexcept {
+        parallel_for<P>([&, this](size_t i) {
+            if constexpr (isReverseDiff)
+                v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
+            else
+                v[i] = fma(getLHS().calc(i), T(getRHS().value()), v[i]);
+        }, Base::getLength(), 0).wait();
+    }
+
+    template<Vector V, Scalar U>
+    template<Vector Target, size_t Length>
+    void VectorExpr<ExprID::Mul, V, U>::assign_add_simd(Target& v) const noexcept {
+        using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
+        constexpr static size_t PacketSize = Pack::size();
+        const auto& lhs = getLHS();
+        const auto rhs = Pack(getRHS());
+        if constexpr (Length != Dynamic) {
+            constexpr size_t to = Length / PacketSize * PacketSize;
+            for (size_t i = 0; i < to; i += PacketSize)
+                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)));
+
+            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+                v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
+        }
+        else {
+            const size_t length = v.getLength();
+            const size_t to = length / PacketSize * PacketSize;
+            size_t i = 0;
+            for (; i < to; i += PacketSize)
+                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs, v.template packet<Pack>(i)));
+
+            for (; i < length; ++i)
+                v[i] = fma(getLHS().calc(i), T(getRHS()), v[i]);
+        }
     }
 
     template<Vector V1, Vector V2>

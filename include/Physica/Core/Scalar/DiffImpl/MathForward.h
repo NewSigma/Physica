@@ -28,6 +28,11 @@ namespace Physica {
         return ResultType(unit(x.value()));
     }
 
+    template<Scalar T1, Scalar T2, Scalar T3>
+    __host__ __device__ auto fma(const T1& x, const T2& y, const T3& z) noexcept requires(ForwardDiff<T1> && ForwardDiff<T2> && ForwardDiff<T3>) {
+        return x * y + z;
+    }
+
     template<Scalar T>
     __host__ __device__ auto abs(const T& x) noexcept requires(ForwardDiff<T>) {
         using ResultType = T::ScalarType;
