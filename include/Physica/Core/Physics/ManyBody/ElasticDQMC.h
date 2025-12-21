@@ -84,12 +84,12 @@ namespace Physica {
             , rSquareOmegas(FreqDQMC<Tc>::calcFreqCutoff(params_.getBeta(), freqDensity))
             , greens(2, params_.getNumSite())
             , buffer(2, params_.getNumSite())
-            , actionR(params_.getHoppingMatrix())
+            , actionR(params_.getHoppingMatrix() * params_.getBeta())
             , eig(params_.getNumSite(), true) {
         assert(freqDensity.isPositive());
         for (size_t i = 0; i < rSquareOmegas.getLength(); ++i)
             rSquareOmegas[i] = T(2 * i + 1);
-        rSquareOmegas *= MathConst<T>::pi / params->getBeta();
+        rSquareOmegas *= MathConst<T>::pi;
         rSquareOmegas = reciprocal(square(rSquareOmegas));
     }
 
@@ -142,7 +142,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     T ElasticDQMC<T>::randAuxField() {
-        return T::template random_normal<R>() * sqrt(params->getRepelU() / params->getBeta());
+        return T::template random_normal<R>() * sqrt(params->getBeta() * params->getRepelU());
     }
 
     template<Scalar T>
@@ -150,13 +150,12 @@ namespace Physica {
         T lnAbsDet = 0;
         for (int spin : {0, 1}) {
             using Tf = Diff<T, DiffMode::Reverse>;
-            const T shiftMu = params->getChemMu() - params->getRepelU() * 0.5;
-            const T repBeta = reciprocal(params->getBeta());
+            const Tr shift = params->getBeta() * fma(params->getRepelU(), Tr(-0.5), params->getChemMu());
             auto& green = buffer[spin];
 
             eig.compute(actionR);
             auto eigenvalues = VectorND<Tf>(eig.getEigenvalues());
-            lnAbsDet += ln1p_elem(square(eigenvalues - shiftMu) * rSquareOmegas.transpose()).sum().reverse(repBeta);
+            lnAbsDet += ln1p_elem(square(eigenvalues - shift) * rSquareOmegas.transpose()).sum().reverse();
             MatrixND<T> temp = eig.getEigenvectors() * DiagMatrix<T>(eigenvalues.grads());
             green = temp * eig.getEigenvectors().transpose();
             green.diag() = Trv(0.5) + green.diag();

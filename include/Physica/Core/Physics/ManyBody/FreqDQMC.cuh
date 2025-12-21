@@ -151,8 +151,7 @@ namespace Physica {
         auto kernel = [linearRHS_ = asStruct(linearRHS),
                        green = asStruct(greensD[spin]),
                        numSite = getNumSite(),
-                       numFreq = getNumFreq(),
-                       repBeta = reciprocal(action.getParams().getBeta())] __device__() mutable {
+                       numFreq = getNumFreq()] __device__() mutable {
             const auto& linearRHS = linearRHS_.getDerived();
             unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
             unsigned int col = blockIdx.y;
@@ -162,7 +161,6 @@ namespace Physica {
                 offset += numSite;
             }
 
-            elem *= repBeta;
             if (row == col)
                 elem += Tr(0.5);
 

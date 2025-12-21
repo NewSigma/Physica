@@ -78,7 +78,7 @@ namespace Physica {
             int m = k - numFreq;
             diag[k] = Trv(2 * m + 1);
         }
-        diag *= MathConst<Trv>::pi / params.getBeta();
+        diag *= MathConst<Trv>::pi;
     }
 
     template<Scalar T>
@@ -91,19 +91,19 @@ namespace Physica {
     template<Scalar T>
     void ActionMatrix<T>::assign_kinetic(Matrix auto&& target) const {
         const int numSite = getNumSite();
-        kronecker(IdentityMatrix<Trv>(matsubara.getOrder()), params.getHoppingMatrix()).assign(target);
+        kronecker(IdentityMatrix<Trv>(matsubara.getOrder()), params.getHoppingMatrix() * params.getBeta()).assign(target);
         kronecker(matsubara, IdentityMatrix<Trv>(numSite) * T(0, 1)).assign_add(target);
     }
 
     template<Scalar T>
     void ActionMatrix<T>::assign_potential(Matrix auto&& target) const {
         const int numSite = getNumSite();
-        const Tr shiftChemMu = params.getChemMu() - params.getRepelU() * 0.5;
+        const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
         for (int rowFreq = 0; rowFreq < getNumFreq() * 2; ++rowFreq) {
             int offsetR = rowFreq * numSite;
             for (int colFreq = 0; colFreq <= rowFreq; ++colFreq) {
                 if (rowFreq == colFreq) {
-                    target.block(offsetR, numSite, offsetR, numSite).diag().reals() = auxField.row(0).reals() - shiftChemMu;
+                    target.block(offsetR, numSite, offsetR, numSite).diag().reals() = auxField.row(0).reals() - shift;
                     continue;
                 }
                 int offsetC = colFreq * numSite;
@@ -127,10 +127,10 @@ namespace Physica {
         bool diagSite = rowSite == colSite;
         if (diagFreq) {
             Tr re = 0, im = 0;
-            re = params.getHoppingMatrix()(rowSite, colSite);
+            re = params.getHoppingMatrix()(rowSite, colSite) * params.getBeta();
             if (diagSite) {
-                const Tr shiftChemMu = params.getChemMu() - params.getRepelU() * 0.5;
-                re += auxField(0, rowSite).real() - shiftChemMu;
+                const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
+                re += auxField(0, rowSite).real() - shift;
                 im = matsubara.diag()[rowFreq];
             }
             return T(re, im);
@@ -155,7 +155,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void ActionMatrix<T>::randAuxField() {
-        Tr factor = sqrt(params.getRepelU() / params.getBeta());
+        Tr factor = sqrt(params.getRepelU() * params.getBeta());
         auxField.template random_normal<R>();
         auxField.row(0) *= factor;
         auxField.bottomRows(1) *= factor / sqrt(Trv(2));
@@ -164,7 +164,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     T ActionMatrix<T>::randAuxField(int freq, int site) {
-        Tr factor = sqrt(params.getRepelU() / params.getBeta());
+        Tr factor = sqrt(params.getRepelU() * params.getBeta());
         if (freq != 0)
             factor /= sqrt(Trv(2));
         return std::exchange(auxField(freq, site), T::template random_normal<R>() * factor);

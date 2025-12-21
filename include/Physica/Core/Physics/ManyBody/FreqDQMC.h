@@ -149,7 +149,6 @@ namespace Physica {
                 green += solBuffer.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }
-            green *= reciprocal(getParams().getBeta());
             green.diag() += Trv(0.5);
         }
     }
