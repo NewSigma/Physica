@@ -184,7 +184,6 @@ namespace Physica {
         [[nodiscard]] bool isZeros() const;
         [[nodiscard]] bool isFinite() const;
         [[nodiscard]] auto cross(const Vector auto& v) const noexcept;
-        [[nodiscard]] T angleTo(const Vector auto& v) const noexcept;
 
         Tr householder(Vector auto& target) const;
 

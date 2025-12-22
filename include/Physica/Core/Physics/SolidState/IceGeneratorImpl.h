@@ -197,7 +197,7 @@ namespace Physica {
             {
                 const Vector3D<T> v1 = vecO2H2.cross(vecO2O1);
                 const Vector3D<T> v2 = vecO2H2.cross(vecO2O3);
-                angle = v1.angleTo(v2);
+                angle = arccos(v1 * v2 / (v1.norm() * v2.norm()));
             }
             const Vector3D<T> vecO2H1 = initialCell.minDistVector(indexO, indexH1);
             const Vector3D<T> cross = vecO2O1.cross(vecO2O3);

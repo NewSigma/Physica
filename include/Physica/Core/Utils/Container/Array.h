@@ -96,6 +96,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
         [[nodiscard]] static IndexType toIndexND(const IndexType& shape, size_t index) noexcept;
+        [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
     };
 
     template<class T, class Allocator>

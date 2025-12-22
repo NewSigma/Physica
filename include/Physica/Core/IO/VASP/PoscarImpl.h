@@ -24,12 +24,9 @@
 #include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include "Poscar.h"
 
 namespace Physica {
-    template<Scalar T>
-    Poscar<T>::Poscar()
-            : Base(), elementTypes(), numOfEachType() {}
-
     template<Scalar T>
     Poscar<T>::Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_)
             : Base(std::move(base))
@@ -176,19 +173,19 @@ namespace Physica {
     }
 
     template<Scalar T>
-    Poscar<T>::CrystalSystem Poscar<T>::getCrystalSystem(double precision) const noexcept {
-        const T norm_list[3]{lattice.row(0).squaredNorm(),
-                                      lattice.row(1).squaredNorm(),
-                                      lattice.row(2).squaredNorm()};
-        const T angle_list[3]{lattice.row(1).angleTo(lattice.row(2)),
-                                       lattice.row(0).angleTo(lattice.row(2)),
-                                       lattice.row(0).angleTo(lattice.row(1))};
-        const bool norm_equal_list[3]{scalarNear(norm_list[0], norm_list[1], precision),
-                                      scalarNear(norm_list[1], norm_list[2], precision),
-                                      scalarNear(norm_list[2], norm_list[0], precision)};
-        const bool angle_equal_list[3]{scalarNear(angle_list[0], angle_list[1], precision),
-                                       scalarNear(angle_list[1], angle_list[2], precision),
-                                       scalarNear(angle_list[2], angle_list[0], precision)};
+    auto Poscar<T>::getCrystalSystem(double precision) const noexcept -> CrystalSystem {
+        const auto norm_list = Array<T, 3>::generate([](size_t i) { return lattice.row(i); });
+        const auto angle_list = Array<T, 3>::generate([this](int i) {
+            auto v1 = lattice.row(i);
+            auto v2 = lattice.row((i + 1) % 3);
+            return arccos(v1 * v2 / (v1.norm() * v2.norm()));
+        });
+        const auto norm_equal_list = Array<bool, 3>::generate([&, precision](size_t i) {
+            return scalarNear(norm_list[i], norm_list[(i + 1) % 3], precision);
+        });
+        const auto angle_equal_list = Array<bool, 3>::generate([&, precision](size_t i) {
+            return scalarNear(angle_list[i], angle_list[(i + 1) % 3], precision);
+        });
 
         const bool allAngleSame = angle_equal_list[0] && angle_equal_list[1];
         if (allAngleSame) {
@@ -204,18 +201,16 @@ namespace Physica {
             }
             return Rhombohedral;
         }
-        else {
-            for (int i = 0; i < 3; ++i) {
-                if (angle_equal_list[i]) {
-                    if (scalarNear(angle_list[i], T(M_PI_2), precision)) {
-                        if (scalarNear(angle_list[(i + 2) % 3], T(M_PI * 2 / 3), precision))
-                            return Hexagonal;
-                        return Monoclinic;
-                    }
-                    [[maybe_unused]] const bool onlyOneSamePair = !angle_equal_list[(i + 1) % 3] && !angle_equal_list[(i + 2) % 3];
-                    assert(onlyOneSamePair);
-                    break;
+        for (int i = 0; i < 3; ++i) {
+            if (angle_equal_list[i]) {
+                if (scalarNear(angle_list[i], T(M_PI_2), precision)) {
+                    if (scalarNear(angle_list[(i + 2) % 3], T(M_PI * 2 / 3), precision))
+                        return Hexagonal;
+                    return Monoclinic;
                 }
+                [[maybe_unused]] const bool onlyOneSamePair = !angle_equal_list[(i + 1) % 3] && !angle_equal_list[(i + 2) % 3];
+                assert(onlyOneSamePair);
+                break;
             }
         }
         return Triclinic;

@@ -48,7 +48,7 @@ namespace Physica {
         ElementTypeArray elementTypes;
         Array<size_t> numOfEachType;
     public:
-        Poscar();
+        Poscar() = default;
         Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_);
         Poscar(CrystalCell<T> cell);
         /* Operators */
@@ -71,7 +71,7 @@ namespace Physica {
         using Base::toUnitCell;
         void readTypesAndNumber(std::istream& is);
         void readAtomPos(std::istream& is);
-        size_t sumNumOfEachType() const;
+        [[nodiscard]] size_t sumNumOfEachType() const;
         void extendInZ_direct(T factor);
         /* Static members */
         [[nodiscard]] static uint8_t elementSymbolToNumber(char ch1, char ch2);

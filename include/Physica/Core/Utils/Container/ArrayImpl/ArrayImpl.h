@@ -126,6 +126,14 @@ namespace Physica {
         }
         return indices;
     }
+
+    template<class T, size_t Length, class Allocator>
+    auto Array<T, Length, Allocator>::generate(std::invocable<size_t> auto fn) -> This {
+        This result{};
+        for (size_t i = 0; i < Length; ++i)
+            result[i] = fn(i);
+        return result;
+    }
     ///////////////////////////////////////Array<T, Dynamic, Allocator>//////////////////////////////////////////
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value)

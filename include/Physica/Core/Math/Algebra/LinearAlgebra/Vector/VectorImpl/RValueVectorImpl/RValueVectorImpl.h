@@ -596,11 +596,6 @@ namespace Physica {
         using V = std::remove_cvref_t<decltype(v)>;
         return CrossProduct<Derived, V>(Base::getDerived(), v);
     }
-
-    template<class Derived>
-    auto RValueVector<Derived>::angleTo(const Vector auto& v) const noexcept -> T {
-        return arccos(Base::getDerived() * v / (norm() * v.norm()));
-    }
     /**
      * The first element of \param target will be the factor to construct houseHolder matrix.
      * The other parts of \param target will be essential HouseHolder vector.
