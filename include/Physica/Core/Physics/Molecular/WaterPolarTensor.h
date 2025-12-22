@@ -92,7 +92,7 @@ namespace Physica {
         auto z = labFrame.row(2);
         z = posOH1 - posOH2;
         auto y = labFrame.row(1);
-        y = z.crossProduct(x);
+        y = z.cross(x);
         x.toUnit();
         y.toUnit();
         z.toUnit();

@@ -592,7 +592,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::crossProduct(const Vector auto& v) const noexcept {
+    auto RValueVector<Derived>::cross(const Vector auto& v) const noexcept {
         using V = std::remove_cvref_t<decltype(v)>;
         return CrossProduct<Derived, V>(Base::getDerived(), v);
     }

@@ -195,12 +195,12 @@ namespace Physica {
             const Vector3D<T> vecO2H2 = initialCell.minDistVector(indexO, indexH2);
             T angle;
             {
-                const Vector3D<T> v1 = vecO2H2.crossProduct(vecO2O1);
-                const Vector3D<T> v2 = vecO2H2.crossProduct(vecO2O3);
+                const Vector3D<T> v1 = vecO2H2.cross(vecO2O1);
+                const Vector3D<T> v2 = vecO2H2.cross(vecO2O3);
                 angle = v1.angleTo(v2);
             }
             const Vector3D<T> vecO2H1 = initialCell.minDistVector(indexO, indexH1);
-            const Vector3D<T> cross = vecO2O1.crossProduct(vecO2O3);
+            const Vector3D<T> cross = vecO2O1.cross(vecO2O3);
             const T dot = cross * vecO2H2;
             if (dot.isNegative())
                 angle = -angle;
@@ -510,7 +510,7 @@ namespace Physica {
 
         const Vector3D<T> parallel = (target * axis / axis.squaredNorm()) * axis;
         const Vector3D<T> verticle = target - parallel;
-        const Vector3D<T> verticle2 = parallel.crossProduct(verticle);
+        const Vector3D<T> verticle2 = parallel.cross(verticle);
         T factor2 = sin(angle) / parallel.norm();
         return Vector3D<T>(parallel + factor1 * verticle + factor2 * verticle2);
     }

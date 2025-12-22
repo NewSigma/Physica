@@ -183,7 +183,7 @@ namespace Physica {
         [[nodiscard]] CoDiff<T> prod() const noexcept;
         [[nodiscard]] bool isZeros() const;
         [[nodiscard]] bool isFinite() const;
-        [[nodiscard]] auto crossProduct(const Vector auto& v) const noexcept;
+        [[nodiscard]] auto cross(const Vector auto& v) const noexcept;
         [[nodiscard]] T angleTo(const Vector auto& v) const noexcept;
 
         Tr householder(Vector auto& target) const;

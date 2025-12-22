@@ -579,9 +579,9 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     auto PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) -> LatticeMatrix {
         LatticeMatrix result{};
-        result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
-        result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
-        result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
+        result.row(0) = lattice.row(1).cross(lattice.row(2));
+        result.row(1) = lattice.row(2).cross(lattice.row(0));
+        result.row(2) = lattice.row(0).cross(lattice.row(1));
         const auto factor = T(2 * M_PI) / (lattice.row(0) * result.row(0));
         result *= factor;
         return result;

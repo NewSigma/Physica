@@ -261,7 +261,7 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueVector<Derived>>::crossProduct(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>) {
+    __device__ auto device_obj<RValueVector<Derived>>::cross(const Vector auto& v) const noexcept requires(CUDA<decltype(v)>) {
         return device_obj<CrossProduct<Derived, decltype(v)>>(*this, v);
     }
 
