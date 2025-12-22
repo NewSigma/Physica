@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 Weibo He.
+ * Copyright 2020-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,14 +22,15 @@
 #include "Physica/Macro.h"
 
 namespace Physica {
-    /*!
+    /**
      * BitArray is similar to bool[] but it has a better use of space.
      */
     class PHYSICA_API BitArray {
         //Every bit of arr stands for a bool.
-        unsigned char* __restrict__ arr;
-        size_t bitCount;
+        unsigned char* __restrict__ arr = nullptr;
+        size_t bitCount = 0;
     public:
+        BitArray() = default;
         explicit BitArray(size_t bitCount_);
         BitArray(size_t bitCount_, bool initial);
         BitArray(const BitArray& array);

@@ -27,11 +27,14 @@
 namespace Physica {
     template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T>> class Array;
     template<class T> class PageLockedAllocator;
-
+    /**
+     * \class Array unifies std::array and std::vector with customized optimizations. Unlike std::vector<bool>, Array<bool> is not bitwise.
+     */
     template<class T, size_t Length, class Allocator>
     class Array : public ArrayBase<Array<T, Length, Allocator>, Allocator>
                 , public CRCoro<Array<T, Length, Allocator>> {
-        static_assert(!std::is_same_v<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
+        static_assert(std::is_default_constructible<T>::value, "[Error]: Expect default constructible T");
+        static_assert(!std::same_as<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
         using This = Array<T, Length, Allocator>;
         using IndexType = Array<size_t, Length>;
     public:
@@ -59,7 +62,8 @@ namespace Physica {
         Array(This&&) noexcept = default;
         ~Array() = default;
         /* Operators */
-        __host__ __device__ This& operator=(This array) noexcept { swap(array); return *this; }
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         template<size_t I>
         [[nodiscard]] constexpr T& get() noexcept;
@@ -123,7 +127,7 @@ namespace Physica {
         template<size_t Length, class OtherAlloc>
         Array(const Array<T, Length, OtherAlloc>& other) noexcept(std::is_nothrow_copy_assignable<T>::value);
         Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value);
-        Array(This&& array) noexcept;
+        Array(This&& obj) noexcept;
         ~Array();
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }

@@ -62,9 +62,10 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
     void MatPowVecProd<M, V>::assign(Vector auto& target) const {
+        target.assert_assign(v);
         const int power = mpow.getPower();
         if (power == 0) {
-            target = v;
+            v.template assign<P>(target);
             return;
         }
 
@@ -72,7 +73,7 @@ namespace Physica {
         V1 buffer = mpow.getMatrix() * v;
         for (int i = 1; i < power; ++i) {
             buffer.swap(target);
-            buffer = mpow.getMatrix() * target;
+            (mpow.getMatrix() * target).template assign<P>(target);
         }
         buffer.swap(target);
     }

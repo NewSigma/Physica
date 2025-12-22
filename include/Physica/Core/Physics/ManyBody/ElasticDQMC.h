@@ -149,17 +149,17 @@ namespace Physica {
     auto ElasticDQMC<T>::diagonalize() -> T {
         T lnAbsDet = 0;
         for (int spin : {0, 1}) {
-            using Tf = Diff<T, DiffMode::Reverse>;
             const Tr shift = params->getBeta() * fma(params->getRepelU(), Tr(-0.5), params->getChemMu());
-            auto& green = buffer[spin];
-
+            using Tf = Diff<T, DiffMode::Reverse>;
             eig.compute(actionR);
             auto eigenvalues = VectorND<Tf>(eig.getEigenvalues());
             lnAbsDet += ln1p_elem(square(eigenvalues - shift) * rSquareOmegas.transpose()).sum().reverse();
+            actionR.diag() = -actionR.diag();
+
+            auto& green = buffer[spin];
             MatrixND<T> temp = eig.getEigenvectors() * DiagMatrix<T>(eigenvalues.grads());
             green = temp * eig.getEigenvectors().transpose();
             green.diag() = Trv(0.5) + green.diag();
-            actionR.diag() = -actionR.diag();
         }
         return lnAbsDet;
     }

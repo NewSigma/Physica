@@ -266,7 +266,7 @@ namespace Physica {
         if constexpr (isReverseDiff) {
             size_t index = 0;
             Tv elem = calc_value(0);
-            for(size_t i = 1; i < getLength(); ++i) {
+            for (size_t i = 1; i < getLength(); ++i) {
                 const Tv temp = calc_value(i);
                 if (elem < temp) {
                     elem = temp;
@@ -278,7 +278,7 @@ namespace Physica {
         }
         else if constexpr (!EnableSIMD) {
             T result = calc(0);
-            for(size_t i = 1; i < getLength(); ++i) {
+            for (size_t i = 1; i < getLength(); ++i) {
                 T temp = calc(i);
                 if (result < temp)
                     result = temp;
@@ -329,7 +329,7 @@ namespace Physica {
         if constexpr (isReverseDiff) {
             size_t index = 0;
             Tv elem = calc_value(0);
-            for(size_t i = 1; i < getLength(); ++i) {
+            for (size_t i = 1; i < getLength(); ++i) {
                 const Tv temp = calc_value(i);
                 if (elem > temp) {
                     elem = temp;
@@ -374,7 +374,7 @@ namespace Physica {
         }
         else {
             T result = calc(0);
-            for(size_t i = 1; i < getLength(); ++i) {
+            for (size_t i = 1; i < getLength(); ++i) {
                 T temp = calc(i);
                 if (result > temp)
                     result = temp;
@@ -420,7 +420,7 @@ namespace Physica {
         }
         else {
             auto result = T(0);
-            for(size_t i = 0; i < getLength(); ++i)
+            for (size_t i = 0; i < getLength(); ++i)
                 result += calc(i);
             co_return std::move(result);
         }
@@ -435,8 +435,8 @@ namespace Physica {
     auto RValueVector<Derived>::mean_stable() const noexcept -> CoDiff<T> {
         auto result = T(0);
         const auto& v = Base::getDerived();
-        for(size_t i = 0; i < getLength(); ++i)
-           result.toNextMean(i, v.calc(i));
+        for (size_t i = 0; i < getLength(); ++i)
+            result.toNextMean(i, v.calc(i));
 
         if constexpr (isReverseDiff) {
             auto y = co_yield std::move(result);
@@ -560,7 +560,7 @@ namespace Physica {
         assert(getLength() != 0);
         if constexpr (isReverseDiff) {
             Tv result = calc_value(0);
-            for(size_t i = 1; i < getLength(); ++i)
+            for (size_t i = 1; i < getLength(); ++i)
                 result *= calc_value(i);
 
             auto tmp = co_yield std::move(result);
@@ -569,7 +569,7 @@ namespace Physica {
         }
         else {
             auto result = calc(0);
-            for(size_t i = 1; i < getLength(); ++i)
+            for (size_t i = 1; i < getLength(); ++i)
                 result *= calc(i);
             co_return std::move(result);
         }
@@ -577,7 +577,7 @@ namespace Physica {
 
     template<class Derived>
     bool RValueVector<Derived>::isZeros() const {
-        for(size_t i = 0; i < getLength(); ++i)
+        for (size_t i = 0; i < getLength(); ++i)
             if (!calc(i).isZero())
                 return false;
         return true;
@@ -585,7 +585,7 @@ namespace Physica {
 
     template<class Derived>
     bool RValueVector<Derived>::isFinite() const {
-        for(size_t i = 0; i < getLength(); ++i)
+        for (size_t i = 0; i < getLength(); ++i)
             if (!calc(i).isFinite())
                 return false;
         return true;
@@ -604,9 +604,9 @@ namespace Physica {
     /**
      * The first element of \param target will be the factor to construct houseHolder matrix.
      * The other parts of \param target will be essential HouseHolder vector.
-     * 
+     *
      * \return Norm of original vector
-     * 
+     *
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:236-244
      * [2] Eigen; https://eigen.tuxfamily.org
@@ -628,16 +628,15 @@ namespace Physica {
             target.template tail<TailLength>(1) = tail<TailLength>(1) * reciprocal(v0 + unit(v0.value()) * norm);
             return norm;
         }
-        else {
-            const bool isZeroVector = sourceNorm0.isSubNormal();
-            if (isZeroVector) {
-                target.zeros();
-                return Trv(0);
-            }
-            target[0] = Trv(2);
-            target.template tail<TailLength>(1).zeros();
-            return sqrt(sourceNorm0);
+
+        const bool isZeroVector = sourceNorm0.isSubNormal();
+        if (isZeroVector) {
+            target.zeros();
+            return Trv(0);
         }
+        target[0] = Trv(2);
+        target.template tail<TailLength>(1).zeros();
+        return sqrt(sourceNorm0);
     }
 
     template<class Derived>
@@ -732,7 +731,7 @@ namespace Physica {
             constexpr size_t to = Length / PacketSize * PacketSize;
             for (size_t i = 0; i < to; i += PacketSize)
                 v.writePacket(i, v0.template packet<Pack>(i));
-            
+
             constexpr size_t i = Length - Length % PacketSize;
             if constexpr (i != Length) {
                 constexpr size_t count = Length - i;

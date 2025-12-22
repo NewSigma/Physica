@@ -163,24 +163,24 @@ namespace Physica {
             : length(obj.length), capacity(obj.capacity), alloc() {
         assert(capacity > 0);
         arr = alloc.allocate(capacity);
-        if constexpr (!std::is_trivially_copyable<ElemType>::value)
+        if constexpr (std::is_trivially_copyable<ElemType>::value)
+            memcpy(arr, obj.arr, length * sizeof(ElemType));
+        else
             for(size_t i = 0; i < length; ++i)
                 alloc.construct(arr + i, obj[i]);
-        else
-            memcpy(arr, obj.arr, length * sizeof(ElemType));
     }
 
     template<class T, class Allocator>
-    Array<T, Dynamic, Allocator>::Array(This&& array) noexcept
-            : arr(array.arr), length(array.length), capacity(array.capacity), alloc() {
-        array.arr = nullptr;
-        array.length = 0;
-        array.capacity = 0;
+    Array<T, Dynamic, Allocator>::Array(This&& obj) noexcept
+            : arr(obj.arr), length(obj.length), capacity(obj.capacity), alloc() {
+        obj.arr = nullptr;
+        obj.length = 0;
+        obj.capacity = 0;
     }
 
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::~Array() {
-        if constexpr (!std::is_trivially_copyable<ElemType>::value)
+        if constexpr (!std::is_trivially_destructible<ElemType>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
                     alloc.destroy(arr + i);
