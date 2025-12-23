@@ -142,7 +142,10 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     T ElasticDQMC<T>::randAuxField() {
-        return T::template random_normal<R>() * sqrt(params->getBeta() * params->getRepelU());
+        Tr betaU = params->getBeta() * params->getRepelU();
+        Vector3D<Tr> shifts{-betaU, 0, betaU};
+        const Tr shift = shifts[std::uniform_int_distribution<int>(0, 2)(R::getInstance())];
+        return T::template random_normal<R>() * sqrt(betaU) + shift;
     }
 
     template<Scalar T>
@@ -161,6 +164,8 @@ namespace Physica {
             green = temp * eig.getEigenvectors().transpose();
             green.diag() = Trv(0.5) + green.diag();
         }
+        Tr betaU = params->getBeta() * params->getRepelU();
+        lnAbsDet -= ln1pexp(lncosh(actionR.diag()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
         return lnAbsDet;
     }
 }

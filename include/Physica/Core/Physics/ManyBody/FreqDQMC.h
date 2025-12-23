@@ -133,6 +133,8 @@ namespace Physica {
             lnAD += ln(abs(spinLU.getMatrixLU().diag())).sum();
             sgnD *= unit(spinLU.getMatrixLU().diag()).prod().real();
         }
+        Trv betaU = getParams().getBeta() * getParams().getRepelU();
+        lnAD -= ln1pexp(lncosh(action.getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
         return {lnAD, sgnD};
     }
 

@@ -64,6 +64,7 @@ namespace Physica {
         [[nodiscard]] Vector2D<float64> promoteDet(const device_obj<MatrixND<T>>& matrixLU);
         void traceGreen(int spin);
         /* Getters */
+        [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
@@ -191,6 +192,8 @@ namespace Physica {
             lnAD += x;
             sgnD *= y;
         }
+        float64 betaU = getParams().getBeta() * getParams().getRepelU();
+        lnAD -= ln1pexp(lncosh(action.getAuxField().row(0).reals()) + fma(betaU, float64(-0.5), MathConst<float64>::ln2)).sum();
         return {lnAD, sgnD};
     }
 
