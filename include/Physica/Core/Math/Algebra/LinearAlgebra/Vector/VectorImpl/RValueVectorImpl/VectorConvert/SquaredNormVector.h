@@ -55,8 +55,6 @@ namespace Physica {
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
         void reverse(const Scalar auto& grad) const noexcept;
 
-        [[nodiscard]] CoDiff<T> sum() const noexcept;
-
         [[nodiscard]] auto values() const noexcept { return v.values().squaredNorms(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
@@ -123,54 +121,6 @@ namespace Physica {
     void SquaredNormVector<V>::reverse(const Scalar auto& grad) const noexcept {
         static_assert(isReverseDiff);
         v.reverse(Tv(2) * grad * v.values());
-    }
-
-    template<class V>
-    auto SquaredNormVector<V>::sum() const noexcept -> CoDiff<T> {
-        assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
-        if constexpr (isComplexV || Diffable<V>)
-            return Base::sum();
-        else if constexpr (Internal::EnableSIMD<V>::value) {
-            auto buffer = PacketType::zeros();
-            if constexpr (SizeAtCompile != Dynamic) {
-                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
-                for (size_t i = 0; i < to; i += PacketType::size()) {
-                    auto x = v.template packet<PacketType>(i);
-                    buffer = fma(x, x, buffer);
-                }
-
-                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
-                if constexpr (i != SizeAtCompile) {
-                    constexpr size_t count = SizeAtCompile - i;
-                    auto x = v.template packetPartial<PacketType>(i, count);
-                    buffer = fma(x, x, buffer);
-                }
-            }
-            else {
-                const size_t length = getLength();
-                size_t i = 0;
-                const size_t to = length / PacketType::size() * PacketType::size();
-                for (; i < to; i += PacketType::size()) {
-                    auto x = v.template packet<PacketType>(i);
-                    buffer = fma(x, x, buffer);
-                }
-
-                if (to != length) {
-                    const size_t count = length - i;
-                    auto x = v.template packetPartial<PacketType>(i, count);
-                    buffer = fma(x, x, buffer);
-                }
-            }
-            return buffer.sum();
-        }
-        else {
-            auto result = T(0);
-            for(size_t i = 0; i < getLength(); ++i) {
-                auto x = v.calc(i);
-                result = fma(x, x, result);
-            }
-            return std::move(result);
-        }
     }
 }
 

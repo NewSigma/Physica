@@ -105,12 +105,8 @@ namespace Physica {
         }
         else {
             auto result = ScalarType(0);
-            for(size_t i = 0; i < v1.getLength(); ++i) {
-                if constexpr (std::same_as<T1, T2>)
-                    result = fma(v1.calc(i), v2.calc(i), result);
-                else
-                    result += v1.calc(i) * v2.calc(i);
-            }
+            for(size_t i = 0; i < v1.getLength(); ++i)
+                result += v1.calc(i) * v2.calc(i);
             co_return std::move(result);
         }
     }
