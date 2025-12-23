@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(Physica
-        VERSION 2025
+        VERSION 2026
         DESCRIPTION "Modern template library for computational physics"
         HOMEPAGE_URL https://gitee.com/newsigma/Physica
         LANGUAGES CXX)

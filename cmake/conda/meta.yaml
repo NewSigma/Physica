@@ -1,6 +1,6 @@
 package:
   name: physica
-  version: 2025
+  version: 2026
 
 source:
   git_url: https://gitee.com/newsigma/Physica
