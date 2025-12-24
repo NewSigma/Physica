@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
-#include <gperftools/profiler.h>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 
@@ -43,8 +42,7 @@ namespace {
 
         VectorND<ScalarType> v1(model.getRow());
         for (auto _ : state) {
-            
-            [[clang::noinline]] expr.assign(v1);
+            PHYSICA_BENCH(expr.assign(v1));
             benchmark::DoNotOptimize(v1);
             benchmark::ClobberMemory();
         }

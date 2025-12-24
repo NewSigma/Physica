@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
@@ -28,7 +28,7 @@ namespace {
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            [[clang::noinline]] auto y = x.norm1();
+            PHYSICA_BENCH(auto y = x.norm1());
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(y);
             benchmark::ClobberMemory();
@@ -40,7 +40,7 @@ namespace {
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            [[clang::noinline]] auto y = x.norm1_base();
+            PHYSICA_BENCH(auto y = x.norm1_base());
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(y);
             benchmark::ClobberMemory();

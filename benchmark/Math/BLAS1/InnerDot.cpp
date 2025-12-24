@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
@@ -32,7 +32,7 @@ namespace {
         auto dot = InnerDot(v1, v2);
         for (auto _ : state) {
             T y{};
-            [[clang::noinline]] y = dot.calc();
+            PHYSICA_BENCH(y = dot.calc());
             benchmark::DoNotOptimize(y);
             benchmark::DoNotOptimize(dot);
         }
@@ -46,7 +46,7 @@ namespace {
         auto dot = InnerDot(v1, v2);
         for (auto _ : state) {
             T y{};
-            [[clang::noinline]] y = dot.calc_base();
+            PHYSICA_BENCH(y = dot.calc_base());
             benchmark::DoNotOptimize(y);
             benchmark::DoNotOptimize(dot);
         }

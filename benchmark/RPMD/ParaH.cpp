@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
-#include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using T = float32;
@@ -56,7 +55,7 @@ namespace {
         auto rpmd = makeSystem(numMolecular);
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (auto _ : state)
-            [[clang::noinline]] rpmd.nve_step<Thread>(kineticModel, forceModel);
+            PHYSICA_BENCH(rpmd.nve_step<Thread>(kineticModel, forceModel));
     }
 }
 

@@ -56,6 +56,7 @@ else()
                               WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                               COMMENT "Generating LLVM IR")
             add_dependencies(LLVMIR Benchmark)
+            add_definitions(-DPHYSICA_LLVMIR)
         endif()
     else()
         message(FATAL_ERROR "Unknown compiler")

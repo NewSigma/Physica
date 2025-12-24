@@ -32,3 +32,9 @@ namespace Physica {
         HostDevAttr::CacheSizeL3  * 6 / 5
     };
 }
+
+#ifdef PHYSICA_LLVMIR
+    #define PHYSICA_BENCH(x) [[clang::noinline]] x
+#else
+    #define PHYSICA_BENCH(x) x
+#endif

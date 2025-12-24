@@ -16,8 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
-#include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/Barostat/SCRBaro.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
@@ -25,6 +23,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using T = float32;
@@ -69,7 +68,7 @@ namespace {
         ThermoType thermo(temperatureT, thermostatTime);
         BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
         for (auto _ : state)
-            [[clang::noinline]] rpmd.npt_step<RandomSource, GPU>(thermo, barostat, kineticModel, forceModel);
+            PHYSICA_BENCH(rpmd.npt_step<RandomSource, GPU>(thermo, barostat, kineticModel, forceModel));
     }
 }
 

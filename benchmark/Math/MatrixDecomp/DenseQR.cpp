@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
@@ -29,7 +29,7 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         DenseQR<T> qr(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] qr.compute(m);
+            PHYSICA_BENCH(qr.compute(m));
             benchmark::DoNotOptimize(qr);
             benchmark::ClobberMemory();
         }
@@ -41,7 +41,7 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         DenseQR<T> qr(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] qr.compute_base(m);
+            PHYSICA_BENCH(qr.compute_base(m));
             benchmark::DoNotOptimize(qr);
             benchmark::ClobberMemory();
         }

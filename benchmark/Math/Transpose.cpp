@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
@@ -31,7 +31,7 @@ namespace {
         auto trans = m.transpose();
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] trans.assign(buffer);
+            PHYSICA_BENCH(trans.assign(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -45,7 +45,7 @@ namespace {
         auto trans = m.transpose();
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            [[clang::noinline]] trans.assign_base(buffer);
+            PHYSICA_BENCH(trans.assign_base(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

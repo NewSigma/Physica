@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Exp.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 
@@ -29,7 +29,7 @@ namespace {
         auto expr = exp(data);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign(buffer);
+            PHYSICA_BENCH(expr.assign(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -42,7 +42,7 @@ namespace {
         auto expr = exp(data);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign_base(buffer);
+            PHYSICA_BENCH(expr.assign_base(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

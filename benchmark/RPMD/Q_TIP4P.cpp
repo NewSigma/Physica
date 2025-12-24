@@ -16,14 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
-#include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using T = float64;
@@ -109,7 +108,7 @@ namespace {
         RPMD<T> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
         rpmd.initMomentum<KineticModel, RandomSource>();
         for (auto _ : state)
-            [[clang::noinline]] rpmd.nve_step<Sequential>(kineticModel, forceModel);
+            PHYSICA_BENCH(rpmd.nve_step<Sequential>(kineticModel, forceModel));
     }
 }
 

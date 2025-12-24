@@ -16,12 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
-#include <gperftools/profiler.h>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Core/Physics/ManyBody/TPQ.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -44,7 +43,7 @@ namespace {
         psi.pre_nvt_step(hamilton, Beta);
         psi.random_normal<RandomSource>();
         for (auto _ : state)
-            [[clang::noinline]] psi.nvt_step(hamilton, Beta);
+            PHYSICA_BENCH(psi.nvt_step(hamilton, Beta));
     }
 }
 

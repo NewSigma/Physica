@@ -17,12 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <benchmark/benchmark.h>
-#include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using T = float64;
@@ -67,7 +66,7 @@ namespace {
         kineticModel.updateMass(rpmd.getRingPolymer());
 
         for (auto _ : state)
-            [[clang::noinline]] rpmd.nve_step<Sequential>(kineticModel, forceModel);
+            PHYSICA_BENCH(rpmd.nve_step<Sequential>(kineticModel, forceModel));
     }
 }
 

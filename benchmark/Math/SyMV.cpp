@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
@@ -32,7 +32,7 @@ namespace {
         auto expr = m * v;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign(buffer);
+            PHYSICA_BENCH(expr.assign(buffer));
             benchmark::DoNotOptimize(buffer);
         }
     }

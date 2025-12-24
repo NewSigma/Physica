@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
@@ -31,7 +31,7 @@ namespace {
         auto expr = v1 - v2 * T(2.0);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign(buffer);
+            PHYSICA_BENCH(expr.assign(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -45,7 +45,7 @@ namespace {
         auto expr = v1 - (IdentityMatrix<T>(size) * T(2.0)) * v2;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign(buffer);
+            PHYSICA_BENCH(expr.assign(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
@@ -58,7 +58,7 @@ namespace {
         auto expr = (IdentityMatrix<T>(size) * T(2.0)) * v;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign_add(buffer);
+            expr.assign_add(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

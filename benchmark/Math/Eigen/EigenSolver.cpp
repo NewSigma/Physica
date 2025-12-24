@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 
@@ -30,7 +30,7 @@ namespace {
         const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);
         for (auto _ : state) {
-            [[clang::noinline]] solver.compute(data);
+            PHYSICA_BENCH(solver.compute(data));
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }
@@ -43,7 +43,7 @@ namespace {
         const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);
         for (auto _ : state) {
-            [[clang::noinline]] solver.compute_base(data);
+            PHYSICA_BENCH(solver.compute_base(data));
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Benchmark.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
@@ -30,7 +30,7 @@ namespace {
         auto expr = x * T(2);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign_add(buffer);
+            PHYSICA_BENCH(expr.assign_add(buffer));
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
@@ -44,7 +44,7 @@ namespace {
         auto expr = x * T(2);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            [[clang::noinline]] expr.assign_add_base(buffer);
+            PHYSICA_BENCH(expr.assign_add_base(buffer));
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
