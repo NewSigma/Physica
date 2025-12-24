@@ -165,6 +165,7 @@ namespace Physica {
         void setLength(size_t size) noexcept;
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
+        [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
     private:
         void resizeImpl(size_t size, auto&&... args) noexcept;
     };

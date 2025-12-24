@@ -108,6 +108,8 @@ namespace Physica {
         [[nodiscard]] static This linspace(T from, T to, size_t count);
         [[nodiscard]] static This read_hdf5(const H5Loc& loc, const char* name);
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
+        [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
+        [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
     };
 
     template<Scalar T> using Vector1D = DenseVector<T, 1>;

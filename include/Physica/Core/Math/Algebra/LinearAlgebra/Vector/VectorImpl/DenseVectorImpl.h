@@ -142,4 +142,14 @@ namespace Physica {
     auto DenseVector<T, Length, Allocator>::read(size_t length, const T* __restrict p) -> This {
         return This(Storage::read(length, p));
     }
+
+    template<Scalar T, size_t Length, class Allocator>
+    auto DenseVector<T, Length, Allocator>::generate(std::invocable<size_t> auto fn) -> This {
+        return This(Storage::generate(std::move(fn)));
+    }
+
+    template<Scalar T, size_t Length, class Allocator>
+    auto DenseVector<T, Length, Allocator>::generate(size_t length, std::invocable<size_t> auto fn) -> This {
+        return This(Storage::generate(length, std::move(fn)));
+    }
 }

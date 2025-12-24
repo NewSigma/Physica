@@ -351,6 +351,16 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
+    auto Array<T, Dynamic, Allocator>::generate(size_t length, std::invocable<size_t> auto fn) -> This {
+        This result{};
+        result.arr = result.get_allocator().allocate(length);
+        result.length = result.capacity = length;
+        for (size_t i = 0; i < length; ++i)
+            new (result.data_ptr(i)) T(std::move(fn(i)));
+        return result;
+    }
+
+    template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, auto&&... args) noexcept {
         if (capacity < size)
             reserve(size);
