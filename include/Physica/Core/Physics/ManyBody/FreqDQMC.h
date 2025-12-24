@@ -54,8 +54,12 @@ namespace Physica {
         void step(bool warmup = false);
         template<RNG R>
         void step_for(int numStep);
+
+        [[nodiscard]] Vector2D<Trv> calcDet();
+        void calcGreen();
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
+        [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
         [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
@@ -63,9 +67,6 @@ namespace Physica {
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
         /* Static members */
         [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
-    private:
-        [[nodiscard]] Vector2D<Trv> calcDet();
-        void calcGreen();
     };
 
     template<Scalar T>
@@ -104,7 +105,7 @@ namespace Physica {
                 calcGreen();
         }
         else
-            action.getAuxField()(freq, site) = save;
+            getAuxField()(freq, site) = save;
     }
 
     template<Scalar T>
@@ -113,12 +114,6 @@ namespace Physica {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
         calcGreen();
-    }
-
-    template<Scalar T>
-    int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
-        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
-        return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
     }
 
     template<Scalar T>
@@ -134,7 +129,9 @@ namespace Physica {
             sgnD *= unit(spinLU.getMatrixLU().diag()).prod().real();
         }
         Trv betaU = getParams().getBeta() * getParams().getRepelU();
-        lnAD -= ln1pexp(lncosh(action.getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
+        lnAD -= ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
+        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
         return {lnAD, sgnD};
     }
 
@@ -153,5 +150,11 @@ namespace Physica {
             }
             green.diag() += Trv(0.5);
         }
+    }
+
+    template<Scalar T>
+    int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
+        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
+        return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
     }
 }

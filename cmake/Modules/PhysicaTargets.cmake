@@ -14,7 +14,7 @@ if(${PHYSICA_HDF5})
 endif()
 
 if(${PHYSICA_CUDA})
-    target_link_libraries(Physica::Core INTERFACE CUDA::cublas CUDA::curand CUDA::cusolver cudss)
+    target_link_libraries(Physica::Core INTERFACE CUDA::cublas INTERFACE CUDA::curand INTERFACE CUDA::cusolver INTERFACE cudss)
 endif()
 
 if(${PHYSICA_MKL})

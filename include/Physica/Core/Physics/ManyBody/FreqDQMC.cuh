@@ -62,17 +62,17 @@ namespace Physica {
         void step_for(int numStep);
 
         [[nodiscard]] Vector2D<float64> promoteDet(const device_obj<MatrixND<T>>& matrixLU);
+        [[nodiscard]] Vector2D<float64> calcDet();
         void traceGreen(int spin);
+        void calcGreen();
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
+        [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
-    private:
-        [[nodiscard]] Vector2D<float64> calcDet();
-        void calcGreen();
     };
 
     template<Scalar T>
@@ -116,7 +116,7 @@ namespace Physica {
                 calcGreen();
         }
         else
-            action.getAuxField()(freq, site) = save;
+            getAuxField()(freq, site) = save;
     }
 
     template<Scalar T>
@@ -148,6 +148,28 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<float64> {
+        action.assign_potential(detBuffer);
+        lu[0].compute(detBuffer);
+
+        action.flip();
+        action.assign_potential(detBuffer);
+        lu[1].compute(detBuffer);
+
+        float64 lnAD = 0, sgnD = 1;
+        for (const auto& spinLU : lu) {
+            auto [x, y] = promoteDet(spinLU.getMatrixLU());
+            lnAD += x;
+            sgnD *= y;
+        }
+        float64 betaU = getParams().getBeta() * getParams().getRepelU();
+        lnAD -= ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, float64(-0.5), MathConst<float64>::ln2)).sum();
+        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, float64(-0.25), MathConst<float64>::ln2)).sum();
+        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, float64(-0.25), MathConst<float64>::ln2)).sum();
+        return {lnAD, sgnD};
+    }
+
+    template<Scalar T>
     void device_obj<FreqDQMC<T>>::traceGreen(int spin) {
         auto kernel = [linearRHS_ = asStruct(linearRHS),
                        green = asStruct(greensD[spin]),
@@ -175,26 +197,6 @@ namespace Physica {
         CUDAExecutor::launch(kernel, KernelConfig({numBlockX, numBlockY}, numThread));
 
         greensD[spin].toHostAsync(greensH[spin]);
-    }
-
-    template<Scalar T>
-    auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<float64> {
-        action.assign_potential(detBuffer);
-        lu[0].compute(detBuffer);
-
-        action.flip();
-        action.assign_potential(detBuffer);
-        lu[1].compute(detBuffer);
-
-        float64 lnAD = 0, sgnD = 1;
-        for (const auto& spinLU : lu) {
-            auto [x, y] = promoteDet(spinLU.getMatrixLU());
-            lnAD += x;
-            sgnD *= y;
-        }
-        float64 betaU = getParams().getBeta() * getParams().getRepelU();
-        lnAD -= ln1pexp(lncosh(action.getAuxField().row(0).reals()) + fma(betaU, float64(-0.5), MathConst<float64>::ln2)).sum();
-        return {lnAD, sgnD};
     }
 
     template<Scalar T>

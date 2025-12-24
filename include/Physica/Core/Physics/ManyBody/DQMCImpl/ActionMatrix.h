@@ -164,15 +164,13 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     T ActionMatrix<T>::randAuxField(int freq, int site) {
-        Tr factor = sqrt(params.getRepelU() * params.getBeta());
+        const Tr betaU = params.getBeta() * params.getRepelU();
+        const Vector3D<Tr> shifts{-betaU, 0, betaU};
+        const Tr factor = sqrt(betaU);
         T result = T::template random_normal<R>() * factor;
-        if (freq == 0) {
-            Tr betaU = params.getBeta() * params.getRepelU();
-            Vector3D<Tr> shifts{-betaU, 0, betaU};
-            const Tr shift = shifts[std::uniform_int_distribution<int>(0, 2)(R::getInstance())];
-            result += shift;
-        }
-        else
+        result.real() += shifts[std::uniform_int_distribution<int>(0, 2)(R::getInstance())];
+        result.imag() += shifts[std::uniform_int_distribution<int>(0, 2)(R::getInstance())];
+        if (freq != 0)
             result /= sqrt(Trv(2));
         return std::exchange(auxField(freq, site), result);
     }
