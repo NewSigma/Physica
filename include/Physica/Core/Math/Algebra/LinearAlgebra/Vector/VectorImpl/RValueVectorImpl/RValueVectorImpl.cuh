@@ -378,35 +378,31 @@ namespace Physica {
     template<class Derived>
     template<Vector V>
     __device__ void device_obj<RValueVector<Derived>>::assign_impl(V& target) const {
+        const auto& v0 = Base::getDerived();
         if constexpr (Internal::EnableSIMD<device_obj<Derived>, V>::value) {
-            constexpr static size_t Size1 = Derived::SizeAtCompile;
-            constexpr static size_t Size2 = V::SizeAtCompile;
-            constexpr static size_t VectorSize = Size1 > Size2 ? Size1 : Size2;
-            using PacketType = device_obj<BestPacket<T, VectorSize>>::Type;
-            constexpr static size_t PacketSize = PacketType::size();
+            constexpr size_t Size1 = Derived::SizeAtCompile;
+            constexpr size_t Size2 = V::SizeAtCompile;
+            constexpr size_t Length = std::max(Size1, Size2);
+            using PacketType = device_obj<BestPacket<T, Length>>::Type;
+            constexpr size_t PacketSize = PacketType::size();
 
-            if constexpr (VectorSize != Dynamic) {
-                constexpr size_t to = VectorSize / PacketSize * PacketSize;
+            if constexpr (Length != Dynamic) {
+                constexpr size_t to = Length / PacketSize * PacketSize;
                 for (size_t i = 0; i < to; i += PacketSize)
-                    target.writePacket(i, Base::getDerived().template packet<PacketType>(i));
+                    target.writePacket(i, v0.template packet<PacketType>(i));
 
-                constexpr size_t i = VectorSize - VectorSize % PacketSize;
-                if constexpr (i != VectorSize) {
-                    constexpr size_t count = VectorSize - i;
-                    target.writePacketPartial(i, count, Base::getDerived().template packetPartial<PacketType>(i, count));
-                }
+                for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+                    target[i] = v0.calc(i);
             }
             else {
                 const size_t length = getLength();
                 const size_t to = length / PacketSize * PacketSize;
                 size_t i = 0;
                 for (; i < to; i += PacketSize)
-                    target.writePacket(i, Base::getDerived().template packet<PacketType>(i));
+                    target.writePacket(i, v0.template packet<PacketType>(i));
 
-                if (to != length) {
-                    const size_t count = length - i;
-                    target.writePacketPartial(i, count, Base::getDerived().template packetPartial<PacketType>(i, count));
-                }
+                for (; i < length; ++i)
+                    target[i] = v0.calc(i);
             }
         }
         else {

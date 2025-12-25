@@ -57,7 +57,7 @@ namespace Physica {
             using U1 = typename T1::ScalarType;
             using U2 = typename T2::ScalarType;
         public:
-            constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
+            constexpr static size_t SizeAtCompile = std::max(Size1, Size2);
             using ResultType = BinaryScalarOpRtnTy<U1, U2>::Type;
             using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
         private:

@@ -21,14 +21,14 @@
 #include "../LValueVector.h"
 
 namespace Physica {
-    template<Vector T1, Vector T2>
-    auto sincos(const T1& x, T2& s, T2& c) {
+    template<Vector V1, Vector V2>
+    auto sincos(const V1& x, V2& s, V2& c) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
-        constexpr size_t Size1 = T1::SizeAtCompile;
-        constexpr size_t Size2 = T2::SizeAtCompile;
-        constexpr size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-        using ScalarType1 = T1::ScalarType;
-        using ScalarType2 = T2::ScalarType;
+        constexpr size_t Size1 = V1::SizeAtCompile;
+        constexpr size_t Size2 = V2::SizeAtCompile;
+        constexpr size_t SizeAtCompile = std::max(Size1, Size2);
+        using ScalarType1 = V1::ScalarType;
+        using ScalarType2 = V2::ScalarType;
         using ScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
         if constexpr (ReverseDiff<ScalarType>) {
@@ -52,12 +52,9 @@ namespace Physica {
                 s.writePacket(i, s_buffer);
                 c.writePacket(i, c_buffer);
             }
-            if (to != length) {
-                const size_t count = length - i;
-                sincos(x.template packetPartial<PacketType>(i, count), s_buffer, c_buffer);
-                s.writePacketPartial(i, count, s_buffer);
-                c.writePacketPartial(i, count, c_buffer);
-            }
+
+            for (; i < length; ++i)
+                sincos(x.calc(i), s[i], c[i]);
         }
     }
 }

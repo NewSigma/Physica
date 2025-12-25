@@ -130,7 +130,7 @@ namespace Physica {
         }
     public:
         using ScalarType = std::conditional<ID == ExprID::Abs, Tr, T12>::type;
-        constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
+        constexpr static size_t SizeAtCompile = std::max(Size1, Size2);
         constexpr static bool FastAssign = calcFastAssign();
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };

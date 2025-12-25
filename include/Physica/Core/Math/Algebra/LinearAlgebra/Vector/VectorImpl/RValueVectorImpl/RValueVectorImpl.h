@@ -727,11 +727,8 @@ namespace Physica {
             for (size_t i = 0; i < to; i += PacketSize)
                 v.writePacket(i, v0.template packet<Pack>(i));
 
-            constexpr size_t i = Length - Length % PacketSize;
-            if constexpr (i != Length) {
-                constexpr size_t count = Length - i;
-                v.writePacketPartial(i, count, v0.template packetPartial<Pack>(i, count));
-            }
+            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+                v[i] = v0.calc(i);
         }
         else {
             const size_t length = getLength();
@@ -741,10 +738,8 @@ namespace Physica {
                 for (; i < to; i += PacketSize)
                     v.writePacket(i, v0.template packet<Pack>(i));
 
-                if (to != length) {
-                    const size_t count = length - i;
-                    v.writePacketPartial(i, count, v0.template packetPartial<Pack>(i, count));
-                }
+                for (; i < length; ++i)
+                    v[i] = v0.calc(i);
             }
             else {
                 const size_t numLoop = to / PacketSize;
@@ -753,10 +748,8 @@ namespace Physica {
                     v.writePacket(i1, v0.template packet<Pack>(i1));
                 }, numLoop, 0);
 
-                if (to != length) {
-                    const size_t count = length % PacketSize;
-                    v.writePacketPartial(to, count, v0.template packetPartial<Pack>(to, count));
-                }
+                for (size_t i = to; i < length; ++i)
+                    v[i] = v0.calc(i);
                 future.wait();
             }
         }
@@ -777,7 +770,7 @@ namespace Physica {
     template<Vector V, size_t Length>
     void RValueVector<Derived>::assign_add_simd(V& v) const noexcept {
         using Pack = BestPacket<typename V::ScalarType, Length>::Type;
-        constexpr static size_t PacketSize = Pack::size();
+        constexpr size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / PacketSize * PacketSize;
@@ -786,12 +779,8 @@ namespace Physica {
                 v.writePacket(i, sum);
             }
 
-            constexpr size_t i = Length - Length % PacketSize;
-            if constexpr (i != Length) {
-                constexpr size_t count = Length - i;
-                const Pack sum = v.template packetPartial<Pack>(i, count) + v0.template packetPartial<Pack>(i, count);
-                v.writePacketPartial(i, count, sum);
-            }
+            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+                v[i] += v0.calc(i);
         }
         else {
             const size_t length = v.getLength();
@@ -801,11 +790,9 @@ namespace Physica {
                 const Pack sum = v.template packet<Pack>(i) + v0.template packet<Pack>(i);
                 v.writePacket(i, sum);
             }
-            if (to != length) {
-                const size_t count = length - i;
-                const Pack sum = v.template packetPartial<Pack>(i, count) + v0.template packetPartial<Pack>(i, count);
-                v.writePacketPartial(i, count, sum);
-            }
+
+            for (; i < length; ++i)
+                v[i] += v0.calc(i);
         }
     }
 }
