@@ -22,18 +22,17 @@
 
 namespace Physica {
     template<Scalar T, bool TakeLn>
-    Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate_, Trv mixBeta_)
+    Vegas<T, TakeLn>::Vegas(VectorND<Trv> from, VectorND<Trv> to, int numRefine, int numSample, int numPoint, Trv compressRate, Trv mixBeta)
             : Base(std::move(from), std::move(to), numRefine, numSample)
-            , compressRate(compressRate_)
-            , mixBeta(mixBeta_) {
+            , pointGrid(numPoint, getDim())
+            , compressRate(compressRate)
+            , mixBeta(mixBeta)
+            , lossMat(numPoint - 1, getDim())
+            , counts(numPoint - 1, getDim()) {
         assert(numPoint > 2 && "[Error]: Invalid point number");
         assert(compressRate.isPositive() && "[Error]: Rate = 0 implies no grid refinement");
         assert(compressRate < Trv(2) && "[Error]: Rate should be ~ 1");
         assert(mixBeta.isPositive() && (mixBeta <= Trv(1)) && "[Error]: Invalid beta");
-        pointGrid.resize(numPoint, getDim());
-        lossMat.resize(numPoint - 1, getDim());
-        counts.resize(numPoint - 1, getDim());
-        
         for (size_t i = 0; i < getDim(); ++i)
             mesh_uniform(i);
     }
@@ -144,10 +143,8 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     void Vegas<T, TakeLn>::pre_trial() {
-        for (auto& arr : counts)
-            for (int& elem : arr)
-                elem = 0;
         lossMat = Trv(std::numeric_limits<T>::min()); // Initial value avoids situation where number of samples is too small to sample effective data
+        counts.zeros();
     }
 
     template<Scalar T, bool TakeLn>
@@ -160,10 +157,10 @@ namespace Physica {
         const VectorND<Trv> buffer = vars * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
         const Vector3D<Trv> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
         size_t i = 0;
-        vars[0] = Trv(7.0 / 8) * buffer[0] + Trv(1.0 / 8) * buffer[1];
+        vars[0] = fma(Trv(7.0 / 8), buffer[0], Trv(1.0 / 8) * buffer[1]);
         for (; i < vars.getLength() - 2; ++i)
             vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
-        vars[i + 1] = Trv(1.0 / 8) * buffer[i] + Trv(7.0 / 8) * buffer[i + 1];
+        vars[i + 1] = fma(Trv(7.0 / 8), buffer[i + 1], Trv(1.0 / 8) * buffer[i]);
 
         vars = pow(divide(vars - Trv(1), ln(vars)), compressRate);
         return vars.mean();
@@ -190,7 +187,8 @@ namespace Physica {
                     j += 1;
                 }
                 temp -= meanVar;
-                newPoints[i] = oldPoints[j] - temp * (oldPoints[j] - oldPoints[j - 1]) / lossMat(j - 1, dim);
+                Trv delta = oldPoints[j] - oldPoints[j - 1];
+                newPoints[i] = fma(temp / lossMat(j - 1, dim), -delta, oldPoints[j]);
             }
             newPoints[i] = oldPoints[i];
             oldPoints = newPoints * mixBeta + oldPoints * (Trv(1) - mixBeta);
@@ -247,8 +245,8 @@ namespace Physica {
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
-                lossMat(index, i).toNextMean(counts[index][i], l);
-                counts[index][i] += 1;
+                lossMat(index, i).toNextMean(counts(index, i), l);
+                counts(index, i) += 1;
             }
         }
     }
@@ -265,7 +263,7 @@ namespace Physica {
             const auto& deltas = pair.second;
             const T lny = fn(x);
             assert(lny.isFinite() && "[Error]: Bad value");
-            const T lnxy = lny + ln(deltas).sum() + Trv(getDim()) * ln(Trv(getNumPoint()));
+            const T lnxy = fma(Trv(getDim()), ln(Trv(getNumPoint())), lny + ln(deltas).sum());
             samples[n] = lnxy;
         }, numSample, 0).wait();
 
@@ -283,11 +281,11 @@ namespace Physica {
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
-                lossMat(index, i).toNextMean(counts[index][i], l);
-                counts[index][i] += 1;
+                lossMat(index, i).toNextMean(counts(index, i), l);
+                counts(index, i) += 1;
             }
         }
         mean = ln(mean) + maxSample;
-        var = ln(var + Trv(std::numeric_limits<T>::min())) + Trv(2) * maxSample;
+        var = fma(Trv(2), maxSample, ln(var + Trv(std::numeric_limits<T>::min())));
     }
 }

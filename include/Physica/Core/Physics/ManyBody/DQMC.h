@@ -47,7 +47,7 @@ namespace Physica {
         int cursor = 0;
     public:
         DQMC() = delete;
-        DQMC(const Params& params_);
+        explicit DQMC(const Params& params_);
         DQMC(const This&) = default;
         DQMC(This&&) noexcept = default;
         ~DQMC() = default;

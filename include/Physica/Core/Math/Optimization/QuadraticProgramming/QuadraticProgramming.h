@@ -94,6 +94,7 @@ namespace Physica {
         if (!equalityConstraint.empty())
             activeConstraints = equalityConstraint;
 
+        int iteration = 0;
         while (true) {
             const EqualityQuadraticProgramming<T> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
             const VectorND<T> vec_p = EQP.getSolution() - x;
@@ -117,6 +118,9 @@ namespace Physica {
             else
                 updateVariables(vec_p);
             updateActiveConstraints(activeConstraints);
+            iteration += 1;
+            if (iteration == 1000)
+                throw BadConvergenceException("QuadraticProgramming");
         };
     }
     /**

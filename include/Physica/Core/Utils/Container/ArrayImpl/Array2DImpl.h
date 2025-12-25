@@ -89,6 +89,7 @@ namespace Physica {
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::zeros() noexcept {
+        assert(!empty());
         asArray().zeros();
     }
 

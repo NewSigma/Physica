@@ -38,8 +38,6 @@ namespace Physica {
     protected:
         using Tv = T::ValueType;
         using Trv = Tv::RealType;
-        using LossMatrix = DenseMatrix<Trv>;
-        using CountArray = Array<Array<int>>;
     private:
         DenseMatrix<Trv> pointGrid;
         Trv compressRate;
@@ -51,8 +49,8 @@ namespace Physica {
         using Base::vars;
         using Base::loss;
 
-        LossMatrix lossMat;
-        CountArray counts;
+        DenseMatrix<Trv> lossMat;
+        Array2D<int> counts;
     public:
         Vegas() = default;
         Vegas(VectorND<Trv> from,
@@ -60,8 +58,8 @@ namespace Physica {
               int numRefine,
               int numSample,
               int numPoint = 1000,
-              Trv compressRate_ = 1.5,
-              Trv mixBeta_ = 1);
+              Trv compressRate = 1.5,
+              Trv mixBeta = 1);
         Vegas(const This&) = default;
         Vegas(This&&) noexcept = default;
         ~Vegas() = default;
