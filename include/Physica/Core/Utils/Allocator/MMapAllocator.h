@@ -44,12 +44,14 @@ namespace Physica {
         [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n);
         void deallocate(T* p, size_t n);
         [[nodiscard, gnu::returns_nonnull]] T* reallocate(T* p, size_t new_size, size_t old_size);
+    protected:
+        [[nodiscard]] static size_t calcSize(size_t n) noexcept;
     };
 
     template<class T, size_t Align>
     T* MMapAllocator<T, Align>::allocate(size_t n) {
         assert(n > 0 && "[Error]: Allocate nothing");
-        size_t size = Base::calcSize(n);
+        size_t size = calcSize(n);
         constexpr int Prot = PROT_READ | PROT_WRITE;
         constexpr int Flag = MAP_PRIVATE;
         TempFile file(".MMAPXXXXXX");
@@ -62,23 +64,27 @@ namespace Physica {
 
     template<class T, size_t Align>
     void MMapAllocator<T, Align>::deallocate(T* p, size_t n) {
-        if (munmap(p, Base::calcSize(n))) [[unlikely]]
+        if (munmap(p, calcSize(n))) [[unlikely]]
             throw SystemException();
     }
 
     template<class T, size_t Align>
     T* MMapAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) {
         assert(new_size > 0 && "[Error]: Allocate nothing");
+        assert(p != nullptr || old_size == 0);
         T* new_p = allocate(new_size);
-        const size_t size = std::min(new_size, old_size);
-        if constexpr (std::is_trivially_copyable<T>::value)
-            memcpy(new_p, p, size * sizeof(T));
-        else {
-            for (size_t i = 0; i < size; ++i)
-                construct(new_p + i, std::move(p[i]));
-        }
+        memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
         deallocate(p, old_size);
         return new_p;
+    }
+
+    template<class T, size_t Align>
+    size_t MMapAllocator<T, Align>::calcSize(size_t n) noexcept {
+        assert(n > 0 && "[Error]: Allocate nothing");
+        size_t size = n * sizeof(T);
+        if constexpr (OverAlign)
+            size = (size + Align - 1) & ~(Align - 1);
+        return size;
     }
 }
 

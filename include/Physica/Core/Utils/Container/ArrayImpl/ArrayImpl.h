@@ -216,14 +216,6 @@ namespace Physica {
         std::allocator_traits<Allocator>::construct(alloc, arr + index, std::forward<decltype(args)>(args)...);
         length += 1;
     }
-
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::reserve(size_t size) noexcept {
-        if (size > getCapacity()) {
-            arr = alloc.reallocate(arr, size, capacity);
-            capacity = size;
-        }
-    }
     /**
      * resize() is inlined, if there is no need to resize, we avoid the overhead of slow resizeImpl() call
      */
@@ -234,39 +226,17 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::reserve(size_t size) noexcept {
+        if (size > getCapacity())
+            adjust(size);
+    }
+
+    template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::squeeze() noexcept {
         if (length == 0)
             *this = Array();
-        else {
-            arr = alloc.reallocate(arr, length, capacity);
-            capacity = length;
-        }
-    }
-    /*!
-     * Increase the capacity.
-     * This function can be used when you are sure the new \param size is larger than the old capacity.
-     */
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::increase(size_t size) noexcept {
-        assert(size >= capacity);
-        [[assume(arr != nullptr)]]; // LLVM loses nonnull information after inlining(GH61966)
-        arr = alloc.reallocate(data(), size, capacity);
-        capacity = size;
-    }
-    /*!
-     * Decrease the capacity.
-     * This function can be used when you are sure the new \param size is shorter than the old capacity.
-     */
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::decrease(size_t size) noexcept {
-        assert(size <= capacity);
-        [[assume(arr != nullptr)]];
-        if(!std::is_trivially_copyable<T>::value) {
-            for(size_t i = size; i < length; ++i)
-                (arr + i)->~T();
-        }
-        arr = alloc.reallocate(data(), size);
-        length = capacity = size;
+        else
+            adjust(length);
     }
 
     template<class T, class Allocator>
@@ -282,12 +252,6 @@ namespace Physica {
         arr = nullptr;
         length = capacity = 0;
         return p;
-    }
-
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::doubleSpace() noexcept {
-        assert(capacity != 0 && "[Error]: Cannot double empty array");
-        increase((capacity * 2) + ((MinDeltaSpace + sizeof(T) - 1) / sizeof(T)));
     }
 
     template<class T, class Allocator>
@@ -346,10 +310,15 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, auto&&... args) noexcept {
-        if (capacity < size)
-            reserve(size);
+    void Array<T, Dynamic, Allocator>::adjust(size_t size) {
+        assert(size >= length && "[Error]: adjust() cannot destroy elements");
+        arr = alloc.reallocate(arr, size, capacity);
+        capacity = size;
+    }
 
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, auto&&... args) noexcept {
+        reserve(size);
         if (length > size) {
             if constexpr (!std::is_trivially_copyable<T>::value)
                 for (size_t i = size; i < length; ++i)
@@ -364,5 +333,12 @@ namespace Physica {
                     std::allocator_traits<Allocator>::construct(alloc, arr + length, std::forward<decltype(args)>(args)...);
             }
         }
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::doubleSpace() noexcept {
+        assert(capacity != 0 && "[Error]: Cannot double empty array");
+        [[assume(arr != nullptr)]]; // LLVM loses nonnull information after inlining(GH61966)
+        adjust((capacity * 2) + ((MinDeltaSpace + sizeof(T) - 1) / sizeof(T)));
     }
 }

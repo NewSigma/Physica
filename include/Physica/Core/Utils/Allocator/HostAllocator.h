@@ -48,14 +48,12 @@ namespace Physica {
         [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n) noexcept;
         void deallocate(T* p, size_t n) noexcept;
         [[nodiscard, gnu::returns_nonnull]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
-    protected:
-        [[nodiscard]] static size_t calcSize(size_t n) noexcept;
     };
 
     template<class T, size_t Align>
     T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
         assert(n > 0 && "[Error]: Allocate nothing");
-        size_t size = calcSize(n);
+        size_t size = n * sizeof(T);
         void* p{};
         if constexpr (OverAlign)
             p = ::operator new(size, std::align_val_t(Align), std::nothrow_t{});
@@ -74,29 +72,18 @@ namespace Physica {
         else
             ::operator delete(p);
     }
-
+    /**
+     * Reference:
+     * [1] N3322; https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3322.pdf
+     */
     template<class T, size_t Align>
     T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
         assert(new_size > 0 && "[Error]: Allocate nothing");
+        assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
         T* new_p = allocate(new_size);
-        const size_t size = std::min(new_size, old_size);
-        if constexpr (std::is_trivially_copyable<T>::value)
-            memcpy(new_p, p, size * sizeof(T));
-        else {
-            for (size_t i = 0; i < size; ++i)
-                std::allocator_traits<This>::construct(*this, new_p + i, std::move(p[i]));
-        }
+        memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
         deallocate(p, old_size);
         return new_p;
-    }
-
-    template<class T, size_t Align>
-    size_t HostAllocator<T, Align>::calcSize(size_t n) noexcept {
-        assert(n > 0 && "[Error]: Allocate nothing");
-        size_t size = n * sizeof(T);
-        if constexpr (OverAlign)
-            size = (size + Align - 1) / Align * Align;
-        return size;
     }
 }
 
@@ -120,7 +107,7 @@ namespace std {
         using propagate_on_container_swap = std::false_type;
         using is_always_equal = std::is_empty<allocator_type>::type;
         template<class U>
-        using rebind_alloc = Physica::HostAllocator<U>;
+        using rebind_alloc = Physica::HostAllocator<U, Align_>;
         template<class U>
         using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
 

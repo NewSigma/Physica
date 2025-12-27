@@ -73,8 +73,8 @@ namespace Physica {
         [[nodiscard]] constexpr const T& get() const noexcept;
 
         __host__ __device__ void insert(size_t, auto&&...) = delete;
-        __host__ __device__ void reserve([[maybe_unused]] size_t size) noexcept { assert(size == Length); }
         __host__ __device__ void resize(size_t length, auto&&... args) noexcept;
+        __host__ __device__ void reserve([[maybe_unused]] size_t size) noexcept { assert(size == Length); }
         __host__ __device__ void zeros() noexcept;
 
         [[nodiscard]] auto toDevice() const;
@@ -136,14 +136,11 @@ namespace Physica {
         void grow(auto&&... args) noexcept;
         void append(auto&&... args) noexcept;
         void insert(size_t index, auto&&... args) noexcept;
-        void reserve(size_t size) noexcept;
         void resize(size_t size, auto&&... args) noexcept;
+        void reserve(size_t size) noexcept;
         void squeeze() noexcept;
-        void increase(size_t size) noexcept;
-        void decrease(size_t size) noexcept;
         void clear() noexcept;
         [[nodiscard]] T* release() noexcept;
-        void doubleSpace() noexcept;
         void zeros() noexcept;
 
         [[nodiscard]] auto toDevice() const;
@@ -165,7 +162,9 @@ namespace Physica {
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
         [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
     private:
+        void adjust(size_t size);
         void resizeImpl(size_t size, auto&&... args) noexcept;
+        void doubleSpace() noexcept;
     };
 
     template<class T, size_t Length, class Allocator>

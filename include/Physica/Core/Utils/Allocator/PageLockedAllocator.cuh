@@ -65,14 +65,9 @@ namespace Physica {
     template<class T>
     T* PageLockedAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
         assert(new_size > 0 && "[Error]: Allocate nothing");
+        assert(p != nullptr || old_size == 0);
         T* new_p = allocate(new_size);
-        size_t size = std::min(new_size, old_size);
-        if constexpr (std::is_trivially_copyable<T>::value)
-            memcpy(new_p, p, size * sizeof(T));
-        else {
-            for (size_t i = 0; i < size; ++i)
-                construct(new_p + i, std::move(p[i]));
-        }
+        memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
         deallocate(p, old_size);
         return new_p;
     }
