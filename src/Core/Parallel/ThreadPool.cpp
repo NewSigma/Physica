@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include <memory>
+#include <xmmintrin.h>
 #ifdef PHYSICA_MKL
     #include <mkl_vml.h>
 #endif
@@ -29,6 +30,8 @@ using namespace Physica;
 
 namespace {
     void setThreadEnv() noexcept {
+        _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+        _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
     #ifdef PHYSICA_MKL
         vmlSetMode(VML_HA | VML_FTZDAZ_CURRENT | VML_ERRMODE_NOERR);
     #endif
