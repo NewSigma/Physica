@@ -34,12 +34,7 @@ namespace Physica {
             : v(length, init.value()), g(length, init.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<T> list) : DenseVector(list.size()) {
-        size_t i = 0;
-        for (auto& elem : list) {
-            v[i] = elem.value();
-            i += 1;
-        }
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<T> list) : v(std::move(list)), g(v.getLength()) {
         g.zeros();
     }
 

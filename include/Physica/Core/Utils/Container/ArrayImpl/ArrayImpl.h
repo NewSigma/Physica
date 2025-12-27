@@ -39,10 +39,8 @@ namespace Physica {
     template<class T, size_t Length, class Allocator>
     __host__ __device__ Array<T, Length, Allocator>::Array(std::initializer_list<T> list) {
         assert(list.size() == Length);
-        unsigned int i = 0;
-        const auto end = list.end();
-        for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            arr[i] = *ite;
+        for (size_t i = 0; i < Length; ++i)
+            arr[i] = std::data(list)[i];
     }
 
     template<class T, size_t Length, class Allocator>
@@ -148,10 +146,8 @@ namespace Physica {
 
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(std::initializer_list<T> list) noexcept : Array(list.size()) {
-        size_t i = 0;
-        const auto end = list.end();
-        for (auto ite = list.begin(); ite != end; ++ite, ++i)
-            alloc.construct(arr + i, std::move(*ite));
+        for (size_t i = 0; i < length; ++i)
+            alloc.construct(arr + i, std::move(*(std::data(list) + i)));
     }
 
     template<class T, class Allocator>

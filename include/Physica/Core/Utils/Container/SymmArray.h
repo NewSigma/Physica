@@ -41,7 +41,6 @@ namespace Physica {
         SymmArray(size_t order_, const T& t);
         SymmArray(size_t row, size_t col);
         SymmArray(size_t row, size_t col, const T& t);
-        SymmArray(std::initializer_list<T> list) : arr(list) {}
         SymmArray(const This&) = default;
         SymmArray(This&&) noexcept = default;
         ~SymmArray() = default;

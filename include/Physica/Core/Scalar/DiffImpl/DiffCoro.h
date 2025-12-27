@@ -52,7 +52,7 @@ namespace Physica {
             Promise& operator=(Promise obj) noexcept { swap(obj); return *this; }
             /* Operations */
             auto get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); };
-            static auto get_return_object_on_allocation_failure() noexcept { return nullptr; }
+            // static auto get_return_object_on_allocation_failure() noexcept { return nullptr; } // FIXME: clang CUDA rejects valid(clang 18)
             std::suspend_never initial_suspend() noexcept { return {}; }
             void await_transform(auto&&) noexcept = delete
                 #ifdef __cpp_deleted_function // FIXME: Remove it once we dump to CXX26
