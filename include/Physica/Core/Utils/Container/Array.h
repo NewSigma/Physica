@@ -28,7 +28,9 @@ namespace Physica {
     template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T>> class Array;
     template<class T> class PageLockedAllocator;
     /**
-     * \class Array unifies std::array and std::vector with customized optimizations. Unlike std::vector<bool>, Array<bool> is not bitwise.
+     * \class Array unifies std::array and std::vector with following features:
+     * 1. Customized extensions;
+     * 2. Array<bool> is not bitwise;
      */
     template<class T, size_t Length, class Allocator>
     class Array : public ArrayBase<Array<T, Length, Allocator>, Allocator>
@@ -90,8 +92,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() noexcept { return Length; }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
-        /* Setters */
-        void setLength([[maybe_unused]] size_t size) { assert(size == Length); }
         /* Static members */
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
@@ -161,8 +161,6 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
-        /* Setters */
-        void setLength(size_t size) noexcept;
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
         [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);

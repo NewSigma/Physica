@@ -77,7 +77,7 @@ namespace Physica {
         using Base = ArrayBase<device_obj<host_obj>, DeviceAllocator<T>>;
         constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
     public:
-        constexpr static bool isTrivial = std::is_trivially_copyable<T>::value;
+        constexpr static bool IsTrivial = std::is_trivially_copyable<T>::value;
         using typename Base::allocator_type;
         using typename Base::value_type;
         using typename Base::pointer;
@@ -174,12 +174,13 @@ namespace Physica {
             : length(obj.getLength()), capacity(obj.getCapacity()), alloc(obj.alloc) {
         d_data = alloc.allocate(capacity);
         auto& ctx = CUDAContext::getInstance();
-        if constexpr (isTrivial)
+        if constexpr (std::is_trivially_copyable<value_type>::value)
             cudaMemcpyAsync(d_data, obj.d_data, length * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice, ctx);
         else {
             Array<ElemType, Dynamic> buffer(length);
             cudaMemcpyAsync(buffer.data(), obj.d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
             ctx.wait();
+
             Array<ElemType, Dynamic> buffer1 = buffer;
             cudaMemcpyAsync(d_data, buffer1.data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             buffer.get_allocator().deallocate(buffer.release(), length);
@@ -197,7 +198,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     __host__ __device__ device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
-        if constexpr (!isTrivial) {
+        if constexpr (!IsTrivial) {
             if (length != 0) {
                 if constexpr (IsHost()) {
                     Array<ElemType, Dynamic> buffer(length);
@@ -219,7 +220,7 @@ namespace Physica {
     template<class T, class Allocator>
     auto device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const {
         assert(getLength() > 0 && "[Error]: Unnecessary memcpy a empty array");
-        using U = std::conditional<isTrivial, ElemType, Physica::PlainStruct<ElemType>>::type;
+        using U = std::conditional<IsTrivial, ElemType, Physica::PlainStruct<ElemType>>::type;
         using AllocatorU = std::allocator_traits<Allocator>::template rebind_alloc<U>;
         using RtnTy = Array<U, Dynamic, AllocatorU>;
 
@@ -250,15 +251,14 @@ namespace Physica {
 
     template<class T, class Allocator>
     void device_obj<Array<T, Dynamic, Allocator>>::toHostAsync(host_obj& obj) const {
-        obj.reserve(length);
-        if constexpr (isTrivial)
+        obj.resize(length);
+        if constexpr (IsTrivial)
             check(cudaMemcpyAsync(obj.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
         else {
             const auto buffer = toPlainHost();
             for (size_t i = 0; i < length; ++i)
                 buffer[i].getDerived().toHostAsync(obj[i]);
         }
-        obj.setLength(length);
     }
 
     template<class T, class Allocator>
@@ -284,12 +284,11 @@ namespace Physica {
 
         auto& ctx = CUDAContext::getInstance();
         if (length > size) {
-            if constexpr (!isTrivial) {
+            if constexpr (!std::is_trivially_destructible<value_type>::value) {
                 const size_t delta = length - size;
-                Array<ElemType, Dynamic> buffer{};
-                buffer.reserve(delta);
+                auto buffer = Array<ElemType, Dynamic>(delta);
                 check(cudaMemcpyAsync(buffer.data(), d_data + size, delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx));
-                buffer.setLength(delta);
+                ctx.wait();
             }
         }
         else if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
@@ -356,28 +355,28 @@ namespace Physica {
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::toDevice(device_obj<This>& obj) const {
         using ElemType = device_obj<This>::ElemType;
-        constexpr bool isTrivial = device_obj<This>::isTrivial;
         const size_t length = getLength();
         obj.resize(length);
 
         auto& ctx = CUDAContext::getInstance();
-        if constexpr (isTrivial) {
+        if constexpr (std::is_trivially_copyable<ElemType>::value) {
             cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             ctx.wait();
         }
         else {
-            Array<ElemType, Dynamic> buffer(length);
-            for (size_t i = 0; i < length; ++i)
-                buffer[i] = this->operator[](i).toDevice();
+            auto buffer = Array<ElemType, Dynamic>::generate(length, [this](size_t i) {
+                return this->operator[](i).toDevice();
+            });
             cudaMemcpyAsync(obj.data(), buffer.data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             ctx.wait();
+
             buffer.get_allocator().deallocate(buffer.release(), length);
         }
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
-        static_assert(device_obj<This>::isTrivial, "[Error]: Do not pass non trivial elements to device asynchronously");
+        static_assert(device_obj<This>::IsTrivial, "[Error]: Do not pass non trivial elements to device asynchronously");
         using ElemType = device_obj<This>::ElemType;
         const size_t length = getLength();
         obj.resize(length);

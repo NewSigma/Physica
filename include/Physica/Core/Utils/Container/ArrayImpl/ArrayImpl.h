@@ -324,17 +324,6 @@ namespace Physica {
         return const_cast<This&>(*this).data();
     }
     /**
-     * Low level api. Designed for performance. Elements between old length and \param size have not allocated. DO NOT try to visit them.
-     */
-    template<class T, class Allocator>
-    void Array<T, Dynamic, Allocator>::setLength(size_t size) noexcept {
-        assert(size <= getCapacity() && "[Error]: Requiring more elements than the array have");
-        if constexpr (!std::is_trivially_copyable<ElemType>::value) {
-            assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");
-        }
-        length = size;
-    }
-    /**
      * Helper function that communicates with C libraries.
      */
     template<class T, class Allocator>

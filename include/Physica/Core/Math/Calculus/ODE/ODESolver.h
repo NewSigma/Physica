@@ -31,7 +31,7 @@ namespace Physica {
         SolutionType solution;
         T stepSize;
     public:
-        ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial);
+        ODESolver(T start, T end, T stepSize_, const VectorType& initial);
         /* Operations */
         void rungeKutta4(std::invocable<T, VectorType> auto fn);
         void verlet(std::invocable<T, T> auto fn, const T& initial1);
@@ -46,14 +46,13 @@ namespace Physica {
     };
 
     template<Scalar T, size_t Dim>
-    ODESolver<T, Dim>::ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial)
-            : stepSize(stepSize_) {
+    ODESolver<T, Dim>::ODESolver(T start, T end, T stepSize_, const VectorType& initial)
+            : x(getNumStep(start, end, stepSize_))
+            , solution(initial.getLength(), getNumStep())
+            , stepSize(stepSize_) {
         assert(start < end);
-        const size_t size = getNumStep(start, end, stepSize);
-        x.reserve(size);
-        x.setLength(size);
         x[0] = start;
-        solution.resize(initial.getLength(), size);
+
         auto col = solution.col(0);
         col = initial;
     }
