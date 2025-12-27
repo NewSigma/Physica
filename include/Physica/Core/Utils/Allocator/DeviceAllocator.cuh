@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,41 +25,23 @@
 #include "HostAllocator.h"
 
 namespace Physica {
-    namespace Internal {
-        template<class T, bool IsClass>
-        struct DeviceAllocatorValueType {
-            using Type = T::device_obj_type;
-        };
-
-        template<class T>
-        struct DeviceAllocatorValueType<T, false> {
-            using Type = T;
-        };
-    }
-
     template<class T>
     class DeviceAllocator {
+        using This = DeviceAllocator<T>;
     public:
-        using value_type = Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
-        using pointer = value_type*;
-        using size_type = size_t;
-        using difference_type = std::ptrdiff_t;
-        using propagate_on_container_move_assignment = std::true_type;
-        template<class U>
-        using rebind_alloc = DeviceAllocator<U>;
+        using value_type = std::allocator_traits<This>::value_type;
+        using pointer = std::allocator_traits<This>::pointer;
     public:
-        DeviceAllocator() noexcept = default;
-        DeviceAllocator(const DeviceAllocator&) noexcept = default;
-        DeviceAllocator(DeviceAllocator&&) noexcept = default;
+        DeviceAllocator() = default;
+        DeviceAllocator(const This&) = default;
+        DeviceAllocator(This&&) noexcept = default;
         ~DeviceAllocator() = default;
         /* Operators */
-        DeviceAllocator& operator=(const DeviceAllocator&) noexcept = default;
-        DeviceAllocator& operator=(DeviceAllocator&&) noexcept = delete;
+        This& operator=(const This&) noexcept = default;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ pointer allocate(size_t n) noexcept;
         __host__ __device__ void deallocate(pointer p, size_t n) noexcept;
-        __host__ __device__ void construct(pointer p, auto&&... args);
-        __host__ __device__ void destroy(pointer p) noexcept;
     };
 
     template<class T>
@@ -92,38 +74,19 @@ namespace Physica {
             }
         }
     }
-
-    template<class T>
-    __host__ __device__ void DeviceAllocator<T>::construct(pointer p, auto&&... args) {
-        if constexpr (IsDevice())
-            ::new (static_cast<void*>(p)) value_type(std::forward<decltype(args)>(args)...);
-        else {
-            value_type temp(std::forward<decltype(args)>(args)...);
-            check(cudaMemcpyAsync(p, &temp, sizeof(value_type), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
-            if constexpr (!std::is_trivially_copyable<value_type>::value)
-                temp.release(); //Ownership has been given to device
-        }
-    }
-
-    template<class T>
-    __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) noexcept {
-        if constexpr (!std::is_trivially_copyable<value_type>::value) {
-            if constexpr (IsDevice())
-                p->~value_type();
-            else {
-                value_type temp;
-                cudaMemcpyAsync(&temp, p, sizeof(value_type), cudaMemcpyDeviceToHost, CUDAContext::getInstance());
-            }
-        }
-    }
 }
 
 namespace std {
     template<class T>
     struct allocator_traits<Physica::DeviceAllocator<T>> {
+        template<bool IsClass>
+        struct ValueType { using Type = T::device_obj_type; };
+
+        template<>
+        struct ValueType<false> { using Type = T; };
     public:
         using allocator_type = Physica::DeviceAllocator<T>;
-        using value_type = allocator_type::value_type;
+        using value_type = ValueType<std::is_class<T>::value>::Type;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using void_pointer = void*;
@@ -144,6 +107,11 @@ namespace std {
 
         constexpr static size_t Align = 256; // CUDA default
         constexpr static bool isPageLocked = false;
+    private:
+        constexpr static bool IsTrivialC = std::is_trivially_constructible<value_type>::value;
+        constexpr static bool IsTrivialD = std::is_trivially_destructible<value_type>::value;
+        constexpr static bool IsTrivialCP = std::is_trivially_copyable<value_type>::value;
+        static_assert((IsTrivialC && IsTrivialD) || IsTrivialCP, "[Error]: Must either be able to construct an object on device or copy it to device");
     public:
         [[nodiscard]] __host__ __device__ static pointer allocate(allocator_type& a, size_type n) {
             return a.allocate(n);
@@ -153,12 +121,26 @@ namespace std {
             a.deallocate(p, n);
         }
 
-        __host__ __device__ static void construct(allocator_type& a, pointer p, auto&&... args) {
-            a.construct(p, std::forward<decltype(args)>(args)...);
+        __host__ __device__ static void construct(allocator_type&, pointer p, auto&&... args) {
+            using namespace Physica;
+            if constexpr (IsDevice())
+                ::new (static_cast<void*>(p)) value_type(std::forward<decltype(args)>(args)...);
+            else if constexpr (sizeof...(args) != 0 || !IsTrivialC) {
+                value_type temp(std::forward<decltype(args)>(args)...);
+                check(cudaMemcpyAsync(p, &temp, sizeof(value_type), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
+                CUDAContext::getInstance().wait();
+            }
         }
 
-        __host__ __device__ static void destroy(allocator_type& a, pointer p) {
-            a.destroy(p);
+        __host__ __device__ static void destroy(allocator_type&, pointer p) {
+            using namespace Physica;
+            if constexpr (IsDevice())
+                p->~value_type();
+            else if constexpr (!IsTrivialD) {
+                value_type temp{};
+                cudaMemcpyAsync(&temp, p, sizeof(value_type), cudaMemcpyDeviceToHost, CUDAContext::getInstance());
+                CUDAContext::getInstance().wait();
+            }
         }
 
          __host__ __device__ static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {

@@ -125,16 +125,12 @@ namespace std {
             a.deallocate(p, n);
         }
 
-        [[nodiscard]] static pointer reallocate(allocator_type& a, pointer p, size_type n) {
-            return a.reallocate(p, n);
+        static void construct(allocator_type&, pointer p, auto&&... args) {
+            ::new (static_cast<void*>(p)) T(std::forward<decltype(args)>(args)...);
         }
 
-        static void construct(allocator_type& a, pointer p, auto&&... args) {
-            a.construct(p, std::forward<decltype(args)>(args)...);
-        }
-
-        static void destroy(allocator_type& a, pointer p) {
-            a.destroy(p);
+        static void destroy(allocator_type&, pointer p) {
+            p->~T();
         }
 
         static constexpr size_type max_size(const allocator_type& a) noexcept {

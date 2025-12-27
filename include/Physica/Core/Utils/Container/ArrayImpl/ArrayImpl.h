@@ -140,14 +140,14 @@ namespace Physica {
         arr = alloc.allocate(capacity);
         if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
             for (size_t i = 0; i < length_; ++i)
-                alloc.construct(arr + i, std::forward<decltype(args)>(args)...);
+                std::allocator_traits<Allocator>::construct(alloc, arr + i, std::forward<decltype(args)>(args)...);
         }
     }
 
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(std::initializer_list<T> list) noexcept : Array(list.size()) {
         for (size_t i = 0; i < length; ++i)
-            alloc.construct(arr + i, std::move(*(std::data(list) + i)));
+            std::allocator_traits<Allocator>::construct(alloc, arr + i, std::move(*(std::data(list) + i)));
     }
 
     template<class T, class Allocator>
@@ -171,7 +171,7 @@ namespace Physica {
             memcpy(arr, obj.arr, length * sizeof(ElemType));
         else
             for(size_t i = 0; i < length; ++i)
-                alloc.construct(arr + i, obj[i]);
+                std::allocator_traits<Allocator>::construct(alloc, arr + i, obj[i]);
     }
 
     template<class T, class Allocator>
@@ -187,14 +187,14 @@ namespace Physica {
         if constexpr (!std::is_trivially_destructible<ElemType>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
-                    alloc.destroy(arr + i);
+                    std::allocator_traits<Allocator>::destroy(alloc, arr + i);
         alloc.deallocate(arr, length);
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::grow(auto&&... args) noexcept {
         assert(length < getCapacity() && "[Error]: You must make sure capacity is enough before calling grow()");
-        alloc.construct(arr + length++, std::forward<decltype(args)>(args)...);
+        std::allocator_traits<Allocator>::construct(alloc, arr + length++, std::forward<decltype(args)>(args)...);
     }
 
     template<class T, class Allocator>
@@ -213,8 +213,8 @@ namespace Physica {
         if (length == capacity)
             doubleSpace();
         memmove(arr + index + 1, arr + index, (length - index) * sizeof(T));
-        alloc.construct(arr + index, std::forward<decltype(args)>(args)...);
-        setLength(length + 1);
+        std::allocator_traits<Allocator>::construct(alloc, arr + index, std::forward<decltype(args)>(args)...);
+        length += 1;
     }
 
     template<class T, class Allocator>
@@ -272,7 +272,7 @@ namespace Physica {
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::clear() noexcept {
         for (size_t i = 0; i < length; ++i)
-            alloc.destroy(arr + i);
+            std::allocator_traits<Allocator>::destroy(alloc, arr + i);
         length = 0;
     }
 
@@ -372,7 +372,7 @@ namespace Physica {
                 length = size;
             else {
                 for (; length < size; ++length)
-                    alloc.construct(arr + length, std::forward<decltype(args)>(args)...);
+                    std::allocator_traits<Allocator>::construct(alloc, arr + length, std::forward<decltype(args)>(args)...);
             }
         }
     }

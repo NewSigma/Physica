@@ -44,8 +44,6 @@ namespace Physica {
         [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n);
         void deallocate(T* p, size_t n);
         [[nodiscard, gnu::returns_nonnull]] T* reallocate(T* p, size_t new_size, size_t old_size);
-        using Base::construct;
-        using Base::destroy;
     };
 
     template<class T, size_t Align>
