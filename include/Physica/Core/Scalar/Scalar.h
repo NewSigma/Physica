@@ -174,7 +174,8 @@ namespace Physica {
         using This = DiffCoro<void>;
         class Promise {
         public:
-            auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
+            auto get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); };
+            static auto get_return_object_on_allocation_failure() noexcept { return nullptr; }
             static std::suspend_never initial_suspend() noexcept { return {}; }
             static std::suspend_always final_suspend() noexcept { return {}; }
             void return_void() noexcept {}
@@ -186,6 +187,7 @@ namespace Physica {
         std::coroutine_handle<Promise> handle = nullptr;
     public:
         DiffCoro() = default;
+        DiffCoro(std::nullptr_t) noexcept {}
         DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : handle(handle_) {}
         DiffCoro(const This&) = delete;
         DiffCoro(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }

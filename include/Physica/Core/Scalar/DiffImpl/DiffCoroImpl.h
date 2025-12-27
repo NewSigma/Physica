@@ -145,8 +145,7 @@ namespace Physica {
 
         if (pred())
             return t();
-        else
-            return f();
+        return f();
     }
 
     template<class Predicate, class Functor>
@@ -158,7 +157,6 @@ namespace Physica {
 
         if (pred())
             return func();
-        else
-            return Handle(nullptr);
+        return Handle(nullptr);
     }
 }
