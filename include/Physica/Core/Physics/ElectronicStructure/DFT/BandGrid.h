@@ -150,12 +150,6 @@ namespace Physica {
         }
         return dos;
     }
-
-    template<Scalar T, bool isSpinPolarized>
-    void swap(Physica::BandGrid<T, isSpinPolarized>& __restrict band1,
-                     Physica::BandGrid<T, isSpinPolarized>& __restrict band2) noexcept {
-        band1.swap(band2);
-    }
     /**
      * \returns Gradient of energy in t-coordinate defined in [1]
      * 
@@ -175,5 +169,10 @@ namespace Physica {
         const T gradY = (kPointGrid(x, dimAdd(y, dimY), z) -  kPointGrid(x, dimSub(y, dimY), z)) * factor;
         const T gradZ = (kPointGrid(x, y, dimAdd(z, dimZ)) -  kPointGrid(x, y, dimSub(z, dimZ))) * factor;
         return {gradX, gradY, gradZ};
+    }
+
+    template<Scalar T, bool isSpinPolarized>
+    void swap(BandGrid<T, isSpinPolarized>& __restrict band1, BandGrid<T, isSpinPolarized>& __restrict band2) noexcept {
+        band1.swap(band2);
     }
 }

@@ -39,7 +39,7 @@ namespace Physica {
         ~PageLockedAllocator() = default;
         /* Operators */
         This& operator=(const This&) noexcept = default;
-        This& operator=(This&&) noexcept = delete;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         [[nodiscard, gnu::returns_nonnull]] static pointer allocate(size_t n);
         static void deallocate(pointer p, size_t n) noexcept;

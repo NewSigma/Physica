@@ -176,12 +176,9 @@ namespace Physica {
         std::swap(iteration, obj.iteration);
         std::swap(mustConverge, obj.mustConverge);
     }
-}
 
-namespace std {
-    template<Physica::Scalar T>
-    void swap(Physica::IterateSolver<T>& __restrict solver1,
-                     Physica::IterateSolver<T>& __restrict solver2) noexcept {
+    template<Scalar T>
+    void swap(IterateSolver<T>& __restrict solver1, IterateSolver<T>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

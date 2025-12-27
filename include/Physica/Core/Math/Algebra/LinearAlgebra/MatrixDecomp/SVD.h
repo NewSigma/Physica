@@ -254,12 +254,9 @@ namespace Physica {
         applyGivens(mat, buffer, i, i + 1);
         applyGivens(rSingularMat, buffer, i, i + 1);
     }
-}
 
-namespace std {
-    template<Physica::Scalar T, size_t RowAtCompile, size_t ColAtCompile>
-    void swap(Physica::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd1,
-                     Physica::SVD<T, RowAtCompile, ColAtCompile>& __restrict svd2) noexcept {
+    template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
+    void swap(SVD<T, RowAtCompile, ColAtCompile>& __restrict svd1, SVD<T, RowAtCompile, ColAtCompile>& __restrict svd2) noexcept {
         svd1.swap(svd2);
     }
 }

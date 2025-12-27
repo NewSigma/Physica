@@ -151,6 +151,11 @@ namespace Physica {
         const size_t max = exchange ? r : c;
         return (order * 2U - min - 1) * min / 2U + max;
     }
+
+    template<class T, size_t Order>
+    void swap(SymmArray<T, Order>& __restrict mat1, SymmArray<T, Order>& __restrict mat2) noexcept {
+        mat1.swap(mat2);
+    }
 }
 
 namespace Physica {
@@ -172,12 +177,4 @@ namespace Physica {
         using ElemType = T;
         using ArrayType = Helper<IsScalar, SizeAtCompile>::Type;
     };
-}
-
-namespace std {
-    template<class T, size_t Order>
-    void swap(Physica::SymmArray<T, Order>& __restrict mat1,
-                     Physica::SymmArray<T, Order>& __restrict mat2) noexcept {
-        mat1.swap(mat2);
-    }
 }

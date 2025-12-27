@@ -189,6 +189,11 @@ namespace Physica {
         result.template random_any<R>(distribution);
         return result;
     }
+
+    template<Physica::Scalar T, size_t Order>
+    void swap(DenseSymmMatrix<T, Order>& __restrict m1, DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
+        m1.swap(m2);
+    }
 }
 
 namespace Physica {
@@ -201,14 +206,6 @@ namespace Physica {
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
-}
-
-namespace std {
-    template<Physica::Scalar T, size_t Order>
-    void swap(Physica::DenseSymmMatrix<T, Order>& __restrict m1,
-                     Physica::DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
-        m1.swap(m2);
-    }
 }
 
 #include "MatrixImpl/MatrixProduct/SyMV.h"

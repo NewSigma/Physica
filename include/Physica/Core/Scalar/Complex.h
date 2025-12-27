@@ -112,6 +112,9 @@ namespace Physica {
     std::ostream& operator<<(std::ostream& os, const Complex<T>& x) {
         return os << std::format("{}", x);
     }
+
+    template<Scalar T>
+    void swap(Complex<T>& __restrict c1, Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
 }
 
 namespace Physica {
@@ -141,9 +144,6 @@ namespace Physica {
 namespace std {
     template<Physica::Scalar T>
     struct numeric_limits<Physica::Complex<T>> : public numeric_limits<T> {};
-
-    template<Physica::Scalar T>
-    void swap(Physica::Complex<T>& __restrict c1, Physica::Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
 
     template<Physica::Scalar T>
     struct formatter<Physica::Complex<T>, char> {

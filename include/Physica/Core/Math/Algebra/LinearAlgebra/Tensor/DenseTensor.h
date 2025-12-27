@@ -63,6 +63,11 @@ namespace Physica {
         static DenseTensor random_normal(IndexType shape);
     };
 
+    template<Scalar T, int... Dims>
+    void swap(DenseTensor<T, Dims...>& __restrict x, DenseTensor<T, Dims...>& __restrict y) noexcept {
+        x.swap(y);
+    }
+
     template<Scalar T> using Tensor3D = DenseTensor<T, 3>;
     template<Scalar T> using Tensor4D = DenseTensor<T, 4>;
     template<Scalar T> using TensorND = DenseTensor<T>;
@@ -76,13 +81,6 @@ namespace Physica {
         using ScalarType = T;
         constexpr static int NDim = ArrayND<T, Dims...>::NDim;
     };
-}
-
-namespace std {
-    template<Physica::Scalar T, int... Dims>
-    void swap(Physica::DenseTensor<T, Dims...>& __restrict x, Physica::DenseTensor<T, Dims...>& __restrict y) noexcept {
-        x.swap(y);
-    }
 }
 
 #include "TensorImpl/DenseTensorImpl.h"

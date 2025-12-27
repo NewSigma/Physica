@@ -176,6 +176,11 @@ namespace Physica {
         }
         target(col_1, col_1) = bidiag.mainDiag[col_1];
     }
+
+    template<Matrix M>
+    void swap(Bidiagonalization<M>& __restrict obj1, Bidiagonalization<M>& __restrict obj2) noexcept {
+        obj1.swap(obj2);
+    }
 }
 
 namespace Physica {
@@ -185,11 +190,4 @@ namespace Physica {
         using Base = Traits<M>;
         using Base::Option;
     };
-}
-
-namespace std {
-    template<Physica::Matrix M>
-    void swap(Physica::Bidiagonalization<M>& __restrict obj1, Physica::Bidiagonalization<M>& __restrict obj2) noexcept {
-        obj1.swap(obj2);
-    }
 }

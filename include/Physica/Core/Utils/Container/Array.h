@@ -51,8 +51,8 @@ namespace Physica {
     private:
         constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
 
-        // FIXME: We have to use such a verbose alignment since GCC 14.2 complains Align maybe 0.
-        alignas(Align == Dynamic ? alignof(T) : Align) std::array<T, Length> arr;
+        // We have to use such a verbose alignment since GCC 14.2 complains Align maybe 0.
+        alignas(std::max(alignof(T), Align)) std::array<T, Length> arr;
         [[no_unique_address]] allocator_type alloc;
     public:
         Array() = default;
@@ -72,7 +72,7 @@ namespace Physica {
         template<size_t I>
         [[nodiscard]] constexpr const T& get() const noexcept;
 
-        __host__ __device__ void insert(const T&, size_t) noexcept { assert(false); }
+        __host__ __device__ void insert(size_t, auto&&...) = delete;
         __host__ __device__ void reserve([[maybe_unused]] size_t size) noexcept { assert(size == Length); }
         __host__ __device__ void resize(size_t length, auto&&... args) noexcept;
         __host__ __device__ void zeros() noexcept;
@@ -167,6 +167,11 @@ namespace Physica {
     private:
         void resizeImpl(size_t size, auto&&... args) noexcept;
     };
+
+    template<class T, size_t Length, class Allocator>
+    void swap(Array<T, Length, Allocator>& __restrict array1, Array<T, Length, Allocator>& __restrict array2) noexcept {
+        array1.swap(array2);
+    }
 }
 
 namespace Physica {
@@ -185,14 +190,9 @@ namespace std {
 
     template<std::size_t I, class T, size_t Length, class Allocator>
     struct tuple_element<I, Physica::Array<T, Length, Allocator>> {
+        static_assert(Length > 0, "[Error]: Dynamic array is not a tuple");
         using type = T;
     };
-
-    template<class T, size_t Length, class Allocator>
-    void swap(Physica::Array<T, Length, Allocator>& __restrict array1,
-                     Physica::Array<T, Length, Allocator>& __restrict array2) noexcept {
-        array1.swap(array2);
-    }
 }
 
 #include "ArrayImpl/ArrayImpl.h"

@@ -112,6 +112,11 @@ namespace Physica {
         [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
     };
 
+    template<Scalar T, size_t Length>
+    void swap(DenseVector<T, Length>& __restrict v1, DenseVector<T, Length>& __restrict v2) noexcept {
+        v1.swap(v2);
+    }
+
     template<Scalar T> using Vector1D = DenseVector<T, 1>;
     template<Scalar T> using Vector2D = DenseVector<T, 2>;
     template<Scalar T> using Vector3D = DenseVector<T, 3>;
@@ -141,11 +146,6 @@ namespace std {
     struct tuple_element<I, Physica::DenseVector<T, Length>> {
         using type = T;
     };
-
-    template<Physica::Scalar T, size_t Length>
-    void swap(Physica::DenseVector<T, Length>& __restrict v1, Physica::DenseVector<T, Length>& __restrict v2) noexcept {
-        v1.swap(v2);
-    }
 }
 
 #include "VectorImpl/DenseVectorImpl.h"

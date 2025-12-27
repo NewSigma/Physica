@@ -35,11 +35,11 @@ namespace Physica {
     public:
         MMapAllocator() noexcept = default;
         MMapAllocator(const This&) noexcept = default;
-        MMapAllocator(This&&) noexcept = delete;
+        MMapAllocator(This&&) noexcept = default;
         ~MMapAllocator() = default;
         /* Operators */
         This& operator=(const This&) noexcept = default;
-        This& operator=(This&&) noexcept = delete;
+        This& operator=(This&&) noexcept = default;
         /* Operations */
         [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n);
         void deallocate(T* p, size_t n);

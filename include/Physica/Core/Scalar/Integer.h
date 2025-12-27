@@ -109,6 +109,10 @@ namespace Physica {
         static inline Integer integerAddImpl(const Integer& i1, const Integer& i2);
         static inline Integer integerSubImpl(const Integer& i1, const Integer& i2);
     };
+
+    inline void swap(Integer& __restrict i1, Integer& __restrict i2) noexcept {
+        i1.swap(i2);
+    }
 }
 
 namespace std {
@@ -116,11 +120,6 @@ namespace std {
     struct numeric_limits<Physica::Integer> {
         constexpr static bool is_integer = true;
     };
-
-    template<>
-    inline void swap(Physica::Integer& __restrict i1, Physica::Integer& __restrict i2) noexcept {
-        i1.swap(i2);
-    }
 }
 
 #include "IntegerImpl/IntegerImpl.h"

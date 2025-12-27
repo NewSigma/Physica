@@ -56,12 +56,9 @@ namespace Physica {
         void upperEliminate(size_t index);
         void lowerEliminate(size_t index);
     };
-}
 
-namespace std {
-    template<Physica::Scalar T>
-    void swap(Physica::LinearSystem<T>& __restrict equ1,
-                     Physica::LinearSystem<T>& __restrict equ2) noexcept {
+    template<Scalar T>
+    void swap(LinearSystem<T>& __restrict equ1, LinearSystem<T>& __restrict equ2) noexcept {
         equ1.swap(equ2);
     }
 }

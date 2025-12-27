@@ -39,7 +39,7 @@ namespace Physica {
     public:
         HostAllocator() = default;
         HostAllocator(const This&) = default;
-        HostAllocator(This&&) noexcept = delete;
+        HostAllocator(This&&) noexcept = default;
         ~HostAllocator() = default;
         /* Operators */
         This& operator=(const This&) noexcept = default;

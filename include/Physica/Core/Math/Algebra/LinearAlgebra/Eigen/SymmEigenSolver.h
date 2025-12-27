@@ -243,12 +243,9 @@ namespace Physica {
     bool SymmEigenSolver<T, Order>::defaultComp(T a, T b) noexcept {
         return a < b;
     }
-}
 
-namespace std {
-    template<Physica::Scalar T, size_t Order>
-    void swap(Physica::SymmEigenSolver<T, Order>& __restrict solver1,
-                     Physica::SymmEigenSolver<T, Order>& __restrict solver2) noexcept {
+    template<Scalar T, size_t Order>
+    void swap(SymmEigenSolver<T, Order>& __restrict solver1, SymmEigenSolver<T, Order>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }
