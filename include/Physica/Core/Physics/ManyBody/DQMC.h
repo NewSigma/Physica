@@ -45,6 +45,9 @@ namespace Physica {
         VectorND<Tr> probs;
         Array<int> sites;
         int cursor = 0;
+
+        uint64_t numTotal = 0;
+        uint64_t numAccept = 0;
     public:
         DQMC() = delete;
         explicit DQMC(const Params& params_);
@@ -71,6 +74,8 @@ namespace Physica {
         [[nodiscard]] const auto& getAuxField() const noexcept { return kinetic.getAuxField(); }
         [[nodiscard]] auto& getGreens() noexcept { return kinetic.getGreens(); }
         [[nodiscard]] Tv getRSign() const noexcept { return kinetic.getRSign(); }
+        [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
+        [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
     private:
         /* Operations */
         void metropolis(int site, int split, Tr prob);
@@ -114,6 +119,9 @@ namespace Physica {
         assert(numStep >= 0 && "[Error]: Invalid step num");
         for (int _ = 0; _ < numStep; ++_)
             step<R>();
+
+        numTotal = 0;
+        numAccept = 0;
     }
 
     template<Scalar T>
@@ -139,6 +147,8 @@ namespace Physica {
             const Vector2D<Tr> arr = exp(Vector2D<Tr>{-x, x});
             productor.single_flip(site, split, arr);
             kinetic.single_flip(site, split, params->getAlpha());
+            numAccept += 1;
         }
+        numTotal += 1;
     }
 }

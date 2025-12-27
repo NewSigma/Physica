@@ -38,6 +38,9 @@ namespace Physica {
         GreenPair greens;
         Trv lnAbsDet = Trv::nan();
         Trv sign = 1;
+
+        uint64_t numTotal = 0;
+        uint64_t numAccept = 0;
     public:
         FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity);
         FreqDQMC(const This&) = default;
@@ -65,6 +68,8 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
+        [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
+        [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
         /* Static members */
         [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
     };
@@ -103,9 +108,11 @@ namespace Physica {
             sign = sgnD;
             if (!warmup)
                 calcGreen();
+            numAccept += 1;
         }
         else
             getAuxField()(freq, site) = save;
+        numTotal += 1;
     }
 
     template<Scalar T>
@@ -114,6 +121,9 @@ namespace Physica {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
         calcGreen();
+
+        numTotal = 0;
+        numAccept = 0;
     }
 
     template<Scalar T>

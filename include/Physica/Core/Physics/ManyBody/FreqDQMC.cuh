@@ -44,6 +44,9 @@ namespace Physica {
         Array<MatrixND<Tr>, 2> greensH;
         float64 lnAbsDet = Trv::nan();
         float64 sign = 1;
+
+        uint64_t numTotal = 0;
+        uint64_t numAccept = 0;
     public:
         device_obj(const HubbardParams<Tr>& params, Trv freqDensity);
         device_obj(const This&) = default;
@@ -73,6 +76,8 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
+        [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
+        [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
     };
 
     template<Scalar T>
@@ -114,9 +119,11 @@ namespace Physica {
             sign = sgnD;
             if (!warmup)
                 calcGreen();
+            numAccept += 1;
         }
         else
             getAuxField()(freq, site) = save;
+        numTotal += 1;
     }
 
     template<Scalar T>
@@ -125,6 +132,9 @@ namespace Physica {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
         calcGreen();
+
+        numTotal = 0;
+        numAccept = 0;
     }
     /**
      * float64 is necessary for determinants
