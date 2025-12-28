@@ -707,7 +707,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_for(Vector auto& v) const noexcept {
+    void RValueVector<Derived>::assign_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] = calc_value(i);
@@ -718,7 +718,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, ExecutePolicy P, size_t Length>
-    void RValueVector<Derived>::assign_simd(V& v) const noexcept {
+    void RValueVector<Derived>::assign_simd(V& __restrict v) const __restrict noexcept {
         using Pack = BestPacket<typename V::ScalarType, Length>::Type;
         constexpr static size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();
@@ -757,7 +757,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_add_for(Vector auto& v) const noexcept {
+    void RValueVector<Derived>::assign_add_for(Vector auto& __restrict v) const __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] += calc_value(i);
@@ -768,7 +768,7 @@ namespace Physica {
 
     template<class Derived>
     template<Vector V, size_t Length>
-    void RValueVector<Derived>::assign_add_simd(V& v) const noexcept {
+    void RValueVector<Derived>::assign_add_simd(V& __restrict v) const __restrict noexcept {
         using Pack = BestPacket<typename V::ScalarType, Length>::Type;
         constexpr size_t PacketSize = Pack::size();
         const auto& v0 = Base::getDerived();
