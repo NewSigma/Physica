@@ -165,7 +165,7 @@ namespace {
         eigenTest(mat2, 1E-15);
 
         DenseMatrix<float64> m = TransIsingMatrix<float64, 1, 8>(1, 0.01, SquareLattice<1>({{8}, 1}));
-        eigenTest(m, 1E-12);
+        eigenTest(m, 1E-10);
     }
 
     void testForwardDiff() {

@@ -17,7 +17,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 ## C++版本
 
-目前使用的C++版本应不低于C++20。
+目前使用的C++版本应不低于C++23。
 
 ## 头文件
 

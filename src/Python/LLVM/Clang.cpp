@@ -124,7 +124,7 @@ void Clang::makeInvocation() {
         }
         else
             args.push_back("-xc++");
-        args.push_back("-std=c++20");
+        args.push_back("-std=c++23");
         args.push_back("-Xclang");
         args.push_back("-fincremental-extensions");
         args.push_back("--compile");
