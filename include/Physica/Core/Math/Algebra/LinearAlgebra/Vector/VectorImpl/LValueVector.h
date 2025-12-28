@@ -24,8 +24,8 @@
 namespace Physica {
     template<class V> class RealVectorL;
     /**
-     * \class LValueVector is a base class for vectors. You can take the address of elements in an LValueVector.
-     * An LValueVector can be assigned to an LValueVector, and other vector classes can be assigned to an LValueVector.
+     * \class LValueVector is a base class for vectors whose elements you can take the address of.
+     * Any vector classes can be assigned to an LValueVector.
      */
     template<class Derived>
     class LValueVector : public RValueVector<Derived> {

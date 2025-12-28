@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,6 +29,7 @@ namespace Physica {
      */
     template<Scalar T>
     class BHProjector final : public FCProjector<T> {
+        using This = BHProjector<T>;
         using Base = FCProjector<T>;
     public:
         using typename Base::VectorType;
@@ -43,16 +44,16 @@ namespace Physica {
         Array<VectorType> huangBases;
     public:
         BHProjector(Index3D superSize_, size_t numDOF_, const MDCellType& unitCell);
-        BHProjector(const BHProjector&) = default;
-        BHProjector(BHProjector&&) noexcept = default;
+        BHProjector(const This&) = default;
+        BHProjector(This&&) noexcept = default;
         ~BHProjector() = default;
         /* Operators */
-        BHProjector& operator=(BHProjector obj) noexcept { swap(obj); return obj; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         using Base::projectSwap;
         T projectRot(VectorType& v) const;
         T projectHuang(VectorType& v) const;
-        void swap(BHProjector& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::getNumForceConsts;
     private:
@@ -103,7 +104,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void BHProjector<T>::swap(BHProjector& __restrict obj) noexcept {
+    void BHProjector<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
     }

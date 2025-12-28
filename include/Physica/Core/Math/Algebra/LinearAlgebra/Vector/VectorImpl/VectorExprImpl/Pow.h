@@ -31,10 +31,21 @@ namespace Physica {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<T> calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
+        [[nodiscard]] CoDiff<T> calc(size_t i) const;
+        [[nodiscard]] Tv calc_value(size_t i) const;
 
-        [[nodiscard]] Tv calc_value(size_t index) const { return pow(Base::getExpr().calc_value(index)); }
+        void reverse(const Vector auto& grad) const noexcept;
     };
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Pow, V, U>::calc(size_t i) const -> CoDiff<T> {
+        return pow(Base::getLHS().calc(i), Base::getRHS());
+    }
+
+    template<Vector V, Scalar U>
+    auto VectorExpr<ExprID::Pow, V, U>::calc_value(size_t i) const -> Tv {
+        return pow(Base::getLHS().calc_value(i), Base::getRHS().value());
+    }
 
     template<Vector V, Scalar U>
     [[nodiscard]] auto pow(V&& v, U&& x) noexcept requires(!CUDA<V>) {

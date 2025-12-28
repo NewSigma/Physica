@@ -60,13 +60,18 @@ namespace Physica {
             constexpr static size_t SizeAtCompile = std::max(Size1, Size2);
             using ResultType = BinaryScalarOpRtnTy<U1, U2>::Type;
             using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
-        private:
-            constexpr static bool isSameScalar = std::same_as<typename U1::ValueType, typename U2::ValueType>;
-            constexpr static bool isBadPacket = PacketType::size() == 1;
-            constexpr static bool isCUDA = CUDA<T1> || CUDA<T2>;
-            constexpr static bool isFloat16 = ResultType::Prec == Float16;
-        public:
-            constexpr static bool value = (isCUDA == isFloat16) && isSameScalar && !isBadPacket;
+
+            constexpr static bool value = []() consteval noexcept {
+                constexpr bool isSameScalar = std::same_as<typename U1::ValueType, typename U2::ValueType>;
+                constexpr bool isScalar = PacketType::size() == 1;
+                constexpr bool isCUDA = CUDA<T1> || CUDA<T2>;
+                constexpr bool isFloat16 = ResultType::Prec == Float16;
+                // Only use FP16 SIMD for device:
+                // 1. Other packet types do not work for CUDA
+                // 2. Old processors do not have FP16 support
+                constexpr bool UsePacketFP16 = isFloat16 == isCUDA;
+                return isSameScalar && !isScalar && UsePacketFP16;
+            }();
         };
 
         template<Vector V1, Vector V2>
@@ -246,7 +251,7 @@ namespace Physica {
         return true;
     }
 
-    std::ostream& operator<<(std::ostream& os, const Vector auto& v) noexcept {
+    std::ostream& operator<<(std::ostream& os, const Vector auto& v) {
         return os << std::format("{}", v.format());
     }
 }

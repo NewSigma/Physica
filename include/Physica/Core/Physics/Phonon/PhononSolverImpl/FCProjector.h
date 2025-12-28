@@ -31,6 +31,7 @@ namespace Physica {
      */
     template<Scalar T>
     class FCProjector {
+        using This = FCProjector<T>;
     public:
         constexpr static unsigned int Dim = 3;
         using VectorType = VectorND<T>;
@@ -42,18 +43,18 @@ namespace Physica {
         Array<VectorType> transBases;
     public:
         FCProjector() = default;
-        FCProjector(Index3D superSize_, size_t numDOF_);
-        FCProjector(const FCProjector&) = default;
-        FCProjector(FCProjector&&) noexcept = default;
+        FCProjector(Index3D superSize, size_t numDOF);
+        FCProjector(const This&) = default;
+        FCProjector(This&&) noexcept = default;
         ~FCProjector() = default;
         /* Operators */
-        FCProjector& operator=(FCProjector obj) noexcept { swap(obj); return obj; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         T projectSwap(VectorType& v) const;
         T projectTrans(VectorType& v) const;
         VectorType toVector(const RSpaceFCGrid& fcGrid) const;
         void toGrid(const VectorType& fcVector, RSpaceFCGrid& fcGrid) const;
-        void swap(FCProjector& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Index3D getSuperSize() const noexcept { return superSize; }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSize[0] * superSize[1] * superSize[2]; }
@@ -66,8 +67,9 @@ namespace Physica {
     };
 
     template<Scalar T>
-    FCProjector<T>::FCProjector(Index3D superSize_, size_t numDOF_)
-            : superSize(std::move(superSize_)), numDOF(numDOF_) {
+    FCProjector<T>::FCProjector(Index3D superSize, size_t numDOF)
+            : superSize(superSize)
+            , numDOF(numDOF) {
         const size_t numBase = numDOF * Dim;
         transBases.reserve(numBase);
         for (size_t i = 0; i < numBase; ++i) {
@@ -136,7 +138,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void FCProjector<T>::swap(FCProjector& __restrict obj) noexcept {
+    void FCProjector<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         superSize.swap(obj.superSize);
         std::swap(numDOF, obj.numDOF);

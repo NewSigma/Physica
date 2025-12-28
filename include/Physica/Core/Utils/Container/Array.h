@@ -35,25 +35,17 @@ namespace Physica {
     template<class T, size_t Length, class Allocator>
     class Array : public ArrayBase<Array<T, Length, Allocator>, Allocator>
                 , public CRCoro<Array<T, Length, Allocator>> {
+        using This = Array<T, Length, Allocator>;
+        using Base = ArrayBase<This, Allocator>;
+        using IndexType = Array<size_t, Length>;
         static_assert(std::is_default_constructible<T>::value, "[Error]: Expect default constructible T");
         static_assert(!std::same_as<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
-        using This = Array<T, Length, Allocator>;
-        using IndexType = Array<size_t, Length>;
-    public:
-        using Base = ArrayBase<This, Allocator>;
-        using typename Base::ElemType;
-        using typename Base::allocator_type;
-        using typename Base::pointer;
-        using typename Base::const_pointer;
-        using typename Base::lvalue_reference;
-        using typename Base::const_lvalue_reference;
-        using typename Base::rvalue_reference;
     private:
         constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
 
         // We have to use such a verbose alignment since GCC 14.2 complains Align maybe 0.
         alignas(std::max(alignof(T), Align)) std::array<T, Length> arr;
-        [[no_unique_address]] allocator_type alloc;
+        [[no_unique_address]] Allocator alloc;
     public:
         Array() = default;
         __host__ __device__ explicit Array(size_t length, auto&&... args);
@@ -91,7 +83,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ constexpr static size_t size() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() noexcept { return Length; }
-        [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
+        [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
         [[nodiscard]] __host__ __device__ static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static size_t toIndex1D(const IndexType& __restrict shape, const IndexType& __restrict indices) noexcept;
@@ -103,24 +95,12 @@ namespace Physica {
     class Array<T, Dynamic, Allocator> : public ArrayBase<Array<T, Dynamic, Allocator>, Allocator>
                                        , public CRCoro<Array<T, Dynamic, Allocator>> {
         using This = Array<T, Dynamic, Allocator>;
-    public:
         using Base = ArrayBase<This, Allocator>;
-        using typename Base::ElemType;
-        using typename Base::allocator_type;
-        using typename Base::pointer;
-        using typename Base::const_pointer;
-        using typename Base::lvalue_reference;
-        using typename Base::const_lvalue_reference;
-        using typename Base::rvalue_reference;
-    private:
-        using Base::getDerived;
-        constexpr static size_t MinDeltaSpace = 1024;
-        constexpr static size_t Align = std::allocator_traits<Allocator>::Align;
     private:
         T* arr = nullptr;
         size_t length = 0;
         size_t capacity = 0;
-        [[no_unique_address]] allocator_type alloc;
+        [[no_unique_address]] Allocator alloc;
     public:
         Array() = default;
         explicit Array(size_t length_, auto&&... args) noexcept(std::is_nothrow_constructible<T, decltype(args)...>::value);
@@ -157,7 +137,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
-        [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
+        [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
         [[nodiscard]] static This read(size_t length, const T* __restrict p);
         [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);

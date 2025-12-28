@@ -93,7 +93,7 @@ namespace Physica {
         assert(length == Length && "[Error]: Length do not match");
         assert(p != nullptr);
         This result(Length);
-        std::memcpy(result.arr.data(), p, Length * sizeof(ElemType));
+        std::memcpy(result.arr.data(), p, Length * sizeof(T));
         return result;
     }
 
@@ -167,8 +167,8 @@ namespace Physica {
             : length(obj.length), capacity(obj.capacity), alloc() {
         assert(capacity > 0);
         arr = alloc.allocate(capacity);
-        if constexpr (std::is_trivially_copyable<ElemType>::value)
-            memcpy(arr, obj.arr, length * sizeof(ElemType));
+        if constexpr (std::is_trivially_copyable<T>::value)
+            memcpy(arr, obj.arr, length * sizeof(T));
         else
             for(size_t i = 0; i < length; ++i)
                 std::allocator_traits<Allocator>::construct(alloc, arr + i, obj[i]);
@@ -184,7 +184,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::~Array() {
-        if constexpr (!std::is_trivially_destructible<ElemType>::value)
+        if constexpr (!std::is_trivially_destructible<T>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
                     std::allocator_traits<Allocator>::destroy(alloc, arr + i);
@@ -248,7 +248,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     T* Array<T, Dynamic, Allocator>::release() noexcept {
-        pointer p = arr;
+        T* p = arr;
         arr = nullptr;
         length = capacity = 0;
         return p;
@@ -277,10 +277,11 @@ namespace Physica {
     template<class T, class Allocator>
     __host__ __device__ T* Array<T, Dynamic, Allocator>::data() noexcept {
         assert(arr != nullptr && "[Error]: We assume data() is nonnull");
+        constexpr size_t Align = std::allocator_traits<Allocator>::Align;
         if constexpr (Align == Dynamic)
             return arr;
         else
-            return std::assume_aligned<Align, ElemType>(arr);
+            return std::assume_aligned<Align, T>(arr);
     }
 
     template<class T, class Allocator>
@@ -295,7 +296,7 @@ namespace Physica {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: C type must be trivial");
         assert(p != nullptr);
         This result(length);
-        memcpy(result.arr, p, length * sizeof(ElemType));
+        memcpy(result.arr, p, length * sizeof(T));
         return result;
     }
 
@@ -323,22 +324,21 @@ namespace Physica {
             if constexpr (!std::is_trivially_copyable<T>::value)
                 for (size_t i = size; i < length; ++i)
                     (arr + i)->~T();
-            length = size;
         }
         else {
-            if constexpr (Base::template isTrivialDefaultConstruct<decltype(args)...>())
-                length = size;
-            else {
-                for (; length < size; ++length)
-                    std::allocator_traits<Allocator>::construct(alloc, arr + length, std::forward<decltype(args)>(args)...);
+            if constexpr (!Base::template isTrivialDefaultConstruct<decltype(args)...>()) {
+                for (size_t i = length; i < size; ++i)
+                    std::allocator_traits<Allocator>::construct(alloc, arr + i, std::forward<decltype(args)>(args)...);
             }
         }
+        length = size;
     }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::doubleSpace() noexcept {
         assert(capacity != 0 && "[Error]: Cannot double empty array");
         [[assume(arr != nullptr)]]; // LLVM loses nonnull information after inlining(GH61966)
+        constexpr size_t MinDeltaSpace = 1024;
         adjust((capacity * 2) + ((MinDeltaSpace + sizeof(T) - 1) / sizeof(T)));
     }
 }
