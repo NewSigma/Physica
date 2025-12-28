@@ -66,7 +66,6 @@ namespace Physica {
 
     template<class T, size_t Align>
     void HostAllocator<T, Align>::deallocate(T* p, size_t) noexcept {
-        // FIXME: Add if (p != nullptr) once llvm improve its nonnull inference
         if constexpr (OverAlign)
             ::operator delete(p, std::align_val_t(Align));
         else

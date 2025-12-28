@@ -70,7 +70,8 @@ namespace Physica::Internal {
         constexpr static uint8_t SpareBits = WorkBits - OutBits;
         static_assert(OutBits <= WorkBits / 2, "[Error]: Working int must larger than output int");
     public:
-        [[nodiscard]] OutI operator()(WorkI internal) const noexcept;
+        /* Operators */
+        [[nodiscard]] static OutI operator()(WorkI internal) noexcept;
         /* Static members */
         [[nodiscard]] consteval static WorkI multiplier() noexcept;
         [[nodiscard]] consteval static WorkI increment() noexcept;
@@ -91,9 +92,9 @@ namespace Physica::Internal {
 
         [[nodiscard]] static WorkI rxs_m_xs_inv(WorkI internal) noexcept;
     };
-    // FIXME: use static operator() once we dump to CXX23
+
     template<class OutI, class WorkI, OutputFnType Type>
-    auto OutputFn<OutI, WorkI, Type>::operator()(WorkI internal) const noexcept -> OutI {
+    auto OutputFn<OutI, WorkI, Type>::operator()(WorkI internal) noexcept -> OutI {
         switch (Type) {
         case XSH:
             return xsh(internal);

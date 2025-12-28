@@ -211,8 +211,7 @@ namespace Physica {
         /* Static members */
         __host__ __device__ constexpr static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ constexpr static void static_assert_assign(const Vector auto& source) noexcept;
-        template<Vector V>
-        [[nodiscard]] consteval static size_t maxSizeAtCompile() noexcept;
+        [[nodiscard]] consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;
     protected:
         RValueVector() = default;
         RValueVector(const This&) = default;

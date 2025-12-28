@@ -14,8 +14,6 @@ else()
     add_compile_options(-Wall -Wfatal-errors -mrdrnd -march=native -ffunction-sections -fdata-sections -fno-semantic-interposition -fno-plt -fno-math-errno -fno-trapping-math -fno-signed-zeros -fassociative-math)
     add_link_options(-Wl,-O2,-Bsymbolic,--gc-sections)
 
-    #add_compile_options(-mdaz-ftz) # FIXME: enable it once we dump to clang 19
-
     if(CMAKE_BUILD_TYPE MATCHES Debug)
         add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Og>)
     elseif(CMAKE_BUILD_TYPE MATCHES Release)
@@ -124,12 +122,8 @@ if(${PHYSICA_CUDA})
     set(CMAKE_BUILD_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
     set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
 endif()
-# clang miscompiles at LTO and does not restrict to -O3, seems blame to [1]?
-# FIXME: Possibly remove it once we dump to clang 20
-#
-# Reference:
-# [1] GH80494; https://github.com/llvm/llvm-project/issues/80494
-if(OFF AND CMAKE_BUILD_TYPE MATCHES Release)
+
+if(CMAKE_BUILD_TYPE MATCHES Release)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT Result OUTPUT Output)
     if(${Result})

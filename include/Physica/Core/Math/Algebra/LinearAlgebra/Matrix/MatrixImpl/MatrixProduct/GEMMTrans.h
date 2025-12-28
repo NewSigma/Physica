@@ -61,7 +61,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
     void GEMM<M1, Transpose<M2>>::assign(Matrix auto& target) const {
         target.assert_assign(*this);
-        if constexpr (GEMM<M1, M2>::template UseMKL<decltype(target)>()) {
+        if constexpr (GEMM<M1, M2>::UseMKL(target)) {
             constexpr int Critical = GEMM<M1, M2>::Critical;
             if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
                 assign_mkl(target);

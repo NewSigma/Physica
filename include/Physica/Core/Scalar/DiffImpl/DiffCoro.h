@@ -37,7 +37,7 @@ namespace Physica {
                     handle = std::move(handle_);
                 }
 
-                [[nodiscard]] Base await_resume() const noexcept { // FIXME: NVCC 12.8 rejects valid if we return const Base
+                [[nodiscard]] Base await_resume() const noexcept {
                     return Base(std::move(handle.promise().obj));
                 }
             };
@@ -52,7 +52,7 @@ namespace Physica {
             Promise& operator=(Promise obj) noexcept { swap(obj); return *this; }
             /* Operations */
             auto get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); };
-            // static auto get_return_object_on_allocation_failure() noexcept { return nullptr; } // FIXME: clang CUDA rejects valid(clang 18)
+            static auto get_return_object_on_allocation_failure() noexcept { return nullptr; }
             std::suspend_never initial_suspend() noexcept { return {}; }
             void await_transform(auto&&) noexcept = delete
                 #ifdef __cpp_deleted_function // FIXME: Remove it once we dump to CXX26

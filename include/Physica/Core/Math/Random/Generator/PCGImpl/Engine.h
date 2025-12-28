@@ -51,11 +51,10 @@ namespace Physica::Internal {
         using result_type = OutI;
         using state_type = WorkI;
     private:
-        using Fn = OutputFn<OutI, WorkI, Type>;
+        using OutFn = OutputFn<OutI, WorkI, Type>;
         using Stream::increment;
 
         WorkI state_;
-        [[no_unique_address]] Fn output;
     public:
         explicit engine(WorkI state = WorkI(0xCAFEF00DD15EA5E5ULL)) noexcept;
         template<typename sm = Stream>
@@ -128,7 +127,7 @@ namespace Physica::Internal {
         constexpr bool OutputPrev = sizeof(WorkI) <= 8;
         const WorkI old_state = state_;
         state_ = bump(state_);
-        return output(OutputPrev ? old_state : state_);
+        return OutFn::operator()(OutputPrev ? old_state : state_);
     }
 
     template<class OutI, class WorkI, OutputFnType Type, class Stream>
@@ -235,7 +234,7 @@ namespace Physica::Internal {
 
     template<class OutI, class WorkI, OutputFnType Type, class Stream>
     WorkI engine<OutI, WorkI, Type, Stream>::bump(WorkI state) noexcept {
-        return state * Fn::multiplier() + Fn::increment();
+        return state * OutFn::multiplier() + OutFn::increment();
     }
 
     template<class OutI, class WorkI, OutputFnType Type, class Stream>
@@ -247,7 +246,7 @@ namespace Physica::Internal {
 
     template<class OutI, class WorkI, OutputFnType Type, class Stream>
     WorkI engine<OutI, WorkI, Type, Stream>::distance(WorkI newstate, WorkI mask) const noexcept {
-        return distance(state_, newstate, Fn::multiplier(), Fn::increment(), mask);
+        return distance(state_, newstate, OutFn::multiplier(), OutFn::increment(), mask);
     }
 
     template<class OutI, class WorkI, OutputFnType Type, class Stream>

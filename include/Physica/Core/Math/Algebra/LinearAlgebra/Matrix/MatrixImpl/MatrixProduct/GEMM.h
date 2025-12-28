@@ -62,8 +62,7 @@ namespace Physica {
         [[nodiscard]] const M1& getLHS() const noexcept { return mat1; }
         [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
         /* Static members */
-        template<Matrix M>
-        [[nodiscard]] constexpr static bool UseMKL() noexcept;
+        [[nodiscard]] constexpr static bool UseMKL(const Matrix auto& target) noexcept;
         /* Friends */
         friend class device_obj<This>;
     };
@@ -79,7 +78,7 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::assign(Matrix auto& target) const {
         target.assert_assign(*this);
-        if constexpr (UseMKL<decltype(target)>()) {
+        if constexpr (UseMKL(target)) {
             if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
                 assign_mkl(target);
             else
@@ -130,12 +129,10 @@ namespace Physica {
     auto GEMM<M1, M2>::values() const noexcept {
         return mat1.values() * mat2.values();
     }
-    /**
-     * FIXME: We cannot use unknown references in params of constexpr, refactor once we dump to Clang 20.
-     */
+
     template<Matrix M1, Matrix M2>
-    template<Matrix M>
-    constexpr bool GEMM<M1, M2>::UseMKL() noexcept {
+    constexpr bool GEMM<M1, M2>::UseMKL(const Matrix auto& target) noexcept {
+        using M = decltype(target);
         constexpr bool Large1 = M1::SizeAtCompile == Dynamic || M1::SizeAtCompile > Critical;
         constexpr bool Large2 = M2::SizeAtCompile == Dynamic || M2::SizeAtCompile > Critical;
         constexpr bool UseMKL1 = Large1 && Large2;

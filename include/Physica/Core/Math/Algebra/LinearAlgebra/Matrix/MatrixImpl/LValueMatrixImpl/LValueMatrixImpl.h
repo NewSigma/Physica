@@ -23,6 +23,23 @@
 
 namespace Physica {
     template<class Derived>
+    template<Scalar T>
+    Derived& LValueMatrix<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
+        ScalarType::template assert_assign<T>();
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        for (size_t i = 0; i < maxMajor; ++i) {
+            for (size_t j = 0; j < maxMinor; ++j) {
+                if constexpr (ReverseDiff<T>)
+                    refFromMajorMinor(i, j) = x.value();
+                else
+                    refFromMajorMinor(i, j) = x;
+            }
+        }
+        return Base::getDerived();
+    }
+
+    template<class Derived>
     void LValueMatrix<Derived>::operator+=(const Scalar auto& x) {
         auto& m = Base::getDerived();
         (m + x).assign(m);

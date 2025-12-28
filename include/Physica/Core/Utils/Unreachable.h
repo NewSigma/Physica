@@ -23,9 +23,11 @@
 
 namespace Physica {
     /**
-     * FIXME: Use std::unreachable once we dump to C++23
+     * Improvements:
+     * 1. Emit assertion to help debugging
+     * 2. __host__ __device__ make it available in kernel functions
      */
-    [[noreturn]] __host__ __device__ inline void unreachable() noexcept {
+    [[noreturn, gnu::always_inline]] __host__ __device__ inline void unreachable() noexcept {
         assert(false && "[Error]: Trigger unreachable");
     #ifdef __CUDA_ARCH__
         __builtin_unreachable();

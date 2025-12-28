@@ -690,13 +690,10 @@ namespace Physica {
         static_assert(isComplex || !Src::isComplex, "[Error]: Assign a complex vector to real vector discards imags");
         static_assert(Diffable<Derived> || !Diffable<Src>, "[Error]: Assign a diffable vector to normal vector discards grads");
     }
-    /**
-     * FIXME: We cannot use unknown references in params of constexpr, refactor once we dump to Clang 20.
-     */
+
     template<class Derived>
-    template<Vector V>
-    consteval size_t RValueVector<Derived>::maxSizeAtCompile() noexcept {
-        return std::max(SizeAtCompile, std::remove_cvref_t<V>::SizeAtCompile);
+    consteval size_t RValueVector<Derived>::maxSizeAtCompile(const Vector auto& other) noexcept {
+        return std::max(SizeAtCompile, std::remove_cvref_t<decltype(other)>::SizeAtCompile);
     }
 
     template<class Derived>

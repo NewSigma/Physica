@@ -58,21 +58,7 @@ namespace Physica {
         This& operator=(This&& m) noexcept = delete;
 
         template<Scalar T>
-        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
-            // FIXME: We have to put it in class because NVCC 12.8 rejects valid.
-            ScalarType::template assert_assign<T>();
-            const size_t maxMajor = Base::getMaxMajor();
-            const size_t maxMinor = Base::getMaxMinor();
-            for (size_t i = 0; i < maxMajor; ++i) {
-                for (size_t j = 0; j < maxMinor; ++j) {
-                    if constexpr (ReverseDiff<T>)
-                        refFromMajorMinor(i, j) = x.value();
-                    else
-                        refFromMajorMinor(i, j) = x;
-                }
-            }
-            return Base::getDerived();
-        }
+        Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
         void operator+=(const Scalar auto& x);
         void operator-=(const Scalar auto& x);
         void operator*=(const Scalar auto& x);

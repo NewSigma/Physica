@@ -175,7 +175,7 @@ namespace Physica {
         class Promise {
         public:
             auto get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); };
-            // static auto get_return_object_on_allocation_failure() noexcept { return nullptr; } // FIXME: clang CUDA rejects valid(clang 18)
+            static auto get_return_object_on_allocation_failure() noexcept { return nullptr; }
             static std::suspend_never initial_suspend() noexcept { return {}; }
             static std::suspend_always final_suspend() noexcept { return {}; }
             void return_void() noexcept {}

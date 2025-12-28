@@ -268,12 +268,7 @@ namespace Physica {
         std::swap(length, obj.length);
         std::swap(capacity, obj.capacity);
     }
-    /**
-     * FIXME: remove __attribute__((returns_nonnull)) and replace with reference once [1] is resolved
-     *
-     * Reference:
-     * [1] GH78399; https://github.com/llvm/llvm-project/issues/78399
-     */
+
     template<class T, class Allocator>
     __host__ __device__ T* Array<T, Dynamic, Allocator>::data() noexcept {
         assert(arr != nullptr && "[Error]: We assume data() is nonnull");
