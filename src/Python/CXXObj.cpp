@@ -42,13 +42,10 @@ CXXObj::CXXObj(CXXPtr p, nanobind::args tparams) : pObj(nullptr) {
     }
 }
 
-CXXObj::CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept
+CXXObj::CXXObj(CXXRecordDecl* pDecl_, void* pObj_) noexcept
         : pDecl(pDecl_), pObj(pObj_) {}
 
-CXXObj::CXXObj(CXXObj&& obj) noexcept
-        : pDecl(obj.pDecl), pObj(obj.pObj) {
-    obj.pObj = nullptr;
-}
+CXXObj::CXXObj(CXXObj&& obj) noexcept : pDecl(obj.pDecl), pObj(std::exchange(obj.pObj, nullptr)) {}
 
 CXXObj::~CXXObj() {
     if (pObj == nullptr)
@@ -57,22 +54,21 @@ CXXObj::~CXXObj() {
     using DtorType = void (*)(void*);
     const auto pFunc = lookupFunc(clang::GlobalDecl(pDecl->getDestructor(), clang::CXXDtorType::Dtor_Base));
     auto* pDtor = reinterpret_cast<DtorType>(pFunc);
-    pDtor(pObj);
-    ::operator delete(pObj);
+    pDtor(pObj.get());
     pObj = nullptr;
 }
 
-void CXXObj::construct(nanobind::args) {
+void CXXObj::construct(const nanobind::args&) {
     assert(pDecl != nullptr);
     assert(pObj == nullptr && "[Error]: Double construct is not allowed");
     using DefaultCtorType = void (*)(void*);
-    for (auto ctor : pDecl->ctors()) {
+    for (auto* ctor : pDecl->ctors()) {
         const bool isDefaultCtor = ctor->getNumCtorInitializers() == 0;
         if (isDefaultCtor) {
             auto* pFunc = lookupFunc(clang::GlobalDecl(ctor, clang::CXXCtorType::Ctor_Base));
             auto* pCtor = reinterpret_cast<DefaultCtorType>(pFunc);
-            pObj = allocateObj(pDecl);
-            pCtor(pObj);
+            pObj = allocate(getType());
+            pCtor(pObj.get());
             break;
         }
     }
@@ -81,35 +77,35 @@ void CXXObj::construct(nanobind::args) {
         throw LLVMException("No available default contructor");
 }
 
-nanobind::object CXXObj::call(const char* rtnTyName, const char* name, nanobind::args args) {
+nanobind::object CXXObj::call(const char* rtnTyName, const char* name, const nanobind::args& args) {
     clang::GlobalDecl funcDecl;
-    for (auto pFunc : pDecl->methods()) {
+    for (auto* pFunc : pDecl->methods()) {
         using namespace clang;
         if (pFunc->getDeclName().getNameKind() != DeclarationName::NameKind::Identifier)
             continue;
 
-        const bool found = pFunc->getName().equals(name);
+        const bool found = pFunc->getName().compare(name) == 0;
         if (found) {
             funcDecl = clang::GlobalDecl(pFunc);
             break;
         }
     }
-    const auto fn = lookupFunc(std::move(funcDecl));
+    const auto fn = lookupFunc(funcDecl);
 
     auto& pp = PhysicaPython::getInstance();
     const auto rtnType = pp.toCXXType(rtnTyName);
-    auto pRtn = rtnType.allocate();
+    auto pRtn = allocate(rtnType);
 
     const size_t numArgs = args.size();
     Array<const ffi_type*> argTypes(numArgs + 1);
-    Array<typename CXXType::Ptr> pArgs(numArgs + 1);
+    Array<Ptr> pArgs(numArgs + 1);
     Array<void*> pRawArgs(numArgs + 1);
     argTypes[0] = &ffi_type_pointer;
-    pRawArgs[0] = pObj;
+    pRawArgs[0] = pObj.get();
     for (size_t i = 1; i <= numArgs; ++i) {
         const auto argType = pp.toCXXType(args[i]);
         argTypes[i] = argType.toFFI();
-        pArgs[i] = argType.allocate();
+        pArgs[i] = allocate(argType);
         pRawArgs[i] = pArgs[i].get();
     }
     FuncInfo info(numArgs + 1, rtnType.toFFI(), argTypes.data());
@@ -117,18 +113,14 @@ nanobind::object CXXObj::call(const char* rtnTyName, const char* name, nanobind:
     return rtnType.toPython(pRtn.get());
 }
 
-void* CXXObj::allocateObj(const CXXRecordDecl* pDecl) {
-    assert(pDecl != nullptr && "[Error]: Invalid param");
-    auto& pp = PhysicaPython::getInstance();
-    const auto& ctx = pp.getClang().getASTContext();
-    const auto type = ctx.getRecordType(pDecl);
-    return ::operator new(ctx.getTypeSize(type), std::align_val_t(ctx.getTypeAlign(type)));
+auto CXXObj::allocate(CXXType ty) -> Ptr {
+    return Ptr(::operator new(ty.getSize(), std::align_val_t(ty.getAlign())));
 }
 
-const CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams) {
+CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams) {
     using namespace clang;
     const size_t numArgs = tparams.size();
-    for (const ClassTemplateSpecializationDecl* pSpec : templateDecl.specializations()) {
+    for (ClassTemplateSpecializationDecl* pSpec : templateDecl.specializations()) {
         const auto& specArgs = pSpec->getTemplateArgs();
         if (numArgs != specArgs.size())
             continue;
@@ -147,21 +139,15 @@ bool CXXObj::matchParamT(const nanobind::handle& pyarg, const clang::TemplateArg
     using Kind = clang::TemplateArgument::ArgKind;
     switch (targ.getKind()) {
     case Kind::Null:
-        return false;
     case Kind::Type:
-        return false;
     case Kind::Declaration:
-        return false;
     case Kind::NullPtr:
         return false;
     case Kind::Integral:
         return targ.getAsIntegral() == int64_t(nanobind::int_(pyarg));
     case Kind::Template:
-        return false;
     case Kind::TemplateExpansion:
-        return false;
     case Kind::Expression:
-        return false;
     case Kind::Pack:
         return false;
     default:

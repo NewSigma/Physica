@@ -73,7 +73,7 @@ const clang::NamedDecl* Clang::include(const char* includeName) {
 
         Preprocessor& pp = Base::getPreprocessor();
         assert(pp.isIncrementalProcessingEnabled() && "[Error]: Unexpected clang state");
-        const bool failed = pp.EnterSourceFile(std::move(fid), nullptr, std::move(loc));
+        const bool failed = pp.EnterSourceFile(fid, nullptr, loc);
         if (failed)
             throw LLVMException("[Error]: Enter source file failed");
         parse();
@@ -117,7 +117,8 @@ void Clang::makeInvocation() {
     std::vector<const char*> args{};
     /* Make args */ {
         args.push_back(exec.c_str());
-        if constexpr (false) {
+        constexpr bool NoImpl = false;
+        if constexpr (NoImpl) {
             args.push_back("-xcuda");
             args.push_back("--cuda-host-only");
             args.push_back(PHYSICA_CUDA_ARCHITECTURES);
@@ -146,8 +147,8 @@ void Clang::makeInvocation() {
     using namespace clang;
     {
         auto pDiagOpts = CreateAndPopulateDiagOpts(args);
-        auto* pDiagBuffer = new TextDiagnosticPrinter(llvm::outs(), pDiagOpts.get());
-        auto* pDiag = new DiagnosticsEngine(new DiagnosticIDs(), pDiagOpts.release(), pDiagBuffer);
+        auto* pDiagBuffer = new TextDiagnosticPrinter(llvm::outs(), *pDiagOpts.get());
+        auto* pDiag = new DiagnosticsEngine(new DiagnosticIDs(), *pDiagOpts.release(), pDiagBuffer);
         Base::setDiagnostics(pDiag);
     }
     auto llvmDirver = driver::Driver("", llvm::sys::getProcessTriple(), Base::getDiagnostics());
@@ -155,7 +156,7 @@ void Clang::makeInvocation() {
     /* Make compilation */ {
         llvmDirver.setCheckInputsExist(false);
         pCompile.reset(llvmDirver.BuildCompilation(args));
-        if (pCompile->getArgs().hasArg(driver::options::OPT_v))
+        if (pCompile->getArgs().hasArg(options::OPT_v))
             pCompile->getJobs().Print(llvm::errs(), "\n", false);
     }
 
@@ -202,7 +203,7 @@ void Clang::parse() {
     {
         auto& consumer = Base::getASTConsumer();
         Parser::DeclGroupPtrTy pDeclGroup;
-        Sema::ModuleImportState state;
+        Sema::ModuleImportState state{};
         bool isDone = parser->ParseFirstTopLevelDecl(pDeclGroup, state);
         while (!isDone) {
             if (pDeclGroup) {
@@ -221,7 +222,7 @@ void Clang::parse() {
         diag.getClient()->clear();
         throw LLVMException("[Error]: Parsing failed");
     }
-    Token check;
+    Token check{};
     Base::getPreprocessor().Lex(check);
     assert(check.is(tok::annot_repl_input_end) && "[Error]: Lexer must be EOF when starting incremental parse");
 }

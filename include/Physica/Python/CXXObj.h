@@ -34,9 +34,15 @@ namespace Physica {
         using ForeignFunc = void (*)();
         using CXXRecordDecl = clang::CXXRecordDecl;
         using ClassTemplateDecl = clang::ClassTemplateDecl;
+
+        struct deleter {
+            void operator()(void* ptr) { ::operator delete(ptr); }
+        };
+
+        using Ptr = std::unique_ptr<void, deleter>;
     private:
-        const CXXRecordDecl* pDecl;
-        void* pObj;
+        CXXRecordDecl* pDecl;
+        Ptr pObj;
     public:
         CXXObj(CXXPtr p, nanobind::args tparams);
         CXXObj(const CXXObj&) = delete;
@@ -46,21 +52,22 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        void construct(nanobind::args args);
-        [[nodiscard]] nanobind::object call(const char* rtnTyName, const char* name, nanobind::args args);
+        void construct(const nanobind::args& args);
+        [[nodiscard]] nanobind::object call(const char* rtnTyName, const char* name, const nanobind::args& args);
         inline void swap(CXXObj& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] CXXType getType() const noexcept { return CXXType(pDecl); }
         template<class T>
-        [[nodiscard]] T& getDerived() noexcept { return *reinterpret_cast<T*>(pObj); }
+        [[nodiscard]] T& getDerived() noexcept { return *reinterpret_cast<T*>(pObj.get()); }
         template<class T>
         [[nodiscard]] const T& getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
     private:
-        CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept;
+        CXXObj(CXXRecordDecl* pDecl_, void* pObj_) noexcept;
 
-        static void* allocateObj(const CXXRecordDecl* pDecl);
-        [[nodiscard]] static const CXXRecordDecl* findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams);
+        [[nodiscard]] static CXXRecordDecl* findSpecialization(const ClassTemplateDecl& templateDecl, nanobind::args tparams);
         [[nodiscard]] static bool matchParamT(const nanobind::handle& pyarg, const clang::TemplateArgument& targ);
         [[nodiscard]] static ForeignFunc lookupFunc(clang::GlobalDecl decl);
+        [[nodiscard]] static Ptr allocate(CXXType ty);
     };
 
     inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {

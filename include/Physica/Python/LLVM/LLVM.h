@@ -38,6 +38,6 @@ namespace Physica {
         LLVM& operator=(LLVM&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ThreadSafeContext& getThreadSafeContext() noexcept { return threadSafeContext; }
-        [[nodiscard]] LLVMContext& getContext() noexcept { return *threadSafeContext.getContext(); }
+        [[nodiscard]] LLVMContext& getContext() noexcept { return *threadSafeContext.withContextDo([](LLVMContext* pContext) { return pContext; }); }
     };
 }

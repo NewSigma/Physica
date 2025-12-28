@@ -26,12 +26,6 @@ namespace Physica {
     class CXXType {
         clang::CXXRecordDecl* pDecl;
         ffi_type ffiType;
-
-        struct deleter {
-            void operator()(void* ptr) { ::operator delete(ptr); }
-        };
-    public:
-        using Ptr = std::unique_ptr<void, deleter>;
     public:
         CXXType() = default;
         CXXType(clang::CXXRecordDecl* pDecl_);
@@ -44,7 +38,7 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] const ffi_type* toFFI() const noexcept { return &ffiType; }
         [[nodiscard]] nanobind::object toPython(void* data) const;
-        [[nodiscard]] Ptr allocate() const noexcept;
+
         void swap(CXXType& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isTrivial() const noexcept { return pDecl == nullptr; }

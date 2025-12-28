@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <clang/AST/RecordLayout.h>
 #include "Physica/Python/CXXType.h"
 #include "Physica/Python/PhysicaPython.h"
 
@@ -25,9 +26,9 @@ CXXType::CXXType(clang::CXXRecordDecl* pDecl_) : pDecl(pDecl_) {
     assert(pDecl != nullptr && "[Error]: Invalid param");
     auto& pp = PhysicaPython::getInstance();
     const auto& ctx = pp.getClang().getASTContext();
-    const auto type = ctx.getRecordType(pDecl);
-    ffiType.size = ctx.getTypeSize(type);
-    ffiType.alignment = ctx.getTypeAlign(type);
+    const auto& layout = ctx.getASTRecordLayout(pDecl);
+    ffiType.size = layout.getSize().getQuantity();
+    ffiType.alignment = layout.getAlignment().getQuantity();
 }
 
 CXXType::CXXType(ffi_type ffiType_)
@@ -44,10 +45,6 @@ nanobind::object CXXType::toPython(void* data) const {
     default:
         throw std::runtime_error("[Error]: Unknown type");
     }
-}
-
-auto CXXType::allocate() const noexcept -> Ptr {
-    return Ptr(::operator new(getSize(), std::align_val_t(getAlign())));
 }
 
 void CXXType::swap(CXXType& __restrict obj) noexcept {

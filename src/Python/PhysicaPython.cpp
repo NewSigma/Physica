@@ -25,10 +25,11 @@
 #include "Physica/Python/LLVM/LLVM.h"
 
 using namespace Physica;
-constinit static PhysicaPython* instance = nullptr;
+namespace {
+    constinit PhysicaPython* instance = nullptr;
+}
 
-PhysicaPython::PhysicaPython(std::filesystem::path root_)
-        : llvm(), clang(std::move(root_), llvm) {
+PhysicaPython::PhysicaPython(std::filesystem::path root_) : clang(std::move(root_), llvm) {
     using namespace llvm::orc;
 
     const auto& target = clang.getTarget();
@@ -85,7 +86,9 @@ NB_MODULE(PhysicaPython, m) {
             instance = new PhysicaPython(root);
     });
 
-    m.def("include", [](const char* includeName) -> CXXPtr { return (void*)PhysicaPython::getInstance().getClang().include(includeName); }, nanobind::rv_policy::move);
+    m.def("include", [](const char* includeName) -> CXXPtr {
+        return (void*)PhysicaPython::getInstance().getClang().include(includeName);
+    }, nanobind::rv_policy::move);
 
     m.def("compile", [](const char* moduleName) {
         PhysicaPython::getInstance().compile(moduleName);
