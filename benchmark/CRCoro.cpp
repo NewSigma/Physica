@@ -16,23 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <benchmark/benchmark.h>
 #include "Physica/CRCoro.h"
+#include "Benchmark.h"
 
 namespace {
     struct Int : public Physica::CRCoro<Int> {
-        int i;
+        int64_t i;
 
-        Int(int i_) : i(i_) {}
+        Int(int64_t i_) : i(i_) {}
     };
 
-    int sum1(int n) {
+    int64_t sum1(int64_t n) noexcept {
         if (n == 0)
             return 0;
         return n + sum1(n - 1);
     }
 
-    Int sum2(int n) {
+    Int sum2(int64_t n) noexcept {
         if (n == 0)
             co_return 0;
         co_return n + sum2(n - 1).i;
@@ -40,18 +40,18 @@ namespace {
 
     void bench1(benchmark::State &state) {
         int64_t n = state.range(0);
-        int a{};
+        int64_t a{};
         for (auto _ : state) {
-            a = sum1(n);
+            PHYSICA_BENCH(a = sum1(n));
             benchmark::DoNotOptimize(a);
         }
     }
 
     void bench2(benchmark::State &state) {
         int64_t n = state.range(0);
-        int a{};
+        int64_t a{};
         for (auto _ : state) {
-            a = sum2(n).i;
+            PHYSICA_BENCH(a = sum2(n).i);
             benchmark::DoNotOptimize(a);
         }
     }

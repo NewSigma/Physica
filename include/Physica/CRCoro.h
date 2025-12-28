@@ -38,11 +38,6 @@ namespace Physica {
         struct RValueWrapper {
             T* p;
 
-            ~RValueWrapper() {
-                // Workaround, wait for CWG2563
-                std::coroutine_handle<T>::from_promise(*p).destroy();
-            }
-
             operator T&&() const noexcept { return std::move(*p); }
         };
     public:
@@ -55,7 +50,7 @@ namespace Physica {
                 ("[Error]: CRCoro never suspends")
             #endif
             ;
-        auto final_suspend() noexcept { return std::suspend_always{}; }
+        auto final_suspend() noexcept { return std::suspend_never{}; }
         void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
         [[noreturn]] void unhandled_exception() { throw; }
     protected:

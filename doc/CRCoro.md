@@ -50,6 +50,7 @@ struct CRCoro { // Curiously Recurring Coroutine
     T& getDerived() noexcept { return *static_cast<T*>(this); }
 
     auto get_return_object() noexcept { return RValueWrapper(&getDerived()); }
+    void await_transform(auto&&) noexcept = delete;
     std::suspend_never initial_suspend() noexcept { return {}; }
     std::suspend_never final_suspend() noexcept { return {}; }
     void return_value(T&& x) noexcept {
@@ -93,48 +94,6 @@ int main() {
     return 0;
 }
 ```
-
-不幸的是，上述代码含有一个UB。三大主要编译器中只有MSVC能够给出预期的结果，GCC和Clang都会选择在协程栈帧析构后进行返回对象的转换$^{[1]}$。这一UB有希望在CWG2563$^{[2]}$中修复。在正式修复以前，我们可以采用以下实现规避该UB:
-
-```C++
-#include <utility>
-#include <coroutine>
-
-template<class T>
-struct CRCoro { // Curiously Recurring Coroutine
-    struct RValueWrapper {
-        T* p;
-
-        ~RValueWrapper() {
-            // Workaround, wait for CWG2563
-            std::coroutine_handle<T>::from_promise(*p).destroy();
-        }
-
-        operator T&&() const noexcept { return std::move(*p); }
-    };
-
-    using promise_type = T;
-
-    T& getDerived() noexcept { return *static_cast<T*>(this); }
-
-    auto get_return_object() noexcept { return RValueWrapper(&getDerived()); }
-    std::suspend_never initial_suspend() noexcept { return {}; }
-    std::suspend_always final_suspend() noexcept { return {}; }
-    void return_value(T&& x) noexcept {
-        getDerived() = std::move(x);
-    }
-    void unhandled_exception() {}
-};
-```
-
-注意该Workaround将会阻碍Clang的协程消除优化。
-
-## Conclusion
-
-我们提出奇异递归协程帮助迁移模板代码。一个从不等待的协程是非常"奇异"的, 它也未必是解决迁移问题的最佳方案。从另一角度, 我们提供了一个有趣的corner case。这对这一case，我们可以问两个问题
-
-1. C++标准如何定义该case的行为
-2. 编译器如何优化该case
 
 ## Reference
 
