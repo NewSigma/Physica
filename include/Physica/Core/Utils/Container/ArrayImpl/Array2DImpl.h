@@ -54,14 +54,14 @@ namespace Physica {
             : arr(std::move(arr_)), r(r_) {}
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    T& Array2D<T, Option, Row, Col, Allocator>::operator()(size_t r, size_t c) {
+    T& Array2D<T, Option, Row, Col, Allocator>::operator[](size_t r, size_t c) {
         assert(r < getRow() && c < getCol());
         return arr[toIndex1D(r, c)];
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    const T& Array2D<T, Option, Row, Col, Allocator>::operator()(size_t r, size_t c) const {
-        return const_cast<This&>(*this).operator()(r, c);
+    const T& Array2D<T, Option, Row, Col, Allocator>::operator[](size_t r, size_t c) const {
+        return const_cast<This&>(*this).operator[](r, c);
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>

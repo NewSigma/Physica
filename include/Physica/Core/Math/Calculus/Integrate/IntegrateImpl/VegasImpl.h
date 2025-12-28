@@ -183,12 +183,12 @@ namespace Physica {
             for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
                 while (temp < meanVar) {
                     assert(j < getNumPoint() && "[Error]: Unexpected not enough vars, this is likely a bug");
-                    temp += lossMat(j, dim);
+                    temp += lossMat[j, dim];
                     j += 1;
                 }
                 temp -= meanVar;
                 Trv delta = oldPoints[j] - oldPoints[j - 1];
-                newPoints[i] = fma(temp / lossMat(j - 1, dim), -delta, oldPoints[j]);
+                newPoints[i] = fma(temp / lossMat[j - 1, dim], -delta, oldPoints[j]);
             }
             newPoints[i] = oldPoints[i];
             oldPoints = newPoints * mixBeta + oldPoints * (Trv(1) - mixBeta);
@@ -213,8 +213,8 @@ namespace Physica {
         VectorND<Trv> deltas(getDim());
         for (size_t i = 0; i < getDim(); ++i) {
             int index = indices[i];
-            x[i] = pointGrid(index, i);
-            deltas[i] = pointGrid(index + 1, i);
+            x[i] = pointGrid[index, i];
+            deltas[i] = pointGrid[index + 1, i];
         }
         deltas -= x;
         deltas.clamp_min(std::numeric_limits<T>::min());
@@ -245,8 +245,8 @@ namespace Physica {
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
-                lossMat(index, i).toNextMean(counts(index, i), l);
-                counts(index, i) += 1;
+                lossMat[index, i].toNextMean(counts[index, i], l);
+                counts[index, i] += 1;
             }
         }
     }
@@ -263,7 +263,8 @@ namespace Physica {
             const auto& deltas = pair.second;
             const T lny = fn(x);
             assert(lny.isFinite() && "[Error]: Bad value");
-            const T lnxy = fma(Trv(getDim()), ln(Trv(getNumPoint())), lny + ln(deltas).sum());
+            T lnxy = lny + ln(deltas).sum();
+            lnxy.value() = fma(Trv(getDim()), ln(Trv(getNumPoint())), lnxy.value());
             samples[n] = lnxy;
         }, numSample, 0).wait();
 
@@ -281,11 +282,12 @@ namespace Physica {
             const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
-                lossMat(index, i).toNextMean(counts(index, i), l);
-                counts(index, i) += 1;
+                lossMat[index, i].toNextMean(counts[index, i], l);
+                counts[index, i] += 1;
             }
         }
         mean = ln(mean) + maxSample;
-        var = fma(Trv(2), maxSample, ln(var + Trv(std::numeric_limits<T>::min())));
+        var = ln(var + Trv(std::numeric_limits<T>::min()));
+        var.value() = fma(Trv(2), maxSample, var.value());
     }
 }

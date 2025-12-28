@@ -61,10 +61,10 @@ namespace Physica {
         __host__ __device__ void operator+=(const Matrix auto& m);
         __host__ __device__ void operator-=(const Matrix auto& m);
 
-        [[nodiscard]] __device__ RefTy operator()(size_t row, size_t col);
-        [[nodiscard]] __device__ ConstRefTy operator()(size_t row, size_t col) const;
+        [[nodiscard]] __device__ RefTy operator[](size_t row, size_t col);
+        [[nodiscard]] __device__ ConstRefTy operator[](size_t row, size_t col) const;
         /* Operations */
-        [[nodiscard]] __device__ ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
+        [[nodiscard]] __device__ ConstRefTy calc(size_t row, size_t col) const { return operator[](row, col); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
         void reverse(const Matrix auto& grad) const noexcept;

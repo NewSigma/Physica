@@ -132,7 +132,7 @@ namespace Physica {
         MatrixND<T> fock;
         auto errorMatrices = DIISBuffer(DIISBufferSize - 1, baseSetSize, baseSetSize, T(0));
         DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -T(1));
-        DIISMat(0, 0) = T(0);
+        DIISMat[0, 0] = T(0);
         DenseVector<T, EDIISBufferSize> energyBuffer{};
 
         iteration = 0;
@@ -184,7 +184,7 @@ namespace Physica {
                 for (size_t k = 0; k < molecular.getAtomCount(); ++k)
                     temp -= BaseSetType::nuclearAttraction(baseSet[i], baseSet[j], molecular.getAtom(k).v())
                             * T(molecular.getAtomicNumber(k));
-                singleHamilton(i, j) = BaseSetType::kinetic(baseSet[i], baseSet[j]) + temp;
+                singleHamilton[i, j] = BaseSetType::kinetic(baseSet[i], baseSet[j]) + temp;
             }
         }
     }
@@ -195,10 +195,10 @@ namespace Physica {
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
             for (; j < i; ++j)
-                overlap(j, i) = overlap(i, j);
+                overlap[j, i] = overlap[i, j];
 
             for (; j < baseSetSize; ++j)
-                overlap(j, i) = BaseSetType::overlap(baseSet[i], baseSet[j]);
+                overlap[j, i] = BaseSetType::overlap(baseSet[i], baseSet[j]);
         }
     }
 
@@ -213,8 +213,8 @@ namespace Physica {
         for (size_t i = 0; i < baseSetSize; ++i) {
             size_t j = 0;
             for (; j < i; ++j) {
-                electronDensity(j, i) = electronDensity(i, j);
-                sameSpinElectronDensity(j, i) = sameSpinElectronDensity(i, j);
+                electronDensity[j, i] = electronDensity[i, j];
+                sameSpinElectronDensity[j, i] = sameSpinElectronDensity[i, j];
             }
 
             for (; j < baseSetSize; ++j) {
@@ -230,8 +230,8 @@ namespace Physica {
                     temp1 += isSingleOccupacy ? dot : T(2) * dot;
                     temp2 += dot;
                 }
-                electronDensity(j, i) = temp1;
-                sameSpinElectronDensity(j, i) = temp2;
+                electronDensity[j, i] = temp1;
+                sameSpinElectronDensity[j, i] = temp2;
             }
         }
     }
@@ -249,10 +249,10 @@ namespace Physica {
                     for (size_t s = 0; s < size; ++s) {
                         const T coulomb = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[q], baseSet[s]);
                         const T exchange = BaseSetType::electronRepulsion(baseSet[p], baseSet[r], baseSet[s], baseSet[q]);
-                        temp += electronDensity(s, r) * coulomb - sameSpinElectronDensity(s, r) * exchange;
+                        temp += electronDensity[s, r] * coulomb - sameSpinElectronDensity[s, r] * exchange;
                     }
                 }
-                fock(q, p) = temp;
+                fock[q, p] = temp;
             }
         }
         fock += singleHamilton;
@@ -278,8 +278,8 @@ namespace Physica {
             for (size_t i = 1; i < DIISMat.getRow(); ++i) {
                 for (size_t j = i; j < DIISMat.getRow(); ++j) {
                     T temp = (errorMatrices[i - 1] * errorMatrices[j - 1]).trace();
-                    DIISMat(i, j) = temp;
-                    DIISMat(j, i) = temp;
+                    DIISMat[i, j] = temp;
+                    DIISMat[j, i] = temp;
                 }
             }
         }
@@ -298,7 +298,7 @@ namespace Physica {
             for (size_t c = r + 1; c < problemDim; ++c) {
                 deltaFock = fockMatrices[offset + r] - fockMatrices[offset + c];
                 deltaDensity = densityMatrices[c] - densityMatrices[r];
-                G(r, c) = (deltaFock * deltaDensity).trace();
+                G[r, c] = (deltaFock * deltaDensity).trace();
             }
         }
 

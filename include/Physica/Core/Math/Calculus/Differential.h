@@ -59,26 +59,26 @@ namespace Physica {
 
         assert(step.isPositive());
         DenseSymmMatrix<T, TableSize> table(TableSize);
-        table(0, 0) = doublePoint(fn, x, step);
+        table[0, 0] = doublePoint(fn, x, step);
         T step_now = step;
         T error = std::numeric_limits<T>::max();
         T result{};
         
         for (size_t i = 1; i < TableSize; ++i) {
             step_now *= T(RepFactor);
-            table(0, i) = doublePoint(fn, x, step_now);
+            table[0, i] = doublePoint(fn, x, step_now);
 
             T factor2 = Factor2;
             for (size_t j = 1; j <= i; ++j) {
-                table(j, i) = (table(j - 1, i) * factor2 - table(j - 1, i - 1)) / (factor2 - 1);
+                table[j, i] = (table[j - 1, i] * factor2 - table[j - 1, i - 1]) / (factor2 - 1);
                 factor2 *= T(Factor2);
-                const T error_now = std::max(abs(table(j, i) - table(j - 1, i)), abs(table(j, i) - table(j - 1, i - 1)));
+                const T error_now = std::max(abs(table[j, i] - table[j - 1, i]), abs(table[j, i] - table[j - 1, i - 1]));
                 if (error_now <= error) {
                     error = error_now;
-                    result = table(j, i);
+                    result = table[j, i];
                 }
             }
-            if (abs(table(i, i) - table(i - 1, i - 1)) >= error * Tolerance)
+            if (abs(table[i, i] - table[i - 1, i - 1]) >= error * Tolerance)
                 break;
         }
         return result;

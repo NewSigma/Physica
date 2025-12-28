@@ -99,7 +99,7 @@ int main() {
 
     for (size_t i = 0; i < numReplica; ++i)
         for (size_t j = 0; j < numMolecular; ++j)
-            if (abs(meanCorr(j, i)) > deviaCorr(j, i) * ScalarType(2.0))
+            if (abs(meanCorr[j, i]) > deviaCorr[j, i] * ScalarType(2.0))
                 return 1;
     if (abs(ScalarType(temperatureT) - meanTemperature) > ScalarType(2.0) * sqrt(varTemperature))
         return 1;

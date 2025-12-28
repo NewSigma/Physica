@@ -97,7 +97,7 @@ namespace Physica {
     template<RNG R>
     void ElasticDQMC<T>::step_random() {
         for (int i = 0; i < getNumSite(); ++i)
-            actionR(i, i) = randAuxField<R>();
+            actionR[i, i] = randAuxField<R>();
         lnAbsDet = diagonalize();
         buffer.swap(greens);
     }
@@ -106,7 +106,7 @@ namespace Physica {
     template<RNG R>
     void ElasticDQMC<T>::step() {
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
-        const T save = std::exchange(actionR(site, site), randAuxField<R>());
+        const T save = std::exchange(actionR[site, site], randAuxField<R>());
 
         const auto lnAbsDet1 = diagonalize();
         const bool accept = Trv::template random_uniform<R>() < exp(lnAbsDet1 - lnAbsDet);
@@ -115,7 +115,7 @@ namespace Physica {
             buffer.swap(greens);
         }
         else
-            actionR(site, site) = save;
+            actionR[site, site] = save;
     }
 
     template<Scalar T>

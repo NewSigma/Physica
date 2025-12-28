@@ -86,13 +86,13 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<LValueMatrix<Derived>>::operator()(size_t row, size_t col) -> RefTy {
+    __device__ auto device_obj<LValueMatrix<Derived>>::operator[](size_t row, size_t col) -> RefTy {
         return *data_ptr(row, col);
     }
 
     template<class Derived>
-    __device__ auto device_obj<LValueMatrix<Derived>>::operator()(size_t row, size_t col) const -> ConstRefTy {
-        return const_cast<This&>(*this)(row, col);
+    __device__ auto device_obj<LValueMatrix<Derived>>::operator[](size_t row, size_t col) const -> ConstRefTy {
+        return const_cast<This&>(*this)[row, col];
     }
 
     template<class Derived>
@@ -301,7 +301,7 @@ namespace Physica {
         assert(minor < Base::getDerived().getMaxMinor());
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
-        return Base::getDerived()(r, c);
+        return Base::getDerived()[r, c];
     }
 
     template<class Derived>

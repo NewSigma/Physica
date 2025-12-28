@@ -215,19 +215,19 @@ namespace Physica {
                         kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
                         kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);
                         kIndex1[2] = rSpaceSize[2] - kIndex[2];
-                        elem += kSpace(kIndex1).conjugate() * factor;
+                        elem += kSpace[kIndex1].conjugate() * factor;
                     }
                     else
-                        elem += kSpace(kIndex) * factor;
+                        elem += kSpace[kIndex] * factor;
                 }
                 else
-                    elem += kSpace(kIndex) * factor;
+                    elem += kSpace[kIndex] * factor;
             });
 
             if constexpr (isComplex)
-                result(rIndex) = elem;
+                result[rIndex] = elem;
             else
-                result(rIndex) = elem.real();
+                result[rIndex] = elem.real();
         });
         result *= reciprocal(RealType(data.getSize()));
         return result;
@@ -264,13 +264,13 @@ namespace Physica {
                     kIndex1[0] = kIndex[0] == 0 ? kIndex[0] : (rSpaceSize[0] - kIndex[0]);
                     kIndex1[1] = kIndex[1] == 0 ? kIndex[1] : (rSpaceSize[1] - kIndex[1]);
                     kIndex1[2] = rSpaceSize[2] - kIndex[2];
-                    elem += kSpace(kIndex1).conjugate() * factor;
+                    elem += kSpace[kIndex1].conjugate() * factor;
                 }
                 else
-                    elem += kSpace(kIndex) * factor;
+                    elem += kSpace[kIndex] * factor;
             }
             else
-                elem += kSpace(kIndex) * factor;
+                elem += kSpace[kIndex] * factor;
         });
 
         T result;

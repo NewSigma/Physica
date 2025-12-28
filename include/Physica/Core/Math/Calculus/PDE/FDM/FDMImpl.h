@@ -53,7 +53,7 @@ namespace Physica {
             for(size_t i = 1; i < col_1; ++i) {
                 for(size_t j = 1; j < row_1; ++j) {
                     if(!onBoundary(i, j)) {
-                        auto& temp = data(j, i);
+                        auto& temp = data[j, i];
                         copy = std::move(temp);
                         temp = (data(j, i - 1) + data(j, i + 1)
                                 + data(j - 1, i) + data(j + 1, i)) >> 2;

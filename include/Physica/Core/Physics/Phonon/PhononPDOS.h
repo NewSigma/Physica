@@ -78,7 +78,7 @@ namespace Physica {
             VectorND<T> project(unitCellDOF);
             for (size_t i = 0; i < unitCellDOF; ++i)
                 project[i] = hadamard(eigenvectors.col(i), direction).squaredNorm();
-            projections(index) = project;
+            projections[index] = project;
         });
     }
 
@@ -93,22 +93,22 @@ namespace Physica {
     template<Scalar T>
     T PhononPDOS<T>::calcPDOS(T freq, size_t band) const {
         T result = 0;
-        forND(eigenvalues.getShape(), [this, freq, band, &result](Index3D index) {
+        forND(eigenvalues.getShape(), [this, freq, band, &result](Index3D x) {
             const Index3D gridDim = eigenvalues.getShape();
-            Index3D index1{};
+            Index3D y{};
             for (unsigned int i = 0; i < Dim; ++i)
-                index1[i] = (index[i] + 1) % gridDim[i];
+                y[i] = (x[i] + 1) % gridDim[i];
 
             CoeffVector cornerProj{};
-            cornerProj[0] = projections(index)[band];
-            cornerProj[1] = projections(index[0], index[1], index1[2])[band];
-            cornerProj[2] = projections(index[0], index1[1], index[2])[band];
-            cornerProj[3] = projections(index[0], index1[1], index1[2])[band];
-            cornerProj[4] = projections(index1[0], index[1], index[2])[band];
-            cornerProj[5] = projections(index1[0], index[1], index1[2])[band];
-            cornerProj[6] = projections(index1[0], index1[1], index[2])[band];
-            cornerProj[7] = projections(index1)[band];
-            result += Base::calcElemDOS(freq, band, index) * cornerProj.mean();
+            cornerProj[0] = projections[x][band];
+            cornerProj[1] = projections[x[0], x[1], y[2]][band];
+            cornerProj[2] = projections[x[0], y[1], x[2]][band];
+            cornerProj[3] = projections[x[0], y[1], y[2]][band];
+            cornerProj[4] = projections[y[0], x[1], x[2]][band];
+            cornerProj[5] = projections[y[0], x[1], y[2]][band];
+            cornerProj[6] = projections[y[0], y[1], x[2]][band];
+            cornerProj[7] = projections[y][band];
+            result += Base::calcElemDOS(freq, band, x) * cornerProj.mean();
         });
         result /= T(eigenvalues.getSize() * ElementVolume);
         return result;

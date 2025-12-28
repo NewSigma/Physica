@@ -77,14 +77,14 @@ namespace Physica {
     template<class Derived>
     void LValueTensor<Derived>::forND(std::invocable<T&, IndexType> auto fn) {
         Physica::forND(Base::getShape(), [this, fn](const IndexType& index) {
-            fn(operator()(index), index);
+            fn(operator[](index), index);
         });
     }
 
     template<class Derived>
     void LValueTensor<Derived>::forND(std::invocable<const T&, IndexType> auto fn) const {
         Physica::forND(Base::getShape(), [this, fn](const IndexType& index) {
-            fn(operator()(index), index);
+            fn(operator[](index), index);
         });
     }
 

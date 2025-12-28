@@ -62,8 +62,8 @@ namespace Physica {
         ~Array2D() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator()(size_t r, size_t c);
-        [[nodiscard]] const T& operator()(size_t r, size_t c) const;
+        [[nodiscard]] T& operator[](size_t r, size_t c);
+        [[nodiscard]] const T& operator[](size_t r, size_t c) const;
         /* Operations */
         void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t order);

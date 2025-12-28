@@ -45,7 +45,7 @@ namespace Physica {
         ~DenseSymmMatrix() = default;
         /* Operators */
         using Base::operator=;
-        using Base::operator();
+        using Base::operator[];
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
         This& operator=(const Scalar auto& x);
@@ -105,7 +105,7 @@ namespace Physica {
         assert(mat.getRow() == mat.getCol());
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = i; j < mat.getRow(); ++j)
-                Base::operator()(i, j) = mat.calc(i, j);
+                Base::operator[](i, j) = mat.calc(i, j);
     }
 
     template<Scalar T, size_t Order>

@@ -44,7 +44,7 @@ namespace Physica {
         ~CyclicChainQDT() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] auto& operator[](size_t i) { return decomps(i, i); }
+        [[nodiscard]] auto& operator[](size_t i) { return decomps[i, i]; }
         /* Operations */
         [[nodiscard]] const QDTDecomp<T>& multiply(size_t from, size_t to) noexcept;
         void single_flip(int site, int split, Tr factor, Tr invfac) noexcept;
@@ -83,14 +83,14 @@ namespace Physica {
     template<Scalar T>
     auto CyclicChainQDT<T>::multiply(size_t from, size_t to) noexcept -> const QDTDecomp<T>& {
         assert(from < getNumSplit() && to < getNumSplit());
-        auto& result = decomps(from, to);
+        auto& result = decomps[from, to];
         if (result)
             return *result;
 
         if (from < to) {
             for (size_t i = from; i < to; ++i) {
-                if (decomps(from, i) && decomps(i + 1, to)) {
-                    result = (*decomps(from, i)) * (*decomps(i + 1, to));
+                if (decomps[from, i] && decomps[i + 1, to]) {
+                    result = (*decomps[from, i]) * (*decomps[i + 1, to]);
                     return *result;
                 }
             }
@@ -102,15 +102,15 @@ namespace Physica {
         assert(from > to);
         for (size_t i = from; i < getNumSplit(); ++i) {
             size_t i1 = (i + 1) % getNumSplit();
-            if (decomps(from, i) && decomps(i1, to)) {
-                result = (*decomps(from, i)) * (*decomps(i1, to));
+            if (decomps[from, i] && decomps[i1, to]) {
+                result = (*decomps[from, i]) * (*decomps[i1, to]);
                 return *result;
             }
         }
 
         for (size_t i = 0; i < to; ++i) {
-            if (decomps(from, i) && decomps(i + 1, to)) {
-                result = (*decomps(from, i)) * (*decomps(i + 1, to));
+            if (decomps[from, i] && decomps[i + 1, to]) {
+                result = (*decomps[from, i]) * (*decomps[i + 1, to]);
                 return *result;
             }
         }
@@ -124,9 +124,9 @@ namespace Physica {
         assert(split < getNumSplit());
         assert(scalarNear(factor * invfac, Tr(1), std::numeric_limits<T>::epsilon() * 10) && "[Error]: Invalid argument");
         for (size_t from = 0; from < getNumSplit(); ++from) {
-            bool ready = decomps(from, split) || (from == split);
+            bool ready = decomps[from, split] || (from == split);
             if (ready)
-                decomps(from, split)->single_flip(site, factor, invfac);
+                decomps[from, split]->single_flip(site, factor, invfac);
         }
     }
 

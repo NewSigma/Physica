@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < numStep; ++i) {
         ForceModel forceModel{};
         rpmd.nvt_step<RandomSource, Sequential>(thermo, kineticModel, forceModel);
-        pdf.sample(rpmd.getRingPolymer().asMatrix()(0, 0), rpmd.getRingPolymer().asMatrix()(1, 0));
+        pdf.sample(rpmd.getRingPolymer().asMatrix()[0, 0], rpmd.getRingPolymer().asMatrix()[1, 0]);
     }
     const auto grid = pdf.makePosition();
     const auto z = pdf.makeDistribution();

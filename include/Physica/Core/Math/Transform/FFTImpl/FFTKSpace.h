@@ -116,7 +116,7 @@ namespace Physica {
         /* Operators */
         FFTKSpace& operator=(const FFTKSpace& obj);
         using MatrixBase::operator=;
-        using MatrixBase::operator();
+        using MatrixBase::operator[];
         /* Operations */
         void invTransform(const Matrix auto& data);
 
@@ -175,7 +175,7 @@ namespace Physica {
         /* Operators */
         FFTKSpace& operator=(const FFTKSpace& obj);
         using TensorBase::operator=;
-        using TensorBase::operator();
+        using TensorBase::operator[];
         /* Operations */
         void invTransform(const Tensor auto& data);
 

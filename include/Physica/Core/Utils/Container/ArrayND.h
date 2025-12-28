@@ -62,10 +62,10 @@ namespace Physica {
         ~ArrayND() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator()(const IndexType& indices);
-        [[nodiscard]] const T& operator()(const IndexType& indices) const;
-        [[nodiscard]] T& operator()(std::integral auto... dims);
-        [[nodiscard]] const T& operator()(std::integral auto... dims) const;
+        [[nodiscard]] T& operator[](const IndexType& indices);
+        [[nodiscard]] const T& operator[](const IndexType& indices) const;
+        [[nodiscard]] T& operator[](std::integral auto... dims);
+        [[nodiscard]] const T& operator[](std::integral auto... dims) const;
         /* Operations */
         void resize(IndexType shape_, auto&&... args);
         void resize(std::integral auto... dims);

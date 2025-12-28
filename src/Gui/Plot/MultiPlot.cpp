@@ -38,7 +38,7 @@ MultiPlot::MultiPlot(int row, int col, double minX, double maxX, double minY, do
     setBox(minX, maxX, minY, maxY, deltaX, deltaY);
 }
 
-Plot& MultiPlot::operator()(int row, int col) {
+Plot& MultiPlot::operator[](int row, int col) {
     assert(0 <= row && row < getRow());
     assert(0 <= col && col < getCol());
     return static_cast<Plot&>(*layout->itemAtPosition(row, col)->widget());
@@ -56,7 +56,7 @@ void MultiPlot::toSvg(const char* path, int resolution) {
 
     QPainter painter{};
     painter.begin(&gen);
-    painter.setRenderHints(operator()(0, 0).renderHints());
+    painter.setRenderHints(operator[](0, 0).renderHints());
     painter.fillRect(gen.viewBox(), Qt::white);
     render(&painter);
     painter.end();

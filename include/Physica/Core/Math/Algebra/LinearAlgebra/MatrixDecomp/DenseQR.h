@@ -158,13 +158,13 @@ namespace Physica {
         const size_t length = taus.getLength();
         assert(diagD.getLength() == length);
         for (size_t i = 0; i < length; ++i) {
-            if (working(i, i).isSubNormal()) {
+            if (working[i, i].isSubNormal()) {
                 diagD[i] = 1;
                 continue;
             }
             if constexpr (isComplex)
-                assert(working(i, i).imag().isZero() && "[Error]: Householder QR should have real diagonals");
-            diagD[i] = working(i, i).real();
+                assert(working.operator[](i, i).imag().isZero() && "[Error]: Householder QR should have real diagonals");
+            diagD[i] = working[i, i].real();
             working.row(i).tail(i) *= reciprocal(diagD[i]);
         }
     }

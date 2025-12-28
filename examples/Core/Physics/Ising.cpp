@@ -24,20 +24,20 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
-using ScalarType = float32;
+using T = float32;
 using RandomSource = Random<>;
 /**
  * Reference:
  * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:304-308
  */
 class Ising {
-    DenseMatrix<ScalarType> lattice;
-    ScalarType couplingJ;
-    ScalarType boltzmannK;
-    ScalarType temperature;
-    ScalarType energy;
+    DenseMatrix<T> lattice;
+    T couplingJ;
+    T boltzmannK;
+    T temperature;
+    T energy;
 public:
-    Ising(uint64_t N, ScalarType couplingJ_, ScalarType boltzmannK_, ScalarType temperature_)
+    Ising(uint64_t N, T couplingJ_, T boltzmannK_, T temperature_)
             : lattice(N, N)
             , couplingJ(couplingJ_)
             , boltzmannK(boltzmannK_)
@@ -49,7 +49,7 @@ public:
         std::uniform_real_distribution<float> dist{};
         for (uint64_t i = 0; i < lattice.getCol(); ++i)
             for (uint64_t j = 0; j < lattice.getRow(); ++j)
-                lattice(j, i) = (dist(R::getInstance()) > 0.5) ? 1 : -1;
+                lattice[j, i] = (dist(R::getInstance()) > 0.5) ? 1 : -1;
         energy = 0;
     }
 
@@ -58,25 +58,25 @@ public:
         uint64_t iteration = stepNum * lattice.getRow() * lattice.getCol();
 
         std::uniform_int_distribution<size_t> int_dist(0, lattice.getRow() - 1);
-        const ScalarType beta = reciprocal(boltzmannK * temperature);
+        const T beta = reciprocal(boltzmannK * temperature);
         auto& gen = R::getInstance();
         for (uint64_t _ = 0; _ < iteration; ++_) {
             const size_t i = int_dist(gen);
             const size_t j = int_dist(gen);
 
-            const ScalarType deltaE = -deltaDotSpin(i, j) * couplingJ;
-            if (!deltaE.isPositive() || ScalarType::random_uniform<R>() < exp(-deltaE * beta)) {
-                lattice(i, j) = -lattice(i, j);
+            const T deltaE = -deltaDotSpin(i, j) * couplingJ;
+            if (!deltaE.isPositive() || T::random_uniform<R>() < exp(-deltaE * beta)) {
+                lattice[i, j] = -lattice[i, j];
                 energy += deltaE;
             }
         }
     }
     /* Getters */
-    [[nodiscard]] ScalarType meanSpin() const {
-        return lattice.sum() / square(ScalarType(lattice.getRow()));
+    [[nodiscard]] T meanSpin() const {
+        return lattice.sum() / square(T(lattice.getRow()));
     }
 
-    [[nodiscard]] ScalarType getEnergy() const {
+    [[nodiscard]] T getEnergy() const {
         return energy;
     }
 
@@ -84,13 +84,13 @@ public:
         return lattice.getSize();
     }
 private:
-    [[nodiscard]] ScalarType deltaDotSpin(size_t i, size_t j) const {
+    [[nodiscard]] T deltaDotSpin(size_t i, size_t j) const {
         const size_t order_1 = lattice.getRow() - 1;
-        ScalarType spin = lattice(i > 0 ? (i - 1) : order_1, j);
-        spin += lattice(i < order_1 ? (i + 1) : 0, j);
-        spin += lattice(i, j > 0 ? (j - 1) : order_1);
-        spin += lattice(i, j < order_1 ? (j + 1) : 0);
-        spin *= lattice(i, j);
+        T spin = lattice[i > 0 ? (i - 1) : order_1, j];
+        spin += lattice[i < order_1 ? (i + 1) : 0, j];
+        spin += lattice[i, j > 0 ? (j - 1) : order_1];
+        spin += lattice[i, j < order_1 ? (j + 1) : 0];
+        spin *= lattice[i, j];
         return -spin * 2;
     }
 };
@@ -100,21 +100,21 @@ constexpr int NumSample = 5000;
 
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
-    const auto t = VectorND<ScalarType>::linspace(1, 7, NumPoint);
-    VectorND<ScalarType> Cv(NumPoint);
+    const auto t = VectorND<T>::linspace(1, 7, NumPoint);
+    VectorND<T> Cv(NumPoint);
     parallel_for<Thread>([&](size_t i) {
         Ising ising(20, 1, 1, t[i]);
         ising.init<RandomSource>();
         ising.step<RandomSource>(2000);
 
-        ScalarType energy = 0;
-        ScalarType energy2 = 0;
+        T energy = 0;
+        T energy2 = 0;
         for (size_t i = 0; i < NumSample; ++i) {
             ising.step<RandomSource>(10);
             energy.toNextMean(i, ising.getEnergy());
             energy2.toNextMean(i, square(ising.getEnergy()));
         }
-        Cv[i] = (energy2 - square(energy)) / (square(t[i]) * ScalarType(ising.getNumSite()));
+        Cv[i] = (energy2 - square(energy)) / (square(t[i]) * T(ising.getNumSite()));
     }, NumPoint, ThreadPool::numThreadRequired).wait();
 
     QApplication app(argc, argv);

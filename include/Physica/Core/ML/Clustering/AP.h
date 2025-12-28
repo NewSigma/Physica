@@ -87,10 +87,10 @@ namespace Physica {
                     for (size_t i = 0; i < order; ++i) {
                         if (i == c)
                             continue;
-                        temp = std::max(temp, availabilities(r, i) + similarity(r, i));
+                        temp = std::max(temp, availabilities[r, i] + similarity[r, i]);
                     }
-                    const T update = similarity(r, c) - temp;
-                    responsibility(r, c) = responsibility(r, c) * mixing + update * mixing2;
+                    const T update = similarity[r, c] - temp;
+                    responsibility[r, c] = responsibility[r, c] * mixing + update * mixing2;
                 }
             }
             //Update availabilities
@@ -101,10 +101,10 @@ namespace Physica {
                     for (size_t i = 0; i < order; ++i) {
                         if (i == r || i == c)
                             continue;
-                        temp += std::max(T(0), responsibility(i, c));
+                        temp += std::max(T(0), responsibility[i, c]);
                     }
-                    const T update = isDiag ? temp : std::min(T(0), responsibility(c, c) + temp);
-                    availabilities(r, c) = availabilities(r, c) * mixing + update * mixing2;
+                    const T update = isDiag ? temp : std::min(T(0), responsibility[c, c] + temp);
+                    availabilities[r, c] = availabilities[r, c] * mixing + update * mixing2;
                 }
             }
             //Find exemplars
@@ -144,7 +144,7 @@ namespace Physica {
             if (r == center)
                 continue;
             const T max = (responsibility.row(r) + availabilities.row(r)).max();
-            const bool belong = (responsibility(r, center) + availabilities(r, center)) == max;
+            const bool belong = (responsibility[r, center] + availabilities[r, center]) == max;
             if (belong)
                 result.push_front(r);
         }

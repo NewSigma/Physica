@@ -110,7 +110,7 @@ namespace Physica {
         BasisType::forKInBasis(repLatt, basisDim, [this, kPoint, &i](Vector3D<T> waveK) {
             constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
             const T kineticE = (kPoint + waveK).squaredNorm() * factor;
-            hamiltonH(i, i) = kineticE;
+            hamiltonH[i, i] = kineticE;
             i += 1;
         });
     }
@@ -124,7 +124,7 @@ namespace Physica {
             forND(basisDim, [this, r, index1](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceIonCoulomb.getShape());
-                hamiltonH(r, c) += kSpaceIonCoulomb(delta);
+                hamiltonH[r, c] += kSpaceIonCoulomb(delta);
             });
         });
     }
@@ -146,7 +146,7 @@ namespace Physica {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getShape());
                 const Vector3D<T> waveG = BasisType::makeWaveVector(repLatt, delta, basisDim);
-                hamiltonH(r, c) += T(factor) * repVolume * kSpaceDensity(delta) / waveG.squaredNorm();
+                hamiltonH[r, c] += T(factor) * repVolume * kSpaceDensity(delta) / waveG.squaredNorm();
             });
         });
     }
@@ -167,7 +167,7 @@ namespace Physica {
             forND(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceXC.getShape());
-                hamiltonH(r, c) += kSpaceXC(delta) * repVolume;
+                hamiltonH[r, c] += kSpaceXC(delta) * repVolume;
             });
         });
     }

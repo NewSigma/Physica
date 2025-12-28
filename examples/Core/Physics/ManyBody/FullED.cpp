@@ -59,7 +59,7 @@ namespace {
             for (int numSpinDown = numSpinUp; numSpinDown <= NumSite; ++numSpinDown) {
                 const bool isVacuum = numSpinDown == 0;
                 if (isVacuum) {
-                    result(numSpinUp, numSpinDown) = std::make_pair<VectorND<T>, VectorND<T>>({0}, {0});
+                    result[numSpinUp, numSpinDown] = std::make_pair<VectorND<T>, VectorND<T>>({0}, {0});
                     continue;
                 }
 
@@ -73,7 +73,7 @@ namespace {
                     using ReprType = FermiRepr<1, NumSite, false>;
                     pair = calcPair(ReprType(numSpinUp, numSpinDown));
                 }
-                result(numSpinUp, numSpinDown) = std::move(pair);
+                result[numSpinUp, numSpinDown] = std::move(pair);
             }
         }
         return result;
@@ -87,7 +87,7 @@ namespace {
             T numParticles = 0, partition = 0;
             for (int numSpinUp = 0; numSpinUp <= NumSite; ++numSpinUp) {
                 for (int numSpinDown = numSpinUp; numSpinDown <= NumSite; ++numSpinDown) {
-                    const VectorPair& pair = spectrum(numSpinUp, numSpinDown);
+                    const VectorPair& pair = spectrum[numSpinUp, numSpinDown];
                     VectorND<T> weights = exp(pair.first * (-beta));
                     if (numSpinDown != numSpinUp)
                         weights *= T(2);

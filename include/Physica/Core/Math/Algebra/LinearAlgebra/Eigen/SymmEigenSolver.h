@@ -103,7 +103,7 @@ namespace Physica {
         if (source.getRow() == 1) [[unlikely]] {
             eigenvalues[0] = source.calc(0, 0);
             if (getNeedEigenvectors())
-                eigenvectors(0, 0) = T(1);
+                eigenvectors[0, 0] = T(1);
             return;
         }
 
@@ -139,7 +139,7 @@ namespace Physica {
         }
 
         for (size_t i = 0; i < order; ++i)
-            eigenvalues[i] = working(i, i) * factor;
+            eigenvalues[i] = working[i, i] * factor;
     }
 
     template<Scalar T, size_t Order>
@@ -205,12 +205,12 @@ namespace Physica {
         Vector2D<T> buffer{};
         /* Init buffer */ {
             const auto subBlock = working.block(lower, sub_order, lower, sub_order);
-            const Tr factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * T(0.5);
-            const Tr factor2 = square(subBlock(sub_order - 1, sub_order - 2));
+            const Tr factor = (subBlock[sub_order - 2, sub_order - 2].real() - subBlock[sub_order - 1, sub_order - 1].real()) * T(0.5);
+            const Tr factor2 = square(subBlock[sub_order - 1, sub_order - 2]);
             const Tr factor3 = sqrt(fma(factor, factor, factor2));
-            const T shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); // TODO: why we introduce a divide operation
-            buffer[0] = subBlock(0, 0) - shift;
-            buffer[1] = subBlock(1, 0);
+            const T shift = subBlock[sub_order - 1, sub_order - 1] - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); // TODO: why we introduce a divide operation
+            buffer[0] = subBlock[0, 0] - shift;
+            buffer[1] = subBlock[1, 0];
         }
 
         for (size_t i = 0; i < sub_order - 1; ++i) {
@@ -219,8 +219,8 @@ namespace Physica {
             const size_t blockSize = ((i == sub_order - 2) ? 3 : 4) - isShiftStep;
             auto subBlock = working.block(blockStart, blockSize, blockStart, blockSize);
             if (!isShiftStep) {
-                buffer[0] = subBlock(1, 0);
-                buffer[1] = subBlock(2, 0);
+                buffer[0] = subBlock[1, 0];
+                buffer[1] = subBlock[2, 0];
             }
 
             const size_t index = !isShiftStep;
@@ -229,13 +229,13 @@ namespace Physica {
             givens_vec[1] = -givens_vec[1];
             applyGivens(subBlock, givens_vec, index, index + 1);
 
-            const T mean = (subBlock(index, index + 1) + subBlock(index + 1, index)) * T(0.5);
-            subBlock(index, index + 1) = subBlock(index + 1, index) = mean;
+            const T mean = (subBlock[index, index + 1] + subBlock[index + 1, index]) * T(0.5);
+            subBlock[index, index + 1] = subBlock[index + 1, index] = mean;
 
             if (getNeedEigenvectors())
                 applyGivens(eigenvectors, givens_vec, lower + i, lower + i + 1);
             if (!isShiftStep)
-                subBlock(2, 0) = subBlock(0, 2) = T(0);
+                subBlock[2, 0] = subBlock[0, 2] = T(0);
         }
     }
 

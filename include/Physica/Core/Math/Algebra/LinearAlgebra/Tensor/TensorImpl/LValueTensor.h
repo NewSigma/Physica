@@ -52,12 +52,12 @@ namespace Physica {
         void operator+=(const Tensor auto& x);
         void operator-=(const Tensor auto& x);
 
-        [[nodiscard]] RefTy& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
-        [[nodiscard]] ConstRefTy& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
-        [[nodiscard]] RefTy& operator()(Index3D index) { return *data_ptr(index); }
-        [[nodiscard]] ConstRefTy& operator()(Index3D index) const { return *data_ptr(index); }
+        [[nodiscard]] RefTy& operator[](size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
+        [[nodiscard]] ConstRefTy& operator[](size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
+        [[nodiscard]] RefTy& operator[](Index3D index) { return *data_ptr(index); }
+        [[nodiscard]] ConstRefTy& operator[](Index3D index) const { return *data_ptr(index); }
         /* Operations */
-        [[nodiscard]] T calc(Index3D index) const { return operator()(index); }
+        [[nodiscard]] T calc(Index3D index) const { return operator[](index); }
 
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;

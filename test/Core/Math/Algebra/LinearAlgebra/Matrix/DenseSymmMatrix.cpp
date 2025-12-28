@@ -22,13 +22,13 @@ using namespace Physica;
 
 int main() {
     SymmArray<float64> s(3, 3, 0);
-    s(1, 0) = 5;
-    if (s(0, 1) != float64(5))
+    s[1, 0] = 5;
+    if (s[0, 1] != float64(5))
         return 1;
 
     DenseSymmMatrix<float64> m(3, 3, 0);
-    m(1, 0) = 5;
-    if (m(0, 1) != float64(5))
+    m[1, 0] = 5;
+    if (m[0, 1] != float64(5))
         return 1;
     return 0;
 }

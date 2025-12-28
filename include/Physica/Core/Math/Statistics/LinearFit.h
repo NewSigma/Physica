@@ -90,10 +90,10 @@ namespace Physica {
         MatrixType working(row, row + 1);
         VectorType x_r(length, 1);
         for (int r = 0; r < row; ++r) {
-            working(r, row) = y * x_r;
+            working[r, row] = y * x_r;
             VectorType x_c(length, 1);
             for (int c = 0; c < row; ++c) {
-                working(r, c) = x_r * x_c;
+                working[r, c] = x_r * x_c;
                 x_c = hadamard(x, x_c);
             }
             x_r = hadamard(x, x_r);

@@ -41,7 +41,7 @@ namespace {
             fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             for (size_t r = 0; r < buffer.getRow(); ++r)
                 for (size_t c = 0; c < buffer.getCol(); ++c)
-                    fin >> buffer(r, c);
+                    fin >> buffer[r, c];
             result.toNextMean(i, buffer.col(4));
         }
         result *= reciprocal(T(NumSite));
@@ -59,7 +59,7 @@ namespace {
             fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             for (size_t r = 0; r < buffer.getRow(); ++r)
                 for (size_t c = 0; c < buffer.getCol(); ++c)
-                    fin >> buffer(r, c);
+                    fin >> buffer[r, c];
             energys = buffer.col(0);
             numParticle = buffer.col(1);
         }

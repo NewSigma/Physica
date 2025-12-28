@@ -38,7 +38,7 @@ namespace Physica {
             lowerEliminate(i);
         }
         for (size_t i = 0; i < rank; ++i)
-            working(i, rank) /= working(i, i);
+            working[i, rank] /= working[i, i];
     }
 
     template<Scalar T>
@@ -50,7 +50,7 @@ namespace Physica {
             lowerEliminate(i);
         }
         for (size_t i = 0; i < rank; ++i)
-            working(i, rank) /= working(i, i);
+            working[i, rank] /= working[i, i];
     }
 
     template<Scalar T>
@@ -61,11 +61,11 @@ namespace Physica {
             lowerEliminate(i);
         }
         for (size_t i = rank - 1; i > 0; --i) {
-            working(i, rank) /= working(i, i);
+            working[i, rank] /= working[i, i];
             for (size_t j = 0; j < i; ++j)
-                working(j, rank) -= working(j, i) * working(i, rank);
+                working[j, rank] -= working[j, i] * working[i, rank];
         }
-        working(0, rank) /= working(0, 0);
+        working[0, rank] /= working[0, 0];
     }
 
     template<Scalar T>
@@ -76,11 +76,11 @@ namespace Physica {
             lowerEliminate(i);
         }
         for (size_t i = rank - 1; i > 0; --i) {
-            working(i, rank) /= working(i, i);
+            working[i, rank] /= working[i, i];
             for (size_t j = 0; j < i; ++j)
-                working(j, rank) -= working(j, i) * working(i, rank);
+                working[j, rank] -= working[j, i] * working[i, rank];
         }
-        working(0, rank) /= working(0, 0);
+        working[0, rank] /= working[0, 0];
     }
 
     template<Scalar T>
@@ -91,14 +91,14 @@ namespace Physica {
 
     template<Scalar T>
     void LinearSystem<T>::upperEliminate(size_t index) {
-        assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
+        assert(!working.operator[](index, index).isZero() && "[Error]: Matrix is singular");
         for(size_t i = 0; i < index; ++i)
             working.rowReduce(index, i, index);
     }
 
     template<Scalar T>
     void LinearSystem<T>::lowerEliminate(size_t index) {
-        assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
+        assert((!working[index, index].isZero()) && "[Error]: Matrix is singular");
         const auto r = working.getRow();
         for(size_t i = index + 1; i < r; ++i)
             working.rowReduce(index, i, index);

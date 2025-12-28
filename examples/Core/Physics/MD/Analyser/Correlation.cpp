@@ -117,9 +117,9 @@ int main(int argc, char** argv) {
             for (size_t sample = 0; sample < numSample; ++sample) {
                 rpmd.nvt_step_for<RandomSource, Sequential>(
                         PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
-                const ScalarType p0 = ringPolymer.makeCentroidMomentum()(0, 0);
+                const ScalarType p0 = ringPolymer.makeCentroidMomentum()[0, 0];
                 for (unsigned int step = 0; step < numStep; ++step) {
-                    const ScalarType p1 = ringPolymer.makeCentroidMomentum()(0, 0);
+                    const ScalarType p1 = ringPolymer.makeCentroidMomentum()[0, 0];
                     rpmd.nvt_step<RandomSource, Sequential>(
                             thermo, kineticModel, forceModel);
                     sampler.sample(p1);

@@ -36,7 +36,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        Plot& operator()(int row, int col);
+        Plot& operator[](int row, int col);
         /* Operations */
         void forPlot(std::invocable<Plot&> auto fn) noexcept;
 
@@ -62,7 +62,7 @@ namespace Physica {
     void MultiPlot::forPlot(std::invocable<Plot&> auto fn) noexcept {
         for (int r = 0; r < getRow(); ++r)
             for (int c = 0; c < getCol(); ++c)
-                fn(operator()(r, c));
+                fn(operator[](r, c));
     }
 
     inline void MultiPlot::setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY) {

@@ -60,7 +60,7 @@ void Outcar::readForce(std::ifstream& fin, Array<char>& buffer) {
             size_t index = 0;
             for (size_t r = 0; r < pos_force.getRow(); ++r) {
                 for (size_t c = 3; c < pos_force.getCol(); ++c) {
-                    force[index] = pos_force(r, c);
+                    force[index] = pos_force[r, c];
                     ++index;
                 }
             }

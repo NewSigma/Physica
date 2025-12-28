@@ -18,12 +18,9 @@
  */
 #pragma once
 
-#include <unordered_set>
-#include <algorithm>
-#include "Physica/Core/Exception/BadFileFormatException.h"
-#include "Physica/Core/Exception/NoImplException.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "Poscar.h"
 #include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Poscar.h"
 
 namespace Physica {
@@ -83,9 +80,9 @@ namespace Physica {
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-        is >> poscar.lattice(0, 0) >> poscar.lattice(0, 1) >> poscar.lattice(0, 2);
-        is >> poscar.lattice(1, 0) >> poscar.lattice(1, 1) >> poscar.lattice(1, 2);
-        is >> poscar.lattice(2, 0) >> poscar.lattice(2, 1) >> poscar.lattice(2, 2);
+        is >> poscar.lattice[0, 0] >> poscar.lattice[0, 1] >> poscar.lattice[0, 2];
+        is >> poscar.lattice[1, 0] >> poscar.lattice[1, 1] >> poscar.lattice[1, 2];
+        is >> poscar.lattice[2, 0] >> poscar.lattice[2, 1] >> poscar.lattice[2, 2];
 
         poscar.readTypesAndNumber(is);
         /* Read format type */ {
@@ -117,12 +114,12 @@ namespace Physica {
         auto corner = temp.bottomRightCorner(1);
         applyHouseholder(buffer1, corner);
         for (int i = 0; i < 3; ++i) {
-            if (temp(i, i).isNegative()) {
+            if (temp[i, i].isNegative()) {
                 auto row = temp.row(i);
                 row = -row;
             }
         }
-        temp(1, 0) = temp(2, 0) = temp(2, 1) = T(0); //Clear numeric error
+        temp[1, 0] = temp[2, 0] = temp[2, 1] = T(0); //Clear numeric error
         lattice = temp.transpose();
     }
     /**
@@ -270,10 +267,10 @@ namespace Physica {
         pos.resize(atomCount, 3);
         size_t i = 0;
         for (; i < atomCount - 1; i++) {
-            is >> pos(i, 0) >> pos(i, 1) >> pos(i, 2);
+            is >> pos[i, 0] >> pos[i, 1] >> pos[i, 2];
             is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         }
-        is >> pos(i, 0) >> pos(i, 1) >> pos(i, 2);
+        is >> pos[i, 0] >> pos[i, 1] >> pos[i, 2];
     }
 
     template<Scalar T>
@@ -287,9 +284,9 @@ namespace Physica {
     template<Scalar T>
     void Poscar<T>::extendInZ_direct(T factor) {
         assert(type == Type::Direct);
-        assert(lattice(0, 2).isZero());
-        assert(lattice(1, 2).isZero());
-        lattice(2, 2) *= factor;
+        assert(lattice.operator[](0, 2).isZero());
+        assert(lattice.operator[](1, 2).isZero());
+        lattice[2, 2] *= factor;
 
         const T inv_factor = reciprocal(factor);
 

@@ -66,12 +66,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::operator()(size_t row, size_t col) -> RefTy {
+    auto LValueMatrix<Derived>::operator[](size_t row, size_t col) -> RefTy {
         return *data_ptr(row, col);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::operator()(size_t row, size_t col) const -> ConstRefTy {
+    auto LValueMatrix<Derived>::operator[](size_t row, size_t col) const -> ConstRefTy {
         return *data_ptr(row, col);
     }
 
@@ -311,11 +311,11 @@ namespace Physica {
     template<class Derived>
     void LValueMatrix<Derived>::rowReduce(size_t r1, size_t r2, size_t elementIndex) {
         Derived& matrix = Base::getDerived();
-        assert(abs(matrix(r1, elementIndex)) > ScalarType(std::numeric_limits<ScalarType>::min()));
-        const ScalarType factor = matrix(r2, elementIndex) / matrix(r1, elementIndex);
+        assert(abs(matrix[r1, elementIndex]) > ScalarType(std::numeric_limits<ScalarType>::min()));
+        const ScalarType factor = matrix[r2, elementIndex] / matrix[r1, elementIndex];
         auto row2 = row(r2);
         row2 -= row(r1) * factor;
-        matrix(r2, elementIndex) = 0;
+        matrix[r2, elementIndex] = 0;
     }
 
     template<class Derived>
@@ -325,7 +325,7 @@ namespace Physica {
         const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
         auto col2 = col(c2);
         col2 -= col(c1) * factor;
-        matrix(elementIndex, c2) = 0;
+        matrix[elementIndex, c2] = 0;
     }
 
     template<class Derived>
@@ -484,7 +484,7 @@ namespace Physica {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
-        return Base::getDerived()(r, c);
+        return Base::getDerived()[r, c];
     }
 
     template<class Derived>
@@ -492,7 +492,7 @@ namespace Physica {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
-        return Base::getDerived()(r, c);
+        return Base::getDerived()[r, c];
     }
 
     template<class Derived>

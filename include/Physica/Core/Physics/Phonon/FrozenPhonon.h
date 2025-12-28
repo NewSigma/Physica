@@ -92,7 +92,7 @@ namespace Physica {
         RSpaceFCGrid result(getSuperSize(), unitCellDOF, unitCellDOF, T(0));
         PositionMatrix pos = superCell.getPos();
         for (size_t major = 0; major < unitCellDOF; ++major) {
-            T& toDisplace = pos(major / Dim, major % Dim);
+            T& toDisplace = pos[major / Dim, major % Dim];
             const T copy = toDisplace;
             toDisplace += displace;
             VectorND<T> forceConst =
@@ -102,7 +102,7 @@ namespace Physica {
             for (size_t cell = 0; cell < getNumCell(); ++cell) {
                 const Index3D index = PeriodIndex3D(cell, superSize);
                 for (size_t minor = 0; minor < unitCellDOF; ++minor)
-                    result(index).refFromMajorMinor(major, minor) = forceConst[cell * unitCellDOF + minor];
+                    result[index].refFromMajorMinor(major, minor) = forceConst[cell * unitCellDOF + minor];
             }
         }
         return result;
@@ -217,11 +217,11 @@ namespace Physica {
                                   T(index[1]) - T(2 * superSize[1]),
                                   T(index[2]) - T(2 * superSize[2])};
             const Vector3D<T> r0 = unitCell.getLattice().transpose() * factor;
-            auto& mat = result(index);
+            auto& mat = result[index];
             for (size_t c = 0; c < result.getCol(); ++c) {
                 for (size_t r = 0; r < result.getRow(); ++r) {
                     const Vector3D<T> r1 = r0 + unitCell.getPos().row(r) - unitCell.getPos().row(c);
-                    mat(r, c) = calcWignerSeitzWeight(r1, wignerSeitzRadius);
+                    mat[r, c] = calcWignerSeitzWeight(r1, wignerSeitzRadius);
                 }
             }
         });

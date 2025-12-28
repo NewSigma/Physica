@@ -78,7 +78,7 @@ namespace Physica {
         const size_t power = poly.getPower();
         auto companion = MatrixType::zeros(power);
         for (size_t i = 0; i < power - 1; ++i)
-            companion(i + 1, i) = T(1);
+            companion[i + 1, i] = T(1);
         auto col = companion.col(power - 1);
         col = -poly.getCoeffVector();
 

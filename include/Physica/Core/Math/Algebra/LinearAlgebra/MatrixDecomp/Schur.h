@@ -155,7 +155,7 @@ namespace Physica {
         while (1 <= upper && upper < order) {
             const size_t lower = activeWindowDownDiag(matrixT, upper);
             if (lower == upper) {
-                matrixT(upper, upper) += exshift;
+                matrixT[upper, upper] += exshift;
                 upper -= 1;
                 iter = 0;
             }
@@ -185,7 +185,7 @@ namespace Physica {
                 }
             }
         }
-        matrixT(0, 0) += exshift;
+        matrixT[0, 0] += exshift;
 
         if (computeMatrixU) {
             WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
@@ -198,24 +198,24 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void Schur<T, Order>::splitOffTwoRows(size_t index) noexcept {
         const size_t index_1 = index + 1;
-        matrixT(index, index) += exshift;
-        matrixT(index_1, index_1) += exshift;
+        matrixT[index, index] += exshift;
+        matrixT[index_1, index_1] += exshift;
 
-        const T p = T(0.5) * (matrixT(index, index) - matrixT(index_1, index_1));
-        const T q = square(p) + matrixT(index, index_1) * matrixT(index_1, index);
+        const T p = T(0.5) * (matrixT[index, index] - matrixT[index_1, index_1]);
+        const T q = square(p) + matrixT[index, index_1] * matrixT[index_1, index];
         const bool haveTwoRealEigenvalues = !q.isNegative();
         if (haveTwoRealEigenvalues) {
             const T z = sqrt(q);
             Vector2D<T> target;
             target[0] = p + (p.isPositive() ? z : -z); // Select the root that ensure numerical stable
-            target[1] = matrixT(index_1, index);
+            target[1] = matrixT[index_1, index];
             auto givensVector = givens(target, 0, 1);
             auto block1 = matrixT.rightCols(index);
             applyGivens(givensVector, block1, index, index_1);
             auto block2 = matrixT.topRows(index_1 + 1);
             givensVector[1] = -givensVector[1];
             applyGivens(block2, givensVector, index, index_1);
-            matrixT(index_1, index) = T(0);
+            matrixT[index_1, index] = T(0);
             if (computeMatrixU)
                 applyGivens(matrixU, givensVector, index, index_1);
         }
@@ -229,35 +229,35 @@ namespace Physica {
     template<Scalar T, size_t Order>
     Vector3D<T> Schur<T, Order>::realShift(size_t upper, size_t iter) {
         const size_t upper_1 = upper - 1;
-        T s = matrixT(upper, upper) + matrixT(upper_1, upper_1);
-        T t1 = matrixT(upper, upper) * matrixT(upper_1, upper_1);
-        T t2 = matrixT(upper, upper_1) * matrixT(upper_1, upper);
+        T s = matrixT[upper, upper] + matrixT[upper_1, upper_1];
+        T t1 = matrixT[upper, upper] * matrixT[upper_1, upper_1];
+        T t2 = matrixT[upper, upper_1] * matrixT[upper_1, upper];
         if (iter > 0 && iter % 16 == 0) {
             const bool useWilkinsonShift = iter % 32 != 0;
             if (useWilkinsonShift) {
-                const T shift = matrixT(upper, upper);
+                const T shift = matrixT[upper, upper];
                 exshift += shift;
                 for (size_t i = 0; i <= upper; ++i)
-                    matrixT(i, i) -= shift;
+                    matrixT[i, i] -= shift;
 
-                const T s1 = abs(matrixT(upper, upper_1)) + abs(matrixT(upper_1, upper - 2));
+                const T s1 = abs(matrixT[upper, upper_1]) + abs(matrixT[upper_1, upper - 2]);
                 const T s2 = square(s1);
                 s = T(0.75 + 0.75) * s1;
                 t1 = T(0.75 * 0.75) * s2;
                 t2 = T(-0.4375) * s2;
             }
             else { // MATLAB new ad hoc shift
-                const T s1 = (matrixT(upper_1, upper_1) - matrixT(upper, upper)) * T(0.5);
+                const T s1 = (matrixT[upper_1, upper_1] - matrixT[upper, upper]) * T(0.5);
                 T shift = square(s1) + t2;
                 if (shift.isPositive()) {
                     shift = sqrt(shift);
                     if (s1.isNegative())
                         shift = -shift;
                     shift += s1;
-                    shift = matrixT(upper, upper) - t2 / shift;
+                    shift = matrixT[upper, upper] - t2 / shift;
                     exshift += shift;
                     for (size_t i = 0; i <= upper; ++i)
-                        matrixT(i, i) -= shift;
+                        matrixT[i, i] -= shift;
                     s = T(0.964 * 2);
                     t1 = T(0.964 * 0.964);
                     t2 = T(0.964);
@@ -271,12 +271,12 @@ namespace Physica {
     void Schur<T, Order>::francisQR(size_t lower, size_t sub_order, Vector3D<T> shift) {
         auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
         Vector3D<T> col_1_M{};
-        col_1_M[0] = (subBlock(0, 0) - shift[0]) * subBlock(0, 0) + shift[1] + (subBlock(0, 1) * subBlock(1, 0) - shift[2]);
-        col_1_M[1] = subBlock(1, 0) * (subBlock(0, 0) + subBlock(1, 1) - shift[0]);
+        col_1_M[0] = (subBlock[0, 0] - shift[0]) * subBlock[0, 0] + shift[1] + (subBlock[0, 1] * subBlock[1, 0] - shift[2]);
+        col_1_M[1] = subBlock[1, 0] * (subBlock[0, 0] + subBlock[1, 1] - shift[0]);
 
         if (sub_order != 2) {
             Vector3D<T> householderVector{};
-            col_1_M[2] = subBlock(1, 0) * subBlock(2, 1);
+            col_1_M[2] = subBlock[1, 0] * subBlock[2, 1];
             col_1_M.householder(householderVector);
             {
                 auto block = matrixT.rightCols(lower);
@@ -368,19 +368,19 @@ namespace Physica {
         using Matrix2D = DenseMatrix<T, MatrixOption::Col, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
-            return abs(matrixT(upper, upper - 1).real()) + abs(matrixT(upper - 1, upper - 2).real());
+            return abs(matrixT[upper, upper - 1].real()) + abs(matrixT[upper - 1, upper - 2].real());
         }
         // compute the shift as one of the eigenvalues of t, the 2x2
         // diagonal block on the bottom of the active submatrix
         const auto activeBlock = matrixT.block(upper - 1, 2, upper - 1, 2);
-        const RealType t_norm = abs(activeBlock(0, 0)) + abs(activeBlock(0, 1)) + abs(activeBlock(1, 0)) + abs(activeBlock(1, 1));
+        const RealType t_norm = abs(activeBlock[0, 0]) + abs(activeBlock[0, 1]) + abs(activeBlock[1, 0]) + abs(activeBlock[1, 1]);
         const Matrix2D t = activeBlock * reciprocal(t_norm); // Normalization to avoid under/overflow
 
-        const ComplexType b = t(0, 1) * t(1, 0);
-        const ComplexType c = t(0, 0) - t(1, 1);
+        const ComplexType b = t[0, 1] * t[1, 0];
+        const ComplexType c = t[0, 0] - t[1, 1];
         const ComplexType disc = sqrt(square(c) + RealType(4) * b);
-        const ComplexType det = t(0, 0) * t(1, 1) - b;
-        const ComplexType trace = t(0, 0) + t(1, 1);
+        const ComplexType det = t[0, 0] * t[1, 1] - b;
+        const ComplexType trace = t[0, 0] + t[1, 1];
         ComplexType eival1 = (trace + disc) * RealType(0.5);
         ComplexType eival2 = (trace - disc) * RealType(0.5);
         const RealType eival1_norm = eival1.norm();
@@ -391,14 +391,14 @@ namespace Physica {
         else if (!eival2_norm.isZero())
             eival1 = det / eival2;
 
-        const bool firstEigenValueCloserToDiagonal = (eival1 - t(1, 1)).norm() < (eival2 - t(1, 1)).norm();
+        const bool firstEigenValueCloserToDiagonal = (eival1 - t[1, 1]).norm() < (eival2 - t[1, 1]).norm();
         return t_norm * (firstEigenValueCloserToDiagonal ? eival1 : eival2);
     }
 
     template<Scalar T, size_t Order>
     void Schur<T, Order>::complexQR(size_t lower, size_t upper, ComplexType shift) {
         {
-            auto givensVec = givens(Vector2D<T>{matrixT(lower, lower) - shift, matrixT(lower + 1, lower)}, 0, 1);
+            auto givensVec = givens(Vector2D<T>{matrixT[lower, lower] - shift, matrixT[lower + 1, lower]}, 0, 1);
             auto rightCols = matrixT.rightCols(lower);
             applyGivens(givensVec, rightCols, lower, lower + 1);
             givensVec[1] = -givensVec[1];
@@ -409,10 +409,10 @@ namespace Physica {
         }
 
         for (size_t i = lower + 1; i < upper; ++i) {
-            auto givensVec = givens(Vector2D<T>{matrixT(i, i - 1), matrixT(i + 1, i - 1)}, 0, 1);
+            auto givensVec = givens(Vector2D<T>{matrixT[i, i - 1], matrixT[i + 1, i - 1]}, 0, 1);
             auto rightCols = matrixT.rightCols(i - 1);
             applyGivens(givensVec, rightCols, i, i + 1);
-            matrixT(i + 1, i - 1) = T(0);
+            matrixT[i + 1, i - 1] = T(0);
             givensVec[1] = -givensVec[1];
             auto topRows = matrixT.topRows(std::min(i + 2, upper) + 1);
             applyGivens(topRows, givensVec, i, i + 1);

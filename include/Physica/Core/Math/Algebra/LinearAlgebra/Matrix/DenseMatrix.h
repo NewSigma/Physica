@@ -64,7 +64,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Base::operator();
+        using Base::operator[];
         /* Operations */
         size_t completePivoting(size_t col);
         size_t partialPivoting(size_t col);

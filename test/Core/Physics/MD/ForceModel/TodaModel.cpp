@@ -59,7 +59,7 @@ namespace {
 
         for (size_t i = 0; i < fc.getRow(); ++i) {
             for (size_t j = 0; j < fc.getCol(); ++j) {
-                if (!scalarNear(fc(i, j), model.forceConst(cell, i, j), 1E-15))
+                if (!scalarNear(fc[i, j], model.forceConst(cell, i, j), 1E-15))
                     exit(EXIT_FAILURE);
             }
         }

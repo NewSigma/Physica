@@ -27,7 +27,7 @@ namespace Physica {
         const auto& derived = Base::getDerived();
         for (size_t i = 0; i < derived.getSize(); ++i) {
             const auto indices = toIndexND(i);
-            x(indices) = calc(indices);
+            x[indices] = calc(indices);
         }
     }
 

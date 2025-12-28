@@ -109,7 +109,7 @@ namespace Physica {
             auto& working = working_.getDerived();
             auto& vecD = vecD_.getDerived();
             const int row = blockIdx.x;
-            if (working(row, row).isZero()) {
+            if (working[row, row].isZero()) {
                 if (isZeroThread())
                     vecD[row] = 1;
                 return;
@@ -117,13 +117,13 @@ namespace Physica {
 
             __shared__ T factor;
             if (isZeroThread()) {
-                vecD[row] = working(row, row);
+                vecD[row] = working[row, row];
                 factor = reciprocal(vecD[row]);
             }
             __syncthreads();
 
             for (int i = threadIdx.x + row; i < vecD.getLength(); i += blockDim.x)
-                working(row, i) *= factor;
+                working[row, i] *= factor;
         }, KernelConfig(length, numThread));
     }
 

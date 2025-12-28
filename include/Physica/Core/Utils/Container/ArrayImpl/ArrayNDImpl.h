@@ -32,23 +32,23 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    T& ArrayND<T, Dims...>::operator()(const IndexType& indices) {
+    T& ArrayND<T, Dims...>::operator[](const IndexType& indices) {
         return *data_ptr(indices);
     }
 
     template<class T, int... Dims>
-    const T& ArrayND<T, Dims...>::operator()(const IndexType& indices) const {
-        return const_cast<This&>(*this)(indices);
+    const T& ArrayND<T, Dims...>::operator[](const IndexType& indices) const {
+        return const_cast<This&>(*this)[indices];
     }
 
     template<class T, int... Dims>
-    T& ArrayND<T, Dims...>::operator()(std::integral auto... dims) {
-        return operator()(IndexType({static_cast<size_t>(dims)...}));
+    T& ArrayND<T, Dims...>::operator[](std::integral auto... dims) {
+        return operator[](IndexType({static_cast<size_t>(dims)...}));
     }
 
     template<class T, int... Dims>
-    const T& ArrayND<T, Dims...>::operator()(std::integral auto... dims) const {
-        return const_cast<This&>(*this)(dims...);
+    const T& ArrayND<T, Dims...>::operator[](std::integral auto... dims) const {
+        return const_cast<This&>(*this)[dims...];
     }
 
     template<class T, int... Dims>

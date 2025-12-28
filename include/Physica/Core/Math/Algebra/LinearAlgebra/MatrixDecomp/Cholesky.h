@@ -49,8 +49,8 @@ namespace Physica {
         using ScalarType = std::remove_cvref_t<decltype(target)>::ScalarType;
         const size_t order = source.getRow();
         /* Handle first vector */ {
-            const auto diag = sqrt(source(0, 0));
-            target(0, 0) = diag;
+            const auto diag = sqrt(source[0, 0]);
+            target[0, 0] = diag;
             const ScalarType inv_diag = reciprocal(diag);
             for (size_t minor = 1; minor < order; ++minor)
                 target.refFromMajorMinor(0, minor) = source.refFromMajorMinor(0, minor) * inv_diag;
@@ -61,12 +61,12 @@ namespace Physica {
                 for (; minor < major; ++minor)
                     target.refFromMajorMinor(major, minor) = ScalarType(0);
 
-                ScalarType diag = source(major, major);
+                ScalarType diag = source[major, major];
                 /* major == minor */ {
                     for (size_t k = 0; k < major; ++k)
                         diag -= square(target.refFromMajorMinor(k, major));
                     diag = sqrt(diag);
-                    target(major, major) = diag;
+                    target[major, major] = diag;
                     ++minor;
                 }
                 const ScalarType inv_diag = reciprocal(diag);

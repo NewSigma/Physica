@@ -208,7 +208,7 @@ namespace Physica {
         auto weights = DenseMatrix<T>(order);
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
-                weights(i, j) = T(i + j);
+                weights[i, j] = T(i + j);
         weights = lnPartitionNVT + weights * (beta * mu);
         weights = exp_elem(weights - weights.lnSumExp());
         return hadamard(weights, observeNVT).sum();

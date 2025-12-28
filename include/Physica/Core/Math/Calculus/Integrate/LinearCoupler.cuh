@@ -123,7 +123,7 @@ namespace Physica {
             auto& indices = indices_.getDerived();
             const Tv tmp = z[i] * factor;
             const int index = tmp.toMachine();
-            indices(i, sample) = index;
+            indices[i, sample] = index;
 
             const auto weights = weights_.getDerived().col(sample);
             auto& deltas = deltas_.getDerived();
@@ -168,7 +168,7 @@ namespace Physica {
 
                 const auto grid = weights.reshape_row(dim, numBin);
                 const auto row = grid.row(i);
-                const auto index = indices(i, sample);
+                const auto index = indices[i, sample];
                 const Tv lnsumexp = lnsumexps(sample, i);
                 const Tv s = softmax(row.values()).calc(index, lnsumexp);
                 const Tv g = (s - square(s)) * deltaG(sample, i);

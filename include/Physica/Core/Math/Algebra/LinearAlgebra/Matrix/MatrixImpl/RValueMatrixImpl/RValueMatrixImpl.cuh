@@ -37,7 +37,7 @@ namespace Physica {
                     const size_t major = blockIdx.y;
                     const size_t r = target.rowFromMajorMinor(major, minor);
                     const size_t c = target.colFromMajorMinor(major, minor);
-                    target(r, c) = source.calc(r, c);
+                    target[r, c] = source.calc(r, c);
                 }
             };
             CUDAExecutor::launch<MaxThreadsPerBlock>(func, target.makeKernelConfig());
@@ -49,7 +49,7 @@ namespace Physica {
                 for (size_t minor = 0; minor < maxMinor; ++minor) {
                     const size_t r = target.rowFromMajorMinor(major, minor);
                     const size_t c = target.colFromMajorMinor(major, minor);
-                    target(r, c) = Base::getDerived().calc(r, c);
+                    target[r, c] = Base::getDerived().calc(r, c);
                 }
             }
         }

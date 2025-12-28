@@ -120,13 +120,13 @@ namespace Physica {
         else {
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
             auto diisMat = DenseMatrix<T>(numValidRecord + 1, numValidRecord + 1, 1.0);
-            diisMat(0, 0) = T(0);
+            diisMat[0, 0] = T(0);
             /* Construct equation */ {
                 for (size_t i = 1; i < diisMat.getRow(); ++i) {
                     for (size_t j = i; j < diisMat.getCol(); ++j) {
                         T temp = residules[i - 1].getTotalDensity().flatten() * residules[j - 1].getTotalDensity().flatten();
-                        diisMat(i, j) = temp;
-                        diisMat(j, i) = temp;
+                        diisMat[i, j] = temp;
+                        diisMat[j, i] = temp;
                     }
                 }
             }

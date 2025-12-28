@@ -73,7 +73,7 @@ namespace {
                     using ReprType = FermiRepr<1, NumSite, false>;
                     elem = calcPartition(ReprType(numSpinUp, numSpinDown), betas);
                 }
-                result(numSpinUp, numSpinDown) = std::move(elem);
+                result[numSpinUp, numSpinDown] = std::move(elem);
             }
         }
         return result;
@@ -89,8 +89,8 @@ namespace {
                 for (unsigned int numSpinDown = numSpinUp; numSpinDown <= NumSite; ++numSpinDown) {
                     const int factor = numSpinUp == numSpinDown ? 1 : 2;
                     const T n = (numSpinUp + numSpinDown) * factor;
-                    sumPartition += partitionMatrix(numSpinUp, numSpinDown)[i] * factor;
-                    numParticle += partitionMatrix(numSpinUp, numSpinDown)[i] * n;
+                    sumPartition += partitionMatrix[numSpinUp, numSpinDown][i] * factor;
+                    numParticle += partitionMatrix[numSpinUp, numSpinDown][i] * n;
                 }
             }
             result[i] = numParticle / (sumPartition * T(NumSite));

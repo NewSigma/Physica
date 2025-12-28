@@ -88,12 +88,12 @@ namespace Physica {
                 fft.getRSpace().template random_normal<R>();
                 FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
                 /* Translational mode */ {
-                    langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
+                    langevinImpl(buffer[0, 0], deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
                 }
                 for (size_t j = 1; j < buffer.getCol(); ++j) {
                     const T phase = M_PI * j / numReplica;
                     const T viscosityY = sin(phase) * omegaW;
-                    langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
+                    langevinImpl(buffer[0, j], deltaT, viscosityY, factor, fft.getKSpace()[j]);
                 }
                 ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
             }, dof, 0).wait();
@@ -102,7 +102,7 @@ namespace Physica {
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
                 const T factor = sqrt(repBeta * mass);
-                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, T::template random_normal<R>());
+                langevinImpl(ringPolymer.asMatrix()[i, 0], deltaT, momentumViscosityY, factor, T::template random_normal<R>());
             }
         }
 

@@ -97,7 +97,7 @@ namespace Physica {
                 if (pIndex.isInReducedK())
                     result += (coeff * factor).real();
                 else
-                    result += (baseCoeff(pIndex.toReducedK()).conjugate() * factor).real();
+                    result += (baseCoeff[pIndex.toReducedK()].conjugate() * factor).real();
             }
             else {
                 (void)this; // Silence unused 'this' warning;
@@ -116,7 +116,7 @@ namespace Physica {
             if (isGammaPoint)
                 return;
             const Tr r4 = square(r2);
-            result += baseCoeff(index).squaredNorm() * (Tr(1) + smoothFactor1 * r2 + smoothFactor2 * r4);
+            result += baseCoeff[index].squaredNorm() * (Tr(1) + smoothFactor1 * r2 + smoothFactor2 * r4);
         };
         TensorBase::forPointIndexInTensor<true, decltype(kernel)>(getBaseDim(), lattice, kernel);
         return result;
@@ -155,9 +155,9 @@ namespace Physica {
             baseCoeff.forND([this, &fft](Tc& coeff, Index3D index) {
                 PeriodIndex3D pIndex(index, dataDim);
                 pIndex.normalize();
-                coeff *= fft.getRSpace()(pIndex);
+                coeff *= fft.getRSpace()[pIndex];
             });
-            baseCoeff(0, 0, 0) = average;
+            baseCoeff[0, 0, 0] = average;
         }
     }
 
@@ -214,11 +214,11 @@ namespace Physica {
         for (size_t c = 0; c < order; ++c) {
             for (size_t r = 0; r < order; ++r) {
                 buffer.forND([r, c, &matrixGrid](auto& elem, Index3D index) {
-                    elem = matrixGrid(index)(r, c);
+                    elem = matrixGrid(index)[r, c];
                 });
                 interpolate(buffer);
                 const auto value = this->operator()(qPoint);
-                result(r, c) = value;
+                result[r, c] = value;
             }
         }
         return result;
@@ -242,9 +242,9 @@ namespace Physica {
             const Tr r2 = r.squaredNorm();
             const bool isGammaPoint = r2 < std::numeric_limits<Tr>::epsilon();
             if (isGammaPoint)
-                baseCoeff(index) = Tr(0);
+                baseCoeff[index] = Tr(0);
             else
-                baseCoeff(index) = reciprocal(Tr(1) + (smoothFactor1 + smoothFactor2 * r2) * r2);
+                baseCoeff[index] = reciprocal(Tr(1) + (smoothFactor1 + smoothFactor2 * r2) * r2);
         };
         TensorBase::forPointIndexInTensor<Tr, true, decltype(kernel)>(getBaseDim(), lattice, kernel);
     }
@@ -269,7 +269,7 @@ namespace Physica {
                     const auto factor = cos(phase);
                     elem += coeff * factor;
                 });
-                matrixM(r, c) = matrixM(c, r) = elem;
+                matrixM[r, c] = matrixM[c, r] = elem;
             }
         }
         return matrixM;

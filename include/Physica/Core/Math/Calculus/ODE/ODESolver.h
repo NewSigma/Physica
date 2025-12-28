@@ -95,13 +95,13 @@ namespace Physica {
     template<Scalar T, size_t Dim>
     void ODESolver<T, Dim>::verlet(std::invocable<T, T> auto fn, const T& initial1) {
         x[1] = x[0] + stepSize;
-        solution(0, 1) = initial1;
+        solution[0, 1] = initial1;
         const T stepSize_2 = square(stepSize);
         const size_t col_1 = solution.getCol() - 1;
         for (size_t i = 1; i < col_1; ++i) {
             const T& x_i = x[i];
-            const T& y_i = solution(0, i);
-            solution(0, i + 1) = -solution(0, i - 1) + y_i * T(2) + fn(x_i, y_i) * stepSize_2;
+            const T& y_i = solution[0, i];
+            solution[0, i + 1] = -solution[0, i - 1] + y_i * T(2) + fn(x_i, y_i) * stepSize_2;
             x[i + 1] = x_i + stepSize;
         }
     }
@@ -130,24 +130,24 @@ namespace Physica {
             const T f_minus_step = fn(x0 - stepSize);
             const T temp1 = T(1) - stepSize_2_12 * f_minus_step;
             const T temp2 = T(1) - stepSize_2_6 * f_minus_step;
-            const T numerator = (T(2) + T(5.0 / 6) * stepSize_2 * fn(x0)) * temp1 * solution(0, 0) + T(2) * stepSize * tangent * temp2;
+            const T numerator = (T(2) + T(5.0 / 6) * stepSize_2 * fn(x0)) * temp1 * solution[0, 0] + T(2) * stepSize * tangent * temp2;
             const T f_step = fn(x[1]);
             const T denominator = (T(1) - stepSize_2_12 * f_step) * temp2 + (T(1) - stepSize_2_6 * f_step) * temp1;
-            solution(0, 1) = numerator / denominator;
+            solution[0, 1] = numerator / denominator;
         }
 
         const size_t col_1 = solution.getCol() - 1;
-        T w_i_minus1 = solution(0, 0) * (T(1) - stepSize_2_12 * fn(x[0]));
-        T w_i = solution(0, 1) * (T(1) - stepSize_2_12 * fn(x[1]));
+        T w_i_minus1 = solution[0, 0] * (T(1) - stepSize_2_12 * fn(x[0]));
+        T w_i = solution[0, 1] * (T(1) - stepSize_2_12 * fn(x[1]));
         T x_i = x[1];
         for (size_t i = 1; i < col_1; ++i) {
-            const T w_i_plus1 = T(2) * w_i + stepSize_2 * fn(x_i) * solution(0, i) - w_i_minus1;
+            const T w_i_plus1 = T(2) * w_i + stepSize_2 * fn(x_i) * solution[0, i] - w_i_minus1;
             w_i_minus1 = w_i;
             w_i = w_i_plus1;
             
             x_i += stepSize;
             const T factor = T(1) - stepSize_2_12 * fn(x_i);
-            solution(0, i + 1) = w_i / factor;
+            solution[0, i + 1] = w_i / factor;
             x[i + 1] = x_i;
         }
     }

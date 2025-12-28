@@ -61,7 +61,7 @@ namespace Physica {
             : chain(length), price(length), point(length) {
         assert(length >= 2 && "[Error]: Invalid length");
         for (size_t i = 0; i < length; ++i)
-            price(i, i) = 0;
+            price[i, i] = 0;
     }
 
     template<Scalar T>
@@ -72,17 +72,17 @@ namespace Physica {
             for (size_t m = 0; m < m_max; ++m) { // m is the start index of each sub-chain.
                 const size_t m_end = m + l; // End index of each sub-chain.
                 const size_t middle = (m + m_end) / 2;
-                size_t& price_m = price(m, m_end);
-                size_t& point_m = point(m, m_end);
+                size_t& price_m = price[m, m_end];
+                size_t& point_m = point[m, m_end];
                 // Cut (m ... m_end) into (m ... n) and (n + 1 ... m_end).
                 size_t n = m;
                 /* Handle n = m */ {
-                    price_m = deltaPrice(n) + price(n + 1, m_end);
+                    price_m = deltaPrice(n) + price[n + 1, m_end];
                     point_m = n;
                     ++n;
                 }
                 for (; n < m_end; ++n) {
-                    size_t p = price(m, n) + deltaPrice(n) + price(n + 1, m_end);
+                    size_t p = price[m, n] + deltaPrice(n) + price[n + 1, m_end];
                     if (isCheaper(p, price_m, n, middle)) {
                         price_m = p;
                         point_m = n;
@@ -105,7 +105,7 @@ namespace Physica {
         assert(to < getLength());
         if (from == to)
             return chain[from];
-        const size_t cut_at = point(from, to);
+        const size_t cut_at = point[from, to];
         auto first = multiply(from, cut_at);
         auto second = multiply(cut_at + 1, to);
         return first * second;

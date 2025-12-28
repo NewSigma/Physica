@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Mesh.h"
+
 namespace Physica {
     template<class T>
     Mesh<T>::Mesh(size_t numElement, size_t numNode)
@@ -26,13 +28,7 @@ namespace Physica {
             , nodeTypes(numNode, NodeType::Free) {}
 
     template<class T>
-    Mesh<T>& Mesh<T>::operator=(Mesh mesh) noexcept {
-        this->swap(mesh);
-        return *this;
-    }
-
-    template<class T>
-    Mesh<T>::ScalarType Mesh<T>::operator()(VectorType p) const {
+    auto Mesh<T>::operator()(VectorType p) const -> ScalarType {
         for (const auto& elem : elements) {
             if (elem.contains(p)) {
                 const auto& globalNodes = elem.getGlobalNodes();
@@ -85,8 +81,8 @@ namespace Physica {
     }
 
     template<class T>
-    Array<typename Mesh<T>::VectorType> Mesh<T>::getNodes() const {
-        Array<typename Mesh<T>::VectorType> result(getNumNodes());
+    auto Mesh<T>::getNodes() const -> Array<VectorType> {
+        Array<VectorType> result(getNumNodes());
         for (const auto& element : elements) {
             size_t local_index = 0;
             for (size_t node : element.getGlobalNodes()) {

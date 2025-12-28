@@ -92,7 +92,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     __device__ T device_obj<PeriodicCell<T, Dim>>::getVolume(const LatticeMatrix& lattice) {
         if constexpr (Dim == 1)
-            return abs(lattice(0, 0));
+            return abs(lattice[0, 0]);
         else if constexpr (Dim == 2)
             return (lattice.row(0).cross(lattice.row(1))).compute().norm();
         else

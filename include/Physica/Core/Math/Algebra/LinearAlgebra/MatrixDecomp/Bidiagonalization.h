@@ -95,7 +95,7 @@ namespace Physica {
         }
         // Handle last - 1 col
         householderOnCol(i);
-        subDiag[i] = working(i, i + 1);
+        subDiag[i] = working[i, i + 1];
         ++i;
         // Handle last col
         if (working.getRow() != numCol) {
@@ -105,8 +105,8 @@ namespace Physica {
             mainDiag[i] = -sub_col.householder() * factor;
         }
         else {
-            mainDiag[i] = -working(i, i);
-            working(i, i) = 2;
+            mainDiag[i] = -working[i, i];
+            working[i, i] = 2;
         }
     }
 
@@ -171,10 +171,10 @@ namespace Physica {
         target = T(0);
         const size_t col_1 = target.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
-            target(i, i) = bidiag.mainDiag[i];
-            target(i, i + 1) = bidiag.subDiag[i];
+            target[i, i] = bidiag.mainDiag[i];
+            target[i, i + 1] = bidiag.subDiag[i];
         }
-        target(col_1, col_1) = bidiag.mainDiag[col_1];
+        target[col_1, col_1] = bidiag.mainDiag[col_1];
     }
 
     template<Matrix M>

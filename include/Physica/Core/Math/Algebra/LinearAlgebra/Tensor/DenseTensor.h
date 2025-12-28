@@ -39,7 +39,7 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        using Storage::operator();
+        using Storage::operator[];
         /* Operations */
         using Storage::toIndex1D;
         using Storage::toIndexND;

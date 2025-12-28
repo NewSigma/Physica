@@ -108,9 +108,9 @@ namespace Physica {
         }
 
         for (auto featureId : availableFeature) {
-            const T feature = features(availableSample.front(), featureId);
+            const T feature = features[availableSample.front(), featureId];
             for (size_t sample : availableSample) {
-                const bool isSeparable = features(sample, featureId) != feature;
+                const bool isSeparable = features[sample, featureId] != feature;
                 if (isSeparable)
                     return std::nan("");
             }
@@ -142,7 +142,7 @@ namespace Physica {
         const bool isContinuous = dataset.isFeatureContinuous[featureId];
         if (isContinuous) {
             for (auto sample : availableSample) {
-                if (dataset.features(sample, featureId) < splitPoint)
+                if (dataset.features[sample, featureId] < splitPoint)
                     list1.push_front(sample);
                 else
                     list2.push_front(sample);
@@ -150,7 +150,7 @@ namespace Physica {
         }
         else {
             for (auto sample : availableSample) {
-                if (dataset.features(sample, featureId) == splitPoint)
+                if (dataset.features[sample, featureId] == splitPoint)
                     list1.push_front(sample);
                 else
                     list2.push_front(sample);
@@ -262,7 +262,7 @@ namespace Physica {
             {
                 std::set<T> featureSet{};
                 for (auto sample : availableSample)
-                    featureSet.insert(dataset.features(sample, featureId));
+                    featureSet.insert(dataset.features[sample, featureId]);
 
                 featureVector.resize(featureSet.size());
                 size_t i = 0;
@@ -279,7 +279,7 @@ namespace Physica {
                     const T midpoint = (featureVector[i] + featureVector[i + 1]) * 0.5;
                     size_t weight1 = 0;
                     for (auto sample : availableSample) {
-                        if (dataset.features(sample, featureId) < midpoint) {
+                        if (dataset.features[sample, featureId] < midpoint) {
                             list1.grow(sample);
                             weight1 += 1;
                         }
@@ -301,7 +301,7 @@ namespace Physica {
                 for (size_t i = 0; i < featureVector.getLength(); ++i) {
                     size_t weight1 = 0;
                     for (auto sample : availableSample) {
-                        if (dataset.features(sample, featureId) == featureVector[i]) {
+                        if (dataset.features[sample, featureId] == featureVector[i]) {
                             list1.grow(sample);
                             weight1 += 1;
                         }

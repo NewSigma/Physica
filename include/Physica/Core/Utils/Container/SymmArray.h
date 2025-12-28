@@ -46,8 +46,8 @@ namespace Physica {
         ~SymmArray() = default;
         /* Operators */
         SymmArray& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __host__ __device__ lvalue_reference operator()(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ const_lvalue_reference operator()(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t row, size_t col) const;
         /* Operations */
         void resize(size_t row, size_t col, auto&&... args);
         void resize(size_t row) { resize(row, row); }
@@ -96,13 +96,13 @@ namespace Physica {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ auto SymmArray<T, Order>::operator()(size_t row, size_t col) -> lvalue_reference {
-        return (*this)[toIndex1D(row, col)];
+    __host__ __device__ auto SymmArray<T, Order>::operator[](size_t row, size_t col) -> lvalue_reference {
+        return arr[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
-    __host__ __device__ auto SymmArray<T, Order>::operator()(size_t row, size_t col) const -> const_lvalue_reference {
-        return (*this)[toIndex1D(row, col)];
+    __host__ __device__ auto SymmArray<T, Order>::operator[](size_t row, size_t col) const -> const_lvalue_reference {
+        return arr[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>

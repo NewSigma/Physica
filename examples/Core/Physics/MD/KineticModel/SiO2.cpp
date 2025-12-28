@@ -74,7 +74,7 @@ namespace {
         cell1.toSuperCell<ExtendCellOption::AtomMajor>(4, 6, 3);
         /* To orthogonal */ {
             LatticeMatrix latt = cell1.getLattice();
-            latt(1, 0) = ScalarType(0);
+            latt[1, 0] = ScalarType(0);
             cell1.setLattice(std::move(latt));
             cell1.normalize();
         }

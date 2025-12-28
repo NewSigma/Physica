@@ -149,14 +149,14 @@ namespace Physica {
                 if constexpr (Dim > 1) {
                     const auto& targets = lattice.getNeighbors()[from];
                     for (size_t to : targets) {
-                        hoppingMatrix(from, to) -= hoppingT;
-                        hoppingMatrix(to, from) -= hoppingT;
+                        hoppingMatrix[from, to] -= hoppingT;
+                        hoppingMatrix[to, from] -= hoppingT;
                     }
                 }
                 else {
                     size_t next = (from + 1) % numSite;
-                    hoppingMatrix(from, next) = -hoppingT;
-                    hoppingMatrix(next, from) = -hoppingT;
+                    hoppingMatrix[from, next] = -hoppingT;
+                    hoppingMatrix[next, from] = -hoppingT;
                 }
             }
         }
@@ -176,8 +176,8 @@ namespace Physica {
                             int dim = boundary.find(pair)->second;
                             phase = phases[dim];
                         }
-                        hoppingMatrix(from, to) -= hoppingT * phase;
-                        hoppingMatrix(to, from) -= hoppingT * phase.conjugate();
+                        hoppingMatrix[from, to] -= hoppingT * phase;
+                        hoppingMatrix[to, from] -= hoppingT * phase.conjugate();
                     }
                 }
                 else {
@@ -188,8 +188,8 @@ namespace Physica {
                         int dim = boundary.find(pair)->second;
                         phase = phases[dim];
                     }
-                    hoppingMatrix(from, next) = -hoppingT * phase;
-                    hoppingMatrix(next, from) = -hoppingT * phase.conjugate();
+                    hoppingMatrix[from, next] = -hoppingT * phase;
+                    hoppingMatrix[next, from] = -hoppingT * phase.conjugate();
                 }
             }
         }

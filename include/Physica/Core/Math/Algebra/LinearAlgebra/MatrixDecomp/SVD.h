@@ -113,9 +113,9 @@ namespace Physica {
         while (1 <= upper && upper < order) {
             size_t lower = Base::activeWindowUpDiag(working, upper);
             for (size_t i = lower; i <= upper; ++i) {
-                if (abs(working(i, i)) <= T(std::numeric_limits<T>::epsilon() * 10)) { //TODO: absolute criteria is unreliable, use relative criteria instead 
-                    working(i, i) = T(0);
-                    working(i, i + (i + 1 < order)) = T(0);
+                if (abs(working[i, i]) <= T(std::numeric_limits<T>::epsilon() * 10)) { //TODO: absolute criteria is unreliable, use relative criteria instead 
+                    working[i, i] = T(0);
+                    working[i, i + (i + 1 < order)] = T(0);
                     if (i < upper - 1) {
                         lower = i + 1;
                         break;
@@ -142,7 +142,7 @@ namespace Physica {
         }
 
         for (size_t i = 0; i < order; ++i)
-            singulars[i] = working(i, i);
+            singulars[i] = working[i, i];
         if (row < col)
             lSingularMat.swap(rSingularMat);
     }
@@ -194,15 +194,15 @@ namespace Physica {
         auto subBlock = working.block(lower, sub_order, lower, sub_order);
         const T shift = computeShift(lower, sub_order);
 
-        Vector2D<T> buffer{square(subBlock(0, 0)) - shift, subBlock(0, 0) * subBlock(0, 1)};
+        Vector2D<T> buffer{square(subBlock[0, 0]) - shift, subBlock[0, 0] * subBlock[0, 1]};
         rightGivens(subBlock, buffer, 0);
         for (size_t i = 0; i < sub_order - 2; ++i) {
             leftGivens(subBlock, buffer, i);
 
-            buffer[0] = subBlock(i, i + 1);
-            buffer[1] = subBlock(i, i + 2);
+            buffer[0] = subBlock[i, i + 1];
+            buffer[1] = subBlock[i, i + 2];
             rightGivens(subBlock, buffer, i + 1);
-            subBlock(i, i + 2) = 0;
+            subBlock[i, i + 2] = 0;
         }
         leftGivens(subBlock, buffer, sub_order - 2);
     }
@@ -212,14 +212,14 @@ namespace Physica {
     template<Scalar T, size_t RowAtCompile, size_t ColAtCompile>
     T SVD<T, RowAtCompile, ColAtCompile>::computeShift(size_t lower, size_t sub_order) {
         const size_t index = lower + sub_order - 1;
-        const T d1 = working(index - 1, index - 1);
-        const T d2 = working(index, index);
+        const T d1 = working[index - 1, index - 1];
+        const T d2 = working[index, index];
         T f1;
         if (lower == 0 && sub_order == 2)
             f1 = 0;
         else
-            f1 = working(index - 2, index - 1);
-        const T f2 = working(index - 1, index);
+            f1 = working[index - 2, index - 1];
+        const T f2 = working[index - 1, index];
         const T a1 = square(d1) + square(f1);
         const T a2 = square(d2) + square(f2);
         const T b = d1 * f2;
@@ -235,11 +235,11 @@ namespace Physica {
             Matrix auto& mat,
             Vector2D<T>& buffer,
             size_t i) {
-        buffer[0] = mat(i, i);
-        buffer[1] = mat(i + 1, i);
+        buffer[0] = mat[i, i];
+        buffer[1] = mat[i + 1, i];
         buffer = givens(buffer, 0, 1);
         applyGivens(buffer, mat, i, i + 1);
-        mat(i + 1, i) = 0;
+        mat[i + 1, i] = 0;
         buffer[1] = -buffer[1];
         applyGivens(lSingularMat, buffer, i, i + 1);
     }

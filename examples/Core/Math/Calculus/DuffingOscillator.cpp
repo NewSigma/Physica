@@ -41,8 +41,8 @@ int main(int argc, char** argv) {
     p.resize(solution.getCol());
 
     for (size_t i = 0; i < solution.getCol(); ++i) {
-        x[i] = solution(0, i);
-        p[i] = solution(1, i);
+        x[i] = solution[0, i];
+        p[i] = solution[1, i];
     }
 
     /* Get fractal dimention */ {

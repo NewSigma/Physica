@@ -88,10 +88,10 @@ namespace {
     template<Scalar T>
     Matrix2D<T> rotation(T theta) noexcept {
         Matrix2D<T> result{};
-        result(0, 0) = cos(theta);
-        result(0, 1) = sin(theta);
-        result(1, 0) = -sin(theta);
-        result(1, 1) = cos(theta);
+        result[0, 0] = cos(theta);
+        result[0, 1] = sin(theta);
+        result[1, 0] = -sin(theta);
+        result[1, 1] = cos(theta);
         return result;
     }
 
@@ -177,7 +177,7 @@ namespace {
 
         for (int i = 0; i < 2; ++i)
             for (int j = 0; j < 2; ++j)
-                if (!result.getEigenvectors().grads()(i, j).isZero())
+                if (!result.getEigenvectors().grads()[i, j].isZero())
                     exit(EXIT_FAILURE);
     }
 }

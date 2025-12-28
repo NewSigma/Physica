@@ -73,7 +73,7 @@ namespace Physica {
 
     template<Scalar T>
     auto ImagKinetic<T>::calcDelta(int site, int split, Tr alpha) const noexcept -> Vector2D<Tr> {
-        const Tr x = Trv(2) * alpha * aux(site, split);
+        const Tr x = Trv(2) * alpha * aux[site, split];
         return exp(Vector2D<Tr>{-x, x}) - Trv(1); // The Eq. above Eq.(7.33) of [1]
     }
 
@@ -82,7 +82,7 @@ namespace Physica {
         assert(site < getNumSite());
         Vector2D<Tv> result = deltas;
         for (int spin : {0, 1})
-            result[spin] *= Trv(1) - greens[spin](site, site);
+            result[spin] *= Trv(1) - greens[spin][site, site];
         result += Trv(1);
         return result; // Eq.(7.36) of [1]
     }

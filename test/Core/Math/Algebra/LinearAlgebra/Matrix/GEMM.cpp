@@ -50,7 +50,7 @@ int main() {
         const MatrixType dm = m.grads();
         for (size_t r = 0; r < dm.getRow(); ++r)
             for (size_t c = 0; c < dm.getCol(); ++c)
-                if (!scalarNear(dm(r, c), x.values().calc(c), 1E-15))
+                if (!scalarNear(dm[r, c], x.values().calc(c), 1E-15))
                     return 1;
     }
     return 0;

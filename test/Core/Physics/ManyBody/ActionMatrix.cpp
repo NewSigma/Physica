@@ -41,7 +41,7 @@ int main() {
     size_t order = action.getOrder();
     for (size_t r = 0; r < order; ++r)
         for (size_t c = 0; c < order; ++c)
-            if (action.calc(r, c) != result(r, c))
+            if (action.calc(r, c) != result[r, c])
                 return 1;
     return 0;
 }

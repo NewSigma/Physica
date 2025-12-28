@@ -208,7 +208,7 @@ namespace Physica {
             T prop_last = reciprocal(propAtZero);
             for (size_t n = 0; n < poolSize; ++n) {
                 monteCarloStep(sample, prop_last, deviation, factor, propAtZero);
-                samplePool(n, i) = T(sample) * lattVec[i];
+                samplePool[n, i] = T(sample) * lattVec[i];
             }
         }
     }
@@ -252,7 +252,7 @@ namespace Physica {
         auto& gen = R::getInstance();
         Vector3D<T> result{};
         for (size_t i = 0; i < Dim; ++i)
-            result[i] = samplePool(dist(gen), i);
+            result[i] = samplePool[dist(gen), i];
         return result;
     }
 
@@ -262,7 +262,7 @@ namespace Physica {
             for (int j = 0; j < Dim; ++j) {
                 if (i == j)
                     continue;
-                if (!lattice(i, j).isZero())
+                if (!lattice[i, j].isZero())
                     return false;
             }
         }

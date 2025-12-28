@@ -120,13 +120,13 @@ namespace Physica {
 
     template<Scalar T, int NumSite, bool UseInversionSymm>
     T AndersonMatrix<T, NumSite, UseInversionSymm>::getOnSiteE(int site) const noexcept {
-        return chainRepr(site, site);
+        return chainRepr[site, site];
     }
 
     template<Scalar T, int NumSite, bool UseInversionSymm>
     T AndersonMatrix<T, NumSite, UseInversionSymm>::getHoppingT(int bond) const noexcept {
         assert(bond + 1 < getNumSite());
-        return chainRepr(bond + 1, bond);
+        return chainRepr[bond + 1, bond];
     }
 
     template<Scalar T, int NumSite, bool UseInversionSymm>

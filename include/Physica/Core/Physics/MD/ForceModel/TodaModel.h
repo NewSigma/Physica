@@ -73,15 +73,15 @@ namespace Physica {
         }
         else {
             /* First */ {
-                const T delta = pos(0, 0) - springLength;
+                const T delta = pos[0, 0] - springLength;
                 energy = delta + exp(-delta);
             }
             for (size_t i = 0; i < numParticle - 1; ++i) {
-                const T delta = pos(i + 1, 0) - pos(i, 0) - springLength;
+                const T delta = pos[i + 1, 0] - pos[i, 0] - springLength;
                 energy += delta + exp(-delta);
             }
             /* Last */ {
-                const T delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
+                const T delta = cell.getLattice()[0, 0] - pos[numParticle - 1, 0] - springLength;
                 energy += delta + exp(-delta);
             }
         }
@@ -115,17 +115,17 @@ namespace Physica {
         }
         else {
             /* First */ {
-                const T delta = pos(0, 0) - springLength;
+                const T delta = pos[0, 0] - springLength;
                 result[0] = T(-1.0) + exp(-delta);
             }
             for (size_t i = 0; i < numParticle - 1; ++i) {
-                const T delta = pos(i + 1, 0) - pos(i, 0) - springLength;
+                const T delta = pos[i + 1, 0] - pos[i, 0] - springLength;
                 const T f = exp(-delta);
                 result[i] -= f;
                 result[i + 1] += f;
             }
             /* Last */ {
-                const T delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
+                const T delta = cell.getLattice()[0, 0] - pos[numParticle - 1, 0] - springLength;
                 result[numParticle - 1] += T(1.0) - exp(-delta);
             }
         }
@@ -153,7 +153,7 @@ namespace Physica {
             const auto& pos = cell.getPos();
             const bool isNeighbor = (dof1 + 1 == dof2) || (dof2 + 1 == dof1);
             if (isNeighbor) {
-                const T delta = abs(pos(dof1, 0) - pos(dof2, 0)) - springLength;
+                const T delta = abs(pos[dof1, 0] - pos[dof2, 0]) - springLength;
                 return -exp(-delta);
             }
 
@@ -161,19 +161,19 @@ namespace Physica {
                 const size_t numParticle = cell.getNumParticle();
                 T delta1, delta2;
                 if (dof1 == 0) {
-                    const T temp = pos(0, 0);
+                    const T temp = pos[0, 0];
                     delta1 = temp;
-                    delta2 = pos(1, 0) - temp;
+                    delta2 = pos[1, 0] - temp;
                 }
                 else if (dof1 == numParticle - 1) {
-                    const T temp = pos(numParticle - 1, 0);
-                    delta1 = temp - pos(numParticle - 2, 0);
-                    delta2 = cell.getLattice()(0, 0) - temp;
+                    const T temp = pos[numParticle - 1, 0];
+                    delta1 = temp - pos[numParticle - 2, 0];
+                    delta2 = cell.getLattice()[0, 0] - temp;
                 }
                 else {
-                    const T temp = pos(dof1, 0);
-                    delta1 = temp - pos(dof1 - 1, 0);
-                    delta2 = pos(dof1 + 1, 0) - temp;
+                    const T temp = pos[dof1, 0];
+                    delta1 = temp - pos[dof1 - 1, 0];
+                    delta2 = pos[dof1 + 1, 0] - temp;
                 }
                 delta1 -= springLength;
                 delta2 -= springLength;
@@ -193,9 +193,9 @@ namespace Physica {
                 const size_t i1 = (i + 1) % dof;
                 const T delta = cell.minDistVector(i, i1).norm() - springLength;
                 const T temp = exp(-delta);
-                result(i, i1) = -temp;
-                result(i, i) += temp;
-                result(i1, i1) += temp;
+                result[i, i1] = -temp;
+                result[i, i] += temp;
+                result[i1, i1] += temp;
             }
         }
         else {
@@ -203,14 +203,14 @@ namespace Physica {
             const size_t dof1 = dof - 1;
             for (size_t i = 0; i < dof1; ++i) {
                 const size_t i1 = i + 1;
-                const T delta = pos(i1, 0) - pos(i, 0) - springLength;
+                const T delta = pos[i1, 0] - pos[i, 0] - springLength;
                 const T temp = exp(-delta);
-                result(i, i1) = -temp;
-                result(i, i) += temp;
-                result(i1, i1) += temp;
+                result[i, i1] = -temp;
+                result[i, i] += temp;
+                result[i1, i1] += temp;
             }
-            result(0, 0) += exp(-pos(0, 0) + springLength);
-            result(dof1, dof1) += exp(-(cell.getLattice()(0, 0) - pos(dof1, 0) - springLength));
+            result[0, 0] += exp(-pos[0, 0] + springLength);
+            result[dof1, dof1] += exp(-(cell.getLattice()[0, 0] - pos[dof1, 0] - springLength));
         }
         return result;
     }
@@ -232,19 +232,19 @@ namespace Physica {
         }
         else {
             /* First*/ {
-                const T r = pos(0, 0);
+                const T r = pos[0, 0];
                 const T delta = r - springLength;
                 const T f = exp(-delta) - T(1.0);
                 result += r * f;
             }
             for (size_t i = 0; i < numParticle - 1; ++i) {
-                const T r = pos(i + 1, 0) - pos(i, 0);
+                const T r = pos[i + 1, 0] - pos[i, 0];
                 const T delta = r - springLength;
                 const T f = exp(-delta) - T(1.0);
                 result += r * f;
             }
             /* Last */ {
-                const T r = cell.getLattice()(0, 0) - pos(numParticle - 1, 0);
+                const T r = cell.getLattice()[0, 0] - pos[numParticle - 1, 0];
                 const T delta = r - springLength;
                 const T f = exp(-delta) - T(1.0);
                 result += r * f;

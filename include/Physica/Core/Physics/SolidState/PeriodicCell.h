@@ -406,30 +406,30 @@ namespace Physica {
     template<Scalar T, unsigned int Dim>
     auto PeriodicCell<T, Dim>::makeLattice(T normA, T normB, T normC, T alpha, T beta, T gamma) -> LatticeMatrix {
         LatticeMatrix result{};
-        result(0, 0) = normA;
-        result(0, 1) = T(0);
-        result(0, 2) = T(0);
-        result(1, 0) = normB * cos(gamma);
-        result(1, 1) = normB * sin(gamma);
-        result(1, 2) = T(0);
-        result(2, 0) = normC * cos(beta);
-        result(2, 1) = normC * (cos(alpha) - cos(beta) * cos(gamma)) / sin(gamma);
-        result(2, 2) = sqrt(square(normC) - square(result(2, 0)) - square(result(2, 1)));
+        result[0, 0] = normA;
+        result[0, 1] = T(0);
+        result[0, 2] = T(0);
+        result[1, 0] = normB * cos(gamma);
+        result[1, 1] = normB * sin(gamma);
+        result[1, 2] = T(0);
+        result[2, 0] = normC * cos(beta);
+        result[2, 1] = normC * (cos(alpha) - cos(beta) * cos(gamma)) / sin(gamma);
+        result[2, 2] = sqrt(square(normC) - square(result[2, 0]) - square(result[2, 1]));
         return result;
     }
 
     template<Scalar T, unsigned int Dim>
     auto PeriodicCell<T, Dim>::makeLattice2D(T normA, T normB, T normC, T gamma) -> LatticeMatrix {
         LatticeMatrix result{};
-        result(0, 0) = normA;
-        result(0, 1) = T(0);
-        result(0, 2) = T(0);
-        result(1, 0) = normB * cos(gamma);
-        result(1, 1) = normB * sin(gamma);
-        result(1, 2) = T(0);
-        result(2, 0) = T(0);
-        result(2, 1) = T(0);
-        result(2, 2) = normC;
+        result[0, 0] = normA;
+        result[0, 1] = T(0);
+        result[0, 2] = T(0);
+        result[1, 0] = normB * cos(gamma);
+        result[1, 1] = normB * sin(gamma);
+        result[1, 2] = T(0);
+        result[2, 0] = T(0);
+        result[2, 1] = T(0);
+        result[2, 2] = normC;
         return result;
     }
     /**
@@ -573,7 +573,7 @@ namespace Physica {
         const T normA = sqrt(squaredNormA);
         const T normB = sqrt(squaredNormB);
         const T gamma = arccos(dot / (T(2) * normA * normB));
-        return makeLattice2D(normA, normB, lattice(2, 2), gamma);
+        return makeLattice2D(normA, normB, lattice[2, 2], gamma);
     }
 
     template<Scalar T, unsigned int Dim>
@@ -801,9 +801,9 @@ namespace Physica {
                 for (unsigned int x_ = 0; x_ < x; ++x_) {
                     for (unsigned int y_ = 0; y_ < y; ++y_) {
                         for (unsigned int z_ = 0; z_ < z; ++z_) {
-                            new_pos(index, 0) = (target(i, 0) + T(x_)) / T(x);
-                            new_pos(index, 1) = (target(i, 1) + T(y_)) / T(y);
-                            new_pos(index, 2) = (target(i, 2) + T(z_)) / T(z);
+                            new_pos[index, 0] = (target[i, 0] + T(x_)) / T(x);
+                            new_pos[index, 1] = (target[i, 1] + T(y_)) / T(y);
+                            new_pos[index, 2] = (target[i, 2] + T(z_)) / T(z);
                             ++index;
                         }
                     }
@@ -815,9 +815,9 @@ namespace Physica {
                 for (unsigned int y_ = 0; y_ < y; ++y_) {
                     for (unsigned int z_ = 0; z_ < z; ++z_) {
                         for (size_t i = 0; i < numParticle; ++i) {
-                            new_pos(index, 0) = (target(i, 0) + T(x_)) / T(x);
-                            new_pos(index, 1) = (target(i, 1) + T(y_)) / T(y);
-                            new_pos(index, 2) = (target(i, 2) + T(z_)) / T(z);
+                            new_pos[index, 0] = (target[i, 0] + T(x_)) / T(x);
+                            new_pos[index, 1] = (target[i, 1] + T(y_)) / T(y);
+                            new_pos[index, 2] = (target[i, 2] + T(z_)) / T(z);
                             ++index;
                         }
                     }

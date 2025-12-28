@@ -37,9 +37,9 @@ int main() {
     DenseMatrix<float64> points{{5, 0}, {5, 1}, {5, -1}, {-5, 0}, {-5, 1}, {-5, -1}};
     DenseSymmMatrix<float64> similar(points.getCol());
     for (size_t i = 0; i < similar.getOrder(); ++i) {
-        similar(i, i) = float64(-1);
+        similar[i, i] = float64(-1);
         for (size_t j = i + 1; j < similar.getOrder(); ++j) {
-            similar(i, j) = -(points.col(i) - points.col(j)).norm();
+            similar[i, j] = -(points.col(i) - points.col(j)).norm();
         }
     }
 

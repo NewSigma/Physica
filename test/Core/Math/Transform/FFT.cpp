@@ -37,7 +37,7 @@ namespace {
         DenseMatrix<T, MatrixOption::Row> data(N1, N2);
         for (size_t i = 0; i < N1; ++i)
             for (size_t j = 0; j < N2; ++j)
-                data(i, j) = T(sin(T(2 * i) * MathConst<T>::pi * freq1 * deltaX) + cos(T(2 * j) * MathConst<T>::pi * freq2 * deltaY) * 2);
+                data[i, j] = T(sin(T(2 * i) * MathConst<T>::pi * freq1 * deltaX) + cos(T(2 * j) * MathConst<T>::pi * freq2 * deltaY) * 2);
 
         FFT<T, 2> fft({N1, N2}, PlanFlag::Estimate);
         fft.transform(data);
@@ -60,8 +60,8 @@ namespace {
             fft.invTransform();
             for (size_t i = 0; i < data.getRow(); ++i) {
                 for (size_t j = 0; j < data.getCol(); ++j) {
-                    const bool isNear = scalarNear(data(i, j), fft.getRSpace()(i, j), precision);
-                    const bool isSmall = abs(data(i, j)) < T(precision) && abs(fft.getRSpace()(i, j)) < T(precision);
+                    const bool isNear = scalarNear(data[i, j], fft.getRSpace()[i, j], precision);
+                    const bool isSmall = abs(data[i, j]) < T(precision) && abs(fft.getRSpace()[i, j]) < T(precision);
                     if(!isNear && !isSmall)
                         exit(EXIT_FAILURE);
                 }

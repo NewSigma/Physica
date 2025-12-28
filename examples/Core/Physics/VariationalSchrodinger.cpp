@@ -75,7 +75,7 @@ private:
                 const ScalarType pro = ScalarType(i * j);
                 const ScalarType numerator = ScalarType(1) - sum - ScalarType(2) * pro;
                 const ScalarType denominator = (sum + ScalarType(3)) * (sum + ScalarType(1)) * (sum - ScalarType(1));
-                result(i, j) = ScalarType(-8) * numerator / denominator;
+                result[i, j] = ScalarType(-8) * numerator / denominator;
             }
         }
         return result;
@@ -88,7 +88,7 @@ private:
                 const ScalarType sum = ScalarType(i + j);
                 const ScalarType term1 = ScalarType(2) * (reciprocal(sum + ScalarType(1)) + reciprocal(sum + ScalarType(5)));
                 const ScalarType term2 = ScalarType(4) * reciprocal(sum + ScalarType(3));
-                result(i, j) = term1 - term2;
+                result[i, j] = term1 - term2;
             }
         }
         return result;
@@ -186,7 +186,7 @@ private:
                 const ScalarType pro = ScalarType(baseSetCoeff[i] * baseSetCoeff[j]);
                 const ScalarType kinetic = ScalarType(3) * pro * sqrt(ScalarType(M_PI) / sum) * ScalarType(M_PI) / square(sum);
                 const ScalarType coulomb = ScalarType(-2) * ScalarType(M_PI) / sum;
-                result(i, j) = kinetic + coulomb;
+                result[i, j] = kinetic + coulomb;
             }
         }
         return result;
@@ -198,7 +198,7 @@ private:
             for (size_t j = 0; j < baseSetCount; ++j) {
                 const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
                 const ScalarType temp = ScalarType(M_PI) / sum;
-                result(i, j) = temp * sqrt(temp);
+                result[i, j] = temp * sqrt(temp);
             }
         }
         return result;
@@ -295,8 +295,8 @@ private:
                 ScalarType coulomb2 = ScalarType(0);
                 for (size_t m = 0; m < baseSetCount; ++m)
                     for (size_t n = 0; n < baseSetCount; ++n)
-                        coulomb2 += Q_value(i, m, j, n) * trial_solution[m] * trial_solution[n];
-                result(i, j) = h_value(i, j) + coulomb2;
+                        coulomb2 += calcValueQ(i, m, j, n) * trial_solution[m] * trial_solution[n];
+                result[i, j] = calcValueH(i, j) + coulomb2;
             }
         }
         return result;
@@ -308,13 +308,13 @@ private:
             for (size_t j = 0; j < baseSetCount; ++j) {
                 const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
                 const ScalarType temp = ScalarType(M_PI) / sum;
-                result(i, j) = temp * sqrt(temp);
+                result[i, j] = temp * sqrt(temp);
             }
         }
         return result;
     }
 
-    ScalarType h_value(size_t p, size_t r) {
+    ScalarType calcValueH(size_t p, size_t r) {
         const ScalarType sum = ScalarType(baseSetCoeff[p] + baseSetCoeff[r]);
         const ScalarType pro = ScalarType(baseSetCoeff[p] * baseSetCoeff[r]);
         const ScalarType kinetic = ScalarType(3) * pro * sqrt(ScalarType(M_PI) / sum) * ScalarType(M_PI) / square(sum);
@@ -322,7 +322,7 @@ private:
         return kinetic + coulomb1;
     }
 
-    ScalarType Q_value(size_t p, size_t r, size_t q, size_t s) {
+    ScalarType calcValueQ(size_t p, size_t r, size_t q, size_t s) {
         const ScalarType sum = ScalarType(baseSetCoeff[p] + baseSetCoeff[q]);
         const ScalarType sum1 = ScalarType(baseSetCoeff[r] + baseSetCoeff[s]);
         const ScalarType demoninator = sum * sum1 * sqrt(sum + sum1);
@@ -334,10 +334,10 @@ private:
         ScalarType energy = ScalarType(0);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
-                energy += ScalarType(2) * solution[i] * solution[j] * h_value(i, j);
+                energy += ScalarType(2) * solution[i] * solution[j] * calcValueH(i, j);
                 for (size_t m = 0; m < baseSetCount; ++m)
                     for (size_t n = 0; n < baseSetCount; ++n)
-                        energy += Q_value(i, m, j, n) * solution[i] * solution[j] * solution[m] * solution[n];
+                        energy += calcValueQ(i, m, j, n) * solution[i] * solution[j] * solution[m] * solution[n];
             }
         }
         return energy;

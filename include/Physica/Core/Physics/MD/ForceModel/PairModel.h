@@ -245,7 +245,7 @@ namespace Physica {
             for (size_t dim_r = 0; dim_r < Dim; ++dim_r) {
                 const size_t r = atom_r * Dim + dim_r;
                 for (size_t c = (atom_r + 1) * Dim; c < dof; ++c)
-                    result(r, c) = T1(forceConst(cell, r, c));
+                    result[r, c] = T1(forceConst(cell, r, c));
 
                 //Handle self interaction
                 for (size_t dim_c = dim_r; dim_c < Dim; ++dim_c) {
@@ -256,7 +256,7 @@ namespace Physica {
                             continue;
                         temp += result(r, atom_c * Dim + dim_c);
                     }
-                    result(r, c) = -T1(temp);
+                    result[r, c] = -T1(temp);
                 }
             }
         }

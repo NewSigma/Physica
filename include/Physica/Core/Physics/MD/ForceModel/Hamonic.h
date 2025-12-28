@@ -113,7 +113,7 @@ namespace Physica {
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof, T(0));
         for (size_t i = 0; i < dof; ++i)
-            result(i, i) = forceConst(cell, i, i);
+            result[i, i] = forceConst(cell, i, i);
         return result;
     }
 

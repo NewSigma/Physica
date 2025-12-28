@@ -239,14 +239,14 @@ namespace Physica {
                     const T factor3 = (factor1 + T(1)) * factor2 * (T(2) / squaredNorm);
                     LatticeMatrix temp = (factor3 * delta) * delta.transpose();
                     for (unsigned int i = 0; i < Dim; ++i)
-                        temp(i, i) -= factor2;
+                        temp[i, i] -= factor2;
                     kSpaceVirial += temp;
                 }
             });
         kSpaceVirial *= T(-M_PI) * square(Base::getInvVolume() / getIntegralLimit());
         const T gammaPointP = gammaPointE * Base::getInvVolume();
         for (unsigned int i = 0; i < Dim; ++i)
-            kSpaceVirial(i, i) += gammaPointP;
+            kSpaceVirial[i, i] += gammaPointP;
         const LatticeMatrix rSpaceVirial = Base::virial(pos);
         return kSpaceVirial + rSpaceVirial;
     }

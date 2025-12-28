@@ -126,8 +126,8 @@ namespace Physica {
 
                 const size_t offset_corr = force_corr.toIndex1D(r, c);
                 for (size_t cell = 0; cell < numCell; ++cell) {
-                    force_corr[offset_corr][cell].toNextMean(numSample, buffer1[cell]);
-                    momentum_corr[offset_corr][cell].toNextMean(numSample, buffer2[cell]);
+                    force_corr.asArray()[offset_corr][cell].toNextMean(numSample, buffer1[cell]);
+                    momentum_corr.asArray()[offset_corr][cell].toNextMean(numSample, buffer2[cell]);
                 }
             }
         }

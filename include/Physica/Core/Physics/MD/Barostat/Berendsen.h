@@ -84,17 +84,17 @@ namespace Physica {
         if constexpr (Type == BaroType::Anisotropic) {
             result = lastStress;
             for (size_t i = 0; i < Dim; ++i)
-                result(i, i) -= centerTargetP;
+                result[i, i] -= centerTargetP;
         }
         else if constexpr (Type == BaroType::XY) {
             auto corner = result.topLeftCorner(2);
             corner = lastStress.topLeftCorner(2);
             for (size_t i = 0; i < 2; ++i)
-                result(i, i) -= centerTargetP;
+                result[i, i] -= centerTargetP;
         }
         else {
             static_assert(Type == BaroType::Z, "[Error]: Not implemented");
-            result(2, 2) = lastStress(2, 2) - centerTargetP;
+            result[2, 2] = lastStress[2, 2] - centerTargetP;
         }
         result *= compressRate / T(Dim);
         return result;
@@ -172,16 +172,16 @@ namespace Physica {
         if constexpr (Type == BaroType::Anisotropic) {
             for (size_t r = 0; r < Dim; ++r)
                 for (size_t c = 0; c < Dim; ++c)
-                    result(r, c) = kernel(r, c);
+                    result[r, c] = kernel(r, c);
         }
         else if constexpr (Type == BaroType::XY) {
             for (size_t r = 0; r < 2; ++r)
                 for (size_t c = 0; c < 2; ++c)
-                    result(r, c) = kernel(r, c);
+                    result[r, c] = kernel(r, c);
         }
         else {
             static_assert(Type == BaroType::Z, "[Error]: Not implemented");
-            result(2, 2) = kernel(2, 2);
+            result[2, 2] = kernel(2, 2);
         }
         return result;
     }

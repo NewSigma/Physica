@@ -83,15 +83,15 @@ namespace Physica {
     template<Matrix M>
     HamonicRotator<M>::HamonicRotator(const M& axisRotation) : initialMat(3, 3), hamonicRotation() {
         assert(axisRotation.getRow() == 3 && axisRotation.getCol() == 3);
-        initialMat(0, 0) = axisRotation(1, 1);
-        initialMat(0, 1) = -axisRotation(1, 2);
-        initialMat(0, 2) = axisRotation(1, 0);
-        initialMat(1, 0) = -axisRotation(2, 1);
-        initialMat(1, 1) = axisRotation(2, 2);
-        initialMat(1, 2) = -axisRotation(2, 0);
-        initialMat(2, 0) = axisRotation(0, 1);
-        initialMat(2, 1) = -axisRotation(0, 2);
-        initialMat(2, 2) = axisRotation(0, 0);
+        initialMat[0, 0] = axisRotation[1, 1];
+        initialMat[0, 1] = -axisRotation[1, 2];
+        initialMat[0, 2] = axisRotation[1, 0];
+        initialMat[1, 0] = -axisRotation[2, 1];
+        initialMat[1, 1] = axisRotation[2, 2];
+        initialMat[1, 2] = -axisRotation[2, 0];
+        initialMat[2, 0] = axisRotation[0, 1];
+        initialMat[2, 1] = -axisRotation[0, 2];
+        initialMat[2, 2] = axisRotation[0, 0];
         hamonicRotation = initialMat;
     }
 
@@ -132,7 +132,7 @@ namespace Physica {
                 if (!nearByMargin(w.toMachine(), 0.0))
                     w *= W(m, n, l);
 
-                result(m + l, n + l) = T(u + v + w);
+                result[m + l, n + l] = T(u + v + w);
             }
         }
         hamonicRotation = std::move(result);
@@ -143,17 +143,17 @@ namespace Physica {
         const size_t matRow = hamonicRotation.getRow();
         assert(matRow % 2U == 1U);
         const size_t offset = matRow >> 1U;
-        return hamonicRotation(row + offset, col + offset);
+        return hamonicRotation[row + offset, col + offset];
     }
 
     template<Matrix M>
     M::ScalarType HamonicRotator<M>::P(int i, int a, int b, int l) {
         const int i_1 = i + 1;
         if (b == l)
-            return initialMat(i_1, 2) * getCenteredElement(a, l - 1) - initialMat(i_1, 0) * getCenteredElement(a, -l + 1);
+            return initialMat[i_1, 2] * getCenteredElement(a, l - 1) - initialMat[i_1, 0] * getCenteredElement(a, -l + 1);
         if (b == -l)
-            return initialMat(i_1, 2) * getCenteredElement(a, -l + 1) + initialMat(i_1, 0) * getCenteredElement(a, l - 1);
-        return initialMat(i_1, 1) * getCenteredElement(a, b);
+            return initialMat[i_1, 2] * getCenteredElement(a, -l + 1) + initialMat[i_1, 0] * getCenteredElement(a, l - 1);
+        return initialMat[i_1, 1] * getCenteredElement(a, b);
     }
 
     template<Matrix M>

@@ -75,7 +75,7 @@ namespace Physica {
         T max_elem = 0;
         for (size_t i = col; i < order; ++i) {
             for (size_t j = col; j < order; ++j) {
-                ConstRefTy temp = (*this)(i, j);
+                ConstRefTy temp = (*this)[i, j];
                 bool flag = absCompare(max_elem, temp);
                 max_elem = flag ? max_elem : temp;
                 main_row_index = flag ? main_row_index : j;
@@ -98,9 +98,9 @@ namespace Physica {
         const auto order = getRow();
         assert(col < order);
         size_t main_col_index = col;
-        T max_elem = (*this)(col, col);
+        T max_elem = (*this)[col, col];
         for (size_t j = col + 1; j < order; ++j) {
-            ConstRefTy temp = (*this)(j, col);
+            ConstRefTy temp = (*this)[j, col];
             bool flag = absCompare(max_elem, temp);
             max_elem = flag ? max_elem : temp;
             main_col_index = flag ? main_col_index : j;

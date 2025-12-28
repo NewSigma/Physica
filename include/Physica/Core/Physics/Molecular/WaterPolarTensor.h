@@ -125,10 +125,10 @@ namespace Physica {
     WaterPolarTensor<T, UseDynamicPolar>::makePolarTensor(T curvePos1, T curvePos2, T curvePos3) {
         Matrix3D polarTensor(3, 3, 0);
         const DiagBaseVector diagBases = makeDiagBases(curvePos1, curvePos2, curvePos3);
-        polarTensor(0, 0) = diagBases * makeFactorXX();
-        polarTensor(1, 1) = diagBases * makeFactorYY();
-        polarTensor(2, 2) = diagBases * makeFactorZZ();
-        polarTensor(2, 0) = polarTensor(0, 2) = makeOffDiagBases(curvePos1, curvePos2, curvePos3) * makeFactorXZ();
+        polarTensor[0, 0] = diagBases * makeFactorXX();
+        polarTensor[1, 1] = diagBases * makeFactorYY();
+        polarTensor[2, 2] = diagBases * makeFactorZZ();
+        polarTensor[2, 0] = polarTensor[0, 2] = makeOffDiagBases(curvePos1, curvePos2, curvePos3) * makeFactorXZ();
         return polarTensor;
     }
 

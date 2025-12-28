@@ -45,8 +45,8 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
-        [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
+        [[nodiscard]] __device__ T& operator[](size_t r, size_t c);
+        [[nodiscard]] __device__ const T& operator[](size_t r, size_t c) const;
         /* Operations */
         __host__ __device__ void resize(size_t row, size_t col, auto&&... args);
         __host__ __device__ void resize(size_t order);

@@ -31,7 +31,7 @@ namespace {
             return true;
         for (size_t i = 0; i < order - 2; ++i) {
             for (size_t j = i + 2; j < order; ++j)
-                if (!m(j, i).isZero())
+                if (!m[j, i].isZero())
                     return false;
         }
         return true;

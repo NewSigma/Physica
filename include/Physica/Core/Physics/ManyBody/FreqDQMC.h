@@ -111,7 +111,7 @@ namespace Physica {
             numAccept += 1;
         }
         else
-            getAuxField()(freq, site) = save;
+            getAuxField()[freq, site] = save;
         numTotal += 1;
     }
 

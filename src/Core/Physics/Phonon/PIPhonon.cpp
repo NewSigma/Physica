@@ -36,8 +36,8 @@ PIPhonon::PIPhonon(size_t numAtomUnitCell_,
     momentum_corr.resize(getUnitCellDOF());
     const size_t numCell = getNumCell();
     for (size_t i = 0; i < force_corr.getLength(); ++i) {
-        force_corr[i].resize(numCell, 0);
-        momentum_corr[i].resize(numCell, 0);
+        force_corr.asArray()[i].resize(numCell, 0);
+        momentum_corr.asArray()[i].resize(numCell, 0);
     }
 
     kSpaceForceCorr.resize(numCell, getUnitCellDOF());
@@ -89,7 +89,7 @@ void PIPhonon::compute() {
         solver.sort();
         normalModes[qPointId] = base * solver.getEigenvectors();
         for (size_t i = 0; i < buffer.getCol(); ++i)
-            kSpaceMomentumCorr[qPointId](i, i) = solver.getEigenvalues()[i];
+            kSpaceMomentumCorr[qPointId][i, i] = solver.getEigenvalues()[i];
     }
 }
 
@@ -113,15 +113,15 @@ void PIPhonon::toKSpace() {
     for (size_t r = 0; r < dof; ++r) {
         for (size_t c = r; c < dof; ++c) {
             const size_t offset_corr = force_corr.toIndex1D(r, c);
-            fft.getRSpace().flatten() = force_corr[offset_corr];
+            fft.getRSpace().flatten() = force_corr.asArray()[offset_corr];
             fft.transform();
             for (size_t cell = 0; cell < getNumCell(); ++cell)
-                kSpaceForceCorr[cell](r, c) = fft.getKSpace().flatten()[cell];
+                kSpaceForceCorr[cell][r, c] = fft.getKSpace().flatten()[cell];
 
-            fft.getRSpace().flatten() = momentum_corr[offset_corr];
+            fft.getRSpace().flatten() = momentum_corr.asArray()[offset_corr];
             fft.transform();
             for (size_t cell = 0; cell < getNumCell(); ++cell)
-                kSpaceMomentumCorr[cell](r, c) = fft.getKSpace().flatten()[cell];
+                kSpaceMomentumCorr[cell][r, c] = fft.getKSpace().flatten()[cell];
         }
     }
 }
@@ -142,11 +142,11 @@ void PIPhonon::applyTranslationInvariance(DenseHermiteMatrix<ComplexType>& targe
             for (size_t i = 0; i < getNumAtomUnitCell(); ++i)
                 term2 += target.calc(r, 3 * i + c % 3U).real() + target.calc(3 * i + r % 3U, c).real();
             term2 /= ScalarType(getNumAtomUnitCell());
-            buffer(r, c) = term1 - term2;
+            buffer[r, c] = term1 - term2;
         }
     }
 
     for (size_t c = 0; c < target.getCol(); ++c)
         for (size_t r = 0; r <= c; ++r)
-            target(r, c) += buffer(r, c);
+            target[r, c] += buffer[r, c];
 }

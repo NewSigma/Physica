@@ -146,7 +146,7 @@ namespace Physica {
         LatticeMatrix result(Dim, Dim);
         for (int r = 0; r < Dim; ++r)
             for (int c = 0; c < Dim; ++c)
-                result(r, c) = swapBuffer[r * Dim + c];
+                result[r, c] = swapBuffer[r * Dim + c];
         result *= reciprocal(MDCellType::getVolume(lattice)) * ScalarType(0.5);
         return result;
     }
@@ -180,9 +180,9 @@ namespace Physica {
         for (int i = 0; i < Dim; ++i) {
             const size_t index = atom1 * Dim + i;
             if constexpr (IsSmallCell)
-                forceBuffer(index, blockIdx.y) = atomForce[i];
+                forceBuffer[index, blockIdx.y] = atomForce[i];
             else
-                forceBuffer(index, 0) = atomForce[i];
+                forceBuffer[index, 0] = atomForce[i];
         }
     }
 
@@ -195,7 +195,7 @@ namespace Physica {
 
         for (int i = 0; i < Dim; ++i) {
             const size_t index = atom * Dim + i;
-            forceBuffer(index, 0) = forceBuffer.row(index).sum();
+            forceBuffer[index, 0] = forceBuffer.row(index).sum();
         }
     }
 
@@ -212,7 +212,7 @@ namespace Physica {
         for (int i = 0; i < Dim; ++i) {
             for (int j = 0; j < Dim; ++j) {
                 const int index = i * Dim + j;
-                virialBuffer(index, atom1) = atomVirial(i, j);
+                virialBuffer[index, atom1] = atomVirial[i, j];
             }
         }
     }
@@ -222,8 +222,8 @@ namespace Physica {
         const size_t numParticle = cell.getNumParticle();
         ScalarType virial = 0;
         for (size_t i = 0; i < numParticle; ++i)
-            virial += virialBuffer(threadIdx.x, i);
-        virialBuffer(threadIdx.x, 0) = virial;
+            virial += virialBuffer[threadIdx.x, i];
+        virialBuffer[threadIdx.x, 0] = virial;
     }
 
     template<class Derived>

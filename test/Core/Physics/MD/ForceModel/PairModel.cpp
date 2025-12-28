@@ -48,7 +48,7 @@ public:
             for (size_t i = 0; i < cell.getDOF(); ++i) {
                 for (size_t j = 0; j < cell.getDOF(); ++j) {
                     const auto fc1 = sg.forceConst(cell, i, j);
-                    if (!scalarNear<dfloat>(fc(i, j), fc1, 1E-15))
+                    if (!scalarNear<dfloat>(fc[i, j], fc1, 1E-15))
                         exit(EXIT_FAILURE);
                 }
             }

@@ -105,7 +105,7 @@ namespace Physica {
         /* Fill pos */ {
             size_t index = dof;
             for (auto elem : cell.getPos().asArray()) {
-                phase(index, 0) = elem;
+                phase[index, 0] = elem;
                 ++index;
             }
             for (size_t i = 1; i < getNumReplica(); ++i) {

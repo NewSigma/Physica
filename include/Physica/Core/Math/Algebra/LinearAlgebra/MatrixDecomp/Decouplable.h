@@ -47,10 +47,10 @@ namespace Physica {
         size_t lower = upper;
         size_t lower_1 = upper - 1;
         for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
-            RealType temp = abs(mat(lower, lower).value()) + abs(mat(lower_1, lower_1).value());
+            RealType temp = abs(mat[lower, lower].value()) + abs(mat[lower_1, lower_1].value());
             temp = std::max(temp, epsilon) * epsilon;
-            if (abs(mat(lower, lower_1).value()) < temp) {
-                mat(lower, lower_1) = 0;
+            if (abs(mat[lower, lower_1].value()) < temp) {
+                mat[lower, lower_1] = 0;
                 break;
             }
         }
@@ -64,10 +64,10 @@ namespace Physica {
         size_t lower = upper;
         size_t lower_1 = upper - 1;
         for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
-            RealType temp = abs(mat(lower, lower).value()) + abs(mat(lower_1, lower_1).value());
+            RealType temp = abs(mat[lower, lower].value()) + abs(mat[lower_1, lower_1].value());
             temp = std::max(abs(temp * RealType(std::numeric_limits<RealType>::epsilon())), RealType(std::numeric_limits<RealType>::min()));
-            if (abs(mat(lower_1, lower)) < temp) {
-                mat(lower_1, lower) = 0;
+            if (abs(mat[lower_1, lower]) < temp) {
+                mat[lower_1, lower] = 0;
                 break;
             }
         }

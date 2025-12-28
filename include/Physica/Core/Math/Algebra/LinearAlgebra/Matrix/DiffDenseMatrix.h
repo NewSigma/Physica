@@ -68,7 +68,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Base::operator();
+        using Base::operator[];
         /* Operations */
         using Base::resize;
         void resize(size_t row, size_t col);

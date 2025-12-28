@@ -431,7 +431,7 @@ namespace Physica {
         for (size_t i = 0; i < dof; ++i) {
             const T mass = cell.getMass(i / Dim);
             for (size_t j = 0; j < getNumReplica(); ++j)
-                result += mass * square(omegaW * (pos(i, j) - pos(i, (j + 1) % getNumReplica()))) * 0.5;
+                result += mass * square(omegaW * (pos[i, j] - pos[i, (j + 1) % getNumReplica()])) * 0.5;
         }
         return result;
     }

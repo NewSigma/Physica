@@ -26,124 +26,126 @@ using namespace Physica;
 using T = float64;
 using ODE = ODESolver<T, 2>;
 
-struct WaterDropArgs {
-    T radius;
-    T sigma;
-    T rho;
-    T tangent;
-    T g;
-};
+namespace {
+    struct WaterDropArgs {
+        T radius;
+        T sigma;
+        T rho;
+        T tangent;
+        T g;
+    };
 
-struct EquationEnv {
-    VectorND<T>& r_arr;
-    VectorND<T>& lambda_arr;
-    VectorND<T>& volume_arr;
-    size_t from;
-    size_t to;
-    double rmin;
-    double solveStepSize;
-    double plotStepSize;
-};
+    struct EquationEnv {
+        VectorND<T>& r_arr;
+        VectorND<T>& lambda_arr;
+        VectorND<T>& volume_arr;
+        size_t from;
+        size_t to;
+        double rmin;
+        double solveStepSize;
+        double plotStepSize;
+    };
 
-class WaterDropSolver {
-private:
-    ODE solver;
-    T stepSize;
-    T const1;
-    T const2;
-    T const3;
-public:
-    WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_);
-    /* Operations */
-    T solve();
-    int output();
-    /* Getters */
-    T getVolume() const;
-    T getMinTangent() const;
-    T getLambda() const { return const3 / const2; }
-private:
-    void setLambda(const T& lambda) { const3 = const2 * lambda; }
-};
+    class WaterDropSolver {
+    private:
+        ODE solver;
+        T stepSize;
+        T const1;
+        T const2;
+        T const3;
+    public:
+        WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_);
+        /* Operations */
+        T solve();
+        int output();
+        /* Getters */
+        T getVolume() const;
+        T getMinTangent() const;
+        T getLambda() const { return const3 / const2; }
+    private:
+        void setLambda(const T& lambda) { const3 = const2 * lambda; }
+    };
 
-WaterDropSolver::WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_)
-        : solver(-drop.radius, -rmin, stepSize_, {0, drop.tangent})
-        , stepSize(stepSize_)
-        , const1(drop.rho * drop.g / drop.sigma)
-        , const2(drop.rho / drop.sigma)
-        , const3(0) {}
+    WaterDropSolver::WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_)
+            : solver(-drop.radius, -rmin, stepSize_, {0, drop.tangent})
+            , stepSize(stepSize_)
+            , const1(drop.rho * drop.g / drop.sigma)
+            , const2(drop.rho / drop.sigma)
+            , const3(0) {}
 
-T WaterDropSolver::solve() {
-    return bisection([&](const T& lambda) { // Use bisection method based on experience
-               setLambda(lambda);
-               solver.rungeKutta4([&](const T& r, const Vector2D<T>& v) -> Vector2D<T> {
-                       const T momentum = v[1];
-                       const T momentum_2_1 = momentum * momentum + T(1);
-                       const T sqrt_momentum_2_1 = sqrt(momentum_2_1);
-                       const T term1 = (momentum_2_1 * sqrt_momentum_2_1 * (const1 * v[0] + const3));
-                       const T term2 = momentum_2_1 * momentum / r;
-                       return {momentum, term1 - term2};
-                   });
-               return getMinTangent();
-           }, T(0), T(-1.1), T(1.1)); // 1.1 is selected based on experience
-}
-
-int WaterDropSolver::output() {
-    const auto& r = solver.getX();
-    const auto& solution = solver.getSolution();
-
-    const size_t length = solution.getCol();
-    VectorND<T> z{};
-    z.resize(length);
-
-    T volumeHelper(0);
-    for (size_t i = 0; i < length; ++i) {
-        T temp1 = solution(0, i);
-        z[i] = temp1;
-        volumeHelper += temp1 * r[i];
+    T WaterDropSolver::solve() {
+        return bisection([&](const T& lambda) { // Use bisection method based on experience
+                setLambda(lambda);
+                solver.rungeKutta4([&](const T& r, const Vector2D<T>& v) -> Vector2D<T> {
+                        const T momentum = v[1];
+                        const T momentum_2_1 = momentum * momentum + T(1);
+                        const T sqrt_momentum_2_1 = sqrt(momentum_2_1);
+                        const T term1 = (momentum_2_1 * sqrt_momentum_2_1 * (const1 * v[0] + const3));
+                        const T term2 = momentum_2_1 * momentum / r;
+                        return {momentum, term1 - term2};
+                    });
+                return getMinTangent();
+            }, T(0), T(-1.1), T(1.1)); // 1.1 is selected based on experience
     }
-    std::cout << "Volume is " << abs(volumeHelper * stepSize * T(1E9)) << " mm^3" << std::endl;
-    std::cout << "Minimum tangent is " << solution(1, length - 1) << std::endl;
-    /* Plot z */ {
-        const VectorND<T> scaled_r = r * T(1E3);
-        z *= T(1E3);
-        Plot* r_z = new Plot(-0.1, 0.001, 0, 0.05, 0.02, 0.02);
-        r_z->spline(scaled_r, z);
-        r_z->getChart()->legend()->hide();
-        r_z->getAxisX()->setTitleText("r/mm");
-        r_z->getAxisY()->setTitleText("z/mm");
-        r_z->show();
+
+    int WaterDropSolver::output() {
+        const auto& r = solver.getX();
+        const auto& solution = solver.getSolution();
+
+        const size_t length = solution.getCol();
+        VectorND<T> z{};
+        z.resize(length);
+
+        T volumeHelper(0);
+        for (size_t i = 0; i < length; ++i) {
+            T temp1 = solution[0, i];
+            z[i] = temp1;
+            volumeHelper += temp1 * r[i];
+        }
+        std::cout << "Volume is " << abs(volumeHelper * stepSize * T(1E9)) << " mm^3" << '\n';
+        std::cout << "Minimum tangent is " << solution[1, length - 1] << '\n';
+        /* Plot z */ {
+            const VectorND<T> scaled_r = r * T(1E3);
+            z *= T(1E3);
+            Plot* r_z = new Plot(-0.1, 0.001, 0, 0.05, 0.02, 0.02);
+            r_z->spline(scaled_r, z);
+            r_z->getChart()->legend()->hide();
+            r_z->getAxisX()->setTitleText("r/mm");
+            r_z->getAxisY()->setTitleText("z/mm");
+            r_z->show();
+        }
+        return QApplication::exec();
     }
-    return QApplication::exec();
-}
 
-T WaterDropSolver::getVolume() const {
-    const auto& r = solver.getX();
-    const auto& solution = solver.getSolution();
+    T WaterDropSolver::getVolume() const {
+        const auto& r = solver.getX();
+        const auto& solution = solver.getSolution();
 
-    const size_t length = solution.getCol();
-    T volumeHelper(0);
-    for (size_t i = 0; i < length; ++i)
-        volumeHelper += solution(0, i) * r[i];
-    return abs(volumeHelper * stepSize);
-}
+        const size_t length = solution.getCol();
+        T volumeHelper(0);
+        for (size_t i = 0; i < length; ++i)
+            volumeHelper += solution[0, i] * r[i];
+        return abs(volumeHelper * stepSize);
+    }
 
-T WaterDropSolver::getMinTangent() const {
-    const auto& solution = solver.getSolution();
-    return solution(1, solution.getCol() - 1);
-}
+    T WaterDropSolver::getMinTangent() const {
+        const auto& solution = solver.getSolution();
+        return solution[1, solution.getCol() - 1];
+    }
 
-void parallelSolve(WaterDropArgs args, const EquationEnv& env) {
-    assert(env.from < env.to);
-    assert(env.to <= env.r_arr.getLength());
-    assert(env.r_arr.getLength() <= env.lambda_arr.getLength());
-    assert(env.r_arr.getLength() <= env.volume_arr.getLength());
-    for (size_t i = env.from; i < env.to; ++i) {
-        env.r_arr[i] = args.radius;
-        WaterDropSolver solver(args, env.rmin, env.solveStepSize);
-        const T lambda = solver.solve();
-        env.lambda_arr[i] = lambda;
-        env.volume_arr[i] = solver.getVolume();
-        args.radius += T(env.plotStepSize);
+    void parallelSolve(WaterDropArgs args, const EquationEnv& env) {
+        assert(env.from < env.to);
+        assert(env.to <= env.r_arr.getLength());
+        assert(env.r_arr.getLength() <= env.lambda_arr.getLength());
+        assert(env.r_arr.getLength() <= env.volume_arr.getLength());
+        for (size_t i = env.from; i < env.to; ++i) {
+            env.r_arr[i] = args.radius;
+            WaterDropSolver solver(args, env.rmin, env.solveStepSize);
+            const T lambda = solver.solve();
+            env.lambda_arr[i] = lambda;
+            env.volume_arr[i] = solver.getVolume();
+            args.radius += T(env.plotStepSize);
+        }
     }
 }
 /**
@@ -222,6 +224,6 @@ int main(int argc, char** argv) {
 
     WaterDropSolver solver({startRadius, sigma, rho, 1, g}, rmin, solveStepSize);
     const T lambda = solver.solve();
-    std::cout << "Lambda is " << lambda << std::endl;
+    std::cout << "Lambda is " << lambda << '\n';
     return solver.output();
 }

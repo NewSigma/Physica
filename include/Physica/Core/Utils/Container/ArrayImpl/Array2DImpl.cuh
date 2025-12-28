@@ -42,14 +42,14 @@ namespace Physica {
             : arr(storage.arr), r(storage.r) {}
 
     template<tparams>
-    __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) -> T& {
+    __device__ auto device_obj<Array2D>::operator[](size_t r, size_t c) -> T& {
         assert(r < getRow() && c < getCol());
         return *data_ptr(r, c);
     }
 
     template<tparams>
-    __device__ auto device_obj<Array2D>::operator()(size_t r, size_t c) const -> const T& {
-        return const_cast<This&>(*this).operator()(r, c);
+    __device__ auto device_obj<Array2D>::operator[](size_t r, size_t c) const -> const T& {
+        return const_cast<This&>(*this).operator[](r, c);
     }
 
     template<tparams>

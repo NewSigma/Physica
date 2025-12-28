@@ -97,9 +97,9 @@ namespace Physica {
                 for (size_t j = 0; j < size; ++j) {
                     bool isDegenerate = scalarNear(eigenvalues.calc_value(i), eigenvalues.calc_value(j), threshold);
                     if (isDegenerate)
-                        transGrads(i, j) = 0;
+                        transGrads[i, j] = 0;
                     else
-                        transGrads(i, j) /= (eigenvalues.calc_value(j) - eigenvalues.calc_value(i));
+                        transGrads[i, j] /= (eigenvalues.calc_value(j) - eigenvalues.calc_value(i));
                 }
             }
             eigenvectors.values() = std::move(basis);

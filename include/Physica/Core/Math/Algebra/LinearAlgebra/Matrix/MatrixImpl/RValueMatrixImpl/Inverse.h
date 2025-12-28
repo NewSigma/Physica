@@ -59,7 +59,7 @@ namespace Physica {
         using M1 = std::remove_cvref_t<decltype(target)>;
         constexpr size_t Order = std::max(M::RowAtCompile, M1::RowAtCompile);
         if constexpr (Order == 1)
-            target = reciprocal(mat(0, 0));
+            target = reciprocal(mat[0, 0]);
         else if constexpr (Order == 2)
             assign2D(target);
         else if constexpr (Order == 3)
@@ -74,36 +74,36 @@ namespace Physica {
 
     template<Matrix M>
     void Inverse<M>::assign2D(Matrix auto& target) const {
-        target(0, 0) = mat(1, 1);
-        target(0, 1) = -mat(0, 1);
-        target(1, 0) = -mat(1, 0);
-        target(1, 1) = mat(0, 0);
+        target[0, 0] = mat[1, 1];
+        target[0, 1] = -mat[0, 1];
+        target[1, 0] = -mat[1, 0];
+        target[1, 1] = mat[0, 0];
         target *= reciprocal(mat.det());
     }
 
     template<Matrix M>
     void Inverse<M>::assign3D(Matrix auto& target) const {
         if constexpr (MatrixOption::isRowMatrix<decltype(target)>()) {
-            target(0, 0) = (mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1));
-            target(0, 1) = (mat(2, 1) * mat(0, 2) - mat(0, 1) * mat(2, 2));
-            target(0, 2) = (mat(0, 1) * mat(1, 2) - mat(1, 1) * mat(0, 2));
-            target(1, 0) = (mat(2, 0) * mat(1, 2) - mat(1, 0) * mat(2, 2));
-            target(1, 1) = (mat(0, 0) * mat(2, 2) - mat(2, 0) * mat(0, 2));
-            target(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2));
-            target(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1));
-            target(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1));
-            target(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1));
+            target[0, 0] = (mat[1, 1] * mat[2, 2] - mat[1, 2] * mat[2, 1]);
+            target[0, 1] = (mat[2, 1] * mat[0, 2] - mat[0, 1] * mat[2, 2]);
+            target[0, 2] = (mat[0, 1] * mat[1, 2] - mat[1, 1] * mat[0, 2]);
+            target[1, 0] = (mat[2, 0] * mat[1, 2] - mat[1, 0] * mat[2, 2]);
+            target[1, 1] = (mat[0, 0] * mat[2, 2] - mat[2, 0] * mat[0, 2]);
+            target[1, 2] = (mat[1, 0] * mat[0, 2] - mat[0, 0] * mat[1, 2]);
+            target[2, 0] = (mat[1, 0] * mat[2, 1] - mat[2, 0] * mat[1, 1]);
+            target[2, 1] = (mat[2, 0] * mat[0, 1] - mat[0, 0] * mat[2, 1]);
+            target[2, 2] = (mat[0, 0] * mat[1, 1] - mat[1, 0] * mat[0, 1]);
         }
         else {
-            target(0, 0) = (mat(1, 1) * mat(2, 2) - mat(1, 2) * mat(2, 1));
-            target(1, 0) = (mat(2, 0) * mat(1, 2) - mat(1, 0) * mat(2, 2));
-            target(2, 0) = (mat(1, 0) * mat(2, 1) - mat(2, 0) * mat(1, 1));
-            target(0, 1) = (mat(2, 1) * mat(0, 2) - mat(0, 1) * mat(2, 2));
-            target(1, 1) = (mat(0, 0) * mat(2, 2) - mat(2, 0) * mat(0, 2));
-            target(2, 1) = (mat(2, 0) * mat(0, 1) - mat(0, 0) * mat(2, 1));
-            target(0, 2) = (mat(0, 1) * mat(1, 2) - mat(1, 1) * mat(0, 2));
-            target(1, 2) = (mat(1, 0) * mat(0, 2) - mat(0, 0) * mat(1, 2));
-            target(2, 2) = (mat(0, 0) * mat(1, 1) - mat(1, 0) * mat(0, 1));
+            target[0, 0] = (mat[1, 1] * mat[2, 2] - mat[1, 2] * mat[2, 1]);
+            target[1, 0] = (mat[2, 0] * mat[1, 2] - mat[1, 0] * mat[2, 2]);
+            target[2, 0] = (mat[1, 0] * mat[2, 1] - mat[2, 0] * mat[1, 1]);
+            target[0, 1] = (mat[2, 1] * mat[0, 2] - mat[0, 1] * mat[2, 2]);
+            target[1, 1] = (mat[0, 0] * mat[2, 2] - mat[2, 0] * mat[0, 2]);
+            target[2, 1] = (mat[2, 0] * mat[0, 1] - mat[0, 0] * mat[2, 1]);
+            target[0, 2] = (mat[0, 1] * mat[1, 2] - mat[1, 1] * mat[0, 2]);
+            target[1, 2] = (mat[1, 0] * mat[0, 2] - mat[0, 0] * mat[1, 2]);
+            target[2, 2] = (mat[0, 0] * mat[1, 1] - mat[1, 0] * mat[0, 1]);
         }
         target *= reciprocal(mat.det());
     }

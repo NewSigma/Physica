@@ -143,7 +143,7 @@ namespace Physica {
     void DQMC<T>::metropolis(int site, int split, Tr prob) {
         const bool accept = prob < kinetic.calcP(site, split, params->getAlpha());
         if (accept) {
-            const Tr x = Tr(2) * params->getAlpha() * getAuxField()(site, split);
+            const Tr x = Tr(2) * params->getAlpha() * getAuxField()[site, split];
             const Vector2D<Tr> arr = exp(Vector2D<Tr>{-x, x});
             productor.single_flip(site, split, arr);
             kinetic.single_flip(site, split, params->getAlpha());

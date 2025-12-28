@@ -31,7 +31,7 @@ int main() {
         decomp -= answer;
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                if (decomp(i, j) > 0.001)
+                if (decomp[i, j] > 0.001)
                     return 1;
     }
     {
@@ -43,7 +43,7 @@ int main() {
         decomp -= answer;
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                if (decomp(i, j) > 0.001)
+                if (decomp[i, j] > 0.001)
                     return 1;
     }
     {
@@ -65,7 +65,7 @@ int main() {
         const Matrix5x5 result = Cholesky(mat);
         for (int i = 0; i < 5; ++i)
             for (int j = 0; j < 5; ++j)
-                if (!scalarNear(result(i, j), answer(j, i), 1E-5))
+                if (!scalarNear(result[i, j], answer[j, i], 1E-5))
                     return 1;
     }
     return 0;

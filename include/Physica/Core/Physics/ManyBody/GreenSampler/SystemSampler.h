@@ -112,8 +112,8 @@ namespace Physica {
             const int kY = FFT<T, 1>::rSizeToKSize(getNumSiteY());
             for (int x = 0; x < kX; ++x)
                 for (int y = 0; y < kY; ++y)
-                    if (result(x, y) < square(T(std::numeric_limits<T>::epsilon())))
-                        result(x, y) = 0;
+                    if (result[x, y] < square(T(std::numeric_limits<T>::epsilon())))
+                        result[x, y] = 0;
         }
         return result;
     }
@@ -145,7 +145,7 @@ namespace Physica {
                 for (int y = 0; y < getNumSiteY(); ++y) {
                     const auto indexB = indexA.shift(0, x, getNumSiteX()).shift(1, y, getNumSiteY());
                     const size_t siteB = lattice.toIndex1D(indexB);
-                    result(x, y).toNextMean(siteA, calcCorr(greenU, siteA, greenD, siteB));
+                    result[x, y].toNextMean(siteA, calcCorr(greenU, siteA, greenD, siteB));
                 }
             }
         }

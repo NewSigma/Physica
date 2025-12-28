@@ -127,10 +127,10 @@ namespace Physica {
         bool diagSite = rowSite == colSite;
         if (diagFreq) {
             Tr re = 0, im = 0;
-            re = params.getHoppingMatrix()(rowSite, colSite) * params.getBeta();
+            re = params.getHoppingMatrix()[rowSite, colSite] * params.getBeta();
             if (diagSite) {
                 const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
-                re += auxField(0, rowSite).real() - shift;
+                re += auxField[0, rowSite].real() - shift;
                 im = matsubara.diag()[rowFreq];
             }
             return T(re, im);
@@ -139,9 +139,9 @@ namespace Physica {
         if (diagSite) {
             T aux;
             if (rowFreq > colFreq)
-                aux = auxField(rowFreq - colFreq, rowSite);
+                aux = auxField[rowFreq - colFreq, rowSite];
             else
-                aux = auxField(colFreq - rowFreq, rowSite).conjugate();
+                aux = auxField[colFreq - rowFreq, rowSite].conjugate();
             return aux;
         }
         return 0;
@@ -172,7 +172,7 @@ namespace Physica {
         result.imag() += shifts[std::uniform_int_distribution<int>(0, 2)(R::getInstance())];
         if (freq != 0)
             result /= sqrt(Trv(2));
-        return std::exchange(auxField(freq, site), result);
+        return std::exchange(auxField[freq, site], result);
     }
 }
 

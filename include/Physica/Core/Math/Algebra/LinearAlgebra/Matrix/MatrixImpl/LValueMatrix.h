@@ -83,10 +83,10 @@ namespace Physica {
         void operator-=(const Matrix auto& m);
         void operator*=(const Matrix auto& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
 
-        [[nodiscard]] RefTy operator()(size_t row, size_t col);
-        [[nodiscard]] ConstRefTy operator()(size_t row, size_t col) const;
+        [[nodiscard]] RefTy operator[](size_t row, size_t col);
+        [[nodiscard]] ConstRefTy operator[](size_t row, size_t col) const;
         /* Operations */
-        [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
+        [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator[](row, col); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;

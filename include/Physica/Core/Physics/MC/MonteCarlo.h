@@ -64,7 +64,7 @@ namespace Physica {
     void MonteCarlo<T, Dim>::nvt_step(const auto& forceModel) {
         for (size_t i = 0; i < cell.getNumParticle(); ++i) {
             for (unsigned int j = 0; j < Dim; ++j)
-                buffer(i, j) = cell.getPos()(i, j) + T::template random_uniform<R>();
+                buffer[i, j] = cell.getPos()(i, j) + T::template random_uniform<R>();
         }
         cell.swapPos(buffer);
 

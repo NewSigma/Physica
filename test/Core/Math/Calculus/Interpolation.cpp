@@ -68,7 +68,7 @@ namespace {
                 auto indices1 = indices;
                 for (auto& id : indices1)
                     id *= 2;
-                if (!scalarNear(data.asArray()[i], result(indices1), 1E-8))
+                if (!scalarNear(data.asArray()[i], result[indices1], 1E-8))
                     exit(EXIT_FAILURE);
             }
         }

@@ -26,7 +26,7 @@ namespace {
         if (m.getRow() != m.getCol())
             return false;
         for (size_t i = 0; i < m.getRow() - 1; ++i) {
-            if (m(i + 1, i).isZero()) {
+            if (m[i + 1, i].isZero()) {
                 auto col = m.col(i);
                 if (!col.tail(i + 1).isZeros())
                     return false;

@@ -99,19 +99,19 @@ namespace Physica {
             auto p = buffer.head(order - i - 1);
             const RealType norm = temp.householder(p);
             for (size_t j = 0; j < p.getLength(); ++j)
-                working(i, i + j + 1) = p[j].conjugate();
+                working[i, i + j + 1] = p[j].conjugate();
             normBuffer[i] = -norm * factor;
 
             if (!norm.isZero()) {
-                const T factor = working(i, i + 1);
-                working(i, i + 1) = T(1);
+                const T factor = working[i, i + 1];
+                working[i, i + 1] = T(1);
                 auto corner = working.bottomRightCorner(i + 1);
                 p = factor * (corner * temp);
                 p -= (p.conjugate() * temp * factor * T(0.5)) * temp;
                 for (size_t r = 0; r < corner.getRow(); ++r)
                     for (size_t c = r; c < corner.getCol(); ++c)
-                        working(r + i + 1, c + i + 1) -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * T(p[r]);
-                working(i, i + 1) = factor;
+                        working[r + i + 1, c + i + 1] -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * T(p[r]);
+                working[i, i + 1] = factor;
             }
         }
     }
@@ -161,20 +161,20 @@ namespace Physica {
     void TridiagonalMatrixT<T, Order>::assign(Matrix auto& target) const {
         const size_t order = getRow();
         target = RealType(0);
-        target(0, 0) = tri.working.calc(0, 0);
-        target(1, 0) = tri.normBuffer[0];
+        target[0, 0] = tri.working.calc(0, 0);
+        target[1, 0] = tri.normBuffer[0];
         size_t i = 1;
         for (; i < order - 2; ++i) {
-            target(i - 1, i) = target(i, i - 1).conjugate();
-            target(i, i) = tri.working.calc(i, i);
-            target(i + 1, i) = tri.normBuffer[i];
+            target[i - 1, i] = target[i, i - 1].conjugate();
+            target[i, i] = tri.working.calc(i, i);
+            target[i + 1, i] = tri.normBuffer[i];
         }
-        target(i - 1, i) = target(i, i - 1).conjugate();
-        target(i, i) = tri.working.calc(i, i);
-        target(i + 1, i) = tri.working.calc(i + 1, i);
+        target[i - 1, i] = target[i, i - 1].conjugate();
+        target[i, i] = tri.working.calc(i, i);
+        target[i + 1, i] = tri.working.calc(i + 1, i);
         ++i;
-        target(i - 1, i) = target(i, i - 1).conjugate();
-        target(i, i) = tri.working.calc(i, i);
+        target[i - 1, i] = target[i, i - 1].conjugate();
+        target[i, i] = tri.working.calc(i, i);
     }
 }
 

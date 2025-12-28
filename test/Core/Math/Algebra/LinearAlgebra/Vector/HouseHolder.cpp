@@ -110,12 +110,12 @@ static void complexApplyTest() noexcept {
     MatrixType m2 = m;
     applyHouseholder(v, m2);
 
-    if (!scalarNear(m1(0, 0).norm(), norm, 1E-15))
+    if (!scalarNear(m1[0, 0].norm(), norm, 1E-15))
         exit(EXIT_FAILURE);
-    if (!scalarNear(m1(1, 0).norm(), T(0), 1E-14))
+    if (!scalarNear(m1[1, 0].norm(), T(0), 1E-14))
         exit(EXIT_FAILURE);
 
-    m1(1, 0) = m2(1, 0) = T(0);
+    m1[1, 0] = m2[1, 0] = T(0);
     if (!matrixNear(m1, m2, 1E-14))
         exit(EXIT_FAILURE);
     /* Idempotency */ {

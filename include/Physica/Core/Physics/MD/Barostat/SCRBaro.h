@@ -93,15 +93,15 @@ namespace Physica {
             result = (rand + rand.transpose()) * (diffuseFactor * T(0.5));
         }
         else if constexpr (Type == BaroType::XY) {
-            result(0, 0) = T::template random_normal<R>();
-            result(1, 1) = T::template random_normal<R>();
-            result(0, 1) = result(1, 0) = T::template random_normal<R>() * T(M_SQRT1_2);
+            result[0, 0] = T::template random_normal<R>();
+            result[1, 1] = T::template random_normal<R>();
+            result[0, 1] = result[1, 0] = T::template random_normal<R>() * T(M_SQRT1_2);
             auto corner = result.topLeftCorner(2);
             corner *= diffuseFactor;
         }
         else {
             static_assert(Type == BaroType::Z, "[Error]: Not implemented");
-            result(2, 2) = T::template random_normal<R>() * diffuseFactor;
+            result[2, 2] = T::template random_normal<R>() * diffuseFactor;
         }
         return result;
     }

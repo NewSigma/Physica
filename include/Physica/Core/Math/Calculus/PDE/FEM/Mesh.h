@@ -42,7 +42,7 @@ namespace Physica {
         Mesh(Mesh&&) noexcept = default;
         ~Mesh() = default;
         /* Operators */
-        Mesh& operator=(Mesh mesh) noexcept;
+        Mesh& operator=(Mesh obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] ScalarType operator()(VectorType p) const;
         /* Operations */
         void addDirichletBoundary(std::invocable<VectorType> auto detector, std::invocable<VectorType> auto conditioner);

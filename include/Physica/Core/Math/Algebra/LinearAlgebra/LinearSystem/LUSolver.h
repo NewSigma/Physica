@@ -70,11 +70,11 @@ namespace Physica {
         }
 
         for (size_t i = order - 1; i > 0; --i) {
-            result[i] /= working(i, i);
+            result[i] /= working[i, i];
             auto top = working.topRows(i);
             result.head(i) -= top.col(i) * result[i];
         }
-        result[0] /= working(0, 0);
+        result[0] /= working[0, 0];
         return result;
     }
 

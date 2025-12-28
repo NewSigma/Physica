@@ -145,19 +145,20 @@ namespace Physica {
     template<Scalar T>
     T PhononDOS<T>::calcElemDOS(T freq, size_t band, Index3D index) const {
         const Index3D shape = eigenvalues.getShape();
-        Index3D index1{};
+        Index3D x = index;
+        Index3D y{};
         for (unsigned int i = 0; i < Dim; ++i)
-            index1[i] = (index[i] + 1) % shape[i];
+            y[i] = (y[i] + 1) % shape[i];
 
         CoeffVector cornerFreq{};
-        cornerFreq[0] = eigenvalues(index)[band];
-        cornerFreq[1] = eigenvalues(index[0], index[1], index1[2])[band];
-        cornerFreq[2] = eigenvalues(index[0], index1[1], index[2])[band];
-        cornerFreq[3] = eigenvalues(index[0], index1[1], index1[2])[band];
-        cornerFreq[4] = eigenvalues(index1[0], index[1], index[2])[band];
-        cornerFreq[5] = eigenvalues(index1[0], index[1], index1[2])[band];
-        cornerFreq[6] = eigenvalues(index1[0], index1[1], index[2])[band];
-        cornerFreq[7] = eigenvalues(index1)[band];
+        cornerFreq[0] = eigenvalues[x][band];
+        cornerFreq[1] = eigenvalues[x[0], x[1], y[2]][band];
+        cornerFreq[2] = eigenvalues[x[0], y[1], x[2]][band];
+        cornerFreq[3] = eigenvalues[x[0], y[1], y[2]][band];
+        cornerFreq[4] = eigenvalues[y[0], x[1], x[2]][band];
+        cornerFreq[5] = eigenvalues[y[0], x[1], y[2]][band];
+        cornerFreq[6] = eigenvalues[y[0], y[1], x[2]][band];
+        cornerFreq[7] = eigenvalues[y][band];
 
         const Vector4D<T> plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - cornerFreq.mean()};
         const auto head = plane.head(3);

@@ -83,18 +83,18 @@ namespace Physica {
     T GreenSampler<T>::calcDensityCorr(const MatrixND<T>& green, int siteA, int siteB) const noexcept {
         assert(siteA < getNumSite());
         assert(siteB < getNumSite());
-        T rhoA = Trv(1) - green(siteA, siteA);
+        T rhoA = Trv(1) - green[siteA, siteA];
         if (siteA == siteB)
             return rhoA;
 
-        T rhoB = Trv(1) - green(siteB, siteB);
-        return rhoA * rhoB - green(siteA, siteB) * green(siteB, siteA);
+        T rhoB = Trv(1) - green[siteB, siteB];
+        return rhoA * rhoB - green[siteA, siteB] * green[siteB, siteA];
     }
 
     template<Scalar T>
     T GreenSampler<T>::calcDensityCorr(const MatrixND<T>& greenA, int siteA, const MatrixND<T>& greenB, int siteB) const noexcept {
         assert(siteA < getNumSite());
         assert(siteB < getNumSite());
-        return (Trv(1) - greenA(siteA, siteA)) * (Trv(1) - greenB(siteB, siteB));
+        return (Trv(1) - greenA[siteA, siteA]) * (Trv(1) - greenB[siteB, siteB]);
     }
 }

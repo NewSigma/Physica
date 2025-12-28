@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
         rpmd.fire_pstep<BaroType::XY, Sequential>(fire, kineticModel, forceModel);
         f2norm[i] = fire.getForceNorm();
         //const auto virial = forceModel.virial(rpmd.phaseToCell(0));
-        //press[i] = abs(virial(0, 0) + virial(1, 1)) * ScalarType(0.5);
+        //press[i] = abs(virial[0, 0] + virial[1, 1]) * ScalarType(0.5);
         press[i] = fire.getNormLattF();
     }
 

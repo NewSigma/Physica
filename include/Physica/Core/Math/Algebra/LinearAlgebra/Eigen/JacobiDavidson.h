@@ -145,7 +145,7 @@ namespace Physica {
                 const bool isGoodInitial = numSearchDim == 1;
                 if (isGoodInitial) {
                     eigenvector = searchSpace.col(0);
-                    eigenvalue = searchSpaceProj(0, 0);
+                    eigenvalue = searchSpaceProj[0, 0];
                     residule = searchSpace.asArray()[1];
                     squaredRes = residule.squaredNorm();
                     eigenGoal = eigenvalue;
@@ -281,7 +281,7 @@ namespace Physica {
 
             const auto dot = dotSpace.col(0);
             auto buffer = searchSpace.col(1);
-            buffer = dot - searchSpaceProj(0, 0) * col;
+            buffer = dot - searchSpaceProj[0, 0] * col;
             const Tr squaredRes = buffer.squaredNorm();
             const bool isGoodInitial = squaredRes < Tr(NearConvergeThreshold);
             if (isGoodInitial)
@@ -335,7 +335,7 @@ namespace Physica {
                 auto row = searchSpaceProj.row(i);
                 auto head2 = row.head(i);
                 head2 = head1.conjugate();
-                searchSpaceProj(i, i) = new_dot.conjugate() * new_direction;
+                searchSpaceProj[i, i] = new_dot.conjugate() * new_direction;
             }
             /* Fill dotSpaceProj */ {
                 auto leftCols = dotSpace.leftCols(i);
@@ -345,12 +345,12 @@ namespace Physica {
                 auto row = dotSpaceProj.row(i);
                 auto head2 = row.head(i);
                 head2 = head1.conjugate();
-                dotSpaceProj(i, i) = new_dot.squaredNorm();
+                dotSpaceProj[i, i] = new_dot.squaredNorm();
             }
         }
         else {
-            searchSpaceProj(0, 0) = new_dot.conjugate() * new_direction;
-            dotSpaceProj(0, 0) = new_dot.squaredNorm();
+            searchSpaceProj[0, 0] = new_dot.conjugate() * new_direction;
+            dotSpaceProj[0, 0] = new_dot.squaredNorm();
         }
     }
 

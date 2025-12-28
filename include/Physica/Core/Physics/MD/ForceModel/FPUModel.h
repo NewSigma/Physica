@@ -77,7 +77,7 @@ namespace Physica {
         }
         else {
             /* First */ {
-                const T delta = pos(0, 0) - springLength;
+                const T delta = pos[0, 0] - springLength;
                 const T delta2 = square(delta);
                 result[0] = -delta - delta * delta2;
             }
@@ -89,7 +89,7 @@ namespace Physica {
                 result[i + 1] -= f;
             }
             /* Last */ {
-                const T delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
+                const T delta = cell.getLattice()[0, 0] - pos(numParticle - 1, 0) - springLength;
                 const T delta2 = square(delta);
                 result[numParticle - 1] += delta + delta * delta2;
             }
@@ -111,7 +111,7 @@ namespace Physica {
         }
         else {
             /* First */ {
-                const T delta = pos(0, 0) - springLength;
+                const T delta = pos[0, 0] - springLength;
                 const T delta2 = square(delta);
                 energy = delta2 * 0.5 + square(delta2) * 0.25;
             }
@@ -121,7 +121,7 @@ namespace Physica {
                 energy += delta2 * 0.5 + square(delta2) * 0.25;
             }
             /* Last */ {
-                const T delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
+                const T delta = cell.getLattice()[0, 0] - pos(numParticle - 1, 0) - springLength;
                 const T delta2 = square(delta);
                 energy += delta2 * 0.5 + square(delta2) * 0.25;
             }
@@ -146,7 +146,7 @@ namespace Physica {
         }
         else {
             /* First */ {
-                const T r = pos(0, 0);
+                const T r = pos[0, 0];
                 const T delta = r - springLength;
                 const T delta2 = square(delta);
                 const T f = -delta - delta * delta2;
@@ -160,7 +160,7 @@ namespace Physica {
                 result += r * f;
             }
             /* Last */ {
-                const T r = cell.getLattice()(0, 0) - pos(numParticle - 1, 0);
+                const T r = cell.getLattice()[0, 0] - pos(numParticle - 1, 0);
                 const T delta = r - springLength;
                 const T delta2 = square(delta);
                 const T f = -delta - delta * delta2;

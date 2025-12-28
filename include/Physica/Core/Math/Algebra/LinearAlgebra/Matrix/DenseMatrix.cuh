@@ -51,7 +51,7 @@ namespace Physica {
         /* Operators */
         This& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Storage::operator();
+        using Storage::operator[];
         /* Operations */
         __host__ __device__ void resize(const Matrix auto& m);
         using Storage::resize;

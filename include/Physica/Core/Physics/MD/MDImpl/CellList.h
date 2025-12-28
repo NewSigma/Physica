@@ -105,7 +105,7 @@ namespace Physica {
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const Index3D index = posToIndex(i);
             atomCellMap[i] = index;
-            cellGrid(index).push_front(i);
+            cellGrid[index].push_front(i);
         }
         {
             size_t cellAtomMapIndex = 0;
@@ -140,7 +140,7 @@ namespace Physica {
         for (size_t i = 0; i < getNumParticle(); ++i) {
             const Index3D index = posToIndex(i);
             atomCellMap[i] = index;
-            cellGrid(index).push_front(i);
+            cellGrid[index].push_front(i);
         }
         {
             size_t cellAtomMapIndex = 0;
@@ -257,15 +257,15 @@ namespace Physica {
 
     template<Scalar T>
     Index3D CellList<T>::posToIndex(size_t atomId) const {
-        const T x0 = abs(directPos(atomId, 0) - T(std::numeric_limits<T>::epsilon()));
-        const T y0 = abs(directPos(atomId, 1) - T(std::numeric_limits<T>::epsilon()));
-        const T z0 = abs(directPos(atomId, 2) - T(std::numeric_limits<T>::epsilon()));
+        const T x0 = abs(directPos[atomId, 0] - T(std::numeric_limits<T>::epsilon()));
+        const T y0 = abs(directPos[atomId, 1] - T(std::numeric_limits<T>::epsilon()));
+        const T z0 = abs(directPos[atomId, 2] - T(std::numeric_limits<T>::epsilon()));
         assert(T(0) <= x0 && x0 <= T(1));
         assert(T(0) <= y0 && y0 <= T(1));
         assert(T(0) <= z0 && z0 <= T(1));
-        const size_t x = size_t(double(x0 * T(getCellGridDimX())));
-        const size_t y = size_t(double(y0 * T(getCellGridDimY())));
-        const size_t z = size_t(double(z0 * T(getCellGridDimZ())));
+        const auto x = size_t(double(x0 * T(getCellGridDimX())));
+        const auto y = size_t(double(y0 * T(getCellGridDimY())));
+        const auto z = size_t(double(z0 * T(getCellGridDimZ())));
         return {x, y, z};
     }
 

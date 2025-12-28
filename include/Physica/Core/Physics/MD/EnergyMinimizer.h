@@ -85,14 +85,14 @@ namespace Physica {
     template<ExecutePolicy P>
     void EnergyMinimizer<T, Dim>::pre_lattice2D_step(const auto& model, auto& optimizer, T diffStep) {
         assert(cell.getLattice()(0, 1).isZero());
-        assert(cell.getLattice()(0, 2).isZero());
-        assert(cell.getLattice()(1, 2).isZero());
-        assert(cell.getLattice()(2, 0).isZero());
-        assert(cell.getLattice()(2, 1).isZero());
+        assert(cell.getLattice()[0, 2].isZero());
+        assert(cell.getLattice()[1, 2].isZero());
+        assert(cell.getLattice()[2, 0].isZero());
+        assert(cell.getLattice()[2, 1].isZero());
         const auto func = makeLattice2DStepFunc(model);
         const auto grad = makeLattice2DStepGrad(model, diffStep);
         const auto& lattice = cell.getLattice();
-        optimizer.init({lattice(0, 0), lattice(1, 0), lattice(1, 1)}, func, grad);
+        optimizer.init({lattice[0, 0], lattice[1, 0], lattice[1, 1]}, func, grad);
     }
 
     template<Scalar T, unsigned int Dim>
@@ -105,9 +105,9 @@ namespace Physica {
 
         LatticeMatrix lattice = cell.getLattice();
         const auto& argX = optimizer.getArgX();
-        lattice(0, 0) = argX[0];
-        lattice(1, 0) = argX[1];
-        lattice(1, 1) = argX[2];
+        lattice[0, 0] = argX[0];
+        lattice[1, 0] = argX[1];
+        lattice[1, 1] = argX[2];
         cell.setLattice(lattice);
     }
 
@@ -140,9 +140,9 @@ namespace Physica {
     auto EnergyMinimizer<T, Dim>::makeLattice2DStepFunc(const auto& forceModel) {
         const auto func = [this, &forceModel](const VectorType& v) -> T {
             LatticeMatrix lattice = cell.getLattice();
-            lattice(0, 0) = v[0];
-            lattice(1, 0) = v[1];
-            lattice(1, 1) = v[2];
+            lattice[0, 0] = v[0];
+            lattice[1, 0] = v[1];
+            lattice[1, 1] = v[2];
             const auto temp = MDCellType(std::move(lattice), cell.getPos(), cell.getMassVec());
             return forceModel.potentialV(temp);
         };

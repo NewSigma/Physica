@@ -126,7 +126,7 @@ namespace Physica {
                 for (size_t col = 0; col < unitCellDOF; ++col) {
                     for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
                         auto& fcMatrix = fcMatrixes[i];
-                        kSpace[i] = fcMatrix(row, col);
+                        kSpace[i] = fcMatrix[row, col];
                     }
                     fft.invTransform();
 
@@ -144,7 +144,7 @@ namespace Physica {
 
                     for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
                         auto& fcMatrix = fcMatrixes[i];
-                        fcMatrix(row, col) = kSpace[i];
+                        fcMatrix[row, col] = kSpace[i];
                     }
                 }
             }
@@ -224,12 +224,12 @@ namespace Physica {
         for (size_t major = 0; major < unitCellDOF; ++major) {
             for (size_t minor = 0; minor < unitCellDOF; ++minor) {
                 fft.getRSpace().forND([major, minor, &rSpaceGrid](T& elem, Index3D index) {
-                    elem = rSpaceGrid(index).calcFromMajorMinor(major, minor);
+                    elem = rSpaceGrid[index].calcFromMajorMinor(major, minor);
                 });
                 fft.transform();
 
                 fft.getKSpace().forND([major, minor, &kSpaceGrid](const Tc& elem, Index3D index) {
-                    kSpaceGrid(index).refFromMajorMinor(major, minor) = elem;
+                    kSpaceGrid[index].refFromMajorMinor(major, minor) = elem;
                 });
             }
         }
@@ -246,7 +246,7 @@ namespace Physica {
             for (size_t minor = major; minor < unitCellDOF; ++minor) {
                 auto& kSpace = fft.getKSpace();
                 kSpace.forND([major, minor, &forceConstants](Tc& elem, Index3D index) {
-                    elem = forceConstants(index).calcFromMajorMinor(major, minor);
+                    elem = forceConstants[index].calcFromMajorMinor(major, minor);
                 });
                 fft.invTransform();
 
@@ -322,7 +322,7 @@ namespace Physica {
                 const size_t atom2 = col / Dim;
                 const T mass2 = unitCell.getMass(atom2);
                 const T repMass = reciprocal(sqrt(mass1 * mass2));
-                forceConstant(row, col) *= repMass;
+                forceConstant[row, col] *= repMass;
             }
         }
     }
@@ -341,7 +341,7 @@ namespace Physica {
 
                 for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
                     auto& fcMatrix = fcMatrixes[i];
-                    fcMatrix(row, col) *= repMass;
+                    fcMatrix[row, col] *= repMass;
                 }
             }
         }

@@ -120,7 +120,7 @@ namespace Physica {
         for (size_t i = 0; i < result.getLength(); ++i) {
             const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);
             const Index3D cellIndex{index5D[0], index5D[1], index5D[2]};
-            result[i] = fcGrid(cellIndex).calcFromMajorMinor(index5D[3], index5D[4]);
+            result[i] = fcGrid[cellIndex].calcFromMajorMinor(index5D[3], index5D[4]);
         }
         return result;
     }
@@ -133,7 +133,7 @@ namespace Physica {
         for (size_t i = 0; i < fcVector.getLength(); ++i) {
             const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);
             const Index3D cellIndex{index5D[0], index5D[1], index5D[2]};
-            fcGrid(cellIndex).refFromMajorMinor(index5D[3], index5D[4]) = fcVector[i];
+            fcGrid[cellIndex].refFromMajorMinor(index5D[3], index5D[4]) = fcVector[i];
         }
     }
 

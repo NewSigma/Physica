@@ -111,15 +111,15 @@ namespace Physica {
     void DenseLU<T, Pivot>::decomp_col(size_t col) {
         const size_t alpha = col + 1;
         for (size_t j = 1; j < alpha; ++j)
-            working(j, col) -= working.row(j).head(j) * working.col(col).head(j);
+            working[j, col] -= working.row(j).head(j) * working.col(col).head(j);
 
-        const T factor = reciprocal(working(col, col));
+        const T factor = reciprocal(working[col, col]);
         if (col == 0)
             working.col(0).tail(alpha) *= factor;
         else {
             const size_t r = working.getRow();
             for (size_t j = alpha; j < r; ++j)
-                working(j, col) = (working(j, col) - working.row(j).head(col) * working.col(col).head(col)) * factor;
+                working[j, col] = (working[j, col] - working.row(j).head(col) * working.col(col).head(col)) * factor;
         }
     }
 }

@@ -52,7 +52,7 @@ MDCellType makeSystem(ScalarType latticeSize) {
 
     MDCellType::PositionMatrix pos(numMolecular, 1);
     for (size_t i = 0; i < numMolecular; ++i)
-        pos(i, 0) = latticeSize * ScalarType(i + 1) / ScalarType(numMolecular + 1);
+        pos[i, 0] = latticeSize * ScalarType(i + 1) / ScalarType(numMolecular + 1);
 
     MDCellType::MassVector massVec(numMolecular);
     for (size_t i = 0; i < numMolecular; ++i) {
@@ -75,7 +75,7 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
         for (size_t i = 0; i < numStep; ++i) {
             rpmd.nvt_step<RandomSource, Sequential>(
                     thermo, kineticModel, forceModel);
-           temp.toNextMean(i, rpmd.makeStressClassical<Sequential>(forceModel)(0, 0));
+           temp.toNextMean(i, rpmd.makeStressClassical<Sequential>(forceModel)[0, 0]);
         }
         variance.toNextVariance(mean, sys, temp);
     }

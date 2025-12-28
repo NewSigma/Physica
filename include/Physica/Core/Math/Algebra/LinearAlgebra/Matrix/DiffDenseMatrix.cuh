@@ -59,7 +59,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Base::operator();
+        using Base::operator[];
         /* Operations */
         void zero_grad();
 

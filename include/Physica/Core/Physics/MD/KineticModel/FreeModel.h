@@ -111,7 +111,7 @@ namespace Physica {
             auto& phase = ringPolymer.asMatrix();
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
-                phase(i + dof, 0) += phase(i, 0) * deltaT / mass;
+                phase[i + dof, 0] += phase[i, 0] * deltaT / mass;
             }
         }
     }
@@ -165,7 +165,7 @@ namespace Physica {
         const auto mass = massVec[id_dof / Dim];
         ringPolymer.toNormalRepr(id_dof, input);
         /* Translational mode */ {
-            buffer(1, 0) = buffer(1, 0) + buffer(0, 0) * (lastTimeStep / mass);
+            buffer[1, 0] = buffer[1, 0] + buffer[0, 0] * (lastTimeStep / mass);
         }
         for (size_t j = 1; j < kSpaceSize; ++j) {
             auto col = buffer.col(j);

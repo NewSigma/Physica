@@ -78,7 +78,7 @@ namespace Physica {
                 for (size_t j = 1; j < buffer.getCol(); ++j) {
                     const T phase = M_PI * j / numReplica;
                     const T viscosityY = sin(phase) * omegaW;
-                    Langevin<T, Dim>::langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
+                    Langevin<T, Dim>::langevinImpl(buffer[0, j], deltaT, viscosityY, factor, fft.getKSpace()[j]);
                 }
                 ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
             }, dof, 0).wait();
