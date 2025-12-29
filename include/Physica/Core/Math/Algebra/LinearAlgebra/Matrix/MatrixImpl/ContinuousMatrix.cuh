@@ -37,8 +37,10 @@ namespace Physica {
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
-        using RowVector = device_obj<ContinuousMatrixBlock<Derived, 1, ColAtCompile>>;
-        using ColVector = device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, 1>>;
+        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
+        constexpr static bool isColMatrix = MatrixOption::isColMatrix<Derived>();
+        using RowVector = std::conditional<isRowMatrix, device_obj<ContinuousMatrixBlock<Derived, 1, ColAtCompile>>, device_obj<LMatrixBlock<Derived, 1, ColAtCompile>>>::type;
+        using ColVector = std::conditional<isColMatrix, device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, 1>>, device_obj<LMatrixBlock<Derived, RowAtCompile, 1>>>::type;
         template<size_t Row>
         using RowBlock = device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>>;
         template<size_t Col>

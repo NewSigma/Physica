@@ -21,16 +21,17 @@
 using namespace Physica;
 using RandomSource = Random<MT19937, 10000>;
 
-int main() {
-    {
+namespace {
+    void hostDeviceCopy() {
         using MatrixType = DenseMatrix<float32>;
         const MatrixType A = MatrixType::random_uniform<RandomSource>(16, 16);
         const auto d_A = A.toDevice();
         const MatrixType B = d_A.toHost();
         if (A.asArray() != B.asArray())
-            return 1;
+            exit(EXIT_FAILURE);
     }
-    {
+
+    void deviceExprEval() {
         using MatrixType = DenseMatrix<float32, MatrixOption::Col>;
         using DeviceMatrix = MatrixType::device_obj_type;
         const MatrixType A = MatrixType::random_uniform<RandomSource>(3, 4);
@@ -43,7 +44,35 @@ int main() {
         CUDAContext::getInstance().wait();
         const auto result = d_result.toHost();
         if (!matrixNear(answer, result, 1E-6))
-            return 1;
+            exit(EXIT_FAILURE);
     }
+    /**
+     * A continuous matrix is continuous in either row or column.
+     */
+    void continuousRowCol() noexcept {
+        constexpr int Size = 8;
+        using T = float32;
+        auto& rng = RandomSource::getInstance();
+        int r = std::uniform_int_distribution<>(0, Size - 1)(rng);
+        int c = std::uniform_int_distribution<>(0, Size - 1)(rng);
+        {
+            using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Col>>;
+            const auto x = MatrixType(Size, Size);
+            if (x.data_ptr(r, c) != x.col(c).data() + r)
+                exit(EXIT_FAILURE);
+        }
+        {
+            using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Row>>;
+            const auto x = MatrixType(Size, Size);
+            if (x.data_ptr(r, c) != x.row(r).data() + c)
+                exit(EXIT_FAILURE);
+        }
+    }
+}
+
+int main() {
+    hostDeviceCopy();
+    deviceExprEval();
+    continuousRowCol();
     return 0;
 }
