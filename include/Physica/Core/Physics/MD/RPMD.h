@@ -141,10 +141,8 @@ namespace Physica {
         [[nodiscard]] const auto& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] T getVolume() const noexcept { return cell.getVolume(); }
-        [[nodiscard]] auto& getRingPolymer() noexcept { return ringPolymer; }
-        [[nodiscard]] const auto& getRingPolymer() const noexcept { return ringPolymer; }
-        [[nodiscard]] auto& getPhaseMatrix() noexcept { return ringPolymer.asMatrix(); }
-        [[nodiscard]] const auto& getPhaseMatrix() const noexcept { return ringPolymer.asMatrix(); }
+        [[nodiscard]] auto&& getRingPolymer(this auto&&) noexcept;
+        [[nodiscard]] auto&& getPhaseMatrix(this auto&&) noexcept;
         [[nodiscard]] size_t getDOF() const noexcept { return ringPolymer.getDOF(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return ringPolymer.getNumReplica(); }
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }

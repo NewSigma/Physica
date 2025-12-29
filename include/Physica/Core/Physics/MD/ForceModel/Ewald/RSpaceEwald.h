@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -80,17 +80,17 @@ namespace Physica {
         [[nodiscard]] BornChargeArray calcBornCharge() const { return makeBornCharge(charges); }
         void swap(RSpaceEwald& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
-        [[nodiscard]] const VectorND<T>& getCharges() const noexcept { return charges; }
+        [[nodiscard]] const auto& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] const auto& getRepLattice() const noexcept { return repLatt; }
+        [[nodiscard]] const auto& getCharges() const noexcept { return charges; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
         [[nodiscard]] T getVolume() const noexcept { return volume; }
         [[nodiscard]] T getInvVolume() const noexcept { return inv_volume; }
         [[nodiscard]] Tv getIntegralLimit() const noexcept { return integralLimit; }
         [[nodiscard]] T getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
         [[nodiscard]] T getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
-        [[nodiscard]] const SearchRangeType& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
-        [[nodiscard]] const SearchRangeType& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
+        [[nodiscard]] const auto& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
+        [[nodiscard]] const auto& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
         /* Setters */
         void setLattice(LatticeMatrix lattice_);
         void setIntegralLimit(Tv integralLimit_);

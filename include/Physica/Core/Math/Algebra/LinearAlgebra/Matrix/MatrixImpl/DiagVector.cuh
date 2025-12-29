@@ -39,9 +39,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
+        /* Operations */
+        [[nodiscard]] __device__ T calc(size_t index) const { return getExpr().calc(index, index); }
         /* Getters */
         [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat.getDerived(); }
-        [[nodiscard]] __device__ T calc(size_t index) const { return getExpr().calc(index, index); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow(); }
     };
 }

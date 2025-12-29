@@ -84,10 +84,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
-        [[nodiscard]] const auto& getWeights() const noexcept { return weights; }
-        [[nodiscard]] auto& getWeights() noexcept { return weights; }
-        [[nodiscard]] const auto& getBias() const noexcept requires(WithBias) { return bias; }
-        [[nodiscard]] auto& getBias() noexcept requires(WithBias) { return bias; }
+        [[nodiscard]] auto&& getWeights(this auto&&) noexcept;
+        [[nodiscard]] auto&& getBias(this auto&&) noexcept requires(WithBias);
         /* Friends */
         friend class LinearLayer<T, WithBias>;
     };
@@ -310,6 +308,16 @@ namespace Physica {
         weights.swap(obj.weights);
         if constexpr (WithBias)
             bias.swap(obj.bias);
+    }
+
+    template<Scalar T, bool WithBias>
+    auto&& device_obj<LinearLayer<T, WithBias>>::getWeights(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).weights;
+    }
+
+    template<Scalar T, bool WithBias>
+    auto&& device_obj<LinearLayer<T, WithBias>>::getBias(this auto&& self) noexcept requires(WithBias) {
+        return std::forward<decltype(self)>(self).bias;
     }
 
     template<Scalar T, bool WithBias>

@@ -59,9 +59,9 @@ namespace {
         T solve();
         int output();
         /* Getters */
-        T getVolume() const;
-        T getMinTangent() const;
-        T getLambda() const { return const3 / const2; }
+        [[nodiscard]] T getVolume() const;
+        [[nodiscard]] T getMinTangent() const;
+        [[nodiscard]] T getLambda() const { return const3 / const2; }
     private:
         void setLambda(const T& lambda) { const3 = const2 * lambda; }
     };

@@ -51,8 +51,7 @@ namespace Physica {
         void swapRows(size_t row1, size_t row2);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const auto& getIndices() const noexcept { return indices; }
-        [[nodiscard]] auto& getIndices() noexcept { return indices; }
+        [[nodiscard]] auto&& getIndices(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
     };
@@ -113,6 +112,11 @@ namespace Physica {
     void PermMatrix<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         indices.swap(obj.indices);
+    }
+
+    template<Scalar T>
+    auto&& PermMatrix<T>::getIndices(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).indices;
     }
 }
 

@@ -23,9 +23,10 @@
 namespace Physica {
     template<Scalar T, size_t Size>
     class GTOnG {
+        using This = GTOnG<T, Size>;
         using BaseType = GaussBase<T>;
-        GaussBase<T> bases[Size];
-        T coeffs[Size];
+        Array<GaussBase<T>, Size> bases;
+        DenseVector<T, Size> coeffs;
     public:
         GTOnG() = default;
         GTOnG(const GTOnG& base) = default;
@@ -44,10 +45,8 @@ namespace Physica {
                                                           const GTOnG& base2,
                                                           const GTOnG& base3,
                                                           const GTOnG& base4);
-        [[nodiscard]] GaussBase<T>* getBases() noexcept { return bases; }
-        [[nodiscard]] const GaussBase<T>* getBases() const noexcept { return bases; }
-        [[nodiscard]] T* getCoeffs() noexcept { return coeffs; }
-        [[nodiscard]] const T* getCoeffs() const noexcept { return coeffs; }
+        [[nodiscard]] auto&& getBases(this auto&&) noexcept;
+        [[nodiscard]] auto&& getCoeffs(this auto&&) noexcept;
         /* Static Members */
         template<RNG R>
         [[nodiscard]] static GTOnG randomBase(const VectorND<T>& center) { return randomBase(center, 0, 0, 0); }
@@ -101,6 +100,16 @@ namespace Physica {
             }
         }
         return result;
+    }
+
+    template<Scalar T, size_t Size>
+    auto&& GTOnG<T, Size>::getBases(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).bases;
+    }
+
+    template<Scalar T, size_t Size>
+    auto&& GTOnG<T, Size>::getCoeffs(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).coeffs;
     }
 
     template<Scalar T, size_t Size>

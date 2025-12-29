@@ -57,16 +57,8 @@ namespace Physica {
         void compute(const M& source, bool computeMatrixU_ = false);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] auto& getMatrixT() noexcept { return matrixT; }
-        [[nodiscard]] auto& getMatrixU() noexcept {
-            assert(computeMatrixU);
-            return matrixU;
-        }
-        [[nodiscard]] const auto& getMatrixT() const noexcept { return matrixT; }
-        [[nodiscard]] const auto& getMatrixU() const noexcept {
-            assert(computeMatrixU);
-            return matrixU;
-        }
+        [[nodiscard]] auto&& getMatrixT(this auto&&) noexcept;
+        [[nodiscard]] auto&& getMatrixU(this auto&&) noexcept;
     private:
         void compute2D(const Matrix auto& normalized);
         void computeND(const Matrix auto& normalized);
@@ -121,6 +113,17 @@ namespace Physica {
         matrixU.swap(obj.matrixU);
         std::swap(computeMatrixU, obj.computeMatrixU);
         exshift.swap(obj.exshift);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& Schur<T, Order>::getMatrixT(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).matrixT;
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& Schur<T, Order>::getMatrixU(this auto&& self) noexcept {
+        assert(self.computeMatrixU);
+        return std::forward<decltype(self)>(self).matrixU;
     }
 
     template<Scalar T, size_t Order>

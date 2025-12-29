@@ -52,10 +52,8 @@ namespace Physica {
         SplitResultType randomSplit(size_t firstSize) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
-        [[nodiscard]] const SampleArray& getSamples() const noexcept { return samples; }
-        [[nodiscard]] LabelArray& getLabels() noexcept { return labels; }
-        [[nodiscard]] const LabelArray& getLabels() const noexcept { return labels; }
+        [[nodiscard]] auto&& getSamples(this auto&&) noexcept;
+        [[nodiscard]] auto&& getLabels(this auto&&) noexcept;
         [[nodiscard]] size_t getSize() const noexcept { return samples.getLength(); }
     private:
         friend class device_obj<This>;
@@ -127,6 +125,16 @@ namespace Physica {
         if (isFirstLarger)
             return std::make_pair(std::move(large), std::move(small));
         return std::make_pair(std::move(small), std::move(large));
+    }
+
+    template<class SampleType, class LabelType>
+    auto&& SimpleDataset<SampleType, LabelType>::getSamples(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).samples;
+    }
+
+    template<class SampleType, class LabelType>
+    auto&& SimpleDataset<SampleType, LabelType>::getLabels(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).labels;
     }
 
     template<class SampleType, class LabelType>

@@ -72,7 +72,7 @@ namespace Physica {
         [[nodiscard]] int getNumSite() const noexcept { return kinetic.getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return kinetic.getNumSplit(); }
         [[nodiscard]] const auto& getAuxField() const noexcept { return kinetic.getAuxField(); }
-        [[nodiscard]] auto& getGreens() noexcept { return kinetic.getGreens(); }
+        [[nodiscard]] const auto& getGreens() noexcept { return kinetic.getGreens(); }
         [[nodiscard]] Tv getRSign() const noexcept { return kinetic.getRSign(); }
         [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
         [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
@@ -126,7 +126,7 @@ namespace Physica {
 
     template<Scalar T>
     void DQMC<T>::calcGreens(int split) {
-        productor.calcGreens(getGreens(), split, params->calcBetaMu());
+        productor.calcGreens(kinetic.getGreens(), split, params->calcBetaMu());
     }
 
     template<Scalar T>

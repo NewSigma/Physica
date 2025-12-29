@@ -83,8 +83,7 @@ namespace Physica {
         [[nodiscard]] FFT<T, 1>& getCanonicalFFT() noexcept { return fft; }
 
         [[nodiscard]] const FFTType& getFFT() const noexcept { return fft; }
-        [[nodiscard]] const BufferType& getBuffer() const noexcept { return buffer; }
-        [[nodiscard]] BufferType& getBuffer() noexcept { return buffer; }
+        [[nodiscard]] auto&& getBuffer(this auto&&) noexcept;
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return buffer.getCol(); }
         /* Static members */
         [[nodiscard]] static T calcRepBeta(T temperatureT, size_t numReplica) noexcept;
@@ -331,6 +330,11 @@ namespace Physica {
         massVec.swap(obj.massVec);
         fft.swap(obj.fft);
         buffer.swap(obj.buffer);
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
+    auto&& RingPolymer<T, Dim, NumReplica>::getBuffer(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).buffer;
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>

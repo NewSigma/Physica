@@ -60,9 +60,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         template<size_t I>
-        [[nodiscard]] constexpr T& get() noexcept;
-        template<size_t I>
-        [[nodiscard]] constexpr const T& get() const noexcept;
+        [[nodiscard]] constexpr auto&& get(this auto&&) noexcept;
 
         __host__ __device__ void insert(size_t, auto&&...) = delete;
         __host__ __device__ void resize(size_t length, auto&&... args) noexcept;

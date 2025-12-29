@@ -56,8 +56,7 @@ namespace Physica {
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto& getWorking() noexcept { return working; }
-        [[nodiscard]] __host__ __device__ const auto& getWorking() const noexcept { return working; }
+        [[nodiscard]] __host__ __device__ auto&& getWorking(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return working.getCol(); }
@@ -166,6 +165,11 @@ namespace Physica {
         taus.swap(obj.taus);
         hostBuffer.swap(obj.hostBuffer);
         deviceBuffer.swap(obj.deviceBuffer);
+    }
+
+    template<Scalar T>
+    __host__ __device__ auto&& device_obj<DenseQR<T>>::getWorking(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).working;
     }
 
     template<Scalar T>

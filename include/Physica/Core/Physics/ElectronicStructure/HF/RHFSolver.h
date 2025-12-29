@@ -35,6 +35,7 @@ namespace Physica {
      */
     template<class BaseSetType>
     class RHFSolver {
+        using This = RHFSolver<BaseSetType>;
         using T = Traits<BaseSetType>::ScalarType;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
@@ -67,8 +68,7 @@ namespace Physica {
         /* Operations */
         bool compute(const T& criteria, size_t maxIte);
         /* Getters */
-        [[nodiscard]] Array<BaseSetType>& getBaseSet() noexcept { return baseSet; }
-        [[nodiscard]] const Array<BaseSetType>& getBaseSet() const noexcept { return baseSet; }
+        [[nodiscard]] auto&& getBaseSet(this auto&&) noexcept;
         [[nodiscard]] size_t getBaseSetSize() const noexcept { return baseSet.getLength(); }
         [[nodiscard]] T getSelfConsistentEnergy() const noexcept { return selfConsistentEnergy; }
         [[nodiscard]] T getTotalEnergy() const noexcept { return selfConsistentEnergy + molecular.getNuclearRepulsionEnergy(); }
@@ -173,6 +173,11 @@ namespace Physica {
                 return false;
         }
         return true;
+    }
+
+    template<class BaseSetType>
+    auto&& RHFSolver<BaseSetType>::getBaseSet(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).baseSet;
     }
 
     template<class BaseSetType>

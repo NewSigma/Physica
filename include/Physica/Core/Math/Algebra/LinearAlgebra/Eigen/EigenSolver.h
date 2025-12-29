@@ -71,8 +71,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
-        [[nodiscard]] const auto& getEigenvalues() const noexcept { return eigenvalues; }
-        [[nodiscard]] auto& getEigenvalues() noexcept { return eigenvalues; }
+        [[nodiscard]] auto&& getEigenvalues(this auto&& self) noexcept;
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const;
         [[nodiscard]] const auto& getRawEigenvectors() const noexcept;
         [[nodiscard]] bool getNeedEigenvectors() const noexcept;
@@ -228,6 +227,11 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(obj.eigenvalues);
         rawEigenvectors.swap(obj.rawEigenvectors);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& EigenSolver<T, Order>::getEigenvalues(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).eigenvalues;
     }
 
     template<Scalar T, size_t Order>

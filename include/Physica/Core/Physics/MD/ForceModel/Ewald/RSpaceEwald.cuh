@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -71,17 +71,17 @@ namespace Physica {
         [[nodiscard]] BornChargeArray calcBornCharge() const { return host_obj::makeBornCharge(charges); }
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const DeviceLattice& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] const DeviceLattice& getRepLattice() const noexcept { return repLatt; }
-        [[nodiscard]] const DeviceVector& getCharges() const noexcept { return charges; }
+        [[nodiscard]] const auto& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] const auto& getRepLattice() const noexcept { return repLatt; }
+        [[nodiscard]] const auto& getCharges() const noexcept { return charges; }
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return charges.getLength(); }
         [[nodiscard]] __host__ __device__ T getVolume() const noexcept { return volume; }
         [[nodiscard]] __host__ __device__ T getInvVolume() const noexcept { return inv_volume; }
         [[nodiscard]] __host__ __device__ T getIntegralLimit() const noexcept { return integralLimit; }
         [[nodiscard]] __host__ __device__ T getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
         [[nodiscard]] __host__ __device__ T getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
-        [[nodiscard]] const SearchRangeType& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
-        [[nodiscard]] const SearchRangeType& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
+        [[nodiscard]] const auto& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
+        [[nodiscard]] const auto& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
         /* Setters */
         void setLattice(const LatticeMatrix& lattice_);
         void setIntegralLimit(T integralLimit_);

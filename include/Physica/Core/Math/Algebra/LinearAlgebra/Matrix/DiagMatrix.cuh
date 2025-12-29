@@ -56,8 +56,7 @@ namespace Physica {
         void resize(size_t order);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto& diag() noexcept { return diags; }
-        [[nodiscard]] __host__ __device__ const auto& diag() const noexcept { return diags; }
+        [[nodiscard]] __host__ __device__ auto&& diag(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
@@ -106,6 +105,11 @@ namespace Physica {
     void device_obj<DiagMatrix<T, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         diags.swap(obj.diags);
+    }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ auto&& device_obj<DiagMatrix<T, Order>>::diag(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).diag;
     }
 
     template<Scalar T, size_t Order>

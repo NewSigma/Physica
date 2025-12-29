@@ -67,8 +67,7 @@ namespace Physica {
         void resize(size_t size, bool needEigenvectors);
         void swap(This& __restrict solver) noexcept;
         /* Getters */
-        [[nodiscard]] const auto& getEigenvalues() const noexcept { return eigenvalues; }
-        [[nodiscard]] auto& getEigenvalues() noexcept { return eigenvalues; }
+        [[nodiscard]] auto&& getEigenvalues(this auto&& self) noexcept;
         [[nodiscard]] const EigenvectorMatrix& getEigenvectors() const noexcept;
         [[nodiscard]] bool getNeedEigenvectors() const noexcept;
     private:
@@ -185,6 +184,11 @@ namespace Physica {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         eigenvectors.swap(solver.eigenvectors);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& SymmEigenSolver<T, Order>::getEigenvalues(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).eigenvalues;
     }
 
     template<Scalar T, size_t Order>

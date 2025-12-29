@@ -29,6 +29,7 @@
 namespace Physica {
     template<Scalar T, class XCProvider>
     class KSSolver {
+        using This = KSSolver<T, XCProvider>;
     public:
         constexpr static bool IsSpinPolarized = XCProvider::IsSpinPolarized;
         using ComplexType = Complex<T>;
@@ -75,11 +76,9 @@ namespace Physica {
         [[nodiscard]] size_t getNumPlainWave() const noexcept { return orbits[0][SpinState::Up].getNumPlainWave(); }
         [[nodiscard]] size_t getNumBand() const noexcept { return orbits.getLength(); }
         [[nodiscard]] size_t getNumFilledBand() const noexcept { return (getNumElectron() + 1) / 2; }
-        [[nodiscard]] KSOrbitArray& getOrbits() noexcept { return orbits; }
-        [[nodiscard]] const KSOrbitArray& getOrbits() const noexcept { return orbits; }
-        [[nodiscard]] const BandType& getBand() const noexcept { return band; }
-        [[nodiscard]] DensityType& getDensity() noexcept { return density; }
-        [[nodiscard]] const DensityType& getDensity() const noexcept { return density; }
+        [[nodiscard]] const auto& getBand() const noexcept { return band; }
+        [[nodiscard]] auto&& getOrbits(this auto&&) noexcept;
+        [[nodiscard]] auto&& getDensity(this auto&&) noexcept;
     protected:
         /* Operations */
         void calcDensity(const BasisType& orbit);
@@ -207,6 +206,16 @@ namespace Physica {
         xcProvider.swap(obj.xcProvider);
 
         fft.swap(obj.fft);
+    }
+
+    template<Scalar T, class XCProvider>
+    auto&& KSSolver<T, XCProvider>::getOrbits(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).orbits;
+    }
+
+    template<Scalar T, class XCProvider>
+    auto&& KSSolver<T, XCProvider>::getDensity(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).density;
     }
 
     template<Scalar T, class XCProvider>

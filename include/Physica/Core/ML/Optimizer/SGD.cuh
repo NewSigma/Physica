@@ -44,8 +44,7 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] T& getLearnRate() noexcept { return lr; }
-        [[nodiscard]] const T& getLearnRate() const noexcept { return lr; }
+        [[nodiscard]] auto&& getLearnRate(this auto&& self) noexcept { return self.lr; }
     };
 
     template<Scalar T>

@@ -27,9 +27,9 @@ namespace Physica {
      * LogThread will scan and delete buffers that should be deleted.
      */
     class LogBuffer : public RingBuffer {
-        bool shouldDelete;
+        bool shouldDelete = false;
     public:
-        LogBuffer(size_t size) : RingBuffer(size), shouldDelete(false) {}
+        LogBuffer(size_t size) : RingBuffer(size) {}
         /* Operations */
         std::string makeMsgString();
         std::string formatToString(const char* __restrict format);

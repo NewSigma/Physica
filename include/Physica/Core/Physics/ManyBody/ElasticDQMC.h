@@ -69,7 +69,7 @@ namespace Physica {
         [[nodiscard]] const auto& getParams() const noexcept { return *params; }
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
-        [[nodiscard]] auto& getGreens() noexcept { return greens; }
+        [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] constexpr static Trv getSign() noexcept { return 1; }
         [[nodiscard]] constexpr static Trv getRSign() noexcept { return 1; }
     private:

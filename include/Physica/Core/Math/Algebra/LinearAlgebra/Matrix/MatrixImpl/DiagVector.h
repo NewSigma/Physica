@@ -38,9 +38,10 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
+        /* Operations */
+        [[nodiscard]] ScalarType calc(size_t index) const { return mat.calc(index, index); }
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
-        [[nodiscard]] ScalarType calc(size_t index) const { return mat.calc(index, index); }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
     };
 
@@ -48,9 +49,6 @@ namespace Physica {
     class DiagVector<T, true> : public LValueVector<DiagVector<T, true>> {
         using This = DiagVector<T, true>;
         using Base = LValueVector<This>;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         T& mat;
     public:
@@ -66,8 +64,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept { return mat.data_ptr(index, index); }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept { return mat.data_ptr(index, index); }
+        [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept { return self.mat.data_ptr(index, index); }
     };
 }
 

@@ -71,8 +71,7 @@ namespace Physica {
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] auto& getWorking() noexcept { return working; }
-        [[nodiscard]] const auto& getWorking() const noexcept { return working; }
+        [[nodiscard]] auto&& getWorking(this auto&& self) noexcept;
         [[nodiscard]] const auto& getTaus() const noexcept { return taus; }
         [[nodiscard]] size_t getRow() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return working.getCol(); }
@@ -199,6 +198,11 @@ namespace Physica {
         working.swap(obj.working);
         taus.swap(obj.taus);
         perm.swap(obj.perm);
+    }
+
+    template<Scalar T, bool Pivot>
+    auto&& DenseQR<T, Pivot>::getWorking(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).working;
     }
 
     template<Scalar T, bool Pivot>

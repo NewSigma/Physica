@@ -25,6 +25,7 @@
 namespace Physica {
     template<Scalar T, bool IsSpinPolarized>
     class DensityGrid {
+        using This = DensityGrid<T, IsSpinPolarized>;
         using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using GridType = DenseTensor<T>;
     public:
@@ -50,10 +51,8 @@ namespace Physica {
         void fit(const DensityGrid& rho);
         void swap(DensityGrid& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const GridType& getTotalDensity() const noexcept { return densityPair[SpinState::Up]; }
-        [[nodiscard]] GridType& getTotalDensity() noexcept { return densityPair[SpinState::Up]; }
-        [[nodiscard]] const GridType& getPolarDensity() const noexcept { return densityPair[SpinState::Down]; }
-        [[nodiscard]] GridType& getPolarDensity() noexcept { return densityPair[SpinState::Down]; }
+        [[nodiscard]] auto&& getTotalDensity(this auto&&) noexcept;
+        [[nodiscard]] auto&& getPolarDensity(this auto&&) noexcept;
     };
 
     template<Scalar T, bool IsSpinPolarized>
@@ -159,6 +158,16 @@ namespace Physica {
     void DensityGrid<T, IsSpinPolarized>::swap(DensityGrid& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         densityPair.swap(obj.densityPair);
+    }
+
+    template<Scalar T, bool IsSpinPolarized>
+    auto&& DensityGrid<T, IsSpinPolarized>::getTotalDensity(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).densityPair[SpinState::Up];
+    }
+
+    template<Scalar T, bool IsSpinPolarized>
+    auto&& DensityGrid<T, IsSpinPolarized>::getPolarDensity(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).densityPair[SpinState::Down];
     }
 
     template<Scalar T, bool IsSpinPolarized>

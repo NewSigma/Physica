@@ -58,8 +58,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const auto& getMatrixQ() const noexcept { return matrixQ; }
         [[nodiscard]] const auto& getMatrixD() const noexcept { return matrixD; }
-        [[nodiscard]] const auto& getMatrixT() const noexcept { return qr.getWorking(); }
-        [[nodiscard]] auto& getMatrixT() noexcept { return qr.getWorking(); }
+        [[nodiscard]] auto&& getMatrixT(this auto&&) noexcept;
         [[nodiscard]] const auto& getQR() const noexcept { return qr; }
         [[nodiscard]] size_t getSize() const noexcept { return matrixQ.getRow(); }
         /* Setters */
@@ -151,6 +150,11 @@ namespace Physica {
         MatrixND<T> x = getMatrixQ() * getMatrixD() * getMatrixT();
         std::cout << x;
         return *this;
+    }
+
+    template<Scalar T>
+    auto&& QDTDecomp<T>::getMatrixT(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).qr.getWorking();
     }
 
     template<Scalar T>

@@ -76,10 +76,8 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const Args& getArgs() const noexcept { return args; }
-        [[nodiscard]] Args& getArgs() noexcept { return args; }
-        [[nodiscard]] T& getLearnRate() noexcept { return args.lr; }
-        [[nodiscard]] const T& getLearnRate() const noexcept { return args.lr; }
+        [[nodiscard]] auto&& getArgs(this auto&& self) noexcept { return self.args; }
+        [[nodiscard]] auto&& getLearnRate(this auto&& self) noexcept { return self.lr; }
     };
 
     template<Scalar T>

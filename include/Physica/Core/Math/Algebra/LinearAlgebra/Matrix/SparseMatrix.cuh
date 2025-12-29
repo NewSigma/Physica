@@ -60,8 +60,7 @@ namespace Physica {
         [[nodiscard]] size_t getMaxMajor() const noexcept;
         [[nodiscard]] size_t getMaxMinor() const noexcept;
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elements.getLength(); }
-        [[nodiscard]] const auto& getElements() const noexcept { return elements; }
-        [[nodiscard]] auto& getElements() noexcept { return elements; }
+        [[nodiscard]] auto&& getElements(this auto&&) noexcept;
         [[nodiscard]] const auto& getMinorIndexes() const noexcept { return minorIndexes; }
         [[nodiscard]] const auto& getMajorStarts() const noexcept { return majorStarts; }
         /* Friends */
@@ -151,6 +150,11 @@ namespace Physica {
     template<Scalar T, int Option>
     size_t device_obj<SparseMatrix<T, Option>>::getMaxMinor() const noexcept {
         return maxMinor;
+    }
+
+    template<Scalar T, int Option>
+    auto&& device_obj<SparseMatrix<T, Option>>::getElements(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).elements;
     }
 
     template<Scalar T, int Option>

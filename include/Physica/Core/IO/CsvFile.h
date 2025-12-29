@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,13 +19,12 @@
 #pragma once
 
 #include <optional>
-#include <variant>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
     class PHYSICA_API CsvFile {
     public:
-        enum DataType {
+        enum DataType : char {
             CHAR,
             UCHAR,
             SHORT,
@@ -61,8 +60,8 @@ namespace Physica {
             DefaultValue(unsigned int i) : uint_value(i) {}
             DefaultValue(long l) : long_value(l) {}
             DefaultValue(unsigned long l) : ulong_value(l) {}
-            DefaultValue(float32 f) : float_value(std::move(f)) {}
-            DefaultValue(float64 d) : double_value(std::move(d)) {}
+            DefaultValue(float32 f) : float_value(f) {}
+            DefaultValue(float64 d) : double_value(d) {}
             DefaultValue(bool b) : bool_value(b) {}
         };
         using DataTypeArray = Array<DataType>;

@@ -690,6 +690,16 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    auto&& RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::getRingPolymer(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).ringPolymer;
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    auto&& RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::getPhaseMatrix(this auto&& self) noexcept {
+        return self.getRingPolymer().asMatrix();
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(T temperature) noexcept {
         assert(!temperature.isNegative() && "[Error]: Negative temperature is not physical");
         temperatureT = temperature;

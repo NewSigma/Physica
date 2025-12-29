@@ -58,9 +58,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] CXXType getType() const noexcept { return CXXType(pDecl); }
         template<class T>
-        [[nodiscard]] T& getDerived() noexcept { return *reinterpret_cast<T*>(pObj.get()); }
-        template<class T>
-        [[nodiscard]] const T& getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
+        [[nodiscard]] auto& getDerived(this auto&& self) noexcept;
     private:
         CXXObj(CXXRecordDecl* pDecl_, void* pObj_) noexcept;
 
@@ -74,5 +72,13 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(pDecl, obj.pDecl);
         std::swap(pObj, obj.pObj);
+    }
+
+    template<class T>
+    auto& CXXObj::getDerived(this auto&& self) noexcept {
+        if constexpr (std::is_const_v<decltype(self)>)
+            return *reinterpret_cast<const T*>(self.pObj.get());
+        else
+            return *reinterpret_cast<T*>(self.pObj.get());
     }
 }
