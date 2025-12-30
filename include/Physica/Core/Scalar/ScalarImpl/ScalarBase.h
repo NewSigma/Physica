@@ -378,7 +378,9 @@ namespace Physica {
     __host__ __device__ auto ScalarBase<Derived>::sum() const noexcept -> ScalarType {
         return this->getDerived();
     }
-
+    /**
+     * Algorithms of toNext*() are also known as welford accumulators
+     */
     template<class Derived>
     __host__ __device__ void ScalarBase<Derived>::toNextMean(size_t lastNumSample, ScalarType sample) noexcept {
         auto& mean = Base::getDerived();
