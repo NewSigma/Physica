@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,19 +17,18 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
+#include "Test.h"
 
 using namespace Physica;
 
 int main() {
     {
         const int i = lcm<int, false>(6, 2);
-        if (i != 6)
-            return 1;
+        expect(i == 6);
     }
     {
         const int i = lcm<int, false>(6, 6);
-        if (i != 6)
-            return 1;
+        expect(i == 6);
     }
     return 0;
 }

@@ -17,17 +17,15 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinState.h"
+#include "Test.h"
 
 using namespace Physica;
 
 int main() {
     const SpinState<1, 6> psi(0b011010);
     const auto psi1 = psi << 2;
-    if (psi1.getOccupyBits() != 0b101001)
-        return 1;
-    if ((psi1 >> 2) != psi)
-        return 1;
-    if (psi.isTransReducible(2))
-        return 1;
+    expect(psi1.getOccupyBits() == 0b101001);
+    expect((psi1 >> 2) == psi);
+    expect(!psi.isTransReducible(2));
     return 0;
 }

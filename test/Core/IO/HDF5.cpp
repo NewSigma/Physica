@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -37,8 +37,7 @@ int main() {
         auto h5f = H5File::open(temp.getName(), H5File::ReadOnly);
         auto dataset = h5f.openDataSet<1>("/data");
         dataset.readStr(buffer.data());
-        if (strcmp(str, buffer.data()) != 0)
-            return 1;
+        expect(strcmp(str, buffer.data()) == 0);
     }
     return 0;
 }

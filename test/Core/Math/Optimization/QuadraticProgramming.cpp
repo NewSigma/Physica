@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/QuadraticProgramming.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -33,8 +34,7 @@ int main() {
         const VectorType initial{2, 0};
         QuadraticProgramming<ScalarType> QP(G, c, equality, inequality, initial);
         QP.compute();
-        if (!vectorNear(QP.getSolution(), answer, 1E-15))
-            return 1;
+        expect(vectorNear(QP.getSolution(), answer, 1E-15));
     }
     return 0;
 }

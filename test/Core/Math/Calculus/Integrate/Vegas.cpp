@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Math/Calculus/Integrate/Vegas.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<MT19937, 12345>;
@@ -40,8 +41,7 @@ int main() {
         const T temp = erf(T(5));
         const T answer = T(std::numbers::pi * std::numbers::pi / 10000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
         const T result = vegas.calcMean();
-        if (abs(answer - result) > T(2) * vegas.calcDevia())
-            return 1;
+        expect(abs(answer - result) < T(2) * vegas.calcDevia());
     }
     /* Eq.28 of [1] */ {
         constexpr double R = 2.0 / 30;
@@ -55,8 +55,7 @@ int main() {
 
         const T answer = square(T(std::numbers::pi * R * R));
         const T result = vegas.calcMean();
-        if (abs(answer - result) > T(2) * vegas.calcDevia())
-            return 1;
+        expect(abs(answer - result) < T(2) * vegas.calcDevia());
     }
     {
         auto func = [&](const VectorND<T>& x) {
@@ -68,8 +67,7 @@ int main() {
         const T temp = erf(T(5));
         const T answer = T(std::numbers::pi * std::numbers::pi / 20000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));
         const T result = exp(vegas.calcLnMean());
-        if (abs(answer - result) > T(2) * exp(vegas.calcLnDevia()))
-            return 1;
+        expect(abs(answer - result) < T(2) * exp(vegas.calcLnDevia()));
     }
     return 0;
 }

@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -31,8 +32,7 @@ namespace {
         CrystalCell<T> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<T>::Type::Direct}, {14});
         Ewald<T> ewald(cell.getLattice(), {4});
         const auto energy = ewald.potentialV(cell.getPos());
-        if (!scalarNear(energy, T(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
-            exit(EXIT_FAILURE);
+        expect(scalarNear(energy, T(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec));
     }
     /**
     * Reference:
@@ -57,10 +57,9 @@ namespace {
             NaCl.toCartesian();
             EwaldType ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
             const auto energy = ewald.potentialV(NaCl.getPos());
-            const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x  cell so energy is divided by 4
+            const auto madelung = -(energy / 4) * (lengthInBohr / 2); // We have 4x  cell so energy is divided by 4
             constexpr double prec = isFloat32 ? 1E-6 : 1E-7;
-            if (!scalarNear(madelung, T(1.7475645946331822), prec))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(madelung, T(1.7475645946331822), prec));
         }
         {
             const double lengthInBohr = 1;
@@ -72,8 +71,7 @@ namespace {
             const auto energy = ewald.potentialV(CsCl.getPos());
             const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
             constexpr double prec = isFloat32 ? 1E-5 : 1E-9;
-            if (!scalarNear(madelung, T(1.76267477307099), prec))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(madelung, T(1.76267477307099), prec));
         }
         {
             const double lengthInBohr = 0.5;
@@ -86,8 +84,7 @@ namespace {
             const auto energy = ewald.potentialV(ZnS.getPos());
             const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
             constexpr double prec = isFloat32 ? 1E-5 : 1E-9;
-            if (!scalarNear(madelung, T(1.63805505338879), prec))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(madelung, T(1.63805505338879), prec));
         }
     }
 }
@@ -139,8 +136,7 @@ namespace Physica {
                 const Tv r2 = square(r);
                 ewald.pot_functor(0, 1, r, r2).reverse();
                 const Tv f = ewald.force_functor(0, 1, r, r2).value();
-                if (!scalarNear(-r.grad(), f, 1E-10))
-                    exit(EXIT_FAILURE);
+                expect(scalarNear(-r.grad(), f, 1E-10));
             }
         }
 
@@ -153,8 +149,7 @@ namespace Physica {
                 for (size_t i = 0; i < pos.getRow(); ++i)
                     for (size_t j = 0; j < pos.getCol(); ++j)
                         force_diff[i, j] = -pos[i, j].grad();
-                if (!vectorNear(force, force_diff.flatten(), 1E-11))
-                    exit(EXIT_FAILURE);
+                expect(vectorNear(force, force_diff.flatten(), 1E-11));
             }
         }
     };
@@ -182,8 +177,7 @@ namespace Physica {
 
                 const Tv press_diff = -volume.grad() / Tv(cellSize * cellSize * cellSize);
                 const Tv press = (ewald.virial(cell.getPos()).trace() / Tv(3)).value();
-                if (!scalarNear(press_diff, press, 1E-13))
-                    exit(EXIT_FAILURE);
+                expect(scalarNear(press_diff, press, 1E-13));
             }
         }
     private:

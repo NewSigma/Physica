@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Scalar/Diff.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<MT19937, std::mt19937::default_seed>;
@@ -41,13 +42,12 @@ namespace {
         const size_t order = mat.getRow();
         EigenvectorMatrix eigenvectors = solver.getEigenvectors();
         for (size_t i = 0; i < order; ++i) {
-            if (i > 1 && solver.getEigenvalues()[i - 1] > solver.getEigenvalues()[i])
-                exit(EXIT_FAILURE);
+            if (i != 0)
+                expect(solver.getEigenvalues()[i - 1] <= solver.getEigenvalues()[i]);
 
             VectorType v1 = mat * eigenvectors.col(i);
             VectorType v2 = eigenvectors.col(i) * ScalarType(solver.getEigenvalues()[i]);
-            if (!vectorNear(v1, v2, precision))
-                exit(EXIT_FAILURE);
+            expect(vectorNear(v1, v2, precision));
         }
     }
 

@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Hessenburg.h"
 #include "Physica/Core/Scalar/Complex.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -38,16 +39,14 @@ namespace {
     }
 
     template<Matrix M>
-    bool hessTest(const M& source, double tolerance) {
+    void hessTest(const M& source, double tolerance) {
         Hessenburg<typename M::ScalarType> hess(source);
         M H = hess.getMatrixH();
-        if (!isHessenburgMatrix(H))
-            return false;
+        expect(isHessenburgMatrix(H));
+
         M Q = hess.getMatrixQ();
         M A = (Q * H).compute() * Q.hermite();
-        if (!matrixNear(A, source, tolerance))
-            return false;
-        return true;
+        expect(matrixNear(A, source, tolerance));
     }
 }
 
@@ -57,14 +56,12 @@ int main() {
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 4, 4>;
         const MatrixType mat{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
-        if (!hessTest(mat, 1E-15))
-            return 1;
+        hessTest(mat, 1E-15);
     }
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 3, 3>;
         const MatrixType mat{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
-        if (!hessTest(mat, 1E-15))
-            return 1;
+        hessTest(mat, 1E-15);
     }
     /* Test degeneracy */ {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 6, 6>;
@@ -74,13 +71,11 @@ int main() {
                               {-0.1343184056,             0,             0,  0.1343184065,             0,             0},
                               {            0, -0.1341424541,             0,             0,  0.1341424554,             0},
                               {            0,             0, -0.1342191848,             0,             0,  0.1342191868}};
-        if (!hessTest(mat1, 1E-15))
-            return 1;
+        hessTest(mat1, 1E-15);
 
         using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Col, 6, 6>;
         const ComplexMatrix mat2 = mat1;
-        if (!hessTest(mat2, 1E-15))
-            return 1;
+        hessTest(mat2, 1E-15);
     }
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 8, 8>;
@@ -92,14 +87,12 @@ int main() {
                             {0, 3.06186, 0, 30.4651, 0, 132.5, 0, 92.1458},
                             {0.318105, 0, 9.36654, 0, 55.789, 0, 195.5, 0},
                             {0, 2.12934, 0, 21.1867, 0, 92.1458, 0, 275.5}};
-        if (!hessTest(mat, 1E-13))
-            return 1;
+        hessTest(mat, 1E-13);
     }
     /* Complex case */ {
         using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col, 3, 3>;
         const MatrixType mat{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
-        if (!hessTest(mat, 1E-12))
-            return 1;
+        hessTest(mat, 1E-12);
     }
     return 0;
 }

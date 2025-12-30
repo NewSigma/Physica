@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/SparseLU.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include "Test.h"
 
 using namespace Physica;
 using T = float32;
@@ -39,19 +40,15 @@ namespace {
         auto d_b = device_obj<MatrixND<T>>(b.toDeviceAsync());
         lu.solve(d_b);
         auto result = d_b.toHost();
-        if (!vectorNear(result.col(0), answer, 1E-6))
-            exit(EXIT_FAILURE);
+        expect(vectorNear(result.col(0), answer, 1E-6));
     }
 
     void testLnAbsDet() {
         using MatrixType = DenseMatrix<T, MatrixOption::Row, 8, 8>;
         const MatrixType A = MatrixType::random_normal<Random<MCG>>(8, 8);
         device_obj<SparseLU<T>> lu((SparseMatrix<T>(A)));
-        if (!scalarNear(lu.lnAbsDet(), A.lnAbsDet(), 1E-5))
-            exit(EXIT_FAILURE);
-
-        if (lu.sgndet() != A.sgndet())
-            exit(EXIT_FAILURE);
+        expect(scalarNear(lu.lnAbsDet(), A.lnAbsDet(), 1E-5));
+        expect(lu.sgndet() == A.sgndet());
     }
 }
 

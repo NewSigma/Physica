@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Discrete/Combination.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -31,7 +32,6 @@ namespace {
 int main() {
     for (int m = 0; m <= 16; ++m)
         for (int n = 0; n <= m; ++n)
-            if (test(m, n) != binomial(m, n))
-                return 1;
+            expect(test(m, n) == binomial(m, n));
     return 0;
 }

@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixChain.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -42,7 +43,6 @@ int main() {
         chain[i] = std::move(a[i]);
     chain.dynamicProgram();
     const auto result = chain.multiply();
-    if (!matrixNear(result, answer, 1E-15))
-        return 1;
+    expect(matrixNear(result, answer, 1E-15));
     return 0;
 }

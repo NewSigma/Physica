@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<>;
@@ -29,8 +30,7 @@ namespace {
         auto v = VectorType::random_uniform<RandomSource>(16);
         v.sum().reverse();
         for (size_t i = 0; i < v.getLength(); ++i)
-            if (v[i].grad() != float64(1)) [[unlikely]]
-                exit(EXIT_FAILURE);
+            expect(v[i].grad() == float64(1));
     }
 
     void test_hdf5() {
@@ -47,8 +47,7 @@ namespace {
         VectorND<dfloat> result;
         auto h5f = H5File::open(tmp.getName(), H5File::ReadOnly);
         result.read(h5f, "x");
-        if (data != result)
-            exit(EXIT_FAILURE);
+        expect(data == result);
     #endif
     }
 }

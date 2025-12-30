@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Scalar/Complex.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<MT19937, 10000>;
@@ -29,31 +30,23 @@ namespace {
         /* Divide */ {
             const auto y = SIMD<T, Size>::template random_uniform<RandomSource>() + SIMD<T, Size>(1);
             const auto result = x / y;
-            for (int i = 0; i < Size; ++i) {
-                if (!scalarNear(result[i], x[i] / y[i], prec))
-                    exit(EXIT_FAILURE);
-            }
+            for (int i = 0; i < Size; ++i)
+                expect(scalarNear(result[i], x[i] / y[i], prec));
         }
         /* Exp */ {
             const auto result = exp(x);
-            for (int i = 0; i < Size; ++i) {
-                if (!scalarNear(result[i], exp(x[i]), prec))
-                    exit(EXIT_FAILURE);
-            }
+            for (int i = 0; i < Size; ++i)
+                expect(scalarNear(result[i], exp(x[i]), prec));
         }
         /* Ln */ {
             const auto result = ln(x);
-            for (int i = 0; i < Size; ++i) {
-                if (!scalarNear(result[i], ln(x[i]), prec))
-                    exit(EXIT_FAILURE);
-            }
+            for (int i = 0; i < Size; ++i)
+                expect(scalarNear(result[i], ln(x[i]), prec));
         }
         /* LnCosh */ {
             const auto result = lncosh(x);
-            for (int i = 0; i < Size; ++i) {
-                if (!scalarNear(result[i], lncosh(x[i]), prec))
-                    exit(EXIT_FAILURE);
-            }
+            for (int i = 0; i < Size; ++i)
+                expect(scalarNear(result[i], lncosh(x[i]), prec));
         }
     }
 
@@ -63,10 +56,8 @@ namespace {
         auto x = SIMD<T, Size>(std::numeric_limits<T>::min());
         /* Divide */ {
             const auto result = SIMD<T, Size>(0) / x;
-            for (int i = 0; i < Size; ++i) {
-                if (!result[i].isZero())
-                    exit(EXIT_FAILURE);
-            }
+            for (int i = 0; i < Size; ++i)
+                expect(result[i].isZero());
         }
         testMath<T, Size>(x);
 
@@ -74,10 +65,8 @@ namespace {
         testMath<T, Size>(x);
         /* Sqrt */ {
             const auto result = sqrt(x);
-            for (int i = 0; i < Size; ++i) {
-                if (!scalarNear(result[i], sqrt(x[i]), prec))
-                    exit(EXIT_FAILURE);
-            }
+            for (int i = 0; i < Size; ++i)
+                expect(scalarNear(result[i], sqrt(x[i]), prec));
         }
     }
 }

@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/EqualityQuadraticProgramming.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -31,8 +32,7 @@ int main() {
 
         const VectorType initial{1, -1, 1};
         EqualityQuadraticProgramming<ScalarType> QP(G, c, constraints, initial);
-        if (!vectorNear(QP.getSolution(), answer, 1E-16))
-            return 1;
+        expect(vectorNear(QP.getSolution(), answer, 1E-16));
     }
     {
         using VectorType = Vector3D<ScalarType>;
@@ -43,8 +43,7 @@ int main() {
 
         const VectorType initial{1, 1, 1};
         EqualityQuadraticProgramming<ScalarType> QP(G, c, constraints, initial);
-        if (!vectorNear(QP.getSolution(), answer, 1E-15)) //Precision can reach 1E-16 in debug mode
-            return 1;
+        expect(vectorNear(QP.getSolution(), answer, 1E-15)); //Precision can reach 1E-16 in debug mode
     }
     return 0;
 }

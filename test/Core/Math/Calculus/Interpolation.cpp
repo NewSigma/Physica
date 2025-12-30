@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -31,8 +32,7 @@ namespace {
         const VectorType x{0, 1, 2};
         const VectorType y{5, -3, 2};
         for (size_t i = 0; i < x.getLength(); ++i)
-            if (!scalarNear(lagrange(x, y, i), y[i], 1E-16))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(lagrange(x, y, i), y[i], 1E-16));
     }
 
     void testFFT1D() {
@@ -40,21 +40,17 @@ namespace {
         const auto result = interpolate_fft(data, 100);
 
         const size_t delta = result.getLength() / data.getLength();
-        for (size_t i = 0; i < result.getLength(); i += delta) {
-            if (!scalarNear(data[i / delta], result[i], 1E-11))
-                exit(EXIT_FAILURE);
-        }
+        for (size_t i = 0; i < result.getLength(); i += delta)
+            expect(scalarNear(data[i / delta], result[i], 1E-11));
 
         for (size_t i = 0; i < data.getLength(); ++i) {
             ScalarType result = interpolate_fft(data, i, data.getLength());
-            if (!scalarNear(result, data[i], 1E-11))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(result, data[i], 1E-11));
         }
         /* Test periodicity */ {
             const ScalarType value = interpolate_fft(data, 0.2, 1);
             const ScalarType value1 = interpolate_fft(data, 1.2, 1);
-            if (!scalarNear(value, value1, 1E-12))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(value, value1, 1E-12));
         }
     }
 
@@ -68,15 +64,13 @@ namespace {
                 auto indices1 = indices;
                 for (auto& id : indices1)
                     id *= 2;
-                if (!scalarNear(data.asArray()[i], result[indices1], 1E-8))
-                    exit(EXIT_FAILURE);
+                expect(scalarNear(data.asArray()[i], result[indices1], 1E-8));
             }
         }
         /* Test periodicity */ {
             const ScalarType value = interpolate_fft(data, {0.2, 0.1, 0.3}, {1, 1, 1});
             const ScalarType value1 = interpolate_fft(data, {1.2, 0.1, 0.3}, {1, 1, 1});
-            if (!scalarNear(value, value1, 1E-12))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(value, value1, 1E-12));
         }
     }
 }

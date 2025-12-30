@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<>;
@@ -36,14 +37,12 @@ namespace {
         {
             using MatrixType = DenseMatrix<T, MatrixOption::Col>;
             const auto x = MatrixType(Size, Size);
-            if (x.data_ptr(r, c) != x.col(c).data() + r)
-                exit(EXIT_FAILURE);
+            expect(x.data_ptr(r, c) == x.col(c).data() + r);
         }
         {
             using MatrixType = DenseMatrix<T, MatrixOption::Row>;
             const auto x = MatrixType(Size, Size);
-            if (x.data_ptr(r, c) != x.row(r).data() + c)
-                exit(EXIT_FAILURE);
+            expect(x.data_ptr(r, c) == x.row(r).data() + c);
         }
     }
 
@@ -60,8 +59,7 @@ namespace {
 
             MatrixType buffer(data.getRow(), data.getCol());
             buffer.read(h5f, "/set");
-            if (data != buffer)
-                exit(EXIT_FAILURE);
+            expect(data == buffer);
         }
         /* Row double matrix */ {
             using T = float64;
@@ -74,8 +72,7 @@ namespace {
 
             MatrixType buffer(data.getRow(), data.getCol());
             buffer.read(h5f, "/set");
-            if (data != buffer)
-                exit(EXIT_FAILURE);
+            expect(data == buffer);
         }
         /* Row complex float matrix */ {
             using T = Complex<float32>;
@@ -88,8 +85,7 @@ namespace {
 
             MatrixType buffer(data.getRow(), data.getCol());
             buffer.read(h5f, "/set");
-            if (data != buffer)
-                exit(EXIT_FAILURE);
+            expect(data == buffer);
         }
     #endif
     }

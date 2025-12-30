@@ -19,6 +19,7 @@
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
+#include "Test.h"
 
 using namespace Physica;
 using RealType = float64;
@@ -31,15 +32,14 @@ namespace {
         auto givens_vector = givens(v, 0, 1);
         DenseMatrix<T> v_mat = v;
         applyGivens(givens_vector, v_mat, 0, 1);
-        if (abs(v_mat[1, 0].value()) > RealType(1E-15))
-            exit(EXIT_FAILURE);
+        expect(abs(v_mat[1, 0].value()) < RealType(1E-15));
     }
 
     void emptyTest() {
         Vector2D<float64> v{1, 0};
         auto g = givens(v, 0, 1);
-        if ((g[0] != float64(1)) || (g[1] != float64(0)))
-            exit(EXIT_FAILURE);
+        expect(g[0] == float64(1));
+        expect(g[1] == float64(0));
     }
 }
 
@@ -52,16 +52,14 @@ int main() {
         auto givens_vector = givens(v, 0, 1);
         DenseMatrix<ComplexType> v_mat = v;
         applyGivens(givens_vector, v_mat, 0, 1);
-        if (v_mat[1, 0].norm() > RealType(1E-15))
-            return 1;
+        expect(v_mat[1, 0].norm() < RealType(1E-15));
     }
     {
         Vector2D<ComplexType> v{{0.8699464447, 0.1883214037}, {-0.520340944, 0.1297693695}};
         auto givens_vector = givens(v, 0, 1);
         DenseMatrix<ComplexType> v_mat = v;
         applyGivens(givens_vector, v_mat, 0, 1);
-        if (v_mat[1, 0].norm() > RealType(1E-15))
-            return 1;
+        expect(v_mat[1, 0].norm() < RealType(1E-15));
     }
     return 0;
 }

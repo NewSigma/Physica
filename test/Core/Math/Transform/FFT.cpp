@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Transform/DiffFFT.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -50,10 +51,8 @@ namespace {
             const T freq1_power = intense[index1 * fft.getKSpaceSize()[1]];
             const T freq1_power_conj = intense[(N1 - index1) * fft.getKSpaceSize()[1]];
             const T freq2_power = intense[index2];
-            if (!scalarNear(freq1_power, freq1_power_conj, 1E-15))
-                exit(EXIT_FAILURE);
-            if (!scalarNear(freq2_power / freq1_power, T(2), 1E-14))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(freq1_power, freq1_power_conj, 1E-15));
+            expect(scalarNear(freq2_power / freq1_power, T(2), 1E-14));
         }
         /* Test inv */ {
             constexpr double precision = 1E-11;
@@ -62,8 +61,7 @@ namespace {
                 for (size_t j = 0; j < data.getCol(); ++j) {
                     const bool isNear = scalarNear(data[i, j], fft.getRSpace()[i, j], precision);
                     const bool isSmall = abs(data[i, j]) < T(precision) && abs(fft.getRSpace()[i, j]) < T(precision);
-                    if(!isNear && !isSmall)
-                        exit(EXIT_FAILURE);
+                    expect(isNear || isSmall);
                 }
             }
         }
@@ -94,8 +92,7 @@ namespace {
             fft.getRSpace() = grads;
             fft.transform();
             VectorND<Tc> k_grads = fft.getKSpace();
-            if (k_values.getLength() != k_grads.getLength()) [[unlikely]]
-                exit(EXIT_FAILURE);
+            expect(k_values.getLength() == k_grads.getLength());
 
             answer.resize(k_values.getLength());
             for (size_t i = 0; i < answer.getLength(); ++i)
@@ -105,8 +102,7 @@ namespace {
         /* Test transform */ {
             fft.getRSpace() = data;
             fft.transform();
-            if (!vectorNear(fft.getKSpace(), answer, 1E-15))
-                exit(EXIT_FAILURE);
+            expect(vectorNear(fft.getKSpace(), answer, 1E-15));
         }
         /* Test invTransform */ {
             constexpr double precision = 1E-13;
@@ -114,8 +110,7 @@ namespace {
             for (size_t i = 0; i < data.getLength(); ++i) {
                 const bool isNear = scalarNear(dfloat(data[i]), dfloat(fft.getRSpace()[i]), precision);
                 const bool isSmall = abs(data[i].value()) < T(precision) && abs(fft.getRSpace()[i].value()) < T(precision);
-                if(!isNear && !isSmall)
-                    exit(EXIT_FAILURE);
+                expect(isNear || isSmall);
             }
         }
     }
@@ -142,15 +137,13 @@ int main() {
         /* Parseval theorem */ {
             const T energyR = data.squaredNorm();
             const T energyK = fft.getKSpace().parseval();
-            if (!scalarNear(energyR, energyK, 1E-15))
-                return 1;
+            expect(scalarNear(energyR, energyK, 1E-15));
         }
         /* Test freq */ {
             const double deltaFreq = double(fft.getKSpaceDelta(T(t_max / N))) / (2 * M_PI);
             const T freq1_power = intense[size_t(freq1 / deltaFreq)];
             const T freq2_power = intense[size_t(freq2 / deltaFreq)];
-            if (!scalarNear(freq2_power / freq1_power, T(2), 1E-14))
-                return 1;
+            expect(scalarNear(freq2_power / freq1_power, T(2), 1E-14));
         }
         /* Test inv */ {
             constexpr double precision = 1E-13;
@@ -158,8 +151,7 @@ int main() {
             for (size_t i = 0; i < data.getLength(); ++i) {
                 const bool isNear = scalarNear(data[i], fft.getRSpace()[i], 1E-14);
                 const bool isSmall = abs(data[i]) < T(precision) && abs(fft.getRSpace()[i]) < T(precision);
-                if(!isNear && !isSmall)
-                    return 1;
+                expect(isNear || isSmall);
             }
         }
     }
@@ -188,8 +180,7 @@ int main() {
             trans[i] = temp;
         }
         fft.invTransform();
-        if (!vectorNear(data, fft.getRSpace(), 1E-14))
-            return 1;
+        expect(vectorNear(data, fft.getRSpace(), 1E-14));
     }
     testReal2D();
     test_differentiable();

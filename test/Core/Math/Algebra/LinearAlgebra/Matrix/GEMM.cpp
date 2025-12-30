@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Scalar/Diff.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -28,8 +29,7 @@ int main() {
         const Matrix m2{{3, 3}, {1, 5}};
         const Matrix result = m1 * m2;
         const Matrix answer{{9, 9}, {11, 7}};
-        if (!matrixNear(result, answer, std::numeric_limits<float>::epsilon()))
-            return 1;
+        expect(matrixNear(result, answer, std::numeric_limits<float>::epsilon()));
     }
     {
         using ScalarType = Diff<float32, DiffMode::Reverse>;
@@ -44,14 +44,12 @@ int main() {
         }
         const Vector3D<float32> dx = x.grads();
         for (size_t i = 0; i < dx.getLength(); ++i)
-            if (!scalarNear(dx[i], m.values().col(i).sum(), 1E-15))
-                return 1;
+            expect(scalarNear(dx[i], m.values().col(i).sum(), 1E-15));
 
         const MatrixType dm = m.grads();
         for (size_t r = 0; r < dm.getRow(); ++r)
             for (size_t c = 0; c < dm.getCol(); ++c)
-                if (!scalarNear(dm[r, c], x.values().calc(c), 1E-15))
-                    return 1;
+                expect(scalarNear(dm[r, c], x.values().calc(c), 1E-15));
     }
     return 0;
 }

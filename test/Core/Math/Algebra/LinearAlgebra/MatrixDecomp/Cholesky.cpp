@@ -18,12 +18,13 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Cholesky.h"
+#include "Test.h"
 
 using namespace Physica;
 
 int main() {
     {
-        typedef DenseMatrix<float64, MatrixOption::Col, 3, 3> Matrix3x3;
+        using Matrix3x3 = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
         Matrix3x3 mat{5, -2, 0, -2, 3, -1, 0, -1, 1};
         Cholesky cholesky(mat);
         Matrix3x3 decomp(cholesky);
@@ -31,11 +32,10 @@ int main() {
         decomp -= answer;
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                if (decomp[i, j] > 0.001)
-                    return 1;
+                expect(decomp[i, j] < 0.001);
     }
     {
-        typedef DenseMatrix<float64, MatrixOption::Col, 3, 3> Matrix3x3;
+        using Matrix3x3 = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
         Matrix3x3 mat{{5, -2, 0}, {-2, 3, -1}, {0, -1, 1}};
         Cholesky cholesky(mat);
         Matrix3x3 decomp(cholesky);
@@ -43,8 +43,7 @@ int main() {
         decomp -= answer;
         for (int i = 0; i < 3; ++i)
             for (int j = 0; j < 3; ++j)
-                if (decomp[i, j] > 0.001)
-                    return 1;
+                expect(decomp[i, j] < 0.001);
     }
     {
         using Matrix5x5 = DenseMatrix<float64, MatrixOption::Col, 5, 5>;
@@ -65,8 +64,7 @@ int main() {
         const Matrix5x5 result = Cholesky(mat);
         for (int i = 0; i < 5; ++i)
             for (int j = 0; j < 5; ++j)
-                if (!scalarNear(result[i, j], answer[j, i], 1E-5))
-                    return 1;
+                expect(scalarNear(result[i, j], answer[j, i], 1E-5));
     }
     return 0;
 }

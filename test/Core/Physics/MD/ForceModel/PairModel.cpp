@@ -20,6 +20,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/LJModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using dfloat = Diff<float64, DiffMode::Reverse, 1>;
@@ -48,8 +49,7 @@ public:
             for (size_t i = 0; i < cell.getDOF(); ++i) {
                 for (size_t j = 0; j < cell.getDOF(); ++j) {
                     const auto fc1 = sg.forceConst(cell, i, j);
-                    if (!scalarNear<dfloat>(fc[i, j], fc1, 1E-15))
-                        exit(EXIT_FAILURE);
+                    expect(scalarNear<dfloat>(fc[i, j], fc1, 1E-15));
                 }
             }
         }
@@ -77,8 +77,7 @@ int main() {
         lj.pot_functor(0, 0, r, square(r)).reverse();
         const float64 f = -r.grad();
         const auto f1 = lj.force_functor(0, 0, r, square(r));
-        if (!scalarNear(f.value(), f1.value(), 1E-15))
-            return 1;
+        expect(scalarNear(f.value(), f1.value(), 1E-15));
     }
     ForceConstTest::run();
     return 0;

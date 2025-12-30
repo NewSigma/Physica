@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -29,9 +30,7 @@ namespace {
         Inverse<M> inv(m);
         const M result(inv);
         M prod = result * m;
-        std::cout << prod << '\n';
-        if (!matrixNear(prod, IdentityMatrix<T>(m.getRow()), prec))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(prod, IdentityMatrix<T>(m.getRow()), prec));
     }
 }
 

@@ -17,28 +17,26 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/BasicAlgebra/Polynomial.h"
+#include "Test.h"
 
 using namespace Physica;
 
 namespace {
     template<Vector V>
-    bool testPolyRoot(const V& coeffs, double precision) {
+    void testPolyRoot(const V& coeffs, double precision) {
         using ScalarType = V::ScalarType;
         const Polynomial<ScalarType, V::SizeAtCompile> poly(coeffs);
         auto roots = polyRoot(poly);
         for (const auto& root : roots) {
             auto result = poly(root);
-            if (!scalarNear(result, decltype(result)(0), precision))
-                return false;
+            expect(scalarNear(result, decltype(result)(0), precision));
         }
-        return true;
     }
 }
 
 int main() {
     using ScalarType = float64;
     VectorND<ScalarType> coeffs{1, 2, 3, 4, 5, 6};
-    if (!testPolyRoot(coeffs, 1E-11))
-        return 1;
+    testPolyRoot(coeffs, 1E-11);
     return 0;
 }

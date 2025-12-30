@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Optimization/SteepestDescent.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -31,7 +32,6 @@ int main() {
     do {
         sd.step(func, grad);
     } while(sd.getGradG().norm() > 0.001);
-    if (sd.getObjectiveValue() > 1E-8)
-        return 1;
+    expect(sd.getObjectiveValue() < 1E-8);
     return 0;
 }

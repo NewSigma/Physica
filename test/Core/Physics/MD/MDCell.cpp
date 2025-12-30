@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -46,11 +47,9 @@ int main() {
 
     MDCellType md1(cell1);
     MDCellType md2(cell2);
-    if (!isMDCellNear(md1, md2, 1E-15))
-        return 1;
+    expect(isMDCellNear(md1, md2, 1E-15));
 
     md1.normalize();
-    if (!isMDCellNear(md1, md2, 1E-6))
-        return 1;
+    expect(isMDCellNear(md1, md2, 1E-6));
     return 0;
 }

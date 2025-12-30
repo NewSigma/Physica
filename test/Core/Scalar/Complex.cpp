@@ -17,11 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Scalar/Complex.h"
+#include "Test.h"
 
 using namespace Physica;
 
 int main() {
-    if (!ln1pexp(cfloat64(-1000, 0)).isZero()) // Test underflow
-        return 1;
+    expect(ln1pexp(cfloat64(-1000, 0)).isZero()); // Test underflow
     return 0;
 }

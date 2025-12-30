@@ -22,17 +22,16 @@
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
+#include "Test.h"
 
 using namespace Physica;
 using namespace Physica;
-using ScalarType = float64;
-using VectorType = VectorND<ScalarType>;
-using MatrixType = DenseMatrix<ScalarType>;
-using MDType = RPMD<ScalarType, 1, Dynamic>;
+using T = float64;
+using MDType = RPMD<T, 1, Dynamic>;
 using MDCellType = MDType::MDCellType;
-using ForceModel = EmptyForceModel<ScalarType, 1>;
-using ThermoType = Langevin<ScalarType, 1, Dynamic>;
-using KineticModel = HardCore<ScalarType, true, Dynamic, RPMDIntegrator::Exact>;
+using ForceModel = EmptyForceModel<T, 1>;
+using ThermoType = Langevin<T, 1, Dynamic>;
+using KineticModel = HardCore<T, true, Dynamic, RPMDIntegrator::Exact>;
 using RandomSource = Random<MT19937, 15502868121535481991UL>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
@@ -50,7 +49,7 @@ namespace {
     MDCellType makeSystem() {
         MDCellType::LatticeMatrix lattice{latticeSize};
 
-        auto posVec = VectorND<ScalarType>::random_uniform<RandomSource>(numMolecular);
+        auto posVec = VectorND<T>::random_uniform<RandomSource>(numMolecular);
         std::ranges::sort(posVec.begin(), posVec.end());
         MDCellType::PositionMatrix pos(numMolecular, 1);
         pos.col(0) = posVec;
@@ -72,15 +71,15 @@ int main() {
     rpmd.initMomentum<KineticModel, RandomSource>();
     kineticModel.updateMass(rpmd.getRingPolymer());
 
-    MatrixType meanCorr(numMolecular, numReplica);
-    MatrixType varCorr(numMolecular, numReplica);
-    MatrixType temp(numMolecular, numReplica);
-    ScalarType meanTemperature = 0;
-    ScalarType varTemperature = 0;
-    const ScalarType factor = reciprocal(ScalarType(temperatureT * numReplica));
+    MatrixND<T> meanCorr(numMolecular, numReplica);
+    MatrixND<T> varCorr(numMolecular, numReplica);
+    MatrixND<T> temp(numMolecular, numReplica);
+    T meanTemperature = 0;
+    T varTemperature = 0;
+    const T factor = reciprocal(T(temperatureT * numReplica));
     for (size_t sys = 0; sys < numSystem; ++sys) {
-        MatrixType buffer(numMolecular, numReplica, 0);
-        ScalarType temperature_sample = 0;
+        MatrixND<T> buffer(numMolecular, numReplica, 0);
+        T temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
             ForceModel forceModel{};
             rpmd.nvt_step<RandomSource, Sequential>(thermo, kineticModel, forceModel);
@@ -95,13 +94,12 @@ int main() {
         varCorr.toNextVariance(meanCorr, sys, buffer);
         varTemperature.toNextVariance(meanTemperature, sys, temperature_sample);
     }
-    const MatrixType deviaCorr = sqrt_elem(varCorr);
+    const MatrixND<T> deviaCorr = sqrt_elem(varCorr);
 
     for (size_t i = 0; i < numReplica; ++i)
         for (size_t j = 0; j < numMolecular; ++j)
-            if (abs(meanCorr[j, i]) > deviaCorr[j, i] * ScalarType(2.0))
-                return 1;
-    if (abs(ScalarType(temperatureT) - meanTemperature) > ScalarType(2.0) * sqrt(varTemperature))
-        return 1;
+            expect(abs(meanCorr[j, i]) < deviaCorr[j, i] * T(2.0));
+
+    expect(abs(T(temperatureT) - meanTemperature) < T(2.0) * sqrt(varTemperature));
     return 0;
 }

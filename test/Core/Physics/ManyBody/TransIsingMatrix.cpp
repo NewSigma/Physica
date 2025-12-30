@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float32;
@@ -32,9 +33,7 @@ namespace {
         DenseMatrix<T> mat(size, size);
         for (size_t i = 0; i < size; ++i)
             mat.col(i) = hamilton * UnitVector<T>(i, size);
-
-        if (!matrixNear(hamilton, mat, 1E-7))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(hamilton, mat, 1E-7));
     }
 }
 

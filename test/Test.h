@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,14 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Test.h"
+#pragma once
 
-using namespace Physica;
-using ScalarType = float64;
+#include <cstdlib>
 
-int main() {
-    const VectorND<ScalarType> a{1, 2, 3, 4, 5};
-    expect(scalarNear(covariance(a, a), a.variance(a.mean()), 1E-16));
-    return 0;
+namespace Physica {
+    inline void expect(bool b) noexcept {
+        if (!b) [[unlikely]]
+            exit(EXIT_FAILURE);
+    }
 }

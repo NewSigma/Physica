@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<>;
@@ -31,7 +32,6 @@ int main() {
     const auto grads = v.grads().toHost();
 
     for (auto elem : grads)
-        if (elem != T(1))
-            return 1;
+        expect(elem == T(1));
     return 0;
 }

@@ -18,6 +18,7 @@
  */
 #include <algorithm>
 #include "Physica/Core/Physics/SolidState/IceGenerator.h"
+#include "Test.h"
 
 using namespace Physica;
 using namespace Physica;
@@ -67,7 +68,6 @@ int main() {
     const bool b1 = std::ranges::find(arr, 0) != arr.cend();
     const bool b2 = std::ranges::find(arr, 6) != arr.cend();
     const bool b3 = std::ranges::find(arr, 7) != arr.cend();
-    if (!(b1 && b2 && b3))
-        return 1;
+    expect(b1 && b2 && b3);
     return 0;
 }

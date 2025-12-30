@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/ElectronicStructure/HF/GaussBase.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -30,10 +31,8 @@ namespace Physica {
 }
 
 namespace {
-    bool test_helper_F() {
-        if (!scalarNear(Test::helper_F(0, 39.03714925), ScalarType(0.1418423419), 1E-10))
-            return false;
-        return true;
+    void test_helper_F() {
+        expect(scalarNear(Test::helper_F(0, 39.03714925), ScalarType(0.1418423419), 1E-10));
     }
 
     ScalarType overlap_1s_1s(const ScalarType& alpha1,
@@ -98,8 +97,8 @@ namespace {
 
 int main() {
     using BaseFunc = GaussBase<ScalarType>;
-    if (!test_helper_F())
-        return 1;
+    test_helper_F();
+
     {
         auto alpha1 = ScalarType(1.25);
         Vector3D<ScalarType> v1{2, 5, -1};
@@ -107,41 +106,35 @@ int main() {
         auto alpha2 = ScalarType(0.76);
         Vector3D<ScalarType> v2{-3, 6, 1};
         GaussBase<ScalarType> base2 = GaussBase<ScalarType>(v2, alpha2, 0, 0, 0);
-        if (!scalarNear(BaseFunc::overlap(base1, base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
-            return 1;
-        if (!scalarNear(BaseFunc::kinetic(base1, base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14))
-            return 1;
+        expect(scalarNear(BaseFunc::overlap(base1, base2), overlap_1s_1s(alpha1, v1, alpha2, v2), 1E-14));
+        expect(scalarNear(BaseFunc::kinetic(base1, base2), kinetic_1s_1s(alpha1, v1, alpha2, v2), 1E-14));
 
         Vector3D<ScalarType> v3{1.5, 1.7, -0.4};
-        if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14))
-            return 1;
+        expect(scalarNear(BaseFunc::nuclearAttraction(base1, base2, v3), attraction_1s_1s(alpha1, v1, alpha2, v2, v3), 1E-14));
 
         auto alpha3 = ScalarType(3.78);
         auto alpha4 = ScalarType(11.7);
         Vector3D<ScalarType> v4{2.7, 0, -3};
         GaussBase<ScalarType> base3 = GaussBase<ScalarType>(v3, alpha3, 0, 0, 0);
         GaussBase<ScalarType> base4 = GaussBase<ScalarType>(v4, alpha4, 0, 0, 0);
-        if (!scalarNear(BaseFunc::electronRepulsion(base1, base2, base3, base4),
-                        repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha3, v3, alpha4, v4),
-                        1E-14))
-            return 1;
+        expect(scalarNear(BaseFunc::electronRepulsion(base1, base2, base3, base4),
+                          repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha3, v3, alpha4, v4),
+                          1E-14));
     }
     {
         Vector3D<ScalarType> v{0, 0, 0};
         GaussBase<ScalarType> base1(v, 0.89, 1, 0, 0);
         GaussBase<ScalarType> base2(v, 12.7, 2, 0, 0);
-        if (!scalarNear(BaseFunc::overlap(base1, base2), ScalarType(0), 1E-15))
-            return 1;
+        expect(scalarNear(BaseFunc::overlap(base1, base2), ScalarType(0), 1E-15));
+
         GaussBase<ScalarType> base3(v, 0.89, 2, 0, 0);
-        if (!scalarNear(BaseFunc::overlap(base2, base3), ScalarType(0.0004513547048841694), 1E-15))
-            return 1;
+        expect(scalarNear(BaseFunc::overlap(base2, base3), ScalarType(0.0004513547048841694), 1E-15));
     }
     {
         Vector3D<ScalarType> v{0, 0, 0};
         GaussBase<ScalarType> base1(v, 0.298073, 0, 0, 0);
         GaussBase<ScalarType> base2(v, 0.298073, 0, 0, 0);
-        if (!scalarNear(BaseFunc::nuclearAttraction(base1, base2, v), ScalarType(10.539675360028560918), 1E-15))
-            return 1;
+        expect(scalarNear(BaseFunc::nuclearAttraction(base1, base2, v), ScalarType(10.539675360028560918), 1E-15));
     }
     {
         const auto alpha1 = ScalarType(13.00773);
@@ -150,10 +143,9 @@ int main() {
         const Vector3D<ScalarType> v2{0, 0, 1};
         const GaussBase<ScalarType> base1(v1, alpha1, 0, 0, 0);
         const GaussBase<ScalarType> base2(v2, alpha2, 0, 0, 0);
-        if (!scalarNear(BaseFunc::electronRepulsion(base1, base2, base2, base1),
-                        repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha2, v2, alpha1, v1),
-                        1E-14))
-            return 1;
+        expect(scalarNear(BaseFunc::electronRepulsion(base1, base2, base2, base1),
+                          repulsion_1s_1s(alpha1, v1, alpha2, v2, alpha2, v2, alpha1, v1),
+                          1E-14));
     }
     return 0;
 }

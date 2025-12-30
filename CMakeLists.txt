@@ -34,7 +34,8 @@ option(PHYSICA_CCACHE ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 # Dev options
 option(PHYSICA_LLVMIR "Collect LLVM IR for benchmark" OFF)
-option(PHYSICA_SANITIZE "Check memory error" OFF)
+option(PHYSICA_ASAN "Compile with address sanitizer" OFF)
+option(PHYSICA_NSAN "Compile with numerical sanitizer" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 include(PhysicaConfigImpl)

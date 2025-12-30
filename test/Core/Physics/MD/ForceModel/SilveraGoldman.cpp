@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -45,8 +46,7 @@ public:
             sg.potentialV(cell).reverse();
             const float64 press_diff = -volume.grad();
             const float64 press = sg.virial(cell).trace().value() / float64(3);
-            if (!scalarNear(press_diff, press, 1E-14))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(press_diff, press, 1E-14));
         }
     }
 private:
@@ -76,8 +76,7 @@ int main() {
             sg.pot_functor(0, 0, r, r2).reverse();
             const Tv f = -r.grad();
             const Tv f1 = sg.force_functor(0, 0, r, r2).value();
-            if (!scalarNear(f, f1, 1E-15))
-                return 1;
+            expect(scalarNear(f, f1, 1E-15));
         }
         {
             dfloat r = 2.0;
@@ -85,8 +84,7 @@ int main() {
             sg.force_functor(0, 0, r, r2).reverse();
             const Tv fc = -r.grad();
             const Tv fc1 = sg.forceConst_functor(r, r2).value();
-            if (!scalarNear(fc, fc1, 1E-15))
-                return 1;
+            expect(scalarNear(fc, fc1, 1E-15));
         }
     }
     PressTest::run();

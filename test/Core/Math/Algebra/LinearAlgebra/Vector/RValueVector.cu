@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -24,7 +25,6 @@ int main() {
     using MatrixType = MatrixND<float32>;
     const MatrixType A = MatrixType::random_uniform<Random<>>(16, 16);
     const auto d_A = A.toDeviceAsync();
-    if (!scalarNear(d_A.diag().sum(), A.diag().sum(), 1E-7))
-        return 1;
+    expect(scalarNear(d_A.diag().sum(), A.diag().sum(), 1E-7));
     return 0;
 }

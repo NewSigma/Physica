@@ -22,6 +22,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -107,8 +108,7 @@ namespace {
         const CellType origin_cell = cell;
         auto order = ForceModel::sortPosition(cell);
         PositionMatrix result = order.transpose() * cell.getPos();
-        if (!matrixNear(result, origin_cell.getPos(), 1E-15))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(result, origin_cell.getPos(), 1E-15));
     }
 
     void testMD() {
@@ -144,8 +144,7 @@ namespace {
             }
         }
         ThreadPool::getInstance().shouldExit();
-        if (!scalarNear(bond, ScalarType(answer), 2E-2))
-            exit(EXIT_FAILURE);
+        expect(scalarNear(bond, ScalarType(answer), 2E-2));
     }
 }
 /**

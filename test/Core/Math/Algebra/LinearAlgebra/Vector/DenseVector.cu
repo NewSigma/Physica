@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float32;
@@ -35,10 +35,7 @@ int main() {
         d_b = d_a;
         CUDAContext::getInstance().wait();
         const VectorType b = d_b.toHost();
-        if (a != b) {
-            std::cout << "[Error]: Copy failed\n";
-            return 1;
-        }
+        expect(a == b);
     }
     {
         const VectorType answer = reciprocal(a);
@@ -46,10 +43,7 @@ int main() {
         VectorType result;
         CUDAContext::getInstance().wait();
         d_a.toHost(result);
-        if (!vectorNear(result, answer, 1E-15)) {
-            std::cout << "[Error]: Reciprocal failed\n";
-            return 1;
-        }
+        expect(vectorNear(result, answer, 1E-15));
     }
     {
         constexpr size_t len = 32;
@@ -67,10 +61,7 @@ int main() {
         }, KernelConfig(1, len)).wait();
 
         d_result.toHost(result);
-        if (!vectorNear(result, answer, 1E-6)) {
-            std::cout << "[Error]: Bad result\n";
-            return 1;
-        }
+        expect(vectorNear(result, answer, 1E-6));
     }
     return 0;
 }

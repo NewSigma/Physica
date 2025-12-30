@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -53,16 +54,12 @@ namespace {
         const auto fc = model.forceConst(cell);
         if constexpr (IsPeriodBoundary) {
             for (size_t i = 0; i < fc.getRow(); ++i)
-                if (!scalarNear(fc.row(i).sum(), ScalarType(0), 1E-15))
-                    exit(EXIT_FAILURE);
+                expect(scalarNear(fc.row(i).sum(), ScalarType(0), 1E-15));
         }
 
-        for (size_t i = 0; i < fc.getRow(); ++i) {
-            for (size_t j = 0; j < fc.getCol(); ++j) {
-                if (!scalarNear(fc[i, j], model.forceConst(cell, i, j), 1E-15))
-                    exit(EXIT_FAILURE);
-            }
-        }
+        for (size_t i = 0; i < fc.getRow(); ++i)
+            for (size_t j = 0; j < fc.getCol(); ++j)
+                expect(scalarNear(fc[i, j], model.forceConst(cell, i, j), 1E-15));
     }
 }
 

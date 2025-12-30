@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Test.h"
 
 int main() {
     using namespace Physica;
@@ -27,20 +28,16 @@ int main() {
         auto func = [](const ScalarType& x) { return hermiteH(5, x); };
         auto result = Differential<ScalarType>::forward(func, ScalarType(3), ScalarType(1E-8));
         const ScalarType answer = ScalarType(8760);
-        if (!scalarNear(result, answer, 1E-8))
-            return 1;
+        expect(scalarNear(result, answer, 1E-8));
 
         result = Differential<ScalarType>::backward(func, ScalarType(3), ScalarType(1E-8));
-        if (!scalarNear(result, answer, 1E-7))
-            return 1;
+        expect(scalarNear(result, answer, 1E-7));
 
         result = Differential<ScalarType>::doublePoint(func, ScalarType(3), ScalarType(1E-5));
-        if (!scalarNear(result, answer, 1E-10))
-            return 1;
+        expect(scalarNear(result, answer, 1E-10));
 
         result = Differential<ScalarType>::ridders(func, ScalarType(3), ScalarType(1.55));
-        if (!scalarNear(result, answer, 1E-14))
-            return 1;
+        expect(scalarNear(result, answer, 1E-14));
     }
     return 0;
 }

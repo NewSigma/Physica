@@ -22,6 +22,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -137,7 +138,6 @@ int main() {
         }
     }
     ThreadPool::getInstance().shouldExit();
-    if (!scalarNear(bond, ScalarType(answer), 2E-2))
-        return 1;
+    expect(scalarNear(bond, ScalarType(answer), 2E-2));
     return 0;
 }

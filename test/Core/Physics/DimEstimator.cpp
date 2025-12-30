@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/Experiment/DimEstimator.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -36,8 +37,7 @@ int main() {
             col[i] = factor * temp * (ScalarType(1) - temp);
         }
         const ScalarType dimen = DimEstimator::corrDimen(data, DenseVector<ScalarType, 8>::linspace(0.00001, 0.0001, 8));
-        if (!(ScalarType(0.495) <= dimen && dimen <= ScalarType(0.505)))
-            return 1;
+        expect(ScalarType(0.495) <= dimen && dimen <= ScalarType(0.505));
     }
     /* Henon map */ {
         // On newer architectures, FMA instructions will affect precision, so we use more data instead of 15000 as [1] does.
@@ -58,8 +58,7 @@ int main() {
         using VectorType = DenseVector<ScalarType, Length>;
         const VectorType r = exp(VectorType::linspace(-10, -3, Length));
         const ScalarType dimen = DimEstimator::corrDimen(data, r);
-        if (!(ScalarType(1.2) <= dimen && dimen <= ScalarType(1.22)))
-            return 1;
+        expect(ScalarType(1.2) <= dimen && dimen <= ScalarType(1.22));
     }
     return 0;
 }

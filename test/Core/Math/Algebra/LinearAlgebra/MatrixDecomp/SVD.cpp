@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/SVD.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -25,7 +26,7 @@ using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col>;
 
 namespace {
     template<Matrix T>
-    bool doTest(const T& source, double tolerance) {
+    void decomp(const T& source, double tolerance) {
         SVD<ScalarType> svd(source);
         const auto& U = svd.getMatrixU();
         const auto& V = svd.getMatrixV();
@@ -34,20 +35,18 @@ namespace {
         T A(source.getRow(), source.getCol(), 0);
         for (size_t i = 0; i < v.getLength(); ++i)
             A += U.col(i) * V.col(i).transpose() * v[i];
-        return matrixNear(A, source, tolerance);
+        expect(matrixNear(A, source, tolerance));
     }
 }
 
 int main() {
     {
         const MatrixType mat{{1, 2, 3}, {2, 1, 1}, {-2, 0, 1}};
-        if (!doTest(mat, 1E-14))
-            return 1;
+        decomp(mat, 1E-14);
     }
     {
         const MatrixType mat{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}, {9, 10, 11, 12, 13}, {7, 6, -8, -9, 5}};
-        if (!doTest(mat, 1E-14))
-            return 1;
+        decomp(mat, 1E-14);
     }
     return 0;
 }

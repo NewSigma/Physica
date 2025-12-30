@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<MT19937, 10000>;
@@ -27,8 +28,7 @@ namespace {
         const MatrixType A = MatrixType::random_uniform<RandomSource>(16, 16);
         const auto d_A = A.toDevice();
         const MatrixType B = d_A.toHost();
-        if (A.asArray() != B.asArray())
-            exit(EXIT_FAILURE);
+        expect(A.asArray() == B.asArray());
     }
 
     void deviceExprEval() {
@@ -43,8 +43,7 @@ namespace {
         const DeviceMatrix d_result = d_A * d_B;
         CUDAContext::getInstance().wait();
         const auto result = d_result.toHost();
-        if (!matrixNear(answer, result, 1E-6))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(answer, result, 1E-6));
     }
     /**
      * A continuous matrix is continuous in either row or column.
@@ -58,14 +57,12 @@ namespace {
         {
             using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Col>>;
             const auto x = MatrixType(Size, Size);
-            if (x.data_ptr(r, c) != x.col(c).data() + r)
-                exit(EXIT_FAILURE);
+            expect(x.data_ptr(r, c) == x.col(c).data() + r);
         }
         {
             using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Row>>;
             const auto x = MatrixType(Size, Size);
-            if (x.data_ptr(r, c) != x.row(r).data() + c)
-                exit(EXIT_FAILURE);
+            expect(x.data_ptr(r, c) == x.row(r).data() + c);
         }
     }
 }

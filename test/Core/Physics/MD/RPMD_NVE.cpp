@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Parallel.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using namespace Physica;
@@ -74,7 +75,6 @@ int main() {
         }
     }
     const bool isEnergyConserved = scalarNear(nve.max(), nve.min(), 1E-11);
-    if (!isEnergyConserved)
-        return 1;
+    expect(isEnergyConserved);
     return 0;
 }

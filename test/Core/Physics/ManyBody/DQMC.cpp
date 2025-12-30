@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/DQMC.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -35,7 +36,7 @@ constexpr int NumSample = 1024;
 
 namespace {
     /**
-     * Test that half filling is free of sign problem
+     * Fuzzing test that half filling is free of sign problem
      */
     void halfFillTest() {
         const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
@@ -44,8 +45,7 @@ namespace {
         dqmc.step_random<RandomSource>();
         for (int i = 0; i < NumSample; ++i) {
             dqmc.step<RandomSource>();
-            if (dqmc.getRSign().isNegative())
-                exit(EXIT_FAILURE);
+            expect(dqmc.getRSign().isPositive());
         }
     }
 }

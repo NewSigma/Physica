@@ -17,17 +17,18 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/ML/Clustering/AP.h"
+#include "Test.h"
 
 using namespace Physica;
 
 namespace {
     bool testCluster(const std::forward_list<size_t>& cluster) {
         const size_t first = cluster.front();
-        for (auto ite = cluster.cbegin(); ite != cluster.cend(); ++ite) {
-            if (first < 3 && *ite >= 3)
-                return false;
-            if (first >= 3 && *ite < 3)
-                return false;
+        for (auto i : cluster) {
+            if (first < 3)
+                expect(i < 3);
+            else
+                expect(i >= 3);
         }
         return true;
     }
@@ -43,17 +44,15 @@ int main() {
         }
     }
 
-    AP<float64> ap(std::move(similar), 0.5, 10, 100);
+    AP<float64> ap(similar, 0.5, 10, 100);
     auto exemplars = ap.getExemplars();
-    if (exemplars.size() != 2)
-        return 1;
+    expect(exemplars.size() == 2);
     {
         auto ite = exemplars.begin();
-        if (!testCluster(ap.getCluster(*ite)))
-            return 1;
+        testCluster(ap.getCluster(*ite));
+
         ++ite;
-        if (!testCluster(ap.getCluster(*ite)))
-            return 1;
+        testCluster(ap.getCluster(*ite));
     }
     return 0;
 }

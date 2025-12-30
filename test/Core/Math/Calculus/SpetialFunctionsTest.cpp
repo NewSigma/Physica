@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -32,16 +33,14 @@ namespace {
             using T = float32;
             T s(value[i]);
             auto temp = lnGamma(s);
-            if (!scalarNear(temp, T(floatResult[i]), 1E-6))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(floatResult[i]), 1E-6));
         }
 
         for (int i = 0; i < count; ++i) {
             using T = float64;
             T s(value[i]);
             auto temp = lnGamma(s);
-            if (!scalarNear(temp, T(doubleResult[i]), 1E-15))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(doubleResult[i]), 1E-15));
         }
     }
 
@@ -54,11 +53,10 @@ namespace {
 
         for (int i = 0; i < count; ++i) {
             auto temp = gammaP(T(a[i]), T(x[i]));
-            if (!scalarNear(temp, T(result[i]), 1E-14))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(result[i]), 1E-14));
+
             temp = gammaQ(T(a[i]), T(x[i]));
-            if (!scalarNear(temp, T(1 - result[i]), 1E-11))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(1 - result[i]), 1E-11));
         }
     }
 
@@ -71,8 +69,7 @@ namespace {
 
         for (int i = 0; i < count; ++i) {
             auto temp = bigamma(T(x[i]), T(step[i]));
-            if (!scalarNear(temp, T(result[i]), 1E-13))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(result[i]), 1E-13));
         }
     }
 
@@ -85,8 +82,7 @@ namespace {
 
         for (int i = 0; i < count; ++i) {
             auto temp = besselJn(n[i], T(x[i]));
-            if (!scalarNear(temp, T(result[i]), 1E-8))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(result[i]), 1E-8));
         }
     }
 
@@ -99,8 +95,7 @@ namespace {
 
         for (int i = 0; i < count; ++i) {
             auto temp = besselYn(n[i], T(x[i]));
-            if (!scalarNear(temp, T(result[i]), 1E-7))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(result[i]), 1E-7));
         }
     }
 
@@ -117,14 +112,10 @@ namespace {
         for (int i = 0; i < count; ++i) {
             T Jn, dJn, Yn, dYn;
             besselJn_Yn_dJn_dYn(T(n[i]), T(x[i]), Jn, Yn, dJn, dYn);
-            if (!scalarNear(Jn, T(result_Jn[i]), 1E-9))
-                exit(EXIT_FAILURE);
-            if (!scalarNear(dJn, T(result_dJn[i]), 1E-10))
-                exit(EXIT_FAILURE);
-            if (!scalarNear(Yn, T(result_Yn[i]), 1E-10))
-                exit(EXIT_FAILURE);
-            if (!scalarNear(dYn, T(result_dYn[i]), 1E-9))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(Jn, T(result_Jn[i]), 1E-9));
+            expect(scalarNear(dJn, T(result_dJn[i]), 1E-10));
+            expect(scalarNear(Yn, T(result_Yn[i]), 1E-10));
+            expect(scalarNear(dYn, T(result_dYn[i]), 1E-9));
         }
     }
 
@@ -140,10 +131,8 @@ namespace {
         for (int i = 0; i < count; ++i) {
             auto result1 = legendreP(l[i], T(theta[i]));
             auto result2 = legendreP(l[i], m[i], T(theta[i]));
-            if (!scalarNear(result1, T(answer1[i]), 1E-15))
-                exit(EXIT_FAILURE);
-            if (!scalarNear(result2, T(answer2[i]), 1E-15))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(result1, T(answer1[i]), 1E-15));
+            expect(scalarNear(result2, T(answer2[i]), 1E-15));
         }
     }
 
@@ -159,8 +148,7 @@ namespace {
 
         for (int i = 0; i < count; ++i) {
             auto result = sphericalHarmomicY(l[i], m[i], T(theta[i]), T(phi[i]));
-            if (!scalarNear(result, Complex<T>(T(result_real[i]), T(result_imag[i])), 1E-14))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(result, Complex<T>(T(result_real[i]), T(result_imag[i])), 1E-14));
         }
     }
     /**
@@ -180,8 +168,7 @@ namespace {
             const Matrix3D answer({cos(alpha), 0, sin(alpha),
                                 0, 1, 0,
                                 -sin(alpha), 0, cos(alpha)});
-            if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
-                exit(EXIT_FAILURE);
+            expect(matrixNear(rotator.getCurrentRotation(), answer, epsilon));
         }
         /* order 2 */ {
             using Matrix5D = DenseMatrix<T, MatrixOption::Row, 5, 5>;
@@ -191,8 +178,7 @@ namespace {
                                 0, 0, 1, 0, 0,
                                 0, -sin(alpha), 0, cos(alpha), 0,
                                 -sin(2 * alpha), 0, 0, 0, cos(2 * alpha)});
-            if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
-                exit(EXIT_FAILURE);
+            expect(matrixNear(rotator.getCurrentRotation(), answer, epsilon));
         }
         /* order 3 */ {
             using Matrix7D = DenseMatrix<T, MatrixOption::Row, 7, 7>;
@@ -204,8 +190,7 @@ namespace {
                                 0, 0, -sin(alpha), 0, cos(alpha), 0, 0,
                                 0, -sin(2 * alpha), 0, 0, 0, cos(2 * alpha), 0,
                                 -sin(3 * alpha), 0, 0, 0, 0, 0, cos(3 * alpha)});
-            if (!matrixNear(rotator.getCurrentRotation(), answer, epsilon))
-                exit(EXIT_FAILURE);
+            expect(matrixNear(rotator.getCurrentRotation(), answer, epsilon));
         }
     }
 
@@ -218,8 +203,7 @@ namespace {
 
         for (size_t i = 0; i < count; ++i) {
             auto temp = hermiteH(n[i], T(x[i]));
-            if (!scalarNear(temp, T(result[i]), 1E-14))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(result[i]), 1E-14));
         }
     }
 
@@ -232,8 +216,7 @@ namespace {
 
         for (size_t i = 0; i < count; ++i) {
             auto temp = studentT(n[i], T(x[i]));
-            if (!scalarNear(temp, T(result[i]), 1E-13))
-                exit(EXIT_FAILURE);
+            expect(scalarNear(temp, T(result[i]), 1E-13));
         }
     }
 }

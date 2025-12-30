@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -48,8 +49,7 @@ namespace {
             for (size_t i = 0; i < order; ++i) {
                 using EigVector = EigenSolver<T>::EigenvalueVector;
                 const EigVector result = (mat - solver.getEigenvalues()[i] * IdentityMatrix<Tr>(order)) * eigenvectors.col(i);
-                if (!vectorNearZero(result, precision))
-                    exit(EXIT_FAILURE);
+                expect(vectorNearZero(result, precision));
             }
         };
 
@@ -58,8 +58,8 @@ namespace {
 
         solver.sort();
         for (size_t i = 0; i < mat.getRow(); ++i) {
-            if (i > 1 && solver.getEigenvalues()[i - 1].real() > solver.getEigenvalues()[i].real())
-                exit(EXIT_FAILURE);
+            if (i != 0)
+                expect(solver.getEigenvalues()[i - 1].real() <= solver.getEigenvalues()[i].real());
         }
         eigenvectors = solver.getEigenvectors();
         checkEigenvectors(eigenvectors);
@@ -75,11 +75,11 @@ namespace {
     }
 
     template<Matrix M, bool IsHermite>
-    bool reconstructTest(const M& mat, double precision) {
+    void reconstructTest(const M& mat, double precision) {
         using ScalarType = M::ScalarType;
         auto solver = EigenSolver<ScalarType>(mat, true);
         const M result = IsHermite ? solver.reconstruct_hermite() : solver.reconstruct();
-        return matrixNear(result, mat, precision);
+        expect(matrixNear(result, mat, precision));
     }
 
     template<Scalar T>
@@ -124,8 +124,8 @@ namespace {
                 { 0.517063, -0.956614, -0.920775}
         };
         eigenTest(mat1, 1E-14);
-        if (!reconstructTest<M, false>(mat1, 1E-14))
-            exit(EXIT_FAILURE);
+        reconstructTest<M, false>(mat1, 1E-14);
+
 
         const M mat2{
                 {0.354784,  0.604092, 0.557408},
@@ -134,8 +134,7 @@ namespace {
         };
         eigenTest(mat2, 1E-15);
         const M mat3 = mat2 + mat2.transpose();
-        if (!reconstructTest<M, true>(mat3, 1E-14))
-            exit(EXIT_FAILURE);
+        reconstructTest<M, true>(mat3, 1E-14);
     }
 
     void testRowMajor() {
@@ -172,13 +171,11 @@ namespace {
         using dfloat = Diff<float64, DiffMode::Forward>;
         auto result = EigenSolver<dfloat, 2>(rotation(dfloat(1, 1)), true);
         auto answer = EigenSolver<float64, 2>(rotation(float64(1) + MathConst<float64>::pi * 0.5), true);
-        if (result.getEigenvalues().grads() != answer.getEigenvalues())
-            exit(EXIT_FAILURE);
+        expect(result.getEigenvalues().grads() == answer.getEigenvalues());
 
         for (int i = 0; i < 2; ++i)
             for (int j = 0; j < 2; ++j)
-                if (!result.getEigenvectors().grads()[i, j].isZero())
-                    exit(EXIT_FAILURE);
+                expect(result.getEigenvectors().grads()[i, j].isZero());
     }
 }
 

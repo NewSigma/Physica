@@ -16,87 +16,87 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Calculus/PDE/FEM/PoissonModel.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Rectangle1.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Triangle1.h"
+#include "Physica/Core/Math/Calculus/PDE/FEM/PoissonModel.h"
+#include "Test.h"
 
 using namespace Physica;
-using ScalarType = float64;
-using VectorType = Vector2D<ScalarType>;
+using T = float64;
 
 constexpr double width = 2;
 constexpr double height = 1;
 constexpr double error = 1E-4;
 
-ScalarType theory_solution(VectorType p) {
-    constexpr double factor = -8 * width * width / (M_PI * M_PI * M_PI);
-    const ScalarType b_2 = height * 0.5;
-    const ScalarType rep_a = 1 / width;
-    ScalarType result = 0;
-    unsigned int k = 1;
-    ScalarType temp = std::numeric_limits<ScalarType>::max();
-    while (abs(temp) > error) {
-        const ScalarType phase = k * M_PI;
-        temp = cosh(phase * (p[1] -b_2) * rep_a) / (cosh(phase * b_2 * rep_a) * (k * k * k)) * sin(phase * p[0] * rep_a);
-        k += 2;
-        result += temp;
+namespace {
+    T theory_solution(Vector2D<T> p) {
+        constexpr double factor = -8 * width * width / (M_PI * M_PI * M_PI);
+        const T b_2 = height * 0.5;
+        const T rep_a = 1 / width;
+        T result = 0;
+        unsigned int k = 1;
+        T temp = std::numeric_limits<T>::max();
+        while (abs(temp) > error) {
+            const T phase = k * M_PI;
+            temp = cosh(phase * (p[1] - b_2) * rep_a) / (cosh(phase * b_2 * rep_a) * (k * k * k)) * sin(phase * p[0] * rep_a);
+            k += 2;
+            result += temp;
+        }
+        return result * factor - p[0] * (p[0] - width);
     }
-    return result * factor - p[0] * (p[0] - width);
-}
 
-template<class ElementType>
-struct ElementIntegratorPacker {
-    static ScalarType run(std::invocable<VectorType> auto fn) {
-        return ElementType::gauss_integral(std::move(fn));
-    }
-};
+    template<class ElementType>
+    struct ElementIntegratorPacker {
+        static T run(std::invocable<Vector2D<T>> auto fn) {
+            return ElementType::gauss_integral(std::move(fn));
+        }
+    };
+}
 
 int main() {
     {
-        using ElementType = Rectangle1<ScalarType>;
+        using ElementType = Rectangle1<T>;
         auto mesh = ElementType::rectangle({0, 0}, {width, height}, 21, 21);
-        mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType(0), 1E-5)
-                                                        || scalarNear(p[0], ScalarType(width), 1E-5)
-                                                        || scalarNear(p[1], ScalarType(0), 1E-5)
-                                                        || scalarNear(p[1], ScalarType(height), 1E-5); },
-                                []([[maybe_unused]] VectorType p) { return ScalarType(0); });
+        mesh.addDirichletBoundary([](Vector2D<T> p) { return scalarNear(p[0], T(0), 1E-5)
+                                                          || scalarNear(p[0], T(width), 1E-5)
+                                                          || scalarNear(p[1], T(0), 1E-5)
+                                                          || scalarNear(p[1], T(height), 1E-5); },
+                                  []([[maybe_unused]] Vector2D<T> p) { return T(0); });
 
-        auto func = []([[maybe_unused]] VectorType p) { return ScalarType(-2); };
+        auto func = []([[maybe_unused]] Vector2D<T> p) { return T(-2); };
         PoissonModel model(std::move(mesh), func);
         model.solve<ElementIntegratorPacker<ElementType>>();
 
-        const VectorND<ScalarType> xs = VectorND<ScalarType>::linspace(0, width * 0.9, 6);
-        const VectorND<ScalarType> ys = VectorND<ScalarType>::linspace(0, height * 0.9, 4);
+        const VectorND<T> xs = VectorND<T>::linspace(0, width * 0.9, 6);
+        const VectorND<T> ys = VectorND<T>::linspace(0, height * 0.9, 4);
         for (auto x : xs) {
             for (auto y : ys) {
-                const ScalarType theory = theory_solution({x, y});
-                const ScalarType simulation = model({x, y});
-                if (!scalarNear(theory, simulation, 1E-2))
-                    return 1;
+                const T theory = theory_solution({x, y});
+                const T simulation = model({x, y});
+                expect(scalarNear(theory, simulation, 1E-2));
             }
         }
     }
     {
-        using ElementType = Triangle1<ScalarType>;
+        using ElementType = Triangle1<T>;
         auto mesh = ElementType::rectangle({0, 0}, {width, height}, 20, 20);
-        mesh.addDirichletBoundary([](VectorType p) { return scalarNear(p[0], ScalarType(0), 1E-5)
-                                                        || scalarNear(p[0], ScalarType(width), 1E-5)
-                                                        || scalarNear(p[1], ScalarType(0), 1E-5)
-                                                        || scalarNear(p[1], ScalarType(height), 1E-5); },
-                                []([[maybe_unused]] VectorType p) { return ScalarType(0); });
+        mesh.addDirichletBoundary([](Vector2D<T> p) { return scalarNear(p[0], T(0), 1E-5)
+                                                          || scalarNear(p[0], T(width), 1E-5)
+                                                          || scalarNear(p[1], T(0), 1E-5)
+                                                          || scalarNear(p[1], T(height), 1E-5); },
+                                  []([[maybe_unused]] Vector2D<T> p) { return T(0); });
 
-        auto func = []([[maybe_unused]] VectorType p) { return ScalarType(-2); };
+        auto func = []([[maybe_unused]] Vector2D<T> p) { return T(-2); };
         PoissonModel model(std::move(mesh), func);
         model.solve<ElementIntegratorPacker<ElementType>>();
 
-        const VectorND<ScalarType> xs = VectorND<ScalarType>::linspace(0, width * 0.9, 6);
-        const VectorND<ScalarType> ys = VectorND<ScalarType>::linspace(0, height * 0.9, 4);
+        const VectorND<T> xs = VectorND<T>::linspace(0, width * 0.9, 6);
+        const VectorND<T> ys = VectorND<T>::linspace(0, height * 0.9, 4);
         for (auto x : xs) {
             for (auto y : ys) {
-                const ScalarType theory = theory_solution({x, y});
-                const ScalarType simulation = model({x, y});
-                if (!scalarNear(theory, simulation, 1E-2))
-                    return 1;
+                const T theory = theory_solution({x, y});
+                const T simulation = model({x, y});
+                expect(scalarNear(theory, simulation, 1E-2));
             }
         }
     }

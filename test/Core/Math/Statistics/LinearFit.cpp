@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Statistics/LinearFit.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -29,7 +30,6 @@ int main() {
     const VectorType p = Fit::polyfit(x, y, 7);
     const VectorType y1 = Fit::polyval(x, p);
     const ScalarType err = square(y - y1).sum() / ScalarType(y.getLength());
-    if (err > ScalarType(1E-3))
-        return 1;
+    expect(err < ScalarType(1E-3));
     return 0;
 }

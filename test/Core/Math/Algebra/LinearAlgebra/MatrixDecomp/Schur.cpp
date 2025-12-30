@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Schur.h"
 #include "Physica/Core/Scalar/Complex.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -54,22 +55,22 @@ namespace {
     }
 
     template<Matrix M>
-    bool realSchurTest(const M& mat, double precision) {
+    void realSchurTest(const M& mat, double precision) {
         Schur<typename M::ScalarType> schur(mat, true);
-        if (!isUpperQuasiTriangle(schur.getMatrixT()))
-            return false;
+        expect(isUpperQuasiTriangle(schur.getMatrixT()));
+
         M A = (schur.getMatrixU() * schur.getMatrixT()).compute() * schur.getMatrixU().transpose();
-        return (A - mat).norm1() <= mat.norm1() * precision;
+        expect((A - mat).norm1() <= mat.norm1() * precision);
     }
 
     template<Matrix M>
-    bool schurTest(const M& mat, double precision) {
+    void schurTest(const M& mat, double precision) {
         static_assert(M::isComplex, "[Error]: Use realSchurTest is prefered");
         Schur<typename M::ScalarType> schur(mat, true);
-        if (!isUpperTriangle(schur.getMatrixT()))
-            return false;
+        expect(isUpperTriangle(schur.getMatrixT()));
+
         M A = (schur.getMatrixU() * schur.getMatrixT()).compute() * schur.getMatrixU().hermite();
-        return (A - mat).norm1() <= mat.norm1() * precision;
+        expect((A - mat).norm1() <= mat.norm1() * precision);
     }
 }
 
@@ -79,33 +80,29 @@ int main() {
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Col>;
         const MatrixType mat{{1, 2}, {3, 4}};
-        if (!realSchurTest(mat, 1E-15))
-            return 1;
+        realSchurTest(mat, 1E-15);
     }
     {
         using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col>;
         const MatrixType mat{{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
-        if (!schurTest(mat, 1E-15))
-            return 1;
+        schurTest(mat, 1E-15);
     }
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 3, 3>;
         const MatrixType mat1{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
-        if (!realSchurTest(mat1, 1E-14))
-            return 1;
+        realSchurTest(mat1, 1E-14);
+
         const MatrixType mat2{{-0.590316, -2.19514, -2.37463},
                               {-1.25006, -0.297493, 1.40349},
                               {0.517063, -0.956614, -0.920775}};
-        if (!realSchurTest(mat2, 1E-14))
-            return 1;
+        realSchurTest(mat2, 1E-14);
     }
     {
         using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col, 3, 3>;
         const MatrixType mat1{{{-149, 37}, {537, -126}, {-27, 0}},
                               {{0, -50}, {0, 180}, {-9, 17}},
                               {{12, -154}, {546, 8}, {-25, 9}}};
-        if (!schurTest(mat1, 1E-14))
-            return 1;
+        schurTest(mat1, 1E-14);
     }
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Row>;
@@ -121,8 +118,7 @@ int main() {
                              { 8.941250463097134e-11, -0.003599700059967799,    -1.083254145986432,    0.6113157992231695,    -2.078228665662546,-1.120358678570584e-07,-0.0002221516784015098,    0.1287911205595803,   -0.1180314801325573,      50.2560006099534,    -4.072439521803009,      41.0073828040026},
                              { 3.242667144581444e-09,   -0.1311225590434474,    -39.45448170920827,     22.27545753248296,    -75.69033937713017,-3.407483848815609e-06, -0.007862265988011478,     4.730168346968156,  -0.03351033843348594,    -4.072439521803009,    -62.61826197626559,     -1.79645092586206},
                              {  7.65812223572007e-11, -0.003097747778273297,   -0.9321542370376518,    0.5268876296522678,    -1.788944253152537,-7.663495077598609e-08,-0.0001779849155034141,    0.1119868370907421,  -0.02848921794527029,      41.0073828040026,     -1.79645092586206,    -34.41047976018166}};
-        if (!realSchurTest(mat, 1E-10))
-            return 1;
+        realSchurTest(mat, 1E-10);
     }
     /* Test degeneracy */ {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 6, 6>;
@@ -132,13 +128,11 @@ int main() {
                               {-0.1343184056,             0,             0,  0.1343184065,             0,             0},
                               {            0, -0.1341424541,             0,             0,  0.1341424554,             0},
                               {            0,             0, -0.1342191848,             0,             0,  0.1342191868}};
-        if (!realSchurTest(mat1, 1E-15))
-            return 1;
+        realSchurTest(mat1, 1E-15);
 
         using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Col, 6, 6>;
         const ComplexMatrix mat2 = mat1;
-        if (!schurTest(mat2, 1E-14))
-            return 1;
+        schurTest(mat2, 1E-14);
     }
     return 0;
 }

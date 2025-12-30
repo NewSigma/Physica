@@ -19,34 +19,33 @@
 #include <random>
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
 
-ScalarType func(ScalarType x) {
-    return ScalarType(M_PI_2) * x * sin(ScalarType(M_PI) * x);
+namespace {
+    ScalarType func(ScalarType x) {
+        return ScalarType(M_PI_2) * x * sin(ScalarType(M_PI) * x);
+    }
 }
 
 int main() {
     {
         IntegrateRange<ScalarType, 1> range({-1}, {1});
         Integrate<IntegrateMethod::Rectangular, ScalarType, 1> rec(range, 0.01);
-        if (!scalarNear(ScalarType(1), rec.solve(func), 1E-4))
-            return 1;
+        expect(scalarNear(ScalarType(1), rec.solve(func), 1E-4));
 
         Integrate<IntegrateMethod::Ladder, ScalarType, 1> ladder(range, 0.01);
-        if (!scalarNear(ScalarType(1), ladder.solve(func), 1E-4))
-            return 1;
+        expect(scalarNear(ScalarType(1), ladder.solve(func), 1E-4));
 
         Integrate<IntegrateMethod::Simpson, ScalarType, 1> simpson(range, 0.01);
-        if (!scalarNear(ScalarType(1), simpson.solve(func), 1E-8))
-            return 1;
+        expect(scalarNear(ScalarType(1), simpson.solve(func), 1E-8));
     }
     {
         IntegrateRange<ScalarType, 1> range({1E-10}, {1});
         Integrate<IntegrateMethod::Tanh_Sinh, ScalarType, 1> tanh_sinh(range, 0.001, 3500);
-        if (!scalarNear(ScalarType(23.025850929940456840), tanh_sinh.solve([](ScalarType x) -> ScalarType { return reciprocal(x); }), 1E-7))
-            return 1;
+        expect(scalarNear(ScalarType(23.025850929940456840), tanh_sinh.solve([](ScalarType x) -> ScalarType { return reciprocal(x); }), 1E-7));
     }
     {
         IntegrateRange<ScalarType, 2> range({0, 0}, {1, 1});
@@ -61,8 +60,7 @@ int main() {
             }, deviation);
         }
         const bool isGoodResult = std::isfinite(double(answer)) && std::isfinite(double(deviation));
-        if (!isGoodResult || abs(answer - result) > deviation)
-            return 1;
+        expect(isGoodResult && (abs(answer - result) < deviation));
     }
     return 0;
 }

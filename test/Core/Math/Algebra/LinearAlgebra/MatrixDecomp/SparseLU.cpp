@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/SparseLU.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -34,16 +35,14 @@ namespace {
         const VectorType answer{0.06910464034803039, 0.6682416388355244, 0.5106380624075890, 1.413471488683768};
         SparseLU<T> lu(SparseMatrix<T>(A), true);
         MatrixND<T> cp(b);
-        if (!vectorNear(lu.solve(b).col(0), answer, 1E-15))
-            exit(EXIT_FAILURE);
+        expect(vectorNear(lu.solve(b).col(0), answer, 1E-15));
     }
 
     void testLnAbsDet() {
         using MatrixType = DenseMatrix<T, MatrixOption::Row, 4, 4>;
         const MatrixType A = MatrixType::random_normal<Random<MT19937, 1000>>(4, 4);
         SparseLU<T> lu(SparseMatrix<T>(A), true);
-        if (!scalarNear(lu.lnAbsDet(), A.lnAbsDet(), 1E-14))
-            exit(EXIT_FAILURE);
+        expect(scalarNear(lu.lnAbsDet(), A.lnAbsDet(), 1E-14));
     }
 }
 

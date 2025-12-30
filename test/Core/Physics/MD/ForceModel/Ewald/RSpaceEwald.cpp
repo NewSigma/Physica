@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -46,8 +47,7 @@ namespace Physica {
                 /* Test press */ {
                     const ValueType press_diff = -volume.grad() / ValueType(cellSize * cellSize * cellSize);
                     const ValueType press = (ewald.virial(pos).trace() / ScalarType(3)).value();
-                    if (!scalarNear(press_diff, press, 1E-13))
-                        exit(EXIT_FAILURE);
+                    expect(scalarNear(press_diff, press, 1E-13));
                 }
             }
         }

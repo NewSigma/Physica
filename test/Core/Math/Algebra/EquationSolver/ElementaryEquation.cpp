@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2025 Weibo He.
  *
  * This file is part of Physica.
 
@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
+#include "Test.h"
 
 int main() {
     using namespace Physica;
@@ -25,14 +26,12 @@ int main() {
     {
         ScalarType result = bisectionMethod(func, ScalarType(0), ScalarType(3));
         const ScalarType answer = ScalarType(1.6094379124341003746);
-        if (!scalarNear(result, answer, 1E-15))
-            return 1;
+        expect(scalarNear(result, answer, 1E-15));
     }
     {
         ScalarType result = secant(func, ScalarType(0), ScalarType(3), ScalarType(1E-9));
         const ScalarType answer = ScalarType(1.6094379124341003746);
-        if (!scalarNear(result, answer, 1E-15))
-            return 1;
+        expect(scalarNear(result, answer, 1E-15));
     }
     return 0;
 }

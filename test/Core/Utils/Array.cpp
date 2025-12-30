@@ -17,11 +17,12 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Utils/Container/Array.h"
+#include "Test.h"
 
 using namespace Physica;
 
 namespace {
-template<class C>
+    template<class C>
     consteval void rangeTest() noexcept {
         using I = PtrIteratorF<C>;
         static_assert(std::indirectly_readable<I>);
@@ -43,7 +44,8 @@ int main() {
     // Test structured binding
     Array<long, 3> arr{1, 2, 3};
     auto [x, y, z] = arr;
-    if (x != 1 || y != 2 || z != 3)
-        return 1;
+    expect(x == 1);
+    expect(y == 2);
+    expect(z == 3);
     return 0;
 }

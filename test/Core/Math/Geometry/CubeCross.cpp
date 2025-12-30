@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Geometry/CubeCross.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -26,28 +26,23 @@ int main() {
     {
         const ScalarType rep3 = reciprocal(ScalarType(3));
         const auto cross = CubeCross<ScalarType>({rep3, rep3, rep3, 1});
-        if (!scalarNear(cross.getArea(), ScalarType(0), 1E-15))
-            return 1;
+        expect(scalarNear(cross.getArea(), ScalarType(0), 1E-15));
     }
     {
         const auto cross = CubeCross<ScalarType>({2, 0, 0, 1});
-        if (!scalarNear(cross.getArea(), ScalarType(4), 1E-15))
-            return 1;
+        expect(scalarNear(cross.getArea(), ScalarType(4), 1E-15));
     }
     {
         const auto cross = CubeCross<ScalarType>({-0.5, 0, 0, 1});
-        if (!scalarNear(cross.getArea(), ScalarType(0), 1E-15))
-            return 1;
+        expect(scalarNear(cross.getArea(), ScalarType(0), 1E-15));
     }
     {
         const auto cross = CubeCross<ScalarType>({1, 1, 0, 1});
-        if (!scalarNear(cross.getArea(), ScalarType(2 * M_SQRT2), 1E-15))
-            return 1;
+        expect(scalarNear(cross.getArea(), ScalarType(2 * M_SQRT2), 1E-15));
     }
     {
         const auto cross = CubeCross<ScalarType>({1, 1, 1, 1});
-        if (!scalarNear(cross.getArea(), sqrt(ScalarType(3)) * ScalarType(2), 1E-15))
-            return 1;
+        expect(scalarNear(cross.getArea(), sqrt(ScalarType(3)) * ScalarType(2), 1E-15));
     }
     {
         const ScalarType rep3 = reciprocal(ScalarType(3));
@@ -61,8 +56,7 @@ int main() {
             y[i] = cross.getArea() * sqrt3;
         }
         const ScalarType volume = y.sum() * (x[1] - x[0]);
-        if (!scalarNear(volume, ScalarType(8), 1E-6))
-            return 1;
+        expect(scalarNear(volume, ScalarType(8), 1E-6));
     }
     return 0;
 }

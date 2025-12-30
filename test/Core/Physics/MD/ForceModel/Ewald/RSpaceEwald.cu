@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float32;
@@ -52,14 +53,12 @@ int main() {
     {
         const auto f0 = hostModel.template force_short<Sequential>(pos);
         const auto f1 = deviceModel.template force_short<GPU>(pos);
-        if (!vectorNear(f0, f1, 1E-4))
-            return 1;
+        expect(vectorNear(f0, f1, 1E-4));
     }
     {
         const auto v0 = hostModel.virial(pos);
         const auto v1 = deviceModel.virial(pos);
-        if (!matrixNear(v0, v1, 1E-4))
-            return 1;
+        expect(matrixNear(v0, v1, 1E-4));
     }
     return 0;
 }

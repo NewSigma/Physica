@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
+#include "Test.h"
 
 using namespace Physica;
 using RealType = float64;
@@ -40,8 +41,7 @@ namespace {
             const size_t temp = KFermiRepr<1, NumSite, true>(rRepr, i).getNumState();
             kNumState += temp;
         }
-        if (rNumState != kNumState)
-            exit(EXIT_FAILURE);
+        expect(rNumState == kNumState);
     }
 
     void testEigen() {
@@ -70,8 +70,7 @@ namespace {
             jd.sort();
             result = jd.getEigenvalues()[0].real();
         }
-        if (!scalarNear(answer, result, 1E-14))
-            exit(EXIT_FAILURE);
+        expect(scalarNear(answer, result, 1E-14));
     }
 }
 

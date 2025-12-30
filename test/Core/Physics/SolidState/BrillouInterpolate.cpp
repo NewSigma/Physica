@@ -21,6 +21,7 @@
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 #include "Physica/Core/Physics/SolidState/BrillouInterpolate.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -75,8 +76,7 @@ int main() {
         const VectorND<ScalarType> x1 = VectorND<ScalarType>::linspace(0, 1, 40);
         for (size_t i = 0; i < x1.getLength(); ++i) {
             const auto value = zone(Vector3D<ScalarType>{x1[i], 0, 0});
-            if (!scalarNear(value.imag(), ScalarType(0), 1E-3))
-                return 1;
+            expect(scalarNear(value.imag(), ScalarType(0), 1E-3));
         }
     }
     return 0;

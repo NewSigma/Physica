@@ -21,6 +21,7 @@
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Test.h"
 
 using namespace Physica;
 using T = float32;
@@ -83,8 +84,7 @@ namespace {
         constexpr double answer = 61.8;
         const T energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
         const T deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
-        if (abs(energyPerMol - answer) > deviation * 2.0)
-            exit(EXIT_FAILURE);
+        expect(abs(energyPerMol - answer) < deviation * 2.0);
     }
 }
 

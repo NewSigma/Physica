@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -35,8 +36,7 @@ int main() {
         for (size_t i = 0; i < solution.getCol(); ++i) {
             const T result = solution.col(i)[0];
             const T answer = exp(x[i]);
-            if (!scalarNear(result, answer, 1E-11))
-                return 1;
+            expect(scalarNear(result, answer, 1E-11));
         }
     }
     /**
@@ -52,11 +52,10 @@ int main() {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
             const auto answer1 = sin(x_i);
-            if (!scalarNear(solVector[0], answer1, 1E-10))
-                return 1;
+            expect(scalarNear(solVector[0], answer1, 1E-10));
+
             const auto answer2 = cos(x_i);
-            if (!scalarNear(solVector[1], answer2, 1E-7))
-                return 1;
+            expect(scalarNear(solVector[1], answer2, 1E-7));
         }
     }
     /**
@@ -71,8 +70,7 @@ int main() {
         for (size_t i = 0; i < solution.getCol(); ++i) {
             const auto solVector = solution.col(i);
             const auto answer = exp(x[i]);
-            if (!scalarNear(solVector[0], answer, 1E-8))
-                return 1;
+            expect(scalarNear(solVector[0], answer, 1E-8));
         }
     }
     /**
@@ -88,8 +86,7 @@ int main() {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
             const auto answer = sin(x_i);
-            if (!scalarNear(solVector[0], answer, 1E-8))
-                return 1;
+            expect(scalarNear(solVector[0], answer, 1E-8));
         }
     }
     /**
@@ -109,8 +106,7 @@ int main() {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
             const auto answer = x_i * exp(-square(x_i) / 2);
-            if (!scalarNear(solVector[0], answer, 1E-8))
-                return 1;
+            expect(scalarNear(solVector[0], answer, 1E-8));
         }
     }
     return 0;

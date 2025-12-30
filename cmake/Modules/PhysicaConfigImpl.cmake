@@ -65,9 +65,14 @@ else()
         add_link_options(-Wl,--icf=safe,-z,pack-relative-relocs)
     endif()
 
-    if(${PHYSICA_SANITIZE})
+    if(${PHYSICA_ASAN})
         add_compile_options(-fsanitize=address)
         add_link_options(-fsanitize=address)
+    endif()
+
+    if(${PHYSICA_NSAN})
+        add_compile_options(-fsanitize=numerical)
+        add_link_options(-fsanitize=numerical)
     endif()
 endif()
 

@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<>;
@@ -47,8 +48,7 @@ namespace Physica {
                 /* Test press */ {
                     const float64 press_diff = -volume.grad() / float64(cellSize * cellSize * cellSize);
                     const float64 press = (forceModel.virial(cell).trace() / float64(3)).value();
-                    if (!scalarNear(press_diff, press, 1E-12))
-                        exit(EXIT_FAILURE);
+                    expect(scalarNear(press_diff, press, 1E-12));
                 }
             }
         }

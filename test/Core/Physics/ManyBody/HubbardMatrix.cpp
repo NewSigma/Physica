@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
+#include "Test.h"
 
 using namespace Physica;
 constexpr double HoppingT = 1.0;
@@ -38,9 +39,7 @@ namespace {
             auto col = mat.col(i);
             col = hamilton * UnitVector<T>(i, numState);
         }
-
-        if (!matrixNear(hamilton, mat, 1E-15))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(hamilton, mat, 1E-15));
     }
 
     template<unsigned int NumSiteX, unsigned int NumSiteY, unsigned int NumSpinUp, unsigned int NumSpinDown>
@@ -56,9 +55,7 @@ namespace {
             auto col = mat.col(i);
             col = hamilton * UnitVector<T>(i, numState);
         }
-
-        if (!matrixNear(hamilton, mat, 1E-15))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(hamilton, mat, 1E-15));
     }
 
     void testKSpinMatrix() {
@@ -75,9 +72,7 @@ namespace {
             auto col = mat.col(i);
             col = hamilton * UnitVector<T>(i, numState);
         }
-
-        if (!matrixNear(hamilton, mat, 1E-15))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(hamilton, mat, 1E-15));
     }
 
     template<BoundaryCond BC>
@@ -101,9 +96,7 @@ namespace {
         VectorND<T> v2(v.getLength());
         for (size_t i = 0; i < v.getLength(); ++i)
             v2[i] = (hamiltonH * v).calc(i);
-
-        if (!vectorNear(v1, v2, 1E-14))
-            exit(EXIT_FAILURE);
+        expect(vectorNear(v1, v2, 1E-14));
     }
 }
 

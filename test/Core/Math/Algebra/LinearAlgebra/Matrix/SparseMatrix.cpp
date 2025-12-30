@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -31,15 +32,13 @@ int main() {
         mat.insert(1, 2, 1);
         {
             DenseMatrix<ScalarType> answer{{0, 1, 0}, {1, 0, 1}, {0, 1, 0}};
-            if (!matrixNear(mat, answer, 1E-16))
-                return 1;
+            expect(matrixNear(mat, answer, 1E-16));
         }
         {
             VectorND<ScalarType> v{1, 1, 1};
             VectorND<ScalarType> result = mat * v;
             VectorND<ScalarType> answer{1, 2, 1};
-            if (!vectorNear(result, answer, 1E-16))
-                return 1;
+            expect(vectorNear(result, answer, 1E-16));
         }
     }
     {
@@ -49,8 +48,7 @@ int main() {
         mat.insert(2, 1, 0);
         mat.insert(3, 0, 1);
         DenseMatrix<ScalarType> answer{{1, 2, 0, 0}, {3, 4, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
-        if (!matrixNear(mat, answer, 1E-15))
-            return 1;
+        expect(matrixNear(mat, answer, 1E-15));
     }
     return 0;
 }

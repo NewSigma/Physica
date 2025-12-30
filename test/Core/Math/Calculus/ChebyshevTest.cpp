@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Calculus/Chebyshev.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -37,10 +37,7 @@ namespace {
             x += delta;
             T answer = fn(x);
             T result = chebyshev_calc(from, to, coeff, x);
-            if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
-                std::cout << "testFit failed: " << result << ' ' << answer << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            expect(scalarNear(result, answer, 1E-14));
         }
     }
 
@@ -57,10 +54,7 @@ namespace {
             x += delta;
             T answer = fn(x);
             T result = chebyshev_calc_even(from, to, coeff, x);
-            if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
-                std::cout << "testFitEven failed: " << x << result << ' ' << answer << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            expect(fabs(result.toMachine() - answer.toMachine()) < 1E-14);
         }
     }
 
@@ -77,10 +71,7 @@ namespace {
             x += delta;
             T answer = fn(x);
             T result = chebyshev_calc_odd(from, to, coeff, x);
-            if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
-                std::cout << "testFitOdd failed: " << result << ' ' << answer << std::endl;
-                exit(EXIT_FAILURE);
-            }
+            expect(scalarNear(result, answer, 1E-14));
         }
     }
 }

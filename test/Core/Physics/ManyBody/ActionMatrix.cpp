@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/ManyBody/DQMCImpl/ActionMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -41,7 +42,6 @@ int main() {
     size_t order = action.getOrder();
     for (size_t r = 0; r < order; ++r)
         for (size_t c = 0; c < order; ++c)
-            if (action.calc(r, c) != result[r, c])
-                return 1;
+            expect(action.calc(r, c) == result[r, c]);
     return 0;
 }

@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/HF/GaussBase.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -51,15 +52,13 @@ int main() {
         ElectronConfig config = ElectronConfig(1);
         config.setOrbitState(0, ElectronConfig::SingleOccupacy);
         const VectorND<ScalarType> base{8.2921890E1, 1.2452437E1, 2.8330562, 8.0001038E-1, 2.5859469E-1, 8.9968966E-2};
-        if (!scalarNear(scf_solve(1, config, base, 1), ScalarType(-0.499945570), precitionGoal))
-            return 1;
+        expect(scalarNear(scf_solve(1, config, base, 1), ScalarType(-0.499945570), precitionGoal));
     }
     {
         ElectronConfig config = ElectronConfig(1);
         config.setOrbitState(0, ElectronConfig::DoubleOccupacy);
         const VectorND<ScalarType> base{2.3406425E2, 3.5174075E1, 7.9911108, 2.2124201, 6.6706872E-1, 2.0894727E-1};
-        if (!scalarNear(scf_solve(2, config, base, 8), ScalarType( -2.86115334), precitionGoal))
-            return 1;
+        expect(scalarNear(scf_solve(2, config, base, 8), ScalarType( -2.86115334), precitionGoal));
     }
     return 0;
 }

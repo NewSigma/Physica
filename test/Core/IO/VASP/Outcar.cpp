@@ -20,6 +20,7 @@
 #include "Physica/Core/IO/VASP/Outcar.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -34,10 +35,8 @@ int main() {
     const auto& force = outcar.getForce();
     VectorND<ScalarType> answer{1.168281, -4.245817, -0.080442, -0.735246, 1.188434, 0.171096, 0.238719, 0.022373, -0.258197, 0.595000, 0.266135, 0.121868, -0.209437, 0.968435, -0.291308, -0.990043, 1.383871, 0.212539, -0.192415, 0.419208, 0.024764, 0.125140, -0.002640, 0.099680};
     answer *= ScalarType(PhyConst<AU>::eVToHartree(1) / PhyConst<AU>::angstormToBohr(1));
-    if (!vectorNear(force, answer, std::numeric_limits<ScalarType>::epsilon()))
-        return 1;
-    if (!scalarNear(outcar.getInternalEnergy(), float64(PhyConst<AU>::eVToHartree(-43.76513486)), 1E-8))
-      return 1;
+    expect(vectorNear(force, answer, std::numeric_limits<ScalarType>::epsilon()));
+    expect(scalarNear(outcar.getInternalEnergy(), float64(PhyConst<AU>::eVToHartree(-43.76513486)), 1E-8));
     return 0;
 }
 

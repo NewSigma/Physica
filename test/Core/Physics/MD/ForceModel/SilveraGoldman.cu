@@ -19,6 +19,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float32;
@@ -57,8 +58,7 @@ int main() {
         RPMD<ScalarType> rpmd = makeSystem(numMolecular);
         const auto f0 = hostModel.template force<Sequential>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<GPU>(rpmd.phaseToCell(0));
-        if (!vectorNear(f0, f1, 1E-3))
-            return 1;
+        expect(vectorNear(f0, f1, 1E-3));
     }
     {
         constexpr unsigned int numMolecular = 108;
@@ -66,8 +66,7 @@ int main() {
         RPMD<ScalarType> rpmd = makeSystem(numMolecular);
         const auto f0 = hostModel.template force<Sequential>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<GPU>(rpmd.phaseToCell(0));
-        if (!vectorNear(f0, f1, 1E-3))
-            return 1;
+        expect(vectorNear(f0, f1, 1E-3));
     }
     return 0;
 }

@@ -19,6 +19,7 @@
 #include <algorithm>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
+#include "Test.h"
 
 using namespace Physica;
 constexpr double timeStep = 0.1;
@@ -86,10 +87,7 @@ namespace {
         kineticModel.do_nve_step(timeStep, 2);
         kineticModel.post_nve_step(rpmd.getRingPolymer());
         const MatrixType mat2 = rpmd.getPhaseMatrix();
-        if (!matrixNear(mat1, mat2, 1E-5)) {
-            printf("testSeperateStep failed\n");
-            exit(EXIT_FAILURE);
-        }
+        expect(matrixNear(mat1, mat2, 1E-5));
     }
 
     template<bool IsFixedBoundary>
@@ -135,10 +133,8 @@ namespace {
                 kineticModel.updateMomentum(rpmd.getRingPolymer());
             }
         }
-        for (int i = 0; i < NumData; ++i) {
-            if (!scalarNear(gpu_data[i], cpu_data[i], precision))
-                exit(EXIT_FAILURE);
-        }
+        for (int i = 0; i < NumData; ++i)
+            expect(scalarNear(gpu_data[i], cpu_data[i], precision));
     }
 }
 

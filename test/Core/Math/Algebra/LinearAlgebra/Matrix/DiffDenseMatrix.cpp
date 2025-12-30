@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -30,7 +30,6 @@ int main() {
 
     auto v = m.flatten();
     for (size_t i = 0; i < v.getLength(); ++i)
-        if (v.calc(i).grad() != ScalarType(1))
-            return 1;
+        expect(v.calc(i).grad() == ScalarType(1));
     return 0;
 }

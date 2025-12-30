@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Test.h"
 
 using namespace Physica;
 using RandomSource = Random<MT19937, 3438603950906262893>;
@@ -107,8 +107,7 @@ namespace {
         constexpr double answer = 61.8;
         const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);
         const ScalarType deviation = PhyConst<AU>::temperatureToK(std::sqrt(double(var))) / numMolecular;
-        if (abs(energyPerMol - answer) > deviation * 2.0)
-            exit(EXIT_FAILURE);
+        expect(abs(energyPerMol - answer) < deviation * 2.0);
     }
 }
 

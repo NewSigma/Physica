@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Bidiagonalization.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -32,8 +33,7 @@ namespace {
         M B = obj.getMatrixB();
 
         M A = (U * B).compute() * V.transpose();
-        if (!matrixNear(A, source, tolerance))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(A, source, tolerance));
     }
 }
 

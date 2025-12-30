@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -28,15 +29,13 @@ int main() {
             DenseMatrix<float64, MatrixOption::Row, 3, 3> mat = -(mat1 + mat2);
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getCol(); ++j)
-                    if (mat[i, j] != float64(-2))
-                        return 1;
+                    expect(mat[i, j] == float64(-2));
         }
         {
             DenseMatrix<float64, MatrixOption::Row, 3, 3> mat = mat1 * mat2;
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getCol(); ++j)
-                    if (mat[i, j] != float64(3))
-                        return 1;
+                    expect(mat[i, j] == float64(3));
         }
     }
     /* ContinuousMatrixBlock<Derived, 1, 1> */ {
@@ -44,8 +43,7 @@ int main() {
         DenseMatrix<ScalarType, MatrixOption::Col, Physica::Dynamic, 1> mat(2, 1);
         mat[0, 0] = 1.0;
         mat[1, 0] = 2.0;
-        if (mat.row(1)[0] != ScalarType(2))
-            return 1;
+        expect(mat.row(1)[0] == ScalarType(2));
     }
     return 0;
 }

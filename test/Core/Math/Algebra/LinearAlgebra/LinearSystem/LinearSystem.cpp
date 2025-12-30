@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LinearSystem.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/IterateSolver.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -33,26 +34,22 @@ int main() {
     {
         LinearSystem<ScalarType> equ(A);
         equ.gaussJordanPartial();
-        if (!vectorNear(equ.getSolution(), answer, 1E-14))
-            return 1;
+        expect(vectorNear(equ.getSolution(), answer, 1E-14));
     }
     {
         LinearSystem<ScalarType> equ(A);
         equ.gaussJordanComplete();
-        if (!vectorNear(equ.getSolution(), answer, 1E-13))
-            return 1;
+        expect(vectorNear(equ.getSolution(), answer, 1E-13));
     }
     {
         LinearSystem<ScalarType> equ(A);
         equ.gaussEliminationPartial();
-        if (!vectorNear(equ.getSolution(), answer, 1E-13))
-            return 1;
+        expect(vectorNear(equ.getSolution(), answer, 1E-13));
     }
     {
         LinearSystem<ScalarType> equ(A);
         equ.gaussEliminationComplete();
-        if (!vectorNear(equ.getSolution(), answer, 1E-13))
-            return 1;
+        expect(vectorNear(equ.getSolution(), answer, 1E-13));
     }
     {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Row, 4, 4>;
@@ -60,8 +57,7 @@ int main() {
         VectorND<ScalarType> b = A.col(4);
         IterateSolver<ScalarType> solver{};
         solver.cg(mat, b);
-        if (!vectorNear(b, answer, 1E-14))
-            return 1;
+        expect(vectorNear(b, answer, 1E-14));
     }
     return 0;
 }

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LUSolver.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -33,7 +33,6 @@ int main() {
     const VectorType answer{0.06910464034803039, 0.6682416388355244, 0.5106380624075890, 1.413471488683768};
     LUSolver<T, MatrixType::Option, 4> solver(A);
     const VectorType result = solver.solve(b);
-    if (!vectorNear(result, answer, 1E-15))
-        return 1;
+    expect(vectorNear(result, answer, 1E-15));
     return 0;
 }

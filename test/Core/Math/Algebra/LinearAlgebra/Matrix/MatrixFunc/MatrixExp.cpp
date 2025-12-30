@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float64;
@@ -39,7 +40,6 @@ int main() {
 
     const VectorType answer = eigenvectors * v1;
     const VectorType result = exp(mat) * v;
-    if (!vectorNear(answer, result, 1E-13))
-        return 1;
+    expect(vectorNear(answer, result, 1E-13));
     return 0;
 }

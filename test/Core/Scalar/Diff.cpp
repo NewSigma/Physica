@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Scalar/Diff.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -41,8 +42,7 @@ namespace {
             dfloat y = square(x);
             good &= scalarNear(y.template grad<2>(), float64(2), 1E-15);
         }
-        if (!good)
-            exit(EXIT_FAILURE);
+        expect(good);
     }
 
     void testMath() {
@@ -64,8 +64,7 @@ namespace {
             good &= scalarNear(y.grad().value(), reciprocal(T(2) * sqrt(x.value())), 1E-15);
             good &= scalarNear(y.grad<2>(), -reciprocal(T(4) * x.value() * sqrt(x.value())), 1E-15);
         }
-        if (!good)
-            exit(EXIT_FAILURE);
+        expect(good);
     }
 
     void testSIMD() {
@@ -97,27 +96,22 @@ namespace {
         for (int i = 0; i < 4; ++i)
             good &= scalarNear(exp(dfloat(value[i], grad1[i])), result[i], 1E-15);
 
-        if (!good)
-            exit(EXIT_FAILURE);
+        expect(good);
     }
 
-    int testReverse() {
+    void testReverse() {
         using dfloat = Diff<float64, DiffMode::Reverse>;
         auto x = dfloat(2);
         /* Simple */ {
             const auto y = sin(x).reverse();
-            if (y != sin(x.value()))
-                return 1;
-            if (x.grad() != cos(x.value()))
-                return 1;
+            expect(y == sin(x.value()));
+            expect(x.grad() == cos(x.value()));
         }
         /* Test r-value 1 */ {
             x.zero_grad();
             const auto y = sin(sin(x)).reverse();
-            if (y.value() != sin(sin(x.value())))
-                return 1;
-            if (x.grad() != cos(x.value()) * cos(sin(x.value())))
-                return 1;
+            expect(y.value() == sin(sin(x.value())));
+            expect(x.grad() == cos(x.value()) * cos(sin(x.value())));
         }
         /* Test r-value 2 */ {
             auto func = [](const dfloat& x) {
@@ -125,8 +119,7 @@ namespace {
             };
             x.zero_grad();
             func(x).reverse();
-            if (x.grad() != cos(x.value()) * cos(sin(x.value())))
-                return 1;
+            expect(x.grad() == cos(x.value()) * cos(sin(x.value())));
         }
         {
             auto func = [](dfloat& x, dfloat& y) {
@@ -135,12 +128,9 @@ namespace {
             dfloat x(3);
             dfloat y(4);
             func(x, y).reverse();
-            bool flag1 = scalarNear(x.grad(), (x.value() - 1.0) * 2.0, 1E-15);
-            bool flag2 = scalarNear(y.grad(), (y.value() - 2.0) * 2.0, 1E-15);
-            if (!flag1 || !flag2)
-                return 1;
+            expect(scalarNear(x.grad(), (x.value() - 1.0) * 2.0, 1E-15));
+            expect(scalarNear(y.grad(), (y.value() - 2.0) * 2.0, 1E-15));
         }
-        return 0;
     }
 }
 
@@ -148,7 +138,6 @@ int main() {
     testFunc();
     testMath();
     testSIMD();
-    if (testReverse() == 1)
-        return 1;
+    testReverse();
     return 0;
 }

@@ -20,6 +20,7 @@
 #include <random>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Scalar/Real.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = Real<FloatMP>;
@@ -38,18 +39,18 @@ namespace {
             double d_b = d * engine();
             T b(d_b);
 
-            double_extract expect{d_a + d_b};
+            double_extract ext{d_a + d_b};
             double_extract result{double(a + b)};
-            if ((expect.sign != static_cast<unsigned int>(result.sign))
-                || (expect.exp != static_cast<unsigned int>(result.exp))
-                || (expect.high != static_cast<unsigned int>(result.high))
-                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+            if ((ext.sign != static_cast<unsigned int>(result.sign))
+                || (ext.exp != static_cast<unsigned int>(result.exp))
+                || (ext.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(ext.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing add test " << d_a << " + " << d_b << '\n';
                 std::cout << "Performing add test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                          << "low:\t" << expect.low << '\t' << result.low << '\n'
-                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
-                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
-                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
+                          << "low:\t" << ext.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << ext.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << ext.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << ext.sign << '\t' << result.sign << '\n';
                 return false;
             }
         }
@@ -67,18 +68,18 @@ namespace {
             double d_b = d * engine();
             T b(d_b);
 
-            double_extract expect{d_a - d_b};
+            double_extract ext{d_a - d_b};
             double_extract result{double(a - b)};
-            if ((expect.sign != static_cast<unsigned int>(result.sign))
-                || (expect.exp != static_cast<unsigned int>(result.exp))
-                || (expect.high != static_cast<unsigned int>(result.high))
-                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+            if ((ext.sign != static_cast<unsigned int>(result.sign))
+                || (ext.exp != static_cast<unsigned int>(result.exp))
+                || (ext.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(ext.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing sub test " << d_a << " - " << d_b << '\n';
                 std::cout << "Performing sub test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                          << "low:\t" << expect.low << '\t' << result.low << '\n'
-                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
-                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
-                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
+                          << "low:\t" << ext.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << ext.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << ext.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << ext.sign << '\t' << result.sign << '\n';
                 return false;
             }
         }
@@ -96,20 +97,20 @@ namespace {
             double d_b = d * engine();
             T b(d_b);
 
-            double_extract expect{d_a * d_b};
+            double_extract ext{d_a * d_b};
             double_extract result{double(a * b)};
-            if ((expect.sign != static_cast<unsigned int>(result.sign))
-                || (expect.exp != static_cast<unsigned int>(result.exp))
-                || (expect.high != static_cast<unsigned int>(result.high))
-                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+            if ((ext.sign != static_cast<unsigned int>(result.sign))
+                || (ext.exp != static_cast<unsigned int>(result.exp))
+                || (ext.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(ext.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing mul test " << d_a << " * " << d_b << '\n';
                 std::cout << "Performing mul test "
                              "--Failed ("
                           << (i + 1) << '/' << loop << ")\n"
-                          << "low:\t" << expect.low << '\t' << result.low << '\n'
-                          << "\nhigh:\t" << expect.high << '\t' << result.high << '\n'
-                          << "\nexp:\t" << expect.exp << '\t' << result.exp << '\n'
-                          << "\nsign:\t" << expect.sign << '\t' << result.sign << '\n';
+                          << "low:\t" << ext.low << '\t' << result.low << '\n'
+                          << "\nhigh:\t" << ext.high << '\t' << result.high << '\n'
+                          << "\nexp:\t" << ext.exp << '\t' << result.exp << '\n'
+                          << "\nsign:\t" << ext.sign << '\t' << result.sign << '\n';
                 return false;
             }
         }
@@ -131,18 +132,18 @@ namespace {
             }
             T b(d_b);
 
-            double_extract expect{d_a / d_b};
+            double_extract ext{d_a / d_b};
             double_extract result{double(a / b)};
-            if ((expect.sign != static_cast<unsigned int>(result.sign))
-                || (expect.exp != static_cast<unsigned int>(result.exp))
-                || (expect.high != static_cast<unsigned int>(result.high))
-                || abs(static_cast<int>(expect.low) - static_cast<int>(result.low)) > 1) {
+            if ((ext.sign != static_cast<unsigned int>(result.sign))
+                || (ext.exp != static_cast<unsigned int>(result.exp))
+                || (ext.high != static_cast<unsigned int>(result.high))
+                || abs(static_cast<int>(ext.low) - static_cast<int>(result.low)) > 1) {
                 std::cout << "Performing div test " << d_a << " / " << d_b << '\n';
                 std::cout << "Performing div test " << "--Failed (" << (i + 1) << '/' << loop << ")\n"
-                          << "low:\t" << expect.low << '\t' << result.low << '\n'
-                          << "high:\t" << expect.high << '\t' << result.high << '\n'
-                          << "exp:\t" << expect.exp << '\t' << result.exp << '\n'
-                          << "sign:\t" << expect.sign << '\t' << result.sign << '\n';
+                          << "low:\t" << ext.low << '\t' << result.low << '\n'
+                          << "high:\t" << ext.high << '\t' << result.high << '\n'
+                          << "exp:\t" << ext.exp << '\t' << result.exp << '\n'
+                          << "sign:\t" << ext.sign << '\t' << result.sign << '\n';
                 return false;
             }
         }
@@ -155,24 +156,19 @@ int main() {
                && numericalSubTest(iterateCount)
                && numericalMulTest(iterateCount)
                && numericalDivTest(iterateCount);
-    if (!passed)
-        return 1;
-
-    if (float64(Real<FloatMP>(0.5)) != 0.5)
-        return 1;
+    expect(passed);
+    expect(float64(Real<FloatMP>(0.5)) == 0.5);
     {
         // Test that addArrWithArr and addArrWithArrEq round correctlly
         T a({3563280027363695401, 17475862807287258288UL, 9708812670373448218UL, 536}, 4, 0);
         T b({9410232262925970914UL, 16029360673564519792UL, 970881267037344821, 8737931403336103397}, 4, -1);
-        if ((a + b)[3] != 537)
-            return 1;
+        expect((a + b)[3] == 537);
     }
     {
         // Test that correctly round if length overflow
         const T a = T({10531239283933347840UL}, -1, -1);
         const T b = T({0, 16275461880519395517UL, 17224891941645282124UL, 11134621108104132433UL}, -4, -1);
-        if ((a + b)[3] != 1)
-            return 1;
+        expect((a + b)[3] == 1);
     }
     return 0;
 }

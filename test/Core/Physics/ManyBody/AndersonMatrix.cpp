@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/AndersonMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float32;
@@ -26,16 +27,13 @@ using T = float32;
 namespace {
     void test() {
         AndersonMatrix<T, 4, false> hamilton(1, 0, {0.2, 0.3, 0.4}, {0.2, 0.3, 0.4}, {3, 2});
-        if (!hamilton.isSymm())
-            exit(EXIT_FAILURE);
+        expect(hamilton.isSymm());
 
         const auto size = hamilton.getRow();
         DenseMatrix<T> mat(size, size);
         for (size_t i = 0; i < size; ++i)
             mat.col(i) = hamilton * UnitVector<T>(i, size);
-
-        if (!matrixNear(hamilton, mat, 1E-7))
-            exit(EXIT_FAILURE);
+        expect(matrixNear(hamilton, mat, 1E-7));
     }
 }
 

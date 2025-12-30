@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
+#include "Test.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 
 using namespace Physica;
@@ -50,8 +51,7 @@ namespace Physica {
                 /* Test press */ {
                     const Tv press_diff = -volume.grad() / Tv(cellSize * cellSize * cellSize);
                     const Tv press = (forceModel.virial(cell).trace() / Tv(3)).value();
-                    if (!scalarNear(press_diff, press, 1E-12))
-                        exit(EXIT_FAILURE);
+                    expect(scalarNear(press_diff, press, 1E-12));
                 }
             }
         }

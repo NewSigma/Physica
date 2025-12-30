@@ -18,6 +18,7 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 using T = float64;
@@ -28,7 +29,6 @@ int main() {
     Matrix3D m = answer;
     const auto D = DiagMatrix<T>(m.balance());
     Matrix3D result = D.inv() * m * D;
-    if (!matrixNear(result, answer, 1E-15))
-        return 1;
+    expect(matrixNear(result, answer, 1E-15));
     return 0;
 }

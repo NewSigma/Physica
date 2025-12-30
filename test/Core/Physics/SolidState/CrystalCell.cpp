@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
+#include "Test.h"
 
 using namespace Physica;
 using ScalarType = float32;
@@ -52,23 +53,20 @@ int main() {
     };
     const Array<uint16_t> answer_atomic{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8};
     CrystalCellType supercell_direct = cell_direct.makeSuperCell(3, 2, 1);
-    if (!matrixNear(answer_lattice, supercell_direct.getLattice(), 1E-15))
-        return 1;
-    if (!matrixNear(answer_pos, supercell_direct.getPos(), 1E-15))
-        return 1;
+    expect(matrixNear(answer_lattice, supercell_direct.getLattice(), 1E-15));
+    expect(matrixNear(answer_pos, supercell_direct.getPos(), 1E-15));
+
     for (size_t i = 0; i < answer_atomic.getLength(); ++i)
-        if (answer_atomic[i] != supercell_direct.getAtomicNumber(i))
-            return 1;
+        expect(answer_atomic[i] == supercell_direct.getAtomicNumber(i));
 
     CrystalCellType supercell_cartesian = cell_direct.makeSuperCell(3, 2, 1);
     supercell_cartesian.toCartesian();
-    if (!matrixNear(answer_lattice, supercell_cartesian.getLattice(), 1E-15))
-        return 1;
+    expect(matrixNear(answer_lattice, supercell_cartesian.getLattice(), 1E-15));
+
     supercell_direct.toCartesian();
-    if (!matrixNear(supercell_direct.getPos(), supercell_cartesian.getPos(), 1E-15))
-        return 1;
+    expect(matrixNear(supercell_direct.getPos(), supercell_cartesian.getPos(), 1E-15));
+
     for (size_t i = 0; i < answer_atomic.getLength(); ++i)
-        if (answer_atomic[i] != supercell_cartesian.getAtomicNumber(i))
-            return 1;
+        expect(answer_atomic[i] == supercell_cartesian.getAtomicNumber(i));
     return 0;
 }

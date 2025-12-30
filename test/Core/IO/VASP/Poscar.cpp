@@ -20,6 +20,7 @@
 #include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
+#include "Test.h"
 
 using namespace Physica;
 
@@ -59,11 +60,11 @@ namespace {
         is.close();
 
         const auto& elements = poscar.getElementTypes();
-        if (!(elements[0] == 8 && elements[1] == 1))
-            exit(EXIT_FAILURE);
+
+        expect(elements[0] == 8 && elements[1] == 1);
+
         const auto& numOfEachType = poscar.getNumOfEachType();
-        if (!(numOfEachType[0] == 1 && numOfEachType[1] == 2))
-            exit(EXIT_FAILURE);
+        expect(numOfEachType[0] == 1 && numOfEachType[1] == 2);
         return poscar;
     }
 
@@ -87,8 +88,7 @@ int main() {
 
         PoscarType::LatticeMatrix mat = poscar.getLattice();
         poscar.standrizeLattice();
-        if (!matrixNear(mat, poscar.getLattice(), 1E-15))
-            return 1;
+        expect(matrixNear(mat, poscar.getLattice(), 1E-15));
     }
     {
         readTest2();
@@ -103,8 +103,7 @@ int main() {
         const CrystalCellType unitcell({std::move(lattice), std::move(pos), CrystalCellType::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
         Poscar<ScalarType> poscar(unitcell);
         const auto& numOfEachType = poscar.getNumOfEachType();
-        if (numOfEachType[0] != 8 || numOfEachType[1] != 4)
-            return 1;
+        expect(numOfEachType[0] == 8 && numOfEachType[1] == 4);
 
     #ifdef PHYSICA_HDF5
         auto tmp = TempFile("/tmp/tmpXXXXXX");
@@ -116,10 +115,8 @@ int main() {
             Poscar<ScalarType> poscar1{};
             auto h5f = H5File::open(tmp.getName(), H5File::ReadOnly);
             poscar1.read(h5f, "poscar");
-            if (!matrixNear(poscar.getLattice(), poscar1.getLattice(), 1E-15))
-                return 1;
-            if (!matrixNear(poscar.getPos(), poscar1.getPos(), 1E-15))
-                return 1;
+            expect(matrixNear(poscar.getLattice(), poscar1.getLattice(), 1E-15));
+            expect(matrixNear(poscar.getPos(), poscar1.getPos(), 1E-15));
         }
     #endif
     }
