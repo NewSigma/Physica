@@ -41,7 +41,7 @@ namespace Physica {
         InvLatticeMatrix invLattice;
     public:
         MDCell() = default;
-        explicit MDCell(size_t numParticle);
+        MDCell(size_t numParticle, MassVector massVec);
         template<Scalar U>
         MDCell(CrystalCell<U> cell);
         template<Scalar U>
@@ -72,9 +72,9 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
-        [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
+        [[nodiscard]] const auto& getMassVec() const { return massVec; }
         [[nodiscard]] T getMass(size_t particleID) const { return massVec[particleID]; }
-        [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
+        [[nodiscard]] const auto& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
         /* Setters */
         void setLattice(const MDCell& cell);
@@ -90,7 +90,7 @@ namespace Physica {
     };
 
     template<Scalar T, unsigned int Dim>
-    MDCell<T, Dim>::MDCell(size_t numParticle) : Base(numParticle), massVec(numParticle) {}
+    MDCell<T, Dim>::MDCell(size_t numParticle, MassVector massVec) : Base(numParticle, Type::Cartesian), massVec(std::move(massVec)) {}
 
     template<Scalar T, unsigned int Dim>
     template<Scalar U>

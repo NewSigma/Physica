@@ -26,14 +26,14 @@ namespace Physica {
     class RingPolymer {
         using This = RingPolymer<T, Dim, NumReplica>;
         using Tv = T::ValueType;
-        using BufferScalarType = Tv::ComplexType;
+        using Tcv = Tv::ComplexType;
         constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixOption::Col : MatrixOption::Row;
     public:
         using MDCellType = MDCell<T, Dim>;
         using MassVector = MDCellType::MassVector;
         using PositionMatrix = MDCellType::PositionMatrix;
         using PhaseMatrix = DenseMatrix<T, PhaseMatrixMajor, Dynamic, NumReplica>;
-        using BufferType = DenseMatrix<BufferScalarType, MatrixOption::Row, 2>;
+        using BufferType = DenseMatrix<Tcv, MatrixOption::Row, 2>;
         using FFTType = FFT<T, 1>;
     private:
         PhaseMatrix phase;
@@ -73,8 +73,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
-        [[nodiscard]] const PhaseMatrix& asMatrix() const noexcept { return phase; }
-        [[nodiscard]] PhaseMatrix& asMatrix() noexcept { return phase; }
+        [[nodiscard]] auto&& asMatrix(this auto&&) noexcept;
         [[nodiscard]] size_t getDOF() const noexcept { return phase.getRow() / 2U; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getDOF() / Dim; }
         [[nodiscard]] size_t getNumReplica() const noexcept { return phase.getCol(); }
@@ -330,6 +329,11 @@ namespace Physica {
         massVec.swap(obj.massVec);
         fft.swap(obj.fft);
         buffer.swap(obj.buffer);
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
+    auto&& RingPolymer<T, Dim, NumReplica>::asMatrix(this auto&& self) noexcept {
+        return std::forward<decltype(self)>(self).phase;
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>

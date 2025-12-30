@@ -20,6 +20,7 @@
 
 #include <climits>
 #include <cstddef>
+#include <type_traits>
 #include "Physica/Config.h" // IWYU pragma: export
 /**
  * \file Macro.h: Non-Proliferation of Macros

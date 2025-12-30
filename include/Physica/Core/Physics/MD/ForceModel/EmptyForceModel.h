@@ -35,7 +35,9 @@ namespace Physica {
             constexpr static bool value = true;
         };
     }
-
+    /**
+     * \class EmptyForceModel serves starting point for a new force model.
+     */
     template<Scalar T, unsigned int Dim>
     class EmptyForceModel {
     public:
@@ -58,7 +60,7 @@ namespace Physica {
         [[nodiscard]] T forceConst(const MDCellType&, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return T(0); }
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
-        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const { return LatticeMatrix(Dim, Dim, 0); }
+        [[nodiscard]] LatticeMatrix virial(const MDCellType&) const { return LatticeMatrix(Dim, Dim, 0); }
     };
 
     template<Scalar T, unsigned int Dim>

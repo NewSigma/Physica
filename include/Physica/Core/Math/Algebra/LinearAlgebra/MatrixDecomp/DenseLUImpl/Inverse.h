@@ -27,7 +27,6 @@ namespace Physica {
         using This = Inverse<LU>;
         using Base = RValueMatrix<This>;
     public:
-        constexpr static int Layout = LAPACK_COL_MAJOR;
         using Base::isComplex;
     protected:
         using typename Base::Tm;

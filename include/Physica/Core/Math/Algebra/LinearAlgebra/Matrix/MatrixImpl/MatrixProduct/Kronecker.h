@@ -45,6 +45,8 @@ namespace Physica {
         void assign_add(Matrix auto&& target) const;
 
         [[nodiscard]] T calc(size_t row, size_t col) const;
+
+        void reverse(const Matrix auto& grad) const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
@@ -104,6 +106,23 @@ namespace Physica {
         size_t col1 = col / rhs.getCol();
         size_t col2 = col % rhs.getCol();
         return lhs.calc(row1, col1) * rhs.calc(row2, col2);
+    }
+
+    template<Matrix M1, Matrix M2>
+    void Kronecker<M1, M2>::reverse(const Matrix auto& grad) const noexcept {
+        grad.assert_assign(*this);
+        if constexpr (Diffable<M1>) {
+            size_t shiftR = m2.getRow();
+            size_t shiftC = m2.getCol();
+            for (size_t r = 0; r < m1.getRow(); ++r) {
+                for (size_t c = 0; c < m1.getCol(); ++c) {
+                    auto block = grad.block(shiftR * r, shiftR, shiftC * c, shiftC);
+                    m1.calc(r, c).reverse(hadamard(block, m2).sum());
+                }
+            }
+        }
+
+        static_assert(!Diffable<M2>, "[Error]: No impl");
     }
 
     template<Matrix M1, Matrix M2>

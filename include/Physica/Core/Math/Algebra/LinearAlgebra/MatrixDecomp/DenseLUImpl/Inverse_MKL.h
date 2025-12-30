@@ -23,6 +23,7 @@
 namespace Physica {
     template<Scalar T, bool Pivot>
     void Inverse<DenseLU<T, Pivot>>::assign_mkl(Matrix auto& target) const {
+        constexpr static int Layout = LAPACK_COL_MAJOR;
         target.assert_assign(*this);
         lu.getMatrixLU().assign(target);
 

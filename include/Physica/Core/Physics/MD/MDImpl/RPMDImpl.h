@@ -61,8 +61,7 @@ namespace Physica {
         // Currently we assume GPU models are stateful
         // constexpr ExecutePolicy HostPolicy = Traits<ForceModel>::IsStateful ? Sequential : Thread;
         constexpr ExecutePolicy HostPolicy = P == GPU ? Sequential : Thread;
-        static_assert((P != GPU) || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
-                , "[Error]: Allocator is not page locked, performance will decrease");
+        static_assert((P != GPU) || std::allocator_traits<ForceMatrixAllocator>::isPageLocked, "[Error]: Allocator is not page locked, performance will decrease");
         if (!isContractEnabled()) {
             auto kernel = [this, &model](unsigned int replica) {
                 MDCellType cell = phaseToCell(replica);
@@ -82,31 +81,34 @@ namespace Physica {
             return;
         }
 
-        constexpr bool IsContractable = Traits<ForceModel>::IsContractable;
-        if constexpr (IsContractable) {
-            auto task_uncontract = parallel_for<HostPolicy>([&](size_t replica) {
-                MDCellType cell = phaseToCell(replica);
-                if constexpr (IsPeriodBoundary)
-                    cell.normalize();
-                auto saveTo = forceBuffer.col(replica);
-                saveTo = model.template force_uncontract<P>(std::move(cell));
-            }, getNumReplica(), 0);
+        if constexpr (!ClassicalMD) {
+            if constexpr (Traits<ForceModel>::IsContractable) {
+                auto task_uncontract = parallel_for<HostPolicy>([&](size_t replica) {
+                    MDCellType cell = phaseToCell(replica);
+                    if constexpr (IsPeriodBoundary)
+                        cell.normalize();
+                    auto saveTo = forceBuffer.col(replica);
+                    saveTo = model.template force_uncontract<P>(std::move(cell));
+                }, getNumReplica(), 0);
 
-            contract();
-            auto task_contract = parallel_for<HostPolicy>([&](size_t contract) {
-                MDCellType cell = contractToCell(contract);
-                if constexpr (IsPeriodBoundary)
-                    cell.normalize();
-                auto saveTo = forceContract.col(contract);
-                saveTo = model.template force_contract<P>(std::move(cell));
-            }, getNumContract(), 0);
+                contract();
+                auto task_contract = parallel_for<HostPolicy>([&](size_t contract) {
+                    MDCellType cell = contractToCell(contract);
+                    if constexpr (IsPeriodBoundary)
+                        cell.normalize();
+                    auto saveTo = forceContract.col(contract);
+                    saveTo = model.template force_contract<P>(std::move(cell));
+                }, getNumContract(), 0);
 
-            task_uncontract.wait();
-            task_contract.wait();
-            decontract();
+                task_uncontract.wait();
+                task_contract.wait();
+                decontract();
+            }
+            else
+                noImpl("[Error]: Force contract is not implemented");
         }
         else
-            noImpl("[Error]: Force contract is not implemented");
+            unreachable();
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -424,16 +426,20 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcClassicalElastic() const {
-        const size_t dof = getDOF();
-        auto pos = getPhaseMatrix().bottomRows(dof);
-        const T omegaW = ringPolymer.calcOmegaW(temperatureT);
-        T result = 0;
-        for (size_t i = 0; i < dof; ++i) {
-            const T mass = cell.getMass(i / Dim);
-            for (size_t j = 0; j < getNumReplica(); ++j)
-                result += mass * square(omegaW * (pos[i, j] - pos[i, (j + 1) % getNumReplica()])) * 0.5;
+        if constexpr (ClassicalMD)
+            return 0;
+        else {
+            T result = 0;
+            const size_t dof = getDOF();
+            auto pos = getPhaseMatrix().bottomRows(dof);
+            const T omegaW = ringPolymer.calcOmegaW(temperatureT);
+            for (size_t i = 0; i < dof; ++i) {
+                const T mass = cell.getMass(i / Dim);
+                for (size_t j = 0; j < getNumReplica(); ++j)
+                    result += mass * square(omegaW * (pos[i, j] - pos[i, (j + 1) % getNumReplica()])) * 0.5;
+            }
+            return result;
         }
-        return result;
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -718,7 +724,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     uint64_t RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::durationToStep(Tv duration, Tv timeStep) {
-        return double(duration / timeStep) + 0.5;
+        return std::lround((duration / timeStep).toMachine());
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

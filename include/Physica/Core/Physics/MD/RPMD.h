@@ -26,21 +26,21 @@ namespace Physica {
     template<Scalar T, unsigned int Dim> class FireModel;
     template<Scalar T, unsigned int Dim, BaroType Type> class CFireModel;
     /**
-     * Refer to [1] for a general review
-     * Original literature of RPMD is [3]
+     * \class RPMD: Uniform engine for any MD-like algorithms
+     * 
+     * Refer to [1] for a general review. Original literature of RPMD is [3]
      * 
      * Reference:
      * [1] Annual Review of Physical Chemistry 64, 387-413 (2013); https://doi.org/10.1146/annurev-physchem-040412-110122
      * [2] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:197-211
      * [3] J. Chem. Phys. 121, 3368 (2004); https://doi.org/10.1063/1.1777575
      */
-    template<Scalar T,
-             unsigned int Dim = 3,
-             size_t NumReplica = Dynamic,
-             class ForceMatrixAllocator = HostAllocator<T>>
+    template<Scalar T, unsigned int Dim = 3, size_t NumReplica = Dynamic, class ForceMatrixAllocator = HostAllocator<T>>
     class RPMD final {
         using This = RPMD<T, Dim, NumReplica, ForceMatrixAllocator>;
         using Tv = T::ValueType;
+
+        constexpr static bool ClassicalMD = NumReplica == 1;
     public:
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
         using PhaseMatrix = RingPolymerType::PhaseMatrix;
@@ -148,7 +148,7 @@ namespace Physica {
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }
         [[nodiscard]] const auto& getForce() const noexcept { return forceBuffer; }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
-        [[nodiscard]] bool isContractEnabled() const noexcept { return (NumReplica != 1) && (getNumReplica() != getNumContract()); }
+        [[nodiscard]] bool isContractEnabled() const noexcept { return !ClassicalMD && (getNumReplica() != getNumContract()); }
         [[nodiscard]] T getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] T getTimeStep() const noexcept { return timeStep; }
         /* Setters */

@@ -58,8 +58,8 @@ namespace Physica {
         VectorType omegaK;
         T omegaW;
         Array<Vector2D<T>> coeffMatrixBase;
-        T lastTimeStep;
-        size_t numReplica;
+        T lastTimeStep = 0;
+        size_t numReplica = 1;
     public:
         FreeModel();
         FreeModel(T temperatureT, size_t numReplica_);
@@ -89,12 +89,9 @@ namespace Physica {
     };
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    FreeModel<T, Dim, NumReplica, Integrator>::FreeModel() : lastTimeStep(0) {}
-
-    template<Scalar T, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
     FreeModel<T, Dim, NumReplica, Integrator>::FreeModel(T temperatureT, size_t numReplica_)
-            : lastTimeStep(0)
-            , numReplica(numReplica_) {
+            : numReplica(numReplica_) {
+        assert(NumReplica == numReplica || NumReplica == Dynamic);
         const size_t kSpaceSize = FFTType::rSizeToKSize(numReplica);
         omegaK.resize(kSpaceSize);
         coeffMatrixBase.resize(kSpaceSize);
