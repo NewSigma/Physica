@@ -25,6 +25,8 @@
 namespace Physica {
     template<size_t N>
     class TempFile {
+        using This = TempFile<N>;
+
         char name[N];
         int fd;
     public:
@@ -37,7 +39,7 @@ namespace Physica {
         /* Operations */
         void reserve(size_t size);
         void release() noexcept { fd = -1; }
-        void swap(TempFile& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const char* getName() const noexcept { return name; }
         [[nodiscard]] int getFd() const noexcept { return fd; }

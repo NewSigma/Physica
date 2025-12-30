@@ -23,20 +23,22 @@
 
 namespace Physica {
     class PHYSICA_API SSHWarpper {
+        using This = SSHWarpper;
+
         std::string hostname;
         std::string command;
         mutable ProcessFuture future;
     public:
         SSHWarpper() = default;
         SSHWarpper(std::string hostname_, std::string command_);
-        SSHWarpper(const SSHWarpper&) = default;
-        SSHWarpper(SSHWarpper&&) noexcept = default;
+        SSHWarpper(const This&) = default;
+        SSHWarpper(This&&) noexcept = default;
         ~SSHWarpper() = default;
         /* Operators */
-        SSHWarpper& operator=(SSHWarpper obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void execute();
-        void swap(SSHWarpper& __restrict ssh) noexcept;
+        void swap(This& __restrict ssh) noexcept;
         /* Getters */
         ProcessFuture& getFuture() noexcept { return future; }
     };

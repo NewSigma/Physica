@@ -37,7 +37,7 @@ namespace Physica {
         friend std::ostream& operator<<(std::ostream& os, const This& obj) { return os << obj.p; }
         /* Operations */
         [[nodiscard]] std::string toString() const;
-        void swap(CXXPtr& obj) noexcept { std::swap(p, obj.p); }
+        void swap(This& obj) noexcept { std::swap(p, obj.p); }
         /* Getters */
         [[nodiscard]] void* get() const noexcept { return p; }
         template<class T>

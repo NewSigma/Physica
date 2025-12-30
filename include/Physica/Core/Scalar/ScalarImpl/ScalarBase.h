@@ -594,6 +594,11 @@ namespace Physica {
         else
             return abs(x) >= abs(y);
     }
+
+    template<Scalar T>
+    void swap(T& __restrict x, T& __restrict y) noexcept {
+        x.swap(y);
+    }
 }
 
 namespace Physica {
@@ -602,11 +607,4 @@ namespace Physica {
     public:
         using Derived = T;
     };
-}
-
-namespace std {
-    template<Physica::Scalar T>
-    void swap(T& __restrict x, T& __restrict y) noexcept {
-        x.swap(y);
-    }
 }

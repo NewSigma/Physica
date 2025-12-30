@@ -24,6 +24,7 @@
 
 namespace Physica {
     class PIPhonon final {
+        using This = PIPhonon;
         using ScalarType = float64;
         using ComplexType = Complex<ScalarType>;
         using CorrMatrix = SymmArray<VectorND<ScalarType>, Dynamic>;
@@ -50,15 +51,15 @@ namespace Physica {
                  size_t superSizeX_,
                  size_t superSizeY_,
                  size_t superSizeZ_);
-        PIPhonon(const PIPhonon&) = default;
-        PIPhonon(PIPhonon&&) noexcept = default;
+        PIPhonon(const This&) = default;
+        PIPhonon(This&&) noexcept = default;
         ~PIPhonon() = default;
         /* Operators */
-        PIPhonon& operator=(PIPhonon obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void sample(const Matrix auto& force, const Matrix auto& momentum);
         void compute();
-        void swap(PIPhonon& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtomUnitCell() const noexcept { return numAtomUnitCell; }
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return 3 * getNumAtomUnitCell(); }

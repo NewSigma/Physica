@@ -33,6 +33,7 @@ namespace Physica {
     class BrillouInterpolate {
         constexpr static unsigned int Dim = 3;
         constexpr static bool isComplex = T::isComplex;
+        using This = BrillouInterpolate<T>;
         using Tr = T::RealType;
         using Tc = T::ComplexType;
         using LatticeMatrix = PeriodicCell<Tr, Dim>::LatticeMatrix;
@@ -48,11 +49,11 @@ namespace Physica {
         Index3D dataDim;
     public:
         BrillouInterpolate(Index3D baseDim, LatticeMatrix unitcell, Tr smoothFactor1_, Tr smoothFactor2_);
-        BrillouInterpolate(const BrillouInterpolate& obj) = default;
-        BrillouInterpolate(BrillouInterpolate&& obj) noexcept = default;
+        BrillouInterpolate(const This& obj) = default;
+        BrillouInterpolate(This&& obj) noexcept = default;
         ~BrillouInterpolate() = default;
         /* Operators */
-        BrillouInterpolate& operator=(BrillouInterpolate obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] T operator()(Vec3D kPoint) const;
         /* Operations */
         Tr calcRoughness() const;
@@ -60,7 +61,7 @@ namespace Physica {
         T interpolateFEM(Vec3D kPoint, const DenseTensor<T, 3>& data) const;
         template<Matrix M>
         M interpolateHermiteMatrix(Vec3D qPoint, const ArrayND<M, 3>& matrixGrid);
-        void swap(BrillouInterpolate& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Index3D getBaseDim() const noexcept { return baseCoeff.getShape(); }
     private:
@@ -225,7 +226,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void BrillouInterpolate<T>::swap(BrillouInterpolate& __restrict obj) noexcept {
+    void BrillouInterpolate<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         baseCoeff.swap(obj.baseCoeff);
         lattice.swap(obj.lattice);

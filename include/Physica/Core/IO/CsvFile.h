@@ -23,6 +23,7 @@
 
 namespace Physica {
     class PHYSICA_API CsvFile {
+        using This = CsvFile;
     public:
         enum DataType : char {
             CHAR,
@@ -86,7 +87,7 @@ namespace Physica {
         template<Scalar T>
         [[nodiscard]] VectorND<T> asVector(size_t col) const;
         size_t countMissingValue(size_t col, const char* missingTag = "NA") const;
-        void swap(CsvFile& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataTypeArray& getDatatypes() const noexcept { return datatypes; }
         [[nodiscard]] const Array<std::string>& getHeaders() const noexcept { return headers; }

@@ -45,12 +45,6 @@ namespace Physica {
     }
 
     template<Scalar T>
-    CrystalCell<T>& CrystalCell<T>::operator=(CrystalCell cell) noexcept {
-        swap(cell);
-        return *this;
-    }
-
-    template<Scalar T>
     void CrystalCell<T>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = Base::getNumParticle();
         Base::template toSuperCell<ExtendCellOption::AtomMajor>(x, y, z);

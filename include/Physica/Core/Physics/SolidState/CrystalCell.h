@@ -26,6 +26,7 @@ namespace Physica {
 
     template<Scalar T>
     class CrystalCell final : public PeriodicCell<T, 3> {
+        using This = CrystalCell<T>;
     public:
         constexpr static unsigned int Dim = 3;
         using Base = PeriodicCell<T, Dim>;
@@ -39,17 +40,17 @@ namespace Physica {
         CrystalCell(Base base, AtomicArray atomicNumbers_);
         template<Scalar U>
         CrystalCell(Poscar<U> poscar);
-        CrystalCell(const CrystalCell&) = default;
-        CrystalCell(CrystalCell&&) noexcept = default;
+        CrystalCell(const This&) = default;
+        CrystalCell(This&&) noexcept = default;
         ~CrystalCell() = default;
         /* Operators */
-        CrystalCell& operator=(CrystalCell cell) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] CrystalCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         H5Group read(const H5Loc& loc, const char* name);
         H5Group write(H5Loc& loc, const char* name) const;
-        void swap(CrystalCell& __restrict cell) noexcept;
+        void swap(This& __restrict cell) noexcept;
         /* Getters */
         using Base::getType;
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }

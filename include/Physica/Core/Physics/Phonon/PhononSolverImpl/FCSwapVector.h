@@ -30,6 +30,7 @@ namespace Physica {
      */
     template<Scalar T>
     class FCSwapVector : public SparseVector<T> {
+        using This = FCSwapVector<T>;
         using Base = SparseVector<T>;
 
         Index3D superSize;
@@ -39,13 +40,13 @@ namespace Physica {
         size_t dof2;
     public:
         FCSwapVector(Index3D superSize_, Index3D cellIndex_, size_t numDOF_, size_t dof1_, size_t dof2_);
-        FCSwapVector(const FCSwapVector&) = default;
-        FCSwapVector(FCSwapVector&&) noexcept = default;
+        FCSwapVector(const This&) = default;
+        FCSwapVector(This&&) noexcept = default;
         ~FCSwapVector() = default;
         /* Operators */
-        FCSwapVector& operator=(FCSwapVector obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(FCSwapVector& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Static members */
         [[nodiscard]] static Index5D index1DTo5D(size_t numDOF, const Index3D& superSize, size_t index1D);
         [[nodiscard]] static size_t index5DTo1D(size_t numDOF, const Index3D& superSize, const Index5D& index5D);
@@ -82,7 +83,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void FCSwapVector<T>::swap(FCSwapVector& __restrict obj) noexcept {
+    void FCSwapVector<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(dof1, obj.dof1);

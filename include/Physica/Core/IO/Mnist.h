@@ -29,6 +29,7 @@ namespace Physica {
      * [1] http://yann.lecun.com/exdb/mnist/
      */
     class PHYSICA_API Mnist {
+        using This = Mnist;
     public:
         constexpr static size_t ImageSize = 28;
         constexpr static size_t NumPixelInImage = ImageSize * ImageSize;
@@ -65,7 +66,7 @@ namespace Physica {
         /* Operations */
         template<Vector V> DatasetType<V> makeTrainDataset() const;
         template<Vector V> DatasetType<V> makeTestDataset() const;
-        void swap(Mnist& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataArray& getTrainSamples() const noexcept { return trainSamples; }
         [[nodiscard]] const DataArray& getTestSamples() const noexcept { return testSamples; }

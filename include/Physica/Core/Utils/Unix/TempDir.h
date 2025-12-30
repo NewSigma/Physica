@@ -25,6 +25,8 @@
 namespace Physica {
     template<size_t N>
     class TempDir {
+        using This = TempDir<N>;
+
         char name[N];
         const char* pName;
     public:
@@ -35,7 +37,7 @@ namespace Physica {
         /* Operators */
         TempDir& operator=(TempDir obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(TempDir& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const char* getName() const noexcept { return name; }
     };

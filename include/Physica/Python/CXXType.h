@@ -24,6 +24,7 @@
 
 namespace Physica {
     class CXXType {
+        using This = CXXType;
         clang::CXXRecordDecl* pDecl;
         ffi_type ffiType;
     public:
@@ -39,7 +40,7 @@ namespace Physica {
         [[nodiscard]] const ffi_type* toFFI() const noexcept { return &ffiType; }
         [[nodiscard]] nanobind::object toPython(void* data) const;
 
-        void swap(CXXType& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isTrivial() const noexcept { return pDecl == nullptr; }
         [[nodiscard]] size_t getSize() const noexcept { return ffiType.size; }

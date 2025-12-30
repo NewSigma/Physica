@@ -75,7 +75,7 @@ namespace Physica {
 
         [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos);
         using Base::calcBornCharge;
-        void swap(Ewald& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] LatticeReturnType getLattice() const noexcept;
         [[nodiscard]] LatticeReturnType getRepLattice() const noexcept;
@@ -252,7 +252,7 @@ namespace Physica {
     }
 
     template<Scalar T, class REwaldType>
-    void Ewald<T, REwaldType>::swap(Ewald& __restrict obj) noexcept {
+    void Ewald<T, REwaldType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         selfE.swap(obj.selfE);

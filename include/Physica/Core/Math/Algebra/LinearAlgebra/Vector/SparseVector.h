@@ -40,11 +40,11 @@ namespace Physica {
         SparseVector();
         SparseVector(size_t length_);
         SparseVector(size_t length_, size_t numNonZero);
-        SparseVector(const SparseVector&) = default;
-        SparseVector(SparseVector&&) noexcept = default;
+        SparseVector(const This&) = default;
+        SparseVector(This&&) noexcept = default;
         ~SparseVector() = default;
         /* Operators */
-        SparseVector& operator=(SparseVector obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] SparseRef operator[](size_t index) { return SparseRef(*this, index); }
         /* Operations */
         void assign_sparse(Vector auto& v) const;
@@ -52,7 +52,7 @@ namespace Physica {
         void resize(size_t newLength);
         void reserve(size_t numNonZero);
         void clear();
-        void swap(SparseVector& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T calc(size_t index) const;
         [[nodiscard]] NonZeroPair calcNonZero(size_t index) const { return std::make_pair(indexes[index], elems[index]); }
@@ -113,7 +113,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void SparseVector<T>::swap(SparseVector& __restrict obj) noexcept {
+    void SparseVector<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(length, obj.length);
         indexes.swap(obj.indexes);

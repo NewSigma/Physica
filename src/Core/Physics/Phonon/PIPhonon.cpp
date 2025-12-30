@@ -46,11 +46,6 @@ PIPhonon::PIPhonon(size_t numAtomUnitCell_,
     normalModes.resize(numCell, getUnitCellDOF(), getUnitCellDOF());
 }
 
-PIPhonon& PIPhonon::operator=(PIPhonon obj) noexcept {
-    swap(obj);
-    return *this;
-}
-
 void PIPhonon::compute() {
     toKSpace();
     applyTranslationInvariance(kSpaceForceCorr[0]);
@@ -93,7 +88,7 @@ void PIPhonon::compute() {
     }
 }
 
-void PIPhonon::swap(PIPhonon& __restrict obj) noexcept {
+void PIPhonon::swap(This& __restrict obj) noexcept {
     assert(this != &obj && "[Error]: Self swap is likely a bug");
     fft.swap(obj.fft);
     std::swap(numAtomUnitCell, obj.numAtomUnitCell);

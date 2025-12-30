@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2025 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,6 +28,7 @@ namespace Physica {
      * [1] https://www.quantum-espresso.org/Doc/INPUT_PW.html
      */
     class PHYSICA_API PWscfIn {
+        using This = PWscfIn;
         using ScalarType = float64;
         constexpr static size_t BufferSize = 1024;
     public:
@@ -49,15 +50,15 @@ namespace Physica {
         Array<char> pseudo_dir;
     public:
         PWscfIn() = default;
-        PWscfIn(const PWscfIn&) = default;
-        PWscfIn(PWscfIn&&) noexcept = default;
+        PWscfIn(const This&) = default;
+        PWscfIn(This&&) noexcept = default;
         ~PWscfIn() = default;
         /* Operators */
-        PWscfIn& operator=(PWscfIn obj) noexcept;
-        PHYSICA_API friend std::ostream& operator<<(std::ostream& os, const PWscfIn& input);
-        PHYSICA_API friend std::istream& operator>>(std::istream& is, PWscfIn& input);
+        This& operator=(This obj) noexcept;
+        PHYSICA_API friend std::ostream& operator<<(std::ostream& os, const This& input);
+        PHYSICA_API friend std::istream& operator>>(std::istream& is, This& input);
         /* Operations */
-        void swap(PWscfIn& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Static members */
         static const char* calculationToStr(CalculationType calculation);
     private:

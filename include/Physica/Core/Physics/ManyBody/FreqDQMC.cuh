@@ -76,8 +76,7 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
-        [[nodiscard]] uint64_t getNumTotal() const noexcept { return numTotal; }
-        [[nodiscard]] uint64_t getNumAccept() const noexcept { return numAccept; }
+        [[nodiscard]] Trv getAcceptRate() const noexcept { return Trv(numAccept) / Trv(numTotal); }
     };
 
     template<Scalar T>

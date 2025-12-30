@@ -45,8 +45,8 @@ namespace Physica {
         Ptr pObj;
     public:
         CXXObj(CXXPtr p, nanobind::args tparams);
-        CXXObj(const CXXObj&) = delete;
-        CXXObj(CXXObj&&) noexcept;
+        CXXObj(const This&) = delete;
+        CXXObj(This&&) noexcept;
         ~CXXObj();
         /* Operators */
         This& operator=(const This&) = delete;
@@ -54,7 +54,7 @@ namespace Physica {
         /* Operations */
         void construct(const nanobind::args& args);
         [[nodiscard]] nanobind::object call(const char* rtnTyName, const char* name, const nanobind::args& args);
-        inline void swap(CXXObj& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] CXXType getType() const noexcept { return CXXType(pDecl); }
         template<class T>
@@ -68,7 +68,7 @@ namespace Physica {
         [[nodiscard]] static Ptr allocate(CXXType ty);
     };
 
-    inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {
+    inline void CXXObj::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(pDecl, obj.pDecl);
         std::swap(pObj, obj.pObj);

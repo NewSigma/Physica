@@ -29,11 +29,6 @@ PWscfOut::PWscfOut(const char* path, size_t numAtom)
     readForce();
 }
 
-PWscfOut& PWscfOut::operator=(PWscfOut obj) noexcept {
-    swap(obj);
-    return *this;
-}
-
 VectorND<typename PWscfOut::ScalarType> PWscfOut::makeTotalForces() {
     fin.seekg(std::ios::beg);
 

@@ -62,7 +62,7 @@ namespace Physica {
 
         [[nodiscard]] device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
-        void swap(CellList& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return directPos.getRow(); }
@@ -237,7 +237,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void CellList<T>::swap(CellList& __restrict obj) noexcept {
+    void CellList<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         directPos.swap(obj.directPos);

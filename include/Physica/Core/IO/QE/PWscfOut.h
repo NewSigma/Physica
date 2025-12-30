@@ -23,6 +23,7 @@
 
 namespace Physica {
     class PHYSICA_API PWscfOut {
+        using This = PWscfOut;
         using ScalarType = float64;
         constexpr static size_t DefaultBufferSize = 1024; //1024 shall be enough
 
@@ -31,14 +32,14 @@ namespace Physica {
         Array<char> buffer;
     public:
         PWscfOut(const char* path, size_t numAtom);
-        PWscfOut(const PWscfOut&) = delete;
-        PWscfOut(PWscfOut&&) noexcept = default;
+        PWscfOut(const This&) = delete;
+        PWscfOut(This&&) noexcept = default;
         ~PWscfOut() = default;
         /* Operators */
-        PWscfOut& operator=(PWscfOut obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] VectorND<ScalarType> makeTotalForces();
-        void swap(PWscfOut& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
         [[nodiscard]] const VectorND<ScalarType>& getForce() const noexcept { return force; }
