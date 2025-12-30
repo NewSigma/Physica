@@ -146,6 +146,15 @@ namespace std {
     struct tuple_element<I, Physica::DenseVector<T, Length>> {
         using type = T;
     };
+
+    template<Physica::Scalar T, size_t Length, class Allocator>
+    struct formatter<Physica::DenseVector<T, Length, Allocator>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+        static auto format(const Physica::DenseVector<T, Length, Allocator>& obj, std::format_context& ctx) {
+            auto f = obj.format();
+            return formatter<decltype(f), char>::format(f, ctx);
+        }
+    };
 }
 
 #include "VectorImpl/DenseVectorImpl.h"

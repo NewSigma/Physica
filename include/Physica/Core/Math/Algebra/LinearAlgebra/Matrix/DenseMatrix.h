@@ -116,6 +116,12 @@ namespace Physica {
 
     // Just give me a matrix. This is what you'll get.
     template<Scalar T> using MatrixND = DenseMatrix<T>;
+
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    void swap(DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
+              DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {
+        m1.swap(m2);
+    }
 }
 
 namespace Physica {
@@ -136,11 +142,13 @@ namespace Physica {
 
 namespace std {
     template<Physica::Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    void swap(
-            Physica::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
-            Physica::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {
-        m1.swap(m2);
-    }
+    struct formatter<Physica::DenseMatrix<T, Option, Row, Col, Allocator>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
+        static auto format(const Physica::DenseMatrix<T, Option, Row, Col, Allocator>& obj, std::format_context& ctx) {
+            auto f = obj.format();
+            return formatter<decltype(f), char>::format(f, ctx);
+        }
+    };
 }
 
 #include "MatrixImpl/DenseMatrixImpl.h"

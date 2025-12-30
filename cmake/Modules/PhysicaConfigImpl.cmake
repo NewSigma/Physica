@@ -48,12 +48,11 @@ else()
             set(CMAKE_CUDA_SEPARABLE_COMPILATION ON) # Workaround to avoid linkage
 
             add_custom_target(LLVMIR
-                              COMMAND mkdir -p llvm && cd llvm && find .. -name '*.o' -exec mv {} . "\\;"
+                              COMMAND mkdir -p llvm && cd llvm && find ../benchmark -name '*.o' -exec mv {} . "\\;"
                               COMMAND mmv '*.cpp.o' "'#1.ll'" && mmv '*.cu.o' "'#1_cu.ll'"
                               COMMAND rm *_MKL.ll
                               WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-                              COMMENT "Generating LLVM IR")
-            add_dependencies(LLVMIR Benchmark)
+                              COMMENT "Collecting LLVM IR")
             add_definitions(-DPHYSICA_LLVMIR)
         endif()
     else()

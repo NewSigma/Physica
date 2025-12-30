@@ -94,11 +94,8 @@ namespace Physica {
 namespace std {
     template<Physica::Vector T>
     struct formatter<Physica::FormatedVector<T>, char> {
-        constexpr auto parse(std::format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const Physica::FormatedVector<T>& obj, std::format_context& ctx) const {
+        constexpr auto parse(std::format_parse_context& ctx);
+        static auto format(const Physica::FormatedVector<T>& obj, std::format_context& ctx) {
             const auto& data = obj.getData();
             const auto& sep = obj.getSeparator();
             size_t length = data.getLength();

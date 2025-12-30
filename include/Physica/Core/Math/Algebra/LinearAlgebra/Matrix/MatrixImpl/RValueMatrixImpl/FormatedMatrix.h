@@ -136,17 +136,14 @@ namespace Physica {
 namespace std {
     template<Physica::Matrix M>
     struct formatter<Physica::FormatedMatrix<M>, char> {
-        constexpr auto parse(std::format_parse_context& ctx) {
-            return ctx.begin();
-        }
-
-        auto format(const Physica::FormatedMatrix<M>& obj, std::format_context& ctx) const {
+        constexpr auto parse(std::format_parse_context& ctx);
+        static auto format(const Physica::FormatedMatrix<M>& obj, std::format_context& ctx) {
             const size_t col = obj.getCol();
             const size_t row = obj.getRow();
             const auto width = [&obj, row, col]() noexcept {
                 size_t result = 0;
                 for (size_t c = 0; c < col; ++c)
-                    for (size_t r = 0; r < row; ++ r)
+                    for (size_t r = 0; r < row; ++r)
                         result = std::max(result, std::formatted_size("{}", obj.calc(r, c).real()));
                 return static_cast<std::streamsize>(result);
             }();
