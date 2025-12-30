@@ -607,7 +607,7 @@ namespace Physica {
      * [2] Eigen; https://eigen.tuxfamily.org
      */
     template<class Derived>
-    auto RValueVector<Derived>::householder(Vector auto& target) const -> Tr {
+    auto RValueVector<Derived>::householder(Vector auto& __restrict target) const __restrict -> Tr {
         using V = std::remove_cvref<decltype(target)>::type;
         constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
         constexpr size_t TailLength = Length > 0 ? (Length - 1) : Dynamic;

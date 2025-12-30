@@ -190,7 +190,7 @@ namespace Physica {
         [[nodiscard]] bool isFinite() const;
         [[nodiscard]] auto cross(const Vector auto& v) const noexcept;
 
-        Tr householder(Vector auto& target) const;
+        Tr householder(Vector auto& __restrict target) const __restrict;
 
         template<Matrix M>
         [[nodiscard]] auto reshape(const M& mat) const noexcept;
