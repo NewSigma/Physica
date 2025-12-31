@@ -519,10 +519,7 @@ namespace Physica {
     template<class Derived>
     auto RValueVector<Derived>::crossEntropy(size_t index) const noexcept -> CoDiff<T> {
         assert(index < getLength() && "[Error]: Index overflow");
-        const auto& v = Base::getDerived();
-        const auto vi = calc(index);
-        const auto delta = v - vi;
-        auto y = delta.lnSumExp();
+        auto y = lnSumExp() - calc(index);
         if constexpr (isReverseDiff) {
             auto tmp = co_yield y.value();
             y.reverse_final(tmp.grad());

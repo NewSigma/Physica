@@ -92,7 +92,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr double toMachine() const noexcept { return d; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
-        [[nodiscard]] __host__ __device__ bool isSubNormal() const noexcept{ return std::abs(d) < std::numeric_limits<double>::min(); }
+        [[nodiscard]] __host__ __device__ inline bool isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
@@ -139,9 +139,12 @@ namespace Physica {
         return std::modf(toMachine(), &buffer);
     }
 
+    [[clang::no_sanitize("numerical")]] __host__ __device__ inline bool Real<Float64>::isSubNormal() const noexcept{
+        return !__builtin_isnormal(d); // Use builtin to help no_sanitize
+    }
+
     __host__ __device__ inline bool Real<Float64>::isFinite() const noexcept {
-        using namespace std;
-        return isfinite(d);
+        return std::isfinite(d);
     }
 
     constexpr Real<Float64> Real<Float64>::nan() noexcept {

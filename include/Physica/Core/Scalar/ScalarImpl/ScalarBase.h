@@ -540,27 +540,26 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T relativeError(const T& x, const T& y) noexcept {
+    [[clang::no_sanitize("numerical")]] T relativeError(T x, T y) noexcept {
         static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid template param");
-        T absX = abs(x);
-        T absY = abs(y);
-        T error = abs(x - y);
-        bool useAbsCompare = absX.isSubNormal() || absY.isSubNormal();
-        if (!useAbsCompare)
-            error *= T(2) / (absX + absY);
-        return error;
+        T error = abs(T(x.toMachine() - y.toMachine())); // toMachine() avoids call of operator-, so that no_sanitize works
+        if (x.isSubNormal() || y.isSubNormal())
+            return error;
+
+        T mean = (abs(x) + abs(y)) * 0.5;
+        return error / mean;
     }
 
     template<Scalar T>
-    bool scalarNear(const T& x, const T& y, double precision) noexcept {
+    [[clang::no_sanitize("numerical")]] bool scalarNear(const T& x, const T& y, double precision) noexcept {
         assert(precision > 0);
         constexpr bool isDiffable = T::isDiffable;
         if constexpr (T::isComplex) {
-            using PlainRealType = T::ValueType::RealType;
-            const T diff = x - y;
-            const bool isValueNear = scalarNear(abs(diff.value()), PlainRealType(0), precision);
+            using Trv = T::ValueType::RealType;
+            Trv diff = std::hypot(x.value().real().toMachine() - y.value().real().toMachine(), x.value().imag().toMachine() - y.value().imag().toMachine());
+            const bool isValueNear = scalarNear(diff, Trv(0), precision);
             if constexpr (isDiffable)
-                return isValueNear && scalarNear(abs(diff.grad()), PlainRealType(0), precision);
+                return isValueNear && scalarNear(diff, Trv(0), precision);
             else
                 return isValueNear;
         }

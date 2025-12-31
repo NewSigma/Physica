@@ -19,7 +19,6 @@
 #pragma once
 
 #include <format>
-#include <iomanip>
 #include "Physica/CRCoro.h"
 #include "../Real.h"
 
@@ -93,7 +92,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr float toMachine() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == 0; }
-        [[nodiscard]] __host__ __device__ bool isSubNormal() const noexcept{ return std::abs(f) < std::numeric_limits<float>::min(); }
+        [[nodiscard]] __host__ __device__ inline bool isSubNormal() const noexcept;
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return f < 0; }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
@@ -140,9 +139,12 @@ namespace Physica {
         return std::modf(toMachine(), &buffer);
     }
 
+    [[clang::no_sanitize("numerical")]] __host__ __device__ inline bool Real<Float32>::isSubNormal() const noexcept {
+        return !__builtin_isnormal(f); // Use builtin to help no_sanitize
+    }
+
     __host__ __device__ inline bool Real<Float32>::isFinite() const noexcept {
-        using namespace std;
-        return isfinite(f);
+        return std::isfinite(f);
     }
 
     constexpr Real<Float32> Real<Float32>::nan() noexcept {
