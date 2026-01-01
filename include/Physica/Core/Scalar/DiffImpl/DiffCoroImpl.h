@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -46,7 +46,7 @@ namespace Physica {
 
     template<class Base>
     template<ReverseDiff T>
-    DiffCoro<Base>::DiffCoro(T&& x) noexcept requires(!IsCoDiff<T>::value) {
+    DiffCoro<Base>::DiffCoro(T&& x) noexcept requires(!is_codiff<T>::value) {
         auto fn = [](auto&& x) noexcept -> This {
             LazyDestroy<T&&> x_ = std::forward<T>(x);
             Base y;

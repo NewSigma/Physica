@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -80,7 +80,7 @@ namespace Physica {
         using MKL_Complex = std::conditional<Prec == Float32, MKL_Complex8,
                                                               typename std::conditional<Prec == Float64, MKL_Complex16, void>::type>::type;
     private:
-        constexpr static bool isScalarRef = Internal::IsScalarRef<Derived>::value;
+        constexpr static bool isScalarRef = instanceof<ScalarRef, Derived>;
         static_assert(isDiffable == (Order > 0), "[Error]: DiffMode is not self consistent");
         static_assert(std::is_same<Derived, ScalarType>::value || isScalarRef, "[Error]: Inconsistent type between traits and inherit class");
 

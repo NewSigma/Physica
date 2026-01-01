@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -116,8 +116,7 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode>
-    FFT<Diff<T, Mode, 1>, 1>
-    FFT<Diff<T, Mode, 1>, 1>::makeEmptyFFT(size_t rSpaceSize) {
+    auto FFT<Diff<T, Mode, 1>, 1>::makeEmptyFFT(size_t rSpaceSize) -> This {
         return This(rSpaceSize);
     }
 
@@ -198,22 +197,22 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode>
-    FFT<Diff<T, Mode, 1>, 1>::RealPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() {
+    auto FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() -> RealPtrTy {
         return RealPtrTy(buffer.data());
     }
 
     template<Scalar T, DiffMode Mode>
-    FFT<Diff<T, Mode, 1>, 1>::RealConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() const {
+    auto FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() const -> RealConstPtrTy {
         return const_cast<This&>(*this).asRealBuffer();
     }
 
     template<Scalar T, DiffMode Mode>
-    FFT<Diff<T, Mode, 1>, 1>::ComplexPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() {
+    auto FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() -> ComplexPtrTy {
         return buffer.data();
     }
 
     template<Scalar T, DiffMode Mode>
-    FFT<Diff<T, Mode, 1>, 1>::ComplexConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() const {
+    auto FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() const -> ComplexConstPtrTy {
         return const_cast<This&>(*this).asComplexBuffer();
     }
 }

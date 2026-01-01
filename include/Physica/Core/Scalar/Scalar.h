@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
 
@@ -28,18 +28,6 @@
 #include "Physica/Core/Utils/MetaProgramming.h"
 
 namespace Physica {
-    namespace Internal {
-        template<class T>
-        struct IsScalarRef {
-            constexpr static bool value = false;
-        };
-
-        template<class T>
-        struct IsScalarRef<ScalarRef<T>> {
-            constexpr static bool value = true;
-        };
-    }
-
     enum FloatPrec : char {
         Float16 = 0,
         Float32 = 1,
@@ -69,6 +57,27 @@ namespace Physica {
     template<class Derived>
     class SIMDBase;
     /**
+     * \class ScalarPtr is general n-dimension pointer that targets SOA(Structure of Arrays) storage
+     */
+    template<class ScalarType> class ScalarPtr;
+    /**
+     * \class ScalarRef helps implementing dereferencing semantic of ScalarPtr
+     */
+    template<class ScalarType> class ScalarRef;
+
+    template<class T>
+    struct remove_scalar_ref {
+        using Type = T;
+    };
+
+    template<class T>
+    struct remove_scalar_ref<ScalarRef<T>> {
+        using Type = T;
+    };
+
+    template<class T>
+    using remove_scalar_ref_t = remove_scalar_ref<T>::Type;
+    /**
      * \class Real is a advanced float type that supports multiple precision
      */
     template<FloatPrec Prec = Float64>
@@ -81,15 +90,7 @@ namespace Physica {
     template<class T>
     concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
                   || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>
-                  || Internal::IsScalarRef<std::remove_cvref_t<T>>::value;
-    /**
-     * \class ScalarPtr is general n-dimension pointer that targets SOA(Structure of Arrays) storage
-     */
-    template<class ScalarType> class ScalarPtr;
-    /**
-     * \class ScalarRef helps implementing dereferencing semantic of ScalarPtr
-     */
-    template<class ScalarType> class ScalarRef;
+                  || instanceof<ScalarRef, T>;
 
     template<class T>
     concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
@@ -107,18 +108,8 @@ namespace Physica {
     class DiffCoro;
 
     template<class T>
-    class IsCoDiff {
-        template<class U>
-        struct Impl {
-            constexpr static bool value = false;
-        };
-
-        template<class U>
-        struct Impl<DiffCoro<U>> {
-            constexpr static bool value = true;
-        };
-    public:
-        constexpr static bool value = Impl<std::remove_cvref_t<T>>::value;
+    struct is_codiff {
+        constexpr static bool value = instanceof<DiffCoro, T>;
     };
 
     template<class T>
@@ -127,20 +118,17 @@ namespace Physica {
     };
 
     template<class T>
-    using remove_codiff_t = remove_codiff<T>::Type;
-
-    template<class T>
     struct remove_codiff<DiffCoro<T>> {
         using Type = T;
     };
 
     template<class T>
-    using CoDiff = std::conditional<std::is_void<T>::value || ReverseDiff<T>
-                 , DiffCoro<remove_codiff_t<typename remove_cvref<T>::Type>>
-                 , typename remove_cvref<T>::Type>::type;
+    using remove_codiff_t = remove_codiff<T>::Type;
 
-    template<class T> requires(std::is_reference<T>::value)
-    using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, std::add_lvalue_reference_t<T>>::type;
+    template<class T>
+    using CoDiff = std::conditional<std::is_void_v<T> || ReverseDiff<T>
+                 , DiffCoro<remove_codiff_t<remove_scalar_ref_t<std::remove_cvref_t<T>>>>
+                 , T>::type;
 
     namespace Internal {
         /**

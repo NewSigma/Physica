@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,19 +21,7 @@
 #include <type_traits>
 
 namespace Physica {
-    template<class> class ScalarRef;
-
     namespace Internal {
-        template<class T>
-        struct remove_ScalarRef {
-            using Type = T;
-        };
-
-        template<class T>
-        struct remove_ScalarRef<ScalarRef<T>> {
-            using Type = T;
-        };
-
         template<template<class...> class, class>
         struct is_instance_of : std::false_type {};
 
@@ -53,11 +41,6 @@ namespace Physica {
         struct is_instance_of_tx<Template, Template<Arg0, Args...>> : std::true_type {};
     }
 
-    template<class T>
-    struct remove_cvref {
-        using Type = Internal::remove_ScalarRef<std::remove_cvref_t<T>>::Type;
-    };
-
     template<template<class...> class Template, class T>
     concept instanceof = Internal::is_instance_of<Template, std::remove_cvref_t<T>>::value;
     /**
@@ -71,4 +54,7 @@ namespace Physica {
 
     template<template<class, auto...> class Template, class T>
     concept instanceof_tx = Internal::is_instance_of_tx<Template, std::remove_cvref_t<T>>::value;
+
+    template<class T> requires(std::is_reference<T>::value)
+    using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T>::type;
 }

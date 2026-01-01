@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ namespace Physica {
     template<class Base>
     class DiffCoro : public Base {
         static_assert(ReverseDiff<Base>, "[Error]: DiffCoro save compute graph for reverse diffable objects");
-        static_assert(!IsCoDiff<Base>::value, "[Error]: Nested DiffCoro is not allowed");
+        static_assert(!is_codiff<Base>::value, "[Error]: Nested DiffCoro is not allowed");
         static_assert(std::is_object<Base>::value, "[Error]: Must save the return by value");
         using This = DiffCoro<Base>;
 
@@ -76,7 +76,7 @@ namespace Physica {
         DiffCoro(std::nullptr_t) noexcept {}
         DiffCoro(std::coroutine_handle<Promise> handle_) noexcept;
         template<ReverseDiff T>
-        DiffCoro(T&& x) noexcept requires(!IsCoDiff<T>::value);
+        DiffCoro(T&& x) noexcept requires(!is_codiff<T>::value); // Require move operations delegate to the move constructor
         DiffCoro(const This& other) = delete;
         DiffCoro(This&& other) noexcept;
         ~DiffCoro();
