@@ -45,8 +45,8 @@ namespace Physica {
         __host__ __device__ This& operator=(const This& other);
         __host__ __device__ This& operator=(This&& other) noexcept;
         __host__ __device__ This& operator=(const Scalar auto& other);
-        __host__ __device__ This& operator=(int x) { return operator=(T(x)); }
-        __host__ __device__ This& operator=(double x) { return operator=(T(x)); }
+        __host__ __device__ This& operator=(int x);
+        __host__ __device__ This& operator=(double x);
         [[nodiscard]] __host__ __device__ operator ScalarType() const requires(!ReverseDiff<T>);
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
@@ -98,6 +98,18 @@ namespace Physica {
             grad() = other.grad();
         else
             zero_grad();
+        return *this;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::operator=(int x) -> This& {
+        operator=(T(x));
+        return *this;
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ auto ScalarRef<Diff<T, Mode, Order>>::operator=(double x) -> This& {
+        operator=(T(x));
         return *this;
     }
 

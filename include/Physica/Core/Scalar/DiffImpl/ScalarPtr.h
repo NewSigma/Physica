@@ -25,22 +25,18 @@ namespace Physica {
     class ScalarPtr<Diff<T, Mode, Order>> {
         using ScalarType = Diff<T, Mode, Order>;
         using This = ScalarPtr<ScalarType>;
+        using RefTy = ScalarRef<ScalarType>;
         using GradType = ScalarType::GradType;
     public:
         using GradPtrTy = GradType::PtrTy;
     private:
-        union {
-            struct {
-                T* pValue;
-                GradPtrTy pGrad;
-            };
-            std::array<T*, Order + 1> arr;
-        };
+        T* pValue;
+        GradPtrTy pGrad;
     public:
-        __host__ __device__ ScalarPtr() {}
+        ScalarPtr() = default;
         __host__ __device__ ScalarPtr(T* pValue_, GradPtrTy pGrad_);
         __host__ __device__ explicit ScalarPtr(ScalarType& x);
-        __host__ __device__ explicit ScalarPtr(ScalarRef<ScalarType>& x);
+        __host__ __device__ explicit ScalarPtr(RefTy& x);
         ScalarPtr(const This&) = default;
         ScalarPtr(This&&) noexcept = default;
         ~ScalarPtr() = default;
@@ -51,20 +47,22 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool operator!=(const This& other) const noexcept { return !(*this == other); }
         template<Scalar U>
         [[nodiscard]] __host__ __device__ explicit operator ScalarPtr<Diff<U, Mode, Order>>() noexcept;
-        [[nodiscard]] __host__ __device__ ScalarRef<ScalarType> operator*() const noexcept;
-        [[nodiscard]] __host__ __device__ ScalarRef<ScalarType> operator->() const noexcept;
+        [[nodiscard]] __host__ __device__ RefTy operator*() const noexcept;
+        [[nodiscard]] __host__ __device__ RefTy operator->() const noexcept;
         [[nodiscard]] __host__ __device__ This operator+(size_t n) const noexcept;
         __host__ __device__ This& operator++() noexcept;
         __host__ __device__ This& operator--() noexcept;
         __host__ __device__ const This operator++(int) noexcept;
         __host__ __device__ const This operator--(int) noexcept;
-        [[nodiscard]] __host__ __device__ T* operator[](size_t i) const noexcept;
         /* Operations */
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ T* value_ptr() const noexcept { return pValue; }
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grad_ptr() const noexcept;
+        template<size_t I>
+        [[nodiscard]] __host__ __device__ constexpr T* get() const noexcept { return get(I); }
+        [[nodiscard]] __host__ __device__ constexpr T* get(int order) const noexcept;
     };
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -74,7 +72,7 @@ namespace Physica {
     __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarType& x) : ScalarPtr(&x.value(), &x.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarRef<ScalarType>& x) : ScalarPtr(&x.value(), &x.grad()) {}
+    __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(RefTy& x) : ScalarPtr(&x.value(), &x.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ bool ScalarPtr<Diff<T, Mode, Order>>::operator==(const This& other) const noexcept {
@@ -92,13 +90,13 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ auto ScalarPtr<Diff<T, Mode, Order>>::operator*() const noexcept -> ScalarRef<ScalarType> {
-        return ScalarRef<ScalarType>(*this);
+    __host__ __device__ auto ScalarPtr<Diff<T, Mode, Order>>::operator*() const noexcept -> RefTy {
+        return RefTy(*this);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ auto ScalarPtr<Diff<T, Mode, Order>>::operator->() const noexcept -> ScalarRef<ScalarType> {
-        return *(*this);
+    __host__ __device__ auto ScalarPtr<Diff<T, Mode, Order>>::operator->() const noexcept -> RefTy {
+        return operator*();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -108,15 +106,15 @@ namespace Physica {
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>& ScalarPtr<Diff<T, Mode, Order>>::operator++() noexcept {
-        for (auto& p : arr)
-            p++;
+        pValue++;
+        pGrad++;
         return *this;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ ScalarPtr<Diff<T, Mode, Order>>& ScalarPtr<Diff<T, Mode, Order>>::operator--() noexcept {
-        for (auto& p : arr)
-            p--;
+        pValue--;
+        pGrad--;
         return *this;
     }
 
@@ -131,15 +129,11 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ T* ScalarPtr<Diff<T, Mode, Order>>::operator[](size_t i) const noexcept {
-        assert(i <= Order);
-        return arr[i];
-    }
-
-    template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ void ScalarPtr<Diff<T, Mode, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(arr, obj.arr);
+        using std::swap;
+        swap(pValue, obj.pValue);
+        swap(pGrad, obj.pGrad);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -151,4 +145,34 @@ namespace Physica {
         else
             return pGrad.template grad_ptr<GradOrder - 1>();
     }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ constexpr T* ScalarPtr<Diff<T, Mode, Order>>::get(int order) const noexcept {
+        if (order == 0)
+            return pValue;
+
+        if constexpr (Order == 1) {
+            assert(order == 1 && "[Error]: Invalid order");
+            return pGrad;
+        }
+        else {
+            assert(order > 0 && "[Error]: Invalid order");
+            return pGrad.get(order - 1);
+        }
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    void swap(ScalarPtr<Diff<T, Mode, Order>>& p1, ScalarPtr<Diff<T, Mode, Order>>& p2) noexcept {
+        p1.swap(p2);
+    }
+}
+
+namespace std {
+    template<class T>
+    struct tuple_size<Physica::ScalarPtr<T>> : public integral_constant<std::size_t, 1 + Physica::Traits<T>::Order> {};
+
+    template<std::size_t I, class T>
+    struct tuple_element<I, Physica::ScalarPtr<T>> {
+        using type = Physica::Traits<T>::ValueType::PtrTy;
+    };
 }

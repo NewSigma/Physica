@@ -242,7 +242,7 @@ namespace Physica {
             auto fileSpace = DataSpaceType({length, DiffOrder + 1});
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
-                dataset.read(data()[i], Tv::dtype_hdf5(), memSpace, fileSpace);
+                dataset.read(data().get(i), Tv::dtype_hdf5(), memSpace, fileSpace);
             }
         }
         else
@@ -269,7 +269,7 @@ namespace Physica {
         if constexpr (isDiffable) {
             for (size_t i = 0; i <= DiffOrder; ++i) {
                 fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
-                dataset.write(data()[i], Tv::dtype_hdf5(), memSpace, fileSpace);
+                dataset.write(data().get(i), Tv::dtype_hdf5(), memSpace, fileSpace);
             }
         }
         else

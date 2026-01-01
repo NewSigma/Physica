@@ -64,8 +64,6 @@ namespace Physica {
     constexpr static MPUnit MPUnitHighestBitMask = static_cast<MPUnit>(1) << (MPUnitWidth - 1);
     constexpr static MPUnit MPUnitLowerMask = MPUnitMax >> (MPUnitWidth / 2);
 
-    template<class ScalarType>
-    class ScalarPtr;
     template<class Derived>
     class ScalarBase;
     template<class Derived>
@@ -84,6 +82,14 @@ namespace Physica {
     concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
                   || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>
                   || Internal::IsScalarRef<std::remove_cvref_t<T>>::value;
+    /**
+     * \class ScalarPtr is general n-dimension pointer that targets SOA(Structure of Arrays) storage
+     */
+    template<class ScalarType> class ScalarPtr;
+    /**
+     * \class ScalarRef helps implementing dereferencing semantic of ScalarPtr
+     */
+    template<class ScalarType> class ScalarRef;
 
     template<class T>
     concept Packet = Scalar<T> || std::derived_from<std::remove_cvref_t<T>, SIMDBase<std::remove_cvref_t<T>>>;
