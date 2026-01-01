@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -315,6 +315,12 @@ namespace Physica {
     const auto LValueMatrix<Derived>::diag() const noexcept {
         assert(Base::isSquare());
         return DiagVector<Derived, true>(Base::getConstCastDerived());
+    }
+
+    template<class Derived>
+    auto LValueMatrix<Derived>::diag(this auto&& self, ssize_t shift) noexcept {
+        using Self = decltype(self);
+        return MinorDiagL<Self>(std::forward<Self>(self), shift);
     }
     /**
      * Reduce the element at one row using the other row.

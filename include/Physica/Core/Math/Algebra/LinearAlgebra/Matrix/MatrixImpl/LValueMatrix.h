@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,6 +22,7 @@
 #include "LValueMatrixImpl/LMatrixBlock.h"
 
 namespace Physica {
+    template<Matrix M> class MinorDiagL;
     template<class> class FlattenL;
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
@@ -113,6 +114,7 @@ namespace Physica {
         [[nodiscard]] const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
         [[nodiscard]] auto diag() noexcept;
         [[nodiscard]] const auto diag() const noexcept;
+        [[nodiscard]] auto diag(this auto&&, ssize_t shift) noexcept;
 
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void colReduce(size_t c1, size_t c2, size_t elementIndex);
@@ -156,4 +158,5 @@ namespace Physica {
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.h"
+#include "LValueMatrixImpl/MinorDiag.h"
 #include "LValueMatrixImpl/ReshapedVector.h"
