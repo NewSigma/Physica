@@ -173,7 +173,7 @@ namespace Physica {
      * Helper function that communicates with C libraries.
      */
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This {
+    auto DenseMatrix<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) noexcept -> This {
         return This(Storage::read(row, col, p));
     }
 }

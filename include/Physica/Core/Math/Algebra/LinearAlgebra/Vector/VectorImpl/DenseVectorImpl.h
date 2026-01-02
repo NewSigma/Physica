@@ -139,7 +139,7 @@ namespace Physica {
      * Helper function that communicates with C libraries.
      */
     template<Scalar T, size_t Length, class Allocator>
-    auto DenseVector<T, Length, Allocator>::read(size_t length, const T* __restrict p) -> This {
+    auto DenseVector<T, Length, Allocator>::read(size_t length, const T* __restrict p) noexcept -> This {
         return This(Storage::read(length, p));
     }
 

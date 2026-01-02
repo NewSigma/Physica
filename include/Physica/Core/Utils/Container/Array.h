@@ -120,6 +120,7 @@ namespace Physica {
         void clear() noexcept;
         [[nodiscard]] T* release() noexcept;
         void zeros() noexcept;
+        void read(const T* __restrict p) noexcept;
 
         [[nodiscard]] auto toDevice() const;
         [[nodiscard]] auto toDeviceAsync() const;
@@ -137,7 +138,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
         [[nodiscard]] auto get_allocator() const noexcept { return alloc; }
         /* Static members */
-        [[nodiscard]] static This read(size_t length, const T* __restrict p);
+        [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
     private:
         void adjust(size_t size);

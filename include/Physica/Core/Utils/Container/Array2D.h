@@ -75,6 +75,7 @@ namespace Physica {
         [[nodiscard]] auto transpose() const noexcept;
 
         void zeros() noexcept;
+        void read(const T* __restrict p) noexcept;
         void swap(This& __restrict obj) noexcept;
         void swap_row(size_t r1, size_t r2) noexcept;
         void swap_col(size_t c1, size_t c2) noexcept;
@@ -90,7 +91,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept;
         [[nodiscard]] __host__ __device__ bool empty() const noexcept;
         /* Static members */
-        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p);
+        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
     private:
         Array2D(ArrayType arr_, IndexType r_);
 

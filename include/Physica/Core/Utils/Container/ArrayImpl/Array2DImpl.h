@@ -93,6 +93,11 @@ namespace Physica {
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    void Array2D<T, Option, Row, Col, Allocator>::read(const T* __restrict p) noexcept {
+        arr.read(p);
+    }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         arr.swap(obj.arr);
@@ -202,7 +207,7 @@ namespace Physica {
      * Helper function that communicates with C libraries.
      */
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    auto Array2D<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) -> This {
+    auto Array2D<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) noexcept -> This {
         This result{};
         new (&result.arr) ArrayType::read(row * col, p);
         result.r = row;

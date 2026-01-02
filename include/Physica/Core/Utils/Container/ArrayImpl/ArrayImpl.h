@@ -253,6 +253,15 @@ namespace Physica {
         static_assert(std::is_trivially_copyable<T>::value, "[Error]: zeros() does not apply to non-trivial type");
         memset(arr, 0, length * sizeof(T));
     }
+    /**
+     * Helper function that communicates with C libraries.
+     */
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Allocator>::read(const T* __restrict p) noexcept {
+        static_assert(std::is_trivially_copyable<T>::value);
+        assert(p != nullptr);
+        memcpy(arr, p, length * sizeof(T));
+    }
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::swap(This& __restrict obj) noexcept {
@@ -277,15 +286,13 @@ namespace Physica {
     __host__ __device__ const T* Array<T, Dynamic, Allocator>::data() const noexcept {
         return const_cast<This&>(*this).data();
     }
-    /**
-     * Helper function that communicates with C libraries.
-     */
+
     template<class T, class Allocator>
-    auto Array<T, Dynamic, Allocator>::read(size_t length, const T* __restrict p) -> This {
-        static_assert(std::is_trivially_copyable<T>::value, "[Error]: C type must be trivial");
-        assert(p != nullptr);
-        This result(length);
-        memcpy(result.arr, p, length * sizeof(T));
+    auto Array<T, Dynamic, Allocator>::read(size_t length, const T* __restrict p) noexcept -> This {
+        This result{};
+        result.arr = result.get_allocator().allocate(length);
+        result.length = result.capacity = length;
+        result.read(length, p);
         return result;
     }
 

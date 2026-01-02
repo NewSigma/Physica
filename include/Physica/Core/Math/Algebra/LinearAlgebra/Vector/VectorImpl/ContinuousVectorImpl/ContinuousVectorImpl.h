@@ -53,16 +53,14 @@ namespace Physica {
             }
             else {
                 constexpr size_t Length = std::max(SizeAtCompile, V::SizeAtCompile);
-                if constexpr (Length != Dynamic) {
+                if constexpr (Length != Dynamic)
                     memcpy(v.data(), data(), Length * sizeof(T)); // Static memcpy
-                    return;
-                }
                 else {
                     constexpr size_t Critical = 1024 * sizeof(float64); // Based on benchmark
-                    constexpr bool Beneficial = Length == Dynamic || (Length * sizeof(T) > Critical);
+                    constexpr bool MaybeBenefit = Length == Dynamic || (Length * sizeof(T) > Critical);
                     size_t size = Base::getLength() * sizeof(T);
-                    if (Beneficial && size > Critical)
-                        memcpy(v.data(), data(), size);
+                    if (MaybeBenefit && (size > Critical))
+                        memcpy(v.data(), data(), size); // Reuse size, because v.read(data()) shows IR regression
                     else
                         Base::template assign_base<P>(v);
                 }
@@ -194,6 +192,11 @@ namespace Physica {
             std::memset(data(), 0, Base::getLength() * sizeof(T));
         else
             Base::template operator=<T>(T(0));
+    }
+
+    template<class Derived>
+    void ContinuousVector<Derived>::read(const T* __restrict p) noexcept {
+        memcpy(data(), p, Base::getLength() * sizeof(T));
     }
 
     template<class Derived>

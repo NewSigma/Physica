@@ -129,6 +129,7 @@ namespace Physica {
         [[nodiscard]] const auto flatten() const noexcept;
 
         void zeros();
+        void read(const T* __restrict p);
         template<RNG R>
         void random_uniform();
         template<RNG R>

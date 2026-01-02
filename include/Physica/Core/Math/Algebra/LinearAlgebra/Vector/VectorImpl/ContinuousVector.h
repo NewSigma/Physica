@@ -109,6 +109,7 @@ namespace Physica {
         [[nodiscard]] Tr norm2_mkl() const noexcept;
 
         void zeros();
+        void read(const T* __restrict p) noexcept;
         template<RNG R>
         void random_uniform();
         template<RNG R>

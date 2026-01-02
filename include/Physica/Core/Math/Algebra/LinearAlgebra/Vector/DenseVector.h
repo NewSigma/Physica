@@ -77,13 +77,13 @@ namespace Physica {
         [[nodiscard]] T excess_kurt() const;
         [[nodiscard]] T kurt() const;
 
-        using Base::zeros;
         using Base::random_uniform;
         using Base::random_normal;
         using Base::random_any;
 
         using Base::read;
         using Base::write;
+        using Storage::zeros;
         using Storage::swap;
 
         using Coro::get_return_object;
@@ -107,7 +107,7 @@ namespace Physica {
         [[nodiscard]] static This random_any(size_t len, auto& distribution);
         [[nodiscard]] static This linspace(T from, T to, size_t count);
         [[nodiscard]] static This read_hdf5(const H5Loc& loc, const char* name);
-        [[nodiscard]] static This read(size_t length, const T* __restrict p);
+        [[nodiscard]] static This read(size_t length, const T* __restrict p) noexcept;
         [[nodiscard]] static This generate(std::invocable<size_t> auto fn);
         [[nodiscard]] static This generate(size_t length, std::invocable<size_t> auto fn);
     };

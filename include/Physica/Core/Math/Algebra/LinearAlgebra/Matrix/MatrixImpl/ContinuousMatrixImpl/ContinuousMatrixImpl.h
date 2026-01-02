@@ -231,6 +231,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    void ContinuousMatrix<Derived>::read(const T* __restrict p) {
+        Base::getDerived().flatten().read(p);
+    }
+
+    template<class Derived>
     template<RNG R>
     void ContinuousMatrix<Derived>::random_uniform() {
         Base::getDerived().flatten().template random_uniform<R>();

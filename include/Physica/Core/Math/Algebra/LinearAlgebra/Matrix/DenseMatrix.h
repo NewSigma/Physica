@@ -108,7 +108,7 @@ namespace Physica {
         template<RNG R>
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
         [[nodiscard]] static auto meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This>;
-        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p);
+        [[nodiscard]] static This read(size_t row, size_t col, const T* __restrict p) noexcept;
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
         friend class device_obj<This>;

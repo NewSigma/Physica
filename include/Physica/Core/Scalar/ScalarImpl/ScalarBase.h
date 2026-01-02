@@ -540,9 +540,9 @@ namespace Physica {
     }
 
     template<Scalar T>
-    [[clang::no_sanitize("numerical")]] T relativeError(T x, T y) noexcept {
+    T relativeError(T x, T y) noexcept {
         static_assert(!T::isComplex && !T::isDiffable, "[Error]: Invalid template param");
-        T error = abs(T(x.toMachine() - y.toMachine())); // toMachine() avoids call of operator-, so that no_sanitize works
+        T error = abs(x - y);
         if (x.isSubNormal() || y.isSubNormal())
             return error;
 
