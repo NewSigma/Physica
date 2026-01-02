@@ -28,8 +28,7 @@ namespace {
         const int64_t size = state.range(0);
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            T y{};
-            PHYSICA_BENCH(y = x.norm2_base());
+            T y = x.norm2_base();
             benchmark::DoNotOptimize(x);
             benchmark::DoNotOptimize(y);
         }

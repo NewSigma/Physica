@@ -30,7 +30,7 @@ namespace {
         const DenseMatrix<T> data = TransIsingMatrix<T, 1, 10>(1, 0.01, lattice);
         EigenSolver<T> solver(data.getRow(), NeedEigenVec);
         for (auto _ : state) {
-            PHYSICA_BENCH(solver.compute(data));
+            solver.compute(data);
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }

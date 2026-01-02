@@ -30,7 +30,7 @@ namespace {
         auto expr = abs(x);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            PHYSICA_BENCH(expr.assign(buffer));
+            expr.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

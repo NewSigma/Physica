@@ -29,7 +29,7 @@ namespace {
         const auto x = VectorND<T>::random_uniform<RandomSource>(size);
         VectorND<T> y(size);
         for (auto _ : state) {
-            PHYSICA_BENCH(x.assign(y));
+            x.assign(y);
             benchmark::DoNotOptimize(y);
             benchmark::ClobberMemory();
         }

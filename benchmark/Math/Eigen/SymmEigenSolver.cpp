@@ -31,7 +31,7 @@ namespace {
 
         auto m = MatrixND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
-            PHYSICA_BENCH(solver.compute(m));
+            solver.compute(m);
             benchmark::DoNotOptimize(solver);
             benchmark::ClobberMemory();
         }

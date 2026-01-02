@@ -34,7 +34,7 @@ namespace {
         auto expr = m1 * m2;
         MatrixType m(order, order);
         for (auto _ : state) {
-            PHYSICA_BENCH(expr.assign(m));
+            expr.assign(m);
             benchmark::DoNotOptimize(m);
             benchmark::ClobberMemory();
         }

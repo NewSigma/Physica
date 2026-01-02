@@ -30,7 +30,7 @@ namespace {
         auto x = VectorND<T>::random_uniform<RandomSource>(size);
         for (auto _ : state) {
             auto expr = x * T(flag ? std::numbers::pi : (1.0 / std::numbers::pi));
-            PHYSICA_BENCH(expr.assign(x));
+            expr.assign(x);
             benchmark::DoNotOptimize(x);
             benchmark::ClobberMemory();
             flag = !flag;

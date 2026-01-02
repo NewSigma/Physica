@@ -31,7 +31,7 @@ namespace {
         auto trans = m.transpose();
         MatrixType buffer(order, order);
         for (auto _ : state) {
-            PHYSICA_BENCH(trans.assign(buffer));
+            trans.assign(buffer);
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }

@@ -29,7 +29,7 @@ namespace {
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
         DenseQR<T> qr(order, order);
         for (auto _ : state) {
-            PHYSICA_BENCH(qr.compute(m));
+            qr.compute(m);
             benchmark::DoNotOptimize(qr);
             benchmark::ClobberMemory();
         }

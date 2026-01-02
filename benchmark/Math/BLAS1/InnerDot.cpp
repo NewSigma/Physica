@@ -31,8 +31,7 @@ namespace {
         const VectorND<T> v2 = VectorND<T>::template random_uniform<RandomSource>(size);
         auto dot = InnerDot(v1, v2);
         for (auto _ : state) {
-            T y{};
-            PHYSICA_BENCH(y = dot.calc());
+            T y = dot.calc();
             benchmark::DoNotOptimize(y);
             benchmark::DoNotOptimize(dot);
         }
