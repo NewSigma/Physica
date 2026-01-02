@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -292,6 +292,6 @@ namespace Physica {
     template<int GradOrder>
     auto ContinuousVector<Derived>::grads() const noexcept {
         static_assert(Diffable<ScalarType>, "[Error]: Undiffable vector does not have grads");
-        return GradVector<ContinuousVector<Derived>, GradOrder>(Base::getDerived());
+        return GradVector<ContinuousVector<Derived>, GradOrder>(Base::getConstCastDerived());
     }
 }

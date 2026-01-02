@@ -202,3 +202,8 @@ namespace Physica {
         }
     };
 }
+
+namespace Physica {
+    template<class T>
+    class Traits<ScalarRef<T>> : public Traits<T> {};
+}

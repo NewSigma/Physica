@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -125,9 +125,9 @@ namespace Physica {
         using ValueType = T;
         using ScalarType = Diff<T, Mode, Order>;
         using PtrTy = ScalarPtr<ScalarType>;
-        using ConstPtrTy = const ScalarPtr<ScalarType>;
+        using ConstPtrTy = ScalarPtr<const ScalarType>;
         using RefTy = ScalarRef<ScalarType>;
-        using ConstRefTy = const ScalarRef<ScalarType>;
+        using ConstRefTy = ScalarRef<const ScalarType>;
         using RealType = Diff<RealT, Mode, Order>;
         using ComplexType = Diff<ComplexT, Mode, Order>;
         using MachineType = T::MachineType;

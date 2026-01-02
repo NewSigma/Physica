@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,9 +29,9 @@ namespace Physica {
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
-        const T& v;
+        T& v;
     public:
-        ValueVector(const T& v_) : v(v_) {}
+        ValueVector(T& v_) : v(v_) {}
         ValueVector(const This&) = default;
         ValueVector(This&&) noexcept = default;
         ~ValueVector() = default;
@@ -56,9 +56,9 @@ namespace Physica {
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
-        const T& v;
+        T& v;
     public:
-        GradVector(const T& v_) : v(v_) {}
+        GradVector(T& v_) : v(v_) {}
         GradVector(const This&) = default;
         GradVector(This&&) noexcept = default;
         ~GradVector() = default;

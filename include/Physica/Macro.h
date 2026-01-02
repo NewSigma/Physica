@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -72,8 +72,8 @@ namespace Physica {
     template<class T>
     class Traits;
 
-    template<class R> requires(std::is_reference<R>::value)
-    class Traits<R> : public Traits<std::remove_cvref_t<R>> {};
+    template<class T> requires(std::is_const_v<T> || std::is_volatile_v<T> || std::is_reference_v<T>)
+    class Traits<T> : public Traits<std::remove_cvref_t<T>> {};
     /**
      * Forward declaration for friend-class-based tests
      */
