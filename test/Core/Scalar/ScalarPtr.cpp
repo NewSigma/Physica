@@ -28,5 +28,7 @@ int main() {
     auto [p1, p2, p3] = ScalarPtr<dfloat>{};
     static_assert(std::same_as<decltype(p1), T*>);
     static_assert(std::same_as<decltype(p3), T*>);
+
+    static_assert(std::formattable<ScalarRef<Diff<float64, DiffMode::Forward>>, char>);
     return 0;
 }

@@ -22,6 +22,8 @@
 using namespace Physica;
 
 int main() {
+    static_assert(std::formattable<Complex<float64>, char>);
+
     expect(ln1pexp(cfloat64(-1000, 0)).isZero()); // Test underflow
     return 0;
 }

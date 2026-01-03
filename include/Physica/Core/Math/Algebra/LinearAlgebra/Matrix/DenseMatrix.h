@@ -144,7 +144,7 @@ namespace std {
     template<Physica::Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     struct formatter<Physica::DenseMatrix<T, Option, Row, Col, Allocator>, char> {
         constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-        static auto format(const Physica::DenseMatrix<T, Option, Row, Col, Allocator>& obj, std::format_context& ctx) {
+        static auto format(const Physica::DenseMatrix<T, Option, Row, Col, Allocator>& obj, auto& ctx) {
             auto f = obj.format();
             return formatter<decltype(f), char>::format(f, ctx);
         }

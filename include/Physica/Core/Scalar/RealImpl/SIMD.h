@@ -211,7 +211,7 @@ namespace std {
             return ctx.begin();
         }
 
-        auto format(const PacketType& obj, std::format_context& ctx) const {
+        auto format(const PacketType& obj, auto& ctx) const {
             for (size_t i = 0; i < Size - 1; ++i)
                 std::format_to(ctx.out(), "{} ", obj[i]);
             return std::format_to(ctx.out(), "{}", obj[Size - 1]);

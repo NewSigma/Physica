@@ -179,11 +179,11 @@ namespace std {
     template<class T>
     struct formatter<Physica::ScalarRef<T>, char> {
         constexpr auto parse(std::format_parse_context& ctx) {
-            return formatter<T, char>::parse(ctx);
+            return ctx.begin();
         }
 
-        auto format(const Physica::ScalarRef<T>& obj, std::format_context& ctx) const {
-            return formatter<T, char>::format(T(obj), ctx);
+        static auto format(const Physica::ScalarRef<T>& obj, auto& ctx) {
+            return std::format_to(ctx.out(), "{}", T(obj));
         }
     };
 }

@@ -138,6 +138,11 @@ namespace std {
     template<>
     struct PHYSICA_API formatter<Physica::Real<Physica::Float16>, char> {
         constexpr static auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-        static auto format(Physica::Real<Physica::Float16> obj, std::format_context& ctx) -> std::format_context::iterator;
+        static auto format(Physica::Real<Physica::Float16> obj, auto& ctx) {
+            auto x = Physica::Real<Physica::Float32>(obj);
+            if (x.isZero())
+                x = abs(x);
+            return std::format_to(ctx.out(), "{:.4G}", x.toMachine());
+        }
     };
 }

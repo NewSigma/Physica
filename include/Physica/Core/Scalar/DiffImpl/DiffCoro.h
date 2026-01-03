@@ -114,7 +114,7 @@ namespace std {
             return ctx.begin();
         }
 
-        auto format(const Physica::DiffCoro<Base>& obj, std::format_context& ctx) const {
+        static auto format(const Physica::DiffCoro<Base>& obj, auto& ctx) {
             return formatter<Base, char>{}.format(obj, ctx);
         }
     };

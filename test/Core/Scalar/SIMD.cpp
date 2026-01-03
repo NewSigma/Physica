@@ -72,6 +72,7 @@ namespace {
 }
 
 int main() {
+    static_assert(std::formattable<SIMD<float64, 2>, char>);
     test<cfloat32, 2>();
     test<cfloat32, 4>();
     test<cfloat64, 1>();

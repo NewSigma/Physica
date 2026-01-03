@@ -185,6 +185,7 @@ int main() {
     rangeTest<VectorND<float64>>();
     rangeTest<decltype(std::declval<VectorND<float64>>().tail(0))>();
     strucBindTest();
+    static_assert(std::formattable<VectorND<float64>, char>);
 
     crossProductTest();
     innerDotTest();

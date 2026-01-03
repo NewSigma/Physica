@@ -92,6 +92,7 @@ namespace {
 }
 
 int main() {
+    static_assert(std::formattable<MatrixND<float64>, char>);
     continuousRowCol();
     testHDF5();
     return 0;

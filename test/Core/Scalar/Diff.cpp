@@ -135,6 +135,8 @@ namespace {
 }
 
 int main() {
+    static_assert(std::formattable<Diff<float64, DiffMode::Forward>, char>);
+    static_assert(std::formattable<DiffCoro<Diff<float64, DiffMode::Reverse>>, char>);
     testFunc();
     testMath();
     testSIMD();

@@ -150,7 +150,7 @@ namespace std {
     template<Physica::Scalar T, size_t Length, class Allocator>
     struct formatter<Physica::DenseVector<T, Length, Allocator>, char> {
         constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-        static auto format(const Physica::DenseVector<T, Length, Allocator>& obj, std::format_context& ctx) {
+        static auto format(const Physica::DenseVector<T, Length, Allocator>& obj, auto& ctx) {
             auto f = obj.format();
             return formatter<decltype(f), char>::format(f, ctx);
         }

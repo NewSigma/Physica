@@ -21,6 +21,8 @@
 using namespace Physica;
 
 int main() {
+    static_assert(std::formattable<float32, char>);
+    static_assert(std::formattable<float64, char>);
     // We handle type casts in the CRTP base class. Test that we do not accidentally fall into infinite recursion.
     std::ignore = float32(0) < float64(0);
     std::ignore = float32(0) > float64(0);
