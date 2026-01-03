@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -81,7 +81,7 @@ namespace Physica {
             return;
         }
 
-        if constexpr (!ClassicalMD) {
+        if constexpr (!IsClassical) {
             if constexpr (Traits<ForceModel>::IsContractable) {
                 auto task_uncontract = parallel_for<HostPolicy>([&](size_t replica) {
                     MDCellType cell = phaseToCell(replica);
@@ -426,7 +426,7 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcClassicalElastic() const {
-        if constexpr (ClassicalMD)
+        if constexpr (IsClassical)
             return 0;
         else {
             T result = 0;

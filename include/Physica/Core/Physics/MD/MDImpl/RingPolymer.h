@@ -118,15 +118,15 @@ namespace Physica {
     template<class KineticModel, RNG R>
     void RingPolymer<T, Dim, NumReplica>::initMomentum(T temperatureT) {
         const size_t dof = getDOF();
+        auto momentum = phase.topRows(dof);
         if (temperatureT.isZero()) [[unlikely]] {
-            auto momentum = phase.topRows(dof);
-            momentum = Tv(0);
+            momentum.zeros();
             return;
         }
+        momentum.template random_normal<R>();
 
         constexpr bool IsPeriodBoundary = Traits<KineticModel>::IsPeriodBoundary;
         const T repBeta = calcRepBeta(temperatureT);
-        phase.topRows(dof).template random_normal<R>();
         if constexpr (IsPeriodBoundary) {
             DenseVector<T, Dim> driftMomentum(Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {

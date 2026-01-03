@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,7 +40,7 @@ namespace Physica {
         using This = RPMD<T, Dim, NumReplica, ForceMatrixAllocator>;
         using Tv = T::ValueType;
 
-        constexpr static bool ClassicalMD = NumReplica == 1;
+        constexpr static bool IsClassical = NumReplica == 1;
     public:
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
         using PhaseMatrix = RingPolymerType::PhaseMatrix;
@@ -148,7 +148,7 @@ namespace Physica {
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }
         [[nodiscard]] const auto& getForce() const noexcept { return forceBuffer; }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
-        [[nodiscard]] bool isContractEnabled() const noexcept { return !ClassicalMD && (getNumReplica() != getNumContract()); }
+        [[nodiscard]] bool isContractEnabled() const noexcept { return !IsClassical && (getNumReplica() != getNumContract()); }
         [[nodiscard]] T getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] T getTimeStep() const noexcept { return timeStep; }
         /* Setters */

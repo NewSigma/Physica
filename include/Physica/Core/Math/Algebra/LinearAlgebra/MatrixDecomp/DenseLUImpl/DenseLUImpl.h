@@ -42,7 +42,9 @@ namespace Physica {
     void DenseLU<T, Pivot>::compute_base(const Matrix auto& source) {
         working.assert_assign(source);
         source.assign(working);
-        for (size_t i = 0; i < getOrder(); ++i) {
+
+        size_t order = getOrder();
+        for (size_t i = 0; i < order; ++i) {
             if constexpr (Pivot) {
                 size_t j = working.partialPivoting(i);
                 perm.swapRows(i, j);
@@ -72,7 +74,7 @@ namespace Physica {
         return unit(working.diag()).prod();
     }
 
-    template<Scalar T, bool Pivot> 
+    template<Scalar T, bool Pivot>
     auto DenseLU<T, Pivot>::inv() const noexcept {
         return Inverse<This>(*this);
     }
@@ -108,18 +110,20 @@ namespace Physica {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
     template<Scalar T, bool Pivot>
-    void DenseLU<T, Pivot>::decomp_col(size_t col) {
-        const size_t alpha = col + 1;
-        for (size_t j = 1; j < alpha; ++j)
-            working[j, col] -= working.row(j).head(j) * working.col(col).head(j);
-
-        const T factor = reciprocal(working[col, col]);
-        if (col == 0)
-            working.col(0).tail(alpha) *= factor;
-        else {
-            const size_t r = working.getRow();
-            for (size_t j = alpha; j < r; ++j)
-                working[j, col] = (working[j, col] - working.row(j).head(col) * working.col(col).head(col)) * factor;
+    void DenseLU<T, Pivot>::decomp_col(size_t index) {
+        auto col = working.col(index);
+        if (index == 0) {
+            col.tail(1) *= reciprocal(col[0]);
+            return;
         }
+
+        const size_t alpha = index + 1;
+        for (size_t j = 1; j < alpha; ++j)
+            col[j] -= working.row(j).head(j) * col.head(j);
+
+        const T factor = reciprocal(working[index, index]);
+        const size_t r = working.getRow();
+        for (size_t j = alpha; j < r; ++j)
+            col[j] = (col[j] - working.row(j).head(index) * col.head(index)) * factor;
     }
 }

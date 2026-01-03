@@ -37,7 +37,6 @@ namespace {
 }
 
 BENCHMARK(qr_mkl)->Name("QR mkl")
-    ->Arg(2)
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)

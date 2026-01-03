@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,48 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.h"
-#include "Benchmark.h"
+#include <benchmark/benchmark.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
 
 using namespace Physica;
 using RandomSource = Random<MCG>;
 
 namespace {
-    void qr(benchmark::State& state) {
+    void lu_mkl(benchmark::State& state) {
         using T = float64;
         const size_t order = state.range(0);
         const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        DenseQR<T> qr(order, order);
+        DenseLU<T, false> lu(order);
         for (auto _ : state) {
-            qr.compute(m);
-            benchmark::DoNotOptimize(qr);
-            benchmark::ClobberMemory();
-        }
-    }
-
-    void qr_base(benchmark::State& state) {
-        using T = float64;
-        const size_t order = state.range(0);
-        const auto m = MatrixND<T>::template random_uniform<RandomSource>(order, order);
-        DenseQR<T> qr(order, order);
-        for (auto _ : state) {
-            PHYSICA_BENCH(qr.compute_base(m));
-            benchmark::DoNotOptimize(qr);
+            lu.compute_mkl(m);
+            benchmark::DoNotOptimize(lu);
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(qr)->Name("QR")
-    ->Arg(4)
-    ->Arg(8)
-    ->Arg(16)
-    ->Arg(32)
-    ->Arg(64)
-    ->Arg(256)
-    ->Arg(1024);
-
-BENCHMARK(qr_base)->Name("QR base")
+BENCHMARK(lu_mkl)->Name("DenseLU mkl")
     ->Arg(4)
     ->Arg(8)
     ->Arg(16)

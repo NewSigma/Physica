@@ -70,7 +70,7 @@ namespace Physica {
         [[nodiscard]] const auto& getPerm() const noexcept;
     private:
         void pre_compute(const Matrix auto& source) const noexcept;
-        void decomp_col(size_t col);
+        void decomp_col(size_t index);
     };
 }
 
