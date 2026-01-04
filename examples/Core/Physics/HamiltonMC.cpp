@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He. All rights reserved.
+ * Copyright 2025-2026 Weibo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     constexpr int N = 1000;
     VectorND<T> x(N), y(N);
     {
-        auto hmc = HamiltonMC<T>({0, 0}, 0.2, 1);
+        auto hmc = HamiltonMC<T>({1, 1}, 0.2, 1);
         auto p = Array<Vector2D<T>>::generate(N, [&](size_t) {
             return hmc.step<RandomSource>(ProbHamiltion{});
         });

@@ -339,11 +339,12 @@ namespace Physica {
      * Kinetic energy using virial estimator referenced from [1]
      * 
      * Reference:
-     * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150(1982).
+     * [1] J. Chem. Phys. 76, 5150-5155 (1982); https://doi.org/10.1063/1.442815
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic() const {
+        static_assert(!IsClassical, "[Error]: Use classical kinetic instead");
         const T repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
         const size_t dof = getDOF();
         const auto centroidPos = ringPolymer.makeCentroidPos();
@@ -361,6 +362,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic(size_t dofIndex) const {
+        static_assert(!IsClassical, "[Error]: Use classical kinetic instead");
         const T repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
         const auto pos = getPhaseMatrix().row(getDOF() + dofIndex);
         const T centroidPos = pos.mean();
@@ -374,11 +376,12 @@ namespace Physica {
      * Note: Use this estimator if NumReplica is small or if force model is \class EmptyForceModel
      * 
      * Reference:
-     * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150 (1982); https://doi.org/10.1063/1.442815
+     * [1] J. Chem. Phys. 76, 5150 (1982); https://doi.org/10.1063/1.442815
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKineticPrim() const {
+        static_assert(!IsClassical, "[Error]: Use classical kinetic instead");
         T kinetic = 0;
         for (size_t i = 0; i < getDOF(); ++i)
             kinetic += calcKineticPrim<KineticModel>(i);
@@ -388,6 +391,7 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKineticPrim(size_t dofIndex) const {
+        static_assert(!IsClassical, "[Error]: Use classical kinetic instead");
         const T repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
         const T omegaW = ringPolymer.calcOmegaW(temperatureT);
         const auto pos = getPhaseMatrix().row(getDOF() + dofIndex);
@@ -407,9 +411,9 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<ExecutePolicy P>
-    T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPotential(const auto& forceModel) const {
+    T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPotential(auto& forceModel) const {
         VectorND<T> temp(getNumReplica());
-        auto kernel = [this, forceModel, &temp](unsigned int replica) {
+        auto kernel = [this, &forceModel, &temp](unsigned int replica) {
             temp[replica] = forceModel.potentialV(phaseToCell(replica));
         };
         parallel_for<P>(kernel, getNumReplica(), 0).wait();
@@ -417,7 +421,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPotentialClassical(const auto& forceModel) const {
+    T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPotentialClassical(auto& forceModel) const {
         T result = 0;
         for (size_t i = 0; i < getNumReplica(); ++i)
             result += forceModel.potentialV(phaseToCell(i));
@@ -443,7 +447,7 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcClassicalInternalEnergy(const auto& forceModel) const {
+    T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcClassicalInternalEnergy(auto& forceModel) const {
         return calcKineticClassical() + calcPotentialClassical(forceModel) + calcClassicalElastic();
     }
 

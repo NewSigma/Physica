@@ -72,7 +72,7 @@ namespace Physica {
         /* Operators */
         RPMD& operator=(RPMD obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<ExecutePolicy P>
+        template<ExecutePolicy P = Sequential>
         void updateForce(auto& model);
 
         template<ExecutePolicy P = Sequential>
@@ -111,11 +111,11 @@ namespace Physica {
         [[nodiscard]] T calcKineticClassical() const;
 
         template<ExecutePolicy P = Sequential>
-        [[nodiscard]] T calcPotential(const auto& model) const;
-        [[nodiscard]] T calcPotentialClassical(const auto& model) const;
+        [[nodiscard]] T calcPotential(auto& forceModel) const;
+        [[nodiscard]] T calcPotentialClassical(auto& forceModel) const;
 
         [[nodiscard]] T calcClassicalElastic() const;
-        [[nodiscard]] T calcClassicalInternalEnergy(const auto& forceModel) const;
+        [[nodiscard]] T calcClassicalInternalEnergy(auto& forceModel) const;
 
         template<class KineticModel> [[nodiscard]] T calcTemperature() const;
         template<class KineticModel, ExecutePolicy P>

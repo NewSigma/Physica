@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,7 +38,7 @@ namespace Physica {
         int64_t numAccept = 0;
         int64_t numTotal = 0;
     public:
-        HamiltonMC(VectorND<T> init, T stepsize, T duration, T temperatureT = 1);
+        HamiltonMC(VectorND<T> mass, T stepsize, T duration);
         HamiltonMC(const This&) = default;
         HamiltonMC(This&&) noexcept = default;
         ~HamiltonMC() = default;
@@ -48,23 +48,26 @@ namespace Physica {
         /* Operations */
         template<RNG R>
         [[nodiscard]] const auto& step(auto&& forceModel);
+
+        void reset() noexcept;
         /* Getters */
-        [[nodiscard]] const auto& getEngine() const noexcept { return engine; }
+        [[nodiscard]] auto& getEngine() noexcept { return engine; }
         [[nodiscard]] size_t getDOF() const noexcept { return engine.getDOF(); }
+        [[nodiscard]] const auto& getPrevX() const noexcept { return prevX; }
         [[nodiscard]] Trv getAcceptRate() const noexcept { return Trv(numAccept) / Trv(numTotal); }
+        /* Setters */
+        void setInitial(VectorND<T> init);
     private:
-        static MDCell<T, 1> makeDummyCell(size_t dof);
+        static MDCell<T, 1> makeDummyCell(VectorND<T> mass);
     };
 
     template<Scalar T>
-    HamiltonMC<T>::HamiltonMC(VectorND<T> init, T stepsize, T duration, T temperatureT)
-            : engine(makeDummyCell(init.getLength()), 1, 1, temperatureT, stepsize)
-            , kinetic(temperatureT, 1)
-            , duration(duration)
-            , prevX(std::move(init)) {
-        auto col = engine.getPhaseMatrix().col(0);
-        col.head(getDOF()).zeros();
-        col.tail(getDOF()) = prevX;
+    HamiltonMC<T>::HamiltonMC(VectorND<T> mass, T stepsize, T duration)
+            : engine(makeDummyCell(std::move(mass)), 1, 1, 1, stepsize)
+            , kinetic(1, 1)
+            , duration(duration) {
+        assert(duration > stepsize);
+        engine.getPhaseMatrix().zeros();
     }
 
     template<Scalar T>
@@ -72,11 +75,11 @@ namespace Physica {
     const auto& HamiltonMC<T>::step(auto&& forceModel) {
         engine.template initMomentum<KineticModel, R>();
 
-        const T prevE = engine.template calcKinetic<KineticModel>() + engine.calcPotential(forceModel);
+        const T prevE = engine.calcClassicalInternalEnergy(forceModel);
         engine.nve_step_for(duration, kinetic, forceModel);
 
-        const T nowE = engine.template calcKinetic<KineticModel>() + engine.calcPotential(forceModel);
-        const bool accept = T::template random_uniform<R>() < exp((prevE - nowE) / engine.getTemperature());
+        const T curE = engine.calcClassicalInternalEnergy(forceModel);
+        const bool accept = T::template random_uniform<R>() < exp((prevE - curE) / engine.getTemperature());
         if (accept) [[likely]] {
             prevX = engine.getPhaseMatrix().col(0).tail(getDOF());
             numAccept += 1;
@@ -89,7 +92,24 @@ namespace Physica {
     }
 
     template<Scalar T>
-    MDCell<T, 1> HamiltonMC<T>::makeDummyCell(size_t dof) {
-        return MDCell<T, 1>(dof, VectorND<T>(dof, 1));
+    void HamiltonMC<T>::reset() noexcept {
+        numAccept = 0;
+        numTotal = 0;
+    }
+
+    template<Scalar T>
+    void HamiltonMC<T>::setInitial(VectorND<T> init) {
+        assert(getDOF() == init.getLength());
+        prevX = std::move(init);
+
+        auto col = engine.getPhaseMatrix().col(0);
+        col.head(getDOF()).zeros();
+        col.tail(getDOF()) = prevX;
+    }
+
+    template<Scalar T>
+    MDCell<T, 1> HamiltonMC<T>::makeDummyCell(VectorND<T> mass) {
+        size_t dof = mass.getLength();
+        return MDCell<T, 1>(dof, std::move(mass));
     }
 }

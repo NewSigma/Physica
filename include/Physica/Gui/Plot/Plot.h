@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -39,7 +39,7 @@ namespace Physica {
         QValueAxis* axisRight;
     public:
         Plot(QWidget* parent = nullptr);
-        Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent = nullptr);
+        Plot(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY, QWidget* parent = nullptr);
         Plot(const Plot&) = delete;
         Plot(Plot&&) noexcept = delete;
         ~Plot() = default;
@@ -93,10 +93,10 @@ namespace Physica {
         inline void setRangeY(double minY, double maxY);
         inline void setDeltaX(double value) noexcept;
         inline void setDeltaY(double value) noexcept;
-        void setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY);
+        void setBox(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY);
 
         void setTickDirection(QAbstractAxis::TickDirection d);
-        void setFont(QFont font);
+        void setFont(const QFont& font);
         void setFontSize(int size);
     private:
         QBoxSet* setFromVector(const Vector auto& v);

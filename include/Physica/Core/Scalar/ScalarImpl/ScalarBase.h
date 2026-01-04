@@ -574,7 +574,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T&& operator+(T&& x) noexcept {
+    [[nodiscard]] T&& operator+(T&& x) noexcept {
         return std::forward<T>(x);
     }
 

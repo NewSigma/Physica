@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -121,9 +121,10 @@ namespace Physica {
         for (size_t j = 1; j < alpha; ++j)
             col[j] -= working.row(j).head(j) * col.head(j);
 
-        const T factor = reciprocal(working[index, index]);
-        const size_t r = working.getRow();
-        for (size_t j = alpha; j < r; ++j)
-            col[j] = (col[j] - working.row(j).head(index) * col.head(index)) * factor;
+        if (alpha < getRow()) {
+            auto tail = col.tail(alpha);
+            tail -= working.bottomLeftCorner(alpha, index) * col.head(index);
+            tail *= reciprocal(working[index, index]);
+        }
     }
 }

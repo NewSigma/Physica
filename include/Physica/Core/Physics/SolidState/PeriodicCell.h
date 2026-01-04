@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -44,11 +44,11 @@ namespace Physica {
         using This = PeriodicCell<T, Dim>;
         using Base = Internal::PeriodicCellImpl;
         using Tv = T::ValueType;
+        static_assert(!T::isComplex, "[Error]: Complex position is not allowed");
     public:
         using LatticeMatrix = DenseMatrix<T, MatrixOption::Row, Dim, Dim>;
         using InvLatticeMatrix = DenseMatrix<T, MatrixOption::Col, Dim, Dim>;
         using PositionMatrix = DenseMatrix<T, MatrixOption::Row, Dynamic, Dim>;
-        using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Array<ssize_t, Dim>;
     protected:
         using VectorType = DenseVector<T, Dim>;
@@ -58,7 +58,7 @@ namespace Physica {
         Type type;
     public:
         PeriodicCell();
-        PeriodicCell(size_t numParticle, Type type_);
+        PeriodicCell(size_t numParticle, Type type);
         PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_);
         template<Scalar U>
         PeriodicCell(const PeriodicCell<U, Dim>& cell);
@@ -147,11 +147,10 @@ namespace Physica {
             , type(Type::Direct) {}
 
     template<Scalar T, unsigned int Dim>
-    PeriodicCell<T, Dim>::PeriodicCell(size_t numParticle, Type type_)
-            : PeriodicCell() {
-        pos.resize(numParticle, Dim);
-        type = type_;
-    }
+    PeriodicCell<T, Dim>::PeriodicCell(size_t numParticle, Type type)
+            : lattice(LatticeMatrix::identity(Dim))
+            , pos(numParticle, Dim)
+            , type(type) {}
 
     template<Scalar T, unsigned int Dim>
     PeriodicCell<T, Dim>::PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_)

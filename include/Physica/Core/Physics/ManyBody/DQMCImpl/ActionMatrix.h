@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -100,16 +100,13 @@ namespace Physica {
         const Tr shift = params.getBeta() * fma(params.getRepelU(), Tr(-0.5), params.getChemMu());
         for (int rowFreq = 0; rowFreq < getNumFreq() * 2; ++rowFreq) {
             int offsetR = rowFreq * numSite;
-            for (int colFreq = 0; colFreq <= rowFreq; ++colFreq) {
-                if (rowFreq == colFreq) {
-                    target.block(offsetR, numSite, offsetR, numSite).diag().reals() = auxField.row(0).reals() - shift;
-                    continue;
-                }
+            for (int colFreq = 0; colFreq < rowFreq; ++colFreq) {
                 int offsetC = colFreq * numSite;
-                int freq = rowFreq - colFreq;
-                target.block(offsetR, numSite, offsetC, numSite).diag() = auxField.row(freq);
-                target.block(offsetC, numSite, offsetR, numSite).diag() = auxField.row(freq).conjugate();
+                int delta = rowFreq - colFreq;
+                target.block(offsetR, numSite, offsetC, numSite).diag() = auxField.row(delta);
+                target.block(offsetC, numSite, offsetR, numSite).diag() = auxField.row(delta).conjugate();
             }
+            target.block(offsetR, numSite, offsetR, numSite).diag().reals() = auxField.row(0).reals() - shift;
         }
     }
 

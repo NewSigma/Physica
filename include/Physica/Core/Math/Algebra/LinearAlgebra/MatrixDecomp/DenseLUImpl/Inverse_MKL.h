@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,7 +30,7 @@ namespace Physica {
         const size_t n = getRow();
         auto* a = reinterpret_cast<Tm*>(target.data());
         if constexpr (Pivot) {
-            const MKL_INT64* ipiv = lu.getPerm().getIndices().data();
+            const auto* ipiv = reinterpret_cast<const MKL_INT64*>(lu.getPerm().getIndices().data());
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgetri_64(Layout, n, a, n, ipiv));

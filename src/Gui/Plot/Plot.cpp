@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -76,7 +76,7 @@ Plot::Plot(QWidget* parent)
     setFont(font);
 }
 
-Plot::Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent)
+Plot::Plot(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY, QWidget* parent)
         : Plot(parent) {
     setBox(minX, maxX, minY, maxY, deltaX, deltaY);
 }
@@ -138,15 +138,15 @@ void Plot::toSvg(const char* path, int width, int height, int resolution) {
     chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 }
 
-void Plot::setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY) {
-    axisX->setTickInterval(deltaX);
-    axisX->setRange(minX, maxX);
-    axisY->setTickInterval(deltaY);
-    axisY->setRange(minY, maxY);
-    axisTop->setTickInterval(deltaX);
-    axisTop->setRange(minX, maxX);
-    axisRight->setTickInterval(deltaY);
-    axisRight->setRange(minY, maxY);
+void Plot::setBox(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY) {
+    axisX->setTickInterval((double)deltaX);
+    axisX->setRange((double)minX, (double)maxX);
+    axisY->setTickInterval((double)deltaY);
+    axisY->setRange((double)minY, (double)maxY);
+    axisTop->setTickInterval((double)deltaX);
+    axisTop->setRange((double)minX, (double)maxX);
+    axisRight->setTickInterval((double)deltaY);
+    axisRight->setRange((double)minY, (double)maxY);
 }
 
 void Plot::setTickDirection(QAbstractAxis::TickDirection d) {
@@ -156,7 +156,7 @@ void Plot::setTickDirection(QAbstractAxis::TickDirection d) {
     axisRight->setTickDirection(d);
 }
 
-void Plot::setFont(QFont font) {
+void Plot::setFont(const QFont& font) {
     Base::setFont(font);
     getLegend().setFont(font);
     getChart()->setTitleFont(font);
