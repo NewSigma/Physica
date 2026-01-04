@@ -1,13 +1,7 @@
 # Physica Examples
 
-Physica案例旨在维护实验代码及相关数据与讨论的可复现性，并用于演示Physica的使用方法及提供原型实现。
-
-## 设计哲学
-
-持续编译: 持续测试的补充。代码的修改常导致过去论文上的成功结果不能复现，这是科学计算的复杂性和测试系统不完备导致的。为了缓解快速测试的要求和科学计算耗时长之间的矛盾。使用编译型语言C++，结合Physica严谨的静态检查和CMake一键式编译，确保在Physica工程的快速迭代下实验代码的可复现性  
-简洁: 尽可能用1个文件解决问题(一个实验 = 1个代码文件 + 1个数据文件 + 1个Markdown文本)，代码、数据、图片和文字等元素通过Markdown有机集成  
-规范: 所有可调参数应置于代码起始位置  
-
 ## License
 
-[GPLv3](../LICENSE), [GFDLv1.3](../doc/LICENSE) © Weibo He
+Data in this folder is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA 4.0).
+
+Copyright © 2019-2026 Weibo He
