@@ -134,8 +134,7 @@ namespace Physica {
         [[nodiscard]] pointer release() noexcept;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard, gnu::return_nonnull]] __host__ __device__ pointer data() noexcept;
-        [[nodiscard, gnu::return_nonnull]] __host__ __device__ const_pointer data() const noexcept;
+        [[nodiscard, gnu::return_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
@@ -326,17 +325,12 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ auto device_obj<Array<T, Dynamic, Allocator>>::data() noexcept -> pointer {
-        assert(d_data != nullptr && "[Error]: We assume data() is nonnull");
+    __host__ __device__ auto* device_obj<Array<T, Dynamic, Allocator>>::data(this auto&& self) noexcept {
+        assert(self.d_data != nullptr && "[Error]: We assume data() is nonnull");
         if constexpr (Align == Dynamic)
-            return d_data;
+            return self.d_data;
         else
-            return std::assume_aligned<Align, ElemType>(d_data);
-    }
-
-    template<class T, class Allocator>
-    __host__ __device__ auto device_obj<Array<T, Dynamic, Allocator>>::data() const noexcept -> const_pointer {
-        return const_cast<This&>(*this).data();
+            return std::assume_aligned<Align, ElemType>(self.d_data);
     }
 
     template<class T, class Allocator>

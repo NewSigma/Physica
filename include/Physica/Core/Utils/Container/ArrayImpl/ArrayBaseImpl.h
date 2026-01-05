@@ -69,14 +69,9 @@ namespace Physica {
     }
 
     template<class Derived, class Allocator>
-    __host__ __device__ auto ArrayBase<Derived, Allocator>::data_ptr(size_t index) noexcept -> pointer {
-        assert(index < getLength());
-        return data() + index;
-    }
-
-    template<class Derived, class Allocator>
-    __host__ __device__ auto ArrayBase<Derived, Allocator>::data_ptr(size_t index) const noexcept -> const_pointer {
-        return const_cast<This&>(*this).data_ptr(index);
+    __host__ __device__ auto* ArrayBase<Derived, Allocator>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.getLength());
+        return self.data() + index;
     }
 
     template<class Derived, class Allocator>

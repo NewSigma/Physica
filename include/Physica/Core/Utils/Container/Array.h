@@ -131,8 +131,7 @@ namespace Physica {
         using Base::write;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ T* data() noexcept;
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const T* data() const noexcept;
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }

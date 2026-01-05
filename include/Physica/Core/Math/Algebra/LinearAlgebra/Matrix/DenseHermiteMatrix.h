@@ -23,37 +23,35 @@
 
 namespace Physica {
     template<Scalar T, size_t Order> class DenseSymmMatrix;
-
+    /**
+     * \class DenseHermiteMatrix: Save the upper triangle part of hermite matrix
+     */
     template<Scalar T, size_t Order = Dynamic>
-    class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order>>
-                             , private SymmArray<T, Order> {
+    class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order>> {
         using This = DenseHermiteMatrix<T, Order>;
         using Base = RValueMatrix<This>;
-        using Storage = SymmArray<T, Order>;
-        using VectorStorage = Storage::ArrayType;
+    protected:
+        using typename Base::Tr;
+    private:
+        SymmArray<T, Order> storage;
     public:
-        using typename Base::ScalarType;
-        using RealType = ScalarType::RealType;
-        using ColMatrix = This;
-        using RowMatrix = This;
-        constexpr static bool isComplex = true;
-    public:
-        using Storage::Storage;
+        DenseHermiteMatrix() = default;
+        DenseHermiteMatrix(size_t order);
+        DenseHermiteMatrix(size_t order, const T& t);
         DenseHermiteMatrix(const Matrix auto& mat);
         DenseHermiteMatrix(const This&) = default;
         DenseHermiteMatrix(This&&) noexcept = default;
         ~DenseHermiteMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        This& operator=(RealType value);
-        [[nodiscard]] ScalarType& operator[](size_t row, size_t col);
-        [[nodiscard]] const ScalarType& operator[](size_t row, size_t col) const;
+        This& operator=(Tr value);
+        [[nodiscard]] decltype(auto) operator[](size_t row, size_t col);
         /* Operations */
-        using Base::format;
-        using Base::transpose;
-        using Storage::resize;
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
+
+        void resize(size_t order, auto&&... args);
         void swap(This& __restrict m) noexcept;
 
         template<RNG R>
@@ -67,10 +65,10 @@ namespace Physica {
         H5DataSet<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
         using Base::getDerived;
-        using Storage::getCol;
-        using Storage::getRow;
-        [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
-        [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
+        [[nodiscard]] auto&& asVector(this auto&& self) noexcept { return self.storage.asArray(); }
         /* Static members */
         [[nodiscard]] static This identity(size_t order);
         template<RNG R>
@@ -81,9 +79,13 @@ namespace Physica {
         [[nodiscard]] static This random_any(size_t order, auto& distribution);
         [[nodiscard]] bool isHermiteMatrix(const Matrix auto& mat, double precision);
     };
-    /**
-     * Save the upper triangle part of \param mat
-     */
+
+    template<Scalar T, size_t Order>
+    DenseHermiteMatrix<T, Order>::DenseHermiteMatrix(size_t order) : storage(order) {}
+
+    template<Scalar T, size_t Order>
+    DenseHermiteMatrix<T, Order>::DenseHermiteMatrix(size_t order, const T& t) : storage(order, t) {}
+
     template<Scalar T, size_t Order>
     DenseHermiteMatrix<T, Order>::DenseHermiteMatrix(const Matrix auto& mat)
             : DenseHermiteMatrix(mat.getRow()) {
@@ -91,41 +93,39 @@ namespace Physica {
         size_t index = 0;
         for (size_t i = 0; i < mat.getRow(); ++i) {
             for (size_t j = i; j < mat.getRow(); ++j) {
-                Storage::asArray()[index] = mat.calc(i, j);
+                asVector()[index] = mat.calc(i, j);
                 ++index;
             }
         }
     }
 
     template<Scalar T, size_t Order>
-    auto DenseHermiteMatrix<T, Order>::operator=(RealType value) -> This& {
+    auto DenseHermiteMatrix<T, Order>::operator=(Tr value) -> This& {
         asVector() = value;
         return *this;
     }
 
     template<Scalar T, size_t Order>
-    auto DenseHermiteMatrix<T, Order>::operator[](size_t row, size_t col) -> ScalarType& {
+    decltype(auto) DenseHermiteMatrix<T, Order>::operator[](size_t row, size_t col) {
         assert(row <= col); // Optimize: possible to make use of this condition
-        const size_t index = Storage::toIndex1D(row, col);
-        return Storage::asArray()[index];
+        return storage[row, col];
     }
 
     template<Scalar T, size_t Order>
-    auto DenseHermiteMatrix<T, Order>::operator[](size_t row, size_t col) const -> const ScalarType& {
-        const size_t index = Storage::toIndex1D(row, col);
-        return Storage::asArray()[index];
+    auto DenseHermiteMatrix<T, Order>::calc(size_t row, size_t col) const -> T {
+        T x = storage[row, col];
+        return col >= row ? x : x.conjugate();
     }
 
     template<Scalar T, size_t Order>
-    auto DenseHermiteMatrix<T, Order>::calc(size_t row, size_t col) const -> ScalarType {
-        const size_t index = Storage::toIndex1D(row, col);
-        return col >= row ? Storage::asArray()[index] : Storage::asArray()[index].conjugate();
+    void DenseHermiteMatrix<T, Order>::resize(size_t order, auto&&... args) {
+        storage.resize(order, std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Order>
     void DenseHermiteMatrix<T, Order>::swap(DenseHermiteMatrix& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
-        Storage::swap(m);
+        storage.swap(m.storage);
     }
 
     template<Scalar T, size_t Order>
@@ -133,7 +133,7 @@ namespace Physica {
     void DenseHermiteMatrix<T, Order>::random_uniform() {
         asVector().template random_uniform<R>();
         for (size_t i = 0; i < getRow(); ++i)
-            (*this)[i, i].imag() = RealType(0);
+            (*this)[i, i].imag() = Tr(0);
     }
 
     template<Scalar T, size_t Order>
@@ -141,7 +141,7 @@ namespace Physica {
     void DenseHermiteMatrix<T, Order>::random_normal() {
         asVector().template random_normal<R>();
         for (size_t i = 0; i < getRow(); ++i)
-            (*this)[i, i].imag() = RealType(0);
+            (*this)[i, i].imag() = Tr(0);
     }
 
     template<Scalar T, size_t Order>
@@ -149,7 +149,7 @@ namespace Physica {
     void DenseHermiteMatrix<T, Order>::random_any(auto& distribution) {
         asVector().template random_any<R>(distribution);
         for (size_t i = 0; i < getRow(); ++i)
-            (*this)[i, i].imag() = RealType(0);
+            (*this)[i, i].imag() = Tr(0);
     }
 
     template<Scalar T, size_t Order>
@@ -206,6 +206,11 @@ namespace Physica {
                     return false;
         return true;
     }
+
+    template<Scalar T, size_t Order>
+    void swap(DenseHermiteMatrix<T, Order>& __restrict m1, DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
+        m1.swap(m2);
+    }
 }
 
 namespace Physica {
@@ -219,13 +224,4 @@ namespace Physica {
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
-}
-
-namespace std {
-    template<Physica::Scalar T, size_t Order>
-    void swap(
-            Physica::DenseHermiteMatrix<T, Order>& __restrict m1,
-            Physica::DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
-        m1.swap(m2);
-    }
 }

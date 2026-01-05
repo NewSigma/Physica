@@ -28,88 +28,61 @@ namespace Physica {
     class SymmArray : public ArrayBase<SymmArray<T, Order>, HostAllocator<T>> {
         using This = SymmArray<T, Order>;
         using Base = ArrayBase<This, HostAllocator<T>>;
-        using typename Base::lvalue_reference;
-        using typename Base::const_lvalue_reference;
     protected:
         using ArrayType = Traits<This>::ArrayType;
     private:
         ArrayType arr;
-        size_t order;
+        size_t order = Order;
     public:
-        SymmArray() : arr(), order(Order) {}
-        SymmArray(size_t order_);
-        SymmArray(size_t order_, const T& t);
-        SymmArray(size_t row, size_t col);
-        SymmArray(size_t row, size_t col, const T& t);
+        SymmArray() = default;
+        SymmArray(size_t order);
+        SymmArray(size_t order, const T& t);
         SymmArray(const This&) = default;
         SymmArray(This&&) noexcept = default;
         ~SymmArray() = default;
         /* Operators */
         SymmArray& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ decltype(auto) operator[](this auto&&, size_t row, size_t col);
         /* Operations */
-        void resize(size_t row, size_t col, auto&&... args);
-        void resize(size_t row) { resize(row, row); }
+        void resize(size_t order_, auto&&... args);
         void zeros() noexcept { arr.zeros(); }
         void swap(This& __restrict storage) noexcept;
 
         const H5DataSet<1> read(const H5Loc& loc, const char* name);
         H5DataSet<1> write(H5Loc& loc, const char* name) const;
         /* Getters */
-        [[nodiscard]] const ArrayType& asArray() const noexcept { return arr; }
-        [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
+        [[nodiscard]] auto&& asArray(this auto&& self) noexcept { return self.arr; }
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return arr.size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
-        [[nodiscard]] __host__ __device__ auto data() noexcept { return arr.data(); }
-        [[nodiscard]] __host__ __device__ auto data() const noexcept { return arr.data(); }
-        [[nodiscard]] __host__ __device__ auto data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ auto data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
 
     template<class T, size_t Order>
-    SymmArray<T, Order>::SymmArray(size_t order_) : arr(order_ * (order_ + 1) / 2), order(order_) {}
+    SymmArray<T, Order>::SymmArray(size_t order) : arr(order * (order + 1) / 2), order(order) {}
     /**
      * If std::same_as<T, size_t> is true, the semantics is ambiguous.
      *
      * Use either SymmArray(size_t) or SymmArray(size_t, size_t, size_t) in this case.
      */
     template<class T, size_t Order>
-    SymmArray<T, Order>::SymmArray(size_t order_, const T& t)
-            : arr(order_ * (order_ + 1) / 2, t), order(order_) {}
+    SymmArray<T, Order>::SymmArray(size_t order, const T& t)
+            : arr(order * (order + 1) / 2, t), order(order) {}
 
     template<class T, size_t Order>
-    SymmArray<T, Order>::SymmArray(size_t row, [[maybe_unused]] size_t col)
-            : SymmArray(row) {
-        assert(row == col);
+    __host__ __device__ decltype(auto) SymmArray<T, Order>::operator[](this auto&& self, size_t row, size_t col) {
+        return self.arr[self.toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
-    SymmArray<T, Order>::SymmArray(size_t row, [[maybe_unused]] size_t col, const T& t)
-            : SymmArray(row, t) {
-        assert(row == col);
-    }
-
-    template<class T, size_t Order>
-    __host__ __device__ auto SymmArray<T, Order>::operator[](size_t row, size_t col) -> lvalue_reference {
-        return arr[toIndex1D(row, col)];
-    }
-
-    template<class T, size_t Order>
-    __host__ __device__ auto SymmArray<T, Order>::operator[](size_t row, size_t col) const -> const_lvalue_reference {
-        return arr[toIndex1D(row, col)];
-    }
-
-    template<class T, size_t Order>
-    void SymmArray<T, Order>::resize(size_t row, [[maybe_unused]] size_t col, auto&&... args) {
-        assert(row == col);
-        arr.resize(row * (row + 1) / 2, std::forward<decltype(args)>(args)...);
-        order = row;
+    void SymmArray<T, Order>::resize(size_t order_, auto&&... args) {
+        arr.resize(order_ * (order_ + 1) / 2, std::forward<decltype(args)>(args)...);
+        order = order_;
     }
 
     template<class T, size_t Order>
@@ -134,13 +107,13 @@ namespace Physica {
 #endif
 
     template<class T, size_t Order>
-    __host__ __device__ auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) noexcept {
-        return arr.data() + toIndex1D(row, col);
+    __host__ __device__ auto SymmArray<T, Order>::data(this auto&& self) noexcept {
+        return self.arr.data();
     }
 
     template<class T, size_t Order>
-    __host__ __device__ auto SymmArray<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
-        return arr.data() + toIndex1D(row, col);
+    __host__ __device__ auto SymmArray<T, Order>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        return self.data() + self.toIndex1D(row, col);
     }
 
     template<class T, size_t Order>

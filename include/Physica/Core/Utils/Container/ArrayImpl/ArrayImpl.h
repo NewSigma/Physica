@@ -273,18 +273,13 @@ namespace Physica {
     }
 
     template<class T, class Allocator>
-    __host__ __device__ T* Array<T, Dynamic, Allocator>::data() noexcept {
-        assert(arr != nullptr && "[Error]: We assume data() is nonnull");
+    __host__ __device__ auto* Array<T, Dynamic, Allocator>::data(this auto&& self) noexcept {
+        assert(self.arr != nullptr && "[Error]: We assume data() is nonnull");
         constexpr size_t Align = std::allocator_traits<Allocator>::Align;
         if constexpr (Align == Dynamic)
-            return arr;
+            return self.arr;
         else
-            return std::assume_aligned<Align, T>(arr);
-    }
-
-    template<class T, class Allocator>
-    __host__ __device__ const T* Array<T, Dynamic, Allocator>::data() const noexcept {
-        return const_cast<This&>(*this).data();
+            return std::assume_aligned<Align, T>(self.arr);
     }
 
     template<class T, class Allocator>

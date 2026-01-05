@@ -64,8 +64,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ auto* data_ptr(this auto&& self, size_t row, size_t col);
     private:
         __host__ __device__ size_t toIndex1D(size_t r, size_t c) const;
     };

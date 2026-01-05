@@ -22,13 +22,14 @@
 
 namespace Physica {
     template<Scalar T, int... Dims>
-    class DenseTensor : public LValueTensor<DenseTensor<T, Dims...>>, private ArrayND<T, Dims...> {
+    class DenseTensor : public LValueTensor<DenseTensor<T, Dims...>> {
         using This = DenseTensor<T, Dims...>;
         using Base = LValueTensor<This>;
-        using Storage = ArrayND<T, Dims...>;
     public:
         using Base::NDim;
         using typename Base::IndexType;
+    private:
+        ArrayND<T, Dims...> storage;
     public:
         DenseTensor() = default;
         DenseTensor(std::integral auto... dims);
@@ -39,23 +40,18 @@ namespace Physica {
         /* Operators */
         using Base::operator=;
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        using Storage::operator[];
         /* Operations */
-        using Storage::toIndex1D;
-        using Storage::toIndexND;
-        using Storage::forND;
-
         using Base::resize;
         void resize(IndexType shape);
 
         using Base::random_normal;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Storage::dim;
-        using Storage::getShape;
-        using Storage::data_ptr;
-        using Storage::asArray;
-        using Storage::getSize;
+        [[nodiscard]] constexpr size_t dim(int index) const noexcept { return storage.dim(index); }
+        [[nodiscard]] IndexType getShape() const noexcept { return storage.getShape(); }
+        [[nodiscard]] auto data_ptr(this auto&&, const IndexType& indices) noexcept;
+        [[nodiscard]] auto&& asArray(this auto&&) noexcept;
+        [[nodiscard]] size_t getSize() const noexcept { return storage.getSize(); }
         /* Static members */
         template<RNG R>
         static DenseTensor random_uniform(IndexType shape);

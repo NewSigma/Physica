@@ -26,26 +26,21 @@ namespace Physica {
     class SyMV;
 
     template<Scalar T, size_t Order = Dynamic>
-    class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order>>
-                          , private SymmArray<T, Order> {
+    class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order>> {
         using This = DenseSymmMatrix<T, Order>;
         using Base = LValueMatrix<This>;
-        using Storage = SymmArray<T, Order>;
-        using VectorStorage = Storage::ArrayType;
-    public:
-        using typename Base::ScalarType;
-        using ColMatrix = This;
-        using RowMatrix = This;
+    private:
+        SymmArray<T, Order> storage;
     public:
         DenseSymmMatrix() = default;
+        DenseSymmMatrix(size_t order);
+        DenseSymmMatrix(size_t order, const T& t);
         DenseSymmMatrix(const Matrix auto& mat);
-        using Storage::Storage;
         DenseSymmMatrix(const This&) = default;
         DenseSymmMatrix(This&&) noexcept = default;
         ~DenseSymmMatrix() = default;
         /* Operators */
         using Base::operator=;
-        using Base::operator[];
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
         This& operator=(const Scalar auto& x);
@@ -57,20 +52,16 @@ namespace Physica {
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept;
         /* Operations */
-        using Base::assign;
-        using Base::calc;
-        using Storage::resize;
+        void resize(size_t order, auto&&... args);
         void resize(const Matrix auto& m, auto&&... args);
 
-        [[nodiscard]] ScalarType max() const { return asVector().max(); }
-        [[nodiscard]] ScalarType min() const { return asVector().min(); }
+        [[nodiscard]] T max() const { return asVector().max(); }
+        [[nodiscard]] T min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] decltype(auto) hermite() const noexcept;
         void swap(This& __restrict m) noexcept;
 
-        using Base::format;
-
-        using Storage::zeros;
+        void zeros() { storage.zeros(); }
         template<RNG R>
         void random_uniform() { asVector().template random_uniform<R>(); }
         template<RNG R>
@@ -78,16 +69,15 @@ namespace Physica {
         template<RNG R>
         void random_any(auto& distribution) { asVector().template random_any<R>(distribution); }
 
-        using Storage::read;
-        using Storage::write;
+        const H5DataSet<1> read(const H5Loc& loc, const char* name) { return storage.read(loc, name); }
+        H5DataSet<1> write(H5Loc& loc, const char* name) const { return storage.write(loc, name); }
         /* Getters */
-        using Storage::data_ptr;
-        using Storage::getCol;
-        using Storage::getRow;
-        using Storage::getOrder;
-        using Storage::toIndex1D;
-        [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
-        [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return storage.getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept { return storage.toIndex1D(r, c); }
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] auto&& asVector(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix identity(size_t order);
         template<RNG R>
@@ -97,6 +87,12 @@ namespace Physica {
         template<RNG R>
         [[nodiscard]] static This random_any(size_t order, auto& distribution);
     };
+
+    template<Scalar T, size_t Order>
+    DenseSymmMatrix<T, Order>::DenseSymmMatrix(size_t order) : storage(order) {}
+
+    template<Scalar T, size_t Order>
+    DenseSymmMatrix<T, Order>::DenseSymmMatrix(size_t order, const T& t) : storage(order, t) {}
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
      */
@@ -105,7 +101,7 @@ namespace Physica {
         assert(mat.getRow() == mat.getCol());
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = i; j < mat.getRow(); ++j)
-                Base::operator[](i, j) = mat.calc(i, j);
+                storage[i, j] = mat.calc(i, j);
     }
 
     template<Scalar T, size_t Order>
@@ -141,8 +137,14 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
+    void DenseSymmMatrix<T, Order>::resize(size_t order, auto&&... args) {
+        storage.resize(order, std::forward<decltype(args)>(args)...);
+    }
+
+    template<Scalar T, size_t Order>
     void DenseSymmMatrix<T, Order>::resize(const Matrix auto& m, auto&&... args) {
-        Base::resize(m, std::forward<decltype(args)>(args)...);
+        assert(m.isSquare());
+        resize(m.getRow(), std::forward<decltype(args)>(args)...);
     }
 
     template<Scalar T, size_t Order>
@@ -156,7 +158,17 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void DenseSymmMatrix<T, Order>::swap(This& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
-        Storage::swap(m);
+        storage.swap(m.storage);
+    }
+
+    template<Scalar T, size_t Order>
+    __host__ __device__ auto DenseSymmMatrix<T, Order>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        return self.storage.data_ptr(row, col);
+    }
+
+    template<Scalar T, size_t Order>
+    auto&& DenseSymmMatrix<T, Order>::asVector(this auto&& self) noexcept {
+        return self.storage.asArray();
     }
 
     template<Scalar T, size_t Order>

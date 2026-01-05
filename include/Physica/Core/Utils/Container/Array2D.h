@@ -82,8 +82,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ auto& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const auto& asArray() const noexcept { return arr; }
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ T* data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept;

@@ -120,13 +120,8 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
-    T* ArrayND<T, Dims...>::data_ptr(const IndexType& indices) noexcept {
-        return arr.data() + toIndex1D(indices);
-    }
-
-    template<class T, int... Dims>
-    const T* ArrayND<T, Dims...>::data_ptr(const IndexType& indices) const noexcept {
-        return const_cast<This&>(*this).data_ptr(indices);
+    auto* ArrayND<T, Dims...>::data_ptr(this auto&& self, const IndexType& indices) noexcept {
+        return self.arr.data() + self.toIndex1D(indices);
     }
 
     template<class T, int... Dims>

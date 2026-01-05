@@ -142,15 +142,10 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) -> T* {
-        assert(row < getRow());
-        assert(col < getCol());
-        return arr.data() + toIndex1D(row, col);
-    }
-
-    template<tparams>
-    __host__ __device__ auto device_obj<Array2D>::data_ptr(size_t row, size_t col) const -> const T* {
-        return const_cast<This&>(*this).data_ptr(row, col);
+    __host__ __device__ auto* device_obj<Array2D>::data_ptr(this auto&& self, size_t row, size_t col) {
+        assert(row < self.getRow());
+        assert(col < self.getCol());
+        return self.arr.data() + self.toIndex1D(row, col);
     }
 
     template<tparams>

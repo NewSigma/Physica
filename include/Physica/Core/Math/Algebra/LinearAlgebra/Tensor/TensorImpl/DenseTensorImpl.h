@@ -22,22 +22,32 @@
 
 namespace Physica {
     template<Scalar T, int... Dims>
-    DenseTensor<T, Dims...>::DenseTensor(std::integral auto... dims) : Storage(dims...) {
+    DenseTensor<T, Dims...>::DenseTensor(std::integral auto... dims) : storage(dims...) {
         static_assert(sizeof...(dims) == NDim, "[Error]: NDim is not consistent");
     }
 
     template<Scalar T, int... Dims>
-    DenseTensor<T, Dims...>::DenseTensor(IndexType shape, auto&&... args) : Storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
+    DenseTensor<T, Dims...>::DenseTensor(IndexType shape, auto&&... args) : storage(std::move(shape), std::forward<decltype(args)>(args)...) {}
 
     template<Scalar T, int... Dims>
     void DenseTensor<T, Dims...>::resize(IndexType shape) {
-        Storage::resize(std::move(shape));
+        storage.resize(std::move(shape));
     }
 
     template<Scalar T, int... Dims>
     void DenseTensor<T, Dims...>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Storage::swap(obj);
+        storage.swap(obj.storage);
+    }
+
+    template<Scalar T, int... Dims>
+    auto DenseTensor<T, Dims...>::data_ptr(this auto&& self, const IndexType& indices) noexcept {
+        return self.storage.data_ptr(indices);
+    }
+
+    template<Scalar T, int... Dims>
+    auto&& DenseTensor<T, Dims...>::asArray(this auto&& self) noexcept {
+        return self.storage.asArray();
     }
 
     template<Scalar T, int... Dims>

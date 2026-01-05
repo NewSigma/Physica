@@ -22,11 +22,11 @@
 using namespace Physica;
 
 int main() {
-    SymmArray<float64> s(3, 3, 0);
+    SymmArray<float64> s(3, 0);
     s[1, 0] = 5;
     expect(s[0, 1] == float64(5));
 
-    DenseSymmMatrix<float64> m(3, 3, 0);
+    DenseSymmMatrix<float64> m(3, 0);
     m[1, 0] = 5;
     expect(m[0, 1] == float64(5));
     return 0;

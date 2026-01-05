@@ -86,8 +86,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return getLength() == getCapacity(); }
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
-        [[nodiscard]] __host__ __device__ pointer data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ const_pointer data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto* data_ptr(this auto&&, size_t index) noexcept;
         /* Static members */
         template<class... Args>
         [[nodiscard]] __host__ __device__ consteval static bool isTrivialDefaultConstruct() noexcept;
