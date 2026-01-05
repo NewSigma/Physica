@@ -130,7 +130,7 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
     include(CheckIPOSupported)
-    check_ipo_supported(RESULT Result OUTPUT Output)
+    check_ipo_supported(RESULT Result OUTPUT Output LANGUAGES CXX)
     if(${Result})
         set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
     else()

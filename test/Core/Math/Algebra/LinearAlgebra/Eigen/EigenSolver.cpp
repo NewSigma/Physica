@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/ForwardEigenSolver.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
 #include "Test.h"
 
 using namespace Physica;
@@ -168,14 +167,14 @@ namespace {
     }
 
     void testForwardDiff() {
-        using dfloat = Diff<float64, DiffMode::Forward>;
+        using T = float64;
+        using dfloat = Diff<T, DiffMode::Forward>;
         auto result = EigenSolver<dfloat, 2>(rotation(dfloat(1, 1)), true);
-        auto answer = EigenSolver<float64, 2>(rotation(float64(1) + MathConst<float64>::pi * 0.5), true);
+        auto answer = EigenSolver<T, 2>(rotation(T(1) + MathConst<T>::pi * 0.5), true);
         expect(result.getEigenvalues().grads() == answer.getEigenvalues());
 
-        for (int i = 0; i < 2; ++i)
-            for (int j = 0; j < 2; ++j)
-                expect(result.getEigenvectors().grads()[i, j].isZero());
+        for (auto elem : result.getEigenvectors().grads().flatten())
+            expect(scalarNear(elem.norm(), T(0), 1E-16));
     }
 }
 

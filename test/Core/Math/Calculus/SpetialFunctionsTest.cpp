@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -62,12 +62,12 @@ namespace {
 
     void testBiGamma() {
         using T = float64;
-        constexpr static int count = 2;
-        constexpr static double x[count]{13.7, 0.3};
-        constexpr static double step[count]{1E-1, 1E-1};
-        constexpr static double result[count]{2.5804557238996526, -3.5025242222001330};
+        constexpr int N = 2;
+        constexpr std::array<float64, N> x{13.7, 0.3};
+        constexpr std::array<float64, N> step{1E-1, 1E-1};
+        constexpr std::array<float64, N> result{2.5804557238996526, -3.5025242222001330};
 
-        for (int i = 0; i < count; ++i) {
+        for (int i = 0; i < N; ++i) {
             auto temp = bigamma(T(x[i]), T(step[i]));
             expect(scalarNear(temp, T(result[i]), 1E-13));
         }

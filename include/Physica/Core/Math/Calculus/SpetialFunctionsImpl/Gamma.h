@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -101,12 +101,12 @@ namespace Physica {
              */
             constexpr static std::array<float64, 9> Coeffs{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
             T temp = x + T(6.5);
-            temp -= (x + T(0.5)) * ln(temp);
+            temp = fma((x + T(0.5)), -ln(temp), temp);
             T ser(1.000000000000123);
             T copy(x);
-            for (int j = 0; j < static_cast<int>(Coeffs.size()); ++j) {
+            for (T coeff : Coeffs) {
                 copy += T(1);
-                ser += Coeffs[j] / copy;
+                ser += coeff / copy;
             }
             return -temp + T(0.91893853320467274178) + ln(ser / x);
         }
@@ -115,12 +115,12 @@ namespace Physica {
             // float version is implemented with gamma = 3 and N = 4 [1] to make full use of precision of float
             constexpr static std::array<float32, 4> Coeffs{7.6845130, -3.284681, 0.05832037, 0.0001856071};
             T temp = x + T(3.5);
-            temp -= (x + T(0.5)) * ln(temp);
+            temp = fma((x + T(0.5)), -ln(temp), temp);
             T ser(0.9999998);
             T copy(x);
-            for (int j = 0; j < static_cast<int>(Coeffs.size()); ++j) {
+            for (T coeff : Coeffs) {
                 copy += T(1);
-                ser += Coeffs[j] / copy;
+                ser += coeff / copy;
             }
             return -temp + T(0.91893853320467274178) + ln(ser / x);
         }

@@ -1,5 +1,5 @@
 <!--
-Copyright 2024-2025 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -144,7 +144,7 @@ $$\text{d}\mathbf{D} = \mathbf{I} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})$$
 
 $$\text{d}\mathbf{U} = \mathbf{U}[\mathbf{F} \circ (\mathbf{U}^{-1} \text{d}\mathbf{AU})] + \mathbf{UD'}$$
 
-其中$\mathbf{D'}$为任意对角矩阵。第一项中$\mathbf{F}$对角元为0, 特征向量自身对其梯度没有贡献。第二项, 若特征向量是归一化的$|\mathbf{u}|^2 = 1$, 两边微分有$\mathbf{u} \cdot \text{d}\mathbf{u} = 0$, 代入上式可知
+其中$\mathbf{D'}$为任意对角矩阵。第一项中$\mathbf{F}$对角元为0, 特征向量自身对其梯度没有贡献。第二项若特征向量是归一化的$|\mathbf{u}|^2 = 1$, 两边微分有$\mathbf{u} \cdot \text{d}\mathbf{u} = 0$, 代入上式可知
 
 $$\mathbf{D'} = 0$$
 

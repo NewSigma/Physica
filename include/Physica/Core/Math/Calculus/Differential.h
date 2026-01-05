@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -70,7 +70,7 @@ namespace Physica {
 
             T factor2 = Factor2;
             for (size_t j = 1; j <= i; ++j) {
-                table[j, i] = (table[j - 1, i] * factor2 - table[j - 1, i - 1]) / (factor2 - 1);
+                table[j, i] = fma(table[j - 1, i], factor2, -table[j - 1, i - 1]) / (factor2 - 1);
                 factor2 *= T(Factor2);
                 const T error_now = std::max(abs(table[j, i] - table[j - 1, i]), abs(table[j, i] - table[j - 1, i - 1]));
                 if (error_now <= error) {
