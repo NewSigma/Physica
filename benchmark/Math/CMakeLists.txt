@@ -5,6 +5,7 @@ add_subdirectory(VectorExpr)
 
 target_sources(Benchmark PRIVATE GEMM.cpp)
 target_sources(Benchmark PRIVATE IdentityMV.cpp)
+target_sources(Benchmark PRIVATE MatrixPow.cpp)
 target_sources(Benchmark PRIVATE SyMV.cpp)
 target_sources(Benchmark PRIVATE Transpose.cpp)
 if(${PHYSICA_MKL})

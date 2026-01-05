@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -44,9 +44,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
 
         template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) const& noexcept;
-        template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) && noexcept;
+        [[nodiscard]] auto operator*(this auto&&, V&& v) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t, size_t) const { noImpl("MatrixPow::calc() is low performance and should be avoided"); }
 
@@ -74,14 +72,9 @@ namespace Physica {
 
     template<Matrix M>
     template<Vector V>
-    auto MatrixPow<M>::operator*(V&& v) const& noexcept {
-        return MatPowVecProd<const This&, V&&>(*this, std::forward<V>(v));
-    }
-
-    template<Matrix M>
-    template<Vector V>
-    auto MatrixPow<M>::operator*(V&& v) && noexcept {
-        return MatPowVecProd<This&&, V&&>(std::move(*this), std::forward<V>(v));
+    auto MatrixPow<M>::operator*(this auto&& self, V&& v) noexcept {
+        using Self = decltype(self);
+        return MatPowVecProd<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
     }
 
     template<Matrix M>

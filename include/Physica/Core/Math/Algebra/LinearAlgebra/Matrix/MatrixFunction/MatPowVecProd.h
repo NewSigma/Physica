@@ -27,9 +27,8 @@ namespace Physica {
 
         using This = MatPowVecProd<M, V>;
         using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
     private:
         LazyDestroy<M> mpow;
@@ -44,9 +43,9 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto& target) const;
+        void assign(Vector auto& target) const __restrict;
 
-        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
@@ -61,7 +60,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
-    void MatPowVecProd<M, V>::assign(Vector auto& target) const {
+    void MatPowVecProd<M, V>::assign(Vector auto& target) const __restrict {
         target.assert_assign(v);
         const int power = mpow.getPower();
         if (power == 0) {
@@ -69,13 +68,12 @@ namespace Physica {
             return;
         }
 
-        using V1 = std::remove_cvref_t<decltype(target)>;
-        V1 buffer = mpow.getMatrix() * v;
+        auto buffer = DenseVector<T, Base::SizeAtCompile>(getLength());
+        (mpow.getMatrix() * v).template assign<P>(target);
         for (int i = 1; i < power; ++i) {
-            buffer.swap(target);
             (mpow.getMatrix() * target).template assign<P>(buffer);
+            buffer.swap(target);
         }
-        buffer.swap(target);
     }
 }
 

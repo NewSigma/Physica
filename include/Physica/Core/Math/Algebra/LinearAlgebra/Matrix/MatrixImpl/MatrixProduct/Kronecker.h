@@ -63,16 +63,20 @@ namespace Physica {
 
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
-        for (size_t r = 0; r < lhs.getRow(); ++r) {
-            size_t offsetR = r * rhs.getRow();
+        size_t lhsRow = lhs.getRow();
+        size_t rhsRow = rhs.getRow();
+        size_t lhsCol = lhs.getCol();
+        size_t rhsCol = rhs.getCol();
+        for (size_t r = 0; r < lhsRow; ++r) {
+            size_t offsetR = r * rhsRow;
             if constexpr (instanceof_tx<IdentityMatrix, M1>)
-                rhs.assign(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
+                rhs.assign(target.block(offsetR, rhsRow, offsetR, rhsCol));
             else if constexpr (instanceof_tx<DiagMatrix, M2>)
-                (rhs * lhs.calc(r, r)).assign(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
+                (rhs * lhs.calc(r, r)).assign(target.block(offsetR, rhsRow, offsetR, rhsCol));
             else {
-                for (size_t c = 0; c < lhs.getCol(); ++c) {
-                    size_t offsetC = c * rhs.getCol();
-                    (rhs * lhs.calc(r, c)).assign(target.block(offsetR, rhs.getRow(), offsetC, rhs.getCol()));
+                for (size_t c = 0; c < lhsCol; ++c) {
+                    size_t offsetC = c * rhsCol;
+                    (rhs * lhs.calc(r, c)).assign(target.block(offsetR, rhsRow, offsetC, rhsCol));
                 }
             }
         }
