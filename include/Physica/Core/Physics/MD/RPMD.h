@@ -112,9 +112,11 @@ namespace Physica {
 
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] T calcPotential(auto& forceModel) const;
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] T calcPotentialClassical(auto& forceModel) const;
 
         [[nodiscard]] T calcClassicalElastic() const;
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] T calcClassicalInternalEnergy(auto& forceModel) const;
 
         template<class KineticModel> [[nodiscard]] T calcTemperature() const;

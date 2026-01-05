@@ -46,7 +46,7 @@ namespace Physica {
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         [[nodiscard]] const auto& step(auto&& forceModel);
 
         void reset() noexcept;
@@ -71,14 +71,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     const auto& HamiltonMC<T>::step(auto&& forceModel) {
         engine.template initMomentum<KineticModel, R>();
 
-        const T prevE = engine.calcClassicalInternalEnergy(forceModel);
-        engine.nve_step_for(duration, kinetic, forceModel);
+        const T prevE = engine.template calcClassicalInternalEnergy<P>(forceModel);
+        engine.template nve_step_for<P>(duration, kinetic, forceModel);
 
-        const T curE = engine.calcClassicalInternalEnergy(forceModel);
+        const T curE = engine.template calcClassicalInternalEnergy<P>(forceModel);
         const bool accept = T::template random_uniform<R>() < exp((prevE - curE) / engine.getTemperature());
         if (accept) [[likely]] {
             prevX = engine.getPhaseMatrix().col(0).tail(getDOF());

@@ -52,23 +52,25 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         void step_random();
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         void step(bool warmup = false);
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         void step_for(int numStep);
 
         template<RNG R>
         void step_random(HamiltonMC<Tr>& hmc);
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         void step(HamiltonMC<Tr>& hmc, bool warmup = false);
-        template<RNG R>
+        template<RNG R, ExecutePolicy P = Sequential>
         void step_for(int numStep, HamiltonMC<Tr>& hmc);
 
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Cell& cell);
-        template<ExecutePolicy P>
+        template<ExecutePolicy P = Sequential>
         void forceAsync(const Cell& cell, Vector auto& result);
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
@@ -84,9 +86,12 @@ namespace Physica {
     private:
         void makeFreqKernel(MatrixND<T>& freqKernel, int site) const;
 
+        template<ExecutePolicy P>
         [[nodiscard]] Vector2D<Trv> calcDet();
+        template<ExecutePolicy P>
         [[nodiscard]] Vector2D<Trv> calcLnWeight();
-        void calcGreen();
+        template<ExecutePolicy P>
+        auto calcGreen();
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
     };
@@ -102,29 +107,29 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     void FreqDQMC<T>::step_random() {
         action.template randAuxField<R>();
-        auto [lnAD, sgnD] = calcLnWeight();
+        auto [lnAD, sgnD] = calcLnWeight<P>();
         lnWeight = lnAD;
         sign = sgnD;
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     void FreqDQMC<T>::step(bool warmup) {
         assert(lnWeight.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
         const T save = action.template randAuxField<R>(freq, site);
 
-        auto [lnW, sgnD] = calcLnWeight();
+        auto [lnW, sgnD] = calcLnWeight<P>();
         const bool accept = Trv::template random_uniform<R>() < exp(lnW - lnWeight);
         if (accept) {
             lnWeight = lnW;
             sign = sgnD;
             if (!warmup)
-                calcGreen();
+                calcGreen<P>();
             numAccept += 1;
         }
         else
@@ -133,11 +138,11 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     void FreqDQMC<T>::step_for(int numStep) {
         for (int i = 0; i < numStep; ++i)
-            step<R>(true);
-        calcGreen();
+            step<R, P>(true);
+        calcGreen<P>();
 
         numTotal = 0;
         numAccept = 0;
@@ -154,28 +159,29 @@ namespace Physica {
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     void FreqDQMC<T>::step(HamiltonMC<Tr>& hmc, bool warmup) {
-        const auto& pos = hmc.template step<R>(*this);
+        const auto& pos = hmc.template step<R, P>(*this);
         getAuxField().read(reinterpret_cast<const T*>(pos.data()));
 
-        auto [lnAD, sgnD] = calcDet();
+        auto [lnAD, sgnD] = calcDet<P>();
         lnWeight = lnAD;
         sign = sgnD;
         if (!warmup)
-            calcGreen();
+            calcGreen<P>();
     }
 
     template<Scalar T>
-    template<RNG R>
+    template<RNG R, ExecutePolicy P>
     void FreqDQMC<T>::step_for(int numStep, HamiltonMC<Tr>& hmc) {
         for (int i = 0; i < numStep; ++i)
-            step<R>(hmc, true);
-        calcGreen();
+            step<R, P>(hmc, true);
+        calcGreen<P>();
         hmc.reset();
     }
 
     template<Scalar T>
+    template<ExecutePolicy P>
     auto FreqDQMC<T>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
         getAuxField().read(reinterpret_cast<const T*>(pos.data()));
@@ -183,12 +189,13 @@ namespace Physica {
         MatrixND<Tr> buffer = getAuxField().squaredNorms();
         buffer *= reciprocal(getBetaU());
         buffer.row(0) *= Trv(0.5);
-        return buffer.sum() - calcDet()[0];
+        return buffer.sum() - calcDet<P>()[0];
     }
 
     template<Scalar T>
+    template<ExecutePolicy P>
     auto FreqDQMC<T>::potentialV(const Cell& cell) -> Trv {
-        return potentialV(cell.getPos().flatten());
+        return potentialV<P>(cell.getPos().flatten());
     }
 
     template<Scalar T>
@@ -222,25 +229,33 @@ namespace Physica {
     }
 
     template<Scalar T>
+    template<ExecutePolicy P>
     auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
+        for (auto& spinLU : lu) {
+            spinLU.setWorking(action);
+            action.flip();
+        }
+
+        parallel_for<P>([this](size_t spin) {
+            lu[spin].compute(action);
+        }, 2).wait();
+
         Trv lnAD = 0, sgnD = 1;
-        for (int spin : {0, 1}) {
-            auto& spinLU = lu[spin];
-            spinLU.compute(action);
+        for (auto& spinLU : lu) {
             lnAD += ln(abs(spinLU.getMatrixLU().diag())).sum();
             sgnD *= unit(spinLU.getMatrixLU().diag()).prod().real();
-            action.flip();
         }
         return {lnAD, sgnD};
     }
 
     template<Scalar T>
-    void FreqDQMC<T>::calcGreen() {
-        const int numSite = getNumSite();
-        for (int spin : {0, 1}) {
+    template<ExecutePolicy P>
+    auto FreqDQMC<T>::calcGreen() {
+        return parallel_for<P>([this](size_t spin) {
             auto& spinLU = lu[spin];
             solBuffer = spinLU.inv();
 
+            const int numSite = getNumSite();
             auto& green = greens[spin];
             green.zeros();
             for (int _ = 0, offset = 0; _ < action.getNumFreq() * 2; ++_) {
@@ -248,7 +263,7 @@ namespace Physica {
                 offset += numSite;
             }
             green.diag() += Trv(0.5);
-        }
+        }, 2);
     }
 
     template<Scalar T>
@@ -273,9 +288,10 @@ namespace Physica {
     }
 
     template<Scalar T>
+    template<ExecutePolicy P>
     auto FreqDQMC<T>::calcLnWeight() -> Vector2D<Trv> {
         Trv betaU = getBetaU();
-        auto [lnAD, sgnD] = calcDet();
+        auto [lnAD, sgnD] = calcDet<P>();
         lnAD = lnAD
              - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum()
              - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()

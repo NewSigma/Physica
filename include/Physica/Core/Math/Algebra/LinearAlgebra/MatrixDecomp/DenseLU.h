@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,6 +49,10 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        void compute();
+        void compute_mkl();
+        void compute_base();
+
         void compute(const Matrix auto& source);
         void compute_mkl(const Matrix auto& source);
         void compute_base(const Matrix auto& source);
@@ -68,8 +72,9 @@ namespace Physica {
         [[nodiscard]] auto getMatrixL() const noexcept { return LUMatrixL<T>(*this); }
         [[nodiscard]] auto getMatrixU() const noexcept { return working.triu(); }
         [[nodiscard]] const auto& getPerm() const noexcept;
+        /* Setters */
+        void setWorking(const Matrix auto& source);
     private:
-        void pre_compute(const Matrix auto& source) const noexcept;
         void decomp_col(size_t index);
     };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,13 +23,10 @@
 
 namespace Physica {
     template<Scalar T, bool Pivot>
-    void DenseLU<T, Pivot>::compute_mkl(const Matrix auto& source) {
-        working.assert_assign(source);
-        source.assign(working);
-
+    void DenseLU<T, Pivot>::compute_mkl() {
         constexpr static int Layout = LAPACK_COL_MAJOR;
-        const size_t m = source.getRow();
-        const size_t n = source.getCol();
+        const size_t m = getOrder();
+        const size_t n = m;
         const size_t lda = m;
         auto* a = reinterpret_cast<Tm*>(working.data());
         int err{};
@@ -71,5 +68,11 @@ namespace Physica {
         // err > 0 implies a singular matrix, we do not care about it
         if (err < 0)
             check_lapack(err);
+    }
+
+    template<Scalar T, bool Pivot>
+    void DenseLU<T, Pivot>::compute_mkl(const Matrix auto& source) {
+        setWorking(source);
+        compute_mkl();
     }
 }

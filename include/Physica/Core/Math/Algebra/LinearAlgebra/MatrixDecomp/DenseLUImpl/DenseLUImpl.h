@@ -31,18 +31,15 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    void DenseLU<T, Pivot>::compute(const Matrix auto& source) {
+    void DenseLU<T, Pivot>::compute() {
         if constexpr (HasMKL())
-            compute_mkl(source);
+            compute_mkl();
         else
-            compute_base(source);
+            compute_base();
     }
 
     template<Scalar T, bool Pivot>
-    void DenseLU<T, Pivot>::compute_base(const Matrix auto& source) {
-        working.assert_assign(source);
-        source.assign(working);
-
+    void DenseLU<T, Pivot>::compute_base() {
         size_t order = getOrder();
         for (size_t i = 0; i < order; ++i) {
             if constexpr (Pivot) {
@@ -54,6 +51,18 @@ namespace Physica {
 
         if constexpr (Pivot)
             perm = perm.inv();
+    }
+
+    template<Scalar T, bool Pivot>
+    void DenseLU<T, Pivot>::compute(const Matrix auto& source) {
+        setWorking(source);
+        compute();
+    }
+
+    template<Scalar T, bool Pivot>
+    void DenseLU<T, Pivot>::compute_base(const Matrix auto& source) {
+        setWorking(source);
+        compute_base();
     }
 
     template<Scalar T, bool Pivot>
@@ -101,9 +110,9 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
-    void DenseLU<T, Pivot>::pre_compute([[maybe_unused]] const Matrix auto& source) const noexcept {
-        assert(source.isSquare());
-        assert(source.getRow() == getOrder());
+    void DenseLU<T, Pivot>::setWorking(const Matrix auto& source) {
+        working.assert_assign(source);
+        source.assign(working);
     }
     /**
      * Reference:

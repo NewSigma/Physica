@@ -421,10 +421,11 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<ExecutePolicy P>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcPotentialClassical(auto& forceModel) const {
         T result = 0;
         for (size_t i = 0; i < getNumReplica(); ++i)
-            result += forceModel.potentialV(phaseToCell(i));
+            result += forceModel.template potentialV<P>(phaseToCell(i));
         return result;
     }
 
@@ -447,8 +448,9 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<ExecutePolicy P>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcClassicalInternalEnergy(auto& forceModel) const {
-        return calcKineticClassical() + calcPotentialClassical(forceModel) + calcClassicalElastic();
+        return calcKineticClassical() + calcPotentialClassical<P>(forceModel) + calcClassicalElastic();
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
