@@ -73,7 +73,7 @@ namespace Physica {
         V1 buffer = mpow.getMatrix() * v;
         for (int i = 1; i < power; ++i) {
             buffer.swap(target);
-            (mpow.getMatrix() * target).template assign<P>(target);
+            (mpow.getMatrix() * target).template assign<P>(buffer);
         }
         buffer.swap(target);
     }
