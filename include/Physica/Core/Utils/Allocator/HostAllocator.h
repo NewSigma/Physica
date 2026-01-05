@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -56,11 +56,10 @@ namespace Physica {
         size_t size = n * sizeof(T);
         void* p{};
         if constexpr (OverAlign)
-            p = ::operator new(size, std::align_val_t(Align), std::nothrow_t{});
+            p = ::operator new(size, std::align_val_t(Align), std::nothrow);
         else
-            p = ::operator new(size, std::nothrow_t{});
-        // null return value is rare in reality
-        assert(p != nullptr);
+            p = ::operator new(size, std::nothrow);
+        assert(p != nullptr); // null return value is rare in reality
         return reinterpret_cast<T*>(p);
     }
 

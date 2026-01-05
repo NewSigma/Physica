@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -48,10 +48,10 @@ namespace Physica {
         using Range = std::pair<unsigned int, unsigned int>;
     public:
         Task() = default;
-        Task(std::coroutine_handle<Promise> handle_) : Base(std::move(handle_)) {}
+        Task(std::coroutine_handle<Promise> handle) : Base(handle) {}
         Task(const Task&) = delete;
         Task(Task&& obj) noexcept = default;
-        ~Task() = default;
+        ~Task();
         /* Operators */
         Task& operator=(Task obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -62,6 +62,13 @@ namespace Physica {
         [[nodiscard]] inline static Range splitJob(size_t num_loop, int part, int i) noexcept;
     };
 
+    inline Task<Thread>::~Task() {
+        if (!empty()) {
+            std::ignore = wait(std::nothrow);
+            Base::~TaskBase();
+        }
+    }
+
     inline auto Task<Thread>::wait(std::nothrow_t) noexcept -> std::exception_ptr {
         while (!done()) {
             auto handle = ThreadPool::getInstance().steal();
@@ -70,7 +77,7 @@ namespace Physica {
             else
                 std::this_thread::yield();
         }
-        return Base::handle<Promise>().promise().ex;
+        return handle<Promise>().promise().ex;
     }
 
     inline void Task<Thread>::wait() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,7 +49,7 @@ namespace Physica {
             ThreadData() = default;
             /* Operations */
             void push(Handle handle) noexcept;
-            Handle pop() noexcept;
+            [[nodiscard]] Handle pop() noexcept;
         };
     public:
         static int numThreadRequired;
@@ -59,7 +59,7 @@ namespace Physica {
         Array<ThreadData> thread_data;
         std::mutex poolMutex;
         std::condition_variable cond;
-        bool exit;
+        bool exit = false;
     public:
         ThreadPool(const This&) = delete;
         ThreadPool(This&&) noexcept = delete;
@@ -72,11 +72,10 @@ namespace Physica {
         [[nodiscard]] Handle steal() noexcept;
         void waitExit();
         void restart();
-        /* Getters */
-        [[nodiscard]] int getNumThreads() const noexcept { return static_cast<int>(thread_data.getLength()); }
         /* Setters */
         void shouldExit() noexcept;
         /* Static Members */
+        [[nodiscard]] static int getNumThreads() noexcept;
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static int getThreadID() noexcept;
         [[nodiscard]] static bool isMainThread() noexcept { return getThreadID() == MainThreadID; }

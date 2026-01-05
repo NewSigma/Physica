@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,14 +58,6 @@ namespace {
         return sinfo.dwNumberOfProcessors;
     #endif
     }
-
-    int makeNumThread() noexcept {
-        const auto numProcesser = getNumProcesser();
-        int num = ThreadPool::numThreadRequired;
-        if (num == 0 || num > numProcesser)
-            num = numProcesser * 3 / 4;
-        return num;
-    }
     /**
      * Generate a sequence of random seed (using the PCG-XSH-RS scheme)
      *
@@ -98,13 +90,13 @@ namespace {
 int ThreadPool::numThreadRequired = 0;
 
 void ThreadPool::ThreadData::push(Handle handle) noexcept {
-    std::unique_lock locker(mutex);
+    std::lock_guard locker(mutex);
     queue.push(handle);
 }
 
 auto ThreadPool::ThreadData::pop() noexcept -> Handle {
     Handle handle = nullptr;
-    std::unique_lock locker(mutex);
+    std::lock_guard locker(mutex);
     if (!queue.empty()) {
         handle = queue.front();
         queue.pop();
@@ -112,14 +104,10 @@ auto ThreadPool::ThreadData::pop() noexcept -> Handle {
     return handle;
 }
 
-ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {
+ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads) {
     assert(numThreads > 0 && "[Error]: numThreads must be positive");
-    for (int i = 0; i < numThreads; ++i) {
-        thread_data[i].thread = std::thread([i]() noexcept {
-            setThreadEnv();
-            getInstance().workerMainLoop(i);
-        });
-    }
+    for (int i = 0; i < numThreads; ++i)
+        thread_data[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
 }
 
 ThreadPool::~ThreadPool() {
@@ -165,24 +153,30 @@ void ThreadPool::waitExit() {
 void ThreadPool::restart() {
     waitExit();
     exit = false;
-    const int numThread = makeNumThread();
+    const int numThread = getNumThreads();
     thread_data = Array<ThreadData>(numThread);
-    for (int i = 0; i < numThread; ++i) {
-        thread_data[i].thread = std::thread([i]() noexcept {
-            getInstance().workerMainLoop(i);
-        });
-    }
+    for (int i = 0; i < numThread; ++i)
+        thread_data[i].thread = std::thread(&ThreadPool::workerMainLoop, this, i);
 }
 
 void ThreadPool::shouldExit() noexcept {
-    poolMutex.lock();
-    exit = true;
-    poolMutex.unlock();
+    {
+        auto locker = std::lock_guard(poolMutex);
+        exit = true;
+    }
     cond.notify_all();
 }
 
+int ThreadPool::getNumThreads() noexcept {
+    int numProcesser = getNumProcesser();
+    int num = ThreadPool::numThreadRequired;
+    if (num == 0 || num > numProcesser)
+        num = std::max(1, numProcesser * 3 / 4);
+    return num;
+}
+
 auto ThreadPool::getInstance() noexcept -> This& {
-    static ThreadPool pool(makeNumThread());
+    static ThreadPool pool(getNumThreads());
     return pool;
 }
 
@@ -191,6 +185,7 @@ int ThreadPool::getThreadID() noexcept {
 }
 
 void ThreadPool::workerMainLoop(int thread_id) noexcept {
+    setThreadEnv();
     getThreadInfo().id = thread_id;
     auto& data = thread_data[thread_id];
     while (true) {
@@ -204,10 +199,10 @@ void ThreadPool::workerMainLoop(int thread_id) noexcept {
             handle.resume();
         }
         else {
-            std::unique_lock poolLocker(poolMutex);
+            std::unique_lock locker(poolMutex);
             if (exit)
                 return;
-            cond.wait(poolLocker);
+            cond.wait(locker);
         }
     }
 }

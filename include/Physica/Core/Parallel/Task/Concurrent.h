@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,23 +40,33 @@ namespace Physica {
         using promise_type = Promise;
     public:
         Task() = default;
-        Task(std::coroutine_handle<Promise> handle_) : Base(std::move(handle_)) {}
+        Task(std::coroutine_handle<Promise> handle) : Base(handle) {}
         Task(const Task&) = delete;
         Task(Task&& obj) noexcept = default;
-        ~Task() = default;
+        ~Task();
         /* Operators */
         Task& operator=(Task obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        [[nodiscard]] std::exception_ptr wait(std::nothrow_t) noexcept;
         void wait();
         void swap(Task& __restrict obj) noexcept { Base::swap(obj); }
     };
 
-    inline void Task<Concurrent>::wait() {
-        auto handle = Base::handle<Promise>();
-        while (!this->done())
-            handle.resume();
+    inline Task<Concurrent>::~Task() {
+        if (!empty()) {
+            std::ignore = wait(std::nothrow);
+            Base::~TaskBase();
+        }
+    }
 
-        std::exception_ptr ex = handle.promise().ex;
+    inline std::exception_ptr Task<Concurrent>::wait(std::nothrow_t) noexcept {
+        while (!done())
+            resume();
+        return handle<Promise>().promise().ex;
+    }
+
+    inline void Task<Concurrent>::wait() {
+        std::exception_ptr ex = wait(std::nothrow);
         if (ex)
             std::rethrow_exception(ex);
     }

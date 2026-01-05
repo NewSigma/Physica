@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@
 namespace Physica {
     class TaskBase {
         using This = TaskBase;
-    protected:
+
         std::coroutine_handle<> h = nullptr;
     public:
         TaskBase() = default;
@@ -36,22 +36,25 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         This& operator=(std::nullptr_t) noexcept;
         [[nodiscard]] inline operator bool() const noexcept;
+        /* Operations */
+        void resume();
         /* Getters */
-        template<class Promise>
-        [[nodiscard]] std::coroutine_handle<Promise> handle() const noexcept;
-        [[nodiscard]] void* address() const noexcept { return h.address(); }
+        [[nodiscard]] bool empty() const noexcept;
         [[nodiscard]] bool done() const noexcept;
     protected:
         TaskBase(std::coroutine_handle<> h_) : h(h_) {}
         TaskBase(This&& obj) noexcept;
         /* Operations */
         void swap(This& __restrict obj) noexcept;
+        /* Getters */
+        template<class Promise>
+        [[nodiscard]] std::coroutine_handle<Promise> handle() const noexcept;
     };
 
     inline TaskBase::TaskBase(This&& obj) noexcept : h(std::exchange(obj.h, nullptr)) {}
 
     inline TaskBase::~TaskBase() {
-        if (h) {
+        if (!empty()) {
             assert(std::uncaught_exceptions() == 0 && "[Error]: Task escapes on unwinding");
             assert(h.done() && "[Error]: Task escapes before finishing");
             h.destroy();
@@ -65,17 +68,26 @@ namespace Physica {
     }
 
     inline TaskBase::operator bool() const noexcept {
-        return bool(h);
+        return !empty();
+    }
+
+    inline void TaskBase::resume() {
+        assert(!done());
+        h.resume();
+    }
+
+    inline bool TaskBase::empty() const noexcept {
+        return h == nullptr;
+    }
+
+    inline bool TaskBase::done() const noexcept {
+        assert(!empty());
+        return h.done();
     }
 
     template<class Promise>
     std::coroutine_handle<Promise> TaskBase::handle() const noexcept {
-        return std::coroutine_handle<Promise>::from_address(address());
-    }
-
-    inline bool TaskBase::done() const noexcept {
-        assert(h != nullptr);
-        return h.done();
+        return std::coroutine_handle<Promise>::from_address(h.address());
     }
 
     inline void TaskBase::swap(This& __restrict obj) noexcept {
