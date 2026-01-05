@@ -1,6 +1,7 @@
 physica_add_test(ActionMatrix ActionMatrix.cpp)
 physica_add_test(AndersonMatrix AndersonMatrix.cpp)
 physica_add_test(DQMC DQMC.cpp)
+physica_add_test(FreqDQMC FreqDQMC.cpp)
 physica_add_test(HubbardMatrix HubbardMatrix.cpp)
 physica_add_test(J1J2Matrix J1J2Matrix.cpp)
 physica_add_test(KFermiRepr KFermiRepr.cpp)

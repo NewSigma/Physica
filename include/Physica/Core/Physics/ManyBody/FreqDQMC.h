@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include "DQMCImpl/ActionMatrix.h"
 #include "DQMCImpl/ImagKinetic.h"
+#include "Physica/Core/Physics/MC/HamiltonMC.h"
 
 namespace Physica {
     template<Scalar T>
@@ -29,6 +30,7 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
+        using Cell = MDCell<Tr, 1>;
         using GreenPair = ImagKinetic<Tr>::GreenPair;
     private:
         Array<DenseLU<T, false>, 2> lu;
@@ -36,7 +38,7 @@ namespace Physica {
         MatrixND<T> solBuffer;
 
         GreenPair greens;
-        Trv lnAbsDet = Trv::nan();
+        Trv lnWeight = Trv::nan();
         Trv sign = 1;
 
         uint64_t numTotal = 0;
@@ -52,14 +54,22 @@ namespace Physica {
         /* Operations */
         template<RNG R>
         void step_random();
-
         template<RNG R>
         void step(bool warmup = false);
         template<RNG R>
         void step_for(int numStep);
 
-        [[nodiscard]] Vector2D<Trv> calcDet();
-        void calcGreen();
+        template<RNG R>
+        void step_random(HamiltonMC<Tr>& hmc);
+        template<RNG R>
+        void step(HamiltonMC<Tr>& hmc, bool warmup = false);
+        template<RNG R>
+        void step_for(int numStep, HamiltonMC<Tr>& hmc);
+
+        [[nodiscard]] Trv potentialV(const Vector auto& pos);
+        [[nodiscard]] Trv potentialV(const Cell& cell);
+        template<ExecutePolicy P>
+        void forceAsync(const Cell& cell, Vector auto& result);
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
@@ -71,6 +81,14 @@ namespace Physica {
         [[nodiscard]] Trv getAcceptRate() const noexcept { return Trv(numAccept) / Trv(numTotal); }
         /* Static members */
         [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
+    private:
+        void makeFreqKernel(MatrixND<T>& freqKernel, int site) const;
+
+        [[nodiscard]] Vector2D<Trv> calcDet();
+        [[nodiscard]] Vector2D<Trv> calcLnWeight();
+        void calcGreen();
+        /* Getters */
+        [[nodiscard]] Trv getBetaU() const noexcept;
     };
 
     template<Scalar T>
@@ -87,23 +105,23 @@ namespace Physica {
     template<RNG R>
     void FreqDQMC<T>::step_random() {
         action.template randAuxField<R>();
-        auto [lnAD, sgnD] = calcDet();
-        lnAbsDet = lnAD;
+        auto [lnAD, sgnD] = calcLnWeight();
+        lnWeight = lnAD;
         sign = sgnD;
     }
 
     template<Scalar T>
     template<RNG R>
     void FreqDQMC<T>::step(bool warmup) {
-        assert(lnAbsDet.isFinite() && "[Error]: Should random initialize before monte carlo step");
+        assert(lnWeight.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
         const T save = action.template randAuxField<R>(freq, site);
 
-        auto [lnAD, sgnD] = calcDet();
-        const bool accept = Trv::template random_uniform<R>() < exp(lnAD - lnAbsDet);
+        auto [lnW, sgnD] = calcLnWeight();
+        const bool accept = Trv::template random_uniform<R>() < exp(lnW - lnWeight);
         if (accept) {
-            lnAbsDet = lnAD;
+            lnWeight = lnW;
             sign = sgnD;
             if (!warmup)
                 calcGreen();
@@ -126,21 +144,93 @@ namespace Physica {
     }
 
     template<Scalar T>
+    template<RNG R>
+    void FreqDQMC<T>::step_random(HamiltonMC<Tr>& hmc) {
+        action.template randAuxField<R>();
+
+        VectorND<Tr> init(getAuxField().getSize() * 2);
+        init.read(reinterpret_cast<const Tr*>(getAuxField().data()));
+        hmc.setInitial(std::move(init));
+    }
+
+    template<Scalar T>
+    template<RNG R>
+    void FreqDQMC<T>::step(HamiltonMC<Tr>& hmc, bool warmup) {
+        const auto& pos = hmc.template step<R>(*this);
+        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
+
+        auto [lnAD, sgnD] = calcDet();
+        lnWeight = lnAD;
+        sign = sgnD;
+        if (!warmup)
+            calcGreen();
+    }
+
+    template<Scalar T>
+    template<RNG R>
+    void FreqDQMC<T>::step_for(int numStep, HamiltonMC<Tr>& hmc) {
+        for (int i = 0; i < numStep; ++i)
+            step<R>(hmc, true);
+        calcGreen();
+        hmc.reset();
+    }
+
+    template<Scalar T>
+    auto FreqDQMC<T>::potentialV(const Vector auto& pos) -> Trv {
+        assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
+        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
+
+        MatrixND<Tr> buffer = getAuxField().squaredNorms();
+        buffer *= reciprocal(getBetaU());
+        buffer.row(0) *= Trv(0.5);
+        return buffer.sum() - calcDet()[0];
+    }
+
+    template<Scalar T>
+    auto FreqDQMC<T>::potentialV(const Cell& cell) -> Trv {
+        return potentialV(cell.getPos().flatten());
+    }
+
+    template<Scalar T>
+    template<ExecutePolicy P>
+    void FreqDQMC<T>::forceAsync(const Cell& cell, Vector auto& result) {
+        assert(result.getLength() == getAuxField().getSize() * 2);
+        getAuxField().read(reinterpret_cast<const T*>(cell.getPos().data()));
+        MatrixND<T> force = -getAuxField() * (Trv(2) / getBetaU());
+        force.row(0) *= Trv(0.5);
+
+        auto freqKernel = MatrixND<T>(2 * getNumFreq());
+        for (int spin : {0, 1}) {
+            auto& spinLU = lu[spin];
+            spinLU.compute(action);
+            solBuffer = spinLU.inv();
+
+            Trv factor = spin == 0 ? 1.0 : -1.0;
+            for (int site = 0; site < getNumSite(); ++site) {
+                makeFreqKernel(freqKernel, site);
+                force[0, site].real() += freqKernel.diag().reals().sum() * factor;
+                for (int delta = 1; delta < 2 * getNumFreq(); ++delta) {
+                    T f1 = freqKernel.diag(delta).sum();
+                    T f2 = freqKernel.diag(-delta).sum();
+                    force[delta, site].real() += (f1.real() + f2.real()) * factor;
+                    force[delta, site].imag() += (f1.imag() - f2.imag()) * factor;
+                }
+            }
+            action.flip();
+        }
+        result.read(reinterpret_cast<const Tr*>(force.data()));
+    }
+
+    template<Scalar T>
     auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
-        lu[0].compute(action);
-
-        action.flip();
-        lu[1].compute(action);
-
         Trv lnAD = 0, sgnD = 1;
-        for (const auto& spinLU : lu) {
+        for (int spin : {0, 1}) {
+            auto& spinLU = lu[spin];
+            spinLU.compute(action);
             lnAD += ln(abs(spinLU.getMatrixLU().diag())).sum();
             sgnD *= unit(spinLU.getMatrixLU().diag()).prod().real();
+            action.flip();
         }
-        Trv betaU = getParams().getBeta() * getParams().getRepelU();
-        lnAD -= ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
-        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
-        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
         return {lnAD, sgnD};
     }
 
@@ -166,4 +256,38 @@ namespace Physica {
         int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
         return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
     }
+
+    template<Scalar T>
+    void FreqDQMC<T>::makeFreqKernel(MatrixND<T>& freqKernel, int site) const {
+        const int numSite = getNumSite();
+        const int size = 2 * getNumFreq();
+        assert(freqKernel.isSquare() && freqKernel.getRow() == size);
+        for (int r = 0; r < size; ++r)
+            for (int c = 0; c < size; ++c)
+                freqKernel[r, c] = solBuffer.transpose().calc(r * numSite + site, c * numSite + site);
+    }
+
+    template<Scalar T>
+    auto FreqDQMC<T>::getBetaU() const noexcept -> Trv {
+        return getParams().getBeta() * getParams().getRepelU();;
+    }
+
+    template<Scalar T>
+    auto FreqDQMC<T>::calcLnWeight() -> Vector2D<Trv> {
+        Trv betaU = getBetaU();
+        auto [lnAD, sgnD] = calcDet();
+        lnAD = lnAD
+             - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum()
+             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
+             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+        return {lnAD, sgnD};
+    }
+}
+
+namespace Physica {
+    template<Scalar T>
+    class Traits<FreqDQMC<T>> {
+    public:
+        constexpr static bool IsPeriodBoundary = false;
+    };
 }
