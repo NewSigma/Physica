@@ -30,6 +30,8 @@ def compile(device_only: bool):
     cuda_flag = ""
     if device_only:
         cuda_flag = "--offload-device-only"
+    else:
+        cuda_flag = "--offload-host-only"
 
     subprocess.run(["cmake", f"-DCMAKE_CUDA_FLAGS={cuda_flag}", ".."], stdout=subprocess.DEVNULL, check=True)
     subprocess.run(["cmake", "--build", ".", "--target=Benchmark"])
