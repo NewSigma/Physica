@@ -184,6 +184,8 @@ int ThreadPool::getThreadID() noexcept {
     return getThreadInfo().id;
 }
 
+void ThreadPool::spin() noexcept { __builtin_ia32_pause(); }
+
 void ThreadPool::workerMainLoop(int thread_id) noexcept {
     setThreadEnv();
     getThreadInfo().id = thread_id;

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <exception>
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "TaskBase.h"
@@ -58,14 +59,16 @@ namespace Physica {
         [[nodiscard]] std::exception_ptr wait(std::nothrow_t) noexcept;
         void wait();
         void swap(Task& __restrict obj) noexcept { Base::swap(obj); }
+        /* Getters */
+        [[nodiscard]] std::exception_ptr getException() const noexcept;
         /* Static members */
         [[nodiscard]] inline static Range splitJob(size_t num_loop, int part, int i) noexcept;
     };
 
     inline Task<Thread>::~Task() {
         if (!empty()) {
-            std::ignore = wait(std::nothrow);
-            Base::~TaskBase();
+            [[maybe_unused]] auto ex = wait(std::nothrow);
+            assert(ex == nullptr && "Exception escape");
         }
     }
 
@@ -77,12 +80,16 @@ namespace Physica {
             else
                 std::this_thread::yield();
         }
-        return handle<Promise>().promise().ex;
+        return getException();
     }
 
     inline void Task<Thread>::wait() {
         if (auto ex = wait(std::nothrow))
             std::rethrow_exception(ex);
+    }
+
+    inline std::exception_ptr Task<Thread>::getException() const noexcept {
+        return handle<Promise>().promise().ex;
     }
 
     inline auto Task<Thread>::splitJob(size_t num_loop, int part, int i) noexcept -> Range {
@@ -108,7 +115,7 @@ namespace Physica {
         std::exception_ptr firstEx = nullptr;
         for (auto& task : tasks) {
             auto ex = task.wait(std::nothrow);
-            firstEx = (firstEx == nullptr) ? ex : nullptr;
+            firstEx = (firstEx == nullptr) ? ex : firstEx;
         }
 
         if (firstEx)
@@ -121,9 +128,9 @@ namespace Physica {
         if (shouldInferPart)
             part = std::min<size_t>(ThreadPool::getInstance().getNumThreads(), num_loop);
 
-        using Range = Task<Thread>::Range;
         Array<Task<Thread>> tasks(part);
         for (int i = 0; i < part; ++i) {
+            using Range = Task<Thread>::Range;
             tasks[i] = [](auto fn, Range range) noexcept -> Task<Thread> {
                 for (size_t loop = range.first; loop < range.second; ++loop)
                     fn(loop);
@@ -135,7 +142,7 @@ namespace Physica {
         std::exception_ptr firstEx = nullptr;
         for (auto& task : tasks) {
             auto ex = task.wait(std::nothrow);
-            firstEx = (firstEx == nullptr) ? ex : nullptr;
+            firstEx = (firstEx == nullptr) ? ex : firstEx;
         }
 
         if (firstEx)

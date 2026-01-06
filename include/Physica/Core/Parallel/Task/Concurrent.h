@@ -19,6 +19,7 @@
 #pragma once
 
 #include <exception>
+#include "Physica/Core/Parallel/ThreadPool.h"
 #include "TaskBase.h"
 
 namespace Physica {
@@ -50,24 +51,32 @@ namespace Physica {
         [[nodiscard]] std::exception_ptr wait(std::nothrow_t) noexcept;
         void wait();
         void swap(Task& __restrict obj) noexcept { Base::swap(obj); }
+        /* Getters */
+        [[nodiscard]] std::exception_ptr getException() const noexcept;
     };
 
     inline Task<Concurrent>::~Task() {
         if (!empty()) {
-            std::ignore = wait(std::nothrow);
-            Base::~TaskBase();
+            [[maybe_unused]] auto ex = wait(std::nothrow);
+            assert(ex == nullptr && "Exception escape");
         }
     }
 
     inline std::exception_ptr Task<Concurrent>::wait(std::nothrow_t) noexcept {
-        while (!done())
+        while (!done()) {
             resume();
-        return handle<Promise>().promise().ex;
+            ThreadPool::spin();
+        }
+        return getException();
     }
 
     inline void Task<Concurrent>::wait() {
         std::exception_ptr ex = wait(std::nothrow);
         if (ex)
             std::rethrow_exception(ex);
+    }
+
+    inline std::exception_ptr Task<Concurrent>::getException() const noexcept {
+        return handle<Promise>().promise().ex;
     }
 }

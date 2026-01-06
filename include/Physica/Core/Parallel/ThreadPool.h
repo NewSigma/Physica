@@ -23,7 +23,6 @@
 #else
     #include <windows.h>
 #endif
-#include <memory>
 #include <thread>
 #include <mutex>
 #include <queue>
@@ -79,6 +78,7 @@ namespace Physica {
         [[nodiscard]] static This& getInstance() noexcept;
         [[nodiscard]] static int getThreadID() noexcept;
         [[nodiscard]] static bool isMainThread() noexcept { return getThreadID() == MainThreadID; }
+        static void spin() noexcept;
     private:
         ThreadPool(int numThreads);
         /* Operations */
