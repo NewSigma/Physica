@@ -73,14 +73,15 @@ namespace Physica {
             const bool isConverged = z.values().normInf() <= criteria * Trv(std::numeric_limits<T>::epsilon() + 1);
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1
             if (isConverged || isCycling) {
+                const Tr normY = y.norm1();
                 if constexpr (isComplex)
-                    return y.norm1();
+                    return normY;
                 else {
-                    VectorND<T> v = VectorND<T>::linspace(1, 2, length) + Tr(1);
-                    for (size_t i = 0; i < length; i += 2)
-                        v[i] = -v[i];
-                    z = m * v;
-                    return std::max(y.norm1(), z.norm1() / v.norm1());
+                    y.linspace(1, 2);
+                    for (size_t i = 1; i < length; i += 2)
+                        y[i] = -y[i];
+                    z = m * y;
+                    return std::max(normY, z.norm1() / y.norm1());
                 }
             }
 

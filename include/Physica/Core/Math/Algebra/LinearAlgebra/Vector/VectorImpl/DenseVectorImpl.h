@@ -74,6 +74,19 @@ namespace Physica {
     auto DenseVector<T, Length, Allocator>::kurt() const -> T {
         return excess_kurt() + Trv(3);
     }
+    /**
+     * Both \param from and \param to are included
+     */
+    template<Scalar T, size_t Length, class Allocator>
+    void DenseVector<T, Length, Allocator>::linspace(T from, T to) {
+        const size_t length = getLength();
+        assert(length > 1);
+        Trv n = Trv(length - 1);
+        for (size_t i = 0; i < length; ++i) {
+            Trv factor = Trv(i) / n;
+            (*this)[i] = from * (Trv(1) - factor) + to * factor;
+        }
+    }
 
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::zeros(size_t len) -> This {
@@ -114,18 +127,11 @@ namespace Physica {
         result.random_any<R>(distribution);
         return result;
     }
-    /**
-     * Both \param from and \param to are included
-     */
+
     template<Scalar T, size_t Length, class Allocator>
     auto DenseVector<T, Length, Allocator>::linspace(T from, T to, size_t count) -> This {
-        assert(count > 1);
-        Trv n = Trv(count - 1);
-        This result = This(count);
-        for (size_t i = 0; i < count; ++i) {
-            Trv factor = Trv(i) / n;
-            result[i] = from * (Trv(1) - factor) + to * factor;
-        }
+        This result(count);
+        result.linspace(from, to);
         return result;
     }
 

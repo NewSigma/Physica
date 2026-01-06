@@ -81,8 +81,7 @@ namespace Physica {
         using Base::random_normal;
         using Base::random_any;
 
-        using Base::read;
-        using Base::write;
+        void linspace(T from, T to);
         using Storage::zeros;
         using Storage::swap;
 
@@ -91,6 +90,9 @@ namespace Physica {
         using Coro::final_suspend;
         using Coro::return_value;
         using Coro::unhandled_exception;
+
+        using Base::read;
+        using Base::write;
         /* Getters */
         using Storage::getLength;
         using Storage::data;
