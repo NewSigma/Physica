@@ -46,15 +46,16 @@ namespace Physica {
         using ForceConstMatrix = DenseSymmMatrix<T>;
     public:
         /* Operations */
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] T potentialV(const MDCellType&) const { return 0; }
 
-        template<ExecutePolicy P>
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] VectorND<T> force(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
-        template<ExecutePolicy P>
+        template<ExecutePolicy P = Sequential>
         void forceAsync(const MDCellType& cell, Vector auto& result) const;
-        template<ExecutePolicy P>
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<P>(cell); }
-        template<ExecutePolicy P>
+        template<ExecutePolicy P = Sequential>
         [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
 
         [[nodiscard]] T forceConst(const MDCellType&, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return T(0); }

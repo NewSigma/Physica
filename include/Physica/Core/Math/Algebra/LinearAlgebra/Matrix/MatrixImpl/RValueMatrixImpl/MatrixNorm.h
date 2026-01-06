@@ -47,15 +47,16 @@ namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
     auto RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const -> Tr {
-        assert(getRow() == getCol() && "[Error]: norm1_power only applies to square matrix");
+        assert(isSquare() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
         const size_t length = getRow();
         if (length == 1) [[unlikely]]
             return abs(calc(0, 0));
 
+        using Buffer = DenseVector<T, RowAtCompile>;
         const Trv factor = reciprocal(Trv(length));
-        VectorND<T> y(length);
-        VectorND<T> z(length);
+        Buffer y(length);
+        Buffer z(length);
         size_t lastIndex = 0;
         size_t index = 0;
         for (unsigned int iteration = 0; iteration < maxIteration; ++iteration) {

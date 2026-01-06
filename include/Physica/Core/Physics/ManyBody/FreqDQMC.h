@@ -35,7 +35,6 @@ namespace Physica {
     private:
         Array<DenseLU<T, false>, 2> lu;
         ActionMatrix<T> action;
-        MatrixND<T> solBuffer;
 
         GreenPair greens;
         Trv lnWeight = Trv::nan();
@@ -84,7 +83,7 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
     private:
-        void makeFreqKernel(MatrixND<T>& freqKernel, int site) const;
+        void makeFreqKernel(MatrixND<T>& freqKernel, const MatrixND<T>& invAction, int site) const;
 
         template<ExecutePolicy P>
         [[nodiscard]] Vector2D<Trv> calcDet();
@@ -103,7 +102,6 @@ namespace Physica {
         size_t size = action.getOrder();
         for (auto& spinLU : lu)
             spinLU.resize(size);
-        solBuffer.resize(size);
     }
 
     template<Scalar T>
@@ -203,28 +201,41 @@ namespace Physica {
     void FreqDQMC<T>::forceAsync(const Cell& cell, Vector auto& result) {
         assert(result.getLength() == getAuxField().getSize() * 2);
         getAuxField().read(reinterpret_cast<const T*>(cell.getPos().data()));
-        MatrixND<T> force = -getAuxField() * (Trv(2) / getBetaU());
-        force.row(0) *= Trv(0.5);
+        for (auto& spinLU : lu) {
+            spinLU.setWorking(action);
+            action.flip();
+        }
 
-        auto freqKernel = MatrixND<T>(2 * getNumFreq());
-        for (int spin : {0, 1}) {
+        Array<MatrixND<T>, 2> spinFs{};
+        auto task = parallel_for<P>([this, &spinFs](size_t spin) {
             auto& spinLU = lu[spin];
-            spinLU.compute(action);
-            solBuffer = spinLU.inv();
+            spinLU.compute();
+            const MatrixND<T> inv = spinLU.inv();
 
+            auto& spinF = spinFs[spin];
+            spinF.resize(getAuxField());
+            spinF.zeros();
+
+            auto freqKernel = MatrixND<T>(2 * getNumFreq());
             Trv factor = spin == 0 ? 1.0 : -1.0;
             for (int site = 0; site < getNumSite(); ++site) {
-                makeFreqKernel(freqKernel, site);
-                force[0, site].real() += freqKernel.diag().reals().sum() * factor;
+                makeFreqKernel(freqKernel, inv, site);
+                spinF[0, site].real() += freqKernel.diag().reals().sum() * factor;
                 for (int delta = 1; delta < 2 * getNumFreq(); ++delta) {
                     T f1 = freqKernel.diag(delta).sum();
                     T f2 = freqKernel.diag(-delta).sum();
-                    force[delta, site].real() += (f1.real() + f2.real()) * factor;
-                    force[delta, site].imag() += (f1.imag() - f2.imag()) * factor;
+                    spinF[delta, site].real() += (f1.real() + f2.real()) * factor;
+                    spinF[delta, site].imag() += (f1.imag() - f2.imag()) * factor;
                 }
             }
-            action.flip();
-        }
+        }, 2);
+
+        MatrixND<T> force = -getAuxField() * (Trv(2) / getBetaU());
+        force.row(0) *= Trv(0.5);
+        task.wait();
+
+        for (auto& spinF : spinFs)
+            force += spinF;
         result.read(reinterpret_cast<const Tr*>(force.data()));
     }
 
@@ -237,7 +248,7 @@ namespace Physica {
         }
 
         parallel_for<P>([this](size_t spin) {
-            lu[spin].compute(action);
+            lu[spin].compute();
         }, 2).wait();
 
         Trv lnAD = 0, sgnD = 1;
@@ -253,13 +264,13 @@ namespace Physica {
     auto FreqDQMC<T>::calcGreen() {
         return parallel_for<P>([this](size_t spin) {
             auto& spinLU = lu[spin];
-            solBuffer = spinLU.inv();
+            MatrixND<T> inv = spinLU.inv();
 
             const int numSite = getNumSite();
             auto& green = greens[spin];
             green.zeros();
             for (int _ = 0, offset = 0; _ < action.getNumFreq() * 2; ++_) {
-                green += solBuffer.block(offset, numSite, offset, numSite).reals();
+                green += inv.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }
             green.diag() += Trv(0.5);
@@ -273,13 +284,13 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void FreqDQMC<T>::makeFreqKernel(MatrixND<T>& freqKernel, int site) const {
+    void FreqDQMC<T>::makeFreqKernel(MatrixND<T>& freqKernel, const MatrixND<T>& invAction, int site) const {
         const int numSite = getNumSite();
         const int size = 2 * getNumFreq();
         assert(freqKernel.isSquare() && freqKernel.getRow() == size);
         for (int r = 0; r < size; ++r)
             for (int c = 0; c < size; ++c)
-                freqKernel[r, c] = solBuffer.transpose().calc(r * numSite + site, c * numSite + site);
+                freqKernel[r, c] = invAction.transpose().calc(r * numSite + site, c * numSite + site);
     }
 
     template<Scalar T>
