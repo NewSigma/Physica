@@ -76,8 +76,7 @@ namespace Physica {
         using Base::write;
         __host__ __device__ void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ T* data() noexcept { return arr.data(); }
-        [[nodiscard]] __host__ __device__ const T* data() const noexcept { return arr.data(); }
+        [[nodiscard]] __host__ __device__ auto* data(this auto&& self) noexcept { return self.arr.data(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t size() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCapacity() noexcept { return Length; }
@@ -91,7 +90,7 @@ namespace Physica {
 
     template<class T, class Allocator>
     class Array<T, Dynamic, Allocator> : public ArrayBase<Array<T, Dynamic, Allocator>, Allocator>
-                                       , public CRCoro<Array<T, Dynamic, Allocator>> {
+                                             , public CRCoro<Array<T, Dynamic, Allocator>> {
         using This = Array<T, Dynamic, Allocator>;
         using Base = ArrayBase<This, Allocator>;
     private:

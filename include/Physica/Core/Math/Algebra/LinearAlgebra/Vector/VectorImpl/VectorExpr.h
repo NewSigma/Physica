@@ -35,7 +35,6 @@ namespace Physica {
     template<ExprID ID, Vector V>
     class UnitaryVectorExpr : public RValueVector<VectorExpr<ID, V>> {
         static_assert(std::is_reference<V>::value, "[Error]: Expect a reference");
-        static_assert(!std::is_const<V>::value, "[Error]: Const is implied");
         using This = UnitaryVectorExpr<ID, V>;
         using Base = RValueVector<VectorExpr<ID, V>>;
     private:
@@ -59,9 +58,6 @@ namespace Physica {
         static_assert(Vector<LHS> || Vector<RHS>, "[Error]: Either type should be Vector");
         static_assert(std::is_reference<LHS>::value, "[Error]: Expect a reference");
         static_assert(std::is_reference<RHS>::value, "[Error]: Expect a reference");
-        static_assert(!std::is_const<LHS>::value, "[Error]: Const is implied");
-        static_assert(!std::is_const<RHS>::value, "[Error]: Const is implied");
-
         using This = BinaryVectorExpr<ID, LHS, RHS>;
         using Base = RValueVector<VectorExpr<ID, LHS, RHS>>;
     private:

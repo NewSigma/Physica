@@ -139,12 +139,17 @@ namespace Physica {
                 arr[temp + c1].swap(arr[temp + c2]);
         }
     }
+
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    __host__ __device__ auto* Array2D<T, Option, Row, Col, Allocator>::data(this auto&& self) noexcept {
+        return self.arr.data();
+    }
     /**
      * FIXME: Seems llvm cannot infer nonnull for nonnull + GEP
      */
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     __host__ __device__ auto* Array2D<T, Option, Row, Col, Allocator>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        return self.arr.data() + self.toIndex1D(row, col);
+        return self.data() + self.toIndex1D(row, col);
     }
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
@@ -211,6 +216,8 @@ namespace Physica {
 
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     __host__ __device__ size_t Array2D<T, Option, Row, Col, Allocator>::toIndex1D(size_t r, size_t c) const noexcept {
+        assert(r < getRow());
+        assert(c < getCol());
         if constexpr (isColMajor)
             return getRow() * c + r;
         else

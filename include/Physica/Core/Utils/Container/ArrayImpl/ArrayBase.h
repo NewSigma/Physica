@@ -54,8 +54,7 @@ namespace Physica {
     public:
         ~ArrayBase() = default;
         /* Operators */
-        [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t index);
-        [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t index) const;
+        [[nodiscard]] __host__ __device__ decltype(auto) operator[](this auto&&, size_t index);
         [[nodiscard]] __host__ __device__ bool operator==(const ArrayBase& array) const;
         [[nodiscard]] __host__ __device__ bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterators */

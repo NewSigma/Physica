@@ -25,15 +25,9 @@
 
 namespace Physica {
     template<class Derived, class Allocator>
-    __host__ __device__ auto ArrayBase<Derived, Allocator>::operator[](size_t index) -> lvalue_reference {
-        assert(index < getLength() && "[Error]: Index overflow");
-        return data()[index];
-    }
-
-    template<class Derived, class Allocator>
-    __host__ __device__ auto ArrayBase<Derived, Allocator>::operator[](size_t index) const -> const_lvalue_reference {
-        assert(index < getLength() && "[Error]: Index overflow");
-        return data()[index];
+    __host__ __device__ decltype(auto) ArrayBase<Derived, Allocator>::operator[](this auto&& self, size_t index) {
+        assert(index < self.getLength() && "[Error]: Index overflow");
+        return self.data()[index];
     }
 
     template<class Derived, class Allocator>

@@ -130,9 +130,6 @@ namespace Physica {
         template<ExecutePolicy P>
         [[nodiscard]] LatticeMatrix makeStressClassical(auto& forceModel) const;
 
-        template<ExecutePolicy P = Sequential>
-        [[nodiscard]] VectorND<T> testNVE(T duration, auto& kineticModel, auto& forceModel) const;
-
         void read(const H5Loc& loc, const char* name);
         void write(H5Loc& loc, const char* name) const;
         void swap(RPMD& __restrict obj) noexcept;

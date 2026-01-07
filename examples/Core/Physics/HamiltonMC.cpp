@@ -17,6 +17,7 @@ namespace {
         using Base = EmptyForceModel<T, 1>;
         using Cell = Base::MDCellType;
     public:
+        template<ExecutePolicy>
         [[nodiscard]] static T potentialV(const Cell& cell) {
             const auto& pos = cell.getPos();
             T x = pos[0, 0];

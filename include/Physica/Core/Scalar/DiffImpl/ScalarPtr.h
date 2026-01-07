@@ -31,6 +31,7 @@ namespace Physica {
         constexpr static DiffMode Mode = ForwardDiff<T> ? DiffMode::Forward : DiffMode::Reverse;
         constexpr static int Order = Traits<T>::Order;
         constexpr static bool IsConst = std::is_const_v<T>;
+        static_assert(!std::is_reference<T>::value);
     public:
         using ValuePtrTy = std::conditional<IsConst, typename Tv::ConstPtrTy, typename Tv::PtrTy>::type;
         using GradPtrTy = std::conditional<IsConst, typename Tg::ConstPtrTy, typename Tg::PtrTy>::type;
@@ -40,6 +41,7 @@ namespace Physica {
     public:
         ScalarPtr() = default;
         __host__ __device__ ScalarPtr(ValuePtrTy pValue, GradPtrTy pGrad);
+        ScalarPtr(int, const ValuePtrTy pValue, const GradPtrTy pGrad) : This(pValue, pGrad) {}
         __host__ __device__ explicit ScalarPtr(T& x);
         __host__ __device__ explicit ScalarPtr(RefTy& x);
         ScalarPtr(const This&) = default;
@@ -199,6 +201,9 @@ namespace std {
 
     template<std::size_t I, class T>
     struct tuple_element<I, Physica::ScalarPtr<T>> {
-        using type = Physica::Traits<T>::ValueType::PtrTy;
+    private:
+        using Tv = Physica::Traits<T>::ValueType;
+    public:
+        using type = std::conditional<std::is_const_v<T>, typename Tv::ConstPtrTy, typename Tv::PtrTy>::type;
     };
 }

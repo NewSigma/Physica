@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -54,7 +54,7 @@ namespace {
     }
 
     SpectrumMatrix makeSpectrum() {
-        SpectrumMatrix result(NumSite + 1, NumSite + 1, std::make_pair(VectorND<T>{}, VectorND<T>{}));
+        SpectrumMatrix result(NumSite + 1, std::make_pair(VectorND<T>{}, VectorND<T>{}));
         for (int numSpinUp = 0; numSpinUp <= NumSite; ++numSpinUp) {
             for (int numSpinDown = numSpinUp; numSpinDown <= NumSite; ++numSpinDown) {
                 const bool isVacuum = numSpinDown == 0;

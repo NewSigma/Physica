@@ -30,6 +30,7 @@ namespace Physica {
         using Tv = std::remove_const_t<T>::ValueType;
         using Tg = std::remove_const_t<T>::GradType;
         constexpr static bool IsConst = std::is_const_v<T>;
+        static_assert(!std::is_reference<T>::value);
     public:
         using Base::Mode;
         using Base::Order;

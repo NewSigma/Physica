@@ -21,16 +21,17 @@
 namespace Physica {
     /**
      * PtrIteratorF(Forward)
+     *
+     * // TODO: Implement const iterator
      */
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     class PtrIteratorF<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
         using ElemType = Diff<T, Mode, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;
         using This = PtrIteratorF<Container>;
-        constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using value_type = ElemType;
         using pointer = ElemType::PtrTy;
         using reference = ElemType::RefTy;
         using iterator_category = std::random_access_iterator_tag;
@@ -64,10 +65,9 @@ namespace Physica {
         using ElemType = Diff<T, Mode, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;
         using This = PtrIteratorR<Container>;
-        constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using value_type = ElemType;
         using pointer = ElemType::PtrTy;
         using reference = ElemType::RefTy;
         using iterator_category = std::random_access_iterator_tag;

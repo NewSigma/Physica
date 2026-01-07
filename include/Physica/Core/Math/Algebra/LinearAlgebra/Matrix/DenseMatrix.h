@@ -42,8 +42,6 @@ namespace Physica {
         using Base = ContinuousMatrix<This>;
         using Storage = Array2D<T, Option, Row, Col, Allocator>;
         using Base::isReverseDiff;
-    protected:
-        using typename Base::ConstRefTy;
     public:
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
@@ -88,7 +86,7 @@ namespace Physica {
 
         using Base::read;
         /* Getters */
-        using Base::data;
+        using Storage::data;
         using Storage::data_ptr;
         using Storage::getCol;
         using Storage::getRow;

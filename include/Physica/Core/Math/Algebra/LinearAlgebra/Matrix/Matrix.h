@@ -31,7 +31,7 @@ namespace Physica {
     }
 
     template<class T>
-    concept Matrix = Internal::MatrixObj<std::remove_cvref_t<T>> || Internal::MatrixObj<remove_codiff_t<std::remove_cvref_t<T>>>;
+    concept Matrix = Internal::MatrixObj<remove_codiff_t<std::remove_cvref_t<T>>>;
     /**
      * \class MatrixOption handles properties of matrix
      */

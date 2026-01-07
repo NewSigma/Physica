@@ -80,8 +80,8 @@ namespace Physica {
         void swap_row(size_t r1, size_t r2) noexcept;
         void swap_col(size_t c1, size_t c2) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ auto& asArray() noexcept { return arr; }
-        [[nodiscard]] __host__ __device__ const auto& asArray() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ auto&& asArray(this auto&& self) noexcept { return self.arr; }
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data(this auto&&) noexcept;
         [[nodiscard, gnu::returns_nonnull]] __host__ __device__ auto* data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;

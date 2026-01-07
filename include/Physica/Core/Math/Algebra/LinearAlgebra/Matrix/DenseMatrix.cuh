@@ -68,7 +68,7 @@ namespace Physica {
 
         using Storage::swap;
         /* Getters */
-        using Base::data;
+        using Storage::data;
         using Storage::data_ptr;
         using Storage::getRow;
         using Storage::getCol;

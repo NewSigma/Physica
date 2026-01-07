@@ -76,7 +76,7 @@ namespace Physica {
 
     template<class T>
     auto& CXXObj::getDerived(this auto&& self) noexcept {
-        if constexpr (std::is_const_v<decltype(self)>)
+        if constexpr (std::is_const_v<std::remove_reference_t<decltype(self)>>)
             return *reinterpret_cast<const T*>(self.pObj.get());
         else
             return *reinterpret_cast<T*>(self.pObj.get());

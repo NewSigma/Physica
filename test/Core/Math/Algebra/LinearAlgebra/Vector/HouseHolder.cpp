@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ using RandomSource = Random<MT19937, 10000>;
 
 namespace {
     template<Vector V>
-    static void reflectTest(const V& x, double prec) noexcept {
+    void reflectTest(const V& x, double prec) noexcept {
         using T = V::ScalarType;
         const size_t rank = x.getLength();
         V v(rank);
@@ -44,7 +44,7 @@ namespace {
             expect(scalarNear(result[i], T(0), prec));
     }
 
-    static void emptyVectorTest() noexcept {
+    void emptyVectorTest() noexcept {
         using VectorType = Vector4D<T>;
         VectorType x{0, 0, 0, 0};
         x.householder();
@@ -52,7 +52,7 @@ namespace {
             expect(elem.isZero());
     }
 
-    static void emptyComplexVectorTest() noexcept {
+    void emptyComplexVectorTest() noexcept {
         using ComplexType = Complex<T>;
         using ComplexVector = Vector4D<ComplexType>;
         const ComplexVector x = Vector4D<T>{0, 0, 1, 0};
@@ -69,7 +69,7 @@ namespace {
             expect(scalarNear(result[i], ComplexType(0), 1E-15));
     }
 
-    static void realApplyTest() noexcept {
+    void realApplyTest() noexcept {
         using VectorType = Vector4D<T>;
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
@@ -90,7 +90,7 @@ namespace {
         expect(matrixNear(r_result, r_answer, 1E-5));
     }
 
-    static void complexApplyTest() noexcept {
+    void complexApplyTest() noexcept {
         using ScalarType = Complex<T>;
         using VectorType = Vector2D<ScalarType>;
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, 2, 2>;

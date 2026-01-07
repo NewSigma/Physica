@@ -105,6 +105,16 @@ namespace Physica {
     }
 
     template<tparams>
+    __host__ __device__ auto* device_obj<Array2D>::data(this auto&& self) noexcept {
+        return self.arr.data();
+    }
+
+    template<tparams>
+    __host__ __device__ auto* device_obj<Array2D>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        return self.arr.data() + self.toIndex1D(row, col);
+    }
+
+    template<tparams>
     __host__ __device__ size_t device_obj<Array2D>::getRow() const noexcept {
         if constexpr (Row == Dynamic) {
             if constexpr (Col == Dynamic)
@@ -142,14 +152,9 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ auto* device_obj<Array2D>::data_ptr(this auto&& self, size_t row, size_t col) {
-        assert(row < self.getRow());
-        assert(col < self.getCol());
-        return self.arr.data() + self.toIndex1D(row, col);
-    }
-
-    template<tparams>
     __host__ __device__ size_t device_obj<Array2D>::toIndex1D(size_t r, size_t c) const {
+        assert(r < getRow());
+        assert(c < getCol());
         if constexpr (isColMajor)
             return getRow() * c + r;
         else

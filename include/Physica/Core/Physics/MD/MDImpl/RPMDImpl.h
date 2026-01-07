@@ -651,22 +651,6 @@ namespace Physica {
         return result;
     }
 
-    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<ExecutePolicy P>
-    VectorND<T> RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::testNVE(
-            T duration, auto& kineticModel, auto& forceModel) const {
-        using KineticModel = std::remove_cvref_t<decltype(kineticModel)>;
-
-        This rpmd = *this;
-        const uint64_t step = durationToStep(duration, timeStep);
-        VectorND<T> pot(step);
-        for (uint64_t i = 0; i < step; ++i) {
-            rpmd.nve_step<P>(kineticModel, forceModel);
-            pot[i] = rpmd.calcKinetic<KineticModel>() + rpmd.calcPotential<P>(forceModel);
-        }
-        pot -= T(pot[0]);
-        return pot;
-    }
 #ifdef PHYSICA_HDF5
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::read(const H5Loc& loc, const char* name) {

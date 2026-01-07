@@ -40,8 +40,6 @@ namespace Physica {
         using Base::isReverseDiff;
     protected:
         using typename Base::Trv;
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     public:
         DenseVector() = default;
         explicit DenseVector(size_t length);

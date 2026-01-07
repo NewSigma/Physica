@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,7 +45,7 @@ namespace {
 
     void testLnAbsDet() {
         using MatrixType = DenseMatrix<T, MatrixOption::Row, 8, 8>;
-        const MatrixType A = MatrixType::random_normal<Random<MCG>>(8, 8);
+        const MatrixType A = MatrixType::random_normal<Random<MCG, 1234>>(8, 8);
         device_obj<SparseLU<T>> lu((SparseMatrix<T>(A)));
         expect(scalarNear(lu.lnAbsDet(), A.lnAbsDet(), 1E-5));
         expect(lu.sgndet() == A.sgndet());

@@ -120,8 +120,13 @@ namespace Physica {
     }
 
     template<class T, int... Dims>
+    auto* ArrayND<T, Dims...>::data(this auto&& self) noexcept {
+        return self.arr.data();
+    }
+
+    template<class T, int... Dims>
     auto* ArrayND<T, Dims...>::data_ptr(this auto&& self, const IndexType& indices) noexcept {
-        return self.arr.data() + self.toIndex1D(indices);
+        return self.data() + self.toIndex1D(indices);
     }
 
     template<class T, int... Dims>
