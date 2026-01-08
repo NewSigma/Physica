@@ -97,10 +97,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
         [[nodiscard]] __host__ __device__ auto diag(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto triu() noexcept;
-        [[nodiscard]] __host__ __device__ const auto triu() const noexcept;
-        [[nodiscard]] __host__ __device__ auto tril() noexcept;
-        [[nodiscard]] __host__ __device__ const auto tril() const noexcept;
+        [[nodiscard]] __host__ __device__ auto triu(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto triu_unit(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto tril(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto tril_unit(this auto&&) noexcept;
 
         [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }

@@ -244,23 +244,27 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::triu() noexcept {
-        return TrigUpper<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::triu(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return MatrixTrig<Self, true, false>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    const auto RValueMatrix<Derived>::triu() const noexcept {
-        return TrigUpper<Derived>(Base::getConstCastDerived());
+    auto RValueMatrix<Derived>::triu_unit(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return MatrixTrig<Self, true, true>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::tril() noexcept {
-        return TrigLower<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::tril(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return MatrixTrig<Self, false, false>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    const auto RValueMatrix<Derived>::tril() const noexcept {
-        return TrigLower<Derived>(Base::getConstCastDerived());
+    auto RValueMatrix<Derived>::tril_unit(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return MatrixTrig<Self, false, true>(std::forward<Self>(self));
     }
 
     template<class Derived>
@@ -542,6 +546,6 @@ namespace Physica {
 #include "Conjugate.h"
 #include "Hermite.h"
 #include "Flatten.h"
-#include "Trig/Trig.h"
+#include "Trig/MatrixTrig.h"
 #include "MatrixConvert.h"
 #include "ReshapedVector.h"

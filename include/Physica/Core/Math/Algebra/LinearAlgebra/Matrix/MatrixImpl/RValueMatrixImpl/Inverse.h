@@ -111,5 +111,8 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M>
-    class Traits<Inverse<M>> : public Traits<M> {};
+    class Traits<Inverse<M>> : public Traits<M> {
+    public:
+        using ExprType = M;
+    };
 }

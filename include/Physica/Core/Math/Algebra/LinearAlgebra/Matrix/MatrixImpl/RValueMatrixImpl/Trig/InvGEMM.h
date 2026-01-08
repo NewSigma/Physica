@@ -18,22 +18,22 @@
  */
 #pragma once
 
-#include "Trig.h"
+#include "MatrixTrig.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2>
-    class GEMM<TrigUpper<M1>, M2> : public RValueMatrix<GEMM<TrigUpper<M1>, M2>> {
-        using This = GEMM<TrigUpper<M1>, M2>;
+    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
+        using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
     public:
         using Base::isComplex;
     protected:
         using typename Base::T;
     private:
-        const TrigUpper<M1>& mat1;
-        const M2& mat2;
+        LazyDestroy<M1&&> inv;
+        LazyDestroy<M2&&> rhs;
     public:
-        GEMM(const TrigUpper<M1>& mat1_, const M2& mat2_);
+        GEMM(M1 inv, M2 rhs);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -44,17 +44,17 @@ namespace Physica {
         void assign(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return mat1; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return mat2; }
+        [[nodiscard]] size_t getRow() const { return inv.getRow(); }
+        [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
+        [[nodiscard]] const auto& getLHS() const noexcept { return inv; }
+        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
     };
 
-    template<Matrix M1, Matrix M2>
-    GEMM<TrigUpper<M1>, M2>::GEMM(const TrigUpper<M1>& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {}
+    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    GEMM<M1, M2>::GEMM(M1 inv, M2 rhs) : inv(std::forward<M1>(inv)), rhs(std::forward<M2>(rhs)) {}
 
-    template<Matrix M1, Matrix M2>
-    void GEMM<TrigUpper<M1>, M2>::assign(Matrix auto& target) const {
+    template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
+    void GEMM<M1, M2>::assign(Matrix auto& target) const {
         if constexpr (HasMKL())
             assign_mkl(target);
         else
@@ -63,5 +63,5 @@ namespace Physica {
 }
 
 #ifdef PHYSICA_MKL
-    #include "TrigGEMM_MKL.h"
+    #include "InvGEMM_MKL.h"
 #endif

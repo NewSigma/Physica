@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -237,23 +237,27 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu() noexcept {
-        return device_obj<TrigUpper<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return device_obj<MatrixTrig<Derived, true, false>>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    __host__ __device__ const auto device_obj<RValueMatrix<Derived>>::triu() const noexcept {
-        return device_obj<TrigUpper<Derived>>(Base::getConstCastDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu_unit(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return device_obj<MatrixTrig<Derived, true, true>>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril() noexcept {
-        return device_obj<TrigLower<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return device_obj<MatrixTrig<Derived, false, false>>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    __host__ __device__ const auto device_obj<RValueMatrix<Derived>>::tril() const noexcept {
-        return device_obj<TrigLower<Derived>>(Base::getConstCastDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril_unit(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return device_obj<MatrixTrig<Derived, false, true>>(std::forward<Self>(self));
     }
 
     template<class Derived>
@@ -362,4 +366,4 @@ namespace Physica {
     }
 }
 
-#include "Trig/Trig.cuh"
+#include "Trig/MatrixTrig.cuh"

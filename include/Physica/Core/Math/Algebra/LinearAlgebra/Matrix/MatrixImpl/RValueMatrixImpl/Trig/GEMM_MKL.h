@@ -18,41 +18,39 @@
  */
 #pragma once
 
-#include "InvTrigGEMM.h"
+#include "GEMM.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2>
-    void GEMM<Inverse<TrigUpper<M1>>, M2>::assign_mkl(Matrix auto& target) const noexcept {
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
+        using Base::isComplex;
         using M = std::remove_cvref_t<decltype(target)>;
-        using Tc = T::ComplexType;
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = CblasLeft;
-        constexpr auto Uplo = CblasUpper;
+        constexpr auto Uplo = Traits<M1>::Upper ? CblasUpper : CblasLower;
         constexpr auto TransA = CblasNoTrans;
-        constexpr auto Diag = CblasNonUnit;
-        const M buffer = mat1;
-        target = mat2;
+        constexpr auto Diag = Traits<M1>::Unit ? CblasUnit : CblasNonUnit;
+        const M buffer = trig;
+        rhs.assign(target);
 
         const size_t m = getRow();
         const size_t n = getCol();
+        const Tm alpha = 1;
         const auto* a = reinterpret_cast<const Tm*>(buffer.data());
         const size_t lda = Side == CblasLeft ? m : n;
         auto* b = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = Layout == CblasColMajor ? m : n;
-        if constexpr (isComplex) {
-            const Tc alpha = 1;
+        if constexpr (Base::isComplex) {
             if constexpr (T::Prec == Float32)
-                cblas_ctrsm_64(Layout, Side, Uplo, TransA, Diag, m, n, (Tm*)&alpha, a, lda, b, ldb);
+                cblas_ctrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, &alpha, a, lda, b, ldb);
             else
-                cblas_ztrsm_64(Layout, Side, Uplo, TransA, Diag, m, n, (Tm*)&alpha, a, lda, b, ldb);
+                cblas_ztrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, &alpha, a, lda, b, ldb);
         }
         else {
-            const Tm alpha = 1;
             if constexpr (T::Prec == Float32)
-                cblas_strsm_64(Layout, Side, Uplo, TransA, Diag, m, n, alpha, a, lda, b, ldb);
+                cblas_strmm_64(Layout, Side, Uplo, TransA, Diag, m, n, alpha, a, lda, b, ldb);
             else
-                cblas_dtrsm_64(Layout, Side, Uplo, TransA, Diag, m, n, alpha, a, lda, b, ldb);
+                cblas_dtrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, alpha, a, lda, b, ldb);
         }
     }
 }

@@ -31,8 +31,7 @@ namespace Physica {
     template<class> class Conjugate;
     template<class> class Hermite;
     template<class> class FlattenR;
-    template<class> class TrigUpper;
-    template<class> class TrigLower;
+    template<class, bool Upper, bool Unit> class MatrixTrig;
 
     template<class> class RealMatrix;
     template<class> class ImagMatrix;
@@ -147,10 +146,10 @@ namespace Physica {
         [[nodiscard]] auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
         [[nodiscard]] auto diag(this auto&&) noexcept;
-        [[nodiscard]] auto triu() noexcept;
-        [[nodiscard]] const auto triu() const noexcept;
-        [[nodiscard]] auto tril() noexcept;
-        [[nodiscard]] const auto tril() const noexcept;
+        [[nodiscard]] auto triu(this auto&&) noexcept;
+        [[nodiscard]] auto triu_unit(this auto&&) noexcept;
+        [[nodiscard]] auto tril(this auto&&) noexcept;
+        [[nodiscard]] auto tril_unit(this auto&&) noexcept;
 
         [[nodiscard]] Tr norm1() const;
         template<ExecutePolicy P = Sequential>
