@@ -230,13 +230,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::diag() noexcept {
-        return device_obj<DiagVector<Derived, false>>(Base::getDerived());
-    }
-
-    template<class Derived>
-    __host__ __device__ const auto device_obj<RValueMatrix<Derived>>::diag() const noexcept {
-        return device_obj<DiagVector<Derived, false>>(Base::getConstCastDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::diag(this auto&& self) noexcept {
+        assert(self.isSquare());
+        using Self = decltype(self);
+        return device_obj<DiagVectorR<Derived>>(std::forward<Self>(self));
     }
 
     template<class Derived>

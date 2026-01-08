@@ -18,21 +18,20 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.cuh"
-#include "RValueMatrix.cuh"
+#include "../RValueMatrix.cuh"
 
 namespace Physica {
-    template<Matrix M, bool isLValueMatrix>
-    class device_obj<DiagVector<M, isLValueMatrix>> : public device_obj<RValueVector<DiagVector<M, isLValueMatrix>>> {
-        using host_obj = DiagVector<M, isLValueMatrix>;
+    template<Matrix M>
+    class device_obj<DiagVectorR<M>> : public device_obj<RValueVector<DiagVectorR<M>>> {
+        using host_obj = DiagVectorR<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
     protected:
         using typename Base::T;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<device_obj<M>> mat;
     public:
-        explicit device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        explicit device_obj(const device_obj<M>& mat) : mat(asStruct(mat)) {}
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;
@@ -48,6 +47,6 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix M, bool isLValueMatrix>
-    class Traits<device_obj<DiagVector<M, isLValueMatrix>>> : public Traits<DiagVector<M, isLValueMatrix>> {};
+    template<Matrix M>
+    class Traits<device_obj<DiagVectorR<M>>> : public Traits<DiagVectorR<M>> {};
 }

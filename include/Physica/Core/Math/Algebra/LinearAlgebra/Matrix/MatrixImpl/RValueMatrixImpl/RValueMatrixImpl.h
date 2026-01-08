@@ -237,15 +237,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::diag() noexcept {
-        assert(isSquare());
-        return DiagVector<Derived, false>(Base::getDerived());
-    }
-
-    template<class Derived>
-    const auto RValueMatrix<Derived>::diag() const noexcept {
-        assert(isSquare());
-        return DiagVector<Derived, false>(Base::getConstCastDerived());
+    auto RValueMatrix<Derived>::diag(this auto&& self) noexcept {
+        assert(self.isSquare());
+        using Self = decltype(self);
+        return DiagVectorR<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>

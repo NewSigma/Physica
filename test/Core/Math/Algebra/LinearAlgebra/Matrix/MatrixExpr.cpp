@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,8 +21,8 @@
 
 using namespace Physica;
 
-int main() {
-    {
+namespace {
+    void general() {
         DenseMatrix<float64, MatrixOption::Col, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
         DenseMatrix<float32, MatrixOption::Col, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
         {
@@ -38,12 +38,28 @@ int main() {
                     expect(mat[i, j] == float64(3));
         }
     }
-    /* ContinuousMatrixBlock<Derived, 1, 1> */ {
+
+    void block1x1() {
         using ScalarType = float64;
         DenseMatrix<ScalarType, MatrixOption::Col, Physica::Dynamic, 1> mat(2, 1);
         mat[0, 0] = 1.0;
         mat[1, 0] = 2.0;
         expect(mat.row(1)[0] == ScalarType(2));
     }
+    /**
+     * Test that we are free of a set of lifetime problems under CXX23
+     */
+    void lifetimeCXX23() {
+        using T = float32;
+        auto diag = (MatrixND<T>::identity(3) + MatrixND<T>(3, 3, 5)).diag();
+        for (int i = 0; i < 3; ++i)
+            expect(diag.calc(i) == T(6));
+    }
+}
+
+int main() {
+    general();
+    block1x1();
+    lifetimeCXX23();
     return 0;
 }

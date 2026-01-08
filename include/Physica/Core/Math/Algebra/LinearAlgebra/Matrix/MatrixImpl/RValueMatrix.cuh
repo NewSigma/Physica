@@ -96,8 +96,7 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t from) const noexcept;
         [[nodiscard]] __host__ __device__ auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] __host__ __device__ const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
-        [[nodiscard]] __host__ __device__ auto diag() noexcept;
-        [[nodiscard]] __host__ __device__ const auto diag() const noexcept;
+        [[nodiscard]] __host__ __device__ auto diag(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto triu() noexcept;
         [[nodiscard]] __host__ __device__ const auto triu() const noexcept;
         [[nodiscard]] __host__ __device__ auto tril() noexcept;
@@ -153,6 +152,7 @@ namespace Physica {
 
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
 #include "RValueMatrixImpl/Sum.cuh"
+#include "RValueMatrixImpl/DiagVector.cuh"
 #include "RValueMatrixImpl/Transpose.cuh"
 #include "RValueMatrixImpl/Hermite.cuh"
 #include "RValueMatrixImpl/MatrixConvert.cuh"
@@ -161,4 +161,3 @@ namespace Physica {
 #include "MatrixProduct/GEVM.cuh"
 #include "MatrixProduct/Kronecker.cuh"
 #include "MatrixExpr.cuh"
-#include "DiagVector.cuh"

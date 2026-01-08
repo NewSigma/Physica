@@ -22,6 +22,7 @@
 #include "LValueMatrixImpl/LMatrixBlock.h"
 
 namespace Physica {
+    template<Matrix> class DiagVectorL;
     template<Matrix M> class MinorDiagL;
     template<class> class FlattenL;
     /**
@@ -107,8 +108,7 @@ namespace Physica {
         [[nodiscard]] const auto bottomRightCorner(size_t from) const noexcept;
         [[nodiscard]] auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
-        [[nodiscard]] auto diag() noexcept;
-        [[nodiscard]] const auto diag() const noexcept;
+        [[nodiscard]] auto diag(this auto&&) noexcept;
         [[nodiscard]] auto diag(this auto&&, ssize_t shift) noexcept;
 
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
@@ -153,3 +153,4 @@ namespace Physica {
 #include "LValueMatrixImpl/LValueMatrixImpl.h"
 #include "LValueMatrixImpl/MinorDiag.h"
 #include "LValueMatrixImpl/ReshapedVector.h"
+#include "LValueMatrixImpl/DiagVector.h"

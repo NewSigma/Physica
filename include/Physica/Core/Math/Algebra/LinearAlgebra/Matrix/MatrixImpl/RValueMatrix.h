@@ -24,7 +24,7 @@ namespace Physica {
     template<class Derived> class LValueMatrix;
     template<class Derived> class ContinuousMatrix;
     template<class, bool ReduceCol> class MatrixSum;
-    template<class MatrixType, bool isLValueMatrix> class DiagVector;
+    template<Matrix> class DiagVectorR;
     template<class> class Inverse;
     template<Matrix> class PseudoInverse;
     template<class> class Transpose;
@@ -146,8 +146,7 @@ namespace Physica {
         [[nodiscard]] const auto bottomRightCorner(size_t from) const noexcept;
         [[nodiscard]] auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         [[nodiscard]] const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
-        [[nodiscard]] auto diag() noexcept;
-        [[nodiscard]] const auto diag() const noexcept;
+        [[nodiscard]] auto diag(this auto&&) noexcept;
         [[nodiscard]] auto triu() noexcept;
         [[nodiscard]] const auto triu() const noexcept;
         [[nodiscard]] auto tril() noexcept;
@@ -255,10 +254,10 @@ namespace Physica {
 }
 
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
+#include "RValueMatrixImpl/DiagVector.h"
 #include "MatrixProduct/GEMM.h"
 #include "MatrixProduct/GEMV.h"
 #include "MatrixProduct/GEVM.h"
 #include "MatrixProduct/Kronecker.h"
 #include "RValueMatrixImpl/MatrixNorm.h"
 #include "MatrixExpr.h"
-#include "DiagVector.h"

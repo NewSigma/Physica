@@ -81,7 +81,7 @@ Scalar* ContinuousVector::data_ptr(size_t index) { return data() + index; }
 
 ## 模板表达式
 
-以矩阵为例, 一元操作可以显示约束:
+一元操作可以显式约束:
 
 ``` C++
 template<ExprID, Matrix M>
@@ -93,6 +93,15 @@ class UnitaryMatrixExpr { ... };
 ``` C++
 template<ExprID, class LHS, class RHS>
 class BinaryMatrixExpr { ... };
+```
+
+使用C++23显式对象参数技术构造表达式对象, 避免一类生命周期问题:
+
+``` C++
+auto c = (MatrixND<T>::identity(3) + MatrixND<T>(3, 3, 5)).diag();
+// Before C++23: Bad: Heap-use-after-delete
+// After C++23: Good: Intermediate results are kept
+std::println("{}", c);
 ```
 
 ## Concept
