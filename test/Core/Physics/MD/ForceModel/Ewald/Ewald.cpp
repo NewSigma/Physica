@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -125,8 +125,8 @@ namespace Physica {
                 5.658125877,  4.686541080,  17.23267174,
                 3.052176714,  2.816649675,  2.054240227
             };
-            lattice *= reciprocal(Tv(PhyConst<SI>::bohrRadius * 1E10));
-            pos *= reciprocal(Tv(PhyConst<SI>::bohrRadius * 1E10));
+            lattice.values() *= reciprocal(Tv(PhyConst<SI>::bohrRadius * 1E10));
+            pos.values() *= reciprocal(Tv(PhyConst<SI>::bohrRadius * 1E10));
             ewald = Ewald<T>(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
         };
         /* Operations */

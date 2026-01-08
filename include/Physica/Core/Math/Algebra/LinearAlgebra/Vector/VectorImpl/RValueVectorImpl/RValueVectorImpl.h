@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -684,8 +684,9 @@ namespace Physica {
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = Src::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        static_assert(isComplex || !Src::isComplex, "[Error]: Assign a complex vector to real vector discards imags");
-        static_assert(Diffable<Derived> || !Diffable<Src>, "[Error]: Assign a diffable vector to normal vector discards grads");
+
+        using U = Src::ScalarType;
+        T::template assert_assign<U>();
     }
 
     template<class Derived>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -56,11 +56,11 @@ namespace Physica {
             }
         }
     private:
-        static Vector3D<T> randomVector(T latticeConst) {
+        static Vector3D<Tv> randomVector(Tv latticeConst) {
             const Tv theta(Tv::random_uniform<RandomSource>() * Tv(M_PI));
             const Tv phi(Tv::random_uniform<RandomSource>() * Tv(M_PI * 2));
-            Vector3D<T> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-            result *= T(ForceModel::equalR / double(latticeConst.value())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
+            Vector3D<Tv> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+            result *= Tv(ForceModel::equalR / double(latticeConst.value())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;
         }
 

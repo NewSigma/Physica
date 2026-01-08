@@ -115,7 +115,7 @@ namespace Physica {
                 T gamma);
         [[nodiscard]] static LatticeMatrix makeNiggliLattice(const LatticeMatrix& lattice, double precision, unsigned int maxIteration);
         [[nodiscard]] static LatticeMatrix makeNiggliLattice2D(const LatticeMatrix& lattice, unsigned int maxIteration);
-        [[nodiscard]] static LatticeMatrix makeRepLattice(const LatticeMatrix& lattice);
+        [[nodiscard]] static auto makeRepLattice(const LatticeMatrix& lattice);
         [[nodiscard]] static CoDiff<T> getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
@@ -576,12 +576,14 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim>
-    auto PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) -> LatticeMatrix {
-        LatticeMatrix result{};
-        result.row(0) = lattice.row(1).cross(lattice.row(2));
-        result.row(1) = lattice.row(2).cross(lattice.row(0));
-        result.row(2) = lattice.row(0).cross(lattice.row(1));
-        const auto factor = T(2 * M_PI) / (lattice.row(0) * result.row(0));
+    auto PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) {
+        using RtnTy = LatticeMatrix::template rebind_scalar<Tv>;
+        const auto& latt = lattice.values();
+        RtnTy result{};
+        result.row(0) = latt.row(1).cross(latt.row(2));
+        result.row(1) = latt.row(2).cross(latt.row(0));
+        result.row(2) = latt.row(0).cross(latt.row(1));
+        const auto factor = Tv(2 * M_PI) / (latt.row(0) * result.row(0));
         result *= factor;
         return result;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,30 +26,38 @@ namespace Physica {
         using This = CrossProduct<V1, V2>;
         using Base = RValueVector<This>;
         using Base::isReverseDiff;
-        using typename Base::ScalarType;
+    protected:
+        using typename Base::T;
     private:
         const V1& v1;
         const V2& v2;
     public:
-        CrossProduct(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
-            assert(v1.getLength() == 3);
-            assert(v2.getLength() == 3);
-        }
+        CrossProduct(const V1& v1_, const V2& v2_);
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Vector auto&& v) const {
-            v[0] = v1[1] * v2[2] - v1[2] * v2[1];
-            v[1] = v1[2] * v2[0] - v1[0] * v2[2];
-            v[2] = v1[0] * v2[1] - v1[1] * v2[0];
-        }
+        void assign(Vector auto&& v) const noexcept;
 
-        [[nodiscard]] ScalarType calc(size_t index) const;
+        [[nodiscard]] T calc(size_t index) const;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return 3; }
     };
 
     template<Vector V1, Vector V2>
-    CrossProduct<V1, V2>::ScalarType CrossProduct<V1, V2>::calc(size_t index) const {
+    CrossProduct<V1, V2>::CrossProduct(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
+        assert(v1.getLength() == 3);
+        assert(v2.getLength() == 3);
+    }
+        
+    template<Vector V1, Vector V2>
+    template<ExecutePolicy>
+    void CrossProduct<V1, V2>::assign(Vector auto&& v) const noexcept {
+        v[0] = v1[1] * v2[2] - v1[2] * v2[1];
+        v[1] = v1[2] * v2[0] - v1[0] * v2[2];
+        v[2] = v1[0] * v2[1] - v1[1] * v2[0];
+    }
+
+    template<Vector V1, Vector V2>
+    auto CrossProduct<V1, V2>::calc(size_t index) const -> T {
         assert(index < getLength());
         switch (index) {
         case 0:

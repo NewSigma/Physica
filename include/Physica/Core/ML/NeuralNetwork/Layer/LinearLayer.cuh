@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -250,9 +250,9 @@ namespace Physica {
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(Tv gain) {
         const Tv deviation = gain * sqrt(Tv(2) / Tv(getInputDim() + getOutputDim()));
         random_normal<R>();
-        weights *= deviation;
+        weights.values() *= deviation;
         if constexpr (WithBias)
-            bias *= deviation;
+            bias.values() *= deviation;
     }
     
     template<Scalar T, bool WithBias>

@@ -43,27 +43,12 @@ namespace Physica {
         asm volatile("" : : "r,m"(handle) : "memory");
     #endif
     }
-
+    /**
+     * Lazily compute expression \tparam T and construct compute graph from the result
+     */
     template<class Base>
     template<ReverseDiff T>
-    DiffCoro<Base>::DiffCoro(T&& x) noexcept requires(!is_codiff<T>::value) {
-        auto fn = [](auto&& x) noexcept -> This {
-            LazyDestroy<T&&> x_ = std::forward<T>(x);
-            Base y;
-            if constexpr (Scalar<T>) {
-                auto result = co_yield std::move(y);
-                x_.reverse(result.grad());
-            }
-            else {
-                static_assert(Vector<T> || Matrix<T>, "[Error]: Unexpected type T");
-                y.resize(x_);
-                x_.assign(y);
-                auto result = co_yield std::move(y);
-                x_.reverse(result.values(), result.grads());
-            }
-        };
-        fn(std::forward<T>(x)).swap(*this);
-    }
+    DiffCoro<Base>::DiffCoro(T&& x) noexcept requires(!is_codiff<T>::value) : DiffCoro(compute(std::forward<T>(x))) {}
 
     template<class Base>
     DiffCoro<Base>::DiffCoro(This&& other) noexcept : Base(static_cast<Base&&>(other)), handle(other.handle) {
@@ -119,6 +104,17 @@ namespace Physica {
             handle.destroy();
             handle = nullptr;
         }
+    }
+
+    template<class Base>
+    template<ReverseDiff T>
+    auto DiffCoro<Base>::compute(T&& expr) noexcept -> This {
+        static_assert(!std::same_as<std::remove_cvref_t<T>, Base>, "[Error]: Not a expression");
+        static_assert(Vector<T> || Matrix<T>, "[Error]: Not a expression");
+
+        LazyDestroy<T&&> expr_ = std::forward<T>(expr);
+        auto result = co_yield expr_.values();
+        expr_.reverse(result.values(), result.grads());
     }
 
     template<class Predicate, class Operation, class Functor>

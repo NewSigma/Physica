@@ -530,6 +530,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar Src>
     consteval void ScalarBase<Derived>::assert_assign() noexcept {
+        static_assert(!ReverseDiff<Src>, "[Error]: Assign reverse diffable scalar to another scalar discards compute graph");
         static_assert(isDiffable || !Src::isDiffable, "[Error]: Assign diffable scalar to normal scalar discards grad");
         static_assert(isComplex || !Src::isComplex, "[Error]: Assign complex to real discards imag");
     }

@@ -446,7 +446,7 @@ namespace Physica {
         const size_t order = Base::getRow();
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
-                refFromMajorMinor(i, j) = Tr(i == j ? 1 : 0);
+                refFromMajorMinor(i, j) = Trv(i == j ? 1 : 0);
     }
     /**
      * Transforms like D^{-1}AD, \returns diagonal part of matrix D

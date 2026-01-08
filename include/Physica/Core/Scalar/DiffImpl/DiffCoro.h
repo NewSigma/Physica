@@ -76,7 +76,7 @@ namespace Physica {
         DiffCoro(std::nullptr_t) noexcept {}
         DiffCoro(std::coroutine_handle<Promise> handle_) noexcept;
         template<ReverseDiff T>
-        DiffCoro(T&& x) noexcept requires(!is_codiff<T>::value); // Require move operations delegate to the move constructor
+        DiffCoro(T&& x) noexcept requires(!is_codiff<T>::value); // Codiff should delegate to the move constructor
         DiffCoro(const This& other) = delete;
         DiffCoro(This&& other) noexcept;
         ~DiffCoro();
@@ -90,6 +90,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
     private:
         void reverse_impl() noexcept;
+        [[nodiscard]] static This compute(ReverseDiff auto&& expr) noexcept;
     };
 
     template<class Predicate, class Operation, class Functor>

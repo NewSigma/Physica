@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -48,6 +48,8 @@ namespace Physica {
         using ColMatrix = DenseMatrix<T, MatrixOption::Col, Row, Col>;
         using RowMatrix = DenseMatrix<T, MatrixOption::Row, Row, Col>;
         using VectorIniter = DenseVector<T, MatrixOption::isColMatrix<This>() ? Row : Col>;
+        template<Scalar U>
+        using rebind_scalar = DenseMatrix<U, Option, Row, Col, Allocator>;
     public:
         DenseMatrix() = default;
         explicit DenseMatrix(size_t order);

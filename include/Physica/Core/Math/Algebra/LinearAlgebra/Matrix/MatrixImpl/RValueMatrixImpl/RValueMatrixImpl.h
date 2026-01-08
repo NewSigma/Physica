@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -534,8 +534,9 @@ namespace Physica {
         using Src = std::remove_cvref_t<decltype(source)>;
         static_assert(RowAtCompile == Src::RowAtCompile || RowAtCompile == Dynamic || Src::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == Src::ColAtCompile || ColAtCompile == Dynamic || Src::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
-        static_assert(isComplex || !Src::isComplex, "[Error]: Assign a complex matrix to real matrix discards imag part");
-        static_assert(isDiffable || !Src::isDiffable, "[Error]: Assign a diffable matrix to normal matrix discards grads");
+
+        using U = Src::ScalarType;
+        T::template assert_assign<U>();
     }
 }
 

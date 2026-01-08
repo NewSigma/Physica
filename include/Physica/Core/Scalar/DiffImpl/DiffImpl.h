@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,8 +30,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     template<Scalar U>
     __host__ __device__ Diff<T, Mode, Order>::Diff(const U& x) {
-        static_assert(!ReverseDiff<U>, "[Error]: Assign reverse diffable scalar to another scalar discards compute graph");
-        static_assert(T::isComplex || !U::isComplex, "[Error]: Assign complex to real discards imag");
+        Base::template assert_assign<U>();
         if constexpr (Diffable<U>) {
             v = x.value();
             g = x.grad().template mask<Order - 1>();

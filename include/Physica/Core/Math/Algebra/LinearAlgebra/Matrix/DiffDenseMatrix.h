@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,13 +30,15 @@ namespace Physica {
     class DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>
             : public ContinuousMatrix<DenseMatrix<Diff<T, Mode, Order> , Option, Row, Col>>
             , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>>, PlainStruct<void>>::type {
-        using This = DenseMatrix<Diff<T, Mode, Order> , Option, Row, Col>;
+        using This = DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>;
         using Base = ContinuousMatrix<This>;
     public:
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
+        template<Scalar U>
+        using rebind_scalar = DenseMatrix<U, Option, Row, Col>;
     protected:
         using typename Base::Tv;
         using typename Base::PtrTy;
