@@ -58,17 +58,17 @@ namespace Physica {
         void reverse(const Vector auto& grad) const noexcept {
             static_assert(isReverseDiff);
             const auto& g = grad.values();
-            if constexpr (ReverseDiff<T>)
+            if constexpr (ReverseDiff<V>)
                 Base::getLHS().reverse(g);
             if constexpr (ReverseDiff<U>)
                 Base::getRHS().reverse(g.sum());
         }
     };
 
-    template<Vector T1, Vector T2>
-    class device_obj<VectorExpr<ExprID::Add, T1, T2>>
-            : public device_obj<BinaryVectorExpr<ExprID::Add, T1, T2>> {
-        using Base = device_obj<BinaryVectorExpr<ExprID::Add, T1, T2>>;
+    template<Vector V1, Vector V2>
+    class device_obj<VectorExpr<ExprID::Add, V1, V2>>
+            : public device_obj<BinaryVectorExpr<ExprID::Add, V1, V2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Add, V1, V2>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -105,29 +105,29 @@ namespace Physica {
         auto values() const noexcept { return Base::getLHS().values() + Base::getRHS().values(); }
     };
 
-    template<Vector T1, Vector T2>
-    void device_obj<VectorExpr<ExprID::Add, T1, T2>>::reverse(const Vector auto& grad) const noexcept {
+    template<Vector V1, Vector V2>
+    void device_obj<VectorExpr<ExprID::Add, V1, V2>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& g = grad.values();
         assert(g.getLength() == Base::getLength());
-        if constexpr (ReverseDiff<T1>)
+        if constexpr (ReverseDiff<V1>)
             Base::getLHS().reverse(g);
-        if constexpr (ReverseDiff<T2>)
+        if constexpr (ReverseDiff<V2>)
             Base::getRHS().reverse(g);
     }
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator+(T&& v, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprID::Add, T&&, U&&>>(std::forward<T>(v), std::forward<U>(x));
+    template<Vector V, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator+(V&& v, U&& x) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprID::Add, V&&, U&&>>(std::forward<V>(v), std::forward<U>(x));
     }
 
-    template<Scalar U, Vector T>
-    [[nodiscard]] __host__ __device__ auto operator+(U&& x, T&& v) noexcept requires(CUDA<T>) {
-        return std::forward<T>(v) + std::forward<U>(x);
+    template<Scalar U, Vector V>
+    [[nodiscard]] __host__ __device__ auto operator+(U&& x, V&& v) noexcept requires(CUDA<V>) {
+        return std::forward<V>(v) + std::forward<U>(x);
     }
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] __host__ __device__ auto operator+(T1&& v1, T2&& v2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<VectorExpr<ExprID::Add, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
+    template<Vector V1, Vector V2>
+    [[nodiscard]] __host__ __device__ auto operator+(V1&& v1, V2&& v2) noexcept requires(CUDA<V1> && CUDA<V2>) {
+        return device_obj<VectorExpr<ExprID::Add, V1&&, V2&&>>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

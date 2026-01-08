@@ -234,14 +234,14 @@ namespace Physica {
         return getLHS().values() - getRHS().values();
     }
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] auto operator-(T&& v, U&& x) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprID::Sub, T&&, U&&>(std::forward<T>(v), std::forward<U>(x));
+    template<Vector V, Scalar U>
+    [[nodiscard]] auto operator-(V&& v, U&& x) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprID::Sub, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
-    template<Scalar U, Vector T>
-    [[nodiscard]] auto operator-(U&& x, T&& v) noexcept requires(!CUDA<T>) {
-        return VectorExpr<ExprID::Sub, U&&, T&&>(std::forward<U>(x), std::forward<T>(v));
+    template<Scalar U, Vector V>
+    [[nodiscard]] auto operator-(U&& x, V&& v) noexcept requires(!CUDA<V>) {
+        return VectorExpr<ExprID::Sub, U&&, V&&>(std::forward<U>(x), std::forward<V>(v));
     }
 
     template<Vector V1, Vector V2>

@@ -22,16 +22,16 @@
 #include "RValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T, bool isLValueMatrix>
-    class DiagVector<T, isLValueMatrix> : public RValueVector<DiagVector<T, isLValueMatrix>> {
-        using This = DiagVector<T, isLValueMatrix>;
+    template<Matrix M, bool isLValueMatrix>
+    class DiagVector<M, isLValueMatrix> : public RValueVector<DiagVector<M, isLValueMatrix>> {
+        using This = DiagVector<M, isLValueMatrix>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const T& mat;
+        const M& mat;
     public:
-        explicit DiagVector(const T& mat_) : mat(mat_) {}
+        explicit DiagVector(const M& mat_) : mat(mat_) {}
         DiagVector(const This&) = default;
         DiagVector(This&&) = default;
         ~DiagVector() = default;
@@ -45,14 +45,14 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
     };
 
-    template<Matrix T>
-    class DiagVector<T, true> : public LValueVector<DiagVector<T, true>> {
-        using This = DiagVector<T, true>;
+    template<Matrix M>
+    class DiagVector<M, true> : public LValueVector<DiagVector<M, true>> {
+        using This = DiagVector<M, true>;
         using Base = LValueVector<This>;
     private:
-        T& mat;
+        M& mat;
     public:
-        explicit DiagVector(T& mat_) : mat(mat_) {}
+        explicit DiagVector(M& mat_) : mat(mat_) {}
         DiagVector(const This&) = default;
         DiagVector(This&&) = default;
         ~DiagVector() = default;
@@ -69,11 +69,11 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T, bool isLValueMatrix>
-    class Traits<DiagVector<T, isLValueMatrix>> {
+    template<Matrix M, bool isLValueMatrix>
+    class Traits<DiagVector<M, isLValueMatrix>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static size_t SizeAtCompile = T::RowAtCompile > T::ColAtCompile ? T::RowAtCompile : T::ColAtCompile;
+        using ScalarType = M::ScalarType;
+        constexpr static size_t SizeAtCompile = std::max(M::RowAtCompile, M::ColAtCompile);
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

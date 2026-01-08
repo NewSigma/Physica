@@ -45,8 +45,8 @@ namespace Physica {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void step(int i);
-        template<Vector T>
-        void fill(T& x);
+        template<Vector V>
+        void fill(V& x);
         void reset();
 
         void swap(This& __restrict obj) noexcept;
@@ -56,10 +56,10 @@ namespace Physica {
         int pre_step();
     };
 
-    template<Vector T>
-    void Sobol::fill(T& x) {
-        static_assert(T::SizeAtCompile <= MaxDim, "[Error]: Vector is too long");
-        constexpr static typename T::ScalarType factor = 1.0 / (1UL << MaxBit);
+    template<Vector V>
+    void Sobol::fill(V& x) {
+        static_assert(V::SizeAtCompile <= MaxDim, "[Error]: Vector is too long");
+        constexpr static typename V::ScalarType factor = 1.0 / (1UL << MaxBit);
         assert(x.getLength() <= MaxDim && "[Error]: Vector is too long");
         const int m = pre_step();
         for (int i = 0; i < x.getLength(); ++i) {

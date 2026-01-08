@@ -42,12 +42,12 @@ namespace Physica {
         /* Operations */
         ScalarType intrinDim(const Matrix auto& data, const Vector auto& radius) const;
         /* Static members */
-        template<Vector T>
-        static ScalarType corrDimen(const Matrix auto& data, const T& radius);
+        template<Vector V>
+        static ScalarType corrDimen(const Matrix auto& data, const V& radius);
         static DataMatrix toHighDimForm(const Vector auto& data, size_t step, size_t dim);
     private:
-        template<Vector T>
-        static T corrIntegral(const Matrix auto& data, const T& radius);
+        template<Vector V>
+        static V corrIntegral(const Matrix auto& data, const V& radius);
     };
 
     template<RNG R>
@@ -72,10 +72,10 @@ namespace Physica {
      * \param data
      * Each row represents a piece of data
      */
-    template<Vector T>
-    auto DimEstimator::corrDimen(const Matrix auto& data, const T& radius) -> ScalarType {
-        const T logCorrIntegral = ln(corrIntegral(data, radius));
-        const T logR = ln(radius);
+    template<Vector V>
+    auto DimEstimator::corrDimen(const Matrix auto& data, const V& radius) -> ScalarType {
+        const V logCorrIntegral = ln(corrIntegral(data, radius));
+        const V logR = ln(radius);
         return LinearFit<ScalarType>::fit(logR, logCorrIntegral).first;
     }
     /**
@@ -94,11 +94,11 @@ namespace Physica {
         return result;
     }
 
-    template<Vector T>
-    T DimEstimator::corrIntegral(const Matrix auto& data, const T& radius) {
+    template<Vector V>
+    V DimEstimator::corrIntegral(const Matrix auto& data, const V& radius) {
         const size_t numData = data.getRow();
-        const T squaredR = square(radius);
-        T count(radius.getLength(), 0);
+        const V squaredR = square(radius);
+        V count(radius.getLength(), 0);
         for (size_t i = 0; i < numData - 1; ++i) {
             auto data1 = data.row(i);
             for (size_t j = i + 1; j < numData; ++j) {

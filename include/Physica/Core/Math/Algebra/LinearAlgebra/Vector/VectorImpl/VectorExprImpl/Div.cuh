@@ -21,53 +21,53 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<class T, class U>
-    class device_obj<VectorExpr<ExprID::Div, T, U>>
-            : public device_obj<BinaryVectorExpr<ExprID::Div, T, U>> {
-        using Base = device_obj<BinaryVectorExpr<ExprID::Div, T, U>>;
+    template<class V, class U>
+    class device_obj<VectorExpr<ExprID::Div, V, U>>
+            : public device_obj<BinaryVectorExpr<ExprID::Div, V, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Div, V, U>>;
+    protected:
+        using typename Base::T;
     public:
-        using typename Base::ScalarType;
-    public:
-        device_obj(T lhs, U rhs) : Base(std::forward<T>(lhs), std::forward<U>(rhs)) {
-            if constexpr (Vector<T>)
+        device_obj(V lhs, U rhs) : Base(std::forward<V>(lhs), std::forward<U>(rhs)) {
+            if constexpr (Vector<V>)
                 assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
         }
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            if constexpr (Vector<T>)
+        [[nodiscard]] __device__ T calc(size_t index) const {
+            if constexpr (Vector<V>)
                 return Base::getLHS().calc(index) / Base::getRHS();
             else
                 return Base::getLHS() / Base::getRHS().calc(index);
         }
     };
 
-    template<Vector T1, Vector T2>
-    class device_obj<VectorExpr<ExprID::Div, T1, T2>>
-            : public device_obj<BinaryVectorExpr<ExprID::Div, T1, T2>> {
-        using Base = device_obj<BinaryVectorExpr<ExprID::Div, T1, T2>>;
-    public:
-        using typename Base::ScalarType;
+    template<Vector V1, Vector V2>
+    class device_obj<VectorExpr<ExprID::Div, V1, V2>>
+            : public device_obj<BinaryVectorExpr<ExprID::Div, V1, V2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Div, V1, V2>>;
+    protected:
+        using typename Base::T;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+        [[nodiscard]] __device__ T calc(size_t index) const {
             assert(!Base::getRHS().calc(index).isZero() && "[Error]: Divide by zero");
             return Base::getLHS().calc(index) / Base::getRHS().calc(index);
         }
     };
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator/(T&& v, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprID::Div, T&&, U&&>>(v, x);
+    template<Vector V, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator/(V&& v, U&& x) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprID::Div, V&&, U&&>>(v, x);
     }
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator/(U&& x, T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprID::Div, U&&, T&&>>(x, v);
+    template<Vector V, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator/(U&& x, V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprID::Div, U&&, V&&>>(x, v);
     }
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] auto divide(T1&& v1, T2&& v2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<VectorExpr<ExprID::Div, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
+    template<Vector V1, Vector V2>
+    [[nodiscard]] auto divide(V1&& v1, V2&& v2) noexcept requires(CUDA<V1> && CUDA<V2>) {
+        return device_obj<VectorExpr<ExprID::Div, V1&&, V2&&>>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

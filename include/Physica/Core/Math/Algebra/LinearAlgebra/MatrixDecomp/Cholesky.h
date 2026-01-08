@@ -23,12 +23,12 @@ namespace Physica {
      * Decomposite a symmetrical, positive matrix A into LL^T.
      * If target matrix is a column matrix, return lower triangular matrix L, if row matrix, return upper triangular matrix L^T
      */
-    template<Matrix T>
-    class Cholesky : public RValueMatrix<Cholesky<T>> {
-        using Base = RValueMatrix<Cholesky<T>>;
-        const T& source;
+    template<Matrix M>
+    class Cholesky : public RValueMatrix<Cholesky<M>> {
+        using Base = RValueMatrix<Cholesky<M>>;
+        const M& source;
     public:
-        explicit Cholesky(const T& source_);
+        explicit Cholesky(const M& source_);
         ~Cholesky() = default;
         /* Operations */
         void assign(Matrix auto& target) const;
@@ -37,15 +37,15 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const noexcept { return source.getRow(); }
     };
 
-    template<Matrix T>
-    Cholesky<T>::Cholesky(const T& source_) : source(source_) {
+    template<Matrix M>
+    Cholesky<M>::Cholesky(const M& source_) : source(source_) {
         assert(source.getRow() == source.getCol());
     }
     /**
      * Implemented the square method
      */
-    template<Matrix T>
-    void Cholesky<T>::assign(Matrix auto& target) const {
+    template<Matrix M>
+    void Cholesky<M>::assign(Matrix auto& target) const {
         using ScalarType = std::remove_cvref_t<decltype(target)>::ScalarType;
         const size_t order = source.getRow();
         /* Handle first vector */ {
@@ -83,13 +83,13 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<Cholesky<T>> {
+    template<Matrix M>
+    class Traits<Cholesky<M>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static int Option = T::MatrixOption;
-        constexpr static size_t RowAtCompile = T::RowAtCompile;
-        constexpr static size_t ColAtCompile = T::ColAtCompile;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        using ScalarType = M::ScalarType;
+        constexpr static int Option = M::MatrixOption;
+        constexpr static size_t RowAtCompile = M::RowAtCompile;
+        constexpr static size_t ColAtCompile = M::ColAtCompile;
+        constexpr static size_t SizeAtCompile = M::SizeAtCompile;
     };
 }

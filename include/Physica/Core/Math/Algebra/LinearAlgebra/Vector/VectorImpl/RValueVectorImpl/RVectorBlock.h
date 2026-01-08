@@ -24,19 +24,19 @@ namespace Physica {
     /**
      * Reference a part of the given vector
      */
-    template<Vector T, size_t Length>
-    class RVectorBlock : public RValueVector<RVectorBlock<T, Length>> {
-        using This = RVectorBlock<T, Length>;
+    template<Vector V, size_t Length>
+    class RVectorBlock : public RValueVector<RVectorBlock<V, Length>> {
+        using This = RVectorBlock<V, Length>;
         using Base = RValueVector<This>;
     public:
         using ScalarType = Base::ScalarType;
     private:
-        T& vec;
+        V& vec;
         size_t from;
         size_t to;
     public:
-        RVectorBlock(T& vec_, size_t from_, size_t to_);
-        RVectorBlock(T& vec_, size_t from_);
+        RVectorBlock(V& vec_, size_t from_, size_t to_);
+        RVectorBlock(V& vec_, size_t from_);
         RVectorBlock(const This& block) = default;
         RVectorBlock(This&&) noexcept = default;
         ~RVectorBlock() = default;
@@ -50,18 +50,18 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept;
     };
 
-    template<Vector T, size_t Length>
-    RVectorBlock<T, Length>::RVectorBlock(T& vec_, size_t from_, size_t to_) : vec(vec_), from(from_), to(to_) {
+    template<Vector V, size_t Length>
+    RVectorBlock<V, Length>::RVectorBlock(V& vec_, size_t from_, size_t to_) : vec(vec_), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<Vector T, size_t Length>
-    RVectorBlock<T, Length>::RVectorBlock(T& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
+    template<Vector V, size_t Length>
+    RVectorBlock<V, Length>::RVectorBlock(V& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
 
-    template<Vector T, size_t Length>
-    size_t RVectorBlock<T, Length>::getLength() const noexcept {
+    template<Vector V, size_t Length>
+    size_t RVectorBlock<V, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else
@@ -70,11 +70,11 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Vector T, size_t Length>
-    class Traits<RVectorBlock<T, Length>> {
-        static_assert(std::is_object<T>::value, "[Errpr]: Invalid type");
+    template<Vector V, size_t Length>
+    class Traits<RVectorBlock<V, Length>> {
+        static_assert(std::is_object<V>::value, "[Errpr]: Invalid type");
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = V::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

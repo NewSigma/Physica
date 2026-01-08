@@ -21,17 +21,17 @@
 #include "Flatten.h"
 
 namespace Physica {
-    template<Matrix T>
-    class device_obj<FlattenR<T>> : public device_obj<RValueVector<FlattenR<T>>> {
-        using This = device_obj<FlattenR<T>>;
+    template<Matrix M>
+    class device_obj<FlattenR<M>> : public device_obj<RValueVector<FlattenR<M>>> {
+        using This = device_obj<FlattenR<M>>;
 
-        const device_obj<T>& mat;
+        const device_obj<M>& mat;
     public:
-        using host_obj = FlattenR<T>;
+        using host_obj = FlattenR<M>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     public:
-        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(mat_) {}
+        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(mat_) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -43,8 +43,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
 
-    template<Matrix T>
-    __device__ auto device_obj<FlattenR<T>>::calc(size_t index) const -> ScalarType {
+    template<Matrix M>
+    __device__ auto device_obj<FlattenR<M>>::calc(size_t index) const -> ScalarType {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
@@ -52,6 +52,6 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<device_obj<FlattenR<T>>> : public Traits<FlattenR<T>> {};
+    template<Matrix M>
+    class Traits<device_obj<FlattenR<M>>> : public Traits<FlattenR<M>> {};
 }

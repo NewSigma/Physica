@@ -25,19 +25,19 @@ namespace Physica {
     /**
      * Reference a part of the given vector
      */
-    template<Vector T, size_t Length>
-    class LVectorBlock : public LValueVector<LVectorBlock<T, Length>> {
-        using This = LVectorBlock<T, Length>;
+    template<Vector V, size_t Length>
+    class LVectorBlock : public LValueVector<LVectorBlock<V, Length>> {
+        using This = LVectorBlock<V, Length>;
         using Base = LValueVector<This>;
     public:
         using ScalarType = Base::ScalarType;
     private:
-        T& vec;
+        V& vec;
         size_t from;
         size_t to;
     public:
-        LVectorBlock(T& vec_, size_t from_, size_t to_);
-        LVectorBlock(T& vec_, size_t from_);
+        LVectorBlock(V& vec_, size_t from_, size_t to_);
+        LVectorBlock(V& vec_, size_t from_);
         LVectorBlock(const This& block) = default;
         LVectorBlock(This&&) noexcept = default;
         ~LVectorBlock() = default;
@@ -53,49 +53,49 @@ namespace Physica {
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
-    template<Vector T, size_t Length>
-    LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_, size_t to_)
+    template<Vector V, size_t Length>
+    LVectorBlock<V, Length>::LVectorBlock(V& vec_, size_t from_, size_t to_)
             : vec(vec_), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<Vector T, size_t Length>
-    LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
+    template<Vector V, size_t Length>
+    LVectorBlock<V, Length>::LVectorBlock(V& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
 
-    template<Vector T, size_t Length>
-    auto LVectorBlock<T, Length>::operator=(const This& v) -> This& {
+    template<Vector V, size_t Length>
+    auto LVectorBlock<V, Length>::operator=(const This& v) -> This& {
         Base::operator=(v);
         return *this;
     }
 
-    template<Vector T, size_t Length>
-    auto LVectorBlock<T, Length>::operator=(This&& v) noexcept -> This& {
+    template<Vector V, size_t Length>
+    auto LVectorBlock<V, Length>::operator=(This&& v) noexcept -> This& {
         Base::operator=(v);
         return *this;
     }
 
-    template<Vector T, size_t Length>
-    size_t LVectorBlock<T, Length>::getLength() const noexcept {
+    template<Vector V, size_t Length>
+    size_t LVectorBlock<V, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else
             return Length;
     }
 
-    template<Vector T, size_t Length>
-    auto LVectorBlock<T, Length>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<Vector V, size_t Length>
+    auto LVectorBlock<V, Length>::data_ptr(this auto&& self, size_t index) noexcept {
         assert((self.from + index) < self.to);
         return self.vec.data_ptr(index + self.from);
     }
 }
 
 namespace Physica {
-    template<Vector T, size_t Length>
-    class Traits<LVectorBlock<T, Length>> {
+    template<Vector V, size_t Length>
+    class Traits<LVectorBlock<V, Length>> {
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = V::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

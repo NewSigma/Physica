@@ -21,12 +21,12 @@
 #include "../LValueVector.cuh"
 
 namespace Physica {
-    template<Vector T, size_t Length>
-    class device_obj<LVectorBlock<T, Length>> : public device_obj<LValueVector<LVectorBlock<T, Length>>> {
-        using host_obj = LVectorBlock<T, Length>;
+    template<Vector V, size_t Length>
+    class device_obj<LVectorBlock<V, Length>> : public device_obj<LValueVector<LVectorBlock<V, Length>>> {
+        using host_obj = LVectorBlock<V, Length>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
-        using DeviceVector = device_obj<T>;
+        using DeviceVector = device_obj<V>;
     public:
         using ScalarType = Base::ScalarType;
     private:
@@ -34,8 +34,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_, size_t to_);
-        __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_);
+        __host__ __device__ device_obj(device_obj<LValueVector<V>>& vec_, size_t from_, size_t to_);
+        __host__ __device__ device_obj(device_obj<LValueVector<V>>& vec_, size_t from_);
         device_obj(const This& block) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -51,45 +51,45 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 
-    template<Vector T, size_t Length>
-    __host__ __device__ device_obj<LVectorBlock<T, Length>>::device_obj(
-            device_obj<LValueVector<T>>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_)), from(from_), to(to_) {
+    template<Vector V, size_t Length>
+    __host__ __device__ device_obj<LVectorBlock<V, Length>>::device_obj(
+            device_obj<LValueVector<V>>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<Vector T, size_t Length>
-    __host__ __device__ device_obj<LVectorBlock<T, Length>>::device_obj(
-            device_obj<LValueVector<T>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+    template<Vector V, size_t Length>
+    __host__ __device__ device_obj<LVectorBlock<V, Length>>::device_obj(
+            device_obj<LValueVector<V>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
-    template<Vector T, size_t Length>
-    auto device_obj<LVectorBlock<T, Length>>::operator=(const This& v) -> This& {
+    template<Vector V, size_t Length>
+    auto device_obj<LVectorBlock<V, Length>>::operator=(const This& v) -> This& {
         Base::operator=(static_cast<const RValueVector<This>&>(v));
         return *this;
     }
 
-    template<Vector T, size_t Length>
-    auto device_obj<LVectorBlock<T, Length>>::operator=(This&& v) noexcept -> This& {
+    template<Vector V, size_t Length>
+    auto device_obj<LVectorBlock<V, Length>>::operator=(This&& v) noexcept -> This& {
         Base::operator=(static_cast<const RValueVector<This>&>(v));
         return *this;
     }
 
-    template<Vector T, size_t Length>
-    __host__ __device__ size_t device_obj<LVectorBlock<T, Length>>::getLength() const noexcept {
+    template<Vector V, size_t Length>
+    __host__ __device__ size_t device_obj<LVectorBlock<V, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
     }
 
-    template<Vector T, size_t Length>
-    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<Vector V, size_t Length>
+    __host__ __device__ auto device_obj<LVectorBlock<V, Length>>::data_ptr(this auto&& self, size_t index) noexcept {
         assert((self.from + index) < self.to);
         return self.vec.getDerived().data_ptr(self.from + index);
     }
 }
 
 namespace Physica {
-    template<Vector T, size_t Length>
-    class Traits<device_obj<LVectorBlock<T, Length>>> : public Traits<LVectorBlock<T, Length>> {};
+    template<Vector V, size_t Length>
+    class Traits<device_obj<LVectorBlock<V, Length>>> : public Traits<LVectorBlock<V, Length>> {};
 }

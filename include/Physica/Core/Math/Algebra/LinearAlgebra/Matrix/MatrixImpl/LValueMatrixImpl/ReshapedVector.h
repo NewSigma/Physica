@@ -21,21 +21,21 @@
 #include "../LValueMatrix.h"
 
 namespace Physica {
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
     class RValueReshapedVector;
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    class LValueReshapedVector : public LValueMatrix<LValueReshapedVector<T, MatrixMajor, Row, Col>> {
-        using This = LValueReshapedVector<T, MatrixMajor, Row, Col>;
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    class LValueReshapedVector : public LValueMatrix<LValueReshapedVector<V, MatrixMajor, Row, Col>> {
+        using This = LValueReshapedVector<V, MatrixMajor, Row, Col>;
         using Base = LValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
-        T& v;
+        V& v;
         size_t r;
         size_t c;
     public:
-        LValueReshapedVector(T& v_, size_t r_, size_t c_);
+        LValueReshapedVector(V& v_, size_t r_, size_t c_);
         LValueReshapedVector(const This&) = default;
         LValueReshapedVector(This&&) noexcept = default;
         ~LValueReshapedVector() = default;
@@ -52,37 +52,37 @@ namespace Physica {
         [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    LValueReshapedVector<T, MatrixMajor, Row, Col>::LValueReshapedVector(T& v_, size_t r_, size_t c_)
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    LValueReshapedVector<V, MatrixMajor, Row, Col>::LValueReshapedVector(V& v_, size_t r_, size_t c_)
             : v(v_), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    void LValueReshapedVector<T, MatrixMajor, Row, Col>::resize(
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    void LValueReshapedVector<V, MatrixMajor, Row, Col>::resize(
             [[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow());
         assert(col == getCol());
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    size_t LValueReshapedVector<T, MatrixMajor, Row, Col>::getRow() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    size_t LValueReshapedVector<V, MatrixMajor, Row, Col>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         return r;
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    size_t LValueReshapedVector<T, MatrixMajor, Row, Col>::getCol() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    size_t LValueReshapedVector<V, MatrixMajor, Row, Col>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         return c;
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    auto LValueReshapedVector<V, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow() && col < self.getCol());
         if constexpr (MatrixOption::isColMatrix<This>())
             return self.v.data_ptr(col * self.getRow() + row);
@@ -130,7 +130,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    class Traits<LValueReshapedVector<T, MatrixMajor, Row, Col>>
-            : public Traits<RValueReshapedVector<T, MatrixMajor, Row, Col>> {};
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    class Traits<LValueReshapedVector<V, MatrixMajor, Row, Col>>
+            : public Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {};
 }

@@ -23,16 +23,16 @@
 namespace Physica {
     template<class VectorType> class FormatedVector;
 
-    template<Vector T>
-    class FormatedVector<T> {
-        using This = FormatedVector<T>;
+    template<Vector V>
+    class FormatedVector<V> {
+        using This = FormatedVector<V>;
 
-        const T& data;
+        const V& data;
         std::string prefix;
         std::string suffix;
         std::string separator;
     public:
-        FormatedVector(const T& data_);
+        FormatedVector(const V& data_);
         FormatedVector(const This&) = delete;
         FormatedVector(This&&) noexcept = delete;
         ~FormatedVector() = default;
@@ -42,7 +42,7 @@ namespace Physica {
         /* Operations */
         This& toFormatMMA();
         /* Getters */
-        [[nodiscard]] const T& getData() const noexcept { return data; }
+        [[nodiscard]] const V& getData() const noexcept { return data; }
         [[nodiscard]] const std::string& getPrefix() const noexcept { return prefix; }
         [[nodiscard]] const std::string& getSuffix() const noexcept { return suffix; }
         [[nodiscard]] const std::string& getSeparator() const noexcept { return separator; }
@@ -52,35 +52,35 @@ namespace Physica {
         This& setSeparator(std::string separator_);
     };
 
-    template<Vector T>
-    FormatedVector<T>::FormatedVector(const T& data_)
+    template<Vector V>
+    FormatedVector<V>::FormatedVector(const V& data_)
             : data(data_)
             , prefix("{")
             , suffix("}")
             , separator(", ") {}
 
-    template<Vector T>
-    auto FormatedVector<T>::toFormatMMA() -> This& {
+    template<Vector V>
+    auto FormatedVector<V>::toFormatMMA() -> This& {
         setPrefix("{");
         setSuffix("}");
         setSeparator(",");
         return *this;
     }
 
-    template<Vector T>
-    auto FormatedVector<T>::setPrefix(std::string prefix_) -> This& {
+    template<Vector V>
+    auto FormatedVector<V>::setPrefix(std::string prefix_) -> This& {
         prefix = std::move(prefix_);
         return *this;
     }
 
-    template<Vector T>
-    auto FormatedVector<T>::setSuffix(std::string suffix_) -> This& {
+    template<Vector V>
+    auto FormatedVector<V>::setSuffix(std::string suffix_) -> This& {
         suffix = std::move(suffix_);
         return *this;
     }
 
-    template<Vector T>
-    auto FormatedVector<T>::setSeparator(std::string separator_) -> This& {
+    template<Vector V>
+    auto FormatedVector<V>::setSeparator(std::string separator_) -> This& {
         separator = std::move(separator_);
         return *this;
     }
@@ -92,10 +92,10 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Vector T>
-    struct formatter<Physica::FormatedVector<T>, char> {
+    template<Physica::Vector V>
+    struct formatter<Physica::FormatedVector<V>, char> {
         constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); };
-        static auto format(const Physica::FormatedVector<T>& obj, auto& ctx) {
+        static auto format(const Physica::FormatedVector<V>& obj, auto& ctx) {
             const auto& data = obj.getData();
             const auto& sep = obj.getSeparator();
             size_t length = data.getLength();

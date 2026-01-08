@@ -25,14 +25,14 @@ using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col>;
 
 namespace {
-    template<Matrix T>
-    void decomp(const T& source, double tolerance) {
+    template<Matrix M>
+    void decomp(const M& source, double tolerance) {
         SVD<ScalarType> svd(source);
         const auto& U = svd.getMatrixU();
         const auto& V = svd.getMatrixV();
         const auto& v = svd.getSingulars();
 
-        T A(source.getRow(), source.getCol(), 0);
+        M A(source.getRow(), source.getCol(), 0);
         for (size_t i = 0; i < v.getLength(); ++i)
             A += U.col(i) * V.col(i).transpose() * v[i];
         expect(matrixNear(A, source, tolerance));

@@ -22,15 +22,15 @@
 #include "Flatten.h"
 
 namespace Physica {
-    template<Matrix T>
-    class device_obj<FlattenC<T>> : public device_obj<ContinuousVector<FlattenC<T>>> {
-        using host_obj = FlattenC<T>;
+    template<Matrix M>
+    class device_obj<FlattenC<M>> : public device_obj<ContinuousVector<FlattenC<M>>> {
+        using host_obj = FlattenC<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
 
-        device_obj<T>& mat;
+        device_obj<M>& mat;
     public:
-        device_obj(device_obj<ContinuousMatrix<T>>& mat_) : mat(mat_.getDerived()) {}
+        device_obj(device_obj<ContinuousMatrix<M>>& mat_) : mat(mat_.getDerived()) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -44,13 +44,13 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
     };
 
-    template<Matrix T>
-    __host__ __device__ auto device_obj<FlattenC<T>>::data(this auto&& self) noexcept {
+    template<Matrix M>
+    __host__ __device__ auto device_obj<FlattenC<M>>::data(this auto&& self) noexcept {
         return self.mat.data();
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<device_obj<FlattenC<T>>> : public Traits<FlattenC<T>> {};
+    template<Matrix M>
+    class Traits<device_obj<FlattenC<M>>> : public Traits<FlattenC<M>> {};
 }

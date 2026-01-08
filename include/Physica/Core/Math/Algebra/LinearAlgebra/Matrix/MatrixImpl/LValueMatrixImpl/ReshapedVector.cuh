@@ -22,20 +22,20 @@
 #include "../LValueMatrix.cuh"
 
 namespace Physica {
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    class device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>
-            : public device_obj<LValueMatrix<LValueReshapedVector<T, MatrixMajor, Row, Col>>> {
-        using host_obj = LValueReshapedVector<T, MatrixMajor, Row, Col>;
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    class device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>
+            : public device_obj<LValueMatrix<LValueReshapedVector<V, MatrixMajor, Row, Col>>> {
+        using host_obj = LValueReshapedVector<V, MatrixMajor, Row, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<host_obj>>;
     public:
         using typename Base::ScalarType;
     private:
-        device_obj<T>& v;
+        device_obj<V>& v;
         size_t r;
         size_t c;
     public:
-    __host__ __device__ device_obj(device_obj<T>& v_, size_t r_, size_t c_);
+    __host__ __device__ device_obj(device_obj<V>& v_, size_t r_, size_t c_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -51,37 +51,37 @@ namespace Physica {
         [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::device_obj(device_obj<T>& v_, size_t r_, size_t c_)
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    __host__ __device__ device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::device_obj(device_obj<V>& v_, size_t r_, size_t c_)
             : v(v_), r(r_), c(c_) {
         assert(r == Row || Row == Dynamic);
         assert(c == Col || Col == Dynamic);
         assert(r * c == v.getLength());
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ void device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::resize(
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    __host__ __device__ void device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::resize(
             [[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
         assert(row == getRow());
         assert(col == getCol());
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ size_t device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::getRow() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    __host__ __device__ size_t device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::getRow() const noexcept {
         if constexpr (Row != Dynamic)
             return Row;
         return r;
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ size_t device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::getCol() const noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    __host__ __device__ size_t device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::getCol() const noexcept {
         if constexpr (Col != Dynamic)
             return Col;
         return c;
     }
 
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow() && col < self.getCol());
         if constexpr (MatrixOption::isColMatrix<This>())
             return self.v.data_ptr(col * self.getRow() + row);
@@ -129,7 +129,7 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    class Traits<device_obj<LValueReshapedVector<T, MatrixMajor, Row, Col>>>
-            : public Traits<RValueReshapedVector<T, MatrixMajor, Row, Col>> {};
+    template<Vector V, int MatrixMajor, size_t Row, size_t Col>
+    class Traits<device_obj<LValueReshapedVector<V, MatrixMajor, Row, Col>>>
+            : public Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {};
 }

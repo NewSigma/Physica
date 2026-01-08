@@ -21,16 +21,16 @@
 #include "../RValueVector.h"
 
 namespace Physica {
-    template<Vector T>
-    class ReversalVector final : public RValueVector<ReversalVector<T>> {
-        using This = ReversalVector<T>;
+    template<Vector V>
+    class ReversalVector final : public RValueVector<ReversalVector<V>> {
+        using This = ReversalVector<V>;
         using Base = RValueVector<This>;
 
-        T& v;
+        V& v;
     public:
         using typename Base::ScalarType;
     public:
-        explicit ReversalVector(T& v_) : v(v_) {}
+        explicit ReversalVector(V& v_) : v(v_) {}
         ReversalVector(const This&) = delete;
         ReversalVector(This&&) noexcept = delete;
         ~ReversalVector() = default;
@@ -54,6 +54,6 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Vector T>
-    class Traits<ReversalVector<T>> : public Traits<T> {};
+    template<Vector V>
+    class Traits<ReversalVector<V>> : public Traits<V> {};
 }

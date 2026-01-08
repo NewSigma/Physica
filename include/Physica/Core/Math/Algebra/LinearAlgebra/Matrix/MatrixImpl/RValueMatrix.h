@@ -225,8 +225,8 @@ namespace Physica {
         return true;
     }
 
-    template<Matrix T>
-    bool operator==(const T& m1, const T& m2) {
+    template<Matrix M>
+    bool operator==(const M& m1, const M& m2) {
         if (m1.getRow() != m2.getRow())
             return false;
         if (m1.getCol() != m2.getCol())
@@ -238,8 +238,8 @@ namespace Physica {
         return true;
     }
 
-    template<Matrix T>
-    bool operator!=(const T& m1, const T& m2) { return !(m1 == m2); }
+    template<Matrix M>
+    bool operator!=(const M& m1, const M& m2) { return !(m1 == m2); }
 
     std::ostream& operator<<(std::ostream& os, const Matrix auto& m) noexcept {
         return os << std::format("{}", m.format());

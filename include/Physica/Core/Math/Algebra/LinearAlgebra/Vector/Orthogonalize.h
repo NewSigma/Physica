@@ -40,8 +40,8 @@ namespace Physica {
      * 
      * This method is vulnerable to numerical roundness.
      */
-    template<Matrix T, Vector U>
-    void normGramSchmidt(const T& base, U& v, typename U::ScalarType::RealType squaredNorm = 1) {
+    template<Matrix M, Vector U>
+    void normGramSchmidt(const M& base, U& v, typename U::ScalarType::RealType squaredNorm = 1) {
         using ScalarType = U::ScalarType;
         using RealType = ScalarType::RealType;
         [[maybe_unused]] constexpr double epsilon = 1E-3;

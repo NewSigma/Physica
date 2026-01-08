@@ -21,16 +21,16 @@
 #include "Flatten.h"
 
 namespace Physica {
-    template<Matrix T>
-    class device_obj<FlattenL<T>> : public device_obj<LValueVector<FlattenL<T>>> {
-        using host_obj = FlattenL<T>;
+    template<Matrix M>
+    class device_obj<FlattenL<M>> : public device_obj<LValueVector<FlattenL<M>>> {
+        using host_obj = FlattenL<M>;
         using This = device_obj<host_obj>;
 
-        const device_obj<T>& mat;
+        const device_obj<M>& mat;
     public:
         using Base = device_obj<LValueVector<host_obj>>;
     public:
-        __host__ __device__ device_obj(const device_obj<LValueMatrix<T>>& mat_) : mat(mat_) {}
+        __host__ __device__ device_obj(const device_obj<LValueMatrix<M>>& mat_) : mat(mat_) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -45,18 +45,18 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 
-    template<Matrix T>
-    __host__ __device__ auto device_obj<FlattenL<T>>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<Matrix M>
+    __host__ __device__ auto device_obj<FlattenL<M>>::data_ptr(this auto&& self, size_t index) noexcept {
         auto&& mat = std::forward<decltype(self)>(self).mat;
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
-        const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
-        const size_t col = MatrixOption::colFromMajorMinor<T>(major, minor);
+        const size_t row = MatrixOption::rowFromMajorMinor<M>(major, minor);
+        const size_t col = MatrixOption::colFromMajorMinor<M>(major, minor);
         return mat.data_ptr(row, col);
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<device_obj<FlattenL<T>>> : public Traits<FlattenL<T>> {};
+    template<Matrix M>
+    class Traits<device_obj<FlattenL<M>>> : public Traits<FlattenL<M>> {};
 }

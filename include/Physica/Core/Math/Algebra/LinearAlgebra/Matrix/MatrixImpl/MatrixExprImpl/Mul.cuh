@@ -45,10 +45,10 @@ namespace Physica {
         }
     };
 
-    template<Matrix T1, Vector T2>
-    class device_obj<MatrixExpr<ExprID::Mul, T1, T2>>
-            : public device_obj<BinaryMatrixExpr<ExprID::Mul, T1, T2>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprID::Mul, T1, T2>>;
+    template<Matrix M, Vector V>
+    class device_obj<MatrixExpr<ExprID::Mul, M, V>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Mul, M, V>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Mul, M, V>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -130,8 +130,8 @@ namespace Physica {
         return hadamard(m, x);
     }
 
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] auto hadamard(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<MatrixExpr<ExprID::Mul, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] auto hadamard(M1&& m1, M2&& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
+        return device_obj<MatrixExpr<ExprID::Mul, M1&&, M2&&>>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

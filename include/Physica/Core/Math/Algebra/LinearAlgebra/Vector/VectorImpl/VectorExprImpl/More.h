@@ -21,10 +21,10 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
-    template<Vector T1, Vector T2>
-    class VectorExpr<ExprID::More, T1, T2>
-            : public BinaryVectorExpr<ExprID::More, T1, T2> {
-        using Base = BinaryVectorExpr<ExprID::More, T1, T2>;
+    template<Vector V1, Vector V2>
+    class VectorExpr<ExprID::More, V1, V2>
+            : public BinaryVectorExpr<ExprID::More, V1, V2> {
+        using Base = BinaryVectorExpr<ExprID::More, V1, V2>;
     protected:
         using typename Base::T;
     public:
@@ -76,8 +76,8 @@ namespace Physica {
         return VectorExpr<ExprID::More, V&&, U&&>(std::forward<V>(v), std::forward<U>(x));
     }
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] auto operator>(T1&& v1, T2&& v2) noexcept requires(!CUDA<T1> && !CUDA<T2>) {
-        return VectorExpr<ExprID::More, T1&&, T2&&>(std::forward<T1>(v1), std::forward<T2>(v2));
+    template<Vector V1, Vector V2>
+    [[nodiscard]] auto operator>(V1&& v1, V2&& v2) noexcept requires(!CUDA<V1> && !CUDA<V2>) {
+        return VectorExpr<ExprID::More, V1&&, V2&&>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

@@ -48,8 +48,8 @@ namespace Physica {
         void reverse(const Vector auto& grad) const noexcept;
     };
 
-    template<Vector T>
-    void device_obj<VectorExpr<ExprID::Relu, T>>::reverse(const Vector auto& grad) const noexcept {
+    template<Vector V>
+    void device_obj<VectorExpr<ExprID::Relu, V>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& expr = Base::getExpr();
         expr.reverse(hadamard(relu(unit(expr.values())), grad.values()));

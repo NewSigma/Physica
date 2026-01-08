@@ -76,10 +76,10 @@ namespace Physica {
         }
     };
 
-    template<Matrix T, Matrix U>
-    class device_obj<MatrixExpr<ExprID::Div, T, U>>
-            : public device_obj<BinaryMatrixExpr<ExprID::Div, T, U>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprID::Div, T, U>>;
+    template<Matrix M, Matrix U>
+    class device_obj<MatrixExpr<ExprID::Div, M, U>>
+            : public device_obj<BinaryMatrixExpr<ExprID::Div, M, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprID::Div, M, U>>;
     public:
         using typename Base::ScalarType;
     protected:
@@ -98,28 +98,28 @@ namespace Physica {
         }
     };
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator/(T&& m, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<MatrixExpr<ExprID::Div, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator/(M&& m, U&& x) noexcept requires(CUDA<M>) {
+        return device_obj<MatrixExpr<ExprID::Div, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator/(U&& x, T&& m) noexcept requires(CUDA<T>) {
-        return device_obj<MatrixExpr<ExprID::Div, U&&, T&&>>(std::forward<U>(x), std::forward<T>(m));
+    template<Matrix M, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator/(U&& x, M&& m) noexcept requires(CUDA<M>) {
+        return device_obj<MatrixExpr<ExprID::Div, U&&, M&&>>(std::forward<U>(x), std::forward<M>(m));
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ auto divide(T&& m, U&& x) noexcept requires(CUDA<T> && CUDA<U>) {
-        return device_obj<MatrixExpr<ExprID::Div, T&&, U&&>>(std::forward<T>(m), std::forward<U>(x));
+    template<Matrix M, Vector U>
+    [[nodiscard]] __host__ __device__ auto divide(M&& m, U&& x) noexcept requires(CUDA<M> && CUDA<U>) {
+        return device_obj<MatrixExpr<ExprID::Div, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
-    template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ auto divide(U&& x, T&& m) noexcept requires(CUDA<T> && CUDA<U>) {
-        return device_obj<MatrixExpr<ExprID::Div, U&&, T&&>>(std::forward<U>(x), std::forward<T>(m));
+    template<Matrix M, Vector U>
+    [[nodiscard]] __host__ __device__ auto divide(U&& x, M&& m) noexcept requires(CUDA<M> && CUDA<U>) {
+        return device_obj<MatrixExpr<ExprID::Div, U&&, M&&>>(std::forward<U>(x), std::forward<M>(m));
     }
 
-    template<Matrix T1, Matrix T2>
-    [[nodiscard]] __host__ __device__ auto divide(T1&& m1, T2&& m2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<MatrixExpr<ExprID::Div, T1&&, T2&&>>(std::forward<T1>(m1), std::forward<T2>(m2));
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] __host__ __device__ auto divide(M1&& m1, M2&& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
+        return device_obj<MatrixExpr<ExprID::Div, M1&&, M2&&>>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

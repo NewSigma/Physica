@@ -31,11 +31,11 @@ namespace Physica {
      * Reference:
      * [1] Eigen; https://eigen.tuxfamily.org
      */
-    template<Matrix T, bool ColWiseRead = true>
-    class HouseholderSequence : public RValueMatrix<HouseholderSequence<T, ColWiseRead>> {
-        using This = HouseholderSequence<T, ColWiseRead>;
+    template<Matrix M, bool ColWiseRead = true>
+    class HouseholderSequence : public RValueMatrix<HouseholderSequence<M, ColWiseRead>> {
+        using This = HouseholderSequence<M, ColWiseRead>;
 
-        const T& source;
+        const M& source;
         /**
          * Number of householder transformation in this sequence
          */
@@ -45,7 +45,7 @@ namespace Physica {
          */
         size_t shift;
     public:
-        HouseholderSequence(const T& source_);
+        HouseholderSequence(const M& source_);
         HouseholderSequence(const This&) = default;
         HouseholderSequence(This&&) noexcept = default;
         ~HouseholderSequence() = default;
@@ -64,14 +64,14 @@ namespace Physica {
         void setShift(size_t shift_);
     };
 
-    template<Matrix T, bool ColWiseRead>
-    HouseholderSequence<T, ColWiseRead>::HouseholderSequence(const T& source_)
+    template<Matrix M, bool ColWiseRead>
+    HouseholderSequence<M, ColWiseRead>::HouseholderSequence(const M& source_)
             : source(source_)
             , size(source_.getCol())
             , shift(0) {}
 
-    template<Matrix T, bool ColWiseRead>
-    void HouseholderSequence<T, ColWiseRead>::assign(Matrix auto& target) const {
+    template<Matrix M, bool ColWiseRead>
+    void HouseholderSequence<M, ColWiseRead>::assign(Matrix auto& target) const {
         const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getCol());
         assert(shift1 < target.getRow());
 
@@ -89,23 +89,23 @@ namespace Physica {
         }
     }
 
-    template<Matrix T, bool ColWiseRead>
-    void HouseholderSequence<T, ColWiseRead>::setSize(size_t size_) {
+    template<Matrix M, bool ColWiseRead>
+    void HouseholderSequence<M, ColWiseRead>::setSize(size_t size_) {
         assert(size_ <= source.getCol());
         size = size_;
     }
 
-    template<Matrix T, bool ColWiseRead>
-    void HouseholderSequence<T, ColWiseRead>::setShift(size_t shift_) {
+    template<Matrix M, bool ColWiseRead>
+    void HouseholderSequence<M, ColWiseRead>::setShift(size_t shift_) {
         shift = shift_;
     }
 }
 
 namespace Physica {
-    template<Matrix T, bool ColWiseRead>
-    class Traits<HouseholderSequence<T, ColWiseRead>> {
+    template<Matrix M, bool ColWiseRead>
+    class Traits<HouseholderSequence<M, ColWiseRead>> {
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = M::ScalarType;
         constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;

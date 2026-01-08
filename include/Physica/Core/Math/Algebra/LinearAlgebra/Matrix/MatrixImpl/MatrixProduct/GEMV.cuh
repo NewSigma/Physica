@@ -22,21 +22,21 @@
 #include "GEMV.h"
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class device_obj<GEMV<T, U>> : public device_obj<RValueVector<GEMV<T, U>>> {
-        using host_obj = GEMV<T, U>;
+    template<Matrix M, Vector U>
+    class device_obj<GEMV<M, U>> : public device_obj<RValueVector<GEMV<M, U>>> {
+        using host_obj = GEMV<M, U>;
         using Base = device_obj<RValueVector<host_obj>>;
         using This = device_obj<host_obj>;
         using DeviceVector = device_obj<U>;
-        using DeviceMatrix = device_obj<T>;
+        using DeviceMatrix = device_obj<M>;
     public:
         using typename Base::ScalarType;
         using Base::isReverseDiff;
     private:
-        PlainStruct<const std::remove_cvref_t<T>> mat;
+        PlainStruct<const std::remove_cvref_t<M>> mat;
         PlainStruct<const std::remove_cvref_t<U>> vec;
     public:
-        __host__ __device__ device_obj(T mat_, U vec_);
+        __host__ __device__ device_obj(M mat_, U vec_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -56,22 +56,22 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return vec.getDerived(); }
     };
 
-    template<Matrix T, Vector U>
-    __host__ __device__ device_obj<GEMV<T, U>>::device_obj(T mat_, U vec_) : mat(asStruct(mat_)), vec(asStruct(vec_)) {
+    template<Matrix M, Vector U>
+    __host__ __device__ device_obj<GEMV<M, U>>::device_obj(M mat_, U vec_) : mat(asStruct(mat_)), vec(asStruct(vec_)) {
         assert(getLHS().getCol() == getRHS().getLength());
     }
 
-    template<Matrix T, Vector U>
-    __device__ auto device_obj<GEMV<T, U>>::calc(size_t index) const -> ScalarType {
+    template<Matrix M, Vector U>
+    __device__ auto device_obj<GEMV<M, U>>::calc(size_t index) const -> ScalarType {
         return getLHS().row(index) * getRHS();
     }
 
-    template<Matrix T, Vector U>
-    __host__ __device__ void device_obj<GEMV<T, U>>::assign(Vector auto& target) const {
+    template<Matrix M, Vector U>
+    __host__ __device__ void device_obj<GEMV<M, U>>::assign(Vector auto& target) const {
         if constexpr (IsHost())
             Base::assign(target);
         else {
-            if constexpr (MatrixOption::isColMatrix<T>()) {
+            if constexpr (MatrixOption::isColMatrix<M>()) {
                 target.assert_assign(*this);
                 const auto& m = getLHS();
                 const auto& v = getRHS();
@@ -84,26 +84,26 @@ namespace Physica {
         }
     }
 
-    template<Matrix T, Vector U>
-    void device_obj<GEMV<T, U>>::reverse(const Vector auto& grad) const noexcept {
+    template<Matrix M, Vector U>
+    void device_obj<GEMV<M, U>>::reverse(const Vector auto& grad) const noexcept {
         static_assert(isReverseDiff);
         const auto& g = grad.values();
         const auto& m = mat.getDerived();
         const auto& v = vec.getDerived();
         Base::assert_assign(grad);
-        if constexpr (ReverseDiff<T>)
+        if constexpr (ReverseDiff<M>)
             m.reverse(g * v.values().transpose());
         if constexpr (ReverseDiff<U>)
             v.reverse(m.values().transpose() * g);
     }
     // FIXME: Turn it into a member function once we dump to C++23
-    template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ auto operator*(T&& m, U&& v) noexcept requires(std::remove_cvref_t<T>::RowAtCompile != 1 && CUDA<T> && CUDA<U>) {
-        return device_obj<GEMV<T&&, U&&>>(std::forward<T>(m), std::forward<U>(v));
+    template<Matrix M, Vector U>
+    [[nodiscard]] __host__ __device__ auto operator*(M&& m, U&& v) noexcept requires(std::remove_cvref_t<M>::RowAtCompile != 1 && CUDA<M> && CUDA<U>) {
+        return device_obj<GEMV<M&&, U&&>>(std::forward<M>(m), std::forward<U>(v));
     }
 }
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class Traits<device_obj<GEMV<T, U>>> : public Traits<GEMV<T, U>> {};
+    template<Matrix M, Vector U>
+    class Traits<device_obj<GEMV<M, U>>> : public Traits<GEMV<M, U>> {};
 }

@@ -22,9 +22,9 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
+    template<Matrix M>
     class ContourSeries : public QObject {
-        using ScalarType = T::ScalarType;
+        using ScalarType = M::ScalarType;
         using ContourLine = std::pair<Array<double>, Array<double>>;
 
         struct Quad {
@@ -71,14 +71,14 @@ namespace Physica {
         class Grid {
             using FlagMatrix = Array<Array<bool>>;
 
-            const LValueMatrix<T>& x;
-            const LValueMatrix<T>& y;
-            const LValueMatrix<T>& z;
+            const M& x;
+            const M& y;
+            const M& z;
             FlagMatrix flags;
         public:            
-            Grid(const LValueMatrix<T>& x_,
-                 const LValueMatrix<T>& y_,
-                 const LValueMatrix<T>& z_);
+            Grid(const M& x_,
+                 const M& y_,
+                 const M& z_);
             Grid(const Grid&) = delete;
             Grid(Grid&&) noexcept = delete;
             ~Grid() = default;
@@ -101,9 +101,9 @@ namespace Physica {
         Array<ContourLine> contourLines;
         Array<QLineSeries*> splines;
     public:
-        ContourSeries(const LValueMatrix<T>& x,
-                      const LValueMatrix<T>& y,
-                      const LValueMatrix<T>& z,
+        ContourSeries(const M& x,
+                      const M& y,
+                      const M& z,
                       Array<double> level,
                       QObject* parent = nullptr);
         ContourSeries(const ContourSeries&) = delete;

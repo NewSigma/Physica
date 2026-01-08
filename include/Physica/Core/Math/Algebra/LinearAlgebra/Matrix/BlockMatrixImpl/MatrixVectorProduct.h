@@ -21,20 +21,20 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/BlockMatrix.h"
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class MatrixVectorProduct<BlockMatrix<T>, U>
-            : public RValueVector<MatrixVectorProduct<BlockMatrix<T>, U>> {
-        using This = MatrixVectorProduct<BlockMatrix<T>, U>;
+    template<Matrix M, Vector U>
+    class MatrixVectorProduct<BlockMatrix<M>, U>
+            : public RValueVector<MatrixVectorProduct<BlockMatrix<M>, U>> {
+        using This = MatrixVectorProduct<BlockMatrix<M>, U>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     protected:
         using typename Base::Tv;
     private:
-        const BlockMatrix<T>& m;
+        const BlockMatrix<M>& m;
         const U& v;
     public:
-        MatrixVectorProduct(const BlockMatrix<T>& m_, const U& v_);
+        MatrixVectorProduct(const BlockMatrix<M>& m_, const U& v_);
         MatrixVectorProduct(const This&) = delete;
         MatrixVectorProduct(This&&) noexcept = delete;
         ~MatrixVectorProduct() = default;
@@ -49,19 +49,19 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const BlockMatrix<T>& getLHS() const noexcept { return m; }
+        [[nodiscard]] const BlockMatrix<M>& getLHS() const noexcept { return m; }
         [[nodiscard]] const U& getRHS() const noexcept { return v; }
     };
 
-    template<Matrix T, Vector U>
-    MatrixVectorProduct<BlockMatrix<T>, U>::MatrixVectorProduct(
-            const BlockMatrix<T>& m, const U& v) {
+    template<Matrix M, Vector U>
+    MatrixVectorProduct<BlockMatrix<M>, U>::MatrixVectorProduct(
+            const BlockMatrix<M>& m, const U& v) {
         assert(m.getCol() == v.getLength() && "[Error]: Dimensions do not match");
     }
 
-    template<Matrix T, Vector U>
+    template<Matrix M, Vector U>
     template<ExecutePolicy P>
-    void MatrixVectorProduct<BlockMatrix<T>, U>::assign(Vector auto& target) const {
+    void MatrixVectorProduct<BlockMatrix<M>, U>::assign(Vector auto& target) const {
         assert(getLength() == target.getLength() && "[Error]: Dimensions do not match");
         size_t from = 0;
         for (size_t i = 0; i < m.getNumBlocks(); ++i) {
@@ -75,10 +75,10 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Matrix T, Vector U>
-    class Traits<MatrixVectorProduct<BlockMatrix<T>, U>> {
+    template<Matrix M, Vector U>
+    class Traits<MatrixVectorProduct<BlockMatrix<M>, U>> {
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = M::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = true;

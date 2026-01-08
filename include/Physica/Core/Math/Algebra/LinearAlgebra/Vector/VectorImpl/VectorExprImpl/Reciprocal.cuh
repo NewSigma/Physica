@@ -21,10 +21,10 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector T>
-    class device_obj<VectorExpr<ExprID::Reciprocal, T>>
-            : public device_obj<UnitaryVectorExpr<ExprID::Reciprocal, T>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprID::Reciprocal, T>>;
+    template<Vector V>
+    class device_obj<VectorExpr<ExprID::Reciprocal, V>>
+            : public device_obj<UnitaryVectorExpr<ExprID::Reciprocal, V>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprID::Reciprocal, V>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -45,8 +45,8 @@ namespace Physica {
         }
     };
 
-    template<Vector T>
-    [[nodiscard]] __host__ __device__ auto reciprocal(T&& v) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprID::Reciprocal, T&&>>(std::forward<T>(v));
+    template<Vector V>
+    [[nodiscard]] __host__ __device__ auto reciprocal(V&& v) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprID::Reciprocal, V&&>>(std::forward<V>(v));
     }
 }

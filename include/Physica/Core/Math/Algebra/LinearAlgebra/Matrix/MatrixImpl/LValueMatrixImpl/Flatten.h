@@ -21,14 +21,14 @@
 #include "../LValueMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
-    class FlattenL<T> : public LValueVector<FlattenL<T>> {
-        using This = FlattenL<T>;
+    template<Matrix M>
+    class FlattenL<M> : public LValueVector<FlattenL<M>> {
+        using This = FlattenL<M>;
         using Base = LValueVector<This>;
 
-        T& mat;
+        M& mat;
     public:
-        FlattenL(LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
+        FlattenL(LValueMatrix<M>& mat_) : mat(mat_.getDerived()) {}
         FlattenL(const This&) = default;
         FlattenL(This&&) noexcept = default;
         ~FlattenL() = default;
@@ -44,22 +44,22 @@ namespace Physica {
         [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
-    template<Matrix T>
-    auto FlattenL<T>::data_ptr(this auto&& self, size_t index) noexcept {
+    template<Matrix M>
+    auto FlattenL<M>::data_ptr(this auto&& self, size_t index) noexcept {
         const size_t major = index / self.mat.getMaxMinor();
         const size_t minor = index % self.mat.getMaxMinor();
-        const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
-        const size_t col = MatrixOption::colFromMajorMinor<T>(major, minor);
+        const size_t row = MatrixOption::rowFromMajorMinor<M>(major, minor);
+        const size_t col = MatrixOption::colFromMajorMinor<M>(major, minor);
         return self.mat.data_ptr(row, col);
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<FlattenL<T>> {
+    template<Matrix M>
+    class Traits<FlattenL<M>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
+        using ScalarType = M::ScalarType;
+        constexpr static size_t SizeAtCompile = M::RowAtCompile * M::ColAtCompile;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

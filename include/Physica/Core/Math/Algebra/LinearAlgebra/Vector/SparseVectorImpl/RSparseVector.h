@@ -33,10 +33,10 @@ namespace Physica {
         [[nodiscard]] size_t getNumNonZero() const noexcept { return Base::getDerived().getNumNonZero(); }
     };
 
-    template<Vector T1, Vector T2>
-    Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
-    operator*(const RSparseVector<T1>& v1, const T2& v2) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+    template<Vector V1, Vector V2>
+    Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type
+    operator*(const RSparseVector<V1>& v1, const V2& v2) {
+        using ResultType = Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         ResultType result(0);
         for (size_t i = 0; i < v1.getNumNonZero(); ++i) {
@@ -46,24 +46,24 @@ namespace Physica {
         return result;
     }
 
-    template<Vector T1, Vector T2>
-    Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
-    operator*(const T1& v1, const RSparseVector<T2>& v2) {
+    template<Vector V1, Vector V2>
+    Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type
+    operator*(const V1& v1, const RSparseVector<V2>& v2) {
         return v2 * v1;
     }
 
-    template<Vector T, Vector U>
-    void operator+=(T& v1, const U& v2) requires Sparse<U> {
-        using ResultType = T::ScalarType;
+    template<Vector V, Vector U>
+    void operator+=(V& v1, const U& v2) requires Sparse<U> {
+        using ResultType = V::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
             v1[pair.first] += ResultType(pair.second);
         }
     }
 
-    template<Vector T, Vector U>
-    void operator-=(T& v1, const U& v2) requires Sparse<U> {
-        using ResultType = T::ScalarType;
+    template<Vector V, Vector U>
+    void operator-=(V& v1, const U& v2) requires Sparse<U> {
+        using ResultType = V::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
             v1[pair.first] -= ResultType(pair.second);

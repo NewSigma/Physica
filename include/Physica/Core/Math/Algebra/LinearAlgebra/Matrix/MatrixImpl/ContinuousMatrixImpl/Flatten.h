@@ -21,15 +21,15 @@
 #include "../ContinuousMatrix.h"
 
 namespace Physica {
-    template<Matrix T>
-    class FlattenC<T> : public ContinuousVector<FlattenC<T>> {
-        using This = FlattenC<T>;
+    template<Matrix M>
+    class FlattenC<M> : public ContinuousVector<FlattenC<M>> {
+        using This = FlattenC<M>;
 
-        T& mat;
+        M& mat;
     public:
         using Base = ContinuousVector<This>;
     public:
-        FlattenC(ContinuousMatrix<T>& mat_) : mat(mat_.getDerived()) {}
+        FlattenC(ContinuousMatrix<M>& mat_) : mat(mat_.getDerived()) {}
         FlattenC(const This&) = default;
         FlattenC(This&&) noexcept = default;
         ~FlattenC() = default;
@@ -43,18 +43,18 @@ namespace Physica {
         [[nodiscard]] auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix T>
-    auto FlattenC<T>::data(this auto&& self) noexcept {
+    template<Matrix M>
+    auto FlattenC<M>::data(this auto&& self) noexcept {
         return self.mat.data();
     }
 }
 
 namespace Physica {
-    template<Matrix T>
-    class Traits<FlattenC<T>> {
+    template<Matrix M>
+    class Traits<FlattenC<M>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
+        using ScalarType = M::ScalarType;
+        constexpr static size_t SizeAtCompile = M::RowAtCompile * M::ColAtCompile;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;

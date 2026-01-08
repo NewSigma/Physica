@@ -23,18 +23,18 @@
 namespace Physica {
     template<ExprID, Vector T1, class T2 = T1> class SparseVectorExpr;
 
-    template<Vector T, Scalar U>
-    class SparseVectorExpr<ExprID::Mul, T, U>
-            : public RSparseVector<SparseVectorExpr<ExprID::Mul, T, U>> {
-        using This = SparseVectorExpr<ExprID::Mul, T, U>;
+    template<Vector V, Scalar U>
+    class SparseVectorExpr<ExprID::Mul, V, U>
+            : public RSparseVector<SparseVectorExpr<ExprID::Mul, V, U>> {
+        using This = SparseVectorExpr<ExprID::Mul, V, U>;
         using Base = RSparseVector<This>;
         using typename Base::ScalarType;
         using typename Base::NonZeroPair;
 
-        const T& v;
+        const V& v;
         const U& s;
     public:
-        SparseVectorExpr(const RSparseVector<T>& v_, const U& s_) : v(v_.getDerived()), s(s_) {}
+        SparseVectorExpr(const RSparseVector<V>& v_, const U& s_) : v(v_.getDerived()), s(s_) {}
         SparseVectorExpr(const This&) = delete;
         SparseVectorExpr(This&&) noexcept = delete;
         ~SparseVectorExpr() = default;
@@ -52,22 +52,22 @@ namespace Physica {
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<Vector T, Scalar U>
-    [[nodiscard]] auto operator*(const RSparseVector<T>& v, const U& x) noexcept {
-        return SparseVectorExpr<ExprID::Mul, T, U>(v.getDerived(), x);
+    template<Vector V, Scalar U>
+    [[nodiscard]] auto operator*(const RSparseVector<V>& v, const U& x) noexcept {
+        return SparseVectorExpr<ExprID::Mul, V, U>(v.getDerived(), x);
     }
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] auto operator*(const U& x, const RSparseVector<T>& v) noexcept {
-        return SparseVectorExpr<ExprID::Mul, T, U>(v * x);
+    template<Vector V, Scalar U>
+    [[nodiscard]] auto operator*(const U& x, const RSparseVector<V>& v) noexcept {
+        return SparseVectorExpr<ExprID::Mul, V, U>(v * x);
     }
 }
 
 namespace Physica {
-    template<ExprID ID, Vector T, Scalar U>
-    class Traits<SparseVectorExpr<ID, T, U>> {
+    template<ExprID ID, Vector V, Scalar U>
+    class Traits<SparseVectorExpr<ID, V, U>> {
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
-        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename V::ScalarType, U>::Type;
+        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
     };
 }

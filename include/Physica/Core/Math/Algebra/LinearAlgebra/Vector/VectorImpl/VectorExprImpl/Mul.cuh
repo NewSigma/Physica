@@ -21,10 +21,10 @@
 #include "../VectorExpr.cuh"
 
 namespace Physica {
-    template<Vector T, Scalar U>
-    class device_obj<VectorExpr<ExprID::Mul, T, U>>
-            : public device_obj<BinaryVectorExpr<ExprID::Mul, T, U>> {
-        using Base = device_obj<BinaryVectorExpr<ExprID::Mul, T, U>>;
+    template<Vector V, Scalar U>
+    class device_obj<VectorExpr<ExprID::Mul, V, U>>
+            : public device_obj<BinaryVectorExpr<ExprID::Mul, V, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Mul, V, U>>;
     public:
         using typename Base::ScalarType;
         using typename Base::Tv;
@@ -54,10 +54,10 @@ namespace Physica {
         }
     };
 
-    template<Vector T1, Vector T2>
-    class device_obj<VectorExpr<ExprID::Mul, T1, T2>>
-            : public device_obj<BinaryVectorExpr<ExprID::Mul, T1, T2>> {
-        using Base = device_obj<BinaryVectorExpr<ExprID::Mul, T1, T2>>;
+    template<Vector V1, Vector V2>
+    class device_obj<VectorExpr<ExprID::Mul, V1, V2>>
+            : public device_obj<BinaryVectorExpr<ExprID::Mul, V1, V2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprID::Mul, V1, V2>>;
     protected:
         using typename Base::T;
     public:
@@ -80,18 +80,18 @@ namespace Physica {
         }
     };
 
-    template<Vector T, Scalar U>
-    [[nodiscard]] __host__ __device__ auto operator*(T&& v, U&& x) noexcept requires(CUDA<T>) {
-        return device_obj<VectorExpr<ExprID::Mul, T&&, U&&>>(std::forward<T>(v), std::forward<U>(x));
+    template<Vector V, Scalar U>
+    [[nodiscard]] __host__ __device__ auto operator*(V&& v, U&& x) noexcept requires(CUDA<V>) {
+        return device_obj<VectorExpr<ExprID::Mul, V&&, U&&>>(std::forward<V>(v), std::forward<U>(x));
     }
 
-    template<Scalar U, Vector T>
-    [[nodiscard]] __host__ __device__ auto operator*(U&& x, T&& v) noexcept requires(CUDA<T>) {
-        return std::forward<T>(v) * std::forward<U>(x);
+    template<Scalar U, Vector V>
+    [[nodiscard]] __host__ __device__ auto operator*(U&& x, V&& v) noexcept requires(CUDA<V>) {
+        return std::forward<V>(v) * std::forward<U>(x);
     }
 
-    template<Vector T1, Vector T2>
-    [[nodiscard]] __host__ __device__ auto hadamard(T1&& v1, T2&& v2) noexcept requires(CUDA<T1> && CUDA<T2>) {
-        return device_obj<VectorExpr<ExprID::Mul, T1&&, T2&&>>(std::forward<T1>(v1), std::forward<T2>(v2));
+    template<Vector V1, Vector V2>
+    [[nodiscard]] __host__ __device__ auto hadamard(V1&& v1, V2&& v2) noexcept requires(CUDA<V1> && CUDA<V2>) {
+        return device_obj<VectorExpr<ExprID::Mul, V1&&, V2&&>>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }
