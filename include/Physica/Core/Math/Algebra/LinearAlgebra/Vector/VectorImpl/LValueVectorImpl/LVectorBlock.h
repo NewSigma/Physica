@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,9 +31,6 @@ namespace Physica {
         using Base = LValueVector<This>;
     public:
         using ScalarType = Base::ScalarType;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         T& vec;
         size_t from;
@@ -53,8 +50,7 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
     template<Vector T, size_t Length>
@@ -89,15 +85,9 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    auto LVectorBlock<T, Length>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert((index + from) < to);
-        return vec.data_ptr(index + from);
-    }
-
-    template<Vector T, size_t Length>
-    auto LVectorBlock<T, Length>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        assert((index + from) < to);
-        return vec.data_ptr(index + from);
+    auto LVectorBlock<T, Length>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert((self.from + index) < self.to);
+        return self.vec.data_ptr(index + self.from);
     }
 }
 

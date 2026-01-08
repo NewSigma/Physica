@@ -38,12 +38,12 @@ namespace {
 
     void gemv(int power) {
         using T = float64; 
-        const T theta = T::random_uniform<Random<>>();
+        const T theta = T::random_uniform<Random<PCG64DXSM, 1234>>();
         auto x = rotation(theta);
         Vector2D<T> proj{1, -1};
         Vector2D<T> answer = rotation(theta * T(power)) * proj;
         Vector2D<T> result = pow(x, power) * proj;
-        expect(vectorNear(result, answer, 1E-14));
+        expect(vectorNear(result, answer, 1E-15));
     }
 }
 

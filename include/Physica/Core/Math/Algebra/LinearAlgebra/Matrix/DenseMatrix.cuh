@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -55,11 +55,13 @@ namespace Physica {
         /* Operations */
         __host__ __device__ void resize(const Matrix auto& m);
         using Storage::resize;
-
         [[nodiscard]] host_obj toHost() const;
         [[nodiscard]] host_obj toHostAsync() const;
         using Base::toHost;
         using Base::toHostAsync;
+
+        using Base::transpose;
+        [[nodiscard]] auto&& flatten(this auto&&) noexcept;
 
         using Base::zeros;
         using Base::random_uniform;

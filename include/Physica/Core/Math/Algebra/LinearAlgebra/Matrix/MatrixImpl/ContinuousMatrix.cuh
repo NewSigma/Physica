@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,8 +34,6 @@ namespace Physica {
         using Base::ColAtCompile;
     protected:
         using typename Base::T;
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
         constexpr static bool isColMatrix = MatrixOption::isColMatrix<Derived>();
@@ -123,8 +121,9 @@ namespace Physica {
         template<RNG R>
         void random_normal();
         /* Getters */
-        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] __host__ __device__ auto data() noexcept;
+        [[nodiscard]] __host__ __device__ auto data() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t r, size_t c) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

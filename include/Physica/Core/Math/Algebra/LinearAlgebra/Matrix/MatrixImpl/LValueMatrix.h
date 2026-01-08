@@ -48,10 +48,6 @@ namespace Physica {
         using typename Base::Tr;
         using typename Base::Tv;
         using typename Base::Trv;
-        using PtrTy = T::PtrTy;
-        using ConstPtrTy = T::ConstPtrTy;
-        using RefTy = T::RefTy;
-        using ConstRefTy = T::ConstRefTy;
     public:
         ~LValueMatrix() = default;
         /* Operators */
@@ -70,10 +66,9 @@ namespace Physica {
         void operator-=(const Matrix auto& m);
         void operator*=(const Matrix auto& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
 
-        [[nodiscard]] RefTy operator[](size_t row, size_t col);
-        [[nodiscard]] ConstRefTy operator[](size_t row, size_t col) const;
+        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t row, size_t col);
         /* Operations */
-        [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator[](row, col); }
+        [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
@@ -139,10 +134,8 @@ namespace Physica {
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
-        [[nodiscard]] RefTy refFromMajorMinor(size_t major, size_t minor) noexcept;
-        [[nodiscard]] ConstRefTy refFromMajorMinor(size_t major, size_t minor) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] decltype(auto) refFromMajorMinor(this auto&&, size_t major, size_t minor) noexcept;
     protected:
         LValueMatrix() = default;
         LValueMatrix(const This&) = default;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,33 +21,19 @@
 #include "ContinuousMatrixBlock.h"
 
 namespace Physica {
-    template<Matrix T, size_t Col>
-    class device_obj<ContinuousMatrixBlock<T, 1, Col>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<T, 1, Col>>> {
-        using host_obj = ContinuousMatrixBlock<T, 1, Col>;
+    template<Matrix M, size_t Col>
+    class device_obj<ContinuousMatrixBlock<M, 1, Col>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, 1, Col>>> {
+        using host_obj = ContinuousMatrixBlock<M, 1, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
-    public:
-        using Base::isComplex;
-        using Base::isReverseDiff;
-        using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        PlainStruct<device_obj<T>> mat;
+        PlainStruct<device_obj<M>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount, size_t fromCol_, size_t colCount_)
-                : device_obj(mat_, fromRow_, fromCol_, colCount_) {
-            assert(rowCount == 1);
-        }
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
-                : mat(asStruct(mat_.getDerived())), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
-            assert(fromRow < mat_.getRow());
-            assert(fromCol + colCount <= mat_.getCol());
-        }
+        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount);
+        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol, size_t colCount);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -60,37 +46,40 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept { return mat.getDerived().data_ptr(fromRow, fromCol + index); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept { return mat.getDerived().data_ptr(fromRow, fromCol + index); }
+        [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix T, size_t Row>
-    class device_obj<ContinuousMatrixBlock<T, Row, 1>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<T, Row, 1>>> {
-        using host_obj = ContinuousMatrixBlock<T, Row, 1>;
+    template<Matrix M, size_t Col>
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, Col>>::device_obj(device_obj<M>& mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
+            : device_obj(mat, fromRow, fromCol, colCount) {
+        assert(rowCount == 1);
+    }
+
+    template<Matrix M, size_t Col>
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, Col>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol, size_t colCount)
+            : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
+        assert(fromRow < mat.getRow());
+        assert(fromCol + colCount <= mat.getCol());
+    }
+
+    template<Matrix M, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, 1, Col>>::data(this auto&& self) noexcept {
+        return self.mat.getDerived().data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row>
+    class device_obj<ContinuousMatrixBlock<M, Row, 1>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, Row, 1>>> {
+        using host_obj = ContinuousMatrixBlock<M, Row, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
-    public:
-        using Base::isComplex;
-        using Base::isReverseDiff;
-        using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        PlainStruct<device_obj<T>> mat;
+        PlainStruct<device_obj<M>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount)
-                : device_obj(mat_, fromRow_, rowCount_, fromCol_) {
-            assert(colCount == 1);
-        }
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(asStruct(mat_.getDerived())), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat_.getRow());
-            assert(fromCol < mat_.getCol());
-        }
+        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
+        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -103,29 +92,39 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept { return mat.getDerived().data_ptr(fromRow + index, fromCol); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept { return mat.getDerived().data_ptr(fromRow + index, fromCol); }
+        [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix T>
-    class device_obj<ContinuousMatrixBlock<T, 1, 1>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<T, 1, 1>>> {
-        using host_obj = ContinuousMatrixBlock<T, 1, 1>;
+    template<Matrix M, size_t Row>
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
+            : device_obj(mat, fromRow, rowCount, fromCol) {
+        assert(colCount == 1);
+    }
+
+    template<Matrix M, size_t Row>
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol)
+            : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
+        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M, size_t Row>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, 1>>::data(this auto&& self) noexcept {
+        return self.mat.getDerived().data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M>
+    class device_obj<ContinuousMatrixBlock<M, 1, 1>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, 1, 1>>> {
+        using host_obj = ContinuousMatrixBlock<M, 1, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        PlainStruct<device_obj<T>> mat;
+        PlainStruct<device_obj<M>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(asStruct(mat_.getDerived())), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat_.getRow());
-            assert(fromCol < mat_.getCol());
-        }
+        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -138,32 +137,35 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t index) noexcept {
-            assert(index == 0 && "[Error]: Index overflow");
-            return mat.getDerived().data_ptr(fromRow, fromCol);
-        }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept {
-            return const_cast<This&>(*this).data_ptr(index);
-        }
+        [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix T, size_t Row, size_t Col>
-    class device_obj<ContinuousMatrixBlock<T, Row, Col>>
-            : public device_obj<LValueMatrix<ContinuousMatrixBlock<T, Row, Col>>> {
-        using host_obj = ContinuousMatrixBlock<T, Row, Col>;
+    template<Matrix M>
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol)
+            : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
+        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, 1, 1>>::data(this auto&& self) noexcept {
+        return self.mat.getDerived().data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    class device_obj<ContinuousMatrixBlock<M, Row, Col>>
+            : public device_obj<LValueMatrix<ContinuousMatrixBlock<M, Row, Col>>> {
+        using host_obj = ContinuousMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<host_obj>>;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        PlainStruct<device_obj<T>> mat;
+        PlainStruct<device_obj<M>> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -177,38 +179,31 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
     };
 
-    template<Matrix T, size_t Row, size_t Col>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<T, Row, Col>>::device_obj(
-            device_obj<ContinuousMatrix<T>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
-            : mat(asStruct(mat_.getDerived()))
-            , fromRow(fromRow_)
-            , rowCount(rowCount_)
-            , fromCol(fromCol_)
-            , colCount(colCount_) {
-        assert(fromRow < mat_.getRow());
-        assert(fromCol < mat_.getCol());
-        assert((fromRow + rowCount) <= mat_.getRow());
-        assert((fromCol + colCount) <= mat_.getCol());
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, Col>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+            : mat(asStruct(mat))
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol)
+            , colCount(colCount) {
+        assert(fromRow < mat.getRow());
+        assert(fromCol < mat.getCol());
+        assert((fromRow + rowCount) <= mat.getRow());
+        assert((fromCol + colCount) <= mat.getCol());
     }
 
-    template<Matrix T, size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrixBlock<T, Row, Col>>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < rowCount);
-        assert(col < colCount);
-        return mat.getDerived().data_ptr(row + fromRow, col + fromCol);
-    }
-
-    template<Matrix T, size_t Row, size_t Col>
-    __host__ __device__ auto device_obj<ContinuousMatrixBlock<T, Row, Col>>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(row, col);
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.rowCount);
+        assert(col < self.colCount);
+        return self.mat.getDerived().data_ptr(row + self.fromRow, col + self.fromCol);
     }
 }
 
 namespace Physica {
-    template<Matrix T, size_t Row, size_t Col>
-    class Traits<device_obj<ContinuousMatrixBlock<T, Row, Col>>> : public Traits<ContinuousMatrixBlock<T, Row, Col>> {};
+    template<Matrix M, size_t Row, size_t Col>
+    class Traits<device_obj<ContinuousMatrixBlock<M, Row, Col>>> : public Traits<ContinuousMatrixBlock<M, Row, Col>> {};
 }

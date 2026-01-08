@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -127,15 +127,11 @@ namespace Physica {
     }
 
     template<tparams>
-    __host__ __device__ auto device_obj<DenseMatrix>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < getRow() && "[Error]: Index out of range");
-        assert(col < getCol() && "[Error]: Index out of range");
-        return PtrTy(v.data_ptr(row, col), g.data_ptr(row, col));
-    }
-
-    template<tparams>
-    __host__ __device__ auto device_obj<DenseMatrix>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(row, col);
+    __host__ __device__ auto device_obj<DenseMatrix>::data(this auto&& self) noexcept {
+        constexpr bool IsConst = std::is_const<std::remove_reference_t<decltype(self)>>::value;
+        using U = Diff<T, Mode, Order>;
+        using RetTy = std::conditional<IsConst, typename U::ConstPtrTy, typename U::PtrTy>::type;
+        return RetTy(self.v.data(), self.g.data());
     }
 
     template<tparams>

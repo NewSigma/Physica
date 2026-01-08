@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,10 +31,6 @@ namespace Physica {
         using Base::isReverseDiff;
     protected:
         using typename Base::T;
-        using PtrTy = T::PtrTy;
-        using ConstPtrTy = T::ConstPtrTy;
-        using RefTy = T::RefTy;
-        using ConstRefTy = T::ConstRefTy;
     public:
         ~LValueTensor() = default;
         /* Operators */
@@ -52,12 +48,10 @@ namespace Physica {
         void operator+=(const Tensor auto& x);
         void operator-=(const Tensor auto& x);
 
-        [[nodiscard]] RefTy& operator[](size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
-        [[nodiscard]] ConstRefTy& operator[](size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
-        [[nodiscard]] RefTy& operator[](Index3D index) { return *data_ptr(index); }
-        [[nodiscard]] ConstRefTy& operator[](Index3D index) const { return *data_ptr(index); }
+        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t x, size_t y, size_t z);
+        [[nodiscard]] decltype(auto) operator[](this auto&&, Index3D index);
         /* Operations */
-        [[nodiscard]] T calc(Index3D index) const { return operator[](index); }
+        [[nodiscard]] decltype(auto) calc(Index3D index) const { return operator[](index); }
 
         void forND(std::invocable<T&, IndexType> auto fn);
         void forND(std::invocable<const T&, IndexType> auto fn) const;
@@ -75,8 +69,7 @@ namespace Physica {
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();
         /* Getters */
-        [[nodiscard]] PtrTy data_ptr(Index3D index) noexcept { return Base::getDerived().data_ptr(index); }
-        [[nodiscard]] ConstPtrTy data_ptr(Index3D index) const noexcept { return Base::getDerived().data_ptr(index); }
+        [[nodiscard]] auto data_ptr(this auto&&, Index3D index) noexcept;
         /* Static members */
         using Base::forPointIndexInTensor;
     protected:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,9 +30,6 @@ namespace Physica {
         using Base = LValueMatrix<This>;
     public:
         using typename Base::ScalarType;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         T& v;
         size_t r;
@@ -51,8 +48,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
         [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
@@ -86,17 +82,12 @@ namespace Physica {
     }
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < getRow() && col < getCol());
+    auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.getRow() && col < self.getCol());
         if constexpr (MatrixOption::isColMatrix<This>())
-            return v.data_ptr(col * getRow() + row);
+            return self.v.data_ptr(col * self.getRow() + row);
         else
-            return v.data_ptr(row * getCol() + col);
-    }
-
-    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    auto LValueReshapedVector<T, MatrixMajor, Row, Col>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(row, col);
+            return self.v.data_ptr(row * self.getCol() + col);
     }
 
     template<class Derived>

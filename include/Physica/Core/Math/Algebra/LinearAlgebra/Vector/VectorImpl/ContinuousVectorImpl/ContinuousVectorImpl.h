@@ -33,12 +33,6 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    Derived& ContinuousVector<Derived>::operator=(const Vector auto& v) {
-        return Base::operator=(v);
-    }
-
-    template<class Derived>
-    template<ExecutePolicy P>
     void ContinuousVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         constexpr bool isContinuous = is_continuous<V>::value;
@@ -282,19 +276,17 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    auto ContinuousVector<Derived>::values() noexcept -> ValuesRtnTy {
-        return Base::getDerived();
+    auto ContinuousVector<Derived>::data() noexcept {
+        return Base::getDerived().data();
     }
 
     template<class Derived>
-    auto ContinuousVector<Derived>::values() const noexcept -> const ValuesRtnTy {
-        return const_cast<This&>(*this).values();
+    auto ContinuousVector<Derived>::data() const noexcept {
+        return Base::getDerived().data();
     }
 
     template<class Derived>
-    template<int GradOrder>
-    auto ContinuousVector<Derived>::grads() const noexcept {
-        static_assert(Diffable<ScalarType>, "[Error]: Undiffable vector does not have grads");
-        return GradVector<ContinuousVector<Derived>, GradOrder>(Base::getConstCastDerived());
+    auto ContinuousVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
+        return self.data() + index;
     }
 }

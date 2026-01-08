@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,16 +26,8 @@ namespace Physica {
         using host_obj = ContinuousVectorBlock<T, Length>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
-        using DeviceVector = device_obj<T>;
-    public:
-        using typename Base::ScalarType;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
-        using typename Base::RefTy;
-        using typename Base::ConstRefTy;
     private:
-        Physica::PlainStruct<DeviceVector> vec;
+        Physica::PlainStruct<device_obj<T>> vec;
         size_t from;
         size_t to;
     public:
@@ -48,15 +40,16 @@ namespace Physica {
         using Base::operator=;
         This& operator=(const This& obj);
         This& operator=(This&& obj) noexcept;
-        [[nodiscard]] __device__ RefTy operator[](size_t index);
-        [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const;
         /* Operations */
         using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept { return vec.getDerived().data() + from + index; }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
     };
 
     template<Vector T, size_t Length>
@@ -86,15 +79,18 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    __device__ auto device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) -> RefTy {
-        assert((index + from) < to);
-        return vec.getDerived()[index + from];
+    auto device_obj<ContinuousVectorBlock<T, Length>>::values(this auto&& self) noexcept {
+        auto&& v = self.vec.getDerived().values();
+        using V1 = remove_device_obj<std::remove_reference_t<decltype(v)>>::type;
+        return device_obj<ContinuousVectorBlock<V1, Length>>(v, self.from, self.to);
     }
 
     template<Vector T, size_t Length>
-    __device__ auto device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) const -> ConstRefTy {
-        assert((index + from) < to);
-        return vec.getDerived()[index + from];
+    template<int GradOrder>
+    auto device_obj<ContinuousVectorBlock<T, Length>>::grads(this auto&& self) noexcept {
+        auto&& g = self.vec.template grads<GradOrder>();
+        using V1 = remove_device_obj<std::remove_reference_t<decltype(g)>>::type;
+        return ContinuousVectorBlock<V1, Length>(g, self.from, self.to);
     }
 
     template<Vector T, size_t Length>
@@ -102,6 +98,11 @@ namespace Physica {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
+    }
+
+    template<Vector T, size_t Length>
+    __host__ __device__ auto device_obj<ContinuousVectorBlock<T, Length>>::data(this auto&& self) noexcept {
+        return self.vec.getDerived().data() + self.from;
     }
 }
 

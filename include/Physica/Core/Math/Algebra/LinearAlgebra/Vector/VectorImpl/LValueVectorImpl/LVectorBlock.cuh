@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,9 +29,6 @@ namespace Physica {
         using DeviceVector = device_obj<T>;
     public:
         using ScalarType = Base::ScalarType;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         Physica::PlainStruct<DeviceVector> vec;
         size_t from;
@@ -51,8 +48,7 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 
     template<Vector T, size_t Length>
@@ -87,14 +83,9 @@ namespace Physica {
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert((index + from) < to);
-        return vec.getDerived().data_ptr(index);
-    }
-
-    template<Vector T, size_t Length>
-    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    __host__ __device__ auto device_obj<LVectorBlock<T, Length>>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert((self.from + index) < self.to);
+        return self.vec.getDerived().data_ptr(self.from + index);
     }
 }
 

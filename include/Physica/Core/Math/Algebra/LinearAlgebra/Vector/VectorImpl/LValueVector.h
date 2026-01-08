@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,10 +42,6 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Tr;
         using typename Base::Trv;
-        using PtrTy = T::PtrTy;
-        using ConstPtrTy = T::ConstPtrTy;
-        using RefTy = T::RefTy;
-        using ConstRefTy = T::ConstRefTy;
     public:
         ~LValueVector() = default;
         /* Operators */
@@ -63,10 +59,9 @@ namespace Physica {
         void operator+=(const Vector auto& v);
         void operator-=(const Vector auto& v);
 
-        [[nodiscard]] RefTy operator[](size_t index);
-        [[nodiscard]] ConstRefTy operator[](size_t index) const;
+        [[nodiscard]] decltype(auto) operator[](this auto&&, size_t index);
         /* Operations */
-        [[nodiscard]] ConstRefTy calc(size_t index) const;
+        [[nodiscard]] decltype(auto) calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
         void writePacket(size_t index, Packet auto packet);
         void writePacketPartial(size_t index, size_t count, Packet auto packet);
@@ -123,8 +118,7 @@ namespace Physica {
         template<int GradOrder = 1>
         [[nodiscard]] auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     protected:
         LValueVector() = default;
         LValueVector(const This&) = default;

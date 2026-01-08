@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,9 +34,6 @@ namespace Physica {
     public:
         using ScalarType = Base::ScalarType;
         using Base::isReverseDiff;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         using ValueMatrix = device_obj<DenseMatrix<T, Option>>;
         using GradType = ScalarType::GradType;
@@ -81,9 +78,7 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Base::data;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data(this auto&& self) noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return v.getRow(); }
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return v.empty(); }

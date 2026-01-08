@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,9 +27,6 @@ namespace Physica {
         using Base = LValueMatrix<TensorSlice<X>>;
         using IndexType = X::IndexType;
         constexpr static int NDim = X::NDim;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         X& tensor;
         IndexType index;
@@ -48,8 +45,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return tensor.dim(dimRow); }
         [[nodiscard]] size_t getCol() const noexcept { return tensor.dim(dimCol); }
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
-        using Base::data_ptr;
+        [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
     };
 
     template<Tensor X>
@@ -72,11 +68,11 @@ namespace Physica {
     }
 
     template<Tensor X>
-    auto TensorSlice<X>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        auto idx = index;
-        idx[dimRow] = row;
-        idx[dimCol] = col;
-        return tensor.data_ptr(idx);
+    auto TensorSlice<X>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        auto idx = self.index;
+        idx[self.dimRow] = row;
+        idx[self.dimCol] = col;
+        return self.tensor.data_ptr(idx);
     }
 }
 

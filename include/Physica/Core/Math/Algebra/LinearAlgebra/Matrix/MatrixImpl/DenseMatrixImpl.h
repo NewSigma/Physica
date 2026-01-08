@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -114,6 +114,11 @@ namespace Physica {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     void DenseMatrix<T, Option, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
         Base::resize(m, std::forward<decltype(args)>(args)...);
+    }
+
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    auto&& DenseMatrix<T, Option, Row, Col, Allocator>::flatten(this auto&& self) noexcept {
+        return self.asArray();
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>

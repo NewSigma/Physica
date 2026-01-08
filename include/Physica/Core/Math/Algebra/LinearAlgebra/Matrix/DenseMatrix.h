@@ -77,8 +77,7 @@ namespace Physica {
         using Base::toDeviceAsync;
 
         using Base::transpose;
-        [[nodiscard]] auto& flatten() noexcept { return Storage::asArray(); }
-        [[nodiscard]] const auto& flatten() const noexcept { return Storage::asArray(); }
+        [[nodiscard]] auto&& flatten(this auto&&) noexcept;
 
         using Base::random_any;
         using Base::random_normal;

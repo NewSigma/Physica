@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -39,8 +39,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tm;
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<This>();
         constexpr static bool isColMatrix = MatrixOption::isColMatrix<This>();
@@ -52,8 +50,6 @@ namespace Physica {
         using ColBlock = ContinuousMatrixBlock<Derived, RowAtCompile, Col>;
         template<size_t Row, size_t Col>
         using BlockType = ContinuousMatrixBlock<Derived, Row, Col>;
-
-        using ValuesRtnTy = std::conditional<Diffable<ScalarType>, ValueMatrix<Derived>, Derived&>::type;
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
@@ -137,12 +133,10 @@ namespace Physica {
         [[nodiscard]] VectorND<T> balance_mkl();
         const H5DataSet<2> read(const H5Loc& loc, const char* name);
         H5DataSet<2> write(H5Loc& loc, const char* name) const;
-
-        [[nodiscard]] ValuesRtnTy values() noexcept;
-        [[nodiscard]] const ValuesRtnTy values() const noexcept;
         /* Getters */
-        [[nodiscard]] PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
-        [[nodiscard]] ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] auto data() noexcept;
+        [[nodiscard]] auto data() const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t r, size_t c) noexcept;
     protected:
         ContinuousMatrix() = default;
         ContinuousMatrix(const This&) = default;

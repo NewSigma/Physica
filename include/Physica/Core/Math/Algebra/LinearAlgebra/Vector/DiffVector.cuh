@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,9 +34,6 @@ namespace Physica {
         using Base::MaxThreadsPerBlock;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         using ValueVector = device_obj<VectorND<T>>;
         using GradType = ScalarType::GradType;
@@ -81,8 +78,7 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
 
         [[nodiscard]] __host__ __device__ const auto& values() const noexcept { return v; }
         [[nodiscard]] __host__ __device__ auto& values() noexcept { return v; }

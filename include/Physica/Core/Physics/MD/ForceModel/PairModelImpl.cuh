@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -244,8 +244,7 @@ namespace Physica {
             dim3& gridDims) {
         CUDAContext::getInstance().wait(); //Ensure reentrancy
         swapBuffer = cartesianPos.flatten();
-        auto flatten_pos = cell.getPos().flatten();
-        swapBuffer.toDeviceAsync(flatten_pos);
+        swapBuffer.toDeviceAsync(cell.getPos().flatten());
         cell.setLattice(lattice, invLattice);
         size_t numThread{};
         if constexpr (IsSmallCell) {

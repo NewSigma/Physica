@@ -83,13 +83,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::operator[](size_t row, size_t col) -> RefTy {
-        return *data_ptr(row, col);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::operator[](size_t row, size_t col) const -> ConstRefTy {
-        return *data_ptr(row, col);
+    decltype(auto) LValueMatrix<Derived>::operator[](this auto&& self, size_t row, size_t col) {
+        return *self.data_ptr(row, col);
     }
 
     template<class Derived>
@@ -492,30 +487,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < Base::getRow() && col < Base::getCol());
-        return Base::getDerived().data_ptr(row, col);
+    auto LValueMatrix<Derived>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.getRow() && col < self.getCol());
+        return self.getDerived().data_ptr(row, col);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(row, col);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) noexcept -> RefTy {
+    decltype(auto) LValueMatrix<Derived>::refFromMajorMinor(this auto&& self, size_t major, size_t minor) noexcept {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
-        return Base::getDerived()[r, c];
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const noexcept -> ConstRefTy {
-        const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
-        const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
-        return Base::getDerived()[r, c];
+        assert(r < self.getRow() && c < self.getCol());
+        return self[r, c];
     }
 
     template<class Derived>

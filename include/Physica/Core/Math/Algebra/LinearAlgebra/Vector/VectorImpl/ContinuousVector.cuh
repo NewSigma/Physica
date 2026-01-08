@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,8 +38,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         using DataSetType = host_obj::DataSetType;
     public:
@@ -83,8 +81,9 @@ namespace Physica {
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }
+        [[nodiscard]] __host__ __device__ auto data() noexcept;
+        [[nodiscard]] __host__ __device__ auto data() const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

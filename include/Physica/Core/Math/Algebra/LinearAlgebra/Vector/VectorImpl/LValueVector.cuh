@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,10 +33,6 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tv;
-        using PtrTy = T::PtrTy;
-        using ConstPtrTy = T::ConstPtrTy;
-        using RefTy = T::RefTy;
-        using ConstRefTy = T::ConstRefTy;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -54,10 +50,9 @@ namespace Physica {
         __host__ __device__ void operator+=(const Vector auto& v);
         __host__ __device__ void operator-=(const Vector auto& v);
 
-        [[nodiscard]] __device__ RefTy operator[](size_t index);
-        [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const;
+        [[nodiscard]] __device__ decltype(auto) operator[](this auto&&, size_t index);
         /* Operations */
-        [[nodiscard]] __device__ ConstRefTy calc(size_t index) const { return operator[](index); }
+        [[nodiscard]] __device__ decltype(auto) calc(size_t index) const { return operator[](index); }
         [[nodiscard]] __device__ Tv calc_value(size_t index) const { return calc(index).value(); }
 
         __host__ __device__ void reverse(const auto& grad) const noexcept;
@@ -95,8 +90,7 @@ namespace Physica {
         template<RNG R>
         void random_any(auto& distribution);
         /* Getters */
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,30 +23,18 @@
 namespace Physica {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class ContinuousMatrixBlock;
 
-    template<Matrix T, size_t Col>
-    class ContinuousMatrixBlock<T, 1, Col> : public ContinuousVector<ContinuousMatrixBlock<T, 1, Col>> {
-        using This = ContinuousMatrixBlock<T, 1, Col>;
+    template<Matrix M, size_t Col>
+    class ContinuousMatrixBlock<M, 1, Col> : public ContinuousVector<ContinuousMatrixBlock<M, 1, Col>> {
+        using This = ContinuousMatrixBlock<M, 1, Col>;
         using Base = ContinuousVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::isReverseDiff;
-        using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        PtrTy pVecHead;
+        M& mat;
+        size_t fromRow;
+        size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(ContinuousMatrix<T>& mat, size_t fromRow, [[maybe_unused]] size_t rowCount_, size_t fromCol, size_t colCount_)
-                : ContinuousMatrixBlock(mat, fromRow, fromCol, colCount_) {
-            assert(rowCount_ == 1);
-        }
-        ContinuousMatrixBlock(ContinuousMatrix<T>& mat, size_t fromRow, size_t fromCol, size_t colCount_)
-                : pVecHead(mat.data_ptr(fromRow, fromCol)), colCount(colCount_) {
-            assert(fromRow < mat.getRow());
-            assert(fromCol + colCount <= mat.getCol());
-        }
+        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
+        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol, size_t colCount);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -58,49 +46,71 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
-        [[nodiscard]] This& row(size_t r) {
+        [[nodiscard]] This& row([[maybe_unused]] size_t r) {
             assert(r == 0);
             return *this;
         }
-        [[nodiscard]] const This& row(size_t r) const {
+        [[nodiscard]] const This& row([[maybe_unused]] size_t r) const {
             assert(r == 0);
             return *this;
         }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept {
-            assert(index < colCount && "[Error]: Index overflow");
-            return pVecHead + index;
-        }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept {
-            return const_cast<This&>(*this).data_ptr(index);
-        }
+        [[nodiscard]] auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix T, size_t Row>
-    class ContinuousMatrixBlock<T, Row, 1> : public ContinuousVector<ContinuousMatrixBlock<T, Row, 1>> {
-        using This = ContinuousMatrixBlock<T, Row, 1>;
+    template<Matrix M, size_t Col>
+    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M& mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
+            : ContinuousMatrixBlock(mat, fromRow, fromCol, colCount) {
+        assert(rowCount == 1);
+    }
+
+    template<Matrix M, size_t Col>
+    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol, size_t colCount)
+            : mat(mat)
+            , fromRow(fromRow)
+            , fromCol(fromCol)
+            , colCount(colCount) {
+        assert(fromRow < mat.getRow());
+        assert(fromCol + colCount <= mat.getCol());
+    }
+
+    template<Matrix M, size_t Col>
+    auto ContinuousMatrixBlock<M, 1, Col>::values(this auto&& self) noexcept {
+        auto&& v = self.mat.values();
+        using M1 = std::remove_reference<decltype(v)>::type;
+        return ContinuousMatrixBlock<M1, 1, Col>(v, self.fromRow, self.fromCol, self.colCount);
+    }
+
+    template<Matrix M, size_t Col>
+    template<int GradOrder>
+    auto ContinuousMatrixBlock<M, 1, Col>::grads(this auto&& self) noexcept {
+        auto&& g = self.mat.grads();
+        using M1 = std::remove_reference<decltype(g)>::type;
+        return ContinuousMatrixBlock<M1, 1, Col>(g, self.fromRow, self.fromCol, self.colCount);
+    }
+
+    template<Matrix M, size_t Col>
+    auto ContinuousMatrixBlock<M, 1, Col>::data(this auto&& self) noexcept {
+        return self.mat.data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row>
+    class ContinuousMatrixBlock<M, Row, 1> : public ContinuousVector<ContinuousMatrixBlock<M, Row, 1>> {
+        using This = ContinuousMatrixBlock<M, Row, 1>;
         using Base = ContinuousVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::isReverseDiff;
-        using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        PtrTy pVecHead;
+        M& mat;
+        size_t fromRow;
         size_t rowCount;
+        size_t fromCol;
     public:
-        ContinuousMatrixBlock(ContinuousMatrix<T>& mat, size_t fromRow, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
-                : ContinuousMatrixBlock(mat, fromRow, rowCount_, fromCol_) {
-            assert(colCount_ == 1);
-        }
-        ContinuousMatrixBlock(ContinuousMatrix<T>& mat, size_t fromRow, size_t rowCount_, size_t fromCol)
-                : pVecHead(mat.data_ptr(fromRow, fromCol)), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(fromCol < mat.getCol());
-        }
+        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
+        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -116,41 +126,66 @@ namespace Physica {
             assert(c == 0);
             return *this;
         }
-        [[nodiscard]] const This& col(size_t c) const {
+        [[nodiscard]] const This& col([[maybe_unused]] size_t c) const {
             assert(c == 0);
             return *this;
         }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept {
-            assert(index < rowCount && "[Error]: Index overflow");
-            return pVecHead + index;
-        }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept {
-            return const_cast<This&>(*this).data_ptr(index);
-        }
+        [[nodiscard]] auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix T>
-    class ContinuousMatrixBlock<T, 1, 1> : public ContinuousVector<ContinuousMatrixBlock<T, 1, 1>> {
-        using This = ContinuousMatrixBlock<T, 1, 1>;
+    template<Matrix M, size_t Row>
+    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
+            : ContinuousMatrixBlock(mat, fromRow, rowCount, fromCol) {
+        assert(colCount == 1);
+    }
+
+    template<Matrix M, size_t Row>
+    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol)
+            : mat(mat)
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol) {
+        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M, size_t Row>
+    auto ContinuousMatrixBlock<M, Row, 1>::values(this auto&& self) noexcept {
+        auto&& v = self.mat.values();
+        using M1 = std::remove_reference<decltype(v)>::type;
+        return ContinuousMatrixBlock<M1, Row, 1>(v, self.fromRow, self.rowCount, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row>
+    template<int GradOrder>
+    auto ContinuousMatrixBlock<M, Row, 1>::grads(this auto&& self) noexcept {
+        auto&& g = self.mat.grads();
+        using M1 = std::remove_reference<decltype(g)>::type;
+        return ContinuousMatrixBlock<M1, Row, 1>(g, self.fromRow, self.rowCount, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row>
+    auto ContinuousMatrixBlock<M, Row, 1>::data(this auto&& self) noexcept {
+        return self.mat.data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M>
+    class ContinuousMatrixBlock<M, 1, 1> : public ContinuousVector<ContinuousMatrixBlock<M, 1, 1>> {
+        using This = ContinuousMatrixBlock<M, 1, 1>;
         using Base = ContinuousVector<This>;
-    public:
-        using Base::isComplex;
-        using Base::isReverseDiff;
-        using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        PtrTy pVecHead;
+        M& mat;
+        size_t fromRow;
         size_t rowCount;
+        size_t fromCol;
     public:
-        ContinuousMatrixBlock(ContinuousMatrix<T>& mat, size_t fromRow, size_t rowCount_, size_t fromCol)
-                : pVecHead(mat.data_ptr(fromRow, fromCol)), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(fromCol < mat.getCol());
-        }
+        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -162,50 +197,73 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == 1); }
 
-        [[nodiscard]] This& row(size_t r) {
+        [[nodiscard]] This& row([[maybe_unused]] size_t r) {
             assert(r == 0);
             return *this;
         }
-        [[nodiscard]] const This& row(size_t r) const {
+        [[nodiscard]] const This& row([[maybe_unused]] size_t r) const {
             assert(r == 0);
             return *this;
         }
-        [[nodiscard]] This& col(size_t c) {
+        [[nodiscard]] This& col([[maybe_unused]] size_t c) {
             assert(c == 0);
             return *this;
         }
-        [[nodiscard]] const This& col(size_t c) const {
+        [[nodiscard]] const This& col([[maybe_unused]] size_t c) const {
             assert(c == 0);
             return *this;
         }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
-        [[nodiscard]] PtrTy data_ptr([[maybe_unused]] size_t index) noexcept {
-            assert(index == 0 && "[Error]: Index overflow");
-            return pVecHead;
-        }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept {
-            return const_cast<This&>(*this).data_ptr(index);
-        }
+        [[nodiscard]] auto data(this auto&& self) noexcept;
     };
 
-    template<Matrix T, size_t Row, size_t Col>
-    class ContinuousMatrixBlock<T, Row, Col> : public LValueMatrix<ContinuousMatrixBlock<T, Row, Col>> {
-        using This = ContinuousMatrixBlock<T, Row, Col>;
+    template<Matrix M>
+    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol)
+            : mat(mat)
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol) {
+        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M>
+    auto ContinuousMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
+        auto&& v = self.mat.values();
+        using M1 = std::remove_reference<decltype(v)>::type;
+        return ContinuousMatrixBlock<M1, 1, 1>(v, self.fromRow, self.rowCount, self.fromCol);
+    }
+
+    template<Matrix M>
+    template<int GradOrder>
+    auto ContinuousMatrixBlock<M, 1, 1>::grads(this auto&& self) noexcept {
+        auto&& g = self.mat.grads();
+        using M1 = std::remove_reference<decltype(g)>::type;
+        return ContinuousMatrixBlock<M1, 1, 1>(g, self.fromRow, self.rowCount, self.fromCol);
+    }
+
+    template<Matrix M>
+    [[nodiscard]] auto ContinuousMatrixBlock<M, 1, 1>::data(this auto&& self) noexcept {
+        return self.mat.data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    class ContinuousMatrixBlock<M, Row, Col> : public LValueMatrix<ContinuousMatrixBlock<M, Row, Col>> {
+        using This = ContinuousMatrixBlock<M, Row, Col>;
         using Base = LValueMatrix<This>;
-    public:
-        using Base::isComplex;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        T& mat;
+        M& mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(ContinuousMatrix<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -216,48 +274,58 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
     };
 
-    template<Matrix T, size_t Row, size_t Col>
-    ContinuousMatrixBlock<T, Row, Col>::ContinuousMatrixBlock(
-            ContinuousMatrix<T>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
-            : mat(mat_.getDerived())
-            , fromRow(fromRow_)
-            , rowCount(rowCount_)
-            , fromCol(fromCol_)
-            , colCount(colCount_) {
+    template<Matrix M, size_t Row, size_t Col>
+    ContinuousMatrixBlock<M, Row, Col>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+            : mat(mat)
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol)
+            , colCount(colCount) {
         assert(fromRow < mat.getRow());
         assert(fromCol < mat.getCol());
         assert((fromRow + rowCount) <= mat.getRow());
         assert((fromCol + colCount) <= mat.getCol());
     }
 
-    template<Matrix T, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < rowCount);
-        assert(col < colCount);
-        return mat.data_ptr(row + fromRow, col + fromCol);
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
+        auto&& v = self.mat.values();
+        using M1 = std::remove_reference<decltype(v)>::type;
+        return ContinuousMatrixBlock<M1, Row, Col>(v, self.fromRow, self.rowCount, self.fromCol, self.colCount);
     }
 
-    template<Matrix T, size_t Row, size_t Col>
-    auto ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
-        assert(row < rowCount);
-        assert(col < colCount);
-        return mat.data_ptr(row + fromRow, col + fromCol);
+    template<Matrix M, size_t Row, size_t Col>
+    template<int GradOrder>
+    auto ContinuousMatrixBlock<M, Row, Col>::grads(this auto&& self) noexcept {
+        auto&& g = self.mat.template grads<GradOrder>();
+        using M1 = std::remove_reference<decltype(g)>::type;
+        return ContinuousMatrixBlock<M1, Row, Col>(g, self.fromRow, self.rowCount, self.fromCol, self.colCount);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.rowCount);
+        assert(col < self.colCount);
+        return self.mat.data_ptr(row + self.fromRow, col + self.fromCol);
     }
 }
 
 namespace Physica {
-    template<Matrix T, size_t Row, size_t Col>
-    class Traits<ContinuousMatrixBlock<T, Row, Col>> {
+    template<Matrix M, size_t Row, size_t Col>
+    class Traits<ContinuousMatrixBlock<M, Row, Col>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static int Option = T::Option;
+        using ScalarType = M::ScalarType;
+        constexpr static int Option = M::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,9 +30,6 @@ namespace Physica {
     public:
         using Base = LValueVector<FlattenL<T>>;
         using typename Base::ScalarType;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     public:
         FlattenL(T& tensor_) : tensor(tensor_) {}
         FlattenL(const This&) = default;
@@ -47,18 +44,12 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.getSize(); }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 
     template<Tensor T>
-    auto FlattenL<T>::data_ptr(size_t index) noexcept -> PtrTy {
-        return tensor.data_ptr(tensor.toIndexND(index));
-    }
-
-    template<Tensor T>
-    auto FlattenL<T>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    auto FlattenL<T>::data_ptr(this auto&& self, size_t index) noexcept {
+        return self.tensor.data_ptr(self.tensor.toIndexND(index));
     }
 }
 

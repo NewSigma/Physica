@@ -50,8 +50,8 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static unsigned int getDim() { return Dim; }
-        [[nodiscard]] __host__ __device__ const LatticeMatrix& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] __host__ __device__ const PositionMatrix& getPos() const noexcept { return pos; }
+        [[nodiscard]] __host__ __device__ auto&& getLattice(this auto&& self) noexcept { return self.lattice; }
+        [[nodiscard]] __host__ __device__ auto&& getPos(this auto&& self) noexcept { return self.pos; }
         [[nodiscard]] __host__ __device__ Type getType() const noexcept { return type; }
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return pos.getRow(); }
         [[nodiscard]] __device__ T getVolume() const noexcept { return getVolume(lattice); }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,8 +34,6 @@ namespace Physica {
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
         using IterF = PtrIteratorF<This>;
         using IterR = PtrIteratorR<This>;
         using IterCF = PtrIteratorF<const This>;
@@ -85,15 +83,12 @@ namespace Physica {
         void random_any(auto& distribution);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        using Base::data;
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] auto data(this auto&&) noexcept;
 
-        [[nodiscard]] const auto& values() const noexcept { return v; }
-        [[nodiscard]] auto& values() noexcept { return v; }
-        [[nodiscard]] const auto& grads() const noexcept { return g; }
-        [[nodiscard]] auto& grads() noexcept { return g; }
+        [[nodiscard]] auto&& values(this auto&& self) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto&& grads(this auto&&) noexcept;
         /* Static members */
         template<RNG R>
         [[nodiscard]] static This random_uniform(size_t len);

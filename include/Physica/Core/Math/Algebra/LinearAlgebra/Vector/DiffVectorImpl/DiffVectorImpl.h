@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -118,14 +118,25 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert(index < getLength() && "[Error]: Index out of range");
-        return PtrTy(v.data_ptr(index), g.data_ptr(index));
+    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data(this auto&& self) noexcept {
+        constexpr bool IsConst = std::is_const<std::remove_reference_t<decltype(self)>>::value;
+        using U = Diff<T, Mode, Order>;
+        using RetTy = std::conditional<IsConst, typename U::ConstPtrTy, typename U::PtrTy>::type;
+        return RetTy(self.v.data(), self.g.data());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    auto DenseVector<Diff<T, Mode, Order>, Length, Allocator>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    auto&& DenseVector<Diff<T, Mode, Order>, Length, Allocator>::values(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.v);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    template<int GradOrder>
+    auto&& DenseVector<Diff<T, Mode, Order>, Length, Allocator>::grads(this auto&& self) noexcept {
+        if constexpr (GradOrder == 1)
+            return forward_like<decltype(self)>(self.g);
+        else
+            return forward_like<decltype(self)>(self.g.template grads<GradOrder - 1>());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>

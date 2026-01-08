@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -203,7 +203,7 @@ namespace Physica {
         [[nodiscard]] auto imags() const noexcept;
         [[nodiscard]] auto squaredNorms() const noexcept;
         [[nodiscard]] auto norms() const noexcept;
-        [[nodiscard]] decltype(auto) values() const noexcept;
+        [[nodiscard]] decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads() const noexcept;
         /* Getters */

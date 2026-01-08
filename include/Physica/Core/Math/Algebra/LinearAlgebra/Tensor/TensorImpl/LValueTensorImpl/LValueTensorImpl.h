@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -75,6 +75,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    decltype(auto) LValueTensor<Derived>::operator[](this auto&& self, size_t x, size_t y, size_t z) {
+        return *self.data_ptr({x, y, z});
+    }
+
+    template<class Derived>
+    decltype(auto) LValueTensor<Derived>::operator[](this auto&& self, Index3D index) {
+        return *self.data_ptr(index);
+    }
+
+    template<class Derived>
     void LValueTensor<Derived>::forND(std::invocable<T&, IndexType> auto fn) {
         Physica::forND(Base::getShape(), [this, fn](const IndexType& index) {
             fn(operator[](index), index);
@@ -138,6 +148,11 @@ namespace Physica {
     template<RNG R>
     void LValueTensor<Derived>::random_normal() {
         flatten().template random_normal<R>();
+    }
+
+    template<class Derived>
+    auto LValueTensor<Derived>::data_ptr(this auto&& self, Index3D index) noexcept {
+        return self.getDerived().data_ptr(index);
     }
 
     template<class Derived>

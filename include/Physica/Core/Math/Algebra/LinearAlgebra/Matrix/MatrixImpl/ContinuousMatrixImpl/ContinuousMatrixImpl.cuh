@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -254,6 +254,26 @@ namespace Physica {
     template<RNG R>
     void device_obj<ContinuousMatrix<Derived>>::random_normal() {
         Base::getDerived().flatten().template random_normal<R>();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::data() noexcept {
+        return Base::getDerived().data();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::data() const noexcept {
+        return Base::getDerived().data();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
+        assert(r < self.getRow());
+        assert(c < self.getCol());
+        if constexpr (isRowMatrix)
+            return self.data() + r * self.getCol() + c;
+        else
+            return self.data() + c * self.getRow() + r;
     }
 
     template<class Derived>

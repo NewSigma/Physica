@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,8 +31,6 @@ namespace Physica {
     protected:
         using typename VectorBase::T;
         using typename VectorBase::Tr;
-        using typename VectorBase::PtrTy;
-        using typename VectorBase::ConstPtrTy;
     public:
         ~FFTKSpace() = default;
         /* Operators */
@@ -47,11 +45,11 @@ namespace Physica {
         using VectorBase::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
+        using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ size_t getRSpaceSize() const noexcept { return Base::getDerived().getRSpaceSize(); }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -89,15 +87,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 1>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert(index < getLength());
-        return Base::getDerived().asComplexBuffer() + index;
-
-    }
-
-    template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 1>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    __host__ __device__ auto FFTKSpace<Derived, 1>::data(this auto&& self) noexcept {
+        return self.getDerived().asComplexBuffer();
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
@@ -109,8 +100,6 @@ namespace Physica {
         using MatrixBase = LValueMatrix<This>;
     protected:
         using typename MatrixBase::T;
-        using typename MatrixBase::PtrTy;
-        using typename MatrixBase::ConstPtrTy;
     public:
         ~FFTKSpace() = default;
         /* Operators */
@@ -123,10 +112,10 @@ namespace Physica {
         using MatrixBase::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
+        using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -148,15 +137,10 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < getRow());
-        assert(col < getCol());
-        return Base::getDerived().asComplexBuffer() + row * getCol() + col;
-    }
-
-    template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(row, col);
+    __host__ __device__ auto FFTKSpace<Derived, 2>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.getRow());
+        assert(col < self.getCol());
+        return self.getDerived().asComplexBuffer() + row * self.getCol() + col;
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
@@ -168,8 +152,6 @@ namespace Physica {
         using TensorBase = LValueTensor<This>;
     protected:
         using typename TensorBase::T;
-        using typename TensorBase::PtrTy;
-        using typename TensorBase::ConstPtrTy;
     public:
         ~FFTKSpace() = default;
         /* Operators */
@@ -182,13 +164,13 @@ namespace Physica {
         using TensorBase::resize;
         void resize([[maybe_unused]] Index3D size);
         /* Getters */
+        using Base::getDerived;
         [[nodiscard]] size_t dim(int index) const noexcept { return getShape()[index]; }
         [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getKSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(Index3D index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(Index3D index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, Index3D index) noexcept;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -217,16 +199,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 3>::data_ptr(Index3D index) noexcept -> PtrTy {
-        assert(index[0] < getDimX());
-        assert(index[1] < getDimY());
-        assert(index[2] < getDimZ());
-        return Base::getDerived().asComplexBuffer() + (index[0] * getDimY() + index[1]) * getDimZ() + index[2];
-    }
-
-    template<class Derived>
-    __host__ __device__ auto FFTKSpace<Derived, 3>::data_ptr(Index3D index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    __host__ __device__ auto FFTKSpace<Derived, 3>::data_ptr(this auto&& self, Index3D index) noexcept {
+        assert(index[0] < self.getDimX());
+        assert(index[1] < self.getDimY());
+        assert(index[2] < self.getDimZ());
+        return self.getDerived().asComplexBuffer() + (index[0] * self.getDimY() + index[1]) * self.getDimZ() + index[2];
     }
 }
 

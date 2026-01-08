@@ -449,11 +449,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::values() const noexcept {
+    decltype(auto) RValueMatrix<Derived>::values(this auto&& self) noexcept {
         if constexpr (isDiffable)
-            return ValueMatrix<Derived>(Base::getDerived());
+            return ValueMatrix<Derived>(self);
         else
-            return Base::getDerived();
+            return std::forward<decltype(self)>(self);
     }
 
     template<class Derived>

@@ -386,12 +386,12 @@ namespace Physica {
     template<class Derived>
     auto RValueVector<Derived>::sum() const noexcept -> CoDiff<T> {
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
+        const auto& v = Base::getDerived();
         if constexpr (isReverseDiff) {
-            auto result = co_yield values().sum();
-            Base::getDerived().reverse(result.grad());
+            auto result = co_yield v.values().sum();
+            v.reverse(result.grad());
         }
         else if constexpr (Internal::EnableSIMD<Derived>::value) {
-            const auto& v = Base::getDerived();
             auto buffer = PacketType::zeros();
             if constexpr (SizeAtCompile != Dynamic) {
                 constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
@@ -501,9 +501,9 @@ namespace Physica {
         const Derived& v = Base::getDerived();
         Tv m;
         if constexpr (isComplex)
-            m = values().reals().max();
+            m = v.values().reals().max();
         else
-            m = values().max();
+            m = v.values().max();
 
         auto expr1 = v - m;
         auto expr2 = exp(expr1);
@@ -655,11 +655,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) RValueVector<Derived>::values() const noexcept {
+    decltype(auto) RValueVector<Derived>::values(this auto&& self) noexcept {
         if constexpr (isDiffable)
-            return ValueVector<Derived>(Base::getDerived());
+            return ValueVector<Derived>(self);
         else
-            return Base::getDerived();
+            return std::forward<decltype(self)>(self);
     }
 
     template<class Derived>

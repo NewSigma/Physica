@@ -57,4 +57,29 @@ namespace Physica {
 
     template<class T> requires(std::is_reference<T>::value)
     using LazyDestroy = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T>::type;
+    /**
+     * std::forward_like does not work if we use GCC 14.2.
+     * FIXME: Simply remove it in the future
+     *
+     * Reference:
+     * [1] GH101614; https://bgithub.xyz/llvm/llvm-project/issues/101614
+     */
+    template<typename Tp, typename Up>
+    [[nodiscard]] constexpr decltype(auto) forward_like(Up&& x) noexcept {
+        using namespace std;
+        constexpr bool _as_rval = is_rvalue_reference_v<Tp&&>;
+        if constexpr (is_const_v<remove_reference_t<Tp>>) {
+            using Up2 = remove_reference_t<Up>;
+            if constexpr (_as_rval)
+                return static_cast<const Up2&&>(x);
+            else
+                return static_cast<const Up2&>(x);
+        }
+        else {
+            if constexpr (_as_rval)
+                return static_cast<remove_reference_t<Up>&&>(x);
+            else
+                return x;
+        }
+    }
 }

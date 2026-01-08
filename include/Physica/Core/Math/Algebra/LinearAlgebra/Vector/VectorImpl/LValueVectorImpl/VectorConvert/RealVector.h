@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,8 +27,6 @@ namespace Physica {
         using Base = LValueVector<This>;
     protected:
         using typename Base::T;
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         V& v;
     public:
@@ -44,20 +42,14 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
 
     template<class V>
-    auto RealVectorL<V>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert(index < Base::getLength() && "[Error]: Index out of range");
-        return v[index].real_ptr();
-    }
-
-    template<class V>
-    auto RealVectorL<V>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    auto RealVectorL<V>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.getLength() && "[Error]: Index out of range");
+        return self.v[index].real_ptr();
     }
 }
 

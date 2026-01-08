@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,8 +38,6 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         constexpr static int DiffOrder = ScalarType::Order;
         constexpr static int DataDim = 1 + (DiffOrder > 0);
@@ -58,8 +56,7 @@ namespace Physica {
         This& operator=(const This& v) = delete;
         This& operator=(This&& v) noexcept = delete;
         Derived& operator=(const Scalar auto& x);
-        template<ExecutePolicy P = Sequential>
-        Derived& operator=(const Vector auto& v);
+        using Base::operator=;
         using Base::operator+=;
         /* Operations */
         template<ExecutePolicy P = Sequential>
@@ -117,14 +114,10 @@ namespace Physica {
 
         const DataSetType read(const H5Loc& loc, const char* name);
         DataSetType write(H5Loc& loc, const char* name) const;
-
-        [[nodiscard]] ValuesRtnTy values() noexcept;
-        [[nodiscard]] const ValuesRtnTy values() const noexcept;
-        template<int GradOrder = 1>
-        auto grads() const noexcept;
         /* Getters */
-        [[nodiscard]] PtrTy data() { return Base::data_ptr(0); }
-        [[nodiscard]] ConstPtrTy data() const { return Base::data_ptr(0); }
+        [[nodiscard]] auto data() noexcept;
+        [[nodiscard]] auto data() const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     protected:
         ContinuousVector() = default;
         ContinuousVector(const This&) = default;
@@ -138,4 +131,3 @@ namespace Physica {
 #ifdef PHYSICA_MKL
     #include "ContinuousVectorImpl/ContinuousVector_MKL.h"
 #endif
-#include "ContinuousVectorImpl/VectorConvert.h"

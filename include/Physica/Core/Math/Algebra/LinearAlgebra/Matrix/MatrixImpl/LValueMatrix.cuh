@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,10 +38,6 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
-        using PtrTy = T::PtrTy;
-        using ConstPtrTy = T::ConstPtrTy;
-        using RefTy = T::RefTy;
-        using ConstRefTy = T::ConstRefTy;
     public:
         /* Operators */
         This& operator=(const This& m) = delete;
@@ -61,10 +57,9 @@ namespace Physica {
         __host__ __device__ void operator+=(const Matrix auto& m);
         __host__ __device__ void operator-=(const Matrix auto& m);
 
-        [[nodiscard]] __device__ RefTy operator[](size_t row, size_t col);
-        [[nodiscard]] __device__ ConstRefTy operator[](size_t row, size_t col) const;
+        [[nodiscard]] __device__ decltype(auto) operator[](this auto&& self, size_t row, size_t col);
         /* Operations */
-        [[nodiscard]] __device__ ConstRefTy calc(size_t row, size_t col) const { return operator[](row, col); }
+        [[nodiscard]] __device__ decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
         [[nodiscard]] __device__ Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
         void reverse(const Matrix auto& grad) const noexcept;
@@ -112,10 +107,8 @@ namespace Physica {
         /* Getters */
         using Base::getRow;
         using Base::getCol;
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
-        [[nodiscard]] __device__ RefTy refFromMajorMinor(size_t major, size_t minor) noexcept;
-        [[nodiscard]] __device__ ConstRefTy refFromMajorMinor(size_t major, size_t minor) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
+        [[nodiscard]] __device__ decltype(auto) refFromMajorMinor(this auto&&, size_t major, size_t minor) noexcept;
     protected:
         device_obj() = default;
         device_obj(const This&) = default;

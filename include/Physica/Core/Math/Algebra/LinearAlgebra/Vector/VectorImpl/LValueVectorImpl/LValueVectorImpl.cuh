@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -105,13 +105,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<LValueVector<Derived>>::operator[](size_t index) -> RefTy {
-        return *data_ptr(index);
-    }
-
-    template<class Derived>
-    __device__ auto device_obj<LValueVector<Derived>>::operator[](size_t index) const -> ConstRefTy {
-        return const_cast<This&>(*this)[index];
+    __device__ decltype(auto) device_obj<LValueVector<Derived>>::operator[](this auto&& self, size_t index) {
+        return *self.data_ptr(index);
     }
 
     template<class Derived>
@@ -186,13 +181,8 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert(index < Base::getLength());
-        return Base::getDerived().data_ptr(index);
-    }
-
-    template<class Derived>
-    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.getLength());
+        return self.getDerived().data_ptr(index);
     }
 }

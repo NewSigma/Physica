@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,11 +28,6 @@ namespace Physica {
         T& mat;
     public:
         using Base = ContinuousVector<This>;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
-        using typename Base::RefTy;
-        using typename Base::ConstRefTy;
     public:
         FlattenC(ContinuousMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         FlattenC(const This&) = default;
@@ -41,29 +36,16 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Operators */
-        [[nodiscard]] RefTy operator[](size_t index) { return *data_ptr(index); }
-        [[nodiscard]] ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] auto data(this auto&& self) noexcept;
     };
 
     template<Matrix T>
-    auto FlattenC<T>::data_ptr(size_t index) noexcept -> PtrTy {
-        const size_t major = index / mat.getMaxMinor();
-        const size_t minor = index % mat.getMaxMinor();
-        const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
-        const size_t col = MatrixOption::colFromMajorMinor<T>(major, minor);
-        return mat.data_ptr(row, col);
-    }
-
-    template<Matrix T>
-    auto FlattenC<T>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    auto FlattenC<T>::data(this auto&& self) noexcept {
+        return self.mat.data();
     }
 }
 

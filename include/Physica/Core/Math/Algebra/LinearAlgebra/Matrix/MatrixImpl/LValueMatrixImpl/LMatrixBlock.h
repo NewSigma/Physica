@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,23 +24,20 @@
 namespace Physica {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class LMatrixBlock;
 
-    template<Matrix T, size_t Col>
-    class LMatrixBlock<T, 1, Col> : public LValueVector<LMatrixBlock<T, 1, Col>> {
-        using This = LMatrixBlock<T, 1, Col>;
+    template<Matrix M, size_t Col>
+    class LMatrixBlock<M, 1, Col> : public LValueVector<LMatrixBlock<M, 1, Col>> {
+        using This = LMatrixBlock<M, 1, Col>;
         using Base = LValueVector<This>;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        T& mat;
+        M& mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
+        LMatrixBlock(M& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
             assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
@@ -54,30 +51,29 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept {
-            assert(index < colCount);
-            return mat.data_ptr(fromRow, fromCol + index);
-        }
-        using Base::data_ptr;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
-    template<Matrix T, size_t Row>
-    class LMatrixBlock<T, Row, 1> : public LValueVector<LMatrixBlock<T, Row, 1>> {
-        using This = LMatrixBlock<T, Row, 1>;
+    template<Matrix M, size_t Col>
+    auto LMatrixBlock<M, 1, Col>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.colCount);
+        return self.mat.data_ptr(self.fromRow, self.fromCol + index);
+    }
+
+    template<Matrix M, size_t Row>
+    class LMatrixBlock<M, Row, 1> : public LValueVector<LMatrixBlock<M, Row, 1>> {
+        using This = LMatrixBlock<M, Row, 1>;
         using Base = LValueVector<This>;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        T& mat;
+        M& mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+        LMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
                 : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
@@ -92,30 +88,29 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept {
-            assert(index < rowCount);
-            return mat.data_ptr(fromRow + index, fromCol);
-        }
-        using Base::data_ptr;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
-    template<Matrix T>
-    class LMatrixBlock<T, 1, 1> : public LValueVector<LMatrixBlock<T, 1, 1>> {
-        using This = LMatrixBlock<T, 1, 1>;
+    template<Matrix M, size_t Row>
+    auto LMatrixBlock<M, Row, 1>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.rowCount);
+        return self.mat.data_ptr(self.fromRow + index, self.fromCol);
+    }
+
+    template<Matrix M>
+    class LMatrixBlock<M, 1, 1> : public LValueVector<LMatrixBlock<M, 1, 1>> {
+        using This = LMatrixBlock<M, 1, 1>;
         using Base = LValueVector<This>;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        T& mat;
+        M& mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+        LMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
                 : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
@@ -130,31 +125,30 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
-        [[nodiscard]] PtrTy data_ptr([[maybe_unused]] size_t index) noexcept {
-            assert(index == 0 && "[Error]: Index overflow");
-            return mat.data_ptr(fromRow, fromCol);
-        }
-        using Base::data_ptr;
+        [[nodiscard]] auto data_ptr(this auto&& self, [[maybe_unused]] size_t index) noexcept;
     };
 
-    template<Matrix T>
-    class LMatrixBlock<T, Dynamic, Dynamic> : public LValueMatrix<LMatrixBlock<T, Dynamic, Dynamic>> {
-        using This = LMatrixBlock<T, Dynamic, Dynamic>;
+    template<Matrix M>
+    auto LMatrixBlock<M, 1, 1>::data_ptr(this auto&& self, [[maybe_unused]] size_t index) noexcept {
+        assert(index == 0 && "[Error]: Index overflow");
+        return self.mat.data_ptr(self.fromRow, self.fromCol);
+    }
+
+    template<Matrix M>
+    class LMatrixBlock<M, Dynamic, Dynamic> : public LValueMatrix<LMatrixBlock<M, Dynamic, Dynamic>> {
+        using This = LMatrixBlock<M, Dynamic, Dynamic>;
         using Base = LValueMatrix<This>;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
-        T& mat;
+        M& mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        LMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
         LMatrixBlock(const This&) = delete;
         LMatrixBlock(This&&) noexcept = delete;
         ~LMatrixBlock() = default;
@@ -166,12 +160,11 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getCol() const noexcept { return colCount; }
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
-        using Base::data_ptr;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t row, size_t col) noexcept;
     };
 
-    template<Matrix T>
-    LMatrixBlock<T, Dynamic, Dynamic>::LMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+    template<Matrix M>
+    LMatrixBlock<M, Dynamic, Dynamic>::LMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(mat_)
             , fromRow(fromRow_)
             , rowCount(rowCount_)
@@ -181,20 +174,20 @@ namespace Physica {
         assert((fromCol + colCount) <= mat.getCol());
     }
 
-    template<Matrix T>
-    auto LMatrixBlock<T, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < rowCount);
-        assert(col < colCount);
-        return mat.data_ptr(row + fromRow, col + fromCol);
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.rowCount);
+        assert(col < self.colCount);
+        return self.mat.data_ptr(row + self.fromRow, col + self.fromCol);
     }
 }
 
 namespace Physica {
-    template<Matrix T, size_t Row, size_t Col>
-    class Traits<LMatrixBlock<T, Row, Col>> {
+    template<Matrix M, size_t Row, size_t Col>
+    class Traits<LMatrixBlock<M, Row, Col>> {
     public:
-        using ScalarType = T::ScalarType;
-        constexpr static int Option = T::Option;
+        using ScalarType = M::ScalarType;
+        constexpr static int Option = M::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;

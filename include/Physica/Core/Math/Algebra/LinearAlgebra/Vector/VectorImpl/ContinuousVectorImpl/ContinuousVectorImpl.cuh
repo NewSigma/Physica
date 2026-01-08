@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -212,6 +212,21 @@ namespace Physica {
         return buffer.write(loc, name);
     }
 #endif
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::data() noexcept {
+        return Base::getDerived().data();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::data() const noexcept {
+        return Base::getDerived().data();
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<ContinuousVector<Derived>>::data_ptr(this auto&& self, size_t index) noexcept {
+        return self.data() + index;
+    }
 
     template<class Derived>
     template<Vector V>

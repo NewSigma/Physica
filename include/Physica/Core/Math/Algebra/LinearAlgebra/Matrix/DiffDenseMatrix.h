@@ -41,8 +41,6 @@ namespace Physica {
         using rebind_scalar = DenseMatrix<U, Option, Row, Col>;
     protected:
         using typename Base::Tv;
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         using ValueMatrix = DenseMatrix<T, Option, Row, Col>;
         using VectorIniter = ValueMatrix::VectorIniter;
@@ -90,9 +88,7 @@ namespace Physica {
         void swap_row(size_t r1, size_t r2) noexcept;
         void swap_col(size_t c1, size_t c2) noexcept;
         /* Getters */
-        using Base::data;
-        [[nodiscard]] PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] auto data(this auto&&) noexcept;
         [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
         [[nodiscard]] bool empty() const noexcept { return v.empty(); }

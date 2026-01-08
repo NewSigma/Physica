@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -62,6 +62,11 @@ namespace Physica {
     template<tparams>
     auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::toHost() const -> host_obj {
         return host_obj(Storage::toHost());
+    }
+
+    template<tparams>
+    auto&& device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::flatten(this auto&& self) noexcept {
+        return self.asArray();
     }
 
     template<tparams>

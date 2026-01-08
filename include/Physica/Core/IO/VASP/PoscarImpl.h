@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -104,7 +104,7 @@ namespace Physica {
     template<Scalar T>
     void Poscar<T>::standrizeLattice() {
         using MatrixType = LatticeMatrix::ColMatrix;
-        MatrixType temp = lattice.transpose();
+        MatrixType temp = Base::getLattice().transpose();
         Vector3D<T> buffer{};
         temp.col(0).householder(buffer);
         applyHouseholder(buffer, temp);
@@ -120,7 +120,7 @@ namespace Physica {
             }
         }
         temp[1, 0] = temp[2, 0] = temp[2, 1] = T(0); //Clear numeric error
-        lattice = temp.transpose();
+        Base::getLattice() = temp.transpose();
     }
     /**
      * Extend the cell in z direction, with all distance of atoms in cell not changed. Use for 2D material only
@@ -146,7 +146,7 @@ namespace Physica {
     template<Scalar T>
     void Poscar<T>::toQECell(std::ostream& os) const {
         os << "CELL_PARAMETERS (angstrom)\n";
-        os << lattice << '\n';
+        os << Base::getLattice() << '\n';
 
         os << "ATOMIC_POSITIONS (angstrom)\n";
         size_t atomIndex = 0;
@@ -154,7 +154,7 @@ namespace Physica {
             const char* symbol = PhyConst<SI>::elementSymbol[elementTypes[i]];
             for (size_t j = 0; j < numOfEachType[i]; ++j) {
                 os << symbol << ' ';
-                os << pos.row(atomIndex).format().setPrefix("").setSuffix("").setSeperator(" ");
+                os << Base::getPos().row(atomIndex).format().setPrefix("").setSuffix("").setSeperator(" ");
                 os << '\n';
                 atomIndex += 1;
             }
@@ -171,8 +171,9 @@ namespace Physica {
 
     template<Scalar T>
     auto Poscar<T>::getCrystalSystem(double precision) const noexcept -> CrystalSystem {
-        const auto norm_list = Array<T, 3>::generate([](size_t i) { return lattice.row(i); });
+        const auto norm_list = Array<T, 3>::generate([this](size_t i) { return Base::getLattice().row(i); });
         const auto angle_list = Array<T, 3>::generate([this](int i) {
+            auto& lattice = Base::getLattice();
             auto v1 = lattice.row(i);
             auto v2 = lattice.row((i + 1) % 3);
             return arccos(v1 * v2 / (v1.norm() * v2.norm()));
@@ -264,6 +265,7 @@ namespace Physica {
     template<Scalar T>
     void Poscar<T>::readAtomPos(std::istream& is) {
         const size_t atomCount = sumNumOfEachType();
+        auto& pos = Base::getPos();
         pos.resize(atomCount, 3);
         size_t i = 0;
         for (; i < atomCount - 1; i++) {
@@ -283,13 +285,15 @@ namespace Physica {
 
     template<Scalar T>
     void Poscar<T>::extendInZ_direct(T factor) {
-        assert(type == Type::Direct);
+        assert(Base::type == Type::Direct);
+
+        auto& lattice = Base::getLattice();
         assert(lattice.operator[](0, 2).isZero());
         assert(lattice.operator[](1, 2).isZero());
         lattice[2, 2] *= factor;
 
         const T inv_factor = reciprocal(factor);
-
+        auto& pos = Base::getPos();
         auto col = pos.col(2);
         for (size_t i = 0; i < col.getLength(); ++i) {
             if (col[i] > T(0.5))

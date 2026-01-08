@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,9 +27,6 @@ namespace Physica {
         using Base = LValueVector<TensorFiber<X>>;
         using IndexType = X::IndexType;
         constexpr static int NDim = X::NDim;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     private:
         X& tensor;
         IndexType index;
@@ -46,8 +43,7 @@ namespace Physica {
         void resize(size_t length);
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return tensor.dim(dim); }
-        [[nodiscard]] PtrTy data_ptr(size_t i) noexcept;
-        using Base::data_ptr;
+        [[nodiscard]] auto data_ptr(this auto&& self, size_t i) noexcept;
     };
 
     template<Tensor X>
@@ -67,10 +63,10 @@ namespace Physica {
     }
 
     template<Tensor X>
-    auto TensorFiber<X>::data_ptr(size_t i) noexcept -> PtrTy {
-        auto idx = index;
-        idx[dim] = i;
-        return tensor.data_ptr(idx);
+    auto TensorFiber<X>::data_ptr(this auto&& self, size_t i) noexcept {
+        auto idx = self.index;
+        idx[self.dim] = i;
+        return self.tensor.data_ptr(idx);
     }
 }
 

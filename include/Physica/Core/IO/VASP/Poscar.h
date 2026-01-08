@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,9 +42,6 @@ namespace Physica {
         using Type = Base::Type;
         using ElementTypeArray = Array<uint8_t>;
     private:
-        using Base::lattice;
-        using Base::pos;
-        using Base::type;
         ElementTypeArray elementTypes;
         Array<size_t> numOfEachType;
     public:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,9 +29,6 @@ namespace Physica {
         const device_obj<T>& mat;
     public:
         using Base = device_obj<LValueVector<host_obj>>;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     public:
         __host__ __device__ device_obj(const device_obj<LValueMatrix<T>>& mat_) : mat(mat_) {}
         device_obj(const This&) = default;
@@ -45,22 +42,17 @@ namespace Physica {
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
     };
 
     template<Matrix T>
-    __host__ __device__ auto device_obj<FlattenL<T>>::data_ptr(size_t index) noexcept -> PtrTy {
+    __host__ __device__ auto device_obj<FlattenL<T>>::data_ptr(this auto&& self, size_t index) noexcept {
+        auto&& mat = std::forward<decltype(self)>(self).mat;
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
         const size_t col = MatrixOption::colFromMajorMinor<T>(major, minor);
         return mat.data_ptr(row, col);
-    }
-
-    template<Matrix T>
-    __host__ __device__ auto device_obj<FlattenL<T>>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
     }
 }
 

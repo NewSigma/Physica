@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,9 +27,6 @@ namespace Physica {
         using Base = LValueVector<This>;
 
         T& mat;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
     public:
         FlattenL(LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         FlattenL(const This&) = default;
@@ -44,22 +41,16 @@ namespace Physica {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] auto data_ptr(this auto&&, size_t index) noexcept;
     };
 
     template<Matrix T>
-    auto FlattenL<T>::data_ptr(size_t index) noexcept -> PtrTy {
-        const size_t major = index / mat.getMaxMinor();
-        const size_t minor = index % mat.getMaxMinor();
+    auto FlattenL<T>::data_ptr(this auto&& self, size_t index) noexcept {
+        const size_t major = index / self.mat.getMaxMinor();
+        const size_t minor = index % self.mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
         const size_t col = MatrixOption::colFromMajorMinor<T>(major, minor);
-        return mat.data_ptr(row, col);
-    }
-
-    template<Matrix T>
-    auto FlattenL<T>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+        return self.mat.data_ptr(row, col);
     }
 }
 

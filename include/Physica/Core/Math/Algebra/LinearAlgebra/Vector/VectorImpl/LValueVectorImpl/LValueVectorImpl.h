@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -80,17 +80,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueVector<Derived>::operator[](size_t index) -> RefTy {
-        return *data_ptr(index);
+    decltype(auto) LValueVector<Derived>::operator[](this auto&& self, size_t index) {
+        return *self.data_ptr(index);
     }
 
     template<class Derived>
-    auto LValueVector<Derived>::operator[](size_t index) const -> ConstRefTy {
-        return *data_ptr(index);
-    }
-
-    template<class Derived>
-    auto LValueVector<Derived>::calc(size_t index) const -> ConstRefTy {
+    decltype(auto) LValueVector<Derived>::calc(size_t index) const {
         return operator[](index);
     }
 
@@ -134,7 +129,7 @@ namespace Physica {
     template<class Derived>
     auto LValueVector<Derived>::sum() const -> CoDiff<T> {
         if constexpr (isReverseDiff) {
-            auto result = co_yield Base::values().sum();
+            auto result = co_yield Base::getDerived().values().sum();
             const auto& grad = result.grad();
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);
@@ -308,13 +303,8 @@ namespace Physica {
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */
     template<class Derived>
-    auto LValueVector<Derived>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert(index < Base::getLength() && "[Error]: Index out of range");
-        return Base::getDerived().data_ptr(index);
-    }
-
-    template<class Derived>
-    auto LValueVector<Derived>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+    auto LValueVector<Derived>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.getLength() && "[Error]: Index out of range");
+        return self.getDerived().data_ptr(index);
     }
 }

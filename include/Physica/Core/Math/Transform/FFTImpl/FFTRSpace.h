@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,9 +33,6 @@ namespace Physica {
     public:
         using typename VectorBase::ScalarType;
         using VectorBase::isComplex;
-    protected:
-        using typename VectorBase::PtrTy;
-        using typename VectorBase::ConstPtrTy;
     public:
         ~FFTRSpace() = default;
         /* Operators */
@@ -48,10 +45,10 @@ namespace Physica {
         using VectorBase::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
+        using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data(this auto&&) noexcept;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -73,17 +70,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) noexcept -> PtrTy {
-        assert(index < getLength());
+    __host__ __device__ auto FFTRSpace<Derived, 1>::data(this auto&& self) noexcept {
         if constexpr (isComplex)
-            return Base::getDerived().asComplexBuffer() + index;
+            return self.getDerived().asComplexBuffer();
         else
-            return Base::getDerived().asRealBuffer() + index;
-    }
-
-    template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 1>::data_ptr(size_t index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
+            return self.getDerived().asRealBuffer();
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
@@ -96,9 +87,6 @@ namespace Physica {
     public:
         using typename MatrixBase::ScalarType;
         using MatrixBase::isComplex;
-    protected:
-        using typename MatrixBase::PtrTy;
-        using typename MatrixBase::ConstPtrTy;
     public:
         ~FFTRSpace() = default;
         /* Operators */
@@ -111,10 +99,10 @@ namespace Physica {
         using MatrixBase::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
+        using Base::getDerived;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t row, size_t col) noexcept;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -136,21 +124,16 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) noexcept -> PtrTy {
-        assert(row < getRow());
-        assert(col < getCol());
-        const size_t numColumn = getCol();
+    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
+        assert(row < self.getRow());
+        assert(col < self.getCol());
+        const size_t numColumn = self.getCol();
         if constexpr (isComplex)
-            return Base::getDerived().asComplexBuffer() + row * numColumn + col;
+            return self.getDerived().asComplexBuffer() + row * numColumn + col;
         else {
             const size_t shift = (numColumn / 2 + 1) * 2;
-            return Base::getDerived().asRealBuffer() + row * shift + col;
+            return self.getDerived().asRealBuffer() + row * shift + col;
         }
-    }
-
-    template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(row, col);
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
@@ -163,9 +146,6 @@ namespace Physica {
     public:
         using typename TensorBase::ScalarType;
         using TensorBase::isComplex;
-    protected:
-        using typename TensorBase::PtrTy;
-        using typename TensorBase::ConstPtrTy;
     public:
         ~FFTRSpace() = default;
         /* Operators */
@@ -178,13 +158,13 @@ namespace Physica {
         using TensorBase::resize;
         void resize([[maybe_unused]] Index3D size);
         /* Getters */
+        using Base::getDerived;
         [[nodiscard]] size_t dim(int index) const noexcept { return getShape()[index]; }
         [[nodiscard]] const auto& getShape() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getRSpaceSize()[2]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(Index3D index) noexcept;
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(Index3D index) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, Index3D index) noexcept;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -213,21 +193,16 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) noexcept -> PtrTy {
-        assert(index[0] < getDimX());
-        assert(index[1] < getDimY());
-        assert(index[2] < getDimZ());
+    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(this auto&& self, Index3D index) noexcept {
+        assert(index[0] < self.getDimX());
+        assert(index[1] < self.getDimY());
+        assert(index[2] < self.getDimZ());
         if constexpr (isComplex)
-            return Base::getDerived().asComplexBuffer() + (index[0] * getDimY() + index[1]) * getDimZ() + index[2];
+            return self.getDerived().asComplexBuffer() + (index[0] * self.getDimY() + index[1]) * self.getDimZ() + index[2];
         else {
-            const size_t shift = (getDimZ() / 2 + 1) * 2;
-            return Base::getDerived().asRealBuffer() + (index[0] * getDimY() + index[1]) * shift + index[2];
+            const size_t shift = (self.getDimZ() / 2 + 1) * 2;
+            return self.getDerived().asRealBuffer() + (index[0] * self.getDimY() + index[1]) * shift + index[2];
         }
-    }
-
-    template<class Derived>
-    __host__ __device__ auto FFTRSpace<Derived, 3>::data_ptr(Index3D index) const noexcept -> ConstPtrTy {
-        return const_cast<This&>(*this).data_ptr(index);
     }
 }
 

@@ -91,8 +91,8 @@ namespace Physica {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getDim() { return Dim; }
-        [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
+        [[nodiscard]] auto&& getLattice(this auto&& self) noexcept { return self.lattice; }
+        [[nodiscard]] auto&& getPos(this auto&& self) noexcept { return self.pos; }
         [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return pos.getRow(); }
         [[nodiscard]] T getVolume() const noexcept { return getVolume(lattice); }

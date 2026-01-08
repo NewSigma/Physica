@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,22 +23,17 @@
 namespace Physica {
     template<class Derived> class ContinuousVector;
 
-    template<Vector T, size_t Length>
-    class ContinuousVectorBlock : public ContinuousVector<ContinuousVectorBlock<T, Length>> {
-        using This = ContinuousVectorBlock<T, Length>;
+    template<Vector V, size_t Length>
+    class ContinuousVectorBlock : public ContinuousVector<ContinuousVectorBlock<V, Length>> {
+        using This = ContinuousVectorBlock<V, Length>;
         using Base = ContinuousVector<This>;
-    protected:
-        using typename Base::PtrTy;
-        using typename Base::ConstPtrTy;
-        using typename Base::RefTy;
-        using typename Base::ConstRefTy;
     private:
-        T& vec;
+        V& vec;
         size_t from;
         size_t to;
     public:
-        ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_, size_t to_);
-        ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_);
+        ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_, size_t to_);
+        ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_);
         ContinuousVectorBlock(const This& block) = default;
         ContinuousVectorBlock(This&&) noexcept = default;
         ~ContinuousVectorBlock() = default;
@@ -46,8 +41,6 @@ namespace Physica {
         using Base::operator=;
         This& operator=(const This& v);
         This& operator=(This&& v) noexcept;
-        [[nodiscard]] RefTy operator[](size_t index);
-        [[nodiscard]] ConstRefTy operator[](size_t index) const;
         /* Operations */
         template<Packet Pack> [[nodiscard]] Pack packet(size_t index) const;
         template<Packet Pack> [[nodiscard]] Pack packetPartial(size_t index, size_t count) const;
@@ -56,84 +49,95 @@ namespace Physica {
 
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+
+        [[nodiscard]] auto values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grads(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
-        [[nodiscard]] PtrTy data_ptr(size_t index) noexcept { return vec.data() + from + index; }
-        [[nodiscard]] ConstPtrTy data_ptr(size_t index) const noexcept { return vec.data() + from + index; }
+        [[nodiscard]] auto data(this auto&&) noexcept;
     };
 
-    template<Vector T, size_t Length>
-    ContinuousVectorBlock<T, Length>::ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_, size_t to_)
+    template<Vector V, size_t Length>
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_, size_t to_)
             : vec(vec_.getDerived()), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<Vector T, size_t Length>
-    ContinuousVectorBlock<T, Length>::ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_)
+    template<Vector V, size_t Length>
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_)
             : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
 
-    template<Vector T, size_t Length>
-    auto ContinuousVectorBlock<T, Length>::operator=(const This& v) -> This& {
+    template<Vector V, size_t Length>
+    auto ContinuousVectorBlock<V, Length>::operator=(const This& v) -> This& {
         Base::operator=(v);
         return *this;
     }
 
-    template<Vector T, size_t Length>
-    auto ContinuousVectorBlock<T, Length>::operator=(This&& v) noexcept -> This& {
+    template<Vector V, size_t Length>
+    auto ContinuousVectorBlock<V, Length>::operator=(This&& v) noexcept -> This& {
         Base::operator=(v);
         return *this;
     }
 
-    template<Vector T, size_t Length>
-    auto ContinuousVectorBlock<T, Length>::operator[](size_t index) -> RefTy {
-        assert((index + from) < to);
-        return vec[index + from];
-    }
-
-    template<Vector T, size_t Length>
-    auto ContinuousVectorBlock<T, Length>::operator[](size_t index) const -> ConstRefTy {
-        assert((index + from) < to);
-        return vec[index + from];
-    }
-
-    template<Vector T, size_t Length>
+    template<Vector V, size_t Length>
     template<Packet Pack>
-    Pack ContinuousVectorBlock<T, Length>::packet(size_t index) const {
+    Pack ContinuousVectorBlock<V, Length>::packet(size_t index) const {
         return vec.template packet<Pack>(from + index);
     }
 
-    template<Vector T, size_t Length>
+    template<Vector V, size_t Length>
     template<Packet Pack>
-    Pack ContinuousVectorBlock<T, Length>::packetPartial(size_t index, size_t count) const {
+    Pack ContinuousVectorBlock<V, Length>::packetPartial(size_t index, size_t count) const {
         return vec.template packetPartial<Pack>(from + index, count);
     }
 
-    template<Vector T, size_t Length>
-    void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const Packet auto packet) {
+    template<Vector V, size_t Length>
+    void ContinuousVectorBlock<V, Length>::writePacket(size_t index, const Packet auto packet) {
         return vec.writePacket(from + index, packet);
     }
 
-    template<Vector T, size_t Length>
-    void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const Packet auto packet) {
+    template<Vector V, size_t Length>
+    void ContinuousVectorBlock<V, Length>::writePacketPartial(size_t index, size_t count, const Packet auto packet) {
         return vec.writePacketPartial(from + index, count, packet);
     }
 
-    template<Vector T, size_t Length>
-    size_t ContinuousVectorBlock<T, Length>::getLength() const noexcept {
+    template<Vector V, size_t Length>
+    auto ContinuousVectorBlock<V, Length>::values(this auto&& self) noexcept {
+        auto&& v = self.vec.values();
+        using V1 = std::remove_reference<decltype(v)>::type;
+        return ContinuousVectorBlock<V1, Length>(v, self.from, self.to);
+    }
+
+    template<Vector V, size_t Length>
+    template<int GradOrder>
+    auto ContinuousVectorBlock<V, Length>::grads(this auto&& self) noexcept {
+        auto&& g = self.vec.template grads<GradOrder>();
+        using V1 = std::remove_reference<decltype(g)>::type;
+        return ContinuousVectorBlock<V1, Length>(g, self.from, self.to);
+    }
+
+    template<Vector V, size_t Length>
+    size_t ContinuousVectorBlock<V, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else
             return Length;
     }
+
+    template<Vector V, size_t Length>
+    auto ContinuousVectorBlock<V, Length>::data(this auto&& self) noexcept {
+        return self.vec.data() + self.from;
+    }
 }
 
 namespace Physica {
-    template<Vector T, size_t Length>
-    class Traits<ContinuousVectorBlock<T, Length>> {
+    template<Vector V, size_t Length>
+    class Traits<ContinuousVectorBlock<V, Length>> {
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = V::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;

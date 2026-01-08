@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -292,15 +292,22 @@ namespace Physica {
 #endif
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::values() noexcept -> ValuesRtnTy {
-        if constexpr (Diffable<ScalarType>)
-            return Base::values();
-        else
-            return Base::getDerived();
+    auto ContinuousMatrix<Derived>::data() noexcept {
+        return Base::getDerived().data();
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::values() const noexcept -> const ValuesRtnTy {
-        return const_cast<This&>(*this).values();
+    auto ContinuousMatrix<Derived>::data() const noexcept {
+        return Base::getDerived().data();
+    }
+
+    template<class Derived>
+    auto ContinuousMatrix<Derived>::data_ptr(this auto&& self, size_t r, size_t c) noexcept {
+        assert(r < self.getRow());
+        assert(c < self.getCol());
+        if constexpr (isRowMatrix)
+            return self.data() + r * self.getCol() + c;
+        else
+            return self.data() + c * self.getRow() + r;
     }
 }

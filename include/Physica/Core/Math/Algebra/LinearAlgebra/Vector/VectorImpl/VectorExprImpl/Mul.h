@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -118,9 +118,9 @@ namespace Physica {
         if constexpr (LowerToFMA) {
             v.assert_assign(Base::getDerived());
             if constexpr (Internal::EnableSIMD<Source, Target>::value && !isReverseDiff) {
-                constexpr static size_t Length1 = Source::SizeAtCompile;
-                constexpr static size_t Length2 = Target::SizeAtCompile;
-                constexpr static size_t Length = std::max(Length1, Length2);
+                constexpr size_t Length1 = Source::SizeAtCompile;
+                constexpr size_t Length2 = Target::SizeAtCompile;
+                constexpr size_t Length = std::max(Length1, Length2);
                 assign_add_simd<Target, Length>(v);
             }
             else
@@ -179,7 +179,7 @@ namespace Physica {
     template<Vector Target, size_t Length>
     void VectorExpr<ExprID::Mul, V, U>::assign_add_simd(Target& v) const noexcept {
         using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
-        constexpr static size_t PacketSize = Pack::size();
+        constexpr size_t PacketSize = Pack::size();
         const auto& lhs = getLHS();
         const auto rhs = Pack(getRHS());
         if constexpr (Length != Dynamic) {
