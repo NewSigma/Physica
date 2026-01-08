@@ -391,7 +391,7 @@ namespace Physica {
 
         const auto factor1 = ScalarType(lastNumSample);
         const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        mean = (factor1 * mean + sample) * factor2;
+        mean = fma(factor1, mean, sample) * factor2;
     }
 
     template<class Derived>
@@ -406,7 +406,7 @@ namespace Physica {
 
         const auto factor1 = ScalarType(lastNumSample);
         const auto factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
+        var = fma(square(mean - sample), factor2, var) * (factor1 * factor2);
         mean.toNextMean(lastNumSample, sample);
     }
 

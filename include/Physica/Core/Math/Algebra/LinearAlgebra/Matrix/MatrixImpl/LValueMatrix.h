@@ -122,6 +122,8 @@ namespace Physica {
         [[nodiscard]] const auto flatten() const;
 
         void zeros() noexcept;
+        void clamp_min(Tv minimum);
+        void clamp_max(Tv maximum);
         template<RNG R>
         void random_uniform();
         template<RNG R>

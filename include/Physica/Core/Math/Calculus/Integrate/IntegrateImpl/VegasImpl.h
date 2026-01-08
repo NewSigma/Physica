@@ -149,6 +149,7 @@ namespace Physica {
 
     template<Scalar T, bool TakeLn>
     auto Vegas<T, TakeLn>::compress(Vector auto&& vars) -> Trv {
+        assert(vars.min().isPositive());
         const auto sum = vars.sum();
         const bool noData = sum.isZero();
         if (noData)
@@ -241,14 +242,16 @@ namespace Physica {
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             var.toNextVariance(mean, n, xy);
-            // Loss has minimal value to avoid the grid size reducing to 0
-            const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
+
+            const auto l = xy.value().squaredNorm();
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
                 lossMat[index, i].toNextMean(counts[index, i], l);
                 counts[index, i] += 1;
             }
         }
+        // Loss has minimal value to avoid the grid size reducing to 0
+        lossMat.clamp_min(std::numeric_limits<Trv>::min());
     }
 
     template<Scalar T, bool TakeLn>
@@ -279,13 +282,15 @@ namespace Physica {
             const T xy = samples[n];
             var.toNextVariance(mean, n, xy);
 
-            const auto l = std::max(xy.value().squaredNorm(), Trv(std::numeric_limits<T>::min()));
+            const auto l = xy.value().squaredNorm();
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indices[n * getDim() + i];
                 lossMat[index, i].toNextMean(counts[index, i], l);
                 counts[index, i] += 1;
             }
         }
+        lossMat.clamp_min(std::numeric_limits<Trv>::min());
+
         mean = ln(mean) + maxSample;
         var = ln(var + Trv(std::numeric_limits<T>::min()));
         var.value() = fma(Trv(2), maxSample, var.value());

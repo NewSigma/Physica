@@ -401,6 +401,16 @@ namespace Physica {
     }
 
     template<class Derived>
+    void LValueMatrix<Derived>::clamp_min(Tv minimum) {
+        Base::getDerived().flatten().clamp_min(minimum);
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::clamp_max(Tv maximum) {
+        Base::getDerived().flatten().clamp_max(maximum);
+    }
+
+    template<class Derived>
     template<RNG R>
     void LValueMatrix<Derived>::random_uniform() {
         const size_t maxMajor = Base::getMaxMajor();

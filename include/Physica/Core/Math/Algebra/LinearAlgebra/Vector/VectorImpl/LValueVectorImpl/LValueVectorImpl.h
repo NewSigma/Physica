@@ -223,13 +223,19 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueVector<Derived>::clamp_min(const Tv& minimum) {
+    void LValueVector<Derived>::zeros() noexcept {
+        for (size_t i = 0; i < Base::getLength(); ++i)
+            (*this)[i] = Trv(0);
+    }
+
+    template<class Derived>
+    void LValueVector<Derived>::clamp_min(Tv minimum) {
         for (size_t i = 0; i < Base::getLength(); ++i)
             (*this)[i] = std::max((*this)[i], minimum);
     }
 
     template<class Derived>
-    void LValueVector<Derived>::clamp_max(const Tv& maximum) {
+    void LValueVector<Derived>::clamp_max(Tv maximum) {
         for (size_t i = 0; i < Base::getLength(); ++i)
             (*this)[i] = std::min((*this)[i], maximum);
     }
@@ -252,12 +258,6 @@ namespace Physica {
     template<class Derived>
     auto LValueVector<Derived>::householder() -> Tr {
         return householder(Base::getDerived());
-    }
-
-    template<class Derived>
-    void LValueVector<Derived>::zeros() noexcept {
-        for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = Trv(0);
     }
 
     template<class Derived>
