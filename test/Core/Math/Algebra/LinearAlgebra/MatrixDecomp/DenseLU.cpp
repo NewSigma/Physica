@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,6 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
+#include "Test.h"
 
 using namespace Physica;
 using Matrix3D = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
@@ -24,7 +26,7 @@ using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
 
 namespace {
     template<bool Pivot>
-    void test(const Matrix auto& answer, double prec) {
+    void decomp(const Matrix auto& answer, double prec) {
         using M = std::remove_cvref<decltype(answer)>::type;
         DenseLU<float64, Pivot> lu(answer.getRow());
         auto product = [&, prec]() {
@@ -33,9 +35,7 @@ namespace {
             M result = matrixL * lu.getMatrixU();
             if constexpr (Pivot)
                 result = M(lu.getPerm() * result);
-
-            if (!matrixNear(result, answer, prec))
-                exit(1);
+            expect(matrixNear(result, answer, prec));
         };
 
         lu.compute_base(answer);
@@ -46,17 +46,44 @@ namespace {
             product();
         }
     }
+
+    template<bool Pivot>
+    void inverse(const Matrix auto& source, double prec) {
+        using M = std::remove_cvref<decltype(source)>::type;
+        using T = M::ScalarType;
+        DenseLU<T, Pivot> lu(source.getRow());
+        lu.compute(source);
+
+        M buffer, prod;
+        buffer.resize(source);
+        if constexpr (!Pivot) {
+            lu.inv().assign_base(buffer);
+            prod = buffer * source;
+            expect(matrixNear(prod, IdentityMatrix<T>(source.getRow()), prec));
+        }
+
+        if constexpr (HasMKL()) {
+            lu.inv().assign_mkl(buffer);
+            prod = buffer * source;
+            expect(matrixNear(prod, IdentityMatrix<T>(source.getRow()), prec));
+        }
+    }
 }
 
 int main() {
     const Matrix3D mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
-    test<false>(mat1, 1E-15);
-    test<true>(mat1, 1E-15);
-    test<true>(Matrix4D{
+    const Matrix4D mat2{
         {1,  2, 0, 1},
         {0,  1, 1, 0},
         {2,  0, 1, 1},
         {1,  1, 0, 1}
-    }, 1E-15);
+    };
+    decomp<false>(mat1, 1E-15);
+    decomp<true>(mat1, 1E-15);
+    decomp<true>(mat2, 1E-15);
+
+    inverse<false>(mat1, 1E-15);
+    inverse<true>(mat1, 1E-14);
+    inverse<true>(mat2, 1E-10);
     return 0;
 }

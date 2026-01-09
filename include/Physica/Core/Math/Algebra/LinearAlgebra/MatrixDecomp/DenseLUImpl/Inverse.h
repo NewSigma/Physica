@@ -44,6 +44,7 @@ namespace Physica {
         [[nodiscard]] T calc(size_t, size_t) const { noImpl(__func__); }
 
         void assign(Matrix auto& target) const;
+        void assign_base(Matrix auto& target) const;
         void assign_mkl(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] const LU& getDenseLU() const noexcept { return lu; }
@@ -60,7 +61,15 @@ namespace Physica {
         if constexpr (HasMKL())
             assign_mkl(target);
         else
-            noImpl(__func__);
+            assign_base(target);
+    }
+
+    template<Scalar T, bool Pivot>
+    void Inverse<DenseLU<T, Pivot>>::assign_base(Matrix auto& target) const {
+        static_assert(!Pivot, "[Error]: No impl");
+        const auto& matrixLU = lu.getMatrixLU();
+        matrixLU.tril_unit().inv().assign(target);
+        (matrixLU.triu().inv() * target).assign(target);
     }
 }
 

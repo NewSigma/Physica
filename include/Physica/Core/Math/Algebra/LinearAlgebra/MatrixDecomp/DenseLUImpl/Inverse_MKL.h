@@ -23,14 +23,15 @@
 namespace Physica {
     template<Scalar T, bool Pivot>
     void Inverse<DenseLU<T, Pivot>>::assign_mkl(Matrix auto& target) const {
-        constexpr static int Layout = LAPACK_COL_MAJOR;
+        constexpr int Layout = LAPACK_COL_MAJOR;
         target.assert_assign(*this);
         lu.getMatrixLU().assign(target);
 
         const size_t n = getRow();
         auto* a = reinterpret_cast<Tm*>(target.data());
         if constexpr (Pivot) {
-            const auto* ipiv = reinterpret_cast<const MKL_INT64*>(lu.getPerm().getIndices().data());
+            auto buffer = lu.getPerm().toMKL();
+            const auto* ipiv = buffer.data();
             if constexpr (isComplex) {
                 if constexpr (T::Prec == Float32)
                     check_lapack(LAPACKE_cgetri_64(Layout, n, a, n, ipiv));
