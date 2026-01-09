@@ -47,12 +47,12 @@ namespace Physica {
         class EnableMKL<M1, M2> {
             using U1 = std::remove_cvref<M1>::type;
             using U2 = std::remove_cvref<M2>::type;
-            using ScalarType1 = U1::ScalarType;
-            using ScalarType2 = U2::ScalarType;
+            using T1 = U1::ScalarType;
+            using T2 = U2::ScalarType;
         public:
             constexpr static bool value = HasMKL()
-                                       && std::same_as<ScalarType1, ScalarType2>
-                                       && (ScalarType1::Prec == Float32 || ScalarType1::Prec == Float64)
+                                       && std::same_as<T1, T2>
+                                       && (T1::Prec == Float32 || T2::Prec == Float64)
                                        && is_continuous<U1>::value
                                        && is_continuous<U2>::value
                                        && !Diffable<U1>;
@@ -93,9 +93,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>);
-        template<Vector V>
-        [[nodiscard]] auto operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>);
+        [[nodiscard]] auto operator*(this auto&&, V&& v) noexcept requires(RowAtCompile != 1 && !CUDA<V>);
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>);
         /* Operations */

@@ -23,25 +23,28 @@
 namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     void GEMV<M, V>::assign_mkl(Vector auto& target) const {
+        v.assign(target);
+
         constexpr bool Pivot = Traits<M>::Pivot;
         constexpr int Layout = LAPACK_COL_MAJOR;
-        constexpr char trans = 'N';
+        constexpr char Trans = 'N';
         size_t n = getLength();
         const auto* a = reinterpret_cast<const Tm*>(m.getDenseLU().getMatrixLU().data());
         auto* b = reinterpret_cast<Tm*>(target.data());
         if constexpr (Pivot) {
-            const auto* ipiv = (MKL_INT64*)m.getDenseLU().getPerm().getIndices().data();
+            auto buffer = m.getDenseLU().getPerm().toMKL();
+            const auto* ipiv = buffer.data();
             if constexpr (Base::isComplex) {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_cgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_cgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
                 else
-                    check_lapack(LAPACKE_zgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_zgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
             }
             else {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_sgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_sgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
                 else
-                    check_lapack(LAPACKE_dgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_dgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
             }
         }
         else {
@@ -51,15 +54,15 @@ namespace Physica {
             auto* ipiv = perm.data();
             if constexpr (Base::isComplex) {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_cgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_cgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
                 else
-                    check_lapack(LAPACKE_zgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_zgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
             }
             else {
                 if constexpr (T::Prec == Float32)
-                    check_lapack(LAPACKE_sgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_sgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
                 else
-                    check_lapack(LAPACKE_dgetrs_work_64(Layout, trans, n, 1, a, n, ipiv, b, n));
+                    check_lapack(LAPACKE_dgetrs_work_64(Layout, Trans, n, 1, a, n, ipiv, b, n));
             }
         }
     }

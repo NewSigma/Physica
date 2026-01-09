@@ -114,19 +114,13 @@ namespace Physica {
                 vec.reverse(mat.values().transpose() * g);
         }
     }
-    // FIXME: Refactor using deducing this once we dump to C++23
-    template<class Derived>
-    template<Vector V>
-    [[nodiscard]] auto RValueMatrix<Derived>::operator*(V&& v) const& noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
-        assert(getCol() == v.getLength());
-        return GEMV<const Derived&, V&&>(Base::getDerived(), std::forward<V>(v));
-    }
 
     template<class Derived>
     template<Vector V>
-    [[nodiscard]] auto RValueMatrix<Derived>::operator*(V&& v) && noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
-        assert(getCol() == v.getLength());
-        return GEMV<Derived&&, V&&>(std::move(Base::getDerived()), std::forward<V>(v));
+    [[nodiscard]] auto RValueMatrix<Derived>::operator*(this auto&& self, V&& v) noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
+        assert(self.getCol() == v.getLength());
+        using Self = decltype(self);
+        return GEMV<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
     }
 
     template<class Derived>

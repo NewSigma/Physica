@@ -68,15 +68,36 @@ namespace {
             expect(matrixNear(prod, IdentityMatrix<T>(source.getRow()), prec));
         }
     }
+
+    template<bool Pivot>
+    void inverseGEMV(double prec) {
+        using T = float64;
+        using Matrix4D = DenseMatrix<T, MatrixOption::Row, 4, 4>;
+        const Matrix4D A{
+                {-0.000696013585639699,     0.816492585748236, 0.0216969440126965, -0.0884307621566726},
+                {    0.691809621910274, -0.000696013585639699,  0.131671000379563, -0.0701048797366553},
+                {  -0.0701048797366553,   -0.0884307621566726, -0.131016640264434,   0.788769710999288},
+                {    0.131671000379563,    0.0216969440126965,  0.643819646681362,  -0.131016640264434}
+        };
+        const Vector4D<T> b{4.316511702487202E-1, 1.548712563601895E-2, 9.840637243791538E-1, 1.671684099146560E-1};
+        const Vector4D<T> answer{0.06910464034803039, 0.6682416388355244, 0.5106380624075890, 1.413471488683768};
+        auto lu = DenseLU<T, Pivot>(A);
+        const Vector4D<T> result = lu.inv() * b;
+        expect(vectorNear(result, answer, prec));
+    }
 }
 
 int main() {
-    const Matrix3D mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
+    const Matrix3D mat1{
+            {2, 3,  4},
+            {1, 1,  9},
+            {1, 2, -6}
+    };
     const Matrix4D mat2{
-        {1,  2, 0, 1},
-        {0,  1, 1, 0},
-        {2,  0, 1, 1},
-        {1,  1, 0, 1}
+            {1, 2, 0, 1},
+            {0, 1, 1, 0},
+            {2, 0, 1, 1},
+            {1, 1, 0, 1}
     };
     decomp<false>(mat1, 1E-15);
     decomp<true>(mat1, 1E-15);
@@ -85,5 +106,8 @@ int main() {
     inverse<false>(mat1, 1E-15);
     inverse<true>(mat1, 1E-14);
     inverse<true>(mat2, 1E-10);
+
+    inverseGEMV<false>(1E-12); // Precision is lower without pivoting
+    inverseGEMV<true>(1E-15);
     return 0;
 }

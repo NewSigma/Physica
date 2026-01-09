@@ -28,8 +28,8 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tm;
 
-        LazyDestroy<M> m;
-        LazyDestroy<V> v;
+        LazyDestroy<M&&> m;
+        LazyDestroy<V&&> v;
     public:
         GEMV(M m, V v);
         GEMV(const This&) = default;
@@ -58,7 +58,6 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
-        target.assert_assign(*this);
         if constexpr (HasMKL())
             assign_mkl(target);
         else
