@@ -44,11 +44,7 @@ namespace Physica {
                 else
                     err = LAPACKE_dgetrf_64(Layout, m, n, a, lda, ipiv.data());
             }
-
-            perm = PermType(m);
-            for (size_t i = 0; i < m; ++i)
-                perm.swapRows(i, ipiv[i] - 1);
-            perm = perm.inv();
+            perm = PermType::fromMKL(std::move(ipiv));
         }
         else {
             if constexpr (isComplex) {

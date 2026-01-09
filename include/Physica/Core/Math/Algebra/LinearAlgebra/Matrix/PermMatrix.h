@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -46,14 +46,17 @@ namespace Physica {
         [[nodiscard]] T det() const;
         [[nodiscard]] constexpr static Trv lnAbsDet() noexcept { return Trv(0); }
         [[nodiscard]] PermMatrix inv() const noexcept;
+        [[nodiscard]] Array<MKL_INT64> toMKL() const;
 
         void resize(size_t order);
-        void swapRows(size_t row1, size_t row2);
+        void swap_row(size_t row1, size_t row2);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] auto&& getIndices(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return indices.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return indices.getLength(); }
+        /* Static members */
+        [[nodiscard]] static This fromMKL(Array<MKL_INT64> ipiv);
     };
 
     template<Scalar T>
@@ -91,11 +94,25 @@ namespace Physica {
     }
 
     template<Scalar T>
-    PermMatrix<T> PermMatrix<T>::inv() const noexcept {
+    auto PermMatrix<T>::inv() const noexcept -> This {
         Array<size_t> result(indices.getLength());
         for (size_t i = 0; i < result.getLength(); ++i)
             result[indices[i]] = i;
-        return PermMatrix<T>(std::move(result));
+        return This(std::move(result));
+    }
+
+    template<Scalar T>
+    Array<MKL_INT64> PermMatrix<T>::toMKL() const {
+        size_t length = indices.getLength();
+        return Array<MKL_INT64>::generate(length, [perm = *this, length](MKL_INT64 i) mutable {
+            for (auto j = i; j < length; ++j) {
+                if (perm.getIndices()[j] == i) {
+                    perm.swap_row(i, j);
+                    return j + 1;
+                }
+            }
+            unreachable();
+        });
     }
 
     template<Scalar T>
@@ -104,7 +121,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void PermMatrix<T>::swapRows(size_t row1, size_t row2) {
+    void PermMatrix<T>::swap_row(size_t row1, size_t row2) {
         std::swap(indices[row1], indices[row2]);
     }
 
@@ -117,6 +134,14 @@ namespace Physica {
     template<Scalar T>
     auto&& PermMatrix<T>::getIndices(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).indices;
+    }
+
+    template<Scalar T>
+    auto PermMatrix<T>::fromMKL(Array<MKL_INT64> ipiv) -> This {
+        auto perm = This(ipiv.getLength());
+        for (size_t i = 0; i < ipiv.getLength(); ++i)
+            perm.swap_row(i, ipiv[i] - 1);
+        return perm.inv();
     }
 }
 

@@ -44,7 +44,7 @@ namespace Physica {
         for (size_t i = 0; i < order; ++i) {
             if constexpr (Pivot) {
                 size_t j = working.partialPivoting(i);
-                perm.swapRows(i, j);
+                perm.swap_row(i, j);
             }
             decomp_col(i);
         }

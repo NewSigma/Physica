@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,22 +18,35 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Test.h"
 
 using namespace Physica;
-using ScalarType = float64;
+using T = float64;
+
+namespace {
+    void mulAndInv() {
+        const PermMatrix<T> perm({0, 3, 2, 1});
+        const VectorND<T> v{0, 1, 2, 3};
+        const VectorND<T> perm_v = perm * v;
+        {
+            const VectorND<T> answer{0, 3, 2, 1};
+            expect(vectorNear(perm_v, answer, 1E-15));
+        }
+        const auto inv = perm.inv();
+        const VectorND<T> v1 = inv * perm_v;
+        expect(vectorNear(v, v1, 1E-15));
+    }
+
+    void fromToMKL() {
+        PermMatrix<T> answer({2, 1, 3, 0});
+        auto result = PermMatrix<T>::fromMKL(answer.toMKL());
+        for (int i = 0; i < answer.getRow(); ++i)
+            expect(result.getIndices()[i] == answer.getIndices()[i]);
+    }
+}
 
 int main() {
-    const PermMatrix<ScalarType> perm({0, 3, 2, 1});
-    const VectorND<ScalarType> v{0, 1, 2, 3};
-    const VectorND<ScalarType> perm_v = perm * v;
-    {
-        const VectorND<ScalarType> answer{0, 3, 2, 1};
-        expect(vectorNear(perm_v, answer, 1E-15));
-    }
-    const auto inv = perm.inv();
-    const VectorND<ScalarType> v1 = inv * perm_v;
-    expect(vectorNear(v, v1, 1E-15));
+    mulAndInv();
+    fromToMKL();
     return 0;
 }

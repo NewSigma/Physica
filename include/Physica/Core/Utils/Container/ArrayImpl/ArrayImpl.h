@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -290,7 +290,9 @@ namespace Physica {
         result.read(length, p);
         return result;
     }
-
+    /**
+     * Reads better and works for non-default-constructable elements
+     */
     template<class T, class Allocator>
     auto Array<T, Dynamic, Allocator>::generate(size_t length, std::invocable<size_t> auto fn) -> This {
         This result{};

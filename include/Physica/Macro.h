@@ -39,6 +39,7 @@
     };
 
     using VSLStreamStatePtr = void*;
+    using MKL_INT64 = long long int;
 #endif
 
 #ifdef PHYSICA_CUDA
