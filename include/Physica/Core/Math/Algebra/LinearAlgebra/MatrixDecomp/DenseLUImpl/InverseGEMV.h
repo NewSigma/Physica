@@ -25,8 +25,6 @@ namespace Physica {
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
-
-        using Base::isComplex;
         using typename Base::T;
         using typename Base::Tm;
 

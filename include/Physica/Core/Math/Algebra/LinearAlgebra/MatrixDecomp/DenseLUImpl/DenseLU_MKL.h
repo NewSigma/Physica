@@ -24,6 +24,8 @@
 namespace Physica {
     template<Scalar T, bool Pivot>
     void DenseLU<T, Pivot>::compute_mkl() {
+        constexpr bool isComplex = T::isComplex;
+        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         constexpr static int Layout = LAPACK_COL_MAJOR;
         const size_t m = getOrder();
         const size_t n = m;

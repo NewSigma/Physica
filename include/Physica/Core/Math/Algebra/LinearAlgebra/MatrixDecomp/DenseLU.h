@@ -28,14 +28,11 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     class DenseLU {
         using This = DenseLU;
-        using WorkingMatrix = DenseMatrix<T>;
-
-        constexpr static bool isComplex = T::isComplex;
         using Tr = T::RealType;
         using Tc = T::ComplexType;
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
-
         using PermType = std::conditional<Pivot, PermMatrix<Tr>, PlainStruct<void>>::type;
+    public:
+        using WorkingMatrix = DenseMatrix<T>;
     private:
         WorkingMatrix working;
         [[no_unique_address]] PermType perm;

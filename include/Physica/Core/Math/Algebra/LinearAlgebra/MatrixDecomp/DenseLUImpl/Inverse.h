@@ -58,7 +58,7 @@ namespace Physica {
     template<Scalar T, bool Pivot>
     void Inverse<DenseLU<T, Pivot>>::assign(Matrix auto& target) const {
         target.assert_assign(*this);
-        if constexpr (HasMKL())
+        if constexpr (Internal::EnableMKL<typename LU::WorkingMatrix, decltype(target)>::value)
             assign_mkl(target);
         else
             assign_base(target);

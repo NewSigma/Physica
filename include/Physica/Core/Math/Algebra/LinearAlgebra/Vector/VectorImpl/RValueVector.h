@@ -52,17 +52,17 @@ namespace Physica {
 
         template<Vector V1, Vector V2 = V1>
         class EnableSIMD {
-            constexpr static size_t Size1 = V1::SizeAtCompile;
-            constexpr static size_t Size2 = V2::SizeAtCompile;
-            using U1 = typename V1::ScalarType;
-            using U2 = typename V2::ScalarType;
+            using U1 = std::remove_cvref<V1>::type;
+            using U2 = std::remove_cvref<V2>::type;
+            using T1 = typename U1::ScalarType;
+            using T2 = typename U2::ScalarType;
         public:
-            constexpr static size_t SizeAtCompile = std::max(Size1, Size2);
-            using ResultType = BinaryScalarOpRtnTy<U1, U2>::Type;
+            constexpr static size_t SizeAtCompile = std::max(U1::SizeAtCompile, U2::SizeAtCompile);
+            using ResultType = BinaryScalarOpRtnTy<T1, T2>::Type;
             using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
 
             constexpr static bool value = []() consteval noexcept {
-                constexpr bool isSameScalar = std::same_as<typename U1::ValueType, typename U2::ValueType>;
+                constexpr bool isSameScalar = std::same_as<typename T1::ValueType, typename T2::ValueType>;
                 constexpr bool isScalar = PacketType::size() == 1;
                 constexpr bool isCUDA = CUDA<V1> || CUDA<V2>;
                 constexpr bool isFloat16 = ResultType::Prec == Float16;

@@ -30,6 +30,18 @@ namespace {
         Matrix4D inv = origin.triu().inv();
         Matrix4D prod = origin.triu() * inv;
         expect(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
+
+        inv = origin.tril().inv();
+        prod = origin.tril() * inv;
+        expect(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
+
+        inv = origin.triu_unit().inv();
+        prod = origin.triu_unit() * inv;
+        expect(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
+
+        inv = origin.tril_unit().inv();
+        prod = origin.tril_unit() * inv;
+        expect(matrixNear(prod, IdentityMatrix<T, 4>(4), 1E-14));
     }
 }
 
