@@ -23,7 +23,6 @@
 namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
     void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
-        using Base::isComplex;
         using M = std::remove_cvref_t<decltype(target)>;
         constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = CblasLeft;

@@ -1,6 +1,7 @@
 physica_add_test(MatrixExp MatrixFunc/MatrixExp.cpp)
 physica_add_test(MatrixPow MatrixFunc/MatrixPow.cpp)
 physica_add_test(LValueMatrix MatrixImpl/LValueMatrix.cpp)
+physica_add_test(MatrixTrig MatrixImpl/MatrixTrig.cpp)
 
 physica_add_test(Balance Balance.cpp)
 physica_add_test(DenseMatrix DenseMatrix.cpp)
