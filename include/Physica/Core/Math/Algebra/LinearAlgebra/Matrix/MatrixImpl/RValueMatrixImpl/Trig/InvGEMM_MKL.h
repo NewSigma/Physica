@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,8 +24,6 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
     void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
         using M = std::remove_cvref_t<decltype(target)>;
-        using Tc = T::ComplexType;
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
         constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = CblasLeft;
         constexpr auto Uplo = Traits<M1>::Upper ? CblasUpper : CblasLower;

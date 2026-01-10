@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,6 +29,8 @@ namespace Physica {
         using Base::isComplex;
     protected:
         using typename Base::T;
+        using typename Base::Tc;
+        using typename Base::Tm;
     private:
         LazyDestroy<M1&&> inv;
         LazyDestroy<M2&&> rhs;

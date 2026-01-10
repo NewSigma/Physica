@@ -47,7 +47,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return trig; }
         [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
-        [[nodiscard]] size_t getCol() const noexcept { return trig.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
     private:
     };
 
