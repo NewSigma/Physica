@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,6 +43,13 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return vec.calc(index + from); }
+
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to = Length_) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] __host__ __device__ auto tail(this auto&&, size_t from) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
     };
@@ -58,6 +65,24 @@ namespace Physica {
     template<Vector V, size_t Length>
     __host__ __device__ device_obj<RVectorBlock<V, Length>>::device_obj(
             const device_obj<V>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    __host__ __device__ auto device_obj<RVectorBlock<V, Length>>::head(this auto&& self, size_t to) noexcept {
+        return device_obj<RVectorBlock<V, Length_>>(self.vec, self.from, self.from + to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    __host__ __device__ auto device_obj<RVectorBlock<V, Length>>::tail(this auto&& self, size_t from) noexcept {
+        return device_obj<RVectorBlock<V, Length_>>(self.vec, self.from + from, self.to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    __host__ __device__ auto device_obj<RVectorBlock<V, Length>>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        return device_obj<RVectorBlock<V, Length_>>(self.vec, self.from + from, self.from + to);
+    }
 
     template<Vector V, size_t Length>
     __host__ __device__ size_t device_obj<RVectorBlock<V, Length>>::getLength() const noexcept {

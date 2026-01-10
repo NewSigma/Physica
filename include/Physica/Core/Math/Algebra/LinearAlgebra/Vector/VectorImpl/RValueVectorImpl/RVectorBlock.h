@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,8 +28,8 @@ namespace Physica {
     class RVectorBlock : public RValueVector<RVectorBlock<V, Length>> {
         using This = RVectorBlock<V, Length>;
         using Base = RValueVector<This>;
-    public:
-        using ScalarType = Base::ScalarType;
+    protected:
+        using typename Base::T;
     private:
         V& vec;
         size_t from;
@@ -44,8 +44,15 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index + from); }
+        [[nodiscard]] T calc(size_t index) const { return vec.calc(index + from); }
         [[nodiscard]] auto calc_value(size_t index) const { return vec.calc_value(index + from); }
+
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] auto head(this auto&&, size_t to = Length_) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
     };
@@ -59,6 +66,24 @@ namespace Physica {
 
     template<Vector V, size_t Length>
     RVectorBlock<V, Length>::RVectorBlock(V& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    auto RVectorBlock<V, Length>::head(this auto&& self, size_t to) noexcept {
+        return RVectorBlock<V, Length_>(self.vec, self.from, self.from + to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    auto RVectorBlock<V, Length>::tail(this auto&& self, size_t from) noexcept {
+        return RVectorBlock<V, Length_>(self.vec, self.from + from, self.to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    auto RVectorBlock<V, Length>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        return RVectorBlock<V, Length_>(self.vec, self.from + from, self.from + to);
+    }
 
     template<Vector V, size_t Length>
     size_t RVectorBlock<V, Length>::getLength() const noexcept {

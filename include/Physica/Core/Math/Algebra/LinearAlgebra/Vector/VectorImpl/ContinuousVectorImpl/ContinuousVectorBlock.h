@@ -32,8 +32,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_, size_t to_);
-        ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_);
+        ContinuousVectorBlock(V& vec, size_t from_, size_t to_);
+        ContinuousVectorBlock(V& vec, size_t from_);
         ContinuousVectorBlock(const This& block) = default;
         ContinuousVectorBlock(This&&) noexcept = default;
         ~ContinuousVectorBlock() = default;
@@ -47,6 +47,13 @@ namespace Physica {
         void writePacket(size_t index, Packet auto packet);
         void writePacketPartial(size_t index, size_t count, Packet auto packet);
 
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] auto head(this auto&&, size_t to = Length_) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
+
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
@@ -59,16 +66,16 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_, size_t to_)
-            : vec(vec_.getDerived()), from(from_), to(to_) {
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V& vec, size_t from_, size_t to_)
+            : vec(vec), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(ContinuousVector<V>& vec_, size_t from_)
-            : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V& vec, size_t from_)
+            : ContinuousVectorBlock(vec, from_, vec.getLength()) {}
 
     template<Vector V, size_t Length>
     auto ContinuousVectorBlock<V, Length>::operator=(const This& v) -> This& {
@@ -102,6 +109,24 @@ namespace Physica {
     template<Vector V, size_t Length>
     void ContinuousVectorBlock<V, Length>::writePacketPartial(size_t index, size_t count, const Packet auto packet) {
         return vec.writePacketPartial(from + index, count, packet);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    auto ContinuousVectorBlock<V, Length>::head(this auto&& self, size_t to) noexcept {
+        return ContinuousVectorBlock<V, Length_>(self.vec, self.from, self.from + to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    auto ContinuousVectorBlock<V, Length>::tail(this auto&& self, size_t from) noexcept {
+        return ContinuousVectorBlock<V, Length_>(self.vec, self.from + from, self.to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    auto ContinuousVectorBlock<V, Length>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        return ContinuousVectorBlock<V, Length_>(self.vec, self.from + from, self.from + to);
     }
 
     template<Vector V, size_t Length>

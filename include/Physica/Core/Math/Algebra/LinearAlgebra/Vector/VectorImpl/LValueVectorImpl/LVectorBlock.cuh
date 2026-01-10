@@ -44,6 +44,13 @@ namespace Physica {
         This& operator=(const This& v);
         This& operator=(This&& v) noexcept;
         /* Operations */
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to = Length_) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] __host__ __device__ auto tail(this auto&&, size_t from) noexcept;
+        template<size_t Length_ = Dynamic>
+        [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
+
         using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
@@ -73,6 +80,24 @@ namespace Physica {
     auto device_obj<LVectorBlock<V, Length>>::operator=(This&& v) noexcept -> This& {
         Base::operator=(static_cast<const RValueVector<This>&>(v));
         return *this;
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    __host__ __device__ auto device_obj<LVectorBlock<V, Length>>::head(this auto&& self, size_t to) noexcept {
+        return device_obj<LVectorBlock<V, Length_>>(self.vec, self.from, self.from + to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    __host__ __device__ auto device_obj<LVectorBlock<V, Length>>::tail(this auto&& self, size_t from) noexcept {
+        return device_obj<LVectorBlock<V, Length_>>(self.vec, self.from + from, self.to);
+    }
+
+    template<Vector V, size_t Length>
+    template<size_t Length_>
+    __host__ __device__ auto device_obj<LVectorBlock<V, Length>>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        return device_obj<LVectorBlock<V, Length_>>(self.vec, self.from + from, self.from + to);
     }
 
     template<Vector V, size_t Length>
