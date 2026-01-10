@@ -158,9 +158,9 @@ namespace Physica {
 
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value)
-            : length(obj.length), capacity(obj.capacity), alloc() {
+            : length(obj.length), capacity(length), alloc() {
         assert(capacity > 0);
-        arr = alloc.allocate(capacity);
+        arr = alloc.allocate(length);
         if constexpr (std::is_trivially_copyable<T>::value)
             memcpy(arr, obj.arr, length * sizeof(T));
         else
