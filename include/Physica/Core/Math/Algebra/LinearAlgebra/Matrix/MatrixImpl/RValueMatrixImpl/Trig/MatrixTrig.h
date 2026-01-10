@@ -29,8 +29,9 @@ namespace Physica {
     protected:
         using typename Base::T;
         using typename Base::Tr;
-        using typename Base::Trv;
         using typename Base::Tv;
+        using typename Base::Trv;
+        using typename Base::Tm;
     private:
         LazyDestroy<M&&> mat;
     public:
@@ -42,6 +43,11 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Matrix auto&& target) const;
+        void assign_mkl(Matrix auto&& target) const;
+        // TODO: assign_base() lower it to memcpy
+
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
 
@@ -56,6 +62,12 @@ namespace Physica {
 
     template<Matrix M, bool Upper, bool Unit>
     MatrixTrig<M, Upper, Unit>::MatrixTrig(M mat) : mat(std::forward<M>(mat)) {}
+
+    template<Matrix M, bool Upper, bool Unit>
+    template<ExecutePolicy P>
+    void MatrixTrig<M, Upper, Unit>::assign(Matrix auto&& target) const {
+        Base::template assign_base<P>(target);
+    }
 
     template<Matrix M, bool Upper, bool Unit>
     auto MatrixTrig<M, Upper, Unit>::calc(size_t row, size_t col) const -> T {
@@ -130,6 +142,9 @@ namespace Physica {
     };
 }
 
+#ifdef PHYSICA_MKL
+    #include "MatrixTrig_MKL.h"
+#endif
 #include "GEMM.h"
 #include "Inverse.h"
 #include "InvGEMM.h"
