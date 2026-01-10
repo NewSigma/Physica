@@ -161,15 +161,6 @@ namespace Physica {
         std::normal_distribution<float> dist{};
         return Real(dist(R::getInstance()));
     }
-
-    inline std::ostream& operator<<(std::ostream& os, const Real<Float32>& x) {
-        return os << std::format("{}", x.toMachine());
-    }
-
-    inline std::istream& operator>>(std::istream& is, Real<Float32>& scalar) {
-        is >> scalar.f;
-        return is;
-    }
 }
 
 namespace std {
@@ -191,4 +182,15 @@ namespace std {
             return std::format_to(ctx.out(), "{}", obj.toMachine());
         }
     };
+}
+
+namespace Physica {
+    inline std::ostream& operator<<(std::ostream& os, Real<Float32> x) {
+        return os << std::format("{}", x.toMachine());
+    }
+
+    inline std::istream& operator>>(std::istream& is, Real<Float32>& scalar) {
+        is >> scalar.f;
+        return is;
+    }
 }

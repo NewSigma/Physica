@@ -20,11 +20,18 @@
 #include "Physica/Core/Scalar/Complex.h"
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "Test.h"
+#include <print>
 
 using namespace Physica;
 using RandomSource = Random<>;
 
 namespace {
+    void formatTest() {
+        static_assert(std::formattable<MatrixND<float64>, char>);
+
+        MatrixND<float64> x = -MatrixND<float64>::zeros(1, 1);
+        expect(std::format("{}", x) == "(0)"); // Signed zero is ignored
+    }
     /**
      * A continuous matrix is continuous in either row or column.
      */
@@ -92,7 +99,7 @@ namespace {
 }
 
 int main() {
-    static_assert(std::formattable<MatrixND<float64>, char>);
+    formatTest();
     continuousRowCol();
     testHDF5();
     return 0;

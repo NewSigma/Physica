@@ -49,6 +49,13 @@ namespace {
         expect(z == 3);
     }
 
+    void formatTest() {
+        static_assert(std::formattable<VectorND<float64>, char>);
+
+        VectorND<float64> x = -VectorND<float64>::zeros(1);
+        expect(std::format("{}", x) == "{0}"); // Signed zero is ignored
+    }
+
     void crossProductTest() {
         using T = float32;
         VectorND<T> v1{3.845971, 0.000000, 0.000000};
@@ -185,7 +192,7 @@ int main() {
     rangeTest<VectorND<float64>>();
     rangeTest<decltype(std::declval<VectorND<float64>>().tail(0))>();
     strucBindTest();
-    static_assert(std::formattable<VectorND<float64>, char>);
+    formatTest();
 
     crossProductTest();
     innerDotTest();

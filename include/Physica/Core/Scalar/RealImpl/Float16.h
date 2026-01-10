@@ -119,11 +119,6 @@ namespace Physica {
     auto Real<Float16>::random_normal() noexcept -> This {
         return This(float32::random_normal<R>());
     }
-
-    inline std::ostream& operator<<(std::ostream& os, const Real<Float16>& s) {
-        int lastPrec = static_cast<int>(os.precision());
-        return os << std::setprecision(4) << float(s) << std::setprecision(lastPrec);
-    }
     // Marked as __device__ because nvcc warning 20014-D, host does not have native float16 support
     [[nodiscard]] __device__ inline float16 operator ""_HF(long double x) {
         return float16(float(x));
@@ -145,4 +140,10 @@ namespace std {
             return std::format_to(ctx.out(), "{:.4G}", x.toMachine());
         }
     };
+}
+
+namespace Physica {
+    inline std::ostream& operator<<(std::ostream& os, Real<Float16> x) {
+        return os << std::format("{}", x);
+    }
 }
