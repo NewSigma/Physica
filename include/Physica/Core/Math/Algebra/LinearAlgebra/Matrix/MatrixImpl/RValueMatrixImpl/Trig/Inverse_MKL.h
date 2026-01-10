@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
-    void Inverse<M>::assign_mkl(Matrix auto& target) const noexcept {
+    void Inverse<M>::assign_mkl(Matrix auto& target) const {
         trig.assign(target);
 
         constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;

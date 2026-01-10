@@ -66,7 +66,7 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] const auto& getMatrixLU() const noexcept { return working; }
-        [[nodiscard]] auto getMatrixL() const noexcept { return LUMatrixL<T>(*this); }
+        [[nodiscard]] auto getMatrixL() const noexcept { return working.tril_unit(); }
         [[nodiscard]] auto getMatrixU() const noexcept { return working.triu(); }
         [[nodiscard]] const auto& getPerm() const noexcept;
         /* Setters */

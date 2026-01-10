@@ -27,6 +27,7 @@ namespace Physica {
         using Base = RValueMatrix<This>;
     protected:
         using typename Base::T;
+        using typename Base::Trv;
         using typename Base::Tc;
         using typename Base::Tm;
     private:
@@ -41,7 +42,8 @@ namespace Physica {
         This& operator=(This&&) = delete;
         /* Operations */
         void assign(Matrix auto& target) const;
-        void assign_mkl(Matrix auto& target) const noexcept;
+        void assign_base(Matrix auto& target) const noexcept;
+        void assign_mkl(Matrix auto& target) const;
         /* Getters */
         [[nodiscard]] const auto& getExpr() const noexcept { return trig; }
         [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
@@ -54,8 +56,29 @@ namespace Physica {
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     void Inverse<M>::assign(Matrix auto& target) const {
-        if constexpr (HasMKL())
+        using Expr = Traits<M>::ExprType;
+        if constexpr (Internal::EnableMKL<Expr, decltype(target)>::value)
             assign_mkl(target);
+        else
+            assign_base(target);
+    }
+
+    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    void Inverse<M>::assign_base(Matrix auto& target) const noexcept {
+        target.assert_assign(*this);
+        if constexpr (!Traits<M>::Upper && Traits<M>::Unit) {
+            (-trig).assign(target);
+            target.diag() = Trv(1);
+            for (size_t i = 1; i < getCol() - 1; ++i) {
+                auto corner = target.bottomLeftCorner(i + 1, i);
+
+                auto row = target.row(i);
+                auto col = target.col(i);
+                auto head = row.head(i);
+                auto tail = col.tail(i + 1);
+                corner += tail * head.transpose();
+            }
+        }
         else
             noImpl(__func__);
     }

@@ -125,6 +125,8 @@ namespace Physica {
         constexpr static int Option = MatrixOption::getMajor<M>();
         constexpr static bool Upper = Upper_;
         constexpr static bool Unit = Unit_;
+
+        using ExprType = std::remove_cvref<M>::type;
     };
 }
 

@@ -75,8 +75,14 @@ namespace Physica {
 
 namespace Physica {
     template<Scalar T, bool P>
-    class Traits<Inverse<DenseLU<T, P>>> : public Traits<LUMatrixL<T>> {
+    class Traits<Inverse<DenseLU<T, P>>> {
     public:
+        using ScalarType = T;
+        constexpr static int Option = MatrixOption::Col;
+        constexpr static size_t RowAtCompile = Dynamic;
+        constexpr static size_t ColAtCompile = Dynamic;
+        constexpr static size_t SizeAtCompile = Dynamic;
+
         constexpr static bool Pivot = P;
     };
 }

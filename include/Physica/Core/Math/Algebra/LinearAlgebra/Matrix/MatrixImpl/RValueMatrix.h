@@ -52,10 +52,11 @@ namespace Physica {
         public:
             constexpr static bool value = HasMKL()
                                        && std::same_as<T1, T2>
+                                       && !Diffable<T1>
+                                       && (Traits<M1>::Option == Traits<M2>::Option)
                                        && (T1::Prec == Float32 || T2::Prec == Float64)
                                        && is_continuous<U1>::value
-                                       && is_continuous<U2>::value
-                                       && !Diffable<U1>;
+                                       && is_continuous<U2>::value;
         };
     }
     /**

@@ -19,7 +19,6 @@
 #pragma once
 
 #include "../DenseLU.h"
-#include "MatrixL.h"
 
 namespace Physica {
     template<Scalar T, bool Pivot>
