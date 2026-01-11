@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,9 +49,12 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] constexpr static bool done() noexcept { return true; }
     };
-
+    /**
+     * always_inline: Avoid the destructor overhead of \class Task
+     * nodebug: This function is less interesting
+     */
     template<ExecutePolicy P>
-    [[gnu::nodebug]] Task<Sequential> parallel_for(auto fn, size_t num_loop) noexcept(std::is_nothrow_invocable<decltype(fn)>::value) requires(P == Sequential) {
+    [[gnu::always_inline, gnu::nodebug]] Task<Sequential> parallel_for(auto fn, size_t num_loop) requires(P == Sequential) {
         assert(num_loop > 0);
         for (size_t i = 0; i < num_loop; ++i)
             fn(i);
@@ -59,7 +62,7 @@ namespace Physica {
     }
 
     template<ExecutePolicy P>
-    [[gnu::nodebug]] Task<Sequential> parallel_for(auto fn, size_t num_loop, int) noexcept(std::is_nothrow_invocable<decltype(fn), int>::value) requires(P == Sequential) {
+    [[gnu::always_inline, gnu::nodebug]] Task<Sequential> parallel_for(auto fn, size_t num_loop, int) requires(P == Sequential) {
         for (size_t i = 0; i < num_loop; ++i)
             fn(i);
         return {};

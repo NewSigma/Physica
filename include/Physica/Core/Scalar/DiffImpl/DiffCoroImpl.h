@@ -100,8 +100,6 @@ namespace Physica {
             }
             handle.promise().obj = Base(static_cast<Base&&>(*this));
             handle.resume();
-            assert(handle.done() && "[Error]: Invalid reverse diff");
-            handle.destroy();
             handle = nullptr;
         }
     }

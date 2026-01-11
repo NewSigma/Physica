@@ -59,7 +59,7 @@ namespace Physica {
                     ("[Error]: Differential coroutine must yield values")
                 #endif
                 ;
-            std::suspend_always final_suspend() noexcept { return {}; }
+            std::suspend_never final_suspend() noexcept { return {}; }
             suspend_yield yield_value(auto&& arg) noexcept;
             void return_void() noexcept {}
             [[noreturn]] void unhandled_exception() { throw; }
