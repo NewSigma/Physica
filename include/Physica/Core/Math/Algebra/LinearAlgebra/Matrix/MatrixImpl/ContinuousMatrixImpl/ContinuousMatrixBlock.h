@@ -25,6 +25,7 @@ namespace Physica {
 
     template<Matrix M, size_t Col>
     class ContinuousMatrixBlock<M, 1, Col> : public ContinuousVector<ContinuousMatrixBlock<M, 1, Col>> {
+        static_assert(Traits<M>::Option == MatrixOption::Row, "[Error]: Col major does not have continuous row");
         using This = ContinuousMatrixBlock<M, 1, Col>;
         using Base = ContinuousVector<This>;
     private:
@@ -83,7 +84,7 @@ namespace Physica {
     auto ContinuousMatrixBlock<M, 1, Col>::values(this auto&& self) noexcept {
         auto&& v = self.mat.values();
         using M1 = std::remove_reference<decltype(v)>::type;
-        return ContinuousMatrixBlock<M1, 1, Col>(v, self.fromRow, self.fromCol, self.colCount);
+        return ContinuousMatrixBlock<M1, 1, Col>(v, self.fromRow, self.fromCol, self.getLength());
     }
 
     template<Matrix M, size_t Col>
@@ -91,7 +92,7 @@ namespace Physica {
     auto ContinuousMatrixBlock<M, 1, Col>::grads(this auto&& self) noexcept {
         auto&& g = self.mat.grads();
         using M1 = std::remove_reference<decltype(g)>::type;
-        return ContinuousMatrixBlock<M1, 1, Col>(g, self.fromRow, self.fromCol, self.colCount);
+        return ContinuousMatrixBlock<M1, 1, Col>(g, self.fromRow, self.fromCol, self.getLength());
     }
 
     template<Matrix M, size_t Col>
@@ -101,6 +102,7 @@ namespace Physica {
 
     template<Matrix M, size_t Row>
     class ContinuousMatrixBlock<M, Row, 1> : public ContinuousVector<ContinuousMatrixBlock<M, Row, 1>> {
+        static_assert(Traits<M>::Option == MatrixOption::Col, "[Error]: Row major does not have continuous col");
         using This = ContinuousMatrixBlock<M, Row, 1>;
         using Base = ContinuousVector<This>;
     private:
@@ -159,7 +161,7 @@ namespace Physica {
     auto ContinuousMatrixBlock<M, Row, 1>::values(this auto&& self) noexcept {
         auto&& v = self.mat.values();
         using M1 = std::remove_reference<decltype(v)>::type;
-        return ContinuousMatrixBlock<M1, Row, 1>(v, self.fromRow, self.rowCount, self.fromCol);
+        return ContinuousMatrixBlock<M1, Row, 1>(v, self.fromRow, self.getLength(), self.fromCol);
     }
 
     template<Matrix M, size_t Row>
@@ -167,7 +169,7 @@ namespace Physica {
     auto ContinuousMatrixBlock<M, Row, 1>::grads(this auto&& self) noexcept {
         auto&& g = self.mat.grads();
         using M1 = std::remove_reference<decltype(g)>::type;
-        return ContinuousMatrixBlock<M1, Row, 1>(g, self.fromRow, self.rowCount, self.fromCol);
+        return ContinuousMatrixBlock<M1, Row, 1>(g, self.fromRow, self.getLength(), self.fromCol);
     }
 
     template<Matrix M, size_t Row>
@@ -182,10 +184,9 @@ namespace Physica {
     private:
         M& mat;
         size_t fromRow;
-        size_t rowCount;
         size_t fromCol;
     public:
-        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol);
+        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -223,12 +224,11 @@ namespace Physica {
     };
 
     template<Matrix M>
-    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol)
+    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol)
             : mat(mat)
             , fromRow(fromRow)
-            , rowCount(rowCount)
             , fromCol(fromCol) {
-        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromRow < mat.getRow());
         assert(fromCol < mat.getCol());
     }
 
@@ -236,7 +236,7 @@ namespace Physica {
     auto ContinuousMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
         auto&& v = self.mat.values();
         using M1 = std::remove_reference<decltype(v)>::type;
-        return ContinuousMatrixBlock<M1, 1, 1>(v, self.fromRow, self.rowCount, self.fromCol);
+        return ContinuousMatrixBlock<M1, 1, 1>(v, self.fromRow, 1, self.fromCol);
     }
 
     template<Matrix M>
@@ -244,7 +244,7 @@ namespace Physica {
     auto ContinuousMatrixBlock<M, 1, 1>::grads(this auto&& self) noexcept {
         auto&& g = self.mat.grads();
         using M1 = std::remove_reference<decltype(g)>::type;
-        return ContinuousMatrixBlock<M1, 1, 1>(g, self.fromRow, self.rowCount, self.fromCol);
+        return ContinuousMatrixBlock<M1, 1, 1>(g, self.fromRow, 1, self.fromCol);
     }
 
     template<Matrix M>
@@ -275,6 +275,22 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
 
+        [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
+        [[nodiscard]] auto rows(this auto&&, size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] auto topRows(this auto&&, size_t to) noexcept;
+        [[nodiscard]] auto bottomRows(this auto&&, size_t from) noexcept;
+        [[nodiscard]] auto cols(this auto&&, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] auto leftCols(this auto&&, size_t to) noexcept;
+        [[nodiscard]] auto rightCols(this auto&&, size_t from) noexcept;
+        [[nodiscard]] auto topLeftCorner(this auto&&, size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] auto topLeftCorner(this auto&&, size_t to) noexcept;
+        [[nodiscard]] auto topRightCorner(this auto&&, size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] auto bottomLeftCorner(this auto&&, size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
+        [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
+
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] auto grads(this auto&&) noexcept;
@@ -291,17 +307,112 @@ namespace Physica {
             , rowCount(rowCount)
             , fromCol(fromCol)
             , colCount(colCount) {
-        assert(fromRow < mat.getRow());
-        assert(fromCol < mat.getCol());
-        assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getCol());
+        Base::checkBlock(mat, fromRow, rowCount, fromCol, colCount);
+        assert(Row == Dynamic || Row == rowCount);
+        assert(Col == Dynamic || Col == colCount);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::row(this auto&& self, size_t r) noexcept {
+        assert(r < self.getRow());
+        if constexpr (MatrixOption::isRowMatrix<M>())
+            return ContinuousMatrixBlock<M, 1, Col>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+        else
+            return LMatrixBlock<M, 1, Col>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::col(this auto&& self, size_t c) noexcept {
+        assert(c < self.getCol());
+        if constexpr (MatrixOption::isColMatrix<M>())
+            return ContinuousMatrixBlock<M, Row, 1>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+        else
+            return LMatrixBlock<M, Row, 1>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+        Base::checkBlock(self, fromRow, rowCount, 0, self.getCol());
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::topRows(this auto&& self, size_t to) noexcept {
+        Base::checkBlock(self, 0, to, 0, self.getCol());
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, to, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::bottomRows(this auto&& self, size_t from) noexcept {
+        Base::checkBlock(self, from, self.getRow() - from, 0, self.getCol());
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+        Base::checkBlock(self, 0, self.getRow(), fromCol, colCount);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::leftCols(this auto&& self, size_t to) noexcept {
+        Base::checkBlock(self, 0, self.getRow(), 0, to);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, self.getRow(), self.fromCol, to);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::rightCols(this auto&& self, size_t from) noexcept {
+        Base::checkBlock(self, 0, self.getRow(), from, self.getCol() - from);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+        Base::checkBlock(self, 0, toRow, 0, toCol);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, toRow, self.fromCol, toCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t to) noexcept {
+        Base::checkBlock(self, 0, to, 0, to);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, to, self.fromCol, to);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+        Base::checkBlock(self, 0, toRow, fromCol, self.getCol() - fromCol);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+        Base::checkBlock(self, fromRow, self.getRow() - fromRow, 0, toCol);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+        Base::checkBlock(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+        Base::checkBlock(self, from, self.getRow() - from, from, self.getCol() - from);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    auto ContinuousMatrixBlock<M, Row, Col>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        Base::checkBlock(self, fromRow, rowCount, fromCol, colCount);
+        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
         auto&& v = self.mat.values();
         using M1 = std::remove_reference<decltype(v)>::type;
-        return ContinuousMatrixBlock<M1, Row, Col>(v, self.fromRow, self.rowCount, self.fromCol, self.colCount);
+        return ContinuousMatrixBlock<M1, Row, Col>(v, self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
@@ -309,13 +420,13 @@ namespace Physica {
     auto ContinuousMatrixBlock<M, Row, Col>::grads(this auto&& self) noexcept {
         auto&& g = self.mat.template grads<GradOrder>();
         using M1 = std::remove_reference<decltype(g)>::type;
-        return ContinuousMatrixBlock<M1, Row, Col>(g, self.fromRow, self.rowCount, self.fromCol, self.colCount);
+        return ContinuousMatrixBlock<M1, Row, Col>(g, self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
-        assert(row < self.rowCount);
-        assert(col < self.colCount);
+        assert(row < self.getRow());
+        assert(col < self.getCol());
         return self.mat.data_ptr(row + self.fromRow, col + self.fromCol);
     }
 }

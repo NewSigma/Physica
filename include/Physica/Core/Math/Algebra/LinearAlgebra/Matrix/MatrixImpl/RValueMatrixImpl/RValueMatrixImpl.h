@@ -465,12 +465,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    template<int GradOrder>
-    auto RValueMatrix<Derived>::grads_impl() const noexcept {
-        return GradMatrix<Derived, GradOrder>(Base::getDerived());
-    }
-
-    template<class Derived>
     bool RValueMatrix<Derived>::isOverdetermined() const noexcept {
         return getRow() > getCol();
     }
@@ -536,6 +530,27 @@ namespace Physica {
 
         using U = Src::ScalarType;
         T::template assert_assign<U>();
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto RValueMatrix<Derived>::grads_impl() const noexcept {
+        return GradMatrix<Derived, GradOrder>(Base::getDerived());
+    }
+    /**
+     * See if the block range is legal to the matrix
+     */
+     template<class Derived>
+    __host__ __device__ void RValueMatrix<Derived>::checkBlock(
+            [[maybe_unused]] const Matrix auto& m,
+            [[maybe_unused]] size_t fromRow,
+            [[maybe_unused]] size_t rowCount,
+            [[maybe_unused]] size_t fromCol,
+            [[maybe_unused]] size_t colCount) noexcept {
+        assert(fromRow < m.getRow());
+        assert(fromCol < m.getCol());
+        assert((fromRow + rowCount) <= m.getRow());
+        assert((fromCol + colCount) <= m.getCol());
     }
 }
 

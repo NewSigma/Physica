@@ -23,6 +23,7 @@
 namespace Physica {
     template<Matrix M, size_t Col>
     class device_obj<ContinuousMatrixBlock<M, 1, Col>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, 1, Col>>> {
+        static_assert(Traits<M>::Option == MatrixOption::Row, "[Error]: Col major does not have continuous row");
         using host_obj = ContinuousMatrixBlock<M, 1, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
@@ -69,6 +70,7 @@ namespace Physica {
 
     template<Matrix M, size_t Row>
     class device_obj<ContinuousMatrixBlock<M, Row, 1>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, Row, 1>>> {
+        static_assert(Traits<M>::Option == MatrixOption::Col, "[Error]: Row major does not have continuous col");
         using host_obj = ContinuousMatrixBlock<M, Row, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
@@ -122,9 +124,8 @@ namespace Physica {
         PlainStruct<device_obj<M>> mat;
         size_t fromRow;
         size_t fromCol;
-        size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol);
+        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -141,9 +142,9 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol)
-            : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
-        assert(fromRow + rowCount <= mat.getRow());
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol)
+            : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol) {
+        assert(fromRow < mat.getRow());
         assert(fromCol < mat.getCol());
     }
 
@@ -176,6 +177,22 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
+
+        [[nodiscard]] __host__ __device__ auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] __host__ __device__ auto col(this auto&&, size_t c) noexcept;
+        [[nodiscard]] __host__ __device__ auto rows(this auto&&, size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] __host__ __device__ auto topRows(this auto&&, size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRows(this auto&&, size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto cols(this auto&&, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] __host__ __device__ auto leftCols(this auto&&, size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto rightCols(this auto&&, size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(this auto&&, size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(this auto&&, size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto topRightCorner(this auto&&, size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomLeftCorner(this auto&&, size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
+        [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
@@ -193,6 +210,102 @@ namespace Physica {
         assert(fromCol < mat.getCol());
         assert((fromRow + rowCount) <= mat.getRow());
         assert((fromCol + colCount) <= mat.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::row(this auto&& self, size_t r) noexcept {
+        assert(r < self.getRow());
+        if constexpr (MatrixOption::isRowMatrix<M>())
+            return device_obj<ContinuousMatrixBlock<M, 1, Col>>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+        else
+            return device_obj<LMatrixBlock<M, 1, Col>>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::col(this auto&& self, size_t c) noexcept {
+        assert(c < self.getCol());
+        if constexpr (MatrixOption::isColMatrix<M>())
+            return device_obj<ContinuousMatrixBlock<M, Row, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+        else
+            return device_obj<LMatrixBlock<M, Row, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+        check(self, fromRow, rowCount, 0, self.getCol());
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::topRows(this auto&& self, size_t to) noexcept {
+        check(self, 0, to, 0, self.getCol());
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow, to, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::bottomRows(this auto&& self, size_t from) noexcept {
+        check(self, from, self.getRow() - from, 0, self.getCol());
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+        check(self, 0, self.getRow(), fromCol, colCount);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::leftCols(this auto&& self, size_t to) noexcept {
+        check(self, 0, self.getRow(), 0, to);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow, self.getRow(), self.fromCol, to);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::rightCols(this auto&& self, size_t from) noexcept {
+        check(self, 0, self.getRow(), from, self.getCol() - from);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+        check(self, 0, toRow, 0, toCol);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow, toRow, self.fromCol, toCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::topLeftCorner(this auto&& self, size_t to) noexcept {
+        check(self, 0, to, 0, to);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow, to, self.fromCol, to);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+        check(self, 0, toRow, fromCol, self.getCol() - fromCol);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+        check(self, fromRow, self.getRow() - fromRow, 0, toCol);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+        check(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+        check(self, from, self.getRow() - from, from, self.getCol() - from);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
+    }
+
+    template<Matrix M, size_t Row, size_t Col>
+    __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        check(self, fromRow, rowCount, fromCol, colCount);
+        return device_obj<ContinuousMatrixBlock<M, Row, Col>>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M, size_t Row, size_t Col>

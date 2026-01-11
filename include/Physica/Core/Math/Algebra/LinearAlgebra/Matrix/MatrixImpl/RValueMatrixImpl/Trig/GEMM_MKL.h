@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,18 +34,19 @@ namespace Physica {
 
         const size_t m = getRow();
         const size_t n = getCol();
-        const Tm alpha = 1;
         const auto* a = reinterpret_cast<const Tm*>(buffer.data());
         const size_t lda = Side == CblasLeft ? m : n;
         auto* b = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = Layout == CblasColMajor ? m : n;
         if constexpr (Base::isComplex) {
+            const Tc alpha = 1;
             if constexpr (T::Prec == Float32)
-                cblas_ctrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, &alpha, a, lda, b, ldb);
+                cblas_ctrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, (Tm*)&alpha, a, lda, b, ldb);
             else
-                cblas_ztrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, &alpha, a, lda, b, ldb);
+                cblas_ztrmm_64(Layout, Side, Uplo, TransA, Diag, m, n, (Tm*)&alpha, a, lda, b, ldb);
         }
         else {
+            const Tm alpha = 1;
             if constexpr (T::Prec == Float32)
                 cblas_strmm_64(Layout, Side, Uplo, TransA, Diag, m, n, alpha, a, lda, b, ldb);
             else

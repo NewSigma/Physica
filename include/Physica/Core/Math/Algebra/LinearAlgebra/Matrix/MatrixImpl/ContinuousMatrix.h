@@ -42,8 +42,6 @@ namespace Physica {
     private:
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<This>();
         constexpr static bool isColMatrix = MatrixOption::isColMatrix<This>();
-        using RowVector = std::conditional<isRowMatrix, ContinuousMatrixBlock<Derived, 1, ColAtCompile>, LMatrixBlock<Derived, 1, ColAtCompile>>::type;
-        using ColVector = std::conditional<isColMatrix, ContinuousMatrixBlock<Derived, RowAtCompile, 1>, LMatrixBlock<Derived, RowAtCompile, 1>>::type;
         template<size_t Row>
         using RowBlock = ContinuousMatrixBlock<Derived, Row, ColAtCompile>;
         template<size_t Col>

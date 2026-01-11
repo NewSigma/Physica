@@ -47,30 +47,38 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::row(size_t r) noexcept {
-        const bool useSpecialization = device_obj<ContinuousMatrix<Derived>>::ColAtCompile == 1;
-        if constexpr (useSpecialization)
-            return RowVector(Base::getDerived(), r, 1, 0);
-        else
-            return RowVector(Base::getDerived(), r, 0, Base::getCol());
+        const bool IsMat1x1 = Base::ColAtCompile == 1;
+        if constexpr (IsMat1x1)
+            return device_obj<ContinuousMatrixBlock<Derived, 1, 1>>(Base::getDerived(), r, 0);
+        else {
+            if constexpr (isRowMatrix)
+                return device_obj<ContinuousMatrixBlock<Derived, 1, ColAtCompile>>(Base::getDerived(), r, 0, Base::getCol());
+            else
+                return device_obj<LMatrixBlock<Derived, 1, ColAtCompile>>(Base::getDerived(), r, 0, Base::getCol());
+        }
     }
 
     template<class Derived>
     __host__ __device__ const auto device_obj<ContinuousMatrix<Derived>>::row(size_t r) const noexcept {
-        const bool useSpecialization = device_obj<ContinuousMatrix<Derived>>::ColAtCompile == 1;
-        if constexpr (useSpecialization)
-            return RowVector(Base::getConstCastDerived(), r, 1, 0);
-        else
-            return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
+        return Base::getConstCastDerived().row(r);
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<ContinuousMatrix<Derived>>::col(size_t c) noexcept {
-        return ColVector(Base::getDerived(), 0, Base::getRow(), c);
+        const bool IsMat1x1 = Base::RowAtCompile == 1;
+        if constexpr (IsMat1x1)
+            return device_obj<ContinuousMatrixBlock<Derived, 1, 1>>(Base::getDerived(), 0, c);
+        else {
+            if constexpr (isColMatrix)
+                return device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, 1>>(Base::getDerived(), 0, Base::getRow(), c);
+            else
+                return device_obj<LMatrixBlock<Derived, RowAtCompile, 1>>(Base::getDerived(), 0, Base::getRow(), c);
+        }
     }
 
     template<class Derived>
     __host__ __device__ const auto device_obj<ContinuousMatrix<Derived>>::col(size_t c) const noexcept {
-        return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
+        return Base::getConstCastDerived().col(c);
     }
 
     template<class Derived>

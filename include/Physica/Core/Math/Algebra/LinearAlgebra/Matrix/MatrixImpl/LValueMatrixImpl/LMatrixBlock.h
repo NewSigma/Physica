@@ -108,13 +108,8 @@ namespace Physica {
         M& mat;
         size_t fromRow;
         size_t fromCol;
-        size_t rowCount;
     public:
-        LMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(fromCol < mat.getCol());
-        }
+        LMatrixBlock(M& mat_, size_t fromRow_, size_t fromCol_);
         LMatrixBlock(const This&) = delete;
         LMatrixBlock(This&&) noexcept = delete;
         ~LMatrixBlock() = default;
@@ -122,11 +117,18 @@ namespace Physica {
         using Base::operator=;
         /* Operations */
         using Base::resize;
-        void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
+        void resize([[maybe_unused]] size_t length) { assert(length == 1); }
         /* Getters */
         [[nodiscard]] constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] auto data_ptr(this auto&& self, [[maybe_unused]] size_t index) noexcept;
     };
+
+    template<Matrix M>
+    LMatrixBlock<M, 1, 1>::LMatrixBlock(M& mat_, size_t fromRow_, size_t fromCol_)
+            : mat(mat_), fromRow(fromRow_), fromCol(fromCol_) {
+        assert(fromRow < mat.getRow());
+        assert(fromCol < mat.getCol());
+    }
 
     template<Matrix M>
     auto LMatrixBlock<M, 1, 1>::data_ptr(this auto&& self, [[maybe_unused]] size_t index) noexcept {
@@ -157,6 +159,22 @@ namespace Physica {
         /* Operations */
         using Base::resize;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
+
+        [[nodiscard]] auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] auto col(this auto&&, size_t c) noexcept;
+        [[nodiscard]] auto rows(this auto&&, size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] auto topRows(this auto&&, size_t to) noexcept;
+        [[nodiscard]] auto bottomRows(this auto&&, size_t from) noexcept;
+        [[nodiscard]] auto cols(this auto&&, size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] auto leftCols(this auto&&, size_t to) noexcept;
+        [[nodiscard]] auto rightCols(this auto&&, size_t from) noexcept;
+        [[nodiscard]] auto topLeftCorner(this auto&&, size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] auto topLeftCorner(this auto&&, size_t to) noexcept;
+        [[nodiscard]] auto topRightCorner(this auto&&, size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] auto bottomLeftCorner(this auto&&, size_t fromRow, size_t toCol) noexcept;
+        [[nodiscard]] auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
+        [[nodiscard]] auto bottomRightCorner(this auto&&, size_t from) noexcept;
+        [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] size_t getCol() const noexcept { return colCount; }
@@ -170,8 +188,97 @@ namespace Physica {
             , rowCount(rowCount_)
             , fromCol(fromCol_)
             , colCount(colCount_) {
-        assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getCol());
+        Base::checkBlock(mat, fromRow, rowCount, fromCol, colCount);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::row(this auto&& self, size_t r) noexcept {
+        assert(r < self.getRow());
+        return LMatrixBlock<M, 1, Dynamic>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::col(this auto&& self, size_t c) noexcept {
+        assert(c < self.getCol());
+        return LMatrixBlock<M, Dynamic, 1>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+        Base::checkBlock(self, fromRow, rowCount, 0, self.getCol());
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::topRows(this auto&& self, size_t to) noexcept {
+        Base::checkBlock(self, 0, to, 0, self.getCol());
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, to, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::bottomRows(this auto&& self, size_t from) noexcept {
+        Base::checkBlock(self, from, self.getRow() - from, 0, self.getCol());
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+        Base::checkBlock(self, 0, self.getRow(), fromCol, colCount);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::leftCols(this auto&& self, size_t to) noexcept {
+        Base::checkBlock(self, 0, self.getRow(), 0, to);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, self.getRow(), self.fromCol, to);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::rightCols(this auto&& self, size_t from) noexcept {
+        Base::checkBlock(self, 0, self.getRow(), from, self.getCol() - from);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+        Base::checkBlock(self, 0, toRow, 0, toCol);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, toRow, self.fromCol, toCol);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::topLeftCorner(this auto&& self, size_t to) noexcept {
+        Base::checkBlock(self, 0, to, 0, to);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, to, self.fromCol, to);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+        Base::checkBlock(self, 0, toRow, fromCol, self.getCol() - fromCol);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+        Base::checkBlock(self, fromRow, self.getRow() - fromRow, 0, toCol);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+        Base::checkBlock(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+        Base::checkBlock(self, from, self.getRow() - from, from, self.getCol() - from);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
+    }
+
+    template<Matrix M>
+    auto LMatrixBlock<M, Dynamic, Dynamic>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        Base::checkBlock(self, fromRow, rowCount, fromCol, colCount);
+        return LMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M>

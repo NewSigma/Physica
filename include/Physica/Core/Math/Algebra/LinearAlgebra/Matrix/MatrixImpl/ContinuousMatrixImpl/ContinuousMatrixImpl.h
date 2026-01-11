@@ -33,30 +33,38 @@ namespace Physica {
 
     template<class Derived>
     auto ContinuousMatrix<Derived>::row(size_t r) noexcept {
-        const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
-        if constexpr (useSpecialization)
-            return RowVector(Base::getDerived(), r, 1, 0);
-        else
-            return RowVector(Base::getDerived(), r, 0, Base::getCol());
+        const bool IsMat1x1 = Base::ColAtCompile == 1;
+        if constexpr (IsMat1x1)
+            return ContinuousMatrixBlock<Derived, 1, 1>(Base::getDerived(), r, 0);
+        else {
+            if constexpr (isRowMatrix)
+                return ContinuousMatrixBlock<Derived, 1, ColAtCompile>(Base::getDerived(), r, 0, Base::getCol());
+            else
+                return LMatrixBlock<Derived, 1, ColAtCompile>(Base::getDerived(), r, 0, Base::getCol());
+        }
     }
 
     template<class Derived>
     const auto ContinuousMatrix<Derived>::row(size_t r) const noexcept {
-        const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
-        if constexpr (useSpecialization)
-            return RowVector(Base::getConstCastDerived(), r, 1, 0);
-        else
-            return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
+        return Base::getConstCastDerived().row(r);
     }
 
     template<class Derived>
     auto ContinuousMatrix<Derived>::col(size_t c) noexcept {
-        return ColVector(Base::getDerived(), 0, Base::getRow(), c);
+        const bool IsMat1x1 = Base::RowAtCompile == 1;
+        if constexpr (IsMat1x1)
+            return ContinuousMatrixBlock<Derived, 1, 1>(Base::getDerived(), 0, c);
+        else {
+            if constexpr (isColMatrix)
+                return ContinuousMatrixBlock<Derived, RowAtCompile, 1>(Base::getDerived(), 0, Base::getRow(), c);
+            else
+                return LMatrixBlock<Derived, RowAtCompile, 1>(Base::getDerived(), 0, Base::getRow(), c);
+        }
     }
 
     template<class Derived>
     const auto ContinuousMatrix<Derived>::col(size_t c) const noexcept {
-        return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
+        return Base::getConstCastDerived().col(c);
     }
 
     template<class Derived>

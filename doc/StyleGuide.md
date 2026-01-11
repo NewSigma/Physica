@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -52,10 +52,6 @@ void T::swap(T& __restrict obj) noexcept {
 
 ## 其他C++特性
 
-### 静态断言
-
-类模板的静态断言应尽可能放置在Traits中
-
 ### RTTI
 
 不得使用
@@ -67,10 +63,6 @@ void T::swap(T& __restrict obj) noexcept {
 ## 命名
 
 模板参数: 鼓励使用缩写函数模板(Abbreviated Function Templates)消除占位符
-
-## 单元测试
-
-单元测试用时一般不超过1 min，合理情况下可适当延长，任何情况下都不应超过10 min。
 
 ## Reference
 

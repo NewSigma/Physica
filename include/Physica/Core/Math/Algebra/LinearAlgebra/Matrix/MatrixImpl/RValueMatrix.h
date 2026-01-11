@@ -208,6 +208,8 @@ namespace Physica {
         /* Operations */
         template<int GradOrder>
         auto grads_impl() const noexcept;
+        /* Static members */
+        __host__ __device__ static void checkBlock(const Matrix auto& m, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
     };
 
     template<Matrix M1, Matrix M2>
