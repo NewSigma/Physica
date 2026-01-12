@@ -64,18 +64,16 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const noexcept {
-        if constexpr (isReverseDiff)
-            values().template assign<P>(target);
+        if constexpr (MatrixOption::isColMatrix<M>()) {
+            size_t length = vec.getLength();
+            (mat.col(0) * vec.calc(0)).template assign<P>(target);
+            for (size_t i = 1; i < length; ++i)
+                (mat.col(i) * vec.calc(i)).template assign_add<P>(target);
+        }
         else {
-            if constexpr (MatrixOption::isColMatrix<M>()) {
-                (mat.col(0) * vec.calc(0)).template assign<P>(target);
-                for (size_t i = 1; i < vec.getLength(); ++i)
-                    (mat.col(i) * vec.calc(i)).template assign_add<P>(target);
-            }
-            else {
-                for (size_t i = 0; i < getLength(); ++i)
-                    target[i] = calc(i);
-            }
+            size_t length = getLength();
+            for (size_t i = 0; i < length; ++i)
+                target[i] = calc(i);
         }
     }
 

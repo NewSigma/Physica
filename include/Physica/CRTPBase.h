@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,13 +31,13 @@ namespace Physica {
         using This = CRTPBase<T>;
         using U = Traits<T>::Derived;
     public:
-        [[nodiscard]] U& getDerived_host() noexcept { return *static_cast<U*>(this); }
-        [[nodiscard]] const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
-        [[nodiscard]] U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard, gnu::nodebug]] U& getDerived_host() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard, gnu::nodebug]] const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard, gnu::nodebug]] U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
 
-        [[nodiscard]] __host__ __device__ U& getDerived() noexcept { return *static_cast<U*>(this); }
-        [[nodiscard]] __host__ __device__ const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
-        [[nodiscard]] __host__ __device__ U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard, gnu::nodebug]] __host__ __device__ U& getDerived() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard, gnu::nodebug]] __host__ __device__ const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard, gnu::nodebug]] __host__ __device__ U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
     protected:
         CRTPBase() = default;
         CRTPBase(const This&) = default;

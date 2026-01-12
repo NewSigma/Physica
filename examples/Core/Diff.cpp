@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,8 +40,10 @@ namespace {
         return x.grad(); // x receives grad
     }
 }
-
+/**
+ * We demonstrate basic concepts of automatic differentiation implemented in Physica.
+ */
 int main() {
-    std::println("{}={}", forward(), reverse());
+    std::println("{} = {}", forward(), reverse());
     return 0;
 }

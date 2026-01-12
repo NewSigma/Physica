@@ -10,8 +10,6 @@ target_sources(Benchmark PRIVATE RPMD/ParaH.cpp)
 target_sources(Benchmark PRIVATE RPMD/Q_TIP4P.cpp)
 if(${PHYSICA_CUDA})
     target_sources(Benchmark PRIVATE RPMD/ParaH.cu)
-    #target_sources(Benchmark PRIVATE RPMD/ParaH_auto.cu)
-    #target_sources(Benchmark PRIVATE RPMD/Q_TIP4P2D.cu)
 endif()
 # Anonymous
 target_sources(Benchmark PRIVATE Benchmark.cpp)
