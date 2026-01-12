@@ -79,6 +79,7 @@ namespace Physica {
         case MT19937:
             return CURAND_RNG_PSEUDO_MTGP32;
         default:
+            static_assert(CURAND_RNG_TEST == 0, "Returns 0 by default");
             return CURAND_RNG_TEST;
         }
     #else

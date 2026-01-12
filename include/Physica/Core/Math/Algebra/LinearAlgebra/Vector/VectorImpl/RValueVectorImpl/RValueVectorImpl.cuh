@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,8 +31,8 @@ namespace Physica {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
                 const auto& source = source_.getDerived();
                 auto& target = target_.getDerived();
-                const size_t length = source.getLength();
-                const uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
+                size_t length = source.getLength();
+                uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
                 if (index < length)
                     target[index] = source.calc(index);
             };
@@ -40,6 +40,29 @@ namespace Physica {
         }
         else if constexpr (IsDevice())
             assign_impl(target);
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign_add(Vector auto& target) const {
+        target.assert_assign(Base::getDerived());
+        if (IsHost()) {
+            auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
+                const auto& source = source_.getDerived();
+                auto& target = target_.getDerived();
+                size_t length = source.getLength();
+                uint32_t index = blockIdx.x * blockDim.x + threadIdx.x;
+                if (index < length)
+                    target[index] += source.calc(index);
+            };
+            CUDAExecutor::launch<MaxThreadsPerBlock>(func, makeKernelConfig());
+        }
+        else if constexpr (IsDevice())
+            noImpl(__func__);
+    }
+
+    template<class Derived>
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign_add_base(Vector auto& target) const {
+        assign_add(target);
     }
 
     template<class Derived>

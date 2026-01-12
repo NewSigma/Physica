@@ -12,3 +12,7 @@ if(${PHYSICA_MKL})
     target_sources(Benchmark PRIVATE Nrm2_MKL.cpp)
     target_sources(Benchmark PRIVATE Scal_MKL.cpp)
 endif()
+
+if(${PHYSICA_CUDA})
+    target_sources(Benchmark PRIVATE Axpy.cu)
+endif()

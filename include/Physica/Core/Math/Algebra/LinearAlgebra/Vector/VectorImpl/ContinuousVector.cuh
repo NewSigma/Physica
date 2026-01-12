@@ -44,7 +44,8 @@ namespace Physica {
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This& obj) = delete;
-        This& operator=(This&& obj) = delete;
+        This& operator=(This&& obj) noexcept = delete;
+        device_obj<Derived>& operator=(const Scalar auto& x);
         using Base::operator=;
         using Base::operator+=;
         /* Operations */

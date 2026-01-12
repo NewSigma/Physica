@@ -22,6 +22,15 @@
 
 namespace Physica {
     template<class Derived>
+    device_obj<Derived>& device_obj<ContinuousVector<Derived>>::operator=(const Scalar auto& x) {
+        if constexpr (Base::SizeAtCompile == Dynamic) {
+            if (x.isZero())
+                zeros();
+        }
+        return Base::operator=(x);
+    }
+
+    template<class Derived>
     void device_obj<ContinuousVector<Derived>>::reverse(const auto& grad) const noexcept {
         static_assert(isReverseDiff);
         using U = std::remove_cvref_t<decltype(grad)>;

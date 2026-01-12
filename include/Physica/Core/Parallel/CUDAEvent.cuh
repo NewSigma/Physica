@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,13 +26,21 @@ namespace Physica {
 
         cudaEvent_t event = nullptr;
     public:
-        CUDAEvent();
+        enum : char {
+            BlockingSync = cudaEventBlockingSync,
+            DisableTiming = cudaEventDisableTiming,
+            Interprocess = cudaEventInterprocess,
+        };
+    public:
+        explicit CUDAEvent(int flag = cudaEventDefault);
         CUDAEvent(const This&) = delete;
         CUDAEvent(This&& obj) noexcept;
         ~CUDAEvent();
         /* Operators */
         CUDAEvent& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] operator cudaEvent_t() const noexcept { return event; }
         /* Operations */
+        void record();
         inline void wait();
         void swap(CUDAEvent& __restrict obj) noexcept;
         /* Getters */
