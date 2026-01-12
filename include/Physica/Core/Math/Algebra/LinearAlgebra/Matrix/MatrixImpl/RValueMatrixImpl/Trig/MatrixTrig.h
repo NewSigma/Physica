@@ -147,5 +147,6 @@ namespace Physica {
 #endif
 #include "GEMM.h"
 #include "Inverse.h"
+#include "InvGEMV.h"
 #include "InvGEMM.h"
 #include "DiagGEMM.h"

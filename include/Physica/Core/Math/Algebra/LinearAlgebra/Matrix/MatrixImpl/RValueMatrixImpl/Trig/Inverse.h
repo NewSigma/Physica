@@ -48,7 +48,6 @@ namespace Physica {
         [[nodiscard]] const auto& getExpr() const noexcept { return trig; }
         [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
-    private:
     };
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
