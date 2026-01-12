@@ -21,6 +21,8 @@
 #include "../VectorExpr.h"
 
 namespace Physica {
+    template<Matrix, Vector> class GEMV;
+
     template<Vector V>
     class VectorExpr<ExprID::Minus, V>
             : public UnitaryVectorExpr<ExprID::Minus, V> {
@@ -100,6 +102,9 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] auto operator-(V&& v) noexcept requires(!CUDA<V>) {
-        return VectorExpr<ExprID::Minus, V&&>(std::forward<V>(v));
+        if constexpr (instanceof<GEMV, V>)
+            return v.getLHS() * (-v.getRHS());
+        else
+            return VectorExpr<ExprID::Minus, V&&>(std::forward<V>(v));
     }
 }
