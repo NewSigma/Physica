@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,25 +34,25 @@ namespace Physica {
      * We promote to the minimal type if precisions do not match.
      */
     template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator+(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
+    [[nodiscard]] __host__ __device__ auto operator+(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) + ResultType(y);
     }
 
     template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator-(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
+    [[nodiscard]] __host__ __device__ auto operator-(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) - ResultType(y);
     }
 
     template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator*(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
+    [[nodiscard]] __host__ __device__ auto operator*(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) * ResultType(y);
     }
 
     template<FloatPrec Prec1, FloatPrec Prec2>
-    __host__ __device__ auto operator/(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
+    [[nodiscard]] __host__ __device__ auto operator/(Real<Prec1> x, Real<Prec2> y) noexcept requires(Prec1 != Prec2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Real<Prec1>, Real<Prec2>>::Type;
         return ResultType(x) / ResultType(y);
     }

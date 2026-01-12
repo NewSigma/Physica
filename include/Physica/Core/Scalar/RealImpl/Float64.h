@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -70,18 +70,18 @@ namespace Physica {
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        __host__ __device__ explicit operator float() const noexcept { return float(d); }
-        __host__ __device__ explicit operator double() const noexcept { return d; }
-        __host__ __device__ constexpr Real operator+(const Real& s) const noexcept;
-        __host__ __device__ constexpr Real operator-(const Real& s) const noexcept;
-        __host__ __device__ constexpr Real operator*(const Real& s) const noexcept;
-        __host__ __device__ constexpr Real operator/(const Real& s) const noexcept;
-        __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(d, i)); }
-        __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(d, -i)); }
-        __host__ __device__ Real operator-() const noexcept { return Real(-d); }
-        __host__ __device__ bool operator>(const Real& s) const noexcept { return d > s.d; }
-        __host__ __device__ bool operator<(const Real& s) const noexcept { return d < s.d; }
-        __host__ __device__ bool operator==(const Real& s) const noexcept { return d == s.d; }
+        [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(d); }
+        [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return d; }
+        [[nodiscard]] __host__ __device__ constexpr Real operator+(const Real& s) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator-(const Real& s) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator*(const Real& s) const noexcept;
+        [[nodiscard]] __host__ __device__ constexpr Real operator/(const Real& s) const noexcept;
+        [[nodiscard]] __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(d, i)); }
+        [[nodiscard]] __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(d, -i)); }
+        [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-d); }
+        [[nodiscard]] __host__ __device__ bool operator>(const Real& s) const noexcept { return d > s.d; }
+        [[nodiscard]] __host__ __device__ bool operator<(const Real& s) const noexcept { return d < s.d; }
+        [[nodiscard]] __host__ __device__ bool operator==(const Real& s) const noexcept { return d == s.d; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;

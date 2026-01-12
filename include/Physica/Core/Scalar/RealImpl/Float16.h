@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -70,16 +70,16 @@ namespace Physica {
         using Base::operator<;
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
-        __host__ __device__ explicit operator float() const noexcept { return h; }
-        __host__ __device__ explicit operator double() const noexcept { return h; }
-        __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(h + s.h); }
-        __host__ __device__ Real operator-(const Real& s) const noexcept { return Real(h - s.h); }
-        __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(h * s.h); }
-        __host__ __device__ Real operator/(const Real& s) const noexcept;
-        __host__ __device__ Real operator-() const noexcept { return Real(-h); }
-        __host__ __device__ bool operator>(const Real& s) const noexcept { return h > s.h; }
-        __host__ __device__ bool operator<(const Real& s) const noexcept { return h < s.h; }
-        __host__ __device__ bool operator==(const Real& s) const noexcept { return h == s.h; }
+        [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return h; }
+        [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return h; }
+        [[nodiscard]] __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(h + s.h); }
+        [[nodiscard]] __host__ __device__ Real operator-(const Real& s) const noexcept { return Real(h - s.h); }
+        [[nodiscard]] __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(h * s.h); }
+        [[nodiscard]] __host__ __device__ Real operator/(const Real& s) const noexcept;
+        [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-h); }
+        [[nodiscard]] __host__ __device__ bool operator>(const Real& s) const noexcept { return h > s.h; }
+        [[nodiscard]] __host__ __device__ bool operator<(const Real& s) const noexcept { return h < s.h; }
+        [[nodiscard]] __host__ __device__ bool operator==(const Real& s) const noexcept { return h == s.h; }
         /* Operations */
         using Base::random_uniform;
         using Base::random_normal;
