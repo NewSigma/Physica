@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,6 +49,10 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
+        using Tc = T::ComplexType;
+        using Tcv = Tc::ValueType;
+
+        using Tm = std::conditional<isComplex, typename Tcv::MKL_Complex, typename T::MachineType>::type;
     private:
         using RealsRtnTy = std::conditional<isComplex, device_obj<RealMatrix<Derived>>, device_obj<Derived>&>::type;
         using ValuesRtnTy = std::conditional<isDiffable, device_obj<ValueMatrix<Derived>>, device_obj<Derived>&>::type;

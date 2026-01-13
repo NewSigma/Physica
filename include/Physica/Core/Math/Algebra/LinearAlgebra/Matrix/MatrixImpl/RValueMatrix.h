@@ -86,8 +86,9 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
         using Tc = T::ComplexType;
+        using Tcv = Tc::ValueType;
 
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        using Tm = std::conditional<isComplex, typename Tcv::MKL_Complex, typename T::MachineType>::type;
     public:
         ~RValueMatrix() = default;
         /* Operators */

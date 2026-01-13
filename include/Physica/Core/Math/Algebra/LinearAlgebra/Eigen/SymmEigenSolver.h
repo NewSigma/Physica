@@ -39,7 +39,7 @@ namespace Physica {
 
         using Tr = T::RealType;
         using Tc = T::ComplexType;
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        using Tcv = Tc::ValueType;
     public:
         using EigenvalueVector = DenseVector<Tr, Order>;
         using EigenvectorMatrix = DenseMatrix<T, MatrixOption::Col, Order, Order>;

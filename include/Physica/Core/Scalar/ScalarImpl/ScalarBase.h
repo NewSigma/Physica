@@ -77,8 +77,7 @@ namespace Physica {
         using device_obj_type = Derived;
 
         using GradType = Internal::GradTypeHelper<ScalarType, isDiffable ? 1 : 0>::Type;
-        using MKL_Complex = std::conditional<Prec == Float32, MKL_Complex8,
-                                                              typename std::conditional<Prec == Float64, MKL_Complex16, void>::type>::type;
+
     private:
         constexpr static bool isScalarRef = instanceof<ScalarRef, Derived>;
         static_assert(isDiffable == (Order > 0), "[Error]: DiffMode is not self consistent");

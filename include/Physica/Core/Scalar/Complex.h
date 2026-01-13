@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include <complex>
 #ifdef PHYSICA_CUDA
+    #include <cuComplex.h>
     #include <thrust/complex.h>
 #endif
 #include "Physica/Core/Scalar/Real.h" // IWYU pragma: export
@@ -39,6 +40,8 @@ namespace Physica {
         using typename Base::MachineType;
 
         constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
+        using MKL_Complex = std::conditional<T::Prec == Float32, MKL_Complex8, typename std::conditional<T::Prec == Float64, MKL_Complex16, void>::type>::type;
+        using cuBLAS_Complex = std::conditional<T::Prec == Float32, cuComplex, typename std::conditional<T::Prec == Float64, cuDoubleComplex, void>::type>::type;
     private:
         using Tm = Base::MachineType;
     private:

@@ -25,6 +25,7 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void SymmEigenSolver<T, Order>::compute_mkl(const Matrix auto& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
+        using Tm = std::conditional<isComplex, typename Tcv::MKL_Complex, typename T::MachineType>::type;
         constexpr int Major = MatrixOption::isColMatrix<decltype(source)>() ? MatrixOption::Col : MatrixOption::Row;
         constexpr int Layout = Major == MatrixOption::Col ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
 

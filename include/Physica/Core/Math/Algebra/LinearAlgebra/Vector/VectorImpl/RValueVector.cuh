@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,6 +43,10 @@ namespace Physica {
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
+        using Tc = T::ComplexType;
+        using Tcv = Tc::ValueType;
+
+        using Tm = std::conditional<isComplex, typename Tcv::cuBLAS_Complex, typename T::MachineType>::type;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -51,6 +55,8 @@ namespace Physica {
         /* Operations */
         template<Vector V>
         __host__ __device__ void assign(V& target) const;
+        __host__ __device__ void assign_add(Vector auto& target) const;
+        __host__ __device__ void assign_add_base(Vector auto& target) const;
         __host__ __device__ void assert_assign(const Vector auto& source) const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const { return Base::getDerived().calc(index); }
