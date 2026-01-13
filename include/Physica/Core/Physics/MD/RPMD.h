@@ -49,13 +49,17 @@ namespace Physica {
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
     private:
+        using ContractFFT1D = std::conditional<IsClassical, PlainStruct<void>, FFT<T, 1>>::type;
+        using ContractPhaseMatrix = std::conditional<IsClassical, PlainStruct<void>, PhaseMatrix>::type;
+        using ContractForceMatrix = std::conditional<IsClassical, PlainStruct<void>, ForceMatrix>::type;
+    private:
         MDCellType cell;
         RingPolymerType ringPolymer;
         ForceMatrix forceBuffer;
 
-        FFT<T, 1> fftContract;
-        PhaseMatrix posContract;
-        ForceMatrix forceContract;
+        [[no_unique_address]] ContractFFT1D fftContract;
+        [[no_unique_address]] ContractPhaseMatrix posContract;
+        [[no_unique_address]] ContractForceMatrix forceContract;
         /* Constant */
         T temperatureT;
         T timeStep;
@@ -77,6 +81,8 @@ namespace Physica {
 
         template<ExecutePolicy P = Sequential>
         void nve_step(auto& kineticModel, auto& forceModel);
+        template<ExecutePolicy P = Sequential>
+        void nve_step_back(auto& kineticModel, auto& forceModel);
         template<ExecutePolicy P = Sequential>
         void nve_step_for(T duration, auto& kineticModel, auto& forceModel);
 
@@ -147,7 +153,7 @@ namespace Physica {
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }
         [[nodiscard]] const auto& getForce() const noexcept { return forceBuffer; }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
-        [[nodiscard]] bool isContractEnabled() const noexcept { return !IsClassical && (getNumReplica() != getNumContract()); }
+        [[nodiscard]] bool isContractEnabled() const noexcept;
         [[nodiscard]] T getTemperature() const noexcept { return temperatureT; }
         [[nodiscard]] T getTimeStep() const noexcept { return timeStep; }
         /* Setters */
@@ -157,13 +163,16 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static uint64_t durationToStep(Tv duration, Tv timeStep);
     private:
+        template<ExecutePolicy P>
+        void nve_step_impl(auto& kineticModel, auto& forceModel, Tv deltaT);
+
         void toContractBeadRepr(size_t posID);
         void forceToNormRepr(size_t posID);
         void forceToBeadRepr(size_t posID);
         void contract();
         void decontract();
         void forceStep(T deltaT);
-        bool checkCentroid() const;
+        [[nodiscard]] bool checkCentroid() const;
         template<class KineticModel, class ForceModel>
         constexpr static void checkRelaxParam();
     };

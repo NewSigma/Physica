@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,7 +32,7 @@ namespace Physica {
         using This = PlainStruct<void>;
     public:
         constexpr PlainStruct() = default;
-        constexpr PlainStruct(auto&&) {}
+        constexpr PlainStruct(auto&&...) {}
         constexpr PlainStruct(const This&) = default;
         constexpr PlainStruct(This&&) noexcept = default;
         constexpr ~PlainStruct() = default;

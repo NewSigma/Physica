@@ -381,8 +381,7 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ KernelConfig device_obj<RValueVector<Derived>>::makeKernelConfig(size_t length) noexcept {
-        constexpr uint32_t MaxThread = MaxThreadsPerBlock;
-        const uint32_t numThread = std::min<uint32_t>(length, MaxThread);
+        const uint32_t numThread = std::min<uint32_t>(length, MaxThreadsPerBlock);
         const uint32_t numBlock = (length + numThread - 1) / numThread;
         return KernelConfig(numBlock, numThread);
     }

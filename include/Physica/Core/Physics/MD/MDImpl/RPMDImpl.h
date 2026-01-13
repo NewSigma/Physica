@@ -38,11 +38,12 @@ namespace Physica {
 
         const size_t dof = getDOF();
         forceBuffer.resize(dof, numReplica, 0);
-        if (isContractEnabled()) {
-            posContract.resize(dof, numContract);
-            forceContract.resize(dof, numContract);
+        if constexpr (!IsClassical) {
+            if (isContractEnabled()) {
+                posContract.resize(dof, numContract);
+                forceContract.resize(dof, numContract);
+            }
         }
-
         setTemperature(temperatureT_);
         setTimeStep(timeStep_);
     }
@@ -114,20 +115,15 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<ExecutePolicy P>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nve_step(auto& kineticModel, auto& forceModel) {
-        using KineticModel = std::remove_cvref_t<decltype(kineticModel)>;
-        using ForceModel = std::remove_cvref_t<decltype(forceModel)>;
-        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
-        static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
-        if (isFreeModel)
-            kineticModel.nve_step(ringPolymer, timeStep);
-        else {
-            forceStep(timeStep * Tv(0.5));
-            kineticModel.nve_step(ringPolymer, timeStep);
-            updateForce<P>(forceModel);
-            forceStep(timeStep * Tv(0.5));
-        }
+        nve_step_impl<P>(kineticModel, forceModel, timeStep);
+    }
+    /**
+     * Some applications may need to step forward and back, e.g. \class HamiltonMC
+     */
+    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<ExecutePolicy P>
+    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nve_step_back(auto& kineticModel, auto& forceModel) {
+        nve_step_impl<P>(kineticModel, forceModel, -timeStep);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -696,6 +692,14 @@ namespace Physica {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    bool RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::isContractEnabled() const noexcept {
+        if constexpr (IsClassical)
+            return false;
+        else
+            return getNumReplica() != getNumContract();
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(T temperature) noexcept {
         assert(!temperature.isNegative() && "[Error]: Negative temperature is not physical");
         temperatureT = temperature;
@@ -715,6 +719,25 @@ namespace Physica {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     uint64_t RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::durationToStep(Tv duration, Tv timeStep) {
         return std::lround((duration / timeStep).toMachine());
+    }
+
+    template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<ExecutePolicy P>
+    void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nve_step_impl(auto& kineticModel, auto& forceModel, Tv deltaT) {
+        using KineticModel = std::remove_cvref_t<decltype(kineticModel)>;
+        using ForceModel = std::remove_cvref_t<decltype(forceModel)>;
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
+        static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
+        if (isFreeModel)
+            kineticModel.nve_step(ringPolymer, deltaT);
+        else {
+            forceStep(deltaT * Tv(0.5));
+            kineticModel.nve_step(ringPolymer, deltaT);
+            updateForce<P>(forceModel);
+            forceStep(deltaT * Tv(0.5));
+        }
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

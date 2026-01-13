@@ -159,7 +159,7 @@ namespace Physica {
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(const This& obj) noexcept(std::is_nothrow_copy_constructible<T>::value)
             : length(obj.length), capacity(length), alloc() {
-        assert(capacity > 0);
+        assert(capacity > 0 && "[Error]: Copy a empty array");
         arr = alloc.allocate(length);
         if constexpr (std::is_trivially_copyable<T>::value)
             memcpy(arr, obj.arr, length * sizeof(T));
