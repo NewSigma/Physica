@@ -4,6 +4,7 @@
  * This file is part of PhysicaNotes.
  */
 #include <QApplication>
+#include <print>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
 #include "Physica/Gui/Plot/Plot.h"
@@ -53,13 +54,20 @@ int main(int argc, char** argv) {
     plot->getAxisX()->setTitleText("x");
     plot->getAxisY()->setTitleText("y");
 
-    constexpr int N = 1000;
+    constexpr int N = 2000;
     VectorND<T> x(N), y(N);
     {
-        auto hmc = HamiltonMC<T>({1, 1}, 0.2, 1);
-        auto p = Array<Vector2D<T>>::generate(N, [&](size_t) {
-            return hmc.step<RandomSource>(ProbHamiltion{});
+        auto hmc = HamiltonMC<T>({1, 1});
+        hmc.warmup<RandomSource>(1000, ProbHamiltion{});
+
+        T acceptM, acceptV;
+        auto p = Array<Vector2D<T>>::generate(N, [&](size_t i) {
+            auto acc = hmc.step<RandomSource>(ProbHamiltion{});
+            acceptV.toNextVariance(acceptM, i, acc);
+            return hmc.getSample();
         });
+        std::println("{}({})", acceptM, sqrt(acceptV));
+
         std::ranges::transform(p, x.begin(), [](Vector2D<T> in) { return in[0]; });
         std::ranges::transform(p, y.begin(), [](Vector2D<T> in) { return in[1]; });
     }

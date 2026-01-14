@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -145,6 +145,7 @@ namespace Physica {
         [[nodiscard]] constexpr static result_type max() { return Generator::max(); }
 
         [[nodiscard]] static This& getInstance() noexcept;
+        [[nodiscard]] static bool coin() noexcept;
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
         static void random_int(Array<int>& arr, int from, int to);
     private:
@@ -192,6 +193,11 @@ namespace Physica {
     auto Random<Option, FixedSeed>::getInstance() noexcept -> This& {
         thread_local static This instance{};
         return instance;
+    }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    bool Random<Option, FixedSeed>::coin() noexcept {
+        return std::uniform_int_distribution<>(0, 1)(getInstance());
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
