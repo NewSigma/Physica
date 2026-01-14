@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2025 Weibo He.
+ * Copyright 2019-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -96,13 +96,24 @@ namespace Physica {
     }
 
     template<FloatPrec Prec>
-    Real<Prec> pow(const Real<Prec>& x, const Real<Prec>& n) noexcept {
+    Real<Prec> pow(const Real<Prec>& x, const Real<Prec>& a) noexcept {
+        assert((!x.isSubNormal() || a.isPositive()) && "[Error]: Invalid param");
         if constexpr (Prec == Float32)
-            return Real<Prec>(::powf(x.toMachine(), n.toMachine()));
+            return Real<Prec>(::powf(x.toMachine(), a.toMachine()));
         else {
             static_assert(Prec == Float64, "[Error]: Unexpected type");
-            return Real<Prec>(::pow(x.toMachine(), n.toMachine()));
+            return Real<Prec>(::pow(x.toMachine(), a.toMachine()));
         }
+    }
+    /**
+     * Some literature defines 0^0 as 1 for convenience
+     */
+    template<FloatPrec Prec>
+    Real<Prec> pow0(Real<Prec> x, Real<Prec> a) noexcept {
+        using T = Real<Prec>;
+        if (a.isZero())
+            return T(1);
+        return x.isZero() ? T(0) : pow(x, a);
     }
     /*!
      * Ignoring error. If x is a float number, use floor() first.

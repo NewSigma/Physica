@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/Molecular/Molecular.h"
-#include "Physica/Core/Physics/ElectronicStructure/ElectronConfig.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/Cholesky.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/QuadraticProgramming.h"
+#include "Physica/Core/Physics/ElectronicStructure/ElectronConfig.h"
+#include "Physica/Core/Physics/Molecular/Molecular.h"
 
 namespace Physica {
     /**
@@ -38,8 +38,8 @@ namespace Physica {
         using This = RHFSolver<BaseSetType>;
         using T = Traits<BaseSetType>::ScalarType;
 
-        constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
-        constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
+        constexpr static size_t EDIISBufferSize = 3; // Refer EDIIS from [3]
+        constexpr static size_t DIISBufferSize = 3; // Refer DIIS from [2]
         constexpr static size_t MatrixBufferSize = std::max(EDIISBufferSize, DIISBufferSize);
         static_assert(DIISBufferSize >= 3, "DIISBufferSize less than three makes no sence");
         using EDIISBuffer = Array<MatrixND<T>, EDIISBufferSize>;
@@ -112,7 +112,7 @@ namespace Physica {
     }
     /**
      * Perform self-consistant computation
-     * 
+     *
      * \return true if converged, false otherwise
      */
     template<class BaseSetType>
@@ -188,7 +188,7 @@ namespace Physica {
                 T temp = T(0);
                 for (size_t k = 0; k < molecular.getAtomCount(); ++k)
                     temp -= BaseSetType::nuclearAttraction(baseSet[i], baseSet[j], molecular.getAtom(k).v())
-                            * T(molecular.getAtomicNumber(k));
+                          * T(molecular.getAtomicNumber(k));
                 singleHamilton[i, j] = BaseSetType::kinetic(baseSet[i], baseSet[j]) + temp;
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Scalar/Real.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Scalar/Real.h"
 
 namespace Physica {
     /**
@@ -46,60 +46,60 @@ namespace Physica {
         GaussBase& operator=(const GaussBase& base) = default;
         GaussBase& operator=(GaussBase&& base) noexcept = default;
         /* Getters */
-        [[nodiscard]] static T overlap(const GaussBase& base1, const GaussBase& base2);
+        [[nodiscard]] static T overlap(const GaussBase& baseA, const GaussBase& baseB);
         [[nodiscard]] static T kinetic(const GaussBase& base1, const GaussBase& base2);
         [[nodiscard]] static T nuclearAttraction(const GaussBase& base1,
-                                                          const GaussBase& base2,
-                                                          const Vector3D<T>& corePos);
+                                                 const GaussBase& base2,
+                                                 const Vector3D<T>& corePos);
         [[nodiscard]] static T electronRepulsion(const GaussBase& base1,
-                                                          const GaussBase& base2,
-                                                          const GaussBase& base3,
-                                                          const GaussBase& base4);
+                                                 const GaussBase& base2,
+                                                 const GaussBase& base3,
+                                                 const GaussBase& base4);
     private:
         [[nodiscard]] T squaredNorm() const;
-        [[nodiscard]] static T overlapImpl(const T& element_pa, const T& element_pb, const T& alpha_sum, size_t index1, size_t index2);
+        [[nodiscard]] static T overlapImpl(T elemPA, T elemPB, T alpha_sum, size_t index1, size_t index2);
         [[nodiscard]] static T attractionHelper(size_t i,
-                                                         size_t index1,
-                                                         size_t index2,
-                                                         const T& element_pa,
-                                                         const T& element_pb,
-                                                         const T& element_cp,
-                                                         const T& alpha_sum);
+                                                size_t index1,
+                                                size_t index2,
+                                                const T& element_pa,
+                                                const T& element_pb,
+                                                const T& element_cp,
+                                                const T& alpha_sum);
         [[nodiscard]] static T attractionHelperG(size_t L,
-                                                                 size_t index1,
-                                                                 size_t index2,
-                                                                 const T& element_pa,
-                                                                 const T& element_pb,
-                                                                 const T& epsilon);
+                                                 size_t index1,
+                                                 size_t index2,
+                                                 const T& element_pa,
+                                                 const T& element_pb,
+                                                 const T& epsilon);
         [[nodiscard]] static T attractionHelperH(size_t i,
-                                                                 size_t lambda,
-                                                                 size_t index1,
-                                                                 size_t index2,
-                                                                 const T& element_pa,
-                                                                 const T& element_pb,
-                                                                 const T& epsilon);
+                                                 size_t lambda,
+                                                 size_t index1,
+                                                 size_t index2,
+                                                 const T& element_pa,
+                                                 const T& element_pb,
+                                                 const T& epsilon);
         [[nodiscard]] static T repulsionHelper(size_t i,
-                                                        size_t index1,
-                                                        size_t index2,
-                                                        size_t index3,
-                                                        size_t index4,
-                                                        const T& element_pq,
-                                                        const T& element_pa,
-                                                        const T& element_pb,
-                                                        const T& element_qc,
-                                                        const T& element_qd,
-                                                        const T& epsilon1,
-                                                        const T& epsilon2,
-                                                        const T& delta);
+                                               size_t index1,
+                                               size_t index2,
+                                               size_t index3,
+                                               size_t index4,
+                                               const T& element_pq,
+                                               const T& element_pa,
+                                               const T& element_pb,
+                                               const T& element_qc,
+                                               const T& element_qd,
+                                               const T& epsilon1,
+                                               const T& epsilon2,
+                                               const T& delta);
         [[nodiscard]] static T repulsionHelperH(size_t L,
-                                                                size_t index1,
-                                                                size_t index2,
-                                                                const T& element1,
-                                                                const T& element2,
-                                                                const T& epsilon,
-                                                                bool type);
+                                                size_t index1,
+                                                size_t index2,
+                                                const T& element1,
+                                                const T& element2,
+                                                const T& epsilon,
+                                                bool type);
         /* Static members */
-        [[nodiscard]] static T helper_f(size_t j, size_t l, size_t m, const T& a, const T& b);
+        [[nodiscard]] static T helper_f(size_t j, size_t l, size_t m, T a, T b);
         [[nodiscard]] static T helper_F(size_t v, const T& t);
 
         friend class Physica::Test;
@@ -120,24 +120,26 @@ namespace Physica {
         assert(m < size_t(16));
         assert(n < size_t(16));
     }
-
+    /**
+     * Eq. (3.5) of [1]
+     */
     template<Scalar T>
-    T GaussBase<T>::overlap(const GaussBase& base1, const GaussBase& base2) {
-        const T alpha_sum = base1.alpha + base2.alpha;
+    T GaussBase<T>::overlap(const GaussBase& baseA, const GaussBase& baseB) {
+        const T alpha_sum = baseA.alpha + baseB.alpha;
         const T inv_alpha_sum = reciprocal(alpha_sum);
-        const T temp = T(M_PI) * inv_alpha_sum;
+        const T temp = MathConst<T>::pi * inv_alpha_sum;
         const T factor = temp * sqrt(temp);
 
-        const T temp1 = base1.alpha * inv_alpha_sum;
+        const T temp1 = baseA.alpha * inv_alpha_sum;
         const T temp2 = T(1) - temp1;
-        const T factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
-        
-        const Vector3D<T> vector_p = temp1 * base1.center + temp2 * base2.center;
-        const Vector3D<T> vector_pa = vector_p - base1.center;
-        const Vector3D<T> vector_pb = vector_p - base2.center;
-        const T factor3_x = overlapImpl(vector_pa[0], vector_pb[0], alpha_sum, base1.l, base2.l);
-        const T factor3_y = overlapImpl(vector_pa[1], vector_pb[1], alpha_sum, base1.m, base2.m);
-        const T factor3_z = overlapImpl(vector_pa[2], vector_pb[2], alpha_sum, base1.n, base2.n);
+        const T factor2 = exp(-temp1 * baseB.alpha * (baseA.center - baseB.center).squaredNorm());
+
+        const Vector3D<T> vecP = temp1 * baseA.center + temp2 * baseB.center;
+        const Vector3D<T> vecPA = vecP - baseA.center;
+        const Vector3D<T> vecPB = vecP - baseB.center;
+        const T factor3_x = overlapImpl(vecPA[0], vecPB[0], alpha_sum, baseA.l, baseB.l);
+        const T factor3_y = overlapImpl(vecPA[1], vecPB[1], alpha_sum, baseA.m, baseB.m);
+        const T factor3_z = overlapImpl(vecPA[2], vecPB[2], alpha_sum, baseA.n, baseB.n);
         return factor * factor2 * factor3_x * factor3_y * factor3_z;
     }
     /**
@@ -180,15 +182,15 @@ namespace Physica {
      */
     template<Scalar T>
     T GaussBase<T>::nuclearAttraction(const GaussBase& base1,
-                                                        const GaussBase& base2,
-                                                        const Vector3D<T>& corePos) {
+                                      const GaussBase& base2,
+                                      const Vector3D<T>& corePos) {
         const T alpha_sum = base1.alpha + base2.alpha;
         const T inv_alpha_sum = reciprocal(alpha_sum);
         const T factor = T(2) * T(M_PI) / alpha_sum;
         const T temp1 = base1.alpha * inv_alpha_sum;
         const T temp2 = T(1) - temp1;
         const T factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
-        
+
         const Vector3D<T> vector_p = temp1 * base1.center + temp2 * base2.center;
         const Vector3D<T> vector_pa = vector_p - base1.center;
         const Vector3D<T> vector_pb = vector_p - base2.center;
@@ -210,20 +212,20 @@ namespace Physica {
 
     template<Scalar T>
     T GaussBase<T>::electronRepulsion(const GaussBase& base1,
-                                                        const GaussBase& base2,
-                                                        const GaussBase& base3,
-                                                        const GaussBase& base4) {
+                                      const GaussBase& base2,
+                                      const GaussBase& base3,
+                                      const GaussBase& base4) {
         const T alpha_sum1 = base1.alpha + base3.alpha;
         const T alpha_sum2 = base2.alpha + base4.alpha;
 
         const T factor = T(2) * square(T(M_PI)) * sqrt(T(M_PI))
-                                / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
+                       / (alpha_sum1 * alpha_sum2 * sqrt(alpha_sum1 + alpha_sum2));
 
         const T inv_alpha_sum1 = reciprocal(alpha_sum1);
         const T temp1 = base1.alpha * inv_alpha_sum1;
         const T temp2 = T(1) - temp1;
         const T factor1 = exp(-temp1 * base3.alpha * (base1.center - base3.center).squaredNorm());
-        
+
         const T inv_alpha_sum2 = reciprocal(alpha_sum2);
         const T temp3 = base2.alpha * inv_alpha_sum2;
         const T temp4 = T(1) - temp3;
@@ -261,25 +263,21 @@ namespace Physica {
         const T temp = T(M_PI_2) / alpha;
         const T factor = temp * sqrt(temp);
         const T numerator = doubleFactorial<T>(l != 0 ? (2 * l - 1) : size_t(0))
-                                   * doubleFactorial<T>(m != 0 ? (2 * m - 1) : size_t(0))
-                                   * doubleFactorial<T>(n != 0 ? (2 * n - 1) : size_t(0));
+                          * doubleFactorial<T>(m != 0 ? (2 * m - 1) : size_t(0))
+                          * doubleFactorial<T>(n != 0 ? (2 * n - 1) : size_t(0));
         const T denominator = pow(T(4) * alpha, T(l + m + n));
         return factor * numerator / denominator;
     }
 
     template<Scalar T>
-    T GaussBase<T>::overlapImpl(const T& element_pa,
-                                                  const T& element_pb,
-                                                  const T& alpha_sum,
-                                                  size_t index1,
-                                                  size_t index2) {
+    T GaussBase<T>::overlapImpl(T elemPA, T elemPB, T alpha_sum, size_t index1, size_t index2) {
         using Internal::doubleFactorial;
         T result = T(0);
         T i_float = T(0);
         for (size_t i = 0; i <= (index1 + index2) / 2; ++i) {
             const T temp = doubleFactorial<T>(i != 0 ? (2 * i - 1) : size_t(0))
-                                   / pow(T(2) * alpha_sum, i_float);
-            const T temp_x = helper_f(2 * i, index1, index2, element_pa, element_pb);
+                         / pow(T(2) * alpha_sum, i_float);
+            const T temp_x = helper_f(2 * i, index1, index2, elemPA, elemPB);
             result += temp_x * temp;
             i_float += T(1);
         }
@@ -288,17 +286,17 @@ namespace Physica {
 
     template<Scalar T>
     T GaussBase<T>::attractionHelper(size_t i,
-                                                       size_t index1,
-                                                       size_t index2,
-                                                       const T& element_pa,
-                                                       const T& element_pb,
-                                                       const T& element_cp,
-                                                       const T& alpha_sum) {
+                                     size_t index1,
+                                     size_t index2,
+                                     const T& element_pa,
+                                     const T& element_pb,
+                                     const T& element_cp,
+                                     const T& alpha_sum) {
         const size_t lower = (2 * i > (index1 + index2)) ? (2 * i - index1 - index2) : size_t(0);
         const T epsilon = reciprocal(T(4) * alpha_sum);
         T result = T(0);
         for (size_t lambda = lower; lambda <= i; ++lambda)
-            result += attractionHelperH(i, lambda, index1, index2, element_pa, element_pb, epsilon) * pow(element_cp, T(lambda));
+            result += attractionHelperH(i, lambda, index1, index2, element_pa, element_pb, epsilon) * pow0(element_cp, T(lambda));
         return result;
     }
     /**
@@ -306,11 +304,11 @@ namespace Physica {
      */
     template<Scalar T>
     T GaussBase<T>::attractionHelperG(size_t L,
-                                                               size_t index1,
-                                                               size_t index2,
-                                                               const T& element_pa,
-                                                               const T& element_pb,
-                                                               const T& epsilon) {
+                                      size_t index1,
+                                      size_t index2,
+                                      const T& element_pa,
+                                      const T& element_pb,
+                                      const T& epsilon) {
         using Internal::factorial;
         T result = T(0);
         for (size_t l = 0; l <= (index1 + index2); ++l) {
@@ -326,12 +324,12 @@ namespace Physica {
      */
     template<Scalar T>
     T GaussBase<T>::attractionHelperH(size_t i,
-                                                               size_t lambda,
-                                                               size_t index1,
-                                                               size_t index2,
-                                                               const T& element_pa,
-                                                               const T& element_pb,
-                                                               const T& epsilon) {
+                                      size_t lambda,
+                                      size_t index1,
+                                      size_t index2,
+                                      const T& element_pa,
+                                      const T& element_pb,
+                                      const T& epsilon) {
         using Internal::factorial;
         T result = T(0);
         for (size_t L = 0; L <= (index1 + index2); ++L) {
@@ -345,18 +343,18 @@ namespace Physica {
 
     template<Scalar T>
     T GaussBase<T>::repulsionHelper(size_t i,
-                                                      size_t index1,
-                                                      size_t index2,
-                                                      size_t index3,
-                                                      size_t index4,
-                                                      const T& element_pq,
-                                                      const T& element_pa,
-                                                      const T& element_pb,
-                                                      const T& element_qc,
-                                                      const T& element_qd,
-                                                      const T& epsilon1,
-                                                      const T& epsilon2,
-                                                      const T& delta) {
+                                    size_t index1,
+                                    size_t index2,
+                                    size_t index3,
+                                    size_t index4,
+                                    const T& element_pq,
+                                    const T& element_pa,
+                                    const T& element_pb,
+                                    const T& element_qc,
+                                    const T& element_qd,
+                                    const T& epsilon1,
+                                    const T& epsilon2,
+                                    const T& delta) {
         using Internal::factorial;
         T result = T(0);
         for (size_t L1 = 0; L1 <= index1 + index2; ++L1) {
@@ -367,7 +365,7 @@ namespace Physica {
                 for (size_t t = 0; t <= (L1 + L2) / 2; ++t) {
                     if ((L1 + L2 - t) == i) {
                         result += ((t % 2 == 0) ? factor1 : -factor1) * factor2 * factor3
-                                * pow(element_pq, T(L1 + L2 - 2 * t))
+                                * pow0(element_pq, T(L1 + L2 - 2 * t))
                                 / (factorial<T>(t) * factorial<T>(L1 + L2 - 2 * t) * pow(delta, T(L1 + L2 - t)));
                     }
                 }
@@ -380,12 +378,12 @@ namespace Physica {
      */
     template<Scalar T>
     T GaussBase<T>::repulsionHelperH(size_t L,
-                                                              size_t index1,
-                                                              size_t index2,
-                                                              const T& element1,
-                                                              const T& element2,
-                                                              const T& epsilon,
-                                                              bool type) {
+                                     size_t index1,
+                                     size_t index2,
+                                     const T& element1,
+                                     const T& element2,
+                                     const T& epsilon,
+                                     bool type) {
         using Internal::factorial;
         T result = T(0);
         const T factor = reciprocal(factorial<T>(L));
@@ -401,22 +399,18 @@ namespace Physica {
     }
 
     template<Scalar T>
-    T GaussBase<T>::helper_f(size_t j, size_t l, size_t m, const T& a, const T& b) {
-        using Internal::factorial;
+    T GaussBase<T>::helper_f(size_t j, size_t l, size_t m, T a, T b) {
         assert(l + m >= j);
+        using Internal::factorial;
         const size_t lower = j > m ? (j - m) : 0;
         const size_t upper = std::min(j, l);
-
-        T result = T(0);
-        T temp1 = pow(a, T(l - lower));
-        T temp2 = pow(b, T(m + lower - j));
         const T const_1 = factorial<T>(l) * factorial<T>(m);
         const T inv_a = a.isZero() ? T(0) : reciprocal(a);
+        T result = T(0);
+        T temp1 = pow0(a, T(l - lower));
+        T temp2 = pow0(b, T(m + lower - j));
         for (size_t i = lower; i <= upper; ++i) {
-            const T temp = const_1 / (factorial<T>(i)
-                                              * factorial<T>(l - i)
-                                              * factorial<T>(j - i)
-                                              * factorial<T>(m + i - j));
+            const T temp = const_1 / (factorial<T>(i) * factorial<T>(l - i) * factorial<T>(j - i) * factorial<T>(m + i - j));
             result += temp * temp1 * temp2;
             temp1 *= inv_a;
             temp2 *= b;

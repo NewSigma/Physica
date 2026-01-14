@@ -707,8 +707,9 @@ namespace Physica {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::setTimeStep(T timeStep_) {
+        assert(timeStep_.isPositive());
         timeStep = timeStep_;
-        if constexpr (NumReplica != 1) {
+        if constexpr (!IsClassical) {
             const T cycle = Tv(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
             bool isSmallEnough = timeStep < cycle / Tv(4);
             if (!isSmallEnough)

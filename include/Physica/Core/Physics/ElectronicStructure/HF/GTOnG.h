@@ -39,12 +39,12 @@ namespace Physica {
         [[nodiscard]] static T overlap(const GTOnG& base1, const GTOnG& base2);
         [[nodiscard]] static T kinetic(const GTOnG& base1, const GTOnG& base2);
         [[nodiscard]] static T nuclearAttraction(const GTOnG& base1,
-                                                          const GTOnG& base2,
-                                                          const Vector3D<T>& corePos);
+                                                 const GTOnG& base2,
+                                                 const Vector3D<T>& corePos);
         [[nodiscard]] static T electronRepulsion(const GTOnG& base1,
-                                                          const GTOnG& base2,
-                                                          const GTOnG& base3,
-                                                          const GTOnG& base4);
+                                                 const GTOnG& base2,
+                                                 const GTOnG& base3,
+                                                 const GTOnG& base4);
         [[nodiscard]] auto&& getBases(this auto&&) noexcept;
         [[nodiscard]] auto&& getCoeffs(this auto&&) noexcept;
         /* Static Members */
@@ -74,8 +74,8 @@ namespace Physica {
 
     template<Scalar T, size_t Size>
     T GTOnG<T, Size>::nuclearAttraction(const GTOnG& base1,
-                                                          const GTOnG& base2,
-                                                          const Vector3D<T>& corePos) {
+                                        const GTOnG& base2,
+                                        const Vector3D<T>& corePos) {
         T result = T(0);
         for (size_t i = 0; i < Size; ++i)
             for (size_t j = 0; j < Size; ++j)
@@ -85,9 +85,9 @@ namespace Physica {
 
     template<Scalar T, size_t Size>
     T GTOnG<T, Size>::electronRepulsion(const GTOnG& base1,
-                                                          const GTOnG& base2,
-                                                          const GTOnG& base3,
-                                                          const GTOnG& base4) {
+                                        const GTOnG& base2,
+                                        const GTOnG& base3,
+                                        const GTOnG& base4) {
         T result = T(0);
         for (size_t i = 0; i < Size; ++i) {
             for (size_t j = 0; j < Size; ++j) {

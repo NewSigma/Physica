@@ -139,6 +139,8 @@ void Plot::toSvg(const char* path, int width, int height, int resolution) {
 }
 
 void Plot::setBox(float64 minX, float64 maxX, float64 minY, float64 maxY, float64 deltaX, float64 deltaY) {
+    assert(deltaX.isPositive());
+    assert(deltaY.isPositive());
     axisX->setTickInterval((double)deltaX);
     axisX->setRange((double)minX, (double)maxX);
     axisY->setTickInterval((double)deltaY);

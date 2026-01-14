@@ -61,9 +61,7 @@ namespace Physica {
         template<RNG R>
         void step_random(HamiltonMC<Tr>& hmc);
         template<RNG R, ExecutePolicy P = Sequential>
-        void step(HamiltonMC<Tr>& hmc, bool warmup = false);
-        template<RNG R, ExecutePolicy P = Sequential>
-        void step_for(int numStep, HamiltonMC<Tr>& hmc);
+        Trv step(HamiltonMC<Tr>& hmc, bool warmup = false);
 
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
@@ -153,29 +151,21 @@ namespace Physica {
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
         init.read(reinterpret_cast<const Tr*>(getAuxField().data()));
-        hmc.setInitial(std::move(init));
+        hmc.setInitPosition(std::move(init));
     }
 
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    void FreqDQMC<T>::step(HamiltonMC<Tr>& hmc, bool warmup) {
-        const auto& pos = hmc.template step<R, P>(*this);
-        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
+    auto FreqDQMC<T>::step(HamiltonMC<Tr>& hmc, bool warmup) -> Trv {
+        Trv acceptR = hmc.template step<R, P>(*this);
+        getAuxField().read(reinterpret_cast<const T*>(hmc.getSample().data()));
 
         auto [lnAD, sgnD] = calcDet<P>();
         lnWeight = lnAD;
         sign = sgnD;
         if (!warmup)
             calcGreen<P>();
-    }
-
-    template<Scalar T>
-    template<RNG R, ExecutePolicy P>
-    void FreqDQMC<T>::step_for(int numStep, HamiltonMC<Tr>& hmc) {
-        for (int i = 0; i < numStep; ++i)
-            step<R, P>(hmc, true);
-        calcGreen<P>();
-        hmc.reset();
+        return acceptR;
     }
 
     template<Scalar T>

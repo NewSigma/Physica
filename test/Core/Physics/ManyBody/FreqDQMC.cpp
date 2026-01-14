@@ -39,8 +39,9 @@ int main() {
     auto dqmc = FreqDQMC<Tc>(params, FreqDensity);
 
     auto mass = VectorND<T>(dqmc.getAuxField().getSize() * 2, 1);
-    auto hmc = HamiltonMC<T>(std::move(mass), StepSize, Duration);
-    auto& engine = hmc.getEngine();
+    auto hmc = HamiltonMC<T>(std::move(mass));
+    auto& engine = hmc.getRoot();
+    engine.setTimeStep(StepSize);
 
     using Kinetic = OpenModel<T, 1, 1>;
     auto kinetic = Kinetic(1, 1);
@@ -49,6 +50,6 @@ int main() {
     const T prevE = engine.calcClassicalInternalEnergy(dqmc);
     engine.nve_step_for(Duration, kinetic, dqmc);
     const T curE = engine.calcClassicalInternalEnergy(dqmc);
-    expect(scalarNear(prevE, curE, 1E-4));
+    expect(scalarNear(prevE, curE, 1E-4)); // Energe conserves
     return 0;
 }

@@ -66,7 +66,7 @@ namespace Physica {
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(auto&& forceModel);
         /* Getters */
-        [[nodiscard]] const auto& getRoot() noexcept { return root; }
+        [[nodiscard]] auto& getRoot() noexcept { return root; }
         [[nodiscard]] size_t getDOF() const noexcept { return root.getDOF(); }
         [[nodiscard]] const auto& getSample() const noexcept { return sample; }
         /* Setters */
