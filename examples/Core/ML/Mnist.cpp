@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -54,11 +54,12 @@ namespace Physica {
         }
         template<Scalar U>
         MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2) {}
-        MnistNet(const This& other) = default;
-        MnistNet(This&&) noexcept = default;
+        MnistNet(const This& other) = delete;
+        MnistNet(This&&) noexcept = delete;
         ~MnistNet() = default;
         /* Operators */
-        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] CoDiff<VectorND<T>> forward(const Vector auto& x) const {
             auto y1 = layer1.forward(x);
@@ -76,12 +77,10 @@ namespace Physica {
             layer2.reverse(other.layer2);
         }
 
-        void step(auto& optimizer) {
-            layer1.step(optimizer);
-            layer2.step(optimizer);
+        void step() {
+            layer1.step(opt);
+            layer2.step(opt);
         }
-
-        void step() { step(opt); }
 
         void zero_grad() {
             layer1.zero_grad();
@@ -101,7 +100,7 @@ namespace Physica {
 
         [[nodiscard]] T loss(const auto& dataset) const { return Base::loss(dataset); }
 
-        size_t classify(const VectorND<Tv>& input) const {
+        [[nodiscard]] size_t classify(const VectorND<Tv>& input) const {
             static_assert(!Base::IsTrain, "[Error]: It is suggested using eval mode to reduce memory use");
             const auto output = forward(input);
             Tv max = output[0];
@@ -123,13 +122,6 @@ namespace Physica {
             for (size_t i = 0; i < numTestData; ++i)
                 count += testLabels[i] == classify(VectorND<Tv>(testSamples[i]));
             return Tv(count) / Tv(numTestData);
-        }
-
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            Base::swap(obj);
-            layer1.swap(obj.layer1);
-            layer2.swap(obj.layer2);
         }
     private:
         template<Scalar> friend class MnistNet;

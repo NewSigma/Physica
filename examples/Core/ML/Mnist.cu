@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <QApplication>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/ML/NeuralNetwork/Layer/LinearLayer.cuh"
@@ -57,11 +56,12 @@ namespace Physica {
         }
         template<Scalar U>
         device_obj(const device_obj<MnistNet<U>>& net) : layer1(net.layer1), layer2(net.layer2) {}
-        device_obj(const This& other) = default;
-        device_obj(This&&) noexcept = default;
+        device_obj(const This& other) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] CoDiff<device_obj<VectorND<T>>> forward(const Vector auto& x) const {
             auto y1 = layer1.forward(x);
@@ -79,12 +79,10 @@ namespace Physica {
             layer2.reverse(other.layer2);
         }
 
-        void step(auto& optimizer) {
-            layer1.step(optimizer);
-            layer2.step(optimizer);
+        void step() {
+            layer1.step(opt);
+            layer2.step(opt);
         }
-
-        void step() { step(opt); }
 
         void zero_grad() {
             layer1.zero_grad();
@@ -129,13 +127,6 @@ namespace Physica {
             for (size_t i = 0; i < numTestData; ++i)
                 count += testLabels[i] == classify(testSamples[i]);
             return Tv(count) / Tv(numTestData);
-        }
-
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            Base::swap(obj);
-            layer1.swap(obj.layer1);
-            layer2.swap(obj.layer2);
         }
     };
 }

@@ -31,8 +31,8 @@ namespace Physica {
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousVector<V>>& vec_, size_t from_, size_t to_);
-        __host__ __device__ device_obj(device_obj<ContinuousVector<V>>& vec_, size_t from_);
+        __host__ __device__ device_obj(device_obj<V>& vec, size_t from, size_t to);
+        __host__ __device__ device_obj(device_obj<V>& vec, size_t from);
         device_obj(const This& block) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -60,18 +60,16 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(
-            device_obj<ContinuousVector<V>>& vec_,
-            size_t from_,
-            size_t to_) : vec(asStruct(vec_.getDerived())), from(from_), to(to_) {
-        assert(from_ < to);
-        assert(to <= vec.getDerived().getLength());
+    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(device_obj<V>& vec, size_t from, size_t to)
+            : vec(asStruct(vec)), from(from), to(to) {
+        assert(from < to);
+        assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(
-            device_obj<ContinuousVector<V>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(device_obj<V>& vec, size_t from)
+            : device_obj(vec, from, vec.getLength()) {}
 
     template<Vector V, size_t Length>
     auto device_obj<ContinuousVectorBlock<V, Length>>::operator=(const This& obj) -> This& {
@@ -122,7 +120,8 @@ namespace Physica {
     __host__ __device__ size_t device_obj<ContinuousVectorBlock<V, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
-        return Length;
+        else
+            return Length;
     }
 
     template<Vector V, size_t Length>

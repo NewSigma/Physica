@@ -121,7 +121,7 @@ namespace Physica {
             numAccept += 1;
         }
         else
-            getAuxField()(freq, site) = save;
+            getAuxField()[freq, site] = save;
         numTotal += 1;
     }
 
@@ -145,7 +145,7 @@ namespace Physica {
             auto& diag = diag_.getDerived();
             unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
             if (i < diag.getLength())
-                diag[i] = matrixLU(i, i);
+                diag[i] = matrixLU[i, i];
         };
 
         constexpr int WarpSize = CUDADevAttr::WarpSize;
@@ -189,14 +189,14 @@ namespace Physica {
             unsigned int col = blockIdx.y;
             Tr elem = 0;
             for (int _ = 0, offset = 0; _ < numFreq * 2; ++_) {
-                elem += linearRHS(offset + row, offset + col).real();
+                elem += linearRHS[offset + row, offset + col].real();
                 offset += numSite;
             }
 
             if (row == col)
                 elem += Tr(0.5);
 
-            green.getDerived()(row, col) = elem;
+            green.getDerived()[row, col] = elem;
         };
 
         int numSite = getNumSite();

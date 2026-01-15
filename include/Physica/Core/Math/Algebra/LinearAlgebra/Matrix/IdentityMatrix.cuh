@@ -78,7 +78,7 @@ namespace Physica {
             auto& target = target_.getDerived();
             auto i = blockIdx.x * blockDim.x + threadIdx.x;
             if (i < target.getRow())
-                target(i, i) = T(1);
+                target[i, i] = T(1);
         };
 
         constexpr int WarpSize = CUDADevAttr::WarpSize;

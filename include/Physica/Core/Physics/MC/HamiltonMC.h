@@ -40,7 +40,7 @@ namespace Physica {
             int numAccept;
             bool converge;
             Trv acceptR; // Averaged acceptance rate during traverse
-            int numTraverse;
+            int numVisited;
         };
 
         Node root;
@@ -62,12 +62,13 @@ namespace Physica {
         This& operator=(This&&) noexcept = default;
         /* Operations */
         template<RNG R, ExecutePolicy P = Sequential>
-        void warmup(int numWarmup, auto&& forceModel);
+        VectorND<Trv> warmup(int numWarmup, auto&& forceModel);
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(auto&& forceModel);
         /* Getters */
         [[nodiscard]] auto& getRoot() noexcept { return root; }
         [[nodiscard]] size_t getDOF() const noexcept { return root.getDOF(); }
+        [[nodiscard]] Trv getTargetR() const noexcept { return targetR; }
         [[nodiscard]] const auto& getSample() const noexcept { return sample; }
         /* Setters */
         void setInitPosition(VectorND<T> init);
@@ -100,9 +101,10 @@ namespace Physica {
      */
     template<Scalar T>
     template<RNG R, ExecutePolicy P>
-    void HamiltonMC<T>::warmup(int numWarmup, auto&& forceModel) {
+    auto HamiltonMC<T>::warmup(int numWarmup, auto&& forceModel) -> VectorND<Trv> {
         initTimeStep<R, P>(forceModel);
 
+        VectorND<Trv> lnTimeSteps(numWarmup);
         Trv initialMu = ln(Trv(10) * root.getTimeStep());
         Trv lnConjTimeStep = 0;
         Trv weightAcceptR = 0;
@@ -120,8 +122,10 @@ namespace Physica {
 
             factor = pow(m, -Kappa);
             lnConjTimeStep = fma(factor, lnTimeStep, (Trv(1) - factor) * lnConjTimeStep);
+            lnTimeSteps[i - 1] = lnConjTimeStep;
         }
         root.setTimeStep(exp(lnConjTimeStep));
+        return lnTimeSteps;
     }
     /**
      * Algo. 3 of [1]
@@ -209,14 +213,14 @@ namespace Physica {
             bool accept = curE < upperE;
             bool converge = curE >= upperE + maxDelta;
             Trv acceptR = std::min(exp(prevE - curE), Trv(1));
-            constexpr int NumTraverse = 1;
-            return {std::move(curX), accept, converge, acceptR, NumTraverse};
+            constexpr int NumVisited = 1;
+            return {std::move(curX), accept, converge, acceptR, NumVisited};
         }
 
         assert(height > 0);
-        auto [curX, numAccept, converge, acceptR, numTraverse] = traverse<R, P>(node, forward, height - 1, forceModel);
+        auto [curX, numAccept, converge, acceptR, numVisited] = traverse<R, P>(node, forward, height - 1, forceModel);
         if (!converge) {
-            auto [curX_, numAccept_, converge_, acceptR_, numTraverse_] = traverse<R, P>(node, forward, height - 1, forceModel);
+            auto [curX_, numAccept_, converge_, acceptR_, numVisited_] = traverse<R, P>(node, forward, height - 1, forceModel);
             if (numAccept_ > 0) {
                 Trv prob = Trv(numAccept_) / Trv(numAccept + numAccept_);
                 bool accept = Trv::template random_uniform<R>() < prob;
@@ -228,14 +232,14 @@ namespace Physica {
             converge = converge_ || !process;
             numAccept += numAccept_;
             acceptR = [=]() -> Trv {
-                Trv total = numTraverse + numTraverse_;
-                Trv factor1 = Trv(numTraverse) / total;
-                Trv factor2 = Trv(numTraverse_) / total;
+                Trv total = numVisited + numVisited_;
+                Trv factor1 = Trv(numVisited) / total;
+                Trv factor2 = Trv(numVisited_) / total;
                 return fma(acceptR, factor1, acceptR_ * factor2);
             }();
-            numTraverse += numTraverse_;
+            numVisited += numVisited_;
         }
-        return {std::move(curX), numAccept, converge, acceptR, numTraverse};
+        return {std::move(curX), numAccept, converge, acceptR, numVisited};
     }
 
     template<Scalar T>

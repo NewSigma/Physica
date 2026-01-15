@@ -217,9 +217,9 @@ namespace Physica {
     void LinearLayer<T, WithBias>::random_kaiming_normal(Tv gain) {
         random_normal<R>();
         const Tv factor = gain / sqrt(Tv(getInputDim()));
-        weights *= factor;
+        weights.values() *= factor;
         if constexpr (WithBias)
-            bias *= factor;
+            bias.values() *= factor;
     }
 
     template<Scalar T, bool WithBias>

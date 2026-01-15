@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,5 +31,5 @@ namespace Physica {
     }
 
     template<class T>
-    concept Tensor = Internal::TensorObj<std::remove_cvref_t<T>> || Internal::TensorObj<remove_codiff_t<std::remove_cvref_t<T>>>;
+    concept Tensor = Internal::TensorObj<remove_codiff_t<std::remove_cvref_t<T>>>;
 }

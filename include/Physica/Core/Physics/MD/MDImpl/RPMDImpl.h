@@ -331,28 +331,32 @@ namespace Physica {
     auto RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeAverageCell() const -> MDCellType {
         return MDCellType(getLattice(), ringPolymer.makeCentroidPos(), cell.getMassVec());
     }
-    /**
-     * Kinetic energy using virial estimator referenced from [1]
-     * 
-     * Reference:
-     * [1] J. Chem. Phys. 76, 5150-5155 (1982); https://doi.org/10.1063/1.442815
-     */
+
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel>
     T RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic() const {
-        static_assert(!IsClassical, "[Error]: Use classical kinetic instead");
-        const T repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
-        const size_t dof = getDOF();
-        const auto centroidPos = ringPolymer.makeCentroidPos();
+        if constexpr (IsClassical)
+            return calcKineticClassical();
+        else {
+            /**
+             * Kinetic energy using virial estimator referenced from [1]. Generally, we should use this one.
+             * 
+             * Reference:
+             * [1] J. Chem. Phys. 76, 5150-5155 (1982); https://doi.org/10.1063/1.442815
+             */
+            const T repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
+            const size_t dof = getDOF();
+            const auto centroidPos = ringPolymer.makeCentroidPos();
 
-        T kinetic = repBeta * dof;
-        for (size_t replica = 0; replica < getNumReplica(); ++replica) {
-            auto phase = getPhaseMatrix().col(replica);
-            auto pos = phase.tail(dof);
-            kinetic += (centroidPos.flatten() - pos) * forceBuffer.col(replica);
+            T kinetic = repBeta * dof;
+            for (size_t replica = 0; replica < getNumReplica(); ++replica) {
+                auto phase = getPhaseMatrix().col(replica);
+                auto pos = phase.tail(dof);
+                kinetic += (centroidPos.flatten() - pos) * forceBuffer.col(replica);
+            }
+            kinetic /= T(getNumReplica() * 2);
+            return kinetic;
         }
-        kinetic /= T(getNumReplica() * 2);
-        return kinetic;
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -369,7 +373,10 @@ namespace Physica {
     }
     /**
      * Kinetic energy using primitive estimator referenced from [1]
-     * Note: Use this estimator if NumReplica is small or if force model is \class EmptyForceModel
+     *
+     * Note: Prefer this estimator either
+     * 1. NumReplica is small -- prim estimator has lower variance
+     * 2. force model is \class EmptyForceModel -- virial estimator does not work
      * 
      * Reference:
      * [1] J. Chem. Phys. 76, 5150 (1982); https://doi.org/10.1063/1.442815

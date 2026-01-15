@@ -273,9 +273,9 @@ namespace Physica {
             bias.template random_normal<R>();
 
         const Tv factor = gain / sqrt(Tv(getInputDim()));
-        weights *= factor;
+        weights.values() *= factor;
         if constexpr (WithBias)
-            bias *= factor;
+            bias.values() *= factor;
     }
 
     template<Scalar T, bool WithBias>
