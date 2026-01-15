@@ -53,6 +53,12 @@ namespace {
 
         sol = m.tril_unit().inv() * v;
         expect(vectorNear(m.tril_unit() * sol, v, 1E-15));
+
+        sol = m.triu().inv() * v;
+        expect(vectorNear(m.triu() * sol, v, 1E-14));
+
+        sol = m.triu_unit().inv() * v;
+        expect(vectorNear(m.triu_unit() * sol, v, 1E-15));
     }
 }
 

@@ -59,23 +59,38 @@ namespace Physica {
     void GEMV<M, V>::assign(Vector auto& target) const {
         using Expr = std::remove_cvref<M>::type;
         constexpr bool Unit = Traits<Expr>::Unit;
-        static_assert(!Traits<Expr>::Upper, "[Error]: No impl");
         rhs.assign(target);
 
         const auto& mat = inv.getExpr();
         size_t length = getLength();
-        if constexpr (Unit) {
-            for (size_t i = 0; i < length - 1; ++i)
-                target.tail(i + 1) -= mat.col(i).tail(i + 1) * target[i];
+        if constexpr (Traits<Expr>::Upper) {
+            if constexpr (Unit) {
+                for (size_t i = length - 1; i > 0; --i)
+                    target.head(i) -= mat.col(i).head(i) * target[i];
+            }
+            else {
+                for (size_t i = length - 1; i > 0; --i) {
+                    T factor = target[i] / mat.calc(i, i);
+                    target[i] = factor;
+                    target.head(i) -= mat.col(i).head(i) * factor;
+                }
+                target[0] /= mat.calc(0, 0);
+            }
         }
         else {
-            size_t i = 0;
-            for (; i < length - 1; ++i) {
-                T factor = target[i] / mat.calc(i, i);
-                target[i] = factor;
-                target.tail(i + 1) -= mat.col(i).tail(i + 1) * factor;
+            if constexpr (Unit) {
+                for (size_t i = 0; i < length - 1; ++i)
+                    target.tail(i + 1) -= mat.col(i).tail(i + 1) * target[i];
             }
-            target[i] /= mat.calc(i, i);
+            else {
+                size_t i = 0;
+                for (; i < length - 1; ++i) {
+                    T factor = target[i] / mat.calc(i, i);
+                    target[i] = factor;
+                    target.tail(i + 1) -= mat.col(i).tail(i + 1) * factor;
+                }
+                target[i] /= mat.calc(i, i);
+            }
         }
     }
 }
