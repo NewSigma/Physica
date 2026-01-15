@@ -385,14 +385,14 @@ namespace Physica {
         const uint32_t numBlock = (length + numThread - 1) / numThread;
         return KernelConfig(numBlock, numThread);
     }
-
+    // Redeclare to expose it to base classes
     template<class Derived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::static_assert_assign(const Scalar auto& source) noexcept {
+    __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Scalar auto& source) noexcept {
         host_obj::static_assert_assign(source);
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& source) noexcept {
+    __host__ __device__ consteval void device_obj<RValueVector<Derived>>::static_assert_assign(const Vector auto& source) noexcept {
         static_assert(SizeAtCompile != Dynamic || CUDA<decltype(source)>, "[Error]: Host object cannot be assigned to dynamic device object");
         host_obj::static_assert_assign(source);
     }

@@ -672,21 +672,20 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ constexpr void RValueVector<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
+    __host__ __device__ consteval void RValueVector<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
         using U = std::remove_cvref<decltype(source)>::type;
-        static_assert(isComplex || !U::isComplex, "[Error]: Assign a complex scalar to real vector discards imags");
-        static_assert(Diffable<This> || !Diffable<U>, "[Error]: Assign a diffable scalar to normal vector discards grads");
+        T::template static_assert_assign<U>();
     }
 
     template<class Derived>
-    __host__ __device__ constexpr void RValueVector<Derived>::static_assert_assign(const Vector auto& source) noexcept {
+    __host__ __device__ consteval void RValueVector<Derived>::static_assert_assign(const Vector auto& source) noexcept {
         using Src = std::remove_cvref<decltype(source)>::type;
         constexpr size_t Size1 = SizeAtCompile;
         constexpr size_t Size2 = Src::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
 
         using U = Src::ScalarType;
-        T::template assert_assign<U>();
+        T::template static_assert_assign<U>();
     }
 
     template<class Derived>

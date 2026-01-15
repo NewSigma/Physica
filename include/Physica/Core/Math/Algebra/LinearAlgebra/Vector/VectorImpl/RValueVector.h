@@ -210,8 +210,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         /* Static members */
-        __host__ __device__ constexpr static void static_assert_assign(const Scalar auto& source) noexcept;
-        __host__ __device__ constexpr static void static_assert_assign(const Vector auto& source) noexcept;
+        __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
+        __host__ __device__ consteval static void static_assert_assign(const Vector auto& source) noexcept;
         [[nodiscard]] consteval static size_t maxSizeAtCompile(const Vector auto& other) noexcept;
     protected:
         RValueVector() = default;

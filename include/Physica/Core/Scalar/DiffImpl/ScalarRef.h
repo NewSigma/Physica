@@ -96,7 +96,7 @@ namespace Physica {
     template<Scalar T> requires(instanceof_tx<Diff, T>)
     __host__ __device__ auto ScalarRef<T>::operator=(const Scalar auto& other) -> This& {
         using U = std::remove_reference<decltype(other)>::type;
-        Base::template assert_assign<U>();
+        Base::template static_assert_assign<U>();
         value() = other.value();
         if constexpr (Diffable<decltype(other)>)
             grad() = other.grad();

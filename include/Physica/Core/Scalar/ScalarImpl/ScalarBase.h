@@ -159,7 +159,7 @@ namespace Physica {
         /* Static Members */
         static bool matchSign(const ScalarType& s1, const ScalarType& s2);
         template<Scalar Src>
-        consteval static void assert_assign() noexcept;
+        consteval static void static_assert_assign() noexcept;
         consteval static void checkComplexCompare() noexcept;
     protected:
         constexpr ScalarBase() = default;
@@ -173,14 +173,14 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ Derived& ScalarBase<Derived>::operator=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        assert_assign<U>();
+        static_assert_assign<U>();
         return Base::getDerived() = ScalarType(x);
     }
 
     template<class Derived>
     template<Scalar U>
     __host__ __device__ void ScalarBase<Derived>::operator+=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        assert_assign<U>();
+        static_assert_assign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y += x.value();
@@ -193,7 +193,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ void ScalarBase<Derived>::operator-=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        assert_assign<U>();
+        static_assert_assign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y -= x.value();
@@ -206,7 +206,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ void ScalarBase<Derived>::operator*=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        assert_assign<U>();
+        static_assert_assign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y *= x.value();
@@ -219,7 +219,7 @@ namespace Physica {
     template<class Derived>
     template<Scalar U>
     __host__ __device__ void ScalarBase<Derived>::operator/=(const U& x) requires(isReverseDiff || !ReverseDiff<U>) {
-        assert_assign<U>();
+        static_assert_assign<U>();
         auto& y = Base::getDerived();
         if constexpr (ReverseDiff<U>)
             y /= x.value();
@@ -528,7 +528,7 @@ namespace Physica {
 
     template<class Derived>
     template<Scalar Src>
-    consteval void ScalarBase<Derived>::assert_assign() noexcept {
+    consteval void ScalarBase<Derived>::static_assert_assign() noexcept {
         static_assert(!ReverseDiff<Src>, "[Error]: Assign reverse diffable scalar to another scalar discards compute graph");
         static_assert(isDiffable || !Src::isDiffable, "[Error]: Assign diffable scalar to normal scalar discards grad");
         static_assert(isComplex || !Src::isComplex, "[Error]: Assign complex to real discards imag");

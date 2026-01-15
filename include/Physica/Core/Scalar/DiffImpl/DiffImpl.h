@@ -30,7 +30,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     template<Scalar U>
     __host__ __device__ Diff<T, Mode, Order>::Diff(const U& x) {
-        Base::template assert_assign<U>();
+        Base::template static_assert_assign<U>();
         if constexpr (Diffable<U>) {
             v = x.value();
             g = x.grad().template mask<Order - 1>();

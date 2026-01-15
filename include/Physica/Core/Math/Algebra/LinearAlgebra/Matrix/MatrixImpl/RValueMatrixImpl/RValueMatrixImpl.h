@@ -523,13 +523,19 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void RValueMatrix<Derived>::static_assert_assign(const Matrix auto& source) noexcept {
+    __host__ __device__ consteval void RValueMatrix<Derived>::static_assert_assign(const Scalar auto& source) noexcept {
+        using U = std::remove_cvref<decltype(source)>::type;
+        T::template static_assert_assign<U>();
+    }
+
+    template<class Derived>
+    __host__ __device__ consteval void RValueMatrix<Derived>::static_assert_assign(const Matrix auto& source) noexcept {
         using Src = std::remove_cvref_t<decltype(source)>;
         static_assert(RowAtCompile == Src::RowAtCompile || RowAtCompile == Dynamic || Src::RowAtCompile == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == Src::ColAtCompile || ColAtCompile == Dynamic || Src::ColAtCompile == Dynamic, "[Error]: Col mismatch between two matrix");
 
         using U = Src::ScalarType;
-        T::template assert_assign<U>();
+        T::template static_assert_assign<U>();
     }
 
     template<class Derived>
