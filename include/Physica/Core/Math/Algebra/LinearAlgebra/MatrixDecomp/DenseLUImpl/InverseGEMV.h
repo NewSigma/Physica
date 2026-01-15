@@ -41,6 +41,7 @@ namespace Physica {
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& target) const;
+        void assign_base(Vector auto& target) const;
         void assign_mkl(Vector auto& target) const;
 
         [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
@@ -58,10 +59,24 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
-        if constexpr (HasMKL())
+        if constexpr (Internal::EnableMKL<V, decltype(target)>::value)
             assign_mkl(target);
         else
-            noImpl(__func__);
+            assign_base(target);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
+    void GEMV<M, V>::assign_base(Vector auto& target) const {
+        const auto& lu = getLHS().getDenseLU();
+        if constexpr (Traits<M>::Pivot) {
+            VectorND<T> temp1 = lu.getPerm().inv() * v;
+            VectorND<T> temp2 = lu.getMatrixL().inv() * temp1;
+            (lu.getMatrixU().inv() * temp2).assign(target);
+        }
+        else {
+            VectorND<T> temp = lu.getMatrixL().inv() * v;
+            (lu.getMatrixU().inv() * temp).assign(target);
+        }
     }
 }
 

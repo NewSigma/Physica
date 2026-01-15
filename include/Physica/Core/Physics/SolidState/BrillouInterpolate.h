@@ -20,7 +20,6 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/DenseTensor.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Tensor/PeriodIndex3D.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearSystem/LUSolver.h"
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/CuboidLinear.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
@@ -42,7 +41,7 @@ namespace Physica {
 
         DenseTensor<Tc, 3> baseCoeff;
         LatticeMatrix lattice;
-        LUSolver<Tc, CoeffMatrixM::Option> solver;
+        DenseLU<Tc, true> lu;
         VectorND<Tc> solverBuffer;
         Tr smoothFactor1;
         Tr smoothFactor2;
@@ -140,16 +139,16 @@ namespace Physica {
             initBaseCoeff();
             if (dataDim != data.getShape()) {
                 dataDim = data.getShape();
-                solver.decomp(makeMatrixM());
-                const VectorND<Tc> ones(solver.getOrder(), Tc(1));
-                solverBuffer = solver.solve(ones);
+                lu = DenseLU<T, true>(makeMatrixM());
+                const VectorND<Tc> ones(lu.getOrder(), Tc(1));
+                solverBuffer = lu.inv() * ones;
             }
-            const auto v1 = solver.solve(data.flatten());
-            const Tc average = v1.sum() / solverBuffer.sum();
-
             FFT<Tc, 3> fft(dataDim, PlanFlag::Estimate);
             auto lambdas = fft.getKSpace().flatten();
-            lambdas = v1 - solverBuffer * average;
+            lambdas = lu.inv() * data.flatten();
+
+            const Tc average = lambdas.sum() / solverBuffer.sum();
+            lambdas -= solverBuffer * average;
             fft.rawInvTransform();
 
             const Index3D baseDim = getBaseDim();
@@ -230,7 +229,7 @@ namespace Physica {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         baseCoeff.swap(obj.baseCoeff);
         lattice.swap(obj.lattice);
-        solver.swap(obj.solver);
+        lu.swap(obj.lu);
         solverBuffer.swap(solverBuffer);
         smoothFactor1.swap(obj.smoothFactor1);
         smoothFactor2.swap(obj.smoothFactor2);

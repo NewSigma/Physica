@@ -31,10 +31,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M> mat;
-        LazyDestroy<V> vec;
+        LazyDestroy<M&&> mat;
+        LazyDestroy<V&&> vec;
     public:
-        GEMV(M mat_, V vec_);
+        GEMV(M mat, V vec);
         GEMV(const This&) = default;
         GEMV(This&&) noexcept = default;
         ~GEMV() = default;
@@ -61,7 +61,7 @@ namespace Physica {
     };
 
     template<Matrix M, Vector V>
-    GEMV<M, V>::GEMV(M mat_, V vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {}
+    GEMV<M, V>::GEMV(M mat, V vec) : mat(std::forward<M>(mat)), vec(std::forward<V>(vec)) {}
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>

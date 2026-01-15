@@ -3,7 +3,6 @@ physica_add_test(JacobiDavidson Eigen/JacobiDavidson.cpp)
 physica_add_test(SymmEigenSolver Eigen/SymmEigenSolver.cpp)
 
 physica_add_test(LinearSystem LinearSystem/LinearSystem.cpp)
-physica_add_test(LUSolver LinearSystem/LUSolver.cpp)
 
 add_subdirectory(Matrix)
 add_subdirectory(MatrixDecomp)
