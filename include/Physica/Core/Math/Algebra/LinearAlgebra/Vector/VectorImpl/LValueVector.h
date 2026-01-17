@@ -31,8 +31,6 @@ namespace Physica {
     class LValueVector : public RValueVector<Derived> {
         using Base = RValueVector<Derived>;
         using This = LValueVector<Derived>;
-        template<size_t Length>
-        using BlockType = LVectorBlock<Derived, Length>;
     public:
         using Base::isForwardDiff;
         using Base::isReverseDiff;
@@ -73,17 +71,11 @@ namespace Physica {
         void reverse(const auto& grad) const noexcept;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] auto head(size_t to) noexcept;
+        [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] const auto head(size_t to) const noexcept;
+        [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] auto tail(size_t from) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] const auto tail(size_t from) const noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] auto segment(size_t from, size_t to) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
 
         template<Matrix M>
         [[nodiscard]] auto reshape(const M& mat) noexcept;

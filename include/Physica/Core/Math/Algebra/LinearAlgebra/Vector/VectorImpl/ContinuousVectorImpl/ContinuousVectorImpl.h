@@ -114,38 +114,23 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    auto ContinuousVector<Derived>::head(size_t to) noexcept {
-        return BlockType<Length>(Base::getDerived(), 0, to);
+    auto ContinuousVector<Derived>::head(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return ContinuousVectorBlock<Self, Length>(std::forward<Self>(self), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    const auto ContinuousVector<Derived>::head(size_t to) const noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
+    auto ContinuousVector<Derived>::tail(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return ContinuousVectorBlock<Self, Length>(std::forward<Self>(self), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    auto ContinuousVector<Derived>::tail(size_t from) noexcept {
-        return BlockType<Length>(Base::getDerived(), from);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    const auto ContinuousVector<Derived>::tail(size_t from) const noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), from);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    auto ContinuousVector<Derived>::segment(size_t from, size_t to) noexcept {
-        return BlockType<Length>(Base::getDerived(), from, to);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    const auto ContinuousVector<Derived>::segment(size_t from, size_t to) const noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), from, to);
+    auto ContinuousVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        using Self = decltype(self);
+        return ContinuousVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
     }
 
     template<class Derived>

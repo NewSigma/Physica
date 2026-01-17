@@ -115,9 +115,6 @@ namespace Physica {
         using Tcv = Tc::ValueType;
 
         using Tm = std::conditional<isComplex, typename Tcv::MKL_Complex, typename T::MachineType>::type;
-    private:
-        template<size_t Length>
-        using BlockType = RVectorBlock<Derived, Length>;
     public:
         ~RValueVector() = default;
         /* Operators */
@@ -145,17 +142,11 @@ namespace Physica {
         decltype(auto) resize(size_t length) { return Base::getDerived().resize(length); }
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] auto head(size_t to) & noexcept;
+        [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] const auto head(size_t to) const& noexcept;
+        [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] auto tail(size_t from) & noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] const auto tail(size_t from) const& noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] auto segment(size_t from, size_t to) & noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] const auto segment(size_t from, size_t to) const& noexcept;
+        [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
         [[nodiscard]] auto reversal() noexcept;
         [[nodiscard]] const auto reversal() const noexcept;
 

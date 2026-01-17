@@ -28,12 +28,12 @@ namespace Physica {
         using This = ContinuousVectorBlock<V, Length>;
         using Base = ContinuousVector<This>;
     private:
-        V& vec;
+        LazyDestroy<V&&> vec;
         size_t from;
         size_t to;
     public:
-        ContinuousVectorBlock(V& vec, size_t from_, size_t to_);
-        ContinuousVectorBlock(V& vec, size_t from_);
+        ContinuousVectorBlock(V vec, size_t from_, size_t to_);
+        ContinuousVectorBlock(V vec, size_t from_);
         ContinuousVectorBlock(const This& block) = default;
         ContinuousVectorBlock(This&&) noexcept = default;
         ~ContinuousVectorBlock() = default;
@@ -66,16 +66,16 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V& vec, size_t from_, size_t to_)
-            : vec(vec), from(from_), to(to_) {
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V vec, size_t from_, size_t to_)
+            : vec(std::forward<V>(vec)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V& vec, size_t from_)
-            : ContinuousVectorBlock(vec, from_, vec.getLength()) {}
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V vec, size_t from_)
+            : ContinuousVectorBlock(std::forward<V>(vec), from_, vec.getLength()) {}
 
     template<Vector V, size_t Length>
     auto ContinuousVectorBlock<V, Length>::operator=(const This& v) -> This& {
@@ -114,34 +114,40 @@ namespace Physica {
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto ContinuousVectorBlock<V, Length>::head(this auto&& self, size_t to) noexcept {
-        return ContinuousVectorBlock<V, Length_>(self.vec, self.from, self.from + to);
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        using V1 = decltype(v);
+        return ContinuousVectorBlock<V1, Length_>(std::forward<V1>(v), self.from, self.from + to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto ContinuousVectorBlock<V, Length>::tail(this auto&& self, size_t from) noexcept {
-        return ContinuousVectorBlock<V, Length_>(self.vec, self.from + from, self.to);
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        using V1 = decltype(v);
+        return ContinuousVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto ContinuousVectorBlock<V, Length>::segment(this auto&& self, size_t from, size_t to) noexcept {
-        return ContinuousVectorBlock<V, Length_>(self.vec, self.from + from, self.from + to);
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        using V1 = decltype(v);
+        return ContinuousVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.from + to);
     }
 
     template<Vector V, size_t Length>
     auto ContinuousVectorBlock<V, Length>::values(this auto&& self) noexcept {
-        auto&& v = self.vec.values();
-        using V1 = std::remove_reference<decltype(v)>::type;
-        return ContinuousVectorBlock<V1, Length>(v, self.from, self.to);
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec.values());
+        using V1 = decltype(v);
+        return ContinuousVectorBlock<V1, Length>(std::forward<V1>(v), self.from, self.to);
     }
 
     template<Vector V, size_t Length>
     template<int GradOrder>
     auto ContinuousVectorBlock<V, Length>::grads(this auto&& self) noexcept {
-        auto&& g = self.vec.template grads<GradOrder>();
-        using V1 = std::remove_reference<decltype(g)>::type;
-        return ContinuousVectorBlock<V1, Length>(g, self.from, self.to);
+        decltype(auto) g = propagate_rvalue_reference<decltype(self), V>(self.vec.template grads<GradOrder>());
+        using V1 = decltype(g);
+        return ContinuousVectorBlock<V1, Length>(std::forward<V1>(g), self.from, self.to);
     }
 
     template<Vector V, size_t Length>
@@ -162,7 +168,7 @@ namespace Physica {
     template<Vector V, size_t Length>
     class Traits<ContinuousVectorBlock<V, Length>> {
     public:
-        using ScalarType = V::ScalarType;
+        using ScalarType = std::remove_cvref_t<V>::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;

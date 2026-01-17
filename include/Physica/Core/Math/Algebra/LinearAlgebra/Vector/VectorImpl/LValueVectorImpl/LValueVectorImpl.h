@@ -188,38 +188,23 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    auto LValueVector<Derived>::head(size_t to) noexcept {
-        return BlockType<Length>(Base::getDerived(), 0, to);
+    auto LValueVector<Derived>::head(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return LVectorBlock<Self, Length>(std::forward<Self>(self), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    const auto LValueVector<Derived>::head(size_t to) const noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
+    auto LValueVector<Derived>::tail(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return LVectorBlock<Self, Length>(std::forward<Self>(self), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    auto LValueVector<Derived>::tail(size_t from) noexcept {
-        return BlockType<Length>(Base::getDerived(), from);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    const auto LValueVector<Derived>::tail(size_t from) const noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), from);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    auto LValueVector<Derived>::segment(size_t from, size_t to) noexcept {
-        return BlockType<Length>(Base::getDerived(), from, to);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    const auto LValueVector<Derived>::segment(size_t from, size_t to) const noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), from, to);
+    auto LValueVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        using Self = decltype(self);
+        return LVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
     }
 
     template<class Derived>

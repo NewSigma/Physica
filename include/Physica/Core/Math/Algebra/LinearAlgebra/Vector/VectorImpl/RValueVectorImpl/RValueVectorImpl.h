@@ -162,38 +162,23 @@ namespace Physica {
 
     template<class Derived>
     template<size_t Length>
-    auto RValueVector<Derived>::head(size_t to) & noexcept {
-        return BlockType<Length>(Base::getDerived(), 0, to);
+    auto RValueVector<Derived>::head(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return RVectorBlock<Self, Length>(std::forward<Self>(self), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    const auto RValueVector<Derived>::head(size_t to) const& noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
+    auto RValueVector<Derived>::tail(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return RVectorBlock<Self, Length>(std::forward<Self>(self), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    auto RValueVector<Derived>::tail(size_t from) & noexcept {
-        return BlockType<Length>(Base::getDerived(), from);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    const auto RValueVector<Derived>::tail(size_t from) const& noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), from);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    auto RValueVector<Derived>::segment(size_t from, size_t to) & noexcept {
-        return BlockType<Length>(Base::getDerived(), from, to);
-    }
-
-    template<class Derived>
-    template<size_t Length>
-    const auto RValueVector<Derived>::segment(size_t from, size_t to) const& noexcept {
-        return BlockType<Length>(Base::getConstCastDerived(), from, to);
+    auto RValueVector<Derived>::segment(this auto&& self, size_t from, size_t to) noexcept {
+        using Self = decltype(self);
+        return RVectorBlock<Self, Length>(std::forward<Self>(self), from, to);
     }
 
     template<class Derived>
@@ -613,11 +598,11 @@ namespace Physica {
 
         const T v0 = calc(0);
         const Tr sourceNorm0 = v0.squaredNorm();
-        const Tr squaredTailNorm = tail<TailLength>(1).squaredNorm();
+        const Tr squaredTailNorm = Base::getDerived().template tail<TailLength>(1).squaredNorm();
         if (!squaredTailNorm.isSubNormal()) [[likely]] {
             const Tr norm = sqrt(squaredTailNorm + sourceNorm0);
             target[0] = Tr(1) + abs(v0) / norm;
-            target.template tail<TailLength>(1) = tail<TailLength>(1) * reciprocal(v0 + unit(v0.value()) * norm);
+            target.template tail<TailLength>(1) = Base::getDerived().template tail<TailLength>(1) * reciprocal(v0 + unit(v0.value()) * norm);
             return norm;
         }
 

@@ -31,12 +31,12 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        V& vec;
+        LazyDestroy<V&&> vec;
         size_t from;
         size_t to;
     public:
-        RVectorBlock(V& vec_, size_t from_, size_t to_);
-        RVectorBlock(V& vec_, size_t from_);
+        RVectorBlock(V vec, size_t from, size_t to);
+        RVectorBlock(V vec, size_t from);
         RVectorBlock(const This& block) = default;
         RVectorBlock(This&&) noexcept = default;
         ~RVectorBlock() = default;
@@ -58,31 +58,37 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    RVectorBlock<V, Length>::RVectorBlock(V& vec_, size_t from_, size_t to_) : vec(vec_), from(from_), to(to_) {
-        assert(from_ < to);
+    RVectorBlock<V, Length>::RVectorBlock(V vec, size_t from, size_t to) : vec(std::forward<V>(vec)), from(from), to(to) {
+        assert(from < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    RVectorBlock<V, Length>::RVectorBlock(V& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
+    RVectorBlock<V, Length>::RVectorBlock(V vec, size_t from) : RVectorBlock(std::forward<V>(vec), from, vec.getLength()) {}
 
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto RVectorBlock<V, Length>::head(this auto&& self, size_t to) noexcept {
-        return RVectorBlock<V, Length_>(self.vec, self.from, self.from + to);
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        using V1 = decltype(v);
+        return RVectorBlock<V1, Length_>(std::forward<V1>(v), self.from, self.from + to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto RVectorBlock<V, Length>::tail(this auto&& self, size_t from) noexcept {
-        return RVectorBlock<V, Length_>(self.vec, self.from + from, self.to);
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        using V1 = decltype(v);
+        return RVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.to);
     }
 
     template<Vector V, size_t Length>
     template<size_t Length_>
     auto RVectorBlock<V, Length>::segment(this auto&& self, size_t from, size_t to) noexcept {
-        return RVectorBlock<V, Length_>(self.vec, self.from + from, self.from + to);
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), V>(self.vec);
+        using V1 = decltype(v);
+        return RVectorBlock<V1, Length_>(std::forward<V1>(v), self.from + from, self.from + to);
     }
 
     template<Vector V, size_t Length>
@@ -97,9 +103,8 @@ namespace Physica {
 namespace Physica {
     template<Vector V, size_t Length>
     class Traits<RVectorBlock<V, Length>> {
-        static_assert(std::is_object<V>::value, "[Errpr]: Invalid type");
     public:
-        using ScalarType = V::ScalarType;
+        using ScalarType = std::remove_cvref_t<V>::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

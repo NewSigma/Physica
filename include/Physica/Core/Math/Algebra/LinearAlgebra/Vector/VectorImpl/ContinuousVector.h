@@ -25,8 +25,6 @@ namespace Physica {
     class ContinuousVector : public LValueVector<Derived> {
         using Base = LValueVector<Derived>;
         using This = ContinuousVector<Derived>;
-        template<size_t Length>
-        using BlockType = ContinuousVectorBlock<Derived, Length>;
     public:
         using typename Base::ScalarType;
         using typename Base::PacketType;
@@ -73,17 +71,11 @@ namespace Physica {
         [[nodiscard]] auto toNumpy() const;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] auto head(size_t to = Length) noexcept;
+        [[nodiscard]] auto head(this auto&&, size_t to = Length) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] const auto head(size_t to = Length) const noexcept;
+        [[nodiscard]] auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] auto tail(size_t from) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] const auto tail(size_t from) const noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] auto segment(size_t from, size_t to) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] auto segment(this auto&&, size_t from, size_t to) noexcept;
 
         [[nodiscard]] auto begin() noexcept { return IterF(data()); }
         [[nodiscard]] auto begin() const noexcept { return cbegin(); }
