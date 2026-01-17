@@ -70,11 +70,8 @@ namespace Physica {
             target.diag() = Trv(1);
             for (size_t i = 1; i < getCol() - 1; ++i) {
                 auto corner = target.bottomLeftCorner(i + 1, i);
-
-                auto row = target.row(i);
-                auto col = target.col(i);
-                auto head = row.head(i);
-                auto tail = col.tail(i + 1);
+                auto head = target.row(i).head(i);
+                auto tail = target.col(i).tail(i + 1);
                 corner += tail * head.transpose();
             }
         }

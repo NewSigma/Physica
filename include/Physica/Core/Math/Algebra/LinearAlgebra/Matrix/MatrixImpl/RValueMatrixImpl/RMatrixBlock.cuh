@@ -111,8 +111,8 @@ namespace Physica {
         size_t colCount;
     public:
         __host__ __device__ device_obj(const device_obj<M>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t row, size_t col) const;

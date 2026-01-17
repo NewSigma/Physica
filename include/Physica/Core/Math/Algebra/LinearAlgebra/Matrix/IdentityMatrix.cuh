@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -74,7 +74,7 @@ namespace Physica {
     template<Matrix M>
     void device_obj<IdentityMatrix<T, Order>>::assign(M&& target) const {
         target.zeros();
-        auto setones = [target_ = asStruct(target)] __device__ () mutable {
+        auto setones = [target_ = asStruct(target)] __device__() mutable {
             auto& target = target_.getDerived();
             auto i = blockIdx.x * blockDim.x + threadIdx.x;
             if (i < target.getRow())

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,13 +40,10 @@ namespace Physica {
         HostMatrix<T> detBuffer;
         device_obj<VectorND<T>> diag;
 
-        Array<device_obj<MatrixND<Tr>>> greensD;
+        Array<device_obj<MatrixND<Tr>>, 2> greensD;
         Array<MatrixND<Tr>, 2> greensH;
-        float64 lnAbsDet = Trv::nan();
+        float64 lnWeight = Trv::nan();
         float64 sign = 1;
-
-        uint64_t numTotal = 0;
-        uint64_t numAccept = 0;
     public:
         device_obj(const HubbardParams<Tr>& params, Trv freqDensity);
         device_obj(const This&) = default;
@@ -60,7 +57,7 @@ namespace Physica {
         void step_random();
 
         template<RNG R>
-        void step(bool warmup = false);
+        bool step(bool warmup = false);
         template<RNG R>
         void step_for(int numStep);
 
@@ -76,7 +73,6 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
-        [[nodiscard]] Trv getAcceptRate() const noexcept { return Trv(numAccept) / Trv(numTotal); }
     };
 
     template<Scalar T>
@@ -99,30 +95,29 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::step_random() {
         action.template randAuxField<R>();
         auto [lnAD, sgnD] = calcDet();
-        lnAbsDet = lnAD;
+        lnWeight = lnAD;
         sign = sgnD;
     }
 
     template<Scalar T>
     template<RNG R>
-    void device_obj<FreqDQMC<T>>::step(bool warmup) {
-        assert(lnAbsDet.isFinite() && "[Error]: Should random initialize before monte carlo step");
+    bool device_obj<FreqDQMC<T>>::step(bool warmup) {
+        assert(lnWeight.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
         const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
         const T save = action.template randAuxField<R>(freq, site);
 
         auto [lnAD, sgnD] = calcDet();
-        const bool accept = float64::template random_uniform<R>() < exp(lnAD - lnAbsDet);
+        const bool accept = float64::template random_uniform<R>() < exp(lnAD - lnWeight);
         if (accept) {
-            lnAbsDet = lnAD;
+            lnWeight = lnAD;
             sign = sgnD;
             if (!warmup)
                 calcGreen();
-            numAccept += 1;
         }
         else
             getAuxField()[freq, site] = save;
-        numTotal += 1;
+        return accept;
     }
 
     template<Scalar T>
@@ -131,9 +126,6 @@ namespace Physica {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
         calcGreen();
-
-        numTotal = 0;
-        numAccept = 0;
     }
     /**
      * float64 is necessary for determinants

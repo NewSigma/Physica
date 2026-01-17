@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,7 +45,7 @@ namespace Physica {
     };
 
     template<class T>
-    __host__ __device__ DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
+    __host__ __device__ auto DeviceAllocator<T>::allocate(size_t n) noexcept -> pointer {
         assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = n * sizeof(value_type);
         void* p{};
@@ -148,8 +148,7 @@ namespace std {
         }
 
          __host__ __device__ static allocator_type select_on_container_copy_construction(const allocator_type& a) {
-            allocator_type result = a;
-            return result;
+            return a;
         }
     };
 }

@@ -110,8 +110,8 @@ namespace Physica {
         size_t colCount;
     public:
         RMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        RMatrixBlock(const This&) = delete;
-        RMatrixBlock(This&&) noexcept = delete;
+        RMatrixBlock(const This&) = default;
+        RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
