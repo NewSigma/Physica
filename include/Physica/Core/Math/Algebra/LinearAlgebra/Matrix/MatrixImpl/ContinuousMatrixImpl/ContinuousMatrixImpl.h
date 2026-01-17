@@ -32,195 +32,122 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto ContinuousMatrix<Derived>::row(size_t r) noexcept {
+    auto ContinuousMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
+        using Self = decltype(self);
         const bool IsMat1x1 = Base::ColAtCompile == 1;
         if constexpr (IsMat1x1)
-            return ContinuousMatrixBlock<Derived, 1, 1>(Base::getDerived(), r, 0);
+            return ContinuousMatrixBlock<Self, 1, 1>(std::forward<Self>(self), r, 0);
         else {
             if constexpr (isRowMatrix)
-                return ContinuousMatrixBlock<Derived, 1, ColAtCompile>(Base::getDerived(), r, 0, Base::getCol());
+                return ContinuousMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
             else
-                return LMatrixBlock<Derived, 1, ColAtCompile>(Base::getDerived(), r, 0, Base::getCol());
+                return LMatrixBlock<Self, 1, ColAtCompile>(std::forward<Self>(self), r, 0, self.getCol());
         }
     }
 
     template<class Derived>
-    const auto ContinuousMatrix<Derived>::row(size_t r) const noexcept {
-        return Base::getConstCastDerived().row(r);
-    }
-
-    template<class Derived>
-    auto ContinuousMatrix<Derived>::col(size_t c) noexcept {
+    auto ContinuousMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
+        using Self = decltype(self);
         const bool IsMat1x1 = Base::RowAtCompile == 1;
         if constexpr (IsMat1x1)
-            return ContinuousMatrixBlock<Derived, 1, 1>(Base::getDerived(), 0, c);
+            return ContinuousMatrixBlock<Self, 1, 1>(std::forward<Self>(self), 0, c);
         else {
             if constexpr (isColMatrix)
-                return ContinuousMatrixBlock<Derived, RowAtCompile, 1>(Base::getDerived(), 0, Base::getRow(), c);
+                return ContinuousMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
             else
-                return LMatrixBlock<Derived, RowAtCompile, 1>(Base::getDerived(), 0, Base::getRow(), c);
+                return LMatrixBlock<Self, RowAtCompile, 1>(std::forward<Self>(self), 0, self.getRow(), c);
         }
     }
 
     template<class Derived>
-    const auto ContinuousMatrix<Derived>::col(size_t c) const noexcept {
-        return Base::getConstCastDerived().col(c);
+    template<size_t Row>
+    auto ContinuousMatrix<Derived>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    auto ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) noexcept {
-        return RowBlock<Row>(Base::getDerived(), fromRow, rowCount, 0, Base::getCol());
+    auto ContinuousMatrix<Derived>::topRows(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Row>
-    const auto ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const noexcept {
-        return RowBlock<Row>(Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol());
-    }
-
-    template<class Derived>
-    template<size_t Row>
-    auto ContinuousMatrix<Derived>::topRows(size_t to) noexcept {
-        return RowBlock<Row>(Base::getDerived(), 0, to, 0, Base::getCol());
-    }
-
-    template<class Derived>
-    template<size_t Row>
-    const auto ContinuousMatrix<Derived>::topRows(size_t to) const noexcept {
-        return RowBlock<Row>(Base::getConstCastDerived(), 0, to, 0, Base::getCol());
-    }
-
-    template<class Derived>
-    template<size_t Row>
-    auto ContinuousMatrix<Derived>::bottomRows(size_t from) noexcept {
-        return RowBlock<Row>(Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol());
-    }
-
-    template<class Derived>
-    template<size_t Row>
-    const auto ContinuousMatrix<Derived>::bottomRows(size_t from) const noexcept {
-        return RowBlock<Row>(Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol());
+    auto ContinuousMatrix<Derived>::bottomRows(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, ColAtCompile>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
     template<class Derived>
     template<size_t Col>
-    auto ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) noexcept {
-        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
+    auto ContinuousMatrix<Derived>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
     template<class Derived>
     template<size_t Col>
-    const auto ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) const noexcept {
-        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
+    auto ContinuousMatrix<Derived>::leftCols(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
     template<class Derived>
     template<size_t Col>
-    auto ContinuousMatrix<Derived>::leftCols(size_t to) noexcept {
-        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), 0, to);
-    }
-
-    template<class Derived>
-    template<size_t Col>
-    const auto ContinuousMatrix<Derived>::leftCols(size_t to) const noexcept {
-        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), 0, to);
-    }
-
-    template<class Derived>
-    template<size_t Col>
-    auto ContinuousMatrix<Derived>::rightCols(size_t from) noexcept {
-        return ColBlock<Col>(Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from);
-    }
-
-    template<class Derived>
-    template<size_t Col>
-    const auto ContinuousMatrix<Derived>::rightCols(size_t from) const noexcept {
-        return ColBlock<Col>(Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from);
+    auto ContinuousMatrix<Derived>::rightCols(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, RowAtCompile, Col>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) noexcept {
-        return BlockType<Row, Col>(Base::getDerived(), 0, toRow, 0, toCol);
+    auto ContinuousMatrix<Derived>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    const auto ContinuousMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const noexcept {
-        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, toRow, 0, toCol);
+    auto ContinuousMatrix<Derived>::topLeftCorner(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, to, 0, to);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::topLeftCorner(size_t to) noexcept {
-        return BlockType<Row, Col>(Base::getDerived(), 0, to, 0, to);
+    auto ContinuousMatrix<Derived>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    const auto ContinuousMatrix<Derived>::topLeftCorner(size_t to) const noexcept {
-        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, to, 0, to);
+    auto ContinuousMatrix<Derived>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) noexcept {
-        return BlockType<Row, Col>(Base::getDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
+    auto ContinuousMatrix<Derived>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    const auto ContinuousMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) const noexcept {
-        return BlockType<Row, Col>(Base::getConstCastDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
+    auto ContinuousMatrix<Derived>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) noexcept {
-        return BlockType<Row, Col>(Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    const auto ContinuousMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept {
-        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) noexcept {
-        return BlockType<Row, Col>(Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    const auto ContinuousMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept {
-        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::bottomRightCorner(size_t from) noexcept {
-        return BlockType<Row, Col>(Base::getDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    const auto ContinuousMatrix<Derived>::bottomRightCorner(size_t from) const noexcept {
-        return BlockType<Row, Col>(Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    auto ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
-        return BlockType<Row, Col>(Base::getDerived(), fromRow, rowCount, fromCol, colCount);
-    }
-
-    template<class Derived>
-    template<size_t Row, size_t Col>
-    const auto ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
-        return BlockType<Row, Col>(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
+    auto ContinuousMatrix<Derived>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        using Self = decltype(self);
+        return ContinuousMatrixBlock<Self, Row, Col>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
     template<class Derived>
@@ -268,9 +195,9 @@ namespace Physica {
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (isColMatrix)
-                dataset.read(col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.read(Base::getDerived().col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
             else
-                dataset.read(row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.read(Base::getDerived().row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
         }
         return dataset;
     }
@@ -291,9 +218,9 @@ namespace Physica {
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (isColMatrix)
-                dataset.write(col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.write(Base::getDerived().col(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
             else
-                dataset.write(row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
+                dataset.write(Base::getDerived().row(major).data(), ScalarType::dtype_hdf5(), memSpace, fileSpace);
         }
         return std::cref(dataset);
     }

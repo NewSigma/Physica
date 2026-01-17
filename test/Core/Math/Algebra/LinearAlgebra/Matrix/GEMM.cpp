@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,8 +36,8 @@ int main() {
         using MatrixType = DenseMatrix<float32, MatrixOption::Col, 3, 3>;
         using DVector = Vector3D<ScalarType>;
         using DMatrix = DenseMatrix<ScalarType, MatrixOption::Col, 3, 3>;
-        const DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
-        const DVector x{1, 2, 3};
+        DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
+        DVector x{1, 2, 3};
         {
             CoDiff<DVector> y = m * x;
             y.sum().reverse();

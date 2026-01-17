@@ -134,6 +134,20 @@ namespace Physica {
     }
 
     template<tparams>
+    auto&& DiffDenseMatrix::values(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.v);
+    }
+
+    template<tparams>
+    template<int GradOrder>
+    auto&& DiffDenseMatrix::grads(this auto&& self) noexcept {
+        if constexpr (GradOrder == 1)
+            return forward_like<decltype(self)>(self.g);
+        else
+            return forward_like<decltype(self)>(self.g.template grads<GradOrder - 1>());
+    }
+
+    template<tparams>
     DiffDenseMatrix DiffDenseMatrix::identity(size_t order) {
         This result(order, order);
         result.toIdentity();

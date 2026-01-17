@@ -93,10 +93,9 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
         [[nodiscard]] bool empty() const noexcept { return v.empty(); }
 
-        [[nodiscard]] const ValueMatrix& values() const noexcept { return v; }
-        [[nodiscard]] ValueMatrix& values() noexcept { return v; }
-        [[nodiscard]] const GradMatrix& grads() const noexcept { return g; }
-        [[nodiscard]] GradMatrix& grads() noexcept { return g; }
+        [[nodiscard]] auto&& values(this auto&&) noexcept;
+        template<int GradOrder = 1>
+        [[nodiscard]] auto&& grads(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] static This identity(size_t order);
         template<RNG R>

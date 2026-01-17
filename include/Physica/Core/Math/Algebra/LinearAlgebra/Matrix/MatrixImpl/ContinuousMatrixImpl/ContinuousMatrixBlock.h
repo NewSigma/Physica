@@ -29,19 +29,19 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, 1, Col>;
         using Base = ContinuousVector<This>;
     private:
-        M& mat;
+        LazyDestroy<M&&> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
-        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol, size_t colCount);
+        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
+        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol, size_t colCount);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) { return *this = m; }
+        This& operator=(This&& m) noexcept { return *this = m; }
         using Base::operator=;
         /* Operations */
         using Base::resize;
@@ -65,14 +65,14 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Col>
-    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M& mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
-            : ContinuousMatrixBlock(mat, fromRow, fromCol, colCount) {
+    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M mat_, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
+            : ContinuousMatrixBlock(std::forward<M>(mat_), fromRow, fromCol, colCount) {
         assert(rowCount == 1);
     }
 
     template<Matrix M, size_t Col>
-    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol, size_t colCount)
-            : mat(mat)
+    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol, size_t colCount)
+            : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , fromCol(fromCol)
             , colCount(colCount) {
@@ -82,16 +82,16 @@ namespace Physica {
 
     template<Matrix M, size_t Col>
     auto ContinuousMatrixBlock<M, 1, Col>::values(this auto&& self) noexcept {
-        auto&& v = self.mat.values();
-        using M1 = std::remove_reference<decltype(v)>::type;
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
+        using M1 = decltype(v);
         return ContinuousMatrixBlock<M1, 1, Col>(v, self.fromRow, self.fromCol, self.getLength());
     }
 
     template<Matrix M, size_t Col>
     template<int GradOrder>
     auto ContinuousMatrixBlock<M, 1, Col>::grads(this auto&& self) noexcept {
-        auto&& g = self.mat.grads();
-        using M1 = std::remove_reference<decltype(g)>::type;
+        decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
+        using M1 = decltype(g);
         return ContinuousMatrixBlock<M1, 1, Col>(g, self.fromRow, self.fromCol, self.getLength());
     }
 
@@ -106,19 +106,19 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, Row, 1>;
         using Base = ContinuousVector<This>;
     private:
-        M& mat;
+        LazyDestroy<M&&> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
     public:
-        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
-        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol);
+        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
+        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) { return *this = m; }
+        This& operator=(This&& m) noexcept { return *this = m; }
         using Base::operator=;
         /* Operations */
         using Base::resize;
@@ -142,14 +142,14 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row>
-    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
-            : ContinuousMatrixBlock(mat, fromRow, rowCount, fromCol) {
+    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
+            : ContinuousMatrixBlock(std::forward<M>(mat_), fromRow, rowCount, fromCol) {
         assert(colCount == 1);
     }
 
     template<Matrix M, size_t Row>
-    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol)
-            : mat(mat)
+    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol)
+            : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
             , fromCol(fromCol) {
@@ -159,16 +159,16 @@ namespace Physica {
 
     template<Matrix M, size_t Row>
     auto ContinuousMatrixBlock<M, Row, 1>::values(this auto&& self) noexcept {
-        auto&& v = self.mat.values();
-        using M1 = std::remove_reference<decltype(v)>::type;
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
+        using M1 = decltype(v);
         return ContinuousMatrixBlock<M1, Row, 1>(v, self.fromRow, self.getLength(), self.fromCol);
     }
 
     template<Matrix M, size_t Row>
     template<int GradOrder>
     auto ContinuousMatrixBlock<M, Row, 1>::grads(this auto&& self) noexcept {
-        auto&& g = self.mat.grads();
-        using M1 = std::remove_reference<decltype(g)>::type;
+        decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
+        using M1 = decltype(g);
         return ContinuousMatrixBlock<M1, Row, 1>(g, self.fromRow, self.getLength(), self.fromCol);
     }
 
@@ -182,17 +182,17 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, 1, 1>;
         using Base = ContinuousVector<This>;
     private:
-        M& mat;
+        LazyDestroy<M&&> mat;
         size_t fromRow;
         size_t fromCol;
     public:
-        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol);
+        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) { return *this = m; }
+        This& operator=(This&& m) noexcept { return *this = m; }
         using Base::operator=;
         /* Operations */
         using Base::resize;
@@ -224,8 +224,8 @@ namespace Physica {
     };
 
     template<Matrix M>
-    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t fromCol)
-            : mat(mat)
+    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol)
+            : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , fromCol(fromCol) {
         assert(fromRow < mat.getRow());
@@ -234,16 +234,16 @@ namespace Physica {
 
     template<Matrix M>
     auto ContinuousMatrixBlock<M, 1, 1>::values(this auto&& self) noexcept {
-        auto&& v = self.mat.values();
-        using M1 = std::remove_reference<decltype(v)>::type;
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
+        using M1 = decltype(v);
         return ContinuousMatrixBlock<M1, 1, 1>(v, self.fromRow, 1, self.fromCol);
     }
 
     template<Matrix M>
     template<int GradOrder>
     auto ContinuousMatrixBlock<M, 1, 1>::grads(this auto&& self) noexcept {
-        auto&& g = self.mat.grads();
-        using M1 = std::remove_reference<decltype(g)>::type;
+        decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
+        using M1 = decltype(g);
         return ContinuousMatrixBlock<M1, 1, 1>(g, self.fromRow, 1, self.fromCol);
     }
 
@@ -257,19 +257,19 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, Row, Col>;
         using Base = LValueMatrix<This>;
     private:
-        M& mat;
+        LazyDestroy<M&&> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
         This& operator=(const This& m) { Base::operator=(m); return *this; }
-        This& operator=(This&& m) { return *this = m; }
+        This& operator=(This&& m) noexcept { return *this = m; }
         using Base::operator=;
         /* Operations */
         using Base::resize;
@@ -301,8 +301,8 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row, size_t Col>
-    ContinuousMatrixBlock<M, Row, Col>::ContinuousMatrixBlock(M& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
-            : mat(mat)
+    ContinuousMatrixBlock<M, Row, Col>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+            : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
             , fromCol(fromCol)
@@ -315,112 +315,142 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
         if constexpr (MatrixOption::isRowMatrix<M>())
-            return ContinuousMatrixBlock<M, 1, Col>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+            return ContinuousMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
         else
-            return LMatrixBlock<M, 1, Col>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+            return LMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::col(this auto&& self, size_t c) noexcept {
         assert(c < self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
         if constexpr (MatrixOption::isColMatrix<M>())
-            return ContinuousMatrixBlock<M, Row, 1>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+            return ContinuousMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
         else
-            return LMatrixBlock<M, Row, 1>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+            return LMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, 0, self.getCol());
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::topRows(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, self.getCol());
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, to, self.fromCol, self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, to, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::bottomRows(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, 0, self.getCol());
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, 0, self.getRow(), fromCol, colCount);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::leftCols(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, self.getRow(), 0, to);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, self.getRow(), self.fromCol, to);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol, to);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::rightCols(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, 0, self.getRow(), from, self.getCol() - from);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         Base::checkBlock(self, 0, toRow, 0, toCol);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, toRow, self.fromCol, toCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol, toCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::topLeftCorner(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, to);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, to, self.fromCol, to);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, to, self.fromCol, to);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         Base::checkBlock(self, 0, toRow, fromCol, self.getCol() - fromCol);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, 0, toCol);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, from, self.getCol() - from);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, fromCol, colCount);
-        return ContinuousMatrixBlock<M, Row, Col>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M, size_t Row, size_t Col>
     auto ContinuousMatrixBlock<M, Row, Col>::values(this auto&& self) noexcept {
-        auto&& v = self.mat.values();
-        using M1 = std::remove_reference<decltype(v)>::type;
-        return ContinuousMatrixBlock<M1, Row, Col>(v, self.fromRow, self.getRow(), self.fromCol, self.getCol());
+        decltype(auto) v = propagate_rvalue_reference<decltype(self), M>(self.mat.values());
+        using M1 = decltype(v);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(v), self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
     template<int GradOrder>
     auto ContinuousMatrixBlock<M, Row, Col>::grads(this auto&& self) noexcept {
-        auto&& g = self.mat.template grads<GradOrder>();
-        using M1 = std::remove_reference<decltype(g)>::type;
-        return ContinuousMatrixBlock<M1, Row, Col>(g, self.fromRow, self.getRow(), self.fromCol, self.getCol());
+        decltype(auto) g = propagate_rvalue_reference<decltype(self), M>(self.mat.template grads<GradOrder>());
+        using M1 = decltype(g);
+        return ContinuousMatrixBlock<M1, Row, Col>(std::forward<M1>(g), self.fromRow, self.getRow(), self.fromCol, self.getCol());
     }
 
     template<Matrix M, size_t Row, size_t Col>
@@ -434,9 +464,10 @@ namespace Physica {
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     class Traits<ContinuousMatrixBlock<M, Row, Col>> {
+        using M1 = std::remove_cvref<M>::type;
     public:
-        using ScalarType = M::ScalarType;
-        constexpr static int Option = M::Option;
+        using ScalarType = M1::ScalarType;
+        constexpr static int Option = M1::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;

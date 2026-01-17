@@ -151,154 +151,95 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::row(size_t r) noexcept {
-        return RowVector(Base::getDerived(), r, 0, Base::getCol());
+    auto LValueMatrix<Derived>::row(this auto&& self, size_t r) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self, 1, Dynamic>(std::forward<Self>(self), r, 0, self.getCol());
     }
 
     template<class Derived>
-    const auto LValueMatrix<Derived>::row(size_t r) const noexcept {
-        return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
+    auto LValueMatrix<Derived>::col(this auto&& self, size_t c) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self, Dynamic, 1>(std::forward<Self>(self), 0, self.getRow(), c);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::col(size_t c) noexcept {
-        return ColVector(Base::getDerived(), 0, Base::getRow(), c);
+    auto LValueMatrix<Derived>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), fromRow, rowCount, 0, self.getCol());
     }
 
     template<class Derived>
-    const auto LValueMatrix<Derived>::col(size_t c) const noexcept {
-        return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
+    auto LValueMatrix<Derived>::topRows(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), 0, to, 0, self.getCol());
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) noexcept {
-        return BlockType(Base::getDerived(), fromRow, rowCount, 0, Base::getCol());
+    auto LValueMatrix<Derived>::bottomRows(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), from, self.getRow() - from, 0, self.getCol());
     }
 
     template<class Derived>
-    const auto LValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const noexcept {
-        return BlockType(Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol());
+    auto LValueMatrix<Derived>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), 0, self.getRow(), fromCol, colCount);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::topRows(size_t to) noexcept {
-        return BlockType(Base::getDerived(), 0, to, 0, Base::getCol());
+    auto LValueMatrix<Derived>::leftCols(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), 0, self.getRow(), 0, to);
     }
 
     template<class Derived>
-    const auto LValueMatrix<Derived>::topRows(size_t to) const noexcept {
-        return BlockType(Base::getConstCastDerived(), 0, to, 0, Base::getCol());
+    auto LValueMatrix<Derived>::rightCols(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), 0, self.getRow(), from, self.getCol() - from);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::bottomRows(size_t from) noexcept {
-        return BlockType(Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol());
+    auto LValueMatrix<Derived>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), 0, toRow, 0, toCol);
     }
 
     template<class Derived>
-    const auto LValueMatrix<Derived>::bottomRows(size_t from) const noexcept {
-        return BlockType(Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol());
+    auto LValueMatrix<Derived>::topLeftCorner(this auto&& self, size_t to) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), 0, to, 0, to);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) noexcept {
-        return BlockType(Base::getDerived(), 0, Base::getRow(), fromCol, colCount);
+    auto LValueMatrix<Derived>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), 0, toRow, fromCol, self.getRow() - fromCol);
     }
 
     template<class Derived>
-    const auto LValueMatrix<Derived>::cols(size_t fromCol, size_t colCount) const noexcept {
-        return BlockType(Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount);
+    auto LValueMatrix<Derived>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, 0, toCol);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::leftCols(size_t to) noexcept {
-        return BlockType(Base::getDerived(), 0, Base::getRow(), 0, to);
+    auto LValueMatrix<Derived>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
     }
 
     template<class Derived>
-    const auto LValueMatrix<Derived>::leftCols(size_t to) const noexcept {
-        return BlockType(Base::getConstCastDerived(), 0, Base::getRow(), 0, to);
+    auto LValueMatrix<Derived>::bottomRightCorner(this auto&& self, size_t from) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), from, self.getRow() - from, from, self.getCol() - from);
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::rightCols(size_t from) noexcept {
-        return BlockType(Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from);
+    auto LValueMatrix<Derived>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
+        using Self = decltype(self);
+        return LMatrixBlock<Self>(std::forward<Self>(self), fromRow, rowCount, fromCol, colCount);
     }
 
-    template<class Derived>
-    const auto LValueMatrix<Derived>::rightCols(size_t from) const noexcept {
-        return BlockType(Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) noexcept {
-        return BlockType(Base::getDerived(), 0, toRow, 0, toCol);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::topLeftCorner(size_t toRow, size_t toCol) const noexcept {
-        return BlockType(Base::getConstCastDerived(), 0, toRow, 0, toCol);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::topLeftCorner(size_t to) noexcept {
-        return BlockType(Base::getDerived(), 0, to, 0, to);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::topLeftCorner(size_t to) const noexcept {
-        return BlockType(Base::getConstCastDerived(), 0, to, 0, to);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) noexcept {
-        return BlockType(Base::getDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::topRightCorner(size_t toRow, size_t fromCol) const noexcept {
-        return BlockType(Base::getConstCastDerived(), 0, toRow, fromCol, Base::getRow() - fromCol);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) noexcept {
-        return BlockType(Base::getDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept {
-        return BlockType(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, 0, toCol);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) noexcept {
-        return BlockType(Base::getDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept {
-        return BlockType(Base::getConstCastDerived(), fromRow, Base::getRow() - fromRow, fromCol, Base::getCol() - fromCol);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::bottomRightCorner(size_t from) noexcept {
-        return BlockType(Base::getDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::bottomRightCorner(size_t from) const noexcept {
-        return BlockType(Base::getConstCastDerived(), from, Base::getRow() - from, from, Base::getCol() - from);
-    }
-
-    template<class Derived>
-    auto LValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
-        return BlockType(Base::getDerived(), fromRow, rowCount, fromCol, colCount);
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept {
-        return BlockType(Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount);
-    }
 
     template<class Derived>
     auto LValueMatrix<Derived>::diag(this auto&& self) noexcept {
@@ -326,8 +267,7 @@ namespace Physica {
         Derived& matrix = Base::getDerived();
         assert(abs(matrix[r1, elementIndex]) > ScalarType(std::numeric_limits<ScalarType>::min()));
         const ScalarType factor = matrix[r2, elementIndex] / matrix[r1, elementIndex];
-        auto row2 = row(r2);
-        row2 -= row(r1) * factor;
+        matrix.row(r2) -= matrix.row(r1) * factor;
         matrix[r2, elementIndex] = 0;
     }
 
@@ -336,8 +276,7 @@ namespace Physica {
         Derived& matrix = Base::getDerived();
         assert(abs(matrix(elementIndex, c1)) > ScalarType(std::numeric_limits<ScalarType>::min()));
         const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
-        auto col2 = col(c2);
-        col2 -= col(c1) * factor;
+        matrix.col(c2) -= matrix.col(c1) * factor;
         matrix[elementIndex, c2] = 0;
     }
 
