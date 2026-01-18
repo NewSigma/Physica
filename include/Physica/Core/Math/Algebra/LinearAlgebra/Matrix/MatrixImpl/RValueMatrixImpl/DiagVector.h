@@ -30,7 +30,7 @@ namespace Physica {
     private:
         LazyDestroy<M> mat;
     public:
-        explicit DiagVectorR(M mat) : mat(std::forward<M>(mat)) {}
+        explicit DiagVectorR(M&& mat) : mat(std::forward<M>(mat)) {}
         DiagVectorR(const This&) = default;
         DiagVectorR(This&&) = default;
         ~DiagVectorR() = default;

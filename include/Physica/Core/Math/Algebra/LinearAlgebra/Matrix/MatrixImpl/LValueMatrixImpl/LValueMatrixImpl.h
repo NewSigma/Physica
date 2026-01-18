@@ -321,13 +321,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueMatrix<Derived>::flatten() {
-        return FlattenL<Derived>(Base::getDerived());
-    }
-
-    template<class Derived>
-    const auto LValueMatrix<Derived>::flatten() const {
-        return FlattenL<Derived>(Base::getConstCastDerived());
+    auto LValueMatrix<Derived>::flatten(this auto&& self) {
+        using Self = decltype(self);
+        return FlattenL<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>

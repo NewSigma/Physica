@@ -26,9 +26,9 @@ namespace Physica {
         using This = FlattenL<M>;
         using Base = LValueVector<This>;
 
-        M& mat;
+        LazyDestroy<M> mat;
     public:
-        FlattenL(LValueMatrix<M>& mat_) : mat(mat_.getDerived()) {}
+        FlattenL(M&& mat_) : mat(std::forward<M>(mat_)) {}
         FlattenL(const This&) = default;
         FlattenL(This&&) noexcept = default;
         ~FlattenL() = default;
@@ -57,9 +57,10 @@ namespace Physica {
 namespace Physica {
     template<Matrix M>
     class Traits<FlattenL<M>> {
+        using M1 = std::remove_reference_t<M>;
     public:
-        using ScalarType = M::ScalarType;
-        constexpr static size_t SizeAtCompile = M::RowAtCompile * M::ColAtCompile;
+        using ScalarType = M1::ScalarType;
+        constexpr static size_t SizeAtCompile = M1::RowAtCompile * M1::ColAtCompile;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

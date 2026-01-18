@@ -63,8 +63,7 @@ namespace Physica {
         [[nodiscard]] LTensorBlock<Derived> block(Index3D from, Index3D count) noexcept;
         [[nodiscard]] const LTensorBlock<Derived> block(Index3D from, Index3D count) const noexcept;
 
-        [[nodiscard]] auto flatten();
-        [[nodiscard]] const auto flatten() const;
+        [[nodiscard]] auto flatten(this auto&&);
 
         template<RNG R> void random_uniform();
         template<RNG R> void random_normal();

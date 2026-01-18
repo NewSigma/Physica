@@ -158,7 +158,7 @@ namespace Physica {
         [[nodiscard]] auto transpose() const noexcept;
         [[nodiscard]] decltype(auto) conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
-        [[nodiscard]] auto flatten() const noexcept;
+        [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         [[nodiscard]] decltype(auto) reals() const noexcept;
         [[nodiscard]] auto imags() const noexcept;

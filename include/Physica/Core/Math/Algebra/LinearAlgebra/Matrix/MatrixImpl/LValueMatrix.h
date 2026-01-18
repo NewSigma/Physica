@@ -100,8 +100,7 @@ namespace Physica {
         void majorMulScalar(size_t v, const ScalarType& factor);
         void majorSwap(size_t v1, size_t v2);
 
-        [[nodiscard]] auto flatten();
-        [[nodiscard]] const auto flatten() const;
+        [[nodiscard]] auto flatten(this auto&&);
 
         void zeros() noexcept;
         void clamp_min(Tv minimum);

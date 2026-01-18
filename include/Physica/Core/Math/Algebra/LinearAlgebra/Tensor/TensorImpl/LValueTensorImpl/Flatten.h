@@ -26,12 +26,12 @@ namespace Physica {
     class FlattenL<T> : public LValueVector<FlattenL<T>> {
         using This = FlattenL<T>;
 
-        T& tensor;
+        LazyDestroy<T> tensor;
     public:
         using Base = LValueVector<FlattenL<T>>;
         using typename Base::ScalarType;
     public:
-        FlattenL(T& tensor_) : tensor(tensor_) {}
+        FlattenL(T&& tensor_) : tensor(std::forward<T>(tensor_)) {}
         FlattenL(const This&) = default;
         FlattenL(This&&) noexcept = default;
         ~FlattenL() = default;
@@ -57,7 +57,7 @@ namespace Physica {
     template<Tensor T>
     class Traits<FlattenL<T>> {
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = std::remove_cvref_t<T>::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = false;

@@ -85,8 +85,7 @@ namespace Physica {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
 
-        [[nodiscard]] auto flatten() noexcept;
-        [[nodiscard]] const auto flatten() const noexcept;
+        [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         void zeros();
         void read(const T* __restrict p);

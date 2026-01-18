@@ -360,8 +360,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::flatten() const noexcept {
-        return FlattenR<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::flatten(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return FlattenR<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>

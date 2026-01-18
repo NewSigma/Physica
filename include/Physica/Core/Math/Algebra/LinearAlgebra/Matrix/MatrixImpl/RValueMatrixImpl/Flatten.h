@@ -26,12 +26,12 @@ namespace Physica {
         using This = FlattenR<M>;
         using Base = RValueVector<FlattenR<M>>;
 
-        const M& mat;
+        LazyDestroy<M> mat;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     public:
-        FlattenR(const M& mat_) : mat(mat_) {}
+        FlattenR(M&& mat_) : mat(std::forward<M>(mat_)) {}
         FlattenR(const This&) = default;
         FlattenR(This&&) noexcept = default;
         ~FlattenR() = default;
@@ -64,9 +64,11 @@ namespace Physica {
 namespace Physica {
     template<Matrix M>
     class Traits<FlattenR<M>> {
+        using M1 = std::remove_reference_t<M>;
     public:
-        using ScalarType = M::ScalarType;
-        constexpr static size_t SizeAtCompile = M::RowAtCompile * M::ColAtCompile;
+        using ScalarType = M1::ScalarType;
+        constexpr static size_t SizeAtCompile = M1::RowAtCompile * M1::ColAtCompile;
+
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };
