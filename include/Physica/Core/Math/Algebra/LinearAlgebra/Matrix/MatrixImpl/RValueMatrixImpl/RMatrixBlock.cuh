@@ -26,7 +26,7 @@ namespace Physica {
         using host_obj = RMatrixBlock<M, 1, Dynamic>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
-        using DeviceM = device_obj<std::remove_cvref_t<M>>;
+        using Ref = add_device_obj<M>::type;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
@@ -34,16 +34,12 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const DeviceM> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(const DeviceM& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
-                : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
-            assert(fromRow < mat_.getRow());
-            assert(fromCol + colCount <= mat_.getCol());
-        }
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow, size_t fromCol, size_t colCount);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -60,11 +56,18 @@ namespace Physica {
     };
 
     template<Matrix M>
+    __host__ __device__ device_obj<RMatrixBlock<M, 1, Dynamic>>::device_obj(Ref mat_, size_t fromRow, size_t fromCol, size_t colCount)
+            : mat(asStruct(mat_)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
+        assert(fromRow < mat_.getRow());
+        assert(fromCol + colCount <= mat_.getCol());
+    }
+
+    template<Matrix M>
     class device_obj<RMatrixBlock<M, Dynamic, 1>> : public device_obj<RValueVector<RMatrixBlock<M, Dynamic, 1>>> {
         using host_obj = RMatrixBlock<M, Dynamic, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
-        using DeviceM = device_obj<std::remove_cvref_t<M>>;
+        using Ref = add_device_obj<M>::type;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
@@ -72,16 +75,12 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const DeviceM> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(const DeviceM& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
-                : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat_.getRow());
-            assert(fromCol < mat_.getCol());
-        }
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -98,22 +97,29 @@ namespace Physica {
     };
 
     template<Matrix M>
+    __host__ __device__ device_obj<RMatrixBlock<M, Dynamic, 1>>::device_obj(Ref mat_, size_t fromRow, size_t rowCount, size_t fromCol)
+            : mat(asStruct(mat_)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
+        assert(fromRow + rowCount <= mat_.getRow());
+        assert(fromCol < mat_.getCol());
+    }
+
+    template<Matrix M>
     class device_obj<RMatrixBlock<M, Dynamic, Dynamic>> : public device_obj<RValueMatrix<RMatrixBlock<M, Dynamic, Dynamic>>> {
         using host_obj = RMatrixBlock<M, Dynamic, Dynamic>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-        using DeviceM = device_obj<std::remove_cvref_t<M>>;
+        using Ref = add_device_obj<M>::type;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const DeviceM> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(const DeviceM& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -143,7 +149,7 @@ namespace Physica {
 
     template<Matrix M>
     __host__ __device__ device_obj<RMatrixBlock<M, Dynamic, Dynamic>>::device_obj(
-            const DeviceM& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+            Ref mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(asStruct(mat_))
             , fromRow(fromRow_)
             , rowCount(rowCount_)

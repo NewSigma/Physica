@@ -103,9 +103,9 @@ namespace Physica {
     template<class From, class To>
     class copy_cvref {
         using T0 = std::remove_cvref<To>::type;
-        using T1 = std::conditional<std::is_lvalue_reference_v<From>, std::add_lvalue_reference_t<T0>, T0>::type;
-        using T2 = std::conditional<std::is_rvalue_reference_v<From>, std::add_rvalue_reference_t<T1>, T1>::type;
+        using T1 = std::conditional<std::is_const_v<std::remove_reference_t<From>>, const T0, T0>::type;
+        using T2 = std::conditional<std::is_rvalue_reference_v<From>, T1&&, T1>::type;
     public:
-        using type = std::conditional<std::is_const_v<std::remove_reference_t<From>>, std::add_const_t<T2>, T2>::type;
+        using type = std::conditional<std::is_lvalue_reference_v<From>, T2&, T2>::type;
     };
 }

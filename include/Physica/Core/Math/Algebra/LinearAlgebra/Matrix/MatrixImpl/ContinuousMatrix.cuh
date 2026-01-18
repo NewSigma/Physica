@@ -37,12 +37,6 @@ namespace Physica {
     private:
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
         constexpr static bool isColMatrix = MatrixOption::isColMatrix<Derived>();
-        template<size_t Row>
-        using RowBlock = device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>>;
-        template<size_t Col>
-        using ColBlock = device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>>;
-        template<size_t Row, size_t Col>
-        using BlockType = device_obj<ContinuousMatrixBlock<Derived, Row, Col>>;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -53,62 +47,34 @@ namespace Physica {
         template<Matrix M> void toHost(ContinuousMatrix<M>& obj) const;
         template<Matrix M> void toHostAsync(ContinuousMatrix<M>& obj) const;
 
-        [[nodiscard]] __host__ __device__ auto row(size_t r) noexcept;
-        [[nodiscard]] __host__ __device__ const auto row(size_t r) const noexcept;
-        [[nodiscard]] __host__ __device__ auto col(size_t c) noexcept;
-        [[nodiscard]] __host__ __device__ const auto col(size_t c) const noexcept;
+        [[nodiscard]] __host__ __device__ auto row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] __host__ __device__ auto col(this auto&&, size_t c) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ auto rows(size_t fromRow, size_t rowCount) noexcept;
+        [[nodiscard]] __host__ __device__ auto rows(this auto&&, size_t fromRow, size_t rowCount) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto rows(size_t fromRow, size_t rowCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto topRows(this auto&&, size_t to) noexcept;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ auto topRows(size_t to) noexcept;
-        template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto topRows(size_t to) const noexcept;
-        template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ auto bottomRows(size_t from) noexcept;
-        template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto bottomRows(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRows(this auto&&, size_t from) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto cols(size_t fromCol, size_t colCount) noexcept;
+        [[nodiscard]] __host__ __device__ auto cols(this auto&&, size_t fromCol, size_t colCount) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto cols(size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto leftCols(this auto&&, size_t to) noexcept;
         template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto leftCols(size_t to) noexcept;
-        template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto leftCols(size_t to) const noexcept;
-        template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto rightCols(size_t from) noexcept;
-        template<size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto rightCols(size_t from) const noexcept;
+        [[nodiscard]] __host__ __device__ auto rightCols(this auto&&, size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto topLeftCorner(size_t toRow, size_t toCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(this auto&&, size_t toRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto topLeftCorner(size_t toRow, size_t toCol) const noexcept;
+        [[nodiscard]] __host__ __device__ auto topLeftCorner(this auto&&, size_t to) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto topLeftCorner(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto topRightCorner(this auto&&, size_t toRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto topLeftCorner(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomLeftCorner(this auto&&, size_t fromRow, size_t toCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto topRightCorner(size_t toRow, size_t fromCol) noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t fromRow, size_t fromCol) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto topRightCorner(size_t toRow, size_t fromCol) const noexcept;
+        [[nodiscard]] __host__ __device__ auto bottomRightCorner(this auto&&, size_t from) noexcept;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto bottomLeftCorner(size_t fromRow, size_t toCol) noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto bottomLeftCorner(size_t fromRow, size_t toCol) const noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto bottomRightCorner(size_t fromRow, size_t fromCol) noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t fromRow, size_t fromCol) const noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto bottomRightCorner(size_t from) noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto bottomRightCorner(size_t from) const noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
-        template<size_t Row = Dynamic, size_t Col = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const noexcept;
+        [[nodiscard]] __host__ __device__ auto block(this auto&&, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept;
 
         [[nodiscard]] auto flatten();
         [[nodiscard]] const auto flatten() const;

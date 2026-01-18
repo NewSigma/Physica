@@ -70,6 +70,25 @@ namespace Physica {
     using remove_device_obj_t = remove_device_obj<T>::type;
 
     template<class T>
+    struct add_device_obj {
+    private:
+        template<bool NoCVRef>
+        struct Helper {
+            using type = device_obj<T>;
+        };
+
+        template<>
+        struct Helper<false> {
+            using type = copy_cvref<T, device_obj<std::remove_cvref_t<T>>>::type;
+        };
+    public:
+        using type = Helper<!std::is_reference_v<T> && !std::is_const_v<T>>::type;
+    };
+
+    template<class T>
+    using add_device_obj_t = add_device_obj<T>::type;
+
+    template<class T>
     concept CUDA = is_device_obj<remove_codiff_t<std::remove_cvref_t<T>>>::value;
 
     template<CUDA T>

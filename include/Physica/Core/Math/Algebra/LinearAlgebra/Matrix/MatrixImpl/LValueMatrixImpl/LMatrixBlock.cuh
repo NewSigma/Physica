@@ -27,13 +27,14 @@ namespace Physica {
         using host_obj = LMatrixBlock<M, 1, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
                 : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
             assert(fromRow < mat_.getRow());
             assert(fromCol + colCount <= mat_.getCol());
@@ -62,13 +63,14 @@ namespace Physica {
         using host_obj = LMatrixBlock<M, Row, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
                 : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(fromCol < mat.getCol());
@@ -97,12 +99,13 @@ namespace Physica {
         using host_obj = LMatrixBlock<M, 1, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat_, size_t fromRow_, size_t fromCol_);
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow_, size_t fromCol_);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -117,7 +120,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __host__ __device__ device_obj<LMatrixBlock<M, 1, 1>>::device_obj(device_obj<M>& mat_, size_t fromRow_, size_t fromCol_)
+    __host__ __device__ device_obj<LMatrixBlock<M, 1, 1>>::device_obj(Ref mat_, size_t fromRow_, size_t fromCol_)
             : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_) {
         assert(fromRow < mat.getRow());
         assert(fromCol < mat.getCol());
@@ -134,14 +137,15 @@ namespace Physica {
         using host_obj = LMatrixBlock<M, Dynamic, Dynamic>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        __host__ __device__ device_obj(Ref mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -174,7 +178,7 @@ namespace Physica {
 
     template<Matrix M>
     __host__ __device__ device_obj<LMatrixBlock<M, Dynamic, Dynamic>>::device_obj(
-            device_obj<M>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+            Ref mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(asStruct(mat_))
             , fromRow(fromRow_)
             , rowCount(rowCount_)
@@ -284,5 +288,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
-    class Traits<device_obj<LMatrixBlock<M, Row, Col>>> : public Traits<LMatrixBlock<M, Row, Col>> {};
+    class Traits<device_obj<LMatrixBlock<M, Row, Col>>> : public Traits<LMatrixBlock<M, Row, Col>> {
+        static_assert(!is_device_obj<M>::value);
+    };
 }

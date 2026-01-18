@@ -27,14 +27,15 @@ namespace Physica {
         using host_obj = ContinuousMatrixBlock<M, 1, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount);
-        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol, size_t colCount);
+        __host__ __device__ device_obj(Ref mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount);
+        __host__ __device__ device_obj(Ref mat, size_t fromRow, size_t fromCol, size_t colCount);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -51,13 +52,13 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Col>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, Col>>::device_obj(device_obj<M>& mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, Col>>::device_obj(Ref mat, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
             : device_obj(mat, fromRow, fromCol, colCount) {
         assert(rowCount == 1);
     }
 
     template<Matrix M, size_t Col>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, Col>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol, size_t colCount)
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, Col>>::device_obj(Ref mat, size_t fromRow, size_t fromCol, size_t colCount)
             : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
         assert(fromRow < mat.getRow());
         assert(fromCol + colCount <= mat.getCol());
@@ -74,14 +75,15 @@ namespace Physica {
         using host_obj = ContinuousMatrixBlock<M, Row, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
-        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol);
+        __host__ __device__ device_obj(Ref mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
+        __host__ __device__ device_obj(Ref mat, size_t fromRow, size_t rowCount, size_t fromCol);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -98,13 +100,13 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, 1>>::device_obj(Ref mat, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
             : device_obj(mat, fromRow, rowCount, fromCol) {
         assert(colCount == 1);
     }
 
     template<Matrix M, size_t Row>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol)
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, 1>>::device_obj(Ref mat, size_t fromRow, size_t rowCount, size_t fromCol)
             : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
         assert(fromRow + rowCount <= mat.getRow());
         assert(fromCol < mat.getCol());
@@ -120,12 +122,13 @@ namespace Physica {
         using host_obj = ContinuousMatrixBlock<M, 1, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t fromCol;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol);
+        __host__ __device__ device_obj(Ref mat, size_t fromRow, size_t fromCol);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -142,7 +145,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, 1>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t fromCol)
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, 1, 1>>::device_obj(Ref mat, size_t fromRow, size_t fromCol)
             : mat(asStruct(mat)), fromRow(fromRow), fromCol(fromCol) {
         assert(fromRow < mat.getRow());
         assert(fromCol < mat.getCol());
@@ -159,14 +162,15 @@ namespace Physica {
         using host_obj = ContinuousMatrixBlock<M, Row, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        __host__ __device__ device_obj(Ref mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -200,7 +204,7 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row, size_t Col>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, Col>>::device_obj(device_obj<M>& mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    __host__ __device__ device_obj<ContinuousMatrixBlock<M, Row, Col>>::device_obj(Ref mat, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(asStruct(mat))
             , fromRow(fromRow)
             , rowCount(rowCount)
@@ -318,5 +322,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
-    class Traits<device_obj<ContinuousMatrixBlock<M, Row, Col>>> : public Traits<ContinuousMatrixBlock<M, Row, Col>> {};
+    class Traits<device_obj<ContinuousMatrixBlock<M, Row, Col>>> : public Traits<ContinuousMatrixBlock<M, Row, Col>> {
+        static_assert(!is_device_obj<M>::value);
+    };
 }
