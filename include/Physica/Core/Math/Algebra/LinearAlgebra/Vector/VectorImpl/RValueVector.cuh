@@ -71,6 +71,7 @@ namespace Physica {
         __host__ __device__ void resize(const Vector auto& x) { resize(x.getLength()); }
         __host__ __device__ auto resize(size_t length) { return Base::getDerived().resize(length); }
 
+        [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
 
         [[nodiscard]] __device__ Tr norm() const;
@@ -130,6 +131,7 @@ namespace Physica {
 }
 
 #include "RValueVectorImpl/RValueVectorImpl.cuh"
+#include "RValueVectorImpl/Conjugate.cuh"
 #include "RValueVectorImpl/CrossProduct.cuh"
 #include "RValueVectorImpl/VectorConvert/RealVector.cuh"
 #include "RValueVectorImpl/VectorConvert/VectorConvert.cuh"

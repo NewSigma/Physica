@@ -192,11 +192,12 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) RValueVector<Derived>::conjugate() const noexcept {
+    decltype(auto) RValueVector<Derived>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isComplex)
-            return Conjugate<Derived>(Base::getDerived());
+            return Conjugate<Self>(std::forward<Self>(self));
         else
-            return Base::getDerived();
+            return std::forward<Self>(self);
     }
 
     template<class Derived>

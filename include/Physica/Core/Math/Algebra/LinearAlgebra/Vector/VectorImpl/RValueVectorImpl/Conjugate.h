@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,8 +23,6 @@
 namespace Physica {
     template<Vector V>
     class Conjugate<V> : public RValueVector<Conjugate<V>> {
-        static_assert(V::isComplex, "[Error]: Unnecessary conjugate call on real vector");
-
         using This = Conjugate<V>;
         using Base = RValueVector<This>;
     protected:
@@ -32,9 +30,9 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Tm;
     private:
-        const V& vec;
+        LazyDestroy<V> vec;
     public:
-        explicit Conjugate(const V& vec_) : vec(vec_) {}
+        explicit Conjugate(V&& vec_) : vec(std::forward<V>(vec_)) {}
         Conjugate(const This&) = default;
         Conjugate(This&&) = default;
         ~Conjugate() = default;
@@ -53,7 +51,7 @@ namespace Physica {
         template<Packet Pack>
         [[nodiscard]] Pack packetPartial(size_t index, size_t count) const noexcept;
 
-        [[nodiscard]] const V& conjugate() const noexcept { return vec; }
+        [[nodiscard]] decltype(auto) conjugate(this auto&&) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
     };
@@ -75,11 +73,18 @@ namespace Physica {
     Pack Conjugate<V>::packetPartial(size_t index, size_t count) const noexcept {
         return vec.template packetPartial<Pack>(index, count).conjugate();
     }
+
+    template<Vector V>
+    decltype(auto) Conjugate<V>::conjugate(this auto&& self) noexcept {
+        return forward_like<decltype(self)>(self.vec);
+    }
 }
 
 namespace Physica {
     template<Vector V>
-    class Traits<Conjugate<V>> : public Traits<V> {};
+    class Traits<Conjugate<V>> : public Traits<V> {
+        static_assert(std::remove_cvref_t<V>::isComplex, "[Error]: Unnecessary conjugate call on real vector");
+    };
 }
 
 #ifdef PHYSICA_MKL

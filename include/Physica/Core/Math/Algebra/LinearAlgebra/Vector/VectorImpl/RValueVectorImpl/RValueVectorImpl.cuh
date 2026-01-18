@@ -104,6 +104,17 @@ namespace Physica {
     }
 
     template<class Derived>
+    __host__ __device__ decltype(auto) device_obj<RValueVector<Derived>>::conjugate(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (isComplex) {
+            using V = remove_device_obj<Self>::type;
+            return device_obj<Conjugate<V>>(std::forward<Self>(self));
+        }
+        else
+            return std::forward<Self>(self);
+    }
+
+    template<class Derived>
     __host__ __device__ auto device_obj<RValueVector<Derived>>::transpose() const noexcept {
         return device_obj<Transpose<Derived>>(Base::getDerived());
     }
