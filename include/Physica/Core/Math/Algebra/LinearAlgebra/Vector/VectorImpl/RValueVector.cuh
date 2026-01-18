@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/Core/Parallel/ThreadBlock.cuh"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "RValueVector.h"
 
