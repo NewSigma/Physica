@@ -36,15 +36,12 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        M& mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        RMatrixBlock(M& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
-            assert(fromRow < mat.getRow());
-            assert(fromCol + colCount <= mat.getCol());
-        }
+        RMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount);
         RMatrixBlock(const This&) = default;
         RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
@@ -61,6 +58,13 @@ namespace Physica {
     };
 
     template<Matrix M>
+    RMatrixBlock<M, 1, Dynamic>::RMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount)
+            : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
+        assert(fromRow < mat.getRow());
+        assert(fromCol + colCount <= mat.getCol());
+    }
+
+    template<Matrix M>
     class RMatrixBlock<M, Dynamic, 1> : public RValueVector<RMatrixBlock<M, Dynamic, 1>> {
         using This = RMatrixBlock<M, Dynamic, 1>;
         using Base = RValueVector<This>;
@@ -71,15 +75,12 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        M& mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        RMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(fromCol < mat.getCol());
-        }
+        RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol);
         RMatrixBlock(const This&) = default;
         RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
@@ -96,6 +97,13 @@ namespace Physica {
     };
 
     template<Matrix M>
+    RMatrixBlock<M, Dynamic, 1>::RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol)
+            : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol), rowCount(rowCount) {
+        assert(fromRow + rowCount <= mat.getRow());
+        assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M>
     class RMatrixBlock<M, Dynamic, Dynamic> : public RValueMatrix<RMatrixBlock<M, Dynamic, Dynamic>> {
         using This = RMatrixBlock<M, Dynamic, Dynamic>;
         using Base = RValueMatrix<This>;
@@ -103,13 +111,13 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        M& mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        RMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        RMatrixBlock(M& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         RMatrixBlock(const This&) = default;
         RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
@@ -138,12 +146,12 @@ namespace Physica {
     };
 
     template<Matrix M>
-    RMatrixBlock<M, Dynamic, Dynamic>::RMatrixBlock(M& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
-            : mat(mat_)
-            , fromRow(fromRow_)
-            , rowCount(rowCount_)
-            , fromCol(fromCol_)
-            , colCount(colCount_) {
+    RMatrixBlock<M, Dynamic, Dynamic>::RMatrixBlock(M& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+            : mat(std::forward<M>(mat_))
+            , fromRow(fromRow)
+            , rowCount(rowCount)
+            , fromCol(fromCol)
+            , colCount(colCount) {
         Base::checkBlock(mat, fromRow, rowCount, fromCol, colCount);
     }
 
@@ -164,91 +172,121 @@ namespace Physica {
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
-        return RMatrixBlock<M, 1, Dynamic>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, 1, Dynamic>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::col(this auto&& self, size_t c) noexcept {
         assert(c < self.getCol());
-        return RMatrixBlock<M, Dynamic, 1>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::rows(this auto&& self, size_t fromRow, size_t rowCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, 0, self.getCol());
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::topRows(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, self.getCol());
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, to, self.fromCol, self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, to, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::bottomRows(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, 0, self.getCol());
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol, self.getCol());
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::cols(this auto&& self, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, 0, self.getRow(), fromCol, colCount);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + fromCol, colCount);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::leftCols(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, self.getRow(), 0, to);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, self.getRow(), self.fromCol, to);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol, to);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::rightCols(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, 0, self.getRow(), from, self.getCol() - from);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::topLeftCorner(this auto&& self, size_t toRow, size_t toCol) noexcept {
         Base::checkBlock(self, 0, toRow, 0, toCol);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, toRow, self.fromCol, toCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol, toCol);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::topLeftCorner(this auto&& self, size_t to) noexcept {
         Base::checkBlock(self, 0, to, 0, to);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, to, self.fromCol, to);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, to, self.fromCol, to);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::topRightCorner(this auto&& self, size_t toRow, size_t fromCol) noexcept {
         Base::checkBlock(self, 0, toRow, fromCol, self.getCol() - fromCol);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow, toRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::bottomLeftCorner(this auto&& self, size_t fromRow, size_t toCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, 0, toCol);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol, toCol);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::bottomRightCorner(this auto&& self, size_t fromRow, size_t fromCol) noexcept {
         Base::checkBlock(self, fromRow, self.getRow() - fromRow, fromCol, self.getCol() - fromCol);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, self.getRow() - fromRow, self.fromCol + fromCol, self.getCol() - fromCol);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::bottomRightCorner(this auto&& self, size_t from) noexcept {
         Base::checkBlock(self, from, self.getRow() - from, from, self.getCol() - from);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + from, self.getRow() - from, self.fromCol + from, self.getCol() - from);
     }
 
     template<Matrix M>
     auto RMatrixBlock<M, Dynamic, Dynamic>::block(this auto&& self, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) noexcept {
         Base::checkBlock(self, fromRow, rowCount, fromCol, colCount);
-        return RMatrixBlock<M, Dynamic, Dynamic>(self.mat, self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
+        decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
+        using M1 = decltype(m);
+        return RMatrixBlock<M1, Dynamic, Dynamic>(std::forward<M1>(m), self.fromRow + fromRow, rowCount, self.fromCol + fromCol, colCount);
     }
 }
 

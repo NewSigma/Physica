@@ -31,7 +31,7 @@ namespace Physica {
     auto RValueMatrix<Derived>::norm1() const -> Tr {
         Tr maxNorm1 = 0;
         for (size_t c = 0; c < getCol(); ++c) {
-            const auto v = col(c);
+            const auto v = Base::getDerived().col(c);
             Tr temp = abs(v).sum();
             if (temp > maxNorm1)
                 maxNorm1 = temp;

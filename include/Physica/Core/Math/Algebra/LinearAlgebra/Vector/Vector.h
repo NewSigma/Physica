@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ namespace Physica {
     namespace Internal {
         template<class T>
         concept VectorObj = std::derived_from<T, RValueVector<T>>
-                         || std::derived_from<T, device_obj<RValueVector<typename remove_device_obj<T>::Type>>>;
+                         || std::derived_from<T, device_obj<RValueVector<typename remove_device_obj<T>::type>>>;
     }
 
     template<class T>

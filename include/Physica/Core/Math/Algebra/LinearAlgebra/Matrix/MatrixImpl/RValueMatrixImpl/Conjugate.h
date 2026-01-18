@@ -33,8 +33,8 @@ namespace Physica {
         const M& matrix;
     public:
         Conjugate(const M& matrix_) : matrix(matrix_) {}
-        Conjugate(const This&) = delete;
-        Conjugate(This&&) = delete;
+        Conjugate(const This&) = default;
+        Conjugate(This&&) = default;
         ~Conjugate() = default;
         /* Operators */
         This& operator=(const This&) = delete;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <type_traits>
 #include "Physica/Core/Scalar/Scalar.h"
 
 namespace Physica {
@@ -31,28 +30,44 @@ namespace Physica {
      */
     template<class T> class device_obj;
 
+    namespace Internal {
+        template<class T>
+        struct remove_device_obj_nocvref {
+            using type = T;
+        };
+
+        template<class T>
+        struct remove_device_obj_nocvref<device_obj<T>> {
+            using type = T;
+        };
+    }
+
     template<class T>
     struct is_device_obj {
-        constexpr static bool value = false;
+        constexpr static bool value = instanceof<device_obj, std::remove_cvref_t<T>>;
     };
 
     template<class T>
-    struct is_device_obj<device_obj<T>> {
-        constexpr static bool value = true;
-    };
+    using is_device_obj_v = is_device_obj<T>::value;
 
     template<class T>
     struct remove_device_obj {
-        using Type = T;
+    private:
+        template<bool NoCVRef>
+        struct Helper {
+            using type = Internal::remove_device_obj_nocvref<T>::type;
+        };
+
+        template<>
+        struct Helper<false> {
+            using type = copy_cvref<T, typename Internal::remove_device_obj_nocvref<std::remove_cvref_t<T>>::type>::type;
+        };
+    public:
+        using type = Helper<!std::is_reference_v<T> && !std::is_const_v<T>>::type;
     };
 
     template<class T>
-    struct remove_device_obj<device_obj<T>> {
-        using Type = T;
-    };
-
-    template<class T>
-    using remove_device_obj_t = remove_device_obj<T>::Type;
+    using remove_device_obj_t = remove_device_obj<T>::type;
 
     template<class T>
     concept CUDA = is_device_obj<remove_codiff_t<std::remove_cvref_t<T>>>::value;

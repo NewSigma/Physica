@@ -26,6 +26,7 @@ namespace Physica {
         using host_obj = RMatrixBlock<M, 1, Dynamic>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
+        using DeviceM = device_obj<std::remove_cvref_t<M>>;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
@@ -33,12 +34,12 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<const DeviceM> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
+        __host__ __device__ device_obj(const DeviceM& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_)
                 : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
             assert(fromRow < mat_.getRow());
             assert(fromCol + colCount <= mat_.getCol());
@@ -63,6 +64,7 @@ namespace Physica {
         using host_obj = RMatrixBlock<M, Dynamic, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
+        using DeviceM = device_obj<std::remove_cvref_t<M>>;
     public:
         using Base::isComplex;
         using Base::SizeAtCompile;
@@ -70,12 +72,12 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<const DeviceM> mat;
         size_t fromRow;
         size_t fromCol;
         size_t rowCount;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+        __host__ __device__ device_obj(const DeviceM& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
                 : mat(asStruct(mat_)), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat_.getRow());
             assert(fromCol < mat_.getCol());
@@ -99,18 +101,19 @@ namespace Physica {
     class device_obj<RMatrixBlock<M, Dynamic, Dynamic>> : public device_obj<RValueMatrix<RMatrixBlock<M, Dynamic, Dynamic>>> {
         using host_obj = RMatrixBlock<M, Dynamic, Dynamic>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<RMatrixBlock<M, Dynamic, Dynamic>>>;
+        using Base = device_obj<RValueMatrix<host_obj>>;
+        using DeviceM = device_obj<std::remove_cvref_t<M>>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
     private:
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<const DeviceM> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        __host__ __device__ device_obj(const DeviceM& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -140,7 +143,7 @@ namespace Physica {
 
     template<Matrix M>
     __host__ __device__ device_obj<RMatrixBlock<M, Dynamic, Dynamic>>::device_obj(
-            const device_obj<M>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+            const DeviceM& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(asStruct(mat_))
             , fromRow(fromRow_)
             , rowCount(rowCount_)
@@ -257,5 +260,7 @@ namespace Physica {
 
 namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
-    class Traits<device_obj<RMatrixBlock<M, Row, Col>>> : public Traits<RMatrixBlock<M, Row, Col>> {};
+    class Traits<device_obj<RMatrixBlock<M, Row, Col>>> : public Traits<RMatrixBlock<M, Row, Col>> {
+        static_assert(!is_device_obj<M>::value);
+    };
 }

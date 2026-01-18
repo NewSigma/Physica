@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,7 +27,7 @@ namespace Physica {
     namespace Internal {
         template<class T>
         concept MatrixObj = std::derived_from<T, RValueMatrix<T>>
-                         || std::derived_from<T, device_obj<RValueMatrix<typename remove_device_obj<T>::Type>>>;
+                         || std::derived_from<T, device_obj<RValueMatrix<typename remove_device_obj<T>::type>>>;
     }
 
     template<class T>

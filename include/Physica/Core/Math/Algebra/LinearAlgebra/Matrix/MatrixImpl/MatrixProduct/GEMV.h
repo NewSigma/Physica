@@ -142,7 +142,7 @@ namespace Physica {
     template<Vector V>
     [[nodiscard]] auto RValueMatrix<Derived>::operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>) {
         assert(getCol() == v.getLength());
-        return row(0) * v;
+        return Base::getDerived().row(0) * v;
     }
 }
 
