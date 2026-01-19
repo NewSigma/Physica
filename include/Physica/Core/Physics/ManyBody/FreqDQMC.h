@@ -65,6 +65,8 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Cell& cell);
         template<ExecutePolicy P = Sequential>
+        void forceAsync(const Vector auto& pos, Vector auto& result);
+        template<ExecutePolicy P = Sequential>
         void forceAsync(const Cell& cell, Vector auto& result);
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
@@ -77,8 +79,6 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
     private:
-        void makeFreqKernel(MatrixND<T>& freqKernel, const MatrixND<T>& invAction, int site) const;
-
         template<ExecutePolicy P>
         [[nodiscard]] Vector2D<Trv> calcDet();
         template<ExecutePolicy P>
@@ -179,9 +179,10 @@ namespace Physica {
 
     template<Scalar T>
     template<ExecutePolicy P>
-    void FreqDQMC<T>::forceAsync(const Cell& cell, Vector auto& result) {
+    void FreqDQMC<T>::forceAsync(const Vector auto& pos, Vector auto& result) {
+        assert(result.getLength() == pos.getLength());
         assert(result.getLength() == getAuxField().getSize() * 2);
-        getAuxField().read(reinterpret_cast<const T*>(cell.getPos().data()));
+        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
         for (auto& spinLU : lu) {
             spinLU.setWorking(action);
             action.flip();
@@ -197,16 +198,18 @@ namespace Physica {
             spinF.resize(getAuxField());
             spinF.zeros();
 
-            auto freqKernel = MatrixND<T>(2 * getNumFreq());
-            Trv factor = spin == 0 ? 1.0 : -1.0;
-            for (int site = 0; site < getNumSite(); ++site) {
-                makeFreqKernel(freqKernel, inv, site);
-                spinF[0, site].real() += freqKernel.diag().reals().sum() * factor;
-                for (int delta = 1; delta < 2 * getNumFreq(); ++delta) {
-                    T f1 = freqKernel.diag(delta).sum();
-                    T f2 = freqKernel.diag(-delta).sum();
-                    spinF[delta, site].real() += (f1.real() + f2.real()) * factor;
-                    spinF[delta, site].imag() += (f1.imag() - f2.imag()) * factor;
+            const Trv factor = spin == 0 ? 1.0 : -1.0;
+            const int size = 2 * getNumFreq();
+            const int numSite = getNumSite();
+            for (int r = 0; r < size; ++r) {
+                for (int c = 0; c < size; ++c) {
+                    const auto diag = inv.transpose().block(r * numSite, numSite, c * numSite, numSite).diag();
+                    if (r == c)
+                        spinF.row(0) += diag.reals() * factor;
+                    else if (r < c)
+                        spinF.row(c - r) += diag * factor;
+                    else
+                        spinF.row(r - c) += diag.conjugate() * factor;
                 }
             }
         }, 2);
@@ -218,6 +221,12 @@ namespace Physica {
         for (auto& spinF : spinFs)
             force += spinF;
         result.read(reinterpret_cast<const Tr*>(force.data()));
+    }
+
+    template<Scalar T>
+    template<ExecutePolicy P>
+    void FreqDQMC<T>::forceAsync(const Cell& cell, Vector auto& result) {
+        forceAsync<P>(cell.getPos().flatten(), result);
     }
 
     template<Scalar T>
@@ -277,18 +286,8 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void FreqDQMC<T>::makeFreqKernel(MatrixND<T>& freqKernel, const MatrixND<T>& invAction, int site) const {
-        const int numSite = getNumSite();
-        const int size = 2 * getNumFreq();
-        assert(freqKernel.isSquare() && freqKernel.getRow() == size);
-        for (int r = 0; r < size; ++r)
-            for (int c = 0; c < size; ++c)
-                freqKernel[r, c] = invAction.transpose().calc(r * numSite + site, c * numSite + site);
-    }
-
-    template<Scalar T>
     auto FreqDQMC<T>::getBetaU() const noexcept -> Trv {
-        return getParams().getBeta() * getParams().getRepelU();;
+        return getParams().getBeta() * getParams().getRepelU();
     }
 }
 

@@ -34,6 +34,7 @@ namespace Physica {
         using Base::Base;
         /* Getters */
         __host__ __device__ void assign_add(Vector auto&& v) const;
+        __device__ void assign_add(Vector auto&& v, const ThreadBlock& block) const;
         void assign_add_cublas(Vector auto&& v) const noexcept;
 
         [[nodiscard]] __device__ T calc(size_t index) const;
@@ -48,6 +49,14 @@ namespace Physica {
     template<Vector V, Scalar U>
     __host__ __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add(Vector auto&& v) const {
         Base::assign_add(v);
+    }
+
+    template<Vector V, Scalar U>
+    __device__ void device_obj<VectorExpr<ExprID::Mul, V, U>>::assign_add(Vector auto&& v, const ThreadBlock& block) const {
+        size_t length = Base::getLength();
+        int delta = block.getLength();
+        for (int index = block.rank(); index < length; index += delta)
+            v[index] += calc(index);
     }
 
     template<Vector V, Scalar U>

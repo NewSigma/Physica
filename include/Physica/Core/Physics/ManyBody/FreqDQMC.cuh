@@ -31,19 +31,20 @@ namespace Physica {
         using Tv = T::ValueType;
         using Trv = Tr::ValueType;
 
+        using Cell = MDCell<Tr, 1>;
         template<Scalar U>
-        using HostMatrix = DenseMatrix<U, MatrixOption::Col, Dynamic, Dynamic, PageLockedAllocator<T>>;
+        using HostMatrix = DenseMatrix<U, MatrixOption::Col, Dynamic, Dynamic, PageLockedAllocator<U>>;
     private:
         Array<device_obj<DenseLU<T, false>>, 2> lu;
-        ActionMatrix<T> action;
-        device_obj<MatrixND<T>> linearRHS;
+        device_obj<MatrixND<T>> forceBuffer{};
+        device_obj<MatrixND<T>> solBuffer;
         HostMatrix<T> detBuffer;
-        device_obj<VectorND<T>> diag;
+        ActionMatrix<T> action;
 
         Array<device_obj<MatrixND<Tr>>, 2> greensD;
         Array<MatrixND<Tr>, 2> greensH;
-        float64 lnWeight = Trv::nan();
-        float64 sign = 1;
+        Trv lnWeight = Trv::nan();
+        Trv sign = 1;
     public:
         device_obj(const HubbardParams<Tr>& params, Trv freqDensity);
         device_obj(const This&) = default;
@@ -55,16 +56,19 @@ namespace Physica {
         /* Operations */
         template<RNG R>
         void step_random();
-
         template<RNG R>
         bool step(bool warmup = false);
         template<RNG R>
         void step_for(int numStep);
 
-        [[nodiscard]] Vector2D<float64> promoteDet(const device_obj<MatrixND<T>>& matrixLU);
-        [[nodiscard]] Vector2D<float64> calcDet();
-        void traceGreen(int spin);
-        void calcGreen();
+        template<ExecutePolicy P = Sequential>
+        [[nodiscard]] Trv potentialV(const Vector auto& pos);
+        template<ExecutePolicy P = Sequential>
+        [[nodiscard]] Trv potentialV(const Cell& cell);
+        template<ExecutePolicy P = Sequential>
+        void forceAsync(const Vector auto& pos, Vector auto& result);
+        template<ExecutePolicy P = Sequential>
+        void forceAsync(const Cell& cell, Vector auto& result);
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
@@ -73,6 +77,13 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
+    private:
+        [[nodiscard]] Vector2D<Trv> calcDet();
+        [[nodiscard]] Vector2D<Trv> calcLnWeight();
+        void calcGreen();
+        void traceGreen(int spin);
+        /* Getters */
+        [[nodiscard]] Trv getBetaU() const noexcept;
     };
 
     template<Scalar T>
@@ -83,9 +94,9 @@ namespace Physica {
         size_t size = action.getOrder();
         for (auto& spinLU : lu)
             spinLU.resize(size);
-        linearRHS.resize(size);
+        forceBuffer.resize(getAuxField());
+        solBuffer.resize(size);
         detBuffer.resize(size);
-        diag.resize(size);
 
         action.assign_kinetic(detBuffer);
     }
@@ -94,8 +105,8 @@ namespace Physica {
     template<RNG R>
     void device_obj<FreqDQMC<T>>::step_random() {
         action.template randAuxField<R>();
-        auto [lnAD, sgnD] = calcDet();
-        lnWeight = lnAD;
+        auto [lnW, sgnD] = calcLnWeight();
+        lnWeight = lnW;
         sign = sgnD;
     }
 
@@ -107,10 +118,10 @@ namespace Physica {
         const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
         const T save = action.template randAuxField<R>(freq, site);
 
-        auto [lnAD, sgnD] = calcDet();
-        const bool accept = float64::template random_uniform<R>() < exp(lnAD - lnWeight);
+        auto [lnW, sgnD] = calcLnWeight();
+        const bool accept = Trv::template random_uniform<R>() < exp(lnW - lnWeight);
         if (accept) {
-            lnWeight = lnAD;
+            lnWeight = lnW;
             sign = sgnD;
             if (!warmup)
                 calcGreen();
@@ -127,29 +138,90 @@ namespace Physica {
             step<R>(true);
         calcGreen();
     }
-    /**
-     * float64 is necessary for determinants
-     */
-    template<Scalar T>
-    auto device_obj<FreqDQMC<T>>::promoteDet(const device_obj<MatrixND<T>>& matrixLU) -> Vector2D<float64> {
-        auto kernel = [matrixLU_ = asStruct(matrixLU), diag_ = asStruct(diag)] __device__() mutable {
-            const auto& matrixLU = matrixLU_.getDerived();
-            auto& diag = diag_.getDerived();
-            unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;
-            if (i < diag.getLength())
-                diag[i] = matrixLU[i, i];
-        };
 
-        constexpr int WarpSize = CUDADevAttr::WarpSize;
-        int numThread = WarpSize;
-        int numBlock = (diag.getLength() + (WarpSize - 1)) / WarpSize;
-        CUDAExecutor::launch(kernel, KernelConfig(numBlock, numThread));
-        DiagMatrix<cfloat64> mat(diag.toHost());
-        return {mat.lnAbsDet(), mat.sgndet().real()};
+    template<Scalar T>
+    template<ExecutePolicy P>
+    auto device_obj<FreqDQMC<T>>::potentialV(const Vector auto& pos) -> Trv {
+        assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
+        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
+
+        MatrixND<Tr> buffer = getAuxField().squaredNorms();
+        buffer *= reciprocal(getBetaU());
+        buffer.row(0) *= Trv(0.5);
+        return buffer.sum() - calcDet()[0];
     }
 
     template<Scalar T>
-    auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<float64> {
+    template<ExecutePolicy P>
+    auto device_obj<FreqDQMC<T>>::potentialV(const Cell& cell) -> Trv {
+        return potentialV<P>(cell.getPos().flatten());
+    }
+
+    template<Scalar T>
+    template<ExecutePolicy P>
+    void device_obj<FreqDQMC<T>>::forceAsync(const Vector auto& pos, Vector auto& result) {
+        assert(result.getLength() == pos.getLength());
+        assert(result.getLength() == getAuxField().getSize() * 2);
+        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
+        forceBuffer.zeros();
+
+        for (int spin : {0, 1}) {
+            auto& spinLU = lu[spin];
+            action.assign_potential(detBuffer);
+            spinLU.compute(detBuffer);
+
+            solBuffer = device_obj<IdentityMatrix<Tr>>(action.getOrder());
+            spinLU.solve(solBuffer);
+
+            Trv factor = spin == 0 ? 1.0 : -1.0;
+            int numSite = getNumSite();
+            auto collectForce = [spinF_ = asStruct(forceBuffer), inv_ = asStruct(solBuffer), factor, numSite] __device__() mutable {
+                const auto& inv = inv_.getDerived();
+                auto& spinF = spinF_.getDerived();
+                unsigned int delta = blockIdx.x;
+                unsigned int size = gridDim.x;
+                ThreadBlock block{};
+
+                bool elastic = delta == 0;
+                if (elastic) {
+                    for (unsigned int i = 0; i < size; ++i) {
+                        const auto diag = inv.transpose().block(i * numSite, numSite, i * numSite, numSite).diag();
+                        (diag.reals() * factor).assign_add(spinF.row(0), block);
+                    }
+                }
+                else {
+                    unsigned int r = 0;
+                    unsigned int c = delta;
+                    auto row = spinF.row(delta);
+                    for (; c < size; ++r, ++c) {
+                        const auto upper = inv.transpose().block(r * numSite, numSite, c * numSite, numSite).diag();
+                        const auto lower = inv.transpose().block(c * numSite, numSite, r * numSite, numSite).diag();
+                        (upper * factor).assign_add(row, block);
+                        (lower.conjugate() * factor).assign_add(row, block);
+                    }
+                }
+            };
+            int numThread = std::min(numSite, device_obj<VectorND<T>>::MaxThreadsPerBlock);
+            int numBlockX = 2 * getNumFreq();
+            CUDAExecutor::launch(collectForce, KernelConfig(numBlockX, numThread));
+
+            action.flip();
+        }
+
+        MatrixND<T> force = -getAuxField() * (Trv(2) / getBetaU());
+        force.row(0) *= Trv(0.5);
+        force += forceBuffer.toHost();
+        result.read(reinterpret_cast<const Tr*>(force.data()));
+    }
+
+    template<Scalar T>
+    template<ExecutePolicy P>
+    void device_obj<FreqDQMC<T>>::forceAsync(const Cell& cell, Vector auto& result) {
+        forceAsync<P>(cell.getPos().flatten(), result);
+    }
+
+    template<Scalar T>
+    auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
         action.assign_potential(detBuffer);
         lu[0].compute(detBuffer);
 
@@ -157,31 +229,48 @@ namespace Physica {
         action.assign_potential(detBuffer);
         lu[1].compute(detBuffer);
 
-        float64 lnAD = 0, sgnD = 1;
+        Trv lnAD = 0, sgnD = 1;
         for (const auto& spinLU : lu) {
-            auto [x, y] = promoteDet(spinLU.getMatrixLU());
-            lnAD += x;
-            sgnD *= y;
+            lnAD += spinLU.lnAbsDet();
+            sgnD *= spinLU.sgndet().real();
         }
-        float64 betaU = getParams().getBeta() * getParams().getRepelU();
-        lnAD -= ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, float64(-0.5), MathConst<float64>::ln2)).sum();
-        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, float64(-0.25), MathConst<float64>::ln2)).sum();
-        lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, float64(-0.25), MathConst<float64>::ln2)).sum();
         return {lnAD, sgnD};
     }
 
     template<Scalar T>
+    auto device_obj<FreqDQMC<T>>::calcLnWeight() -> Vector2D<Trv> {
+        Trv betaU = getBetaU();
+        auto [lnAD, sgnD] = calcDet();
+        lnAD = lnAD
+             - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum()
+             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
+             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+        return {lnAD, sgnD};
+    }
+
+    template<Scalar T>
+    void device_obj<FreqDQMC<T>>::calcGreen() {
+        for (int spin : {0, 1}) {
+            auto& spinLU = lu[spin];
+            solBuffer = device_obj<IdentityMatrix<Tr>>(action.getOrder());
+            spinLU.solve(solBuffer);
+            traceGreen(spin);
+        }
+        CUDAExecutor::wait();
+    }
+
+    template<Scalar T>
     void device_obj<FreqDQMC<T>>::traceGreen(int spin) {
-        auto kernel = [linearRHS_ = asStruct(linearRHS),
+        auto kernel = [solBuffer_ = asStruct(solBuffer),
                        green = asStruct(greensD[spin]),
                        numSite = getNumSite(),
                        numFreq = getNumFreq()] __device__() mutable {
-            const auto& linearRHS = linearRHS_.getDerived();
+            const auto& solBuffer = solBuffer_.getDerived();
             unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
             unsigned int col = blockIdx.y;
             Tr elem = 0;
             for (int _ = 0, offset = 0; _ < numFreq * 2; ++_) {
-                elem += linearRHS[offset + row, offset + col].real();
+                elem += solBuffer[offset + row, offset + col].real();
                 offset += numSite;
             }
 
@@ -201,13 +290,12 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void device_obj<FreqDQMC<T>>::calcGreen() {
-        for (int spin : {0, 1}) {
-            auto& spinLU = lu[spin];
-            linearRHS = device_obj<IdentityMatrix<Tr>>(action.getOrder());
-            spinLU.solve(linearRHS);
-            traceGreen(spin);
-        }
-        CUDAExecutor::wait();
+    auto device_obj<FreqDQMC<T>>::getBetaU() const noexcept -> Trv {
+        return getParams().getBeta() * getParams().getRepelU();
     }
+}
+
+namespace Physica {
+    template<Scalar T>
+    class Traits<device_obj<FreqDQMC<T>>> : public Traits<FreqDQMC<T>> {};
 }

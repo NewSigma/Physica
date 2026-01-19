@@ -7,3 +7,7 @@ physica_add_test(J1J2Matrix J1J2Matrix.cpp)
 physica_add_test(KFermiRepr KFermiRepr.cpp)
 physica_add_test(SpinState SpinState.cpp)
 physica_add_test(TransIsingMatrix TransIsingMatrix.cpp)
+
+if(${PHYSICA_CUDA})
+    physica_add_test(FreqDQMC_cuda FreqDQMC.cu)
+endif()
