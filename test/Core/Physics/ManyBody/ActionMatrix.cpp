@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 #include "Test.h"
 
 using namespace Physica;
+using RandomSource = Random<>;
 using T = float64;
 using Tc = cfloat64;
 constexpr int Dim = 2;
@@ -35,7 +36,8 @@ constexpr int NumSplit = 1;
 int main() {
     const SquareLattice<Dim> lattice({NumSiteX, NumSiteY}, 1);
     const HubbardParams<T> params(HoppingT, RepelU, lattice, Beta, ChemMu, NumSplit);
-    ActionMatrix<Tc> action(params, NumFreq);
+    int maxBoson = std::uniform_int_distribution<>(1, NumFreq)(RandomSource::getInstance());
+    ActionMatrix<Tc> action(params, NumFreq, maxBoson);
     action.randAuxField<Random<>>();
 
     const MatrixND<Tc> result = action;

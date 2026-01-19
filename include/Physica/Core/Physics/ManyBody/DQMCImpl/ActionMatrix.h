@@ -37,6 +37,7 @@ namespace Physica {
 
         const HubbardParams<Tr>& params;
     public:
+        ActionMatrix(const HubbardParams<Tr>& params, int numFreq, int maxBoson);
         ActionMatrix(const HubbardParams<Tr>& params, int numFreq);
         ActionMatrix(const This&) = default;
         ActionMatrix(This&&) noexcept = default;
@@ -61,17 +62,19 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] auto&& getAuxField(this auto&&) noexcept;
-        [[nodiscard]] int getNumFreq() const noexcept { return auxField.getRow() / 2; }
+        [[nodiscard]] int getNumFreq() const noexcept { return matsubara.getOrder() / 2; }
         [[nodiscard]] int getNumSite() const noexcept { return auxField.getCol(); }
+        [[nodiscard]] int getMaxBoson() const noexcept { return auxField.getRow(); }
         [[nodiscard]] const auto& getParams() const noexcept { return params; }
     };
 
     template<Scalar T>
-    ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq)
+    ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq, int maxBoson)
             : matsubara(numFreq * 2)
-            , auxField(numFreq * 2, params.getNumSite())
+            , auxField(maxBoson, params.getNumSite())
             , params(params) {
         assert(numFreq > 0);
+        assert((1 <= maxBoson) && (maxBoson <= 2 * numFreq) && "[Error]: maxBoson out of range");
         auto& diag = matsubara.diag();
         for (int k = 0; k < diag.getLength(); ++k) {
             int m = k - numFreq;
@@ -79,6 +82,9 @@ namespace Physica {
         }
         diag *= MathConst<Trv>::pi;
     }
+
+    template<Scalar T>
+    ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq) : This(params, numFreq, numFreq * 2) {}
 
     template<Scalar T>
     void ActionMatrix<T>::assign(Matrix auto&& target) const {
@@ -103,8 +109,10 @@ namespace Physica {
             for (int colFreq = 0; colFreq < rowFreq; ++colFreq) {
                 int offsetC = colFreq * numSite;
                 int delta = rowFreq - colFreq;
-                target.block(offsetR, numSite, offsetC, numSite).diag() = auxField.row(delta);
-                target.block(offsetC, numSite, offsetR, numSite).diag() = auxField.row(delta).conjugate();
+                if (delta < getMaxBoson()) {
+                    target.block(offsetR, numSite, offsetC, numSite).diag() = auxField.row(delta);
+                    target.block(offsetC, numSite, offsetR, numSite).diag() = auxField.row(delta).conjugate();
+                }
             }
             target.block(offsetR, numSite, offsetR, numSite).diag().reals() = auxField.row(0).reals() - shift;
         }
@@ -133,12 +141,12 @@ namespace Physica {
         }
 
         if (diagSite) {
-            T aux;
-            if (rowFreq > colFreq)
-                aux = auxField[rowFreq - colFreq, rowSite];
-            else
-                aux = auxField[colFreq - rowFreq, rowSite].conjugate();
-            return aux;
+            bool upper = rowFreq > colFreq;
+            auto delta = upper ? (rowFreq - colFreq) : (colFreq - rowFreq);
+            if (delta < getMaxBoson()) {
+                T aux = auxField[delta, rowSite];
+                return upper ? aux : aux.conjugate();
+            }
         }
         return 0;
     }
@@ -154,7 +162,8 @@ namespace Physica {
         Tr factor = sqrt(params.getRepelU() * params.getBeta());
         auxField.template random_normal<R>();
         auxField.row(0) *= factor;
-        auxField.bottomRows(1) *= factor / sqrt(Trv(2));
+        if (getMaxBoson() > 1)
+            auxField.bottomRows(1) *= factor / sqrt(Trv(2));
     }
 
     template<Scalar T>

@@ -40,6 +40,7 @@ namespace Physica {
         Trv lnWeight = Trv::nan();
         Trv sign = 1;
     public:
+        FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson);
         FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity);
         FreqDQMC(const This&) = default;
         FreqDQMC(This&&) noexcept = default;
@@ -73,6 +74,7 @@ namespace Physica {
         [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
         [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
+        [[nodiscard]] int getMaxBoson() const noexcept { return action.getMaxBoson(); }
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
@@ -88,6 +90,15 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] Trv getBetaU() const noexcept;
     };
+
+    template<Scalar T>
+    FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
+            : action(params, calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+            , greens(2, params.getNumSite()) {
+        size_t size = action.getOrder();
+        for (auto& spinLU : lu)
+            spinLU.resize(size);
+    }
 
     template<Scalar T>
     FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity)
@@ -112,7 +123,7 @@ namespace Physica {
     bool FreqDQMC<T>::step(bool warmup) {
         assert(lnWeight.isFinite() && "[Error]: Should random initialize before monte carlo step");
         const int site = std::uniform_int_distribution<int>(0, getNumSite() - 1)(R::getInstance());
-        const int freq = std::uniform_int_distribution<int>(0, getNumFreq() * 2 - 1)(R::getInstance());
+        const int freq = std::uniform_int_distribution<int>(0, getMaxBoson() - 1)(R::getInstance());
         const T save = action.template randAuxField<R>(freq, site);
 
         auto [lnW, sgnD] = calcLnWeight<P>();
@@ -199,7 +210,7 @@ namespace Physica {
             spinF.zeros();
 
             const Trv factor = spin == 0 ? 1.0 : -1.0;
-            const int size = 2 * getNumFreq();
+            const int size = getMaxBoson();
             const int numSite = getNumSite();
             for (int r = 0; r < size; ++r) {
                 for (int c = 0; c < size; ++c) {
@@ -271,7 +282,7 @@ namespace Physica {
             const int numSite = getNumSite();
             auto& green = greens[spin];
             green.zeros();
-            for (int _ = 0, offset = 0; _ < action.getNumFreq() * 2; ++_) {
+            for (int _ = 0, offset = 0; _ < getMaxBoson(); ++_) {
                 green += inv.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }
