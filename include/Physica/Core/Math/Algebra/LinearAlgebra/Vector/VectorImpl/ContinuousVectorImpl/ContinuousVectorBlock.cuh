@@ -26,13 +26,14 @@ namespace Physica {
         using host_obj = ContinuousVectorBlock<V, Length>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
+        using Ref = add_device_obj<V>::type;
     private:
-        Physica::PlainStruct<device_obj<V>> vec;
+        Physica::PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> vec;
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(device_obj<V>& vec, size_t from, size_t to);
-        __host__ __device__ device_obj(device_obj<V>& vec, size_t from);
+        __host__ __device__ device_obj(Ref vec, size_t from, size_t to);
+        __host__ __device__ device_obj(Ref vec, size_t from);
         device_obj(const This& block) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -60,7 +61,7 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(device_obj<V>& vec, size_t from, size_t to)
+    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(Ref vec, size_t from, size_t to)
             : vec(asStruct(vec)), from(from), to(to) {
         assert(from < to);
         assert(to <= vec.getLength());
@@ -68,7 +69,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(device_obj<V>& vec, size_t from)
+    __host__ __device__ device_obj<ContinuousVectorBlock<V, Length>>::device_obj(Ref vec, size_t from)
             : device_obj(vec, from, vec.getLength()) {}
 
     template<Vector V, size_t Length>

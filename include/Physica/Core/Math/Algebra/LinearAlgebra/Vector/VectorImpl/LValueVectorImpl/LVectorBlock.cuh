@@ -26,16 +26,14 @@ namespace Physica {
         using host_obj = LVectorBlock<V, Length>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
-        using DeviceVector = device_obj<V>;
-    public:
-        using ScalarType = Base::ScalarType;
+        using Ref = add_device_obj<V>::type;
     private:
-        Physica::PlainStruct<DeviceVector> vec;
+        Physica::PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> vec;
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(device_obj<LValueVector<V>>& vec_, size_t from_, size_t to_);
-        __host__ __device__ device_obj(device_obj<LValueVector<V>>& vec_, size_t from_);
+        __host__ __device__ device_obj(Ref vec_, size_t from, size_t to);
+        __host__ __device__ device_obj(Ref vec_, size_t from);
         device_obj(const This& block) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -60,15 +58,15 @@ namespace Physica {
 
     template<Vector V, size_t Length>
     __host__ __device__ device_obj<LVectorBlock<V, Length>>::device_obj(
-            device_obj<LValueVector<V>>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_)), from(from_), to(to_) {
-        assert(from_ < to);
+            Ref vec_, size_t from, size_t to) : vec(asStruct(vec_)), from(from), to(to) {
+        assert(from < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
     __host__ __device__ device_obj<LVectorBlock<V, Length>>::device_obj(
-            device_obj<LValueVector<V>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+            Ref vec_, size_t from) : device_obj(vec_, from, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
     auto device_obj<LVectorBlock<V, Length>>::operator=(const This& v) -> This& {

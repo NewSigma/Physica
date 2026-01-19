@@ -26,8 +26,6 @@ namespace Physica {
     class device_obj<LValueVector<Derived>> : public device_obj<RValueVector<Derived>> {
         using This = device_obj<LValueVector<Derived>>;
         using Base = device_obj<RValueVector<Derived>>;
-        template<size_t Length>
-        using BlockType = device_obj<LVectorBlock<Derived, Length>>;
     public:
         using Base::isReverseDiff;
     protected:
@@ -58,17 +56,11 @@ namespace Physica {
         __host__ __device__ void reverse(const auto& grad) const noexcept;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ auto head(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto head(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ auto tail(size_t from) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto tail(size_t from) const noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ auto segment(size_t from, size_t to) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
 
         template<Matrix M>
         [[nodiscard]] __host__ __device__ auto reshape(const M& mat) noexcept;

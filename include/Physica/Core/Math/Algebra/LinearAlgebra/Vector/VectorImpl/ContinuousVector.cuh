@@ -29,8 +29,6 @@ namespace Physica {
         using host_obj = ContinuousVector<Derived>;
         using Base = device_obj<LValueVector<Derived>>;
         using This = device_obj<host_obj>;
-        template<size_t Length>
-        using BlockType = device_obj<ContinuousVectorBlock<Derived, Length>>;
     public:
         using typename Base::ScalarType;
         using Base::isReverseDiff;
@@ -61,17 +59,11 @@ namespace Physica {
         template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ auto head(size_t to) noexcept;
+        [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto head(size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto tail(this auto&&, size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ auto tail(size_t from) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto tail(size_t from) const noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ auto segment(size_t from, size_t to) noexcept;
-        template<size_t Length = Dynamic>
-        [[nodiscard]] __host__ __device__ const auto segment(size_t from, size_t to) const noexcept;
+        [[nodiscard]] __host__ __device__ auto segment(this auto&&, size_t from, size_t to) noexcept;
 
         void zeros();
         template<RNG R>
