@@ -61,6 +61,11 @@ namespace Physica {
         template<RNG R>
         void step_for(int numStep);
 
+        template<RNG R>
+        void step_random(HamiltonMC<Tr>& hmc);
+        template<RNG R, ExecutePolicy P>
+        Trv step(HamiltonMC<Tr>& hmc);
+
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
         template<ExecutePolicy P = Sequential>
@@ -137,6 +142,29 @@ namespace Physica {
         for (int i = 0; i < numStep; ++i)
             step<R>(true);
         calcGreen();
+    }
+
+    template<Scalar T>
+    template<RNG R>
+    void device_obj<FreqDQMC<T>>::step_random(HamiltonMC<Tr>& hmc) {
+        action.template randAuxField<R>();
+
+        VectorND<Tr> init(getAuxField().getSize() * 2);
+        init.read(reinterpret_cast<const Tr*>(getAuxField().data()));
+        hmc.setInitPosition(std::move(init));
+    }
+
+    template<Scalar T>
+    template<RNG R, ExecutePolicy P>
+    auto device_obj<FreqDQMC<T>>::step(HamiltonMC<Tr>& hmc) -> Trv {
+        Trv acceptR = hmc.template step<R, P>(*this);
+        getAuxField().read(reinterpret_cast<const T*>(hmc.getSample().data()));
+
+        auto [lnAD, sgnD] = calcDet();
+        lnWeight = lnAD;
+        sign = sgnD;
+        calcGreen();
+        return acceptR;
     }
 
     template<Scalar T>
