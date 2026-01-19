@@ -32,7 +32,7 @@ namespace Physica {
     private:
         PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        explicit device_obj(Ref mat) : mat(asStruct(mat)) {}
+        __host__ __device__ explicit device_obj(Ref mat) : mat(asStruct(mat)) {}
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;

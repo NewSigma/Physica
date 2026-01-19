@@ -29,13 +29,13 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, 1, Col>;
         using Base = ContinuousVector<This>;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
-        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol, size_t colCount);
+        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount_, size_t fromCol, size_t colCount);
+        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -65,13 +65,13 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Col>
-    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M mat_, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
+    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, [[maybe_unused]] size_t rowCount, size_t fromCol, size_t colCount)
             : ContinuousMatrixBlock(std::forward<M>(mat_), fromRow, fromCol, colCount) {
         assert(rowCount == 1);
     }
 
     template<Matrix M, size_t Col>
-    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol, size_t colCount)
+    ContinuousMatrixBlock<M, 1, Col>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , fromCol(fromCol)
@@ -106,13 +106,13 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, Row, 1>;
         using Base = ContinuousVector<This>;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
     public:
-        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
-        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol);
+        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount);
+        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -142,13 +142,13 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row>
-    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
+    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, [[maybe_unused]] size_t colCount)
             : ContinuousMatrixBlock(std::forward<M>(mat_), fromRow, rowCount, fromCol) {
         assert(colCount == 1);
     }
 
     template<Matrix M, size_t Row>
-    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol)
+    ContinuousMatrixBlock<M, Row, 1>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
@@ -182,11 +182,11 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, 1, 1>;
         using Base = ContinuousVector<This>;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
     public:
-        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol);
+        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -224,7 +224,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t fromCol)
+    ContinuousMatrixBlock<M, 1, 1>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , fromCol(fromCol) {
@@ -257,13 +257,13 @@ namespace Physica {
         using This = ContinuousMatrixBlock<M, Row, Col>;
         using Base = LValueMatrix<This>;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         ContinuousMatrixBlock(const This&) = default;
         ContinuousMatrixBlock(This&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
@@ -301,7 +301,7 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Row, size_t Col>
-    ContinuousMatrixBlock<M, Row, Col>::ContinuousMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    ContinuousMatrixBlock<M, Row, Col>::ContinuousMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)

@@ -32,12 +32,12 @@ namespace Physica {
         using Base::isComplex;
         using Base::SizeAtCompile;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        LMatrixBlock(M mat_, size_t fromRow, size_t fromCol, size_t colCount);
+        LMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount);
         LMatrixBlock(const This&) = default;
         LMatrixBlock(This&&) noexcept = default;
         ~LMatrixBlock() = default;
@@ -52,7 +52,7 @@ namespace Physica {
     };
 
     template<Matrix M, size_t Col>
-    LMatrixBlock<M, 1, Col>::LMatrixBlock(M mat_, size_t fromRow, size_t fromCol, size_t colCount)
+    LMatrixBlock<M, 1, Col>::LMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol), colCount(colCount) {
         assert(fromRow < mat.getRow());
         assert(fromCol + colCount <= mat.getCol());
@@ -112,11 +112,11 @@ namespace Physica {
         using Base::isComplex;
         using Base::SizeAtCompile;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t fromCol;
     public:
-        LMatrixBlock(M mat_, size_t fromRow, size_t fromCol);
+        LMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol);
         LMatrixBlock(const This&) = delete;
         LMatrixBlock(This&&) noexcept = delete;
         ~LMatrixBlock() = default;
@@ -131,7 +131,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    LMatrixBlock<M, 1, 1>::LMatrixBlock(M mat_, size_t fromRow, size_t fromCol)
+    LMatrixBlock<M, 1, 1>::LMatrixBlock(M&& mat_, size_t fromRow, size_t fromCol)
             : mat(std::forward<M>(mat_)), fromRow(fromRow), fromCol(fromCol) {
         assert(fromRow < mat.getRow());
         assert(fromCol < mat.getCol());
@@ -151,13 +151,13 @@ namespace Physica {
         using Base::isComplex;
         using Base::SizeAtCompile;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        LMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        LMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         LMatrixBlock(const This&) = delete;
         LMatrixBlock(This&&) noexcept = delete;
         ~LMatrixBlock() = default;
@@ -189,7 +189,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    LMatrixBlock<M, Dynamic, Dynamic>::LMatrixBlock(M mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    LMatrixBlock<M, Dynamic, Dynamic>::LMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)

@@ -117,7 +117,7 @@ namespace Physica {
         size_t fromCol;
         size_t colCount;
     public:
-        RMatrixBlock(M& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         RMatrixBlock(const This&) = default;
         RMatrixBlock(This&&) noexcept = default;
         ~RMatrixBlock() = default;
@@ -146,7 +146,7 @@ namespace Physica {
     };
 
     template<Matrix M>
-    RMatrixBlock<M, Dynamic, Dynamic>::RMatrixBlock(M& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
+    RMatrixBlock<M, Dynamic, Dynamic>::RMatrixBlock(M&& mat_, size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount)
             : mat(std::forward<M>(mat_))
             , fromRow(fromRow)
             , rowCount(rowCount)
