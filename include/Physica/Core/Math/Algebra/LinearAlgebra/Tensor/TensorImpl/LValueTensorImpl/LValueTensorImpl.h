@@ -99,33 +99,21 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto LValueTensor<Derived>::fiber(int dim, IndexType index) noexcept {
-        return TensorFiber<Derived>(Base::getDerived(), dim, index);
+    auto LValueTensor<Derived>::fiber(this auto&& self, int dim, IndexType index) noexcept {
+        using Self = decltype(self);
+        return TensorFiber<Self>(std::forward<Self>(self), dim, index);
     }
 
     template<class Derived>
-    const auto LValueTensor<Derived>::fiber(int dim, IndexType index) const noexcept {
-        return TensorFiber<Derived>(Base::getConstCastDerived(), dim, index);
+    auto LValueTensor<Derived>::slice(this auto&& self, int dimRow, int dimCol, IndexType index) noexcept {
+        using Self = decltype(self);
+        return TensorSlice<Self>(std::forward<Self>(self), dimRow, dimCol, index);
     }
 
     template<class Derived>
-    auto LValueTensor<Derived>::slice(int dimRow, int dimCol, IndexType index) noexcept {
-        return TensorSlice<Derived>(Base::getDerived(), dimRow, dimCol, index);
-    }
-
-    template<class Derived>
-    const auto LValueTensor<Derived>::slice(int dimRow, int dimCol, IndexType index) const noexcept {
-        return TensorSlice<Derived>(Base::getConstCastDerived(), dimRow, dimCol, index);
-    }
-
-    template<class Derived>
-    LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) noexcept {
-        return {Base::getDerived(), from, count};
-    }
-
-    template<class Derived>
-    const LTensorBlock<Derived> LValueTensor<Derived>::block(Index3D from, Index3D count) const noexcept {
-        return {Base::getDerived(), from, count};
+    auto LValueTensor<Derived>::block(this auto&& self, Index3D from, Index3D count) noexcept {
+        using Self = decltype(self);
+        return LTensorBlock<Self>(std::forward<Self>(self), from, count);
     }
 
     template<class Derived>

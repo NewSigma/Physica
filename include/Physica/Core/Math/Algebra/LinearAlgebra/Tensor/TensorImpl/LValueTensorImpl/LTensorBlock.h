@@ -18,22 +18,24 @@
  */
 #pragma once
 
+#include "../LValueTensor.h"
+
 namespace Physica {
     template<class Derived> class LValueTensor;
     template<class TensorType> class LTensorBlock;
 
-    template<Tensor T>
-    class LTensorBlock<T> : public LValueTensor<LTensorBlock<T>> {
-        using This = LTensorBlock<T>;
+    template<Tensor X>
+    class LTensorBlock<X> : public LValueTensor<LTensorBlock<X>> {
+        using This = LTensorBlock<X>;
         using Base = LValueTensor<This>;
     public:
         using typename Base::ScalarType;
     private:
-        T& grid;
+        LazyDestroy<X> grid;
         Index3D from;
         Index3D count;
     public:
-        LTensorBlock(T& grid_, Index3D from_, Index3D count_);
+        LTensorBlock(X&& grid_, Index3D from, Index3D count);
         LTensorBlock(const LTensorBlock&) = delete;
         LTensorBlock(LTensorBlock&&) noexcept = delete;
         ~LTensorBlock() = default;
@@ -50,27 +52,27 @@ namespace Physica {
         [[nodiscard]] auto data_ptr(this auto&&, Index3D index) noexcept;
     };
 
-    template<Tensor T>
-    LTensorBlock<T>::LTensorBlock(T& grid_, Index3D from_, Index3D count_)
-            : grid(grid_)
-            , from(from_)
-            , count(count_) {
+    template<Tensor X>
+    LTensorBlock<X>::LTensorBlock(X&& grid_, Index3D from, Index3D count)
+            : grid(std::forward<X>(grid_))
+            , from(from)
+            , count(count) {
         for (int i = 0; i < 3; ++i) {
             assert(from[i] < grid.getDim()[i]);
             assert(from[i] + count[i] <= grid.getDim()[i]);
         }
     }
 
-    template<Tensor T>
-    auto LTensorBlock<T>::data_ptr(this auto&& self, Index3D index) noexcept {
+    template<Tensor X>
+    auto LTensorBlock<X>::data_ptr(this auto&& self, Index3D index) noexcept {
         return self.grid.data_ptr({self.from[0] + index[0], self.from[1] + index[1], self.from[2] + index[2]});
     }
 }
 
 namespace Physica {
-    template<Tensor T>
-    class Traits<LTensorBlock<T>> {
+    template<Tensor X>
+    class Traits<LTensorBlock<X>> {
     public:
-        using ScalarType = T::ScalarType;
+        using ScalarType = std::remove_cvref_t<X>::ScalarType;
     };
 }

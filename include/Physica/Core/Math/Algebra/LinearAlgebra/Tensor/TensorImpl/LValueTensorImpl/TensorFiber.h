@@ -28,11 +28,11 @@ namespace Physica {
         using IndexType = X::IndexType;
         constexpr static int NDim = X::NDim;
     private:
-        X& tensor;
+        LazyDestroy<X> tensor;
         IndexType index;
         int dim;
     public:
-        TensorFiber(X& tensor, int dim, IndexType index);
+        TensorFiber(X&& tensor, int dim, IndexType index);
         TensorFiber(const This&) = default;
         TensorFiber(This&&) noexcept = default;
         ~TensorFiber() = default;
@@ -47,8 +47,8 @@ namespace Physica {
     };
 
     template<Tensor X>
-    TensorFiber<X>::TensorFiber(X& tensor, int dim, IndexType index)
-            : tensor(tensor), index(index), dim(dim) {
+    TensorFiber<X>::TensorFiber(X&& tensor, int dim, IndexType index)
+            : tensor(std::forward<X>(tensor)), index(index), dim(dim) {
         assert(dim < NDim);
         for (int i = 0; i < NDim; ++i) {
             if (i == dim)
@@ -74,7 +74,7 @@ namespace Physica {
     template<Tensor X>
     class Traits<TensorFiber<X>> {
     public:
-        using ScalarType = X::ScalarType;
+        using ScalarType = std::remove_cvref_t<X>::ScalarType;
         constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;

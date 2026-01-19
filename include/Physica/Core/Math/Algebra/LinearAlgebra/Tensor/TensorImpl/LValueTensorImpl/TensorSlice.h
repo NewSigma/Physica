@@ -28,12 +28,12 @@ namespace Physica {
         using IndexType = X::IndexType;
         constexpr static int NDim = X::NDim;
     private:
-        X& tensor;
+        LazyDestroy<X> tensor;
         IndexType index;
         int dimRow;
         int dimCol;
     public:
-        TensorSlice(X& tensor, int dimRow, int dimCol, IndexType index);
+        TensorSlice(X&& tensor, int dimRow, int dimCol, IndexType index);
         TensorSlice(const This&) = default;
         TensorSlice(This&&) noexcept = default;
         ~TensorSlice() = default;
@@ -49,8 +49,8 @@ namespace Physica {
     };
 
     template<Tensor X>
-    TensorSlice<X>::TensorSlice(X& tensor, int dimRow, int dimCol, IndexType index)
-            : tensor(tensor), index(index), dimRow(dimRow), dimCol(dimCol) {
+    TensorSlice<X>::TensorSlice(X&& tensor, int dimRow, int dimCol, IndexType index)
+            : tensor(std::forward<X>(tensor)), index(index), dimRow(dimRow), dimCol(dimCol) {
         assert(dimRow < NDim && dimCol < NDim);
         assert(dimRow != dimCol);
         for (int i = 0; i < NDim; ++i) {
@@ -80,7 +80,7 @@ namespace Physica {
     template<Tensor X>
     class Traits<TensorSlice<X>> {
     public:
-        using ScalarType = X::ScalarType;
+        using ScalarType = std::remove_cvref_t<X>::ScalarType;
         constexpr static int Option = MatrixOption::AnyMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;

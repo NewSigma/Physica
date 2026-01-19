@@ -63,7 +63,7 @@ namespace Physica {
 
         template<RNG R>
         void step_random(HamiltonMC<Tr>& hmc);
-        template<RNG R, ExecutePolicy P>
+        template<RNG R, ExecutePolicy P = Sequential>
         Trv step(HamiltonMC<Tr>& hmc);
 
         template<ExecutePolicy P = Sequential>
