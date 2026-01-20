@@ -286,10 +286,11 @@ namespace Physica {
     auto device_obj<FreqDQMC<T>>::calcLnWeight() -> Vector2D<Trv> {
         Trv betaU = getBetaU();
         auto [lnAD, sgnD] = calcDet();
-        lnAD = lnAD
-             - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum()
-             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
-             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+        lnAD = lnAD - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
+        if (getMaxBoson() > 1) {
+            lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
+                  + ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+        }
         return {lnAD, sgnD};
     }
 
@@ -309,12 +310,12 @@ namespace Physica {
         auto kernel = [solBuffer_ = asStruct(solBuffer),
                        green = asStruct(greensD[spin]),
                        numSite = getNumSite(),
-                       numBoson = getMaxBoson()] __device__() mutable {
+                       size = 2 * getNumFreq()] __device__() mutable {
             const auto& solBuffer = solBuffer_.getDerived();
             unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
             unsigned int col = blockIdx.y;
             Tr elem = 0;
-            for (int _ = 0, offset = 0; _ < numBoson; ++_) {
+            for (int _ = 0, offset = 0; _ < size; ++_) {
                 elem += solBuffer[offset + row, offset + col].real();
                 offset += numSite;
             }

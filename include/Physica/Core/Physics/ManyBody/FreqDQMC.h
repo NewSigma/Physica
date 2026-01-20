@@ -265,10 +265,11 @@ namespace Physica {
     auto FreqDQMC<T>::calcLnWeight() -> Vector2D<Trv> {
         Trv betaU = getBetaU();
         auto [lnAD, sgnD] = calcDet<P>();
-        lnAD = lnAD
-             - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum()
-             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
-             - ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+        lnAD = lnAD - ln1pexp(lncosh(getAuxField().row(0).reals()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
+        if (getMaxBoson() > 1) {
+            lnAD -= ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().reals()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum()
+                  + ln1pexp(lncosh(getAuxField().bottomRows(1).flatten().imags()) + fma(betaU, Trv(-0.25), MathConst<Trv>::ln2)).sum();
+        }
         return {lnAD, sgnD};
     }
 
@@ -282,7 +283,7 @@ namespace Physica {
             const int numSite = getNumSite();
             auto& green = greens[spin];
             green.zeros();
-            for (int _ = 0, offset = 0; _ < getMaxBoson(); ++_) {
+            for (int _ = 0, offset = 0; _ < 2 * getNumFreq(); ++_) {
                 green += inv.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }

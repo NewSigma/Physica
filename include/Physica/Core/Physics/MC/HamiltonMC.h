@@ -71,7 +71,8 @@ namespace Physica {
         [[nodiscard]] Trv getTargetR() const noexcept { return targetR; }
         [[nodiscard]] const auto& getSample() const noexcept { return sample; }
         /* Setters */
-        void setInitPosition(VectorND<T> init);
+        void setInitPosition(VectorND<T> init) noexcept;
+        void setTimeStep(Trv timestep) noexcept;
     private:
         template<RNG R, ExecutePolicy P = Sequential>
         void initTimeStep(auto&& forceModel);
@@ -163,9 +164,14 @@ namespace Physica {
     }
 
     template<Scalar T>
-    void HamiltonMC<T>::setInitPosition(VectorND<T> init) {
+    void HamiltonMC<T>::setInitPosition(VectorND<T> init) noexcept {
         assert(getDOF() == init.getLength());
         sample = std::move(init);
+    }
+
+    template<Scalar T>
+    void HamiltonMC<T>::setTimeStep(Trv timestep) noexcept {
+        root.setTimeStep(timestep);
     }
     /**
      * Algo. 4 of [1]
