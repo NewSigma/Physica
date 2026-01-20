@@ -162,8 +162,14 @@ namespace Physica {
     }
 
     template<class Derived>
-    void ContinuousMatrix<Derived>::read(const T* __restrict p) {
-        Base::getDerived().flatten().read(p);
+    void ContinuousMatrix<Derived>::read(const auto& obj) noexcept {
+        using O = decltype(obj);
+        if constexpr(Vector<O>)
+            Base::getDerived().flatten().read(obj);
+        else {
+            static_assert(Matrix<O>, "[Error]: Unexpected type");
+            read(obj.flatten());
+        }
     }
 
     template<class Derived>

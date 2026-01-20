@@ -167,7 +167,7 @@ namespace Physica {
         action.template randAuxField<R>();
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
-        init.read(reinterpret_cast<const Tr*>(getAuxField().data()));
+        init.read(getAuxField());
         hmc.setInitPosition(std::move(init));
     }
 
@@ -175,7 +175,7 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     auto device_obj<FreqDQMC<T>>::step(HamiltonMC<Tr>& hmc) -> Trv {
         Trv acceptR = hmc.template step<R, P>(*this);
-        getAuxField().read(reinterpret_cast<const T*>(hmc.getSample().data()));
+        getAuxField().read(hmc.getSample());
 
         auto [lnAD, sgnD] = calcDet();
         lnWeight = lnAD;
@@ -188,7 +188,7 @@ namespace Physica {
     template<ExecutePolicy P>
     auto device_obj<FreqDQMC<T>>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
-        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
+        getAuxField().read(pos);
 
         MatrixND<Tr> buffer = getAuxField().squaredNorms();
         buffer *= reciprocal(getBetaU());
@@ -207,7 +207,7 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::forceAsync(const Vector auto& pos, Vector auto& result) {
         assert(result.getLength() == pos.getLength());
         assert(result.getLength() == getAuxField().getSize() * 2);
-        getAuxField().read(reinterpret_cast<const T*>(pos.data()));
+        getAuxField().read(pos);
         forceBuffer.zeros();
 
         for (int spin : {0, 1}) {
@@ -256,7 +256,7 @@ namespace Physica {
         MatrixND<T> force = -getAuxField() * (Trv(2) / getBetaU());
         force.row(0) *= Trv(0.5);
         force += forceBuffer.toHost();
-        result.read(reinterpret_cast<const Tr*>(force.data()));
+        result.read(force);
     }
 
     template<Scalar T>

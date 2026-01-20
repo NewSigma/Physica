@@ -145,6 +145,11 @@ namespace Physica {
     }
 
     template<class Derived>
+    auto ContinuousVector<Derived>::norm1_base() const noexcept -> CoDiff<Tr> {
+        return Base::norm1();
+    }
+
+    template<class Derived>
     auto ContinuousVector<Derived>::norm2() const noexcept -> CoDiff<Tr> {
         return norm2_base();
     }
@@ -152,11 +157,6 @@ namespace Physica {
     template<class Derived>
     auto ContinuousVector<Derived>::norm2_base() const noexcept -> CoDiff<Tr> {
         return Base::norm2();
-    }
-
-    template<class Derived>
-    auto ContinuousVector<Derived>::norm1_base() const noexcept -> CoDiff<Tr> {
-        return Base::norm1();
     }
     /**
      * Prefer zeros() over simply assigning zeros for better performance.
@@ -172,10 +172,25 @@ namespace Physica {
         else
             Base::template operator=<T>(T(0));
     }
-
+    /**
+     * Read any continuous object and fetch enough scalars to fill self
+     *
+     * E.g. In optimization problems, we convert between complex vectors and real vectors.
+     */
     template<class Derived>
-    void ContinuousVector<Derived>::read(const T* __restrict p) noexcept {
-        memcpy(data(), p, Base::getLength() * sizeof(T));
+    void ContinuousVector<Derived>::read(const auto& obj) noexcept {
+        using O = decltype(obj);
+        if constexpr (Vector<O>) {
+            using U = std::remove_cvref_t<O>::ScalarType;
+            static_assert(T::Prec == U::Prec);
+            size_t size = Base::getLength() * sizeof(T);
+            assert(size <= obj.getLength() * sizeof(U));
+            memcpy(data(), obj.data(), size);
+        }
+        else {
+            static_assert(Matrix<O>, "[Error]: Unexpected type");
+            read(obj.flatten());
+        }
     }
 
     template<class Derived>

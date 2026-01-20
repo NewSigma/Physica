@@ -88,7 +88,7 @@ namespace Physica {
         [[nodiscard]] auto flatten(this auto&&) noexcept;
 
         void zeros();
-        void read(const T* __restrict p);
+        void read(const auto& obj) noexcept;
         template<RNG R>
         void random_uniform();
         template<RNG R>

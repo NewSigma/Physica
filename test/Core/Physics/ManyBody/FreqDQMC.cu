@@ -42,7 +42,7 @@ namespace {
         dqmcH.step_random<RandomSource>();
 
         VectorND<T> pos(dqmcH.getAuxField().getSize() * 2);
-        pos.read((T*)dqmcH.getAuxField().data());
+        pos.read(dqmcH.getAuxField().flatten());
         {
             auto potH = dqmcH.potentialV(pos);
             auto potD = dqmcD.potentialV(pos);
