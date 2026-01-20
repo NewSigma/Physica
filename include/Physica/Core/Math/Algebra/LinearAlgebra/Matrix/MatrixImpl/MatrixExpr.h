@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -78,6 +78,7 @@ namespace Physica {
         using This = BinaryMatrixExpr<ID, LHS, RHS>;
         using Base = RValueMatrix<Derived>;
     public:
+        using Base::RowAtCompile;
         using Base::isReverseDiff;
     private:
         LazyDestroy<LHS> lhs;
@@ -90,26 +91,16 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
         /* Operations */
         [[nodiscard]] decltype(auto) transpose() const noexcept;
         [[nodiscard]] decltype(auto) hermite() const noexcept;
         /* Getters */
-        [[nodiscard]] size_t getRow() const {
-            if constexpr (Matrix<LHS>)
-                return getLHS().getRow();
-            else
-                return getRHS().getRow();
-        }
-        [[nodiscard]] size_t getCol() const {
-            if constexpr (Matrix<LHS>)
-                return getLHS().getCol();
-            else
-                return getRHS().getCol();
-        }
-        [[nodiscard]] const auto& getLHS() const noexcept { return lhs; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
-        [[nodiscard]] auto& getLHS() noexcept { return lhs; }
-        [[nodiscard]] auto& getRHS() noexcept { return rhs; }
+        [[nodiscard]] size_t getRow() const;
+        [[nodiscard]] size_t getCol() const;
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] consteval static bool isStaticHermite() noexcept;
@@ -126,6 +117,17 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
+    auto BinaryMatrixExpr<ID, LHS, RHS>::operator*(this auto&& self, Vector auto&& v) noexcept requires(RowAtCompile != 1) {
+        using V = decltype(v);
+        if constexpr (ID == ExprID::Mul && Scalar<RHS>)
+            return self.getLHS() * (self.getRHS() * std::forward<V>(v));
+        else {
+            using Self = decltype(self);
+            return GEMV<Self, V>(std::forward<Self>(self), std::forward<V>(v));
+        }
+    }
+
+    template<ExprID ID, class LHS, class RHS>
     decltype(auto) BinaryMatrixExpr<ID, LHS, RHS>::transpose() const noexcept {
         if constexpr (isStaticSymm())
             return Base::getDerived();
@@ -139,6 +141,32 @@ namespace Physica {
             return Base::getDerived();
         else
             return Base::hermite();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    size_t BinaryMatrixExpr<ID, LHS, RHS>::getRow() const {
+        if constexpr (Matrix<LHS>)
+            return getLHS().getRow();
+        else
+            return getRHS().getRow();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    size_t BinaryMatrixExpr<ID, LHS, RHS>::getCol() const {
+        if constexpr (Matrix<LHS>)
+            return getLHS().getCol();
+        else
+            return getRHS().getCol();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    auto&& BinaryMatrixExpr<ID, LHS, RHS>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), LHS>(self.lhs);
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    auto&& BinaryMatrixExpr<ID, LHS, RHS>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), RHS>(self.rhs);
     }
 
     template<ExprID ID, class LHS, class RHS>
@@ -261,3 +289,5 @@ namespace Physica {
 #include "MatrixExprImpl/Cos.h"
 #include "MatrixExprImpl/Tanh.h"
 #include "MatrixExprImpl/Sech.h"
+
+#include "MatrixExprImpl/MatrixProduct/GEMV.h"

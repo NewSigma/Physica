@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -160,5 +160,3 @@ namespace Physica {
         constexpr static bool FastPacket = false;
     };
 }
-
-#include "GEMVExpr.h"

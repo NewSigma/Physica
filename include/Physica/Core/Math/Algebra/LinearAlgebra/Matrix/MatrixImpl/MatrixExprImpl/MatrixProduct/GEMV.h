@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,11 +18,9 @@
  */
 #pragma once
 
-#include "GEMV.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixExpr.h"
 
 namespace Physica {
-    template<ExprID, class, class U> class MatrixExpr;
-
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;

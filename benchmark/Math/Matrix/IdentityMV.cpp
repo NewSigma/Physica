@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ namespace {
         const int64_t size = state.range(0);
         const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
         const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
-        auto expr = v1 - v2 * T(2.0);
+        auto expr = v1 - v2 * T(2.1);
         VectorND<T> buffer(size);
         for (auto _ : state) {
             expr.assign(buffer);
@@ -42,7 +42,7 @@ namespace {
         const int64_t size = state.range(0);
         const auto v1 = VectorND<T>::random_uniform<RandomSource>(size);
         const auto v2 = VectorND<T>::random_uniform<RandomSource>(size);
-        auto expr = v1 - (IdentityMatrix<T>(size) * T(2.0)) * v2;
+        auto expr = v1 - (IdentityMatrix<T>(size) * T(2.1)) * v2;
         VectorND<T> buffer(size);
         for (auto _ : state) {
             PHYSICA_BENCH(expr.assign(buffer));
@@ -55,7 +55,7 @@ namespace {
         using T = float64;
         const int64_t size = state.range(0);
         const auto v = VectorND<T>::random_uniform<RandomSource>(size);
-        auto expr = (IdentityMatrix<T>(size) * T(2.0)) * v;
+        auto expr = (IdentityMatrix<T>(size) * T(2.1)) * v;
         VectorND<T> buffer(size);
         for (auto _ : state) {
             expr.assign_add(buffer);
