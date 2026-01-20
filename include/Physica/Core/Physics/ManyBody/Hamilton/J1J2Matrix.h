@@ -23,9 +23,6 @@
 #include "HamiltonMatrix.h"
 
 namespace Physica {
-    template<Scalar, int, int, BoundaryCond, Vector>
-    class J1J2VecProd;
-
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC = BoundaryCond::PBC>
     class J1J2Matrix : public HamiltonMatrix<J1J2Matrix<T, Dim, NumSite, BC>>
                      , public SquareLattice<Dim, BC> {
@@ -55,7 +52,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
-        [[nodiscard]] auto operator*(const Vector auto& v) const noexcept;
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
@@ -73,9 +70,10 @@ namespace Physica {
     }
 
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
-    auto J1J2Matrix<T, Dim, NumSite, BC>::operator*(const Vector auto& v) const noexcept {
-        using V = std::remove_cvref_t<decltype(v)>;
-        return J1J2VecProd<T, Dim, NumSite, BC, V>(*this, v);
+    auto J1J2Matrix<T, Dim, NumSite, BC>::operator*(this auto&& self, Vector auto&& v) noexcept {
+        using Self = decltype(self);
+        using V = decltype(v);
+        return GEMV<Self, V>(std::forward<Self>(self), std::forward<V>(v));
     }
 
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
@@ -141,4 +139,4 @@ namespace Physica {
     };
 }
 
-#include "J1J2VecProd.h"
+#include "J1J2GEMV.h"

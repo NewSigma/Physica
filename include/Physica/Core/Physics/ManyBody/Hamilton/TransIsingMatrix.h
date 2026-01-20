@@ -23,9 +23,6 @@
 #include "HamiltonMatrix.h"
 
 namespace Physica {
-    template<Scalar, int, int, BoundaryCond, Vector>
-    class TransIsingVecProd;
-
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC = BoundaryCond::PBC>
     class TransIsingMatrix : public HamiltonMatrix<TransIsingMatrix<T, Dim, NumSite, BC>>
                            , public SquareLattice<Dim, BC> {
@@ -51,7 +48,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
-        [[nodiscard]] auto operator*(const Vector auto& v) const noexcept;
+        [[nodiscard]] auto operator*(this auto&& self, Vector auto&& v) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
@@ -69,9 +66,10 @@ namespace Physica {
     }
 
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
-    auto TransIsingMatrix<T, Dim, NumSite, BC>::operator*(const Vector auto& v) const noexcept {
-        using V = std::remove_cvref_t<decltype(v)>;
-        return TransIsingVecProd<T, Dim, NumSite, BC, V>(*this, v);
+    auto TransIsingMatrix<T, Dim, NumSite, BC>::operator*(this auto&& self, Vector auto&& v) noexcept {
+        using Self = decltype(self);
+        using V = decltype(v);
+        return GEMV<Self, V>(std::forward<Self>(self), std::forward<V>(v));
     }
 
     template<Scalar T, int Dim, int NumSite, BoundaryCond BC>
@@ -120,4 +118,4 @@ namespace Physica {
     };
 }
 
-#include "TransIsingVecProd.h" // IWYU pragma: export
+#include "TransIsingGEMV.h" // IWYU pragma: export

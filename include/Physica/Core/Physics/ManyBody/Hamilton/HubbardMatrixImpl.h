@@ -27,16 +27,17 @@ namespace Physica {
             , hoppingT(hoppingT_)
             , repelU(repelU_)
             , repr(std::move(repr_))
-            , planProvider(NumSite, PlanFlag::Estimate) {
+            , plan(NumSite, PlanFlag::Estimate) {
         assert(Lattice::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
         if constexpr (BC == BoundaryCond::TBC)
             phases = Lattice::template calcPhase<Tr>();
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
-    auto HubbardMatrix<T, Repr, BC>::operator*(const Vector auto& v) const noexcept {
-        using V = std::remove_cvref_t<decltype(v)>;
-        return HubbardVecProd<T, Repr, BC, V>(*this, v);
+    auto HubbardMatrix<T, Repr, BC>::operator*(this auto&& self, Vector auto&& v) noexcept {
+        using Self = decltype(self);
+        using V = decltype(v);
+        return GEMV<Self, V>(std::forward<Self>(self), std::forward<V>(v));
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>
@@ -64,7 +65,7 @@ namespace Physica {
                     psi2 <<= 1;
                 }
             }
-            FFT1D::transform(planProvider, fft);
+            FFT1D::transform(plan, fft);
             const Tr normalizer = sqrt(Tr(periods[row] * periods[col])) / Tr(NumSite);
             return fft.getKSpace()[repr.getReducedK()] * normalizer;
         }
@@ -97,7 +98,7 @@ namespace Physica {
         repelU.swap(obj.repelU);
         repr.swap(obj.repr);
         phases.swap(obj.phases);
-        planProvider.swap(obj.planProvider);
+        plan.swap(obj.plan);
     }
 
     template<Scalar T, Representation Repr, BoundaryCond BC>

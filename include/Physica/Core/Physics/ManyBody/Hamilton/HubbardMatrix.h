@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,8 +24,6 @@
 #include "HamiltonMatrix.h"
 
 namespace Physica {
-    template<Scalar, Representation, BoundaryCond, Vector>
-    class HubbardVecProd;
     /**
      * Refer to [1] for applied symmetries
      * 
@@ -38,11 +36,11 @@ namespace Physica {
         using This = HubbardMatrix<T, Repr, BC>;
         using Base = HamiltonMatrix<This>;
         using Lattice = SquareLattice<Repr::Dim, BC>;
-
-        using typename Base::StateType;
         using typename Lattice::IndexType;
         using typename Lattice::ArgVector;
-
+    public:
+        using typename Base::StateType;
+    protected:
         using Tr = T::RealType;
         using Tv = T::ValueType;
         using Tc = T::ComplexType;
@@ -55,7 +53,7 @@ namespace Physica {
         Tr repelU;
         Repr repr;
         DenseVector<Tc, Dim> phases;
-        FFT1D planProvider;
+        FFT1D plan;
     public:
         HubbardMatrix() = default;
         HubbardMatrix(T hoppingT_, Tr repelU_, Lattice lattice, Repr repr_);
@@ -65,7 +63,7 @@ namespace Physica {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
-        [[nodiscard]] auto operator*(const Vector auto& v) const noexcept;
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept;
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const;
@@ -77,6 +75,7 @@ namespace Physica {
         [[nodiscard]] Tr getRepelU() const noexcept { return repelU; }
         [[nodiscard]] const Lattice& getLattice() const noexcept { return *this; }
         [[nodiscard]] const auto& getRepr() const noexcept { return repr; }
+        [[nodiscard]] const auto& getPlan() const noexcept { return plan; }
         /* Setters */
         void setPhaseArgs(ArgVector phaseArgs) noexcept requires(BC == BoundaryCond::TBC);
     protected:
@@ -84,8 +83,7 @@ namespace Physica {
         T hoppingElem(StateType rowPsi, StateType colPsi) const noexcept;
     private:
         Vector2D<T> calcBoundaryPhase(int site, int site1) const noexcept;
-        template<Scalar, Representation, BoundaryCond, Vector>
-        friend class HubbardVecProd;
+        template<Matrix, Vector> friend class GEMV;
     };
 }
 
@@ -100,4 +98,4 @@ namespace Physica {
 }
 
 #include "HubbardMatrixImpl.h"
-#include "HubbardVecProd.h"
+#include "HubbardGEMV.h"

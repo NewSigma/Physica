@@ -22,22 +22,23 @@
 #include "J1J2Matrix.h"
 
 namespace Physica {
-    template<Scalar U, int Dim, int NumSite, BoundaryCond BC, Vector V>
-    class J1J2VecProd : public RValueVector<J1J2VecProd<U, Dim, NumSite, BC, V>> {
-        using MatrixType = J1J2Matrix<U, Dim, NumSite, BC>;
-        using This = J1J2VecProd<U, Dim, NumSite, BC, V>;
+    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
+        using This = GEMV<M, V>;
         using Base = RValueVector<This>;
+        using M1 = std::remove_cvref<M>::type;
+        constexpr static unsigned int NumSite = M1::NumSite;
     protected:
         using typename Base::T;
         using typename Base::Trv;
     private:
-        const MatrixType& mat;
-        const V& vec;
+        LazyDestroy<M> mat;
+        LazyDestroy<V> vec;
     public:
-        J1J2VecProd(const MatrixType& mat_, const V& vec_);
-        J1J2VecProd(const This&) = default;
-        J1J2VecProd(This&&) noexcept = default;
-        ~J1J2VecProd() = default;
+        GEMV(M&& mat_, V&& vec_);
+        GEMV(const This&) = default;
+        GEMV(This&&) noexcept = default;
+        ~GEMV() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -48,8 +49,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const V& getRHS() const noexcept { return vec; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     private:
         /* Getters */
         [[nodiscard]] const auto& getRepr() const noexcept { return mat.getRepr(); }
@@ -57,14 +58,14 @@ namespace Physica {
         [[nodiscard]] auto getCouplingJ2() const noexcept { return mat.getCouplingJ2(); }
     };
 
-    template<Scalar U, int Dim, int NumSite, BoundaryCond BC, Vector V>
-    J1J2VecProd<U, Dim, NumSite, BC, V>::J1J2VecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Scalar U, int Dim, int NumSite, BoundaryCond BC, Vector V>
+    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
     template<ExecutePolicy P>
-    void J1J2VecProd<U, Dim, NumSite, BC, V>::assign(Vector auto& target) const {
+    void GEMV<M, V>::assign(Vector auto& target) const {
         target.assert_assign(*this);
         target.zeros();
 
@@ -105,16 +106,28 @@ namespace Physica {
             }
         }
     }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
 }
 
 namespace Physica {
-    template<Scalar U, int Dim, int NumSite, BoundaryCond BC, Vector V>
-    class Traits<J1J2VecProd<U, Dim, NumSite, BC, V>> {
-        using MatrixType = J1J2Matrix<U, Dim, NumSite, BC>;
-        using U1 = V::ScalarType;
+    template<Matrix M, Vector V> requires(instanceof_tx<J1J2Matrix, M>)
+    class Traits<GEMV<M, V>> {
+        using M1 = std::remove_cvref<M>::type;
+        using V1 = std::remove_cvref<V>::type;
+        using T1 = M1::ScalarType;
+        using T2 = V1::ScalarType;
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<U, U1>::Type;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
+        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;
     };

@@ -21,17 +21,18 @@
 #include "HubbardMatrix.h"
 
 namespace Physica {
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
-    class HubbardVecProd : public RValueVector<HubbardVecProd<T0, U, BC, V>> {
-        using MatrixType = HubbardMatrix<T0, U, BC>;
-        using This = HubbardVecProd<T0, U, BC, V>;
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
+        using This = GEMV<M, V>;
         using Base = RValueVector<This>;
-        using FFT1D = MatrixType::FFT1D;
-        using StateType = U::StateType;
-        constexpr static unsigned int Dim = MatrixType::Dim;
-        constexpr static unsigned int NumSite = MatrixType::NumSite;
-        constexpr static unsigned int SiteDOF = MatrixType::SiteDOF;
-        constexpr static bool IsTransInvariant = MatrixType::IsTransInvariant;
+
+        using M1 = std::remove_cvref<M>::type;
+        using FFT1D = M1::FFT1D;
+        using StateType = M1::StateType;
+        constexpr static unsigned int Dim = M1::Dim;
+        constexpr static unsigned int NumSite = M1::NumSite;
+        constexpr static unsigned int SiteDOF = M1::SiteDOF;
+        constexpr static bool IsTransInvariant = M1::IsTransInvariant;
     public:
         using typename Base::ScalarType;
     protected:
@@ -39,13 +40,13 @@ namespace Physica {
         using typename Base::Tr;
         using typename Base::Tv;
     private:
-        const MatrixType& mat;
-        const V& vec;
+        LazyDestroy<M> mat;
+        LazyDestroy<V> vec;
     public:
-        HubbardVecProd(const MatrixType& mat_, const V& vec_);
-        HubbardVecProd(const This&) = default;
-        HubbardVecProd(This&&) noexcept = default;
-        ~HubbardVecProd() = default;
+        GEMV(M&& mat_, V&& vec_);
+        GEMV(const This&) = default;
+        GEMV(This&&) noexcept = default;
+        ~GEMV() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -57,25 +58,25 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const V& getRHS() const noexcept { return vec; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     private:
         void sumHopping(Vector auto& target, FFT1D& fft, T factor, StateType psi) const;
         void dotImpl(Vector auto& target, T factor, size_t index) const;
         /* Getters */
         [[nodiscard]] T getHoppingT() const noexcept { return mat.getHoppingT(); }
         [[nodiscard]] T getRepelU() const noexcept { return mat.getRepelU(); }
-        [[nodiscard]] const U& getRepr() const noexcept { return mat.getRepr(); }
+        [[nodiscard]] const auto& getRepr() const noexcept { return mat.getRepr(); }
     };
 
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
-    HubbardVecProd<T0, U, BC, V>::HubbardVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
     template<ExecutePolicy P>
-    void HubbardVecProd<T0, U, BC, V>::assign(Vector auto& target) const {
+    void GEMV<M, V>::assign(Vector auto& target) const {
         target.assert_assign(*this);
         if constexpr (P == Thread) {
             parallel_for<Thread>([&](size_t i) {
@@ -90,8 +91,8 @@ namespace Physica {
         }
     }
 
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
-    auto HubbardVecProd<T0, U, BC, V>::calc(size_t index) const -> T {
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    auto GEMV<M, V>::calc(size_t index) const -> T {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const T hop = -mat.getHoppingT();
         const auto state = getRepr()[index];
@@ -123,13 +124,23 @@ namespace Physica {
         return result;
     }
 
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
-    auto HubbardVecProd<T0, U, BC, V>::calc_value(size_t index) const -> Tv {
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
         return calc(index).value();
     }
 
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
-    void HubbardVecProd<T0, U, BC, V>::sumHopping(Vector auto& target, FFT1D& fft, T factor, StateType psi) const {
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    void GEMV<M, V>::sumHopping(Vector auto& target, FFT1D& fft, T factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -140,14 +151,14 @@ namespace Physica {
             sign *= psi.lShiftSign();
             psi <<= 1;
         }
-        fft.transform(mat.planProvider, fft);
+        fft.transform(mat.getPlan(), fft);
         const auto& repr = getRepr();
         const size_t index = repr[reducedPsi];
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(Tr(repr.getPeriods()[index])) * factor;
     }
 
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
-    void HubbardVecProd<T0, U, BC, V>::dotImpl(Vector auto& target, T factor, size_t index) const {
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    void GEMV<M, V>::dotImpl(Vector auto& target, T factor, size_t index) const {
         const auto state = getRepr()[index];
         /* On site contribution */ {
             int numRepel = 0;
@@ -158,7 +169,7 @@ namespace Physica {
 
         if constexpr (IsTransInvariant) {
             static_assert(Dim == 1 && "[Error]: Not implemented");
-            static_assert(BC == BoundaryCond::PBC, "[Error]: Not implemented");
+            static_assert(Traits<M>::Boundary == BoundaryCond::PBC, "[Error]: Not implemented");
             const Tr normalizer = sqrt(Tr(getRepr().getPeriods()[index])) / Tr(NumSite);
             const T hop = -factor * normalizer * getHoppingT();
 
@@ -201,13 +212,15 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T0, Representation U, BoundaryCond BC, Vector V>
-    class Traits<HubbardVecProd<T0, U, BC, V>> {
-        using MatrixType = HubbardMatrix<T0, U, BC>;
-        using T1 = V::ScalarType;
+    template<Matrix M, Vector V> requires(instanceof_ttx<HubbardMatrix, M>)
+    class Traits<GEMV<M, V>> {
+        using M1 = std::remove_cvref<M>::type;
+        using V1 = std::remove_cvref<V>::type;
+        using T1 = M1::ScalarType;
+        using T2 = V1::ScalarType;
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<T0, T1>::Type;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
+        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;
     };

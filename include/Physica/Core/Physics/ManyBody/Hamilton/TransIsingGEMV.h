@@ -22,21 +22,22 @@
 #include "TransIsingMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
-    class TransIsingVecProd : public RValueVector<TransIsingVecProd<T, Dim, NumSite, BC, V>> {
-        using MatrixType = TransIsingMatrix<T, Dim, NumSite, BC>;
-        using This = TransIsingVecProd<T, Dim, NumSite, BC, V>;
+    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
+        using This = GEMV<M, V>;
         using Base = RValueVector<This>;
-    public:
-        using ScalarType = Base::ScalarType;
+        using M1 = std::remove_cvref<M>::type;
+        constexpr static unsigned int NumSite = M1::NumSite;
+    protected:
+        using typename Base::T;
     private:
-        const MatrixType& mat;
-        const V& vec;
+        LazyDestroy<M> mat;
+        LazyDestroy<V> vec;
     public:
-        TransIsingVecProd(const MatrixType& mat_, const V& vec_);
-        TransIsingVecProd(const This&) = default;
-        TransIsingVecProd(This&&) noexcept = default;
-        ~TransIsingVecProd() = default;
+        GEMV(M&& mat_, V&& vec_);
+        GEMV(const This&) = default;
+        GEMV(This&&) noexcept = default;
+        ~GEMV() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -44,11 +45,11 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& target) const;
 
-        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const V& getRHS() const noexcept { return vec; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     private:
         /* Getters */
         [[nodiscard]] const auto& getRepr() const noexcept { return mat.getRepr(); }
@@ -56,14 +57,14 @@ namespace Physica {
         [[nodiscard]] T getTransG() const noexcept { return mat.getTransG(); }
     };
 
-    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
-    TransIsingVecProd<T, Dim, NumSite, BC, V>::TransIsingVecProd(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
+    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(std::forward<M>(mat_)), vec(std::forward<V>(vec_)) {
         assert(mat.getCol() == vec.getLength());
     }
 
-    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
+    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
     template<ExecutePolicy P>
-    void TransIsingVecProd<T, Dim, NumSite, BC, V>::assign(Vector auto& target) const {
+    void GEMV<M, V>::assign(Vector auto& target) const {
         target.assert_assign(*this);
         target.zeros();
 
@@ -78,6 +79,7 @@ namespace Physica {
             }
 
             const T couplingJ = getCouplingJ() * vec.calc(i);
+            constexpr BoundaryCond BC = Traits<M>::Boundary;
             if constexpr (BC == BoundaryCond::OBC) {
                 for (unsigned int site = 0; site < NumSite - 1; ++site) {
                     auto coeff = PauliMatrix<T, Z>(site).apply(psi0);
@@ -95,16 +97,28 @@ namespace Physica {
             }
         }
     }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
 }
 
 namespace Physica {
-    template<Scalar T, int Dim, int NumSite, BoundaryCond BC, Vector V>
-    class Traits<TransIsingVecProd<T, Dim, NumSite, BC, V>> {
-        using MatrixType = TransIsingMatrix<T, Dim, NumSite, BC>;
-        using T1 = V::ScalarType;
+    template<Matrix M, Vector V> requires(instanceof_tx<TransIsingMatrix, M>)
+    class Traits<GEMV<M, V>> {
+        using M1 = std::remove_cvref<M>::type;
+        using V1 = std::remove_cvref<V>::type;
+        using T1 = M1::ScalarType;
+        using T2 = V1::ScalarType;
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<T, T1>::Type;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
+        constexpr static size_t SizeAtCompile = M1::RowAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;
     };
