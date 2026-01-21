@@ -39,6 +39,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        __device__ void sync() const noexcept { block.sync(); }
         /* Getters */
         [[nodiscard]] __device__ static unsigned int rank() noexcept { return Base::thread_rank(); }
         [[nodiscard]] __device__ static unsigned int getLength() noexcept { return Base::num_threads(); }

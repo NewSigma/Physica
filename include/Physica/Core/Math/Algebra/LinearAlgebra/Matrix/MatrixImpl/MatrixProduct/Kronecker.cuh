@@ -49,6 +49,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
         [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return m1.getDerived(); }
         [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return m2.getDerived(); }
+    private:
+        void assign_identity(Matrix auto&& target) const;
+        void assign_add_identity(Matrix auto&& target) const;
+        void assign_diagonal(Matrix auto&& target) const;
+        void assign_add_diagonal(Matrix auto&& target) const;
     };
 
     template<Matrix M1, Matrix M2>
@@ -56,41 +61,56 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void device_obj<Kronecker<M1, M2>>::assign(Matrix auto&& target) const {
-        target.zeros();
+        if constexpr (instanceof_tx<IdentityMatrix, M1>)
+            assign_identity(target);
+        else if constexpr (instanceof_tx<DiagMatrix, M2>)
+            assign_diagonal(target);
+        else {
+            target.zeros();
+            auto assign_general = [lhs_ = m1, rhs_ = m2, target_ = asStruct(target)] __device__() mutable {
+                const auto& lhs = lhs_.getDerived();
+                const auto& rhs = rhs_.getDerived();
+                unsigned int r = blockIdx.y;
+                unsigned int c = blockIdx.z;
+                unsigned int offsetR = r * rhs.getRow();
+                unsigned int offsetC = c * rhs.getCol();
+                (lhs.calc(r, c) * rhs).assign(target_.getDerived().block(offsetR, rhs.getRow(), offsetC, rhs.getCol()), ThreadBlock{});
+            };
 
-        const auto& lhs = getLHS();
-        const auto& rhs = getRHS();
-        for (size_t r = 0; r < lhs.getRow(); ++r) {
-            size_t offsetR = r * rhs.getRow();
-            if constexpr (instanceof_tx<IdentityMatrix, M1>)
-                rhs.assign(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
-            else if constexpr (instanceof_tx<DiagMatrix, M2>)
-                (rhs * lhs.calc(r, r)).assign(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
-            else {
-                for (size_t c = 0; c < lhs.getCol(); ++c) {
-                    size_t offsetC = c * rhs.getCol();
-                    (rhs * lhs.calc(r, c)).assign(target.block(offsetR, rhs.getRow(), offsetC, rhs.getCol()));
-                }
-            }
+            const auto& lhs = getLHS();
+            const auto& rhs = getRHS();
+            const unsigned int numThread = std::min(rhs.getSize(), rhs.MaxThreadsPerBlock);
+            const unsigned int numBlockX = 1;
+            const unsigned int numBlockY = lhs.getRow();
+            const unsigned int numBlockZ = lhs.getCol();
+            CUDAExecutor::launch(assign_general, KernelConfig({numBlockX, numBlockY, numBlockZ}, numThread));
         }
     }
 
     template<Matrix M1, Matrix M2>
     void device_obj<Kronecker<M1, M2>>::assign_add(Matrix auto&& target) const {
-        const auto& lhs = getLHS();
-        const auto& rhs = getRHS();
-        for (size_t r = 0; r < lhs.getRow(); ++r) {
-            size_t offsetR = r * rhs.getRow();
-            if constexpr (instanceof_tx<IdentityMatrix, M1>)
-                rhs.assign_add(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
-            else if constexpr (instanceof_tx<DiagMatrix, M2>)
-                (rhs * lhs.calc(r, r)).assign_add(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
-            else {
-                for (size_t c = 0; c < lhs.getCol(); ++c) {
-                    size_t offsetC = c * rhs.getCol();
-                    (rhs * lhs.calc(r, c)).assign_add(target.block(offsetR, rhs.getRow(), offsetC, rhs.getCol()));
-                }
-            }
+        if constexpr (instanceof_tx<IdentityMatrix, M1>)
+            assign_add_identity(target);
+        else if constexpr (instanceof_tx<DiagMatrix, M2>)
+            assign_add_diagonal(target);
+        else {
+            auto assign_add_general = [lhs_ = m1, rhs_ = m2, target_ = asStruct(target)] __device__() mutable {
+                const auto& lhs = lhs_.getDerived();
+                const auto& rhs = rhs_.getDerived();
+                unsigned int r = blockIdx.y;
+                unsigned int c = blockIdx.z;
+                unsigned int offsetR = r * rhs.getRow();
+                unsigned int offsetC = c * rhs.getCol();
+                (lhs.calc(r, c) * rhs).assign_add(target_.getDerived().block(offsetR, rhs.getRow(), offsetC, rhs.getCol()), ThreadBlock{});
+            };
+
+            const auto& lhs = getLHS();
+            const auto& rhs = getRHS();
+            const unsigned int numThread = std::min(rhs.getSize(), rhs.MaxThreadsPerBlock);
+            const unsigned int numBlockX = 1;
+            const unsigned int numBlockY = lhs.getRow();
+            const unsigned int numBlockZ = lhs.getCol();
+            CUDAExecutor::launch(assign_add_general, KernelConfig({numBlockX, numBlockY, numBlockZ}, numThread));
         }
     }
 
@@ -107,10 +127,52 @@ namespace Physica {
     __host__ __device__ size_t device_obj<Kronecker<M1, M2>>::getRow() const noexcept {
         return getLHS().getRow() * getRHS().getRow();
     }
-    
+
     template<Matrix M1, Matrix M2>
     __host__ __device__ size_t device_obj<Kronecker<M1, M2>>::getCol() const noexcept {
         return getLHS().getCol() * getRHS().getCol();
+    }
+
+    template<Matrix M1, Matrix M2>
+    void device_obj<Kronecker<M1, M2>>::assign_identity(Matrix auto&& target) const {
+        target.zeros();
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        for (size_t r = 0; r < lhs.getRow(); ++r) {
+            size_t offsetR = r * rhs.getRow();
+            rhs.assign(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    void device_obj<Kronecker<M1, M2>>::assign_add_identity(Matrix auto&& target) const {
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        for (size_t r = 0; r < lhs.getRow(); ++r) {
+            size_t offsetR = r * rhs.getRow();
+            rhs.assign_add(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    void device_obj<Kronecker<M1, M2>>::assign_diagonal(Matrix auto&& target) const {
+        target.zeros();
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        for (size_t r = 0; r < lhs.getRow(); ++r) {
+            size_t offsetR = r * rhs.getRow();
+            (rhs * lhs.calc(r, r)).assign(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
+        }
+    }
+
+    template<Matrix M1, Matrix M2>
+    void device_obj<Kronecker<M1, M2>>::assign_add_diagonal(Matrix auto&& target) const {
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        for (size_t r = 0; r < lhs.getRow(); ++r) {
+            size_t offsetR = r * rhs.getRow();
+            (rhs * lhs.calc(r, r)).assign_add(target.block(offsetR, rhs.getRow(), offsetR, rhs.getCol()));
+        }
     }
 
     template<Matrix M1, Matrix M2>

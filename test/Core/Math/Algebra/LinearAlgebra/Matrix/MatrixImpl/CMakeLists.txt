@@ -1,0 +1,11 @@
+physica_add_test(GEMM MatrixProduct/GEMM.cpp)
+if(${PHYSICA_CUDA})
+    physica_add_test(Kronecker_cuda MatrixProduct/Kronecker.cu)
+endif()
+
+physica_add_test(Balance Balance.cpp)
+physica_add_test(Det Det.cpp)
+physica_add_test(Inverse Inverse.cpp)
+physica_add_test(LValueMatrix LValueMatrix.cpp)
+physica_add_test(MatrixExpr MatrixExpr.cpp)
+physica_add_test(MatrixTrig MatrixTrig.cpp)

@@ -57,6 +57,7 @@ namespace Physica {
         int delta = block.getLength();
         for (int index = block.rank(); index < length; index += delta)
             v[index] += calc(index);
+        block.sync();
     }
 
     template<Vector V, Scalar U>

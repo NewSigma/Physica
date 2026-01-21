@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/Core/Parallel/ThreadBlock.cuh"
 #include "RValueMatrixImpl/RMatrixBlock.cuh"
 #include "RValueMatrix.h"
 
@@ -59,9 +60,10 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Matrix M>
-        __host__ __device__ void assign(M&& target) const;
+        __host__ __device__ void assign(Matrix auto&& target) const;
+        __device__ void assign(Matrix auto&& target, const ThreadBlock& block) const;
         __host__ __device__ void assign_add(Matrix auto&& target) const;
+        __device__ void assign_add(Matrix auto&& target, const ThreadBlock& block) const;
         __host__ __device__ void assert_assign(const Matrix auto& source) const noexcept;
 
         __host__ __device__ void resize(const Matrix auto& m, auto&&... args);

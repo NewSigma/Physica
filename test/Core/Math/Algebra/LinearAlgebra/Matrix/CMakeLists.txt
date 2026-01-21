@@ -1,17 +1,12 @@
 physica_add_test(MatrixExp MatrixFunc/MatrixExp.cpp)
 physica_add_test(MatrixPow MatrixFunc/MatrixPow.cpp)
-physica_add_test(LValueMatrix MatrixImpl/LValueMatrix.cpp)
-physica_add_test(MatrixTrig MatrixImpl/MatrixTrig.cpp)
 
-physica_add_test(Balance Balance.cpp)
+add_subdirectory(MatrixImpl)
+
 physica_add_test(DenseMatrix DenseMatrix.cpp)
-physica_add_test(MatrixExpr MatrixExpr.cpp)
 physica_add_test(DenseSymmMatrix DenseSymmMatrix.cpp)
-physica_add_test(Det Det.cpp)
 physica_add_test(DiffDenseMatrix DiffDenseMatrix.cpp)
-physica_add_test(Inverse Inverse.cpp)
 physica_add_test(MatrixChain MatrixChain.cpp)
-physica_add_test(GEMM GEMM.cpp)
 physica_add_test(PermMatrix PermMatrix.cpp)
 physica_add_test(SparseMatrix SparseMatrix.cpp)
 
