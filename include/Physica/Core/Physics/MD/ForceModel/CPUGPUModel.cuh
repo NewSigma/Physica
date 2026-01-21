@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Parallel/Parallel.h"
-#include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "Physica/Core/Utils/CUDA/device_obj.h"
 
 namespace Physica {
     /**

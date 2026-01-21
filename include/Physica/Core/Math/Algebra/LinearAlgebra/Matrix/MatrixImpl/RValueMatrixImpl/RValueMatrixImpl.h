@@ -24,6 +24,23 @@
 
 namespace Physica {
     template<class Derived>
+    [[nodiscard]] auto RValueMatrix<Derived>::operator*(this auto&& self, Vector auto&& v) noexcept requires(RowAtCompile != 1) {
+        assert(self.getCol() == v.getLength());
+        using Self = decltype(self);
+        using V = decltype(v);
+        static_assert(!is_device_obj<V>::value, "[Error]: host-device mismatch");
+        return GEMV<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
+    }
+
+    template<class Derived>
+    [[nodiscard]] auto RValueMatrix<Derived>::operator*(const Vector auto& v) const noexcept requires(RowAtCompile == 1) {
+        assert(getCol() == v.getLength());
+        using V = decltype(v);
+        static_assert(!is_device_obj<V>::value, "[Error]: host-device mismatch");
+        return Base::getDerived().row(0) * v;
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto&& target) const {
         target.assert_assign(Base::getDerived());
@@ -366,11 +383,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    decltype(auto) RValueMatrix<Derived>::reals() const noexcept {
+    decltype(auto) RValueMatrix<Derived>::reals(this auto&& self) noexcept {
         if constexpr (isComplex)
-            return RealMatrix<Derived>(Base::getDerived());
+            return RealMatrix<Derived>(self);
         else
-            return Base::getDerived();
+            return std::forward<decltype(self)>(self);
     }
 
     template<class Derived>

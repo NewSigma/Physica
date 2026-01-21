@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -95,11 +95,6 @@ namespace Physica {
             m.reverse(g * v.values().transpose());
         if constexpr (ReverseDiff<U>)
             v.reverse(m.values().transpose() * g);
-    }
-    // FIXME: Turn it into a member function once we dump to C++23
-    template<Matrix M, Vector U>
-    [[nodiscard]] __host__ __device__ auto operator*(M&& m, U&& v) noexcept requires(std::remove_cvref_t<M>::RowAtCompile != 1 && CUDA<M> && CUDA<U>) {
-        return device_obj<GEMV<M&&, U&&>>(std::forward<M>(m), std::forward<U>(v));
     }
 }
 

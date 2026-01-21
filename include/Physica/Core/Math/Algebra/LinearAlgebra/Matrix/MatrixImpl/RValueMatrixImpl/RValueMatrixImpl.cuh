@@ -24,6 +24,14 @@
 
 namespace Physica {
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator*(this auto&& self, Vector auto&& v) noexcept requires(RowAtCompile != 1) {
+        using Self = decltype(self);
+        using V = decltype(v);
+        static_assert(is_device_obj<V>::value, "[Error]: host-device mismatch");
+        return device_obj<GEMV<Self, V>>(std::forward<Self>(self), std::forward<V>(v));
+    }
+
+    template<class Derived>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assign(Matrix auto&& target) const {
         target.assert_assign(Base::getDerived());
         if (IsHost()) {
@@ -281,8 +289,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::reals() const noexcept -> RealsRtnTy {
-        return RealsRtnTy(Base::getDerived());
+    __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived>>::reals(this auto&& self) noexcept {
+        if constexpr (isComplex)
+            return device_obj<RealMatrix<Derived>>(self);
+        else
+            return std::forward<decltype(self)>(self);
     }
 
     template<class Derived>
@@ -301,8 +312,11 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::values() const noexcept -> ValuesRtnTy {
-        return ValuesRtnTy(Base::getDerived());
+    __host__ __device__ decltype(auto) device_obj<RValueMatrix<Derived>>::values(this auto&& self) noexcept {
+        if constexpr (isDiffable)
+            return device_obj<ValueMatrix<Derived>>(self);
+        else
+            return std::forward<decltype(self)>(self);
     }
 
     template<class Derived>

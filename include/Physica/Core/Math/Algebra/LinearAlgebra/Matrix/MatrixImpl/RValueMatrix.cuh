@@ -51,14 +51,12 @@ namespace Physica {
         using Tcv = Tc::ValueType;
 
         using Tm = std::conditional<isComplex, typename Tcv::MKL_Complex, typename T::MachineType>::type;
-    private:
-        using RealsRtnTy = std::conditional<isComplex, device_obj<RealMatrix<Derived>>, device_obj<Derived>&>::type;
-        using ValuesRtnTy = std::conditional<isDiffable, device_obj<ValueMatrix<Derived>>, device_obj<Derived>&>::type;
     public:
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
         /* Operations */
         __host__ __device__ void assign(Matrix auto&& target) const;
         __device__ void assign(Matrix auto&& target, const ThreadBlock& block) const;
@@ -101,11 +99,11 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
 
-        [[nodiscard]] __host__ __device__ RealsRtnTy reals() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) reals(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto imags() const noexcept;
         [[nodiscard]] __host__ __device__ auto squaredNorms() const noexcept;
         [[nodiscard]] __host__ __device__ auto norms() const noexcept;
-        [[nodiscard]] __host__ __device__ ValuesRtnTy values() const noexcept;
+        [[nodiscard]] __host__ __device__ decltype(auto) values(this auto&&) noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] __host__ __device__ auto grads() const noexcept;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "LayerBase.h"
-#include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "Physica/Core/Utils/CUDA/device_obj.h"
 
 namespace Physica {
     template<class Derived>

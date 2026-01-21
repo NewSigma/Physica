@@ -91,10 +91,8 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        template<Vector V>
-        [[nodiscard]] auto operator*(this auto&&, V&& v) noexcept requires(RowAtCompile != 1 && !CUDA<V>);
-        template<Vector V>
-        [[nodiscard]] auto operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>);
+        [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
+        [[nodiscard]] auto operator*(const Vector auto& v) const noexcept requires(RowAtCompile == 1);
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& target) const;
@@ -160,7 +158,7 @@ namespace Physica {
         [[nodiscard]] auto hermite() const noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;
 
-        [[nodiscard]] decltype(auto) reals() const noexcept;
+        [[nodiscard]] decltype(auto) reals(this auto&&) noexcept;
         [[nodiscard]] auto imags() const noexcept;
         [[nodiscard]] auto squaredNorms() const noexcept;
         [[nodiscard]] auto norms() const noexcept;

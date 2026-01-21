@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <memory>
 #include "Physica/Core/Parallel/CUDAContext.cuh"
-#include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "Physica/Core/Utils/CUDA/device_obj.h"
 #include "HostAllocator.h"
 
 namespace Physica {

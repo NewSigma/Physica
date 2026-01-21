@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,7 +21,7 @@
 #include <array>
 #include "Physica/CRCoro.h"
 #include "Physica/Core/Utils/Allocator/HostAllocator.h"
-#include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "Physica/Core/Utils/CUDA/device_obj.h"
 #include "ArrayImpl/ArrayBase.h"
 
 namespace Physica {

@@ -129,21 +129,6 @@ namespace Physica {
                 vec.reverse(mat.values().transpose() * g);
         }
     }
-
-    template<class Derived>
-    template<Vector V>
-    [[nodiscard]] auto RValueMatrix<Derived>::operator*(this auto&& self, V&& v) noexcept requires(RowAtCompile != 1 && !CUDA<V>) {
-        assert(self.getCol() == v.getLength());
-        using Self = decltype(self);
-        return GEMV<Self, V&&>(std::forward<Self>(self), std::forward<V>(v));
-    }
-
-    template<class Derived>
-    template<Vector V>
-    [[nodiscard]] auto RValueMatrix<Derived>::operator*(const V& v) const noexcept requires(RowAtCompile == 1 && !CUDA<V>) {
-        assert(getCol() == v.getLength());
-        return Base::getDerived().row(0) * v;
-    }
 }
 
 namespace Physica {
