@@ -26,7 +26,7 @@ using RandomSource = Random<MCG, 1234>;
 using Matrix4D = DenseMatrix<T, MatrixOption::Col, 4, 4>;
 
 namespace {
-    void trivial_inv() noexcept {
+    void invAndProd() noexcept {
         auto origin = Matrix4D::random_uniform<RandomSource>(4, 4);
         Matrix4D inv = origin.triu().inv();
         Matrix4D prod = origin.triu() * inv;
@@ -63,7 +63,7 @@ namespace {
 }
 
 int main() {
-    trivial_inv();
+    invAndProd();
     invGEMV();
     return 0;
 }

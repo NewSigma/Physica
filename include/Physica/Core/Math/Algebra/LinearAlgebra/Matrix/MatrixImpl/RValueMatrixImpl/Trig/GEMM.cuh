@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,17 +26,17 @@ namespace Physica {
         using host_obj = GEMM<M1, M2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using Base::isComplex;
+        using Ref1 = add_device_obj<M1>::type;
+        using Ref2 = add_device_obj<M2>::type;
     protected:
         using typename Base::T;
-        using Tc = T::ComplexType;
-        using Tm = std::conditional<isComplex, typename Tc::MKL_Complex, typename T::MachineType>::type;
+        using typename Base::Tc;
+        using typename Base::Tm;
     private:
-        const device_obj<M1>& trig;
-        const device_obj<M2>& rhs;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> trig;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M2>>> rhs;
     public:
-        device_obj(const device_obj<M1>& trig, const device_obj<M2>& rhs);
+        device_obj(Ref1 trig, Ref2 rhs);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -46,14 +46,14 @@ namespace Physica {
         /* Operations */
         void assign(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return trig.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const { return rhs.getCol(); }
-        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return trig; }
-        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return getRHS().getCol(); }
+        [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
-    device_obj<GEMM<M1, M2>>::device_obj(const device_obj<M1>& trig, const device_obj<M2>& rhs) : trig(trig), rhs(rhs) {}
+    device_obj<GEMM<M1, M2>>::device_obj(Ref1 trig, Ref2 rhs) : trig(asStruct(trig)), rhs(asStruct(rhs)) {}
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
@@ -63,8 +63,8 @@ namespace Physica {
         constexpr auto Uplo = Traits<M1>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
         constexpr auto TransA = CUBLAS_OP_N;
         constexpr auto Diag = Traits<M1>::Unit ? CUBLAS_DIAG_UNIT : CUBLAS_DIAG_NON_UNIT;
-        const M buffer = trig;
-        rhs.assign(target);
+        const M buffer = getLHS();
+        getRHS().assign(target);
 
         const size_t m = getRow();
         const size_t n = getCol();
@@ -76,7 +76,7 @@ namespace Physica {
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
-        if constexpr (isComplex) {
+        if constexpr (Base::isComplex) {
             if constexpr (T::Prec == Float32)
                 check(cublasCtrmm_64(ctx, Side, Uplo, TransA, Diag, m, n, &alpha, A, lda, B, ldb, B, ldb));
             else
@@ -88,5 +88,15 @@ namespace Physica {
             else
                 check(cublasDtrmm_64(ctx, Side, Uplo, TransA, Diag, m, n, &alpha, A, lda, B, ldb, B, ldb));
         }
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.trig.getDerived());
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
+    __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M2>(self.rhs.getDerived());
     }
 }
