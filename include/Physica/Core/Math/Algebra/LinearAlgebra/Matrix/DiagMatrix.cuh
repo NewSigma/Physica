@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include "DiagMatrix.h"
 #include "MatrixImpl/RValueMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
 
 namespace Physica {
     template<Scalar T, size_t Order>
@@ -109,7 +110,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     __host__ __device__ auto&& device_obj<DiagMatrix<T, Order>>::diag(this auto&& self) noexcept {
-        return std::forward<decltype(self)>(self).diag;
+        return forward_like<decltype(self)>(self.diags);
     }
 
     template<Scalar T, size_t Order>

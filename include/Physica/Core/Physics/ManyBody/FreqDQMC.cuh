@@ -21,6 +21,7 @@
 #include "FreqDQMC.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.cuh"
+#include "DQMCImpl/ActionMatrix.cuh"
 
 namespace Physica {
     template<Scalar T>
@@ -34,12 +35,13 @@ namespace Physica {
         using Cell = MDCell<Tr, 1>;
         template<Scalar U>
         using HostMatrix = DenseMatrix<U, MatrixOption::Col, Dynamic, Dynamic, PageLockedAllocator<U>>;
+
+        static_assert(T::Prec == Float32, "[Info]: Suggest FP32");
     private:
         Array<device_obj<DenseLU<T, false>>, 2> lu;
-        device_obj<MatrixND<T>> forceBuffer{};
+        device_obj<ActionMatrix<T>> action;
+        device_obj<MatrixND<T>> forceBuffer;
         device_obj<MatrixND<T>> solBuffer;
-        HostMatrix<T> detBuffer;
-        ActionMatrix<T> action;
 
         Array<device_obj<MatrixND<Tr>>, 2> greensD;
         Array<MatrixND<Tr>, 2> greensH;
@@ -76,7 +78,6 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void forceAsync(const Cell& cell, Vector auto& result);
         /* Getters */
-        [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
         [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
@@ -84,6 +85,8 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greensH; }
         [[nodiscard]] Trv getSign() const noexcept { return Trv(sign); }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
+        [[nodiscard]] Trv getRepelU() const noexcept { return action.getRepelU(); }
+        [[nodiscard]] Trv getBeta() const noexcept { return action.getBeta(); }
     private:
         [[nodiscard]] Vector2D<Trv> calcDet();
         [[nodiscard]] Vector2D<Trv> calcLnWeight();
@@ -103,9 +106,6 @@ namespace Physica {
             spinLU.resize(size);
         forceBuffer.resize(getAuxField());
         solBuffer.resize(size);
-        detBuffer.resize(size);
-
-        action.assign_kinetic(detBuffer);
     }
 
     template<Scalar T>
@@ -118,9 +118,6 @@ namespace Physica {
             spinLU.resize(size);
         forceBuffer.resize(getAuxField());
         solBuffer.resize(size);
-        detBuffer.resize(size);
-
-        action.assign_kinetic(detBuffer);
     }
 
     template<Scalar T>
@@ -167,7 +164,8 @@ namespace Physica {
         action.template randAuxField<R>();
 
         VectorND<Tr> init(getAuxField().getSize() * 2);
-        init.read(getAuxField());
+        check(cudaMemcpyAsync(init.data(), getAuxField().data(), sizeof(Tr) * init.getLength(), cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
+        CUDAExecutor::wait();
         hmc.setInitPosition(std::move(init));
     }
 
@@ -175,7 +173,7 @@ namespace Physica {
     template<RNG R, ExecutePolicy P>
     auto device_obj<FreqDQMC<T>>::step(HamiltonMC<Tr>& hmc) -> Trv {
         Trv acceptR = hmc.template step<R, P>(*this);
-        getAuxField().read(hmc.getSample());
+        check(cudaMemcpyAsync(getAuxField().data(), hmc.getSample().data(), sizeof(Tr) * hmc.getDOF(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
 
         auto [lnAD, sgnD] = calcDet();
         lnWeight = lnAD;
@@ -188,12 +186,16 @@ namespace Physica {
     template<ExecutePolicy P>
     auto device_obj<FreqDQMC<T>>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
-        getAuxField().read(pos);
+        check(cudaMemcpyAsync(getAuxField().data(), pos.data(), sizeof(Tr) * pos.getLength(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
 
-        MatrixND<Tr> buffer = getAuxField().squaredNorms();
-        buffer *= reciprocal(getBetaU());
-        buffer.row(0) *= Trv(0.5);
-        return buffer.sum() - calcDet()[0];
+        MatrixND<T> buffer;
+        buffer.resize(getAuxField());
+        buffer.read(pos);
+
+        MatrixND<Tr> sqnorms = buffer.squaredNorms();
+        sqnorms *= reciprocal(getBetaU());
+        sqnorms.row(0) *= Trv(0.5);
+        return sqnorms.sum() - calcDet()[0];
     }
 
     template<Scalar T>
@@ -207,13 +209,12 @@ namespace Physica {
     void device_obj<FreqDQMC<T>>::forceAsync(const Vector auto& pos, Vector auto& result) {
         assert(result.getLength() == pos.getLength());
         assert(result.getLength() == getAuxField().getSize() * 2);
-        getAuxField().read(pos);
+        check(cudaMemcpyAsync(getAuxField().data(), pos.data(), sizeof(Tr) * pos.getLength(), cudaMemcpyHostToDevice, CUDAContext::getInstance()));
         forceBuffer.zeros();
 
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
-            action.assign_potential(detBuffer);
-            spinLU.compute(detBuffer);
+            spinLU.compute(action);
 
             solBuffer = device_obj<IdentityMatrix<Tr>>(action.getOrder());
             spinLU.solve(solBuffer);
@@ -253,7 +254,10 @@ namespace Physica {
             action.flip();
         }
 
-        MatrixND<T> force = -getAuxField() * (Trv(2) / getBetaU());
+        MatrixND<T> force;
+        force.resize(getAuxField());
+        force.read(pos);
+        force *= Trv(-2) / getBetaU();
         force.row(0) *= Trv(0.5);
         force += forceBuffer.toHost();
         result.read(force);
@@ -267,12 +271,10 @@ namespace Physica {
 
     template<Scalar T>
     auto device_obj<FreqDQMC<T>>::calcDet() -> Vector2D<Trv> {
-        action.assign_potential(detBuffer);
-        lu[0].compute(detBuffer);
+        lu[0].compute(action);
 
         action.flip();
-        action.assign_potential(detBuffer);
-        lu[1].compute(detBuffer);
+        lu[1].compute(action);
 
         Trv lnAD = 0, sgnD = 1;
         for (const auto& spinLU : lu) {
@@ -337,7 +339,7 @@ namespace Physica {
 
     template<Scalar T>
     auto device_obj<FreqDQMC<T>>::getBetaU() const noexcept -> Trv {
-        return getParams().getBeta() * getParams().getRepelU();
+        return getBeta() * getRepelU();
     }
 }
 

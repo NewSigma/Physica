@@ -81,6 +81,8 @@ namespace Physica {
         void random_normal();
         template<RNG R>
         void random_any(auto& distribution);
+
+        [[nodiscard]] __host__ __device__ decltype(auto) reals() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ auto data_ptr(this auto&&, size_t index) noexcept;
     protected:
@@ -91,4 +93,5 @@ namespace Physica {
 }
 
 #include "LValueVectorImpl/LValueVectorImpl.cuh"
+#include "LValueVectorImpl/VectorConvert/RealVector.cuh"
 #include "LValueVectorImpl/LVectorBlock.cuh"

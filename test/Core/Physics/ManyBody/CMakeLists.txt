@@ -9,5 +9,6 @@ physica_add_test(SpinState SpinState.cpp)
 physica_add_test(TransIsingMatrix TransIsingMatrix.cpp)
 
 if(${PHYSICA_CUDA})
+    physica_add_test(ActionMatrix_cuda ActionMatrix.cu)
     physica_add_test(FreqDQMC_cuda FreqDQMC.cu)
 endif()

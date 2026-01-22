@@ -29,7 +29,7 @@ namespace Physica {
     private:
         PlainStruct<device_obj<M>> mat;
     public:
-        explicit device_obj(const device_obj<M>& mat) : mat(asStruct(mat)) {}
+        __host__ __device__ explicit device_obj(const device_obj<M>& mat) : mat(asStruct(mat)) {}
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;

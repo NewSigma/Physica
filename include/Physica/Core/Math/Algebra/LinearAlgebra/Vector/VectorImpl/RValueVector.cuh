@@ -26,6 +26,7 @@
 namespace Physica {
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public CRTPBase<device_obj<RValueVector<Derived>>> {
+        static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is not allowed");
         using host_obj = RValueVector<Derived>;
         using This = device_obj<host_obj>;
         using Base = CRTPBase<This>;
@@ -54,8 +55,8 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<Vector V>
-        __host__ __device__ void assign(V& target) const;
+        __host__ __device__ void assign(Vector auto&& target) const;
+        __device__ void assign(Vector auto&& target, const ThreadBlock& block) const;
         __host__ __device__ void assign_add(Vector auto& target) const;
         __host__ __device__ void assign_add_base(Vector auto& target) const;
         __host__ __device__ void assert_assign(const Vector auto& source) const noexcept;

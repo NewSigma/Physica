@@ -1,0 +1,60 @@
+/*
+ * Copyright 2026 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.cuh"
+
+namespace Physica {
+    template<class V>
+    class device_obj<RealVectorL<V>> : public device_obj<LValueVector<RealVectorL<V>>> {
+        using host_obj = RealVectorL<V>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<LValueVector<host_obj>>;
+    protected:
+        using typename Base::T;
+    private:
+        PlainStruct<device_obj<V>> v;
+    public:
+        __host__ __device__ explicit device_obj(device_obj<V>& v_) : v(asStruct(v_)) {}
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        using Base::operator=;
+        /* Operations */
+        using Base::resize;
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+        /* Getters */
+        [[nodiscard]] __host__ __device__ auto data_ptr(this auto&& self, size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return v.getDerived().getLength(); }
+    };
+
+    template<class V>
+    __host__ __device__ auto device_obj<RealVectorL<V>>::data_ptr(this auto&& self, size_t index) noexcept {
+        assert(index < self.getLength() && "[Error]: Index out of range");
+        return self.v.getDerived()[index].real_ptr();
+    }
+}
+
+namespace Physica {
+    template<class V>
+    class Traits<device_obj<RealVectorL<V>>> : public Traits<RealVectorL<V>> {};
+}

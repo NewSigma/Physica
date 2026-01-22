@@ -24,8 +24,7 @@
 
 namespace Physica {
     template<class Derived>
-    template<Vector V>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(V& target) const {
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target) const {
         target.assert_assign(Base::getDerived());
         if (IsHost()) {
             auto func = [source_ = asStruct(Base::getDerived()), target_ = asStruct(target)] __device__() mutable {
@@ -40,6 +39,13 @@ namespace Physica {
         }
         else if constexpr (IsDevice())
             assign_impl(target);
+    }
+
+    template<class Derived>
+    __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target, const ThreadBlock& block) const {
+        for (int i = block.rank(); i < getLength(); i += block.getLength())
+            target[i] = calc(i);
+        block.sync();
     }
 
     template<class Derived>

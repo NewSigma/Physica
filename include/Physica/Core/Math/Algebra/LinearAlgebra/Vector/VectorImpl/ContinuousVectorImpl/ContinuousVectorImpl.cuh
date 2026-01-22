@@ -237,7 +237,7 @@ namespace Physica {
     template<Vector V>
     void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<V>>& obj) const {
         static_assert(std::is_same<T, typename V::ScalarType>::value,
-                "[Error]: ScalarType inconsistent, additional buffer is necessary");
+                "[Error]: Type inconsistent between source and target, please cast instead of memcpy");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(T);
         obj.resize(length);
