@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,14 +17,16 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.cuh"
+#include "Test.h"
 
 using namespace Physica;
 using T = float32;
 using RandomSource = Random<PCG64DXSM, 1000>;
 
 namespace {
-    void testLU() {
+    void decomp() {
         auto answer = MatrixND<T>::random_uniform<RandomSource>(32, 32);
         answer.diag() = T(10); // Diagonal dominance for numerical stability
         device_obj<DenseLU<float32, false>> lu(answer.toDevice());
@@ -43,7 +45,16 @@ namespace {
             exit(1);
     }
 
-    void testSolve() {
+    void inverse() {
+        auto m = device_obj<MatrixND<T>>::random_uniform<RandomSource>(32, 32);
+        auto lu = device_obj<DenseLU<float32, false>>(m);
+        device_obj<MatrixND<T>> inv = lu.inv();
+        device_obj<MatrixND<T>> id = inv * m;
+
+        expect(matrixNear(id.toHost(), IdentityMatrix<T>(m.getRow()), 1E-4));
+    }
+
+    void inverseGEMV() {
         const auto A = MatrixND<T>::random_uniform<RandomSource>(32, 32);
         const auto b = MatrixND<T>::random_uniform<RandomSource>(32, 1);
         const VectorND<T> answer = MatrixND<T>(A.inv()) * b.col(0);
@@ -58,7 +69,8 @@ namespace {
 }
 
 int main() {
-    testLU();
-    testSolve();
+    decomp();
+    inverse();
+    inverseGEMV();
     return 0;
 }

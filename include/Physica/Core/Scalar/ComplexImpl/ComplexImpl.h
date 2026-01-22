@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -56,6 +56,16 @@ namespace Physica {
             *this = This(T(x.real()), T(x.imag()));
         else
             *this = This(T(x.real()));
+    }
+
+    template<Scalar T>
+    Complex<T>::operator MKL_Complex() const noexcept {
+        return {re.toMachine(), im.toMachine()};
+    }
+
+    template<Scalar T>
+    Complex<T>::operator cuBLAS_Complex() const noexcept {
+        return {re.toMachine(), im.toMachine()};
     }
 
     template<Scalar T>

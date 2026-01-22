@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,6 +34,7 @@ namespace Physica {
     private:
         device_obj<MatrixND<T>> working;
         [[no_unique_address]] PermType perm;
+
         device_obj<Array<std::byte>> deviceBuffer;
         Array<std::byte> hostBuffer;
         device_obj<Array<int>> err = device_obj<Array<int>>(1);
@@ -52,6 +53,7 @@ namespace Physica {
 
         [[nodiscard]] Tr lnAbsDet() const noexcept;
         [[nodiscard]] T sgndet() const noexcept;
+        [[nodiscard]] auto inv() const noexcept;
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -60,8 +62,6 @@ namespace Physica {
         [[nodiscard]] size_t getOrder() const noexcept { return working.getRow(); }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
-    private:
-        [[nodiscard]] constexpr static cudaDataType getDataType() noexcept;
     };
 
     template<Scalar T, bool Pivot>
@@ -130,6 +130,11 @@ namespace Physica {
     }
 
     template<Scalar T, bool Pivot>
+    auto device_obj<DenseLU<T, Pivot>>::inv() const noexcept {
+        return device_obj<Inverse<host_obj>>(*this);
+    }
+
+    template<Scalar T, bool Pivot>
     void device_obj<DenseLU<T, Pivot>>::resize(size_t size) {
         working.resize(size, size);
         if constexpr (Pivot)
@@ -140,10 +145,9 @@ namespace Physica {
             int64_t m = getOrder();
             int64_t n = m;
             constexpr cudaDataType dataTypeA = DataType;
-            const void* A = working.data();
             int64_t lda = m;
             constexpr cudaDataType computeType = DataType;
-            check(cusolverDnXgetrf_bufferSize(ctx, ctx, m, n, dataTypeA, A, lda, computeType, &deviceBufferSize, &hostBufferSize));
+            check(cusolverDnXgetrf_bufferSize(ctx, ctx, m, n, dataTypeA, nullptr, lda, computeType, &deviceBufferSize, &hostBufferSize));
         }
         deviceBuffer.resize(deviceBufferSize);
         hostBuffer.resize(hostBufferSize);
@@ -159,3 +163,5 @@ namespace Physica {
         err.swap(obj.err);
     }
 }
+
+#include "DenseLUImpl/Inverse.cuh"

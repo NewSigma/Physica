@@ -67,6 +67,8 @@ namespace Physica {
         using Base::operator=;
         This& operator=(const This&) = default;
         This& operator=(This&&) = default;
+        [[nodiscard]] explicit operator MKL_Complex() const noexcept;
+        [[nodiscard]] explicit operator cuBLAS_Complex() const noexcept;
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
 
         template<Scalar U>

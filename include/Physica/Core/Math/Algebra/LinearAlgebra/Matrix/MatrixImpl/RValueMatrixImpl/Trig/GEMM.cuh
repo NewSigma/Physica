@@ -58,7 +58,6 @@ namespace Physica {
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
     void device_obj<GEMM<M1, M2>>::assign(Matrix auto& target) const {
         using M = std::remove_cvref_t<decltype(target)>;
-        constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? CblasRowMajor : CblasColMajor;
         constexpr auto Side = CUBLAS_SIDE_LEFT;
         constexpr auto Uplo = Traits<M1>::Upper ? CUBLAS_FILL_MODE_UPPER : CUBLAS_FILL_MODE_LOWER;
         constexpr auto TransA = CUBLAS_OP_N;
@@ -72,7 +71,7 @@ namespace Physica {
         const auto* A = reinterpret_cast<const Tm*>(buffer.data());
         const size_t lda = Side == CUBLAS_SIDE_LEFT ? m : n;
         auto* B = reinterpret_cast<Tm*>(target.data());
-        const size_t ldb = Layout == CblasColMajor ? m : n;
+        const size_t ldb = MatrixOption::isColMatrix<M>() ? m : n;
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);

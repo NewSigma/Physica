@@ -215,9 +215,7 @@ namespace Physica {
         for (int spin : {0, 1}) {
             auto& spinLU = lu[spin];
             spinLU.compute(action);
-
-            solBuffer = device_obj<IdentityMatrix<Tr>>(action.getOrder());
-            spinLU.solve(solBuffer);
+            solBuffer = spinLU.inv();
 
             Trv factor = spin == 0 ? 1.0 : -1.0;
             int numSite = getNumSite();
@@ -299,9 +297,7 @@ namespace Physica {
     template<Scalar T>
     void device_obj<FreqDQMC<T>>::calcGreen() {
         for (int spin : {0, 1}) {
-            auto& spinLU = lu[spin];
-            solBuffer = device_obj<IdentityMatrix<Tr>>(action.getOrder());
-            spinLU.solve(solBuffer);
+            solBuffer = lu[spin].inv();
             traceGreen(spin);
         }
         CUDAExecutor::wait();

@@ -102,3 +102,4 @@ namespace Physica {
 
 #include "GEMM.cuh"
 #include "Inverse.cuh"
+#include "InvGEMM.cuh"
