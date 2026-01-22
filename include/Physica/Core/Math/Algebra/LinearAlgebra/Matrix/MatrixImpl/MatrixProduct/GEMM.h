@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,10 +35,10 @@ namespace Physica {
         using typename Base::Tv;
         using typename Base::Tm;
     private:
-        const M1& mat1;
-        const M2& mat2;
+        LazyDestroy<M1> mat1;
+        LazyDestroy<M2> mat2;
     public:
-        GEMM(const M1& mat1_, const M2& mat2_);
+        GEMM(M1&& mat1_, M2&& mat2_);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -59,8 +59,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] const M1& getLHS() const noexcept { return mat1; }
-        [[nodiscard]] const M2& getRHS() const noexcept { return mat2; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
         /* Static members */
         [[nodiscard]] constexpr static bool UseMKL(const Matrix auto& target) noexcept;
         /* Friends */
@@ -68,7 +68,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    GEMM<M1, M2>::GEMM(const M1& mat1_, const M2& mat2_) : mat1(mat1_), mat2(mat2_) {
+    GEMM<M1, M2>::GEMM(M1&& mat1_, M2&& mat2_) : mat1(std::forward<M1>(mat1_)), mat2(std::forward<M2>(mat2_)) {
         assert(mat1.getRow() > 0);
         assert(mat1.getCol() > 0);
         assert(mat2.getCol() > 0);
@@ -133,36 +133,43 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     constexpr bool GEMM<M1, M2>::UseMKL(const Matrix auto& target) noexcept {
         using M = decltype(target);
-        constexpr bool Large1 = M1::SizeAtCompile == Dynamic || M1::SizeAtCompile > Critical;
-        constexpr bool Large2 = M2::SizeAtCompile == Dynamic || M2::SizeAtCompile > Critical;
+        using T1 = std::remove_cvref_t<M1>;
+        using T2 = std::remove_cvref_t<M2>;
+        constexpr bool Large1 = T1::SizeAtCompile == Dynamic || T1::SizeAtCompile > Critical;
+        constexpr bool Large2 = T2::SizeAtCompile == Dynamic || T2::SizeAtCompile > Critical;
         constexpr bool UseMKL1 = Large1 && Large2;
-        constexpr bool UseMKL2 = Internal::EnableMKL<M1, M>::value;
-        constexpr bool UseMKL3 = Internal::EnableMKL<M2, M>::value;
+        constexpr bool UseMKL2 = Internal::EnableMKL<T1, M>::value;
+        constexpr bool UseMKL3 = Internal::EnableMKL<T2, M>::value;
         constexpr bool UseMKL = UseMKL1 && UseMKL2 && UseMKL3;
-        constexpr bool SameMajor1 = MatrixOption::getMajor<M1>() == MatrixOption::getMajor<M>();
-        constexpr bool SameMajor2 = MatrixOption::getMajor<M2>() == MatrixOption::getMajor<M>();
+        constexpr bool SameMajor1 = MatrixOption::getMajor<T1>() == MatrixOption::getMajor<M>();
+        constexpr bool SameMajor2 = MatrixOption::getMajor<T2>() == MatrixOption::getMajor<M>();
         constexpr bool SameMajor = SameMajor1 && SameMajor2;
         return UseMKL && SameMajor;
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto operator*(const M1& mat1, const M2& mat2) noexcept requires(((M1::ColAtCompile != 1 && M2::ColAtCompile != 1) || (M1::ColAtCompile == 1 && M2::ColAtCompile == 1)) && !CUDA<M1> && !CUDA<M2>) {
-        return GEMM<M1, M2>(mat1, mat2);
+    auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.mat1);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.mat2);
     }
 }
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
     class Traits<GEMM<M1, M2>> {
-        static_assert(M1::ColAtCompile == M2::RowAtCompile ||
-                      M1::ColAtCompile == Dynamic ||
-                      M2::RowAtCompile == Dynamic,
+        using T1 = std::remove_cvref_t<M1>;
+        using T2 = std::remove_cvref_t<M2>;
+        static_assert(T1::ColAtCompile == T2::RowAtCompile || T1::ColAtCompile == Dynamic || T2::RowAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor;
-        constexpr static size_t RowAtCompile = M1::RowAtCompile;
-        constexpr static size_t ColAtCompile = M2::ColAtCompile;
+        constexpr static size_t RowAtCompile = T1::RowAtCompile;
+        constexpr static size_t ColAtCompile = T2::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

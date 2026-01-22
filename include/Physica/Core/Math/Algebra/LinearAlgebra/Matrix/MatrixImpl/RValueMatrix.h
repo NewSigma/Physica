@@ -93,6 +93,7 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
         [[nodiscard]] auto operator*(const Vector auto& v) const noexcept requires(RowAtCompile == 1);
+        [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& target) const;

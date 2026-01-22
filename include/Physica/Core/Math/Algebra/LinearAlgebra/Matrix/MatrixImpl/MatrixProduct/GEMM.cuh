@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,18 +29,17 @@ namespace Physica {
         using host_obj = GEMM<M1, M2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
-        using Base::isReverseDiff;
+        using Ref1 = add_device_obj<M1>::type;
+        using Ref2 = add_device_obj<M2>::type;
     protected:
+        using typename Base::T;
         using typename Base::Tv;
+        using typename Base::Tm;
     private:
-        using Tm = ScalarType::MachineType;
-
-        Physica::PlainStruct<const M1> mat1;
-        Physica::PlainStruct<const M2> mat2;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> mat1;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M2>>> mat2;
     public:
-        __host__ __device__ device_obj(const M1& mat1_, const M2& mat2_);
+        __host__ __device__ device_obj(Ref1 mat1_, Ref2 mat2_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -52,7 +51,7 @@ namespace Physica {
         __host__ __device__ void assign_add(Matrix auto& target) const;
 
         [[nodiscard]] auto compute() const;
-        [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
+        [[nodiscard]] __device__ T calc(size_t, size_t) const { noImpl("GEMM.calc() is low performance and should be avoided"); }
         [[nodiscard]] __device__ Tv calc_value(size_t, size_t) const { noImpl("GEMM.calc_value() is low performance and should be avoided"); }
 
         void reverse(const Matrix auto& grad) const noexcept;
@@ -61,15 +60,15 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getRHS().getCol(); }
-        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return mat1.getDerived(); }
-        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return mat2.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     private:
         template<bool AssignAdd>
         void assign_impl_cublas(Matrix auto& target) const;
     };
 
     template<Matrix M1, Matrix M2>
-    __host__ __device__ device_obj<GEMM<M1, M2>>::device_obj(const M1& mat1_, const M2& mat2_) : mat1(asStruct(mat1_)), mat2(asStruct(mat2_)) {
+    __host__ __device__ device_obj<GEMM<M1, M2>>::device_obj(Ref1 mat1_, Ref2 mat2_) : mat1(asStruct(mat1_)), mat2(asStruct(mat2_)) {
         assert(mat1_.getCol() == mat2_.getRow());
     }
 
@@ -97,11 +96,21 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void device_obj<GEMM<M1, M2>>::reverse(const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
+        static_assert(Base::isReverseDiff);
         if constexpr (ReverseDiff<M1>)
             getLHS().reverse(grad * getRHS().values().transpose());
         if constexpr (ReverseDiff<M2>)
             getRHS().reverse(getLHS().values().transpose() * grad);
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.mat1.getDerived());
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ auto&& device_obj<GEMM<M1, M2>>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.mat2.getDerived());
     }
 
     template<Matrix M1, Matrix M2>
@@ -115,7 +124,6 @@ namespace Physica {
         static_assert(!Diffable<This>);
         target.assert_assign(*this);
 
-        using Tm = ScalarType::MachineType;
         const auto op1 = isTranspose1 ? CUBLAS_OP_T : CUBLAS_OP_N;
         const auto op2 = isTranspose2 ? CUBLAS_OP_T : CUBLAS_OP_N;
         const size_t r = getRow();
@@ -155,26 +163,22 @@ namespace Physica {
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);
-        if constexpr (ScalarType::Prec == Float16)
+        if constexpr (T::Prec == Float16)
             check(cublasHgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
-        else if constexpr (ScalarType::Prec == Float32)
+        else if constexpr (T::Prec == Float32)
             check(cublasSgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
         else {
-            static_assert(ScalarType::Prec == Float64, "[Error]: Unknown ScalarType");
+            static_assert(T::Prec == Float64, "[Error]: Unknown ScalarType");
             check(cublasDgemm_64(ctx, op1, op2, r, c, k, pAlpha, A, r, B, k, pBeta, C, r));
         }
-    }
-
-    template<Matrix M1, Matrix M2>
-    [[nodiscard]] __host__ __device__ auto operator*(const M1& mat1, const M2& mat2) noexcept
-            requires(((M1::ColAtCompile != 1 && M2::ColAtCompile != 1) || (M1::ColAtCompile == 1 && M2::ColAtCompile == 1)) && CUDA<M1> && CUDA<M2>) {
-        return device_obj<GEMM<M1, M2>>(mat1, mat2);
     }
 }
 
 namespace Physica {
     template<Matrix M1, Matrix M2>
     class Traits<device_obj<GEMM<M1, M2>>> : public Traits<GEMM<M1, M2>> {
+        static_assert(!is_device_obj<M1>::value);
+        static_assert(!is_device_obj<M2>::value);
     public:
         constexpr static bool FastAssign = true;
     };

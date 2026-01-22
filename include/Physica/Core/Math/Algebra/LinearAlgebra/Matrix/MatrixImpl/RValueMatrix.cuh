@@ -57,12 +57,18 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
+        [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Matrix auto&& m) noexcept;
         /* Operations */
         __host__ __device__ void assign(Matrix auto&& target) const;
         __device__ void assign(Matrix auto&& target, const ThreadBlock& block) const;
         __host__ __device__ void assign_add(Matrix auto&& target) const;
         __device__ void assign_add(Matrix auto&& target, const ThreadBlock& block) const;
         __host__ __device__ void assert_assign(const Matrix auto& source) const noexcept;
+
+        [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+        [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
+        [[nodiscard]] __device__ T calcFromMajorMinor(size_t major, size_t minor) const;
+        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept;
 
         __host__ __device__ void resize(const Matrix auto& m, auto&&... args);
         __host__ __device__ auto resize(size_t r, size_t c, auto&&... args);
@@ -88,13 +94,10 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto tril(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto tril_unit(this auto&&) noexcept;
 
-        [[nodiscard]] __device__ auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
-        [[nodiscard]] __device__ auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
-        [[nodiscard]] __device__ T calcFromMajorMinor(size_t major, size_t minor) const;
-        void reverse(const Matrix auto& y, const Matrix auto& grad) const noexcept;
-
         [[nodiscard]] __host__ __device__ auto sum_rows() const;
         [[nodiscard]] __host__ __device__ auto sum_cols() const;
+
+        [[nodiscard]] __host__ __device__ auto inv() const noexcept;
         [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
         [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;

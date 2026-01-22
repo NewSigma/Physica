@@ -41,6 +41,14 @@ namespace Physica {
     }
 
     template<class Derived>
+    [[nodiscard]] auto RValueMatrix<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+        using Self = decltype(self);
+        using M = decltype(m);
+        static_assert(!is_device_obj<M>::value, "[Error]: host-device mismatch");
+        return GEMM<Self, M>(std::forward<Self>(self), std::forward<M>(m));
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     void RValueMatrix<Derived>::assign(Matrix auto&& target) const {
         target.assert_assign(Base::getDerived());

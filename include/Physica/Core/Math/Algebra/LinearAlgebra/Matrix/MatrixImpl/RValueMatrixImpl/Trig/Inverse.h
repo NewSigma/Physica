@@ -31,9 +31,9 @@ namespace Physica {
         using typename Base::Tc;
         using typename Base::Tm;
     private:
-        LazyDestroy<M&&> trig;
+        const M& trig;
     public:
-        explicit Inverse(M trig);
+        explicit Inverse(const M& trig);
         Inverse(const This&) = default;
         Inverse(This&&) noexcept = default;
         ~Inverse() = default;
@@ -51,7 +51,7 @@ namespace Physica {
     };
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
-    Inverse<M>::Inverse(M trig) : trig(std::forward<M>(trig)) {}
+    Inverse<M>::Inverse(const M& trig) : trig(trig) {}
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     void Inverse<M>::assign(Matrix auto& target) const {

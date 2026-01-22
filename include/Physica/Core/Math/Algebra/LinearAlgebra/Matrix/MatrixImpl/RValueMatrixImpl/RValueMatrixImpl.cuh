@@ -28,7 +28,15 @@ namespace Physica {
         using Self = decltype(self);
         using V = decltype(v);
         static_assert(is_device_obj<V>::value, "[Error]: host-device mismatch");
-        return device_obj<GEMV<Self, V>>(std::forward<Self>(self), std::forward<V>(v));
+        return device_obj<GEMV<remove_device_obj_t<Self>, remove_device_obj_t<V>>>(std::forward<Self>(self), std::forward<V>(v));
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+        using Self = decltype(self);
+        using M = decltype(m);
+        static_assert(is_device_obj<M>::value, "[Error]: host-device mismatch");
+        return device_obj<GEMM<remove_device_obj_t<Self>, remove_device_obj_t<M>>>(std::forward<Self>(self), std::forward<M>(m));
     }
 
     template<class Derived>
@@ -100,6 +108,17 @@ namespace Physica {
         static_assert_assign(source);
         assert(getRow() == source.getRow() && "[Error]: Dimensions do not match");
         assert(getCol() == source.getCol() && "[Error]: Dimensions do not match");
+    }
+
+    template<class Derived>
+    __device__ auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const -> T {
+        return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
+    }
+
+    template<class Derived>
+    void device_obj<RValueMatrix<Derived>>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
+        static_assert(isReverseDiff);
+        Base::getDerived().reverse(grad);
     }
 
     template<class Derived>
@@ -250,17 +269,6 @@ namespace Physica {
     }
 
     template<class Derived>
-    __device__ auto device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const -> T {
-        return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
-    }
-
-    template<class Derived>
-    void device_obj<RValueMatrix<Derived>>::reverse(const Matrix auto&, const Matrix auto& grad) const noexcept {
-        static_assert(isReverseDiff);
-        Base::getDerived().reverse(grad);
-    }
-
-    template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::sum_rows() const {
         return device_obj<MatrixSum<Derived, false>>(Base::getDerived());
     }
@@ -268,6 +276,11 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::sum_cols() const {
         return device_obj<MatrixSum<Derived, true>>(Base::getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::inv() const noexcept {
+        return device_obj<Inverse<Derived>>(Base::getDerived());
     }
 
     template<class Derived>
@@ -367,3 +380,4 @@ namespace Physica {
 }
 
 #include "Trig/MatrixTrig.cuh"
+#include "Inverse.cuh"

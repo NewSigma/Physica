@@ -31,10 +31,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        LazyDestroy<M&&> mat;
-        LazyDestroy<V&&> vec;
+        LazyDestroy<M> mat;
+        LazyDestroy<V> vec;
     public:
-        GEMV(M mat, V vec);
+        GEMV(M&& mat, V&& vec);
         GEMV(const This&) = default;
         GEMV(This&&) noexcept = default;
         ~GEMV() = default;
@@ -56,12 +56,12 @@ namespace Physica {
         [[nodiscard]] auto values() const noexcept { return mat.values() * vec.values(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M, Vector V>
-    GEMV<M, V>::GEMV(M mat, V vec) : mat(std::forward<M>(mat)), vec(std::forward<V>(vec)) {}
+    GEMV<M, V>::GEMV(M&& mat, V&& vec) : mat(std::forward<M>(mat)), vec(std::forward<V>(vec)) {}
 
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
@@ -128,6 +128,16 @@ namespace Physica {
             else
                 vec.reverse(mat.values().transpose() * g);
         }
+    }
+
+    template<Matrix M, Vector V>
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M, Vector V>
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 }
 
