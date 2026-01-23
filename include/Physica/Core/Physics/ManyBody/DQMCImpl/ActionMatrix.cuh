@@ -180,7 +180,7 @@ namespace Physica {
     template<Scalar T>
     template<RNG R>
     void device_obj<ActionMatrix<T>>::randAuxField() {
-        Tr factor = sqrt(repelU / beta);
+        Tr factor = sqrt(repelU * beta);
         MatrixND<T> buffer;
         buffer.resize(auxField);
         buffer.template random_normal<R>();
