@@ -113,6 +113,9 @@ namespace Physica {
     };
 
     template<class T>
+    constexpr bool is_codiff_v = is_codiff<T>::value;
+
+    template<class T>
     struct remove_codiff {
         using Type = T;
     };

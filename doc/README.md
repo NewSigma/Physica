@@ -1,8 +1,8 @@
 # Physica Documentation
 
-Physica文档主要面向开发者，用于阐明Physica整体架构、算法设计细节及物理上的考虑。
+The Physica documentation is primarily aimed at developers, intended to clarify the overall architecture, algorithmic design details, and physical considerations of Physica.
 
-实践上，文档几乎总是滞后于代码更新。因此我们将文档的功能分解: Documentation讨论Why，include和src讨论What，examples讨论How。
+Practically, documentation almost always lags behind code updates. Therefore, we attempt to break down the functions of the documentation: **Documentation** discusses the *Why*, **include** and **src** discuss the *What*, and **examples** discuss the *How*.
 
 ## License
 

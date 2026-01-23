@@ -32,35 +32,38 @@ namespace Physica {
 
     namespace Internal {
         template<class T>
-        struct remove_device_obj_nocvref {
+        struct remove_device_obj_trivial {
+            static_assert(!std::is_reference_v<T> && !std::is_const_v<T> && !is_codiff_v<T>, "[Error]: Not a trivial type");
             using type = T;
         };
 
         template<class T>
-        struct remove_device_obj_nocvref<device_obj<T>> {
+        struct remove_device_obj_trivial<device_obj<T>> {
             using type = T;
         };
     }
 
     template<class T>
     struct is_device_obj {
-        constexpr static bool value = instanceof<device_obj, std::remove_cvref_t<T>>;
+        constexpr static bool value = instanceof<device_obj, remove_codiff_t<std::remove_cvref_t<T>>>;
     };
 
     template<class T>
-    using is_device_obj_v = is_device_obj<T>::value;
+    constexpr bool is_device_obj_v = is_device_obj<T>::value;
 
     template<class T>
     struct remove_device_obj {
     private:
         template<bool NoCVRef>
         struct Helper {
-            using type = Internal::remove_device_obj_nocvref<T>::type;
+            using type = Internal::remove_device_obj_trivial<T>::type;
         };
 
         template<>
         struct Helper<false> {
-            using type = copy_cvref<T, typename Internal::remove_device_obj_nocvref<std::remove_cvref_t<T>>::type>::type;
+            using U1 = Internal::remove_device_obj_trivial<remove_codiff_t<std::remove_cvref_t<T>>>::type;
+            using U2 = std::conditional<is_codiff<T>::value, CoDiff<U1>, U1>::type;
+            using type = copy_cvref<T, U2>::type;
         };
     public:
         using type = Helper<!std::is_reference_v<T> && !std::is_const_v<T>>::type;
@@ -72,24 +75,26 @@ namespace Physica {
     template<class T>
     struct add_device_obj {
     private:
-        template<bool NoCVRef>
+        template<bool Trivial>
         struct Helper {
             using type = device_obj<T>;
         };
 
         template<>
         struct Helper<false> {
-            using type = copy_cvref<T, device_obj<std::remove_cvref_t<T>>>::type;
+            using U1 = device_obj<remove_codiff_t<std::remove_cvref_t<T>>>;
+            using U2 = std::conditional<is_codiff<T>::value, CoDiff<U1>, U1>::type;
+            using type = copy_cvref<T, U2>::type;
         };
     public:
-        using type = Helper<!std::is_reference_v<T> && !std::is_const_v<T>>::type;
+        using type = Helper<!std::is_reference_v<T> && !std::is_const_v<T> && !is_codiff_v<T>>::type;
     };
 
     template<class T>
     using add_device_obj_t = add_device_obj<T>::type;
 
     template<class T>
-    concept CUDA = is_device_obj<remove_codiff_t<std::remove_cvref_t<T>>>::value;
+    concept CUDA = is_device_obj<T>::value;
 
     template<CUDA T>
     class device_obj<T> {
