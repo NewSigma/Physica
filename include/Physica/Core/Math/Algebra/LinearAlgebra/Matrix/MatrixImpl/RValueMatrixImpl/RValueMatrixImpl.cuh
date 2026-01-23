@@ -247,25 +247,29 @@ namespace Physica {
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu(this auto&& self) noexcept {
         using Self = decltype(self);
-        return device_obj<MatrixTrig<Derived, true, false>>(std::forward<Self>(self));
+        using M = remove_device_obj<Self>::type;
+        return device_obj<MatrixTrig<M, true, false>>(std::forward<Self>(self));
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::triu_unit(this auto&& self) noexcept {
         using Self = decltype(self);
-        return device_obj<MatrixTrig<Derived, true, true>>(std::forward<Self>(self));
+        using M = remove_device_obj<Self>::type;
+        return device_obj<MatrixTrig<M, true, true>>(std::forward<Self>(self));
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril(this auto&& self) noexcept {
         using Self = decltype(self);
-        return device_obj<MatrixTrig<Derived, false, false>>(std::forward<Self>(self));
+        using M = remove_device_obj<Self>::type;
+        return device_obj<MatrixTrig<M, false, false>>(std::forward<Self>(self));
     }
 
     template<class Derived>
     __host__ __device__ auto device_obj<RValueMatrix<Derived>>::tril_unit(this auto&& self) noexcept {
         using Self = decltype(self);
-        return device_obj<MatrixTrig<Derived, false, true>>(std::forward<Self>(self));
+        using M = remove_device_obj<Self>::type;
+        return device_obj<MatrixTrig<M, false, true>>(std::forward<Self>(self));
     }
 
     template<class Derived>

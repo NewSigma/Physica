@@ -27,15 +27,16 @@ namespace Physica {
         using host_obj = MatrixTrig<M, Upper, Unit>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     protected:
         using typename Base::T;
         using typename Base::Tr;
         using typename Base::Tv;
         using typename Base::Trv;
     private:
-        const device_obj<M>& mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat);
+        __host__ __device__ device_obj(Ref mat);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -48,13 +49,13 @@ namespace Physica {
 
         [[nodiscard]] auto lnAbsDet() const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat; }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.getCol(); }
+        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&& self) noexcept;
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getExpr().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getExpr().getCol(); }
     };
 
     template<Matrix M, bool Upper, bool Unit>
-    __host__ __device__ device_obj<MatrixTrig<M, Upper, Unit>>::device_obj(const device_obj<M>& mat) : mat(mat) {}
+    __host__ __device__ device_obj<MatrixTrig<M, Upper, Unit>>::device_obj(Ref mat) : mat(asStruct(mat)) {}
 
     template<Matrix M, bool Upper, bool Unit>
     __device__ auto device_obj<MatrixTrig<M, Upper, Unit>>::calc(size_t row, size_t col) const -> T {
@@ -70,7 +71,7 @@ namespace Physica {
         if constexpr (Unit)
             if (row == col)
                 return Trv(1);
-        return mat.calc(row, col);
+        return getExpr().calc(row, col);
     }
 
     template<Matrix M, bool Upper, bool Unit>
@@ -81,7 +82,7 @@ namespace Physica {
 
         if (row > col)
             return Tv(0);
-        return mat.calc_value(row, col);
+        return getExpr().calc_value(row, col);
     }
 
     template<Matrix M, bool Upper, bool Unit>
@@ -92,6 +93,11 @@ namespace Physica {
             assert(!Base::diag().prod().isZero() && "[Error]: Singular matrix");
             return ln(abs(Base::diag())).sum();
         }
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    __host__ __device__ auto&& device_obj<MatrixTrig<M, Upper, Unit>>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived());
     }
 }
 
