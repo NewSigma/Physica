@@ -31,14 +31,16 @@ namespace Physica {
 
         class Promise {
             struct suspend_yield : public std::suspend_always {
-                std::coroutine_handle<Promise> handle;
+                Promise* p;
 
-                void await_suspend(std::coroutine_handle<Promise> handle_) noexcept {
-                    handle = std::move(handle_);
+                explicit suspend_yield(Promise* p) : p(p) {}
+
+                static void await_suspend(std::coroutine_handle<>) noexcept {
+                    // In LLVM, await_suspend is implemented as an intrinsic. Making it static would enable more optimizations.
                 }
 
                 [[nodiscard]] Base await_resume() const noexcept {
-                    return Base(std::move(handle.promise().obj));
+                    return Base(std::move(p->obj));
                 }
             };
         public:

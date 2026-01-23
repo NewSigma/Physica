@@ -30,7 +30,7 @@ namespace Physica {
             obj = Base(arg.value());
         else
             obj = Base(std::forward<decltype(arg)>(arg).values());
-        return suspend_yield{};
+        return suspend_yield(this);
     }
 
     template<class Base>
