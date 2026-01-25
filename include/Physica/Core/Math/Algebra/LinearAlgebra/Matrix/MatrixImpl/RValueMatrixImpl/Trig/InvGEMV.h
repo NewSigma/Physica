@@ -32,10 +32,10 @@ namespace Physica {
         using typename Base::Tc;
         using typename Base::Tm;
     private:
-        LazyDestroy<M&&> inv;
-        LazyDestroy<V&&> rhs;
+        LazyDestroy<M> inv;
+        LazyDestroy<V> rhs;
     public:
-        GEMV(M inv, V rhs);
+        GEMV(M&& inv, V&& rhs);
         GEMV(const This&) = default;
         GEMV(This&&) noexcept = default;
         ~GEMV() = default;
@@ -52,7 +52,7 @@ namespace Physica {
     };
 
     template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
-    GEMV<M, V>::GEMV(M inv, V rhs) : inv(std::forward<M>(inv)), rhs(std::forward<V>(rhs)) {}
+    GEMV<M, V>::GEMV(M&& inv, V&& rhs) : inv(std::forward<M>(inv)), rhs(std::forward<V>(rhs)) {}
 
     template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
     template<ExecutePolicy P>

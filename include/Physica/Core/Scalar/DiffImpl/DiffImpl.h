@@ -92,13 +92,8 @@ namespace Physica {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ auto Diff<T, Mode, Order>::real_ptr() noexcept {
-        return RealType::PtrTy(v.real_ptr(), g.real_ptr());
-    }
-
-    template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ const auto Diff<T, Mode, Order>::real_ptr() const noexcept {
-        return Base::real_ptr();
+    __host__ __device__ auto Diff<T, Mode, Order>::real_ptr(this auto&& self) noexcept {
+        return RealType::PtrTy(self.v.real_ptr(), self.g.real_ptr());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -296,9 +291,10 @@ namespace Physica {
     template<Scalar T, Scalar U>
     [[nodiscard]] auto operator/(U&& x, T&& y) noexcept -> CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
             requires(ReverseDiff<T> && !Diffable<U>) {
-        const auto rep = reciprocal(std::forward<T>(y));
-        auto result = co_yield x * rep.value();
-        rep.reverse(x * result.grad());
+        LazyDestroy<U&&> x_ = std::forward<U>(x);
+        auto rep = reciprocal(std::forward<T>(y));
+        auto result = co_yield x_ * rep.value();
+        rep.reverse(x_ * result.grad());
     }
 
     template<Scalar T>

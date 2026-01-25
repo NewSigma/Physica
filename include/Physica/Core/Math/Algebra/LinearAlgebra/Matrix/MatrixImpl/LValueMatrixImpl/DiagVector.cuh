@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,10 +26,11 @@ namespace Physica {
         using host_obj = DiagVectorL<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<M>& mat) : mat(asStruct(mat)) {}
+        __host__ __device__ explicit device_obj(Ref mat) : mat(asStruct(mat)) {}
         device_obj(const This&) = default;
         device_obj(This&&) = default;
         ~device_obj() = default;

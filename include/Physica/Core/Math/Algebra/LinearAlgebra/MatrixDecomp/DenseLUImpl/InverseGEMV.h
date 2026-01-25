@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,10 +28,10 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tm;
 
-        LazyDestroy<M&&> m;
-        LazyDestroy<V&&> v;
+        LazyDestroy<M> m;
+        LazyDestroy<V> v;
     public:
-        GEMV(M m, V v);
+        GEMV(M&& m, V&& v);
         GEMV(const This&) = default;
         GEMV(This&&) noexcept = default;
         ~GEMV() = default;
@@ -54,7 +54,7 @@ namespace Physica {
     };
 
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
-    GEMV<M, V>::GEMV(M m, V v) : m(std::forward<M>(m)), v(std::forward<V>(v)) {}
+    GEMV<M, V>::GEMV(M&& m, V&& v) : m(std::forward<M>(m)), v(std::forward<V>(v)) {}
 
     template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
     template<ExecutePolicy P>

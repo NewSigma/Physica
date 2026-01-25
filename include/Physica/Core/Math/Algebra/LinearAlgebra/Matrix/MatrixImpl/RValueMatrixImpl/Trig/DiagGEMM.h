@@ -30,10 +30,10 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        LazyDestroy<M1&&> trig;
-        LazyDestroy<M2&&> diag;
+        LazyDestroy<M1> trig;
+        LazyDestroy<M2> diag;
     public:
-        GEMM(M1 trig, M2 diag);
+        GEMM(M1&& trig, M2&& diag);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -50,7 +50,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
-    GEMM<M1, M2>::GEMM(M1 trig, M2 diag) : trig(std::forward<M1>(trig)), diag(std::forward<M2>(diag)) {}
+    GEMM<M1, M2>::GEMM(M1&& trig, M2&& diag) : trig(std::forward<M1>(trig)), diag(std::forward<M2>(diag)) {}
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {

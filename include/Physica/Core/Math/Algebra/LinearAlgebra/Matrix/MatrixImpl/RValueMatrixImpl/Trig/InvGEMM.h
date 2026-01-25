@@ -32,10 +32,10 @@ namespace Physica {
         using typename Base::Tc;
         using typename Base::Tm;
     private:
-        LazyDestroy<M1&&> inv;
-        LazyDestroy<M2&&> rhs;
+        LazyDestroy<M1> inv;
+        LazyDestroy<M2> rhs;
     public:
-        GEMM(M1 inv, M2 rhs);
+        GEMM(M1&& inv, M2&& rhs);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -53,7 +53,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
-    GEMM<M1, M2>::GEMM(M1 inv, M2 rhs) : inv(std::forward<M1>(inv)), rhs(std::forward<M2>(rhs)) {}
+    GEMM<M1, M2>::GEMM(M1&& inv, M2&& rhs) : inv(std::forward<M1>(inv)), rhs(std::forward<M2>(rhs)) {}
 
     template<Matrix M1, Matrix M2> requires(instanceof<Inverse, M1> && instanceof_tx<MatrixTrig, typename Traits<M1>::ExprType>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {

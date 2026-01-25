@@ -68,6 +68,7 @@ namespace Physica {
         void step_random(HamiltonMC<Tr>& hmc);
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(HamiltonMC<Tr>& hmc);
+        [[nodiscard]] VectorND<Trv> makeDefaultMass() const;
 
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
@@ -78,7 +79,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void forceAsync(const Cell& cell, Vector auto& result);
         /* Getters */
-        [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
+        [[nodiscard]] auto&& getAuxField(this auto&& self) noexcept { return self.action.getAuxField(); }
         [[nodiscard]] int getNumSite() const noexcept { return action.getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] int getMaxBoson() const noexcept { return action.getMaxBoson(); }
@@ -180,6 +181,13 @@ namespace Physica {
         sign = sgnD;
         calcGreen();
         return acceptR;
+    }
+
+    template<Scalar T>
+    auto device_obj<FreqDQMC<T>>::makeDefaultMass() const -> VectorND<Trv> {
+        VectorND<Trv> result(getAuxField().getSize() * 2, 1);
+        result.tail(2) *= Trv(2);
+        return result;
     }
 
     template<Scalar T>

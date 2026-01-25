@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,10 +30,10 @@ namespace Physica {
         using typename Base::Tc;
         using typename Base::Tm;
     private:
-        LazyDestroy<M1&&> trig;
-        LazyDestroy<M2&&> rhs;
+        LazyDestroy<M1> trig;
+        LazyDestroy<M2> rhs;
     public:
-        GEMM(M1 trig, M2 rhs);
+        GEMM(M1&& trig, M2&& rhs);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -51,7 +51,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
-    GEMM<M1, M2>::GEMM(M1 trig, M2 rhs) : trig(std::forward<M1>(trig)), rhs(std::forward<M2>(rhs)) {}
+    GEMM<M1, M2>::GEMM(M1&& trig, M2&& rhs) : trig(std::forward<M1>(trig)), rhs(std::forward<M2>(rhs)) {}
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1>)
     void GEMM<M1, M2>::assign(Matrix auto& target) const {

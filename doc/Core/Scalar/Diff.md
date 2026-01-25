@@ -19,8 +19,26 @@ Physica在前向传播完成时暂停协程以等待未来的梯度, 使用RAII�
 对满足ReferseDiff概念的类型, 提供以下函数
 
     ``` C++
-    void reverse(GradType grad = 1) const noexcept { ... } // 累积梯度但不进行传播
+    // 累积梯度但不进行传播
+    void reverse(GradType grad = 1) const noexcept { ... }
     ```
+
+考虑
+
+    ``` C++
+    VectorND<dfloat> x = ...;
+    use(x.sum());
+    ```
+
+我们希望将`sum()`声明为`const`, `reverse`的声明应当保持一致:
+
+    ``` C++
+    // const reverse: working
+    // non-const reverse: does not compile
+    x.sum().reverse();
+    ```
+
+最底层的`reverse`实现需要使用`const_cast`.
 
 ### CoDiff
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,13 +17,14 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Scalar/Diff.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Test.h"
 
 using namespace Physica;
 using T = float64;
 
 namespace {
-    void testFunc() {
+    void testForwardFunc() {
         bool good = true;
         {
             using dfloat = Diff<T, DiffMode::Forward, 1>;
@@ -45,7 +46,7 @@ namespace {
         expect(good);
     }
 
-    void testMath() {
+    void testForwardMath() {
         bool good = true;
         {
             using dfloat = Diff<T, DiffMode::Forward, 1>;
@@ -67,14 +68,14 @@ namespace {
         expect(good);
     }
 
-    void testSIMD() {
-        T value[4]{1.5, -1.5, 0, 2};
-        T grad1[4]{1, 1, 1, 0};
-        T grad2[4]{0, 0, 0, 0};
+    void testForwardSIMD() {
+        Vector4D<T> value{1.5, -1.5, 0, 2};
+        Vector4D<T> grad1{1, 1, 1, 0};
+        Vector4D<T> grad2{0, 0, 0, 0};
 
         using dfloat = Diff<T, DiffMode::Forward, 2>;
         SIMD<dfloat, 4> packet{};
-        packet.load({value, {grad1, grad2}});
+        packet.load({value.data(), {grad1.data(), grad2.data()}});
 
         bool good = true;
         auto result = abs(packet);
@@ -121,7 +122,7 @@ namespace {
             func(x).reverse();
             expect(x.grad() == cos(x.value()) * cos(sin(x.value())));
         }
-        {
+        /* Test return value */ {
             auto func = [](dfloat& x, dfloat& y) {
                 return square(x - T(1.0)) + square(y - T(2.0));
             };
@@ -137,9 +138,9 @@ namespace {
 int main() {
     static_assert(std::formattable<Diff<float64, DiffMode::Forward>, char>);
     static_assert(std::formattable<DiffCoro<Diff<float64, DiffMode::Reverse>>, char>);
-    testFunc();
-    testMath();
-    testSIMD();
+    testForwardFunc();
+    testForwardMath();
+    testForwardSIMD();
     testReverse();
     return 0;
 }

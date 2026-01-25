@@ -37,10 +37,15 @@ namespace Physica {
      */
     class MatrixOption {
     public:
-        enum : char {
+        enum Major : char {
             Col = 0b00,
             Row = 0b01,
             AnyMajor = 0b10,
+
+            RightMajor = Col,
+            LeftMajor = Row,
+            FMajor = Col,
+            CMajor = Row,
         };
     public:
         MatrixOption() = delete;

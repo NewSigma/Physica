@@ -209,7 +209,8 @@ namespace Physica {
     __host__ __device__ auto device_obj<LValueMatrix<Derived>>::diag(this auto&& self) noexcept {
         assert(self.isSquare());
         using Self = decltype(self);
-        return device_obj<DiagVectorL<Derived>>(std::forward<Self>(self));
+        using M = remove_device_obj<Self>::type;
+        return device_obj<DiagVectorL<M>>(std::forward<Self>(self));
     }
 
     template<class Derived>

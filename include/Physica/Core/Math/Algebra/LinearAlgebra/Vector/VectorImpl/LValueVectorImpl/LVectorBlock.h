@@ -32,12 +32,12 @@ namespace Physica {
     public:
         using ScalarType = Base::ScalarType;
     private:
-        LazyDestroy<V&&> vec;
+        LazyDestroy<V> vec;
         size_t from;
         size_t to;
     public:
-        LVectorBlock(V vec, size_t from, size_t to);
-        LVectorBlock(V vec, size_t from);
+        LVectorBlock(V&& vec, size_t from, size_t to);
+        LVectorBlock(V&& vec, size_t from);
         LVectorBlock(const This& block) = default;
         LVectorBlock(This&&) noexcept = default;
         ~LVectorBlock() = default;
@@ -61,7 +61,7 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    LVectorBlock<V, Length>::LVectorBlock(V vec, size_t from, size_t to)
+    LVectorBlock<V, Length>::LVectorBlock(V&& vec, size_t from, size_t to)
             : vec(std::forward<V>(vec)), from(from), to(to) {
         assert(from < to);
         assert(to <= vec.getLength());
@@ -69,7 +69,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    LVectorBlock<V, Length>::LVectorBlock(V vec, size_t from_) : LVectorBlock(std::forward<V>(vec), from_, vec.getLength()) {}
+    LVectorBlock<V, Length>::LVectorBlock(V&& vec, size_t from_) : LVectorBlock(std::forward<V>(vec), from_, vec.getLength()) {}
 
     template<Vector V, size_t Length>
     auto LVectorBlock<V, Length>::operator=(const This& v) -> This& {

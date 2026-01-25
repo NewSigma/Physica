@@ -28,12 +28,12 @@ namespace Physica {
         using This = ContinuousVectorBlock<V, Length>;
         using Base = ContinuousVector<This>;
     private:
-        LazyDestroy<V&&> vec;
+        LazyDestroy<V> vec;
         size_t from;
         size_t to;
     public:
-        ContinuousVectorBlock(V vec, size_t from_, size_t to_);
-        ContinuousVectorBlock(V vec, size_t from_);
+        ContinuousVectorBlock(V&& vec, size_t from_, size_t to_);
+        ContinuousVectorBlock(V&& vec, size_t from_);
         ContinuousVectorBlock(const This& block) = default;
         ContinuousVectorBlock(This&&) noexcept = default;
         ~ContinuousVectorBlock() = default;
@@ -66,7 +66,7 @@ namespace Physica {
     };
 
     template<Vector V, size_t Length>
-    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V vec, size_t from_, size_t to_)
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V&& vec, size_t from_, size_t to_)
             : vec(std::forward<V>(vec)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
@@ -74,7 +74,7 @@ namespace Physica {
     }
 
     template<Vector V, size_t Length>
-    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V vec, size_t from_)
+    ContinuousVectorBlock<V, Length>::ContinuousVectorBlock(V&& vec, size_t from_)
             : ContinuousVectorBlock(std::forward<V>(vec), from_, vec.getLength()) {}
 
     template<Vector V, size_t Length>

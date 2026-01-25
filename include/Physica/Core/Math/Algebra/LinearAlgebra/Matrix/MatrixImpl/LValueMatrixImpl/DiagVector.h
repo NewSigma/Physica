@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,9 +26,9 @@ namespace Physica {
         using This = DiagVectorL<M>;
         using Base = LValueVector<This>;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
     public:
-        explicit DiagVectorL(M mat) : mat(std::forward<M>(mat)) {}
+        explicit DiagVectorL(M&& mat) : mat(std::forward<M>(mat)) {}
         DiagVectorL(const This&) = default;
         DiagVectorL(This&&) = default;
         ~DiagVectorL() = default;

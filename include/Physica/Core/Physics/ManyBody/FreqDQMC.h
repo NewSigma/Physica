@@ -60,6 +60,7 @@ namespace Physica {
         void step_random(HamiltonMC<Tr>& hmc);
         template<RNG R, ExecutePolicy P = Sequential>
         Trv step(HamiltonMC<Tr>& hmc);
+        [[nodiscard]] VectorND<Trv> makeDefaultMass() const;
 
         template<ExecutePolicy P = Sequential>
         [[nodiscard]] Trv potentialV(const Vector auto& pos);
@@ -71,7 +72,7 @@ namespace Physica {
         void forceAsync(const Cell& cell, Vector auto& result);
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return action.getParams(); }
-        [[nodiscard]] auto& getAuxField() noexcept { return action.getAuxField(); }
+        [[nodiscard]] auto&& getAuxField(this auto&& self) noexcept { return self.action.getAuxField(); }
         [[nodiscard]] int getNumSite() const noexcept { return getParams().getNumSite(); }
         [[nodiscard]] int getNumFreq() const noexcept { return action.getNumFreq(); }
         [[nodiscard]] int getMaxBoson() const noexcept { return action.getMaxBoson(); }
@@ -171,6 +172,13 @@ namespace Physica {
     }
 
     template<Scalar T>
+    auto FreqDQMC<T>::makeDefaultMass() const -> VectorND<Trv> {
+        VectorND<Trv> result(getAuxField().getSize() * 2, 1);
+        result.tail(2) *= Trv(2);
+        return result;
+    }
+
+    template<Scalar T>
     template<ExecutePolicy P>
     auto FreqDQMC<T>::potentialV(const Vector auto& pos) -> Trv {
         assert(pos.getLength() == getAuxField().getSize() * 2 && "[Error]: Real matrix contains 2x number of elements of complex matrix");
@@ -241,6 +249,12 @@ namespace Physica {
     }
 
     template<Scalar T>
+    int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
+        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
+        return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
+    }
+
+    template<Scalar T>
     template<ExecutePolicy P>
     auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
         for (auto& spinLU : lu) {
@@ -289,12 +303,6 @@ namespace Physica {
             }
             green.diag() += Trv(0.5);
         }, 2);
-    }
-
-    template<Scalar T>
-    int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
-        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
-        return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
     }
 
     template<Scalar T>

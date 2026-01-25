@@ -33,9 +33,9 @@ namespace Physica {
         using typename Base::Trv;
         using typename Base::Tm;
     private:
-        LazyDestroy<M&&> mat;
+        LazyDestroy<M> mat;
     public:
-        MatrixTrig(M mat_);
+        MatrixTrig(M&& mat_);
         MatrixTrig(const This&) = default;
         MatrixTrig(This&&) noexcept = default;
         ~MatrixTrig() = default;
@@ -61,7 +61,7 @@ namespace Physica {
     };
 
     template<Matrix M, bool Upper, bool Unit>
-    MatrixTrig<M, Upper, Unit>::MatrixTrig(M mat) : mat(std::forward<M>(mat)) {}
+    MatrixTrig<M, Upper, Unit>::MatrixTrig(M&& mat) : mat(std::forward<M>(mat)) {}
 
     template<Matrix M, bool Upper, bool Unit>
     template<ExecutePolicy P>
