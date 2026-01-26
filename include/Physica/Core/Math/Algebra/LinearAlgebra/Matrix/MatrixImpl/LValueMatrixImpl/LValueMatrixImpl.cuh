@@ -22,8 +22,7 @@
 
 namespace Physica {
     template<class Derived>
-    template<Scalar U>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const U& x) {
+    __host__ __device__ auto device_obj<LValueMatrix<Derived>>::operator=(Scalar auto x) -> device_obj<Derived>& {
         if (IsHost()) {
             auto func = [m_ = asStruct(Base::getDerived()), x] __device__() mutable {
                 auto& m = m_.getDerived();
@@ -44,25 +43,25 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator+=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator+=(Scalar auto x) {
         auto& m = Base::getDerived();
         (m + x).assign(m);
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator-=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator-=(Scalar auto x) {
         auto& m = Base::getDerived();
         (m - x).assign(m);
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator*=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator*=(Scalar auto x) {
         auto& m = Base::getDerived();
         (m * x).assign(m);
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator/=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueMatrix<Derived>>::operator/=(Scalar auto x) {
         auto& m = Base::getDerived();
         (m / x).assign(m);
     }

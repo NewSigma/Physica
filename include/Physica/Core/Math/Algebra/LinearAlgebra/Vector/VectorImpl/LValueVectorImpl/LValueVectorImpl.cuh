@@ -22,8 +22,7 @@
 
 namespace Physica {
     template<class Derived>
-    template<Scalar U>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const U& x) {
+    __host__ __device__ auto device_obj<LValueVector<Derived>>::operator=(Scalar auto x) -> device_obj<Derived>& {
         Base::static_assert_assign(x);
         if (IsHost()) {
             constexpr int WarpSize = Physica::CUDADevAttr::WarpSize;
@@ -44,7 +43,7 @@ namespace Physica {
             return Base::getDerived();
         }
         else if constexpr (IsDevice()) {
-            if constexpr (!std::same_as<T, U>)
+            if constexpr (!std::same_as<T, decltype(x)>)
                 return operator=(T(x));
             else {
                 for (size_t i = 0; i < Base::getLength(); ++i)
@@ -55,25 +54,25 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator+=(Scalar auto x) {
         auto& v = Base::getDerived();
         (v + x).assign(v);
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator-=(Scalar auto x) {
         auto& v = Base::getDerived();
         (v - x).assign(v);
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator*=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator*=(Scalar auto x) {
         auto& v = Base::getDerived();
         (v * x).assign(v);
     }
 
     template<class Derived>
-    __host__ __device__ void device_obj<LValueVector<Derived>>::operator/=(const Scalar auto& x) {
+    __host__ __device__ void device_obj<LValueVector<Derived>>::operator/=(Scalar auto x) {
         auto& v = Base::getDerived();
         (v / x).assign(v);
     }

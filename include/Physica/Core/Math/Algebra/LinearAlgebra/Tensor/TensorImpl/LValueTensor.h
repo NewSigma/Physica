@@ -37,14 +37,13 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
 
-        template<Scalar U>
-        Derived& operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
-        void operator+=(const Scalar auto& x);
-        void operator-=(const Scalar auto& x);
-        void operator*=(const Scalar auto& x);
-        void operator/=(const Scalar auto& x);
+        auto operator=(Scalar auto x) noexcept -> Derived&;
+        void operator+=(Scalar auto x) noexcept;
+        void operator-=(Scalar auto x) noexcept;
+        void operator*=(Scalar auto x) noexcept;
+        void operator/=(Scalar auto x) noexcept;
 
-        Derived& operator=(const Tensor auto& other);
+        auto operator=(const Tensor auto& other) -> Derived&;
         void operator+=(const Tensor auto& x);
         void operator-=(const Tensor auto& x);
 

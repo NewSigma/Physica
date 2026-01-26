@@ -46,14 +46,14 @@ namespace Physica {
         This& operator=(const This& v) = delete;
         This& operator=(This&& v) = delete;
 
-        Derived& operator=(const Scalar auto& x);
-        void operator+=(const Scalar auto& x);
-        void operator-=(const Scalar auto& x);
-        void operator*=(const Scalar auto& x);
-        void operator/=(const Scalar auto& x);
+        auto operator=(Scalar auto x) noexcept -> Derived&;
+        void operator+=(Scalar auto x) noexcept;
+        void operator-=(Scalar auto x) noexcept;
+        void operator*=(Scalar auto x) noexcept;
+        void operator/=(Scalar auto x) noexcept;
 
         template<ExecutePolicy P = Sequential>
-        Derived& operator=(const Vector auto& v);
+        auto operator=(const Vector auto& v) -> Derived&;
         void operator+=(const Vector auto& v);
         void operator-=(const Vector auto& v);
 

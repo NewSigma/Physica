@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<class Derived>
-    Derived& LValueVector<Derived>::operator=(const Scalar auto& x) {
+    auto LValueVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         Base::static_assert_assign(x);
         if constexpr (!std::same_as<T, std::remove_cvref_t<decltype(x)>>)
             return operator=(T(x));
@@ -34,25 +34,25 @@ namespace Physica {
     }
 
     template<class Derived>
-    void LValueVector<Derived>::operator+=(const Scalar auto& x) {
+    void LValueVector<Derived>::operator+=(Scalar auto x) noexcept {
         auto& v = Base::getDerived();
         (v + x).assign(v);
     }
 
     template<class Derived>
-    void LValueVector<Derived>::operator-=(const Scalar auto& x) {
+    void LValueVector<Derived>::operator-=(Scalar auto x) noexcept {
         auto& v = Base::getDerived();
         (v - x).assign(v);
     }
 
     template<class Derived>
-    void LValueVector<Derived>::operator*=(const Scalar auto& x) {
+    void LValueVector<Derived>::operator*=(Scalar auto x) noexcept {
         auto& v = Base::getDerived();
         (v * x).assign(v);
     }
 
     template<class Derived>
-    void LValueVector<Derived>::operator/=(const Scalar auto& x) {
+    void LValueVector<Derived>::operator/=(Scalar auto x) noexcept {
         auto& v = Base::getDerived();
         (v / x).assign(v);
     }

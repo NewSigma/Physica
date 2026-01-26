@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -54,11 +54,11 @@ private:
         if constexpr (Disable) {
             LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
             const auto latticeConst = cbrt(volume);
-            lattice *= latticeConst;
+            lattice *= latticeConst.value();
 
             PositionMatrix pos(numMolecular, 3);
             pos.random_uniform<RandomSource>();
-            pos *= latticeConst;
+            pos *= latticeConst.value();
 
             MassVector massVec(numMolecular, mass);
             return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));

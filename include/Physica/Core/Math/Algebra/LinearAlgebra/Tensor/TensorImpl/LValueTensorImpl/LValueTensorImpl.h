@@ -24,32 +24,31 @@
 
 namespace Physica {
     template<class Derived>
-    template<Scalar U>
-    Derived& LValueTensor<Derived>::operator=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+    auto LValueTensor<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         flatten() = x;
         return Base::getDerived();
     }
 
     template<class Derived>
-    void LValueTensor<Derived>::operator+=(const Scalar auto& x) {
+    void LValueTensor<Derived>::operator+=(Scalar auto x) noexcept {
         auto& t = Base::getDerived();
         (t + x).assign(t);
     }
 
     template<class Derived>
-    void LValueTensor<Derived>::operator-=(const Scalar auto& x) {
+    void LValueTensor<Derived>::operator-=(Scalar auto x) noexcept {
         auto& t = Base::getDerived();
         (t - x).assign(t);
     }
 
     template<class Derived>
-    void LValueTensor<Derived>::operator*=(const Scalar auto& x) {
+    void LValueTensor<Derived>::operator*=(Scalar auto x) noexcept {
         auto& t = Base::getDerived();
         (t * x).assign(t);
     }
 
     template<class Derived>
-    void LValueTensor<Derived>::operator/=(const Scalar auto& x) {
+    void LValueTensor<Derived>::operator/=(Scalar auto x) noexcept {
         auto& t = Base::getDerived();
         (t / x).assign(t);
     }

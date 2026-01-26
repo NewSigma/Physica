@@ -55,8 +55,8 @@ namespace Physica {
         double d;
     public:
         constexpr Real() = default;
-        __host__ __device__ constexpr Real(std::floating_point auto d_) noexcept : d(d_) {}
-        __host__ __device__ constexpr Real(std::integral auto i) noexcept : d(i) {}
+        [[gnu::nodebug]] __host__ __device__ constexpr Real(std::floating_point auto d_) noexcept : d(d_) {}
+        [[gnu::nodebug]] __host__ __device__ constexpr Real(std::integral auto i) noexcept : d(i) {}
         Real(const Integer& i) : Real(double(i)) {}
         Real(const Rational& r) : Real(double(r)) {}
         template<Scalar T>
@@ -79,9 +79,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ Real operator<<(int i) const { return Real(std::ldexp(d, i)); }
         [[nodiscard]] __host__ __device__ Real operator>>(int i) const { return Real(std::ldexp(d, -i)); }
         [[nodiscard]] __host__ __device__ Real operator-() const noexcept { return Real(-d); }
-        [[nodiscard]] __host__ __device__ bool operator>(const Real& s) const noexcept { return d > s.d; }
-        [[nodiscard]] __host__ __device__ bool operator<(const Real& s) const noexcept { return d < s.d; }
-        [[nodiscard]] __host__ __device__ bool operator==(const Real& s) const noexcept { return d == s.d; }
+        [[nodiscard]] __host__ __device__ constexpr bool operator>(const Real& s) const noexcept { return d > s.d; }
+        [[nodiscard]] __host__ __device__ constexpr bool operator<(const Real& s) const noexcept { return d < s.d; }
+        [[nodiscard]] __host__ __device__ constexpr bool operator==(const Real& s) const noexcept { return d == s.d; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Real mod() const noexcept;

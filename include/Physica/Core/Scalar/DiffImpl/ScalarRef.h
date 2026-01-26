@@ -44,7 +44,7 @@ namespace Physica {
         /* Operators */
         __host__ __device__ This& operator=(const This& other);
         __host__ __device__ This& operator=(This&& other) noexcept;
-        __host__ __device__ This& operator=(const Scalar auto& other);
+        __host__ __device__ This& operator=(Scalar auto other) noexcept;
         __host__ __device__ This& operator=(int x);
         __host__ __device__ This& operator=(double x);
         [[nodiscard]] __host__ __device__ bool operator==(const This& other) const;
@@ -94,7 +94,7 @@ namespace Physica {
     }
 
     template<Scalar T> requires(instanceof_tx<Diff, T>)
-    __host__ __device__ auto ScalarRef<T>::operator=(const Scalar auto& other) -> This& {
+    __host__ __device__ auto ScalarRef<T>::operator=(Scalar auto other) noexcept -> This& {
         using U = std::remove_reference<decltype(other)>::type;
         Base::template static_assert_assign<U>();
         value() = other.value();

@@ -23,7 +23,7 @@
 
 namespace Physica {
     template<class Derived>
-    Derived& ContinuousVector<Derived>::operator=(const Scalar auto& x) {
+    auto ContinuousVector<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         if constexpr (SizeAtCompile == Dynamic) {
             if (x.isZero())
                 zeros();

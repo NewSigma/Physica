@@ -56,9 +56,9 @@ namespace Physica {
         half h;
     public:
         constexpr Real() = default;
-        __host__ __device__ Real(half f_) noexcept : h(f_) {}
-        __host__ __device__ Real(std::floating_point auto f) : h(f) {}
-        __host__ __device__ Real(std::integral auto i) : h(i) {}
+        [[gnu::nodebug]] __host__ __device__ Real(half f_) noexcept : h(f_) {}
+        [[gnu::nodebug]] __host__ __device__ Real(std::floating_point auto f) : h(f) {}
+        [[gnu::nodebug]] __host__ __device__ Real(std::integral auto i) : h(i) {}
         template<Scalar T>
         __host__ __device__ explicit(Float16 < T::Prec) Real(const T& x) requires(!T::isComplex && !Diffable<T>);
         constexpr Real(const This&) = default;

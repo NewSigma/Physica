@@ -47,14 +47,7 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
-        [[nodiscard]] This& row([[maybe_unused]] size_t r) {
-            assert(r == 0);
-            return *this;
-        }
-        [[nodiscard]] const This& row([[maybe_unused]] size_t r) const {
-            assert(r == 0);
-            return *this;
-        }
+        [[nodiscard]] auto&& row(this auto&&, size_t r) noexcept;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
@@ -78,6 +71,12 @@ namespace Physica {
             , colCount(colCount) {
         assert(fromRow < mat.getRow());
         assert(fromCol + colCount <= mat.getCol());
+    }
+
+    template<Matrix M, size_t Col>
+    auto&& ContinuousMatrixBlock<M, 1, Col>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
+        assert(r == 0);
+        return self;
     }
 
     template<Matrix M, size_t Col>
@@ -124,14 +123,7 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
 
-        [[nodiscard]] This& col([[maybe_unused]] size_t c) {
-            assert(c == 0);
-            return *this;
-        }
-        [[nodiscard]] const This& col([[maybe_unused]] size_t c) const {
-            assert(c == 0);
-            return *this;
-        }
+        [[nodiscard]] auto&& col(this auto&&, size_t c) noexcept;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
@@ -155,6 +147,12 @@ namespace Physica {
             , fromCol(fromCol) {
         assert(fromRow + rowCount <= mat.getRow());
         assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M, size_t Row>
+    auto&& ContinuousMatrixBlock<M, Row, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
+        assert(c == 0);
+        return self;
     }
 
     template<Matrix M, size_t Row>
@@ -198,22 +196,8 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t length) { assert(length == 1); }
 
-        [[nodiscard]] This& row([[maybe_unused]] size_t r) {
-            assert(r == 0);
-            return *this;
-        }
-        [[nodiscard]] const This& row([[maybe_unused]] size_t r) const {
-            assert(r == 0);
-            return *this;
-        }
-        [[nodiscard]] This& col([[maybe_unused]] size_t c) {
-            assert(c == 0);
-            return *this;
-        }
-        [[nodiscard]] const This& col([[maybe_unused]] size_t c) const {
-            assert(c == 0);
-            return *this;
-        }
+        [[nodiscard]] auto&& row(this auto&&, size_t r) noexcept;
+        [[nodiscard]] auto&& col(this auto&&, size_t c) noexcept;
 
         [[nodiscard]] auto values(this auto&&) noexcept;
         template<int GradOrder = 1>
@@ -230,6 +214,18 @@ namespace Physica {
             , fromCol(fromCol) {
         assert(fromRow < mat.getRow());
         assert(fromCol < mat.getCol());
+    }
+
+    template<Matrix M>
+    auto&& ContinuousMatrixBlock<M, 1, 1>::row(this auto&& self, [[maybe_unused]] size_t r) noexcept {
+        assert(r == 0);
+        return self;
+    }
+
+    template<Matrix M>
+    auto&& ContinuousMatrixBlock<M, 1, 1>::col(this auto&& self, [[maybe_unused]] size_t c) noexcept {
+        assert(c == 0);
+        return self;
     }
 
     template<Matrix M>

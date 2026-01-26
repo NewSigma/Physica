@@ -23,42 +23,36 @@
 
 namespace Physica {
     template<class Derived>
-    template<Scalar T>
-    Derived& LValueMatrix<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
+    auto LValueMatrix<Derived>::operator=(Scalar auto x) noexcept -> Derived& {
         Base::static_assert_assign(x);
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
-        for (size_t i = 0; i < maxMajor; ++i) {
-            for (size_t j = 0; j < maxMinor; ++j) {
-                if constexpr (ReverseDiff<T>)
-                    refFromMajorMinor(i, j) = x.value();
-                else
+        for (size_t i = 0; i < maxMajor; ++i)
+            for (size_t j = 0; j < maxMinor; ++j)
                     refFromMajorMinor(i, j) = x;
-            }
-        }
         return Base::getDerived();
     }
 
     template<class Derived>
-    void LValueMatrix<Derived>::operator+=(const Scalar auto& x) {
+    void LValueMatrix<Derived>::operator+=(Scalar auto x) noexcept {
         auto& m = Base::getDerived();
         (m + x).assign(m);
     }
 
     template<class Derived>
-    void LValueMatrix<Derived>::operator-=(const Scalar auto& x) {
+    void LValueMatrix<Derived>::operator-=(Scalar auto x) noexcept {
         auto& m = Base::getDerived();
         (m - x).assign(m);
     }
 
     template<class Derived>
-    void LValueMatrix<Derived>::operator*=(const Scalar auto& x) {
+    void LValueMatrix<Derived>::operator*=(Scalar auto x) noexcept {
         auto& m = Base::getDerived();
         (m * x).assign(m);
     }
 
     template<class Derived>
-    void LValueMatrix<Derived>::operator/=(const Scalar auto& x) {
+    void LValueMatrix<Derived>::operator/=(Scalar auto x) noexcept {
         auto& m = Base::getDerived();
         (m / x).assign(m);
     }

@@ -37,12 +37,11 @@ namespace Physica {
         This& operator=(const This& obj) = delete;
         This& operator=(This&& obj) = delete;
 
-        template<Scalar U>
-        __host__ __device__ device_obj<Derived>& operator=(const U& x);
-        __host__ __device__ void operator+=(const Scalar auto& x);
-        __host__ __device__ void operator-=(const Scalar auto& x);
-        __host__ __device__ void operator*=(const Scalar auto& x);
-        __host__ __device__ void operator/=(const Scalar auto& x);
+        __host__ __device__ auto operator=(Scalar auto x) -> device_obj<Derived>&;
+        __host__ __device__ void operator+=(Scalar auto x);
+        __host__ __device__ void operator-=(Scalar auto x);
+        __host__ __device__ void operator*=(Scalar auto x);
+        __host__ __device__ void operator/=(Scalar auto x);
 
         __host__ __device__ device_obj<Derived>& operator=(const Vector auto& v);
         __host__ __device__ void operator+=(const Vector auto& v);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,8 @@ constexpr bool Disable = sizeof(int) == 0;
 
 namespace Physica {
     class Test {
-        using dfloat = Diff<float64, DiffMode::Reverse, 1>;
+        using T = float64;
+        using dfloat = Diff<T, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<dfloat>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
@@ -46,8 +47,8 @@ namespace Physica {
                 ForceModel forceModel(cell, pair_cutoff, Ewald<dfloat>{});
                 forceModel.potentialV(cell).reverse();
                 /* Test press */ {
-                    const float64 press_diff = -volume.grad() / float64(cellSize * cellSize * cellSize);
-                    const float64 press = (forceModel.virial(cell).trace() / float64(3)).value();
+                    const T press_diff = -volume.grad() / T(cellSize * cellSize * cellSize);
+                    const T press = (forceModel.virial(cell).trace() / T(3)).value();
                     expect(scalarNear(press_diff, press, 1E-12));
                 }
             }
@@ -57,18 +58,18 @@ namespace Physica {
          * Reference:
          * [1] mp-7000; https://doi.org/10.17188/1272685
          */
-        static Vector3D<float64> randomVector(float64 latticeConst) {
+        static Vector3D<T> randomVector(T latticeConst) {
             constexpr double equalR = PhyConst<AU>::angstormToBohr(1.62844); // Bond length of Si-O, refer to [1]
-            const auto theta = float64::random_uniform<RandomSource>() * float64(M_PI);
-            const auto phi = float64::random_uniform<RandomSource>() * float64(M_PI * 2);
-            Vector3D<float64> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-            result *= float64(equalR / double(latticeConst.value())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
+            const auto theta = T::random_uniform<RandomSource>() * T(M_PI);
+            const auto phi = T::random_uniform<RandomSource>() * T(M_PI * 2);
+            Vector3D<T> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+            result *= T(equalR / double(latticeConst.value())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;
         }
 
         static MDCell<dfloat> makeSystem(dfloat& cellVolume, unsigned int cellSize) {
             if constexpr (Disable) {
-                using CrystalCellType = CrystalCell<float64>;
+                using CrystalCellType = CrystalCell<T>;
                 using LatticeMatrix = CrystalCellType::LatticeMatrix;
                 constexpr size_t maxIndexO = MoleculePerCell * 2;
                 constexpr size_t maxIndexSi = MoleculePerCell * 3;
@@ -80,29 +81,29 @@ namespace Physica {
                 CrystalCellType::PositionMatrix pos(numAtom, 3);
                 std::uniform_real_distribution dist(-0.1, 0.1);
                 for (size_t i = 0; i < MoleculePerCell; ++i) {
-                    auto temp = Vector3D<float64>::template random_any<RandomSource>(3, dist);
+                    auto temp = Vector3D<T>::template random_any<RandomSource>(3, dist);
                     if (i == 0) {
-                        temp[0] += float64(0.25);
-                        temp[1] += float64(0.25);
-                        temp[2] += float64(0.25);
+                        temp[0] += T(0.25);
+                        temp[1] += T(0.25);
+                        temp[2] += T(0.25);
                     }
                     else if (i == 1) {
-                        temp[0] += float64(0.75);
-                        temp[1] += float64(0.75);
-                        temp[2] += float64(0.25);
+                        temp[0] += T(0.75);
+                        temp[1] += T(0.75);
+                        temp[2] += T(0.25);
                     }
                     else if (i == 2) {
-                        temp[0] += float64(0.75);
-                        temp[1] += float64(0.25);
-                        temp[2] += float64(0.75);
+                        temp[0] += T(0.75);
+                        temp[1] += T(0.25);
+                        temp[2] += T(0.75);
                     }
                     else if (i == 3) {
-                        temp[0] += float64(0.25);
-                        temp[1] += float64(0.75);
-                        temp[2] += float64(0.75);
+                        temp[0] += T(0.25);
+                        temp[1] += T(0.75);
+                        temp[2] += T(0.75);
                     }
 
-                    temp *= latticeConst;
+                    temp *= latticeConst.value();
                     auto posSi = pos.row(i + maxIndexO);
                     auto posO1 = pos.row(2 * i);
                     auto posO2 = pos.row(2 * i + 1);

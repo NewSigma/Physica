@@ -22,7 +22,7 @@
 
 namespace Physica {
     template<class Derived>
-    device_obj<Derived>& device_obj<ContinuousVector<Derived>>::operator=(const Scalar auto& x) {
+    auto device_obj<ContinuousVector<Derived>>::operator=(Scalar auto x) -> device_obj<Derived>& {
         if constexpr (Base::SizeAtCompile == Dynamic) {
             if (x.isZero())
                 zeros();

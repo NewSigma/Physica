@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,43 +26,43 @@ using namespace Physica;
 constexpr bool Disable = sizeof(int) == 0;
 namespace Physica {
     class Test {
-        using ValueType = float64;
-        using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
-        using MDCellType = MDCell<ScalarType>;
+        using T = float64;
+        using dfloat = Diff<T, DiffMode::Reverse, 1>;
+        using MDCellType = MDCell<dfloat>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
         using MassVector = MDCellType::MassVector;
     public:
         static void run() {
             if constexpr (Disable) {
-                ScalarType volume = 125;
+                dfloat volume = 125;
                 const size_t cellSize = 3;
                 const auto cell = makeSystem(volume, cellSize);
                 const auto& pos = cell.getPos();
-                VectorND<ScalarType> charges(cell.getNumParticle(), 1.0);
+                VectorND<dfloat> charges(cell.getNumParticle(), 1.0);
                 auto tail = charges.tail(cell.getNumParticle() / 2);
-                tail = float64(-1);
-                RSpaceEwald<ScalarType, false> ewald(cell.getLattice(), std::move(charges));
+                tail = T(-1);
+                RSpaceEwald<dfloat, false> ewald(cell.getLattice(), std::move(charges));
                 ewald.potentialV(pos).reverse();
                 /* Test press */ {
-                    const ValueType press_diff = -volume.grad() / ValueType(cellSize * cellSize * cellSize);
-                    const ValueType press = (ewald.virial(pos).trace() / ScalarType(3)).value();
+                    const T press_diff = -volume.grad() / T(cellSize * cellSize * cellSize);
+                    const T press = (ewald.virial(pos).trace() / dfloat(3)).value();
                     expect(scalarNear(press_diff, press, 1E-13));
                 }
             }
         }
     private:
-        static MDCellType makeSystem(ScalarType& volume, size_t cellSize) {
+        static MDCellType makeSystem(dfloat& volume, size_t cellSize) {
             if constexpr (Disable) {
                 constexpr size_t numMolecularUnitCell = 2;
                 LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
                 const auto latticeConst = cbrt(volume);
-                lattice *= latticeConst;
+                lattice *= latticeConst.value();
 
-                PositionMatrix pos(numMolecularUnitCell, 3, ValueType(0));
+                PositionMatrix pos(numMolecularUnitCell, 3, T(0));
                 auto row = pos.row(1);
-                row = float64(0.5);
-                pos *= latticeConst;
+                row = T(0.5);
+                pos *= latticeConst.value();
 
                 MassVector massVec(numMolecularUnitCell, 1);
                 MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));

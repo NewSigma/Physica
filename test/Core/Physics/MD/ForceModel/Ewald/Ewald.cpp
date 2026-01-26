@@ -186,12 +186,12 @@ namespace Physica {
                 constexpr size_t numMolecularUnitCell = 2;
                 LatticeMatrix lattice = MDCellType::LatticeMatrix::identity(3);
                 const auto latticeConst = cbrt(volume);
-                lattice *= latticeConst;
+                lattice *= latticeConst.value();
 
                 PositionMatrix pos(numMolecularUnitCell, 3, Tv(0));
                 auto row = pos.row(1);
                 row = Tv(0.5);
-                pos *= latticeConst;
+                pos *= latticeConst.value();
 
                 MassVector massVec(numMolecularUnitCell, 1);
                 MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));

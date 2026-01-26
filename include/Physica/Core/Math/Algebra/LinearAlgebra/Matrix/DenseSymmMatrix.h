@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,11 +43,11 @@ namespace Physica {
         using Base::operator=;
         This& operator=(This obj) noexcept { swap(obj); return *this; }
 
-        This& operator=(const Scalar auto& x);
-        void operator+=(const Scalar auto& x);
-        void operator-=(const Scalar auto& x);
-        void operator*=(const Scalar auto& x);
-        void operator/=(const Scalar auto& x);
+        auto operator=(Scalar auto x) noexcept -> This&;
+        void operator+=(Scalar auto x) noexcept;
+        void operator-=(Scalar auto x) noexcept;
+        void operator*=(Scalar auto x) noexcept;
+        void operator/=(Scalar auto x) noexcept;
 
         template<Vector V>
         [[nodiscard]] auto operator*(const V& v) const noexcept;
@@ -105,28 +105,28 @@ namespace Physica {
     }
 
     template<Scalar T, size_t Order>
-    auto DenseSymmMatrix<T, Order>::operator=(const Scalar auto& x) -> This& {
+    auto DenseSymmMatrix<T, Order>::operator=(Scalar auto x) noexcept -> This& {
         asVector() = x;
         return *this;
     }
 
     template<Scalar T, size_t Order>
-    void DenseSymmMatrix<T, Order>::operator+=(const Scalar auto& x) {
+    void DenseSymmMatrix<T, Order>::operator+=(Scalar auto x) noexcept {
         asVector() += x;
     }
 
     template<Scalar T, size_t Order>
-    void DenseSymmMatrix<T, Order>::operator-=(const Scalar auto& x) {
+    void DenseSymmMatrix<T, Order>::operator-=(Scalar auto x) noexcept {
         asVector() -= x;
     }
 
     template<Scalar T, size_t Order>
-    void DenseSymmMatrix<T, Order>::operator*=(const Scalar auto& x) {
+    void DenseSymmMatrix<T, Order>::operator*=(Scalar auto x) noexcept {
         asVector() *= x;
     }
 
     template<Scalar T, size_t Order>
-    void DenseSymmMatrix<T, Order>::operator/=(const Scalar auto& x) {
+    void DenseSymmMatrix<T, Order>::operator/=(Scalar auto x) noexcept {
         asVector() /= x;
     }
 

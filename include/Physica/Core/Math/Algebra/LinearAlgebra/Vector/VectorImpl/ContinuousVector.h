@@ -53,7 +53,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This& v) = delete;
         This& operator=(This&& v) noexcept = delete;
-        Derived& operator=(const Scalar auto& x);
+        Derived& operator=(Scalar auto x) noexcept;
         using Base::operator=;
         using Base::operator+=;
         /* Operations */
