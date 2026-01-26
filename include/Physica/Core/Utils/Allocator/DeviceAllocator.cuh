@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <memory>
 #include "Physica/Core/Parallel/CUDAContext.cuh"
-#include "Physica/Core/Utils/CUDA/device_obj.h"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "HostAllocator.h"
 
 namespace Physica {
@@ -40,12 +40,12 @@ namespace Physica {
         This& operator=(const This&) noexcept = default;
         This& operator=(This&&) noexcept = default;
         /* Operations */
-        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ pointer allocate(size_t n) noexcept;
+        [[nodiscard, gnu::returns_nonnull]] __host__ __device__ pointer allocate(size_t n);
         __host__ __device__ void deallocate(pointer p, size_t n) noexcept;
     };
 
     template<class T>
-    __host__ __device__ auto DeviceAllocator<T>::allocate(size_t n) noexcept -> pointer {
+    __host__ __device__ auto DeviceAllocator<T>::allocate(size_t n) -> pointer {
         assert(n > 0 && "[Error]: Allocate nothing");
         size_t size = n * sizeof(value_type);
         void* p{};
@@ -53,10 +53,11 @@ namespace Physica {
             p = ::operator new(size);
         else {
             if constexpr (CUDADevAttr::MemoryPoolsSupported)
-                cudaMallocAsync(&p, size, CUDAContext::getInstance());
+                check(cudaMallocAsync(&p, size, CUDAContext::getInstance()));
             else
-                cudaMalloc(&p, size);
+                check(cudaMalloc(&p, size));
         }
+        assert(p != nullptr && "[Error]: Expect exception instead of nullptr");
         return reinterpret_cast<pointer>(p);
     }
 
