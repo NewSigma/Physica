@@ -19,7 +19,6 @@
 #pragma once
 
 #include "FreqDQMC.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/IdentityMatrix.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseLU.cuh"
 #include "DQMCImpl/ActionMatrix.cuh"
 
@@ -42,6 +41,7 @@ namespace Physica {
         device_obj<ActionMatrix<T>> action;
         device_obj<MatrixND<T>> forceBuffer;
         device_obj<MatrixND<T>> solBuffer;
+        Trv correction;
 
         Array<device_obj<MatrixND<Tr>>, 2> greensD;
         Array<MatrixND<Tr>, 2> greensH;
@@ -100,6 +100,7 @@ namespace Physica {
     template<Scalar T>
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
             : action(params, host_obj::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+            , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greensD(2, params.getNumSite())
             , greensH(2, params.getNumSite()) {
         size_t size = action.getOrder();
@@ -111,7 +112,8 @@ namespace Physica {
 
     template<Scalar T>
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity)
-            : action(params, host_obj::calcFreqCutoff(params.getBeta(), freqDensity))
+            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
+            , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greensD(2, params.getNumSite())
             , greensH(2, params.getNumSite()) {
         size_t size = action.getOrder();
@@ -316,7 +318,8 @@ namespace Physica {
         auto kernel = [solBuffer_ = asStruct(solBuffer),
                        green = asStruct(greensD[spin]),
                        numSite = getNumSite(),
-                       size = 2 * getNumFreq()] __device__() mutable {
+                       size = 2 * getNumFreq(),
+                       correction = correction] __device__() mutable {
             const auto& solBuffer = solBuffer_.getDerived();
             unsigned int row = blockIdx.x * blockDim.x + threadIdx.x;
             unsigned int col = blockIdx.y;
@@ -327,7 +330,7 @@ namespace Physica {
             }
 
             if (row == col)
-                elem += Tr(0.5);
+                elem += Tr(0.5) + correction;
 
             green.getDerived()[row, col] = elem;
         };

@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include "DQMCImpl/ActionMatrix.h"
-#include "DQMCImpl/ImagKinetic.h"
 #include "Physica/Core/Physics/MC/HamiltonMC.h"
+#include "DQMCImpl/ActionMatrix.h"
+#include "ElasticDQMC.h"
 
 namespace Physica {
     template<Scalar T>
@@ -35,6 +35,7 @@ namespace Physica {
     private:
         Array<DenseLU<T, false>, 2> lu;
         ActionMatrix<T> action;
+        Trv correction;
 
         GreenPair greens;
         Trv lnWeight = Trv::nan();
@@ -79,8 +80,6 @@ namespace Physica {
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] Trv getSign() const noexcept { return sign; }
         [[nodiscard]] Trv getRSign() const noexcept { return getSign(); }
-        /* Static members */
-        [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
     private:
         template<ExecutePolicy P>
         [[nodiscard]] Vector2D<Trv> calcDet();
@@ -95,6 +94,7 @@ namespace Physica {
     template<Scalar T>
     FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
             : action(params, calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+            , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greens(2, params.getNumSite()) {
         size_t size = action.getOrder();
         for (auto& spinLU : lu)
@@ -103,7 +103,8 @@ namespace Physica {
 
     template<Scalar T>
     FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity)
-            : action(params, calcFreqCutoff(params.getBeta(), freqDensity))
+            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity))
+            , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greens(2, params.getNumSite()) {
         size_t size = action.getOrder();
         for (auto& spinLU : lu)
@@ -249,12 +250,6 @@ namespace Physica {
     }
 
     template<Scalar T>
-    int FreqDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
-        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
-        return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
-    }
-
-    template<Scalar T>
     template<ExecutePolicy P>
     auto FreqDQMC<T>::calcDet() -> Vector2D<Trv> {
         for (auto& spinLU : lu) {
@@ -301,7 +296,7 @@ namespace Physica {
                 green += inv.block(offset, numSite, offset, numSite).reals();
                 offset += numSite;
             }
-            green.diag() += Trv(0.5);
+            green.diag() += Trv(0.5) + correction;
         }, 2);
     }
 

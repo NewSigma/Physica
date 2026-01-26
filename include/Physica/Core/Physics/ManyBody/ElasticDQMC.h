@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "DQMCImpl/ImagKinetic.h"
-#include "FreqDQMC.h"
 
 namespace Physica {
     template<Scalar T>
@@ -42,6 +41,7 @@ namespace Physica {
         VectorND<Trv> rSquareOmegas;
         GreenPair greens;
         GreenPair buffer;
+        T correction;
 
         MatrixND<T> actionR;
         SymmEigenSolver<T> eig;
@@ -68,10 +68,14 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] const auto& getParams() const noexcept { return *params; }
         [[nodiscard]] int getNumSite() const noexcept { return params->getNumSite(); }
+        [[nodiscard]] int getNumFreq() const noexcept { return rSquareOmegas.getLength(); }
         [[nodiscard]] int getNumSplit() const noexcept { return params->getNumSplit(); }
         [[nodiscard]] const auto& getGreens() noexcept { return greens; }
         [[nodiscard]] constexpr static Trv getSign() noexcept { return 1; }
         [[nodiscard]] constexpr static Trv getRSign() noexcept { return 1; }
+        /* Static members */
+        [[nodiscard]] static int calcFreqCutoff(Trv beta, Trv freqDensity) noexcept;
+        [[nodiscard]] static T calcLocalCorrection(T beta, T repelU, T chemMu, int numFreq) noexcept;
     private:
         template<RNG R>
         [[nodiscard]] T randAuxField();
@@ -81,9 +85,10 @@ namespace Physica {
     template<Scalar T>
     ElasticDQMC<T>::ElasticDQMC(const Params& params_, Trv freqDensity)
             : params(&params_)
-            , rSquareOmegas(FreqDQMC<Tc>::calcFreqCutoff(params_.getBeta(), freqDensity))
+            , rSquareOmegas(calcFreqCutoff(params_.getBeta(), freqDensity))
             , greens(2, params_.getNumSite())
             , buffer(2, params_.getNumSite())
+            , correction(calcLocalCorrection(params->getBeta(), params->getRepelU(), params->getChemMu(), getNumFreq()))
             , actionR(params_.getHoppingMatrix() * params_.getBeta())
             , eig(params_.getNumSite(), true) {
         assert(freqDensity.isPositive());
@@ -140,6 +145,35 @@ namespace Physica {
     }
 
     template<Scalar T>
+    int ElasticDQMC<T>::calcFreqCutoff(Trv beta, Trv freqDensity) noexcept {
+        int i = static_cast<int>((beta * freqDensity).toMachine() * 0.25);
+        return std::max(i, 1) * 4; // Multiple of 4 so that SIMD works
+    }
+    /**
+     * Simple correction on infinite summation
+     *
+     * Reference:
+     * [1] Phys. Rev. B 110, 085132 (2024); https://doi.org/10.1103/PhysRevB.110.085132
+     */
+    template<Scalar T>
+    T ElasticDQMC<T>::calcLocalCorrection(T beta, T repelU, T chemMu, int numFreq) noexcept {
+        T shift = chemMu - repelU - 0.5;
+        if (shift.isZero())
+            return 0;
+
+        auto calcF = [=](T omega) {
+            return T(-2) / beta * (shift / (square(shift) + square(omega)));
+        };
+
+        auto calcFreq = [](int m) {
+            return T(2 * m + 1) * MathConst<T>::pi;
+        };
+        T omega1 = calcFreq(numFreq);
+        T omega2 = calcFreq(numFreq + 1);
+        return fma(T(5), calcF(omega2), calcF(omega1)) / T(12) + arctan(omega2 / shift) / MathConst<T>::pi - unit(shift) * 0.5;
+    }
+
+    template<Scalar T>
     template<RNG R>
     T ElasticDQMC<T>::randAuxField() {
         Tr betaU = params->getBeta() * params->getRepelU();
@@ -162,7 +196,7 @@ namespace Physica {
             auto& green = buffer[spin];
             MatrixND<T> temp = eig.getEigenvectors() * DiagMatrix<T>(eigenvalues.grads());
             green = temp * eig.getEigenvectors().transpose();
-            green.diag() = Trv(0.5) + green.diag();
+            green.diag() += Trv(0.5) + correction;
         }
         Tr betaU = params->getBeta() * params->getRepelU();
         lnAbsDet -= ln1pexp(lncosh(actionR.diag()) + fma(betaU, Trv(-0.5), MathConst<Trv>::ln2)).sum();
