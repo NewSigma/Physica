@@ -93,7 +93,7 @@ namespace Physica {
 
     template<Scalar T>
     FreqDQMC<T>::FreqDQMC(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
-            : action(params, calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greens(2, params.getNumSite()) {
         size_t size = action.getOrder();

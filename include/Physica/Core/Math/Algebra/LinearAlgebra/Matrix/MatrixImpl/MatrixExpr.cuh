@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -44,8 +44,7 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return expr.getDerived(); }
-        [[nodiscard]] __host__ __device__ auto& getExpr() noexcept { return expr.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
     };
 
     template<ExprID ID, Matrix M>
@@ -65,6 +64,11 @@ namespace Physica {
             return Base::getDerived();
         else
             return Base::hermite();
+    }
+
+    template<ExprID ID, Matrix M>
+    __host__ __device__ auto&& device_obj<UnitaryMatrixExpr<ID, M>>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.expr.getDerived());
     }
 
     template<ExprID ID, class LHS, class RHS>

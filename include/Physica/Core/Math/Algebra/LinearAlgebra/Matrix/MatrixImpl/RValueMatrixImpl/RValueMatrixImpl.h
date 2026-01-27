@@ -354,8 +354,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::inv() const noexcept {
-        return Inverse<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::inv(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return Inverse<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
@@ -364,8 +365,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueMatrix<Derived>::transpose() const noexcept {
-        return Transpose<Derived>(Base::getDerived());
+    auto RValueMatrix<Derived>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return Transpose<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
@@ -381,7 +383,7 @@ namespace Physica {
         if constexpr (isComplex)
             return Hermite<Derived>(Base::getDerived());
         else
-            return transpose();
+            return Base::getDerived().transpose();
     }
 
     template<class Derived>

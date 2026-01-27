@@ -45,21 +45,24 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) hermite() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
-        [[nodiscard]] auto& getExpr() noexcept { return expr; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
     };
 
     template<ExprID ID, Matrix M>
-    decltype(auto) UnitaryMatrixExpr<ID, M>::transpose() const noexcept {
+    decltype(auto) UnitaryMatrixExpr<ID, M>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (MatrixOption::isSymmMatrix<M>())
-            return Base::getDerived();
-        else
-            return Base::transpose();
+            return std::forward<Self>(self);
+        else {
+            using X = Base; // FIXME: clang 22 rejects valid
+            [[maybe_unused]] auto x = sizeof(X);
+            return std::forward<Self>(self).X::transpose();
+        }
     }
 
     template<ExprID ID, Matrix M>
@@ -68,6 +71,11 @@ namespace Physica {
             return Base::getDerived();
         else
             return Base::hermite();
+    }
+
+    template<ExprID ID, Matrix M>
+    auto&& UnitaryMatrixExpr<ID, M>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.expr);
     }
 
     template<ExprID ID, class LHS, class RHS>
@@ -94,7 +102,7 @@ namespace Physica {
 
         [[nodiscard]] auto operator*(this auto&&, Vector auto&& v) noexcept requires(RowAtCompile != 1);
         /* Operations */
-        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) hermite() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const;
@@ -128,11 +136,15 @@ namespace Physica {
     }
 
     template<ExprID ID, class LHS, class RHS>
-    decltype(auto) BinaryMatrixExpr<ID, LHS, RHS>::transpose() const noexcept {
+    decltype(auto) BinaryMatrixExpr<ID, LHS, RHS>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
         if constexpr (isStaticSymm())
-            return Base::getDerived();
-        else
-            return Base::transpose();
+            return std::forward<Self>(self);
+        else {
+            using X = Base; // FIXME: clang 22 rejects valid
+            [[maybe_unused]] auto x = sizeof(X);
+            return std::forward<Self>(self).X::transpose();
+        }
     }
 
     template<ExprID ID, class LHS, class RHS>

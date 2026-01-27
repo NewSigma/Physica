@@ -38,10 +38,15 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
-        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept { return self.mat.data_ptr(index, index); }
     };
+
+    template<Matrix M>
+    auto&& DiagVectorL<M>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
 }
 
 namespace Physica {

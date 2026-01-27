@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,9 +49,13 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return getExpr().getLength(); }
-        [[nodiscard]] const auto& getExpr() const noexcept { return expr; }
-        [[nodiscard]] auto& getExpr() noexcept { return expr; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
     };
+
+    template<ExprID ID, Vector V>
+    auto&& UnitaryVectorExpr<ID, V>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.expr);
+    }
 
     template<ExprID ID, class LHS, class RHS>
     class BinaryVectorExpr : public RValueVector<VectorExpr<ID, LHS, RHS>> {

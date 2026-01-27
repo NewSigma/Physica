@@ -47,13 +47,18 @@ namespace Physica {
 
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return vec.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getLength(); }
     };
 
     template<Vector V>
     __host__ __device__ decltype(auto) device_obj<Conjugate<V>>::conjugate(this auto&& self) noexcept {
         return forward_like<decltype(self)>(self.vec);
+    }
+
+    template<Vector V>
+    __host__ __device__ auto&& device_obj<Conjugate<V>>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec.getDerived());
     }
 }
 

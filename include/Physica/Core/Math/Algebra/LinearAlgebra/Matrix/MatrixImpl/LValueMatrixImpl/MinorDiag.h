@@ -39,7 +39,7 @@ namespace Physica {
         using Base::resize;
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
-        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() - std::abs(shift); }
         [[nodiscard]] auto data_ptr(this auto&& self, size_t index) noexcept;
     };
@@ -56,6 +56,11 @@ namespace Physica {
         size_t r = shift < 0 ? -shift : 0;
         size_t c = shift > 0 ? shift : 0;
         return self.mat.data_ptr(r + index, c + index);
+    }
+
+    template<Matrix M>
+    auto&& MinorDiagL<M>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 }
 

@@ -187,8 +187,9 @@ namespace Physica {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::transpose() const noexcept {
-        return Transpose<Derived>(Base::getDerived());
+    auto RValueVector<Derived>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
+        return Transpose<Self>(std::forward<Self>(self));
     }
 
     template<class Derived>
@@ -205,7 +206,7 @@ namespace Physica {
         if constexpr (isComplex)
             return Hermite<Derived>(Base::getDerived());
         else
-            return transpose();
+            return Base::getDerived().transpose();
     }
 
     template<class Derived>

@@ -283,13 +283,17 @@ namespace Physica {
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::inv() const noexcept {
-        return device_obj<Inverse<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::inv(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<Inverse<M>>(std::forward<Self>(self));
     }
 
     template<class Derived>
-    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::transpose() const noexcept {
-        return device_obj<Transpose<Derived>>(Base::getDerived());
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
+        using M = remove_device_obj<Self>::type;
+        return device_obj<Transpose<M>>(std::forward<Self>(self));
     }
 
     template<class Derived>

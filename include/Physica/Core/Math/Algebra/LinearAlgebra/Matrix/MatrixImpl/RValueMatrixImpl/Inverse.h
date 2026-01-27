@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,9 +29,9 @@ namespace Physica {
         using Base = RValueMatrix<This>;
         using typename Base::T;
 
-        const M& mat;
+        LazyDestroy<M> mat;
     public:
-        explicit Inverse(const M& mat_);
+        explicit Inverse(M&& mat_);
         Inverse(const This&) = default;
         Inverse(This&&) noexcept = default;
         ~Inverse() = default;
@@ -50,14 +50,14 @@ namespace Physica {
     };
 
     template<Matrix M>
-    Inverse<M>::Inverse(const M& mat_) : mat(mat_) {
+    Inverse<M>::Inverse(M&& mat_) : mat(std::forward<M>(mat_)) {
         assert(mat.getRow() == mat.getCol());
     }
 
     template<Matrix M>
     void Inverse<M>::assign(Matrix auto& target) const {
-        using M1 = std::remove_cvref_t<decltype(target)>;
-        constexpr size_t Order = std::max(M::RowAtCompile, M1::RowAtCompile);
+        using M2 = std::remove_cvref_t<decltype(target)>;
+        constexpr size_t Order = std::max(Base::RowAtCompile, M2::RowAtCompile);
         if constexpr (Order == 1)
             target = reciprocal(mat[0, 0]);
         else if constexpr (Order == 2)

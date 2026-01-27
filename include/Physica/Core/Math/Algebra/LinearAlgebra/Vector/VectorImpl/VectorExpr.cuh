@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,12 +40,16 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getLength(); }
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return expr.getDerived(); }
-        [[nodiscard]] __host__ __device__ auto& getExpr() noexcept { return expr.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
     };
 
     template<ExprID ID, Vector V>
     __host__ __device__ device_obj<UnitaryVectorExpr<ID, V>>::device_obj(V expr_) : expr(asStruct(expr_)) {}
+
+    template<ExprID ID, Vector V>
+    __host__ __device__ auto&& device_obj<UnitaryVectorExpr<ID, V>>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.expr.getDerived());
+    }
 
     template<ExprID ID, Vector LHS, class RHS>
     class device_obj<BinaryVectorExpr<ID, LHS, RHS>> : public device_obj<RValueVector<VectorExpr<ID, LHS, RHS>>> {

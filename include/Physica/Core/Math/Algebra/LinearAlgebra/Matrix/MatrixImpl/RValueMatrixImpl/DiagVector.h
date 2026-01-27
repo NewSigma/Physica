@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,9 +40,14 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] T calc(size_t index) const { return mat.calc(index, index); }
         /* Getters */
-        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
     };
+
+    template<Matrix M>
+    auto&& DiagVectorR<M>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
 }
 
 namespace Physica {

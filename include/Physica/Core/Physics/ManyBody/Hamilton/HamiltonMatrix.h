@@ -46,7 +46,7 @@ namespace Physica {
     public:
         ~HamiltonMatrix() = default;
         /* Operations */
-        [[nodiscard]] decltype(auto) transpose() const noexcept;
+        [[nodiscard]] decltype(auto) transpose(this auto&&) noexcept;
         [[nodiscard]] const Derived& hermite() const noexcept { return Base::getDerived(); }
         /* Getters */
         [[nodiscard]] const auto& getModel() const noexcept { return Base::getDerived().getModel(); }
@@ -64,11 +64,15 @@ namespace Physica {
     };
 
     template<class Derived>
-    decltype(auto) HamiltonMatrix<Derived>::transpose() const noexcept {
-        if constexpr (T::isComplex)
-            return Base::transpose();
+    decltype(auto) HamiltonMatrix<Derived>::transpose(this auto&& self) noexcept {
+        using Self = decltype(self);
+        if constexpr (T::isComplex) {
+            using X = Base; // FIXME: clang 22 rejects valid
+            [[maybe_unused]] auto x = sizeof(X);
+            return std::forward<Self>(self).X::transpose();
+        }
         else
-            return Base::getDerived();
+            return std::forward<Self>(self);
     }
 }
 

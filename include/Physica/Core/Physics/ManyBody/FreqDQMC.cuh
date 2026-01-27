@@ -99,7 +99,7 @@ namespace Physica {
 
     template<Scalar T>
     device_obj<FreqDQMC<T>>::device_obj(const HubbardParams<Tr>& params, Trv freqDensity, int maxBoson)
-            : action(params, host_obj::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
+            : action(params, ElasticDQMC<Trv>::calcFreqCutoff(params.getBeta(), freqDensity), maxBoson)
             , correction(ElasticDQMC<Trv>::calcLocalCorrection(params.getBeta(), params.getRepelU(), params.getChemMu(), getNumFreq()))
             , greensD(2, params.getNumSite())
             , greensH(2, params.getNumSite()) {

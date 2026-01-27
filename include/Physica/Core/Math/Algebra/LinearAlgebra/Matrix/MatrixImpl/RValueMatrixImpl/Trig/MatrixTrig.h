@@ -55,7 +55,7 @@ namespace Physica {
         [[nodiscard]] auto lnAbsDet() const;
         [[nodiscard]] auto sgndet() const;
         /* Getters */
-        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getCol(); }
     };
@@ -127,6 +127,11 @@ namespace Physica {
             return Trv(1);
         else
             return unit(mat.diag()).prod();
+    }
+
+    template<Matrix M, bool Upper, bool Unit>
+    auto&& MatrixTrig<M, Upper, Unit>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 }
 

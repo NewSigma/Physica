@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -41,13 +41,13 @@ namespace Physica {
         using This = Transpose<M>;
         using Base = RValueMatrix<This>;
 
-        const M& mat;
+        LazyDestroy<M> mat;
     public:        
         using typename Base::T;
         using typename Base::Tv;
         using typename Base::Tm;
     public:
-        Transpose(const M& mat_) : mat(mat_) {}
+        Transpose(M&& mat_) : mat(std::forward<M>(mat_)) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
@@ -64,7 +64,7 @@ namespace Physica {
 
         [[nodiscard]] const M& transpose() const noexcept { return mat; }
         /* Getters */
-        [[nodiscard]] const auto& getExpr() const noexcept { return mat; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return mat.getCol(); }
         [[nodiscard]] size_t getCol() const noexcept { return mat.getRow(); }
     };
@@ -72,7 +72,7 @@ namespace Physica {
     template<Matrix M>
     template<ExecutePolicy P>
     void Transpose<M>::assign(Matrix auto&& target) const {
-        constexpr bool LargeMatrix = M::SizeAtCompile == Dynamic;
+        constexpr bool LargeMatrix = Traits<This>::SizeAtCompile == Dynamic;
         if constexpr (LargeMatrix && Internal::EnableMKL<M, decltype(target)>::value && MatrixOption::isSameMajor<M, decltype(target)>()) {
             if (Base::getSize() <= 16)
                 Base::template assign<P>(target);
@@ -83,6 +83,11 @@ namespace Physica {
             Base::template assign<P>(target);
     }
 
+    template<Matrix M>
+    auto&& Transpose<M>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
     template<Vector V>
     class Transpose<V> : public RValueMatrix<Transpose<V>> {
         using This = Transpose<V>;
@@ -91,9 +96,9 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tv;
     private:
-        const V& vec;
+        LazyDestroy<V> vec;
     public:
-        explicit Transpose(const V& vec_) : vec(vec_) {}
+        explicit Transpose(V&& vec_) : vec(std::forward<V>(vec_)) {}
         Transpose(const This&) = default;
         Transpose(This&&) noexcept = default;
         ~Transpose() = default;
@@ -122,25 +127,26 @@ namespace Physica {
 namespace Physica {
     template<Matrix M>
     class Traits<Transpose<M>> {
-    private:
+        using M1 = std::remove_cvref_t<M>;
         constexpr static int OtherMajor = MatrixOption::isColMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr static int Major = MatrixOption::isAnyMajor<M>() ? MatrixOption::AnyMajor : OtherMajor;
     public:
-        using ScalarType = M::ScalarType;
+        using ScalarType = M1::ScalarType;
         constexpr static int Option = Major;
-        constexpr static size_t RowAtCompile = M::ColAtCompile;
-        constexpr static size_t ColAtCompile = M::RowAtCompile;
-        constexpr static size_t SizeAtCompile = M::SizeAtCompile;
+        constexpr static size_t RowAtCompile = M1::ColAtCompile;
+        constexpr static size_t ColAtCompile = M1::RowAtCompile;
+        constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
     };
 
     template<Vector V>
     class Traits<Transpose<V>> {
+        using V1 = std::remove_cvref_t<V>;
     public:
-        using ScalarType = V::ScalarType;
+        using ScalarType = V1::ScalarType;
         constexpr static int Option = MatrixOption::Row;
         constexpr static size_t RowAtCompile = 1;
-        constexpr static size_t ColAtCompile = V::SizeAtCompile;
-        constexpr static size_t SizeAtCompile = V::SizeAtCompile;
+        constexpr static size_t ColAtCompile = V1::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = V1::SizeAtCompile;
     };
 }
 

@@ -31,9 +31,9 @@ namespace Physica {
         using typename Base::Tc;
         using typename Base::Tm;
     private:
-        const M& trig;
+        LazyDestroy<M> trig;
     public:
-        explicit Inverse(const M& trig);
+        explicit Inverse(M&& trig);
         Inverse(const This&) = default;
         Inverse(This&&) noexcept = default;
         ~Inverse() = default;
@@ -45,13 +45,13 @@ namespace Physica {
         void assign_base(Matrix auto& target) const noexcept;
         void assign_mkl(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] const auto& getExpr() const noexcept { return trig; }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
     };
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
-    Inverse<M>::Inverse(const M& trig) : trig(trig) {}
+    Inverse<M>::Inverse(M&& trig) : trig(std::forward<M>(trig)) {}
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     void Inverse<M>::assign(Matrix auto& target) const {
@@ -77,6 +77,11 @@ namespace Physica {
         }
         else
             noImpl(__func__);
+    }
+
+    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    auto&& Inverse<M>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.trig);
     }
 }
 

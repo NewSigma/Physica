@@ -42,9 +42,14 @@ namespace Physica {
         /* Operations */
         [[nodiscard]] __device__ T calc(size_t index) const { return getExpr().calc(index, index); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getExpr().getRow(); }
     };
+
+    template<Matrix M>
+    __host__ __device__ auto&& device_obj<DiagVectorR<M>>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived());
+    }
 }
 
 namespace Physica {

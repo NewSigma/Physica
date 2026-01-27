@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,8 +27,7 @@ namespace {
     void testInv(const Matrix auto& m, double prec) {
         using M = std::remove_cvref<decltype(m)>::type;
         using T = M::ScalarType;
-        Inverse<M> inv(m);
-        const M result(inv);
+        const M result = m.inv();
         M prod = result * m;
         expect(matrixNear(prod, IdentityMatrix<T>(m.getRow()), prec));
     }

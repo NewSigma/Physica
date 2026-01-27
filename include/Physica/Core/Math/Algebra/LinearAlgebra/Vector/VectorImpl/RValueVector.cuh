@@ -73,7 +73,7 @@ namespace Physica {
         __host__ __device__ auto resize(size_t length) { return Base::getDerived().resize(length); }
 
         [[nodiscard]] __host__ __device__ decltype(auto) conjugate(this auto&&) noexcept;
-        [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ auto transpose(this auto&&) noexcept;
 
         [[nodiscard]] __device__ Tr norm() const;
         [[nodiscard]] __device__ Tr squaredNorm() const;

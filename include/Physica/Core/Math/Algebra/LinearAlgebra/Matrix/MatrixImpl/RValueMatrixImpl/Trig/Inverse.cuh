@@ -27,19 +27,20 @@ namespace Physica {
         using host_obj = Inverse<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj<M>::type;
     protected:
         using typename Base::T;
         using typename Base::Tm;
     private:
         constexpr static cudaDataType DataType = CUDAContext::getDataType<T>();
 
-        const device_obj<M>& trig;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> trig;
 
         device_obj<Array<std::byte>> deviceBuffer;
         Array<std::byte> hostBuffer;
         device_obj<Array<int>> err = device_obj<Array<int>>(1);
     public:
-        explicit device_obj(const device_obj<M>& trig);
+        explicit device_obj(Ref trig);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -50,15 +51,15 @@ namespace Physica {
         void assign(Matrix auto& target) const;
         void assign_cusolver(Matrix auto& target) const;
         /* Getters */
-        [[nodiscard]] const auto& getExpr() const noexcept { return trig; }
-        [[nodiscard]] size_t getRow() const noexcept { return trig.getRow(); }
+        [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
+        [[nodiscard]] size_t getRow() const noexcept { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return getRow(); }
     private:
         void allocate();
     };
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
-    device_obj<Inverse<M>>::device_obj(const device_obj<M>& trig) : trig(trig) {
+    device_obj<Inverse<M>>::device_obj(Ref trig) : trig(asStruct(trig)) {
         allocate();
     }
 
@@ -73,7 +74,7 @@ namespace Physica {
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
     void device_obj<Inverse<M>>::assign_cusolver(Matrix auto& target) const {
-        trig.assign(target);
+        getExpr().assign(target);
 
         auto& ctx = CUDAContext::getInstance();
         constexpr auto Uplo = Traits<M>::Upper ? cublasFillMode_t::CUBLAS_FILL_MODE_UPPER : cublasFillMode_t::CUBLAS_FILL_MODE_LOWER;
@@ -86,6 +87,11 @@ namespace Physica {
         size_t workspaceInBytesOnHost = hostBuffer.getLength();
         int* info = err.data();
         check(cusolverDnXtrtri(ctx, Uplo, Diag, n, DataType, A, n, bufferOnDevice, workspaceInBytesOnDevice, bufferOnHost, workspaceInBytesOnHost, info));
+    }
+
+    template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)
+    auto&& device_obj<Inverse<M>>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.trig.getDerived());
     }
 
     template<Matrix M> requires(instanceof_tx<MatrixTrig, M>)

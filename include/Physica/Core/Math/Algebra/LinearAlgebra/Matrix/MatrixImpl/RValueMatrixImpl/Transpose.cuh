@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,14 +31,15 @@ namespace Physica {
         using host_obj = Transpose<M>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj<M>::type;
 
-        PlainStruct<const device_obj<M>> mat;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> mat;
     public:
         using typename Base::T;
         using typename Base::Tv;
         using Base::isReverseDiff;
     public:
-        __host__ __device__ device_obj(const device_obj<M>& mat_) : mat(asStruct(mat_)) {}
+        __host__ __device__ device_obj(Ref mat_) : mat(asStruct(mat_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -51,7 +52,7 @@ namespace Physica {
 
         void reverse(const Vector auto& grad) const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ const auto& getExpr() const noexcept { return mat.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getExpr(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getExpr().getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getExpr().getRow(); }
     };
@@ -62,19 +63,25 @@ namespace Physica {
         getExpr().reverse(grad.transpose());
     }
 
+    template<Matrix M>
+    __host__ __device__ auto&& device_obj<Transpose<M>>::getExpr(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat.getDerived());
+    }
+
     template<Vector V>
     class device_obj<Transpose<V>> : public device_obj<RValueMatrix<Transpose<V>>> {
         using host_obj = Transpose<V>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref = add_device_obj<V>::type;
 
-        PlainStruct<const device_obj<V>> vec;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> vec;
     public:
         using typename Base::T;
         using typename Base::Tv;
         using Base::isReverseDiff;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<V>& vec_) : vec(asStruct(vec_)) {}
+        __host__ __device__ explicit device_obj(Ref vec_) : vec(asStruct(vec_)) {}
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;

@@ -152,9 +152,9 @@ namespace Physica {
         [[nodiscard]] auto sgndet() const;
 
         [[nodiscard]] auto format() const noexcept;
-        [[nodiscard]] auto inv() const noexcept;
+        [[nodiscard]] auto inv(this auto&&) noexcept;
         [[nodiscard]] auto pinv() const noexcept;
-        [[nodiscard]] auto transpose() const noexcept;
+        [[nodiscard]] auto transpose(this auto&&) noexcept;
         [[nodiscard]] decltype(auto) conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
         [[nodiscard]] auto flatten(this auto&&) noexcept;

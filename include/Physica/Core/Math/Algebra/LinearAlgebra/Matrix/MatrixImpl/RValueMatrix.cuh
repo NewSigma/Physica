@@ -97,8 +97,8 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ auto sum_rows() const;
         [[nodiscard]] __host__ __device__ auto sum_cols() const;
 
-        [[nodiscard]] __host__ __device__ auto inv() const noexcept;
-        [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ auto inv(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto transpose(this auto&&) noexcept;
         [[nodiscard]] __host__ __device__ auto hermite() const noexcept;
         [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
 
