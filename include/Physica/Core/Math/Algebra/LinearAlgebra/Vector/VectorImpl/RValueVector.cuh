@@ -54,6 +54,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] __host__ __device__ auto operator*(this auto&&, Matrix auto&& m) noexcept;
         /* Operations */
         __host__ __device__ void assign(Vector auto&& target) const;
         __device__ void assign(Vector auto&& target, const ThreadBlock& block) const;

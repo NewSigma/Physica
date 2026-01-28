@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica {
     /**
@@ -36,7 +36,8 @@ namespace Physica {
         copy.tail(1) = householder;
 
         const BufferType temp1 = copy * factor;
-        mat -= temp1 * (copy.hermite() * mat).compute();
+        using BufferType1 = DenseMatrix<T, MatrixOption::Row, 1, decltype(mat * copy)::SizeAtCompile>;
+        mat -= temp1 * BufferType1(copy.hermite() * mat);
     }
 
     template<Matrix M, Vector V>

@@ -22,6 +22,14 @@
 
 namespace Physica {
     template<class Derived>
+    auto RValueVector<Derived>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+        using Self = decltype(self);
+        using M = decltype(m);
+        static_assert(!is_device_obj<M>::value, "[Error]: host-device mismatch");
+        return GEVM<Self&&, M&&>(std::forward<Self>(self), std::forward<M>(m));
+    }
+
+    template<class Derived>
     template<ExecutePolicy P>
     void RValueVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;

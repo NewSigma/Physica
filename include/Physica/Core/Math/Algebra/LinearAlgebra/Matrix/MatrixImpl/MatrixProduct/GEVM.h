@@ -131,12 +131,6 @@ namespace Physica {
     auto&& GEVM<V, M>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
-
-    template<Vector V, Matrix M>
-    [[nodiscard]] auto operator*(V&& vec, M&& mat) noexcept requires(!CUDA<V> && !CUDA<M>) {
-        static_assert(std::remove_cvref_t<M>::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
-        return GEVM<V&&, M&&>(std::forward<V>(vec), std::forward<M>(mat));
-    }
 }
 
 namespace Physica {
@@ -147,7 +141,7 @@ namespace Physica {
         using T1 = V1::ScalarType;
         using T2 = M1::ScalarType;
 
-        static_assert(M1::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
+        static_assert(M1::RowAtCompile == 1 || M1::RowAtCompile == Dynamic, "[Error]: Outer product requires that the rows of M be 1");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static int Option = MatrixOption::AnyMajor;

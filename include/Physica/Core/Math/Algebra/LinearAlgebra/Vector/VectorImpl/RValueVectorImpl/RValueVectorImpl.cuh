@@ -24,6 +24,14 @@
 
 namespace Physica {
     template<class Derived>
+    __host__ __device__ auto device_obj<RValueVector<Derived>>::operator*(this auto&& self, Matrix auto&& m) noexcept {
+        using Self = decltype(self);
+        using M = decltype(m);
+        static_assert(is_device_obj<M>::value, "[Error]: host-device mismatch");
+        return device_obj<GEVM<Self&&, M&&>>(std::forward<Self>(self), std::forward<M>(m));
+    }
+
+    template<class Derived>
     __host__ __device__ void device_obj<RValueVector<Derived>>::assign(Vector auto&& target) const {
         target.assert_assign(Base::getDerived());
         if (IsHost()) {

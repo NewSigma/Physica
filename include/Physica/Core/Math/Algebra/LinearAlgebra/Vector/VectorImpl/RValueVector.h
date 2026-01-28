@@ -39,6 +39,7 @@ namespace Physica {
     template<class T> class NormVector;
     template<class T> class ValueVector;
     template<class T, int GradOrder> class GradVector;
+    template<Vector, Matrix> class GEVM;
 
     template<class T>
     class is_continuous {
@@ -120,6 +121,7 @@ namespace Physica {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
+        [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto&& v) const noexcept;

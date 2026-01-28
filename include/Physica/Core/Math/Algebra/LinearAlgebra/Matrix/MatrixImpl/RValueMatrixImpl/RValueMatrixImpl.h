@@ -45,7 +45,20 @@ namespace Physica {
         using Self = decltype(self);
         using M = decltype(m);
         static_assert(!is_device_obj<M>::value, "[Error]: host-device mismatch");
-        return GEMM<Self, M>(std::forward<Self>(self), std::forward<M>(m));
+        constexpr bool ColVectorLHS = ColAtCompile == 1;
+        constexpr bool RowVectorLHS = RowAtCompile == 1;
+        constexpr bool ColVectorRHS = Traits<M>::ColAtCompile == 1;
+        constexpr bool RowVectorRHS = Traits<M>::RowAtCompile == 1;
+        if constexpr (RowVectorLHS)
+            return (std::forward<M>(m).transpose() * std::forward<Self>(self).row(0)).transpose();
+        else if constexpr (ColVectorRHS)
+            return std::forward<Self>(self) * std::forward<M>(m).col(0);
+        else if constexpr (ColVectorLHS || RowVectorRHS) {
+            assert(self.getCol() == m.getRow());
+            return std::forward<Self>(self).col(0) * std::forward<M>(m);
+        }
+        else
+            return GEMM<Self, M>(std::forward<Self>(self), std::forward<M>(m));
     }
 
     template<class Derived>

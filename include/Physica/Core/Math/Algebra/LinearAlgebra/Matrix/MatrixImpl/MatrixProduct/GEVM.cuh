@@ -53,12 +53,6 @@ namespace Physica {
     __device__ auto device_obj<GEVM<V, M>>::calc(size_t row, size_t col) const -> T {
         return vec.getDerived().calc(row) * mat.getDerived().calc(0, col);
     }
-
-    template<Vector V, Matrix M>
-    [[nodiscard]] __host__ __device__ auto operator*(V&& vec, M&& mat) noexcept requires(CUDA<V> && CUDA<M>) {
-        static_assert(std::remove_cvref_t<M>::RowAtCompile == 1, "[Error]: Outer product requires that the rows of M be 1");
-        return device_obj<GEVM<V&&, M&&>>(std::forward<V>(vec), std::forward<M>(mat));
-    }
 }
 
 namespace Physica {
