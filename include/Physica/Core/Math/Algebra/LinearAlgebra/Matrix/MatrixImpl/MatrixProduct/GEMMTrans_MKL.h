@@ -32,7 +32,7 @@ namespace Physica {
         const size_t ldb = mat2.getMaxMinor();
         const size_t ldc = target.getMaxMinor();
         auto* a = reinterpret_cast<const Tm*>(mat1.data());
-        auto* b = reinterpret_cast<const Tm*>(mat2.data());
+        auto* b = reinterpret_cast<const Tm*>(mat2.getExpr().data());
         auto* c = reinterpret_cast<Tm*>(target.data());
 
         if constexpr (Base::isComplex) {

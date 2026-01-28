@@ -25,8 +25,7 @@ namespace Physica {
     class TensorSlice : public LValueMatrix<TensorSlice<X>> {
         using This = TensorSlice<X>;
         using Base = LValueMatrix<TensorSlice<X>>;
-        using IndexType = X::IndexType;
-        constexpr static int NDim = X::NDim;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
     private:
         LazyDestroy<X> tensor;
         IndexType index;
@@ -51,6 +50,7 @@ namespace Physica {
     template<Tensor X>
     TensorSlice<X>::TensorSlice(X&& tensor, int dimRow, int dimCol, IndexType index)
             : tensor(std::forward<X>(tensor)), index(index), dimRow(dimRow), dimCol(dimCol) {
+        constexpr int NDim = tensor.ndim();
         assert(dimRow < NDim && dimCol < NDim);
         assert(dimRow != dimCol);
         for (int i = 0; i < NDim; ++i) {

@@ -25,8 +25,7 @@ namespace Physica {
     class TensorFiber : public LValueVector<TensorFiber<X>> {
         using This = TensorFiber<X>;
         using Base = LValueVector<TensorFiber<X>>;
-        using IndexType = X::IndexType;
-        constexpr static int NDim = X::NDim;
+        using IndexType = std::remove_cvref_t<X>::IndexType;
     private:
         LazyDestroy<X> tensor;
         IndexType index;
@@ -49,6 +48,7 @@ namespace Physica {
     template<Tensor X>
     TensorFiber<X>::TensorFiber(X&& tensor, int dim, IndexType index)
             : tensor(std::forward<X>(tensor)), index(index), dim(dim) {
+        constexpr int NDim = tensor.ndim();
         assert(dim < NDim);
         for (int i = 0; i < NDim; ++i) {
             if (i == dim)

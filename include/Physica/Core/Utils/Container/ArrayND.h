@@ -79,6 +79,7 @@ namespace Physica {
 
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] constexpr int ndim() const noexcept { return NDim; }
         [[nodiscard]] constexpr size_t dim(int index) const noexcept;
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard, gnu::returns_nonnull]] auto* data(this auto&&) noexcept;

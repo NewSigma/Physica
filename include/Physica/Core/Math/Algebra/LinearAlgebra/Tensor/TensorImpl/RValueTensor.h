@@ -73,6 +73,7 @@ namespace Physica {
         template<int GradOrder = 1>
         auto grads() const noexcept;
         /* Getters */
+        [[nodiscard]] constexpr int ndim() const noexcept { return NDim; }
         [[nodiscard]] size_t dim(int index) const noexcept;
         [[nodiscard]] IndexType getShape() const noexcept;
         [[nodiscard]] size_t getSize() const noexcept;

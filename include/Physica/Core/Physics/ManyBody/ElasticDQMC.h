@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
+#include "DQMCImpl/HubbardParams.h"
 #include "DQMCImpl/ImagKinetic.h"
 
 namespace Physica {
