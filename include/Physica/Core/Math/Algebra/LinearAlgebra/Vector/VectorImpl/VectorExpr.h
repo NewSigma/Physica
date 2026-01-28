@@ -77,10 +77,8 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept;
-        [[nodiscard]] const auto& getLHS() const noexcept { return lhs; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
-        [[nodiscard]] auto& getLHS() noexcept { return lhs; }
-        [[nodiscard]] auto& getRHS() noexcept { return rhs; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -95,6 +93,16 @@ namespace Physica {
             return getLHS().getLength();
         else
             return getRHS().getLength();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    auto&& BinaryVectorExpr<ID, LHS, RHS>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), LHS>(self.lhs);
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    auto&& BinaryVectorExpr<ID, LHS, RHS>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), RHS>(self.rhs);
     }
 }
 

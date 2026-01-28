@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -54,17 +54,17 @@ namespace Physica {
     };
 
     template<Tensor X, Scalar U>
-    [[nodiscard]] auto operator*(const X& x, const U& y) noexcept {
-        return TensorExpr<ExprID::Mul, X, U>(x, y);
+    [[nodiscard]] auto operator*(X&& x, U&& y) noexcept {
+        return TensorExpr<ExprID::Mul, X&&, U&&>(std::forward<X>(x), std::forward<U>(y));
     }
 
     template<Tensor X, Scalar U>
-    [[nodiscard]] auto operator*(const U& y, const X& x) noexcept {
-        return x * y;
+    [[nodiscard]] auto operator*(U&& y, X&& x) noexcept {
+        return std::forward<X>(x) * std::forward<U>(y);
     }
 
     template<Tensor X1, Tensor X2>
-    [[nodiscard]] auto hadamard(const X1& x, const X2& y) noexcept {
-        return TensorExpr<ExprID::Mul, X1, X2>(x, y);
+    [[nodiscard]] auto hadamard(X1&& x, X2&& y) noexcept {
+        return TensorExpr<ExprID::Mul, X1&&, X2&&>(std::forward<X1>(x), std::forward<X2>(y));
     }
 }

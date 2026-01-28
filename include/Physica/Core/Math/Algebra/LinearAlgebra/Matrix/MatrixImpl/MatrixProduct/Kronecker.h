@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,10 +30,10 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        const M1& m1;
-        const M2& m2;
+        LazyDestroy<M1> m1;
+        LazyDestroy<M2> m2;
     public:
-        Kronecker(const M1& m1, const M2& m2);
+        Kronecker(M1&& m1, M2&& m2);
         Kronecker(const This&) = default;
         Kronecker(This&&) noexcept = default;
         ~Kronecker() = default;
@@ -50,12 +50,12 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept;
         [[nodiscard]] size_t getCol() const noexcept;
-        [[nodiscard]] const auto& getLHS() const noexcept { return m1; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return m2; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M1, Matrix M2>
-    Kronecker<M1, M2>::Kronecker(const M1& m1, const M2& m2) : m1(m1), m2(m2) {}
+    Kronecker<M1, M2>::Kronecker(M1&& m1, M2&& m2) : m1(std::forward<M1>(m1)), m2(std::forward<M2>(m2)) {}
 
     template<Matrix M1, Matrix M2>
     void Kronecker<M1, M2>::assign(Matrix auto&& target) const {
@@ -140,14 +140,26 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] auto kronecker(const M1& m1, const M2& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
-        return Kronecker<M1, M2>(m1, m2);
+    auto&& Kronecker<M1, M2>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.m1);
+    }
+
+    template<Matrix M1, Matrix M2>
+    auto&& Kronecker<M1, M2>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M2>(self.m2);
+    }
+
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] auto kronecker(M1&& m1, M2&& m2) noexcept requires(!CUDA<M1> && !CUDA<M2>) {
+        return Kronecker<M1&&, M2&&>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }
 
 namespace Physica {
-    template<Matrix M1, Matrix M2>
-    class Traits<Kronecker<M1, M2>> {
+    template<Matrix M1_, Matrix M2_>
+    class Traits<Kronecker<M1_, M2_>> {
+        using M1 = std::remove_cvref<M1_>::type;
+        using M2 = std::remove_cvref<M2_>::type;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor;

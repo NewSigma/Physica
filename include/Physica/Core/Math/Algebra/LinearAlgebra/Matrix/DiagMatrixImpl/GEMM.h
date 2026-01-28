@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,17 +21,17 @@
 #include "../DiagMatrix.h"
 
 namespace Physica {
-    template<Matrix M1, Scalar U, size_t Order>
-    class GEMM<M1, DiagMatrix<U, Order>> : public RValueMatrix<GEMM<M1, DiagMatrix<U, Order>>> {
-        using This = GEMM<M1, DiagMatrix<U, Order>>;
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
+        using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
     protected:
         using typename Base::T;
     private:
-        const M1& lhs;
-        const DiagMatrix<U, Order>& rhs;
+        LazyDestroy<M1> lhs;
+        LazyDestroy<M2> rhs;
     public:
-        GEMM(const M1& lhs_, const DiagMatrix<U, Order>& rhs_);
+        GEMM(M1&& lhs_, M2&& rhs_);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -46,41 +46,50 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
-        [[nodiscard]] const M1& getLHS() const noexcept { return lhs; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Scalar U, size_t Order>
-    GEMM<M1, DiagMatrix<U, Order>>::GEMM(
-            const M1& lhs_, const DiagMatrix<U, Order>& rhs_) : lhs(lhs_), rhs(rhs_) {}
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    GEMM<M1, M2>::GEMM(M1&& lhs_, M2&& rhs_) : lhs(std::forward<M1>(lhs_)), rhs(std::forward<M2>(rhs_)) {}
 
-    template<Matrix M1, Scalar U, size_t Order>
-    void GEMM<M1, DiagMatrix<U, Order>>::assign(Matrix auto& target) const {
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getCol(); ++i)
             target.col(i) = lhs.col(i) * rhs.diag()[i];
     }
 
-    template<Matrix M1, Scalar U, size_t Order>
-    auto GEMM<M1, DiagMatrix<U, Order>>::calc(size_t row, size_t col) const -> T {
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> T {
         return lhs.calc(row, col) * rhs.diag()[col];
     }
 
-    template<Matrix M1, Scalar U, size_t Order>
-    auto GEMM<M1, DiagMatrix<U, Order>>::calc_value(size_t row, size_t col) const -> T {
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    auto GEMM<M1, M2>::calc_value(size_t row, size_t col) const -> T {
         return lhs.calc_value(row, col) * rhs.diag()[col].value();
     }
 
-    template<Scalar U, size_t Order, Matrix M2>
-    class GEMM<DiagMatrix<U, Order>, M2> : public RValueMatrix<GEMM<DiagMatrix<U, Order>, M2>> {
-        using This = GEMM<DiagMatrix<U, Order>, M2>;
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.lhs);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M2>)
+    auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
+        using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
     protected:
         using typename Base::T;
     private:
-        const DiagMatrix<U, Order>& lhs;
-        const M2& rhs;
+        LazyDestroy<M1> lhs;
+        LazyDestroy<M2> rhs;
     public:
-        GEMM(const DiagMatrix<U, Order>& lhs_, const M2& rhs_);
+        GEMM(M1&& lhs_, M2&& rhs_);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -95,27 +104,36 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return lhs.getRow(); }
         [[nodiscard]] size_t getCol() const { return rhs.getCol(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return lhs; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Scalar U, size_t Order, Matrix M2>
-    GEMM<DiagMatrix<U, Order>, M2>::GEMM(
-            const DiagMatrix<U, Order>& lhs_, const M2& rhs_) : lhs(lhs_), rhs(rhs_) {}
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    GEMM<M1, M2>::GEMM(M1&& lhs_, M2&& rhs_) : lhs(std::forward<M1>(lhs_)), rhs(std::forward<M2>(rhs_)) {}
 
-    template<Scalar U, size_t Order, Matrix M2>
-    void GEMM<DiagMatrix<U, Order>, M2>::assign(Matrix auto& target) const {
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    void GEMM<M1, M2>::assign(Matrix auto& target) const {
         for (size_t i = 0; i < getRow(); ++i)
             target.row(i) = lhs.diag()[i] * rhs.row(i);
     }
 
-    template<Scalar U, size_t Order, Matrix M2>
-    auto GEMM<DiagMatrix<U, Order>, M2>::calc(size_t row, size_t col) const -> T {
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> T {
         return lhs.diag()[row] * rhs.calc(row, col);
     }
 
-    template<Scalar U, size_t Order, Matrix M2>
-    auto GEMM<DiagMatrix<U, Order>, M2>::calc_value(size_t row, size_t col) const -> T {
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    auto GEMM<M1, M2>::calc_value(size_t row, size_t col) const -> T {
         return lhs.diag()[row].value() * rhs.calc_value(row, col);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.lhs);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<DiagMatrix, M1>)
+    auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M2>(self.rhs);
     }
 }

@@ -111,4 +111,4 @@ namespace Physica {
     };
 }
 
-#include "BlockMatrixImpl/MatrixVectorProduct.h"
+#include "BlockMatrixImpl/GEMV.h"

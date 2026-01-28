@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,23 +21,22 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/BlockMatrix.h"
 
 namespace Physica {
-    template<Matrix M, Vector U>
-    class MatrixVectorProduct<BlockMatrix<M>, U>
-            : public RValueVector<MatrixVectorProduct<BlockMatrix<M>, U>> {
-        using This = MatrixVectorProduct<BlockMatrix<M>, U>;
+    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
+        using This = GEMV<M, V>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     protected:
         using typename Base::Tv;
     private:
-        const BlockMatrix<M>& m;
-        const U& v;
+        LazyDestroy<M> m;
+        LazyDestroy<V> v;
     public:
-        MatrixVectorProduct(const BlockMatrix<M>& m_, const U& v_);
-        MatrixVectorProduct(const This&) = delete;
-        MatrixVectorProduct(This&&) noexcept = delete;
-        ~MatrixVectorProduct() = default;
+        GEMV(M m_, V v_);
+        GEMV(const This&) = delete;
+        GEMV(This&&) noexcept = delete;
+        ~GEMV() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -49,19 +48,18 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const BlockMatrix<M>& getLHS() const noexcept { return m; }
-        [[nodiscard]] const U& getRHS() const noexcept { return v; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M, Vector U>
-    MatrixVectorProduct<BlockMatrix<M>, U>::MatrixVectorProduct(
-            const BlockMatrix<M>& m, const U& v) {
+    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    GEMV<M, V>::GEMV(M m_, V v_) : m(std::forward<M>(m_)), v(std::forward<V>(v_)) {
         assert(m.getCol() == v.getLength() && "[Error]: Dimensions do not match");
     }
 
-    template<Matrix M, Vector U>
+    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
     template<ExecutePolicy P>
-    void MatrixVectorProduct<BlockMatrix<M>, U>::assign(Vector auto& target) const {
+    void GEMV<M, V>::assign(Vector auto& target) const {
         assert(getLength() == target.getLength() && "[Error]: Dimensions do not match");
         size_t from = 0;
         for (size_t i = 0; i < m.getNumBlocks(); ++i) {
@@ -72,16 +70,14 @@ namespace Physica {
             from = to;
         }
     }
-}
 
-namespace Physica {
-    template<Matrix M, Vector U>
-    class Traits<MatrixVectorProduct<BlockMatrix<M>, U>> {
-    public:
-        using ScalarType = M::ScalarType;
-        constexpr static size_t SizeAtCompile = Dynamic;
+    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.m);
+    }
 
-        constexpr static bool FastAssign = true;
-        constexpr static bool FastPacket = false;
-    };
+    template<Matrix M, Vector V> requires(instanceof<BlockMatrix, M>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v);
+    }
 }

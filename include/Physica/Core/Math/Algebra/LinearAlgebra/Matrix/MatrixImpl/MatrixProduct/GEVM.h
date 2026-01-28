@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -59,8 +59,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return vec.getLength(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return vec; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return mat; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Vector V, Matrix M>
@@ -120,6 +120,16 @@ namespace Physica {
     template<Vector V, Matrix M>
     auto GEVM<V, M>::values() const noexcept {
         return vec.values() * mat.values();
+    }
+
+    template<Vector V, Matrix M>
+    auto&& GEVM<V, M>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
+    }
+
+    template<Vector V, Matrix M>
+    auto&& GEVM<V, M>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
     }
 
     template<Vector V, Matrix M>

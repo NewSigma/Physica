@@ -21,7 +21,7 @@
 #include "Inverse.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
@@ -49,14 +49,14 @@ namespace Physica {
         [[nodiscard]] auto values() const noexcept { return m.values() * v.values(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return m.getRow(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return m; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return v; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     GEMV<M, V>::GEMV(M&& m, V&& v) : m(std::forward<M>(m)), v(std::forward<V>(v)) {}
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const {
         if constexpr (Internal::EnableMKL<V, decltype(target)>::value)
@@ -65,10 +65,10 @@ namespace Physica {
             assign_base(target);
     }
 
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     void GEMV<M, V>::assign_base(Vector auto& target) const {
         const auto& lu = getLHS().getDenseLU();
-        if constexpr (Traits<M>::Pivot) {
+        if constexpr (lu.isPivot()) {
             VectorND<T> temp1 = lu.getPerm().inv() * v;
             VectorND<T> temp2 = lu.getMatrixL().inv() * temp1;
             (lu.getMatrixU().inv() * temp2).assign(target);
@@ -77,6 +77,16 @@ namespace Physica {
             VectorND<T> temp = lu.getMatrixL().inv() * v;
             (lu.getMatrixU().inv() * temp).assign(target);
         }
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.m);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v);
     }
 }
 

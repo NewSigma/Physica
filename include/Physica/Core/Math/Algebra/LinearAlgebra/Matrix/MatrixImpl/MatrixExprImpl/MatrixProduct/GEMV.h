@@ -52,8 +52,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t index) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return expr.getRow(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return expr; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
@@ -135,6 +135,16 @@ namespace Physica {
     template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
     auto GEMV<M, V>::calc_value(size_t index) const -> Tv {
         return expr.row(index).values() * vec.values();
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.expr);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_xt<MatrixExpr, M>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 }
 

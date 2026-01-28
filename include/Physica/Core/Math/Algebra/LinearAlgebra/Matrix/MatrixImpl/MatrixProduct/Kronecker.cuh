@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,13 +26,15 @@ namespace Physica {
         using host_obj = Kronecker<M1, M2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
+        using Ref1 = add_device_obj<M1>::type;
+        using Ref2 = add_device_obj<M2>::type;
     protected:
         using typename Base::T;
     private:
-        PlainStruct<const M1> m1;
-        PlainStruct<const M2> m2;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M1>>> m1;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M2>>> m2;
     public:
-        __host__ __device__ device_obj(const M1& m1, const M2& m2);
+        __host__ __device__ device_obj(Ref1 m1, Ref2 m2);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -47,8 +49,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept;
-        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return m1.getDerived(); }
-        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return m2.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     private:
         void assign_identity(Matrix auto&& target) const;
         void assign_add_identity(Matrix auto&& target) const;
@@ -57,7 +59,7 @@ namespace Physica {
     };
 
     template<Matrix M1, Matrix M2>
-    __host__ __device__ device_obj<Kronecker<M1, M2>>::device_obj(const M1& m1, const M2& m2) : m1(asStruct(m1)), m2(asStruct(m2)) {}
+    __host__ __device__ device_obj<Kronecker<M1, M2>>::device_obj(Ref1 m1, Ref2 m2) : m1(asStruct(m1)), m2(asStruct(m2)) {}
 
     template<Matrix M1, Matrix M2>
     void device_obj<Kronecker<M1, M2>>::assign(Matrix auto&& target) const {
@@ -176,8 +178,19 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    [[nodiscard]] __host__ __device__ auto kronecker(const M1& m1, const M2& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
-        return device_obj<Kronecker<M1, M2>>(m1, m2);
+    __host__ __device__ auto&& device_obj<Kronecker<M1, M2>>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.m1.getDerived());
+    }
+
+    template<Matrix M1, Matrix M2>
+    __host__ __device__ auto&& device_obj<Kronecker<M1, M2>>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M2>(self.m2.getDerived());
+    }
+
+    template<Matrix M1, Matrix M2>
+    [[nodiscard]] __host__ __device__ auto kronecker(M1&& m1, M2&& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
+        using RetTy = device_obj<Kronecker<remove_device_obj_t<M1&&>, remove_device_obj_t<M2&&>>>;
+        return RetTy(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }
 

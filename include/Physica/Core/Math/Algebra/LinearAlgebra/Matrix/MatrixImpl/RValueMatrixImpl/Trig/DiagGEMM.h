@@ -45,8 +45,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getRow() const { return trig.getRow(); }
         [[nodiscard]] size_t getCol() const { return diag.getCol(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return trig; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return diag; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
@@ -62,6 +62,15 @@ namespace Physica {
             else
                 target.col(i).tail(i) = trig.col(i).tail(i) * diag.diag()[i];
         }
+    }
 
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
+    auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.trig);
+    }
+
+    template<Matrix M1, Matrix M2> requires(instanceof_tx<MatrixTrig, M1> && instanceof_tx<DiagMatrix, M2>)
+    auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M2>(self.diag);
     }
 }

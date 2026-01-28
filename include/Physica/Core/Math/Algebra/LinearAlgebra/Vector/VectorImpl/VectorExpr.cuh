@@ -70,16 +70,24 @@ namespace Physica {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getLHS().getLength(); }
-        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
-        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
-        [[nodiscard]] __host__ __device__ auto& getLHS() noexcept { return lhs.getDerived(); }
-        [[nodiscard]] __host__ __device__ auto& getRHS() noexcept { return rhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     };
 
     template<ExprID ID, Vector LHS, class RHS>
     __host__ __device__ device_obj<BinaryVectorExpr<ID, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
         if constexpr (Vector<RHS>)
             assert(getLHS().getLength() == getRHS().getLength());
+    }
+
+    template<ExprID ID, Vector LHS, class RHS>
+    __host__ __device__ auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), LHS>(self.lhs.getDerived());
+    }
+
+    template<ExprID ID, Vector LHS, class RHS>
+    __host__ __device__ auto&& device_obj<BinaryVectorExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), RHS>(self.rhs.getDerived());
     }
 }
 

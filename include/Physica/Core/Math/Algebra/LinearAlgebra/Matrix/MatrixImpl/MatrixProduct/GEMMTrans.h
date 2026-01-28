@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,19 +21,19 @@
 #include "GEMM.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
-    class GEMM<M1, Transpose<M2>> : public RValueMatrix<GEMM<M1, Transpose<M2>>> {
-        using This = GEMM<M1, Transpose<M2>>;
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    class GEMM<M1, M2> : public RValueMatrix<GEMM<M1, M2>> {
+        using This = GEMM<M1, M2>;
         using Base = RValueMatrix<This>;
     protected:
         using typename Base::T;
         using typename Base::Tv;
         using typename Base::Tm;
     private:
-        const M1& mat1;
-        const M2& mat2;
+        LazyDestroy<M1> mat1;
+        LazyDestroy<M2> mat2;
     public:
-        GEMM(const M1& mat1_, const Transpose<M2>& mat2_);
+        GEMM(M1&& mat1_, M2&& mat2_);
         GEMM(const This&) = default;
         GEMM(This&&) noexcept = default;
         ~GEMM() = default;
@@ -50,19 +50,21 @@ namespace Physica {
         [[nodiscard]] auto values() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] size_t getCol() const { return mat2.getRow(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return mat1; }
-        [[nodiscard]] decltype(auto) getRHS() const noexcept { return mat2.transpose(); }
+        [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
-    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
-    GEMM<M1, Transpose<M2>>::GEMM(const M1& mat1_, const Transpose<M2>& mat2_) : mat1(mat1_), mat2(mat2_.getExpr()) {}
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    GEMM<M1, M2>::GEMM(M1&& mat1_, M2&& mat2_) : mat1(std::forward<M1>(mat1_)), mat2(std::forward<M2>(mat2_)) {}
 
-    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
-    void GEMM<M1, Transpose<M2>>::assign(Matrix auto& target) const {
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    void GEMM<M1, M2>::assign(Matrix auto& target) const {
         target.assert_assign(*this);
-        if constexpr (GEMM<M1, M2>::UseMKL(target)) {
-            constexpr int Critical = GEMM<M1, M2>::Critical;
+
+        using Helper = GEMM<M1, decltype(mat2.getExpr())>;
+        if constexpr (Helper::UseMKL(target)) {
+            constexpr int Critical = Helper::Critical;
             if (getLHS().getSize() > Critical && getRHS().getSize() > Critical)
                 assign_mkl(target);
             else
@@ -72,19 +74,29 @@ namespace Physica {
             Base::assign_base(target);
     }
 
-    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
-    auto GEMM<M1, Transpose<M2>>::calc(size_t row, size_t col) const -> CoDiff<T> {
-        return mat1.row(row) * mat2.row(col);
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    auto GEMM<M1, M2>::calc(size_t row, size_t col) const -> CoDiff<T> {
+        return mat1.row(row) * mat2.col(col);
     }
 
-    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
-    auto GEMM<M1, Transpose<M2>>::calc_value(size_t row, size_t col) const -> Tv {
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    auto GEMM<M1, M2>::calc_value(size_t row, size_t col) const -> Tv {
         return (getLHS().values() * getRHS().values()).calc(row, col);
     }
 
-    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
-    auto GEMM<M1, Transpose<M2>>::values() const noexcept {
-        return mat1 * mat2.transpose();
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    auto GEMM<M1, M2>::values() const noexcept {
+        return mat1.values() * mat2.values();
+    }
+
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M1>(self.mat1);
+    }
+
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M2>(self.mat2);
     }
 }
 

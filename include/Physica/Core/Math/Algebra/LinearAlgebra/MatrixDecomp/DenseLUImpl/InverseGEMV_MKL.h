@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,18 +21,18 @@
 #include "InverseGEMV.h"
 
 namespace Physica {
-    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && requires { std::declval<M>().getDenseLU(); })
+    template<Matrix M, Vector V> requires(instanceof_tx<Inverse, M> && instanceof_tx<DenseLU, typename Traits<M>::ExprType>)
     void GEMV<M, V>::assign_mkl(Vector auto& target) const {
         v.assign(target);
 
-        constexpr bool Pivot = Traits<M>::Pivot;
         constexpr int Layout = LAPACK_COL_MAJOR;
         constexpr char Trans = 'N';
+        const auto& lu = m.getDenseLU();
         size_t n = getLength();
-        const auto* a = reinterpret_cast<const Tm*>(m.getDenseLU().getMatrixLU().data());
+        const auto* a = reinterpret_cast<const Tm*>(lu.getMatrixLU().data());
         auto* b = reinterpret_cast<Tm*>(target.data());
-        if constexpr (Pivot) {
-            auto buffer = m.getDenseLU().getPerm().toMKL();
+        if constexpr (lu.isPivot()) {
+            auto buffer = lu.getPerm().toMKL();
             const auto* ipiv = buffer.data();
             if constexpr (Base::isComplex) {
                 if constexpr (T::Prec == Float32)

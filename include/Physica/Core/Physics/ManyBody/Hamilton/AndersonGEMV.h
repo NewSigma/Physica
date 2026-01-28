@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -49,8 +49,8 @@ namespace Physica {
         [[nodiscard]] T calc(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
@@ -88,5 +88,15 @@ namespace Physica {
             }
             target[i] += mat.calc(i, i) * vec.calc(i);
         }
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mat);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<AndersonMatrix, M>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.vec);
     }
 }

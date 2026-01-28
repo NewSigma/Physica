@@ -97,10 +97,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const;
         [[nodiscard]] __host__ __device__ size_t getCol() const;
-        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return lhs.getDerived(); }
-        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return rhs.getDerived(); }
-        [[nodiscard]] __host__ __device__ auto& getLHS() noexcept { return lhs.getDerived(); }
-        [[nodiscard]] __host__ __device__ auto& getRHS() noexcept { return rhs.getDerived(); }
+        [[nodiscard]] __host__ __device__ auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] __host__ __device__ auto&& getRHS(this auto&&) noexcept;
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -145,6 +143,16 @@ namespace Physica {
             return getLHS().getCol();
         else
             return getRHS().getCol();
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ auto&& device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), LHS>(self.lhs.getDerived());
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    __host__ __device__ auto&& device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), RHS>(self.rhs.getDerived());
     }
 }
 

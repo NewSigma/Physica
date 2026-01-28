@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,8 +21,8 @@
 #include "GEMMTrans.h"
 
 namespace Physica {
-    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1>)
-    void GEMM<M1, Transpose<M2>>::assign_mkl(Matrix auto& target) const noexcept {
+    template<Matrix M1, Matrix M2> requires(!instanceof<Inverse, M1> && instanceof<Transpose, M2>)
+    void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
         constexpr int Major = MatrixOption::isRowMatrix<M1>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr auto Layout = Major == MatrixOption::Row ? CblasRowMajor : CblasColMajor;
         const size_t m = getRow();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,7 +38,7 @@ namespace Physica {
     };
 
     template<Tensor X1, Tensor X2>
-    [[nodiscard]] auto operator+(const X1& x, const X2& y) noexcept {
-        return TensorExpr<ExprID::Add, X1, X2>(x, y);
+    [[nodiscard]] auto operator+(X1&& x, X2&& y) noexcept {
+        return TensorExpr<ExprID::Add, X1&&, X2&&>(std::forward<X1>(x), std::forward<X2>(y));
     }
 }

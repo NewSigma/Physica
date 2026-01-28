@@ -96,10 +96,10 @@ namespace Physica {
         [[nodiscard]] auto operator*(this auto&&, Matrix auto&& m) noexcept;
         /* Operations */
         template<ExecutePolicy P = Sequential>
-        void assign(Matrix auto&& target) const;
+        void assign(Matrix auto&& target) const noexcept;
         template<ExecutePolicy P = Sequential>
-        void assign_base(Matrix auto&& target) const;
-        void assign_add(Matrix auto&& target) const;
+        void assign_base(Matrix auto&& target) const noexcept;
+        void assign_add(Matrix auto&& target) const noexcept;
         void assert_assign(const Matrix auto& source) const noexcept;
         void assert_assign_mkl(const Matrix auto& source) const noexcept;
 

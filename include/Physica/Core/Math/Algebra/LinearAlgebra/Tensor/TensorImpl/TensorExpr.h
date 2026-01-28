@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,13 +34,10 @@ namespace Physica {
     public:
         using Base::isReverseDiff;
     private:
-        const LHS* lhs;
-        const RHS* rhs;
+        LazyDestroy<LHS> lhs;
+        LazyDestroy<RHS> rhs;
     public:
-        BinaryTensorExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_), rhs(&rhs_) {
-            if constexpr (Tensor<LHS> && Tensor<RHS>)
-                assert(lhs->getShape() == rhs->getShape());
-        }
+        BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_);
         BinaryTensorExpr(const This&) = delete;
         BinaryTensorExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~BinaryTensorExpr() = default;
@@ -52,9 +49,15 @@ namespace Physica {
         [[nodiscard]] decltype(auto) getShape() const noexcept;
         [[nodiscard]] int getDim() const;
         [[nodiscard]] size_t getSize() const noexcept;
-        [[nodiscard]] const LHS& getLHS() const noexcept { return *lhs; }
-        [[nodiscard]] const RHS& getRHS() const noexcept { return *rhs; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
+
+    template<ExprID ID, class LHS, class RHS>
+    BinaryTensorExpr<ID, LHS, RHS>::BinaryTensorExpr(LHS&& lhs_, RHS&& rhs_) : lhs(std::forward<LHS>(lhs_)), rhs(std::forward<RHS>(rhs_)) {
+        if constexpr (Tensor<LHS> && Tensor<RHS>)
+            assert(lhs->getShape() == rhs->getShape());
+    }
 
     template<ExprID ID, class LHS, class RHS>
     size_t BinaryTensorExpr<ID, LHS, RHS>::dim(int index) const noexcept {
@@ -87,6 +90,16 @@ namespace Physica {
         else
             return getRHS().getSize();
     }
+
+    template<ExprID ID, class LHS, class RHS>
+    auto&& BinaryTensorExpr<ID, LHS, RHS>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), LHS>(self.lhs);
+    }
+
+    template<ExprID ID, class LHS, class RHS>
+    auto&& BinaryTensorExpr<ID, LHS, RHS>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), RHS>(self.rhs);
+    }
 }
 
 namespace Physica {
@@ -95,19 +108,19 @@ namespace Physica {
         constexpr static int NDim1 = Traits<LHS>::NDim;
         constexpr static int NDim2 = Traits<RHS>::NDim;
 
-        using T = LHS::ScalarType;
-        using Tr = T::RealType;
-        using T12 = Internal::BinaryScalarOpRtnTy<T, typename RHS::ScalarType>::Type;
+        using T1 = std::remove_cvref_t<LHS>::ScalarType;
+        using T2 = std::remove_cvref_t<RHS>::ScalarType;
+        using T12 = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         static_assert(NDim1 == Dynamic || NDim2 == Dynamic || (NDim1 == NDim2), "[Error]: Tensor dimentions do not match");
     public:
-        using ScalarType = std::conditional<ID == ExprID::Abs, Tr, T12>::type;
+        using ScalarType = std::conditional<ID == ExprID::Abs, typename T1::RealType, T12>::type;
         constexpr static int NDim = NDim1 > NDim2 ? NDim1 : NDim2;
     };
 
     template<ExprID ID, Tensor LHS, Scalar RHS>
     class Traits<TensorExpr<ID, LHS, RHS>> {
     public:
-        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename std::remove_cvref_t<LHS>::ScalarType, std::remove_cvref_t<RHS>>::Type;
         constexpr static int NDim = Traits<LHS>::NDim;
     };
 

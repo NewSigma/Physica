@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,58 +18,56 @@
  */
 #pragma once
 
-#include "GEMV.h"
+#include "../SparseMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Option> class SparseMatrix;
-
-    template<Scalar T, int Option, Vector V>
-    class SpMV : public RValueVector<SpMV<T, Option, V>> {
-        using Base = RValueVector<SpMV<T, Option, V>>;
-    public:
-        using typename Base::ScalarType;
-        using MatrixType = SparseMatrix<T, Option>;
-        static_assert(MatrixType::ColAtCompile == V::SizeAtCompile,
-                      "Row and column do not match in matrix product");
+    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
+    class GEMV<M, V> : public RValueVector<GEMV<M, V>> {
+        using Base = RValueVector<GEMV<M, V>>;
+    protected:
+        using typename Base::T;
     private:
-        const MatrixType& mat;
-        const V& vec;
+        LazyDestroy<M> mat;
+        LazyDestroy<V> vec;
     public:
-        SpMV(const MatrixType& mat_, const V& vec_)
-                : mat(mat_), vec(vec_) {
-            assert(mat.getCol() == vec.getLength());
-        }
+        GEMV(M&& mat_, V&& vec_);
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Vector auto& target) const;
+
+        [[nodiscard]] T calc(size_t index) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] const auto& getLHS() const noexcept { return mat; }
         [[nodiscard]] const auto& getRHS() const noexcept { return vec; }
     };
 
-    template<Scalar T, int Option, Vector V>
+    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
+    GEMV<M, V>::GEMV(M&& mat_, V&& vec_) : mat(mat_), vec(vec_) {
+        assert(mat.getCol() == vec.getLength());
+    }
+
+    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
     template<ExecutePolicy P>
-    void SpMV<T, Option, V>::assign(Vector auto& target) const {
+    void GEMV<M, V>::assign(Vector auto& target) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();
 
-        if constexpr (MatrixOption::isColMatrix<MatrixType>())
+        if constexpr (MatrixOption::isColMatrix<M>())
             target = 0;
 
         for (size_t major = 0; major < mat.getMaxMajor(); ++major) {
             const size_t from = majorStarts[major];
             const size_t to = majorStarts[major + 1];
-            if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
+            if constexpr (MatrixOption::isColMatrix<M>()) {
                 for (size_t i = from; i < to; ++i) {
                     const size_t row = minorIndexes[i];
                     target[row] += elements[i] * vec[major];
                 }
             }
             else {
-                ScalarType temp = 0;
+                T temp = 0;
                 for (size_t i = from; i < to; ++i) {
                     const size_t col = minorIndexes[i];
                     temp += elements[i] * vec[col];
@@ -79,14 +77,14 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Option, Vector V>
-    auto SpMV<T, Option, V>::calc(size_t index) const -> ScalarType {
+    template<Matrix M, Vector V> requires(instanceof_tx<SparseMatrix, M>)
+    auto GEMV<M, V>::calc(size_t index) const -> T {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();
 
-        ScalarType result = 0;
-        if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
+        T result = 0;
+        if constexpr (MatrixOption::isColMatrix<M>()) {
             for (size_t major = 0; major < mat.getMaxMajor(); ++major) {
                 const size_t from = majorStarts[major];
                 const size_t to = majorStarts[major + 1];

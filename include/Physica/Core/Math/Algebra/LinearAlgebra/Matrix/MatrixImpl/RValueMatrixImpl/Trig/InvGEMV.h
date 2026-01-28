@@ -47,8 +47,8 @@ namespace Physica {
         void assign(Vector auto& target) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const { return rhs.getLength(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return inv; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return rhs; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
@@ -92,5 +92,15 @@ namespace Physica {
                 target[i] /= mat.calc(i, i);
             }
         }
+    }
+
+    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    auto&& GEMV<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.inv);
+    }
+
+    template<Matrix M, Vector V> requires(instanceof<Inverse, M> && instanceof_tx<MatrixTrig, typename Traits<M>::ExprType>)
+    auto&& GEMV<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.rhs);
     }
 }

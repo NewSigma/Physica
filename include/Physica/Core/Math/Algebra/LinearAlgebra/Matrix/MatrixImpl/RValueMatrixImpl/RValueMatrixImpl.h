@@ -50,7 +50,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueMatrix<Derived>::assign(Matrix auto&& target) const {
+    void RValueMatrix<Derived>::assign(Matrix auto&& target) const noexcept {
         target.assert_assign(Base::getDerived());
 
         const size_t maxMajor = target.getMaxMajor();
@@ -62,12 +62,12 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueMatrix<Derived>::assign_base(Matrix auto&& target) const {
+    void RValueMatrix<Derived>::assign_base(Matrix auto&& target) const noexcept {
         assign<P>(target);
     }
 
     template<class Derived>
-    void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const {
+    void RValueMatrix<Derived>::assign_add(Matrix auto&& target) const noexcept {
         target.assert_assign(Base::getDerived());
 
         const size_t maxMajor = target.getMaxMajor();

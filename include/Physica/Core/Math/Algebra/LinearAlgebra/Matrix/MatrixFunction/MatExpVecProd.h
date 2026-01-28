@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -76,8 +76,8 @@ namespace Physica {
         [[nodiscard]] ParamPair calcParam(Tr traceMu) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const auto& getLHS() const noexcept { return mexp; }
-        [[nodiscard]] const auto& getRHS() const noexcept { return v; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     private:
         constexpr static Tm calcTheta(int numTaylorTerm);
     };
@@ -192,6 +192,16 @@ namespace Physica {
             }
         }
         return std::make_pair(numMinCostTerm, std::max(cost / numMinCostTerm, 1));
+    }
+
+    template<Matrix M, Vector V>
+    auto&& MatExpVecProd<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mexp);
+    }
+
+    template<Matrix M, Vector V>
+    auto&& MatExpVecProd<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v);
     }
 
     template<Matrix M, Vector V>

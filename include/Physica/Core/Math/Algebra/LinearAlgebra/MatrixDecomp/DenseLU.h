@@ -69,6 +69,7 @@ namespace Physica {
         [[nodiscard]] auto getMatrixL() const noexcept { return working.tril_unit(); }
         [[nodiscard]] auto getMatrixU() const noexcept { return working.triu(); }
         [[nodiscard]] const auto& getPerm() const noexcept;
+        [[nodiscard]] consteval static bool isPivot() noexcept { return Pivot; }
         /* Setters */
         void setWorking(const Matrix auto& source);
     private:

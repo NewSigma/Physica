@@ -49,8 +49,8 @@ namespace Physica {
         [[nodiscard]] Tv calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const MatrixPow<M>& getLHS() const noexcept { return mpow; }
-        [[nodiscard]] const V& getRHS() const noexcept { return v; }
+        [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
+        [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
     };
 
     template<Matrix M, Vector V>
@@ -74,6 +74,16 @@ namespace Physica {
             (mpow.getMatrix() * target).template assign<P>(buffer);
             buffer.swap(target);
         }
+    }
+
+    template<Matrix M, Vector V>
+    auto&& MatPowVecProd<M, V>::getLHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), M>(self.mpow);
+    }
+
+    template<Matrix M, Vector V>
+    auto&& MatPowVecProd<M, V>::getRHS(this auto&& self) noexcept {
+        return propagate_rvalue_reference<decltype(self), V>(self.v);
     }
 }
 

@@ -48,9 +48,6 @@ namespace Physica {
         void operator-=(Scalar auto x) noexcept;
         void operator*=(Scalar auto x) noexcept;
         void operator/=(Scalar auto x) noexcept;
-
-        template<Vector V>
-        [[nodiscard]] auto operator*(const V& v) const noexcept;
         /* Operations */
         void resize(size_t order, auto&&... args);
         void resize(const Matrix auto& m, auto&&... args);
@@ -128,12 +125,6 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void DenseSymmMatrix<T, Order>::operator/=(Scalar auto x) noexcept {
         asVector() /= x;
-    }
-
-    template<Scalar T, size_t Order>
-    template<Vector V>
-    auto DenseSymmMatrix<T, Order>::operator*(const V& v) const noexcept {
-        return SyMV<T, Order, V>(*this, v);
     }
 
     template<Scalar T, size_t Order>
@@ -220,4 +211,4 @@ namespace Physica {
     };
 }
 
-#include "MatrixImpl/MatrixProduct/SyMV.h"
+#include "DenseSymmMatrixImpl/SyMV.h"

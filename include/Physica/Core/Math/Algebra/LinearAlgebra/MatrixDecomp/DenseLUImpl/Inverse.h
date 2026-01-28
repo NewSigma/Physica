@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -83,7 +83,7 @@ namespace Physica {
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;
 
-        constexpr static bool Pivot = P;
+        using ExprType = DenseLU<T, P>;
     };
 }
 
