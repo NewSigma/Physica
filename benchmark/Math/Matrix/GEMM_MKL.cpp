@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,29 +23,53 @@ using namespace Physica;
 using RandomSource = Random<MCG>;
 
 namespace {
-    template<int Order = 0>
+    template<Scalar T, int Major0, int Major1, int Major2>
     void gemm_mkl(benchmark::State& state) {
-        static_assert(Order >= 0);
-        using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col, Order, Order>;
-        const size_t order = state.range(0);
-        const auto m1 = MatrixType::template random_uniform<RandomSource>(order, order);
-        const auto m2 = MatrixType::template random_uniform<RandomSource>(order, order);
-        MatrixType m(order, order);
+        using M0 = DenseMatrix<T, Major0>;
+        using M1 = DenseMatrix<T, Major1>;
+        using M2 = DenseMatrix<T, Major2>;
+
+        const size_t m = state.range(0);
+        const size_t k = state.range(0);
+        const size_t n = state.range(0);
+        const auto m1 = M1::template random_uniform<RandomSource>(m, k);
+        const auto m2 = M2::template random_uniform<RandomSource>(k, n);
+        auto expr = m1 * m2;
+        M0 result(m, n);
         for (auto _ : state) {
-            (m1 * m2).assign_mkl(m);
-            benchmark::DoNotOptimize(m);
+            expr.assign_mkl(result);
+            benchmark::DoNotOptimize(result);
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(gemm_mkl<2>)->Name("GEMM mkl")->Arg(2);
-BENCHMARK(gemm_mkl<4>)->Name("GEMM mkl")->Arg(4);
-BENCHMARK(gemm_mkl<8>)->Name("GEMM mkl")->Arg(8);
-BENCHMARK(gemm_mkl<16>)->Name("GEMM mkl")->Arg(16);
-BENCHMARK(gemm_mkl<32>)->Name("GEMM mkl")->Arg(32);
-BENCHMARK(gemm_mkl)->Name("GEMM mkl")
-    ->Arg(64)
-    ->Arg(256)
-    ->Arg(1024);
+using enum MatrixOption::Major;
+BENCHMARK(gemm_mkl<float64, Col, Col, Col>)->Name("GEMM CCC mkl")
+    ->Args({4, 4, 4})
+    ->Args({8, 8, 8})
+    ->Args({16, 16, 16})
+    ->Args({64, 64, 64})
+    ->Args({256, 256, 256})
+    ->Args({1024, 1024, 1024});
+BENCHMARK(gemm_mkl<float64, Col, Row, Col>)->Name("GEMM CRC mkl")
+    ->Args({4, 4, 4})
+    ->Args({8, 8, 8})
+    ->Args({16, 16, 16})
+    ->Args({64, 64, 64})
+    ->Args({256, 256, 256})
+    ->Args({1024, 1024, 1024});
+BENCHMARK(gemm_mkl<float64, Col, Col, Row>)->Name("GEMM CCR mkl")
+    ->Args({4, 4, 4})
+    ->Args({8, 8, 8})
+    ->Args({16, 16, 16})
+    ->Args({64, 64, 64})
+    ->Args({256, 256, 256})
+    ->Args({1024, 1024, 1024});
+BENCHMARK(gemm_mkl<float64, Col, Row, Row>)->Name("GEMM CRR mkl")
+    ->Args({4, 4, 4})
+    ->Args({8, 8, 8})
+    ->Args({16, 16, 16})
+    ->Args({64, 64, 64})
+    ->Args({256, 256, 256})
+    ->Args({1024, 1024, 1024});
