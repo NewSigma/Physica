@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -47,6 +47,6 @@ namespace Physica {
 
     template<Vector V>
     [[nodiscard]] __host__ __device__ auto abs(V&& v) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprID::Abs, V&&>>(std::forward<V>(v));
+        return device_obj<VectorExpr<ExprID::Abs, remove_device_obj_t<V&&>>>(std::forward<V>(v));
     }
 }

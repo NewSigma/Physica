@@ -23,15 +23,14 @@
 namespace Physica {
     template<ExprID ID, Matrix M>
     class device_obj<UnitaryMatrixExpr<ID, M>> : public device_obj<RValueMatrix<MatrixExpr<ID, M>>> {
-        static_assert(CUDA<M>, "[Error]: Invalid type");
         using host_obj = UnitaryMatrixExpr<ID, M>;
-        using Derived = MatrixExpr<ID, M>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<Derived>>;
+        using Base = device_obj<RValueMatrix<MatrixExpr<ID, M>>>;
+        using Ref = add_device_obj<M>::type;
     private:
-        PlainStruct<const std::remove_cvref_t<M>> expr;
+        PlainStruct<add_device_obj_t<std::remove_reference_t<M>>> expr;
     public:
-        __host__ __device__ device_obj(M expr_);
+        __host__ __device__ device_obj(Ref expr_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -48,7 +47,7 @@ namespace Physica {
     };
 
     template<ExprID ID, Matrix M>
-    __host__ __device__ device_obj<UnitaryMatrixExpr<ID, M>>::device_obj(M expr_) : expr(asStruct(expr_)) {}
+    __host__ __device__ device_obj<UnitaryMatrixExpr<ID, M>>::device_obj(Ref expr_) : expr(asStruct(expr_)) {}
 
     template<ExprID ID, Matrix M>
     __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<ID, M>>::transpose() const noexcept {
@@ -74,17 +73,22 @@ namespace Physica {
     template<ExprID ID, class LHS, class RHS>
     class device_obj<BinaryMatrixExpr<ID, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<ID, LHS, RHS>>> {
         static_assert(Matrix<LHS> || Matrix<RHS>, "[Error]: Either types should be Matrix");
-        static_assert((CUDA<LHS> || Scalar<LHS>) && (CUDA<RHS> || Scalar<RHS>), "[Error]: Invalid type");
 
         using host_obj = BinaryMatrixExpr<ID, LHS, RHS>;
-        using Derived = MatrixExpr<ID, LHS, RHS>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<ID, LHS, RHS>>>;
+
+        using LHS1 = std::remove_reference_t<LHS>;
+        using RHS1 = std::remove_reference_t<RHS>;
+        using LHS2 = std::conditional<Scalar<LHS>, LHS1, add_device_obj_t<LHS1>>::type;
+        using RHS2 = std::conditional<Scalar<RHS>, RHS1, add_device_obj_t<RHS1>>::type;
+        using Ref1 = std::conditional<Scalar<LHS>, LHS, add_device_obj_t<LHS>>::type;
+        using Ref2 = std::conditional<Scalar<RHS>, RHS, add_device_obj_t<RHS>>::type;
     private:
-        PlainStruct<const std::remove_cvref_t<LHS>> lhs;
-        PlainStruct<const std::remove_cvref_t<RHS>> rhs;
+        Physica::PlainStruct<LHS2> lhs;
+        Physica::PlainStruct<RHS2> rhs;
     public:
-        __host__ __device__ device_obj(LHS lhs_, RHS rhs_);
+        __host__ __device__ device_obj(Ref1 lhs_, Ref2 rhs_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -102,7 +106,7 @@ namespace Physica {
     };
 
     template<ExprID ID, class LHS, class RHS>
-    __host__ __device__ device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::device_obj(LHS lhs_, RHS rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
+    __host__ __device__ device_obj<BinaryMatrixExpr<ID, LHS, RHS>>::device_obj(Ref1 lhs_, Ref2 rhs_) : lhs(asStruct(lhs_)), rhs(asStruct(rhs_)) {
         if constexpr (Matrix<LHS> && Matrix<RHS>) {
             assert(getLHS().getRow() == getRHS().getRow());
             assert(getLHS().getCol() == getRHS().getCol());

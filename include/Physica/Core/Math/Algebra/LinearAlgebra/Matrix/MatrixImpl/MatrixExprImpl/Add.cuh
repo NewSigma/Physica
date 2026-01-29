@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -130,6 +130,6 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] __host__ __device__ auto operator+(M1&& m1, M2&& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
-        return device_obj<MatrixExpr<ExprID::Add, M1&&, M2&&>>(std::forward<M1>(m1), std::forward<M2>(m2));
+        return device_obj<MatrixExpr<ExprID::Add, remove_device_obj_t<M1&&>, remove_device_obj_t<M2&&>>>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

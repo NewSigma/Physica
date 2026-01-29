@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -118,7 +118,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator+(V&& v, U&& x) noexcept requires(CUDA<V>) {
-        return device_obj<VectorExpr<ExprID::Add, V&&, U&&>>(std::forward<V>(v), std::forward<U>(x));
+        return device_obj<VectorExpr<ExprID::Add, remove_device_obj_t<V&&>, U&&>>(std::forward<V>(v), std::forward<U>(x));
     }
 
     template<Scalar U, Vector V>
@@ -128,6 +128,6 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     [[nodiscard]] __host__ __device__ auto operator+(V1&& v1, V2&& v2) noexcept requires(CUDA<V1> && CUDA<V2>) {
-        return device_obj<VectorExpr<ExprID::Add, V1&&, V2&&>>(std::forward<V1>(v1), std::forward<V2>(v2));
+        return device_obj<VectorExpr<ExprID::Add, remove_device_obj_t<V1&&>, remove_device_obj_t<V2&&>>>(std::forward<V1>(v1), std::forward<V2>(v2));
     }
 }

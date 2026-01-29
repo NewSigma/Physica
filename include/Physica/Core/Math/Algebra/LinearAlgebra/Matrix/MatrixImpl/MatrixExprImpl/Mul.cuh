@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -112,7 +112,7 @@ namespace Physica {
 
     template<Matrix M, Scalar U>
     [[nodiscard]] __host__ __device__ auto operator*(M&& m, U&& x) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprID::Mul, M&&, U&&>>(std::forward<M>(m), std::forward<U>(x));
+        return device_obj<MatrixExpr<ExprID::Mul, remove_device_obj_t<M&&>, U&&>>(std::forward<M>(m), std::forward<U>(x));
     }
 
     template<Matrix M, Scalar U>
@@ -122,7 +122,7 @@ namespace Physica {
 
     template<Matrix M, Vector V>
     [[nodiscard]] __host__ __device__ auto hadamard(M&& m, V&& x) noexcept requires(CUDA<M> && CUDA<V>) {
-        return device_obj<MatrixExpr<ExprID::Mul, M&&, V&&>>(std::forward<M>(m), std::forward<V>(x));
+        return device_obj<MatrixExpr<ExprID::Mul, remove_device_obj_t<M&&>, V&&>>(std::forward<M>(m), std::forward<V>(x));
     }
 
     template<Matrix M, Vector V>
@@ -132,6 +132,6 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     [[nodiscard]] auto hadamard(M1&& m1, M2&& m2) noexcept requires(CUDA<M1> && CUDA<M2>) {
-        return device_obj<MatrixExpr<ExprID::Mul, M1&&, M2&&>>(std::forward<M1>(m1), std::forward<M2>(m2));
+        return device_obj<MatrixExpr<ExprID::Mul, remove_device_obj_t<M1&&>, remove_device_obj_t<M2&&>>>(std::forward<M1>(m1), std::forward<M2>(m2));
     }
 }

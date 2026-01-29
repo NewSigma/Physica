@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/PlainStruct.h"
 #include "RVectorBlock.h"
 
 namespace Physica {
@@ -26,15 +27,16 @@ namespace Physica {
         using host_obj = RVectorBlock<V, Length>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
-    public:
-        using ScalarType = Base::ScalarType;
+        using Ref = add_device_obj<V>::type;
+    protected:
+        using typename Base::T;
     private:
-        const V& vec;
+        Physica::PlainStruct<add_device_obj_t<std::remove_reference_t<V>>> vec;
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(const device_obj<V>& vec_, size_t from_, size_t to_);
-        __host__ __device__ device_obj(const device_obj<V>& vec_, size_t from_);
+        __host__ __device__ device_obj(Ref vec_, size_t from_, size_t to_);
+        __host__ __device__ device_obj(Ref vec_, size_t from_);
         device_obj(const This& block) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -42,7 +44,7 @@ namespace Physica {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return vec.calc(index + from); }
+        [[nodiscard]] __device__ T calc(size_t index) const { return vec.calc(index + from); }
 
         template<size_t Length_ = Dynamic>
         [[nodiscard]] __host__ __device__ auto head(this auto&&, size_t to = Length_) noexcept;
@@ -56,15 +58,14 @@ namespace Physica {
 
     template<Vector V, size_t Length>
     __host__ __device__ device_obj<RVectorBlock<V, Length>>::device_obj(
-            const device_obj<V>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_)), from(from_), to(to_) {
+            Ref vec_, size_t from_, size_t to_) : vec(asStruct(vec_)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<Vector V, size_t Length>
-    __host__ __device__ device_obj<RVectorBlock<V, Length>>::device_obj(
-            const device_obj<V>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+    __host__ __device__ device_obj<RVectorBlock<V, Length>>::device_obj(Ref vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
     template<Vector V, size_t Length>
     template<size_t Length_>

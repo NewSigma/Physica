@@ -74,6 +74,7 @@ namespace Physica {
 
     template<class T>
     struct add_device_obj {
+        static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj is not allowed");
     private:
         template<bool Trivial>
         struct Helper {

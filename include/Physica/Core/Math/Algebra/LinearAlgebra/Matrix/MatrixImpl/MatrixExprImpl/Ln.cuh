@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -61,6 +61,6 @@ namespace Physica {
 
     template<Matrix M>
     [[nodiscard]] auto ln_elem(M&& m) noexcept requires(CUDA<M>) {
-        return device_obj<MatrixExpr<ExprID::Ln, M&&>>(std::forward<M>(m));
+        return device_obj<MatrixExpr<ExprID::Ln, remove_device_obj_t<M&&>>>(std::forward<M>(m));
     }
 }
