@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -67,7 +67,8 @@ namespace Physica {
 
     template<Scalar T>
     auto GreenSampler<T>::calcSign() const noexcept -> Tv {
-        return rsigns.mean();
+        // DQMC returns relative sign, we do not care about it
+        return abs(rsigns.mean());
     }
 
     template<Scalar T>
