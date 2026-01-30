@@ -139,6 +139,8 @@ namespace Physica {
         [[nodiscard]] Tr normInf() const;
         [[nodiscard]] T cond2() const;
 
+        [[nodiscard]] Index2D argmax() const noexcept;
+        [[nodiscard]] Index2D argmin() const noexcept;
         [[nodiscard]] T max() const;
         [[nodiscard]] T min() const;
         [[nodiscard]] CoDiff<T> sum() const;

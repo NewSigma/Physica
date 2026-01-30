@@ -246,6 +246,38 @@ namespace Physica {
     }
 
     template<class Derived>
+    Index2D RValueMatrix<Derived>::argmax() const noexcept {
+        Trv x = std::numeric_limits<Trv>::lowest();
+        Index2D result{0, 0};
+        for (size_t r = 0; r < getRow(); ++r) {
+            for (size_t c = 0; c < getCol(); ++c) {
+                Trv y = calc_value(r, c);
+                if (y > x) {
+                    x = y;
+                    result = Index2D{r, c};
+                }
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
+    Index2D RValueMatrix<Derived>::argmin() const noexcept {
+        Trv x = std::numeric_limits<Trv>::max();
+        Index2D result{0, 0};
+        for (size_t r = 0; r < getRow(); ++r) {
+            for (size_t c = 0; c < getCol(); ++c) {
+                Trv y = calc_value(r, c);
+                if (y < x) {
+                    x = y;
+                    result = Index2D{r, c};
+                }
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
     auto RValueMatrix<Derived>::max() const -> T {
         T result;
         if constexpr (MatrixOption::isColMatrix<This>()) {
@@ -271,9 +303,9 @@ namespace Physica {
     auto RValueMatrix<Derived>::min() const -> T {
         T result;
         if constexpr (MatrixOption::isColMatrix<This>()) {
-            result = col(0).min();
+            result = Base::getDerived().col(0).min();
             for (size_t i = 1; i < getCol(); ++i) {
-                T temp = col(i).min();
+                T temp = Base::getDerived().col(i).min();
                 if (temp < result)
                     result = temp;
             }
@@ -281,7 +313,7 @@ namespace Physica {
         else {
             result = row(0).min();
             for (size_t i = 1; i < getRow(); ++i) {
-                T temp = row(i).min();
+                T temp = Base::getDerived().row(i).min();
                 if (temp < result)
                     result = temp;
             }

@@ -253,6 +253,34 @@ namespace Physica {
     }
 
     template<class Derived>
+    size_t RValueVector<Derived>::argmax() const noexcept {
+        Trv x = std::numeric_limits<Trv>::lowest();
+        size_t result = 0;
+        for (size_t i = 0; i < getLength(); ++i) {
+            Trv y = calc_value(i);
+            if (y > x) {
+                x = y;
+                result = i;
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
+    size_t RValueVector<Derived>::argmin() const noexcept {
+        Trv x = std::numeric_limits<Trv>::max();
+        size_t result = 0;
+        for (size_t i = 0; i < getLength(); ++i) {
+            Trv y = calc_value(i);
+            if (y < x) {
+                x = y;
+                result = i;
+            }
+        }
+        return result;
+    }
+
+    template<class Derived>
     auto RValueVector<Derived>::max() const noexcept -> CoDiff<T> {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         assert(getLength() != 0);

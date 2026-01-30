@@ -164,6 +164,8 @@ namespace Physica {
         [[nodiscard]] Tr lnSquaredNorm() const;
         [[nodiscard]] Tr normInf() const;
 
+        [[nodiscard]] size_t argmax() const noexcept;
+        [[nodiscard]] size_t argmin() const noexcept;
         [[nodiscard]] CoDiff<T> max() const noexcept;
         [[nodiscard]] CoDiff<T> min() const noexcept;
         [[nodiscard]] CoDiff<T> sum() const noexcept;

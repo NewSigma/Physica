@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,12 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica {
-    using Index2D = Array<size_t, 2>;
-    using Index3D = Array<size_t, 3>;
-    using Index4D = Array<size_t, 4>;
-    using Index5D = Array<size_t, 5>;
-    using IndexND = Array<size_t>;
-
     template<class T, int... Dims>
     class ArrayND {
         using This = ArrayND<T, Dims...>;
