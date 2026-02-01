@@ -68,6 +68,9 @@ namespace Physica {
         [[nodiscard]] decltype(auto) calc(size_t row, size_t col) const { return operator[](row, col); }
         [[nodiscard]] Tv calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
+        [[nodiscard]] size_t pivotPartial(size_t column) const noexcept;
+        [[nodiscard]] size_t pivotComplete(size_t column) const noexcept;
+
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 
         void toNextMean(size_t lastNumSample, const Matrix auto& sample) noexcept;

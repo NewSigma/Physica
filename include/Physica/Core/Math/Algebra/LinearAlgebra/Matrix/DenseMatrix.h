@@ -66,9 +66,6 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
-        size_t completePivoting(size_t col);
-        size_t partialPivoting(size_t col);
-
         using Storage::resize;
         void resize(const Matrix auto& m, auto&&... args);
         [[nodiscard]] auto toDevice() const;

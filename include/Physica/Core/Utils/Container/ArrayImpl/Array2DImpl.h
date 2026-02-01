@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -107,6 +107,7 @@ namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::swap_row(size_t r1, size_t r2) noexcept {
         assert(r1 < getRow() && r2 < getRow());
+        assert(r1 != r2);
         if constexpr (isColMajor) {
             const size_t row = getRow();
             const size_t col = getCol();
@@ -125,6 +126,7 @@ namespace Physica {
     template<class T, int Option, size_t Row, size_t Col, class Allocator>
     void Array2D<T, Option, Row, Col, Allocator>::swap_col(size_t c1, size_t c2) noexcept {
         assert(c1 < getCol() && c2 < getCol());
+        assert(c1 != c2);
         if constexpr (isColMajor) {
             const size_t row = getRow();
             const size_t offset1 = c1 * row;

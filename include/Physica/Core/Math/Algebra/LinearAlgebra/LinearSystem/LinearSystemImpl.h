@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,7 +33,10 @@ namespace Physica {
     void LinearSystem<T>::gaussJordanPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            working.partialPivoting(i);
+            size_t pivot = working.leftCols(rank).pivotPartial(i);
+            if (i != pivot)
+                working.swap_row(i, pivot);
+
             upperEliminate(i);
             lowerEliminate(i);
         }
@@ -45,7 +48,10 @@ namespace Physica {
     void LinearSystem<T>::gaussJordanComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            working.completePivoting(i);
+            size_t pivot = working.leftCols(rank).pivotComplete(i);
+            if (i != pivot)
+                working.swap_row(i, pivot);
+
             upperEliminate(i);
             lowerEliminate(i);
         }
@@ -57,7 +63,10 @@ namespace Physica {
     void LinearSystem<T>::gaussEliminationPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            working.partialPivoting(i);
+            size_t pivot = working.leftCols(rank).pivotPartial(i);
+            if (i != pivot)
+                working.swap_row(i, pivot);
+
             lowerEliminate(i);
         }
         for (size_t i = rank - 1; i > 0; --i) {
@@ -72,7 +81,10 @@ namespace Physica {
     void LinearSystem<T>::gaussEliminationComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            working.completePivoting(i);
+            size_t pivot = working.leftCols(rank).pivotComplete(i);
+            if (i != pivot)
+                working.swap_row(i, pivot);
+
             lowerEliminate(i);
         }
         for (size_t i = rank - 1; i > 0; --i) {

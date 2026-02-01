@@ -82,6 +82,20 @@ namespace Physica {
     }
 
     template<class Derived>
+    size_t LValueMatrix<Derived>::pivotPartial(size_t column) const noexcept {
+        assert(column < Base::getCol());
+        assert(Base::isSquare());
+        return column + abs(Base::getDerived().col(column).tail(column)).argmax();
+    }
+
+    template<class Derived>
+    size_t LValueMatrix<Derived>::pivotComplete(size_t column) const noexcept {
+        assert(column < Base::getCol());
+        assert(Base::isSquare());
+        return column + abs_elem(Base::getDerived().bottomRightCorner(column)).argmax()[0];
+    }
+
+    template<class Derived>
     auto LValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
         if constexpr (isReverseDiff) {
             const size_t maxMajor = Base::getMaxMajor();
