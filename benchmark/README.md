@@ -1,6 +1,6 @@
 # Physica Benchmark
 
-Physica Benchmark用于维护性能测试。由于性能测试对平台的高度依赖性, 测试结果仅供参考$^{[1]}$。
+*Physica Benchmarks* are used for monitoring performance regression. Since performance testing is highly dependent on the platform, the test results are for reference only.$^{[1]}$。
 
 ## Notes
 

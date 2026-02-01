@@ -1,6 +1,6 @@
 # Physica Examples
 
-The Physica Examples is designed to
+*Physica Examples* is designed to
 
 - Demonstrate the usage and provide prototype implementations
 - Maintain the reproducibility of experimental code, related data, and discussions
