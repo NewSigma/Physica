@@ -34,18 +34,35 @@ namespace {
 }
 
 int main() {
-    using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
-    testInv(Matrix4D{
-            {1,  1,  1,  1},
-            {1,  1, -1, -1},
-            {1, -1,  1, -1},
-            {1, -1, -1,  1}
-    }, 1E-15);
-    testInv(Matrix4D{
-            {1,  2, 0, 1},
-            {0,  1, 1, 0},
-            {2,  0, 1, 1},
-            {1,  1, 0, 1}
-    }, 1E-15);
+    /* Col major */ {
+        using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
+        testInv(Matrix4D{
+                {1,  1,  1,  1},
+                {1,  1, -1, -1},
+                {1, -1,  1, -1},
+                {1, -1, -1,  1}
+        }, 1E-15);
+        testInv(Matrix4D{
+                {1,  2, 0, 1},
+                {0,  1, 1, 0},
+                {2,  0, 1, 1},
+                {1,  1, 0, 1}
+        }, 1E-15);
+    }
+    /* Row major */ {
+        using Matrix4D = DenseMatrix<float64, MatrixOption::Row, 4, 4>;
+        testInv(Matrix4D{
+                {1,  1,  1,  1},
+                {1,  1, -1, -1},
+                {1, -1,  1, -1},
+                {1, -1, -1,  1}
+        }, 1E-15);
+        testInv(Matrix4D{
+                {1,  2, 0, 1},
+                {0,  1, 1, 0},
+                {2,  0, 1, 1},
+                {1,  1, 0, 1}
+        }, 1E-15);
+    }
     return 0;
 }

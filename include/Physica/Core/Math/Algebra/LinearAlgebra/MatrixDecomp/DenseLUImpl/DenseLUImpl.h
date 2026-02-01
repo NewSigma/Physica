@@ -41,14 +41,29 @@ namespace Physica {
     void DenseLU<T, Pivot>::compute_base() {
         size_t order = getOrder();
         for (size_t i = 0; i < order; ++i) {
-            if constexpr (Pivot) {
-                size_t pivot = working.pivotPartial(i);
-                if (i != pivot) {
-                    working.swap_row(i, pivot);
-                    perm.swap_row(i, pivot);
-                }
+            auto col = working.col(i);
+            if (i == 0) {
+                col.tail(1) *= reciprocal(col[0]);
+                continue;
             }
-            decomp_col(i);
+
+            const size_t alpha = i + 1;
+            for (size_t j = 1; j < alpha; ++j)
+                col[j] -= working.row(j).head(j) * col.head(j);
+
+            if (alpha < getRow()) {
+                auto tail = col.tail(alpha);
+                tail -= working.bottomLeftCorner(alpha, i) * col.head(i);
+
+                if constexpr (Pivot) {
+                    size_t pivot = working.pivotPartial(i);
+                    if (i != pivot) {
+                        working.swap_row(i, pivot);
+                        perm.swap_row(i, pivot);
+                    }
+                }
+                tail *= reciprocal(working[i, i]);
+            }
         }
 
         if constexpr (Pivot)
@@ -115,27 +130,5 @@ namespace Physica {
     void DenseLU<T, Pivot>::setWorking(const Matrix auto& source) {
         working.assert_assign(source);
         source.assign(working);
-    }
-    /**
-     * Reference:
-     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
-     */
-    template<Scalar T, bool Pivot>
-    void DenseLU<T, Pivot>::decomp_col(size_t index) {
-        auto col = working.col(index);
-        if (index == 0) {
-            col.tail(1) *= reciprocal(col[0]);
-            return;
-        }
-
-        const size_t alpha = index + 1;
-        for (size_t j = 1; j < alpha; ++j)
-            col[j] -= working.row(j).head(j) * col.head(j);
-
-        if (alpha < getRow()) {
-            auto tail = col.tail(alpha);
-            tail -= working.bottomLeftCorner(alpha, index) * col.head(index);
-            tail *= reciprocal(working[index, index]);
-        }
     }
 }

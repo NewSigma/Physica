@@ -88,25 +88,37 @@ namespace {
 }
 
 int main() {
-    const Matrix3D mat1{
-            {2, 3,  4},
-            {1, 1,  9},
-            {1, 2, -6}
-    };
-    const Matrix4D mat2{
-            {1, 2, 0, 1},
-            {0, 1, 1, 0},
-            {2, 0, 1, 1},
-            {1, 1, 0, 1}
-    };
-    decomp<false>(mat1, 1E-15);
-    decomp<true>(mat1, 1E-15);
-    decomp<true>(mat2, 1E-15);
+    {
+        // We know this matrix does not need pivoting
+        const Matrix3D mat{
+                {2, 3,  4},
+                {1, 1,  9},
+                {1, 2, -6}
+        };
+        decomp<false>(mat, 1E-15);
+        inverse<false>(mat, 1E-15);
+    }
+    {
+        // Otherwise, always prefer pivoting
+        const Matrix4D mat1{
+                {1, 2, 0, 1},
+                {0, 1, 1, 0},
+                {2, 0, 1, 1},
+                {1, 1, 0, 1}
+        };
+        decomp<true>(mat1, 1E-15);
+        inverse<true>(mat1, 1E-14);
 
-    inverse<false>(mat1, 1E-15);
-    inverse<true>(mat1, 1E-14);
-    inverse<true>(mat2, 1E-10);
-
+        // Partial pivoting does not work for it
+        const Matrix4D mat2{
+                {1,  1,  1,  1},
+                {1,  1, -1, -1},
+                {1, -1,  1, -1},
+                {1, -1, -1,  1}
+        };
+        decomp<true>(mat2, 1E-15);
+        inverse<true>(mat2, 1E-10);
+    }
     inverseGEMV<false>(1E-12); // Precision is lower without pivoting
     inverseGEMV<true>(1E-15);
     return 0;
