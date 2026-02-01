@@ -25,7 +25,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void ContinuousMatrix<Derived>::assign(Matrix auto&& m) const noexcept {
         using M = decltype(m);
-        if constexpr (is_continuous<M>::value && MatrixOption::isSameMajor<Derived, M>())
+        if constexpr (std::remove_cvref_t<M>::IsContinuous && MatrixOption::isSameMajor<Derived, M>())
             Base::getDerived().flatten().template assign<P>(m.flatten());
         else
             Base::template assign<P>(m);

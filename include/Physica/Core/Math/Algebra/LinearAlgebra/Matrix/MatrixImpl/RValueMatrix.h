@@ -55,8 +55,8 @@ namespace Physica {
                                        && !Diffable<T1>
                                        && (Traits<M1>::Option == Traits<M2>::Option)
                                        && (T1::Prec == Float32 || T2::Prec == Float64)
-                                       && is_continuous<U1>::value
-                                       && is_continuous<U2>::value;
+                                       && U1::IsContinuous
+                                       && U2::IsContinuous;
         };
     }
     /**
@@ -77,6 +77,7 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
+        constexpr static bool IsContinuous = requires{ std::declval<Derived>().data(); };
     protected:
         using T = ScalarType;
         using Tr = T::RealType;

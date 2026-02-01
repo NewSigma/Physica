@@ -41,6 +41,7 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
+        constexpr static bool IsContinuous = host_obj::IsContinuous;
         constexpr static size_t MaxThreadsPerBlock = 256;
     protected:
         using T = ScalarType;

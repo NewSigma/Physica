@@ -43,6 +43,7 @@ namespace Physica {
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
+        constexpr static bool IsContinuous = requires{ std::declval<Derived>().data(); };
 
         using IndexType = Array<size_t, NDim>;
     protected:

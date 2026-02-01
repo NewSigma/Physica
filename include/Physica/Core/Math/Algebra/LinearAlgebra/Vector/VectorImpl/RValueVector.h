@@ -41,13 +41,6 @@ namespace Physica {
     template<class T, int GradOrder> class GradVector;
     template<Vector, Matrix> class GEVM;
 
-    template<class T>
-    class is_continuous {
-        using U = remove_device_obj<std::remove_cvref_t<T>>::type;
-    public:
-        constexpr static bool value = std::is_base_of<ContinuousVector<U>, U>::value || std::is_base_of<ContinuousMatrix<U>, U>::value;
-    };
-
     namespace Internal {
         template<class T1, class T2 = T1> class EnableMKL;
 
@@ -84,8 +77,8 @@ namespace Physica {
             constexpr static bool value = HasMKL()
                                        && std::same_as<T, typename U2::ScalarType>
                                        && (T::Prec == Float16 || T::Prec == Float32 || T::Prec == Float64)
-                                       && is_continuous<U1>::value
-                                       && is_continuous<U2>::value
+                                       && U1::IsContinuous
+                                       && U2::IsContinuous
                                        && !Diffable<U1>
                                        && (EnableSIMD<U1, U2>::SizeAtCompile == Dynamic);
         };
@@ -107,6 +100,7 @@ namespace Physica {
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isDiffable = ScalarType::isDiffable;
         constexpr static bool isComplex = ScalarType::isComplex;
+        constexpr static bool IsContinuous = requires{ std::declval<Derived>().data(); };
     protected:
         using T = ScalarType;
         using Tr = T::RealType;

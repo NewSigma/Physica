@@ -35,10 +35,9 @@ namespace Physica {
     template<ExecutePolicy P>
     void ContinuousVector<Derived>::assign(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
-        constexpr bool isContinuous = is_continuous<V>::value;
         constexpr bool SameScalar = std::same_as<T, typename V::ScalarType>;
         constexpr bool Copyable = std::is_trivially_copyable<T>::value;
-        if constexpr (isContinuous && SameScalar && Copyable) {
+        if constexpr (V::IsContinuous && SameScalar && Copyable) {
             if constexpr (isDiffable) {
                 auto& x = Base::getDerived();
                 x.values().template assign<P>(v.values());
