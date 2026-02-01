@@ -261,6 +261,24 @@ namespace Physica {
         using Self = decltype(self);
         return MinorDiagL<Self>(std::forward<Self>(self), shift);
     }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::swap_row(size_t r1, size_t r2) {
+        assert(r1 < Base::getRow() && r2 < Base::getRow());
+        assert(r1 != r2);
+        const auto& m = Base::getDerived();
+        for (size_t c = 0; c < m.getCol(); ++c)
+            m[r1, c].swap(m[r2, c]);
+    }
+
+    template<class Derived>
+    void LValueMatrix<Derived>::swap_col(size_t c1, size_t c2) {
+        assert(c1 < Base::getCol() && c2 < Base::getCol());
+        assert(c1 != c2);
+        const auto& m = Base::getDerived();
+        for (size_t r = 0; r < m.getRow(); ++r)
+            m[r, c1].swap(m[r, c2]);
+    }
     /**
      * Reduce the element at one row using the other row.
      * \param r1

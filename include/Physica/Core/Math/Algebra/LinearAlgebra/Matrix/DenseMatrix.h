@@ -80,6 +80,8 @@ namespace Physica {
         using Base::random_normal;
         using Base::random_uniform;
         using Storage::zeros;
+        using Storage::swap_row;
+        using Storage::swap_col;
         using Storage::swap;
 
         using Base::read;

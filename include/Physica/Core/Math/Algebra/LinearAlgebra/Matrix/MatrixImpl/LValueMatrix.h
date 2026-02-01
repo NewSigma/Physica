@@ -95,6 +95,8 @@ namespace Physica {
         [[nodiscard]] auto diag(this auto&&) noexcept;
         [[nodiscard]] auto diag(this auto&&, ssize_t shift) noexcept;
 
+        void swap_row(size_t r1, size_t r2);
+        void swap_col(size_t c1, size_t c2);
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void colReduce(size_t c1, size_t c2, size_t elementIndex);
         void majorReduce(size_t v1, size_t v2, size_t elementIndex);
