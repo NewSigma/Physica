@@ -62,6 +62,19 @@ namespace {
             benchmark::ClobberMemory();
         }
     }
+
+    void gemm_trans(benchmark::State& state) {
+        constexpr int N = 1024;
+        const auto m1 = MatrixND<float64>::template random_uniform<RandomSource>(N, N);
+        const auto m2 = MatrixND<float64>::template random_uniform<RandomSource>(N, N);
+        auto expr = m1 * m2.transpose();
+        MatrixND<float64> result(N, N);
+        for (auto _ : state) {
+            expr.assign(result);
+            benchmark::DoNotOptimize(result);
+            benchmark::ClobberMemory();
+        }
+    }
 }
 
 using enum MatrixOption::Major;
@@ -122,3 +135,5 @@ BENCHMARK(gemm_base<float64, Col, Row, Row>)->Name("GEMM CRR base")
     ->Args({64, 64, 64})
     ->Args({256, 256, 256})
     ->Args({1024, 1024, 1024});
+
+BENCHMARK(gemm_trans)->Name("GEMM trans");

@@ -61,8 +61,11 @@ namespace Physica {
         [[nodiscard]] size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+    private:
         /* Static members */
-        [[nodiscard]] constexpr static bool UseMKL(const Matrix auto& target) noexcept;
+        [[nodiscard]] consteval static bool UseMKL(const Matrix auto& target) noexcept;
+        template<Matrix Target, Matrix MaybeTrans>
+        consteval static bool MatOrTransUseMKL() noexcept;
         /* Friends */
         friend class device_obj<This>;
     };
@@ -131,23 +134,6 @@ namespace Physica {
     }
 
     template<Matrix M1, Matrix M2>
-    constexpr bool GEMM<M1, M2>::UseMKL(const Matrix auto& target) noexcept {
-        using M = decltype(target);
-        using T1 = std::remove_cvref_t<M1>;
-        using T2 = std::remove_cvref_t<M2>;
-        constexpr bool Large1 = T1::SizeAtCompile == Dynamic || T1::SizeAtCompile > Critical;
-        constexpr bool Large2 = T2::SizeAtCompile == Dynamic || T2::SizeAtCompile > Critical;
-        constexpr bool UseMKL1 = Large1 && Large2;
-        constexpr bool UseMKL2 = Internal::EnableMKL<T1, M>::value;
-        constexpr bool UseMKL3 = Internal::EnableMKL<T2, M>::value;
-        constexpr bool UseMKL = UseMKL1 && UseMKL2 && UseMKL3;
-        constexpr bool SameMajor1 = MatrixOption::getMajor<T1>() == MatrixOption::getMajor<M>();
-        constexpr bool SameMajor2 = MatrixOption::getMajor<T2>() == MatrixOption::getMajor<M>();
-        constexpr bool SameMajor = SameMajor1 && SameMajor2;
-        return UseMKL && SameMajor;
-    }
-
-    template<Matrix M1, Matrix M2>
     auto&& GEMM<M1, M2>::getLHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.mat1);
     }
@@ -155,6 +141,28 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     auto&& GEMM<M1, M2>::getRHS(this auto&& self) noexcept {
         return propagate_rvalue_reference<decltype(self), M1>(self.mat2);
+    }
+
+    template<Matrix M1, Matrix M2>
+    consteval bool GEMM<M1, M2>::UseMKL(const Matrix auto& target) noexcept {
+        using M = decltype(target);
+        using T1 = std::remove_cvref_t<M1>;
+        using T2 = std::remove_cvref_t<M2>;
+        constexpr bool Large1 = T1::SizeAtCompile == Dynamic || T1::SizeAtCompile > Critical;
+        constexpr bool Large2 = T2::SizeAtCompile == Dynamic || T2::SizeAtCompile > Critical;
+        constexpr bool UseMKL1 = Large1 && Large2;
+        constexpr bool UseMKL2 = MatOrTransUseMKL<M, T1>();
+        constexpr bool UseMKL3 = MatOrTransUseMKL<M, T2>();
+        return UseMKL1 && UseMKL2 && UseMKL3;
+    }
+
+    template<Matrix M1, Matrix M2>
+    template<Matrix Target, Matrix MaybeTrans>
+    consteval bool GEMM<M1, M2>::MatOrTransUseMKL() noexcept {
+        if constexpr (instanceof<Transpose, MaybeTrans>)
+            return Internal::EnableMKL<Target, decltype(std::declval<MaybeTrans>().getExpr())>::value;
+        else
+            return Internal::EnableMKL<Target, MaybeTrans>::value;
     }
 }
 
@@ -177,4 +185,3 @@ namespace Physica {
 #ifdef PHYSICA_MKL
     #include "GEMM_MKL.h"
 #endif
-#include "GEMMTrans.h"
