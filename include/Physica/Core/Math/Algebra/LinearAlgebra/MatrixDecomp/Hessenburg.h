@@ -165,7 +165,7 @@ namespace Physica {
     class Traits<HessenburgMatrixH<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::Col;
+        constexpr static int Option = MatrixMajor::Col;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

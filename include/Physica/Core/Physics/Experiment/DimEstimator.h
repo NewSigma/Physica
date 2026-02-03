@@ -33,7 +33,7 @@ namespace Physica {
      */
     class DimEstimator {
         using ScalarType = float64;
-        using DataMatrix = DenseMatrix<ScalarType, MatrixOption::Row>;
+        using DataMatrix = DenseMatrix<ScalarType, MatrixMajor::Row>;
         VectorND<ScalarType> intrinsicDim;
         VectorND<ScalarType> correlateDim;
     public:

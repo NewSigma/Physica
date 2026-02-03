@@ -77,7 +77,6 @@ namespace Physica {
         [[nodiscard]] static This random_normal(size_t order);
         template<RNG R>
         [[nodiscard]] static This random_any(size_t order, auto& distribution);
-        [[nodiscard]] bool isHermiteMatrix(const Matrix auto& mat, double precision);
     };
 
     template<Scalar T, size_t Order>
@@ -195,17 +194,6 @@ namespace Physica {
         return asVector().write(loc, name);
     }
 #endif
-    template<Scalar T, size_t Order>
-    bool DenseHermiteMatrix<T, Order>::isHermiteMatrix(const Matrix auto& mat, double precision) {
-        if (mat.getRow() != mat.getCol())
-            return false;
-
-        for (size_t i = 0; i < mat.getRow(); ++i)
-            for (size_t j = 0; j < mat.getCol(); ++j)
-                if (!scalarNear(mat.calc(i, j), mat.calc(j, i).conjugate(), precision))
-                    return false;
-        return true;
-    }
 
     template<Scalar T, size_t Order>
     void swap(DenseHermiteMatrix<T, Order>& __restrict m1, DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
@@ -219,7 +207,7 @@ namespace Physica {
         static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::BothMajor;
+        constexpr static int Option = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

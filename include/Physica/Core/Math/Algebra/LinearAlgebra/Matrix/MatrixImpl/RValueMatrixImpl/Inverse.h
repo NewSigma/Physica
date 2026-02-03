@@ -83,7 +83,7 @@ namespace Physica {
 
     template<Matrix M>
     void Inverse<M>::assign3D(Matrix auto& target) const {
-        if constexpr (MatrixOption::isRowMatrix<decltype(target)>()) {
+        if constexpr (MatrixMajor::isRowMatrix<decltype(target)>()) {
             target[0, 0] = (mat[1, 1] * mat[2, 2] - mat[1, 2] * mat[2, 1]);
             target[0, 1] = (mat[2, 1] * mat[0, 2] - mat[0, 1] * mat[2, 2]);
             target[0, 2] = (mat[0, 1] * mat[1, 2] - mat[1, 1] * mat[0, 2]);

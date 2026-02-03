@@ -27,13 +27,13 @@ namespace Physica {
         using This = RingPolymer<T, Dim, NumReplica>;
         using Tv = T::ValueType;
         using Tcv = Tv::ComplexType;
-        constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixOption::Col : MatrixOption::Row;
+        constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixMajor::Col : MatrixMajor::Row;
     public:
         using MDCellType = MDCell<T, Dim>;
         using MassVector = MDCellType::MassVector;
         using PositionMatrix = MDCellType::PositionMatrix;
         using PhaseMatrix = DenseMatrix<T, PhaseMatrixMajor, Dynamic, NumReplica>;
-        using BufferType = DenseMatrix<Tcv, MatrixOption::Row, 2>;
+        using BufferType = DenseMatrix<Tcv, MatrixMajor::Row, 2>;
         using FFTType = FFT<T, 1>;
     private:
         PhaseMatrix phase;

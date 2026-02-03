@@ -26,7 +26,7 @@ namespace Physica {
     auto ContinuousMatrix<Derived>::balance_mkl() -> VectorND<T> {
         Base::assert_balance();
 
-        constexpr int Layout = MatrixOption::getMajor<Derived>() == MatrixOption::Row ? CblasRowMajor : CblasColMajor;
+        constexpr int Layout = MatrixMajor::getMajor<Derived>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
         constexpr char job = 'S';
         size_t n = Base::getRow();
         auto* a = reinterpret_cast<Tm*>(data());

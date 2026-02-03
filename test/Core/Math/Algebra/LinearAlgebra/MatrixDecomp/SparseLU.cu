@@ -27,7 +27,7 @@ using T = float32;
 namespace {
     void testSolver() {
         using VectorType = Vector4D<T>;
-        using MatrixType = DenseMatrix<T, MatrixOption::Row, 4, 4>;
+        using MatrixType = DenseMatrix<T, MatrixMajor::Row, 4, 4>;
         const MatrixType A{
                 {-0.000696013585639699,     0.816492585748236, 0.0216969440126965, -0.0884307621566726},
                 {    0.691809621910274, -0.000696013585639699,  0.131671000379563, -0.0701048797366553},
@@ -44,7 +44,7 @@ namespace {
     }
 
     void testLnAbsDet() {
-        using MatrixType = DenseMatrix<T, MatrixOption::Row, 8, 8>;
+        using MatrixType = DenseMatrix<T, MatrixMajor::Row, 8, 8>;
         const MatrixType A = MatrixType::random_normal<Random<MCG, 1234>>(8, 8);
         device_obj<SparseLU<T>> lu((SparseMatrix<T>(A)));
         expect(scalarNear(lu.lnAbsDet(), A.lnAbsDet(), 1E-5));

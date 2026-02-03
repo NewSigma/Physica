@@ -251,8 +251,8 @@ namespace Physica {
     __device__ decltype(auto) device_obj<LValueMatrix<Derived>>::refFromMajorMinor(this auto&& self, size_t major, size_t minor) noexcept {
         assert(major < self.getMaxMajor());
         assert(minor < self.getMaxMinor());
-        const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
-        const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
+        const size_t r = MatrixMajor::rowFromMajorMinor<Derived>(major, minor);
+        const size_t c = MatrixMajor::colFromMajorMinor<Derived>(major, minor);
         return self[r, c];
     }
 }

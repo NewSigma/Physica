@@ -24,7 +24,7 @@ using namespace Physica;
 
 int main() {
     {
-        using Matrix = DenseMatrix<float32, MatrixOption::Col, 2, 2>;
+        using Matrix = DenseMatrix<float32, MatrixMajor::Col, 2, 2>;
         const Matrix m1{{1, 2}, {2, 1}};
         const Matrix m2{{3, 3}, {1, 5}};
         const Matrix result = m1 * m2;
@@ -33,9 +33,9 @@ int main() {
     }
     {
         using ScalarType = Diff<float32, DiffMode::Reverse>;
-        using MatrixType = DenseMatrix<float32, MatrixOption::Col, 3, 3>;
+        using MatrixType = DenseMatrix<float32, MatrixMajor::Col, 3, 3>;
         using DVector = Vector3D<ScalarType>;
-        using DMatrix = DenseMatrix<ScalarType, MatrixOption::Col, 3, 3>;
+        using DMatrix = DenseMatrix<ScalarType, MatrixMajor::Col, 3, 3>;
         DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
         DVector x{1, 2, 3};
         {

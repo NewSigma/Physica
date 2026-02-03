@@ -308,7 +308,7 @@ namespace Physica {
 
     template<class Derived>
     void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, size_t elementIndex) {
-        if constexpr (MatrixOption::isColMatrix<Derived>())
+        if constexpr (MatrixMajor::isColMatrix<Derived>())
             colReduce(v1, v2, elementIndex);
         else
             rowReduce(v1, v2, elementIndex);
@@ -316,7 +316,7 @@ namespace Physica {
 
     template<class Derived>
     void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
-        if constexpr (MatrixOption::isColMatrix<Derived>()) {
+        if constexpr (MatrixMajor::isColMatrix<Derived>()) {
             auto col1 = col(v1);
             col1 -= col(v2) * factor;
         }
@@ -328,7 +328,7 @@ namespace Physica {
 
     template<class Derived>
     void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
-        if constexpr (MatrixOption::isColMatrix<Derived>()) {
+        if constexpr (MatrixMajor::isColMatrix<Derived>()) {
             auto c = col(v);
             c *= factor;
         }
@@ -340,7 +340,7 @@ namespace Physica {
 
     template<class Derived>
     void LValueMatrix<Derived>::majorSwap(size_t v1, size_t v2) {
-        if constexpr (MatrixOption::isColMatrix<Derived>())
+        if constexpr (MatrixMajor::isColMatrix<Derived>())
             Base::getDerived().swap_col(v1, v2);
         else
             Base::getDerived().swap_row(v1, v2);
@@ -460,15 +460,15 @@ namespace Physica {
 
     template<class Derived>
     decltype(auto) LValueMatrix<Derived>::refFromMajorMinor(this auto&& self, size_t major, size_t minor) noexcept {
-        const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
-        const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
+        const size_t r = MatrixMajor::rowFromMajorMinor<Derived>(major, minor);
+        const size_t c = MatrixMajor::colFromMajorMinor<Derived>(major, minor);
         assert(r < self.getRow() && c < self.getCol());
         return self[r, c];
     }
 
     template<class Derived>
     void LValueMatrix<Derived>::assert_balance() const noexcept {
-        static_assert(!MatrixOption::isSymmMatrix<Derived>(), "[Error]: Unnecesary balancing on symm matrix");
+        static_assert(!Derived::isStaticSymm(), "[Error]: Unnecesary balancing on symm matrix");
         assert(Base::isSquare() && "[Error]: balance() requires a square matrix");
     }
 }

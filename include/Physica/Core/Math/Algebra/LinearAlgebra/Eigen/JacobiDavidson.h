@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -117,8 +117,8 @@ namespace Physica {
 
     template<Scalar T>
     void JacobiDavidson<T>::compute(const Matrix auto& source, VectorND<T> initial, T eigenGoal) {
-        constexpr bool isHermite = MatrixOption::isHermiteMatrix<decltype(source)>();
-        constexpr bool isRealSymm = !T::isComplex && MatrixOption::isSymmMatrix<decltype(source)>();
+        constexpr bool isHermite = source.isStaticHermite();
+        constexpr bool isRealSymm = !T::isComplex && source.isStaticSymm();
         static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigenvalues is not implemented");
         assert(source.getRow() == source.getCol() && "[Error]: Matrix should be square");
         assert(source.getRow() == initial.getLength() && "[Error]: Dimensions do not match");

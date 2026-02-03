@@ -56,8 +56,8 @@ namespace {
 int main() {
     {
         using T = float64;
-        using Matrix3D = DenseMatrix<T, MatrixOption::Col, 3, 3>;
-        using Matrix4D = DenseMatrix<T, MatrixOption::Col, 4, 4>;
+        using Matrix3D = DenseMatrix<T, MatrixMajor::Col, 3, 3>;
+        using Matrix4D = DenseMatrix<T, MatrixMajor::Col, 4, 4>;
         const Matrix3D m1{2, 3, 4, 1, 1, 9, 1, 2, -6};
         const Matrix4D m2{0, 0.125, 0.125, 0, 0.125, 0, 0, 0.125, 0.125, 0, 0, 0.125, 0, 0.125, 0.125, 0};
         testDecomp(m1, 1E-14, 1E-13);
@@ -65,7 +65,7 @@ int main() {
     }
     {
         using T = cfloat64;
-        using Matrix3D = DenseMatrix<T, MatrixOption::Col, 3, 3>;
+        using Matrix3D = DenseMatrix<T, MatrixMajor::Col, 3, 3>;
         const Matrix3D m1{
                 {{0.314168, 0.121569}, {0.542236, 0.789234}, {0.681570, 0.478108}},
                 {{0.912647, 0.227165}, {0.216599, 0.948223}, {0.006347, 0.337121}},
@@ -75,7 +75,7 @@ int main() {
     }
     {
         using T = cfloat32;
-        using Matrix43 = DenseMatrix<T, MatrixOption::Col, 4, 3>;
+        using Matrix43 = DenseMatrix<T, MatrixMajor::Col, 4, 3>;
         Matrix43 m{
                 {  {0.49671415, -0.1382643},   {0.64768854, 1.52302986}, {-0.23415337, -0.23413696},   {1.57921282, 0.76743473}},
                 {{-0.46947439, -0.56228743}, {-0.46341769, -1.91328024},  {-1.02447039, 1.11792545}, {-0.17242821, -0.86175486}},

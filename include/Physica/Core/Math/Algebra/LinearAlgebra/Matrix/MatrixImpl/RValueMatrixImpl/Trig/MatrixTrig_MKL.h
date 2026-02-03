@@ -27,12 +27,12 @@ namespace Physica {
         target.assert_assign_mkl(mat);
         target.zeros();
 
-        constexpr auto Layout = MatrixOption::isRowMatrix<M>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
+        constexpr auto Layout = MatrixMajor::isRowMatrix<M>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
         constexpr char Uplo = Upper ? 'U' : 'L';
         const size_t m = getRow();
         const size_t n = getCol();
         const auto* a = reinterpret_cast<const Tm*>(mat.data());
-        const size_t lda = MatrixOption::isRowMatrix<M>() ? n : m;
+        const size_t lda = MatrixMajor::isRowMatrix<M>() ? n : m;
         auto* b = reinterpret_cast<Tm*>(target.data());
         const size_t ldb = lda;
         if constexpr (Base::isComplex) {

@@ -66,7 +66,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
     void GEMV<M, V>::assign(Vector auto& target) const noexcept {
-        if constexpr (MatrixOption::isColMatrix<M>()) {
+        if constexpr (MatrixMajor::isColMatrix<M>()) {
             size_t length = vec.getLength();
             (mat.col(0) * vec.calc(0)).template assign<P>(target);
             for (size_t i = 1; i < length; ++i)
@@ -82,7 +82,7 @@ namespace Physica {
     template<Matrix M, Vector V>
     template<ExecutePolicy P>
     void GEMV<M, V>::assign_add(Vector auto& target) const noexcept {
-        if constexpr (MatrixOption::isColMatrix<M>()) {
+        if constexpr (MatrixMajor::isColMatrix<M>()) {
             size_t length = vec.getLength();
             for (size_t i = 0; i < length; ++i)
                 (mat.col(i) * vec.calc(i)).template assign_add<P>(target);
@@ -110,7 +110,7 @@ namespace Physica {
         vec.assert_assign(grad);
         const auto& g = grad.values();
         if constexpr (ReverseDiff<M>) {
-            if constexpr (MatrixOption::isRowMatrix<M>()) {
+            if constexpr (MatrixMajor::isRowMatrix<M>()) {
                 for (size_t i = 0; i < mat.getRow(); ++i)
                     mat.row(i).reverse(g[i] * vec.values());
             }
@@ -121,7 +121,7 @@ namespace Physica {
         }
 
         if constexpr (ReverseDiff<V>) {
-            if constexpr (MatrixOption::isRowMatrix<M>()) {
+            if constexpr (MatrixMajor::isRowMatrix<M>()) {
                 for (size_t i = 0; i < getLength(); ++i)
                     vec.reverse(mat.values().row(i) * g.calc(i));
             }
@@ -151,7 +151,7 @@ namespace Physica {
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename V1::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = M1::RowAtCompile;
-        constexpr static bool FastAssign = MatrixOption::isColMatrix<M>();
+        constexpr static bool FastAssign = MatrixMajor::isColMatrix<M>();
         constexpr static bool FastPacket = false;
     };
 }

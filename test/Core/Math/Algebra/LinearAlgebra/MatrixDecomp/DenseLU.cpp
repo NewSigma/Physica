@@ -21,8 +21,8 @@
 #include "Test.h"
 
 using namespace Physica;
-using Matrix3D = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
-using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
+using Matrix3D = DenseMatrix<float64, MatrixMajor::Col, 3, 3>;
+using Matrix4D = DenseMatrix<float64, MatrixMajor::Col, 4, 4>;
 
 namespace {
     template<bool Pivot>
@@ -72,7 +72,7 @@ namespace {
     template<bool Pivot>
     void inverseGEMV(double prec) {
         using T = float64;
-        using Matrix4D = DenseMatrix<T, MatrixOption::Row, 4, 4>;
+        using Matrix4D = DenseMatrix<T, MatrixMajor::Row, 4, 4>;
         const Matrix4D A{
                 {-0.000696013585639699,     0.816492585748236, 0.0216969440126965, -0.0884307621566726},
                 {    0.691809621910274, -0.000696013585639699,  0.131671000379563, -0.0701048797366553},

@@ -24,9 +24,9 @@ namespace Physica {
     template<Matrix M1, Matrix M2>
     void GEMM<M1, M2>::assign_mkl(Matrix auto& target) const noexcept {
         using M = decltype(target);
-        constexpr auto Layout = MatrixOption::getMajor<M>() == MatrixOption::Row ? CblasRowMajor : CblasColMajor;
-        constexpr auto TransA = MatrixOption::isSameMajor<M, M1>() ? CblasNoTrans : CblasTrans;
-        constexpr auto TransB = MatrixOption::isSameMajor<M, M2>() ? CblasNoTrans : CblasTrans;
+        constexpr auto Layout = MatrixMajor::getMajor<M>() == MatrixMajor::Row ? CblasRowMajor : CblasColMajor;
+        constexpr auto TransA = MatrixMajor::isSameMajor<M, M1>() ? CblasNoTrans : CblasTrans;
+        constexpr auto TransB = MatrixMajor::isSameMajor<M, M2>() ? CblasNoTrans : CblasTrans;
         auto getData = [](const auto& mat) {
             if constexpr (instanceof<Transpose, decltype(mat)>)
                 return mat.getExpr().data();

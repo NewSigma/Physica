@@ -68,7 +68,7 @@ namespace Physica {
         constexpr static unsigned int NumPoint = 3;
         constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
         using ScalarType = T;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col, Dim, Dim>;
+        using MatrixType = DenseMatrix<T, MatrixMajor::Col, Dim, Dim>;
     };
 }
 

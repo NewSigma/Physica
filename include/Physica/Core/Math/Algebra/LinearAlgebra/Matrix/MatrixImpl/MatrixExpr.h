@@ -56,7 +56,7 @@ namespace Physica {
     template<ExprID ID, Matrix M>
     decltype(auto) UnitaryMatrixExpr<ID, M>::transpose(this auto&& self) noexcept {
         using Self = decltype(self);
-        if constexpr (MatrixOption::isSymmMatrix<M>())
+        if constexpr (M::isStaticSymm())
             return std::forward<Self>(self);
         else {
             using X = Base; // FIXME: clang 22 rejects valid
@@ -67,7 +67,7 @@ namespace Physica {
 
     template<ExprID ID, Matrix M>
     decltype(auto) UnitaryMatrixExpr<ID, M>::hermite() const noexcept {
-        if constexpr (MatrixOption::isHermiteMatrix<M>())
+        if constexpr (M::isStaticHermite())
             return Base::getDerived();
         else
             return Base::hermite();
@@ -183,29 +183,33 @@ namespace Physica {
 
     template<ExprID ID, class LHS, class RHS>
     consteval bool BinaryMatrixExpr<ID, LHS, RHS>::isStaticSymm() noexcept {
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
         if constexpr (Matrix<LHS> && Matrix<RHS>)
-            return MatrixOption::isSymmMatrix<LHS>() && MatrixOption::isSymmMatrix<RHS>();
+            return LHS1::isStaticSymm() && RHS1::isStaticSymm();
         else if constexpr (Vector<LHS> || Vector<RHS>)
             return false;
         else if constexpr (Scalar<LHS>)
-            return MatrixOption::isSymmMatrix<RHS>();
+            return RHS1::isStaticSymm();
         else {
             static_assert(Scalar<RHS>, "[Error]: Unexpected type");
-            return MatrixOption::isSymmMatrix<LHS>();
+            return LHS1::isStaticSymm();
         }
     }
 
     template<ExprID ID, class LHS, class RHS>
     consteval bool BinaryMatrixExpr<ID, LHS, RHS>::isStaticHermite() noexcept {
+        using LHS1 = std::remove_cvref_t<LHS>;
+        using RHS1 = std::remove_cvref_t<RHS>;
         if constexpr (Matrix<LHS> && Matrix<RHS>)
-            return MatrixOption::isHermiteMatrix<LHS>() && MatrixOption::isHermiteMatrix<RHS>();
+            return LHS1::isStaticHermite() && RHS1::isStaticHermite();
         else if constexpr (Vector<LHS> || Vector<RHS>)
             return false;
         else if constexpr (Scalar<LHS>)
-            return MatrixOption::isHermiteMatrix<RHS>() && !std::remove_cvref_t<LHS>::isComplex;
+            return RHS1::isStaticHermite() && !LHS1::isComplex;
         else {
             static_assert(Scalar<RHS>, "[Error]: Unexpected type");
-            return MatrixOption::isHermiteMatrix<LHS>() && !std::remove_cvref_t<RHS>::isComplex;
+            return LHS1::isStaticHermite() && !RHS1::isComplex;
         }
     }
 }
@@ -222,9 +226,9 @@ namespace Physica {
         using RHS1 = std::remove_cvref_t<RHS>;
         using ResultType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
 
-        constexpr static bool SameMajor = MatrixOption::isSameMajor<LHS1, RHS1>();
-        constexpr static int Major = SameMajor ? MatrixOption::getMajor<LHS1>()
-                                               : int(MatrixOption::BothMajor);
+        constexpr static bool SameMajor = MatrixMajor::isSameMajor<LHS1, RHS1>();
+        constexpr static int Major = SameMajor ? MatrixMajor::getMajor<LHS1>()
+                                               : int(MatrixMajor::BothMajor);
         constexpr static bool IsReal = ID == ExprID::Abs || ID == ExprID::Square;
     public:
         using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;

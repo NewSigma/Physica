@@ -71,7 +71,7 @@ namespace Physica {
         const auto* A = reinterpret_cast<const Tm*>(buffer.data());
         const size_t lda = Side == CUBLAS_SIDE_LEFT ? m : n;
         auto* B = reinterpret_cast<Tm*>(target.data());
-        const size_t ldb = MatrixOption::isColMatrix<M>() ? m : n;
+        const size_t ldb = MatrixMajor::isColMatrix<M>() ? m : n;
 
         auto& ctx = CUDAContext::getInstance();
         ctx.setPointerMode(false);

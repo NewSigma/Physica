@@ -25,7 +25,7 @@ namespace Physica {
 
     template<Matrix M, size_t Col>
     class ContinuousMatrixBlock<M, 1, Col> : public ContinuousVector<ContinuousMatrixBlock<M, 1, Col>> {
-        static_assert(MatrixOption::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
+        static_assert(MatrixMajor::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
         using This = ContinuousMatrixBlock<M, 1, Col>;
         using Base = ContinuousVector<This>;
     private:
@@ -101,7 +101,7 @@ namespace Physica {
 
     template<Matrix M, size_t Row>
     class ContinuousMatrixBlock<M, Row, 1> : public ContinuousVector<ContinuousMatrixBlock<M, Row, 1>> {
-        static_assert(MatrixOption::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
+        static_assert(MatrixMajor::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
         using This = ContinuousMatrixBlock<M, Row, 1>;
         using Base = ContinuousVector<This>;
     private:
@@ -313,7 +313,7 @@ namespace Physica {
         assert(r < self.getRow());
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        if constexpr (MatrixOption::isRowMatrix<M>())
+        if constexpr (MatrixMajor::isRowMatrix<M>())
             return ContinuousMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
         else
             return LMatrixBlock<M1, 1, Col>(std::forward<M1>(m), self.fromRow + r, self.fromCol, self.getCol());
@@ -324,7 +324,7 @@ namespace Physica {
         assert(c < self.getCol());
         decltype(auto) m = propagate_rvalue_reference<decltype(self), M>(self.mat);
         using M1 = decltype(m);
-        if constexpr (MatrixOption::isColMatrix<M>())
+        if constexpr (MatrixMajor::isColMatrix<M>())
             return ContinuousMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);
         else
             return LMatrixBlock<M1, Row, 1>(std::forward<M1>(m), self.fromRow, self.getRow(), self.fromCol + c);

@@ -22,7 +22,7 @@
 
 using namespace Physica;
 using ScalarType = float64;
-using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col>;
+using MatrixType = DenseMatrix<ScalarType, MatrixMajor::Col>;
 
 namespace {
     template<Matrix M>

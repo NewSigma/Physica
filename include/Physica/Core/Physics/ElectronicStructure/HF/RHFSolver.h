@@ -45,7 +45,7 @@ namespace Physica {
         using EDIISBuffer = Array<MatrixND<T>, EDIISBufferSize>;
         using DIISBuffer = Array<MatrixND<T>, DIISBufferSize - 1>;
         using MatrixBuffer = Array<MatrixND<T>, MatrixBufferSize>;
-        using DIISMatrix = DenseMatrix<T, MatrixOption::Col, DIISBufferSize, DIISBufferSize>;
+        using DIISMatrix = DenseMatrix<T, MatrixMajor::Col, DIISBufferSize, DIISBufferSize>;
     private:
         const Molecular<T>& molecular;
         ElectronConfig electronConfig;
@@ -307,8 +307,8 @@ namespace Physica {
             }
         }
 
-        auto equalityConstraint = DenseMatrix<T, MatrixOption::Row, 1, Dynamic>(1, problemDim + 1, T(1));
-        auto inequalityConstraint = DenseMatrix<T, MatrixOption::Row>(problemDim, problemDim + 1, T(0));
+        auto equalityConstraint = DenseMatrix<T, MatrixMajor::Row, 1, Dynamic>(1, problemDim + 1, T(1));
+        auto inequalityConstraint = DenseMatrix<T, MatrixMajor::Row>(problemDim, problemDim + 1, T(0));
         auto block = inequalityConstraint.leftCols(problemDim);
         block.toIdentity();
         auto initial = VectorND<T>(problemDim, T(0));

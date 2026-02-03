@@ -70,7 +70,7 @@ namespace Physica {
         if constexpr (IsHost())
             Base::assign(target);
         else {
-            if constexpr (MatrixOption::isColMatrix<M>()) {
+            if constexpr (MatrixMajor::isColMatrix<M>()) {
                 target.assert_assign(*this);
                 const auto& m = getLHS();
                 const auto& v = getRHS();

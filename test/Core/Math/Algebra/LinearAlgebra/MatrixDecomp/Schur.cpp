@@ -78,17 +78,17 @@ int main() {
     using RealType = float64;
     using ComplexType = Complex<RealType>;
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col>;
+        using MatrixType = DenseMatrix<RealType, MatrixMajor::Col>;
         const MatrixType mat{{1, 2}, {3, 4}};
         realSchurTest(mat, 1E-15);
     }
     {
-        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col>;
+        using MatrixType = DenseMatrix<ComplexType, MatrixMajor::Col>;
         const MatrixType mat{{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
         schurTest(mat, 1E-15);
     }
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 3, 3>;
+        using MatrixType = DenseMatrix<RealType, MatrixMajor::Col, 3, 3>;
         const MatrixType mat1{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
         realSchurTest(mat1, 1E-14);
 
@@ -98,14 +98,14 @@ int main() {
         realSchurTest(mat2, 1E-14);
     }
     {
-        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col, 3, 3>;
+        using MatrixType = DenseMatrix<ComplexType, MatrixMajor::Col, 3, 3>;
         const MatrixType mat1{{{-149, 37}, {537, -126}, {-27, 0}},
                               {{0, -50}, {0, 180}, {-9, 17}},
                               {{12, -154}, {546, 8}, {-25, 9}}};
         schurTest(mat1, 1E-14);
     }
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Row>;
+        using MatrixType = DenseMatrix<RealType, MatrixMajor::Row>;
         const MatrixType mat{{    -51.01383690006933, 6.924908905363546e-06, 7.198932025559497e-09,-1.272828037030942e-10,-1.443364854227616e-10, 5.138822756983425e-09, 4.861712242670409e-06,-1.277597529382988e-07, 1.017976888750943e-09, 8.941250463097134e-11, 3.242667144581444e-09,  7.65812223572007e-11},
                              { 6.924908905363546e-06,  0.002006525953277094,    0.4127416614600888,   0.02490964847741966,-2.771538634330499e-07,-4.484994220048364e-07,-0.0004996107522897938,  -0.09645908706481159, 0.0007476472528712804, -0.003599700059967799,   -0.1311225590434474, -0.003097747778273297},
                              { 7.198932025559497e-09,    0.4127416614600888,     93.41683282000623,     40.48827018429925,      6.06268744786774, 0.0007298507600543566,    0.6993685886441052,     11.35175309941103,  -0.08855627490432495,    -1.083254145986432,    -39.45448170920827,   -0.9321542370376518},
@@ -121,7 +121,7 @@ int main() {
         realSchurTest(mat, 1E-10);
     }
     /* Test degeneracy */ {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col, 6, 6>;
+        using MatrixType = DenseMatrix<RealType, MatrixMajor::Col, 6, 6>;
         const MatrixType mat1{{ 0.1343184046,             0,             0, -0.1343184056,             0,             0},
                               {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
                               {            0,             0,  0.1342191829,             0,             0, -0.1342191848},
@@ -130,7 +130,7 @@ int main() {
                               {            0,             0, -0.1342191848,             0,             0,  0.1342191868}};
         realSchurTest(mat1, 1E-15);
 
-        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Col, 6, 6>;
+        using ComplexMatrix = DenseMatrix<ComplexType, MatrixMajor::Col, 6, 6>;
         const ComplexMatrix mat2 = mat1;
         schurTest(mat2, 1E-14);
     }

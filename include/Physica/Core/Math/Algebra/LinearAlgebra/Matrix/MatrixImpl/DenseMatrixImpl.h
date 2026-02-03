@@ -37,12 +37,12 @@ namespace Physica {
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)
-            : DenseMatrix(MatrixOption::isColMatrix<This>() ? list.begin()->getLength() : list.size(),
-                          MatrixOption::isColMatrix<This>() ? list.size() : list.begin()->getLength()) {
+            : DenseMatrix(MatrixMajor::isColMatrix<This>() ? list.begin()->getLength() : list.size(),
+                          MatrixMajor::isColMatrix<This>() ? list.size() : list.begin()->getLength()) {
         size_t major = 0;
         for (auto& v : list) {
             assert(v.getLength() == getMaxMinor());
-            if constexpr (MatrixOption::isColMatrix<This>())
+            if constexpr (MatrixMajor::isColMatrix<This>())
                 this->col(major) = v;
             else
                 this->row(major) = v;
@@ -119,8 +119,8 @@ namespace Physica {
         MatrixType y(row, col);
         for (size_t i = 0; i < x.getMaxMajor(); ++i) {
             for (size_t j = 0; j < x.getMaxMinor(); ++j) {
-                x.refFromMajorMinor(i, j) = vecX.calc(MatrixOption::colFromMajorMinor<MatrixType>(i, j));
-                y.refFromMajorMinor(i, j) = vecY.calc(MatrixOption::rowFromMajorMinor<MatrixType>(i, j));
+                x.refFromMajorMinor(i, j) = vecX.calc(MatrixMajor::colFromMajorMinor<MatrixType>(i, j));
+                y.refFromMajorMinor(i, j) = vecY.calc(MatrixMajor::rowFromMajorMinor<MatrixType>(i, j));
             }
         }
         return std::make_pair(std::move(x), std::move(y));

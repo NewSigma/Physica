@@ -35,7 +35,7 @@ namespace {
         constexpr T freq1 = 10;
         constexpr T freq2 = 5;
 
-        DenseMatrix<T, MatrixOption::Row> data(N1, N2);
+        DenseMatrix<T, MatrixMajor::Row> data(N1, N2);
         for (size_t i = 0; i < N1; ++i)
             for (size_t j = 0; j < N2; ++j)
                 data[i, j] = T(sin(T(2 * i) * MathConst<T>::pi * freq1 * deltaX) + cos(T(2 * j) * MathConst<T>::pi * freq2 * deltaY) * 2);

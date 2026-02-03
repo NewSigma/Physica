@@ -50,8 +50,8 @@ namespace Physica {
         auto&& mat = std::forward<decltype(self)>(self).mat;
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
-        const size_t row = MatrixOption::rowFromMajorMinor<M>(major, minor);
-        const size_t col = MatrixOption::colFromMajorMinor<M>(major, minor);
+        const size_t row = MatrixMajor::rowFromMajorMinor<M>(major, minor);
+        const size_t col = MatrixMajor::colFromMajorMinor<M>(major, minor);
         return mat.data_ptr(row, col);
     }
 }

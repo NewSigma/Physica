@@ -48,8 +48,8 @@ namespace Physica {
     auto FlattenL<M>::data_ptr(this auto&& self, size_t index) noexcept {
         const size_t major = index / self.mat.getMaxMinor();
         const size_t minor = index % self.mat.getMaxMinor();
-        const size_t row = MatrixOption::rowFromMajorMinor<M>(major, minor);
-        const size_t col = MatrixOption::colFromMajorMinor<M>(major, minor);
+        const size_t row = MatrixMajor::rowFromMajorMinor<M>(major, minor);
+        const size_t col = MatrixMajor::colFromMajorMinor<M>(major, minor);
         return self.mat.data_ptr(row, col);
     }
 }

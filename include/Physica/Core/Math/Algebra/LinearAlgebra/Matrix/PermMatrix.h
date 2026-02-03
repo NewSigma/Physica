@@ -150,7 +150,7 @@ namespace Physica {
     class Traits<PermMatrix<T>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::BothMajor;
+        constexpr static int Option = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

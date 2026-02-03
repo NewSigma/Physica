@@ -107,7 +107,7 @@ namespace Physica {
         static_assert(!U::isComplex);
     public:
         using ScalarType = std::conditional<Idx == PauliIndex::Y, typename U::ComplexType, U>::type;
-        constexpr static int Option = MatrixOption::BothMajor;
+        constexpr static int Option = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = 2;
         constexpr static size_t ColAtCompile = 2;
         constexpr static size_t SizeAtCompile = 4;

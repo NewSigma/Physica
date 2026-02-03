@@ -42,8 +42,8 @@ namespace Physica {
         using Tcv = Tc::ValueType;
     public:
         using EigenvalueVector = DenseVector<Tr, Order>;
-        using EigenvectorMatrix = DenseMatrix<T, MatrixOption::Col, Order, Order>;
-        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col, Order, Order>; // Optimize: Use tridiagonal matrix is better
+        using EigenvectorMatrix = DenseMatrix<T, MatrixMajor::Col, Order, Order>;
+        using WorkingMatrix = DenseMatrix<T, MatrixMajor::Col, Order, Order>; // Optimize: Use tridiagonal matrix is better
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;

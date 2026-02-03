@@ -82,7 +82,7 @@ namespace {
     }
 
     template<Scalar T>
-    using Matrix2D = DenseMatrix<T, MatrixOption::Col, 2, 2>;
+    using Matrix2D = DenseMatrix<T, MatrixMajor::Col, 2, 2>;
 
     template<Scalar T>
     Matrix2D<T> rotation(T theta) noexcept {
@@ -95,7 +95,7 @@ namespace {
     }
 
     void testReal() {
-        using M = DenseMatrix<float64, MatrixOption::Col, 5, 5>;
+        using M = DenseMatrix<float64, MatrixMajor::Col, 5, 5>;
         const M mat1{
                 {0.200743, 0.151314, 0.152894, 0.934051,  0.487404},
                 {0.819659, 0.434558, 0.829935, 0.837801,  0.699088},
@@ -116,7 +116,7 @@ namespace {
     }
 
     void testReconstruct() {
-        using M = DenseMatrix<float64, MatrixOption::Col, 3, 3>;
+        using M = DenseMatrix<float64, MatrixMajor::Col, 3, 3>;
         const M mat1{
                 {-0.590316,  -2.19514,  -2.37463},
                 { -1.25006, -0.297493,   1.40349},
@@ -137,7 +137,7 @@ namespace {
     }
 
     void testRowMajor() {
-        using M = DenseMatrix<float64, MatrixOption::Row, 3, 3>;
+        using M = DenseMatrix<float64, MatrixMajor::Row, 3, 3>;
         const M mat1{
                 {-0.590316,  -2.19514,  -2.37463},
                 { -1.25006, -0.297493,   1.40349},
@@ -147,7 +147,7 @@ namespace {
     }
 
     void testDegeneracy() {
-        using M = DenseMatrix<float64, MatrixOption::Col, 6, 6>;
+        using M = DenseMatrix<float64, MatrixMajor::Col, 6, 6>;
         const M mat1{
                 { 0.1343184046,             0,             0, -0.1343184056,             0,             0},
                 {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
@@ -158,7 +158,7 @@ namespace {
         };
         eigenTest(mat1, 1E-15);
 
-        using ComplexMatrix = DenseMatrix<cfloat64, MatrixOption::Col, 6, 6>;
+        using ComplexMatrix = DenseMatrix<cfloat64, MatrixMajor::Col, 6, 6>;
         const ComplexMatrix mat2 = mat1;
         eigenTest(mat2, 1E-15);
 

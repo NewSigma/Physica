@@ -72,7 +72,7 @@ namespace Physica {
         const auto* A = reinterpret_cast<const Tm*>(getLHS().getExpr().getExpr().data());
         const size_t lda = Side == CUBLAS_SIDE_LEFT ? m : n;
         auto* B = reinterpret_cast<Tm*>(target.data());
-        const size_t ldb = MatrixOption::isColMatrix<M1>() ? m : n;
+        const size_t ldb = MatrixMajor::isColMatrix<M1>() ? m : n;
         if constexpr (Base::isComplex) {
             if constexpr (T::Prec == Float32)
                 check(cublasCtrsm_64(ctx, Side, Uplo, Trans, Diag, m, n, &alpha, A, lda, B, ldb));

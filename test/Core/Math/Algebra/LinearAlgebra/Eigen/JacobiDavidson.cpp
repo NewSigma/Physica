@@ -25,7 +25,7 @@ using RandomSource = Random<MT19937, std::mt19937::default_seed>;
 
 namespace {
     void test1() {
-        using MatrixType = DenseMatrix<cfloat64, MatrixOption::Row>;
+        using MatrixType = DenseMatrix<cfloat64, MatrixMajor::Row>;
         const MatrixType data = MatrixType::random_uniform<RandomSource>(64);
         const DenseHermiteMatrix<cfloat64> hermite = data + data.hermite();
 

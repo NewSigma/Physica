@@ -120,7 +120,7 @@ namespace Physica {
         constexpr bool isTranspose1 = is_transpose<M1>::value;
         constexpr bool isTranspose2 = is_transpose<M2>::value;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
-        static_assert(MatrixOption::isColMatrix<M1>() && MatrixOption::isColMatrix<M2>(), "[Error]: cuBLAS uses column major");
+        static_assert(MatrixMajor::isColMatrix<M1>() && MatrixMajor::isColMatrix<M2>(), "[Error]: cuBLAS uses column major");
         static_assert(!Diffable<This>);
         target.assert_assign(*this);
 

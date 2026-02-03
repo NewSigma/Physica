@@ -51,7 +51,7 @@ namespace Physica {
 
     template<ExprID ID, Matrix M>
     __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<ID, M>>::transpose() const noexcept {
-        if constexpr (MatrixOption::isSymmMatrix<M>())
+        if constexpr (M::isStaticSymm())
             return Base::getDerived();
         else
             return Base::transpose();
@@ -59,7 +59,7 @@ namespace Physica {
 
     template<ExprID ID, Matrix M>
     __host__ __device__ decltype(auto) device_obj<UnitaryMatrixExpr<ID, M>>::hermite() const noexcept {
-        if constexpr (MatrixOption::isHermiteMatrix<M>())
+        if constexpr (M::isStaticHermite())
             return Base::getDerived();
         else
             return Base::hermite();

@@ -23,7 +23,7 @@
 
 using namespace Physica;
 template<Scalar T>
-using Matrix2D = DenseMatrix<T, MatrixOption::Col, 2, 2>;
+using Matrix2D = DenseMatrix<T, MatrixMajor::Col, 2, 2>;
 
 namespace {
     template<Scalar T>

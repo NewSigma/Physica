@@ -172,8 +172,8 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return Base::getDerived().getCol(); }
         [[nodiscard]] size_t getSize() const noexcept { return getRow() * getCol(); }
-        [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<Derived>(Base::getDerived()); }
-        [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<Derived>(Base::getDerived()); }
+        [[nodiscard]] size_t getMaxMajor() const noexcept { return MatrixMajor::getMaxMajor<Derived>(Base::getDerived()); }
+        [[nodiscard]] size_t getMaxMinor() const noexcept { return MatrixMajor::getMaxMinor<Derived>(Base::getDerived()); }
 
         [[nodiscard]] bool isOverdetermined() const noexcept;
         [[nodiscard]] bool isUnderdetermined() const noexcept;
@@ -182,8 +182,10 @@ namespace Physica {
         [[nodiscard]] bool isHermite() const noexcept;
         [[nodiscard]] bool isFinite() const noexcept;
         /* Static members */
-        [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
-        [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
+        [[nodiscard]] consteval static bool isStaticSymm() noexcept;
+        [[nodiscard]] consteval static bool isStaticHermite() noexcept;
+        [[nodiscard]] static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::rowFromMajorMinor<Derived>(major, minor); }
+        [[nodiscard]] static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixMajor::colFromMajorMinor<Derived>(major, minor); }
         __host__ __device__ consteval static void static_assert_assign(const Scalar auto& source) noexcept;
         __host__ __device__ consteval static void static_assert_assign(const Matrix auto& source) noexcept;
     protected:

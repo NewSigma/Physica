@@ -69,8 +69,8 @@ namespace Physica {
 
     template<Scalar T, int Option>
     device_obj<SparseMatrix<T, Option>>::device_obj(size_t row, size_t col)
-            : majorStarts(MatrixOption::selectMajor<This>(row, col) + 1, 0)
-            , maxMinor(MatrixOption::selectMinor<This>(row, col)) {
+            : majorStarts(MatrixMajor::selectMajor<This>(row, col) + 1, 0)
+            , maxMinor(MatrixMajor::selectMinor<This>(row, col)) {
         size_t size = std::max(row, col);
         elements.reserve(size);
         minorIndexes.reserve(size);
@@ -84,8 +84,8 @@ namespace Physica {
     template<Scalar T, int Option>
     void device_obj<SparseMatrix<T, Option>>::resize(size_t row, size_t col) {
         zeros();
-        majorStarts.resize(MatrixOption::selectMajor<This>(row, col) + 1, 0);
-        maxMinor = MatrixOption::selectMinor<This>(row, col);
+        majorStarts.resize(MatrixMajor::selectMajor<This>(row, col) + 1, 0);
+        maxMinor = MatrixMajor::selectMinor<This>(row, col);
     }
 
     template<Scalar T, int Option>
@@ -134,12 +134,12 @@ namespace Physica {
 
     template<Scalar T, int Option>
     size_t device_obj<SparseMatrix<T, Option>>::getRow() const noexcept {
-        return MatrixOption::isColMatrix<This>() ? getMaxMinor() : getMaxMajor();
+        return MatrixMajor::isColMatrix<This>() ? getMaxMinor() : getMaxMajor();
     }
 
     template<Scalar T, int Option>
     size_t device_obj<SparseMatrix<T, Option>>::getCol() const noexcept {
-        return MatrixOption::isColMatrix<This>() ? getMaxMajor() : getMaxMinor();
+        return MatrixMajor::isColMatrix<This>() ? getMaxMajor() : getMaxMinor();
     }
 
     template<Scalar T, int Option>

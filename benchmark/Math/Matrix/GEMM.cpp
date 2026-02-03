@@ -77,7 +77,7 @@ namespace {
     }
 }
 
-using enum MatrixOption::Major;
+using enum MatrixMajor::Option;
 BENCHMARK(gemm<float64, Col, Col, Col>)->Name("GEMM CCC")
     ->Args({4, 4, 4})
     ->Args({8, 8, 8})

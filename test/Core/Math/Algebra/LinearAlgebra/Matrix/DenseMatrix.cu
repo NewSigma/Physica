@@ -32,7 +32,7 @@ namespace {
     }
 
     void deviceExprEval() {
-        using MatrixType = DenseMatrix<float32, MatrixOption::Col>;
+        using MatrixType = DenseMatrix<float32, MatrixMajor::Col>;
         using DeviceMatrix = MatrixType::device_obj_type;
         const MatrixType A = MatrixType::random_uniform<RandomSource>(3, 4);
         const MatrixType B = A.transpose();
@@ -55,12 +55,12 @@ namespace {
         int r = std::uniform_int_distribution<>(0, Size - 1)(rng);
         int c = std::uniform_int_distribution<>(0, Size - 1)(rng);
         {
-            using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Col>>;
+            using MatrixType = device_obj<DenseMatrix<T, MatrixMajor::Col>>;
             const auto x = MatrixType(Size, Size);
             expect(x.data_ptr(r, c) == x.col(c).data() + r);
         }
         {
-            using MatrixType = device_obj<DenseMatrix<T, MatrixOption::Row>>;
+            using MatrixType = device_obj<DenseMatrix<T, MatrixMajor::Row>>;
             const auto x = MatrixType(Size, Size);
             expect(x.data_ptr(r, c) == x.row(r).data() + c);
         }

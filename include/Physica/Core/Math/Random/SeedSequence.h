@@ -28,7 +28,7 @@
  */
 
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -147,15 +147,15 @@ namespace Physica {
             return dataval;
         }
         else if constexpr (std::same_as<T, uint64_t>) {
-            uint32_t l = generate();
-            uint32_t h = generate();
-            return (uint64_t(h) << 32U) + l;
+            uint32_t low = generate();
+            uint32_t high = generate();
+            return (uint64_t(high) << 32U) + low;
         }
         else {
             static_assert(std::same_as<T, __uint128_t>);
-            uint32_t l = generate<uint64_t>();
-            uint32_t h = generate<uint64_t>();
-            return (__uint128_t(h) << 64U) + l;
+            uint32_t low = generate<uint64_t>();
+            uint32_t high = generate<uint64_t>();
+            return (__uint128_t(high) << 64U) + low;
         }
     }
 

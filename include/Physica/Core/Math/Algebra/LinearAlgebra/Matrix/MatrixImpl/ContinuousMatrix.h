@@ -40,8 +40,8 @@ namespace Physica {
         using typename Base::T;
         using typename Base::Tm;
     private:
-        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<This>();
-        constexpr static bool isColMatrix = MatrixOption::isColMatrix<This>();
+        constexpr static bool isRowMatrix = MatrixMajor::isRowMatrix<This>();
+        constexpr static bool isColMatrix = MatrixMajor::isColMatrix<This>();
     public:
         ~ContinuousMatrix() = default;
         /* Operators */

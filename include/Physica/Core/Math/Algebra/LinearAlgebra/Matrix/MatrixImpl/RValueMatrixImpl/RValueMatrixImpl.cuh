@@ -371,12 +371,12 @@ namespace Physica {
 
     template<class Derived>
     __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::rowFromMajorMinor(size_t major, size_t minor) noexcept {
-        return MatrixOption::rowFromMajorMinor<device_obj<Derived>>(major, minor);
+        return MatrixMajor::rowFromMajorMinor<device_obj<Derived>>(major, minor);
     }
 
     template<class Derived>
     __host__ __device__ size_t device_obj<RValueMatrix<Derived>>::colFromMajorMinor(size_t major, size_t minor) noexcept {
-        return MatrixOption::colFromMajorMinor<device_obj<Derived>>(major, minor);
+        return MatrixMajor::colFromMajorMinor<device_obj<Derived>>(major, minor);
     }
 
     template<class Derived>

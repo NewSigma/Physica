@@ -110,8 +110,8 @@ namespace Physica {
 namespace Physica {
     template<Matrix M>
     class Traits<Hermite<M>> {
-        constexpr static int OtherMajor = MatrixOption::isColMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
-        constexpr static int Major = MatrixOption::isBothMajor<M>() ? MatrixOption::BothMajor : OtherMajor;
+        constexpr static int OtherMajor = MatrixMajor::isColMatrix<M>() ? MatrixMajor::Row : MatrixMajor::Col;
+        constexpr static int Major = MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
     public:
         using ScalarType = M::ScalarType;
         constexpr static int Option = Major;
@@ -124,7 +124,7 @@ namespace Physica {
     class Traits<Hermite<V>> {
     public:
         using ScalarType = V::ScalarType;
-        constexpr static int Option = MatrixOption::Row;
+        constexpr static int Option = MatrixMajor::Row;
         constexpr static size_t RowAtCompile = 1;
         constexpr static size_t ColAtCompile = V::SizeAtCompile;
         constexpr static size_t SizeAtCompile = V::SizeAtCompile;

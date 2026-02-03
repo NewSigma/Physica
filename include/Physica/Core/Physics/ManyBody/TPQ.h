@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -223,6 +223,6 @@ namespace Physica {
     constexpr void TPQ<T>::checkH(const Matrix auto& hamiltonH) noexcept {
         using M = std::remove_cvref<decltype(hamiltonH)>::type;
         static_assert(std::same_as<T, typename M::ScalarType>, "[Error]: Inconsistent ScalarType");
-        static_assert(MatrixOption::isHermiteMatrix<M>(), "[Error]: Do not support non-hermite hamiltionian");
+        static_assert(M::isStaticHermite(), "[Error]: Do not support non-hermite hamiltionian");
     }
 }

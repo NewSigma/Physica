@@ -35,7 +35,7 @@ namespace {
 
 int main() {
     /* Col major */ {
-        using Matrix4D = DenseMatrix<float64, MatrixOption::Col, 4, 4>;
+        using Matrix4D = DenseMatrix<float64, MatrixMajor::Col, 4, 4>;
         testInv(Matrix4D{
                 {1,  1,  1,  1},
                 {1,  1, -1, -1},
@@ -50,7 +50,7 @@ int main() {
         }, 1E-15);
     }
     /* Row major */ {
-        using Matrix4D = DenseMatrix<float64, MatrixOption::Row, 4, 4>;
+        using Matrix4D = DenseMatrix<float64, MatrixMajor::Row, 4, 4>;
         testInv(Matrix4D{
                 {1,  1,  1,  1},
                 {1,  1, -1, -1},

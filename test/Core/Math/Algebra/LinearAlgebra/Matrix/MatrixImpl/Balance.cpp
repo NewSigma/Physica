@@ -22,7 +22,7 @@
 
 using namespace Physica;
 using T = float64;
-using Matrix3D = DenseMatrix<T, MatrixOption::Col, 3, 3>;
+using Matrix3D = DenseMatrix<T, MatrixMajor::Col, 3, 3>;
 
 int main() {
     const Matrix3D answer{1, 100,  10000, 0.01, 1, 100, 0.0001, 0.01, 1};

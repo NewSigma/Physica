@@ -42,12 +42,12 @@ namespace {
         int r = std::uniform_int_distribution<>(0, Size - 1)(rng);
         int c = std::uniform_int_distribution<>(0, Size - 1)(rng);
         {
-            using MatrixType = DenseMatrix<T, MatrixOption::Col>;
+            using MatrixType = DenseMatrix<T, MatrixMajor::Col>;
             const auto x = MatrixType(Size, Size);
             expect(x.data_ptr(r, c) == x.col(c).data() + r);
         }
         {
-            using MatrixType = DenseMatrix<T, MatrixOption::Row>;
+            using MatrixType = DenseMatrix<T, MatrixMajor::Row>;
             const auto x = MatrixType(Size, Size);
             expect(x.data_ptr(r, c) == x.row(r).data() + c);
         }
@@ -70,7 +70,7 @@ namespace {
         }
         /* Row double matrix */ {
             using T = float64;
-            using MatrixType = DenseMatrix<T, MatrixOption::Row>;
+            using MatrixType = DenseMatrix<T, MatrixMajor::Row>;
             const auto data = MatrixType::random_uniform<RandomSource>(16, 20);
 
             TempFile tmp("/tmp/tmpXXXXXX");
@@ -83,7 +83,7 @@ namespace {
         }
         /* Row complex float matrix */ {
             using T = Complex<float32>;
-            using MatrixType = DenseMatrix<T, MatrixOption::Row>;
+            using MatrixType = DenseMatrix<T, MatrixMajor::Row>;
             const auto data = MatrixType::random_uniform<RandomSource>(16, 12);
 
             TempFile tmp("/tmp/tmpXXXXXX");

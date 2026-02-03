@@ -60,7 +60,7 @@ namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
     auto RValueReshapedVector<V, MatrixMajor, Row, Col>::calc(size_t r1, size_t c1) const -> T {
         assert(r1 < getRow() && c1 < getCol());
-        if constexpr (MatrixOption::isColMatrix<This>())
+        if constexpr (MatrixMajor::isColMatrix<This>())
             return v.calc(c1 * getRow() + r1);
         else
             return v.calc(r1 * getCol() + c1);
@@ -69,7 +69,7 @@ namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
     auto RValueReshapedVector<V, MatrixMajor, Row, Col>::calc_value(size_t r1, size_t c1) const -> Tv {
         assert(r1 < getRow() && c1 < getCol());
-        if constexpr (MatrixOption::isColMatrix<This>())
+        if constexpr (MatrixMajor::isColMatrix<This>())
             return v.calc_value(c1 * getRow() + r1);
         else
             return v.calc_value(r1 * getCol() + c1);
@@ -92,26 +92,26 @@ namespace Physica {
     template<class Derived>
     template<Matrix M>
     auto RValueVector<Derived>::reshape(const M& mat) const noexcept {
-        return RValueReshapedVector<Derived, MatrixOption::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>(Base::getDerived(), mat.getRow(), mat.getCol());
+        return RValueReshapedVector<Derived, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>(Base::getDerived(), mat.getRow(), mat.getCol());
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
     auto RValueVector<Derived>::reshape_col(size_t row, size_t col) const noexcept {
-        return RValueReshapedVector<Derived, MatrixOption::Col, Row, Col>(Base::getDerived(), row, col);
+        return RValueReshapedVector<Derived, MatrixMajor::Col, Row, Col>(Base::getDerived(), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
     auto RValueVector<Derived>::reshape_row(size_t row, size_t col) const noexcept {
-        return RValueReshapedVector<Derived, MatrixOption::Row, Row, Col>(Base::getDerived(), row, col);
+        return RValueReshapedVector<Derived, MatrixMajor::Row, Row, Col>(Base::getDerived(), row, col);
     }
 }
 
 namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
     class Traits<RValueReshapedVector<V, MatrixMajor, Row, Col>> {
-        static_assert(MatrixMajor == MatrixOption::Col || MatrixMajor == MatrixOption::Row, "[Error]: Invalid major");
+        static_assert(MatrixMajor == MatrixMajor::Col || MatrixMajor == MatrixMajor::Row, "[Error]: Invalid major");
     public:
         using ScalarType = V::ScalarType;
         constexpr static int Option = MatrixMajor;

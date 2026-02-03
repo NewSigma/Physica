@@ -25,7 +25,7 @@ namespace Physica {
     template<class Derived>
     auto ContinuousMatrix<Derived>::toNumpy() const {
         using namespace nanobind;
-        constexpr auto Major = MatrixOption::getMajor<Derived>() == MatrixOption::Row ? c_config : f_contig;
+        constexpr auto Major = MatrixMajor::getMajor<Derived>() == MatrixMajor::Row ? c_config : f_contig;
         using T = ScalarType::MachineType;
         using ResultType = ndarray<T, numpy, Major>;
         return ResultType((const T*)data(), {Base::getRow(), Base::getCol()});

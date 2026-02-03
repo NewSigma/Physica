@@ -28,7 +28,7 @@ using ScalarType = float64;
 
 class InfiniteDeepWell {
     constexpr static size_t baseSetCount = 8;
-    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, baseSetCount, baseSetCount>;
+    using MatrixType = DenseMatrix<ScalarType, MatrixMajor::Col, baseSetCount, baseSetCount>;
 public:
     int execute(int argc, char** argv) {
         MatrixType overlap = getOverlapMatrix();
@@ -147,7 +147,7 @@ private:
 class HedrogenAtom {
     constexpr static size_t baseSetCount = 4;
     constexpr static double baseSetCoeff[baseSetCount]{13.00773, 1.962079, 0.444529, 0.1219492};
-    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, baseSetCount, baseSetCount>;
+    using MatrixType = DenseMatrix<ScalarType, MatrixMajor::Col, baseSetCount, baseSetCount>;
 public:
     int execute(int argc, char** argv) {
         MatrixType overlap = getOverlapMatrix();
@@ -246,7 +246,7 @@ class HeliumAtom {
     constexpr static size_t baseSetCount = 4;
     constexpr static double baseSetCoeff[baseSetCount]{0.298073, 1.242567, 5.782948, 38.474970};
 public:
-    using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col, baseSetCount, baseSetCount>;
+    using MatrixType = DenseMatrix<ScalarType, MatrixMajor::Col, baseSetCount, baseSetCount>;
 public:
     int execute(int argc, char** argv, VectorND<ScalarType>& trial_solution, const ScalarType& criteria) {
         MatrixType overlap = getOverlapMatrix();

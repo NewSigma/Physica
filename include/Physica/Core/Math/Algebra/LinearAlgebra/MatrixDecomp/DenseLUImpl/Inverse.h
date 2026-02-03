@@ -78,7 +78,7 @@ namespace Physica {
     class Traits<Inverse<DenseLU<T, P>>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::Col;
+        constexpr static int Option = MatrixMajor::Col;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;

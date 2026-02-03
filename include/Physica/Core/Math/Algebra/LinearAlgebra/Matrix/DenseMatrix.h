@@ -28,10 +28,10 @@ namespace Physica {
      * or dynamic matrix, whose size is dynamically changed.
      *
      * \tparam Option
-     * Option is combinations of \enum MatrixOption
+     * Option is combinations of \enum MatrixMajor
      */
     template<Scalar T,
-             int Option = MatrixOption::Col,
+             int Option = MatrixMajor::Col,
              size_t Row = Dynamic,
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
@@ -45,9 +45,9 @@ namespace Physica {
     public:
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
-        using ColMatrix = DenseMatrix<T, MatrixOption::Col, Row, Col>;
-        using RowMatrix = DenseMatrix<T, MatrixOption::Row, Row, Col>;
-        using VectorIniter = DenseVector<T, MatrixOption::isColMatrix<This>() ? Row : Col>;
+        using ColMatrix = DenseMatrix<T, MatrixMajor::Col, Row, Col>;
+        using RowMatrix = DenseMatrix<T, MatrixMajor::Row, Row, Col>;
+        using VectorIniter = DenseVector<T, MatrixMajor::isColMatrix<This>() ? Row : Col>;
         template<Scalar U>
         using rebind_scalar = DenseMatrix<U, Option, Row, Col, Allocator>;
     public:

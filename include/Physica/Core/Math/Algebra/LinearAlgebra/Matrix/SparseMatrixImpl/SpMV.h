@@ -54,13 +54,13 @@ namespace Physica {
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();
 
-        if constexpr (MatrixOption::isColMatrix<M>())
+        if constexpr (MatrixMajor::isColMatrix<M>())
             target = 0;
 
         for (size_t major = 0; major < mat.getMaxMajor(); ++major) {
             const size_t from = majorStarts[major];
             const size_t to = majorStarts[major + 1];
-            if constexpr (MatrixOption::isColMatrix<M>()) {
+            if constexpr (MatrixMajor::isColMatrix<M>()) {
                 for (size_t i = from; i < to; ++i) {
                     const size_t row = minorIndexes[i];
                     target[row] += elements[i] * vec[major];
@@ -84,7 +84,7 @@ namespace Physica {
         const auto& majorStarts = mat.getMajorStarts();
 
         T result = 0;
-        if constexpr (MatrixOption::isColMatrix<M>()) {
+        if constexpr (MatrixMajor::isColMatrix<M>()) {
             for (size_t major = 0; major < mat.getMaxMajor(); ++major) {
                 const size_t from = majorStarts[major];
                 const size_t to = majorStarts[major + 1];

@@ -87,7 +87,7 @@ namespace Physica {
     class Traits<Cholesky<M>> {
     public:
         using ScalarType = M::ScalarType;
-        constexpr static int Option = M::MatrixOption;
+        constexpr static int Option = M::MatrixMajor;
         constexpr static size_t RowAtCompile = M::RowAtCompile;
         constexpr static size_t ColAtCompile = M::ColAtCompile;
         constexpr static size_t SizeAtCompile = M::SizeAtCompile;

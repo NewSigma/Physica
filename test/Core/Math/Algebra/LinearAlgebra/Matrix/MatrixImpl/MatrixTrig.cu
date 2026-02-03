@@ -23,7 +23,7 @@
 using namespace Physica;
 using T = float32;
 using RandomSource = Random<MCG, 1234>;
-using M = device_obj<DenseMatrix<T, MatrixOption::Col>>;
+using M = device_obj<DenseMatrix<T, MatrixMajor::Col>>;
 
 namespace {
     void invAndProd() noexcept {

@@ -37,7 +37,7 @@ namespace Physica {
     class EqualityQuadraticProgramming {
         DenseSymmMatrix<T> objectiveMatG;
         VectorND<T> objectiveVecC;
-        DenseMatrix<T, MatrixOption::Row> constraints;
+        DenseMatrix<T, MatrixMajor::Row> constraints;
         VectorND<T> x;
         VectorND<T> multipliers;
     public:
@@ -94,7 +94,7 @@ namespace Physica {
         }
 
         const size_t problemSize = degreeOfFreedom + constraints.getRow();
-        DenseMatrix<T, MatrixOption::Row> equationMatA(problemSize, problemSize);
+        DenseMatrix<T, MatrixMajor::Row> equationMatA(problemSize, problemSize);
         /* Assemble matrix */ {
             if (haveConstraints) {
                 const auto matA = constraints.leftCols(degreeOfFreedom);
@@ -110,7 +110,7 @@ namespace Physica {
             else
                 equationMatA = objectiveMatG;
         }
-        const DenseMatrix<T, MatrixOption::Row> inv_equationMatA = equationMatA.inv();
+        const DenseMatrix<T, MatrixMajor::Row> inv_equationMatA = equationMatA.inv();
         const VectorND<T> solution = inv_equationMatA * equationVecB;
         x -= solution.head(degreeOfFreedom);
         if (haveConstraints)

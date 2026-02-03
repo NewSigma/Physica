@@ -104,6 +104,18 @@ namespace Physica {
     }
 
     template<class Derived>
+    consteval bool RValueMatrix<Derived>::isStaticSymm() noexcept {
+        using TransposeTy = std::remove_cvref_t<decltype(std::declval<Derived>().transpose())>;
+        return std::same_as<TransposeTy, Derived>;
+    }
+
+    template<class Derived>
+    consteval bool RValueMatrix<Derived>::isStaticHermite() noexcept {
+        using HermiteTy = std::remove_cvref_t<decltype(std::declval<Derived>().hermite())>;
+        return std::same_as<HermiteTy, Derived>;
+    }
+
+    template<class Derived>
     decltype(auto) RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
@@ -280,7 +292,7 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::max() const -> T {
         T result;
-        if constexpr (MatrixOption::isColMatrix<This>()) {
+        if constexpr (MatrixMajor::isColMatrix<This>()) {
             result = Base::getDerived().col(0).max();
             for (size_t i = 1; i < getCol(); ++i) {
                 T temp = Base::getDerived().col(i).max();
@@ -302,7 +314,7 @@ namespace Physica {
     template<class Derived>
     auto RValueMatrix<Derived>::min() const -> T {
         T result;
-        if constexpr (MatrixOption::isColMatrix<This>()) {
+        if constexpr (MatrixMajor::isColMatrix<This>()) {
             result = Base::getDerived().col(0).min();
             for (size_t i = 1; i < getCol(); ++i) {
                 T temp = Base::getDerived().col(i).min();
@@ -331,7 +343,7 @@ namespace Physica {
         else {
             T result = 0;
             for (size_t major = 0; major < getMaxMajor(); ++major)
-                result += MatrixOption::isColMatrix<Derived>() ? x.col(major).sum() : x.row(major).sum();
+                result += MatrixMajor::isColMatrix<Derived>() ? x.col(major).sum() : x.row(major).sum();
             co_return std::move(result);
         }
     }
@@ -494,36 +506,40 @@ namespace Physica {
 
     template<class Derived>
     bool RValueMatrix<Derived>::isSymm() const noexcept {
-        if constexpr (MatrixOption::isSymmMatrix<Derived>())
+        if constexpr (isStaticSymm())
             return true;
-        if (!isSquare())
-            return false;
+        else {
+            if (!isSquare())
+                return false;
 
-        const size_t order = getRow();
-        for (size_t r = 0; r < order; ++r)
-            for (size_t c = r + 1; c < order; ++c)
-                if (calc(r, c) != calc(c, r))
-                    return false;
-        return true;
+            const size_t order = getRow();
+            for (size_t r = 0; r < order; ++r)
+                for (size_t c = r + 1; c < order; ++c)
+                    if (calc(r, c) != calc(c, r))
+                        return false;
+            return true;
+        }
     }
 
     template<class Derived>
     bool RValueMatrix<Derived>::isHermite() const noexcept {
-        if constexpr (MatrixOption::isHermiteMatrix<Derived>())
+        if constexpr (isStaticHermite())
             return true;
-        if (!isSquare())
-            return false;
-
-        const size_t order = getRow();
-        for (size_t r = 0; r < order; ++r) {
-            if (!calc(r, r).imag().isZero())
+        else {
+            if (!isSquare())
                 return false;
 
-            for (size_t c = r + 1; c < order; ++c)
-                if (calc(r, c) != calc(c, r).conjugate())
+            const size_t order = getRow();
+            for (size_t r = 0; r < order; ++r) {
+                if (!calc(r, r).imag().isZero())
                     return false;
+
+                for (size_t c = r + 1; c < order; ++c)
+                    if (calc(r, c) != calc(c, r).conjugate())
+                        return false;
+            }
+            return true;
         }
-        return true;
     }
 
     template<class Derived>

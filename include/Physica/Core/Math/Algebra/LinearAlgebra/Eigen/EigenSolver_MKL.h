@@ -25,8 +25,8 @@ namespace Physica {
     template<Scalar T, size_t Order>
     void EigenSolver<T, Order>::compute_mkl(const Matrix auto& source) {
         static_assert(T::Prec == Float32 || T::Prec == Float64);
-        constexpr int Major = MatrixOption::isColMatrix<decltype(source)>() ? MatrixOption::Col : MatrixOption::Row;
-        constexpr int Layout = Major == MatrixOption::Col ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
+        constexpr int Major = MatrixMajor::isColMatrix<decltype(source)>() ? MatrixMajor::Col : MatrixMajor::Row;
+        constexpr int Layout = Major == MatrixMajor::Col ? LAPACK_COL_MAJOR : LAPACK_ROW_MAJOR;
         using WorkingMatrixMKL = DenseMatrix<T, Major>;
 
         pre_compute(source);
@@ -55,7 +55,7 @@ namespace Physica {
                     eigenvalues[i] = Tc(ereal[i], eimag[i]);
             }
 
-            if constexpr (Major == MatrixOption::Row) {
+            if constexpr (Major == MatrixMajor::Row) {
                 working  = rawEigenvectors.transpose();
                 rawEigenvectors = working;
             }

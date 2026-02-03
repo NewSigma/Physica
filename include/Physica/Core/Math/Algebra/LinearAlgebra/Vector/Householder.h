@@ -36,7 +36,7 @@ namespace Physica {
         copy.tail(1) = householder;
 
         const BufferType temp1 = copy * factor;
-        using BufferType1 = DenseMatrix<T, MatrixOption::Row, 1, decltype(mat * copy)::SizeAtCompile>;
+        using BufferType1 = DenseMatrix<T, MatrixMajor::Row, 1, decltype(mat * copy)::SizeAtCompile>;
         mat -= temp1 * BufferType1(copy.hermite() * mat);
     }
 

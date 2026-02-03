@@ -80,7 +80,7 @@ namespace Physica {
     template<class Derived>
     class Traits<HamiltonMatrix<Derived>> {
     public:
-        constexpr static int Option = MatrixOption::BothMajor;
+        constexpr static int Option = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;

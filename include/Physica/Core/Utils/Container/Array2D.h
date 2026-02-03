@@ -24,18 +24,18 @@
 
 namespace Physica {
     template<class T,
-             int Option = MatrixOption::Col,
+             int Option = MatrixMajor::Col,
              size_t Row = Dynamic,
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
     class Array2D {
         using This = Array2D<T, Option, Row, Col, Allocator>;
         constexpr static bool isDynamicArray = Row == Dynamic && Col == Dynamic;
-        constexpr static bool isColMajor = (Option & MatrixOption::Col) != 0;
+        constexpr static bool isColMajor = (Option & MatrixMajor::Col) != 0;
         constexpr static size_t MaxMajor = isColMajor ? Col : Row;
         constexpr static size_t MaxMinor = isColMajor ? Row : Col;
-        constexpr static int TransOption = isColMajor ? MatrixOption::Row : MatrixOption::Col;
-        static_assert(Option != MatrixOption::BothMajor, "[Error]: Invalid Option");
+        constexpr static int TransOption = isColMajor ? MatrixMajor::Row : MatrixMajor::Col;
+        static_assert(Option != MatrixMajor::BothMajor, "[Error]: Invalid Option");
 
         template<class U>
         struct Helper {

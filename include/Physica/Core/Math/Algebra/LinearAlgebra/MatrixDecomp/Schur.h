@@ -368,7 +368,7 @@ namespace Physica {
 
     template<Scalar T, size_t Order>
     Schur<T, Order>::ComplexType Schur<T, Order>::complexShift(size_t upper, size_t iter) {
-        using Matrix2D = DenseMatrix<T, MatrixOption::Col, 2, 2>;
+        using Matrix2D = DenseMatrix<T, MatrixMajor::Col, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
             return abs(matrixT[upper, upper - 1].real()) + abs(matrixT[upper - 1, upper - 2].real());

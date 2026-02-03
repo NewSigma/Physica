@@ -35,8 +35,8 @@ namespace Physica {
     protected:
         using typename Base::T;
     private:
-        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
-        constexpr static bool isColMatrix = MatrixOption::isColMatrix<Derived>();
+        constexpr static bool isRowMatrix = MatrixMajor::isRowMatrix<Derived>();
+        constexpr static bool isColMatrix = MatrixMajor::isColMatrix<Derived>();
     public:
         ~device_obj() = default;
         /* Operators */

@@ -45,13 +45,13 @@ namespace Physica {
     template<class U, class V>
     void MatrixExpr<ExprID::Sub, U, V>::assign(Matrix auto&& target) const {
         if constexpr (Matrix<U>) {
-            if constexpr (MatrixOption::isSameMajor<U, decltype(target)>())
+            if constexpr (MatrixMajor::isSameMajor<U, decltype(target)>())
                 (getLHS().flatten() - getRHS()).assign(target.flatten());
             else
                 Base::assign(target);
         }
         else {
-            if constexpr (MatrixOption::isSameMajor<V, decltype(target)>())
+            if constexpr (MatrixMajor::isSameMajor<V, decltype(target)>())
                 (getLHS() - getRHS().flatten()).assign(target.flatten());
             else
                 Base::assign(target);
@@ -101,8 +101,8 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     void MatrixExpr<ExprID::Sub, M1, M2>::assign(Matrix auto&& target) const {
-        constexpr bool SameMajor1 = MatrixOption::isSameMajor<M1, decltype(target)>();
-        constexpr bool SameMajor2 = MatrixOption::isSameMajor<M2, decltype(target)>();
+        constexpr bool SameMajor1 = MatrixMajor::isSameMajor<M1, decltype(target)>();
+        constexpr bool SameMajor2 = MatrixMajor::isSameMajor<M2, decltype(target)>();
         if constexpr (SameMajor1 && SameMajor2)
             (getLHS().flatten() - getRHS().flatten()).assign(target.flatten());
         else

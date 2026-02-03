@@ -23,16 +23,16 @@ using namespace Physica;
 
 namespace {
     void general() {
-        DenseMatrix<float64, MatrixOption::Col, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-        DenseMatrix<float32, MatrixOption::Col, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
+        DenseMatrix<float64, MatrixMajor::Col, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+        DenseMatrix<float32, MatrixMajor::Col, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
         {
-            DenseMatrix<float64, MatrixOption::Row, 3, 3> mat = -(mat1 + mat2);
+            DenseMatrix<float64, MatrixMajor::Row, 3, 3> mat = -(mat1 + mat2);
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getCol(); ++j)
                     expect(mat[i, j] == float64(-2));
         }
         {
-            DenseMatrix<float64, MatrixOption::Row, 3, 3> mat = mat1 * mat2;
+            DenseMatrix<float64, MatrixMajor::Row, 3, 3> mat = mat1 * mat2;
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getCol(); ++j)
                     expect(mat[i, j] == float64(3));
@@ -41,7 +41,7 @@ namespace {
 
     void block1x1() {
         using ScalarType = float64;
-        DenseMatrix<ScalarType, MatrixOption::Col, Physica::Dynamic, 1> mat(2, 1);
+        DenseMatrix<ScalarType, MatrixMajor::Col, Physica::Dynamic, 1> mat(2, 1);
         mat[0, 0] = 1.0;
         mat[1, 0] = 2.0;
         expect(mat.row(1)[0] == ScalarType(2));

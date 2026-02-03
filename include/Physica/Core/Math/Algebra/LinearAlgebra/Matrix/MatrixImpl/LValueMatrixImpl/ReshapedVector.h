@@ -84,7 +84,7 @@ namespace Physica {
     template<Vector V, int MatrixMajor, size_t Row, size_t Col>
     auto LValueReshapedVector<V, MatrixMajor, Row, Col>::data_ptr(this auto&& self, size_t row, size_t col) noexcept {
         assert(row < self.getRow() && col < self.getCol());
-        if constexpr (MatrixOption::isColMatrix<This>())
+        if constexpr (MatrixMajor::isColMatrix<This>())
             return self.v.data_ptr(col * self.getRow() + row);
         else
             return self.v.data_ptr(row * self.getCol() + col);
@@ -93,39 +93,39 @@ namespace Physica {
     template<class Derived>
     template<Matrix M>
     auto LValueVector<Derived>::reshape(const M& mat) noexcept {
-        using ResultType = LValueReshapedVector<Derived, MatrixOption::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
+        using ResultType = LValueReshapedVector<Derived, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
         return ResultType(Base::getDerived(), mat.getRow(), mat.getCol());
     }
 
     template<class Derived>
     template<Matrix M>
     const auto LValueVector<Derived>::reshape(const M& mat) const noexcept {
-        using ResultType = LValueReshapedVector<Derived, MatrixOption::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
+        using ResultType = LValueReshapedVector<Derived, MatrixMajor::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>;
         return ResultType(Base::getConstCastDerived(), mat.getRow(), mat.getCol());
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
     auto LValueVector<Derived>::reshape_col(size_t row, size_t col) noexcept {
-        return LValueReshapedVector<Derived, MatrixOption::Col, Row, Col>(Base::getDerived(), row, col);
+        return LValueReshapedVector<Derived, MatrixMajor::Col, Row, Col>(Base::getDerived(), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
     const auto LValueVector<Derived>::reshape_col(size_t row, size_t col) const noexcept {
-        return LValueReshapedVector<Derived, MatrixOption::Col, Row, Col>(Base::getConstCastDerived(), row, col);
+        return LValueReshapedVector<Derived, MatrixMajor::Col, Row, Col>(Base::getConstCastDerived(), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
     auto LValueVector<Derived>::reshape_row(size_t row, size_t col) noexcept {
-        return LValueReshapedVector<Derived, MatrixOption::Row, Row, Col>(Base::getDerived(), row, col);
+        return LValueReshapedVector<Derived, MatrixMajor::Row, Row, Col>(Base::getDerived(), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
     const auto LValueVector<Derived>::reshape_row(size_t row, size_t col) const noexcept {
-        return LValueReshapedVector<Derived, MatrixOption::Row, Row, Col>(Base::getConstCastDerived(), row, col);
+        return LValueReshapedVector<Derived, MatrixMajor::Row, Row, Col>(Base::getConstCastDerived(), row, col);
     }
 }
 

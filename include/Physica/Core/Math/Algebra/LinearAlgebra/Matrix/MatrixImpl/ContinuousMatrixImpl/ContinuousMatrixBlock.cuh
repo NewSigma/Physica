@@ -23,7 +23,7 @@
 namespace Physica {
     template<Matrix M, size_t Col>
     class device_obj<ContinuousMatrixBlock<M, 1, Col>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, 1, Col>>> {
-        static_assert(MatrixOption::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
+        static_assert(MatrixMajor::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
         using host_obj = ContinuousMatrixBlock<M, 1, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
@@ -71,7 +71,7 @@ namespace Physica {
 
     template<Matrix M, size_t Row>
     class device_obj<ContinuousMatrixBlock<M, Row, 1>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, Row, 1>>> {
-        static_assert(MatrixOption::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
+        static_assert(MatrixMajor::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
         using host_obj = ContinuousMatrixBlock<M, Row, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
@@ -219,7 +219,7 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::row(this auto&& self, size_t r) noexcept {
         assert(r < self.getRow());
-        if constexpr (MatrixOption::isRowMatrix<M>())
+        if constexpr (MatrixMajor::isRowMatrix<M>())
             return device_obj<ContinuousMatrixBlock<M, 1, Col>>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
         else
             return device_obj<LMatrixBlock<M, 1, Col>>(self.mat, self.fromRow + r, self.fromCol, self.getCol());
@@ -228,7 +228,7 @@ namespace Physica {
     template<Matrix M, size_t Row, size_t Col>
     __host__ __device__ auto device_obj<ContinuousMatrixBlock<M, Row, Col>>::col(this auto&& self, size_t c) noexcept {
         assert(c < self.getCol());
-        if constexpr (MatrixOption::isColMatrix<M>())
+        if constexpr (MatrixMajor::isColMatrix<M>())
             return device_obj<ContinuousMatrixBlock<M, Row, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);
         else
             return device_obj<LMatrixBlock<M, Row, 1>>(self.mat, self.fromRow, self.getRow(), self.fromCol + c);

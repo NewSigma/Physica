@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/MatrixDecomp/DenseQR.cuh"
 
 using namespace Physica;
-using Matrix3D = DenseMatrix<float32, MatrixOption::Col, 3>;
+using Matrix3D = DenseMatrix<float32, MatrixMajor::Col, 3>;
 
 namespace {
     void testQR(device_obj<DenseQR<float32>>& qr, const Matrix3D& answer) {

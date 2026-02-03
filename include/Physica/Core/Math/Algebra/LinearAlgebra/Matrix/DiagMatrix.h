@@ -142,7 +142,7 @@ namespace Physica {
     class Traits<DiagMatrix<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::BothMajor;
+        constexpr static int Option = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

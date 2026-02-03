@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,7 +34,7 @@ namespace Physica {
         using Tcv = Tc::ValueType;
     public:
         using EigenvalueVector = DenseVector<Tc, Order>;
-        using EigenvectorMatrix = DenseMatrix<Tc, MatrixOption::Col, Order, Order>;
+        using EigenvectorMatrix = DenseMatrix<Tc, MatrixMajor::Col, Order, Order>;
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;
@@ -79,8 +79,8 @@ namespace Physica {
         const auto basis = solver.getEigenvectors();
 
         GradMatrix transGrads;
-        constexpr bool isHermite = MatrixOption::isHermiteMatrix<decltype(source)>();
-        constexpr bool isRealSymm = !T::isComplex && MatrixOption::isSymmMatrix<decltype(source)>();
+        constexpr bool isHermite = source.isStaticHermite();
+        constexpr bool isRealSymm = !T::isComplex && source.isStaticSymm();
         if constexpr (isHermite || isRealSymm)
             transGrads = basis.hermite() * GradMatrix(source.grads() * basis);
         else

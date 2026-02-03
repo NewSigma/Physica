@@ -23,7 +23,7 @@
 using namespace Physica;
 using T = float64;
 using RandomSource = Random<MCG, 1234>;
-using Matrix4D = DenseMatrix<T, MatrixOption::Col, 4, 4>;
+using Matrix4D = DenseMatrix<T, MatrixMajor::Col, 4, 4>;
 
 namespace {
     void invAndProd() noexcept {

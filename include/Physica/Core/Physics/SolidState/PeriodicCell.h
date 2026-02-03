@@ -46,9 +46,9 @@ namespace Physica {
         using Tv = T::ValueType;
         static_assert(!T::isComplex, "[Error]: Complex position is not allowed");
     public:
-        using LatticeMatrix = DenseMatrix<T, MatrixOption::Row, Dim, Dim>;
-        using InvLatticeMatrix = DenseMatrix<T, MatrixOption::Col, Dim, Dim>;
-        using PositionMatrix = DenseMatrix<T, MatrixOption::Row, Dynamic, Dim>;
+        using LatticeMatrix = DenseMatrix<T, MatrixMajor::Row, Dim, Dim>;
+        using InvLatticeMatrix = DenseMatrix<T, MatrixMajor::Col, Dim, Dim>;
+        using PositionMatrix = DenseMatrix<T, MatrixMajor::Row, Dynamic, Dim>;
         using SearchRangeType = Array<ssize_t, Dim>;
     protected:
         using VectorType = DenseVector<T, Dim>;

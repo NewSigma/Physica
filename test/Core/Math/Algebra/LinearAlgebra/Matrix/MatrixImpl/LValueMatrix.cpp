@@ -23,7 +23,7 @@ using namespace Physica;
 
 int main() {
     using T = float32;
-    using Matrix4D = DenseMatrix<T, MatrixOption::Col, 4, 4>;
+    using Matrix4D = DenseMatrix<T, MatrixMajor::Col, 4, 4>;
     auto continuous = Matrix4D::random_uniform<Random<>>(4, 4);
     auto lMatrix = continuous.topLeftCorner(3);
     for (int i = 0; i < 3; ++i)

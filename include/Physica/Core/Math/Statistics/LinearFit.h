@@ -82,7 +82,7 @@ namespace Physica {
      */
     template<Scalar T>
     LinearFit<T>::VectorType LinearFit<T>::polyfit(const VectorType& x, const VectorType& y, int order) {
-        using MatrixType = DenseMatrix<T, MatrixOption::Row>;
+        using MatrixType = DenseMatrix<T, MatrixMajor::Row>;
         assert(x.getLength() == y.getLength() && "[Error]: Dimensions do not match");
         assert(order > 1 && "[Error]: Invalid order");
         const size_t length = x.getLength();

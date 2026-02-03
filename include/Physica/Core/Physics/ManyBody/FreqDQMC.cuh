@@ -33,7 +33,7 @@ namespace Physica {
 
         using Cell = MDCell<Tr, 1>;
         template<Scalar U>
-        using HostMatrix = DenseMatrix<U, MatrixOption::Col, Dynamic, Dynamic, PageLockedAllocator<U>>;
+        using HostMatrix = DenseMatrix<U, MatrixMajor::Col, Dynamic, Dynamic, PageLockedAllocator<U>>;
 
         static_assert(T::Prec == Float32, "[Info]: Suggest FP32");
     private:

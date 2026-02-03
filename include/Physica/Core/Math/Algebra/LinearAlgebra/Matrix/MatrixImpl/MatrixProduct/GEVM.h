@@ -76,7 +76,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     void GEVM<V, M>::assign_base(Matrix auto& target) const {
-        if constexpr (MatrixOption::isColMatrix<decltype(target)>()) {
+        if constexpr (MatrixMajor::isColMatrix<decltype(target)>()) {
             for (size_t c = 0; c < getCol(); ++c)
                 target.col(c) = vec * mat(0, c);
         }
@@ -88,7 +88,7 @@ namespace Physica {
 
     template<Vector V, Matrix M>
     void GEVM<V, M>::assign_add(Matrix auto& target) const {
-        if constexpr (MatrixOption::isColMatrix<decltype(target)>()) {
+        if constexpr (MatrixMajor::isColMatrix<decltype(target)>()) {
             for (size_t c = 0; c < getCol(); ++c)
                 target.col(c) += vec * mat.calc(0, c);
         }
@@ -144,7 +144,7 @@ namespace Physica {
         static_assert(M1::RowAtCompile == 1 || M1::RowAtCompile == Dynamic, "[Error]: Outer product requires that the rows of M be 1");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
-        constexpr static int Option = MatrixOption::BothMajor;
+        constexpr static int Option = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = V1::SizeAtCompile;
         constexpr static size_t ColAtCompile = M1::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

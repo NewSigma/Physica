@@ -73,7 +73,7 @@ namespace Physica {
     template<ExecutePolicy P>
     void Transpose<M>::assign(Matrix auto&& target) const {
         constexpr bool LargeMatrix = Traits<This>::SizeAtCompile == Dynamic;
-        if constexpr (LargeMatrix && Internal::EnableMKL<M, decltype(target)>::value && MatrixOption::isSameMajor<M, decltype(target)>()) {
+        if constexpr (LargeMatrix && Internal::EnableMKL<M, decltype(target)>::value && MatrixMajor::isSameMajor<M, decltype(target)>()) {
             if (Base::getSize() <= 16)
                 Base::template assign<P>(target);
             else
@@ -128,8 +128,8 @@ namespace Physica {
     template<Matrix M>
     class Traits<Transpose<M>> {
         using M1 = std::remove_cvref_t<M>;
-        constexpr static int OtherMajor = MatrixOption::isColMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
-        constexpr static int Major = MatrixOption::isBothMajor<M>() ? MatrixOption::BothMajor : OtherMajor;
+        constexpr static int OtherMajor = MatrixMajor::isColMatrix<M>() ? MatrixMajor::Row : MatrixMajor::Col;
+        constexpr static int Major = MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
     public:
         using ScalarType = M1::ScalarType;
         constexpr static int Option = Major;
@@ -143,7 +143,7 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
     public:
         using ScalarType = V1::ScalarType;
-        constexpr static int Option = MatrixOption::Row;
+        constexpr static int Option = MatrixMajor::Row;
         constexpr static size_t RowAtCompile = 1;
         constexpr static size_t ColAtCompile = V1::SizeAtCompile;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;

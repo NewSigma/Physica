@@ -32,12 +32,10 @@ namespace Physica {
 
     template<class T>
     concept Matrix = Internal::MatrixObj<remove_codiff_t<std::remove_cvref_t<T>>>;
-    /**
-     * \class MatrixOption handles properties of matrix
-     */
-    class MatrixOption {
+
+    class MatrixMajor {
     public:
-        enum Major : char {
+        enum Option : char {
             Col = 0b01,
             Row = 0b10,
             BothMajor = 0b11, // Wildcard that indicates no performance difference between row access and col access
@@ -48,7 +46,7 @@ namespace Physica {
             CMajor = Row,
         };
     public:
-        MatrixOption() = delete;
+        MatrixMajor() = delete;
         /* Static members */
         template<class MatrixType>
         consteval static bool isColMatrix() noexcept {
@@ -103,22 +101,6 @@ namespace Physica {
         template<class MatrixType>
         [[nodiscard]] constexpr static size_t colFromMajorMinor(size_t major, size_t minor) noexcept {
             return isColMatrix<MatrixType>() ? major : minor;
-        }
-
-        template<class MatrixType>
-        [[nodiscard]] consteval static bool isSymmMatrix() noexcept {
-            using M = std::remove_cvref_t<MatrixType>;
-            using TransposeType = decltype(std::declval<M>().transpose());
-            using TransposeType1 = std::remove_cvref<TransposeType>::type;
-            return std::is_base_of<TransposeType1, M>::value;
-        }
-
-        template<class MatrixType>
-        [[nodiscard]] consteval static bool isHermiteMatrix() noexcept {
-            using M = std::remove_cvref_t<MatrixType>;
-            using HermiteType = decltype(std::declval<M>().hermite());
-            using HermiteType1 = std::remove_cvref<HermiteType>::type;
-            return std::is_base_of<HermiteType1, M>::value;
         }
     };
 }

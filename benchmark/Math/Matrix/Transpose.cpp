@@ -25,7 +25,7 @@ using RandomSource = Random<MCG>;
 namespace {
     void trans(benchmark::State& state) {
         using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col>;
+        using MatrixType = DenseMatrix<T, MatrixMajor::Col>;
         const size_t order = state.range(0);
         const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
         auto trans = m.transpose();
@@ -39,7 +39,7 @@ namespace {
 
     void trans_base(benchmark::State& state) {
         using T = float64;
-        using MatrixType = DenseMatrix<T, MatrixOption::Col>;
+        using MatrixType = DenseMatrix<T, MatrixMajor::Col>;
         const size_t order = state.range(0);
         const auto m = MatrixType::template random_uniform<RandomSource>(order, order);
         auto trans = m.transpose();

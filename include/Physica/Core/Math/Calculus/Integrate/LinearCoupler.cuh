@@ -98,7 +98,7 @@ namespace Physica {
      */
     template<Scalar T>
     auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const -> CoDiff<device_obj<VectorND<T>>> {
-        constexpr static int Option = MatrixOption::Row;
+        constexpr static int Option = MatrixMajor::Row;
         const int numSample = z.getCol();
         assert(weights.getRow() == getDim() * numBin);
         assert(weights.getCol() == numSample);

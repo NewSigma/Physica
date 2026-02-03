@@ -28,7 +28,7 @@ using ScalarType = float64;
  */
 int main() {
     /* logistic */ {
-        DenseMatrix<ScalarType, MatrixOption::Col, Dynamic, 1> data(30000, 1);
+        DenseMatrix<ScalarType, MatrixMajor::Col, Dynamic, 1> data(30000, 1);
         auto col = data.col(0);
         const ScalarType factor = 3.5699456;
         col[0] = 0.5;
@@ -41,7 +41,7 @@ int main() {
     }
     /* Henon map */ {
         // On newer architectures, FMA instructions will affect precision, so we use more data instead of 15000 as [1] does.
-        DenseMatrix<ScalarType, MatrixOption::Col, Dynamic, 2> data(20000, 2);
+        DenseMatrix<ScalarType, MatrixMajor::Col, Dynamic, 2> data(20000, 2);
         auto col1 = data.col(0);
         auto col2 = data.col(1);
         const ScalarType factor1 = 1.4;

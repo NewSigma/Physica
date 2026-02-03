@@ -26,7 +26,7 @@ namespace Physica {
     void Inverse<M>::assign_mkl(Matrix auto& target) const {
         trig.assign(target);
 
-        constexpr auto Layout = MatrixOption::isRowMatrix<decltype(target)>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
+        constexpr auto Layout = MatrixMajor::isRowMatrix<decltype(target)>() ? LAPACK_ROW_MAJOR : LAPACK_COL_MAJOR;
         constexpr char Uplo = Traits<M>::Upper ? 'U' : 'L';
         constexpr char Diag = Traits<M>::Unit ? 'U' : 'N';
         size_t n = getRow();
