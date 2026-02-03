@@ -50,8 +50,8 @@ namespace {
     }
 }
 
-BENCHMARK(abs<float32>)->Name("abs float32")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(abs<float64>)->Name("abs float64")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs<float32>)->Name(std::format("{} float32", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs<float64>)->Name(std::format("{} float64", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
 
-BENCHMARK(abs_base<float32>)->Name("abs float32 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(abs_base<float64>)->Name("abs float64 base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs_base<float32>)->Name(std::format("{} float32 base", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(abs_base<float64>)->Name(std::format("{} float64 base", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

@@ -37,5 +37,5 @@ namespace {
     }
 }
 
-BENCHMARK(add<float32>)->Name("add float32 mkl")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(add<float64>)->Name("add float64 mkl")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(add<float32>)->Name(std::format("{} float32", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(add<float64>)->Name(std::format("{} float64", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);

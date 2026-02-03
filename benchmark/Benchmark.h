@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,6 +21,7 @@
 #include "Physica/Config.h"
 #include <benchmark/benchmark.h>
 #include <array>
+#include <source_location>
 
 namespace Physica {
     constexpr std::array<std::size_t, 6> CacheSizes{
@@ -38,3 +39,5 @@ namespace Physica {
 #else
     #define PHYSICA_BENCH(x) x
 #endif
+
+std::string makeBenchID(std::source_location loc = std::source_location::current()) noexcept;

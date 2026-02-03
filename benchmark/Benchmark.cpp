@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,13 +16,30 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
-#include <benchmark/benchmark.h>
 #include "Physica/Core/Version.h"
+#include "Benchmark.h"
 
 using namespace benchmark;
+
+std::string makeBenchID(std::source_location loc) noexcept {
+    std::string result = loc.file_name();
+    {
+        std::string cur = std::source_location::current().file_name();
+        size_t beginBaseDir = cur.find_last_of('/');
+        result = result.substr(beginBaseDir + 1);
+    }
+    {
+        size_t lastDot = result.find_last_of('.');
+        assert(lastDot != std::string::npos && "[Error]: Unexpected missing extension");
+        result = result.substr(0, lastDot);
+    }
+    std::ranges::replace(result, '/', '.');
+    return result;
+}
 
 namespace {
     const char* const Executable = "Benchmark";
