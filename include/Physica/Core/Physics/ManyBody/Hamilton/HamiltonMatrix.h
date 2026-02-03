@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -80,7 +80,7 @@ namespace Physica {
     template<class Derived>
     class Traits<HamiltonMatrix<Derived>> {
     public:
-        constexpr static int Option = MatrixOption::AnyMajor;
+        constexpr static int Option = MatrixOption::BothMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;

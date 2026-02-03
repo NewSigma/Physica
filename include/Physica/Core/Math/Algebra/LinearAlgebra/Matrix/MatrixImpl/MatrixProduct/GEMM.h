@@ -96,8 +96,8 @@ namespace Physica {
         constexpr static bool SameMajor = MatrixOption::isSameMajor<M1, M2>();
         constexpr static bool RowMajor = MatrixOption::isRowMatrix<M1>();
         constexpr static auto Major1 = RowMajor ? MatrixOption::Col : MatrixOption::Row;
-        constexpr static auto Major = SameMajor ? Major1 : MatrixOption::AnyMajor;
-        constexpr static int Option = Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major;
+        constexpr static auto Major = SameMajor ? Major1 : MatrixOption::BothMajor;
+        constexpr static int Option = Major == MatrixOption::BothMajor ? MatrixOption::Col : Major;
         using RtnTy = DenseMatrix<T, Option, Base::RowAtCompile, Base::ColAtCompile, HostAllocator<T>>;
         return RtnTy(*this);
     }
@@ -175,7 +175,7 @@ namespace Physica {
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
-        constexpr static int Option = MatrixOption::AnyMajor;
+        constexpr static int Option = MatrixOption::BothMajor;
         constexpr static size_t RowAtCompile = T1::RowAtCompile;
         constexpr static size_t ColAtCompile = T2::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

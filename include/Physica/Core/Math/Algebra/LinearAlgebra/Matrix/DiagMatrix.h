@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -142,7 +142,7 @@ namespace Physica {
     class Traits<DiagMatrix<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::AnyMajor;
+        constexpr static int Option = MatrixOption::BothMajor;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

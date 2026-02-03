@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -111,7 +111,7 @@ namespace Physica {
     template<Matrix M>
     class Traits<Hermite<M>> {
         constexpr static int OtherMajor = MatrixOption::isColMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
-        constexpr static int Major = MatrixOption::isAnyMajor<M>() ? MatrixOption::AnyMajor : OtherMajor;
+        constexpr static int Major = MatrixOption::isBothMajor<M>() ? MatrixOption::BothMajor : OtherMajor;
     public:
         using ScalarType = M::ScalarType;
         constexpr static int Option = Major;

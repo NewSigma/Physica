@@ -224,7 +224,7 @@ namespace Physica {
 
         constexpr static bool SameMajor = MatrixOption::isSameMajor<LHS1, RHS1>();
         constexpr static int Major = SameMajor ? MatrixOption::getMajor<LHS1>()
-                                               : int(MatrixOption::AnyMajor);
+                                               : int(MatrixOption::BothMajor);
         constexpr static bool IsReal = ID == ExprID::Abs || ID == ExprID::Square;
     public:
         using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;

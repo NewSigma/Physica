@@ -129,7 +129,7 @@ namespace Physica {
     class Traits<Transpose<M>> {
         using M1 = std::remove_cvref_t<M>;
         constexpr static int OtherMajor = MatrixOption::isColMatrix<M>() ? MatrixOption::Row : MatrixOption::Col;
-        constexpr static int Major = MatrixOption::isAnyMajor<M>() ? MatrixOption::AnyMajor : OtherMajor;
+        constexpr static int Major = MatrixOption::isBothMajor<M>() ? MatrixOption::BothMajor : OtherMajor;
     public:
         using ScalarType = M1::ScalarType;
         constexpr static int Option = Major;

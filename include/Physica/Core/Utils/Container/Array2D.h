@@ -31,10 +31,11 @@ namespace Physica {
     class Array2D {
         using This = Array2D<T, Option, Row, Col, Allocator>;
         constexpr static bool isDynamicArray = Row == Dynamic && Col == Dynamic;
-        constexpr static bool isColMajor = !(Option & MatrixOption::Row);
+        constexpr static bool isColMajor = (Option & MatrixOption::Col) != 0;
         constexpr static size_t MaxMajor = isColMajor ? Col : Row;
         constexpr static size_t MaxMinor = isColMajor ? Row : Col;
         constexpr static int TransOption = isColMajor ? MatrixOption::Row : MatrixOption::Col;
+        static_assert(Option != MatrixOption::BothMajor, "[Error]: Invalid Option");
 
         template<class U>
         struct Helper {

@@ -23,7 +23,7 @@
 namespace Physica {
     template<Matrix M, size_t Col>
     class device_obj<ContinuousMatrixBlock<M, 1, Col>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, 1, Col>>> {
-        static_assert(Traits<M>::Option == MatrixOption::Row, "[Error]: Col major does not have continuous row");
+        static_assert(MatrixOption::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
         using host_obj = ContinuousMatrixBlock<M, 1, Col>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;
@@ -71,7 +71,7 @@ namespace Physica {
 
     template<Matrix M, size_t Row>
     class device_obj<ContinuousMatrixBlock<M, Row, 1>> : public device_obj<ContinuousVector<ContinuousMatrixBlock<M, Row, 1>>> {
-        static_assert(Traits<M>::Option == MatrixOption::Col, "[Error]: Row major does not have continuous col");
+        static_assert(MatrixOption::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
         using host_obj = ContinuousMatrixBlock<M, Row, 1>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousVector<host_obj>>;

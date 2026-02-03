@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -107,7 +107,7 @@ namespace Physica {
         static_assert(!U::isComplex);
     public:
         using ScalarType = std::conditional<Idx == PauliIndex::Y, typename U::ComplexType, U>::type;
-        constexpr static int Option = MatrixOption::AnyMajor;
+        constexpr static int Option = MatrixOption::BothMajor;
         constexpr static size_t RowAtCompile = 2;
         constexpr static size_t ColAtCompile = 2;
         constexpr static size_t SizeAtCompile = 4;

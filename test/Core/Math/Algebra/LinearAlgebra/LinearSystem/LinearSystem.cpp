@@ -52,7 +52,7 @@ int main() {
         expect(vectorNear(equ.getSolution(), answer, 1E-13));
     }
     {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Row, 4, 4>;
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row, 4, 4>;
         const MatrixType mat = A.leftCols(4);
         VectorND<ScalarType> b = A.col(4);
         IterateSolver<ScalarType> solver{};

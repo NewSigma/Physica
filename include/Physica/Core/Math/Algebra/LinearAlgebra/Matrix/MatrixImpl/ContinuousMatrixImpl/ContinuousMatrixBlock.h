@@ -25,7 +25,7 @@ namespace Physica {
 
     template<Matrix M, size_t Col>
     class ContinuousMatrixBlock<M, 1, Col> : public ContinuousVector<ContinuousMatrixBlock<M, 1, Col>> {
-        static_assert(Traits<M>::Option == MatrixOption::Row, "[Error]: Col major does not have continuous row");
+        static_assert(MatrixOption::isRowMatrix<M>(), "[Error]: Col major does not have continuous row");
         using This = ContinuousMatrixBlock<M, 1, Col>;
         using Base = ContinuousVector<This>;
     private:
@@ -101,7 +101,7 @@ namespace Physica {
 
     template<Matrix M, size_t Row>
     class ContinuousMatrixBlock<M, Row, 1> : public ContinuousVector<ContinuousMatrixBlock<M, Row, 1>> {
-        static_assert(Traits<M>::Option == MatrixOption::Col, "[Error]: Row major does not have continuous col");
+        static_assert(MatrixOption::isColMatrix<M>(), "[Error]: Row major does not have continuous col");
         using This = ContinuousMatrixBlock<M, Row, 1>;
         using Base = ContinuousVector<This>;
     private:

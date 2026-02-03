@@ -75,7 +75,7 @@ namespace Physica {
     class Traits<TensorFiber<X>> {
     public:
         using ScalarType = std::remove_cvref_t<X>::ScalarType;
-        constexpr static int Option = MatrixOption::AnyMajor;
+        constexpr static int Option = MatrixOption::BothMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

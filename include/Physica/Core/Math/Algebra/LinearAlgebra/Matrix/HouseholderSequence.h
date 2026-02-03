@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -106,7 +106,7 @@ namespace Physica {
     class Traits<HouseholderSequence<M, ColWiseRead>> {
     public:
         using ScalarType = M::ScalarType;
-        constexpr static int Option = MatrixOption::AnyMajor;
+        constexpr static int Option = MatrixOption::BothMajor;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;

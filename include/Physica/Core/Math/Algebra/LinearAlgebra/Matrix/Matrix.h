@@ -38,9 +38,9 @@ namespace Physica {
     class MatrixOption {
     public:
         enum Major : char {
-            Col = 0b00,
-            Row = 0b01,
-            AnyMajor = 0b10,
+            Col = 0b01,
+            Row = 0b10,
+            BothMajor = 0b11, // Wildcard that indicates no performance difference between row access and col access
 
             RightMajor = Col,
             LeftMajor = Row,
@@ -52,23 +52,22 @@ namespace Physica {
         /* Static members */
         template<class MatrixType>
         consteval static bool isColMatrix() noexcept {
-            return isAnyMajor<MatrixType>() || !(Traits<std::remove_cvref_t<MatrixType>>::Option & Row);
+            return (Traits<MatrixType>::Option & Col) != 0;
         }
 
         template<class MatrixType>
         consteval static bool isRowMatrix() noexcept {
-            return isAnyMajor<MatrixType>() || !isColMatrix<MatrixType>();
+            return (Traits<MatrixType>::Option & Row) != 0;
         }
 
         template<class MatrixType>
-        consteval static bool isAnyMajor() noexcept {
-            return Traits<std::remove_cvref_t<MatrixType>>::Option & AnyMajor;
+        consteval static bool isBothMajor() noexcept {
+            return Traits<MatrixType>::Option == BothMajor;
         }
 
         template<class MatrixType>
         consteval static int getMajor() noexcept {
-            constexpr int Major = isColMatrix<MatrixType>() ? Col : Row;
-            return isAnyMajor<MatrixType>() ? AnyMajor : Major;
+            return Traits<MatrixType>::Option;
         }
 
         template<class MatrixType1, class MatrixType2>
