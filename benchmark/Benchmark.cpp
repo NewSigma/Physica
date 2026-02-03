@@ -17,32 +17,26 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
 #include "Physica/Core/Version.h"
+#include "Physica/Config.h"
 #include "Benchmark.h"
 
 using namespace benchmark;
-
-std::string makeBenchID(std::source_location loc) noexcept {
-    std::string result = loc.file_name();
-    {
-        std::string cur = std::source_location::current().file_name();
-        size_t beginBaseDir = cur.find_last_of('/');
-        result = result.substr(beginBaseDir + 1);
-    }
-    {
-        size_t lastDot = result.find_last_of('.');
-        assert(lastDot != std::string::npos && "[Error]: Unexpected missing extension");
-        result = result.substr(0, lastDot);
-    }
-    std::ranges::replace(result, '/', '.');
-    return result;
-}
+using namespace Physica;
 
 namespace {
-    const char* const Executable = "Benchmark";
+    constexpr std::array<std::size_t, 6> CacheSizes{
+        HostDevAttr::LineSizeL1D / 2,
+        HostDevAttr::LineSizeL1D,
+        HostDevAttr::CacheSizeL1D * 3 / 4,
+        HostDevAttr::CacheSizeL2 * 3 / 4,
+        HostDevAttr::CacheSizeL3 * 3 / 4,
+        HostDevAttr::CacheSizeL3  * 6 / 5
+    };
 
     class Reporter : public ConsoleReporter {
         using Base = ConsoleReporter;
@@ -101,7 +95,34 @@ namespace {
     }
 }
 
+namespace Physica {
+    std::string makeBenchID(std::source_location loc) noexcept {
+        std::string result = loc.file_name();
+        {
+            std::string cur = std::source_location::current().file_name();
+            size_t beginBaseDir = cur.find_last_of('/');
+            result = result.substr(beginBaseDir + 1);
+        }
+        {
+            size_t lastDot = result.find_last_of('.');
+            assert(lastDot != std::string::npos && "[Error]: Unexpected missing extension");
+            result = result.substr(0, lastDot);
+        }
+        std::ranges::replace(result, '/', '.');
+        return result;
+    }
+
+    size_t makeVectorSize(int64_t level, size_t sizeElem) noexcept {
+        return CacheSizes.at(level) / sizeElem;
+    }
+
+    size_t makeMatrixSize(int64_t level, size_t sizeElem) noexcept {
+        return std::lround(std::sqrt(double(CacheSizes.at(level)) / double(sizeElem)));
+    }
+}
+
 int main(int argc, char** argv) {
+    const char* const Executable = "Benchmark";
     if (!argv) {
         argc = 1;
         argv = const_cast<char**>(&Executable);

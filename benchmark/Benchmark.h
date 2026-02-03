@@ -18,20 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Config.h"
 #include <benchmark/benchmark.h>
-#include <array>
 #include <source_location>
 
 namespace Physica {
-    constexpr std::array<std::size_t, 6> CacheSizes{
-        HostDevAttr::LineSizeL1D / 2,
-        HostDevAttr::LineSizeL1D,
-        HostDevAttr::CacheSizeL1D * 3 / 4,
-        HostDevAttr::CacheSizeL2 * 3 / 4,
-        HostDevAttr::CacheSizeL3 * 3 / 4,
-        HostDevAttr::CacheSizeL3  * 6 / 5
-    };
+    std::string makeBenchID(std::source_location loc = std::source_location::current()) noexcept;
+    size_t makeVectorSize(int64_t level, size_t sizeElem) noexcept;
+    size_t makeMatrixSize(int64_t level, size_t sizeElem) noexcept;
 }
 
 #ifdef PHYSICA_LLVMIR
@@ -39,5 +32,3 @@ namespace Physica {
 #else
     #define PHYSICA_BENCH(x) x
 #endif
-
-std::string makeBenchID(std::source_location loc = std::source_location::current()) noexcept;

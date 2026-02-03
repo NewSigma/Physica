@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ using RandomSource = Random<MCG>;
 namespace {
     template<Scalar T>
     void square(benchmark::State& state) {
-        const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
+        const auto size = makeVectorSize(state.range(0), sizeof(T));
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = square(x);
         VectorND<T> buffer(size);
@@ -38,7 +38,7 @@ namespace {
 
     template<Scalar T>
     void square_base(benchmark::State& state) {
-        const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
+        const auto size = makeVectorSize(state.range(0), sizeof(T));
         const VectorND<T> x = VectorND<T>::template random_uniform<RandomSource>(size);
         auto expr = square(x);
         VectorND<T> buffer(size);

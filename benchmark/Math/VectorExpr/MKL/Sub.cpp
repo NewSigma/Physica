@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ using RandomSource = Random<MCG>;
 namespace {
     template<Scalar T>
     void sub(benchmark::State& state) noexcept {
-        const int64_t size = CacheSizes[state.range(0)] / sizeof(T);
+        const auto size = makeVectorSize(state.range(0), sizeof(T));
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
         VectorND<T> buffer(size);
