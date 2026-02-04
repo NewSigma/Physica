@@ -52,7 +52,7 @@ namespace Physica {
 
     template<class Derived>
     template<ExecutePolicy P>
-    void RValueVector<Derived>::assign_add(Vector auto& v) const noexcept {
+    void RValueVector<Derived>::assign_add(Vector auto&& v) const noexcept {
         using V = std::remove_cvref<decltype(v)>::type;
         v.assert_assign(Base::getDerived());
         if constexpr (Internal::EnableSIMD<Derived, V>::value && !isReverseDiff) {

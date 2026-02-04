@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -79,7 +79,7 @@ namespace Physica {
             return Complex<T>(std::log(c.toMachine()));
         else {
         #ifdef PHYSICA_CUDA
-            return Complex<T>(thrust::log(c.toMachineThrust()));
+            return Complex<T>(thrust::log(c.toThrust()));
         #endif
         }
     }
@@ -95,8 +95,7 @@ namespace Physica {
             T norm = c.norm();
             return norm + ln(exp(-norm) + exp(c - norm));
         }
-        else
-            return ln1p(exp(c));
+        return ln1p(exp(c));
     }
 
     template<Scalar T>

@@ -211,21 +211,23 @@ namespace Physica {
         return true;
     }
 
-    template<Matrix M>
-    bool operator==(const M& m1, const M& m2) {
+    bool operator==(const Matrix auto& m1, const Matrix auto& m2) noexcept {
         if (m1.getRow() != m2.getRow())
             return false;
         if (m1.getCol() != m2.getCol())
             return false;
-        for (size_t major = 0; major < m1.getMaxMajor(); ++major)
-            for (size_t minor = 0; minor < m1.getMaxMinor(); ++minor)
-                if (m1.calcFromMajorMinor(major, minor) != m2.calcFromMajorMinor(major, minor))
+        for (size_t major = 0; major < m1.getMaxMajor(); ++major) {
+            for (size_t minor = 0; minor < m1.getMaxMinor(); ++minor) {
+                size_t r = m1.rowFromMajorMinor(major, minor);
+                size_t c = m1.colFromMajorMinor(major, minor);
+                if (m1.calc(r, c) != m2.calc(r, c))
                     return false;
+            }
+        }
         return true;
     }
 
-    template<Matrix M>
-    bool operator!=(const M& m1, const M& m2) { return !(m1 == m2); }
+    bool operator!=(const Matrix auto& m1, const Matrix auto& m2) noexcept { return !(m1 == m2); }
 
     std::ostream& operator<<(std::ostream& os, const Matrix auto& m) noexcept {
         return os << std::format("{}", m.format());

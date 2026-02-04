@@ -60,12 +60,12 @@ namespace Physica {
 
     template<Scalar T>
     Complex<T>::operator MKL_Complex() const noexcept {
-        return {re.toMachine(), im.toMachine()};
+        return toMKL();
     }
 
     template<Scalar T>
     Complex<T>::operator cuBLAS_Complex() const noexcept {
-        return {re.toMachine(), im.toMachine()};
+        return toCUDA();
     }
 
     template<Scalar T>
@@ -188,12 +188,22 @@ namespace Physica {
     }
 
     template<Scalar T>
-    __host__ __device__ auto Complex<T>::toMachineThrust() const noexcept {
+    __host__ __device__ auto Complex<T>::toThrust() const noexcept {
     #ifdef PHYSICA_CUDA
         return thrust::complex<Tm>(toMachine());
     #else
         return;
     #endif
+    }
+
+    template<Scalar T>
+    __host__ __device__ auto Complex<T>::toMKL() const noexcept -> MKL_Complex {
+        return {re.toMachine(), im.toMachine()};
+    }
+
+    template<Scalar T>
+    __host__ __device__ auto Complex<T>::toCUDA() const noexcept -> cuBLAS_Complex {
+        return {re.toMachine(), im.toMachine()};
     }
 
     template<Scalar T>

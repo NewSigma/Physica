@@ -45,6 +45,12 @@ namespace Physica {
 
         template<template<class, class, auto...> class Template, class Arg0, class Arg1, auto... Args>
         struct is_instance_of_ttx<Template, Template<Arg0, Arg1, Args...>> : std::true_type {};
+
+        template<template<class, auto, auto, auto, class...> class, class>
+        struct is_instance_of_txxxt : std::false_type {};
+
+        template<template<class, auto, auto, auto, class...> class Template, class Arg0, auto Arg1, auto Arg2, auto Arg3, class... Args>
+        struct is_instance_of_txxxt<Template, Template<Arg0, Arg1, Arg2, Arg3, Args...>> : std::true_type {};
     }
 
     template<template<class...> class Template, class T>
@@ -63,6 +69,9 @@ namespace Physica {
 
     template<template<class, class, auto...> class Template, class T>
     concept instanceof_ttx = Internal::is_instance_of_ttx<Template, std::remove_cvref_t<T>>::value;
+
+    template<template<class, auto, auto, auto, class...> class Template, class T>
+    concept instanceof_txxxt = Internal::is_instance_of_txxxt<Template, std::remove_cvref_t<T>>::value;
     /**
      * Reject const&& to avoid potential bad pattern
      */

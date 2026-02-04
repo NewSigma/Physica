@@ -66,6 +66,10 @@ namespace Physica {
         using Base::operator=;
         using Base::operator[];
         /* Operations */
+        template<ExecutePolicy P = Sequential>
+        void assign(Matrix auto&& target) const noexcept;
+        void assign_mkl(Matrix auto&& target) const noexcept requires(instanceof_txxxt<DenseMatrix, decltype(target)>);
+
         using Storage::resize;
         void resize(const Matrix auto& m, auto&&... args);
         [[nodiscard]] auto toDevice() const;
@@ -150,3 +154,6 @@ namespace std {
 }
 
 #include "MatrixImpl/DenseMatrixImpl.h"
+#ifdef PHYSICA_MKL
+    #include "MatrixImpl/DenseMatrixImpl_MKL.h"
+#endif

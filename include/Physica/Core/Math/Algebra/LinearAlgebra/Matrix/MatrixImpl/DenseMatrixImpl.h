@@ -63,6 +63,15 @@ namespace Physica {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<ExecutePolicy P>
+    void DenseMatrix<T, Option, Row, Col, Allocator>::assign(Matrix auto&& target) const noexcept {
+        if constexpr (HasMKL() && !MatrixMajor::isSameMajor<This, decltype(target)>() && instanceof_txxxt<DenseMatrix, decltype(target)>)
+            assign_mkl(target);
+        else
+            Base::template assign<P>(target);
+    }
+
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     void DenseMatrix<T, Option, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
         Base::resize(m, std::forward<decltype(args)>(args)...);
     }

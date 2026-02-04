@@ -15,7 +15,7 @@ else()
     add_link_options(-Wl,-O2,-Bsymbolic,--gc-sections)
 
     if(CMAKE_BUILD_TYPE MATCHES Debug)
-        #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Og>)
+        add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Og>)
     elseif(CMAKE_BUILD_TYPE MATCHES Release)
         add_link_options(-Wl,--strip-all)
     endif()

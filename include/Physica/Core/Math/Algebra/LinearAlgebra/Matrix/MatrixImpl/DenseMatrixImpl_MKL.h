@@ -1,5 +1,5 @@
 /*
- * Copyright 2025-2026 Weibo He.
+ * Copyright 2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,19 +18,20 @@
  */
 #pragma once
 
-#include <mkl_trans.h>
-#include "Transpose.h"
+#include "../DenseMatrix.h"
 
 namespace Physica {
-    template<Matrix M>
-    void Transpose<M>::assign_mkl(Matrix auto&& target) const {
-        target.assert_assign_mkl(mat);
-        static_assert(MatrixMajor::isSameMajor<M, decltype(target)>(), "[Error]: Cannot apply MKL to this expr");
-        constexpr char ordering = MatrixMajor::isRowMatrix<M>() ? 'R' : 'C';
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Option, Row, Col, Allocator>::assign_mkl(Matrix auto&& target) const noexcept requires(instanceof_txxxt<DenseMatrix, decltype(target)>) {
+        static_assert(!MatrixMajor::isSameMajor<This, decltype(target)>() && "[Error]: Suggest using assign_base");
+        using Tm = Base::Tm;
+        target.assert_assign_mkl(*this);
+
+        constexpr char ordering = 'R'; // Ordering does not matter
         constexpr char trans = 'T';
         const size_t rows = getRow();
         const size_t cols = getCol();
-        const auto* A = reinterpret_cast<const Tm*>(mat.data());
+        const auto* A = reinterpret_cast<const Tm*>(data());
         auto* B = reinterpret_cast<Tm*>(target.data());
         const size_t lda = Base::getMaxMinor();
         const size_t ldb = target.getMaxMinor();

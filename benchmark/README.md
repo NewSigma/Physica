@@ -5,7 +5,7 @@
 ## Notes
 
 对于随机数质量要求不高的非热点函数，生成器统一采用线性同余生成器(MCG);  
-使用[[clang::noinline]]避免callee内联, 便于后续LLVM IR层次分析;  
+使用[[clang::noinline]]避免感兴趣的callee内联, 便于后续LLVM IR层次分析;  
 
 ## References
 

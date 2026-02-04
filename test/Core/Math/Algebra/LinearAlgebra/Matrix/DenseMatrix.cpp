@@ -96,11 +96,34 @@ namespace {
         }
     #endif
     }
+
+    void assign_mkl() {
+        using T = float32;
+        using MatrixR = DenseMatrix<T, MatrixMajor::Row>;
+        using MatrixC = DenseMatrix<T, MatrixMajor::Col>;
+        if constexpr (HasMKL()) {
+            {
+                auto mC = MatrixC::random_uniform<RandomSource>(4, 4);
+                MatrixR buffer;
+                buffer.resize(mC);
+                mC.assign_mkl(buffer);
+                expect(mC == buffer);
+            }
+            {
+                auto mR = MatrixR::random_uniform<RandomSource>(4, 4);
+                MatrixC buffer;
+                buffer.resize(mR);
+                mR.assign_mkl(buffer);
+                expect(mR == buffer);
+            }
+        }
+    }
 }
 
 int main() {
     formatTest();
     continuousRowCol();
     testHDF5();
+    assign_mkl();
     return 0;
 }

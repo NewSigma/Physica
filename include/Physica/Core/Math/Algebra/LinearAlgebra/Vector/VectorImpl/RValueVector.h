@@ -122,7 +122,7 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign_base(Vector auto&& v) const noexcept;
         template<ExecutePolicy P = Sequential>
-        void assign_add(Vector auto& v) const noexcept;
+        void assign_add(Vector auto&& v) const noexcept;
         void assert_assign(const Vector auto& source) const noexcept;
         void assert_assign_mkl(const Vector auto& source) const noexcept;
 

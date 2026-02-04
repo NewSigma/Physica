@@ -27,6 +27,7 @@ namespace Physica {
     size_t makeMatrixSize(int64_t level, size_t sizeElem) noexcept;
 }
 
+// Prevent the callee of interest from being inlined, facilitating subsequent analysis at the LLVM IR level.
 #ifdef PHYSICA_LLVMIR
     #define PHYSICA_BENCH(x) [[clang::noinline]] x
 #else

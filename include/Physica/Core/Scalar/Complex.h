@@ -99,7 +99,9 @@ namespace Physica {
         [[nodiscard]] __host__ __device__ T& imag() noexcept { return im; }
         [[nodiscard]] __host__ __device__ const T& imag() const noexcept { return im; }
         [[nodiscard]] __host__ __device__ std::complex<Tm> toMachine() const noexcept;
-        [[nodiscard]] __host__ __device__ auto toMachineThrust() const noexcept;
+        [[nodiscard]] __host__ __device__ auto toThrust() const noexcept;
+        [[nodiscard]] __host__ __device__ MKL_Complex toMKL() const noexcept;
+        [[nodiscard]] __host__ __device__ cuBLAS_Complex toCUDA() const noexcept;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         [[nodiscard]] __host__ __device__ bool isSubNormal() const noexcept { return re.isSubNormal() && im.isSubNormal(); }
         [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return re.isFinite() && im.isFinite(); }
