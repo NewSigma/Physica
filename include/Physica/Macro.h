@@ -152,4 +152,12 @@ namespace Physica {
         return false;
     #endif
     }
+
+    [[maybe_unused]] consteval static bool HasMimalloc() noexcept {
+    #ifdef PHYSICA_MIMALLOC
+        return true;
+    #else
+        return false;
+    #endif
+    }
 }

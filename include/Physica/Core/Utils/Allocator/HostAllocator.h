@@ -48,6 +48,8 @@ namespace Physica {
         [[nodiscard, gnu::returns_nonnull]] T* allocate(size_t n) noexcept;
         void deallocate(T* p, size_t n) noexcept;
         [[nodiscard, gnu::returns_nonnull]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
+    private:
+        T* reallocate_mimalloc(T* p, size_t new_size, size_t old_size) noexcept;
     };
 
     template<class T, size_t Align>
@@ -76,12 +78,16 @@ namespace Physica {
      */
     template<class T, size_t Align>
     T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, size_t old_size) noexcept {
-        assert(new_size > 0 && "[Error]: Allocate nothing");
-        assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
-        T* new_p = allocate(new_size);
-        memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
-        deallocate(p, old_size);
-        return new_p;
+        if constexpr (HasMimalloc())
+            return reallocate_mimalloc(p, new_size, old_size);
+        else {
+            assert(new_size > 0 && "[Error]: Allocate nothing");
+            assert(p != nullptr || old_size == 0); // According to [1], the behavior is well defined now
+            T* new_p = allocate(new_size);
+            memcpy((void*)new_p, p, std::min(new_size, old_size) * sizeof(T));
+            deallocate(p, old_size);
+            return new_p;
+        }
     }
 }
 
@@ -138,3 +144,7 @@ namespace std {
         }
     };
 }
+
+#ifdef PHYSICA_MIMALLOC
+    #include "HostAllocator_Mimalloc.h"
+#endif
