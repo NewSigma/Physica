@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -96,10 +96,9 @@ Clang::PartialTranslationUnit& Clang::compile(const char* moduleName) {
     ptu.unitDecl = ctx.getTranslationUnitDecl();
     /* Make module */ {
         CodeGenerator& codeGen = getCodeGen();
-        auto* unitModule = codeGen.ReleaseModule();
-        unitModule->setModuleIdentifier(moduleName);
-        ptu.unitModule.reset(unitModule);
-        codeGen.StartModule(DummyFile, unitModule->getContext());
+        ptu.unitModule = codeGen.ReleaseModule();
+        ptu.unitModule->setModuleIdentifier(moduleName);
+        codeGen.StartModule(DummyFile, ptu.unitModule->getContext());
     }
     partialUnitList.push_front(std::move(ptu));
     return partialUnitList.front();
@@ -147,7 +146,7 @@ void Clang::makeInvocation() {
     using namespace clang;
     {
         auto pDiagOpts = CreateAndPopulateDiagOpts(args);
-        auto* pDiagBuffer = new TextDiagnosticPrinter(llvm::outs(), *pDiagOpts.get());
+        auto* pDiagBuffer = new TextDiagnosticPrinter(llvm::outs(), *pDiagOpts);
         auto* pDiag = new DiagnosticsEngine(new DiagnosticIDs(), *pDiagOpts.release(), pDiagBuffer);
         Base::setDiagnostics(pDiag);
     }

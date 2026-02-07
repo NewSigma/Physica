@@ -28,8 +28,8 @@
 #ifdef PHYSICA_MKL
     #include <mkl_types.h>
 #else
-    using MKL_Complex8 = std::complex<float>;
-    using MKL_Complex16 = std::complex<double>;
+    struct MKL_Complex8 {};
+    struct MKL_Complex16 {};
 
     using VSLStreamStatePtr = void*;
     using MKL_INT64 = long long int;
@@ -41,8 +41,8 @@
     #define __host__
     #define __device__
 
-    using cuComplex = std::complex<float>;
-    using cuDoubleComplex = std::complex<double>;
+    struct cuComplex {};
+    struct cuDoubleComplex {};
 
     struct curandGenerator;
     using curandGenerator_t = curandGenerator*; // Do not conflict with other pointers 

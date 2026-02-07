@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <memory>
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/FrontendTool/Utils.h"
@@ -42,7 +43,7 @@ void IncrementalAction::ExecuteAction() {
 
 void IncrementalAction::EndSourceFile() {}
 
-std::unique_ptr<clang::FrontendAction> IncrementalAction::makeAction(CompilerInstance& ci, llvm::LLVMContext& context) {
+auto IncrementalAction::makeAction(CompilerInstance& ci, llvm::LLVMContext& context) -> std::unique_ptr<clang::FrontendAction> {
     using namespace clang::frontend;
     std::unique_ptr<FrontendAction> result{};
     switch (ci.getFrontendOpts().ProgramAction) {
@@ -64,7 +65,7 @@ std::unique_ptr<clang::FrontendAction> IncrementalAction::makeAction(CompilerIns
     case PrintPreprocessedInput:
         [[fallthrough]];
     case EmitLLVMOnly:
-        result.reset(new clang::EmitLLVMOnlyAction(&context));
+        result = std::make_unique<clang::EmitLLVMOnlyAction>(&context);
         break;
     default:
         throw LLVMException(llvm::createStringError(std::errc::state_not_recoverable,

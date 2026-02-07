@@ -178,7 +178,7 @@ namespace std {
         constexpr static auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
         static auto format(Physica::Real<Physica::Float32> obj, auto& ctx) {
             if (obj.isZero())
-                obj = std::abs(obj.toMachine());
+                return std::format_to(ctx.out(), "0");
             return std::format_to(ctx.out(), "{}", obj.toMachine());
         }
     };

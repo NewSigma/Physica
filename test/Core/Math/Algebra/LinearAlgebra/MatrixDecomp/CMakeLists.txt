@@ -4,9 +4,12 @@ physica_add_test(Hessenburg Hessenburg.cpp)
 physica_add_test(DenseLU DenseLU.cpp)
 physica_add_test(DenseQR DenseQR.cpp)
 physica_add_test(Schur Schur.cpp)
-physica_add_test(SparseLU SparseLU.cpp)
 physica_add_test(SVD SVD.cpp)
 physica_add_test(Tridiagonalization Tridiagonalization.cpp)
+
+if(${PHYSICA_MKL})
+    physica_add_test(SparseLU SparseLU.cpp)
+endif()
 
 if(${PHYSICA_CUDA})
     physica_add_test(DenseLU_cuda DenseLU.cu)

@@ -36,11 +36,13 @@ namespace Physica {
     template<Scalar T>
     Complex<T>::Complex(std::complex<Tm> x) : re(x.real()), im(x.imag()) {}
 
+#ifdef PHYSICA_MKL
     template<Scalar T>
     Complex<T>::Complex(MKL_Complex8 x) : This(x.real, x.imag) {}
 
     template<Scalar T>
     Complex<T>::Complex(MKL_Complex16 x) : This(x.real, x.imag) {}
+#endif
 
 #ifdef PHYSICA_CUDA
     template<Scalar T>

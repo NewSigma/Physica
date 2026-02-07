@@ -21,20 +21,20 @@ LinearAlgebra模块提供有SIMD和GPU加速的可微线性代数功能。
 
 受Eigen、Armadillo等C++线性代数库的启发，LinearAlgebra广泛使用模板表达式技术以减少中间对象和进行编译期表达式优化。
 
-## 左值/右值线性空间
+## 架构设计: 左值/右值线性空间
 
 历史上, C语言的左值和右值的定义非常简单：
 
     左值(lvalue)：可以出现在赋值语句左边的表达式。它代表一个有名字、有固定地址的内存位置。
     右值(rvalue)：只能出现在赋值语句右边的表达式。它代表一个临时的、即将消亡的值。
 
-数值计算的线性空间不是抽象的线性空间, 可将赋值运算引入线性空间, 构造一个广义线性空间, 这种构造有助于清晰简洁地用模板表达式实现数学操作。
+数值计算的线性空间不是抽象的线性空间, 所有计算必须在一定的物理内存中进行。可将赋值运算引入线性空间, 构造广义线性空间。这种构造有助于将模板表达式纳入我们的类型系统, 便于进一步的特化。
 
 线性代数对象的基类一般有三种:
 
-- 右值对象(右值向量RValueVector, 右值矩阵RValueMatrix)
-- 左值对象(LValueVector, LValueMatrix)
-- 连续对象(ContinuousVector, ContinuousMatrix)
+- 右值对象(RValueVector, RValueMatrix, ...)
+- 左值对象(LValueVector, LValueMatrix, ...)
+- 连续对象(ContinuousVector, ContinuousMatrix, ...)
 
 以密集向量为例, 继承关系为DenseVector -> ContinuousVector -> LValueVector -> RValueVector
 
@@ -47,7 +47,7 @@ Scalar RValueVector::calc(size_t index) { ... }
 size_t RValueVector::getLength() { ... }
 ```
 
-可以计算右值对象的元素但不能取其指针。提供calc_value()返回元素的value, 用于反向传播等不需要梯度的情况
+原则上所有"数学"向量的操作均可以在核心操作的基础上实现。可以计算右值对象的元素但不能取其指针, 因此**任何**模板表达式都是一个右值对象。。提供calc_value()返回元素的value, 用于反向传播等不需要梯度的情况。
 
 **左值对象**:
 
@@ -77,8 +77,6 @@ Scalar* ContinuousVector::data() { ... }
 Scalar* ContinuousVector::data_ptr(size_t index) { return data() + index; }
 ```
 
-引入左值/右值线性空间概念的主要目的是为模板表达式设计一个严格的类型系统，在该框架下**任何模板表达式都是一个右值对象**。
-
 ## 模板表达式
 
 一元操作可以显式约束:
@@ -106,7 +104,7 @@ std::println("{}", c);
 
 ## Concept
 
-以矩阵为例, 在C语言框架下, 常使用二维数组实现:
+以矩阵为例, 在C语言观点下, 矩阵是一个二维数组:
 
 ``` C
 void fn(double** matrix) {
@@ -114,7 +112,7 @@ void fn(double** matrix) {
 }
 ```
 
-C++20以前, 矩阵可以使用面向对象的方法实现:
+C++20以前, 面向对象的观点:
 
 ``` C++
 class Matrix {
@@ -122,12 +120,14 @@ class Matrix {
 };
 ```
 
-C++20及以后, 我们认为矩阵更适合作为抽象的概念(Concept):
+C++20及以后, 我们认为矩阵更适合作为抽象的concept(概念):
 
 ``` C++
 template<class T>
 concept Matrix = ...;
 ```
+
+我们提供四个逐级递进的concept: `Scalar`, `Vector`, `Matrix`, `Tensor`
 
 ## 模板参数
 

@@ -1,5 +1,5 @@
 <!--
-Copyright 2024 Weibo He.
+Copyright 2024-2026 Weibo He.
 
 This file is part of Physica.
 
@@ -13,9 +13,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Exception
 
-## 错误码异常
-
-C++语言使用异常进行错误处理，C语言常使用错误码报告错误。因此在调用C规范的库函数时应使用异常对错误码进行包装。
+在顶层处理复杂数值计算程序的错误通常更具有实用价值。常见数值计算库(LAPACK, cuBLAS)通常使用错误码报告错误，在调用C规范库函数时使用异常进行封装。
 
 对任意错误码类型ErrorCodeType，Physica::check使用函数重载进行处理，如有错误则抛出对应的异常对象，其一般实现为:
 

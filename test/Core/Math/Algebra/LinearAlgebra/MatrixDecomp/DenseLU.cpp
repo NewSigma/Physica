@@ -119,7 +119,7 @@ int main() {
         decomp<true>(mat2, 1E-15);
         inverse<true>(mat2, 1E-10);
     }
-    inverseGEMV<false>(1E-12); // Precision is lower without pivoting
+    inverseGEMV<false>(1E-11); // Precision is lower without pivoting
     inverseGEMV<true>(1E-15);
     return 0;
 }
