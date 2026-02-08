@@ -69,6 +69,8 @@ namespace Physica {
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& target) const noexcept;
         void assign_mkl(Matrix auto&& target) const noexcept requires(instanceof_txxxt<DenseMatrix, decltype(target)>);
+        template<ExecutePolicy P = Sequential>
+        void assign_base(Matrix auto&& __restrict target) const __restrict noexcept;
 
         using Storage::resize;
         void resize(const Matrix auto& m, auto&&... args);

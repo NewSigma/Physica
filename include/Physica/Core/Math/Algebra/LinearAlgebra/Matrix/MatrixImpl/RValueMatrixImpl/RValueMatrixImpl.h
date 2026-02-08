@@ -572,6 +572,14 @@ namespace Physica {
     auto RValueMatrix<Derived>::grads_impl() const noexcept {
         return GradMatrix<Derived, GradOrder>(Base::getDerived());
     }
+
+    template<class Derived>
+    consteval int RValueMatrix<Derived>::calcBlockingSize(int CacheSize) noexcept {
+        int result = 1;
+        while (result * result * int(sizeof(Trv)) < CacheSize)
+            result *= 2;
+        return result / 2;
+    }
     /**
      * See if the block range is legal to the matrix
      */
