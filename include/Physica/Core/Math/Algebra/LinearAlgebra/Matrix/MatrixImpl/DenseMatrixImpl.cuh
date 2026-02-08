@@ -21,67 +21,67 @@
 #include "../DenseMatrix.cuh"
 
 namespace Physica {
-#define tparams Scalar T, int Option, size_t Row, size_t Col, class Allocator
+#define tparams Scalar T, int Major, size_t Row, size_t Col, class Allocator
 
     template<tparams>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(const host_obj& mat)
+    device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(const host_obj& mat)
             : device_obj(mat.getRow(), mat.getCol()) {
         mat.toDevice(*this);
     }
 
     template<tparams>
-    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(size_t order)
+    __host__ __device__ device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(size_t order)
             : Storage(order) {}
 
     template<tparams>
-    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(size_t row, size_t col)
+    __host__ __device__ device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(size_t row, size_t col)
             : Storage(row, col) {}
 
     template<tparams>
-    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(size_t row, size_t col, T value)
+    __host__ __device__ device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(size_t row, size_t col, T value)
             : Storage(row, col) {
         *this = value;
     }
 
     template<tparams>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(const Matrix auto& mat) : device_obj(mat.getRow(), mat.getCol()) {
+    device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(const Matrix auto& mat) : device_obj(mat.getRow(), mat.getCol()) {
         mat.assign(*this);
     }
 
     template<tparams>
-    device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::device_obj(const Vector auto& vec) : device_obj(vec.getLength(), 1) {
+    device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::device_obj(const Vector auto& vec) : device_obj(vec.getLength(), 1) {
         auto col = this->col(0);
         vec.assign(col);
     }
 
     template<tparams>
-    __host__ __device__ void device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::resize(const Matrix auto& m) {
+    __host__ __device__ void device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::resize(const Matrix auto& m) {
         Storage::resize(m.getRow(), m.getCol());
     }
 
     template<tparams>
-    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::toHost() const -> host_obj {
+    auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::toHost() const -> host_obj {
         return host_obj(Storage::toHost());
     }
 
     template<tparams>
-    auto&& device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::flatten(this auto&& self) noexcept {
+    auto&& device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::flatten(this auto&& self) noexcept {
         return self.asArray();
     }
 
     template<tparams>
-    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::toHostAsync() const -> host_obj {
+    auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::toHostAsync() const -> host_obj {
         return host_obj(Storage::toHostAsync());
     }
 
     template<tparams>
-    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::identity(size_t order) -> This {
+    auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::identity(size_t order) -> This {
         return host_obj::identity(order).toDevice();
     }
 
     template<tparams>
     template<RNG R>
-    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform(size_t row, size_t col) -> This {
+    auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::random_uniform(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_uniform<R>();
         return result;
@@ -89,7 +89,7 @@ namespace Physica {
 
     template<tparams>
     template<RNG R>
-    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal(size_t row, size_t col) -> This {
+    auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::random_normal(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_normal<R>();
         return result;
@@ -97,7 +97,7 @@ namespace Physica {
 
     template<tparams>
     template<RNG R>
-    auto device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(size_t row, size_t col, auto& distribution) -> This {
+    auto device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>::random_any(size_t row, size_t col, auto& distribution) -> This {
         This result(row, col);
         result.template random_any<R>(distribution);
         return result;

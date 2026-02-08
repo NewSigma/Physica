@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -36,13 +36,13 @@ namespace Physica {
         static_assert(!T::isComplex, "[Error]: SVD class do not support complex data");
         using Base = Decouplable;
         using RealType = T::RealType;
-        constexpr static int Option = MatrixMajor::Col;
+        constexpr static int Major = MatrixMajor::Col;
     public:
         constexpr static size_t NumSingularValue = RowAtCompile > ColAtCompile ? ColAtCompile : RowAtCompile;
         using SingularValueVector = DenseVector<RealType, NumSingularValue>;
-        using WorkingMatrix = DenseMatrix<RealType, Option, RowAtCompile, ColAtCompile>;
-        using LSingularMatrix = DenseMatrix<RealType, Option, RowAtCompile, RowAtCompile>;
-        using RSingularMatrix = DenseMatrix<RealType, Option, ColAtCompile, ColAtCompile>;
+        using WorkingMatrix = DenseMatrix<RealType, Major, RowAtCompile, ColAtCompile>;
+        using LSingularMatrix = DenseMatrix<RealType, Major, RowAtCompile, RowAtCompile>;
+        using RSingularMatrix = DenseMatrix<RealType, Major, ColAtCompile, ColAtCompile>;
     private:
         WorkingMatrix working;
         SingularValueVector singulars;

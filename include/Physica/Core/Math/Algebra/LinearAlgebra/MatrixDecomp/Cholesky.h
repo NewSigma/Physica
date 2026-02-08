@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -87,7 +87,7 @@ namespace Physica {
     class Traits<Cholesky<M>> {
     public:
         using ScalarType = M::ScalarType;
-        constexpr static int Option = M::MatrixMajor;
+        constexpr static int Major = M::MatrixMajor;
         constexpr static size_t RowAtCompile = M::RowAtCompile;
         constexpr static size_t ColAtCompile = M::ColAtCompile;
         constexpr static size_t SizeAtCompile = M::SizeAtCompile;

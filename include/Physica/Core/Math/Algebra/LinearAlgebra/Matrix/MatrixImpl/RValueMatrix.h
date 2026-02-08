@@ -68,7 +68,7 @@ namespace Physica {
         using Base = CRTPBase<This>;
     public:
         using ScalarType = Traits<Derived>::ScalarType;
-        constexpr static int Option = Traits<Derived>::Option;
+        constexpr static int Major = Traits<Derived>::Major;
         constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
         constexpr static size_t ColAtCompile = Traits<Derived>::ColAtCompile;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;

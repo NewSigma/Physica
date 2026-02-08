@@ -22,25 +22,17 @@
 #include "MatrixImpl/ContinuousMatrix.h"
 
 namespace Physica {
-    /**
-     * \class DenseMatrix
-     * A matrix can be either fixed matrix, which have its max size defined,
-     * or dynamic matrix, whose size is dynamically changed.
-     *
-     * \tparam Option
-     * Option is combinations of \enum MatrixMajor
-     */
     template<Scalar T,
-             int Option = MatrixMajor::Col,
+             int Major = MatrixMajor::Col,
              size_t Row = Dynamic,
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
-    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>
-                      , public CRCoro<DenseMatrix<T, Option, Row, Col, Allocator>>
-                      , public Array2D<T, Option, Row, Col, Allocator> {
-        using This = DenseMatrix<T, Option, Row, Col, Allocator>;
+    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>
+                      , public CRCoro<DenseMatrix<T, Major, Row, Col, Allocator>>
+                      , public Array2D<T, Major, Row, Col, Allocator> {
+        using This = DenseMatrix<T, Major, Row, Col, Allocator>;
         using Base = ContinuousMatrix<This>;
-        using Storage = Array2D<T, Option, Row, Col, Allocator>;
+        using Storage = Array2D<T, Major, Row, Col, Allocator>;
         using Base::isReverseDiff;
     public:
         using typename Base::ScalarType;
@@ -49,7 +41,7 @@ namespace Physica {
         using RowMatrix = DenseMatrix<T, MatrixMajor::Row, Row, Col>;
         using VectorIniter = DenseVector<T, MatrixMajor::isColMatrix<This>() ? Row : Col>;
         template<Scalar U>
-        using rebind_scalar = DenseMatrix<U, Option, Row, Col, Allocator>;
+        using rebind_scalar = DenseMatrix<U, Major, Row, Col, Allocator>;
     public:
         DenseMatrix() = default;
         explicit DenseMatrix(size_t order);
@@ -121,20 +113,20 @@ namespace Physica {
     // Just give me a matrix. This is what you'll get.
     template<Scalar T> using MatrixND = DenseMatrix<T>;
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    void swap(DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
-              DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void swap(DenseMatrix<T, Major, Row, Col, Allocator>& __restrict m1,
+              DenseMatrix<T, Major, Row, Col, Allocator>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }
 
 namespace Physica {
-    template<Scalar T, int Op, size_t Row, size_t Col, class Allocator>
-    class Traits<DenseMatrix<T, Op, Row, Col, Allocator>> {
+    template<Scalar T, int Major_, size_t Row, size_t Col, class Allocator>
+    class Traits<DenseMatrix<T, Major_, Row, Col, Allocator>> {
         static_assert(!Diffable<T>, "[Error]: Use diffable matrix instead");
     public:
         using ScalarType = T;
-        constexpr static int Option = Op;
+        constexpr static int Major = Major_;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
@@ -145,10 +137,10 @@ namespace Physica {
 }
 
 namespace std {
-    template<Physica::Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    struct formatter<Physica::DenseMatrix<T, Option, Row, Col, Allocator>, char> {
+    template<Physica::Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    struct formatter<Physica::DenseMatrix<T, Major, Row, Col, Allocator>, char> {
         constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-        static auto format(const Physica::DenseMatrix<T, Option, Row, Col, Allocator>& obj, auto& ctx) {
+        static auto format(const Physica::DenseMatrix<T, Major, Row, Col, Allocator>& obj, auto& ctx) {
             auto f = obj.format();
             return formatter<decltype(f), char>::format(f, ctx);
         }

@@ -24,9 +24,9 @@ namespace Physica {
     /**
      * CSR & CSC format
      */
-    template<Scalar T, int Option = MatrixMajor::Row>
-    class SparseMatrix : public RValueMatrix<SparseMatrix<T, Option>> {
-        using This = SparseMatrix<T, Option>;
+    template<Scalar T, int Major = MatrixMajor::Row>
+    class SparseMatrix : public RValueMatrix<SparseMatrix<T, Major>> {
+        using This = SparseMatrix<T, Major>;
         using Base = RValueMatrix<This>;
     private:
         Array<T> elements;
@@ -69,8 +69,8 @@ namespace Physica {
         friend class device_obj<This>;
     };
 
-    template<Scalar T, int Option>
-    SparseMatrix<T, Option>::SparseMatrix(size_t row, size_t col)
+    template<Scalar T, int Major>
+    SparseMatrix<T, Major>::SparseMatrix(size_t row, size_t col)
             : majorStarts(MatrixMajor::selectMajor<This>(row, col) + 1, 0)
             , maxMinor(MatrixMajor::selectMinor<This>(row, col)) {
         size_t size = std::max(row, col);
@@ -78,13 +78,13 @@ namespace Physica {
         minorIndexes.reserve(size);
     }
 
-    template<Scalar T, int Option>
-    SparseMatrix<T, Option>::SparseMatrix(const Matrix auto& m) : SparseMatrix(m.getRow(), m.getCol()) {
+    template<Scalar T, int Major>
+    SparseMatrix<T, Major>::SparseMatrix(const Matrix auto& m) : SparseMatrix(m.getRow(), m.getCol()) {
         operator=(m);
     }
 
-    template<Scalar T, int Option>
-    auto SparseMatrix<T, Option>::operator=(const Matrix auto& m) -> This& {
+    template<Scalar T, int Major>
+    auto SparseMatrix<T, Major>::operator=(const Matrix auto& m) -> This& {
         resize(m);
         for (size_t r = 0; r < getRow(); ++r) {
             for (size_t c = 0; c < getCol(); ++c) {
@@ -96,8 +96,8 @@ namespace Physica {
         return *this;
     }
 
-    template<Scalar T, int Option>
-    T SparseMatrix<T, Option>::calc(size_t row, size_t col) const {
+    template<Scalar T, int Major>
+    T SparseMatrix<T, Major>::calc(size_t row, size_t col) const {
         assert(row < getRow());
         assert(col < getCol());
         const size_t major = MatrixMajor::selectMajor<This>(row, col);
@@ -113,8 +113,8 @@ namespace Physica {
         return T(0);
     }
 
-    template<Scalar T, int Option>
-    void SparseMatrix<T, Option>::insert(T x, size_t row, size_t col) {
+    template<Scalar T, int Major>
+    void SparseMatrix<T, Major>::insert(T x, size_t row, size_t col) {
         assert(row < getRow());
         assert(col < getCol());
         assert(!x.isZero() && "[Error]: Zero element is useless");
@@ -144,22 +144,22 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Option>
-    void SparseMatrix<T, Option>::resize(size_t row, size_t col) {
+    template<Scalar T, int Major>
+    void SparseMatrix<T, Major>::resize(size_t row, size_t col) {
         zeros();
         majorStarts.resize(MatrixMajor::selectMajor<This>(row, col) + 1, 0);
         maxMinor = MatrixMajor::selectMinor<This>(row, col);
     }
 
-    template<Scalar T, int Option>
-    void SparseMatrix<T, Option>::zeros() {
+    template<Scalar T, int Major>
+    void SparseMatrix<T, Major>::zeros() {
         elements.resize(0);
         minorIndexes.resize(0);
         majorStarts.zeros();
     }
 
-    template<Scalar T, int Option>
-    void SparseMatrix<T, Option>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, int Major>
+    void SparseMatrix<T, Major>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         elements.swap(obj.elements);
         minorIndexes.swap(obj.minorIndexes);
@@ -167,23 +167,23 @@ namespace Physica {
         std::swap(maxMinor, obj.maxMinor);
     }
 
-    template<Scalar T, int Option>
-    size_t SparseMatrix<T, Option>::getRow() const noexcept {
+    template<Scalar T, int Major>
+    size_t SparseMatrix<T, Major>::getRow() const noexcept {
         return MatrixMajor::isColMatrix<This>() ? getMaxMinor() : getMaxMajor();
     }
 
-    template<Scalar T, int Option>
-    size_t SparseMatrix<T, Option>::getCol() const noexcept {
+    template<Scalar T, int Major>
+    size_t SparseMatrix<T, Major>::getCol() const noexcept {
         return MatrixMajor::isColMatrix<This>() ? getMaxMajor() : getMaxMinor();
     }
 
-    template<Scalar T, int Option>
-    size_t SparseMatrix<T, Option>::getMaxMajor() const noexcept {
+    template<Scalar T, int Major>
+    size_t SparseMatrix<T, Major>::getMaxMajor() const noexcept {
         return majorStarts.getLength() - 1;
     }
 
-    template<Scalar T, int Option>
-    size_t SparseMatrix<T, Option>::getMaxMinor() const noexcept {
+    template<Scalar T, int Major>
+    size_t SparseMatrix<T, Major>::getMaxMinor() const noexcept {
         return maxMinor;
     }
 }
@@ -193,7 +193,7 @@ namespace Physica {
     class Traits<SparseMatrix<T, Op>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = Op;
+        constexpr static int Major = Op;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;

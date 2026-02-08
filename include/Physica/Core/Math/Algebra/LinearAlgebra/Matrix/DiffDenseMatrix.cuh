@@ -23,21 +23,21 @@
 #include "DiffDenseMatrix.h"
 
 namespace Physica {
-    template<Scalar T, DiffMode Mode, int Order, int Option>
-    class device_obj<DenseMatrix<Diff<T, Mode, Order>, Option>>
-            : public device_obj<ContinuousMatrix<DenseMatrix<Diff<T, Mode, Order>, Option>>>
-            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseMatrix<Diff<T, Mode, Order>, Option>>>, PlainStruct<void>>::type {
+    template<Scalar T, DiffMode Mode, int Order, int Major>
+    class device_obj<DenseMatrix<Diff<T, Mode, Order>, Major>>
+            : public device_obj<ContinuousMatrix<DenseMatrix<Diff<T, Mode, Order>, Major>>>
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<device_obj<DenseMatrix<Diff<T, Mode, Order>, Major>>>, PlainStruct<void>>::type {
         static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
-        using host_obj = DenseMatrix<Diff<T, Mode, Order>, Option>;
+        using host_obj = DenseMatrix<Diff<T, Mode, Order>, Major>;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousMatrix<host_obj>>;
     public:
         using ScalarType = Base::ScalarType;
         using Base::isReverseDiff;
     private:
-        using ValueMatrix = device_obj<DenseMatrix<T, Option>>;
+        using ValueMatrix = device_obj<DenseMatrix<T, Major>>;
         using GradType = ScalarType::GradType;
-        using GradMatrix = std::conditional<Order == 1, ValueMatrix, device_obj<DenseMatrix<GradType, Option>>>::type;
+        using GradMatrix = std::conditional<Order == 1, ValueMatrix, device_obj<DenseMatrix<GradType, Major>>>::type;
 
         ValueMatrix v;
         GradMatrix g;
@@ -98,9 +98,9 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, DiffMode Mode, int Order, int Option>
-    class Traits<device_obj<Diff<DenseMatrix<T, Option>, Mode, Order>>>
-            : public Traits<DenseMatrix<T, Option>> {
+    template<Scalar T, DiffMode Mode, int Order, int Major>
+    class Traits<device_obj<Diff<DenseMatrix<T, Major>, Mode, Order>>>
+            : public Traits<DenseMatrix<T, Major>> {
     public:
         using ScalarType = device_obj<Diff<T, Mode, Order>>;
     };

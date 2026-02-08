@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -38,7 +38,7 @@ namespace Physica {
         using HouseholderNorm = DenseVector<T, NormVectorLength>;
         using This = Hessenburg<T, Order>;
     public:
-        using WorkingMatrix = DenseMatrix<T, Traits<MatrixH>::Option, Order, Order>;
+        using WorkingMatrix = DenseMatrix<T, Traits<MatrixH>::Major, Order, Order>;
     protected:
         using Tr = T::RealType;
         using Trv = Tr::ValueType;
@@ -165,7 +165,7 @@ namespace Physica {
     class Traits<HessenburgMatrixH<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixMajor::Col;
+        constexpr static int Major = MatrixMajor::Col;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

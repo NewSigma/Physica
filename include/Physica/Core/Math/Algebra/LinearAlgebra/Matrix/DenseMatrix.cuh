@@ -23,17 +23,17 @@
 #include "DenseMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    class device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
-            : public device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>
-            , public CRCoro<device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>>
-            , public device_obj<Array2D<T, Option, Row, Col, Allocator>> {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    class device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>
+            : public device_obj<ContinuousMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>>
+            , public CRCoro<device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>>
+            , public device_obj<Array2D<T, Major, Row, Col, Allocator>> {
         static_assert(!Diffable<T>, "[Error]: Use diffable matrix instead");
-        using host_obj = DenseMatrix<T, Option, Row, Col, Allocator>;
+        using host_obj = DenseMatrix<T, Major, Row, Col, Allocator>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>;
+        using Base = device_obj<ContinuousMatrix<DenseMatrix<T, Major, Row, Col, Allocator>>>;
         using Coro = CRCoro<This>;
-        using Storage = device_obj<Array2D<T, Option, Row, Col, Allocator>>;
+        using Storage = device_obj<Array2D<T, Major, Row, Col, Allocator>>;
     protected:
         using typename Base::Tv;
         using Tm = T::MachineType;
@@ -85,13 +85,13 @@ namespace Physica {
         [[nodiscard]] static This random_any(size_t row, size_t col, auto& distribution);
     };
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::toDevice() const {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::toDevice() const {
         return device_obj<This>(*this);
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::toDeviceAsync() const {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::toDeviceAsync() const {
         device_obj<This> result(getRow(), getCol());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));
@@ -99,9 +99,9 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    class Traits<device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>>
-            : public Traits<DenseMatrix<T, Option, Row, Col, Allocator>> {};
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    class Traits<device_obj<DenseMatrix<T, Major, Row, Col, Allocator>>>
+            : public Traits<DenseMatrix<T, Major, Row, Col, Allocator>> {};
 }
 
 #include "MatrixImpl/DenseMatrixImpl.cuh"

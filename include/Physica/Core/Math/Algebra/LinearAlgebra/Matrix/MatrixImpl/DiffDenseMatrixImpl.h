@@ -21,8 +21,8 @@
 #include "../DiffDenseMatrix.h"
 
 namespace Physica {
-#define tparams Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col
-#define DiffDenseMatrix DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>
+#define tparams Scalar T, DiffMode Mode, int Order, int Major, size_t Row, size_t Col
+#define DiffDenseMatrix DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(size_t order) : DenseMatrix(order, order) {}

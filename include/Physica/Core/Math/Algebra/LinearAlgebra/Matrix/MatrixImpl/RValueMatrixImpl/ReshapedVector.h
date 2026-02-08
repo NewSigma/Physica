@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -114,7 +114,7 @@ namespace Physica {
         static_assert(MatrixMajor == MatrixMajor::Col || MatrixMajor == MatrixMajor::Row, "[Error]: Invalid major");
     public:
         using ScalarType = V::ScalarType;
-        constexpr static int Option = MatrixMajor;
+        constexpr static int Major = MatrixMajor;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = V::SizeAtCompile;

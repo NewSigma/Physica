@@ -26,11 +26,11 @@ namespace Physica {
      * Reference:
      * [1] Giles, M. An extended collection of matrix derivative results for forward and reverse mode algorithmic differentiation (2008); https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf.
      */
-    template<Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col>
-    class DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>
-            : public ContinuousMatrix<DenseMatrix<Diff<T, Mode, Order> , Option, Row, Col>>
-            , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>>, PlainStruct<void>>::type {
-        using This = DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>;
+    template<Scalar T, DiffMode Mode, int Order, int Major, size_t Row, size_t Col>
+    class DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>
+            : public ContinuousMatrix<DenseMatrix<Diff<T, Mode, Order> , Major, Row, Col>>
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>>, PlainStruct<void>>::type {
+        using This = DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>;
         using Base = ContinuousMatrix<This>;
     public:
         using typename Base::ScalarType;
@@ -38,14 +38,14 @@ namespace Physica {
         using Base::isForwardDiff;
         using Base::isReverseDiff;
         template<Scalar U>
-        using rebind_scalar = DenseMatrix<U, Option, Row, Col>;
+        using rebind_scalar = DenseMatrix<U, Major, Row, Col>;
     protected:
         using typename Base::Tv;
     private:
-        using ValueMatrix = DenseMatrix<T, Option, Row, Col>;
+        using ValueMatrix = DenseMatrix<T, Major, Row, Col>;
         using VectorIniter = ValueMatrix::VectorIniter;
         using GradType = ScalarType::GradType;
-        using GradMatrix = std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Option, Row, Col>>::type;
+        using GradMatrix = std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Major, Row, Col>>::type;
 
         ValueMatrix v;
         GradMatrix g;
@@ -110,8 +110,8 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col>
-    class Traits<DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>> : public Traits<DenseMatrix<T, Option, Row, Col>> {
+    template<Scalar T, DiffMode Mode, int Order, int Major, size_t Row, size_t Col>
+    class Traits<DenseMatrix<Diff<T, Mode, Order>, Major, Row, Col>> : public Traits<DenseMatrix<T, Major, Row, Col>> {
     public:
         using ScalarType = Diff<T, Mode, Order>;
     };

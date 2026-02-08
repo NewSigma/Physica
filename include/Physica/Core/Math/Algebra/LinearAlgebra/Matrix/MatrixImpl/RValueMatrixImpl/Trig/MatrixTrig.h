@@ -139,7 +139,7 @@ namespace Physica {
     template<Matrix M, bool Upper_, bool Unit_>
     class Traits<MatrixTrig<M, Upper_, Unit_>> : public Traits<M> {
     public:
-        constexpr static int Option = MatrixMajor::getMajor<M>();
+        constexpr static int Major = MatrixMajor::getMajor<M>();
         constexpr static bool Upper = Upper_;
         constexpr static bool Unit = Unit_;
 

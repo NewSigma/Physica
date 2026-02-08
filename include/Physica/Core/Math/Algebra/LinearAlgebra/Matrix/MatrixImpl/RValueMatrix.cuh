@@ -33,7 +33,7 @@ namespace Physica {
         using TraitsType = Traits<device_obj<Derived>>;
     public:
         using ScalarType = TraitsType::ScalarType;
-        constexpr static int Option = TraitsType::Option;
+        constexpr static int Major = TraitsType::Major;
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColAtCompile = TraitsType::ColAtCompile;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;

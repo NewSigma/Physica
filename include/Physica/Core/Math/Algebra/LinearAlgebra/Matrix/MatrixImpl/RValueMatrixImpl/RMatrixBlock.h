@@ -296,7 +296,7 @@ namespace Physica {
         using M1 = std::remove_cvref<M>::type;
     public:
         using ScalarType = M1::ScalarType;
-        constexpr static int Option = M1::Option;
+        constexpr static int Major = M1::Major;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;

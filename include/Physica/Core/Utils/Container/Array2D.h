@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2025 Weibo He.
+ * Copyright 2021-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,18 +24,18 @@
 
 namespace Physica {
     template<class T,
-             int Option = MatrixMajor::Col,
+             int Major = MatrixMajor::Col,
              size_t Row = Dynamic,
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
     class Array2D {
-        using This = Array2D<T, Option, Row, Col, Allocator>;
+        using This = Array2D<T, Major, Row, Col, Allocator>;
         constexpr static bool isDynamicArray = Row == Dynamic && Col == Dynamic;
-        constexpr static bool isColMajor = (Option & MatrixMajor::Col) != 0;
+        constexpr static bool isColMajor = (Major & MatrixMajor::Col) != 0;
         constexpr static size_t MaxMajor = isColMajor ? Col : Row;
         constexpr static size_t MaxMinor = isColMajor ? Row : Col;
         constexpr static int TransOption = isColMajor ? MatrixMajor::Row : MatrixMajor::Col;
-        static_assert(Option != MatrixMajor::BothMajor, "[Error]: Invalid Option");
+        static_assert(Major != MatrixMajor::BothMajor, "[Error]: Invalid Major");
 
         template<class U>
         struct Helper {
@@ -103,10 +103,10 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<class T, int Op, size_t Row, size_t Col, class Allocator>
-    class Traits<Array2D<T, Op, Row, Col, Allocator>> {
+    template<class T, int Major_, size_t Row, size_t Col, class Allocator>
+    class Traits<Array2D<T, Major_, Row, Col, Allocator>> {
     public:
-        constexpr static int Option = Op;
+        constexpr static int Major = Major_;
     };
 }
 

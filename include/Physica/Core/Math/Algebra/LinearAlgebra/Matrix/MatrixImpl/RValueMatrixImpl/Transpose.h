@@ -129,10 +129,9 @@ namespace Physica {
     class Traits<Transpose<M>> {
         using M1 = std::remove_cvref_t<M>;
         constexpr static int OtherMajor = MatrixMajor::isColMatrix<M>() ? MatrixMajor::Row : MatrixMajor::Col;
-        constexpr static int Major = MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
     public:
         using ScalarType = M1::ScalarType;
-        constexpr static int Option = Major;
+        constexpr static int Major = MatrixMajor::isBothMajor<M>() ? MatrixMajor::BothMajor : OtherMajor;
         constexpr static size_t RowAtCompile = M1::ColAtCompile;
         constexpr static size_t ColAtCompile = M1::RowAtCompile;
         constexpr static size_t SizeAtCompile = M1::SizeAtCompile;
@@ -143,7 +142,7 @@ namespace Physica {
         using V1 = std::remove_cvref_t<V>;
     public:
         using ScalarType = V1::ScalarType;
-        constexpr static int Option = MatrixMajor::Row;
+        constexpr static int Major = MatrixMajor::Row;
         constexpr static size_t RowAtCompile = 1;
         constexpr static size_t ColAtCompile = V1::SizeAtCompile;
         constexpr static size_t SizeAtCompile = V1::SizeAtCompile;

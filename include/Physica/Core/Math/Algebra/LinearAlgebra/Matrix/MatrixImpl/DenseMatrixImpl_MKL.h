@@ -21,8 +21,8 @@
 #include "../DenseMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Option, Row, Col, Allocator>::assign_mkl(Matrix auto&& target) const noexcept requires(instanceof_txxxt<DenseMatrix, decltype(target)>) {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::assign_mkl(Matrix auto&& target) const noexcept requires(instanceof_txxxt<DenseMatrix, decltype(target)>) {
         static_assert(!MatrixMajor::isSameMajor<This, decltype(target)>() && "[Error]: Suggest using assign_base");
         using Tm = Base::Tm;
         target.assert_assign_mkl(*this);

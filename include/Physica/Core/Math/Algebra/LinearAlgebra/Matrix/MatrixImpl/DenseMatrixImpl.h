@@ -21,22 +21,22 @@
 #include "../DenseMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(size_t order) : DenseMatrix(order, order) {}
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t order) : DenseMatrix(order, order) {}
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col)
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col)
             : Storage(row, col) {}
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col, T value)
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col, T value)
             : Storage(row, col, std::move(value)) {}
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : Storage(std::move(list)) {}
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<T> list) : Storage(std::move(list)) {}
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(std::initializer_list<VectorIniter> list)
             : DenseMatrix(MatrixMajor::isColMatrix<This>() ? list.begin()->getLength() : list.size(),
                           MatrixMajor::isColMatrix<This>() ? list.size() : list.begin()->getLength()) {
         size_t major = 0;
@@ -50,27 +50,27 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const Matrix auto& mat)
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(const Matrix auto& mat)
             : DenseMatrix(mat.getRow(), mat.getCol()) {
         mat.assign(*this);
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const Vector auto& vec) : DenseMatrix(vec.getLength(), 1) {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    DenseMatrix<T, Major, Row, Col, Allocator>::DenseMatrix(const Vector auto& vec) : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
         vec.assign(col);
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     template<ExecutePolicy P>
-    void DenseMatrix<T, Option, Row, Col, Allocator>::assign(Matrix auto&& target) const noexcept {
+    void DenseMatrix<T, Major, Row, Col, Allocator>::assign(Matrix auto&& target) const noexcept {
         assign_base(target);
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     template<ExecutePolicy P>
-    void DenseMatrix<T, Option, Row, Col, Allocator>::assign_base(Matrix auto&& __restrict target) const __restrict noexcept {
+    void DenseMatrix<T, Major, Row, Col, Allocator>::assign_base(Matrix auto&& __restrict target) const __restrict noexcept {
         if constexpr (MatrixMajor::isSameMajor<This, decltype(target)>())
             Base::template assign<P>(target);
         else {
@@ -87,57 +87,57 @@ namespace Physica {
         }
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    void DenseMatrix<T, Option, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    void DenseMatrix<T, Major, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
         Base::resize(m, std::forward<decltype(args)>(args)...);
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto&& DenseMatrix<T, Option, Row, Col, Allocator>::flatten(this auto&& self) noexcept {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto&& DenseMatrix<T, Major, Row, Col, Allocator>::flatten(this auto&& self) noexcept {
         return self.asArray();
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::zeros(size_t row, size_t col) -> This {
         DenseMatrix result(row, col);
         result.zeros();
         return result;
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::identity(size_t order) -> This {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::identity(size_t order) -> This {
         DenseMatrix result(order, order);
         result.toIdentity();
         return result;
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     template<RNG R>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(size_t row, size_t col) -> This {
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::random_uniform(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_uniform<R>();
         return result;
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     template<RNG R>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(size_t row, size_t col) -> This {
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::random_normal(size_t row, size_t col) -> This {
         This result(row, col);
         result.template random_normal<R>();
         return result;
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     template<RNG R>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(size_t row, size_t col, auto& distribution) -> This {
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::random_any(size_t row, size_t col, auto& distribution) -> This {
         This result(row, col);
         result.template random_any<R>(distribution);
         return result;
     }
 
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This> {
-        using MatrixType = DenseMatrix<T, Option, Row, Col, Allocator>;
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::meshgrid(const Vector auto& vecX, const Vector auto& vecY) -> std::pair<This, This> {
+        using MatrixType = DenseMatrix<T, Major, Row, Col, Allocator>;
         const size_t row = vecY.getLength();
         const size_t col = vecX.getLength();
         MatrixType x(row, col);
@@ -153,8 +153,8 @@ namespace Physica {
     /**
      * Helper function that communicates with C libraries.
      */
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    auto DenseMatrix<T, Option, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) noexcept -> This {
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
+    auto DenseMatrix<T, Major, Row, Col, Allocator>::read(size_t row, size_t col, const T* __restrict p) noexcept -> This {
         return This(Storage::read(row, col, p));
     }
 }

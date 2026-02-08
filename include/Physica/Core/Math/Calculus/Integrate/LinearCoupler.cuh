@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -98,14 +98,14 @@ namespace Physica {
      */
     template<Scalar T>
     auto device_obj<LinearCoupler<T>>::transform(const device_obj<MatrixND<T>>& weights, device_obj<MatrixND<Tv>>& z) const -> CoDiff<device_obj<VectorND<T>>> {
-        constexpr static int Option = MatrixMajor::Row;
+        constexpr static int Major = MatrixMajor::Row;
         const int numSample = z.getCol();
         assert(weights.getRow() == getDim() * numBin);
         assert(weights.getCol() == numSample);
 
-        auto indices = device_obj<Array2D<size_t, Option>>(getDim(), numSample);
-        auto deltas = device_obj<DenseMatrix<T, Option>>(numSample, getDim(), 1);
-        auto lnsumexps = device_obj<DenseMatrix<Tv, Option>>(numSample, getDim());
+        auto indices = device_obj<Array2D<size_t, Major>>(getDim(), numSample);
+        auto deltas = device_obj<DenseMatrix<T, Major>>(numSample, getDim(), 1);
+        auto lnsumexps = device_obj<DenseMatrix<Tv, Major>>(numSample, getDim());
         auto fwd = [dim = getDim(),
                     numBin = numBin,
                     weights_ = asStruct(weights.values()),

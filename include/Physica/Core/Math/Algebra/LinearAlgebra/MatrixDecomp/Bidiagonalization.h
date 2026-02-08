@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -188,6 +188,6 @@ namespace Physica {
     class Traits<BiDiagMatrixB<M>> : public Traits<M> {
     private:
         using Base = Traits<M>;
-        using Base::Option;
+        using Base::Major;
     };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -191,7 +191,7 @@ namespace Physica {
     class Traits<RealMatrix<M>> {
     public:
         using ScalarType = M::ScalarType::RealType;
-        constexpr static int Option = M::Option;
+        constexpr static int Major = M::Major;
         constexpr static size_t RowAtCompile = M::RowAtCompile;
         constexpr static size_t ColAtCompile = M::ColAtCompile;
         constexpr static size_t SizeAtCompile = M::SizeAtCompile;
@@ -210,7 +210,7 @@ namespace Physica {
     class Traits<ValueMatrix<M>> {
     public:
         using ScalarType = M::ScalarType::ValueType;
-        constexpr static int Option = M::Option;
+        constexpr static int Major = M::Major;
         constexpr static size_t RowAtCompile = M::RowAtCompile;
         constexpr static size_t ColAtCompile = M::ColAtCompile;
         constexpr static size_t SizeAtCompile = M::SizeAtCompile;
@@ -221,7 +221,7 @@ namespace Physica {
         static_assert(M::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
         using ScalarType = Internal::GradTypeHelper<typename M::ScalarType, GradOrder>::Type;
-        constexpr static int Option = M::Option;
+        constexpr static int Major = M::Major;
         constexpr static size_t RowAtCompile = M::RowAtCompile;
         constexpr static size_t ColAtCompile = M::ColAtCompile;
         constexpr static size_t SizeAtCompile = M::SizeAtCompile;

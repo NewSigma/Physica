@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,9 +23,9 @@
 #include "Physica/Core/Utils/Container/Array.cuh"
 
 namespace Physica {
-    template<Scalar T, int Option>
-    class device_obj<SparseMatrix<T, Option>> : public device_obj<RValueMatrix<SparseMatrix<T, Option>>> {
-        using host_obj = SparseMatrix<T, Option>;
+    template<Scalar T, int Major>
+    class device_obj<SparseMatrix<T, Major>> : public device_obj<RValueMatrix<SparseMatrix<T, Major>>> {
+        using host_obj = SparseMatrix<T, Major>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
     private:
@@ -64,11 +64,11 @@ namespace Physica {
         [[nodiscard]] const auto& getMinorIndexes() const noexcept { return minorIndexes; }
         [[nodiscard]] const auto& getMajorStarts() const noexcept { return majorStarts; }
         /* Friends */
-        friend class SparseMatrix<T, Option>;
+        friend class SparseMatrix<T, Major>;
     };
 
-    template<Scalar T, int Option>
-    device_obj<SparseMatrix<T, Option>>::device_obj(size_t row, size_t col)
+    template<Scalar T, int Major>
+    device_obj<SparseMatrix<T, Major>>::device_obj(size_t row, size_t col)
             : majorStarts(MatrixMajor::selectMajor<This>(row, col) + 1, 0)
             , maxMinor(MatrixMajor::selectMinor<This>(row, col)) {
         size_t size = std::max(row, col);
@@ -76,55 +76,55 @@ namespace Physica {
         minorIndexes.reserve(size);
     }
 
-    template<Scalar T, int Option>
-    device_obj<SparseMatrix<T, Option>>::device_obj(const host_obj& obj) : device_obj(obj.getRow(), obj.getCol()) {
+    template<Scalar T, int Major>
+    device_obj<SparseMatrix<T, Major>>::device_obj(const host_obj& obj) : device_obj(obj.getRow(), obj.getCol()) {
         obj.toDevice(*this);
     }
 
-    template<Scalar T, int Option>
-    void device_obj<SparseMatrix<T, Option>>::resize(size_t row, size_t col) {
+    template<Scalar T, int Major>
+    void device_obj<SparseMatrix<T, Major>>::resize(size_t row, size_t col) {
         zeros();
         majorStarts.resize(MatrixMajor::selectMajor<This>(row, col) + 1, 0);
         maxMinor = MatrixMajor::selectMinor<This>(row, col);
     }
 
-    template<Scalar T, int Option>
-    auto device_obj<SparseMatrix<T, Option>>::toHost() const -> host_obj {
+    template<Scalar T, int Major>
+    auto device_obj<SparseMatrix<T, Major>>::toHost() const -> host_obj {
         auto result = toHostAsync();
         CUDAExecutor::wait();
         return result;
     }
 
-    template<Scalar T, int Option>
-    auto device_obj<SparseMatrix<T, Option>>::toHostAsync() const -> host_obj {
+    template<Scalar T, int Major>
+    auto device_obj<SparseMatrix<T, Major>>::toHostAsync() const -> host_obj {
         host_obj result{};
         toHostAsync(result);
         return result;
     }
 
-    template<Scalar T, int Option>
-    void device_obj<SparseMatrix<T, Option>>::toHost(host_obj& obj) const {
+    template<Scalar T, int Major>
+    void device_obj<SparseMatrix<T, Major>>::toHost(host_obj& obj) const {
         toHostAsync(obj);
         CUDAExecutor::wait();
     }
 
-    template<Scalar T, int Option>
-    void device_obj<SparseMatrix<T, Option>>::toHostAsync(host_obj& obj) const {
+    template<Scalar T, int Major>
+    void device_obj<SparseMatrix<T, Major>>::toHostAsync(host_obj& obj) const {
         obj.resize(getRow(), getCol());
         elements.toHostAsync(obj.elements);
         majorStarts.toHostAsync(obj.majorStarts);
         minorIndexes.toHostAsync(obj.minorIndexes);
     }
 
-    template<Scalar T, int Option>
-    void device_obj<SparseMatrix<T, Option>>::zeros() {
+    template<Scalar T, int Major>
+    void device_obj<SparseMatrix<T, Major>>::zeros() {
         elements.resize(0);
         minorIndexes.resize(0);
         majorStarts.zeros();
     }
 
-    template<Scalar T, int Option>
-    void device_obj<SparseMatrix<T, Option>>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, int Major>
+    void device_obj<SparseMatrix<T, Major>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         elements.swap(obj.elements);
         minorIndexes.swap(obj.minorIndexes);
@@ -132,53 +132,53 @@ namespace Physica {
         std::swap(maxMinor, obj.maxMinor);
     }
 
-    template<Scalar T, int Option>
-    size_t device_obj<SparseMatrix<T, Option>>::getRow() const noexcept {
+    template<Scalar T, int Major>
+    size_t device_obj<SparseMatrix<T, Major>>::getRow() const noexcept {
         return MatrixMajor::isColMatrix<This>() ? getMaxMinor() : getMaxMajor();
     }
 
-    template<Scalar T, int Option>
-    size_t device_obj<SparseMatrix<T, Option>>::getCol() const noexcept {
+    template<Scalar T, int Major>
+    size_t device_obj<SparseMatrix<T, Major>>::getCol() const noexcept {
         return MatrixMajor::isColMatrix<This>() ? getMaxMajor() : getMaxMinor();
     }
 
-    template<Scalar T, int Option>
-    size_t device_obj<SparseMatrix<T, Option>>::getMaxMajor() const noexcept {
+    template<Scalar T, int Major>
+    size_t device_obj<SparseMatrix<T, Major>>::getMaxMajor() const noexcept {
         return majorStarts.getLength() - 1;
     }
 
-    template<Scalar T, int Option>
-    size_t device_obj<SparseMatrix<T, Option>>::getMaxMinor() const noexcept {
+    template<Scalar T, int Major>
+    size_t device_obj<SparseMatrix<T, Major>>::getMaxMinor() const noexcept {
         return maxMinor;
     }
 
-    template<Scalar T, int Option>
-    auto&& device_obj<SparseMatrix<T, Option>>::getElements(this auto&& self) noexcept {
+    template<Scalar T, int Major>
+    auto&& device_obj<SparseMatrix<T, Major>>::getElements(this auto&& self) noexcept {
         return std::forward<decltype(self)>(self).elements;
     }
 
-    template<Scalar T, int Option>
-    auto SparseMatrix<T, Option>::toDevice() const -> device_obj<This> {
+    template<Scalar T, int Major>
+    auto SparseMatrix<T, Major>::toDevice() const -> device_obj<This> {
         auto result = toDeviceAsync();
         CUDAExecutor::wait();
         return result;
     }
 
-    template<Scalar T, int Option>
-    auto SparseMatrix<T, Option>::toDeviceAsync() const -> device_obj<This> {
+    template<Scalar T, int Major>
+    auto SparseMatrix<T, Major>::toDeviceAsync() const -> device_obj<This> {
         device_obj<This> result{};
         toDeviceAsync(result);
         return result;
     }
 
-    template<Scalar T, int Option>
-    void SparseMatrix<T, Option>::toDevice(device_obj<This>& obj) const {
+    template<Scalar T, int Major>
+    void SparseMatrix<T, Major>::toDevice(device_obj<This>& obj) const {
         toDeviceAsync(obj);
         CUDAExecutor::wait();
     }
 
-    template<Scalar T, int Option>
-    void SparseMatrix<T, Option>::toDeviceAsync(device_obj<This>& obj) const {
+    template<Scalar T, int Major>
+    void SparseMatrix<T, Major>::toDeviceAsync(device_obj<This>& obj) const {
         obj.resize(getRow(), getCol());
         elements.toDeviceAsync(obj.elements);
         majorStarts.toDeviceAsync(obj.majorStarts);

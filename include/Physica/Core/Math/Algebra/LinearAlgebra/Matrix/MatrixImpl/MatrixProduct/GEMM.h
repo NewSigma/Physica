@@ -21,7 +21,7 @@
 #include "../RValueMatrix.h"
 
 namespace Physica {
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     class DenseMatrix;
 
     template<Matrix M1, Matrix M2>
@@ -93,12 +93,10 @@ namespace Physica {
 
     template<Matrix M1, Matrix M2>
     auto GEMM<M1, M2>::compute() const {
-        constexpr static bool SameMajor = MatrixMajor::isSameMajor<M1, M2>();
-        constexpr static bool RowMajor = MatrixMajor::isRowMatrix<M1>();
-        constexpr static auto Major1 = RowMajor ? MatrixMajor::Col : MatrixMajor::Row;
-        constexpr static auto Major = SameMajor ? Major1 : MatrixMajor::BothMajor;
-        constexpr static int Option = Major == MatrixMajor::BothMajor ? MatrixMajor::Col : Major;
-        using RtnTy = DenseMatrix<T, Option, Base::RowAtCompile, Base::ColAtCompile, HostAllocator<T>>;
+        constexpr int Major1 = MatrixMajor::isRowMatrix<M1>() ? MatrixMajor::Col : MatrixMajor::Row;
+        constexpr int Major2 = MatrixMajor::isSameMajor<M1, M2>() ? Major1 : MatrixMajor::BothMajor;
+        constexpr int Major = Major2 == MatrixMajor::BothMajor ? MatrixMajor::Col : Major2;
+        using RtnTy = DenseMatrix<T, Major, Base::RowAtCompile, Base::ColAtCompile, HostAllocator<T>>;
         return RtnTy(*this);
     }
 
@@ -175,7 +173,7 @@ namespace Physica {
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
-        constexpr static int Option = MatrixMajor::BothMajor;
+        constexpr static int Major = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = T1::RowAtCompile;
         constexpr static size_t ColAtCompile = T2::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,8 +21,8 @@
 #include "../Array2D.cuh"
 
 namespace Physica {
-#define tparams class T, int Option, size_t Row, size_t Col, class Allocator
-#define Array2D Array2D<T, Option, Row, Col, Allocator>
+#define tparams class T, int Major, size_t Row, size_t Col, class Allocator
+#define Array2D Array2D<T, Major, Row, Col, Allocator>
 
     template<tparams>
     __host__ __device__ device_obj<Array2D>::device_obj(size_t order) : device_obj(order, order) {}

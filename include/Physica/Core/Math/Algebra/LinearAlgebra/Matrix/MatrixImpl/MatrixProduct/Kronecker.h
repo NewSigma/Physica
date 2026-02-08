@@ -162,7 +162,7 @@ namespace Physica {
         using M2 = std::remove_cvref<M2_>::type;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
-        constexpr static int Option = MatrixMajor::BothMajor;
+        constexpr static int Major = MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = M1::RowAtCompile * M2::RowAtCompile;
         constexpr static size_t ColAtCompile = M1::ColAtCompile * M2::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

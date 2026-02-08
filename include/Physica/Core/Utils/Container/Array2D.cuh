@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,9 +22,9 @@
 #include "Array2D.h"
 
 namespace Physica {
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    class device_obj<Array2D<T, Option, Row, Col, Allocator>> {
-        using host_obj = Array2D<T, Option, Row, Col, Allocator>;
+    template<class T, int Major, size_t Row, size_t Col, class Allocator>
+    class device_obj<Array2D<T, Major, Row, Col, Allocator>> {
+        using host_obj = Array2D<T, Major, Row, Col, Allocator>;
         using This = device_obj<host_obj>;
         using ArrayType = device_obj<typename host_obj::ArrayType>;
         using IndexType = host_obj::IndexType;

@@ -227,12 +227,10 @@ namespace Physica {
         using ResultType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
 
         constexpr static bool SameMajor = MatrixMajor::isSameMajor<LHS1, RHS1>();
-        constexpr static int Major = SameMajor ? MatrixMajor::getMajor<LHS1>()
-                                               : int(MatrixMajor::BothMajor);
         constexpr static bool IsReal = ID == ExprID::Abs || ID == ExprID::Square;
     public:
         using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
-        constexpr static int Option = Major;
+        constexpr static int Major = SameMajor ? MatrixMajor::getMajor<LHS1>() : MatrixMajor::BothMajor;
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile > RHS1::RowAtCompile ? LHS1::RowAtCompile : RHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile > RHS1::ColAtCompile ? LHS1::ColAtCompile : RHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile > RHS1::SizeAtCompile ? LHS1::SizeAtCompile : RHS1::SizeAtCompile;
@@ -251,7 +249,7 @@ namespace Physica {
         using RHS1 = std::remove_cvref_t<RHS>;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, typename RHS1::ScalarType>::Type;
-        constexpr static int Option = LHS1::Option;
+        constexpr static int Major = LHS1::Major;
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
@@ -275,7 +273,7 @@ namespace Physica {
         using RHS1 = std::remove_cvref_t<RHS>;
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS1::ScalarType, RHS1>::Type;
-        constexpr static int Option = LHS1::Option;
+        constexpr static int Major = LHS1::Major;
         constexpr static size_t RowAtCompile = LHS1::RowAtCompile;
         constexpr static size_t ColAtCompile = LHS1::ColAtCompile;
         constexpr static size_t SizeAtCompile = LHS1::SizeAtCompile;
