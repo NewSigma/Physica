@@ -11,6 +11,8 @@ target_sources(Benchmark PRIVATE RPMD/Q_TIP4P.cpp)
 if(${PHYSICA_CUDA})
     target_sources(Benchmark PRIVATE RPMD/ParaH.cu)
 endif()
+# Parallel
+target_sources(Benchmark PRIVATE Parallel/ThreadPool.cpp)
 # Anonymous
 target_sources(Benchmark PRIVATE Benchmark.cpp)
 target_sources(Benchmark PRIVATE CRCoro.cpp)

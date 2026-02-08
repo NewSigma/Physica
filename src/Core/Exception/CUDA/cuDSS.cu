@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Exception/CUDA/cuDSS.cuh"
-#include "Physica/Core/Utils/Unreachable.h"
+#include "Physica/Core/Utils/Builtin.h"
 
 using namespace Physica;
 

@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <exception>
 #include "Physica/Core/Parallel/ThreadPool.h"
+#include "Physica/Core/Utils/Builtin.h"
 #include "TaskBase.h"
 
 namespace Physica {
@@ -128,6 +129,7 @@ namespace Physica {
         if (shouldInferPart)
             part = std::min<size_t>(ThreadPool::getInstance().getNumThreads(), num_loop);
 
+        assume(part > 0);
         Array<Task<Thread>> tasks(part);
         for (int i = 0; i < part; ++i) {
             using Range = Task<Thread>::Range;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,5 +40,10 @@ namespace Physica {
         #endif
         }
     #endif
+    }
+
+    [[gnu::always_inline, gnu::nodebug]] __host__ __device__ inline void assume(bool predicate) noexcept {
+        assert(predicate);
+        [[assume(predicate)]];
     }
 }

@@ -41,7 +41,7 @@
 
 #include <concepts>
 #include <cstdint>
-#include "Physica/Core/Utils/Unreachable.h"
+#include "Physica/Core/Utils/Builtin.h"
 
 namespace Physica::Internal {
     enum OutputFnType : char {
