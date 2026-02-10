@@ -51,6 +51,9 @@ namespace Physica {
         /* Operations */
         template<ExecutePolicy P = Sequential>
         void assign(Matrix auto&& m) const noexcept;
+        void assign_mkl(Matrix auto&& target) const noexcept;
+        template<ExecutePolicy P = Sequential>
+        void assign_base(Matrix auto&& __restrict target) const __restrict noexcept;
 
         template<Matrix M> void toDevice(device_obj<ContinuousMatrix<M>>& obj) const;
         template<Matrix M> void toDeviceAsync(device_obj<ContinuousMatrix<M>>& obj) const;

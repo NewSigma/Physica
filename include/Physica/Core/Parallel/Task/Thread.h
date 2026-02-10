@@ -31,7 +31,7 @@ namespace Physica {
         using Base = TaskBase;
 
         struct ThreadAwaiter : public std::suspend_always {
-            void await_suspend(std::coroutine_handle<> handle) const noexcept {
+            static void await_suspend(std::coroutine_handle<> handle) noexcept {
                 ThreadPool::getInstance().schedule(handle);
             }
         };

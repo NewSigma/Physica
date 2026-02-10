@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,13 +23,13 @@
 
 namespace Physica {
     /**
-     * co_await \class suspend_promise fetches pointer to promise when executing coroutine
+     * co_await \class suspend_promise fetches current coroutine handle
      */
     struct suspend_promise : public std::suspend_always {
         std::coroutine_handle<> handle;
 
         bool await_suspend(std::coroutine_handle<> handle_) noexcept {
-            handle = std::move(handle_);
+            handle = handle_;
             return false;
         }
 

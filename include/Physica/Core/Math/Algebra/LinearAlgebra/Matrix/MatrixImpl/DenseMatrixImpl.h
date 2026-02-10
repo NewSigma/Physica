@@ -63,31 +63,6 @@ namespace Physica {
     }
 
     template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    template<ExecutePolicy P>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::assign(Matrix auto&& target) const noexcept {
-        assign_base(target);
-    }
-
-    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
-    template<ExecutePolicy P>
-    void DenseMatrix<T, Major, Row, Col, Allocator>::assign_base(Matrix auto&& __restrict target) const __restrict noexcept {
-        if constexpr (MatrixMajor::isSameMajor<This, decltype(target)>())
-            Base::template assign<P>(target);
-        else {
-            constexpr size_t BlockingL1 = Base::calcBlockingSize(HostDevAttr::CacheSizeL1D);
-            size_t r0 = getRow();
-            size_t c0 = getCol();
-            for (size_t r = 0; r < r0; r += BlockingL1) {
-                size_t numR = std::min(BlockingL1, r0 - r);
-                for (size_t c = 0; c < c0; c += BlockingL1) {
-                    size_t numC = std::min(BlockingL1, c0 - c);
-                    Base::block(r, numR, c, numC).assign(target.block(r, numR, c, numC));
-                }
-            }
-        }
-    }
-
-    template<Scalar T, int Major, size_t Row, size_t Col, class Allocator>
     void DenseMatrix<T, Major, Row, Col, Allocator>::resize(const Matrix auto& m, auto&&... args) {
         Base::resize(m, std::forward<decltype(args)>(args)...);
     }

@@ -24,11 +24,32 @@ namespace Physica {
     template<class Derived>
     template<ExecutePolicy P>
     void ContinuousMatrix<Derived>::assign(Matrix auto&& m) const noexcept {
-        using M = decltype(m);
-        if constexpr (std::remove_cvref_t<M>::IsContinuous && MatrixMajor::isSameMajor<Derived, M>())
-            Base::getDerived().flatten().template assign<P>(m.flatten());
-        else
-            Base::template assign<P>(m);
+        assign_base<P>(m);
+    }
+
+    template<class Derived>
+    template<ExecutePolicy P>
+    void ContinuousMatrix<Derived>::assign_base(Matrix auto&& __restrict target) const __restrict noexcept {
+        using M = decltype(target);
+        const auto& self = Base::getDerived();
+        if constexpr (MatrixMajor::isSameMajor<Derived, decltype(target)>()) {
+            if constexpr (std::remove_cvref_t<M>::IsContinuous)
+                self.flatten().template assign<P>(target.flatten());
+            else
+                Base::template assign<P>(target);
+        }
+        else {
+            constexpr size_t BlockingL1 = Base::calcBlockingSize(HostDevAttr::CacheSizeL1D);
+            size_t r0 = self.getRow();
+            size_t c0 = self.getCol();
+            for (size_t r = 0; r < r0; r += BlockingL1) {
+                size_t numR = std::min(BlockingL1, r0 - r);
+                for (size_t c = 0; c < c0; c += BlockingL1) {
+                    size_t numC = std::min(BlockingL1, c0 - c);
+                    self.block(r, numR, c, numC).assign(target.block(r, numR, c, numC));
+                }
+            }
+        }
     }
 
     template<class Derived>

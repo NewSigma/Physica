@@ -59,6 +59,6 @@ namespace {
     }
 }
 
-BENCHMARK(assign_match)->Name("DenseMatrix match")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(assign_mismatch)->Name("DenseMatrix mismatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(assign_mismatch_base)->Name("DenseMatrix mismatch base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(assign_match)->Name("Continuous match")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(assign_mismatch)->Name("Continuous mismatch")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(assign_mismatch_base)->Name("Continuous mismatch base")->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
