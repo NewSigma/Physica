@@ -4,7 +4,7 @@
 
 [CMake](https://cmake.org/) Refer CMakeLists.txt for version requirements  
 
-2. A C++ compiler that support C++ 23, the following compilers passed our test:
+2. A C++ compiler that support C++ 23, the following compilers are tested:
 
 [GCC](https://gcc.gnu.org/) N/A (Bug 104177)  
 [clang](https://clang.llvm.org/) 22.0.0  
@@ -14,14 +14,14 @@
 
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional, Recommended data format)  
-[oneMKL](https://www.intel.com/) 2024.2 (Optional)  
+[oneMKL](https://www.intel.com/) >=2024.2 (Optional)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.8  (Optional)  
-[cuDSS](https://developer.nvidia.com/cudss) 0.7.1 (Optional)  
+[cuDSS](https://developer.nvidia.com/cudss) >=0.7.1 (Required by CUDA)  
 [Qt](https://www.qt.io/)  6.5.3  (Optional, Plotting support)  
-[nanobind](https://github.com/wjakob/nanobind) 2.5 (Optional, Python binding, Concept Validation)  
-[LLVM](https://llvm.org/) 17.0.6 (Optional, Python binding, Concept Validation)  
-[libffi](https://github.com/libffi/libffi/) 3.4.6 (Optional, Python binding, Concept Validation)  
-[vectorclass](https://github.com/vectorclass/version2) 2.01.03 (Bundled)  
+[nanobind](https://github.com/wjakob/nanobind) >=2.5 (Optional, Python binding, Concept Validation)   
+[libffi](https://github.com/libffi/libffi/) >=3.4.6 (Optional, Python binding, Concept Validation)  
+[LLVM](https://llvm.org/) The same version as clang (Optional, Python binding, Concept Validation) 
+[vectorclass](https://github.com/vectorclass/version2) (Bundled)  
 
 We recommend incrementally installing them according to your specific requirements.
 
@@ -39,7 +39,7 @@ cmake --install .
 
 ``` Bash
 cd /path/to/Physica/build/test
-ctest -j<N>
+ctest --parallel
 ```
 
 Do not use Physica if any test were failed.  

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -45,11 +45,7 @@ namespace Physica {
     public:
         auto get_return_object() noexcept { return RValueWrapper(&Base::getDerived()); }
         auto initial_suspend() noexcept { return std::suspend_never{}; }
-        void await_transform(auto&&) noexcept = delete
-            #ifdef __cpp_deleted_function // FIXME: Remove it once we dump to CXX26
-                ("[Error]: CRCoro never suspends")
-            #endif
-            ;
+        void await_transform(auto&&) noexcept = delete("[Error]: CRCoro never suspends");
         auto final_suspend() noexcept { return std::suspend_never{}; }
         void return_value(T&& x) noexcept { Base::getDerived() = std::move(x); }
         [[noreturn]] void unhandled_exception() { throw; }
