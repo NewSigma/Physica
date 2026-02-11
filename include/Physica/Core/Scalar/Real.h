@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <cstring>
 #include <cmath>
 #include <bit>
 #ifdef PHYSICA_CUDA
@@ -82,6 +83,24 @@ namespace Physica {
             unsigned int sign : Flag ? 1 : 32;
         };
     };
+
+    template<FloatPrec Prec>
+    auto calcULPDiff(Real<Prec> x1, Real<Prec> x2) noexcept {
+        using PossibleRtnTy = std::tuple<uint16_t, uint32_t, uint64_t>;
+        using Int = std::remove_reference<decltype(std::get<Prec>(std::declval<PossibleRtnTy>()))>::type;
+        constexpr Int SignMask = Int(1) << (sizeof(Int) * CHAR_BIT - 1);
+        constexpr Int AntiSignMask = ~SignMask;
+        static_assert(sizeof(Int) == sizeof(Real<Prec>));
+
+        assert(x1.isFinite() && x2.isFinite());
+        Int i1, i2;
+        memcpy(&i1, &x1, sizeof(Int));
+        memcpy(&i2, &x2, sizeof(Int));
+        bool signdiff = (i1 ^ i2) & SignMask;
+        if (signdiff)
+            return (i1 & AntiSignMask) + (i2 & AntiSignMask);
+        return i1 > i2 ? (i1 - i2) : (i2 - i1);
+    }
 }
 
 #include "Rational.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2025 Weibo He.
+ * Copyright 2020-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -161,9 +161,9 @@ namespace {
     void softmaxTest() {
         using T = float64;
         using dfloat = Diff<T, DiffMode::Reverse>;
-        const auto factors = VectorND<T>::random_uniform<RandomSource>(8);
-        const auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
-        const auto x1 = x;
+        auto factors = VectorND<T>::random_uniform<RandomSource>(8);
+        auto x = VectorND<dfloat>::random_uniform<RandomSource>(8);
+        auto x1 = x;
         VectorND<T> y = softmax(x1.values());
         softmax(x1).reverse(y, factors);
 

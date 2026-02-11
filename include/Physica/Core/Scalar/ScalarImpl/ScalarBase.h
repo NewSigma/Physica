@@ -553,23 +553,30 @@ namespace Physica {
     template<Scalar T>
     [[clang::no_sanitize("numerical")]] bool scalarNear(const T& x, const T& y, double precision) noexcept {
         assert(precision > 0);
-        constexpr bool isDiffable = T::isDiffable;
-        if constexpr (T::isComplex) {
-            using Trv = T::ValueType::RealType;
-            Trv diff = std::hypot(x.value().real().toMachine() - y.value().real().toMachine(), x.value().imag().toMachine() - y.value().imag().toMachine());
-            const bool isValueNear = scalarNear(diff, Trv(0), precision);
-            if constexpr (isDiffable)
-                return isValueNear && scalarNear(diff, Trv(0), precision);
-            else
-                return isValueNear;
-        }
+        if constexpr (T::isDiffable)
+            return scalarNear(x.value(), y.value(), precision) && scalarNear(x.grad(), y.grad(), precision);
         else {
-            using ValueType = T::ValueType;
-            const bool isValueNear = relativeError(x.value(), y.value()) < ValueType(precision);
-            if constexpr (T::isDiffable)
-                return isValueNear && scalarNear(x.grad(), y.grad(), precision);
+            using Tv = T::ValueType;
+            if constexpr (T::isComplex) {
+                using Trv = Tv::RealType;
+                Trv diff = std::hypot(x.value().real().toMachine() - y.value().real().toMachine(), x.value().imag().toMachine() - y.value().imag().toMachine());
+                return scalarNear(diff, Trv(0), precision);
+            }
             else
-                return isValueNear;
+                return relativeError(x.value(), y.value()) < Tv(precision);
+        }
+    }
+
+    template<Scalar T>
+    bool scalarNear(const T& x, const T& y, uint64_t ulp) noexcept {
+        if constexpr (T::isDiffable)
+            return scalarNear(x.value(), y.value(), ulp) && scalarNear(x.grad(), y.grad(), ulp);
+        else {
+            if constexpr (T::isComplex)
+                return scalarNear(x.real(), y.real(), ulp)
+                    && scalarNear(x.imag(), y.imag(), ulp);
+            else
+                return calcULPDiff(x, y) <= ulp;
         }
     }
 

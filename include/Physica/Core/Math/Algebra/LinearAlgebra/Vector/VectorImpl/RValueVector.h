@@ -240,6 +240,16 @@ namespace Physica {
         return true;
     }
 
+    template<Vector V1, Vector V2>
+    bool vectorNear(const V1& v1, const V2& v2, uint64_t ulp) noexcept {
+        using T = Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
+        assert(v1.getLength() == v2.getLength());
+        for (size_t i = 0; i < v1.getLength(); ++i)
+            if (!scalarNear(T(v1.calc(i)), T(v2.calc(i)), ulp))
+                return false;
+        return true;
+    }
+
     std::ostream& operator<<(std::ostream& os, const Vector auto& v) {
         return os << std::format("{}", v.format());
     }

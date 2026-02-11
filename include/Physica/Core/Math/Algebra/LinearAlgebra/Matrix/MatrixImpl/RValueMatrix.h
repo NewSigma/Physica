@@ -212,6 +212,18 @@ namespace Physica {
         return true;
     }
 
+    template<Matrix M1, Matrix M2>
+    bool matrixNear(const M1& m1, const M2& m2, uint64_t ulp) noexcept {
+        using T = Internal::BinaryScalarOpRtnTy<typename M1::ScalarType, typename M2::ScalarType>::Type;
+        assert(m1.getRow() == m2.getRow());
+        assert(m1.getCol() == m2.getCol());
+        for (size_t i = 0; i < m1.getCol(); ++i)
+            for (size_t j = 0; j < m1.getRow(); ++j)
+                if (!scalarNear(T(m1.calc(j, i)), T(m2.calc(j, i)), ulp))
+                    return false;
+        return true;
+    }
+
     bool operator==(const Matrix auto& m1, const Matrix auto& m2) noexcept {
         if (m1.getRow() != m2.getRow())
             return false;
