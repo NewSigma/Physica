@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2025 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,16 +18,19 @@
  */
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
+#include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Test.h"
 
 using namespace Physica;
-using RandomSource = Random<MT19937, std::mt19937::default_seed>;
+using RandomSource = Random<MT19937>;
 
 namespace {
     void test1() {
         using MatrixType = DenseMatrix<cfloat64, MatrixMajor::Row>;
         const MatrixType data = MatrixType::random_uniform<RandomSource>(64);
         const DenseHermiteMatrix<cfloat64> hermite = data + data.hermite();
+        RandomSource::getInstance().reseed(std::mt19937::default_seed);
 
         EigenSolver<cfloat64> eig(hermite, false);
         eig.sort();
@@ -35,12 +38,33 @@ namespace {
         jd.compute(hermite, VectorND<cfloat64>::random_uniform<RandomSource>(data.getRow()));
         jd.sort();
 
-        if (!vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-12))
-            exit(1);
+        expect(vectorNear(jd.getEigenvalues(), eig.getEigenvalues().head(jd.getNumRequired()), 1E-12));
+    }
+
+    void test2() {
+        constexpr int Dim = 1;
+        constexpr int NumSite = 8;
+        constexpr int NumLevel = 6;
+        constexpr BoundaryCond BC = BoundaryCond::PBC;
+        using T = float64;
+        using Hamiltonian = TransIsingMatrix<float64, Dim, NumSite, BC>;
+        RandomSource::getInstance().reseed(10000);
+
+        auto Js = VectorND<T>::linspace(0, 1, 200);
+        SquareLattice<Dim, BC> lattice({NumSite}, 1);
+        Hamiltonian hamilton(T(1) - Js[1], Js[1], lattice);
+        JacobiDavidson<T> jd(hamilton.getRow(), NumLevel);
+        jd.compute(hamilton, VectorND<T>::template random_uniform<RandomSource>(hamilton.getRow()));
+        jd.sort();
+
+        EigenSolver<T> eig(hamilton, false);
+        eig.sort();
+        expect(vectorNear(eig.getEigenvalues().reals().head(NumLevel - 1), jd.getEigenvalues().head(NumLevel - 1), 1E-12));
     }
 }
 
 int main() {
     test1();
+    test2();
     return 0;
 }

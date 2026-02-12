@@ -139,6 +139,8 @@ namespace Physica {
                 eigenvalues[i] = v.conjugate() * residual;
                 eigenGoal = eigenvalues[i];
                 initSearchSpace(source, v);
+                for (size_t j = 1; j <= i; ++j)
+                    projSearchSpace(source, j);
             }
         }
     }
