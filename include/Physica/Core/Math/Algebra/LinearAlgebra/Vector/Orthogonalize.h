@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,10 +23,12 @@
 
 namespace Physica {
     /**
+     * Use snake case to respect the authors' contributions
+     *
      * Reference:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:254-255
      */
-    void gramSchmidt(const Matrix auto& base, Vector auto& v) {
+    void gram_schmidt(const Matrix auto& base, Vector auto& v) {
         assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < base.getCol(); ++i) {
             const auto col = base.col(i);
@@ -35,30 +37,8 @@ namespace Physica {
         }
         v.toUnit();
     }
-    /**
-     * normGramSchmidt can run faster than gramSchmidt if \param base_ are normalized.
-     * 
-     * This method is vulnerable to numerical roundness.
-     */
-    template<Matrix M, Vector U>
-    void normGramSchmidt(const M& base, U& v, typename U::ScalarType::RealType squaredNorm = 1) {
-        using ScalarType = U::ScalarType;
-        using RealType = ScalarType::RealType;
-        [[maybe_unused]] constexpr double epsilon = 1E-3;
-        assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
-        assert(scalarNear(v.squaredNorm(), squaredNorm, epsilon) && "[Error]: Invalid param");
-        for (size_t i = 0; i < base.getCol(); ++i) {
-            const auto col = base.col(i);
-            [[maybe_unused]] const RealType temp = col.squaredNorm();
-            assert(scalarNear(temp, RealType(1), epsilon) && "[Error]: Invalid param");
-            const auto dot = col.conjugate() * v;
-            v -= dot * col;
-            squaredNorm -= dot.squaredNorm();
-        }
-        v *= reciprocal(sqrt(squaredNorm));
-    }
 
-    void gramSchmidt(Matrix auto& m) {
+    void gram_schmidt(Matrix auto& m) {
         assert(m.getRow() >= m.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < m.getCol(); ++i) {
             auto col1 = m.col(i);

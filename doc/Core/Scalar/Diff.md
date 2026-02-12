@@ -1,3 +1,16 @@
+<!--
+Copyright 2025-2026 Weibo He.
+
+This file is part of Physica.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+You should have received a copy of the GNU Free Documentation License
+along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+-->
 # Diff - 自动微分支持
 
 ## Forward
@@ -8,7 +21,7 @@
 
 协程反向传播指代使用协程管理计算图生命周期的反向传播实现。我们将前向传播和反向传播视为一个整体, 为编译器暴露更多优化机会。
 
-Physica在前向传播完成时暂停协程以等待未来的梯度, 使用RAII在析构时恢复协程执行, 当协程恢复执行时进行梯度累积。
+Physica在前向传播完成时暂停协程以等待未来梯度, 使用RAII在析构时恢复协程执行, 当协程恢复执行时进行梯度累积。
 
 由[1]:
 

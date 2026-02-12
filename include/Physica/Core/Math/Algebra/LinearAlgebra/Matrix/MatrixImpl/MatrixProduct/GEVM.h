@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica {
+    template<Scalar T, size_t Order> class IdentityMatrix;
     /**
      * \class GEVM represents a outer product expression
      *
@@ -142,6 +143,7 @@ namespace Physica {
         using T2 = M1::ScalarType;
 
         static_assert(M1::RowAtCompile == 1 || M1::RowAtCompile == Dynamic, "[Error]: Outer product requires that the rows of M be 1");
+        static_assert(!instanceof_tx<IdentityMatrix, M>, "[Error]: This pattern is unusual and is likely a bug. Consider rewriting if this is a false-positive");
     public:
         using ScalarType = Internal::BinaryScalarOpRtnTy<T1, T2>::Type;
         constexpr static int Major = MatrixMajor::BothMajor;
