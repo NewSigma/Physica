@@ -105,7 +105,7 @@ namespace Physica {
                 for (size_t minor = 0; minor < maxMinor; ++minor)
                     v += refFromMajorMinor(major, minor).value();
 
-            const auto result = co_yield std::move(v);
+            const auto& result = co_yield std::move(v);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
                     refFromMajorMinor(major, minor).reverse(result.grad());

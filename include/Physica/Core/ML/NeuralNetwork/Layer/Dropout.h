@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -62,7 +62,7 @@ namespace Physica {
             elem = (elem > p) ? Tv(1) : Tv(0);
 
         if constexpr (ReverseDiff<T>) {
-            auto y = co_yield hadamard(x.values(), mask);
+            auto& y = co_yield hadamard(x.values(), mask);
             x.reverse(hadamard(y.grads(), mask));
         }
         else

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -95,7 +95,7 @@ namespace Physica {
             auto w = weights.toHost();
             auto loss = w.crossEntropy(dataset.getLabels()[index]);
             if constexpr (ReverseDiff<T>) {
-                auto tmp = co_yield loss.value();
+                auto& tmp = co_yield loss.value();
                 loss.reverse_final(tmp.grad());
                 weights.reverse(w.grads().toDeviceAsync());
             }

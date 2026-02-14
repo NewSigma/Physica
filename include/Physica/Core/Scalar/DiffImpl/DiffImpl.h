@@ -77,7 +77,7 @@ namespace Physica {
     template<Scalar T, DiffMode Mode, int Order>
     auto Diff<T, Mode, Order>::squaredNorm() const noexcept -> CoDiff<This> {
         if constexpr (isReverseDiff) {
-            auto y = co_yield value().squaredNorm();
+            auto& y = co_yield value().squaredNorm();
             reverse(T(2) * v * y.grad());
         }
         else
@@ -178,7 +178,7 @@ namespace Physica {
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
-        auto result = co_yield x_.value() + y_.value();
+        auto& result = co_yield x_.value() + y_.value();
         auto& g = result.grad();
         x_.reverse(g);
         if constexpr (Diffable<U>)
@@ -199,7 +199,7 @@ namespace Physica {
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
-        auto result = co_yield x_.value() - y_.value();
+        auto& result = co_yield x_.value() - y_.value();
         auto& g = result.grad();
         x_.reverse(g);
         if constexpr (Diffable<U>)
@@ -223,7 +223,7 @@ namespace Physica {
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
-        auto result = co_yield x_.value() * y_.value();
+        auto& result = co_yield x_.value() * y_.value();
         auto& g = result.grad();
         x_.reverse(y_.value() * g);
         if constexpr (Diffable<U>)
@@ -250,7 +250,7 @@ namespace Physica {
             requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
         LazyDestroy<U&&> y_ = std::forward<U>(y);
-        auto result = co_yield x_.value() / y_.value();
+        auto& result = co_yield x_.value() / y_.value();
         const auto factor = reciprocal(y_.value()) * result.grad();
         x_.reverse(factor);
         if constexpr (Diffable<U>)
@@ -293,7 +293,7 @@ namespace Physica {
             requires(ReverseDiff<T> && !Diffable<U>) {
         LazyDestroy<U&&> x_ = std::forward<U>(x);
         auto rep = reciprocal(std::forward<T>(y));
-        auto result = co_yield x_ * rep.value();
+        auto& result = co_yield x_ * rep.value();
         rep.reverse(x_ * result.grad());
     }
 
@@ -306,7 +306,7 @@ namespace Physica {
     template<Scalar T>
     [[nodiscard]] CoDiff<T> operator-(T&& x) noexcept requires(ReverseDiff<T>) {
         LazyDestroy<T&&> x_ = std::forward<T>(x);
-        auto y = co_yield -x_.value();
+        auto& y = co_yield -x_.value();
         x_.reverse(-y.grad());
     }
 }

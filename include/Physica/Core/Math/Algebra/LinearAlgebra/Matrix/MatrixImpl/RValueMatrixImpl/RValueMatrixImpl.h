@@ -337,7 +337,7 @@ namespace Physica {
     auto RValueMatrix<Derived>::sum() const -> CoDiff<T> {
         const auto& x = Base::getDerived();
         if constexpr (isReverseDiff) {
-            auto result = co_yield x.values().sum();
+            auto& result = co_yield x.values().sum();
             x.reverse(result.grad());
         }
         else {

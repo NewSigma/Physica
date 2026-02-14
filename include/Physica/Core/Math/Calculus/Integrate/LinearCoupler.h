@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -78,7 +78,7 @@ namespace Physica {
         auto lnJ = transform(w1, xB) + transform(w2, xA);
         x = xA + xB;
         if constexpr (ReverseDiff<T>) {
-            auto result = co_yield lnJ.value() + Tv(dim) * ln(calcFactor());
+            auto& result = co_yield lnJ.value() + Tv(dim) * ln(calcFactor());
             lnJ.reverse(result.grad());
         }
         else
@@ -120,7 +120,7 @@ namespace Physica {
         auto expr = ln(deltas);
         auto lnJ = expr.sum();
         if constexpr (ReverseDiff<T>) {
-            auto tmp = co_yield lnJ.value();
+            auto& tmp = co_yield lnJ.value();
             lnJ.reverse_final(tmp.grad());
             for (int i = 0; i < dim; ++i) {
                 if (z[i].isZero())

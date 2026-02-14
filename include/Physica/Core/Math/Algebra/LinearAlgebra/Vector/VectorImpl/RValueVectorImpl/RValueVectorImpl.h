@@ -296,7 +296,7 @@ namespace Physica {
                     index = i;
                 }
             }
-            const auto result = co_yield calc_value(index);
+            const auto& result = co_yield calc_value(index);
             calc(index).reverse(result.grad());
         }
         else if constexpr (!EnableSIMD) {
@@ -359,7 +359,7 @@ namespace Physica {
                     index = i;
                 }
             }
-            const auto result = co_yield calc_value(index);
+            const auto& result = co_yield calc_value(index);
             calc(index).reverse(result.grad());
         }
         else if constexpr (EnableSIMD) {
@@ -411,7 +411,7 @@ namespace Physica {
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         const auto& v = Base::getDerived();
         if constexpr (isReverseDiff) {
-            auto result = co_yield v.values().sum();
+            auto& result = co_yield v.values().sum();
             v.reverse(result.grad());
         }
         else if constexpr (Internal::EnableSIMD<Derived>::value) {
@@ -462,7 +462,7 @@ namespace Physica {
             result.toNextMean(i, v.calc(i));
 
         if constexpr (isReverseDiff) {
-            auto y = co_yield std::move(result);
+            auto& y = co_yield std::move(result);
             v.reverse(y.grad());
         }
         else
@@ -478,7 +478,7 @@ namespace Physica {
         const auto expr2 = square(expr);
         auto result = expr2.sum() / Trv(length);
         if constexpr (isReverseDiff) {
-            auto tmp = co_yield result.value();
+            auto& tmp = co_yield result.value();
             result.reverse(tmp.grad());
         }
         else
@@ -532,7 +532,7 @@ namespace Physica {
         auto expr2 = exp(expr1);
         auto y = ln(expr2.sum() + Trv(std::numeric_limits<Trv>::min())) + m; // Add min() to avoid ln(0)
         if constexpr (isReverseDiff) {
-            auto tmp = co_yield y.value();
+            auto& tmp = co_yield y.value();
             y.reverse_final(tmp.grad());
         }
         else
@@ -544,7 +544,7 @@ namespace Physica {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = lnSumExp() - calc(index);
         if constexpr (isReverseDiff) {
-            auto tmp = co_yield y.value();
+            auto& tmp = co_yield y.value();
             y.reverse_final(tmp.grad());
         }
         else
@@ -556,7 +556,7 @@ namespace Physica {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = -crossEntropy(index);
         if constexpr (isReverseDiff) {
-            auto tmp = co_yield y.value();
+            auto& tmp = co_yield y.value();
             y.reverse(tmp.grad());
         }
         else
@@ -568,7 +568,7 @@ namespace Physica {
         assert(index < getLength() && "[Error]: Index overflow");
         auto y = exp(lnSoftmax(index));
         if constexpr (isReverseDiff) {
-            auto tmp = co_yield y.value();
+            auto& tmp = co_yield y.value();
             y.reverse_final(tmp.grad());
         }
         else
@@ -583,7 +583,7 @@ namespace Physica {
             for (size_t i = 1; i < getLength(); ++i)
                 result *= calc_value(i);
 
-            auto tmp = co_yield std::move(result);
+            auto& tmp = co_yield std::move(result);
             const auto& v = Base::getDerived();
             v.reverse(reciprocal(v.values()) * (tmp.value() * tmp.grad()));
         }

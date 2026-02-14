@@ -91,7 +91,7 @@ namespace Physica {
             auto weights = forward(dataset.getSamples()[index]);
             auto loss = weights.crossEntropy(dataset.getLabels()[index]);
             if constexpr (ReverseDiff<T>) {
-                auto tmp = co_yield loss.value();
+                auto& tmp = co_yield loss.value();
                 loss.reverse(tmp.grad());
             }
             else

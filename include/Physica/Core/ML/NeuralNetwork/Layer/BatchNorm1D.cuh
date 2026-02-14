@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -105,7 +105,7 @@ namespace Physica {
 
         auto result = device_obj<MatrixND<T>>(hadamard(normal, gamma.values()) + beta.values());
         if constexpr (ReverseDiff<T>) {
-            auto result_ = co_yield std::move(result);
+            auto& result_ = co_yield std::move(result);
             if constexpr (Diffable<M>)
                 x.reverse(hadamard(result_.grads(), divide(gamma.values(), sigma)));
             gamma.reverse(hadamard(result_.grads(), normal).sum_cols());

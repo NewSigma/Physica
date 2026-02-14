@@ -129,7 +129,7 @@ namespace Physica {
     template<class Derived>
     auto LValueVector<Derived>::sum() const -> CoDiff<T> {
         if constexpr (isReverseDiff) {
-            auto result = co_yield Base::getDerived().values().sum();
+            auto& result = co_yield Base::getDerived().values().sum();
             const auto& grad = result.grad();
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);

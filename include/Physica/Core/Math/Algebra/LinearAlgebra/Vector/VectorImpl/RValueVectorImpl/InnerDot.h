@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -79,7 +79,7 @@ namespace Physica {
     template<Vector V1, Vector V2>
     auto InnerDot<V1, V2>::calc_base() const noexcept -> CoDiff<ScalarType> {
         if constexpr (isReverseDiff) {
-            auto result = co_yield v1.values() * v2.values();
+            auto& result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<V1>)
                 v1.reverse(v2.values() * result.grad());
             if constexpr (ReverseDiff<V2>)

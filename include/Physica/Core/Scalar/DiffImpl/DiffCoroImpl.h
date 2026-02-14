@@ -111,7 +111,7 @@ namespace Physica {
         static_assert(Vector<T> || Matrix<T>, "[Error]: Not a expression");
 
         LazyDestroy<T&&> expr_ = std::forward<T>(expr);
-        auto result = co_yield expr_.values();
+        auto& result = co_yield expr_.values();
         expr_.reverse(result.values(), result.grads());
     }
 

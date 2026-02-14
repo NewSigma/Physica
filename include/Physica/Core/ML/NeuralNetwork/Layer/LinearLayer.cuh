@@ -117,11 +117,11 @@ namespace Physica {
             auto expr1 = weights * x;
             if constexpr (WithBias) {
                 auto expr2 = expr1 + bias;
-                const auto result = co_yield expr2.values();
+                const auto& result = co_yield expr2.values();
                 expr2.reverse(result.grads());
             }
             else {
-                const auto result = co_yield expr1.values();
+                const auto& result = co_yield expr1.values();
                 expr1.reverse(result.grads());
             }
         }
@@ -140,11 +140,11 @@ namespace Physica {
             auto expr1 = weights * x;
             if constexpr (WithBias) {
                 auto expr2 = expr1 + bias;
-                const auto result = co_yield expr2.values();
+                const auto& result = co_yield expr2.values();
                 expr2.reverse(result.grads());
             }
             else {
-                const auto result = co_yield expr1.values();
+                const auto& result = co_yield expr1.values();
                 expr1.reverse(result.grads());
             }
         }

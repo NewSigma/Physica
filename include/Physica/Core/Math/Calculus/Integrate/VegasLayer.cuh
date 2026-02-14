@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Weibo He.
+ * Copyright 2025-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -68,7 +68,7 @@ namespace Physica {
         assert(x.getRow() == weights.getLength());
         CoDiff<device_obj<MatrixND<T>>> y = x + weights;
         if constexpr (ReverseDiff<T>) {
-            auto co_y = co_yield y.values();
+            auto& co_y = co_yield y.values();
             y.reverse(co_y.grads());
         }
         else

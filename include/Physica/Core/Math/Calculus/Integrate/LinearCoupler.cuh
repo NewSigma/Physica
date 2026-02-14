@@ -86,7 +86,7 @@ namespace Physica {
         auto lnJs2 = transform(w2, xA);
         x = xA + xB;
         if constexpr (ReverseDiff<T>) {
-            auto result = co_yield lnJs1.values() + lnJs2.values() + Tv(getDim()) * ln(calcFactor());
+            auto& result = co_yield lnJs1.values() + lnJs2.values() + Tv(getDim()) * ln(calcFactor());
             lnJs1.reverse(result.grads());
             lnJs2.reverse(result.grads());
         }
@@ -147,7 +147,7 @@ namespace Physica {
         auto expr = ln_elem(deltas);
         CoDiff<device_obj<VectorND<T>>> lnJs = expr.sum_cols();
         if constexpr (ReverseDiff<T>) {
-            auto tmp = co_yield lnJs.values();
+            auto& tmp = co_yield lnJs.values();
             lnJs.reverse_final(tmp.grads());
             auto func = [dim = getDim(),
                          numBin = numBin,

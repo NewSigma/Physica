@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,9 +35,7 @@ namespace Physica {
             co_return ResultType(std::move(value), std::move(grad2));
         }
         else {
-            auto result = ResultType(fma(a.value(), b.value(), c.value()));
-            co_yield result;
-
+            auto& result = co_yield ResultType(fma(a.value(), b.value(), c.value()));
             auto& grad = result.grad();
             a.reverse(grad * b.value());
             b.reverse(grad * a.value());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2023-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -58,7 +58,7 @@ namespace Physica {
         auto rep_r12 = square(rep_r6);
         auto result = rep_r12 - rep_r6;
         if constexpr (ReverseDiff<T>) {
-            auto r = co_yield result.value();
+            auto& r = co_yield result.value();
             result.reverse(r.grad());
         }
         else
@@ -75,7 +75,7 @@ namespace Physica {
         auto rep_r13 = rep_r7 * rep_r6;
         auto result = (rep_r13 * Tv(2) - rep_r7) * sigma1;
         if constexpr (ReverseDiff<T>) {
-            auto r = co_yield result.value();
+            auto& r = co_yield result.value();
             result.reverse(r.grad());
         }
         else

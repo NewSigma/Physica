@@ -39,9 +39,7 @@ namespace Physica {
                     // In LLVM, await_suspend is implemented as an intrinsic. Making it static would enable more optimizations.
                 }
 
-                [[nodiscard]] Base await_resume() const noexcept {
-                    return Base(std::move(p->obj));
-                }
+                [[nodiscard]] Base& await_resume() const noexcept { return p->obj; }
             };
         public:
             Base obj;

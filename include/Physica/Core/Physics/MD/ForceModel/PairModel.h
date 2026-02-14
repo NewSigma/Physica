@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2022-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -226,7 +226,7 @@ namespace Physica {
 
         const auto result = -forceConstImpl(cell, dof1, dof2);
         if constexpr (ReverseDiff<T>) {
-            auto r = co_yield result.value();
+            auto& r = co_yield result.value();
             result.reverse(r.grad());
         }
         else
@@ -406,7 +406,7 @@ namespace Physica {
         const auto term2 = force_functor(unused, unused, norm, squaredNorm) / norm * (T(dir1 == dir2 ? 1.0 : 0.0) - factor);
         const auto result = term1 - term2;
         if constexpr (ReverseDiff<T>) {
-            auto r = co_yield result.value();
+            auto& r = co_yield result.value();
             result.reverse(r.grad());
         }
         else
