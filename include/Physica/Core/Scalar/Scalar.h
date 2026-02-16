@@ -24,7 +24,7 @@
 #include <limits>
 #include <concepts>
 #include <coroutine>
-#include "Physica/Macro.h"
+#include "Physica/Core/Utils/Builtin.h"
 #include "Physica/Core/Utils/MetaProgramming.h"
 
 namespace Physica {
@@ -172,7 +172,7 @@ namespace Physica {
         class Promise {
         public:
             auto get_return_object() noexcept { return std::coroutine_handle<Promise>::from_promise(*this); };
-            static auto get_return_object_on_allocation_failure() noexcept { return nullptr; }
+            static std::nullptr_t get_return_object_on_allocation_failure() noexcept { unreachable("Expect coro frame is small"); }
             static std::suspend_never initial_suspend() noexcept { return {}; }
             static std::suspend_always final_suspend() noexcept { return {}; }
             void return_void() noexcept {}

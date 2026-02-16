@@ -27,7 +27,7 @@ namespace Physica {
      * 1. Emit assertion to help debugging
      * 2. __host__ __device__ make it available in kernel functions
      */
-    [[noreturn, gnu::always_inline]] __host__ __device__ inline void unreachable() noexcept {
+    [[noreturn, gnu::always_inline]] __host__ __device__ inline void unreachable([[maybe_unused]] const char* msg = nullptr) noexcept {
         assert(false && "[Error]: Trigger unreachable");
     #ifdef __CUDA_ARCH__
         __builtin_unreachable();
@@ -43,7 +43,7 @@ namespace Physica {
     }
 
     [[gnu::always_inline, gnu::nodebug]] __host__ __device__ inline void assume(bool predicate) noexcept {
-        assert(predicate);
+        assert(predicate && "[Error]: Bad assumption");
         [[assume(predicate)]];
     }
 }
