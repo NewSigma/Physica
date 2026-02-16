@@ -24,93 +24,101 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica {
-    template<class Base>
-    auto DiffCoro<Base>::Promise::yield_value(auto&& arg) noexcept -> suspend_yield {
-        if constexpr (Scalar<decltype(arg)>)
-            obj = Base(arg.value());
-        else
-            obj = Base(std::forward<decltype(arg)>(arg).values());
-        return suspend_yield(this);
+    // Other nodes may take ownership of the promise
+    template<class T>
+    void DiffCoro<T>::Promise::listen(DiffCoro<T>& node) noexcept {
+        pObj = &node;
     }
 
-    template<class Base>
-    DiffCoro<Base>::DiffCoro(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {
-        /**
-         * Reference:
-         * [1] GH123347; https://github.com/llvm/llvm-project/issues/123347
-         */
-    #if defined(__clang__) && (__clang_major__ <= 20)
-        asm volatile("" : : "r,m"(handle) : "memory");
-    #endif
+    template<class T>
+    auto DiffCoro<T>::Promise::get_return_object() noexcept {
+        return DiffCoro<T>(*this);
+    };
+
+    template<class T>
+    auto DiffCoro<T>::Promise::yield_value(auto&& arg) noexcept {
+        if constexpr (Scalar<decltype(arg)>)
+            *pObj = T(arg.value());
+        else
+            *pObj = T(std::forward<decltype(arg)>(arg).values());
+
+        struct awaiter : public std::suspend_always {
+            Promise& promise;
+
+            explicit awaiter(Promise& promise) : promise(promise) {}
+
+            static void await_suspend(std::coroutine_handle<>) noexcept {} // Making it static helps the compiler recognize that it does not cross suspension points.
+            [[nodiscard]] T& await_resume() const noexcept { return *(promise.pObj); }
+        };
+        return awaiter(*this);
     }
     /**
-     * Lazily compute expression \tparam T and construct compute graph from the result
+     * Lazily compute expression and construct compute graph from the result
      */
-    template<class Base>
-    template<ReverseDiff T>
-    DiffCoro<Base>::DiffCoro(T&& x) noexcept requires(!is_codiff<T>::value) : DiffCoro(compute(std::forward<T>(x))) {}
+    template<class T>
+    DiffCoro<T>::DiffCoro(ReverseDiff auto&& expr) noexcept requires(!is_codiff<decltype(expr)>::value)
+            : DiffCoro(compute(std::forward<decltype(expr)>(expr))) {}
 
-    template<class Base>
-    DiffCoro<Base>::DiffCoro(This&& other) noexcept : Base(static_cast<Base&&>(other)), handle(other.handle) {
-        other.handle = nullptr;
+    template<class T>
+    DiffCoro<T>::DiffCoro(Promise& p) noexcept : handle(std::coroutine_handle<Promise>::from_promise(p)) {
+        p.listen(*this);
     }
 
-    template<class Base>
-    DiffCoro<Base>::~DiffCoro() {
+    template<class T>
+    DiffCoro<T>::DiffCoro(This&& other) noexcept
+            : Base(static_cast<T&&>(other))
+            , handle(std::exchange(other.handle, nullptr)) {
+        handle.promise().listen(*this);
+    }
+
+    template<class T>
+    DiffCoro<T>::~DiffCoro() {
         reverse_impl();
     }
 
-    template<class Base>
-    auto DiffCoro<Base>::operator=(This&& obj) noexcept -> This& {
+    template<class T>
+    auto DiffCoro<T>::operator=(This&& obj) noexcept -> This& {
         swap(obj);
         return *this;
     }
 
-    template<class Base>
-    void DiffCoro<Base>::reverse_final() noexcept {
+    template<class T>
+    void DiffCoro<T>::reverse_final(auto&&... args) noexcept {
         assert(handle != nullptr && "[Error]: Reverse has been finalized");
-        Base::reverse();
+        Base::reverse(std::forward<decltype(args)>(args)...);
         reverse_impl();
     }
 
-    template<class Base>
-    void DiffCoro<Base>::reverse_final(auto&& x) noexcept {
-        assert(handle != nullptr && "[Error]: Reverse has been finalized");
-        Base::reverse(std::forward<decltype(x)>(x));
-        reverse_impl();
-    }
-
-    template<class Base>
-    void DiffCoro<Base>::swap(This& __restrict obj) noexcept {
+    template<class T>
+    void DiffCoro<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(handle, obj.handle);
     }
 
-    template<class Base>
-    void DiffCoro<Base>::reverse_impl() noexcept {
+    template<class T>
+    void DiffCoro<T>::reverse_impl() noexcept {
         if (handle) {
             assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
-            if constexpr (Scalar<Base>) {
+            if constexpr (Scalar<T>) {
                 if (Base::grad().isZero()) {
                     handle.destroy();
                     handle = nullptr;
                     return;
                 }
             }
-            handle.promise().obj = Base(static_cast<Base&&>(*this));
             handle.resume();
             handle = nullptr;
         }
     }
 
-    template<class Base>
-    template<ReverseDiff T>
-    auto DiffCoro<Base>::compute(T&& expr) noexcept -> This {
-        static_assert(!std::same_as<std::remove_cvref_t<T>, Base>, "[Error]: Not a expression");
-        static_assert(Vector<T> || Matrix<T>, "[Error]: Not a expression");
+    template<class T>
+    auto DiffCoro<T>::compute(ReverseDiff auto&& expr) noexcept -> This {
+        using Expr = decltype(expr);
+        static_assert(!std::same_as<T, std::remove_cvref_t<Expr>>, "[Error]: Not a expression");
+        static_assert(Vector<Expr> || Matrix<Expr>, "[Error]: Not a expression");
 
-        LazyDestroy<T&&> expr_ = std::forward<T>(expr);
+        LazyDestroy<Expr> expr_ = std::forward<Expr>(expr);
         auto& result = co_yield expr_.values();
         expr_.reverse(result.values(), result.grads());
     }

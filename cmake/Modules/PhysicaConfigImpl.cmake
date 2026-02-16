@@ -128,7 +128,7 @@ if(${PHYSICA_CUDA})
     set(CMAKE_INSTALL_RPATH ${CMAKE_BUILD_RPATH} ${CUDAToolkit_LIBRARY_DIR})
 endif()
 
-if(CMAKE_BUILD_TYPE MATCHES Release)
+if(CMAKE_BUILD_TYPE MATCHES Release AND NOT ${PHYSICA_LLVMIR})
     include(CheckIPOSupported)
     check_ipo_supported(RESULT Result OUTPUT Output LANGUAGES CXX)
     if(${Result})
