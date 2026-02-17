@@ -64,9 +64,9 @@ namespace Physica {
         using Base::getRHS;
     private:
         template<ExecutePolicy P>
-        void assign_add_for(Vector auto& v) const noexcept;
-        template<Vector Target, size_t Size>
-        void assign_add_simd(Target& v) const noexcept;
+        void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
+        template<Vector Target, size_t Length>
+        void assign_fma_simd(Target&  __restrict v) const  __restrict noexcept;
     };
 
     template<Vector V, Scalar U>
@@ -121,10 +121,10 @@ namespace Physica {
                 constexpr size_t Length1 = Source::SizeAtCompile;
                 constexpr size_t Length2 = Target::SizeAtCompile;
                 constexpr size_t Length = std::max(Length1, Length2);
-                assign_add_simd<Target, Length>(v);
+                assign_fma_simd<Target, Length>(v);
             }
             else
-                assign_add_for<P>(v);
+                assign_fma_for<P>(v);
         }
         else
             Base::template assign_add<P>(v);
@@ -166,7 +166,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<ExecutePolicy P>
-    void VectorExpr<ExprID::Mul, V, U>::assign_add_for(Vector auto& v) const noexcept {
+    void VectorExpr<ExprID::Mul, V, U>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
         parallel_for<P>([&, this](size_t i) {
             if constexpr (isReverseDiff)
                 v[i] = fma(getLHS().calc_value(i), Tv(getRHS().value()), v[i]);
@@ -177,7 +177,7 @@ namespace Physica {
 
     template<Vector V, Scalar U>
     template<Vector Target, size_t Length>
-    void VectorExpr<ExprID::Mul, V, U>::assign_add_simd(Target& v) const noexcept {
+    void VectorExpr<ExprID::Mul, V, U>::assign_fma_simd(Target&  __restrict v) const  __restrict noexcept {
         using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
         constexpr size_t PacketSize = Pack::size();
         const auto& lhs = getLHS();
@@ -205,6 +205,7 @@ namespace Physica {
     template<Vector V1, Vector V2>
     class VectorExpr<ExprID::Mul, V1, V2>
             : public BinaryVectorExpr<ExprID::Mul, V1, V2> {
+        using This = VectorExpr<ExprID::Mul, V1, V2>;
         using Base = BinaryVectorExpr<ExprID::Mul, V1, V2>;
     public:
         using Base::isComplex;
@@ -220,6 +221,11 @@ namespace Physica {
         void assign(Vector auto&& v) const;
         void assign_mkl(Vector auto& v) const noexcept;
 
+        template<ExecutePolicy P = Sequential>
+        void assign_add(Vector auto&& v) const;
+        template<ExecutePolicy P = Sequential>
+        void assign_add_base(Vector auto&& v) const noexcept;
+
         [[nodiscard]] CoDiff<T> calc(size_t index) const;
         [[nodiscard]] Tv calc_value(size_t index) const;
 
@@ -230,12 +236,49 @@ namespace Physica {
 
         using Base::reverse;
         void reverse(const auto& grad) const noexcept;
+        /* Getters */
+        using Base::getLHS;
+        using Base::getRHS;
+    private:
+        template<ExecutePolicy P>
+        void assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept;
+        template<Vector Target, size_t Size>
+        void assign_fma_simd(Target&  __restrict v) const  __restrict noexcept;
     };
 
     template<Vector V1, Vector V2>
     template<ExecutePolicy P>
     void VectorExpr<ExprID::Mul, V1, V2>::assign(Vector auto&& v) const {
         Base::template assign_base<P>(v);
+    }
+
+    template<Vector V1, Vector V2>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprID::Mul, V1, V2>::assign_add(Vector auto&& v) const {
+        assign_add_base<P>(std::forward<decltype(v)>(v));
+    }
+
+    template<Vector V1, Vector V2>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprID::Mul, V1, V2>::assign_add_base(Vector auto&& v) const noexcept {
+        using Target = std::remove_cvref_t<decltype(v)>;
+        using T1 = std::remove_cvref_t<V1>::ScalarType;
+        using T2 = std::remove_cvref_t<V2>::ScalarType;
+        using U = Target::ScalarType;
+        constexpr bool LowerToFMA = std::same_as<T1, T2> && std::same_as<T, U>;
+        if constexpr (LowerToFMA) {
+            v.assert_assign(Base::getDerived());
+            if constexpr (Internal::EnableSIMD<This, Target>::value && !isReverseDiff) {
+                constexpr size_t Length1 = This::SizeAtCompile;
+                constexpr size_t Length2 = Target::SizeAtCompile;
+                constexpr size_t Length = std::max(Length1, Length2);
+                assign_fma_simd<Target, Length>(v);
+            }
+            else
+                assign_fma_for<P>(v);
+        }
+        else
+            Base::template assign_add<P>(v);
     }
 
     template<Vector V1, Vector V2>
@@ -276,6 +319,44 @@ namespace Physica {
                 Base::getLHS().reverse(hadamard(Base::getRHS().values(), g));
             if constexpr (ReverseDiff<V2>)
                 Base::getRHS().reverse(hadamard(Base::getLHS().values(), g));
+        }
+    }
+
+    template<Vector V1, Vector V2>
+    template<ExecutePolicy P>
+    void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_for(Vector auto&  __restrict v) const  __restrict noexcept {
+        parallel_for<P>([&, this](size_t i) {
+            if constexpr (isReverseDiff)
+                v[i] = fma(getLHS().calc_value(i), Tv(getRHS().calc_value(i)), v[i]);
+            else
+                v[i] = fma(getLHS().calc(i), T(getRHS().calc(i)), v[i]);
+        }, Base::getLength(), 0).wait();
+    }
+
+    template<Vector V1, Vector V2>
+    template<Vector Target, size_t Length>
+    void VectorExpr<ExprID::Mul, V1, V2>::assign_fma_simd(Target&  __restrict v) const  __restrict noexcept {
+        using Pack = BestPacket<typename Target::ScalarType, Length>::Type;
+        constexpr size_t PacketSize = Pack::size();
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        if constexpr (Length != Dynamic) {
+            constexpr size_t to = Length / PacketSize * PacketSize;
+            for (size_t i = 0; i < to; i += PacketSize)
+                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)));
+
+            for (size_t i = Length - Length % PacketSize; i < Length; ++i)
+                v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
+        }
+        else {
+            const size_t length = v.getLength();
+            const size_t to = length / PacketSize * PacketSize;
+            size_t i = 0;
+            for (; i < to; i += PacketSize)
+                v.writePacket(i, fma(lhs.template packet<Pack>(i), rhs.template packet<Pack>(i), v.template packet<Pack>(i)));
+
+            for (; i < length; ++i)
+                v[i] = fma(getLHS().calc(i), getRHS().calc(i), v[i]);
         }
     }
 

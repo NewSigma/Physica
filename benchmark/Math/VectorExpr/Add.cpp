@@ -22,38 +22,78 @@
 using namespace Physica;
 using RandomSource = Random<MCG>;
 
+// Benchmark that we can recognize fma patterns
 namespace {
+    constexpr size_t size = 1024;
+
     template<Scalar T>
-    void add(benchmark::State& state) {
-        const auto size = makeVectorSize(state.range(0), sizeof(T));
+    void add_scalar1(benchmark::State& state) {
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
         const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto expr = a + b;
+        auto expr = hadamard(a, b) + T(0.1);
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            expr.assign(buffer);
+            PHYSICA_BENCH(expr.assign(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
     }
 
     template<Scalar T>
-    void add_base(benchmark::State& state) {
-        const auto size = makeVectorSize(state.range(0), sizeof(T));
+    void add_scalar2(benchmark::State& state) {
         const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
-        const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
-        auto expr = a + b;
+        const VectorND<T> c = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = a * T(0.1) + c;
         VectorND<T> buffer(size);
         for (auto _ : state) {
-            PHYSICA_BENCH(expr.assign_base(buffer));
+            PHYSICA_BENCH(expr.assign(buffer));
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
+    }
+
+    template<Scalar T>
+    void add_scalar_inplace(benchmark::State& state) {
+        const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = a * T(0.1);
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            PHYSICA_BENCH(expr.assign_add(buffer));
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
+    }
+
+    template<Scalar T>
+    void add_vector(benchmark::State& state) {
+        const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
+        const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
+        const VectorND<T> c = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = hadamard(a, b) + c;
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            PHYSICA_BENCH(expr.assign(buffer));
+            benchmark::DoNotOptimize(buffer);
+            benchmark::ClobberMemory();
+        }
+    }
+
+    template<Scalar T>
+    void add_vector_inplace(benchmark::State& state) {
+        const VectorND<T> a = VectorND<T>::template random_uniform<RandomSource>(size);
+        const VectorND<T> b = VectorND<T>::template random_uniform<RandomSource>(size);
+        auto expr = hadamard(a, b);
+        VectorND<T> buffer(size);
+        for (auto _ : state) {
+            PHYSICA_BENCH(expr.assign_add(buffer));
             benchmark::DoNotOptimize(buffer);
             benchmark::ClobberMemory();
         }
     }
 }
 
-BENCHMARK(add<float32>)->Name(std::format("{} float32", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(add<float64>)->Name(std::format("{} float64", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-
-BENCHMARK(add_base<float32>)->Name(std::format("{} float32 base", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
-BENCHMARK(add_base<float64>)->Name(std::format("{} float64 base", makeBenchID()))->Arg(0)->Arg(1)->Arg(2)->Arg(3)->Arg(4)->Arg(5);
+BENCHMARK(add_scalar1<float64>)->Name("add scalar1");
+BENCHMARK(add_scalar2<float64>)->Name("add scalar2");
+BENCHMARK(add_scalar_inplace<float64>)->Name("add scalar inplace");
+BENCHMARK(add_vector<float64>)->Name("add vector");
+BENCHMARK(add_vector_inplace<float64>)->Name("add vector inplace");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024-2025 Weibo He.
+ * Copyright 2024-2026 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -47,28 +47,46 @@ namespace Physica {
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
+    private:
+        consteval static bool lowerToFMA() noexcept;
     };
 
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::calc(size_t s) const -> CoDiff<T> {
-        return Base::getLHS().calc(s) + Base::getRHS();
+        if constexpr (lowerToFMA())
+            return fma(getLHS().getLHS().calc(s), getLHS().getRHS().calc(s), getRHS());
+        else
+            return getLHS().calc(s) + getRHS();
     }
 
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::calc_value(size_t s) const -> Tv {
-        return Base::getLHS().calc_value(s) + Base::getRHS().value();
+        if constexpr (lowerToFMA())
+            return fma(getLHS().getLHS().calc_value(s), getLHS().getRHS().calc_value(s), getRHS().value());
+        else
+            return getLHS().calc_value(s) + getRHS().value();
     }
 
     template<Vector V, Scalar U>
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V, U>::packet(size_t index) const {
-        return Base::getLHS().template packet<Pack>(index) + Pack(Base::getRHS());
+        if constexpr (lowerToFMA())
+            return fma(getLHS().getLHS().template packet<Pack>(index),
+                       getLHS().getRHS().template packet<Pack>(index),
+                       Pack(getRHS()));
+        else
+            return getLHS().template packet<Pack>(index) + Pack(getRHS());
     }
 
     template<Vector V, Scalar U>
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V, U>::packetPartial(size_t index, size_t count) const {
-        return Base::getLHS().template packetPartial<Pack>(index, count) + Pack(Base::getRHS(), count);
+        if constexpr (lowerToFMA())
+            return fma(getLHS().getLHS().template packetPartial<Pack>(index, count),
+                       getLHS().getRHS().template packetPartial<Pack>(index, count),
+                       Pack(getRHS(), count));
+        else
+            return getLHS().template packetPartial<Pack>(index, count) + Pack(getRHS(), count);
     }
 
     template<Vector V, Scalar U>
@@ -84,6 +102,17 @@ namespace Physica {
     template<Vector V, Scalar U>
     auto VectorExpr<ExprID::Add, V, U>::values() const noexcept {
         return getLHS().values() + getRHS().value();
+    }
+
+    template<Vector V, Scalar U>
+    consteval bool VectorExpr<ExprID::Add, V, U>::lowerToFMA() noexcept {
+        if constexpr (instanceof_xt<VectorExpr, V>) {
+            using V1 = std::remove_cvref_t<V>;
+            using T1 = V1::ScalarType;
+            using T2 = std::remove_cvref_t<U>;
+            return (V1::getExprID() == ExprID::Mul) && std::same_as<T1, T2>;
+        }
+        return false;
     }
 
     template<Vector V1, Vector V2>
@@ -118,6 +147,8 @@ namespace Physica {
         /* Getters */
         using Base::getLHS;
         using Base::getRHS;
+    private:
+        consteval static bool lowerToFMA() noexcept;
     };
 
     template<Vector V1, Vector V2>
@@ -154,24 +185,64 @@ namespace Physica {
 
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Add, V1, V2>::calc(size_t s) const -> CoDiff<T> {
-        return getLHS().calc(s) + getRHS().calc(s);
+        if constexpr (lowerToFMA()) {
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                return fma(getLHS().getLHS().calc(s), getLHS().getRHS(), getRHS().calc(s));
+            else
+                return fma(getLHS().getLHS().calc(s), getLHS().getRHS().calc(s), getRHS().calc(s));
+        }
+        else
+            return getLHS().calc(s) + getRHS().calc(s);
     }
 
     template<Vector V1, Vector V2>
     auto VectorExpr<ExprID::Add, V1, V2>::calc_value(size_t s) const -> Tv {
-        return Base::getLHS().calc_value(s) + Base::getRHS().calc_value(s);
+        if constexpr (lowerToFMA()) {
+            if constexpr (Scalar<decltype(getLHS().getRHS())>)
+                return fma(getLHS().getLHS().calc(s), getLHS().getRHS().value(), getRHS().calc(s));
+            else
+                return fma(getLHS().getLHS().calc_value(s), getLHS().getRHS().calc_value(s), getRHS().calc_value(s));
+        }
+        else
+            return getLHS().calc_value(s) + getRHS().calc_value(s);
     }
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V1, V2>::packet(size_t index) const {
-        return getLHS().template packet<Pack>(index) + getRHS().template packet<Pack>(index);
+        if constexpr (lowerToFMA()) {
+            if constexpr (Scalar<decltype(getLHS().getRHS())>) {
+                return fma(getLHS().getLHS().template packet<Pack>(index),
+                           Pack(getLHS().getRHS()),
+                           getRHS().template packet<Pack>(index));
+            }
+            else {
+                return fma(getLHS().getLHS().template packet<Pack>(index),
+                           getLHS().getRHS().template packet<Pack>(index),
+                           getRHS().template packet<Pack>(index));
+            }
+        }
+        else
+            return getLHS().template packet<Pack>(index) + getRHS().template packet<Pack>(index);
     }
 
     template<Vector V1, Vector V2>
     template<Packet Pack>
     Pack VectorExpr<ExprID::Add, V1, V2>::packetPartial(size_t index, size_t count) const {
-        return getLHS().template packetPartial<Pack>(index, count) + getRHS().template packetPartial<Pack>(index, count);
+        if constexpr (lowerToFMA()) {
+            if constexpr (Scalar<decltype(getLHS().getRHS())>) {
+                return fma(getLHS().getLHS().template packetPartial<Pack>(index, count),
+                           Pack(getLHS().getRHS()).cutoff(count),
+                           getRHS().template packetPartial<Pack>(index, count));
+            }
+            else {
+                return fma(getLHS().getLHS().template packetPartial<Pack>(index, count),
+                           getLHS().getRHS().template packetPartial<Pack>(index, count),
+                           getRHS().template packetPartial<Pack>(index, count));
+            }
+        }
+        else
+            return getLHS().template packetPartial<Pack>(index, count) + getRHS().template packetPartial<Pack>(index, count);
     }
 
     template<Vector V1, Vector V2>
@@ -193,6 +264,16 @@ namespace Physica {
             if constexpr (ReverseDiff<V2>)
                 Base::getRHS().reverse(g);
         }
+    }
+
+    template<Vector V1, Vector V2>
+    consteval bool VectorExpr<ExprID::Add, V1, V2>::lowerToFMA() noexcept {
+        if constexpr (instanceof_xt<VectorExpr, V1>) {
+            using T1 = std::remove_cvref_t<V1>::ScalarType;
+            using T2 = std::remove_cvref_t<V2>::ScalarType;
+            return (std::remove_cvref_t<V1>::getExprID() == ExprID::Mul) && std::same_as<T1, T2>;
+        }
+        return false;
     }
 
     template<Vector V, Scalar U>
