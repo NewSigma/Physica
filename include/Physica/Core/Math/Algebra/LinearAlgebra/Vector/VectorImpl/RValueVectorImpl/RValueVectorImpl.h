@@ -791,10 +791,8 @@ namespace Physica {
         const auto& v0 = Base::getDerived();
         if constexpr (Length != Dynamic) {
             constexpr size_t to = Length / PacketSize * PacketSize;
-            for (size_t i = 0; i < to; i += PacketSize) {
-                const Pack sum = v.template packet<Pack>(i) + v0.template packet<Pack>(i);
-                v.writePacket(i, sum);
-            }
+            for (size_t i = 0; i < to; i += PacketSize)
+                v.writePacket(i, v.template packet<Pack>(i) + v0.template packet<Pack>(i));
 
             for (size_t i = Length - Length % PacketSize; i < Length; ++i)
                 v[i] += v0.calc(i);
@@ -803,10 +801,8 @@ namespace Physica {
             const size_t length = v.getLength();
             const size_t to = length / PacketSize * PacketSize;
             size_t i = 0;
-            for (; i < to; i += PacketSize) {
-                const Pack sum = v.template packet<Pack>(i) + v0.template packet<Pack>(i);
-                v.writePacket(i, sum);
-            }
+            for (; i < to; i += PacketSize)
+                v.writePacket(i, v.template packet<Pack>(i) + v0.template packet<Pack>(i));
 
             for (; i < length; ++i)
                 v[i] += v0.calc(i);

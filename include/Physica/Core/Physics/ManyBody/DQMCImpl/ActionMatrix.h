@@ -37,8 +37,8 @@ namespace Physica {
 
         const HubbardParams<Tr>& params;
     public:
-        ActionMatrix(const HubbardParams<Tr>& params, int numFreq, int maxBoson);
-        ActionMatrix(const HubbardParams<Tr>& params, int numFreq);
+        ActionMatrix(const HubbardParams<Tr>& params, int numFreq, int maxBoson) noexcept;
+        ActionMatrix(const HubbardParams<Tr>& params, int numFreq) noexcept;
         ActionMatrix(const This&) = default;
         ActionMatrix(This&&) noexcept = default;
         ~ActionMatrix() = default;
@@ -69,7 +69,7 @@ namespace Physica {
     };
 
     template<Scalar T>
-    ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq, int maxBoson)
+    ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq, int maxBoson) noexcept
             : matsubara(numFreq * 2)
             , auxField(maxBoson, params.getNumSite())
             , params(params) {
@@ -84,7 +84,7 @@ namespace Physica {
     }
 
     template<Scalar T>
-    ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq) : This(params, numFreq, numFreq * 2) {}
+    ActionMatrix<T>::ActionMatrix(const HubbardParams<Tr>& params, int numFreq) noexcept : This(params, numFreq, numFreq * 2) {}
 
     template<Scalar T>
     void ActionMatrix<T>::assign(Matrix auto&& target) const {

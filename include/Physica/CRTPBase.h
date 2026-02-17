@@ -31,13 +31,13 @@ namespace Physica {
         using This = CRTPBase<T>;
         using U = Traits<T>::Derived;
     public:
-        [[nodiscard, gnu::nodebug]] U& getDerived_host() noexcept { return *static_cast<U*>(this); }
-        [[nodiscard, gnu::nodebug]] const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
-        [[nodiscard, gnu::nodebug]] U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] U& getDerived_host() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] const U& getDerived_host() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] U& getConstCastDerived_host() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
 
-        [[nodiscard, gnu::nodebug]] __host__ __device__ U& getDerived() noexcept { return *static_cast<U*>(this); }
-        [[nodiscard, gnu::nodebug]] __host__ __device__ const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
-        [[nodiscard, gnu::nodebug]] __host__ __device__ U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ U& getDerived() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
     protected:
         CRTPBase() = default;
         CRTPBase(const This&) = default;

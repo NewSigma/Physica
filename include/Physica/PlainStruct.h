@@ -50,8 +50,8 @@ namespace Physica {
     private:
         std::array<std::byte, sizeof(T)> bytes;
     public:
-        [[nodiscard]] __host__ __device__ const T& getDerived() const noexcept { return *reinterpret_cast<const T*>(this); }
-        [[nodiscard]] __host__ __device__ T& getConstCastDerived() const noexcept { return *reinterpret_cast<T*>(const_cast<PlainStruct*>(this)); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ const T& getDerived() const noexcept { return *reinterpret_cast<const T*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ T& getConstCastDerived() const noexcept { return *reinterpret_cast<T*>(const_cast<PlainStruct*>(this)); }
     };
 
     template<class T>
@@ -59,16 +59,16 @@ namespace Physica {
         using Base = PlainStruct<const T>;
     public:
         using Base::getDerived;
-        [[nodiscard]] __host__ __device__ T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
+        [[nodiscard, gnu::always_inline, gnu::malloc, gnu::nodebug]] __host__ __device__ T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
     };
 
     template<class T>
-    [[nodiscard]] __host__ __device__ auto asStruct(const T& obj) noexcept {
+    [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ auto asStruct(const T& obj) noexcept {
         return PlainStruct<const T>(reinterpret_cast<const PlainStruct<const T>&>(obj));
     }
 
     template<class T>
-    [[nodiscard]] __host__ __device__ auto asStruct(T& obj) noexcept {
+    [[nodiscard, gnu::always_inline, gnu::nodebug]] __host__ __device__ auto asStruct(T& obj) noexcept {
         return PlainStruct<T>(reinterpret_cast<PlainStruct<T>&>(obj));
     }
 }
