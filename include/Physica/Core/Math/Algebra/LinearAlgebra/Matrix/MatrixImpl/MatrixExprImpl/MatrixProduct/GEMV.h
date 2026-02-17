@@ -26,7 +26,6 @@ namespace Physica {
         using This = GEMV<M, V>;
         using Base = RValueVector<This>;
         using M1 = std::remove_cvref_t<M>;
-        constexpr static ExprID ID = Traits<M1>::ID;
     protected:
         using typename Base::T;
         using typename Base::Tv;
@@ -74,6 +73,7 @@ namespace Physica {
     void GEMV<M, V>::assign(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
+            constexpr ExprID ID = std::remove_cvref_t<M>::getExprID();
             if constexpr (ID == ExprID::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
@@ -100,6 +100,7 @@ namespace Physica {
     void GEMV<M, V>::assign_add(Vector auto& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
         if constexpr (FastAssign) {
+            constexpr ExprID ID = expr.getExprID();
             if constexpr (ID == ExprID::Minus) {
                 const auto& lhs = getLHS();
                 const auto& rhs = getRHS();
@@ -159,7 +160,7 @@ namespace Physica {
         constexpr static bool calcFastAssign() {
             using U = Traits<M1>::RHS;
             constexpr bool isScalarU = Scalar<U>;
-            constexpr ExprID ID = Traits<M1>::ID;
+            constexpr ExprID ID = M1::getExprID();
 
             if constexpr (ID == ExprID::Minus)
                 return Traits<M1>::FastAssign;

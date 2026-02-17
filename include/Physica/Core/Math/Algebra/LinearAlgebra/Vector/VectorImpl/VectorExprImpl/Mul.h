@@ -283,9 +283,8 @@ namespace Physica {
     [[nodiscard]] auto operator*(V&& v, U&& x) noexcept requires(!CUDA<V>) {
         using RtnTy = VectorExpr<ExprID::Mul, V&&, U&&>;
         if constexpr (instanceof_xt<VectorExpr, V>) {
-            constexpr ExprID ID = Traits<V>::ID;
             using RHS = Traits<V>::RHS;
-            if constexpr (ID == ExprID::Mul && Scalar<RHS>)
+            if constexpr (v.getExprID() == ExprID::Mul && Scalar<RHS>)
                 return v.getLHS() * (v.getRHS() * x);
             else
                 return RtnTy(std::forward<V>(v), std::forward<U>(x));
@@ -304,13 +303,11 @@ namespace Physica {
         using RtnTy = VectorExpr<ExprID::Mul, V1&&, V2&&>;
         if constexpr (instanceof_xt<VectorExpr, V1>) {
             using RHS1 = Traits<V1>::RHS;
-            constexpr ExprID ID1 = Traits<V1>::ID;
-            if constexpr (ID1 == ExprID::Mul && Scalar<RHS1>) // if we can lower V1
+            if constexpr (v1.getExprID() == ExprID::Mul && Scalar<RHS1>) // if we can lower V1
                 return hadamard(v2, v1.getLHS()) * v1.getRHS();
             else if constexpr (instanceof_xt<VectorExpr, V2>) { // if not, see if we can lower V2
                 using RHS2 = Traits<V2>::RHS;
-                constexpr ExprID ID2 = Traits<V2>::ID;
-                if constexpr (ID2 == ExprID::Mul && Scalar<RHS2>)
+                if constexpr (v2.getExprID() == ExprID::Mul && Scalar<RHS2>)
                     return hadamard(v1, v2.getLHS()) * v2.getRHS();
                 else
                     return RtnTy(std::forward<V1>(v1), std::forward<V2>(v2));

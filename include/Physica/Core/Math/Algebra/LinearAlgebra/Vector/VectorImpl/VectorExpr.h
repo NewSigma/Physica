@@ -49,6 +49,8 @@ namespace Physica {
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return getExpr().getLength(); }
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
 
     template<ExprID ID, Vector V>
@@ -76,6 +78,8 @@ namespace Physica {
         [[nodiscard]] size_t getLength() const noexcept;
         [[nodiscard]] auto&& getLHS(this auto&&) noexcept;
         [[nodiscard]] auto&& getRHS(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -104,10 +108,9 @@ namespace Physica {
 }
 
 namespace Physica {
-    template<ExprID ID_, Vector LHS_, Vector RHS_>
-    class Traits<VectorExpr<ID_, LHS_, RHS_>> {
+    template<ExprID ID, Vector LHS_, Vector RHS_>
+    class Traits<VectorExpr<ID, LHS_, RHS_>> {
     public:
-        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
@@ -143,7 +146,6 @@ namespace Physica {
     template<ExprID ID_, Vector LHS_, Scalar RHS_>
     class Traits<VectorExpr<ID_, LHS_, RHS_>> {
     public:
-        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:

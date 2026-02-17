@@ -51,6 +51,8 @@ namespace Physica {
         [[nodiscard]] size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] auto&& getExpr(this auto&&) noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
 
     template<ExprID ID, Matrix M>
@@ -112,6 +114,8 @@ namespace Physica {
         /* Static members */
         [[nodiscard]] consteval static bool isStaticSymm() noexcept;
         [[nodiscard]] consteval static bool isStaticHermite() noexcept;
+        /* Static members */
+        [[nodiscard]] __host__ __device__ constexpr static ExprID getExprID() noexcept { return ID; }
     };
 
     template<ExprID ID, class LHS, class RHS>
@@ -238,10 +242,9 @@ namespace Physica {
         constexpr static bool FastAssign = false;
     };
 
-    template<ExprID ID_, Matrix LHS_, Vector RHS_>
-    class Traits<MatrixExpr<ID_, LHS_, RHS_>> {
+    template<ExprID ID, Matrix LHS_, Vector RHS_>
+    class Traits<MatrixExpr<ID, LHS_, RHS_>> {
     public:
-        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
@@ -262,10 +265,9 @@ namespace Physica {
     template<ExprID ID, Vector LHS, Matrix RHS>
     class Traits<MatrixExpr<ID, LHS, RHS>> : public Traits<MatrixExpr<ID, RHS, LHS>> {};
 
-    template<ExprID ID_, Matrix LHS_, Scalar RHS_>
-    class Traits<MatrixExpr<ID_, LHS_, RHS_>> {
+    template<ExprID ID, Matrix LHS_, Scalar RHS_>
+    class Traits<MatrixExpr<ID, LHS_, RHS_>> {
     public:
-        constexpr static ExprID ID = ID_;
         using LHS = LHS_;
         using RHS = RHS_;
     private:
